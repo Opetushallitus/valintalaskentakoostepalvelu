@@ -7,26 +7,39 @@
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>camel-context.xml</param-value>
+        <param-value>WEB-INF/application-context.xml</param-value>
     </context-param>
 
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
+	<!--
     <servlet>
         <servlet-name>CXFServlet</servlet-name>
         <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
-        <!-- If you want to leverage the Servlet3's async feature in Tomcat,
-         please enable this feature
+        
+        If you want to leverage the Servlet3's async feature in Tomcat,
+        please enable this feature
         <async-supported>true</async-supported>
-        -->
+        
     </servlet>
-
+	 
     <servlet-mapping>
         <servlet-name>CXFServlet</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
-
+    -->
+	<servlet>
+	  <servlet-name>StartLaskentaServlet</servlet-name>
+	  <servlet-class>org.apache.camel.component.servlet.CamelHttpTransportServlet</servlet-class>
+	  <load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+	  <servlet-name>StartLaskentaServlet</servlet-name>
+	  <url-pattern>/services/*</url-pattern>
+	</servlet-mapping>
+	
 </web-app>
