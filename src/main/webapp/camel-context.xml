@@ -33,7 +33,7 @@
     </cxf:cxfEndpoint>
     <cxf:cxfEndpoint id="hakemukset"
                      address="http://localhost:8080/vvv"
-                     serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService">
+                     serviceClass="fi.vm.sade.service.hakemus.HakemusService">
     </cxf:cxfEndpoint>
     <cxf:cxfEndpoint id="valintaperusteet"
                      address="http://localhost:8080/vvv"
