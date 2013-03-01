@@ -28,7 +28,6 @@
 
 	
 	<ctx:component-scan base-package="fi.vm.sade.valinta.esb"/>
-	<ctx:component-scan base-package="fi.vm.sade.valinta.esb.endpoint"/>
 	<ctx:component-scan base-package="fi.vm.sade.valinta.esb.impl"/>
 	
 	
