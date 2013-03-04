@@ -11,11 +11,18 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.valinta.esb.HaeLahtotiedotKomponentti;
 import fi.vm.sade.valinta.esb.SuoritaLaskentaKomponentti;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ *         Rakentaa reitin valintalaskentaan käyttäen hakemus- ja
+ *         valintaperustepalvelua lähtötietoina
+ * 
+ */
 @Component
 public class ValintalaskentaRouteBuilderImpl extends RouteBuilder {
 
     public void configure() throws Exception {
-        System.out.println("Configuring!");
         from("servlet://laske?matchOnUriPrefix=true&servletName=StartLaskentaServlet").process(new Processor() {
 
             public void process(Exchange exchange) throws Exception {
