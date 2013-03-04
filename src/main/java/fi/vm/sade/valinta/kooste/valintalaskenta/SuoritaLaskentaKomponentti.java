@@ -1,0 +1,31 @@
+package fi.vm.sade.valinta.kooste.valintalaskenta;
+
+import java.util.List;
+
+import org.apache.camel.language.Simple;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
+import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
+@Component("suoritaLaskentaKomponentti")
+public class SuoritaLaskentaKomponentti {
+
+    @Autowired
+    private ValintalaskentaService valintalaskentaService;
+
+    public void suoritaLaskenta(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
+            @Simple("${property.valinnanvaihe}") Integer valinnanvaihe,
+            @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset,
+            @Simple("${property.valinnanvaiheet}") List<ValintaperusteetTyyppi> valintaperusteet) {
+        valintalaskentaService.laske(hakukohdeOid, valinnanvaihe, hakemukset, valintaperusteet);
+    }
+
+}

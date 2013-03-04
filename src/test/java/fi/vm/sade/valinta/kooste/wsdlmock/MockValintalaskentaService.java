@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.esb.endpoint;
+package fi.vm.sade.valinta.kooste.wsdlmock;
 
 import java.util.List;
 
