@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
+	xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://camel.apache.org/schema/cxf
+       http://camel.apache.org/schema/cxf/camel-cxf.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<ctx:annotation-config />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakutoiveet" />
+
+	<camel:camelContext id="hakuPaasykokeetCamelContext"
+		autoStartup="true">
+		<!-- Proxy Jersey REST triggerin ja Camelin eriyttämiseen toisistaan -->
+		<camel:proxy id="hakuPaasykokeetAktivointiRajapinta"
+			serviceInterface="fi.vm.sade.valinta.kooste.hakutoiveet.HakuPaasykokeetAktivointiProxy"
+			serviceUrl="direct:kaynnistaHakuPaasykokeetReitti" />
+		<camel:route>
+			<camel:from uri="direct:kaynnistaHakuPaasykokeetReitti" />
+			<camel:setProperty propertyName="hakuOid">
+				<camel:simple>${body.args[0]}</camel:simple>
+			</camel:setProperty>
+			<camel:to uri="bean:haeHakutoiveetKomponentti" />
+			<camel:setProperty propertyName="hakutoiveet">
+				<camel:simple>${body}</camel:simple>
+			</camel:setProperty>
+			<camel:to uri="bean:haePaasykokeetKomponentti" />
+			<camel:setProperty propertyName="paasykokeet">
+				<camel:simple>${body}</camel:simple>
+			</camel:setProperty>
+			<camel:to uri="bean:luoDokumenttiKomponentti" />
+		</camel:route>
+	</camel:camelContext>
+
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta" />
+	<bean id="groupedAggregationStrategy"
+		class="org.apache.camel.processor.aggregate.GroupedExchangeAggregationStrategy" />
+
+	<camel:camelContext id="valintalaskentaCamelContext"
+		autoStartup="true">
+		<!-- Proxy Jersey REST triggerin ja Camelin eriyttämiseen toisistaan -->
+		<camel:proxy id="valintalaskentaAktivointiRajapinta"
+			serviceInterface="fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiProxy"
+			serviceUrl="direct:kaynnistaValintalaskentaReitti" />
+		<camel:route>
+			<camel:from uri="direct:kaynnistaValintalaskentaReitti" />
+			<camel:setProperty propertyName="hakukohdeOid">
+				<camel:simple>${body.args[0]}</camel:simple>
+			</camel:setProperty>
+			<camel:setProperty propertyName="valinnanvaihe">
+				<camel:simple>${body.args[1]}</camel:simple>
+			</camel:setProperty>
+			<camel:to uri="bean:haeValintaperusteetKomponentti" />
+			<camel:setProperty propertyName="valintaperusteet">
+				<camel:simple>${body}</camel:simple>
+			</camel:setProperty>
+			<camel:to uri="bean:haeHakemusKomponentti" />
+			<camel:setProperty propertyName="hakemukset">
+				<camel:simple>${body}</camel:simple>
+			</camel:setProperty>
+			<camel:to uri="bean:suoritaLaskentaKomponentti" />
+		</camel:route>
+	</camel:camelContext>
+
+</beans>

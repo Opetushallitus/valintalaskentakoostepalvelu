@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakutoiveet;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.ws.rs.GET;
@@ -23,26 +24,31 @@ import org.springframework.stereotype.Controller;
  */
 @Controller
 @Path("/hakutoiveet")
-public class HakutoiveetAktivointiResource {
+public class HakuPaasykokeetAktivointiResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HakutoiveetAktivointiResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HakuPaasykokeetAktivointiResource.class);
+
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd_MM_yyyy");
 
     @Autowired
-    private HakutoiveetAktivointiProxy hakutoiveetProxy;
+    private HakuPaasykokeetAktivointiProxy hakutoiveetProxy;
 
     /**
      * "http://stackoverflow.com/questions/974079/setting-mime-type-for-excel-document"
      * 
      * @param hakutoiveetOid
-     * @return
+     * @return Ketkä menee tekemään hakukoetta kyseessä olevaan hakukohteeseen
      */
     @GET
     @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     @Path("/aktivoi")
-    public Response aktivoiHakutoiveidenHaku(@QueryParam("hakutoiveOid") String hakutoiveetOid) {
-        LOG.info("Hakutoiveiden({}) haku aktivoitu REST-resurssista!", hakutoiveetOid);
-        return Response.status(200).entity(hakutoiveetProxy.aktivoiHakutoiveetReitti(hakutoiveetOid))
-                .header("Content-disposition", "attachment;filename=" + hakutoiveetOid + new Date() + ".xslx").build();
+    public Response aktivoiPaasykokeidenHaku(@QueryParam("hakuOid") String hakuOid) {
+        LOG.info("Hakuoid({}) haku aktivoitu REST-resurssista!", hakuOid);
+        return Response
+                .status(200)
+                .entity(hakutoiveetProxy.aktivoiHakuPaasykokeetReitti(hakuOid))
+                .header("Content-disposition",
+                        "attachment;filename=" + hakuOid + "-" + formatter.format(new Date()) + ".xslx").build();
     }
 
 }

@@ -7,8 +7,8 @@ package fi.vm.sade.valinta.kooste.hakutoiveet;
  *         Portti(proxy), jonka Camel toteuttaa, hakutoiveiden reitityksen
  *         käynnistykseen
  */
-public interface HakutoiveetAktivointiProxy {
+public interface HakuPaasykokeetAktivointiProxy {
 
-    byte[] aktivoiHakutoiveetReitti(String hakutoiveetOid);
+    byte[] aktivoiHakuPaasykokeetReitti(String hakuOid);
 
 }
