@@ -41,4 +41,12 @@ public class MockValintaperusteService implements ValintaperusteService {
         throw new UnsupportedOperationException("Mock ei implementoi tätä!");
     }
 
+    @Override
+    @RequestWrapper(localName = "haePaasykokeet", targetNamespace = "http://valintaperusteet.service.sade.vm.fi/messages", className = "fi.vm.sade.service.valintaperusteet.messages.HaePaasykokeetTyyppi")
+    @WebMethod
+    @ResponseWrapper(localName = "haePaasykokeetVastaus", targetNamespace = "http://valintaperusteet.service.sade.vm.fi/messages", className = "fi.vm.sade.service.valintaperusteet.messages.HaePaasykokeetVastausTyyppi")
+    public void haePaasykokeet() throws GenericFault {
+        // TODO Auto-generated method stub
+
+    }
 }
