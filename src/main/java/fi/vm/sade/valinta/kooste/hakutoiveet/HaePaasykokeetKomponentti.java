@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakutoiveet;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.camel.language.Simple;
@@ -26,7 +27,7 @@ public class HaePaasykokeetKomponentti {
 
     public List<HakutoiveTyyppi> haeHakutoiveet(@Simple("${property.hakuOid}") String hakuOid) {
         LOG.info("Haetaan hakutoiveita hakutoiveoid:lla {}", hakuOid);
-
-        return hakemusService.haeHakutoiveet(hakuOid);
+        return Collections.emptyList();
+        // return hakemusService.haeHakutoiveet(hakuOid);
     }
 }
