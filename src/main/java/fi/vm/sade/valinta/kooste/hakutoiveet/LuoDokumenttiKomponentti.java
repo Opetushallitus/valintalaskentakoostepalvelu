@@ -2,19 +2,26 @@ package fi.vm.sade.valinta.kooste.hakutoiveet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.camel.language.Simple;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
-import fi.vm.sade.service.hakemus.schema.HakutoiveTyyppi;
 import fi.vm.sade.service.valintaperusteet.messages.PaasykoeHakukohdeTyyppi;
 
 /**
@@ -24,6 +31,12 @@ import fi.vm.sade.service.valintaperusteet.messages.PaasykoeHakukohdeTyyppi;
  */
 @Component("luoDokumenttiKomponentti")
 public class LuoDokumenttiKomponentti {
+
+    // suodattaa pääsykokeettomat hakukohteet oletuksena. käytä spring
+    // propertyplaceholderia sovelluskontekstissa ylikirjoittamaan tämän arvon
+    // tarvittaessa.
+    @Value("${valintalaskenta.kooste.dokumentti.suodataPaasykokeettomatHakukohteet:true}")
+    private boolean suodataPaasykokeettomatHakukohteet;
 
     /**
      * Ketkä menee tekemään hakukoetta kyseessä olevaan hakukohteeseen
@@ -35,33 +48,63 @@ public class LuoDokumenttiKomponentti {
      *             Annetaan Camelin hoitaa poikkeukset niin reittiin voidaan
      *             tehdä poikkeuskäsittelylogiikka tarpeeseen.
      */
-    public byte[] suoritaLaskenta(@Simple("${property.hakutoiveet}") List<HakutoiveTyyppi> hakutoiveet,
+    public byte[] suoritaLaskenta(@Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset,
             @Simple("${property.paasykokeet}") List<PaasykoeHakukohdeTyyppi> paasykokeet) throws IOException {
         Workbook wb = new XSSFWorkbook();
 
         CreationHelper createHelper = wb.getCreationHelper();
         Sheet sheet = wb.createSheet("Hakukokeelliset hakukohteet");
 
-        for (HakutoiveTyyppi hakutoive : hakutoiveet) {
-            Row row = sheet.createRow(0);
-            row.createCell(0).setCellValue(createHelper.createRichTextString(hakutoive.getHakemusOid()));
+        Map<String, List<String>> hakukohdeHakemukset = createHakemustenHakukohteet(suodataPaasykokeettomatHakukohteet,
+                hakemukset, createHakukohdeTunnisteet(paasykokeet));
 
-            for (HakukohdeTyyppi hakukohde : hakutoive.getHakutoive()) {
-                for (PaasykoeHakukohdeTyyppi paasykoe : paasykokeet) {
-                    String hakukohdeoid = paasykoe.getHakukohdeOid();
+        int rivi = 0;
+        for (Entry<String, List<String>> hk : hakukohdeHakemukset.entrySet()) {
+            Row row = sheet.createRow(rivi);
+            Cell cell = row.createCell(0);
+            RichTextString richText = createHelper.createRichTextString(hk.getKey());
+            cell.setCellValue(richText);
 
-                }
+            int indeksi = 1;
+            for (String hakemus : hk.getValue()) {
+                row.createCell(indeksi).setCellValue(createHelper.createRichTextString(hakemus));
+                ++indeksi;
             }
+            ++rivi;
         }
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try {
-            wb.write(output);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        wb.write(output);
         IOUtils.closeQuietly(output);
         return output.toByteArray();
     }
 
+    private static Map<String, List<String>> createHakemustenHakukohteet(boolean filtteroiHakemuksettomat,
+            List<HakemusTyyppi> hakemukset, Map<String, List<String>> hakukohdeTunnisteet) {
+        Map<String, List<String>> hakukohdeHakemukset = new HashMap<String, List<String>>();
+        for (HakemusTyyppi hakemus : hakemukset) {
+            for (HakukohdeTyyppi hakukohde : hakemus.getHakukohde()) {
+                if (hakukohdeTunnisteet.containsKey(hakukohde.getHakukohdeOid())) {
+                    String hakukohdeoid = hakukohde.getHakukohdeOid();
+                    List<String> hakemuksetHakukohteelle = null;
+                    if (hakukohdeHakemukset.containsKey(hakukohdeoid)) {
+                        hakemuksetHakukohteelle = hakukohdeHakemukset.get(hakukohdeoid);
+                    } else {
+                        hakemuksetHakukohteelle = new ArrayList<String>();
+                    }
+                    hakemuksetHakukohteelle.add(hakemus.getHakemusOid());
+                    hakukohdeHakemukset.put(hakukohde.getHakukohdeOid(), hakemuksetHakukohteelle);
+                }
+            }
+        }
+        return hakukohdeHakemukset;
+    }
+
+    private static Map<String, List<String>> createHakukohdeTunnisteet(List<PaasykoeHakukohdeTyyppi> paasykokeet) {
+        Map<String, List<String>> hakukohdeTunniste = new HashMap<String, List<String>>();
+        for (PaasykoeHakukohdeTyyppi paasykoe : paasykokeet) {
+            hakukohdeTunniste.put(paasykoe.getHakukohdeOid(), paasykoe.getTunniste());
+        }
+        return hakukohdeTunniste;
+    }
 }

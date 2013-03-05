@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.wsdlmock;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,9 +33,18 @@ public class MockValintaperusteService implements ValintaperusteService {
     }
 
     @Override
-    public List<PaasykoeHakukohdeTyyppi> haePaasykokeet(@WebParam(name = "hakuOid", targetNamespace = "") String hakuOid)
-            throws GenericFault {
-        return null;
+    public List<PaasykoeHakukohdeTyyppi> haePaasykokeet(
+            @WebParam(name = "hakukohdeOid", targetNamespace = "") String hakukohdeOid) throws GenericFault {
+
+        List<PaasykoeHakukohdeTyyppi> paasykokeet = new ArrayList<PaasykoeHakukohdeTyyppi>();
+        for (int i = 0; i < 10; ++i) {
+            PaasykoeHakukohdeTyyppi p = new PaasykoeHakukohdeTyyppi();
+            p.setHakukohdeOid("hakukohdeoid" + i);
+            p.getTunniste().add("tunniste" + i);
+            paasykokeet.add(p);
+        }
+
+        return paasykokeet;
     }
 
 }

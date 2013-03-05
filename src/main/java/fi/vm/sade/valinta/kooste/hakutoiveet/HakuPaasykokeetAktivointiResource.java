@@ -42,13 +42,13 @@ public class HakuPaasykokeetAktivointiResource {
     @GET
     @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     @Path("/aktivoi")
-    public Response aktivoiPaasykokeidenHaku(@QueryParam("hakuOid") String hakuOid) {
-        LOG.info("Hakuoid({}) haku aktivoitu REST-resurssista!", hakuOid);
+    public Response aktivoiPaasykokeidenHaku(@QueryParam("hakukohdeOid") String hakukohdeOid) {
+        LOG.info("hakukohdeOid({}) haku aktivoitu REST-resurssista!", hakukohdeOid);
         return Response
                 .status(200)
-                .entity(hakutoiveetProxy.aktivoiHakuPaasykokeetReitti(hakuOid))
+                .entity(hakutoiveetProxy.aktivoiHakuPaasykokeetReitti(hakukohdeOid))
                 .header("Content-disposition",
-                        "attachment;filename=" + hakuOid + "-" + formatter.format(new Date()) + ".xslx").build();
+                        "attachment;filename=" + hakukohdeOid + "-" + formatter.format(new Date()) + ".xlsx").build();
     }
 
 }

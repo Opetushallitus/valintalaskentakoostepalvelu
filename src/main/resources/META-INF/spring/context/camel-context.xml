@@ -22,11 +22,11 @@
 			serviceUrl="direct:kaynnistaHakuPaasykokeetReitti" />
 		<camel:route>
 			<camel:from uri="direct:kaynnistaHakuPaasykokeetReitti" />
-			<camel:setProperty propertyName="hakuOid">
+			<camel:setProperty propertyName="hakukohdeOid">
 				<camel:simple>${body.args[0]}</camel:simple>
 			</camel:setProperty>
 			<camel:to uri="bean:haeHakutoiveetKomponentti" />
-			<camel:setProperty propertyName="hakutoiveet">
+			<camel:setProperty propertyName="hakemukset">
 				<camel:simple>${body}</camel:simple>
 			</camel:setProperty>
 			<camel:to uri="bean:haePaasykokeetKomponentti" />

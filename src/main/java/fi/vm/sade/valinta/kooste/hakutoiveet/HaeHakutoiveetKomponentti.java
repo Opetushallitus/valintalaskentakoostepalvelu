@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakutoiveet;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.camel.language.Simple;
@@ -9,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.service.hakemus.HakemusService;
-import fi.vm.sade.service.hakemus.schema.HakutoiveTyyppi;
+import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 
 /**
  * 
@@ -24,8 +25,8 @@ public class HaeHakutoiveetKomponentti {
     @Autowired
     private HakemusService hakemusService;
 
-    public List<HakutoiveTyyppi> haeHakutoiveet(@Simple("${property.hakuOid}") String hakuOid) {
-        LOG.info("Haetaan hakutoiveita hakutoiveoid:lla {}", hakuOid);
-        return hakemusService.haeHakutoiveet(hakuOid);
+    public List<HakemusTyyppi> haeHakutoiveet(@Simple("${property.hakukohdeOid}") String hakukohdeOid) {
+        LOG.info("Haetaan hakutoiveita hakutoiveoid:lla {}", hakukohdeOid);
+        return hakemusService.haeHakemukset(Arrays.asList(hakukohdeOid));// haeHakutoiveet(hakuOid);
     }
 }

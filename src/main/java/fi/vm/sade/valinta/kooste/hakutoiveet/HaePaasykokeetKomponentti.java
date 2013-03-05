@@ -24,8 +24,8 @@ public class HaePaasykokeetKomponentti {
     @Autowired
     private ValintaperusteService valintaperusteService;
 
-    public List<PaasykoeHakukohdeTyyppi> haeHakutoiveet(@Simple("${property.hakuOid}") String hakuOid) {
-        LOG.info("Haetaan hakutoiveita hakutoiveoid:lla {}", hakuOid);
-        return valintaperusteService.haePaasykokeet(hakuOid);
+    public List<PaasykoeHakukohdeTyyppi> haeHakutoiveet(@Simple("${property.hakukohdeOid}") String hakukohdeOid) {
+        LOG.info("Haetaan hakutoiveita hakutoiveoid:lla {}", hakukohdeOid);
+        return valintaperusteService.haePaasykokeet(hakukohdeOid);
     }
 }
