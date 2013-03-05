@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.hakemus.HakemusService;
 import fi.vm.sade.service.hakemus.schema.HakutoiveTyyppi;
+import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 
 /**
  * 
@@ -17,15 +17,16 @@ import fi.vm.sade.service.hakemus.schema.HakutoiveTyyppi;
  * 
  */
 @Component("haeHakutoiveetKomponentti")
-public class HaeHakutoiveetKomponentti {
+public class HaePaasykokeetKomponentti {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HaeHakutoiveetKomponentti.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HaePaasykokeetKomponentti.class);
 
     @Autowired
-    private HakemusService hakemusService;
+    private ValintaperusteService valintaperusteService;
 
     public List<HakutoiveTyyppi> haeHakutoiveet(@Simple("${property.hakuOid}") String hakuOid) {
         LOG.info("Haetaan hakutoiveita hakutoiveoid:lla {}", hakuOid);
+
         return hakemusService.haeHakutoiveet(hakuOid);
     }
 }

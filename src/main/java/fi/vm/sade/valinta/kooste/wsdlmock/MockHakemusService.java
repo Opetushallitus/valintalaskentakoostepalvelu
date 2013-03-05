@@ -35,6 +35,8 @@ public class MockHakemusService implements HakemusService {
     @WebMethod
     @ResponseWrapper(localName = "haeHakutoiveetVastaus", targetNamespace = "http://hakemus.service.sade.vm.fi/messages", className = "fi.vm.sade.service.hakemus.messages.HaeHakutoiveetVastausTyyppi")
     public List<HakutoiveTyyppi> haeHakutoiveet(@WebParam(name = "hakuOid", targetNamespace = "") String arg0) {
-        throw new UnsupportedOperationException("Mock ei implementoi tätä!");
+        HakutoiveTyyppi ht = new HakutoiveTyyppi();
+        ht.setHakemusOid("sdfgsdfg");
+        return Arrays.asList(ht);
     }
 }

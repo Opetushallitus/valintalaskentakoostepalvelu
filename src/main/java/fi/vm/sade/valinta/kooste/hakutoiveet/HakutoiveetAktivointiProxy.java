@@ -9,6 +9,6 @@ package fi.vm.sade.valinta.kooste.hakutoiveet;
  */
 public interface HakutoiveetAktivointiProxy {
 
-    void aktivoiHakutoiveetReitti(String hakutoiveetOid);
+    byte[] aktivoiHakutoiveetReitti(String hakutoiveetOid);
 
 }

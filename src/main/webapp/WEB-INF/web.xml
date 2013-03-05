@@ -42,15 +42,5 @@
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
     -->
-	<servlet>
-	  <servlet-name>StartLaskentaServlet</servlet-name>
-	  <servlet-class>org.apache.camel.component.servlet.CamelHttpTransportServlet</servlet-class>
-	  <load-on-startup>1</load-on-startup>
-	</servlet>
-	
-	<servlet-mapping>
-	  <servlet-name>StartLaskentaServlet</servlet-name>
-	  <url-pattern>/services/*</url-pattern>
-	</servlet-mapping>
-	
+    
 </web-app>

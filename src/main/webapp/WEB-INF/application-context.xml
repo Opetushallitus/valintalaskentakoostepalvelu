@@ -12,8 +12,10 @@
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
 	<ctx:annotation-config />
-	<ctx:property-placeholder location="classpath:wsdlSource.properties"/>
+	<ctx:property-placeholder location="classpath:META-INF/wsdlSource.properties"/>
 	
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.wsdlmock"/>
+	<!-- 
 	<jaxws:client id="ValintaperusteServiceClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
                   address="${ValintaperusteService.url}" />
@@ -25,7 +27,8 @@
 	<jaxws:client id="ValintalaskentaServiceClient" 
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
                   address="${ValintalaskentaService.url}" />
-
+	-->
+	
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta"/>
 
 	<ctx:annotation-config />
@@ -40,7 +43,7 @@
 						serviceUrl="direct:kaynnistaHakutoiveetReitti"/>
 		<camel:route>
 			<camel:from uri="direct:kaynnistaHakutoiveetReitti"/>
-			<camel:setProperty propertyName="hakutoiveetOid">
+			<camel:setProperty propertyName="hakuOid">
 				<camel:simple>${body.args[0]}</camel:simple>
 			</camel:setProperty>
 			<camel:to uri="bean:haeHakutoiveetKomponentti"/>

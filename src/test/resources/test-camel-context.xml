@@ -23,7 +23,7 @@
 						serviceUrl="direct:kaynnistaHakutoiveetReitti"/>
 		<camel:route>
 			<camel:from uri="direct:kaynnistaHakutoiveetReitti"/>
-			<camel:setProperty propertyName="hakutoiveetOid">
+			<camel:setProperty propertyName="hakuOid">
 				<camel:simple>${body.args[0]}</camel:simple>
 			</camel:setProperty>
 			<camel:to uri="bean:haeHakutoiveetKomponentti"/>
