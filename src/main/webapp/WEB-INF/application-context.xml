@@ -29,6 +29,6 @@
                   address="${ValintalaskentaService.url}" />
 	-->
 	
-	<beans:import resource="camel-context.xml"/>
+	<beans:import resource="classpath:META-INF/spring/context/camel-context.xml"/>
 	
 </beans>
