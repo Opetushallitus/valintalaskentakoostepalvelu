@@ -36,7 +36,7 @@ public class LuoDokumenttiKomponentti {
     // propertyplaceholderia sovelluskontekstissa ylikirjoittamaan tämän arvon
     // tarvittaessa.
     @Value("${valintalaskenta.kooste.dokumentti.suodataPaasykokeettomatHakukohteet:true}")
-    private boolean suodataPaasykokeettomatHakukohteet;
+    private Boolean suodataPaasykokeettomatHakukohteet;
 
     /**
      * Ketkä menee tekemään hakukoetta kyseessä olevaan hakukohteeseen
