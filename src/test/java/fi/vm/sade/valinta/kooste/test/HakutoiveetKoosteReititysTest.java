@@ -1,18 +1,13 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Collections;
-
-import javax.ws.rs.core.Response;
-
+import fi.vm.sade.service.hakemus.HakemusService;
+import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
+import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
+import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
+import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.valinta.kooste.paasykokeet.HakuPaasykokeetAktivointiResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -24,15 +19,12 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import fi.vm.sade.service.hakemus.HakemusService;
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.hakemus.schema.HakutoiveTyyppi;
-import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.valinta.kooste.paasykokeet.HakuPaasykokeetAktivointiResource;
-import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResource;
+import javax.ws.rs.core.Response;
+import java.util.Arrays;
+
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * 
@@ -64,7 +56,7 @@ public class HakutoiveetKoosteReititysTest {
     @Bean
     public HakemusService getHakemusServiceMock() {
         HakemusService hakemusMock = mock(HakemusService.class);
-        when(hakemusMock.haeHakutoiveet(anyString())).thenReturn(Collections.<HakutoiveTyyppi> emptyList());
+        //when(hakemusMock.haeHakutoiveet(anyString())).thenReturn(Collections.<HakutoiveTyyppi> emptyList());
         HakemusTyyppi htyyppi = new HakemusTyyppi();
         htyyppi.setHakemusOid(HAKEMUSOID);
         when(hakemusMock.haeHakemukset(anyListOf(String.class))).thenReturn(Arrays.asList(htyyppi));
