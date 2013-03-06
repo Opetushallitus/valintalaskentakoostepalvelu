@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.hakutoiveet;
+package fi.vm.sade.valinta.kooste.paasykokeet;
 
 import java.util.List;
 

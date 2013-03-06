@@ -13,7 +13,7 @@
 
 	<ctx:annotation-config />
 	<ctx:property-placeholder location="classpath:test.properties"/>
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakutoiveet"/>
+	
 
 	<beans:import resource="classpath:META-INF/spring/context/camel-context.xml"/>
 

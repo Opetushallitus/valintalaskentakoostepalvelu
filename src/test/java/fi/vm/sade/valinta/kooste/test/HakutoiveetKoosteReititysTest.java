@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.hakutoiveet;
+package fi.vm.sade.valinta.kooste.test;
 
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
@@ -31,6 +31,7 @@ import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.valinta.kooste.paasykokeet.HakuPaasykokeetAktivointiResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResource;
 
 /**

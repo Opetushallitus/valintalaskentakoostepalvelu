@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.hakutoiveet;
+package fi.vm.sade.valinta.kooste.paasykokeet;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,7 +28,7 @@ public class HakuPaasykokeetAktivointiResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(HakuPaasykokeetAktivointiResource.class);
 
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd_MM_yyyy");
+    private final SimpleDateFormat formatter = new SimpleDateFormat("dd_MM_yyyy");
 
     @Autowired
     private HakuPaasykokeetAktivointiProxy hakutoiveetProxy;
