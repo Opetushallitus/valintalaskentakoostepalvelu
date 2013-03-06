@@ -13,8 +13,6 @@
 
 	<ctx:annotation-config />
 	<ctx:property-placeholder location="classpath:test.properties"/>
-	
-
 	<beans:import resource="classpath:META-INF/spring/context/camel-context.xml"/>
-
+	
 </beans>
