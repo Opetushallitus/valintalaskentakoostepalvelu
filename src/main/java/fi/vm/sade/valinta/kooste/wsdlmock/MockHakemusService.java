@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.service.hakemus.HakemusService;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
-import fi.vm.sade.service.hakemus.schema.HakutoiveTyyppi;
 
 @Component
 public class MockHakemusService implements HakemusService {
@@ -35,9 +34,4 @@ public class MockHakemusService implements HakemusService {
         return hakemukset;
     }
 
-    @Override
-    public List<HakutoiveTyyppi> haeHakutoiveet(String hakuOid) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }
