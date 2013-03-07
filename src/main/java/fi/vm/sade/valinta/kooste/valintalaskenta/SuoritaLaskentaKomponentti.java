@@ -21,11 +21,10 @@ public class SuoritaLaskentaKomponentti {
     @Autowired
     private ValintalaskentaService valintalaskentaService;
 
-    public void suoritaLaskenta(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
-            @Simple("${property.valinnanvaihe}") Integer valinnanvaihe,
+    public void suoritaLaskenta(
             @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset,
             @Simple("${property.valinnanvaiheet}") List<ValintaperusteetTyyppi> valintaperusteet) {
-        valintalaskentaService.laske(hakukohdeOid, valinnanvaihe, hakemukset, valintaperusteet);
+        valintalaskentaService.laske(hakemukset, valintaperusteet);
     }
 
 }

@@ -12,30 +12,7 @@
 
 	<ctx:annotation-config />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.paasykokeet" />
-   <!--
-	<camel:camelContext id="hakuPaasykokeetCamelContext"
-		autoStartup="true">
 
-		<camel:proxy id="hakuPaasykokeetAktivointiRajapinta"
-			serviceInterface="fi.vm.sade.valinta.kooste.paasykokeet.HakuPaasykokeetAktivointiProxy"
-			serviceUrl="direct:kaynnistaHakuPaasykokeetReitti" />
-		<camel:route>
-			<camel:from uri="direct:kaynnistaHakuPaasykokeetReitti" />
-			<camel:setProperty propertyName="hakukohdeOid">
-				<camel:simple>${body.args[0]}</camel:simple>
-			</camel:setProperty>
-			<camel:to uri="bean:haeHakutoiveetKomponentti" />
-			<camel:setProperty propertyName="hakemukset">
-				<camel:simple>${body}</camel:simple>
-			</camel:setProperty>
-			<camel:to uri="bean:haePaasykokeetKomponentti" />
-			<camel:setProperty propertyName="paasykokeet">
-				<camel:simple>${body}</camel:simple>
-			</camel:setProperty>
-			<camel:to uri="bean:luoDokumenttiKomponentti" />
-		</camel:route>
-	</camel:camelContext>
-    -->
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta" />
 	<bean id="groupedAggregationStrategy"
 		class="org.apache.camel.processor.aggregate.GroupedExchangeAggregationStrategy" />
@@ -65,5 +42,22 @@
 			<camel:to uri="bean:suoritaLaskentaKomponentti" />
 		</camel:route>
 	</camel:camelContext>
+
+    <camel:camelContext id="valintakoelaskentaCamelContext" autoStartup="true">
+        <camel:proxy id="valintakoelaskentaAktivointiRajapinta"
+                     serviceInterface="fi.vm.sade.valinta.kooste.paasykokeet.ValintakoelaskentaAktivointiProxy"
+                     serviceUrl="direct:kaynnistaValintakoelaskentaReitti" />
+        <camel:route>
+            <camel:from uri="direct:kaynnistaValintakoelaskentaReitti" />
+            <camel:setProperty propertyName="hakukohdeOid">
+                <camel:simple>${body.args[0]}</camel:simple>
+            </camel:setProperty>
+            <camel:to uri="bean:haeHakemusKomponentti" />
+            <camel:setProperty propertyName="hakemukset">
+                <camel:simple>${body}</camel:simple>
+            </camel:setProperty>
+            <camel:to uri="bean:valintakoeLaskeKomponentti" />
+          </camel:route>
+    </camel:camelContext>
 
 </beans>

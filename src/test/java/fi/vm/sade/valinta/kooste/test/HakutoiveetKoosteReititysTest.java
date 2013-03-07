@@ -90,8 +90,7 @@ public class HakutoiveetKoosteReititysTest {
     public void testLaskentaKooste() {
         valintalaskentaResource.aktivoiValintalaskenta(HAKUKOHDEOID, VALINNANVAIHE);
 
-        verify(valintalaskentaService, atLeastOnce()).laske(eq(HAKUKOHDEOID), eq(VALINNANVAIHE),
-                anyListOf(HakemusTyyppi.class), anyListOf(ValintaperusteetTyyppi.class));
+        verify(valintalaskentaService, atLeastOnce()).laske(anyListOf(HakemusTyyppi.class), anyListOf(ValintaperusteetTyyppi.class));
     }
 
 }
