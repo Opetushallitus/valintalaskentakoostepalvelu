@@ -28,7 +28,6 @@ import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.valinta.kooste.paasykokeet.HakuPaasykokeetAktivointiResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResource;
 
 /**
@@ -52,8 +51,6 @@ public class HakutoiveetKoosteReititysTest {
     private static final String HAKUKOHDEOID = "hakukohde0";
     private static final Integer VALINNANVAIHE = 6;
 
-    @Autowired
-    private HakuPaasykokeetAktivointiResource hakuPaasykokeetResource;
 
     @Autowired
     private ValintalaskentaAktivointiResource valintalaskentaResource;
@@ -88,11 +85,6 @@ public class HakutoiveetKoosteReititysTest {
     @Autowired
     private ValintalaskentaService valintalaskentaService;
 
-    @Test
-    public void testHakutoiveetKooste() {
-        Response r = hakuPaasykokeetResource.aktivoiPaasykokeidenHaku(HAKUTOIVEOID);
-        LOG.debug("Dokumentin tavut {}", Arrays.toString((byte[]) r.getEntity()));
-    }
 
     @Test
     public void testLaskentaKooste() {
