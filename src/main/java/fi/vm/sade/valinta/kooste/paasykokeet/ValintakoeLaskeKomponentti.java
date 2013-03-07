@@ -32,9 +32,10 @@ public class ValintakoeLaskeKomponentti {
 
     public void haeLahtotiedot( @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
 
-        // LOG.info("Haetaan valintaperusteet laskentaa varten hakukohteelle({})", new Object[] {hakemukset });
+         LOG.info("ValintakoeLaskeKomponentti, aloitetaan valintaperusteiden hakeminen ja valintalaskennan kutsut");
 
         for(HakemusTyyppi hakemus : hakemukset) {
+            LOG.info("Haetaan tiedot hakemukselle, hakemusoid: {} ", hakemus.getHakemusOid() );
 
             List <HakuparametritTyyppi> hptl = new ArrayList<HakuparametritTyyppi>();
             for(HakukohdeTyyppi hkt : hakemus.getHakutoive())        {

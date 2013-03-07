@@ -36,8 +36,10 @@ public class HaeValintaperusteetKomponentti {
 
     public List<ValintaperusteetTyyppi> haeLahtotiedot(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
             @Simple("${property.valinnanvaihe}") Integer valinnanvaihe) {
+
         LOG.info("Haetaan valintaperusteet laskentaa varten hakukohteelle({}) ja valinnanvaiheelle({})", new Object[] {
                 hakukohdeOid, valinnanvaihe });
+
         HakuparametritTyyppi hakuparametri = new HakuparametritTyyppi();
         hakuparametri.setHakukohdeOid(hakukohdeOid);
         hakuparametri.setValinnanVaiheJarjestysluku(valinnanvaihe);

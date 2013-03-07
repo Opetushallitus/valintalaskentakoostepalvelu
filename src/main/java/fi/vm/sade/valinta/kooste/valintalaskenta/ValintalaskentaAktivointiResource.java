@@ -4,6 +4,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,15 @@ public class ValintalaskentaAktivointiResource {
 
     @GET
     @Path("/aktivoi")
-    public void aktivoiValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid,
+    public String aktivoiValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valinnanvaihe") Integer valinnanvaihe) {
-        valintalaskentaProxy.aktivoiValintalaskenta(hakukohdeOid, valinnanvaihe);
+
+        if(StringUtils.isBlank(hakukohdeOid) || valinnanvaihe == null) {
+            return "get parameter 'hakukohdeOid' and 'valinnanvaihe' required";
+        } else {
+            LOG.info("Valintalaskenta for {}", hakukohdeOid);
+            valintalaskentaProxy.aktivoiValintalaskenta(hakukohdeOid, valinnanvaihe);
+            return "in progress";
+        }
     }
 }

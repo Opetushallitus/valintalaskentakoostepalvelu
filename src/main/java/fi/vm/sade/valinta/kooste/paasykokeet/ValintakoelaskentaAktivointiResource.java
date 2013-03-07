@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.paasykokeet;
 
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,14 @@ public class ValintakoelaskentaAktivointiResource {
 
     @GET
     @Path("/aktivoi")
-    public void aktivoiValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid) {
-        valintalaskentaProxy.aktivoiValintakoelaskenta(hakukohdeOid);
+    public String aktivoiValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid) {
+        if(StringUtils.isBlank(hakukohdeOid)) {
+            return "get parameter 'hakukohdeOid required";
+        }
+        else {
+            LOG.info("Valintakoelaskenta for {}", hakukohdeOid);
+            valintalaskentaProxy.aktivoiValintakoelaskenta(hakukohdeOid);
+            return "in progress";
+        }
     }
 }
