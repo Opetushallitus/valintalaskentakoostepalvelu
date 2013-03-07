@@ -1,13 +1,16 @@
 package fi.vm.sade.valinta.kooste.wsdlmock;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.jws.WebParam;
+
+import org.springframework.stereotype.Component;
+
 import fi.vm.sade.service.hakemus.HakemusService;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
-import org.springframework.stereotype.Component;
-
-import javax.jws.WebParam;
-import java.util.ArrayList;
-import java.util.List;
+import fi.vm.sade.service.hakemus.schema.HakutoiveTyyppi;
 
 @Component
 public class MockHakemusService implements HakemusService {
@@ -30,5 +33,11 @@ public class MockHakemusService implements HakemusService {
         }
 
         return hakemukset;
+    }
+
+    @Override
+    public List<HakutoiveTyyppi> haeHakutoiveet(String hakuOid) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
