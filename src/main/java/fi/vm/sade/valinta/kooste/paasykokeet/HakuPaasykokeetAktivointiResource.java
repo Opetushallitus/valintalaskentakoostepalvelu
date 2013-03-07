@@ -23,7 +23,7 @@ import org.springframework.stereotype.Controller;
  *         Proxyä(HakutoiveetAktivointiProxy) reitin käynnistykseen.
  */
 @Controller
-@Path("/hakutoiveet")
+@Path("/valintakokeet")
 public class HakuPaasykokeetAktivointiResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(HakuPaasykokeetAktivointiResource.class);
@@ -33,22 +33,26 @@ public class HakuPaasykokeetAktivointiResource {
     @Autowired
     private HakuPaasykokeetAktivointiProxy hakutoiveetProxy;
 
-    /**
-     * "http://stackoverflow.com/questions/974079/setting-mime-type-for-excel-document"
-     * 
-     * @param hakutoiveetOid
-     * @return Ketkä menee tekemään hakukoetta kyseessä olevaan hakukohteeseen
-     */
+  //  /**
+  //   * "http://stackoverflow.com/questions/974079/setting-mime-type-for-excel-document"
+ //    *
+ //    * @param hakutoiveetOid
+//     * @return Ketkä menee tekemään hakukoetta kyseessä olevaan hakukohteeseen
+//     */
+ //   @GET
+ //   @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+   // @Path("/aktivoi")
+
     @GET
-    @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     @Path("/aktivoi")
-    public Response aktivoiPaasykokeidenHaku(@QueryParam("hakukohdeOid") String hakukohdeOid) {
+    public void aktivoiPaasykokeidenHaku(@QueryParam("hakukohdeOid") String hakukohdeOid) {
         LOG.info("hakukohdeOid({}) haku aktivoitu REST-resurssista!", hakukohdeOid);
-        return Response
-                .status(200)
-                .entity(hakutoiveetProxy.aktivoiHakuPaasykokeetReitti(hakukohdeOid))
-                .header("Content-disposition",
-                        "attachment;filename=" + hakukohdeOid + "-" + formatter.format(new Date()) + ".xlsx").build();
+        hakutoiveetProxy.aktivoiHakuPaasykokeetReitti(hakukohdeOid);
+ //       return Response
+        //        .status(200)
+       //         .entity(hakutoiveetProxy.aktivoiHakuPaasykokeetReitti(hakukohdeOid))
+     ////           .header("Content-disposition",
+       //                 "attachment;filename=" + hakukohdeOid + "-" + formatter.format(new Date()) + ".xlsx").build();
     }
 
 }
