@@ -32,7 +32,7 @@ public class ValintalaskentaAktivointiResource {
         if(StringUtils.isBlank(hakukohdeOid) || valinnanvaihe == null) {
             return "get parameter 'hakukohdeOid' and 'valinnanvaihe' required";
         } else {
-            LOG.info("Valintalaskenta for {}", hakukohdeOid);
+            LOG.info("Valintalaskenta kohteelle {}", hakukohdeOid);
             valintalaskentaProxy.aktivoiValintalaskenta(hakukohdeOid, valinnanvaihe);
             return "in progress";
         }

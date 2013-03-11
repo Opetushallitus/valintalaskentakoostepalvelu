@@ -47,6 +47,8 @@ public class HaeValintaperusteetKomponentti {
         List<ValintaperusteetTyyppi> valintaperusteet = valintaperusteService.haeValintaperusteet(Arrays
                 .asList(hakuparametri));
 
+        LOG.info("valintaperusteet haettu: " + valintaperusteet.size());
+
         return valintaperusteet;
     }
 }

@@ -27,7 +27,18 @@ public class SuoritaLaskentaKomponentti {
 
     public void suoritaLaskenta(
             @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset,
-            @Simple("${property.valinnanvaiheet}") List<ValintaperusteetTyyppi> valintaperusteet) {
+            @Simple("${property.valintaperusteet}") List<ValintaperusteetTyyppi> valintaperusteet) {
+
+        int hCount = 0;
+        int vCount = 0;
+        if(hakemukset != null) {
+            hCount = hakemukset.size();
+        }
+        if(valintaperusteet != null) {
+            vCount = valintaperusteet.size();
+        }
+        LOG.info("Suoritetaan valintalaskenta, hakemuksia:{} ja valintaperusteita:{}", new Object[] {
+                hCount, vCount });
 
 
         valintalaskentaService.laske(hakemukset, valintaperusteet);

@@ -34,7 +34,7 @@ public class HaeHakemusKomponentti {
     private HakemusService hakemusService;
 
     public List<HakemusTyyppi> haeHakemusKomponentti(@Simple("${property.hakukohdeOid}") String hakukohdeOid) {
-        LOG.info("Haetaan hakemus laskentaa varten hakukohteelle({})", new Object[] { hakukohdeOid });
+        LOG.info("Haetaan hakemukset laskentaa varten hakukohteelle({})", new Object[] { hakukohdeOid });
         return hakemusService.haeHakemukset(Arrays.asList(hakukohdeOid));
 
     }
