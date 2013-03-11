@@ -6,16 +6,25 @@
 
 	<artifactId>valintalaskentakoostepalvelu</artifactId>
     <groupId>fi.vm.sade.valinta</groupId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
 	<version>1.0-SNAPSHOT</version>
 	<name>valintalaskentakoostepalvelu</name>
-	
+
+
+
 	<parent>
 		<groupId>fi.vm.sade.valintaperusteet</groupId>
 		<artifactId>valintaperusteet</artifactId>
 		<version>1.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
+
+
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+    </build>
+
 
     <dependencies>
 
