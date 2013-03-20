@@ -22,9 +22,9 @@
 		<!-- Proxy Jersey REST triggerin ja Camelin eriyttämiseen toisistaan -->
 		<camel:proxy id="valintalaskentaAktivointiRajapinta"
 			serviceInterface="fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiProxy"
-			serviceUrl="direct:kaynnistaValintalaskentaReitti" />
+			serviceUrl="seda:kaynnistaValintalaskentaReitti" />
 		<camel:route>
-			<camel:from uri="direct:kaynnistaValintalaskentaReitti" />
+			<camel:from uri="seda:kaynnistaValintalaskentaReitti" />
 			<camel:setProperty propertyName="hakukohdeOid">
 				<camel:simple>${body.args[0]}</camel:simple>
 			</camel:setProperty>
@@ -46,9 +46,9 @@
     <camel:camelContext id="valintakoelaskentaCamelContext" autoStartup="true">
         <camel:proxy id="valintakoelaskentaAktivointiRajapinta"
                      serviceInterface="fi.vm.sade.valinta.kooste.paasykokeet.ValintakoelaskentaAktivointiProxy"
-                     serviceUrl="direct:kaynnistaValintakoelaskentaReitti" />
+                     serviceUrl="seda:kaynnistaValintakoelaskentaReitti" />
         <camel:route>
-            <camel:from uri="direct:kaynnistaValintakoelaskentaReitti" />
+            <camel:from uri="seda:kaynnistaValintakoelaskentaReitti" />
             <camel:setProperty propertyName="hakukohdeOid">
                 <camel:simple>${body.args[0]}</camel:simple>
             </camel:setProperty>
