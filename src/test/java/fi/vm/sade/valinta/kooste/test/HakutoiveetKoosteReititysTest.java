@@ -9,8 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
-import javax.ws.rs.core.Response;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -28,6 +26,7 @@ import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.tarjonta.service.TarjontaPublicService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResource;
 
 /**
@@ -47,10 +46,8 @@ public class HakutoiveetKoosteReititysTest {
     private static final Logger LOG = LoggerFactory.getLogger(HakutoiveetKoosteReititysTest.class);
 
     private static final String HAKEMUSOID = "hakemus0";
-    private static final String HAKUTOIVEOID = "hakutoive0";
     private static final String HAKUKOHDEOID = "hakukohde0";
     private static final Integer VALINNANVAIHE = 6;
-
 
     @Autowired
     private ValintalaskentaAktivointiResource valintalaskentaResource;
@@ -58,8 +55,6 @@ public class HakutoiveetKoosteReititysTest {
     @Bean
     public HakemusService getHakemusServiceMock() {
         HakemusService hakemusMock = mock(HakemusService.class);
-        // when(hakemusMock.haeHakutoiveet(anyString())).thenReturn(Collections.<HakutoiveTyyppi>
-        // emptyList());
         HakemusTyyppi htyyppi = new HakemusTyyppi();
         htyyppi.setHakemusOid(HAKEMUSOID);
         when(hakemusMock.haeHakemukset(anyListOf(String.class))).thenReturn(Arrays.asList(htyyppi));
@@ -82,15 +77,25 @@ public class HakutoiveetKoosteReititysTest {
         return mock(ValintalaskentaService.class);
     }
 
+    @Bean
+    public TarjontaPublicService getTarjontaPublicServiceMock() {
+        return mock(TarjontaPublicService.class);
+    }
+
     @Autowired
     private ValintalaskentaService valintalaskentaService;
 
+    @Autowired
+    private HakemusService hakemusService;
 
     @Test
     public void testLaskentaKooste() {
         valintalaskentaResource.aktivoiValintalaskenta(HAKUKOHDEOID, VALINNANVAIHE);
-
-        verify(valintalaskentaService, atLeastOnce()).laske(anyListOf(HakemusTyyppi.class), anyListOf(ValintaperusteetTyyppi.class));
+        // verify that hakemusservice was indeed called with REST argument!
+        verify(hakemusService, atLeastOnce()).haeHakemukset(eq(Arrays.asList(HAKUKOHDEOID)));
+        // verify that the route ended calling valintalaskentaservice!
+        verify(valintalaskentaService, atLeastOnce()).laske(anyListOf(HakemusTyyppi.class),
+                anyListOf(ValintaperusteetTyyppi.class));
     }
 
 }

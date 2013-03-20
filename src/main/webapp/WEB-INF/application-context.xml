@@ -30,6 +30,10 @@
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
                   address="${ValintalaskentaService.url}" />
 
+	<jaxws:client id="TarjontaServiceClient" 
+                  serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
+                  address="${ValintalaskentaService.url}" />
+
 	
 	<beans:import resource="classpath:META-INF/spring/context/camel-context.xml"/>
 	
