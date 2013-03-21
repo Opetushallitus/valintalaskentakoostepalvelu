@@ -49,9 +49,6 @@ public class HakutoiveetKoosteReititysTest {
     private static final String HAKUKOHDEOID = "hakukohde0";
     private static final Integer VALINNANVAIHE = 6;
 
-    @Autowired
-    private ValintalaskentaAktivointiResource valintalaskentaResource;
-
     @Bean
     public HakemusService getHakemusServiceMock() {
         HakemusService hakemusMock = mock(HakemusService.class);
@@ -87,6 +84,9 @@ public class HakutoiveetKoosteReititysTest {
 
     @Autowired
     private HakemusService hakemusService;
+
+    @Autowired
+    private ValintalaskentaAktivointiResource valintalaskentaResource;
 
     @Test
     public void testLaskentaKooste() {
