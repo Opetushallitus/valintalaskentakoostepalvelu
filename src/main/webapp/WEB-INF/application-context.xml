@@ -12,7 +12,12 @@
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
 	<ctx:annotation-config />
-	<ctx:property-placeholder location="classpath:META-INF/wsdlSource.properties"/>
+	  <!--
+    <ctx:property-placeholder location="classpath:META-INF/wsdlSource.properties"/>
+      -->
+    <ctx:property-placeholder
+            location="classpath:META-INF/wsdlSource.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/override.properties"
+            ignore-resource-not-found="true" />
 
     <!--
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.wsdlmock"/>
