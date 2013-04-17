@@ -18,7 +18,13 @@
     <ctx:property-placeholder
             location="classpath:META-INF/wsdlSource.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/override.properties"
             ignore-resource-not-found="true" />
-
+	
+	<!-- 
+		Implementoi TarjontaHakuTiedotPalvelu kun määritelmä tarkentuu! Ajastettu Camel-reitti käyttää sitä!
+	 -->
+	<beans:bean id="tarjontaTiedotPalvelu" class="fi.vm.sade.valinta.kooste.tarjonta.stub.TarjontaHakuTiedotPalveluImpl"/>
+	 
+	
     <!--
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.wsdlmock"/>
 	-->
@@ -40,6 +46,8 @@
                   address="${TarjontaService.url}" />
 
 	
-	<beans:import resource="classpath:META-INF/spring/context/camel-context.xml"/>
+	<beans:import resource="classpath:META-INF/spring/context/tarjonta-ajastus-context.xml"/>
+	<beans:import resource="classpath:META-INF/spring/context/valintakoe-context.xml"/>
+	<beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
 	
 </beans>

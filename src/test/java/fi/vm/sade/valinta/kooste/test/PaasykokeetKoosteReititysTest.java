@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -33,7 +34,9 @@ import fi.vm.sade.valinta.kooste.paasykokeet.ValintakoelaskentaAktivointiResourc
  */
 @Configuration
 @ContextConfiguration(classes = PaasykokeetKoosteReititysTest.class)
-@ImportResource("classpath:test-camel-context.xml")
+@PropertySource("classpath:test.properties")
+@ImportResource({ "classpath:META-INF/spring/context/valintakoe-context.xml",
+        "classpath:META-INF/spring/context/valintalaskenta-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class PaasykokeetKoosteReititysTest {
 
