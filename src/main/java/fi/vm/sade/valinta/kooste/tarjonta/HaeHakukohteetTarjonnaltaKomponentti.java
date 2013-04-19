@@ -17,6 +17,9 @@ public class HaeHakukohteetTarjonnaltaKomponentti {
     @Autowired
     private TarjontaPublicService tarjontaService;
 
+    /**
+     * @return hakukohdeoidit
+     */
     public List<String> haeHakukohteetTarjonnalta(@Simple("${property.hakuoid}") String hakuoid) {
         TarjontaTyyppi tarjonta = tarjontaService.haeTarjonta(hakuoid);
         List<String> hakukohdeoidit = new ArrayList<String>();
