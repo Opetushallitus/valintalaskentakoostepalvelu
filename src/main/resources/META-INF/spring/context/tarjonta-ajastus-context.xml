@@ -20,8 +20,8 @@
 	<ctx:property-placeholder />
 	
 	<util:properties id="tarjontaProperties">
-		<beans:prop key="tarjonta.ajastinReitti.aktivoi">${tarjonta.ajastinReitti.aktivoi}</beans:prop>
-		<beans:prop key="tarjonta.ajastinReitti.cron">${tarjonta.ajastinReitti.cron}</beans:prop>
+		<beans:prop key="tarjonta.ajastinReitti.aktivoi">${valintalaskentakoostepalvelu.tarjonta.ajastinReitti.aktivoi:false}</beans:prop>
+		<beans:prop key="tarjonta.ajastinReitti.cron">${valintalaskentakoostepalvelu.tarjonta.ajastinReitti.cron:*/1+*+*+?+*+*}</beans:prop>
 	</util:properties>
 	
 	

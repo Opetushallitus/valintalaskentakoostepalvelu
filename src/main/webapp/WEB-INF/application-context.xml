@@ -31,19 +31,19 @@
 
 	<jaxws:client id="ValintaperusteServiceClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
-                  address="${ValintaperusteService.url}" />
+                  address="${valintalaskentakoostepalvelu.valintaperusteService.url}" />
 	
 	<jaxws:client id="HakemusServiceClient"
                   serviceClass="fi.vm.sade.service.hakemus.HakemusService"
-                  address="${HakemusService.url}" />
+                  address="${valintalaskentakoostepalvelu.hakemusService.url}" />
 	
 	<jaxws:client id="ValintalaskentaServiceClient" 
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
-                  address="${ValintalaskentaService.url}" />
+                  address="${valintalaskentakoostepalvelu.valintalaskentaService.url}" />
 
 	<jaxws:client id="TarjontaServiceClient" 
                   serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
-                  address="${TarjontaService.url}" />
+                  address="${valintalaskentakoostepalvelu.tarjontaService.url}" />
 
 	
 	<beans:import resource="classpath:META-INF/spring/context/tarjonta-ajastus-context.xml"/>
