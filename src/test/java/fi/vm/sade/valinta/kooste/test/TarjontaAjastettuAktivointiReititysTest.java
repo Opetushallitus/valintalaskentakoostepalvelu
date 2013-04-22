@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 
 import org.apache.camel.CamelContext;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,8 @@ import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakuTiedotPalvelu;
  *         CRON-ajastettua valintakoelaskennan käynnistystä ei ole vielä
  *         speksattu (16.4.2013)
  */
+@Ignore
+// Epävakaa!
 @Configuration
 @ContextConfiguration(classes = TarjontaAjastettuAktivointiReititysTest.class)
 @PropertySource({ "classpath:test.properties", "classpath:tarjonta-ajastin.properties" })
