@@ -9,13 +9,13 @@
 	<artifactId>valintalaskentakoostepalvelu</artifactId>
 	<groupId>fi.vm.sade.valinta</groupId>
 	<packaging>war</packaging>
-	<version>4.0-SNAPSHOT</version>
+	<version>5.0-SNAPSHOT</version>
 	<name>Valintalaskentakoostepalvelu</name>
 
 	<parent>
 		<groupId>fi.vm.sade.valintaperusteet</groupId>
 		<artifactId>valintaperusteet</artifactId>
-		<version>4.0-SNAPSHOT</version>
+		<version>5.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
