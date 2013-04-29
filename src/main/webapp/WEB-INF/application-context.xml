@@ -16,7 +16,7 @@
     <ctx:property-placeholder location="classpath:META-INF/wsdlSource.properties"/>
       -->
     <ctx:property-placeholder
-            location="classpath:META-INF/wsdlSource.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/override.properties"
+            location="classpath:META-INF/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/override.properties"
             ignore-resource-not-found="true" />
 	
 	<!-- 
@@ -45,9 +45,19 @@
                   serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
                   address="${valintalaskentakoostepalvelu.tarjontaService.url}" />
 
-	
+    <jaxws:client id="valintaTulosService"
+                  serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
+                  address="${valintalaskentakoostepalvelu.valintaTulosService.url}" />
+
+    <jaxws:client id="sijoitteluService"
+                  serviceClass="fi.vm.sade.service.sijoittelu.SijoitteluService"
+                  address="${valintalaskentakoostepalvelu.sijoitteluService.url}" />
+
 	<beans:import resource="classpath:META-INF/spring/context/tarjonta-ajastus-context.xml"/>
 	<beans:import resource="classpath:META-INF/spring/context/valintakoe-context.xml"/>
 	<beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
-	
+    <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
+
+
+
 </beans>
