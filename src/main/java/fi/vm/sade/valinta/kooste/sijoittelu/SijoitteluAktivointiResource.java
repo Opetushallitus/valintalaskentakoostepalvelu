@@ -11,9 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
 /**
- * 
- * @author Jussi Jartamo
- * 
+ *
  */
 @Controller
 @Path("/sijoittelu")
