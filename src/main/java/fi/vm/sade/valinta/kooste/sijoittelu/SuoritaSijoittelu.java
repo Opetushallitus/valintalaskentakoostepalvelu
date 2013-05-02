@@ -40,7 +40,7 @@ public class SuoritaSijoittelu {
      //   b.setTarjonta( new TarjontaTyyppi());
      //   List<fi.vm.sade.service.sijoittelu.schema.HakukohdeTyyppi> c = b.getTarjonta().getHakukohde();
 
-        sijoitteluService.sijoittele(b);
+        //sijoitteluService.sijoittele(b);
 
     }
 }
