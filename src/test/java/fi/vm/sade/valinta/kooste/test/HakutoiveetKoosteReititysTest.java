@@ -1,14 +1,14 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-
+import fi.vm.sade.service.hakemus.HakemusService;
+import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
+import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
+import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
+import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.TavallinenValinnanVaiheTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.tarjonta.service.TarjontaPublicService;
+import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -21,14 +21,11 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import fi.vm.sade.service.hakemus.HakemusService;
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.tarjonta.service.TarjontaPublicService;
-import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResource;
+import java.util.Arrays;
+
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * 
@@ -65,7 +62,9 @@ public class HakutoiveetKoosteReititysTest {
         ValintaperusteService valintaperusteMock = mock(ValintaperusteService.class);
         ValintaperusteetTyyppi vtyyppi = new ValintaperusteetTyyppi();
         vtyyppi.setHakukohdeOid(HAKUKOHDEOID);
-        vtyyppi.setValinnanVaiheJarjestysluku(VALINNANVAIHE);
+        TavallinenValinnanVaiheTyyppi vaihe = new TavallinenValinnanVaiheTyyppi();
+        vaihe.setValinnanVaiheJarjestysluku(VALINNANVAIHE);
+
         when(valintaperusteMock.haeValintaperusteet(anyListOf(HakuparametritTyyppi.class))).thenReturn(
                 Arrays.asList(vtyyppi));
         return valintaperusteMock;
