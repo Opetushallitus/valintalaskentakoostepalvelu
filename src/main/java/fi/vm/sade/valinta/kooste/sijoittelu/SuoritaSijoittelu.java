@@ -6,6 +6,7 @@ import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.HakukohdeTyyppi;
+import fi.vm.sade.tarjonta.service.types.HakuTyyppi;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,14 +34,13 @@ public class SuoritaSijoittelu {
 
         LOG.info("Haetaan valintatiedot haulle {}", new Object[] {hakuOid});
 
-             List<fi.vm.sade.service.valintatiedot.schema.HakukohdeTyyppi>    a =      valintatietoService.haeValintatiedot(hakuOid);
-
-
-       // SijoitteleTyyppi b = new SijoitteleTyyppi();
-     //   b.setTarjonta( new TarjontaTyyppi());
-     //   List<fi.vm.sade.service.sijoittelu.schema.HakukohdeTyyppi> c = b.getTarjonta().getHakukohde();
-
-        //sijoitteluService.sijoittele(b);
+        List<fi.vm.sade.service.valintatiedot.schema.HakukohdeTyyppi> hakukohteet = valintatietoService.haeValintatiedot(hakuOid);
+        SijoitteleTyyppi sijoittelu = new SijoitteleTyyppi();
+        sijoittelu.setTarjonta( new TarjontaTyyppi());
+        sijoittelu.getTarjonta().getHakukohde().addAll(hakukohteet);
+        sijoittelu.getTarjonta().setHaku(new HakuTyyppi());
+        sijoittelu.getTarjonta().getHaku().setOid(hakuOid);
+        sijoitteluService.sijoittele(sijoittelu);
 
     }
 }
