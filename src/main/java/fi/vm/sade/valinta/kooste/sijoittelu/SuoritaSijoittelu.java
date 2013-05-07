@@ -41,7 +41,6 @@ public class SuoritaSijoittelu {
         sijoittelu.getTarjonta().setHaku(new HakuTyyppi());
         sijoittelu.getTarjonta().getHaku().setOid(hakuOid);
         sijoitteluService.sijoittele(sijoittelu);
-
     }
 }
 

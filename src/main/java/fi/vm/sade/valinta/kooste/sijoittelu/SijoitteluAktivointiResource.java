@@ -25,7 +25,6 @@ public class SijoitteluAktivointiResource {
     @GET
     @Path("/aktivoi")
     public String aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
-
         if(StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";
         } else {
