@@ -32,9 +32,10 @@ public class SuoritaSijoittelu {
 
     public void haeLahtotiedot(@Simple("${property.hakuOid}") String hakuOid) {
 
-        LOG.info("Haetaan valintatiedot haulle {}", new Object[] {hakuOid});
-
+        LOG.info("KOOSTEPALVELU: Haetaan valintatiedot haulle {}", new Object[] {hakuOid});
         List<fi.vm.sade.service.valintatiedot.schema.HakukohdeTyyppi> hakukohteet = valintatietoService.haeValintatiedot(hakuOid);
+        LOG.info("Haettu valinnan tulokset");
+
         SijoitteleTyyppi sijoittelu = new SijoitteleTyyppi();
         sijoittelu.setTarjonta( new TarjontaTyyppi());
         sijoittelu.getTarjonta().getHakukohde().addAll(hakukohteet);
