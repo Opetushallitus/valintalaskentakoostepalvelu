@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <ctx:annotation-config />
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakuimport" />
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
+
+    <routeContext id="hakuImportRoutes" xmlns="http://camel.apache.org/schema/spring">
+        <route id="hakukohdeImportRoute">
+            <from uri="direct:kaynnistaHakukohdeImportReitti" />
+            <setProperty propertyName="hakukohde">
+                <simple>${body}</simple>
+            </setProperty>
+            <to uri="bean:suoritaHakukohdeImportKomponentti" />
+        </route>
+
+        <route id="hakuImportRoute">
+            <from uri="direct:kaynnistaHakuImportReitti" />
+            <setProperty propertyName="hakuOid">
+                <simple>${body}</simple>
+            </setProperty>
+            <to uri="bean:hakukohteetTarjonnaltaKomponentti" />
+            <split>
+                <simple>${body}</simple>
+                <to uri="direct:kaynnistaHakukohdeImportReitti" />
+            </split>
+        </route>
+    </routeContext>
+    <camelContext id="hakukohdeImportCamelContext"
+                  autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+        <proxy id="hakuImportAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.hakuimport.HakuImportAktivointiProxy"
+               serviceUrl="direct:kaynnistaHakuImportReitti" />
+        <routeContextRef ref="hakuImportRoutes" />
+    </camelContext>
+
+
+</beans>

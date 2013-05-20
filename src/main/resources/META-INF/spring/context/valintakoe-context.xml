@@ -1,25 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
-	xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
-	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
-	xsi:schemaLocation="
-       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
-       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-       http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-       http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
-
-	<!-- 
-		Konteksti vaatii valintalaskennan reitit
-	 -->
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<ctx:annotation-config />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.paasykokeet" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta" />
 
 	<routeContext id="valintakoelaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
-		<route id="valintalaskentakoeReitti">
+		<route id="valintakoelaskentaReitti">
 			<from uri="direct:kaynnistaValintakoelaskentaReitti" />
 			<setProperty propertyName="hakukohdeOid">
 				<simple>${body}</simple>
@@ -39,7 +28,7 @@
 			</setProperty>
 			<to uri="bean:hakukohteetTarjonnaltaKomponentti" />
 			<split parallelProcessing="true">
-				<simple>${body}</simple>
+				<method bean="splitHakukohteetKomponentti" method="splitHakukohteet" />
 				<to uri="direct:kaynnistaValintakoelaskentaReitti" />
 			</split>
 		</route>

@@ -9,5 +9,5 @@ package fi.vm.sade.valinta.kooste.tarjonta;
  */
 public interface TarjontaHakukohteetAktivointiProxy {
 
-    void aktivoiTarjontaHakukohteet(String hakuoid);
+    void aktivoiTarjontaHakukohteet(String hakuOid);
 }
