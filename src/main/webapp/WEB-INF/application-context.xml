@@ -9,54 +9,58 @@
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
          http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
-	<ctx:annotation-config />
-	  <!--
-    <ctx:property-placeholder location="classpath:META-INF/wsdlSource.properties"/>
-      -->
+    <ctx:annotation-config/>
+    <!--
+  <ctx:property-placeholder location="classpath:META-INF/wsdlSource.properties"/>
+    -->
     <ctx:property-placeholder
             location="classpath:META-INF/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/override.properties"
-            ignore-resource-not-found="true" />
-	
-	<!-- 
-		Implementoi TarjontaHakuTiedotPalvelu kun määritelmä tarkentuu! Ajastettu Camel-reitti käyttää sitä!
-	 -->
-	<beans:bean id="tarjontaTiedotPalvelu" class="fi.vm.sade.valinta.kooste.tarjonta.stub.TarjontaHakuTiedotPalveluImpl"/>
-	 
-	
+            ignore-resource-not-found="true"/>
+
+    <!--
+        Implementoi TarjontaHakuTiedotPalvelu kun määritelmä tarkentuu! Ajastettu Camel-reitti käyttää sitä!
+     -->
+    <beans:bean id="tarjontaTiedotPalvelu"
+                class="fi.vm.sade.valinta.kooste.tarjonta.stub.TarjontaHakuTiedotPalveluImpl"/>
+
+
     <!--
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.wsdlmock"/>
 	-->
 
-	<jaxws:client id="ValintaperusteServiceClient"
+    <jaxws:client id="ValintaperusteServiceClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
-                  address="${valintalaskentakoostepalvelu.valintaperusteService.url}" />
-	
-	<jaxws:client id="HakemusServiceClient"
-                  serviceClass="fi.vm.sade.service.hakemus.HakemusService"
-                  address="${valintalaskentakoostepalvelu.hakemusService.url}" />
-	
-	<jaxws:client id="ValintalaskentaServiceClient" 
-                  serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
-                  address="${valintalaskentakoostepalvelu.valintalaskentaService.url}" />
+                  address="${valintalaskentakoostepalvelu.valintaperusteService.url}"/>
 
-	<jaxws:client id="TarjontaServiceClient" 
+    <jaxws:client id="HakemusServiceClient"
+                  serviceClass="fi.vm.sade.service.hakemus.HakemusService"
+                  address="${valintalaskentakoostepalvelu.hakemusService.url}"/>
+
+    <jaxws:client id="ValintalaskentaServiceClient"
+                  serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
+                  address="${valintalaskentakoostepalvelu.valintalaskentaService.url}"/>
+
+    <jaxws:client id="TarjontaServiceClient"
                   serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
-                  address="${valintalaskentakoostepalvelu.tarjontaService.url}" />
+                  address="${valintalaskentakoostepalvelu.tarjontaService.url}"/>
 
     <jaxws:client id="valintaTulosService"
                   serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
-                  address="${valintalaskentakoostepalvelu.valintaTulosService.url}" />
+                  address="${valintalaskentakoostepalvelu.valintaTulosService.url}"/>
 
     <jaxws:client id="sijoitteluService"
                   serviceClass="fi.vm.sade.service.sijoittelu.SijoitteluService"
-                  address="${valintalaskentakoostepalvelu.sijoitteluService.url}" />
+                  address="${valintalaskentakoostepalvelu.sijoitteluService.url}"/>
+
+    <jaxws:client id="koodiService"
+                  serviceClass="fi.vm.sade.koodisto.service.KoodiService"
+                  address="${valintalaskentakoostepalvelu.koodiService.url}"/>
 
     <beans:import resource="classpath:META-INF/spring/context/hakuimport-context.xml"/>
-	<beans:import resource="classpath:META-INF/spring/context/tarjonta-ajastus-context.xml"/>
-	<beans:import resource="classpath:META-INF/spring/context/valintakoe-context.xml"/>
-	<beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
+    <beans:import resource="classpath:META-INF/spring/context/tarjonta-ajastus-context.xml"/>
+    <beans:import resource="classpath:META-INF/spring/context/valintakoe-context.xml"/>
+    <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
-
 
 
 </beans>

@@ -3,8 +3,9 @@ package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.HakukohdekoodiTyyppi;
-import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
+import fi.vm.sade.valinta.kooste.hakuimport.wrapper.Hakukohde;
 import org.apache.camel.language.Simple;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,20 +21,29 @@ public class SuoritaHakukohdeImportKomponentti {
     private ValintaperusteService valintaperusteService;
 
     public void suoritaHakukohdeImport(@Simple("${property.hakuOid}") String hakuOid,
-                                       @Simple("${property.hakukohde}") HakukohdeTyyppi hakukohde) {
+                                       @Simple("${property.hakukohde}") Hakukohde hakukohde) {
         HakukohdekoodiTyyppi koodi = new HakukohdekoodiTyyppi();
 
-        // Hakukohdenimi on todellisuudessa hakukohteen määrittävän koodin URI. Tarjonta ei jostakin syystä
-        // tallenna hakukohteen oikeaa nimeä kantaansa. Pitää kaivella tämä koodistosta jossakin vaiheessa.
-        koodi.setKoodiUri(hakukohde.getHakukohdeNimi());
-        koodi.setArvo(hakukohde.getHakukohdeNimi());
-        koodi.setNimiFi(hakukohde.getHakukohdeNimi());
-        koodi.setNimiSv(hakukohde.getHakukohdeNimi());
-        koodi.setNimiEn(hakukohde.getHakukohdeNimi());
+        koodi.setKoodiUri(hakukohde.getHakukohdeKoodiUri());
+        koodi.setArvo(hakukohde.getHakukohdeKoodiArvo());
+        koodi.setNimiFi(hakukohde.getNimiFi());
+        koodi.setNimiSv(hakukohde.getNimiSv());
+        koodi.setNimiEn(hakukohde.getNimiEn());
 
         HakukohdeImportTyyppi hakukohdeImport = new HakukohdeImportTyyppi();
         hakukohdeImport.setHakukohdekoodi(koodi);
-        hakukohdeImport.setHakukohdeOid(hakukohde.getOid());
+
+        if (StringUtils.isNotBlank(hakukohde.getNimiFi())) {
+            hakukohdeImport.setNimi(hakukohde.getNimiFi());
+        } else if (StringUtils.isNotBlank(hakukohde.getNimiSv())) {
+            hakukohdeImport.setNimi(hakukohde.getNimiSv());
+        } else if (StringUtils.isNotBlank(hakukohde.getNimiEn())) {
+            hakukohdeImport.setNimi(hakukohde.getNimiEn());
+        } else {
+            hakukohdeImport.setNimi(hakukohde.getHakukohdeOid());
+        }
+
+        hakukohdeImport.setHakukohdeOid(hakukohde.getHakukohdeOid());
         hakukohdeImport.setHakuOid(hakuOid);
 
         valintaperusteService.tuoHakukohde(hakukohdeImport);
