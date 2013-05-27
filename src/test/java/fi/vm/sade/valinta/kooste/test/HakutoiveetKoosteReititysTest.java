@@ -28,12 +28,10 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
+ *         <p/>
  *         Testaa että Camel-reitit menee läpi ja että kutsun viimeinen palvelu
  *         saa oikeat arvot reititysketjun läpi
- * 
  */
 @Configuration
 @ContextConfiguration(classes = HakutoiveetKoosteReititysTest.class)
@@ -91,7 +89,7 @@ public class HakutoiveetKoosteReititysTest {
 
     @Test
     public void testLaskentaKooste() {
-        valintalaskentaResource.aktivoiValintalaskenta(HAKUKOHDEOID, VALINNANVAIHE);
+        valintalaskentaResource.aktivoiHakukohteenValintalaskenta(HAKUKOHDEOID, VALINNANVAIHE);
         // verify that hakemusservice was indeed called with REST argument!
         verify(hakemusService, atLeastOnce()).haeHakemukset(eq(Arrays.asList(HAKUKOHDEOID)));
         // verify that the route ended calling valintalaskentaservice!
