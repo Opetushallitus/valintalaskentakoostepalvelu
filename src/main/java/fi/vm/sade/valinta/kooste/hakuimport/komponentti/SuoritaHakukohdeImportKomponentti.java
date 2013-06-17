@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.HakukohdekoodiTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.MonikielinenTekstiTyyppi;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
@@ -35,19 +36,23 @@ public class SuoritaHakukohdeImportKomponentti {
 
 
         HakukohdeImportTyyppi importTyyppi = new HakukohdeImportTyyppi();
-
         Gson gson = new Gson();
-        //Type collectionType = new TypeToken<List<JsonObject>>(){}.getType();
-        System.out.println("hakukohdeNimi" + hakukohdeNimi);
         HakukohdeDTO hakukohde = gson.fromJson(hakukohdeNimi,HakukohdeDTO.class);
 
-
         for(String s : hakukohde.getTarjoajaNimi().keySet()) {
-
+            MonikielinenTekstiTyyppi m = new MonikielinenTekstiTyyppi();
+            m.setLang(s);
+            m.setText(hakukohde.getTarjoajaNimi().get(s));
+            importTyyppi.getTarjoajaNimi().add(m);
         }
         for(String s : hakukohde.getHakukohdeNimi().keySet()) {
-            System.out.println(s + "=>" +hakukohde.getHakukohdeNimi().get(s));
+            MonikielinenTekstiTyyppi m = new MonikielinenTekstiTyyppi();
+            m.setLang(s);
+            m.setText(hakukohde.getHakukohdeNimi().get(s));
+            importTyyppi.getHakukohdeNimi().add(m);
         }
+
+
 
 
       //  JsonElement tarjoajanimi = hakukohdeJson.get("tarjoajaNimi");
