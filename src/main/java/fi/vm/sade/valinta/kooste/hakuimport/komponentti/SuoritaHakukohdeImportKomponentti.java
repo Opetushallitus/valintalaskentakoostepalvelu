@@ -38,13 +38,34 @@ public class SuoritaHakukohdeImportKomponentti {
 
         Gson gson = new Gson();
         //Type collectionType = new TypeToken<List<JsonObject>>(){}.getType();
-        JsonObject hakukohdeJson = gson.fromJson(hakukohdeData,JsonObject.class);
-        JsonArray tarjoajanimi = hakukohdeJson.get("tarjoajaNimi").getAsJsonArray();
-        Iterator<JsonElement> it = tarjoajanimi.iterator();
-        while(it.hasNext()) {
-            JsonElement next = it.next();
-            next.getAsString();
+        System.out.println("hakukohdeNimi" + hakukohdeNimi);
+        HakukohdeDTO hakukohde = gson.fromJson(hakukohdeNimi,HakukohdeDTO.class);
+
+
+        for(String s : hakukohde.getTarjoajaNimi().keySet()) {
+
         }
+        for(String s : hakukohde.getHakukohdeNimi().keySet()) {
+            System.out.println(s + "=>" +hakukohde.getHakukohdeNimi().get(s));
+        }
+
+
+      //  JsonElement tarjoajanimi = hakukohdeJson.get("tarjoajaNimi");
+       // JsonArray t =   tarjoajanimi.getAsJsonArray();
+      //  Iterator<JsonElement> a = t.iterator();
+      //  while(a.hasNext()) {
+      //      JsonElement b = a.next();
+      //      System.out.println("KIELI:" + b.getAsJsonObject().get("type").getAsString());
+      //      System.out.println("teksti:" + b.getAsJsonObject().get("type").getAsString());
+       // }
+
+
+       // System.out.println("tarjoajaNimi!::::" + tarjoajanimi);
+        // Iterator<JsonElement> it = tarjoajanimi.iterator();
+        //  while(it.hasNext()) {
+        //     JsonElement next = it.next();
+        //  System.out.println("JORMA" +   next.getAsString() );
+        // }
 
     /*
         HakukohdeImportTyyppi hakukohdeImport = new HakukohdeImportTyyppi();
