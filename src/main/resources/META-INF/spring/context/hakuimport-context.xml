@@ -9,43 +9,59 @@
        http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
     <ctx:annotation-config/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakuimport"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti"/>
 
-
-    <routeContext id="hakuImportRoutes" xmlns="http://camel.apache.org/schema/spring">
-        <route id="hakukohdeImportRoute">
-            <from uri="direct:kaynnistaHakukohdeImportReitti"/>
-            <setProperty propertyName="hakukohde">
-                <simple>${body}</simple>
-            </setProperty>
-            <to uri="bean:suoritaHakukohdeImportKomponentti"/>
-        </route>
-
-        <route id="hakuImportRoute">
-            <from uri="direct:kaynnistaHakuImportReitti"/>
-            <setProperty propertyName="hakuOid">
-                <simple>${body}</simple>
-            </setProperty>
-            <to uri="bean:hakukohteetTarjonnaltaKomponentti"/>
-            <setProperty propertyName="hakukohteet">
-                <simple>${body}</simple>
-            </setProperty>
-            <to uri="bean:haeHakukohdekooditImportiinKomponentti"/>
-            <split>
-                <simple>${body}</simple>
-                <to uri="direct:kaynnistaHakukohdeImportReitti"/>
-            </split>
-        </route>
-    </routeContext>
-    <camelContext id="hakukohdeImportCamelContext"
-                  autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+    <camelContext id="hakukohdeImportCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
         <proxy id="hakuImportAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.hakuimport.HakuImportAktivointiProxy"
                serviceUrl="direct:kaynnistaHakuImportReitti"/>
         <routeContextRef ref="hakuImportRoutes"/>
     </camelContext>
+
+    <routeContext id="hakuImportRoutes" xmlns="http://camel.apache.org/schema/spring">
+        <route id="hakuImportRoute">
+            <from uri="direct:kaynnistaHakuImportReitti"/>
+
+            <camel:recipientList>
+                <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/haku/${body}/hakukohde?count=99999999</camel:simple>
+            </camel:recipientList>
+
+            <split parallelProcessing="true" >
+                <method bean="jsonSplitter" method="split"/>
+                <to uri="direct:kaynnistaHakukohdeImportReitti"/>
+            </split>
+        </route>
+
+        <route id="hakukohdeImportRoute">
+            <from uri="direct:kaynnistaHakukohdeImportReitti"/>
+            <setProperty propertyName="hakukohdeOid">
+                <simple>${body}</simple>
+            </setProperty>
+             <setBody>
+                 <simple></simple>
+             </setBody>
+            <camel:recipientList>
+                <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/hakukohde/${property.hakukohdeOid}?a=b</camel:simple>              <!--miksi a=b tarvitaan -->
+            </camel:recipientList>
+            <setProperty propertyName="hakukohdeData">
+                <simple>${body}</simple>
+            </setProperty>
+            <setBody>
+                <simple></simple>
+            </setBody>
+            <camel:recipientList>
+                <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/hakukohde/${property.hakukohdeOid}/nimi?a=b</camel:simple>
+            </camel:recipientList>
+            <setProperty propertyName="hakukohdeNimi">
+                <simple>${body}</simple>
+            </setProperty>
+
+            <to uri="bean:suoritaHakukohdeImportKomponentti"/>
+        </route>
+
+    </routeContext>
 
 
 </beans>

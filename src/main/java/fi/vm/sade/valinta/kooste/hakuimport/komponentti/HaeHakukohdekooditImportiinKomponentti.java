@@ -1,4 +1,5 @@
-package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
+
+/*package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.common.KieliType;
@@ -16,13 +17,10 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * User: wuoti
- * Date: 21.5.2013
- * Time: 12.51
- */
+
 @Component("haeHakukohdekooditImportiinKomponentti")
 public class HaeHakukohdekooditImportiinKomponentti {
+
 
     private static final Logger LOG = LoggerFactory.getLogger(HaeHakukohdekooditImportiinKomponentti.class);
 
@@ -88,4 +86,6 @@ public class HaeHakukohdekooditImportiinKomponentti {
 
         return importit;
     }
+
 }
+*/

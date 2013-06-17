@@ -1,13 +1,17 @@
-package fi.vm.sade.valinta.kooste.hakuimport.wrapper;
+/*package fi.vm.sade.valinta.kooste.hakuimport.wrapper;
 
-/**
- * User: wuoti
- * Date: 21.5.2013
- * Time: 13.11
- */
 public class Hakukohde {
-    public Hakukohde() {
+
+    private String oid;
+
+    public String getOid() {
+        return oid;
     }
+
+    public void setOid(String oid) {
+        this.oid = oid;
+    }
+
 
     public Hakukohde(String hakukohdeKoodiUri, String hakukohdeKoodiArvo, String hakukohdeOid, String nimiFi,
                      String nimiSv, String nimiEn) {
@@ -75,3 +79,4 @@ public class Hakukohde {
     }
 
 }
+  */
