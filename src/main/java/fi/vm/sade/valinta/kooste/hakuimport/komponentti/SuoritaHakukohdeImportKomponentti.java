@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.HakukohdekoodiTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.HakukohteenValintakoeTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.MonikielinenTekstiTyyppi;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import org.apache.camel.language.Simple;
@@ -52,20 +53,50 @@ public class SuoritaHakukohdeImportKomponentti {
             importTyyppi.getHakukohdeNimi().add(m);
         }
 
+        for(String s : hakukohde.getHakuKausi().keySet()) {
+            MonikielinenTekstiTyyppi m = new MonikielinenTekstiTyyppi();
+            m.setLang(s);
+            m.setText(hakukohde.getHakuKausi().get(s));
+            importTyyppi.getHakuKausi().add(m);
+        }
+
+        importTyyppi.setHakuVuosi(hakukohde.getHakuVuosi());
+
+        hakukohde = gson.fromJson(hakukohdeData,HakukohdeDTO.class);
+
+        for(String s : hakukohde.getOpetuskielet()) {
+            importTyyppi.getOpetuskielet().add(s);
+        }
+
+        HakukohdekoodiTyyppi hkt = new HakukohdekoodiTyyppi();
+        hkt.setKoodiUri(hakukohde.getHakukohdeNimiUri());
+        importTyyppi.setHakukohdekoodi(hkt);
+
+        importTyyppi.setHakukohdeOid(hakukohde.getHakukohdeOid());
+        importTyyppi.setHakuOid(hakukohde.getHakuOid());
+        importTyyppi.setValinnanAloituspaikat(hakukohde.getValintojenAloituspaikatLkm());
+
+        for(ValintakoeDTO valinakoe : hakukohde.getValintakoes()) {
+            HakukohteenValintakoeTyyppi v = new HakukohteenValintakoeTyyppi();
+            v.setOid(valinakoe.getOid());
+            v.setTyyppiUri(valinakoe.getTyyppiUri());
+            importTyyppi.getValintakoe().add(v);
+        }
 
 
+        //importTyyppi.setHakukohteenKoulutusaste();
 
-      //  JsonElement tarjoajanimi = hakukohdeJson.get("tarjoajaNimi");
-       // JsonArray t =   tarjoajanimi.getAsJsonArray();
-      //  Iterator<JsonElement> a = t.iterator();
-      //  while(a.hasNext()) {
-      //      JsonElement b = a.next();
-      //      System.out.println("KIELI:" + b.getAsJsonObject().get("type").getAsString());
-      //      System.out.println("teksti:" + b.getAsJsonObject().get("type").getAsString());
-       // }
+        //  JsonElement tarjoajanimi = hakukohdeJson.get("tarjoajaNimi");
+        // JsonArray t =   tarjoajanimi.getAsJsonArray();
+        //  Iterator<JsonElement> a = t.iterator();
+        //  while(a.hasNext()) {
+        //      JsonElement b = a.next();
+        //      System.out.println("KIELI:" + b.getAsJsonObject().get("type").getAsString());
+        //      System.out.println("teksti:" + b.getAsJsonObject().get("type").getAsString());
+        // }
 
 
-       // System.out.println("tarjoajaNimi!::::" + tarjoajanimi);
+        // System.out.println("tarjoajaNimi!::::" + tarjoajanimi);
         // Iterator<JsonElement> it = tarjoajanimi.iterator();
         //  while(it.hasNext()) {
         //     JsonElement next = it.next();
@@ -105,12 +136,14 @@ public class SuoritaHakukohdeImportKomponentti {
         }
           */
         /*
-        valintaperusteService.tuoHakukohde(hakukohdeImport);
+
 
 
     */
 
         //    System.out.println("[" + hakukohdeOid + "]\n\n" +hakukohdeData + "\n\n" +hakukohdeNimi );
+
+        valintaperusteService.tuoHakukohde(importTyyppi);
     }
 
 }

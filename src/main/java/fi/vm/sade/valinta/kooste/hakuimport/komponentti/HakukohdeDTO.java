@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,13 @@ public class HakukohdeDTO {
     private Map<String, String> hakukohdeNimi = new HashMap<String, String>();
     private String hakukohdeOid;
     private String tarjoajaOid;
+    private String hakuOid;
     private List<String > opetuskielet;
-    private String valintojenAloituspaikatLkm;
+    private int valintojenAloituspaikatLkm;
+    private String hakukohdeNimiUri;
+    private List<ValintakoeDTO> valintakoes = new ArrayList<ValintakoeDTO>();
+    private Map<String, String> hakuKausi = new HashMap<String, String>();
+    private String hakuVuosi;
 
 
     public Map<String, String> getTarjoajaNimi() {
@@ -61,11 +67,55 @@ public class HakukohdeDTO {
         this.opetuskielet = opetuskielet;
     }
 
-    public String getValintojenAloituspaikatLkm() {
+    public int getValintojenAloituspaikatLkm() {
         return valintojenAloituspaikatLkm;
     }
 
-    public void setValintojenAloituspaikatLkm(String valintojenAloituspaikatLkm) {
+    public void setValintojenAloituspaikatLkm(int valintojenAloituspaikatLkm) {
         this.valintojenAloituspaikatLkm = valintojenAloituspaikatLkm;
+    }
+
+    public String getHakukohdeNimiUri() {
+        return hakukohdeNimiUri;
+    }
+
+    public void setHakukohdeNimiUri(String hakukohdeNimiUri) {
+        this.hakukohdeNimiUri = hakukohdeNimiUri;
+    }
+
+    public List<ValintakoeDTO> getValintakoes() {
+        return valintakoes;
+    }
+
+    public void setValintakoes(List<ValintakoeDTO> valintakoes) {
+        this.valintakoes = valintakoes;
+    }
+
+
+
+
+
+    public String getHakuVuosi() {
+        return hakuVuosi;
+    }
+
+    public void setHakuVuosi(String hakuVuosi) {
+        this.hakuVuosi = hakuVuosi;
+    }
+
+    public Map<String, String> getHakuKausi() {
+        return hakuKausi;
+    }
+
+    public void setHakuKausi(Map<String, String> hakuKausi) {
+        this.hakuKausi = hakuKausi;
+    }
+
+    public String getHakuOid() {
+        return hakuOid;
+    }
+
+    public void setHakuOid(String hakuOid) {
+        this.hakuOid = hakuOid;
     }
 }
