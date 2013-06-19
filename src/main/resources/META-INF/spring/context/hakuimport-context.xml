@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
-       xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
-       xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
-       xsi:schemaLocation="
-       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
-       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-       http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-       http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xsi:schemaLocation="http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <ctx:annotation-config/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakuimport"/>
@@ -25,10 +20,12 @@
             <from uri="direct:kaynnistaHakuImportReitti"/>
 
             <camel:recipientList>
-                <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/haku/${body}/hakukohde?count=99999999</camel:simple>
+                <camel:simple>
+                    http://luokka.hard.ware.fi:8302/tarjonta-service/rest/haku/${body}/hakukohde?count=99999999
+                </camel:simple>
             </camel:recipientList>
 
-            <split parallelProcessing="true" >
+            <split parallelProcessing="true">
                 <method bean="jsonSplitter" method="split"/>
                 <to uri="direct:kaynnistaHakukohdeImportReitti"/>
             </split>
@@ -39,11 +36,14 @@
             <setProperty propertyName="hakukohdeOid">
                 <simple>${body}</simple>
             </setProperty>
-             <setBody>
-                 <simple></simple>
-             </setBody>
+            <setBody>
+                <simple></simple>
+            </setBody>
             <camel:recipientList>
-                <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/hakukohde/${property.hakukohdeOid}?a=b</camel:simple>              <!--miksi a=b tarvitaan  -->
+                <camel:simple>
+                    http://luokka.hard.ware.fi:8302/tarjonta-service/rest/hakukohde/${property.hakukohdeOid}?a=b
+                </camel:simple>
+                <!--miksi a=b tarvitaan  -->
             </camel:recipientList>
             <setProperty propertyName="hakukohdeData">
                 <simple>${body}</simple>
@@ -52,7 +52,9 @@
                 <simple></simple>
             </setBody>
             <camel:recipientList>
-                <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/hakukohde/${property.hakukohdeOid}/nimi?a=b</camel:simple>
+                <camel:simple>
+                    http://luokka.hard.ware.fi:8302/tarjonta-service/rest/hakukohde/${property.hakukohdeOid}/nimi?a=b
+                </camel:simple>
             </camel:recipientList>
             <setProperty propertyName="hakukohdeNimi">
                 <simple>${body}</simple>
