@@ -72,7 +72,7 @@ public class SuoritaHakukohdeImportKomponentti {
         hkt.setKoodiUri(hakukohde.getHakukohdeNimiUri());
         importTyyppi.setHakukohdekoodi(hkt);
 
-        importTyyppi.setHakukohdeOid(hakukohde.getHakukohdeOid());
+        importTyyppi.setHakukohdeOid(hakukohde.getOid());
         importTyyppi.setHakuOid(hakukohde.getHakuOid());
         importTyyppi.setValinnanAloituspaikat(hakukohde.getValintojenAloituspaikatLkm());
 

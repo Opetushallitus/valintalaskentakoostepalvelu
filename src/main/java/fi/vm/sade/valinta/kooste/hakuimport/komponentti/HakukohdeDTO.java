@@ -16,7 +16,7 @@ public class HakukohdeDTO {
 
     private Map<String, String> tarjoajaNimi = new HashMap<String, String>();
     private Map<String, String> hakukohdeNimi = new HashMap<String, String>();
-    private String hakukohdeOid;
+    private String oid;
     private String tarjoajaOid;
     private String hakuOid;
     private List<String > opetuskielet;
@@ -43,13 +43,6 @@ public class HakukohdeDTO {
         this.hakukohdeNimi = hakukohdeNimi;
     }
 
-    public String getHakukohdeOid() {
-        return hakukohdeOid;
-    }
-
-    public void setHakukohdeOid(String hakukohdeOid) {
-        this.hakukohdeOid = hakukohdeOid;
-    }
 
     public String getTarjoajaOid() {
         return tarjoajaOid;
@@ -117,5 +110,13 @@ public class HakukohdeDTO {
 
     public void setHakuOid(String hakuOid) {
         this.hakuOid = hakuOid;
+    }
+
+    public String getOid() {
+        return oid;
+    }
+
+    public void setOid(String oid) {
+        this.oid = oid;
     }
 }
