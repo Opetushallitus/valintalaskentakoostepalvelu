@@ -43,14 +43,6 @@ public class HakukohdeDTO {
         this.hakukohdeNimi = hakukohdeNimi;
     }
 
-    public String getHakukohdeOid() {
-        return oid;
-    }
-
-    public void setHakukohdeOid(String hakukohdeOid) {
-        this.oid = hakukohdeOid;
-    }
-
     public String getTarjoajaOid() {
         return tarjoajaOid;
     }
@@ -114,5 +106,13 @@ public class HakukohdeDTO {
 
     public void setHakuOid(String hakuOid) {
         this.hakuOid = hakuOid;
+    }
+
+    public String getOid() {
+        return oid;
+    }
+
+    public void setOid(String oid) {
+        this.oid = oid;
     }
 }

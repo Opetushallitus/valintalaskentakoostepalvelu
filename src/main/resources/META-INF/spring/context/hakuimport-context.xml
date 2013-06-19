@@ -43,7 +43,7 @@
                  <simple></simple>
              </setBody>
             <camel:recipientList>
-                <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/hakukohde/${property.hakukohdeOid}?a=b</camel:simple>              <!--miksi a=b tarvitaan -->
+                <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/hakukohde/${property.hakukohdeOid}?a=b</camel:simple>              <!--miksi a=b tarvitaan  -->
             </camel:recipientList>
             <setProperty propertyName="hakukohdeData">
                 <simple>${body}</simple>

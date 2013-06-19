@@ -72,7 +72,7 @@ public class SuoritaHakukohdeImportKomponentti {
         hkt.setKoodiUri(hakukohde.getHakukohdeNimiUri());
         importTyyppi.setHakukohdekoodi(hkt);
 
-        importTyyppi.setHakukohdeOid(hakukohde.getHakukohdeOid());
+        importTyyppi.setHakukohdeOid(hakukohde.getOid());
         importTyyppi.setHakuOid(hakukohde.getHakuOid());
         importTyyppi.setValinnanAloituspaikat(hakukohde.getValintojenAloituspaikatLkm());
 
@@ -83,67 +83,8 @@ public class SuoritaHakukohdeImportKomponentti {
             importTyyppi.getValintakoe().add(v);
         }
 
+       valintaperusteService.tuoHakukohde(importTyyppi);
 
-        //importTyyppi.setHakukohteenKoulutusaste();
-
-        //  JsonElement tarjoajanimi = hakukohdeJson.get("tarjoajaNimi");
-        // JsonArray t =   tarjoajanimi.getAsJsonArray();
-        //  Iterator<JsonElement> a = t.iterator();
-        //  while(a.hasNext()) {
-        //      JsonElement b = a.next();
-        //      System.out.println("KIELI:" + b.getAsJsonObject().get("type").getAsString());
-        //      System.out.println("teksti:" + b.getAsJsonObject().get("type").getAsString());
-        // }
-
-
-        // System.out.println("tarjoajaNimi!::::" + tarjoajanimi);
-        // Iterator<JsonElement> it = tarjoajanimi.iterator();
-        //  while(it.hasNext()) {
-        //     JsonElement next = it.next();
-        //  System.out.println("JORMA" +   next.getAsString() );
-        // }
-
-    /*
-        HakukohdeImportTyyppi hakukohdeImport = new HakukohdeImportTyyppi();
-        HakukohdekoodiTyyppi hkt  = new HakukohdekoodiTyyppi();
-        hakukohdeImport.setHakukohdekoodi(hkt);
-        hakukohdeImport.setHakukohdeOid(hakukohde.getOid());
-        hakukohdeImport.setHakuOid(hakukohdeImport.getHakuOid());
-        hkt.setKoodiUri(hakukohde.getHakukohdeNimi());
-
-      */
-
-
-        /*
-        HakukohdekoodiTyyppi koodi = new HakukohdekoodiTyyppi();
-
-        koodi.setKoodiUri(hakukohde.getHakukohdeKoodiUri());
-        koodi.setArvo(hakukohde.getHakukohdeKoodiArvo());
-        koodi.setNimiFi(hakukohde.getNimiFi());
-        koodi.setNimiSv(hakukohde.getNimiSv());
-        koodi.setNimiEn(hakukohde.getNimiEn());
-
-
-
-        if (StringUtils.isNotBlank(hakukohde.getNimiFi())) {
-            hakukohdeImport.setNimi(hakukohde.getNimiFi());
-        } else if (StringUtils.isNotBlank(hakukohde.getNimiSv())) {
-            hakukohdeImport.setNimi(hakukohde.getNimiSv());
-        } else if (StringUtils.isNotBlank(hakukohde.getNimiEn())) {
-            hakukohdeImport.setNimi(hakukohde.getNimiEn());
-        } else {
-            hakukohdeImport.setNimi(hakukohde.getHakukohdeOid());
-        }
-          */
-        /*
-
-
-
-    */
-
-        //    System.out.println("[" + hakukohdeOid + "]\n\n" +hakukohdeData + "\n\n" +hakukohdeNimi );
-
-        valintaperusteService.tuoHakukohde(importTyyppi);
     }
 
 }
