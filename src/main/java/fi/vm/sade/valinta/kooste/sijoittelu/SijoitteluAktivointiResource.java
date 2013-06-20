@@ -14,7 +14,7 @@ import javax.ws.rs.QueryParam;
  *
  */
 @Controller
-@Path("/sijoittelu")
+@Path("sijoittelu")
 public class SijoitteluAktivointiResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(SijoitteluAktivointiResource.class);
@@ -23,7 +23,7 @@ public class SijoitteluAktivointiResource {
     private SijoitteluAktivointiProxy sijoitteluaAktivointiProxy;
 
     @GET
-    @Path("/aktivoi")
+    @Path("aktivoi")
     public String aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
         if(StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";

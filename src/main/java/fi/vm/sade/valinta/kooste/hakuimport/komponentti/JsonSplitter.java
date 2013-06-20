@@ -1,11 +1,8 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;

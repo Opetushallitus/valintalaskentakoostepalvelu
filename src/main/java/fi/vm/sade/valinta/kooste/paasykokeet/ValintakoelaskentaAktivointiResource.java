@@ -17,7 +17,7 @@ import javax.ws.rs.QueryParam;
  * 
  */
 @Controller
-@Path("/valintakoelaskenta")
+@Path("valintakoelaskenta")
 public class ValintakoelaskentaAktivointiResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValintakoelaskentaAktivointiResource.class);
@@ -26,7 +26,7 @@ public class ValintakoelaskentaAktivointiResource {
     private ValintakoelaskentaAktivointiProxy valintalaskentaProxy;
 
     @GET
-    @Path("/aktivoi")
+    @Path("aktivoi")
     public String aktivoiValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid) {
         if(StringUtils.isBlank(hakukohdeOid)) {
             return "get parameter 'hakukohdeOid required";

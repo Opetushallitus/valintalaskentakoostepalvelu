@@ -16,7 +16,7 @@ import javax.ws.rs.QueryParam;
  * 
  */
 @Controller
-@Path("/tarjonta")
+@Path("tarjonta")
 public class TarjontaHakukohteetAktivointiResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(TarjontaHakukohteetAktivointiResource.class);
@@ -25,7 +25,7 @@ public class TarjontaHakukohteetAktivointiResource {
     private TarjontaHakukohteetAktivointiProxy hakukohteetProxy;
 
     @GET
-    @Path("/aktivoi")
+    @Path("aktivoi")
     public String aktivoiValintalaskenta(@QueryParam("hakuOid") String hakuOid) {
         if (StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakukohdeOid' required";

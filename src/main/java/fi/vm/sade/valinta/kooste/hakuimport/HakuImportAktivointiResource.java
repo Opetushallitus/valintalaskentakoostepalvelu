@@ -15,7 +15,7 @@ import javax.ws.rs.QueryParam;
  * Date: 20.5.2013
  * Time: 10.34
  */
-@Path("/hakuimport")
+@Path("hakuimport")
 @Controller
 public class HakuImportAktivointiResource {
     private static final Logger LOG = LoggerFactory.getLogger(HakuImportAktivointiResource.class);
@@ -24,7 +24,7 @@ public class HakuImportAktivointiResource {
     private HakuImportAktivointiProxy hakuImportAktivointiProxy;
 
     @GET
-    @Path("/aktivoi")
+    @Path("aktivoi")
     public String aktivoiHakuImport(@QueryParam("hakuOid") String hakuOid) {
         if (StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";

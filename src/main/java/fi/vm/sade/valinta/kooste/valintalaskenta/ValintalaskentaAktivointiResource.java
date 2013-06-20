@@ -14,7 +14,7 @@ import javax.ws.rs.QueryParam;
  * @author Jussi Jartamo
  */
 @Controller
-@Path("/valintalaskenta")
+@Path("valintalaskenta")
 public class ValintalaskentaAktivointiResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaAktivointiResource.class);
@@ -26,7 +26,7 @@ public class ValintalaskentaAktivointiResource {
     private HaunValintalaskentaAktivointiProxy haunValintalaskentaAktivointiProxy;
 
     @GET
-    @Path("/aktivoi")
+    @Path("aktivoi")
     public String aktivoiHakukohteenValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid,
                                                     @QueryParam("valinnanvaihe") Integer valinnanvaihe) {
 
