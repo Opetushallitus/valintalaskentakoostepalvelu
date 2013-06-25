@@ -22,6 +22,7 @@
     </util:properties>
 
     <camelContext id="hakukohdeImportCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+        <propertyPlaceholder id="tarjontaContextProperties" location="ref:tarjontaProperties" />
         <proxy id="hakuImportAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.hakuimport.HakuImportAktivointiProxy"
                serviceUrl="direct:kaynnistaHakuImportReitti"/>
