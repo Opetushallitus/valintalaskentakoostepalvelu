@@ -3,9 +3,11 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
        xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
        xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
        http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
        http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
@@ -13,6 +15,10 @@
 
     <ctx:annotation-config/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakuimport"/>
+
+    <util:properties id="tarjontaProperties">
+        <beans:prop key="tarjonta.rest">${valintalaskentakoostepalvelu.tarjonta.rest.url}</beans:prop>
+    </util:properties>
 
     <camelContext id="hakukohdeImportCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
         <proxy id="hakuImportAktivointiRajapinta"
@@ -28,7 +34,7 @@
             <policy ref="admin">
 
                 <camel:recipientList>
-                    <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/haku/${body}/hakukohde?count=99999999</camel:simple>
+                    <camel:simple>{{tarjonta.rest}}/haku/${body}/hakukohde?count=99999999</camel:simple>
                 </camel:recipientList>
 
                 <!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
@@ -49,7 +55,7 @@
                  <simple></simple>
              </setBody>
             <camel:recipientList>
-                <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/hakukohde/${property.hakukohdeOid}?a=b</camel:simple>              <!--miksi a=b tarvitaan  -->
+                <camel:simple>{{tarjonta.rest}}/hakukohde/${property.hakukohdeOid}?a=b</camel:simple>              <!--miksi a=b tarvitaan  -->
             </camel:recipientList>
             <setProperty propertyName="hakukohdeData">
                 <simple>${body}</simple>
@@ -58,7 +64,7 @@
                 <simple></simple>
             </setBody>
             <camel:recipientList>
-                <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/hakukohde/${property.hakukohdeOid}/nimi?a=b</camel:simple>
+                <camel:simple>{{tarjonta.rest}}/hakukohde/${property.hakukohdeOid}/nimi?a=b</camel:simple>
             </camel:recipientList>
             <setProperty propertyName="hakukohdeNimi">
                 <simple>${body}</simple>
