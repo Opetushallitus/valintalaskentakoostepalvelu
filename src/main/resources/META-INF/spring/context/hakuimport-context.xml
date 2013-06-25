@@ -14,7 +14,7 @@
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
     <ctx:annotation-config/>
-    <ctx:property-placeholder />
+
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakuimport"/>
 
     <util:properties id="hakuimportProperties">

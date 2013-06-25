@@ -52,11 +52,7 @@
 
     <jaxws:client id="ValintaperusteServiceClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
-                  address="${valintalaskentakoostepalvelu.valintaperusteService.url}">
-        <jaxws:outInterceptors>
-            <ref bean="ticketInterceptor" />
-        </jaxws:outInterceptors>
-    </jaxws:client>
+                  address="${valintalaskentakoostepalvelu.valintaperusteService.url}" />
 
     <jaxws:client id="HakemusServiceClient"
                   serviceClass="fi.vm.sade.service.hakemus.HakemusService"
@@ -64,11 +60,7 @@
 
     <jaxws:client id="ValintalaskentaServiceClient"
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
-                  address="${valintalaskentakoostepalvelu.valintalaskentaService.url}">
-        <jaxws:outInterceptors>
-            <ref bean="ticketInterceptor" />
-        </jaxws:outInterceptors>
-    </jaxws:client>
+                  address="${valintalaskentakoostepalvelu.valintalaskentaService.url}" />
 
     <jaxws:client id="TarjontaServiceClient"
                   serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
@@ -76,19 +68,11 @@
 
     <jaxws:client id="valintaTulosService"
                   serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
-                  address="${valintalaskentakoostepalvelu.valintaTulosService.url}">
-        <jaxws:outInterceptors>
-            <ref bean="ticketInterceptor" />
-        </jaxws:outInterceptors>
-    </jaxws:client>
+                  address="${valintalaskentakoostepalvelu.valintaTulosService.url}" />
 
     <jaxws:client id="sijoitteluService"
                   serviceClass="fi.vm.sade.service.sijoittelu.SijoitteluService"
-                  address="${valintalaskentakoostepalvelu.sijoitteluService.url}">
-        <jaxws:outInterceptors>
-            <ref bean="ticketInterceptor" />
-        </jaxws:outInterceptors>
-    </jaxws:client>
+                  address="${valintalaskentakoostepalvelu.sijoitteluService.url}" />
 
     <jaxws:client id="koodiService"
                   serviceClass="fi.vm.sade.koodisto.service.KoodiService"
