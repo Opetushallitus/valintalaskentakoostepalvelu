@@ -14,7 +14,7 @@
 	<ctx:annotation-config />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu" />
 
-	<camelContext trace="true" id="sijoitteluCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+	<camelContext id="sijoitteluCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
 		<!-- Proxy Jersey REST triggerin ja Camelin eriyttämiseen toisistaan -->
 		<proxy id="sijoitteluAktivointiRajapinta"
 			serviceInterface="fi.vm.sade.valinta.kooste.sijoittelu.SijoitteluAktivointiProxy"

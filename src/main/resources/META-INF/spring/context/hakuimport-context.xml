@@ -14,7 +14,7 @@
     <ctx:annotation-config/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakuimport"/>
 
-    <camelContext trace="true" id="hakukohdeImportCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+    <camelContext id="hakukohdeImportCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
         <proxy id="hakuImportAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.hakuimport.HakuImportAktivointiProxy"
                serviceUrl="direct:kaynnistaHakuImportReitti"/>
