@@ -36,7 +36,7 @@ import fi.vm.sade.valinta.kooste.paasykokeet.ValintakoelaskentaAktivointiResourc
 @ContextConfiguration(classes = PaasykokeetKoosteReititysTest.class)
 @PropertySource("classpath:test.properties")
 @ImportResource({ "classpath:META-INF/spring/context/valintakoe-context.xml",
-        "classpath:META-INF/spring/context/valintalaskenta-context.xml" })
+        "classpath:META-INF/spring/context/valintalaskenta-context.xml", "test-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class PaasykokeetKoosteReititysTest {
 

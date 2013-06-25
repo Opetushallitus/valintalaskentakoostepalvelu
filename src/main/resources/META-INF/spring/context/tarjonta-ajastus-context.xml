@@ -10,6 +10,7 @@
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
 	<!-- 
@@ -24,12 +25,13 @@
 		<beans:prop key="tarjonta.ajastinReitti.cron">${valintalaskentakoostepalvelu.tarjonta.ajastinReitti.cron:*/1+*+*+?+*+*}</beans:prop>
 	</util:properties>
 	
-	
 	<routeContext id="tarjontaCamelRoutes" xmlns="http://camel.apache.org/schema/spring">
 		<route id="ajastinReitti" autoStartup="{{tarjonta.ajastinReitti.aktivoi}}">
 			<from uri="quartz://timerName?cron={{tarjonta.ajastinReitti.cron}}" />
 			<setBody><simple>${bean:tarjontaTiedotPalvelu?method=haeHakuOid}</simple></setBody>
-			<to uri="bean:tarjonnanHakukohteetAktivointiRajapinta"/>
+            <policy ref="admin">
+                <to uri="bean:tarjonnanHakukohteetAktivointiRajapinta"/>
+            </policy>
 		</route>
 	</routeContext>
 	

@@ -8,12 +8,13 @@
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
     <ctx:annotation-config/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakuimport"/>
 
-    <camelContext id="hakukohdeImportCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+    <camelContext trace="true" id="hakukohdeImportCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
         <proxy id="hakuImportAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.hakuimport.HakuImportAktivointiProxy"
                serviceUrl="direct:kaynnistaHakuImportReitti"/>
@@ -24,14 +25,19 @@
         <route id="hakuImportRoute">
             <from uri="direct:kaynnistaHakuImportReitti"/>
 
-            <camel:recipientList>
-                <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/haku/${body}/hakukohde?count=99999999</camel:simple>
-            </camel:recipientList>
+            <policy ref="admin">
 
-            <split parallelProcessing="true" >
-                <method bean="jsonSplitter" method="split"/>
-                <to uri="direct:kaynnistaHakukohdeImportReitti"/>
-            </split>
+                <camel:recipientList>
+                    <camel:simple>http://luokka.hard.ware.fi:8302/tarjonta-service/rest/haku/${body}/hakukohde?count=99999999</camel:simple>
+                </camel:recipientList>
+
+                <!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
+                <split parallelProcessing="false" >
+                    <method bean="jsonSplitter" method="split"/>
+                        <to uri="direct:kaynnistaHakukohdeImportReitti"/>
+                </split>
+            </policy>
+
         </route>
 
         <route id="hakukohdeImportRoute">
@@ -59,6 +65,7 @@
             </setProperty>
 
             <to uri="bean:suoritaHakukohdeImportKomponentti"/>
+
         </route>
 
     </routeContext>

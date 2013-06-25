@@ -8,6 +8,7 @@
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
 
@@ -18,32 +19,37 @@
     <routeContext id="valintalaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
             <from uri="direct:kaynnistaHakukohteenValintalaskentaReitti"/>
-            <setProperty propertyName="hakukohdeOid">
-                <simple>${body.args[0]}</simple>
-            </setProperty>
-            <setProperty propertyName="valinnanvaihe">
-                <simple>${body.args[1]}</simple>
-            </setProperty>
-            <to uri="bean:haeValintaperusteetKomponentti"/>
-            <setProperty propertyName="valintaperusteet">
-                <simple>${body}</simple>
-            </setProperty>
-            <to uri="bean:haeHakemusKomponentti"/>
-            <setProperty propertyName="hakemukset">
-                <simple>${body}</simple>
-            </setProperty>
-            <to uri="bean:suoritaLaskentaKomponentti"/>
+            <policy ref="admin">
+                <setProperty propertyName="hakukohdeOid">
+                    <simple>${body.args[0]}</simple>
+                </setProperty>
+                <setProperty propertyName="valinnanvaihe">
+                    <simple>${body.args[1]}</simple>
+                </setProperty>
+                <to uri="bean:haeValintaperusteetKomponentti"/>
+                <setProperty propertyName="valintaperusteet">
+                    <simple>${body}</simple>
+                </setProperty>
+                <to uri="bean:haeHakemusKomponentti"/>
+                <setProperty propertyName="hakemukset">
+                    <simple>${body}</simple>
+                </setProperty>
+                <to uri="bean:suoritaLaskentaKomponentti"/>
+            </policy>
         </route>
         <route>
             <from uri="direct:kaynnistaHaunValintalaskentaReitti"/>
             <setProperty propertyName="hakuOid">
                 <simple>${body.args[0]}</simple>
             </setProperty>
-            <to uri="bean:hakukohteetTarjonnaltaKomponentti"/>
-            <split parallelProcessing="true">
-                <method bean="splitHakukohteetKomponentti" method="splitHakukohteet"/>
-                <to uri="bean:hakukohteenValintalaskentaAktivointiRajapinta"/>
-            </split>
+            <policy ref="admin">
+                <to uri="bean:hakukohteetTarjonnaltaKomponentti"/>
+                <!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
+                <split parallelProcessing="false">
+                    <method bean="splitHakukohteetKomponentti" method="splitHakukohteet"/>
+                    <to uri="bean:hakukohteenValintalaskentaAktivointiRajapinta"/>
+                </split>
+            </policy>
         </route>
     </routeContext>
 

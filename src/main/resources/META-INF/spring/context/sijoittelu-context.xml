@@ -8,12 +8,13 @@
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
 	<ctx:annotation-config />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu" />
 
-	<camelContext id="sijoitteluCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+	<camelContext trace="true" id="sijoitteluCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
 		<!-- Proxy Jersey REST triggerin ja Camelin eriyttämiseen toisistaan -->
 		<proxy id="sijoitteluAktivointiRajapinta"
 			serviceInterface="fi.vm.sade.valinta.kooste.sijoittelu.SijoitteluAktivointiProxy"
@@ -23,7 +24,9 @@
 			<setProperty propertyName="hakuOid">
 				<simple>${body.args[0]}</simple>
 			</setProperty>
-			<to uri="bean:suoritaSijoittelu" />
+            <policy ref="admin">
+			    <to uri="bean:suoritaSijoittelu" />
+            </policy>
 			<!--
             <setProperty propertyName="valintaperusteet">
 				<simple>${body}</simple>

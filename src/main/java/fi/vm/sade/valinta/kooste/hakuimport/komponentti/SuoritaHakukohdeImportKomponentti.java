@@ -8,6 +8,7 @@ import fi.vm.sade.service.valintaperusteet.schema.HakukohteenValintakoeTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.MonikielinenTekstiTyyppi;
 import org.apache.camel.language.Simple;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,11 +17,11 @@ import org.springframework.stereotype.Component;
  * Time: 10.46
  */
 @Component("suoritaHakukohdeImportKomponentti")
+@PreAuthorize("isAuthenticated()")
 public class SuoritaHakukohdeImportKomponentti {
 
     @Autowired
     private ValintaperusteService valintaperusteService;
-
     public void suoritaHakukohdeImport(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
                                        @Simple("${property.hakukohdeData}") String hakukohdeData,
                                        @Simple("${property.hakukohdeNimi}") String hakukohdeNimi) {

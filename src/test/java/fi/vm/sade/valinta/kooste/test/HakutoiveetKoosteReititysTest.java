@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 @Configuration
 @ContextConfiguration(classes = HakutoiveetKoosteReititysTest.class)
 @PropertySource("classpath:test.properties")
-@ImportResource("classpath:META-INF/spring/context/valintalaskenta-context.xml")
+@ImportResource({"classpath:META-INF/spring/context/valintalaskenta-context.xml", "test-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HakutoiveetKoosteReititysTest {
 

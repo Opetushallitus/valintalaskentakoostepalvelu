@@ -47,7 +47,7 @@ import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakuTiedotPalvelu;
 // timeouttien ansiosta vaikka latausjärjestys olisi epäoptimaalinen.
 @ImportResource({ "classpath:META-INF/spring/context/valintakoe-context.xml",
         "classpath:META-INF/spring/context/valintalaskenta-context.xml",
-        "classpath:META-INF/spring/context/tarjonta-ajastus-context.xml" })
+        "classpath:META-INF/spring/context/tarjonta-ajastus-context.xml", "test-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class TarjontaAjastettuAktivointiReititysTest {
 

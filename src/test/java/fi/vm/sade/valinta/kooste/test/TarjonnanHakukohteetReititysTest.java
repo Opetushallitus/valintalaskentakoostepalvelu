@@ -37,7 +37,7 @@ import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakukohteetAktivointiResource;
 @ContextConfiguration(classes = TarjonnanHakukohteetReititysTest.class)
 @PropertySource("classpath:test.properties")
 @ImportResource({ "classpath:META-INF/spring/context/valintakoe-context.xml",
-        "classpath:META-INF/spring/context/valintalaskenta-context.xml" })
+        "classpath:META-INF/spring/context/valintalaskenta-context.xml", "test-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class TarjonnanHakukohteetReititysTest {
 

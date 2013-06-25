@@ -4,6 +4,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import javax.ws.rs.GET;
@@ -17,6 +19,7 @@ import javax.ws.rs.QueryParam;
  */
 @Path("hakuimport")
 @Controller
+@PreAuthorize("isAuthenticated()")
 public class HakuImportAktivointiResource {
     private static final Logger LOG = LoggerFactory.getLogger(HakuImportAktivointiResource.class);
 
