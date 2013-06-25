@@ -17,12 +17,12 @@
     <ctx:property-placeholder />
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakuimport"/>
 
-    <util:properties id="tarjontaProperties">
+    <util:properties id="hakuimportProperties">
         <beans:prop key="tarjonta.rest">${valintalaskentakoostepalvelu.tarjonta.rest.url}</beans:prop>
     </util:properties>
 
     <camelContext id="hakukohdeImportCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
-        <propertyPlaceholder id="tarjontaContextProperties" location="ref:tarjontaProperties" />
+        <propertyPlaceholder id="hakuimportContextProperties" location="ref:hakuimportProperties" />
         <proxy id="hakuImportAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.hakuimport.HakuImportAktivointiProxy"
                serviceUrl="direct:kaynnistaHakuImportReitti"/>
