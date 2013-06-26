@@ -25,19 +25,19 @@
             <util:properties local-override="true">
                 <prop key="cas_key">valintalaskentakoostepalvelu</prop>
                 <prop key="cas_service">${cas.service.valintalaskentakoostepalvelu}</prop>
-                <prop key="spring_security_default_access">isAuthenticated()</prop>
+                <prop key="spring_security_default_access">permitAll</prop>
             </util:properties>
         </property>
     </bean>
     <import resource="file:///${user.home:''}/oph-configuration/security-context-backend.xml"/>
 
     <!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
-    <import resource="classpath:authentication-client.xml"/>
+    <!--<import resource="classpath:authentication-client.xml"/>-->
 
-    <authorizationPolicy id="admin" access="isAuthenticated()"
-                         authenticationManager="authenticationManager"
-                         accessDecisionManager="accessDecisionManager"
-                         xmlns="http://camel.apache.org/schema/spring-security"/>
+    <!--<authorizationPolicy id="admin" access="isAuthenticated()"-->
+                         <!--authenticationManager="authenticationManager"-->
+                         <!--accessDecisionManager="accessDecisionManager"-->
+                         <!--xmlns="http://camel.apache.org/schema/spring-security"/>-->
 
     <!--
         Implementoi TarjontaHakuTiedotPalvelu kun määritelmä tarkentuu! Ajastettu Camel-reitti käyttää sitä!
