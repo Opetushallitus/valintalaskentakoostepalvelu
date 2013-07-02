@@ -23,9 +23,10 @@
     <bean id="defaultProps" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
         <property name="properties">
             <util:properties local-override="true">
+                <prop key="cas_mode">front</prop>
                 <prop key="cas_key">valintalaskentakoostepalvelu</prop>
                 <prop key="cas_service">${cas.service.valintalaskentakoostepalvelu}</prop>
-                <prop key="spring_security_default_access">permitAll</prop>
+                <prop key="spring_security_default_access">isAuthenticated()</prop>
             </util:properties>
         </property>
     </bean>
@@ -34,10 +35,13 @@
     <!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
     <!--<import resource="classpath:authentication-client.xml"/>-->
 
-    <!--<authorizationPolicy id="admin" access="isAuthenticated()"-->
-                         <!--authenticationManager="authenticationManager"-->
-                         <!--accessDecisionManager="accessDecisionManager"-->
-                         <!--xmlns="http://camel.apache.org/schema/spring-security"/>-->
+    <bean id="ticketInterceptor" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor">
+    </bean>
+
+    <authorizationPolicy id="admin" access="isAuthenticated()"
+                         authenticationManager="authenticationManager"
+                         accessDecisionManager="accessDecisionManager"
+                         xmlns="http://camel.apache.org/schema/spring-security"/>
 
     <!--
         Implementoi TarjontaHakuTiedotPalvelu kun määritelmä tarkentuu! Ajastettu Camel-reitti käyttää sitä!
@@ -52,7 +56,11 @@
 
     <jaxws:client id="ValintaperusteServiceClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
-                  address="${valintalaskentakoostepalvelu.valintaperusteService.url}" />
+                  address="${valintalaskentakoostepalvelu.valintaperusteService.url}" >
+        <jaxws:outInterceptors>
+            <ref bean="ticketInterceptor" />
+        </jaxws:outInterceptors>
+    </jaxws:client>
 
     <jaxws:client id="HakemusServiceClient"
                   serviceClass="fi.vm.sade.service.hakemus.HakemusService"
@@ -60,7 +68,11 @@
 
     <jaxws:client id="ValintalaskentaServiceClient"
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
-                  address="${valintalaskentakoostepalvelu.valintalaskentaService.url}" />
+                  address="${valintalaskentakoostepalvelu.valintalaskentaService.url}" >
+        <jaxws:outInterceptors>
+            <ref bean="ticketInterceptor" />
+        </jaxws:outInterceptors>
+    </jaxws:client>
 
     <jaxws:client id="TarjontaServiceClient"
                   serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
@@ -68,11 +80,19 @@
 
     <jaxws:client id="valintaTulosService"
                   serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
-                  address="${valintalaskentakoostepalvelu.valintaTulosService.url}" />
+                  address="${valintalaskentakoostepalvelu.valintaTulosService.url}" >
+        <jaxws:outInterceptors>
+            <ref bean="ticketInterceptor" />
+        </jaxws:outInterceptors>
+    </jaxws:client>
 
     <jaxws:client id="sijoitteluService"
                   serviceClass="fi.vm.sade.service.sijoittelu.SijoitteluService"
-                  address="${valintalaskentakoostepalvelu.sijoitteluService.url}" />
+                  address="${valintalaskentakoostepalvelu.sijoitteluService.url}" >
+        <jaxws:outInterceptors>
+            <ref bean="ticketInterceptor" />
+        </jaxws:outInterceptors>
+    </jaxws:client>
 
     <jaxws:client id="koodiService"
                   serviceClass="fi.vm.sade.koodisto.service.KoodiService"

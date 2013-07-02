@@ -19,7 +19,7 @@
     <routeContext id="valintalaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
             <from uri="direct:kaynnistaHakukohteenValintalaskentaReitti"/>
-            <!--<policy ref="admin">-->
+            <policy ref="admin">
                 <setProperty propertyName="hakukohdeOid">
                     <simple>${body.args[0]}</simple>
                 </setProperty>
@@ -35,21 +35,21 @@
                     <simple>${body}</simple>
                 </setProperty>
                 <to uri="bean:suoritaLaskentaKomponentti"/>
-            <!--</policy>-->
+            </policy>
         </route>
         <route>
             <from uri="direct:kaynnistaHaunValintalaskentaReitti"/>
             <setProperty propertyName="hakuOid">
                 <simple>${body.args[0]}</simple>
             </setProperty>
-            <!--<policy ref="admin">-->
+            <policy ref="admin">
                 <to uri="bean:hakukohteetTarjonnaltaKomponentti"/>
                 <!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
                 <split parallelProcessing="false">
                     <method bean="splitHakukohteetKomponentti" method="splitHakukohteet"/>
                     <to uri="bean:hakukohteenValintalaskentaAktivointiRajapinta"/>
                 </split>
-            <!--</policy>-->
+            </policy>
         </route>
     </routeContext>
 
