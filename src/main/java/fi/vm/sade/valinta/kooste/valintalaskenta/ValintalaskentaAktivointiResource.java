@@ -1,14 +1,15 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
 
 /**
  * @author Jussi Jartamo
@@ -27,27 +28,37 @@ public class ValintalaskentaAktivointiResource {
 
     @GET
     @Path("aktivoi")
-    public String aktivoiHakukohteenValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid,
-                                                    @QueryParam("valinnanvaihe") Integer valinnanvaihe) {
-
-        if (StringUtils.isBlank(hakukohdeOid) || valinnanvaihe == null) {
-            return "get parameter 'hakukohdeOid' and 'valinnanvaihe' required";
-        } else {
-            LOG.info("Valintalaskenta kohteelle {}", hakukohdeOid);
-            hakukohteenValintalaskentaAktivointiProxy.aktivoiValintalaskenta(hakukohdeOid, valinnanvaihe);
-            return "in progress";
+    public Response aktivoiHakukohteenValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("valinnanvaihe") Integer valinnanvaihe) {
+        try {
+            if (StringUtils.isBlank(hakukohdeOid) || valinnanvaihe == null) {
+                return Response.status(Response.Status.OK)
+                        .entity("get parameter 'hakukohdeOid' and 'valinnanvaihe' required").build();
+            } else {
+                LOG.info("Valintalaskenta kohteelle {}", hakukohdeOid);
+                hakukohteenValintalaskentaAktivointiProxy.aktivoiValintalaskenta(hakukohdeOid, valinnanvaihe);
+                return Response.status(Response.Status.OK).entity("in progress").build();
+            }
+        } catch (Exception e) {
+            LOG.error("Error aktivoi: {}", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 
     @GET
     @Path("aktivoiHaunValintalaskenta")
-    public String aktivoiHaunValintalaskenta(@QueryParam("hakuOid") String hakuOid) {
-        if (StringUtils.isBlank(hakuOid)) {
-            return "get parameter 'hakuoid' required";
-        } else {
-            LOG.info("Suoritetaan valintalaskenta haulle {}", hakuOid);
-            haunValintalaskentaAktivointiProxy.aktivoiValintalaskenta(hakuOid);
-            return "in progress";
+    public Response aktivoiHaunValintalaskenta(@QueryParam("hakuOid") String hakuOid) {
+        try {
+            if (StringUtils.isBlank(hakuOid)) {
+                return Response.status(Response.Status.OK).entity("get parameter 'hakuoid' required").build();
+            } else {
+                LOG.info("Suoritetaan valintalaskenta haulle {}", hakuOid);
+                haunValintalaskentaAktivointiProxy.aktivoiValintalaskenta(hakuOid);
+                return Response.status(Response.Status.OK).entity("in progress").build();
+            }
+        } catch (Exception e) {
+            LOG.error("Error aktivoiHaunValintalaskenta: {}", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 }
