@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
+	xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
+       http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+    <ctx:annotation-config/>
+    <ctx:property-placeholder />
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu"/>
+
+	<util:properties id="viestintapalveluProperties">
+		<beans:prop key="viestintapalvelu.url">${valintalaskentakoostepalvelu.viestintapalvelu.url}</beans:prop>
+	</util:properties>
+
+    <routeContext id="viestintapalveluRoutes" xmlns="http://camel.apache.org/schema/spring">
+        <route>
+            <from uri="direct:kaynnistaViestintapalveluHyvaksymiskirjeBatchReitti"/>
+            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
+            <to uri="{{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/pdf"/>
+            <setHeader headerName="CamelHttpMethod"><constant>GET</constant></setHeader>
+            <setHeader headerName="CamelHttpUri"><simple>${body}</simple></setHeader>
+            <setHeader headerName="Content-Type"><constant>application/pdf</constant></setHeader>
+            <setBody><constant></constant></setBody>
+            <to uri="{{viestintapalvelu.url}}"/>
+        </route>
+        <route>
+            <from uri="direct:kaynnistaViestintapalveluJalkiohjauskirjeBatchReitti"/>
+            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
+            <to uri="{{viestintapalvelu.url}}/api/v1/jalkiohjauskirje/pdf"/>
+            <setHeader headerName="CamelHttpMethod"><constant>GET</constant></setHeader>
+            <setHeader headerName="CamelHttpUri"><simple>${body}</simple></setHeader>
+            <setHeader headerName="Content-Type"><constant>application/pdf</constant></setHeader>
+            <setBody><constant></constant></setBody>
+            <to uri="{{viestintapalvelu.url}}"/>
+        </route>
+    </routeContext>
+
+    <camelContext id="viestintapalveluCamelContext"
+                  autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+        <propertyPlaceholder id="viestintapalveluContextProperties" location="ref:viestintapalveluProperties" />
+        <proxy id="hyvaksymiskirjeBatchAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.HyvaksymiskirjeBatchAktivointiProxy"
+               serviceUrl="direct:kaynnistaViestintapalveluHyvaksymiskirjeBatchReitti"/>
+        <proxy id="jalkiohjauskirjeBatchAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.JalkiohjauskirjeBatchAktivointiProxy"
+               serviceUrl="direct:kaynnistaViestintapalveluJalkiohjauskirjeBatchReitti"/>
+        <routeContextRef ref="viestintapalveluRoutes"/>
+    </camelContext>
+</beans>
