@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.test;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -18,6 +19,7 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
+import fi.vm.sade.valinta.kooste.viestintapalvelu.AddressLabelBatchAktivointiProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.HyvaksymiskirjeBatchAktivointiProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.JalkiohjauskirjeBatchAktivointiProxy;
 
@@ -31,6 +33,7 @@ public class ViestintapalveluAktivointiReititysTest {
 
     private static final String HYVAKSYMISKIRJE_BATCH_JSON = "viestintapalvelu/data/hyvaksymiskirjebatch.json";
     private static final String JALKIOHJAUSKIRJE_BATCH_JSON = "viestintapalvelu/data/jalkiohjauskirjebatch.json";
+    private static final String ADDRESSLABEL_BATCH_JSON = "viestintapalvelu/data/addresslabelbatch.json";
 
     /**
      * 
@@ -47,12 +50,21 @@ public class ViestintapalveluAktivointiReititysTest {
     public static class KunYhteydenottoViestintapalveluun extends AbstractJUnit4SpringContextTests {
 
         @Autowired
+        AddressLabelBatchAktivointiProxy addressLabelBatchProxy;
+
+        @Test
+        public void osoitteidenValitysToimiiOikeinJaSaadaanPalautetta() throws IOException {
+            assertTrue(URI.create(addressLabelBatchProxy.addressLabelBatchAktivointi(Resources.toString(
+                    Resources.getResource(ADDRESSLABEL_BATCH_JSON), Charsets.UTF_8))) != null);
+        }
+
+        @Autowired
         HyvaksymiskirjeBatchAktivointiProxy hyvaksymiskirjeBatchProxy;
 
         @Test
         public void hoitaaHyvaksymiskirjeenUudelleenohjauksenDokumenttiResurssiinOikein() throws IOException {
-            assertTrue(hyvaksymiskirjeBatchProxy.hyvaksymiskirjeBatchAktivointi(Resources.toString(
-                    Resources.getResource(HYVAKSYMISKIRJE_BATCH_JSON), Charsets.UTF_8)).length > 0);
+            assertTrue(URI.create(hyvaksymiskirjeBatchProxy.hyvaksymiskirjeBatchAktivointi(Resources.toString(
+                    Resources.getResource(HYVAKSYMISKIRJE_BATCH_JSON), Charsets.UTF_8))) != null);
         }
 
         @Autowired
@@ -60,8 +72,8 @@ public class ViestintapalveluAktivointiReititysTest {
 
         @Test
         public void hoitaaJalkiohjauskirjeenUudelleenohjauksenDokumenttiResurssiinOikein() throws IOException {
-            assertTrue(jalkiohjauskirjeBatchProxy.jalkiohjauskirjeBatchAktivoi(Resources.toString(
-                    Resources.getResource(JALKIOHJAUSKIRJE_BATCH_JSON), Charsets.UTF_8)).length > 0);
+            assertTrue(URI.create(jalkiohjauskirjeBatchProxy.jalkiohjauskirjeBatchAktivoi(Resources.toString(
+                    Resources.getResource(JALKIOHJAUSKIRJE_BATCH_JSON), Charsets.UTF_8))) != null);
         }
 
     }

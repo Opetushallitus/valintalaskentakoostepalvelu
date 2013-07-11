@@ -7,5 +7,5 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu;
  */
 public interface JalkiohjauskirjeBatchAktivointiProxy {
 
-    byte[] jalkiohjauskirjeBatchAktivoi(String jalkiohjauskirjeBatchJson);
+    String jalkiohjauskirjeBatchAktivoi(String jalkiohjauskirjeBatchJson);
 }

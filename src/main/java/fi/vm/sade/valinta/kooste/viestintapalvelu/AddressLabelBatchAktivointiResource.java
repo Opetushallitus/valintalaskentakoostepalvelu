@@ -24,35 +24,27 @@ import org.springframework.stereotype.Controller;
  *         tarpeen?).
  */
 @Controller
-@Path("jalkiohjauskirjeBatch")
-public class JalkiohjauskirjeBatchAktivointiResource {
+@Path("addressLabelBatch")
+public class AddressLabelBatchAktivointiResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JalkiohjauskirjeBatchAktivointiResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AddressLabelBatchAktivointiResource.class);
 
     @Autowired
-    JalkiohjauskirjeBatchAktivointiProxy jalkiohjauskirjeBatchProxy;
+    AddressLabelBatchAktivointiProxy addressLabelBatchProxy;
 
     @POST
     @Consumes("application/json")
     @Path("aktivoi")
     @Produces("text/plain")
-    public Response aktivoiViestintapalvelu(String jalkiohjauskirjeBatchJson) {
+    public Response aktivoiViestintapalvelu(String addressLabelBatchJson) {
         try {
-            LOG.debug("JalkiohjauskirjeBatch json {}", jalkiohjauskirjeBatchJson);
-            URI contentLocation = URI.create(jalkiohjauskirjeBatchProxy
-                    .jalkiohjauskirjeBatchAktivoi(jalkiohjauskirjeBatchJson));
+            LOG.debug("AddressLabelBatch json {}", addressLabelBatchJson);
+            URI contentLocation = URI.create(addressLabelBatchProxy.addressLabelBatchAktivointi(addressLabelBatchJson));
             return Response.status(Status.ACCEPTED).contentLocation(contentLocation).entity(contentLocation.toString())
                     .build();
-            /*
-             * return Response.status(Response.Status.OK)
-             * .header("Content-Disposition",
-             * "attachment; filename*=UTF-8''jalkiohjauskirje.pdf;")
-             * .entity(jalkiohjauskirjeBatchProxy
-             * .jalkiohjauskirjeBatchAktivoi(jalkiohjauskirjeBatchJson
-             * )).build();
-             */
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
+
 }

@@ -23,24 +23,35 @@
 
     <routeContext id="viestintapalveluRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
+            <from uri="direct:kaynnistaViestintapalveluAddressLabelBatchReitti"/>
+            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
+            <to uri="{{viestintapalvelu.url}}/api/v1/addresslabel/pdf"/>
+        </route>
+        <route>
             <from uri="direct:kaynnistaViestintapalveluHyvaksymiskirjeBatchReitti"/>
             <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
             <to uri="{{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/pdf"/>
+            <!-- 
+            EI PALAUTETAKKAAN KOKO PDF-TIEDOSTOA VAAN ANNETAAN URI RESURSSIIN
             <setHeader headerName="CamelHttpMethod"><constant>GET</constant></setHeader>
             <setHeader headerName="CamelHttpUri"><simple>${body}</simple></setHeader>
             <setHeader headerName="Content-Type"><constant>application/pdf</constant></setHeader>
             <setBody><constant></constant></setBody>
             <to uri="{{viestintapalvelu.url}}"/>
+             -->
         </route>
         <route>
             <from uri="direct:kaynnistaViestintapalveluJalkiohjauskirjeBatchReitti"/>
             <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
             <to uri="{{viestintapalvelu.url}}/api/v1/jalkiohjauskirje/pdf"/>
+            <!-- 
+            EI PALAUTETAKKAAN KOKO PDF-TIEDOSTOA VAAN ANNETAAN URI RESURSSIIN
             <setHeader headerName="CamelHttpMethod"><constant>GET</constant></setHeader>
             <setHeader headerName="CamelHttpUri"><simple>${body}</simple></setHeader>
             <setHeader headerName="Content-Type"><constant>application/pdf</constant></setHeader>
             <setBody><constant></constant></setBody>
             <to uri="{{viestintapalvelu.url}}"/>
+             -->
         </route>
     </routeContext>
 
@@ -53,6 +64,9 @@
         <proxy id="jalkiohjauskirjeBatchAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.JalkiohjauskirjeBatchAktivointiProxy"
                serviceUrl="direct:kaynnistaViestintapalveluJalkiohjauskirjeBatchReitti"/>
+        <proxy id="addressLabelBatchAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.AddressLabelBatchAktivointiProxy"
+               serviceUrl="direct:kaynnistaViestintapalveluAddressLabelBatchReitti"/>
         <routeContextRef ref="viestintapalveluRoutes"/>
     </camelContext>
 </beans>
