@@ -29,9 +29,9 @@
 		<route id="ajastinReitti" autoStartup="{{tarjonta.ajastinReitti.aktivoi}}">
 			<from uri="quartz://timerName?cron={{tarjonta.ajastinReitti.cron}}" />
 			<setBody><simple>${bean:tarjontaTiedotPalvelu?method=haeHakuOid}</simple></setBody>
-            <policy ref="admin">
+            <!--<policy ref="admin">-->
                 <to uri="bean:tarjonnanHakukohteetAktivointiRajapinta"/>
-            </policy>
+            <!--</policy>-->
 		</route>
 	</routeContext>
 	

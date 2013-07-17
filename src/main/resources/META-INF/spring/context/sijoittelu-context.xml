@@ -24,9 +24,9 @@
 			<setProperty propertyName="hakuOid">
 				<simple>${body.args[0]}</simple>
 			</setProperty>
-            <policy ref="admin">
+            <!--<policy ref="admin">-->
 			    <to uri="bean:suoritaSijoittelu" />
-            </policy>
+            <!--</policy>-->
 			<!--
             <setProperty propertyName="valintaperusteet">
 				<simple>${body}</simple>
