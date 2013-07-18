@@ -23,13 +23,13 @@
 			<setProperty propertyName="hakukohdeOid">
 				<simple>${body}</simple>
 			</setProperty>
-            <!--<policy ref="admin">-->
+            <policy ref="admin">
 			<to uri="bean:haeHakemusKomponentti" />
 			<setProperty propertyName="hakemukset">
 				<simple>${body}</simple>
 			</setProperty>
 			<to uri="bean:valintakoeLaskeKomponentti" />
-            <!--</policy>-->
+            </policy>
 		</route>
 		<!-- Kutsuu ylempaa reittia moniajoisesti jokaiselle tarjonnalta saadulle 
 			hakukohdeoidille -->
@@ -38,14 +38,14 @@
 			<setProperty propertyName="hakuOid">
 				<simple>${body}</simple>
 			</setProperty>
-            <!--<policy ref="admin">-->
+            <policy ref="admin">
                 <to uri="bean:hakukohteetTarjonnaltaKomponentti" />
                 <!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
                 <split parallelProcessing="false">
                     <method bean="splitHakukohteetKomponentti" method="splitHakukohteet" />
                     <to uri="direct:kaynnistaValintakoelaskentaReitti" />
                 </split>
-            <!--</policy>-->
+            </policy>
 		</route>
 	</routeContext>
 

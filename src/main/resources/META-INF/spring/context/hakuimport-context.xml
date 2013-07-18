@@ -33,7 +33,7 @@
         <route id="hakuImportRoute">
             <from uri="direct:kaynnistaHakuImportReitti"/>
 
-            <!--<policy ref="admin">-->
+            <policy ref="admin">
 
                 <camel:recipientList>
                     <camel:simple>{{tarjonta.rest}}/haku/${body}/hakukohde?count=99999999</camel:simple>
@@ -44,7 +44,7 @@
                     <method bean="jsonSplitter" method="split"/>
                         <to uri="direct:kaynnistaHakukohdeImportReitti"/>
                 </split>
-            <!--</policy>-->
+            </policy>
 
         </route>
 
