@@ -52,7 +52,25 @@
     <!--
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.wsdlmock"/>
 	-->
+	<bean id="casInterceptor" class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+        <property name="webCasUrl" value="${web.url.cas}"/>
+        <property name="targetService" value="${cas.service.authentication-service}/j_spring_cas_security_check"/>
+        <property name="appClientUsername" value="${haku.app.username.to.usermanagement}"/>
+        <property name="appClientPassword" value="${haku.app.password.to.usermanagement}"/>
+    </bean>
 
+
+    <!-- Configure CXF bus to contain ticketInterceptor -->
+    <cxf:bus>
+        <cxf:outInterceptors>
+            <ref bean="casInterceptor" />
+        </cxf:outInterceptors>
+        <cxf:inFaultInterceptors>
+            <bean class="org.apache.cxf.interceptor.LoggingOutInterceptor"/>
+            <bean class="org.apache.cxf.interceptor.LoggingInInterceptor"/>
+        </cxf:inFaultInterceptors>
+    </cxf:bus>
+    
     <jaxws:client id="ValintaperusteServiceClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
                   address="${valintalaskentakoostepalvelu.valintaperusteService.url}" >
