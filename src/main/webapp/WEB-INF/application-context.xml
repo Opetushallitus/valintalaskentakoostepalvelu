@@ -34,9 +34,9 @@
 
     <!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
     <!--<import resource="classpath:authentication-client.xml"/>-->
-	<!-- 
+	 
     <bean id="ticketInterceptor" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor" />
- 	-->
+ 	
  	
     <authorizationPolicy id="admin" access="isAuthenticated()"
                          authenticationManager="authenticationManager"
@@ -52,19 +52,19 @@
 
     <!--
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.wsdlmock"/>
-	-->
+	
 	<bean id="casInterceptor" class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
         <property name="webCasUrl" value="${web.url.cas}"/>
         <property name="targetService" value="${cas.service.authentication-service}/j_spring_cas_security_check"/>
         <property name="appClientUsername" value="${haku.app.username.to.usermanagement}"/>
         <property name="appClientPassword" value="${haku.app.password.to.usermanagement}"/>
     </bean>
-
+-->
 
     <!-- Configure CXF bus to contain ticketInterceptor -->
     <cxf:bus>
         <cxf:outInterceptors>
-            <ref bean="casInterceptor" />
+            <ref bean="ticketInterceptor" />
         </cxf:outInterceptors>
         <cxf:inFaultInterceptors>
             <bean class="org.apache.cxf.interceptor.LoggingOutInterceptor"/>
@@ -76,7 +76,7 @@
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
                   address="${valintalaskentakoostepalvelu.valintaperusteService.url}" >
         <jaxws:outInterceptors>
-            <ref bean="casInterceptor" />
+            <ref bean="ticketInterceptor" />
         </jaxws:outInterceptors>
     </jaxws:client>
 
@@ -84,7 +84,7 @@
                   serviceClass="fi.vm.sade.service.hakemus.HakemusService"
                   address="${valintalaskentakoostepalvelu.hakemusService.url}">
 	        <jaxws:outInterceptors>
-            <ref bean="casInterceptor" />
+            <ref bean="ticketInterceptor" />
         </jaxws:outInterceptors>
 	</jaxws:client>
 
@@ -92,7 +92,7 @@
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
                   address="${valintalaskentakoostepalvelu.valintalaskentaService.url}" >
         <jaxws:outInterceptors>
-            <ref bean="casInterceptor" />
+            <ref bean="ticketInterceptor" />
         </jaxws:outInterceptors>
     </jaxws:client>
 
@@ -100,7 +100,7 @@
                   serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
                   address="${valintalaskentakoostepalvelu.tarjontaService.url}">
         <jaxws:outInterceptors>
-            <ref bean="casInterceptor" />
+            <ref bean="ticketInterceptor" />
         </jaxws:outInterceptors>
 	</jaxws:client>
 
@@ -108,7 +108,7 @@
                   serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
                   address="${valintalaskentakoostepalvelu.valintaTulosService.url}" >
         <jaxws:outInterceptors>
-            <ref bean="casInterceptor" />
+            <ref bean="ticketInterceptor" />
         </jaxws:outInterceptors>
     </jaxws:client>
 
@@ -116,7 +116,7 @@
                   serviceClass="fi.vm.sade.service.sijoittelu.SijoitteluService"
                   address="${valintalaskentakoostepalvelu.sijoitteluService.url}" >
         <jaxws:outInterceptors>
-            <ref bean="casInterceptor" />
+            <ref bean="ticketInterceptor" />
         </jaxws:outInterceptors>
     </jaxws:client>
 
@@ -124,7 +124,7 @@
                   serviceClass="fi.vm.sade.koodisto.service.KoodiService"
                   address="${valintalaskentakoostepalvelu.koodiService.url}">
 	        <jaxws:outInterceptors>
-            <ref bean="casInterceptor" />
+            <ref bean="ticketInterceptor" />
         </jaxws:outInterceptors>
 	</jaxws:client>
 
