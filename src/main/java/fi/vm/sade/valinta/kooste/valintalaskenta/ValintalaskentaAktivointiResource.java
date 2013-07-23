@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -40,6 +41,9 @@ public class ValintalaskentaAktivointiResource {
     @Path("aktivoi")
     public Response aktivoiHakukohteenValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valinnanvaihe") Integer valinnanvaihe) {
+        LOG.info("AUTHIT {}", new Object[] { SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .toArray() });
+
         LOG.info(
                 "Valintalaskenta hakukohteelle: HakemusService URL({}), ValintaperusteService URL({}), ValintalaskentaService URL({})",
                 new Object[] { hakemusServiceUrl, valintaperusteServiceUrl, valintalaskentaServiceUrl });
@@ -61,6 +65,9 @@ public class ValintalaskentaAktivointiResource {
     @GET
     @Path("aktivoiHaunValintalaskenta")
     public Response aktivoiHaunValintalaskenta(@QueryParam("hakuOid") String hakuOid) {
+        LOG.info("AUTHIT {}", new Object[] { SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .toArray() });
+
         LOG.info(
                 "Valintalaskenta hakuoidille: HakemusService URL({}), ValintaperusteService URL({}), ValintalaskentaService URL({})",
                 new Object[] { hakemusServiceUrl, valintaperusteServiceUrl, valintalaskentaServiceUrl });
