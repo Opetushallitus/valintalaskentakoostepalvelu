@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -26,10 +27,22 @@ public class ValintalaskentaAktivointiResource {
     @Autowired
     private HaunValintalaskentaAktivointiProxy haunValintalaskentaAktivointiProxy;
 
+    @Value("${valintalaskentakoostepalvelu.valintaperusteService.url}")
+    String valintaperusteServiceUrl;
+
+    @Value("${valintalaskentakoostepalvelu.hakemusService.url}")
+    String hakemusServiceUrl;
+
+    @Value("${valintalaskentakoostepalvelu.valintalaskentaService.url}")
+    String valintalaskentaServiceUrl;
+
     @GET
     @Path("aktivoi")
     public Response aktivoiHakukohteenValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valinnanvaihe") Integer valinnanvaihe) {
+        LOG.info(
+                "Valintalaskenta hakukohteelle: HakemusService URL({}), ValintaperusteService URL({}), ValintalaskentaService URL({})",
+                new Object[] { hakemusServiceUrl, valintaperusteServiceUrl, valintalaskentaServiceUrl });
         try {
             if (StringUtils.isBlank(hakukohdeOid) || valinnanvaihe == null) {
                 return Response.status(Response.Status.OK)
@@ -48,6 +61,9 @@ public class ValintalaskentaAktivointiResource {
     @GET
     @Path("aktivoiHaunValintalaskenta")
     public Response aktivoiHaunValintalaskenta(@QueryParam("hakuOid") String hakuOid) {
+        LOG.info(
+                "Valintalaskenta hakuoidille: HakemusService URL({}), ValintaperusteService URL({}), ValintalaskentaService URL({})",
+                new Object[] { hakemusServiceUrl, valintaperusteServiceUrl, valintalaskentaServiceUrl });
         try {
             if (StringUtils.isBlank(hakuOid)) {
                 return Response.status(Response.Status.OK).entity("get parameter 'hakuoid' required").build();
