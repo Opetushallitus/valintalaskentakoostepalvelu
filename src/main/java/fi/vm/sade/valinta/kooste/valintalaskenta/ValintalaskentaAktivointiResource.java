@@ -42,12 +42,12 @@ public class ValintalaskentaAktivointiResource {
     public Response aktivoiHakukohteenValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valinnanvaihe") Integer valinnanvaihe) {
         try {
-            LOG.info("AUTHIT {}", new Object[] { SecurityContextHolder.getContext().getAuthentication()
+            LOG.error("AUTHIT {}", new Object[] { SecurityContextHolder.getContext().getAuthentication()
                     .getAuthorities().toArray() });
         } catch (Exception e) {
         }
 
-        LOG.info(
+        LOG.error(
                 "Valintalaskenta hakukohteelle: HakemusService URL({}), ValintaperusteService URL({}), ValintalaskentaService URL({})",
                 new Object[] { hakemusServiceUrl, valintaperusteServiceUrl, valintalaskentaServiceUrl });
         try {
@@ -69,12 +69,12 @@ public class ValintalaskentaAktivointiResource {
     @Path("aktivoiHaunValintalaskenta")
     public Response aktivoiHaunValintalaskenta(@QueryParam("hakuOid") String hakuOid) {
         try {
-            LOG.info("AUTHIT {}", new Object[] { SecurityContextHolder.getContext().getAuthentication()
+            LOG.error("AUTHIT {}", new Object[] { SecurityContextHolder.getContext().getAuthentication()
                     .getAuthorities().toArray() });
         } catch (Exception e) {
         }
 
-        LOG.info(
+        LOG.error(
                 "Valintalaskenta hakuoidille: HakemusService URL({}), ValintaperusteService URL({}), ValintalaskentaService URL({})",
                 new Object[] { hakemusServiceUrl, valintaperusteServiceUrl, valintalaskentaServiceUrl });
         try {
