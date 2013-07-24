@@ -52,6 +52,7 @@
 
 
     <!-- Configure CXF bus to contain ticketInterceptor -->
+    <!-- 
     <cxf:bus>
         <cxf:outInterceptors>
             <ref bean="ticketInterceptor" />
@@ -61,6 +62,7 @@
             <bean class="org.apache.cxf.interceptor.LoggingInInterceptor"/>
         </cxf:inFaultInterceptors>
     </cxf:bus>
+    -->
     
     <jaxws:client id="ValintaperusteServiceClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
