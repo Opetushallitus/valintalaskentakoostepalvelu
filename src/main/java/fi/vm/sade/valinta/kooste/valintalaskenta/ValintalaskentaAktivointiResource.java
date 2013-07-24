@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -42,15 +41,6 @@ public class ValintalaskentaAktivointiResource {
     public Response aktivoiHakukohteenValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valinnanvaihe") Integer valinnanvaihe) {
         try {
-            LOG.error("AUTHIT {}", new Object[] { SecurityContextHolder.getContext().getAuthentication()
-                    .getAuthorities().toArray() });
-        } catch (Exception e) {
-        }
-
-        LOG.error(
-                "Valintalaskenta hakukohteelle: HakemusService URL({}), ValintaperusteService URL({}), ValintalaskentaService URL({})",
-                new Object[] { hakemusServiceUrl, valintaperusteServiceUrl, valintalaskentaServiceUrl });
-        try {
             if (StringUtils.isBlank(hakukohdeOid) || valinnanvaihe == null) {
                 return Response.status(Response.Status.OK)
                         .entity("get parameter 'hakukohdeOid' and 'valinnanvaihe' required").build();
@@ -68,15 +58,7 @@ public class ValintalaskentaAktivointiResource {
     @GET
     @Path("aktivoiHaunValintalaskenta")
     public Response aktivoiHaunValintalaskenta(@QueryParam("hakuOid") String hakuOid) {
-        try {
-            LOG.error("AUTHIT {}", new Object[] { SecurityContextHolder.getContext().getAuthentication()
-                    .getAuthorities().toArray() });
-        } catch (Exception e) {
-        }
 
-        LOG.error(
-                "Valintalaskenta hakuoidille: HakemusService URL({}), ValintaperusteService URL({}), ValintalaskentaService URL({})",
-                new Object[] { hakemusServiceUrl, valintaperusteServiceUrl, valintalaskentaServiceUrl });
         try {
             if (StringUtils.isBlank(hakuOid)) {
                 return Response.status(Response.Status.OK).entity("get parameter 'hakuoid' required").build();
