@@ -16,6 +16,7 @@
     <ctx:annotation-config/>
     <ctx:property-placeholder />
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
 
 	<util:properties id="viestintapalveluProperties">
 		<beans:prop key="viestintapalvelu.url">${valintalaskentakoostepalvelu.viestintapalvelu.url}</beans:prop>
@@ -24,6 +25,14 @@
     <routeContext id="viestintapalveluRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
             <from uri="direct:kaynnistaViestintapalveluAddressLabelBatchReitti"/>
+            <setProperty propertyName="hakukohdeOid">
+                <simple>${body.args[0]}</simple>
+            </setProperty>
+            <to uri="bean:haeHakemusKomponentti"/>
+            <setProperty propertyName="hakemukset">
+                <simple>${body}</simple>
+            </setProperty>
+            <to uri="bean:haeOsallistuneetHakemuksilleKomponentti"/>
             <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
             <to uri="{{viestintapalvelu.url}}/api/v1/addresslabel/pdf"/>
         </route>
