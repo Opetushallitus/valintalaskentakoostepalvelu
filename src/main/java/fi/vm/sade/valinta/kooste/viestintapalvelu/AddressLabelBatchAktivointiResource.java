@@ -2,12 +2,10 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
 import java.net.URI;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -33,9 +31,7 @@ public class AddressLabelBatchAktivointiResource {
     @POST
     @Path("aktivoi")
     @Produces("text/plain")
-    public Response aktivoiViestintapalvelu(@QueryParam("hakukohdeOid") String hakukohdeOid,
-            @Context HttpServletResponse response) {
-        response.setHeader("Access-Control-Allow-Origin", "*");
+    public Response aktivoiViestintapalvelu(@QueryParam("hakukohdeOid") String hakukohdeOid) {
         try {
             URI contentLocation = URI.create(addressLabelBatchProxy.addressLabelBatchAktivointi(hakukohdeOid));
             return Response.status(Status.ACCEPTED).contentLocation(contentLocation).entity(contentLocation.toString())
