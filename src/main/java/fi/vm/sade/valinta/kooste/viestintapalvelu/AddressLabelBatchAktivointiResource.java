@@ -12,6 +12,10 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.google.gson.Gson;
+
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.LatausUrl;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -30,11 +34,11 @@ public class AddressLabelBatchAktivointiResource {
 
     @POST
     @Path("aktivoi")
-    @Produces("text/plain")
+    @Produces("application/json")
     public Response aktivoiViestintapalvelu(@QueryParam("hakukohdeOid") String hakukohdeOid) {
         try {
             URI contentLocation = URI.create(addressLabelBatchProxy.addressLabelBatchAktivointi(hakukohdeOid));
-            return Response.status(Status.ACCEPTED).contentLocation(contentLocation).entity(contentLocation.toString())
+            return Response.status(Status.OK).entity(new Gson().toJson(new LatausUrl(contentLocation.toString())))
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
