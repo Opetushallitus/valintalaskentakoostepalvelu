@@ -32,9 +32,10 @@ public class HaeOsallistuneetHakemuksilleKomponentti {
     private ValintatietoService valintatietoService;
 
     public String haeOsallistuneetHakemuksille(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
+            @Simple("${property.valintakoeOid}") String valintakoeOid,
             @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
-        List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService
-                .haeValintatiedotHakukohteelle(hakukohdeOid);
+        List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService.haeValintatiedotHakukohteelle(
+                hakukohdeOid, valintakoeOid);
         Set<String> osallistujienHakemusOidit = new HashSet<String>();
         for (HakemusOsallistuminenTyyppi o : tiedotHakukohteelle) {
             if (Osallistuminen.OSALLISTUU.equals(o.getOsallistuminen())) {

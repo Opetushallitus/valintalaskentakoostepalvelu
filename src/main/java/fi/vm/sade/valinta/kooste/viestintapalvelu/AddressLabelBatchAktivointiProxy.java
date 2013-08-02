@@ -7,5 +7,5 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu;
  */
 public interface AddressLabelBatchAktivointiProxy {
 
-    String addressLabelBatchAktivointi(String hakukohdeOid);
+    String addressLabelBatchAktivointi(String hakukohdeOid, String valintakoeOid);
 }

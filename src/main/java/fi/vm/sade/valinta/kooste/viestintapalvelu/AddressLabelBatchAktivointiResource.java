@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
-import java.net.URI;
-
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -35,11 +33,13 @@ public class AddressLabelBatchAktivointiResource {
     @POST
     @Path("aktivoi")
     @Produces("application/json")
-    public Response aktivoiViestintapalvelu(@QueryParam("hakukohdeOid") String hakukohdeOid) {
+    public Response aktivoiViestintapalvelu(@QueryParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("valintakoeOid") String valintakoeOid) {
         try {
-            URI contentLocation = URI.create(addressLabelBatchProxy.addressLabelBatchAktivointi(hakukohdeOid));
-            return Response.status(Status.OK).entity(new Gson().toJson(new LatausUrl(contentLocation.toString())))
-                    .build();
+            return Response
+                    .status(Status.OK)
+                    .entity(new Gson().toJson(new LatausUrl(addressLabelBatchProxy.addressLabelBatchAktivointi(
+                            hakukohdeOid, valintakoeOid)))).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
