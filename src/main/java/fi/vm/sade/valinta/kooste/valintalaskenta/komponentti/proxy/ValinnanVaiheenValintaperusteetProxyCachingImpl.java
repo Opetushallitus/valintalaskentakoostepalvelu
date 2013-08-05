@@ -20,6 +20,9 @@ import java.util.concurrent.TimeUnit;
  * User: wuoti
  * Date: 5.8.2013
  * Time: 9.28
+ * <p/>
+ * Cachettava proxy valintaperusteille. Tallentaa välimuistiin yksittäisten valinnan vaiheiden valintaperusteiden
+ * hakuja
  */
 @Component
 public class ValinnanVaiheenValintaperusteetProxyCachingImpl implements ValinnanVaiheenValintaperusteetProxy {

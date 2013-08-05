@@ -12,4 +12,6 @@ import java.util.Set;
  */
 public interface HakukohteenValintaperusteetProxy {
     List<ValintaperusteetTyyppi> haeValintaperusteet(Set<String> hakukohdeOids);
+
+    List<ValintaperusteetTyyppi> haeValintaperusteet(String hakukohdeOid);
 }

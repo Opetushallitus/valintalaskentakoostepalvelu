@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
  * User: wuoti
  * Date: 5.8.2013
  * Time: 12.59
+ * <p/>
+ * Cachettava proxy valintaperusteille. Tallentaa välimuistiin hakukohteen kaikkien valinnan vaiheiden valintaperusteet.
  */
 @Component
 public class HakukohteenValintaperusteetProxyCachingImpl implements HakukohteenValintaperusteetProxy {
@@ -30,9 +32,16 @@ public class HakukohteenValintaperusteetProxyCachingImpl implements HakukohteenV
         valintaperusteetCache = CacheBuilder
                 .newBuilder()
                 .recordStats()
-                .refreshAfterWrite(10, TimeUnit.MINUTES)
                 .expireAfterWrite(20, TimeUnit.MINUTES)
                 .build();
+    }
+
+    @Override
+    public List<ValintaperusteetTyyppi> haeValintaperusteet(String hakukohdeOid) {
+        Set<String> oids = new HashSet<String>();
+        oids.add(hakukohdeOid);
+
+        return haeValintaperusteet(oids);
     }
 
     @Override
