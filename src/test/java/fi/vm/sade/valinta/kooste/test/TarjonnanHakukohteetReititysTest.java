@@ -25,6 +25,7 @@ import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
+import fi.vm.sade.tarjonta.service.types.TarjontaTila;
 import fi.vm.sade.tarjonta.service.types.TarjontaTyyppi;
 import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakukohteetAktivointiResource;
 
@@ -37,7 +38,7 @@ import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakukohteetAktivointiResource;
 @ContextConfiguration(classes = TarjonnanHakukohteetReititysTest.class)
 @PropertySource("classpath:test.properties")
 @ImportResource({ "classpath:META-INF/spring/context/valintakoe-context.xml",
-        "classpath:META-INF/spring/context/valintalaskenta-context.xml", "test-context.xml"})
+        "classpath:META-INF/spring/context/valintalaskenta-context.xml", "test-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class TarjonnanHakukohteetReititysTest {
 
@@ -69,6 +70,7 @@ public class TarjonnanHakukohteetReititysTest {
         for (String oid : HAKUKOHDE_OIDS) {
             HakukohdeTyyppi hakukohde = new HakukohdeTyyppi();
             hakukohde.setOid(oid);
+            hakukohde.setHakukohteenTila(TarjontaTila.JULKAISTU);
             tarjonta.getHakukohde().add(hakukohde);
         }
         when(tarjontaService.haeTarjonta(anyString())).thenReturn(tarjonta);
