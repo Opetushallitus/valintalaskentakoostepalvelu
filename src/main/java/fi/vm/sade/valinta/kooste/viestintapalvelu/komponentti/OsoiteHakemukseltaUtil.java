@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,19 +54,9 @@ public class OsoiteHakemukseltaUtil {
 
         }
 
-        String etunimi = latin1ToUtf8(hakemus.getHakijanEtunimi());
-        String sukunimi = latin1ToUtf8(hakemus.getHakijanSukunimi());
-        return new Osoite(etunimi, sukunimi, latin1ToUtf8(lahiosoite), null, null, latin1ToUtf8(postinumero),
-                latin1ToUtf8(postitoimipaikka), maa, null, maakoodi);
-    }
-
-    private static String latin1ToUtf8(String iso88591) {
-        try {
-            return new String(new String(iso88591.getBytes(), "ISO-8859-1").getBytes(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        String etunimi = hakemus.getHakijanEtunimi();
+        String sukunimi = hakemus.getHakijanSukunimi();
+        return new Osoite(etunimi, sukunimi, lahiosoite, null, null, postinumero, postitoimipaikka, maa, null, maakoodi);
     }
 
     private static Map<String, String> arvotMappaus(List<AvainArvoTyyppi> arvot) {
