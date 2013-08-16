@@ -1,16 +1,15 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import fi.vm.sade.service.hakemus.HakemusService;
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.TavallinenValinnanVaiheTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.tarjonta.service.TarjontaPublicService;
-import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
-import fi.vm.sade.tarjonta.service.types.TarjontaTyyppi;
-import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResource;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -23,30 +22,33 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Arrays;
-
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import fi.vm.sade.service.hakemus.HakemusService;
+import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
+import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
+import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
+import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.TavallinenValinnanVaiheTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.tarjonta.service.TarjontaPublicService;
+import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
+import fi.vm.sade.tarjonta.service.types.TarjontaTila;
+import fi.vm.sade.tarjonta.service.types.TarjontaTyyppi;
+import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResource;
 
 /**
- * User: wuoti
- * Date: 27.5.2013
- * Time: 9.30
+ * User: wuoti Date: 27.5.2013 Time: 9.30
  */
 @Configuration
 @ContextConfiguration(classes = HaunValintalaskentaReititysTest.class)
 @PropertySource("classpath:test.properties")
-@ImportResource({"classpath:META-INF/spring/context/valintalaskenta-context.xml", "test-context.xml"})
+@ImportResource({ "classpath:META-INF/spring/context/valintalaskenta-context.xml", "test-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HaunValintalaskentaReititysTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(HakutoiveetKoosteReititysTest.class);
 
-    private static final String[] HAKUKOHDE_OIDS = {"hakukohdeoid1",
-            "hakukohdeoid2", "hakukohdeoid3",
-            "hakukohdeoid4", "hakukohdeoid5",
-            "hakukohdeoid6s"};
+    private static final String[] HAKUKOHDE_OIDS = { "hakukohdeoid1", "hakukohdeoid2", "hakukohdeoid3",
+            "hakukohdeoid4", "hakukohdeoid5", "hakukohdeoid6s" };
 
     private static final String HAKUOID = "hakuoid";
 
@@ -81,7 +83,6 @@ public class HaunValintalaskentaReititysTest {
         return mock(ValintalaskentaService.class);
     }
 
-
     @Bean
     public TarjontaPublicService getTarjontaPublicServiceMock() {
         TarjontaPublicService tarjontaService = mock(TarjontaPublicService.class);
@@ -89,6 +90,7 @@ public class HaunValintalaskentaReititysTest {
         for (String oid : HAKUKOHDE_OIDS) {
             HakukohdeTyyppi hakukohde = new HakukohdeTyyppi();
             hakukohde.setOid(oid);
+            hakukohde.setHakukohteenTila(TarjontaTila.JULKAISTU);
             tarjonta.getHakukohde().add(hakukohde);
         }
         when(tarjontaService.haeTarjonta(eq(HAKUOID))).thenReturn(tarjonta);

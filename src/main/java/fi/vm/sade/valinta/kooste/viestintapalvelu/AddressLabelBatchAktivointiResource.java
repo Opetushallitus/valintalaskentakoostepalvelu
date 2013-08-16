@@ -1,18 +1,18 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
-import java.net.URI;
-
-import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import com.google.gson.Gson;
+
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.LatausUrl;
 
 /**
  * 
@@ -27,21 +27,19 @@ import org.springframework.stereotype.Controller;
 @Path("addressLabelBatch")
 public class AddressLabelBatchAktivointiResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AddressLabelBatchAktivointiResource.class);
-
     @Autowired
     AddressLabelBatchAktivointiProxy addressLabelBatchProxy;
 
     @POST
-    @Consumes("application/json")
     @Path("aktivoi")
-    @Produces("text/plain")
-    public Response aktivoiViestintapalvelu(String addressLabelBatchJson) {
+    @Produces("application/json")
+    public Response aktivoiViestintapalvelu(@QueryParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("valintakoeOid") String valintakoeOid) {
         try {
-            LOG.debug("AddressLabelBatch json {}", addressLabelBatchJson);
-            URI contentLocation = URI.create(addressLabelBatchProxy.addressLabelBatchAktivointi(addressLabelBatchJson));
-            return Response.status(Status.ACCEPTED).contentLocation(contentLocation).entity(contentLocation.toString())
-                    .build();
+            return Response
+                    .status(Status.OK)
+                    .entity(new Gson().toJson(new LatausUrl(addressLabelBatchProxy.addressLabelBatchAktivointi(
+                            hakukohdeOid, valintakoeOid)))).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }

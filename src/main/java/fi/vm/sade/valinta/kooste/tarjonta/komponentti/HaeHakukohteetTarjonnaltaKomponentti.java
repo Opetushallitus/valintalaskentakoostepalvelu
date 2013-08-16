@@ -1,12 +1,18 @@
 package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
-import fi.vm.sade.tarjonta.service.TarjontaPublicService;
-import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
+import static fi.vm.sade.tarjonta.service.types.TarjontaTila.JULKAISTU;
+
+import java.util.Collection;
+
 import org.apache.camel.language.Simple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+
+import fi.vm.sade.tarjonta.service.TarjontaPublicService;
+import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 
 @Component("hakukohteetTarjonnaltaKomponentti")
 public class HaeHakukohteetTarjonnaltaKomponentti {
@@ -17,9 +23,14 @@ public class HaeHakukohteetTarjonnaltaKomponentti {
     /**
      * @return hakukohteet
      */
-    public List<HakukohdeTyyppi> haeHakukohteetTarjonnalta(@Simple("${property.hakuOid}") String hakuOid) {
-        List<HakukohdeTyyppi> hakukohde = tarjontaService.haeTarjonta(hakuOid).getHakukohde();
-        return hakukohde;
+    public Collection<HakukohdeTyyppi> haeHakukohteetTarjonnalta(@Simple("${property.hakuOid}") String hakuOid) {
+        return Collections2.filter(tarjontaService.haeTarjonta(hakuOid).getHakukohde(),
+                new Predicate<HakukohdeTyyppi>() {
+                    public boolean apply(HakukohdeTyyppi hakukohde) {
+
+                        return JULKAISTU == hakukohde.getHakukohteenTila();
+                    }
+                });
     }
 
 }

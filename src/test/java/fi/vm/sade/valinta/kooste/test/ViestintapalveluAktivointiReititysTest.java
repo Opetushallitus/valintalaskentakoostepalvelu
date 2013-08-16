@@ -54,8 +54,8 @@ public class ViestintapalveluAktivointiReititysTest {
 
         @Test
         public void osoitteidenValitysToimiiOikeinJaSaadaanPalautetta() throws IOException {
-            assertTrue(URI.create(addressLabelBatchProxy.addressLabelBatchAktivointi(Resources.toString(
-                    Resources.getResource(ADDRESSLABEL_BATCH_JSON), Charsets.UTF_8))) != null);
+            assertTrue(URI.create(addressLabelBatchProxy.addressLabelBatchAktivointi(
+                    Resources.toString(Resources.getResource(ADDRESSLABEL_BATCH_JSON), Charsets.UTF_8), "")) != null);
         }
 
         @Autowired
