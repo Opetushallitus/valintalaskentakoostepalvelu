@@ -14,12 +14,12 @@
 
 	<ctx:annotation-config />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.paasykokeet" />
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
 
 
 	<routeContext id="valintakoelaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
-		<route id="valintakoelaskentaReitti">
-			<from uri="direct:kaynnistaValintakoelaskentaReitti" />
+		<route>
+			<from uri="direct:kaynnistaHakukohteenValintakoelaskentaReitti" />
 			<setProperty propertyName="hakukohdeOid">
 				<simple>${body}</simple>
 			</setProperty>
@@ -33,8 +33,8 @@
 		</route>
 		<!-- Kutsuu ylempaa reittia moniajoisesti jokaiselle tarjonnalta saadulle 
 			hakukohdeoidille -->
-		<route id="tarjontaReitti">
-			<from uri="direct:kaynnistaTarjonnanHakukohteetReitti" />
+		<route>
+			<from uri="direct:kaynnistaHaunValintakoelaskentaReitti" />
 			<setProperty propertyName="hakuOid">
 				<simple>${body}</simple>
 			</setProperty>
@@ -43,7 +43,7 @@
                 <!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
                 <split parallelProcessing="false">
                     <method bean="splitHakukohteetKomponentti" method="splitHakukohteet" />
-                    <to uri="direct:kaynnistaValintakoelaskentaReitti" />
+                    <to uri="bean:hakukohteenValintakoelaskentaAktivointiRajapinta" />
                 </split>
             </policy>
 		</route>
@@ -51,13 +51,13 @@
 
 	<camelContext id="valintakoelaskentaCamelContext"
 		autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
-		<proxy id="tarjonnanHakukohteetAktivointiRajapinta"
-			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakukohteetAktivointiProxy"
-			serviceUrl="direct:kaynnistaTarjonnanHakukohteetReitti" />
+		<proxy id="hakukohteenValintakoelaskentaAktivointiRajapinta"
+			serviceInterface="fi.vm.sade.valinta.kooste.paasykokeet.HakukohteenValintakoelaskentaAktivointiProxy"
+			serviceUrl="direct:kaynnistaHakukohteenValintakoelaskentaReitti" />
 
-		<proxy id="valintakoelaskentaAktivointiRajapinta"
-			serviceInterface="fi.vm.sade.valinta.kooste.paasykokeet.ValintakoelaskentaAktivointiProxy"
-			serviceUrl="direct:kaynnistaValintakoelaskentaReitti" />
+		<proxy id="haunValintakoelaskentaAktivointiRajapinta"
+			serviceInterface="fi.vm.sade.valinta.kooste.paasykokeet.HaunValintakoelaskentaAktivointiProxy"
+			serviceUrl="direct:kaynnistaHaunValintakoelaskentaReitti" />
 		<routeContextRef ref="valintakoelaskentaRoutes" />
 	</camelContext>
 
