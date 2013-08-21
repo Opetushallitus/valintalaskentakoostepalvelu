@@ -12,9 +12,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
  */
 @Controller
 @Path("valintakoelaskenta")
@@ -23,17 +21,31 @@ public class ValintakoelaskentaAktivointiResource {
     private static final Logger LOG = LoggerFactory.getLogger(ValintakoelaskentaAktivointiResource.class);
 
     @Autowired
-    private ValintakoelaskentaAktivointiProxy valintalaskentaProxy;
+    private HakukohteenValintakoelaskentaAktivointiProxy hakukohteenValintakoelaskentaAktivointiProxy;
+
+    @Autowired
+    private HaunValintakoelaskentaAktivointiProxy haunValintakoelaskentaAktivointiProxy;
 
     @GET
     @Path("aktivoi")
     public String aktivoiValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid) {
-        if(StringUtils.isBlank(hakukohdeOid)) {
+        if (StringUtils.isBlank(hakukohdeOid)) {
             return "get parameter 'hakukohdeOid required";
-        }
-        else {
+        } else {
             LOG.info("Valintakoelaskenta for {}", hakukohdeOid);
-            valintalaskentaProxy.aktivoiValintakoelaskenta(hakukohdeOid);
+            hakukohteenValintakoelaskentaAktivointiProxy.aktivoiValintakoelaskenta(hakukohdeOid);
+            return "in progress";
+        }
+    }
+
+    @GET
+    @Path("aktivoiHaunValintakoelaskenta")
+    public String aktivoiHaunValintakoelaskenta(@QueryParam("hakuOid") String hakuOid) {
+        if (StringUtils.isBlank(hakuOid)) {
+            return "get parameter 'hakuOid required";
+        } else {
+            LOG.info("Valintakoelaskenta for haku {}", hakuOid);
+            haunValintakoelaskentaAktivointiProxy.aktivoiValintakoelaskenta(hakuOid);
             return "in progress";
         }
     }
