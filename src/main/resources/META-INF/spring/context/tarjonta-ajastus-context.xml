@@ -30,7 +30,7 @@
 			<from uri="quartz://timerName?cron={{tarjonta.ajastinReitti.cron}}" />
 			<setBody><simple>${bean:tarjontaTiedotPalvelu?method=haeHakuOid}</simple></setBody>
             <policy ref="admin">
-                <to uri="bean:tarjonnanHakukohteetAktivointiRajapinta"/>
+                <to uri="bean:haunValintakoelaskentaAktivointiRajapinta"/>
             </policy>
 		</route>
 	</routeContext>
