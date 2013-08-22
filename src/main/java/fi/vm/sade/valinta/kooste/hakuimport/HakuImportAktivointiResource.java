@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakuimport;
 
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +27,16 @@ public class HakuImportAktivointiResource {
     @Autowired
     private HakuImportAktivointiProxy hakuImportAktivointiProxy;
 
+    @Autowired
+    private ParametriService parametriService;
+
     @GET
     @Path("aktivoi")
     public String aktivoiHakuImport(@QueryParam("hakuOid") String hakuOid) {
+        if(!parametriService.valinnanhallintaEnabled(hakuOid)) {
+            return "no privileges.";
+        }
+
         if (StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";
         } else {
