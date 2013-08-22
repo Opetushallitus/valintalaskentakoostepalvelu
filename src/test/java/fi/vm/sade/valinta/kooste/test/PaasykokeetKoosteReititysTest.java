@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,11 @@ public class PaasykokeetKoosteReititysTest {
     @Bean
     public TarjontaPublicService getTarjontaPublicServiceMock() {
         return mock(TarjontaPublicService.class);
+    }
+
+    @Bean
+    public ParametriService getParametriService() {
+        return mock(ParametriService.class);
     }
 
     @Autowired
