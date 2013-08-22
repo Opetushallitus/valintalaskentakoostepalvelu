@@ -31,6 +31,8 @@ public class SuoritaHakukohdeImportKomponentti {
         Gson gson = new Gson();
         HakukohdeDTO hakukohde = gson.fromJson(hakukohdeNimi, HakukohdeDTO.class);
 
+        importTyyppi.setTarjoajaOid(hakukohde.getTarjoajaOid());
+
         for (String s : hakukohde.getTarjoajaNimi().keySet()) {
             MonikielinenTekstiTyyppi m = new MonikielinenTekstiTyyppi();
             m.setLang(s);
@@ -65,6 +67,7 @@ public class SuoritaHakukohdeImportKomponentti {
 
         importTyyppi.setHakukohdeOid(hakukohde.getOid());
         importTyyppi.setHakuOid(hakukohde.getHakuOid());
+
         importTyyppi.setValinnanAloituspaikat(hakukohde.getValintojenAloituspaikatLkm());
 
         for (ValintakoeDTO valinakoe : hakukohde.getValintakoes()) {

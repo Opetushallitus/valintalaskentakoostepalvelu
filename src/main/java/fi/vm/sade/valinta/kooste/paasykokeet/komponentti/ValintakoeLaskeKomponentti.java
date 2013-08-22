@@ -29,7 +29,7 @@ public class ValintakoeLaskeKomponentti {
 
     public void haeLahtotiedot(@Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
 
-        LOG.info("ValintakoeLaskeKomponentti, aloitetaan valintaperusteiden hakeminen ja valintalaskennan kutsut");
+        LOG.info("ValintakoeLaskeKomponentti, aloitetaan valintaperusteiden hakeminen ja valintakoelaskennan kutsut");
 
         for (HakemusTyyppi hakemus : hakemukset) {
             LOG.info("Haetaan tiedot hakemukselle, hakemusoid: {} ", hakemus.getHakemusOid());
