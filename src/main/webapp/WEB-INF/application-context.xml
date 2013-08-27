@@ -17,7 +17,7 @@
   <ctx:property-placeholder location="classpath:META-INF/wsdlSource.properties"/>
     -->
     <ctx:property-placeholder
-            location="classpath:META-INF/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/override.properties"
+            location="classpath:META-INF/valintalaskentakoostepalvelu.properties, classpath:META-INF/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/override.properties"
             ignore-resource-not-found="true" properties-ref="defaultProps"/>
 
     <bean id="defaultProps" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
@@ -126,6 +126,7 @@
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/viestintapalvelu-context.xml"/>
+    <beans:import resource="classpath:META-INF/spring/context/parametrit-context.xml"/>
 
 
 </beans>

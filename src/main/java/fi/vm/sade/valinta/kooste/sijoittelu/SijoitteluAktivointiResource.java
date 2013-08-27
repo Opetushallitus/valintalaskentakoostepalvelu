@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoittelu;
 
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +23,16 @@ public class SijoitteluAktivointiResource {
     @Autowired
     private SijoitteluAktivointiProxy sijoitteluaAktivointiProxy;
 
+    @Autowired
+    private ParametriService parametriService;
+
     @GET
     @Path("aktivoi")
     public String aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
+        if(!parametriService.valinnanhallintaEnabled(hakuOid)) {
+            return "no privileges.";
+        }
+
         if(StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";
         } else {

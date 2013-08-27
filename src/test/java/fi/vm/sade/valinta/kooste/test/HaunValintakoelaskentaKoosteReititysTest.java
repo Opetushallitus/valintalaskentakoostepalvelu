@@ -9,6 +9,7 @@ import fi.vm.sade.tarjonta.service.TarjontaPublicService;
 import fi.vm.sade.tarjonta.service.types.TarjontaTila;
 import fi.vm.sade.tarjonta.service.types.TarjontaTyyppi;
 import fi.vm.sade.valinta.kooste.paasykokeet.HaunValintakoelaskentaAktivointiProxy;
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,11 @@ public class HaunValintakoelaskentaKoosteReititysTest {
     @Bean
     public ValintaperusteService getValintaperusteServiceMock() {
         return mock(ValintaperusteService.class);
+    }
+
+    @Bean
+    public ParametriService getParametriService() {
+        return mock(ParametriService.class);
     }
 
     private static String[] HAKUKOHDE_OIDS = {"0000-2tg2wgg-dfgsdh", "0000-252rtgwg5-dfgsdh",

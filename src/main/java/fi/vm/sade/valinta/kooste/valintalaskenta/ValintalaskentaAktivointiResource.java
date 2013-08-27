@@ -5,6 +5,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,9 @@ public class ValintalaskentaAktivointiResource {
 
     @Autowired
     private HaunValintalaskentaAktivointiProxy haunValintalaskentaAktivointiProxy;
+
+    @Autowired
+    private ParametriService parametriService;
 
     @Value("${valintalaskentakoostepalvelu.valintaperusteService.url}")
     String valintaperusteServiceUrl;
@@ -58,6 +62,9 @@ public class ValintalaskentaAktivointiResource {
     @GET
     @Path("aktivoiHaunValintalaskenta")
     public Response aktivoiHaunValintalaskenta(@QueryParam("hakuOid") String hakuOid) {
+        if(!parametriService.valintalaskentaEnabled(hakuOid)) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
 
         try {
             if (StringUtils.isBlank(hakuOid)) {
