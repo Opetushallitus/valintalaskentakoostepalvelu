@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
-import javax.ws.rs.POST;
+import java.util.List;
+
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -30,16 +32,16 @@ public class AddressLabelBatchAktivointiResource {
     @Autowired
     AddressLabelBatchAktivointiProxy addressLabelBatchProxy;
 
-    @POST
+    @GET
     @Path("aktivoi")
     @Produces("application/json")
     public Response aktivoiViestintapalvelu(@QueryParam("hakukohdeOid") String hakukohdeOid,
-            @QueryParam("valintakoeOid") String valintakoeOid) {
+            @QueryParam("valintakoeOid") List<String> valintakoeOids) {
         try {
             return Response
                     .status(Status.OK)
                     .entity(new Gson().toJson(new LatausUrl(addressLabelBatchProxy.addressLabelBatchAktivointi(
-                            hakukohdeOid, valintakoeOid)))).build();
+                            hakukohdeOid, valintakoeOids)))).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }

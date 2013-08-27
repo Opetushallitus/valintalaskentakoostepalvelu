@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -55,7 +56,8 @@ public class ViestintapalveluAktivointiReititysTest {
         @Test
         public void osoitteidenValitysToimiiOikeinJaSaadaanPalautetta() throws IOException {
             assertTrue(URI.create(addressLabelBatchProxy.addressLabelBatchAktivointi(
-                    Resources.toString(Resources.getResource(ADDRESSLABEL_BATCH_JSON), Charsets.UTF_8), "")) != null);
+                    Resources.toString(Resources.getResource(ADDRESSLABEL_BATCH_JSON), Charsets.UTF_8),
+                    Arrays.asList(""))) != null);
         }
 
         @Autowired
