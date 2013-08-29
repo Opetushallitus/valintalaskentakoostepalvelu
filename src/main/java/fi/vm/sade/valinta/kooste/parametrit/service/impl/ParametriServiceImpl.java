@@ -58,9 +58,9 @@ public class ParametriServiceImpl implements ParametriService {
 
     @Override
     public boolean valintalaskentaEnabled(String hakuOid) {
-        Date now = Calendar.getInstance().getTime();
-        Date hakuAlkupvm = new Date(parametrit.getHakuAlkupvm() * 1000);
-        return now.after(hakuAlkupvm) && isOPH();
+        //Date now = Calendar.getInstance().getTime();
+        //Date hakuAlkupvm = new Date(parametrit.getHakuAlkupvm() * 1000);
+        return isOPH(); //now.after(hakuAlkupvm) && isOPH();
     }
 
     @Override
