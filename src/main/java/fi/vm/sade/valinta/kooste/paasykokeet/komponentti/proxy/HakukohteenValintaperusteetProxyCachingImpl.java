@@ -32,7 +32,7 @@ public class HakukohteenValintaperusteetProxyCachingImpl implements HakukohteenV
         valintaperusteetCache = CacheBuilder
                 .newBuilder()
                 .recordStats()
-                .expireAfterWrite(20, TimeUnit.MINUTES)
+                .expireAfterWrite(24, TimeUnit.HOURS)
                 .build();
     }
 

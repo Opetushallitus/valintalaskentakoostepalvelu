@@ -30,8 +30,9 @@ public class ValintakoeLaskeKomponentti {
     public void haeLahtotiedot(@Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
 
         LOG.info("ValintakoeLaskeKomponentti, aloitetaan valintaperusteiden hakeminen ja valintakoelaskennan kutsut");
-
+        Long startTime = System.currentTimeMillis();
         for (HakemusTyyppi hakemus : hakemukset) {
+            Long hakemusTime = System.currentTimeMillis();
             LOG.info("Haetaan tiedot hakemukselle, hakemusoid: {} ", hakemus.getHakemusOid());
 
             Set<String> hakukohteet = new HashSet<String>();
@@ -39,9 +40,12 @@ public class ValintakoeLaskeKomponentti {
                 hakukohteet.add(hkt.getHakukohdeOid());
             }
             List<ValintaperusteetTyyppi> valintaperusteet = proxy.haeValintaperusteet(hakukohteet);
+            LOG.info("Valintaperusteet haettu: " + (System.currentTimeMillis()-hakemusTime));
 
             valintalaskentaService.valintakokeet(hakemus, valintaperusteet);
-
+            LOG.info("Hakemus suoritettu: " + (System.currentTimeMillis()-hakemusTime));
         }
+
+        LOG.info("ValintakoeLaskeKomponentti suoritettu: " + hakemukset.size() + " : " + (System.currentTimeMillis()-startTime)/1000.0);
     }
 }
