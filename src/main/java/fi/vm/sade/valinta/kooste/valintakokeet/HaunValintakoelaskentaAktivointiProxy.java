@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.paasykokeet;
+package fi.vm.sade.valinta.kooste.valintakokeet;
 
 
 /**
