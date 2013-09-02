@@ -16,7 +16,7 @@ import javax.ws.rs.QueryParam;
  * Time: 12.28
  */
 @Controller
-@Path("valintakoelaskenta")
+@Path("haunvalintakoelaskenta")
 public class HaunValintakoelaskentaAktivointiResource {
     private static final Logger LOG = LoggerFactory.getLogger(HaunValintakoelaskentaAktivointiResource.class);
 
