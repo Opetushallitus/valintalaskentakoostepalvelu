@@ -21,7 +21,34 @@
     </build>
 
     <dependencies>
-        <dependency>
+    	<dependency>
+    		<groupId>commons-io</groupId>
+    		<artifactId>commons-io</artifactId>
+    		<version>2.4</version>
+    		<scope>test</scope>
+    	</dependency>
+    	<dependency>
+    		<groupId>org.apache.poi</groupId>
+    		<artifactId>poi</artifactId>
+    		<version>3.7</version>
+    	</dependency>
+    	<dependency>
+    		<groupId>org.apache.poi</groupId>
+    		<artifactId>poi-ooxml</artifactId>
+    		<version>3.7</version>
+    		<exclusions>
+    			<exclusion>
+    				<artifactId>poi-ooxml-schemas</artifactId>
+    				<groupId>org.apache.poi</groupId>
+    			</exclusion>
+    			<exclusion>
+    				<artifactId>dom4j</artifactId>
+    				<groupId>dom4j</groupId>
+    			</exclusion>
+    		</exclusions>
+    	</dependency>
+
+    	<dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>14.0.1</version>
