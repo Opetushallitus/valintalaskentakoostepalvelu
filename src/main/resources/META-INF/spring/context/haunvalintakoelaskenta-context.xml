@@ -18,7 +18,7 @@
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintakokeet,fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy"/>
 
     <util:properties id="valintakoelaskentaProperties">
-        <beans:prop key="hakemus.rest.url">${valintalaskentakoostepalvelu.hakemus.all.rest.url}</beans:prop>
+        <beans:prop key="hakemus.rest.url">${valintalaskentakoostepalvelu.hakemus.rest.url}</beans:prop>
     </util:properties>
 
     <routeContext id="haunValintakoelaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
