@@ -1,0 +1,275 @@
+package fi.vm.sade.valinta.kooste.test.komponentti;
+
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
+import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+
+/**
+ * User: wuoti
+ * Date: 29.8.2013
+ * Time: 14.28
+ */
+public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
+
+    private LaskeValintakoeosallistumisetHakemukselleKomponentti laskeValintakoeosallistumisetHakemukselleKomponentti;
+
+    private HakukohteenValintaperusteetProxy hakukohteenValintaperusteetProxyMock;
+    private ValintalaskentaService valintalaskentaServiceMock;
+
+
+    private final static int PORT = 8096;
+    private final static String HAKEMUS_URL = "http://localhost:" + PORT + "/%1$s";
+
+    @Rule
+    public WireMockRule wireMockRule = new WireMockRule(PORT);
+
+
+    @Before
+    public void setUp() {
+        laskeValintakoeosallistumisetHakemukselleKomponentti = new LaskeValintakoeosallistumisetHakemukselleKomponentti();
+        hakukohteenValintaperusteetProxyMock = mock(HakukohteenValintaperusteetProxy.class);
+        valintalaskentaServiceMock = mock(ValintalaskentaService.class);
+
+        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "proxy",
+                hakukohteenValintaperusteetProxyMock);
+        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "valintalaskentaService",
+                valintalaskentaServiceMock);
+    }
+
+    private final static String HAKUKOHDE_OID = "1.2.246.562.5.01245_01_114_0125";
+
+    private final static String RESPONSE_JSON =
+            "{\n" +
+                    "type: \"Application\",\n" +
+                    "applicationSystemId: \"1.2.246.562.5.2013060313080811526781\",\n" +
+                    "answers: {\n" +
+                    "henkilotiedot: {\n" +
+                    "kansalaisuus: \"FIN\",\n" +
+                    "asuinmaa: \"FIN\",\n" +
+                    "postitoimipaikka: \"\",\n" +
+                    "Sukunimi: \"pFUBjjes\",\n" +
+                    "SUKUPUOLI: \"n\",\n" +
+                    "matkapuhelinnumero: \"0000000928\",\n" +
+                    "Henkilotunnus: \"300582-2022\",\n" +
+                    "Postinumero: \"00100\",\n" +
+                    "lahiosoite: \"Jokukatu 1\",\n" +
+                    "Sähköposti: \"TjtpvjnOuNehQar@oph.fi\",\n" +
+                    "Kutsumanimi: \"VXCVX\",\n" +
+                    "Etunimet: \"VXCVX XccVrVr\",\n" +
+                    "ensisijainenOsoite1: \"true\",\n" +
+                    "kotikunta: \"186\",\n" +
+                    "aidinkieli: \"FI\",\n" +
+                    "syntymaaika: \"30.05.1982\",\n" +
+                    "Henkilotunnus_digest: \"d7cfec1111373ba98b0aff6ad4838269fbe3b2bd11aa2cef3becf5496323edf2\"\n" +
+                    "},\n" +
+                    "lisatiedot: {\n" +
+                    "asiointikieli: \"suomi\",\n" +
+                    "vaiheId: \"lisatiedot\"\n" +
+                    "},\n" +
+                    "hakutoiveet: {\n" +
+                    "preference1-Koulutus-id: \"" + HAKUKOHDE_OID + "\",\n" +
+                    "preference1-Harkinnanvarainen: \"false\",\n" +
+                    "preference1-Opetuspiste-id: \"1.2.246.562.10.70057800685\",\n" +
+                    "preference1-Opetuspiste: \"Helmi Liiketalousopisto\",\n" +
+                    "preference1-Koulutus-educationDegree: \"\",\n" +
+                    "preference1-Koulutus: \"Liiketalouden perustutkinto, pk\",\n" +
+                    "preference1-discretionary: \"\",\n" +
+                    "preference1-Opetuspiste-id-parents: \"1.2.246.562.10.56373523374,1.2.246.562.10.80843262926,1.2.246.562.10.70057800685,1.2.246.562.10.00000000001\"\n" +
+                    "},\n" +
+                    "koulutustausta: {\n" +
+                    "LISAKOULUTUS_TALOUS: \"false\",\n" +
+                    "LISAKOULUTUS_AMMATTISTARTTI: \"false\",\n" +
+                    "LISAKOULUTUS_KANSANOPISTO: \"false\",\n" +
+                    "PK_PAATTOTODISTUSVUOSI: \"2012\",\n" +
+                    "LISAKOULUTUS_VAMMAISTEN: \"false\",\n" +
+                    "KOULUTUSPAIKKA_AMMATILLISEEN_TUTKINTOON: \"false\",\n" +
+                    "LISAKOULUTUS_KYMPPI: \"false\",\n" +
+                    "POHJAKOULUTUS: \"1\",\n" +
+                    "perusopetuksen_kieli: \"FI\",\n" +
+                    "osallistunut: \"false\",\n" +
+                    "LISAKOULUTUS_MAAHANMUUTTO: \"false\"\n" +
+                    "},\n" +
+                    "osaaminen: {\n" +
+                    "PK_KU_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_TE: \"Ei arvosanaa\",\n" +
+                    "PK_KU_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_KS: \"7\",\n" +
+                    "PK_KT: \"7\",\n" +
+                    "PK_KU: \"9\",\n" +
+                    "PK_BI_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_KO: \"9\",\n" +
+                    "PK_BI_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_FY: \"6\",\n" +
+                    "PK_MU_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_MU_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_BI: \"7\",\n" +
+                    "PK_A1_OPPIAINE: \"EN\",\n" +
+                    "PK_B22_OPPIAINE: \"PT\",\n" +
+                    "PK_A2_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_A2_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_AI_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_MA_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_AI_VAL1: \"Ei arvosanaa\",\n" +
+                    "vaiheId: \"osaaminen\",\n" +
+                    "PK_A1_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_A1_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_MA_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_HI_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_B1_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_B22: \"6\",\n" +
+                    "PK_HI_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_B1_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_KO_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_KO_VAL1: \"8\",\n" +
+                    "PK_GE: \"6\",\n" +
+                    "PK_A12_OPPIAINE: \"ES\",\n" +
+                    "PK_KE: \"5\",\n" +
+                    "PK_AI_OPPIAINE: \"FI\",\n" +
+                    "PK_A2_OPPIAINE: \"JA\",\n" +
+                    "PK_FY_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_MU: \"6\",\n" +
+                    "PK_FY_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_B2_OPPIAINE: \"DE\",\n" +
+                    "PK_HI: \"7\",\n" +
+                    "PK_KS_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_YH_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_YH_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_A1: \"7\",\n" +
+                    "PK_B1_OPPIAINE: \"SV\",\n" +
+                    "PK_A2: \"6\",\n" +
+                    "PK_KE_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_LI_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_KE_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_LI_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_KS_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_AI: \"9\",\n" +
+                    "PK_LI: \"7\",\n" +
+                    "PK_B2_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_B2_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_A12: \"9\",\n" +
+                    "PK_YH: \"7\",\n" +
+                    "PK_GE_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_B22_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_B22_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_GE_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_B2: \"7\",\n" +
+                    "PK_A12_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_MA: \"7\",\n" +
+                    "PK_A12_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_TE_VAL1: \"Ei arvosanaa\",\n" +
+                    "PK_KT_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_TE_VAL2: \"Ei arvosanaa\",\n" +
+                    "PK_B1: \"6\",\n" +
+                    "PK_KT_VAL1: \"Ei arvosanaa\"\n" +
+                    "}\n" +
+                    "},\n" +
+                    "oid: \"1.2.3.4.5.00000000039\",\n" +
+                    "state: \"ACTIVE\",\n" +
+                    "personOid: \"1.2.246.562.24.37911437777\",\n" +
+                    "received: 1377088668958,\n" +
+                    "meta: {\n" +
+                    "sessionId: \"ef19a88b-9e4c-453d-9c5a-9cda899335f1\"\n" +
+                    "},\n" +
+                    "notes: [\n" +
+                    "{\n" +
+                    "type: \"ApplicationNote\",\n" +
+                    "noteText: \"Päivitetty vaihetta 'lisatiedot'\",\n" +
+                    "added: 1377682598056,\n" +
+                    "user: \"1.2.246.562.24.00000000001\"\n" +
+                    "},\n" +
+                    "{\n" +
+                    "type: \"ApplicationNote\",\n" +
+                    "noteText: \"Päivitetty vaihetta 'lisatiedot'\",\n" +
+                    "added: 1377599364371,\n" +
+                    "user: \"1.2.246.562.24.00000000001\"\n" +
+                    "},\n" +
+                    "{\n" +
+                    "type: \"ApplicationNote\",\n" +
+                    "noteText: \"Päivitetty vaihetta 'osaaminen'\",\n" +
+                    "added: 1377250942628,\n" +
+                    "user: \"fi.vm.sade.security.SadeUserDetailsWrapper@5d0369f2\"\n" +
+                    "},\n" +
+                    "{\n" +
+                    "type: \"ApplicationNote\",\n" +
+                    "noteText: \"Päivitetty vaihetta 'osaaminen'\",\n" +
+                    "added: 1377249644617,\n" +
+                    "user: \"fi.vm.sade.security.SadeUserDetailsWrapper@5d0369f2\"\n" +
+                    "},\n" +
+                    "{\n" +
+                    "type: \"ApplicationNote\",\n" +
+                    "noteText: \"Päivitetty vaihetta 'osaaminen'\",\n" +
+                    "added: 1377249079902,\n" +
+                    "user: \"fi.vm.sade.security.SadeUserDetailsWrapper@585c3e99\"\n" +
+                    "},\n" +
+                    "{\n" +
+                    "type: \"ApplicationNote\",\n" +
+                    "noteText: \"Kävin katsomassa\",\n" +
+                    "added: 1377180205623,\n" +
+                    "user: \"fi.vm.sade.security.SadeUserDetailsWrapper@2985158\"\n" +
+                    "},\n" +
+                    "{\n" +
+                    "type: \"ApplicationNote\",\n" +
+                    "noteText: \"Hakemus vastaanotettu\",\n" +
+                    "added: 1377088668958,\n" +
+                    "user: \"anonymousUser\"\n" +
+                    "}\n" +
+                    "],\n" +
+                    "_id: {\n" +
+                    "time: 1377088669000,\n" +
+                    "new: false,\n" +
+                    "inc: 42510648,\n" +
+                    "machine: -458164698,\n" +
+                    "timeSecond: 1377088669\n" +
+                    "}\n" +
+                    "}";
+
+    @Test
+    public void test() {
+        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "hakemusUrl", HAKEMUS_URL);
+        final String hakemusOid = "1.2.3.4.5.00000000039";
+
+        stubFor(get(urlEqualTo("/" + hakemusOid))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "text/json")
+                        .withBody(RESPONSE_JSON)));
+
+        Set<String> hakukohdeParams = new HashSet<String>(Arrays.asList(HAKUKOHDE_OID));
+
+        ValintaperusteetTyyppi vp = new ValintaperusteetTyyppi();
+        vp.setHakukohdeOid(HAKUKOHDE_OID);
+
+        List<ValintaperusteetTyyppi> vps = Arrays.asList(vp);
+
+        when(hakukohteenValintaperusteetProxyMock.haeValintaperusteet(hakukohdeParams)).thenReturn(vps);
+        laskeValintakoeosallistumisetHakemukselleKomponentti.laske(hakemusOid);
+
+        ArgumentCaptor<HakemusTyyppi> ac = ArgumentCaptor.forClass(HakemusTyyppi.class);
+        verify(valintalaskentaServiceMock).valintakokeet(ac.capture(), anyList());
+
+        HakemusTyyppi hakemus = ac.getValue();
+        assertEquals(hakemusOid, hakemus.getHakemusOid());
+        assertEquals(1, hakemus.getHakutoive().size());
+        assertEquals(HAKUKOHDE_OID, hakemus.getHakutoive().get(0).getHakukohdeOid());
+        assertEquals(1, hakemus.getHakutoive().get(0).getPrioriteetti());
+    }
+}

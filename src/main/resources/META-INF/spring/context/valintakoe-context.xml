@@ -12,53 +12,31 @@
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
 
-	<ctx:annotation-config />
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.paasykokeet" />
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
+    <ctx:annotation-config/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.paasykokeet"/>
 
-
-	<routeContext id="valintakoelaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
-		<route>
-			<from uri="direct:kaynnistaHakukohteenValintakoelaskentaReitti" />
-			<setProperty propertyName="hakukohdeOid">
-				<simple>${body}</simple>
-			</setProperty>
+    <routeContext id="valintakoelaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
+        <route>
+            <from uri="direct:kaynnistaHakukohteenValintakoelaskentaReitti"/>
+            <setProperty propertyName="hakukohdeOid">
+                <simple>${body}</simple>
+            </setProperty>
             <policy ref="admin">
-			<to uri="bean:haeHakemusKomponentti" />
-			<setProperty propertyName="hakemukset">
-				<simple>${body}</simple>
-			</setProperty>
-			<to uri="bean:valintakoeLaskeKomponentti" />
+                <to uri="bean:haeHakemusKomponentti"/>
+                <setProperty propertyName="hakemukset">
+                    <simple>${body}</simple>
+                </setProperty>
+                <to uri="bean:valintakoeLaskeKomponentti"/>
             </policy>
-		</route>
-		<!-- Kutsuu ylempaa reittia moniajoisesti jokaiselle tarjonnalta saadulle 
-			hakukohdeoidille -->
-		<route>
-			<from uri="direct:kaynnistaHaunValintakoelaskentaReitti" />
-			<setProperty propertyName="hakuOid">
-				<simple>${body}</simple>
-			</setProperty>
-            <policy ref="admin">
-                <to uri="bean:hakukohteetTarjonnaltaKomponentti" />
-                <!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
-                <split parallelProcessing="false">
-                    <method bean="splitHakukohteetKomponentti" method="splitHakukohteet" />
-                    <to uri="bean:hakukohteenValintakoelaskentaAktivointiRajapinta" />
-                </split>
-            </policy>
-		</route>
-	</routeContext>
+        </route>
+    </routeContext>
 
-	<camelContext id="valintakoelaskentaCamelContext"
-		autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
-		<proxy id="hakukohteenValintakoelaskentaAktivointiRajapinta"
-			serviceInterface="fi.vm.sade.valinta.kooste.paasykokeet.HakukohteenValintakoelaskentaAktivointiProxy"
-			serviceUrl="direct:kaynnistaHakukohteenValintakoelaskentaReitti" />
-
-		<proxy id="haunValintakoelaskentaAktivointiRajapinta"
-			serviceInterface="fi.vm.sade.valinta.kooste.paasykokeet.HaunValintakoelaskentaAktivointiProxy"
-			serviceUrl="direct:kaynnistaHaunValintakoelaskentaReitti" />
-		<routeContextRef ref="valintakoelaskentaRoutes" />
-	</camelContext>
+    <camelContext id="valintakoelaskentaCamelContext"
+                  autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+        <proxy id="hakukohteenValintakoelaskentaAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.paasykokeet.HakukohteenValintakoelaskentaAktivointiProxy"
+               serviceUrl="direct:kaynnistaHakukohteenValintakoelaskentaReitti"/>
+        <routeContextRef ref="valintakoelaskentaRoutes"/>
+    </camelContext>
 
 </beans>

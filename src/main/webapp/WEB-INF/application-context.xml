@@ -135,6 +135,7 @@
     <beans:import resource="classpath:META-INF/spring/context/hakuimport-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/tarjonta-ajastus-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintakoe-context.xml"/>
+    <beans:import resource="classpath:META-INF/spring/context/haunvalintakoelaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskentatulos-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
