@@ -17,6 +17,7 @@ import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintatiedot.ValintatietoService;
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
+import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 
 /**
  * 
@@ -34,14 +35,18 @@ public class HaeOsallistuneetHakemuksilleKomponentti {
     public String haeOsallistuneetHakemuksille(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
             @Simple("${property.valintakoeOid}") List<String> valintakoeOids,
             @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
-        List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = new ArrayList<HakemusOsallistuminenTyyppi>();
-        for (String valintakoeOid : valintakoeOids) {
-            tiedotHakukohteelle.addAll(valintatietoService.haeValintatiedotHakukohteelle(hakukohdeOid, valintakoeOid));
-        }
+        List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService.haeValintatiedotHakukohteelle(
+                valintakoeOids, hakukohdeOid);
+
         Set<String> osallistujienHakemusOidit = new HashSet<String>();
+        //
+        // Haetaan vain johonkin kokeeseen osallistuneet hakemukset!
+        //
         for (HakemusOsallistuminenTyyppi o : tiedotHakukohteelle) {
-            if (Osallistuminen.OSALLISTUU.equals(o.getOsallistuminen())) {
-                osallistujienHakemusOidit.add(o.getHakemusOid());
+            for (ValintakoeOsallistuminenTyyppi o1 : o.getOsallistumiset()) {
+                if (Osallistuminen.OSALLISTUU.equals(o1.getOsallistuminen())) {
+                    osallistujienHakemusOidit.add(o.getHakemusOid());
+                }
             }
         }
         List<Osoite> osoitteet = new ArrayList<Osoite>();

@@ -2,10 +2,13 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintatiedot.ValintatietoService;
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
+import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
 
 /**
@@ -43,22 +47,54 @@ public class ValintalaskentaTulosExcelKomponentti {
             b.append(hakemus.getHakijanSukunimi()).append(", ").append(hakemus.getHakijanEtunimi());
             oidToName.put(hakemus.getHakemusOid(), b.toString());
         }
-        List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = new ArrayList<HakemusOsallistuminenTyyppi>();
-        for (String valintakoeOid : valintakoeOids) {
-            tiedotHakukohteelle.addAll(valintatietoService.haeValintatiedotHakukohteelle(hakukohdeOid, valintakoeOid));
+        List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService.haeValintatiedotHakukohteelle(
+                valintakoeOids, hakukohdeOid);
+        List<String> tunnisteet = getTunnisteet(tiedotHakukohteelle);
+        if (tunnisteet.isEmpty()) {
+            return ExcelExportUtil.exportGridAsXls(new Object[][] {
+                    new Object[] { "Hakukohteelle ei löytynyt tuloksia annetuilla syötteillä!" },
+                    new Object[] { "Hakukohde OID", hakukohdeOid },
+                    new Object[] { "Valintakoe OID:it", Arrays.toString(valintakoeOids.toArray()) } });
+        } else {
+            List<Object[]> rows = new ArrayList<Object[]>();
+            LOG.debug("Creating rows for Excel file!");
+            ArrayList<String> otsikot = new ArrayList<String>();
+            otsikot.addAll(Arrays.asList("Nimi", "Hakemus", "Laskettu pvm"));
+            otsikot.addAll(tunnisteet);
+            rows.add(otsikot.toArray());
+            for (HakemusOsallistuminenTyyppi o : tiedotHakukohteelle) {
+                XMLGregorianCalendar calendar = o.getLuontiPvm();
+                Date date = calendar.toGregorianCalendar().getTime();
+                Map<String, ValintakoeOsallistuminenTyyppi> osallistumiset = new HashMap<String, ValintakoeOsallistuminenTyyppi>();
+                for (ValintakoeOsallistuminenTyyppi v : o.getOsallistumiset()) {
+                    osallistumiset.put(v.getValintakoeTunniste(), v);
+                }
+                ArrayList<String> rivi = new ArrayList<String>();
+                rivi.addAll(Arrays.asList(oidToName.get(o.getHakemusOid()), o.getHakemusOid(),
+                        ExcelExportUtil.DATE_FORMAT.format(date)));
+                for (String tunniste : tunnisteet) {
+                    if (osallistumiset.containsKey(tunniste)) {
+                        rivi.add(osallistumiset.get(tunniste).getOsallistuminen().toString());
+                    } else {
+                        rivi.add("----");
+                    }
+                }
+                rows.add(rivi.toArray());
+            }
+
+            return ExcelExportUtil.exportGridAsXls(rows.toArray(new Object[][] {}));
         }
+    }
 
-        List<Object[]> rows = new ArrayList<Object[]>();
-        LOG.debug("Creating rows for Excel file!");
-        rows.add(new Object[] { "Nimi", "Hakemus", "Osallistuminen", "Laskettu pvm" });
-        for (HakemusOsallistuminenTyyppi o : tiedotHakukohteelle) {
-            XMLGregorianCalendar calendar = o.getLuontiPvm();
-            Date date = calendar.toGregorianCalendar().getTime();
-            rows.add(new Object[] { "" + oidToName.get(o.getHakemusOid()), o.getHakemusOid(),
-                    "" + o.getOsallistuminen().toString(), ExcelExportUtil.DATE_FORMAT.format(date) });
-
+    private List<String> getTunnisteet(List<HakemusOsallistuminenTyyppi> osallistujat) {
+        Set<String> tunnisteet = new HashSet<String>();
+        for (HakemusOsallistuminenTyyppi osallistuja : osallistujat) {
+            for (ValintakoeOsallistuminenTyyppi valintakoe : osallistuja.getOsallistumiset()) {
+                if (!tunnisteet.contains(valintakoe.getValintakoeTunniste())) {
+                    tunnisteet.add(valintakoe.getValintakoeTunniste());
+                }
+            }
         }
-
-        return ExcelExportUtil.exportGridAsXls(rows.toArray(new Object[][] {}));
+        return new ArrayList<String>(tunnisteet);
     }
 }
