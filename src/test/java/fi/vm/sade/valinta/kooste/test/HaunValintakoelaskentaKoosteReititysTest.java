@@ -5,8 +5,8 @@ import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiResource;
-import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.HaeHaunHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LueHakemuksetJsonistaKomponentti;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,7 +19,6 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,18 +35,14 @@ import static org.mockito.Mockito.verify;
  */
 @Configuration
 @ContextConfiguration(classes = HaunValintakoelaskentaKoosteReititysTest.class)
-@PropertySource("classpath:test.properties")
+@PropertySource("classpath:valintakoelaskenta-test.properties")
 @ImportResource({"classpath:META-INF/spring/context/haunvalintakoelaskenta-context.xml", "test-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HaunValintakoelaskentaKoosteReititysTest {
 
     @Autowired
     private HaunValintakoelaskentaAktivointiResource haunValintakoelaskentaAktivointiResource;
-
-
     private final static int PORT = 8097;
-    private final static String KAIKKI_HAKEMUKSET_URL = "http://localhost:" + PORT;
-    private final static String YKSI_HAKEMUS_URL = "http://localhost:" + PORT + "/%1$s";
 
     private final static String HAKU_OID = "hakuOid1";
 
@@ -56,7 +51,7 @@ public class HaunValintakoelaskentaKoosteReititysTest {
 
     private final static String HAKEMUKSET_RESPONSE_JSON =
             "{" +
-                    "totalCount: 3," +
+                    "totalCount: 2," +
                     "results: [" +
                     "{" +
                     "oid: \"" + HAKEMUS1_OID + "\"," +
@@ -455,7 +450,7 @@ public class HaunValintakoelaskentaKoosteReititysTest {
     public WireMockRule wireMockRule = new WireMockRule(PORT);
 
     @Autowired
-    private HaeHaunHakemuksetKomponentti haeHaunHakemuksetKomponentti;
+    private LueHakemuksetJsonistaKomponentti lueHakemuksetJsonistaKomponentti;
 
     @Autowired
     private LaskeValintakoeosallistumisetHakemukselleKomponentti laskeValintakoeosallistumisetHakemukselleKomponentti;
@@ -478,14 +473,12 @@ public class HaunValintakoelaskentaKoosteReititysTest {
 
     @Before
     public void setUp() {
-        ReflectionTestUtils.setField(haeHaunHakemuksetKomponentti, "hakemusUrl", KAIKKI_HAKEMUKSET_URL);
         stubFor(get(urlEqualTo("/?asId=" + HAKU_OID + "&appState=ACTIVE&appState=INCOMPLETE"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "text/json")
                         .withBody(HAKEMUKSET_RESPONSE_JSON)));
 
-        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "hakemusUrl", YKSI_HAKEMUS_URL);
         stubFor(get(urlEqualTo("/" + HAKEMUS1_OID))
                 .willReturn(aResponse()
                         .withStatus(200)

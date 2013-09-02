@@ -1,18 +1,12 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.HaeHaunHakemuksetKomponentti;
-import org.junit.Before;
-import org.junit.Rule;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LueHakemuksetJsonistaKomponentti;
 import org.junit.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 
 /**
@@ -20,21 +14,9 @@ import static org.junit.Assert.assertEquals;
  * Date: 29.8.2013
  * Time: 14.28
  */
-public class HaeHaunHakemuksetKomponenttiTest {
+public class LueHakemuksetJsonistaKomponenttiTest {
 
-    private HaeHaunHakemuksetKomponentti haeHaunHakemuksetKomponentti;
-
-    private final static int PORT = 8095;
-    private final static String HAKEMUS_URL = "http://localhost:" + PORT;
-
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(PORT);
-
-
-    @Before
-    public void setUp() {
-        haeHaunHakemuksetKomponentti = new HaeHaunHakemuksetKomponentti();
-    }
+    private LueHakemuksetJsonistaKomponentti lueHakemuksetJsonistaKomponentti = new LueHakemuksetJsonistaKomponentti();
 
     private final static String[] HAKEMUS_OIDS = new String[]{
             "1.2.3.4.5.00000000039",
@@ -42,7 +24,7 @@ public class HaeHaunHakemuksetKomponenttiTest {
             "1.2.3.4.5.00000000057",
     };
 
-    private final static String RESPONSE_JSON =
+    private final static String HAKEMUKSET_JSON =
             "{" +
                     "totalCount: 3," +
                     "results: [" +
@@ -75,17 +57,7 @@ public class HaeHaunHakemuksetKomponenttiTest {
 
     @Test
     public void test() {
-        ReflectionTestUtils.setField(haeHaunHakemuksetKomponentti, "hakemusUrl", HAKEMUS_URL);
-        final String hakuOid = "1.2.246.56552.5.2013060313080811526781";
-
-        stubFor(get(urlEqualTo("/?asId=" + hakuOid + "&appState=ACTIVE&appState=INCOMPLETE"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "text/json")
-                        .withBody(RESPONSE_JSON)));
-
-        List<String> oids = haeHaunHakemuksetKomponentti.haeHaunHakemukset(hakuOid);
-        assertEquals(HAKEMUS_OIDS.length, oids.size());
+        List<String> oids = lueHakemuksetJsonistaKomponentti.lueHakemuksetJsonista(HAKEMUKSET_JSON);
         assertTrue(oids.containsAll(Arrays.asList(HAKEMUS_OIDS)));
     }
 }

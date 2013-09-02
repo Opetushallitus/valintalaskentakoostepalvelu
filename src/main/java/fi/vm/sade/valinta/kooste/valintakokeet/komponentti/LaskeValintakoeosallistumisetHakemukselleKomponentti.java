@@ -6,24 +6,13 @@ import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
-import fi.vm.sade.valinta.kooste.exception.ValintalaskentapalveluException;
-import fi.vm.sade.valinta.kooste.exception.ValintaperustepalveluException;
-import fi.vm.sade.valinta.kooste.paasykokeet.komponentti.ValintakoeLaskeKomponentti;
 import fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
 import org.apache.camel.language.Simple;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.*;
 
 /**
@@ -34,16 +23,13 @@ import java.util.*;
 @Component("laskeValintakoeosallistumisetHakemukselleKomponentti")
 public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ValintakoeLaskeKomponentti.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LaskeValintakoeosallistumisetHakemukselleKomponentti.class);
 
     @Autowired
     private HakukohteenValintaperusteetProxy proxy;
 
     @Autowired
     private ValintalaskentaService valintalaskentaService;
-
-    @Value("${valintalaskentakoostepalvelu.hakemus.single.rest.url}")
-    private String hakemusUrl;
 
     private class Answers {
         private Map<String, String> henkilotiedot = new HashMap<String, String>();
@@ -178,128 +164,94 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
         }
     }
 
-    public void laske(@Simple("${property.hakemusOid}") String hakemusOid) {
-        Reader reader = null;
-        HakemusTyyppi hakemusTyyppi = null;
-        try {
-            GetMethod getMethod = new GetMethod(String.format(hakemusUrl, hakemusOid));
-            HttpClient httpClient = new HttpClient();
-            httpClient.executeMethod(getMethod);
-            String string = getMethod.getResponseBodyAsString();
-            reader = new BufferedReader(new InputStreamReader(getMethod.getResponseBodyAsStream()));
-            Hakemus hakemus = new Gson().fromJson(reader, Hakemus.class);
+    public void laske(@Simple("${property.hakemusJson}") String hakemusJson) {
+        Hakemus hakemus = new Gson().fromJson(hakemusJson, Hakemus.class);
 
-            hakemusTyyppi = new HakemusTyyppi();
-            hakemusTyyppi.setHakemusOid(hakemus.getOid());
-            hakemusTyyppi.setHakijanEtunimi(hakemus.getAnswers().getHenkilotiedot().get(ETUNIMET));
-            hakemusTyyppi.setHakijanSukunimi(hakemus.getAnswers().getHenkilotiedot().get(SUKUNIMI));
-            hakemusTyyppi.setHakijaOid(hakemus.getPersonOid());
+        HakemusTyyppi hakemusTyyppi = new HakemusTyyppi();
+        hakemusTyyppi.setHakemusOid(hakemus.getOid());
+        hakemusTyyppi.setHakijanEtunimi(hakemus.getAnswers().getHenkilotiedot().get(ETUNIMET));
+        hakemusTyyppi.setHakijanSukunimi(hakemus.getAnswers().getHenkilotiedot().get(SUKUNIMI));
+        hakemusTyyppi.setHakijaOid(hakemus.getPersonOid());
 
-            Map<Integer, Hakutoive> hakutoiveet = new HashMap<Integer, Hakutoive>();
-            for (Map.Entry<String, String> e : hakemus.getAnswers().getHakutoiveet().entrySet()) {
-                AvainArvoTyyppi aa = new AvainArvoTyyppi();
-                aa.setAvain(e.getKey());
-                aa.setArvo(e.getValue());
+        Map<Integer, Hakutoive> hakutoiveet = new HashMap<Integer, Hakutoive>();
+        for (Map.Entry<String, String> e : hakemus.getAnswers().getHakutoiveet().entrySet()) {
+            AvainArvoTyyppi aa = new AvainArvoTyyppi();
+            aa.setAvain(e.getKey());
+            aa.setArvo(e.getValue());
 
-                hakemusTyyppi.getAvainArvo().add(aa);
+            hakemusTyyppi.getAvainArvo().add(aa);
 
-                if (e.getKey().startsWith(PREFERENCE)) {
-                    Integer prioriteetti = Integer.valueOf(e.getKey().replaceAll("\\D+", ""));
+            if (e.getKey().startsWith(PREFERENCE)) {
+                Integer prioriteetti = Integer.valueOf(e.getKey().replaceAll("\\D+", ""));
 
-                    Hakutoive hakutoive = null;
-                    if (!hakutoiveet.containsKey(prioriteetti)) {
-                        hakutoive = new Hakutoive();
-                        hakutoiveet.put(prioriteetti, hakutoive);
-                    } else {
-                        hakutoive = hakutoiveet.get(prioriteetti);
-                    }
-
-                    if (e.getKey().endsWith(KOULUTUS_ID)) {
-                        hakutoive.setHakukohdeOid(e.getValue());
-                    } else if (e.getKey().endsWith(DISCRETIONARY)) {
-                        Boolean discretionary = Boolean.valueOf(e.getValue());
-                        discretionary = discretionary == null ? false : discretionary;
-
-                        hakutoive.setHarkinnanvaraisuus(discretionary);
-                    }
+                Hakutoive hakutoive = null;
+                if (!hakutoiveet.containsKey(prioriteetti)) {
+                    hakutoive = new Hakutoive();
+                    hakutoiveet.put(prioriteetti, hakutoive);
+                } else {
+                    hakutoive = hakutoiveet.get(prioriteetti);
                 }
-            }
 
-            for (Map.Entry<Integer, Hakutoive> e : hakutoiveet.entrySet()) {
-                Hakutoive hakutoive = e.getValue();
-                if (hakutoive.getHakukohdeOid() != null && !hakutoive.getHakukohdeOid().trim().isEmpty()) {
-                    HakukohdeTyyppi hk = new HakukohdeTyyppi();
-                    hk.setHakukohdeOid(e.getValue().getHakukohdeOid());
-                    hk.setHarkinnanvaraisuus(e.getValue().getHarkinnanvaraisuus());
-                    hk.setPrioriteetti(e.getKey());
-                    hakemusTyyppi.getHakutoive().add(hk);
+                if (e.getKey().endsWith(KOULUTUS_ID)) {
+                    hakutoive.setHakukohdeOid(e.getValue());
+                } else if (e.getKey().endsWith(DISCRETIONARY)) {
+                    Boolean discretionary = Boolean.valueOf(e.getValue());
+                    discretionary = discretionary == null ? false : discretionary;
+
+                    hakutoive.setHarkinnanvaraisuus(discretionary);
                 }
-            }
-
-            for (Map.Entry<String, String> e : hakemus.getAnswers().getHenkilotiedot().entrySet()) {
-                AvainArvoTyyppi aa = new AvainArvoTyyppi();
-                aa.setAvain(e.getKey());
-                aa.setArvo(e.getValue());
-
-                hakemusTyyppi.getAvainArvo().add(aa);
-            }
-
-            for (Map.Entry<String, String> e : hakemus.getAnswers().getKoulutustausta().entrySet()) {
-                AvainArvoTyyppi aa = new AvainArvoTyyppi();
-                aa.setAvain(e.getKey());
-                aa.setArvo(e.getValue());
-
-                hakemusTyyppi.getAvainArvo().add(aa);
-            }
-
-            for (Map.Entry<String, String> e : hakemus.getAnswers().getLisatiedot().entrySet()) {
-                AvainArvoTyyppi aa = new AvainArvoTyyppi();
-                aa.setAvain(e.getKey());
-                aa.setArvo(e.getValue());
-
-                hakemusTyyppi.getAvainArvo().add(aa);
-            }
-
-            for (Map.Entry<String, String> e : hakemus.getAnswers().getOsaaminen().entrySet()) {
-                AvainArvoTyyppi aa = new AvainArvoTyyppi();
-                aa.setAvain(e.getKey());
-                aa.setArvo(e.getValue());
-
-                hakemusTyyppi.getAvainArvo().add(aa);
-            }
-        } catch (Exception e) {
-            LOG.error("Virhe hakemuksen hakemisessa", e);
-            throw new HakemuspalveluException(e);
-        } finally {
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                LOG.error("Virhe hakemuksen hakemisessa", e);
-                throw new HakemuspalveluException(e);
             }
         }
 
-        List<ValintaperusteetTyyppi> valintaperusteet = null;
-        try {
-            Set<String> hakutoiveOids = new HashSet<String>();
-            for (HakukohdeTyyppi ht : hakemusTyyppi.getHakutoive()) {
-                hakutoiveOids.add(ht.getHakukohdeOid());
+        for (Map.Entry<Integer, Hakutoive> e : hakutoiveet.entrySet()) {
+            Hakutoive hakutoive = e.getValue();
+            if (hakutoive.getHakukohdeOid() != null && !hakutoive.getHakukohdeOid().trim().isEmpty()) {
+                HakukohdeTyyppi hk = new HakukohdeTyyppi();
+                hk.setHakukohdeOid(e.getValue().getHakukohdeOid());
+                hk.setHarkinnanvaraisuus(e.getValue().getHarkinnanvaraisuus());
+                hk.setPrioriteetti(e.getKey());
+                hakemusTyyppi.getHakutoive().add(hk);
             }
-
-            valintaperusteet = proxy.haeValintaperusteet(hakutoiveOids);
-        } catch (Exception e) {
-            LOG.error("Virhe valintaperusteiden hakemisessa", e);
-            throw new ValintaperustepalveluException(e);
         }
 
-        try {
-            valintalaskentaService.valintakokeet(hakemusTyyppi, valintaperusteet);
-        } catch (Exception e) {
-            LOG.error("Virhe valintakoeosallistumisien laskemisessa hakemukselle " + hakemusTyyppi.getHakemusOid(), e);
-            throw new ValintalaskentapalveluException(e);
+        for (Map.Entry<String, String> e : hakemus.getAnswers().getHenkilotiedot().entrySet()) {
+            AvainArvoTyyppi aa = new AvainArvoTyyppi();
+            aa.setAvain(e.getKey());
+            aa.setArvo(e.getValue());
+
+            hakemusTyyppi.getAvainArvo().add(aa);
         }
 
+        for (Map.Entry<String, String> e : hakemus.getAnswers().getKoulutustausta().entrySet()) {
+            AvainArvoTyyppi aa = new AvainArvoTyyppi();
+            aa.setAvain(e.getKey());
+            aa.setArvo(e.getValue());
+
+            hakemusTyyppi.getAvainArvo().add(aa);
+        }
+
+        for (Map.Entry<String, String> e : hakemus.getAnswers().getLisatiedot().entrySet()) {
+            AvainArvoTyyppi aa = new AvainArvoTyyppi();
+            aa.setAvain(e.getKey());
+            aa.setArvo(e.getValue());
+
+            hakemusTyyppi.getAvainArvo().add(aa);
+        }
+
+        for (Map.Entry<String, String> e : hakemus.getAnswers().getOsaaminen().entrySet()) {
+            AvainArvoTyyppi aa = new AvainArvoTyyppi();
+            aa.setAvain(e.getKey());
+            aa.setArvo(e.getValue());
+
+            hakemusTyyppi.getAvainArvo().add(aa);
+        }
+
+        Set<String> hakutoiveOids = new HashSet<String>();
+        for (HakukohdeTyyppi ht : hakemusTyyppi.getHakutoive()) {
+            hakutoiveOids.add(ht.getHakukohdeOid());
+        }
+
+        List<ValintaperusteetTyyppi> valintaperusteet = proxy.haeValintaperusteet(hakutoiveOids);
+        valintalaskentaService.valintakokeet(hakemusTyyppi, valintaperusteet);
     }
 }

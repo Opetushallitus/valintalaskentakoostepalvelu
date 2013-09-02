@@ -1,13 +1,11 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -17,11 +15,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verify;
 
 /**
  * User: wuoti
@@ -34,13 +30,6 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
 
     private HakukohteenValintaperusteetProxy hakukohteenValintaperusteetProxyMock;
     private ValintalaskentaService valintalaskentaServiceMock;
-
-
-    private final static int PORT = 8096;
-    private final static String HAKEMUS_URL = "http://localhost:" + PORT + "/%1$s";
-
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(PORT);
 
 
     @Before
@@ -57,7 +46,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
 
     private final static String HAKUKOHDE_OID = "1.2.246.562.5.01245_01_114_0125";
 
-    private final static String RESPONSE_JSON =
+    private final static String HAKEMUS_JSON =
             "{\n" +
                     "type: \"Application\",\n" +
                     "applicationSystemId: \"1.2.246.562.5.2013060313080811526781\",\n" +
@@ -244,15 +233,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
 
     @Test
     public void test() {
-        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "hakemusUrl", HAKEMUS_URL);
         final String hakemusOid = "1.2.3.4.5.00000000039";
-
-        stubFor(get(urlEqualTo("/" + hakemusOid))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "text/json")
-                        .withBody(RESPONSE_JSON)));
-
         Set<String> hakukohdeParams = new HashSet<String>(Arrays.asList(HAKUKOHDE_OID));
 
         ValintaperusteetTyyppi vp = new ValintaperusteetTyyppi();
@@ -261,7 +242,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
         List<ValintaperusteetTyyppi> vps = Arrays.asList(vp);
 
         when(hakukohteenValintaperusteetProxyMock.haeValintaperusteet(hakukohdeParams)).thenReturn(vps);
-        laskeValintakoeosallistumisetHakemukselleKomponentti.laske(hakemusOid);
+        laskeValintakoeosallistumisetHakemukselleKomponentti.laske(HAKEMUS_JSON);
 
         ArgumentCaptor<HakemusTyyppi> ac = ArgumentCaptor.forClass(HakemusTyyppi.class);
         verify(valintalaskentaServiceMock).valintakokeet(ac.capture(), anyList());
