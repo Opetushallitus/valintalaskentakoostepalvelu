@@ -3,8 +3,10 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
        xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
        xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
@@ -15,6 +17,10 @@
     <ctx:annotation-config/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintakokeet,fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy"/>
 
+    <util:properties id="valintakoelaskentaProperties">
+        <beans:prop key="hakemus.rest.url">${valintalaskentakoostepalvelu.hakemus.all.rest.url}</beans:prop>
+    </util:properties>
+
     <routeContext id="haunValintakoelaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
             <from uri="direct:kaynnistaHaunValintakoelaskentaReitti"/>
@@ -22,8 +28,14 @@
                 <simple>${body}</simple>
             </setProperty>
             <policy ref="admin">
-                <to uri="bean:haeHaunHakemuksetKomponentti"/>
-                <!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
+                <setHeader headerName="CamelHttpQuery">
+                    <simple>asId=${property.hakuOid}&amp;appState=ACTIVE&amp;appState=INCOMPLETE</simple>
+                </setHeader>
+                <to uri="{{hakemus.rest.url}}" />
+                <setProperty propertyName="hakemuksetJson">
+                    <simple>${body}</simple>
+                </setProperty>
+                <to uri="bean:lueHakemuksetJsonistaKomponentti"/>
                 <split parallelProcessing="false">
                     <simple>body</simple>
                     <to uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
@@ -32,11 +44,21 @@
         </route>
         <route>
             <from uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
-            <setProperty propertyName="hakemusOid">
-                <simple>${body}</simple>
-            </setProperty>
+            <setHeader headerName="CamelHttpUri">
+                <simple>{{hakemus.rest.url}}/${body}</simple>
+            </setHeader>
+            <setHeader headerName="CamelHttpQuery">
+                <simple></simple>
+            </setHeader>
+            <setHeader headerName="CamelHttpMethod">
+                <simple>GET</simple>
+            </setHeader>
             <policy ref="admin">
-                <to uri="bean:laskeValintakoeosallistumisetHakemukselleKomponentti"/>
+                <to uri="{{hakemus.rest.url}}"/>
+                <setProperty propertyName="hakemusJson">
+                    <simple>${body}</simple>
+                </setProperty>
+                <to uri="bean:laskeValintakoeosallistumisetHakemukselleKomponentti" />
             </policy>
         </route>
 
@@ -44,6 +66,7 @@
 
     <camelContext id="haunValintakoelaskentaCamelContext"
                   autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+        <propertyPlaceholder id="valintakoelaskentaContextProperties" location="ref:valintakoelaskentaProperties" />
         <proxy id="haunValintakoelaskentaAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiProxy"
                serviceUrl="direct:kaynnistaHaunValintakoelaskentaReitti"/>
