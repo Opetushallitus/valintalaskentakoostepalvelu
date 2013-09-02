@@ -2,9 +2,12 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
@@ -46,10 +49,13 @@ public class ValintalaskentaTulosExcelKomponentti {
         }
 
         List<Object[]> rows = new ArrayList<Object[]>();
+        LOG.debug("Creating rows for Excel file!");
         rows.add(new Object[] { "Nimi", "Hakemus", "Osallistuminen", "Laskettu pvm" });
         for (HakemusOsallistuminenTyyppi o : tiedotHakukohteelle) {
+            XMLGregorianCalendar calendar = o.getLuontiPvm();
+            Date date = calendar.toGregorianCalendar().getTime();
             rows.add(new Object[] { "" + oidToName.get(o.getHakemusOid()), o.getHakemusOid(),
-                    "" + o.getOsallistuminen().toString(), ExcelExportUtil.DATE_FORMAT.format(o.getLuontiPvm()) });
+                    "" + o.getOsallistuminen().toString(), ExcelExportUtil.DATE_FORMAT.format(date) });
 
         }
 
