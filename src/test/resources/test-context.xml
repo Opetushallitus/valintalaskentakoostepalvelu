@@ -9,4 +9,9 @@
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <bean name="admin" class="fi.vm.sade.valinta.kooste.test.AuthPolicyMock" />
+    <ctx:property-placeholder
+            location="classpath:test.properties,classpath:valintakoelaskenta-test.properties"
+            ignore-resource-not-found="true" properties-ref="defaultProps"/>
+
+    <bean id="defaultProps" class="org.springframework.beans.factory.config.PropertiesFactoryBean" />
 </beans>
