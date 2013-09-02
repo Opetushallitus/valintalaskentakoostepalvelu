@@ -23,9 +23,6 @@ public class ValintakoelaskentaAktivointiResource {
     @Autowired
     private HakukohteenValintakoelaskentaAktivointiProxy hakukohteenValintakoelaskentaAktivointiProxy;
 
-    @Autowired
-    private HaunValintakoelaskentaAktivointiProxy haunValintakoelaskentaAktivointiProxy;
-
     @GET
     @Path("aktivoi")
     public String aktivoiValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid) {
@@ -34,18 +31,6 @@ public class ValintakoelaskentaAktivointiResource {
         } else {
             LOG.info("Valintakoelaskenta for {}", hakukohdeOid);
             hakukohteenValintakoelaskentaAktivointiProxy.aktivoiValintakoelaskenta(hakukohdeOid);
-            return "in progress";
-        }
-    }
-
-    @GET
-    @Path("aktivoiHaunValintakoelaskenta")
-    public String aktivoiHaunValintakoelaskenta(@QueryParam("hakuOid") String hakuOid) {
-        if (StringUtils.isBlank(hakuOid)) {
-            return "get parameter 'hakuOid required";
-        } else {
-            LOG.info("Valintakoelaskenta for haku {}", hakuOid);
-            haunValintakoelaskentaAktivointiProxy.aktivoiValintakoelaskenta(hakuOid);
             return "in progress";
         }
     }
