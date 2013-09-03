@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintakokeet.komponentti;
 
-import com.google.gson.Gson;
 import fi.vm.sade.service.hakemus.schema.AvainArvoTyyppi;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
@@ -8,8 +7,8 @@ import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
 import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.rest.haku.dto.Hakemus;
 import org.apache.camel.language.Simple;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,112 +34,6 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
 
     @Autowired
     private ApplicationResource applicationResource;
-
-    private class Answers {
-        private Map<String, String> henkilotiedot = new HashMap<String, String>();
-        private Map<String, String> lisatiedot = new HashMap<String, String>();
-        private Map<String, String> hakutoiveet = new HashMap<String, String>();
-        private Map<String, String> koulutustausta = new HashMap<String, String>();
-        private Map<String, String> osaaminen = new HashMap<String, String>();
-
-        private Map<String, String> getHenkilotiedot() {
-            return henkilotiedot;
-        }
-
-        private void setHenkilotiedot(Map<String, String> henkilotiedot) {
-            this.henkilotiedot = henkilotiedot;
-        }
-
-        private Map<String, String> getLisatiedot() {
-            return lisatiedot;
-        }
-
-        private void setLisatiedot(Map<String, String> lisatiedot) {
-            this.lisatiedot = lisatiedot;
-        }
-
-        private Map<String, String> getHakutoiveet() {
-            return hakutoiveet;
-        }
-
-        private void setHakutoiveet(Map<String, String> hakutoiveet) {
-            this.hakutoiveet = hakutoiveet;
-        }
-
-        private Map<String, String> getKoulutustausta() {
-            return koulutustausta;
-        }
-
-        private void setKoulutustausta(Map<String, String> koulutustausta) {
-            this.koulutustausta = koulutustausta;
-        }
-
-        private Map<String, String> getOsaaminen() {
-            return osaaminen;
-        }
-
-        private void setOsaaminen(Map<String, String> osaaminen) {
-            this.osaaminen = osaaminen;
-        }
-    }
-
-    private class Hakemus {
-        private String type;
-        private String applicationSystemId;
-        private Answers answers;
-
-        private String oid;
-        private String state;
-        private String personOid;
-
-        private String getType() {
-            return type;
-        }
-
-        private void setType(String type) {
-            this.type = type;
-        }
-
-        private String getApplicationSystemId() {
-            return applicationSystemId;
-        }
-
-        private void setApplicationSystemId(String applicationSystemId) {
-            this.applicationSystemId = applicationSystemId;
-        }
-
-        private Answers getAnswers() {
-            return answers;
-        }
-
-        private void setAnswers(Answers answers) {
-            this.answers = answers;
-        }
-
-        private String getOid() {
-            return oid;
-        }
-
-        private void setOid(String oid) {
-            this.oid = oid;
-        }
-
-        private String getState() {
-            return state;
-        }
-
-        private void setState(String state) {
-            this.state = state;
-        }
-
-        private String getPersonOid() {
-            return personOid;
-        }
-
-        private void setPersonOid(String personOid) {
-            this.personOid = personOid;
-        }
-    }
 
     private final static String ETUNIMET = "Etunimet";
     private final static String SUKUNIMI = "Sukunimi";
@@ -170,9 +63,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
     }
 
     public void laske(@Simple("${property.hakemusOid}") String hakemusOid) {
-        String applicationJson = applicationResource.getApplicationByOid(hakemusOid);
-
-        Hakemus hakemus = new Gson().fromJson(applicationJson, Hakemus.class);
+        Hakemus hakemus = applicationResource.getApplicationByOid(hakemusOid);
 
         HakemusTyyppi hakemusTyyppi = new HakemusTyyppi();
         hakemusTyyppi.setHakemusOid(hakemus.getOid());

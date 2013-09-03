@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
+import com.google.gson.Gson;
 import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.rest.haku.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.HaeHaunHakemuksetKomponentti;
 import org.codehaus.jettison.json.JSONException;
 import org.junit.Before;
@@ -74,10 +76,10 @@ public class HaeHaunHakemuksetKomponenttiTest {
     public void test() throws JSONException {
         final String hakuOid = "hakuOid1";
 
-        when(applicationResourceMock.findApplications(anyString(),anyList(),anyString(),anyString(),eq(hakuOid),anyInt(),anyInt()))
-                .thenReturn(HAKEMUKSET_JSON);
+        when(applicationResourceMock.findApplications(anyString(), anyList(), anyString(), anyString(), eq(hakuOid), anyInt(), anyInt()))
+                .thenReturn(new Gson().fromJson(HAKEMUKSET_JSON, HakemusList.class));
 
-        List <String> oids = haeHaunHakemuksetKomponentti.haeHaunHakemukset(hakuOid);
+        List<String> oids = haeHaunHakemuksetKomponentti.haeHaunHakemukset(hakuOid);
         assertTrue(oids.containsAll(Arrays.asList(HAKEMUS_OIDS)));
     }
 }

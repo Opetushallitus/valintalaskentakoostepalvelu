@@ -1,13 +1,14 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
+import com.google.gson.Gson;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
 import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.rest.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -249,7 +250,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
 
         List<ValintaperusteetTyyppi> vps = Arrays.asList(vp);
 
-        when(applicationResourceMock.getApplicationByOid(eq(hakemusOid))).thenReturn(HAKEMUS_JSON);
+        when(applicationResourceMock.getApplicationByOid(eq(hakemusOid))).thenReturn(new Gson().fromJson(HAKEMUS_JSON, Hakemus.class));
         when(hakukohteenValintaperusteetProxyMock.haeValintaperusteet(hakukohdeParams)).thenReturn(vps);
         laskeValintakoeosallistumisetHakemukselleKomponentti.laske(hakemusOid);
 
