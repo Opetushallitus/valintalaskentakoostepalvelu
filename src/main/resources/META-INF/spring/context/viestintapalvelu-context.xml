@@ -26,37 +26,45 @@
     <routeContext id="viestintapalveluRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
         	<from uri="direct:haeHakemuksetReitti"/>
-        	<setProperty propertyName="hakukohdeOid">
-                <simple>${body.args[0]}</simple>
-            </setProperty>
-            <setProperty propertyName="valintakoeOid">
-                <simple>${body.args[1]}</simple>
-            </setProperty>
-            <to uri="bean:haeHakemusKomponentti"/>
-            <setProperty propertyName="hakemukset">
-                <simple>${body}</simple>
-            </setProperty>
+        	<policy ref="admin">
+	        	<setProperty propertyName="hakukohdeOid">
+	                <simple>${body.args[0]}</simple>
+	            </setProperty>
+	            <setProperty propertyName="valintakoeOid">
+	                <simple>${body.args[1]}</simple>
+	            </setProperty>
+	            <to uri="bean:haeHakemusKomponentti"/>
+	            <setProperty propertyName="hakemukset">
+	                <simple>${body}</simple>
+	            </setProperty>
+            </policy>
         </route>
         <route>
             <from uri="direct:kaynnistaOsoitetarratReitti"/>
-            <to uri="direct:haeHakemuksetReitti"/>
-            <to uri="bean:osoitetarratKomponentti"/>
-            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
-            <to uri="{{viestintapalvelu.url}}/api/v1/addresslabel/pdf"/>
+            <policy ref="admin">
+	            <to uri="direct:haeHakemuksetReitti"/>
+	            <to uri="bean:osoitetarratKomponentti"/>
+	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
+	            <to uri="{{viestintapalvelu.url}}/api/v1/addresslabel/pdf"/>
+            </policy>
         </route>
         <route>
             <from uri="direct:kaynnistaHyvaksymiskirjeetReitti"/>
-            <to uri="direct:haeHakemuksetReitti"/>
-            <to uri="bean:hyvaksymiskirjeetKomponentti"/>
-            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
-            <to uri="{{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/pdf"/>
+            <policy ref="admin">
+	            <to uri="direct:haeHakemuksetReitti"/>
+	            <to uri="bean:hyvaksymiskirjeetKomponentti"/>
+	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
+	            <to uri="{{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/pdf"/>
+            </policy>
         </route>
         <route>
             <from uri="direct:kaynnistaJalkiohjauskirjeetReitti"/>
-            <to uri="direct:haeHakemuksetReitti"/>
-            <to uri="bean:jalkiohjauskirjeetKomponentti"/>
-            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
-            <to uri="{{viestintapalvelu.url}}/api/v1/jalkiohjauskirje/pdf"/>
+            <policy ref="admin">
+	            <to uri="direct:haeHakemuksetReitti"/>
+	            <to uri="bean:jalkiohjauskirjeetKomponentti"/>
+	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
+	            <to uri="{{viestintapalvelu.url}}/api/v1/jalkiohjauskirje/pdf"/>
+	        </policy>
         </route>
     </routeContext>
 
