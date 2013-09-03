@@ -1,17 +1,16 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.google.gson.Gson;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.rest.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.rest.haku.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiResource;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.HaeHaunHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
-import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LueHakemuksetJsonistaKomponentti;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -27,11 +26,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Jussi Jartamo
@@ -453,7 +450,7 @@ public class HaunValintakoelaskentaKoosteReititysTest {
                     "}";
 
     @Autowired
-    private LueHakemuksetJsonistaKomponentti lueHakemuksetJsonistaKomponentti;
+    private HaeHaunHakemuksetKomponentti haeHaunHakemuksetKomponentti;
 
     @Autowired
     private LaskeValintakoeosallistumisetHakemukselleKomponentti laskeValintakoeosallistumisetHakemukselleKomponentti;
@@ -482,9 +479,9 @@ public class HaunValintakoelaskentaKoosteReititysTest {
 
     @Test
     public void test() throws JSONException {
-        when(applicationResourceMock.findApplications(anyString(),anyList(),anyString(),anyString(),eq(HAKU_OID),anyInt(),anyInt())).thenReturn(HAKEMUKSET_RESPONSE_JSON);
-        when(applicationResourceMock.getApplicationByOid(eq(HAKEMUS1_OID))).thenReturn(HAKEMUS1_RESPONSE_JSON);
-        when(applicationResourceMock.getApplicationByOid(eq(HAKEMUS2_OID))).thenReturn(HAKEMUS2_RESPONSE_JSON);
+        when(applicationResourceMock.findApplications(anyString(), anyList(), anyString(), anyString(), eq(HAKU_OID), anyInt(), anyInt())).thenReturn(new Gson().fromJson(HAKEMUKSET_RESPONSE_JSON, HakemusList.class));
+        when(applicationResourceMock.getApplicationByOid(eq(HAKEMUS1_OID))).thenReturn(new Gson().fromJson(HAKEMUS1_RESPONSE_JSON, Hakemus.class));
+        when(applicationResourceMock.getApplicationByOid(eq(HAKEMUS2_OID))).thenReturn(new Gson().fromJson(HAKEMUS2_RESPONSE_JSON, Hakemus.class));
 
         haunValintakoelaskentaAktivointiResource.aktivoiHaunValintakoelaskenta(HAKU_OID);
 

@@ -1,9 +1,10 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
+import com.google.gson.Gson;
 import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LueHakemuksetJsonistaKomponentti;
+import fi.vm.sade.valinta.kooste.rest.haku.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.HaeHaunHakemuksetKomponentti;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -22,16 +23,16 @@ import static org.mockito.Mockito.when;
  * Date: 29.8.2013
  * Time: 14.28
  */
-public class LueHakemuksetJsonistaKomponenttiTest {
+public class HaeHaunHakemuksetKomponenttiTest {
 
-    private LueHakemuksetJsonistaKomponentti lueHakemuksetJsonistaKomponentti = new LueHakemuksetJsonistaKomponentti();
+    private HaeHaunHakemuksetKomponentti haeHaunHakemuksetKomponentti = new HaeHaunHakemuksetKomponentti();
 
     private ApplicationResource applicationResourceMock;
 
     @Before
     public void setUp() {
         applicationResourceMock = mock(ApplicationResource.class);
-        ReflectionTestUtils.setField(lueHakemuksetJsonistaKomponentti, "applicationResource", applicationResourceMock);
+        ReflectionTestUtils.setField(haeHaunHakemuksetKomponentti, "applicationResource", applicationResourceMock);
     }
 
     private final static String[] HAKEMUS_OIDS = new String[]{
@@ -75,10 +76,10 @@ public class LueHakemuksetJsonistaKomponenttiTest {
     public void test() throws JSONException {
         final String hakuOid = "hakuOid1";
 
-        when(applicationResourceMock.findApplications(anyString(),anyList(),anyString(),anyString(),eq(hakuOid),anyInt(),anyInt()))
-                .thenReturn(HAKEMUKSET_JSON);
+        when(applicationResourceMock.findApplications(anyString(), anyList(), anyString(), anyString(), eq(hakuOid), anyInt(), anyInt()))
+                .thenReturn(new Gson().fromJson(HAKEMUKSET_JSON, HakemusList.class));
 
-        List <String> oids = lueHakemuksetJsonistaKomponentti.lueHakemuksetJsonista(hakuOid);
+        List<String> oids = haeHaunHakemuksetKomponentti.haeHaunHakemukset(hakuOid);
         assertTrue(oids.containsAll(Arrays.asList(HAKEMUS_OIDS)));
     }
 }
