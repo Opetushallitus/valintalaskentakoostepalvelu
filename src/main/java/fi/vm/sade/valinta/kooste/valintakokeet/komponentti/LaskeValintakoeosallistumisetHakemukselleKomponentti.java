@@ -7,7 +7,9 @@ import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
+import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
 import org.apache.camel.language.Simple;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
 
     @Autowired
     private ValintalaskentaService valintalaskentaService;
+
+    @Autowired
+    private ApplicationResource applicationResource;
 
     private class Answers {
         private Map<String, String> henkilotiedot = new HashMap<String, String>();
@@ -164,8 +169,10 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
         }
     }
 
-    public void laske(@Simple("${property.hakemusJson}") String hakemusJson) {
-        Hakemus hakemus = new Gson().fromJson(hakemusJson, Hakemus.class);
+    public void laske(@Simple("${property.hakemusOid}") String hakemusOid) {
+        String applicationJson = applicationResource.getApplicationByOid(hakemusOid);
+
+        Hakemus hakemus = new Gson().fromJson(applicationJson, Hakemus.class);
 
         HakemusTyyppi hakemusTyyppi = new HakemusTyyppi();
         hakemusTyyppi.setHakemusOid(hakemus.getOid());

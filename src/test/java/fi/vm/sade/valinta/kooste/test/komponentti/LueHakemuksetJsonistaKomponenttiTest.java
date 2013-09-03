@@ -1,12 +1,20 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
+import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LueHakemuksetJsonistaKomponentti;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 /**
@@ -17,6 +25,14 @@ import static junit.framework.Assert.assertTrue;
 public class LueHakemuksetJsonistaKomponenttiTest {
 
     private LueHakemuksetJsonistaKomponentti lueHakemuksetJsonistaKomponentti = new LueHakemuksetJsonistaKomponentti();
+
+    private ApplicationResource applicationResourceMock;
+
+    @Before
+    public void setUp() {
+        applicationResourceMock = mock(ApplicationResource.class);
+        ReflectionTestUtils.setField(lueHakemuksetJsonistaKomponentti, "applicationResource", applicationResourceMock);
+    }
 
     private final static String[] HAKEMUS_OIDS = new String[]{
             "1.2.3.4.5.00000000039",
@@ -56,8 +72,13 @@ public class LueHakemuksetJsonistaKomponenttiTest {
                     "}";
 
     @Test
-    public void test() {
-        List<String> oids = lueHakemuksetJsonistaKomponentti.lueHakemuksetJsonista(HAKEMUKSET_JSON);
+    public void test() throws JSONException {
+        final String hakuOid = "hakuOid1";
+
+        when(applicationResourceMock.findApplications(anyString(),anyList(),anyString(),anyString(),eq(hakuOid),anyInt(),anyInt()))
+                .thenReturn(HAKEMUKSET_JSON);
+
+        List <String> oids = lueHakemuksetJsonistaKomponentti.lueHakemuksetJsonista(hakuOid);
         assertTrue(oids.containsAll(Arrays.asList(HAKEMUS_OIDS)));
     }
 }
