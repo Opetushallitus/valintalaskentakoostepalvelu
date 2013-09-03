@@ -4,9 +4,12 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
+import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiResource;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LueHakemuksetJsonistaKomponentti;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +45,10 @@ public class HaunValintakoelaskentaKoosteReititysTest {
 
     @Autowired
     private HaunValintakoelaskentaAktivointiResource haunValintakoelaskentaAktivointiResource;
+
+    @Autowired
+    private ApplicationResource applicationResourceMock;
+
     private final static int PORT = 8097;
 
     private final static String HAKU_OID = "hakuOid1";
@@ -445,10 +452,6 @@ public class HaunValintakoelaskentaKoosteReititysTest {
                     "}\n" +
                     "}";
 
-
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(PORT);
-
     @Autowired
     private LueHakemuksetJsonistaKomponentti lueHakemuksetJsonistaKomponentti;
 
@@ -471,29 +474,18 @@ public class HaunValintakoelaskentaKoosteReititysTest {
         return mock(ValintalaskentaService.class);
     }
 
-    @Before
-    public void setUp() {
-        stubFor(get(urlEqualTo("/?asId=" + HAKU_OID + "&appState=ACTIVE&appState=INCOMPLETE"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "text/json")
-                        .withBody(HAKEMUKSET_RESPONSE_JSON)));
-
-        stubFor(get(urlEqualTo("/" + HAKEMUS1_OID))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "text/json")
-                        .withBody(HAKEMUS1_RESPONSE_JSON)));
-
-        stubFor(get(urlEqualTo("/" + HAKEMUS2_OID))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "text/json")
-                        .withBody(HAKEMUS2_RESPONSE_JSON)));
+    @Bean
+    public ApplicationResource getApplicationResourceMock() {
+        return mock(ApplicationResource.class);
     }
 
+
     @Test
-    public void test() {
+    public void test() throws JSONException {
+        when(applicationResourceMock.findApplications(anyString(),anyList(),anyString(),anyString(),eq(HAKU_OID),anyInt(),anyInt())).thenReturn(HAKEMUKSET_RESPONSE_JSON);
+        when(applicationResourceMock.getApplicationByOid(eq(HAKEMUS1_OID))).thenReturn(HAKEMUS1_RESPONSE_JSON);
+        when(applicationResourceMock.getApplicationByOid(eq(HAKEMUS2_OID))).thenReturn(HAKEMUS2_RESPONSE_JSON);
+
         haunValintakoelaskentaAktivointiResource.aktivoiHaunValintakoelaskenta(HAKU_OID);
 
         ArgumentCaptor<HakemusTyyppi> ac = ArgumentCaptor.forClass(HakemusTyyppi.class);

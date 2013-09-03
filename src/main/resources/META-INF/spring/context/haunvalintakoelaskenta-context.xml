@@ -28,13 +28,6 @@
                 <simple>${body}</simple>
             </setProperty>
             <policy ref="admin">
-                <setHeader headerName="CamelHttpQuery">
-                    <simple>asId=${property.hakuOid}&amp;appState=ACTIVE&amp;appState=INCOMPLETE</simple>
-                </setHeader>
-                <to uri="{{hakemus.rest.url}}" />
-                <setProperty propertyName="hakemuksetJson">
-                    <simple>${body}</simple>
-                </setProperty>
                 <to uri="bean:lueHakemuksetJsonistaKomponentti"/>
                 <split parallelProcessing="false">
                     <simple>body</simple>
@@ -44,20 +37,10 @@
         </route>
         <route>
             <from uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
-            <setHeader headerName="CamelHttpUri">
-                <simple>{{hakemus.rest.url}}/${body}</simple>
-            </setHeader>
-            <setHeader headerName="CamelHttpQuery">
-                <simple></simple>
-            </setHeader>
-            <setHeader headerName="CamelHttpMethod">
-                <simple>GET</simple>
-            </setHeader>
+           <setProperty propertyName="hakemusOid">
+               <simple>${body}</simple>
+           </setProperty>
             <policy ref="admin">
-                <to uri="{{hakemus.rest.url}}"/>
-                <setProperty propertyName="hakemusJson">
-                    <simple>${body}</simple>
-                </setProperty>
                 <to uri="bean:laskeValintakoeosallistumisetHakemukselleKomponentti" />
             </policy>
         </route>

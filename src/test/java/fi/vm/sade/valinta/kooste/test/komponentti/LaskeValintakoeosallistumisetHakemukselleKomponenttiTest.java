@@ -4,7 +4,10 @@ import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
+import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,6 +33,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
 
     private HakukohteenValintaperusteetProxy hakukohteenValintaperusteetProxyMock;
     private ValintalaskentaService valintalaskentaServiceMock;
+    private ApplicationResource applicationResourceMock;
 
 
     @Before
@@ -37,11 +41,15 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
         laskeValintakoeosallistumisetHakemukselleKomponentti = new LaskeValintakoeosallistumisetHakemukselleKomponentti();
         hakukohteenValintaperusteetProxyMock = mock(HakukohteenValintaperusteetProxy.class);
         valintalaskentaServiceMock = mock(ValintalaskentaService.class);
+        applicationResourceMock = mock(ApplicationResource.class);
+
 
         ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "proxy",
                 hakukohteenValintaperusteetProxyMock);
         ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "valintalaskentaService",
                 valintalaskentaServiceMock);
+        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "applicationResource",
+                applicationResourceMock);
     }
 
     private final static String HAKUKOHDE_OID = "1.2.246.562.5.01245_01_114_0125";
@@ -232,7 +240,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
                     "}";
 
     @Test
-    public void test() {
+    public void test() throws JSONException {
         final String hakemusOid = "1.2.3.4.5.00000000039";
         Set<String> hakukohdeParams = new HashSet<String>(Arrays.asList(HAKUKOHDE_OID));
 
@@ -241,8 +249,9 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
 
         List<ValintaperusteetTyyppi> vps = Arrays.asList(vp);
 
+        when(applicationResourceMock.getApplicationByOid(eq(hakemusOid))).thenReturn(HAKEMUS_JSON);
         when(hakukohteenValintaperusteetProxyMock.haeValintaperusteet(hakukohdeParams)).thenReturn(vps);
-        laskeValintakoeosallistumisetHakemukselleKomponentti.laske(HAKEMUS_JSON);
+        laskeValintakoeosallistumisetHakemukselleKomponentti.laske(hakemusOid);
 
         ArgumentCaptor<HakemusTyyppi> ac = ArgumentCaptor.forClass(HakemusTyyppi.class);
         verify(valintalaskentaServiceMock).valintakokeet(ac.capture(), anyList());

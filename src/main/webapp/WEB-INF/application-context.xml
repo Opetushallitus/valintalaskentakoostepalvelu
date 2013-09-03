@@ -2,17 +2,19 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
        xmlns:beans="http://www.springframework.org/schema/beans"
-       xmlns:cxf="http://cxf.apache.org/core"
+       xmlns:cxf="http://camel.apache.org/schema/cxf"
        xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:http="http://cxf.apache.org/transports/http/configuration"
        xsi:schemaLocation="
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-           http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd
+           http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
            http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+           http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
            http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd">
 
     <ctx:annotation-config/>
@@ -39,8 +41,10 @@
     <!--<import resource="classpath:authentication-client.xml"/>-->
 	 
     <bean id="ticketInterceptor" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor" />
- 	
- 	
+    <bean id="ticketInterceptorRest" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest" />
+
+
+
     <authorizationPolicy id="admin" access="isAuthenticated()"
                          authenticationManager="authenticationManager"
                          accessDecisionManager="accessDecisionManager"
@@ -59,7 +63,7 @@
 
 
     <!-- Configure CXF bus to contain ticketInterceptor -->
-    <!-- 
+    <!--
     <cxf:bus>
         <cxf:outInterceptors>
             <ref bean="ticketInterceptor" />
@@ -87,6 +91,15 @@
         </jaxws:outInterceptors>
 	</jaxws:client>
 
+    <jaxrs:client id="HakemusServiceRestClient"
+                  address="${valintalaskentakoostepalvelu.hakemus.rest.url}"
+                  serviceClass="fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource"
+                  inheritHeaders="true">
+        <jaxrs:outInterceptors>
+            <ref bean="ticketInterceptorRest" />
+        </jaxrs:outInterceptors>
+    </jaxrs:client>
+
     <jaxws:client id="ValintalaskentaServiceClient"
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
                   address="${valintalaskentakoostepalvelu.valintalaskentaService.url}" >
@@ -110,10 +123,6 @@
             <ref bean="ticketInterceptor" />
         </jaxws:outInterceptors>
     </jaxws:client>
-
-
-
-
 
 
     <jaxws:client id="sijoitteluService"
