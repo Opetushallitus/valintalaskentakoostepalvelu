@@ -1,10 +1,13 @@
 package fi.vm.sade.valinta.kooste.rest.haku.dto;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 /**
  * User: wuoti
  * Date: 3.9.2013
  * Time: 14.42
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Hakemus {
     private String type;
     private String applicationSystemId;

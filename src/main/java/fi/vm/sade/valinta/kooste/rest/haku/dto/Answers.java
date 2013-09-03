@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.rest.haku.dto;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +10,7 @@ import java.util.Map;
  * Date: 3.9.2013
  * Time: 14.43
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Answers {
     private Map<String, String> henkilotiedot = new HashMap<String, String>();
     private Map<String, String> lisatiedot = new HashMap<String, String>();

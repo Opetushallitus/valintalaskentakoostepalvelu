@@ -74,7 +74,7 @@
         </cxf:inFaultInterceptors>
     </cxf:bus>
     -->
-    
+
     <jaxws:client id="ValintaperusteServiceClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
                   address="${valintalaskentakoostepalvelu.valintaperusteService.url}" >
@@ -98,6 +98,9 @@
         <jaxrs:outInterceptors>
             <ref bean="ticketInterceptorRest" />
         </jaxrs:outInterceptors>
+        <jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+        </jaxrs:providers>
     </jaxrs:client>
 
     <jaxws:client id="ValintalaskentaServiceClient"

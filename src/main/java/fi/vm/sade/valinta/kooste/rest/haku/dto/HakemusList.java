@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.rest.haku.dto;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +10,7 @@ import java.util.List;
  * Date: 3.9.2013
  * Time: 14.40
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HakemusList {
     private Integer totalCount;
     private List<SuppeaHakemus> results = new ArrayList<SuppeaHakemus>();
