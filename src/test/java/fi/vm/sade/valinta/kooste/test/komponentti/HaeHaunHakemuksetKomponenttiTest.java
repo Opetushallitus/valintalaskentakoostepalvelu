@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
 import com.google.gson.Gson;
-import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.rest.haku.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.HaeHaunHakemuksetKomponentti;
 import org.codehaus.jettison.json.JSONException;
 import org.junit.Before;

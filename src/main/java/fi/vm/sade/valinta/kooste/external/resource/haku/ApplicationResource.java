@@ -1,7 +1,7 @@
-package fi.vm.sade.valinta.kooste.rest.haku;
+package fi.vm.sade.valinta.kooste.external.resource.haku;
 
-import fi.vm.sade.valinta.kooste.rest.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.rest.haku.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import javax.ws.rs.*;

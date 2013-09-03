@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintakokeet.komponentti;
 
-import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.rest.haku.dto.HakemusList;
-import fi.vm.sade.valinta.kooste.rest.haku.dto.SuppeaHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +26,8 @@ public class HaeHaunHakemuksetKomponentti {
     private ApplicationResource applicationResource;
 
     public List<String> haeHaunHakemukset(@Simple("${property.hakuOid}") String hakuOid) {
+        LOG.info("Haetaan haun " + hakuOid + " hakemukset");
+
         HakemusList hakemusList = applicationResource.findApplications(null, null, null, null, hakuOid, 0,
                 Integer.MAX_VALUE);
 
