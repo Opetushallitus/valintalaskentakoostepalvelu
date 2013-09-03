@@ -1,17 +1,13 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiResource;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.HaeHaunHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
-import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LueHakemuksetJsonistaKomponentti;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -27,7 +23,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.*;
@@ -453,7 +448,7 @@ public class HaunValintakoelaskentaKoosteReititysTest {
                     "}";
 
     @Autowired
-    private LueHakemuksetJsonistaKomponentti lueHakemuksetJsonistaKomponentti;
+    private HaeHaunHakemuksetKomponentti haeHaunHakemuksetKomponentti;
 
     @Autowired
     private LaskeValintakoeosallistumisetHakemukselleKomponentti laskeValintakoeosallistumisetHakemukselleKomponentti;
