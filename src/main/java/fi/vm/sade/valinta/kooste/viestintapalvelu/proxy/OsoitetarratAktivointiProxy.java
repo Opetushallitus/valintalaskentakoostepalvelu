@@ -9,8 +9,8 @@ import org.apache.camel.Property;
  * @author Jussi Jartamo
  * 
  */
-public interface JalkiohjauskirjeBatchAktivointiProxy {
+public interface OsoitetarratAktivointiProxy {
 
-    String jalkiohjauskirjeetAktivoi(@Property("hakukohdeOid") String hakukohdeOid,
+    String osoitetarratAktivointi(@Property("hakukohdeOid") String hakukohdeOid,
             @Property("valintakoeOid") List<String> valintakoeOid);
 }

@@ -25,7 +25,7 @@ import com.google.common.io.Resources;
 import fi.vm.sade.service.hakemus.HakemusService;
 import fi.vm.sade.service.valintatiedot.ValintatietoService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.HaeHakemusKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.AddressLabelBatchAktivointiProxy;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.OsoitetarratAktivointiProxy;
 
 /**
  * 
@@ -54,7 +54,7 @@ public class ViestintapalveluAktivointiReititysTest {
     public static class KunYhteydenottoViestintapalveluun extends AbstractJUnit4SpringContextTests {
 
         @Autowired
-        AddressLabelBatchAktivointiProxy addressLabelBatchProxy;
+        OsoitetarratAktivointiProxy addressLabelBatchProxy;
 
         @Bean(name = "haeHakemusKomponentti")
         public HaeHakemusKomponentti getValintaperusteService() {
@@ -73,7 +73,7 @@ public class ViestintapalveluAktivointiReititysTest {
 
         @Test
         public void osoitteidenValitysToimiiOikeinJaSaadaanPalautetta() throws IOException {
-            assertTrue(URI.create(addressLabelBatchProxy.addressLabelBatchAktivointi(
+            assertTrue(URI.create(addressLabelBatchProxy.osoitetarratAktivointi(
                     Resources.toString(Resources.getResource(ADDRESSLABEL_BATCH_JSON), Charsets.UTF_8),
                     Arrays.asList(""))) != null);
         }

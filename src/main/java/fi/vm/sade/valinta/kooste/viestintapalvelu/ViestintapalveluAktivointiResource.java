@@ -18,9 +18,9 @@ import org.springframework.stereotype.Controller;
 import com.google.gson.Gson;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.LatausUrl;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.AddressLabelBatchAktivointiProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksymiskirjeBatchAktivointiProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.JalkiohjauskirjeBatchAktivointiProxy;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.OsoitetarratAktivointiProxy;
 
 /**
  * 
@@ -38,7 +38,7 @@ public class ViestintapalveluAktivointiResource {
     private static final Logger LOG = LoggerFactory.getLogger(ViestintapalveluAktivointiResource.class);
 
     @Autowired
-    private AddressLabelBatchAktivointiProxy addressLabelBatchProxy;
+    private OsoitetarratAktivointiProxy addressLabelBatchProxy;
 
     @GET
     @Path("osoitetarrat/aktivoi")
@@ -48,8 +48,8 @@ public class ViestintapalveluAktivointiResource {
         try {
             return Response
                     .status(Status.OK)
-                    .entity(new Gson().toJson(new LatausUrl(addressLabelBatchProxy.addressLabelBatchAktivointi(
-                            hakukohdeOid, valintakoeOids)))).build();
+                    .entity(new Gson().toJson(new LatausUrl(addressLabelBatchProxy.osoitetarratAktivointi(hakukohdeOid,
+                            valintakoeOids)))).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
@@ -61,11 +61,11 @@ public class ViestintapalveluAktivointiResource {
     @GET
     @Path("jalkiohjauskirjeet/aktivoi")
     @Produces("application/json")
-    public Response aktivoiJalkiohjauskirjeidenLuonti(String jalkiohjauskirjeBatchJson) {
+    public Response aktivoiJalkiohjauskirjeidenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("valintakoeOid") List<String> valintakoeOids) {
         try {
-            LOG.debug("JalkiohjauskirjeBatch json {}", jalkiohjauskirjeBatchJson);
-            URI contentLocation = URI.create(jalkiohjauskirjeBatchProxy
-                    .jalkiohjauskirjeBatchAktivoi(jalkiohjauskirjeBatchJson));
+            URI contentLocation = URI.create(jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(hakukohdeOid,
+                    valintakoeOids));
             return Response.status(Status.ACCEPTED).contentLocation(contentLocation).entity(contentLocation.toString())
                     .build();
             /*
@@ -87,11 +87,11 @@ public class ViestintapalveluAktivointiResource {
     @GET
     @Path("hyvaksymiskirjeet/aktivoi")
     @Produces("application/json")
-    public Response aktivoiHyvaksymiskirjeidenLuonti(String hyvaksymiskirjeBatchJson) {
+    public Response aktivoiHyvaksymiskirjeidenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("valintakoeOid") List<String> valintakoeOids) {
         try {
-            LOG.debug("HyvaksymiskirjeBatch json {}", hyvaksymiskirjeBatchJson);
-            URI contentLocation = URI.create(hyvaksymiskirjeBatchProxy
-                    .hyvaksymiskirjeBatchAktivointi(hyvaksymiskirjeBatchJson));
+            URI contentLocation = URI.create(hyvaksymiskirjeBatchProxy.hyvaksymiskirjeetAktivointi(hakukohdeOid,
+                    valintakoeOids));
             return Response.status(Status.ACCEPTED).contentLocation(contentLocation).entity(contentLocation.toString())
                     .build();
             /*

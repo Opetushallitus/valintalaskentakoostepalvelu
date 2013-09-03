@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,6 +39,8 @@ public class OsoitetarratKomponentti {
     public String teeOsoitetarrat(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
             @Simple("${property.valintakoeOid}") List<String> valintakoeOids,
             @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
+        LOG.debug("Osoitetarrat for hakukohde '{}' and valintakokeet '{}'",
+                new Object[] { hakukohdeOid, Arrays.toString(valintakoeOids.toArray()) });
         List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService.haeValintatiedotHakukohteelle(
                 valintakoeOids, hakukohdeOid);
 

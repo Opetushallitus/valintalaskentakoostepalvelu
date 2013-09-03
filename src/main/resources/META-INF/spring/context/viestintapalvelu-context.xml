@@ -25,24 +25,12 @@
 
     <routeContext id="viestintapalveluRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
-        	<from uri="direct:haeHakemuksetReitti"/>
-        	<policy ref="admin">
-	        	<setProperty propertyName="hakukohdeOid">
-	                <simple>${body.args[0]}</simple>
-	            </setProperty>
-	            <setProperty propertyName="valintakoeOid">
-	                <simple>${body.args[1]}</simple>
-	            </setProperty>
-	            <to uri="bean:haeHakemusKomponentti"/>
-	            <setProperty propertyName="hakemukset">
-	                <simple>${body}</simple>
-	            </setProperty>
-            </policy>
-        </route>
-        <route>
             <from uri="direct:kaynnistaOsoitetarratReitti"/>
             <policy ref="admin">
-	            <to uri="direct:haeHakemuksetReitti"/>
+	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
+	            <setProperty propertyName="valintakoeOid"><simple>${body.args[1]}</simple></setProperty>
+	            <to uri="bean:haeHakemusKomponentti"/>
+	            <setProperty propertyName="hakemukset"><simple>${body}</simple></setProperty>
 	            <to uri="bean:osoitetarratKomponentti"/>
 	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
 	            <to uri="{{viestintapalvelu.url}}/api/v1/addresslabel/pdf"/>
@@ -51,7 +39,10 @@
         <route>
             <from uri="direct:kaynnistaHyvaksymiskirjeetReitti"/>
             <policy ref="admin">
-	            <to uri="direct:haeHakemuksetReitti"/>
+	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
+	            <setProperty propertyName="valintakoeOid"><simple>${body.args[1]}</simple></setProperty>
+	            <to uri="bean:haeHakemusKomponentti"/>
+	            <setProperty propertyName="hakemukset"><simple>${body}</simple></setProperty>
 	            <to uri="bean:hyvaksymiskirjeetKomponentti"/>
 	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
 	            <to uri="{{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/pdf"/>
@@ -60,7 +51,10 @@
         <route>
             <from uri="direct:kaynnistaJalkiohjauskirjeetReitti"/>
             <policy ref="admin">
-	            <to uri="direct:haeHakemuksetReitti"/>
+	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
+	            <setProperty propertyName="valintakoeOid"><simple>${body.args[1]}</simple></setProperty>
+	            <to uri="bean:haeHakemusKomponentti"/>
+	            <setProperty propertyName="hakemukset"><simple>${body}</simple></setProperty>
 	            <to uri="bean:jalkiohjauskirjeetKomponentti"/>
 	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
 	            <to uri="{{viestintapalvelu.url}}/api/v1/jalkiohjauskirje/pdf"/>
@@ -78,7 +72,7 @@
                serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.JalkiohjauskirjeBatchAktivointiProxy"
                serviceUrl="direct:kaynnistaJalkiohjauskirjeetReitti"/>
         <proxy id="addressLabelBatchAktivointiRajapinta"
-               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.AddressLabelBatchAktivointiProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.OsoitetarratAktivointiProxy"
                serviceUrl="direct:kaynnistaOsoitetarratReitti"/>
         <routeContextRef ref="viestintapalveluRoutes"/>
     </camelContext>

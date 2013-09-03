@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -40,6 +41,9 @@ public class HyvaksymiskirjeetKomponentti {
     public String teeHyvaksymiskirjeet(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
             @Simple("${property.valintakoeOid}") List<String> valintakoeOids,
             @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
+        LOG.debug("Hyvaksymiskirjeet for hakukohde '{}' and valintakokeet '{}'",
+                new Object[] { hakukohdeOid, Arrays.toString(valintakoeOids.toArray()) });
+
         List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService.haeValintatiedotHakukohteelle(
                 valintakoeOids, hakukohdeOid);
 
