@@ -10,7 +10,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.PropertySource;
@@ -20,9 +22,10 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
-import fi.vm.sade.valinta.kooste.viestintapalvelu.AddressLabelBatchAktivointiProxy;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.HyvaksymiskirjeBatchAktivointiProxy;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.JalkiohjauskirjeBatchAktivointiProxy;
+import fi.vm.sade.service.hakemus.HakemusService;
+import fi.vm.sade.service.valintatiedot.ValintatietoService;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.HaeHakemusKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.AddressLabelBatchAktivointiProxy;
 
 /**
  * 
@@ -53,31 +56,49 @@ public class ViestintapalveluAktivointiReititysTest {
         @Autowired
         AddressLabelBatchAktivointiProxy addressLabelBatchProxy;
 
+        @Bean(name = "haeHakemusKomponentti")
+        public HaeHakemusKomponentti getValintaperusteService() {
+            return new HaeHakemusKomponentti();
+        }
+
+        @Bean
+        public ValintatietoService getValintatietoService() {
+            return Mockito.mock(ValintatietoService.class);
+        }
+
+        @Bean
+        public HakemusService getHakemusService() {
+            return Mockito.mock(HakemusService.class);
+        }
+
         @Test
         public void osoitteidenValitysToimiiOikeinJaSaadaanPalautetta() throws IOException {
             assertTrue(URI.create(addressLabelBatchProxy.addressLabelBatchAktivointi(
                     Resources.toString(Resources.getResource(ADDRESSLABEL_BATCH_JSON), Charsets.UTF_8),
                     Arrays.asList(""))) != null);
         }
-
-        @Autowired
-        HyvaksymiskirjeBatchAktivointiProxy hyvaksymiskirjeBatchProxy;
-
-        @Test
-        public void hoitaaHyvaksymiskirjeenUudelleenohjauksenDokumenttiResurssiinOikein() throws IOException {
-            assertTrue(URI.create(hyvaksymiskirjeBatchProxy.hyvaksymiskirjeBatchAktivointi(Resources.toString(
-                    Resources.getResource(HYVAKSYMISKIRJE_BATCH_JSON), Charsets.UTF_8))) != null);
-        }
-
-        @Autowired
-        JalkiohjauskirjeBatchAktivointiProxy jalkiohjauskirjeBatchProxy;
-
-        @Test
-        public void hoitaaJalkiohjauskirjeenUudelleenohjauksenDokumenttiResurssiinOikein() throws IOException {
-            assertTrue(URI.create(jalkiohjauskirjeBatchProxy.jalkiohjauskirjeBatchAktivoi(Resources.toString(
-                    Resources.getResource(JALKIOHJAUSKIRJE_BATCH_JSON), Charsets.UTF_8))) != null);
-        }
-
+        /*
+         * @Autowired HyvaksymiskirjeBatchAktivointiProxy
+         * hyvaksymiskirjeBatchProxy;
+         * 
+         * @Test public void
+         * hoitaaHyvaksymiskirjeenUudelleenohjauksenDokumenttiResurssiinOikein()
+         * throws IOException { assertTrue(URI.create(hyvaksymiskirjeBatchProxy.
+         * hyvaksymiskirjeBatchAktivointi(Resources.toString(
+         * Resources.getResource(HYVAKSYMISKIRJE_BATCH_JSON), Charsets.UTF_8)))
+         * != null); }
+         * 
+         * @Autowired JalkiohjauskirjeBatchAktivointiProxy
+         * jalkiohjauskirjeBatchProxy;
+         * 
+         * @Test public void
+         * hoitaaJalkiohjauskirjeenUudelleenohjauksenDokumenttiResurssiinOikein
+         * () throws IOException {
+         * assertTrue(URI.create(jalkiohjauskirjeBatchProxy
+         * .jalkiohjauskirjeBatchAktivoi(Resources.toString(
+         * Resources.getResource(JALKIOHJAUSKIRJE_BATCH_JSON), Charsets.UTF_8)))
+         * != null); }
+         */
     }
 
 }

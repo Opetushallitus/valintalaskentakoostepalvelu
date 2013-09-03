@@ -18,21 +18,24 @@ import fi.vm.sade.service.valintatiedot.ValintatietoService;
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteHakemukseltaUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
-@Component("haeOsallistuneetHakemuksilleKomponentti")
-public class HaeOsallistuneetHakemuksilleKomponentti {
+@Component("osoitetarratKomponentti")
+public class OsoitetarratKomponentti {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HaeOsallistuneetHakemuksilleKomponentti.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OsoitetarratKomponentti.class);
 
     @Autowired
     private ValintatietoService valintatietoService;
 
-    public String haeOsallistuneetHakemuksille(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
+    public String teeOsoitetarrat(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
             @Simple("${property.valintakoeOid}") List<String> valintakoeOids,
             @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
         List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService.haeValintatiedotHakukohteelle(

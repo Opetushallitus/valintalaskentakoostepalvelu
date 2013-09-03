@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
+package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
 import java.util.List;
 

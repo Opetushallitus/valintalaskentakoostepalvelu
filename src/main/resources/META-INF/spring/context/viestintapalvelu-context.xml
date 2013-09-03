@@ -16,6 +16,7 @@
     <ctx:annotation-config/>
     <ctx:property-placeholder />
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
 
 	<util:properties id="viestintapalveluProperties">
@@ -24,8 +25,8 @@
 
     <routeContext id="viestintapalveluRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
-            <from uri="direct:kaynnistaViestintapalveluAddressLabelBatchReitti"/>
-            <setProperty propertyName="hakukohdeOid">
+        	<from uri="direct:haeHakemuksetReitti"/>
+        	<setProperty propertyName="hakukohdeOid">
                 <simple>${body.args[0]}</simple>
             </setProperty>
             <setProperty propertyName="valintakoeOid">
@@ -35,35 +36,27 @@
             <setProperty propertyName="hakemukset">
                 <simple>${body}</simple>
             </setProperty>
-            <to uri="bean:haeOsallistuneetHakemuksilleKomponentti"/>
+        </route>
+        <route>
+            <from uri="direct:kaynnistaOsoitetarratReitti"/>
+            <to uri="direct:haeHakemuksetReitti"/>
+            <to uri="bean:osoitetarratKomponentti"/>
             <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
             <to uri="{{viestintapalvelu.url}}/api/v1/addresslabel/pdf"/>
         </route>
         <route>
-            <from uri="direct:kaynnistaViestintapalveluHyvaksymiskirjeBatchReitti"/>
+            <from uri="direct:kaynnistaHyvaksymiskirjeetReitti"/>
+            <to uri="direct:haeHakemuksetReitti"/>
+            <to uri="bean:hyvaksymiskirjeetKomponentti"/>
             <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
             <to uri="{{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/pdf"/>
-            <!-- 
-            EI PALAUTETAKKAAN KOKO PDF-TIEDOSTOA VAAN ANNETAAN URI RESURSSIIN
-            <setHeader headerName="CamelHttpMethod"><constant>GET</constant></setHeader>
-            <setHeader headerName="CamelHttpUri"><simple>${body}</simple></setHeader>
-            <setHeader headerName="Content-Type"><constant>application/pdf</constant></setHeader>
-            <setBody><constant></constant></setBody>
-            <to uri="{{viestintapalvelu.url}}"/>
-             -->
         </route>
         <route>
-            <from uri="direct:kaynnistaViestintapalveluJalkiohjauskirjeBatchReitti"/>
+            <from uri="direct:kaynnistaJalkiohjauskirjeetReitti"/>
+            <to uri="direct:haeHakemuksetReitti"/>
+            <to uri="bean:jalkiohjauskirjeetKomponentti"/>
             <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
             <to uri="{{viestintapalvelu.url}}/api/v1/jalkiohjauskirje/pdf"/>
-            <!-- 
-            EI PALAUTETAKKAAN KOKO PDF-TIEDOSTOA VAAN ANNETAAN URI RESURSSIIN
-            <setHeader headerName="CamelHttpMethod"><constant>GET</constant></setHeader>
-            <setHeader headerName="CamelHttpUri"><simple>${body}</simple></setHeader>
-            <setHeader headerName="Content-Type"><constant>application/pdf</constant></setHeader>
-            <setBody><constant></constant></setBody>
-            <to uri="{{viestintapalvelu.url}}"/>
-             -->
         </route>
     </routeContext>
 
@@ -71,14 +64,14 @@
                   autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
         <propertyPlaceholder id="viestintapalveluContextProperties" location="ref:viestintapalveluProperties" />
         <proxy id="hyvaksymiskirjeBatchAktivointiRajapinta"
-               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.HyvaksymiskirjeBatchAktivointiProxy"
-               serviceUrl="direct:kaynnistaViestintapalveluHyvaksymiskirjeBatchReitti"/>
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksymiskirjeBatchAktivointiProxy"
+               serviceUrl="direct:kaynnistaHyvaksymiskirjeetReitti"/>
         <proxy id="jalkiohjauskirjeBatchAktivointiRajapinta"
-               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.JalkiohjauskirjeBatchAktivointiProxy"
-               serviceUrl="direct:kaynnistaViestintapalveluJalkiohjauskirjeBatchReitti"/>
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.JalkiohjauskirjeBatchAktivointiProxy"
+               serviceUrl="direct:kaynnistaJalkiohjauskirjeetReitti"/>
         <proxy id="addressLabelBatchAktivointiRajapinta"
-               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.AddressLabelBatchAktivointiProxy"
-               serviceUrl="direct:kaynnistaViestintapalveluAddressLabelBatchReitti"/>
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.AddressLabelBatchAktivointiProxy"
+               serviceUrl="direct:kaynnistaOsoitetarratReitti"/>
         <routeContextRef ref="viestintapalveluRoutes"/>
     </camelContext>
 </beans>

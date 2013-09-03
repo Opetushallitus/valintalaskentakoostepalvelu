@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.viestintapalvelu;
+package fi.vm.sade.valinta.kooste.viestintapalvelu.proxy;
 
 /**
  * 
