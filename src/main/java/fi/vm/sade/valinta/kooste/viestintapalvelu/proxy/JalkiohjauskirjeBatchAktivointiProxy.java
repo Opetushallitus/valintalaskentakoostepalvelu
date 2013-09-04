@@ -1,9 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.proxy;
 
-import java.util.List;
-
-import org.apache.camel.Property;
-
 /**
  * 
  * @author Jussi Jartamo
@@ -11,6 +7,5 @@ import org.apache.camel.Property;
  */
 public interface JalkiohjauskirjeBatchAktivointiProxy {
 
-    String jalkiohjauskirjeetAktivoi(@Property("hakukohdeOid") String hakukohdeOid,
-            @Property("valintakoeOid") List<String> valintakoeOid);
+    String jalkiohjauskirjeetAktivoi(String hakukohdeOid, String hakuOid, Long sijoitteluajoId);
 }

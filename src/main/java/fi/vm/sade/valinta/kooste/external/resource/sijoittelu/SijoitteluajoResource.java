@@ -1,0 +1,19 @@
+package fi.vm.sade.valinta.kooste.external.resource.sijoittelu;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.Hakukohde;
+
+@Path("sijoitteluajo")
+public interface SijoitteluajoResource {
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{sijoitteluajoId}/hakukohde/{hakukohdeOid}")
+    public Hakukohde getHakukohdeBySijoitteluajo(@PathParam("sijoitteluajoId") Long sijoitteluajoId,
+            @PathParam("hakukohdeOid") String hakukohdeOid);
+}
