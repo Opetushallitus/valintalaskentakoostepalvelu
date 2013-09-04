@@ -8,7 +8,6 @@ import java.util.Map;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
@@ -24,8 +23,7 @@ public class ValintalaskennanTulosExcelKomponentti {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValintalaskennanTulosExcelKomponentti.class);
 
-    @Autowired
-    private ValintalaskentaTulosService valintatietoService;
+    // private ValintalaskentaTulosService valintatietoService;
 
     public InputStream luoTuloksetXlsMuodossa(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
             @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
