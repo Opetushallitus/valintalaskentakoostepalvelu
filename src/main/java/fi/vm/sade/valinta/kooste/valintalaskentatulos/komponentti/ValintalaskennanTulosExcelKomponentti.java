@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintatiedot.ValintatietoService;
 
 /**
  * 
@@ -26,7 +25,7 @@ public class ValintalaskennanTulosExcelKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(ValintalaskennanTulosExcelKomponentti.class);
 
     @Autowired
-    private ValintatietoService valintatietoService;
+    private ValintalaskentaTulosService valintatietoService;
 
     public InputStream luoTuloksetXlsMuodossa(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
             @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
