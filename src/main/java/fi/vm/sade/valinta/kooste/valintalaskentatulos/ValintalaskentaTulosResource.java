@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosProxy;
 
 /**
@@ -26,7 +27,8 @@ import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulos
 public class ValintalaskentaTulosResource {
 
     public final static MediaType APPLICATION_VND_MS_EXCEL = new MediaType("application", "vnd.ms-excel");
-
+    @Autowired
+    private ValintalaskentaTulosExcelProxy valintalaskentaTulosProxy;
     @Autowired
     private ValintalaskentaTulosProxy valintalaskentaTulos;
 
@@ -44,4 +46,19 @@ public class ValintalaskentaTulosResource {
                                                   // APPLICATION_VND_MS_EXCEL).build();
         }
     }
+
+    @GET
+    @Path("valintalaskentatulos/aktivoi")
+    @Produces("application/vnd.ms-excel")
+    public Response haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid) {
+        try {
+            InputStream input = valintalaskentaTulosProxy.haeValintalaskennanTuloksetXlsMuodossa(hakukohdeOid);
+            return Response.ok(input, APPLICATION_VND_MS_EXCEL)
+                    .header("content-disposition", "inline; filename=valintalaskentatulos.xls").build();
+        } catch (Exception e) {
+            return Response.serverError().build();// ok(input,
+                                                  // APPLICATION_VND_MS_EXCEL).build();
+        }
+    }
+
 }

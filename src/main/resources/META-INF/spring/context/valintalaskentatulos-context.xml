@@ -30,6 +30,17 @@
 	            <to uri="bean:luoTuloksetXlsMuodossa"/>
             </policy>
         </route>
+        <route>
+            <from uri="direct:kaynnistaValintalaskennanTulostenLuontiXlsMuodossaReitti"/>
+            <policy ref="admin">
+	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
+	            <to uri="bean:haeHakemusKomponentti"/>
+	            <setProperty propertyName="hakemukset">
+	                <simple>${body}</simple>
+	            </setProperty>
+	            <to uri="bean:luoValintalaskennanTuloksetXlsMuodossa"/>
+            </policy>
+        </route>
     </routeContext>
 
     <camelContext id="valintalaskentaTulosCamelContext"
@@ -38,6 +49,9 @@
         <proxy id="tulostenLuontiXlsMuodossaProxy"
                serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosProxy"
                serviceUrl="direct:kaynnistaTulostenLuontiXlsMuodossaReitti"/>
+        <proxy id="valintalaskennanTulostenLuontiXlsMuodossaProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy"
+               serviceUrl="direct:kaynnistaValintalaskennanTulostenLuontiXlsMuodossaReitti"/>
         <routeContextRef ref="valintalaskentaTulosRoutes"/>
     </camelContext>
 </beans>
