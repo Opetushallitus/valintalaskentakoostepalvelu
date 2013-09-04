@@ -47,6 +47,9 @@ public class HyvaksymiskirjeetKomponentti {
     @Autowired
     private HakukohdeResource tarjontaResource;
 
+    @Autowired
+    fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource laskentaResource;
+
     private static final String KIELIKOODI = "FI";
 
     public String teeHyvaksymiskirjeet(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
@@ -66,10 +69,10 @@ public class HyvaksymiskirjeetKomponentti {
         HakukohdeNimiRDTO nimi = haeHakukohdeNimi(hakukohdeOid, cache);
         List<Kirje> kirjeet = new ArrayList<Kirje>();
         Map<String, HakemusTyyppi> hake = convertToHakemusOidMap(hakemukset);
-        Map<String, Hakemus> hyvaksytytHakemukset = filterHyvaksytytHakemukset(hakukohde);
+        List<Hakemus> hyvaksytytHakemukset = filterHyvaksytytHakemukset(hakukohde);
         final String koulu = extractHakukohdeNimi(nimi, KIELIKOODI);
         final String koulutus = extractHakukohdeNimi(nimi, KIELIKOODI);
-        for (Hakemus hakemus : hyvaksytytHakemukset.values()) {
+        for (Hakemus hakemus : hyvaksytytHakemukset) {
             Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hake.get(hakemus.getHakemusOid()));
 
             List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
@@ -114,12 +117,12 @@ public class HyvaksymiskirjeetKomponentti {
         return hyvaksymiskirjeet;
     }
 
-    private Map<String, Hakemus> filterHyvaksytytHakemukset(Hakukohde hakukohde) {
-        Map<String, Hakemus> h = new HashMap<String, Hakemus>();
+    private List<Hakemus> filterHyvaksytytHakemukset(Hakukohde hakukohde) {
+        List<Hakemus> h = new ArrayList<Hakemus>();
         for (Valintatapajono jono : hakukohde.getValintatapajonot()) {
             for (Hakemus hakemus : jono.getHakemukset()) {
                 if (HakemuksenTila.HYVAKSYTTY.equals(hakemus.getTila())) {
-                    h.put(hakemus.getHakemusOid(), hakemus);
+                    h.add(hakemus);// .getHakemusOid(), hakemus);
                 }
             }
         }

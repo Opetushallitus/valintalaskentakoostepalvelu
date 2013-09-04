@@ -124,6 +124,18 @@
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
         </jaxrs:providers>
     </jaxrs:client>
+    <jaxrs:client id="ValintalaskentaServiceRestClient"
+                  address="${valintalaskentakoostepalvelu.valintalaskenta.rest.url}"
+                  serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource"
+                  inheritHeaders="true">
+        <jaxrs:outInterceptors>
+            <ref bean="ticketInterceptorRest" />
+        </jaxrs:outInterceptors>
+        <jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+        </jaxrs:providers>
+    </jaxrs:client>
+    
     
     <jaxws:client id="ValintalaskentaServiceClient"
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
