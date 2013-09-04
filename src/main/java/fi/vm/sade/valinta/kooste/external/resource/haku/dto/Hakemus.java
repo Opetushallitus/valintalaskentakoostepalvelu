@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.rest.haku.dto;
+package fi.vm.sade.valinta.kooste.external.resource.haku.dto;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 

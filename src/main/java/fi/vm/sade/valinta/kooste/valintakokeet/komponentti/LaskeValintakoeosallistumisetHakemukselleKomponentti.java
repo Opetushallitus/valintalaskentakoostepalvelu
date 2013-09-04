@@ -6,8 +6,8 @@ import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
-import fi.vm.sade.valinta.kooste.rest.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.rest.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +63,8 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
     }
 
     public void laske(@Simple("${property.hakemusOid}") String hakemusOid) {
+        LOG.info("Lasketaan valintakoeosallistumiset hakemukselle " + hakemusOid);
+
         Hakemus hakemus = applicationResource.getApplicationByOid(hakemusOid);
 
         HakemusTyyppi hakemusTyyppi = new HakemusTyyppi();
