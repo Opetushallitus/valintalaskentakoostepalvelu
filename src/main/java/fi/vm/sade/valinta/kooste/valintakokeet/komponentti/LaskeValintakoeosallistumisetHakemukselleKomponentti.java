@@ -5,9 +5,9 @@ import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +41,8 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
     private final static String KOULUTUS_ID = "Koulutus-id";
     private final static String DISCRETIONARY = "discretionary";
 
+    private final static String EI_ARVOSANAA = "Ei arvosanaa";
+
     private class Hakutoive {
         private Boolean harkinnanvaraisuus;
         private String hakukohdeOid;
@@ -62,6 +64,21 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
         }
     }
 
+    /**
+     * Poistaa "Ei arvosanaa" -kentät hakemukselta. Tämän funkkarin voi poistaa kunhan hakemuspalveluun saadaan
+     * tehtyä filtteri näille kentille
+     *
+     * @param arvo
+     * @return
+     */
+    private String sanitizeArvo(String arvo) {
+        if (arvo != null && EI_ARVOSANAA.equals(arvo)) {
+            return "";
+        }
+
+        return arvo;
+    }
+
     public void laske(@Simple("${property.hakemusOid}") String hakemusOid) {
         LOG.info("Lasketaan valintakoeosallistumiset hakemukselle " + hakemusOid);
 
@@ -77,7 +94,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
         for (Map.Entry<String, String> e : hakemus.getAnswers().getHakutoiveet().entrySet()) {
             AvainArvoTyyppi aa = new AvainArvoTyyppi();
             aa.setAvain(e.getKey());
-            aa.setArvo(e.getValue());
+            aa.setArvo(sanitizeArvo(e.getValue()));
 
             hakemusTyyppi.getAvainArvo().add(aa);
 
@@ -117,7 +134,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
         for (Map.Entry<String, String> e : hakemus.getAnswers().getHenkilotiedot().entrySet()) {
             AvainArvoTyyppi aa = new AvainArvoTyyppi();
             aa.setAvain(e.getKey());
-            aa.setArvo(e.getValue());
+            aa.setArvo(sanitizeArvo(e.getValue()));
 
             hakemusTyyppi.getAvainArvo().add(aa);
         }
@@ -125,7 +142,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
         for (Map.Entry<String, String> e : hakemus.getAnswers().getKoulutustausta().entrySet()) {
             AvainArvoTyyppi aa = new AvainArvoTyyppi();
             aa.setAvain(e.getKey());
-            aa.setArvo(e.getValue());
+            aa.setArvo(sanitizeArvo(e.getValue()));
 
             hakemusTyyppi.getAvainArvo().add(aa);
         }
@@ -133,7 +150,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
         for (Map.Entry<String, String> e : hakemus.getAnswers().getLisatiedot().entrySet()) {
             AvainArvoTyyppi aa = new AvainArvoTyyppi();
             aa.setAvain(e.getKey());
-            aa.setArvo(e.getValue());
+            aa.setArvo(sanitizeArvo(e.getValue()));
 
             hakemusTyyppi.getAvainArvo().add(aa);
         }
@@ -141,7 +158,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
         for (Map.Entry<String, String> e : hakemus.getAnswers().getOsaaminen().entrySet()) {
             AvainArvoTyyppi aa = new AvainArvoTyyppi();
             aa.setAvain(e.getKey());
-            aa.setArvo(e.getValue());
+            aa.setArvo(sanitizeArvo(e.getValue()));
 
             hakemusTyyppi.getAvainArvo().add(aa);
         }

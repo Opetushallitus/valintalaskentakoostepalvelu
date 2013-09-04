@@ -85,7 +85,6 @@
             <version>${project.version}</version>
         </dependency>
 
-
         <!-- SADE -->
         <dependency>
             <groupId>fi.vm.sade.haku</groupId>

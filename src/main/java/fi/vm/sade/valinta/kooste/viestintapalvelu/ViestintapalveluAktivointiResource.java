@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
-import java.net.URI;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -62,20 +61,12 @@ public class ViestintapalveluAktivointiResource {
     @Path("jalkiohjauskirjeet/aktivoi")
     @Produces("application/json")
     public Response aktivoiJalkiohjauskirjeidenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
-            @QueryParam("valintakoeOid") List<String> valintakoeOids) {
+            @QueryParam("hakuOid") String hakuOid, @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
         try {
-            URI contentLocation = URI.create(jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(hakukohdeOid,
-                    valintakoeOids));
-            return Response.status(Status.ACCEPTED).contentLocation(contentLocation).entity(contentLocation.toString())
-                    .build();
-            /*
-             * return Response.status(Response.Status.OK)
-             * .header("Content-Disposition",
-             * "attachment; filename*=UTF-8''jalkiohjauskirje.pdf;")
-             * .entity(jalkiohjauskirjeBatchProxy
-             * .jalkiohjauskirjeBatchAktivoi(jalkiohjauskirjeBatchJson
-             * )).build();
-             */
+            return Response
+                    .status(Status.OK)
+                    .entity(new Gson().toJson(new LatausUrl(jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(
+                            hakukohdeOid, hakuOid, sijoitteluajoId)))).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
@@ -88,20 +79,12 @@ public class ViestintapalveluAktivointiResource {
     @Path("hyvaksymiskirjeet/aktivoi")
     @Produces("application/json")
     public Response aktivoiHyvaksymiskirjeidenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
-            @QueryParam("valintakoeOid") List<String> valintakoeOids) {
+            @QueryParam("hakuOid") String hakuOid, @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
         try {
-            URI contentLocation = URI.create(hyvaksymiskirjeBatchProxy.hyvaksymiskirjeetAktivointi(hakukohdeOid,
-                    valintakoeOids));
-            return Response.status(Status.ACCEPTED).contentLocation(contentLocation).entity(contentLocation.toString())
-                    .build();
-            /*
-             * return Response.status(Response.Status.OK)
-             * .header("Content-Disposition",
-             * "attachment; filename*=UTF-8''hyvaksymiskirje.pdf;")
-             * .entity(hyvaksymiskirjeBatchProxy
-             * .hyvaksymiskirjeBatchAktivointi(hyvaksymiskirjeBatchJson
-             * )).build();
-             */
+            return Response
+                    .status(Status.OK)
+                    .entity(new Gson().toJson(new LatausUrl(hyvaksymiskirjeBatchProxy.hyvaksymiskirjeetAktivointi(
+                            hakukohdeOid, hakuOid, sijoitteluajoId)))).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
