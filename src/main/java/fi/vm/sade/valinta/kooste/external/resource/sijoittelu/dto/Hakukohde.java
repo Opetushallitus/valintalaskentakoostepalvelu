@@ -4,6 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ *         Koska sijoittelulla ei ole omaa API:a!
+ */
 public class Hakukohde implements Serializable {
 
     private String id;

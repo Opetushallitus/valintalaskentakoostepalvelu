@@ -3,6 +3,12 @@ package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ *         Koska sijoittelulla ei ole omaa API:a!
+ */
 public class Valintatapajono implements Serializable {
 
     private Tasasijasaanto tasasijasaanto;
