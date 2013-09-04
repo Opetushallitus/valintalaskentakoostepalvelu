@@ -100,7 +100,7 @@
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
         </jaxrs:providers>
     </jaxrs:client>
-    <!-- 
+     
     <jaxrs:client id="TarjontaServiceRestClient"
                   address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
                   serviceClass="fi.vm.sade.tarjonta.service.resources.HakukohdeResource"
@@ -112,21 +112,10 @@
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
         </jaxrs:providers>
     </jaxrs:client>
-    -->
+    
 	<jaxrs:client id="SijoitteluajoServiceRestClient"
-                  address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}/sijoitteluajo"
+                  address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
                   serviceClass="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluajoResource"
-                  inheritHeaders="true">
-        <jaxrs:outInterceptors>
-            <ref bean="ticketInterceptorRest" />
-        </jaxrs:outInterceptors>
-        <jaxrs:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-        </jaxrs:providers>
-    </jaxrs:client>
-    <jaxrs:client id="SijoitteluServiceRestClient"
-                  address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}/sijoittelu"
-                  serviceClass="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluResource"
                   inheritHeaders="true">
         <jaxrs:outInterceptors>
             <ref bean="ticketInterceptorRest" />

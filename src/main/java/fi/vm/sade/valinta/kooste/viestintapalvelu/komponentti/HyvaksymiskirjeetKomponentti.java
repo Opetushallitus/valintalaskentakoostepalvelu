@@ -16,7 +16,6 @@ import com.google.gson.Gson;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluajoResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemuksenTila;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.Hakemus;
@@ -41,13 +40,11 @@ public class HyvaksymiskirjeetKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetKomponentti.class);
     private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
     private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
+
     @Autowired
     private SijoitteluajoResource sijoitteluajoResource;
 
     @Autowired
-    private SijoitteluResource sijoitteluResource;
-
-    // @Autowired
     private HakukohdeResource tarjontaResource;
 
     private static final String KIELIKOODI = "FI";
