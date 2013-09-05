@@ -183,7 +183,7 @@
     <beans:import resource="classpath:META-INF/spring/context/valintakoe-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/haunvalintakoelaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
-    <beans:import resource="classpath:META-INF/spring/context/valintalaskentatulos-context.xml"/>
+    <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-excel-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/viestintapalvelu-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/parametrit-context.xml"/>

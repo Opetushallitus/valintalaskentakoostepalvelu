@@ -4,5 +4,5 @@ import java.io.InputStream;
 
 public interface ValintalaskentaTulosExcelProxy {
 
-    InputStream haeValintalaskennanTuloksetXlsMuodossa(String hakukohdeOid);
+    InputStream luoXls(String hakukohdeOid);
 }

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.SijoittelunTulosExcelProxy;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosProxy;
 
@@ -28,15 +29,17 @@ import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulos
  */
 @Controller
 @Path("valintalaskentatulos")
-public class ValintalaskentaTulosResource {
+public class ValintalaskentaExcelResource {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaTulosResource.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaExcelResource.class);
 
     public final static MediaType APPLICATION_VND_MS_EXCEL = new MediaType("application", "vnd.ms-excel");
     @Autowired
     private ValintalaskentaTulosExcelProxy valintalaskentaTulosProxy;
     @Autowired
     private ValintalaskentaTulosProxy valintalaskentaTulos;
+    @Autowired
+    private SijoittelunTulosExcelProxy sijoittelunTulosExcelProxy;
 
     @GET
     @Path("excel/aktivoi")
@@ -44,7 +47,7 @@ public class ValintalaskentaTulosResource {
     public Response haeTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valintakoeOid") List<String> valintakoeOids) {
         try {
-            InputStream input = valintalaskentaTulos.haeTuloksetXlsMuodossa(hakukohdeOid, valintakoeOids);
+            InputStream input = valintalaskentaTulos.luoXls(hakukohdeOid, valintakoeOids);
             return Response.ok(input, APPLICATION_VND_MS_EXCEL)
                     .header("content-disposition", "inline; filename=valintakoetulos.xls").build();
         } catch (Exception e) {
@@ -64,11 +67,37 @@ public class ValintalaskentaTulosResource {
     }
 
     @GET
+    @Path("sijoitteluntulokset/aktivoi")
+    @Produces("application/vnd.ms-excel")
+    public Response haeSijoittelunTuloksetExcelMuodossa(@QueryParam("sijoitteluajoId") Long sijoitteluajoId,
+            @QueryParam("hakukohdeOid") String hakukohdeOid) {
+        try {
+            InputStream input = sijoittelunTulosExcelProxy.luoXls(hakukohdeOid, sijoitteluajoId);
+            return Response.ok(input, APPLICATION_VND_MS_EXCEL)
+                    .header("content-disposition", "inline; filename=valintalaskentatulos.xls").build();
+        } catch (Exception e) {
+            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+            // todennäköisin syy on sijoittelupalvelun tai hakemuspalvelun
+            // ylikuormittumisessa!
+            // Ylläpitäjä voi lukea logeista todellisen syyn!
+            LOG.error("Sijoitteluntulos excelin luonti epäonnistui hakukohteelle {} ja sijoitteluajolle {}: {}",
+                    new Object[] { hakukohdeOid, sijoitteluajoId, e.getMessage() });
+            return Response
+                    .serverError()
+                    .entity(ExcelExportUtil.exportGridAsXls(new Object[][] { new Object[] {
+                            "Tarvittavien tietojen hakeminen epäonnistui!",
+                            "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!" } }))
+                    .type(APPLICATION_VND_MS_EXCEL)
+                    .header("content-disposition", "inline; filename=yritauudelleen.xls").build();
+        }
+    }
+
+    @GET
     @Path("valintalaskentatulos/aktivoi")
     @Produces("application/vnd.ms-excel")
     public Response haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid) {
         try {
-            InputStream input = valintalaskentaTulosProxy.haeValintalaskennanTuloksetXlsMuodossa(hakukohdeOid);
+            InputStream input = valintalaskentaTulosProxy.luoXls(hakukohdeOid);
             return Response.ok(input, APPLICATION_VND_MS_EXCEL)
                     .header("content-disposition", "inline; filename=valintalaskentatulos.xls").build();
         } catch (Exception e) {

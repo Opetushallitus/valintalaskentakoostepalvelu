@@ -19,6 +19,18 @@
 
     <routeContext id="valintalaskentaTulosRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
+            <from uri="direct:sijoittelunTulosExcelReitti"/>
+            <policy ref="admin">
+            	<setProperty propertyName="sijoitteluajoId"><simple>${body.args[1]}</simple></setProperty>
+	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
+	            <to uri="bean:haeHakemusKomponentti"/>
+	            <setProperty propertyName="hakemukset">
+	                <simple>${body}</simple>
+	            </setProperty>
+	            <to uri="bean:sijoittelunTulosXlsKomponentti"/>
+            </policy>
+        </route>
+        <route>
             <from uri="direct:kaynnistaTulostenLuontiXlsMuodossaReitti"/>
             <policy ref="admin">
 	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
@@ -45,10 +57,19 @@
 
     <camelContext id="valintalaskentaTulosCamelContext"
                   autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
-        <!-- Proxy Jersey REST triggerin ja Camelin eriyttämiseen toisistaan -->
+        <!--
+        	Sijoittelun tulosten excelointi! 
+        -->
+        <proxy id="sijoittelunTulosExcelProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.SijoittelunTulosExcelProxy"
+               serviceUrl="direct:sijoittelunTulosExcelReitti"/>
+        <!-- 
+        -->
         <proxy id="tulostenLuontiXlsMuodossaProxy"
                serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosProxy"
                serviceUrl="direct:kaynnistaTulostenLuontiXlsMuodossaReitti"/>
+        <!-- 
+        -->
         <proxy id="valintalaskennanTulostenLuontiXlsMuodossaProxy"
                serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy"
                serviceUrl="direct:kaynnistaValintalaskennanTulostenLuontiXlsMuodossaReitti"/>

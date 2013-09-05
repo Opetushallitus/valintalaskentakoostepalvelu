@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface ValintalaskentaTulosProxy {
 
-    InputStream haeTuloksetXlsMuodossa(String hakukohdeOid, List<String> valintakoeOid);
+    InputStream luoXls(String hakukohdeOid, List<String> valintakoeOid);
 }
