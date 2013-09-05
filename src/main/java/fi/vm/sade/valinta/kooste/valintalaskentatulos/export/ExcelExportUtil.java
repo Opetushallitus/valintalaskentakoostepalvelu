@@ -44,7 +44,8 @@ public class ExcelExportUtil {
                 assert (dataCell != null);
                 numberOfcolumns = Math.max(numberOfcolumns, cellIndex);
                 Cell excelCell = excelRow.createCell(cellIndex);
-                excelCell.setCellValue(dataCell.toString());
+                String value = dataCell.toString();
+                excelCell.setCellValue(value);
                 ++cellIndex;
             }
             ++rowIndex;
@@ -64,5 +65,9 @@ public class ExcelExportUtil {
                                  // I/O
         }
         return bytesOut.newInputStream();
+    }
+
+    private static boolean isInteger(String str) {
+        return str.matches("^-?[0-9]+(\\.[0-9]+)?$");
     }
 }

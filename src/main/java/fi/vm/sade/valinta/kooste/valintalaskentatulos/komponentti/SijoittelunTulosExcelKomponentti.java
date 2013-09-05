@@ -34,29 +34,40 @@ public class SijoittelunTulosExcelKomponentti {
         List<Object[]> rivit = new ArrayList<Object[]>();
         for (Valintatapajono jono : hakukohde.getValintatapajonot()) {
 
-            rivit.add(new Object[] { "Valintatapajono", "oid", jono.getOid() });
-            rivit.add(new Object[] { "", "tila", suomennaTila(jono.getTila()) });
-            rivit.add(new Object[] { "", "varasijatäyttö", suomennaTaytto(jono.getEiVarasijatayttoa()) });
-            rivit.add(new Object[] { "", "tasasijasääntö", suomennaTasasijasaanto(jono.getTasasijasaanto()) });
-            rivit.add(new Object[] { "", "Jonosija", "Tasasijan jonosija", "Hakija", "Hakemus", "Hakutoive",
+            rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
+            // rivit.add(new Object[] { "", "tila", suomennaTila(jono.getTila())
+            // });
+            // rivit.add(new Object[] { "", "varasijatäyttö",
+            // suomennaTaytto(jono.getEiVarasijatayttoa()) });
+            // rivit.add(new Object[] { "", "tasasijasääntö",
+            // suomennaTasasijasaanto(jono.getTasasijasaanto()) });
+
+            rivit.add(new Object[] { "Jonosija", "Tasasijan jonosija", "Hakija", "Hakemus", "Hakutoive",
                     "Sijoittelun tila", "Vastaanottotieto" });
             for (Hakemus hakemus : jono.getHakemukset()) {
                 // Jonosija Tasasijan jonosija Hakija Hakemus Hakutoive
                 // Sijoittelun tila Vastaanottotieto
                 StringBuilder nimi = new StringBuilder();
                 nimi.append(hakemus.getSukunimi()).append(", ").append(hakemus.getEtunimi());
-                rivit.add(new Object[] { "", hakemus.getJonosija(), hakemus.getTasasijaJonosija(), nimi.toString(),
+                rivit.add(new Object[] { hakemus.getJonosija(), hakemus.getTasasijaJonosija(), nimi.toString(),
                         hakemus.getHakemusOid(), hakemus.getPrioriteetti(), hakemus.getTila(), "--" });
             }
+            rivit.add(new Object[] {});
         }
         return ExcelExportUtil.exportGridAsXls(rivit.toArray(new Object[][] {}));
     }
 
     private static String suomennaTila(ValintatapajonoTila tila) {
+        if (tila == null) {
+            return "";
+        }
         return tila.toString();
     }
 
     private static String suomennaTasasijasaanto(Tasasijasaanto saanto) {
+        if (saanto == null) {
+            return "";
+        }
         return saanto.toString();
     }
 
