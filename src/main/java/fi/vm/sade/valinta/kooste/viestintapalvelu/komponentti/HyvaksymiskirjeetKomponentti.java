@@ -57,7 +57,7 @@ public class HyvaksymiskirjeetKomponentti {
     @Autowired
     fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource laskentaResource;
 
-    private static final String KIELIKOODI = "FI";
+    private static final String KIELIKOODI = "kieli_fi";
 
     public String teeHyvaksymiskirjeet(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
             @Simple("${property.hakuOid}") String hakuOid, @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
