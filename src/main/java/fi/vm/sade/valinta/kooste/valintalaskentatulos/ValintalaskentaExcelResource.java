@@ -28,7 +28,7 @@ import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulos
  *         Aktivoi valintalaskennan tulos service pyyntoja!
  */
 @Controller
-@Path("valintalaskentatulos")
+@Path("valintalaskentaexcel")
 public class ValintalaskentaExcelResource {
 
     private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaExcelResource.class);
@@ -42,7 +42,7 @@ public class ValintalaskentaExcelResource {
     private SijoittelunTulosExcelProxy sijoittelunTulosExcelProxy;
 
     @GET
-    @Path("excel/aktivoi")
+    @Path("/valintakoekutsut/aktivoi")
     @Produces("application/vnd.ms-excel")
     public Response haeTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valintakoeOid") List<String> valintakoeOids) {
@@ -67,7 +67,7 @@ public class ValintalaskentaExcelResource {
     }
 
     @GET
-    @Path("sijoitteluntulokset/aktivoi")
+    @Path("/sijoitteluntulos/aktivoi")
     @Produces("application/vnd.ms-excel")
     public Response haeSijoittelunTuloksetExcelMuodossa(@QueryParam("sijoitteluajoId") Long sijoitteluajoId,
             @QueryParam("hakukohdeOid") String hakukohdeOid) {
@@ -93,7 +93,7 @@ public class ValintalaskentaExcelResource {
     }
 
     @GET
-    @Path("valintalaskentatulos/aktivoi")
+    @Path("/valintalaskennantulos/aktivoi")
     @Produces("application/vnd.ms-excel")
     public Response haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid) {
         try {

@@ -23,10 +23,6 @@
             <policy ref="admin">
             	<setProperty propertyName="sijoitteluajoId"><simple>${body.args[1]}</simple></setProperty>
 	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
-	            <to uri="bean:haeHakemusKomponentti"/>
-	            <setProperty propertyName="hakemukset">
-	                <simple>${body}</simple>
-	            </setProperty>
 	            <to uri="bean:sijoittelunTulosXlsKomponentti"/>
             </policy>
         </route>
