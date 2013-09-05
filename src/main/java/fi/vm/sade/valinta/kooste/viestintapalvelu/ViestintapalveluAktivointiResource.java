@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 
 import com.google.gson.Gson;
 
+import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.LatausUrl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksymiskirjeBatchAktivointiProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.JalkiohjauskirjeBatchAktivointiProxy;
@@ -50,7 +51,15 @@ public class ViestintapalveluAktivointiResource {
                     .entity(new Gson().toJson(new LatausUrl(addressLabelBatchProxy.osoitetarratAktivointi(hakukohdeOid,
                             valintakoeOids)))).build();
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+            LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
+            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+            // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+            // Ylläpitäjä voi lukea logeista todellisen syyn!
+            return Response
+                    .status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Vastaus
+                            .virhe("Osoitetarrojen luonti epäonnistui! Hakemuspalvelu saattaa olla ylikuormittunut, yritä uudelleen!"))
+                    .build();
         }
     }
 
@@ -68,7 +77,15 @@ public class ViestintapalveluAktivointiResource {
                     .entity(new Gson().toJson(new LatausUrl(jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(
                             hakukohdeOid, hakuOid, sijoitteluajoId)))).build();
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+            LOG.error("Jälkiohjauskirjeiden luonnissa virhe! {}", e.getMessage());
+            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+            // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+            // Ylläpitäjä voi lukea logeista todellisen syyn!
+            return Response
+                    .status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Vastaus
+                            .virhe("Jälkiohjauskirjeiden luonti epäonnistui! Hakemuspalvelu saattaa olla ylikuormittunut, yritä uudelleen!"))
+                    .build();
         }
     }
 
@@ -86,7 +103,15 @@ public class ViestintapalveluAktivointiResource {
                     .entity(new Gson().toJson(new LatausUrl(hyvaksymiskirjeBatchProxy.hyvaksymiskirjeetAktivointi(
                             hakukohdeOid, hakuOid, sijoitteluajoId)))).build();
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+            LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
+            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+            // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+            // Ylläpitäjä voi lukea logeista todellisen syyn!
+            return Response
+                    .status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Vastaus
+                            .virhe("Hyväksymiskirjeiden luonti epäonnistui! Hakemuspalvelu saattaa olla ylikuormittunut, yritä uudelleen!"))
+                    .build();
         }
     }
 
