@@ -29,6 +29,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.Hakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.Valintatapajono;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -57,10 +58,11 @@ public class HyvaksymiskirjeetKomponentti {
     @Autowired
     fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource laskentaResource;
 
-    private static final String KIELIKOODI = "kieli_fi";
+    // private static final String KIELIKOODI = "kieli_fi";
 
-    public String teeHyvaksymiskirjeet(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
-            @Simple("${property.hakuOid}") String hakuOid, @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
+    public String teeHyvaksymiskirjeet(@Simple("${property.kielikoodi}") String kielikoodi,
+            @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid,
+            @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
             @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
         LOG.debug("Hyvaksymiskirjeet for hakukohde '{}' and haku '{}'", new Object[] { hakukohdeOid, hakuOid });
 
@@ -81,8 +83,8 @@ public class HyvaksymiskirjeetKomponentti {
         Map<String, HakemusTyyppi> hakuAppHakemukset = convertToHakemusOidMap(hakemukset);
         Collection<Hakemus> hyvaksytytHakemukset = filterHyvaksytytHakemukset(haeHakemukset(haeHakukohde(
                 sijoitteluajoId, hakukohdeOid, kohdeCache)));
-        final String koulu = extractTarjoajaNimi(haeHakukohdeNimi(hakukohdeOid, nimiCache), KIELIKOODI);
-        final String koulutus = extractHakukohdeNimi(haeHakukohdeNimi(hakukohdeOid, nimiCache), KIELIKOODI);
+        final String koulu = extractTarjoajaNimi(haeHakukohdeNimi(hakukohdeOid, nimiCache), kielikoodi);
+        final String koulutus = extractHakukohdeNimi(haeHakukohdeNimi(hakukohdeOid, nimiCache), kielikoodi);
         for (Hakemus hakemus : hyvaksytytHakemukset) {
             Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakuAppHakemukset.get(hakemus.getHakemusOid()));
 
@@ -98,12 +100,17 @@ public class HyvaksymiskirjeetKomponentti {
                 // List<ValinnanvaiheDTO> valinnanvaiheet =
                 // haeValinnanvaiheet(dto.getHakukohdeOid(), laskentaCache);
                 Collection<Hakemus> kaikkiHakemukset = haeHakemukset(hakukohde);
-                Collection<Hakemus> tahanHyvaksytyt = filterHyvaksytytHakemukset(kaikkiHakemukset);
+                // Collection<Hakemus> tahanHyvaksytyt =
+                // filterHyvaksytytHakemukset(kaikkiHakemukset);
 
                 HakukohdeNimiRDTO tamanHakukohteenNimi = haeHakukohdeNimi(dto.getHakukohdeOid(), nimiCache);
                 Map<String, String> tulokset = new HashMap<String, String>();
                 tulokset.put("alinHyvaksyttyPistemaara", "--");
-                tulokset.put("hakukohteenNimi", extractHakukohdeNimi(tamanHakukohteenNimi, KIELIKOODI));
+
+                tulokset.put("hakukohteenNimi", extractHakukohdeNimi(tamanHakukohteenNimi, kielikoodi));
+                tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
+                                                       // hakukohdenimea joten
+                                                       // tuskin tarvii toistaa
                 tulokset.put("hylkayksenSyy", "");
                 tulokset.put("hyvaksytyt", "" + countHyvaksytytHakemukset(hakukohde, hyvaksytytCache));//
 
@@ -111,11 +118,10 @@ public class HyvaksymiskirjeetKomponentti {
                 tulokset.put("omatPisteet", "--");// countOmatPisteet(dto.getHakemusOid(),
                                                   // valinnanvaiheet));
 
-                tulokset.put("oppilaitoksenNimi", "lukio");
-                tulokset.put("organisaationNimi", extractTarjoajaNimi(tamanHakukohteenNimi, KIELIKOODI));
+                tulokset.put("organisaationNimi", extractTarjoajaNimi(tamanHakukohteenNimi, kielikoodi));
                 tulokset.put("paasyJaSoveltuvuuskoe", "--");
                 tulokset.put("selite", "");
-                tulokset.put("valinnanTulos", dto.getTila().toString());
+                tulokset.put("valinnanTulos", HakemuksenTilaUtil.tilaConverter(dto.getTila().toString()));
                 tulosList.add(tulokset);
 
             }
