@@ -69,9 +69,9 @@ public class ValintalaskentaExcelResource {
     @Path("sijoitteluntulos/aktivoi")
     @Produces("application/vnd.ms-excel")
     public Response haeSijoittelunTuloksetExcelMuodossa(@QueryParam("sijoitteluajoId") Long sijoitteluajoId,
-            @QueryParam("hakukohdeOid") String hakukohdeOid) {
+            @QueryParam("hakukohdeOid") String hakukohdeOid, @QueryParam("hakuOid") String hakuOid) {
         try {
-            InputStream input = sijoittelunTulosExcelProxy.luoXls(hakukohdeOid, sijoitteluajoId);
+            InputStream input = sijoittelunTulosExcelProxy.luoXls(hakukohdeOid, sijoitteluajoId, hakuOid);
             return Response.ok(input, APPLICATION_VND_MS_EXCEL)
                     .header("content-disposition", "inline; filename=valintalaskentatulos.xls").build();
         } catch (Exception e) {

@@ -4,5 +4,5 @@ import java.io.InputStream;
 
 public interface SijoittelunTulosExcelProxy {
 
-    public InputStream luoXls(String hakukohdeOid, Long sijoitteluajoId);
+    public InputStream luoXls(String hakukohdeOid, Long sijoitteluajoId, String hakuOid);
 }

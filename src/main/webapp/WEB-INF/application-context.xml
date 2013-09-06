@@ -113,9 +113,9 @@
         </jaxrs:providers>
     </jaxrs:client>
     
-	<jaxrs:client id="SijoitteluajoServiceRestClient"
+	<jaxrs:client id="SijoitteluServiceRestClient"
                   address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
-                  serviceClass="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluajoResource"
+                  serviceClass="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluResource"
                   inheritHeaders="true">
         <jaxrs:outInterceptors>
             <ref bean="ticketInterceptorRest" />

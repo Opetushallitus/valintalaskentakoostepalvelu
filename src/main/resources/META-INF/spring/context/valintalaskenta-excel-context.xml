@@ -21,6 +21,7 @@
         <route>
             <from uri="direct:sijoittelunTulosExcelReitti"/>
             <policy ref="admin">
+            	<setProperty propertyName="hakuOid"><simple>${body.args[2]}</simple></setProperty>
             	<setProperty propertyName="sijoitteluajoId"><simple>${body.args[1]}</simple></setProperty>
 	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
 	            <to uri="bean:sijoittelunTulosXlsKomponentti"/>

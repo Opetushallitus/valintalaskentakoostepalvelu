@@ -8,11 +8,11 @@ import org.apache.camel.language.Simple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluajoResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.Hakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemusDTO;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.Tasasijasaanto;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.Valintatapajono;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.ValintatapajonoTila;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
 
@@ -26,13 +26,15 @@ import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
 public class SijoittelunTulosExcelKomponentti {
 
     @Autowired
-    private SijoitteluajoResource sijoitteluajoResource;
+    private SijoitteluResource sijoitteluajoResource;
 
     public InputStream luoXls(@Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
-            @Simple("${property.hakukohdeOid}") String hakukohdeOid) {
-        Hakukohde hakukohde = sijoitteluajoResource.getHakukohdeBySijoitteluajo(sijoitteluajoId, hakukohdeOid);
+            @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid) {
+        HakukohdeDTO hakukohde = sijoitteluajoResource.getHakukohdeBySijoitteluajo(hakuOid, sijoitteluajoId.toString(),
+                hakukohdeOid);
+        // getHakukohdeBySijoitteluajo(hakuOid, sijoitteluajoId, hakukohdeOid);
         List<Object[]> rivit = new ArrayList<Object[]>();
-        for (Valintatapajono jono : hakukohde.getValintatapajonot()) {
+        for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
 
             rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
             // rivit.add(new Object[] { "", "tila", suomennaTila(jono.getTila())
@@ -44,7 +46,7 @@ public class SijoittelunTulosExcelKomponentti {
 
             rivit.add(new Object[] { "Jonosija", "Tasasijan jonosija", "Hakija", "Hakemus", "Hakutoive",
                     "Sijoittelun tila", "Vastaanottotieto" });
-            for (Hakemus hakemus : jono.getHakemukset()) {
+            for (HakemusDTO hakemus : jono.getHakemukset()) {
                 // Jonosija Tasasijan jonosija Hakija Hakemus Hakutoive
                 // Sijoittelun tila Vastaanottotieto
                 StringBuilder nimi = new StringBuilder();
