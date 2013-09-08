@@ -12,9 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
  */
 @Component("suoritaLaskentaKomponentti")
 public class SuoritaLaskentaKomponentti {
@@ -22,7 +20,7 @@ public class SuoritaLaskentaKomponentti {
     @Autowired
     private ValintalaskentaService valintalaskentaService;
 
-    private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SuoritaLaskentaKomponentti.class);
 
     public void suoritaLaskenta(
             @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset,
@@ -30,14 +28,14 @@ public class SuoritaLaskentaKomponentti {
 
         int hCount = 0;
         int vCount = 0;
-        if(hakemukset != null) {
+        if (hakemukset != null) {
             hCount = hakemukset.size();
         }
-        if(valintaperusteet != null) {
+        if (valintaperusteet != null) {
             vCount = valintaperusteet.size();
         }
-        LOG.info("Suoritetaan valintalaskenta, hakemuksia:{} ja valintaperusteita:{}", new Object[] {
-                hCount, vCount });
+        LOG.info("Suoritetaan valintalaskenta, hakemuksia:{} ja valintaperusteita:{}", new Object[]{
+                hCount, vCount});
 
 
         valintalaskentaService.laske(hakemukset, valintaperusteet);
