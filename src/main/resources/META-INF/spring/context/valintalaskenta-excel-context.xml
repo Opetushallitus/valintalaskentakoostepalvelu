@@ -60,7 +60,7 @@
         <!-- 
         -->
         <proxy id="tulostenLuontiXlsMuodossaProxy"
-               serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintakoekutsutExcelProxy"
                serviceUrl="direct:kaynnistaTulostenLuontiXlsMuodossaReitti"/>
         <!-- 
         -->
