@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 public class ValintatapajonoDTO implements Serializable {
@@ -10,8 +11,17 @@ public class ValintatapajonoDTO implements Serializable {
     private String oid;
     private Integer prioriteetti;
     private Integer aloituspaikat;
+    private BigDecimal alinHyvaksyttyPistemaara;
     private Boolean eiVarasijatayttoa;
     private ArrayList<HakemusDTO> hakemukset = new ArrayList<HakemusDTO>();
+
+    public BigDecimal getAlinHyvaksyttyPistemaara() {
+        return alinHyvaksyttyPistemaara;
+    }
+
+    public void setAlinHyvaksyttyPistemaara(BigDecimal alinHyvaksyttyPistemaara) {
+        this.alinHyvaksyttyPistemaara = alinHyvaksyttyPistemaara;
+    }
 
     public Tasasijasaanto getTasasijasaanto() {
         return tasasijasaanto;

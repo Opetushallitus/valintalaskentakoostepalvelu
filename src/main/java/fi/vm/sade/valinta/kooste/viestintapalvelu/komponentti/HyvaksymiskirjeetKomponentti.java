@@ -11,6 +11,7 @@ import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -18,7 +19,6 @@ import com.google.gson.Gson;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemuksenTila;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemusDTO;
@@ -45,12 +45,13 @@ public class HyvaksymiskirjeetKomponentti {
 
     @Autowired
     private SijoitteluResource sijoitteluajoResource;
+    @Value("${valintalaskentakoostepalvelu.sijoitteluService.url}")
+    private String sijoitteluServiceUrl;
 
     @Autowired
     private HakukohdeResource tarjontaResource;
-
-    @Autowired
-    fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource laskentaResource;
+    @Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}")
+    private String tarjontaServiceUrl;
 
     // private static final String KIELIKOODI = "kieli_fi";
 
@@ -217,23 +218,13 @@ public class HyvaksymiskirjeetKomponentti {
                                                                   // joku!
     }
 
-    private List<ValinnanvaiheDTO> haeValinnanvaiheet(String hakukohdeOid, Map<String, List<ValinnanvaiheDTO>> cache) {
-        if (cache.containsKey(hakukohdeOid)) {
-            return cache.get(hakukohdeOid);
-        } else {
-            LOG.debug("Haetaan hakukohde '{}' valintalaskennan tulospalvelusta!", hakukohdeOid);
-            List<ValinnanvaiheDTO> valinnanvaiheet = laskentaResource.hakukohde(hakukohdeOid);
-            cache.put(hakukohdeOid, valinnanvaiheet);
-            return valinnanvaiheet;
-        }
-    }
-
     private HakukohdeDTO haeHakukohde(String hakuOid, Long sijoitteluajoId, String hakukohdeOid,
             Map<String, HakukohdeDTO> cache) {
         if (cache.containsKey(hakukohdeOid)) {
             return cache.get(hakukohdeOid);
         } else {
-            LOG.debug("Haetaan hakukohde '{}' sijoittelulta!", hakukohdeOid);
+            LOG.debug("Kutsutaan {} Sijoittelu getHakukohdeBySijoitteluajo({},{},{})", new Object[] {
+                    sijoitteluServiceUrl, hakuOid, sijoitteluajoId, hakukohdeOid });
             HakukohdeDTO kohde = sijoitteluajoResource.getHakukohdeBySijoitteluajo(hakuOid, sijoitteluajoId.toString(),
                     hakukohdeOid);// HakukohdeBySijoitteluajo(sijoitteluajoId,
                                   // hakukohdeOid);
@@ -246,7 +237,7 @@ public class HyvaksymiskirjeetKomponentti {
         if (cache.containsKey(hakukohdeOid)) {
             return cache.get(hakukohdeOid);
         } else {
-            LOG.debug("Haetaan hakukohteen '{}' todellinen nimi tarjonnalta!", hakukohdeOid);
+            LOG.debug("Kutsutaan {} getHakukohdeNimi({})", new Object[] { tarjontaServiceUrl, hakukohdeOid });
             HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
             cache.put(hakukohdeOid, nimi);
             return nimi;

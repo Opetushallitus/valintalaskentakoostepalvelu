@@ -19,7 +19,7 @@ import org.springframework.stereotype.Controller;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.SijoittelunTulosExcelProxy;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosProxy;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintakoekutsutExcelProxy;
 
 /**
  * 
@@ -37,7 +37,7 @@ public class ValintalaskentaExcelResource {
     @Autowired
     private ValintalaskentaTulosExcelProxy valintalaskentaTulosProxy;
     @Autowired
-    private ValintalaskentaTulosProxy valintalaskentaTulos;
+    private ValintakoekutsutExcelProxy valintalaskentaTulos;
     @Autowired
     private SijoittelunTulosExcelProxy sijoittelunTulosExcelProxy;
 

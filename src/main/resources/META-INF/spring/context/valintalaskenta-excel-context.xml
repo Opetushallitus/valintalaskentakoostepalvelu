@@ -28,7 +28,7 @@
             </policy>
         </route>
         <route>
-            <from uri="direct:kaynnistaTulostenLuontiXlsMuodossaReitti"/>
+            <from uri="direct:valintakoekutsutExcelReitti"/>
             <policy ref="admin">
 	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
 	            <setProperty propertyName="valintakoeOid"><simple>${body.args[1]}</simple></setProperty>
@@ -40,13 +40,9 @@
             </policy>
         </route>
         <route>
-            <from uri="direct:kaynnistaValintalaskennanTulostenLuontiXlsMuodossaReitti"/>
+            <from uri="direct:valintalaskennanTulosExcelReitti"/>
             <policy ref="admin">
 	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
-	            <to uri="bean:haeHakemusKomponentti"/>
-	            <setProperty propertyName="hakemukset">
-	                <simple>${body}</simple>
-	            </setProperty>
 	            <to uri="bean:luoValintalaskennanTuloksetXlsMuodossa"/>
             </policy>
         </route>
@@ -63,13 +59,15 @@
         <!-- 
         -->
         <proxy id="tulostenLuontiXlsMuodossaProxy"
-               serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosProxy"
-               serviceUrl="direct:kaynnistaTulostenLuontiXlsMuodossaReitti"/>
+               serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintakoekutsutExcelProxy"
+               serviceUrl="direct:valintakoekutsutExcelReitti"/>
         <!-- 
         -->
         <proxy id="valintalaskennanTulostenLuontiXlsMuodossaProxy"
                serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy"
-               serviceUrl="direct:kaynnistaValintalaskennanTulostenLuontiXlsMuodossaReitti"/>
+               serviceUrl="direct:valintalaskennanTulosExcelReitti"/>
+        <!-- 
+         -->
         <routeContextRef ref="valintalaskentaTulosRoutes"/>
     </camelContext>
 </beans>

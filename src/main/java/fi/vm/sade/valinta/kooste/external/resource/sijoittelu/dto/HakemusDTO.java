@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class HakemusDTO implements Serializable {
 
@@ -11,6 +12,8 @@ public class HakemusDTO implements Serializable {
     private Integer prioriteetti;
     private Integer jonosija;
     private Integer tasasijaJonosija;
+    private Integer varasijanNumero;
+    private BigDecimal pisteet;
     private HakemuksenTila tila;
     private boolean hyvaksyttyHarkinnanvaraisesti = false;
     private Long sijoitteluajoId;
@@ -18,6 +21,22 @@ public class HakemusDTO implements Serializable {
     private String tarjoajaOid;
     private String valintatapajonoOid;
     private String hakuOid;
+
+    public BigDecimal getPisteet() {
+        return pisteet;
+    }
+
+    public Integer getVarasijanNumero() {
+        return varasijanNumero;
+    }
+
+    public void setVarasijanNumero(Integer varasijanNumero) {
+        this.varasijanNumero = varasijanNumero;
+    }
+
+    public void setPisteet(BigDecimal pisteet) {
+        this.pisteet = pisteet;
+    }
 
     public String getHakuOid() {
         return hakuOid;

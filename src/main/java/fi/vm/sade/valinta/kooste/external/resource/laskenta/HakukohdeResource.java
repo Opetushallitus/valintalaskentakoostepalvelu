@@ -10,11 +10,10 @@ import javax.ws.rs.core.MediaType;
 
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValinnanvaiheDTO;
 
-//@Path("/hakukohde")
 public interface HakukohdeResource {
 
     @GET
-    @Path("{hakukohdeoid}/valinnanvaihe")
+    @Path("hakukohde/{hakukohdeoid}/valinnanvaihe")
     @Produces(MediaType.APPLICATION_JSON)
     List<ValinnanvaiheDTO> hakukohde(@PathParam("hakukohdeoid") String hakukohdeoid);
 }
