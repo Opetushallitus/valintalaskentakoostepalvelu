@@ -61,7 +61,7 @@ public class ValintalaskennanTulosExcelKomponentti {
                     hakija.append(sija.getSukunimi()).append(", ").append(sija.getEtunimi());
                     String yhteispisteet = "--";
                     try {
-                        yhteispisteet = sija.getJarjestyskriteerit().get(0).getArvo().toString();
+                        yhteispisteet = sija.getJarjestyskriteerit().first().getArvo().toString();
                         // sija.getJarjestyskriteerit().
                         // yhteispisteet =
                         // sija.getJarjestyskriteerit().firstEntry().getValue().getArvo().toString();

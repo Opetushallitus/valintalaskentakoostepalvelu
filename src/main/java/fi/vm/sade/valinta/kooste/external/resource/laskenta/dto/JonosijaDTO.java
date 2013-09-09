@@ -1,14 +1,15 @@
 package fi.vm.sade.valinta.kooste.external.resource.laskenta.dto;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class JonosijaDTO {
 
     private int jonosija;
     private String hakemusOid;
     private String hakijaOid;
-    private List<JarjestyskriteeritulosDTO> jarjestyskriteerit = new ArrayList<JarjestyskriteeritulosDTO>();
+    private SortedSet<JarjestyskriteeritulosDTO> jarjestyskriteerit = new TreeSet<JarjestyskriteeritulosDTO>();
     private int prioriteetti;
     private String sukunimi;
     private String etunimi;
@@ -25,11 +26,11 @@ public class JonosijaDTO {
         this.historiat = historiat;
     }
 
-    public List<JarjestyskriteeritulosDTO> getJarjestyskriteerit() {
+    public SortedSet<JarjestyskriteeritulosDTO> getJarjestyskriteerit() {
         return jarjestyskriteerit;
     }
 
-    public void setJarjestyskriteerit(List<JarjestyskriteeritulosDTO> jarjestyskriteerit) {
+    public void setJarjestyskriteerit(SortedSet<JarjestyskriteeritulosDTO> jarjestyskriteerit) {
         this.jarjestyskriteerit = jarjestyskriteerit;
     }
 

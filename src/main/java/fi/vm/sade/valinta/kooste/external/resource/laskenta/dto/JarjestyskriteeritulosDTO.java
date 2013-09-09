@@ -3,12 +3,17 @@ package fi.vm.sade.valinta.kooste.external.resource.laskenta.dto;
 import java.math.BigDecimal;
 
 //@Converters(BigDecimalConverter.class)
-public class JarjestyskriteeritulosDTO {
+public class JarjestyskriteeritulosDTO implements Comparable<JarjestyskriteeritulosDTO> {
 
     private BigDecimal arvo;
     private JarjestyskriteerituloksenTila tila;
     private String kuvaus;
     private int prioriteetti;
+
+    @Override
+    public int compareTo(JarjestyskriteeritulosDTO o) {
+        return new Integer(prioriteetti).compareTo(o.getPrioriteetti());
+    }
 
     public BigDecimal getArvo() {
         return arvo;
