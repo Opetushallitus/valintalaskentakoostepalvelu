@@ -1,33 +1,23 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.xml.datatype.XMLGregorianCalendar;
-
+import fi.vm.sade.service.valintatiedot.ValintatietoService;
+import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
+import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintatiedot.ValintatietoService;
-import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
-import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.InputStream;
+import java.util.*;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
+ *         <p/>
  *         Komponentti tulosten kasaamiseen Excel-muodossa
  */
 @Component("luoTuloksetXlsMuodossa")
@@ -39,22 +29,22 @@ public class ValintalaskentaTulosExcelKomponentti {
     private ValintatietoService valintatietoService;
 
     public InputStream luoTuloksetXlsMuodossa(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
-            @Simple("${property.valintakoeOid}") List<String> valintakoeOids,
-            @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
+                                              @Simple("${property.valintakoeOid}") List<String> valintakoeOids,
+                                              @Simple("${property.hakemukset}") List<SuppeaHakemus> hakemukset) {
         Map<String, String> oidToName = new HashMap<String, String>();
-        for (HakemusTyyppi hakemus : hakemukset) {
+        for (SuppeaHakemus hakemus : hakemukset) {
             StringBuilder b = new StringBuilder();
-            b.append(hakemus.getHakijanSukunimi()).append(", ").append(hakemus.getHakijanEtunimi());
-            oidToName.put(hakemus.getHakemusOid(), b.toString());
+            b.append(hakemus.getLastName()).append(", ").append(hakemus.getFirstNames());
+            oidToName.put(hakemus.getOid(), b.toString());
         }
         List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService.haeValintatiedotHakukohteelle(
                 valintakoeOids, hakukohdeOid);
         List<String> tunnisteet = getTunnisteet(tiedotHakukohteelle);
         if (tunnisteet.isEmpty()) {
-            return ExcelExportUtil.exportGridAsXls(new Object[][] {
-                    new Object[] { "Hakukohteelle ei löytynyt tuloksia annetuilla syötteillä!" },
-                    new Object[] { "Hakukohde OID", hakukohdeOid },
-                    new Object[] { "Valintakoe OID:it", Arrays.toString(valintakoeOids.toArray()) } });
+            return ExcelExportUtil.exportGridAsXls(new Object[][]{
+                    new Object[]{"Hakukohteelle ei löytynyt tuloksia annetuilla syötteillä!"},
+                    new Object[]{"Hakukohde OID", hakukohdeOid},
+                    new Object[]{"Valintakoe OID:it", Arrays.toString(valintakoeOids.toArray())}});
         } else {
             List<Object[]> rows = new ArrayList<Object[]>();
             LOG.debug("Creating rows for Excel file!");
@@ -82,7 +72,7 @@ public class ValintalaskentaTulosExcelKomponentti {
                 rows.add(rivi.toArray());
             }
 
-            return ExcelExportUtil.exportGridAsXls(rows.toArray(new Object[][] {}));
+            return ExcelExportUtil.exportGridAsXls(rows.toArray(new Object[][]{}));
         }
     }
 
