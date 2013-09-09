@@ -3,10 +3,9 @@ package fi.vm.sade.valinta.kooste.external.resource.laskenta.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ValintatapajonoDTO implements Comparable<ValintatapajonoDTO> {
+public class ValintatapajonoDTO {
 
     private String valintatapajonooid;
-    private Long versio;
     private String nimi;
     private int prioriteetti;
     private int aloituspaikat;
@@ -19,12 +18,12 @@ public class ValintatapajonoDTO implements Comparable<ValintatapajonoDTO> {
         return nimi;
     }
 
-    public Long getVersio() {
-        return versio;
+    public String getValintatapajonooid() {
+        return valintatapajonooid;
     }
 
-    public void setVersio(Long versio) {
-        this.versio = versio;
+    public void setValintatapajonooid(String valintatapajonooid) {
+        this.valintatapajonooid = valintatapajonooid;
     }
 
     public void setNimi(String nimi) {
@@ -63,11 +62,9 @@ public class ValintatapajonoDTO implements Comparable<ValintatapajonoDTO> {
         this.valintatapajonooid = oid;
     }
 
-    public int compareTo(ValintatapajonoDTO o) {
-        if (equals(o)) {
-            return 0;
-        }
-        return versio.compareTo(o.versio);
+    @Override
+    public int hashCode() {
+        return valintatapajonooid.hashCode();
     }
 
     public boolean equals(Object obj) {
@@ -78,20 +75,27 @@ public class ValintatapajonoDTO implements Comparable<ValintatapajonoDTO> {
         return false;
     }
 
-    public int hashCode() {
-        return versio.intValue();
-    }
-
     public Tasasijasaanto getTasasijasaanto() {
         return tasasijasaanto;
+    }
+
+    public void setTasasijasaanto(Tasasijasaanto tasasijasaanto) {
+        this.tasasijasaanto = tasasijasaanto;
     }
 
     public List<JonosijaDTO> getJonosijat() {
         return jonosijat;
     }
 
+    public void setJonosijat(List<JonosijaDTO> jonosijat) {
+        this.jonosijat = jonosijat;
+    }
+
     public Boolean getEiVarasijatayttoa() {
         return eiVarasijatayttoa;
     }
 
+    public void setEiVarasijatayttoa(Boolean eiVarasijatayttoa) {
+        this.eiVarasijatayttoa = eiVarasijatayttoa;
+    }
 }
