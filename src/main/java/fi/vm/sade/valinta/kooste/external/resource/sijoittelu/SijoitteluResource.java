@@ -30,7 +30,7 @@ public interface SijoitteluResource {
     // public SijoitteluajoDTO getSijoitteluajo(@PathParam("hakuOid") String
     // hakuOid,
     // @PathParam("sijoitteluajoId") String sijoitteluajoId);
-    //
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("sijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluajoId}/hakukohde/{hakukohdeOid}")
