@@ -6,37 +6,23 @@
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
-       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
        http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
        http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
 
-
     <ctx:annotation-config/>
-    <ctx:component-scan
-            base-package="fi.vm.sade.valinta.kooste.valintakokeet,fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintakokeet"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus"/>
 
     <util:properties id="valintakoelaskentaProperties">
         <beans:prop key="hakemus.rest.url">${valintalaskentakoostepalvelu.hakemus.rest.url}</beans:prop>
     </util:properties>
 
-    <routeContext id="haunValintakoelaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
-        <route>
-            <from uri="direct:kaynnistaHaunValintakoelaskentaReitti"/>
-            <setProperty propertyName="hakuOid">
-                <simple>${body}</simple>
-            </setProperty>
-            <policy ref="admin">
-                <to uri="bean:haeHaunHakemuksetKomponentti"/>
-                <split parallelProcessing="false">
-                    <simple>body</simple>
-                    <to uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
-                </split>
-            </policy>
-        </route>
+    <routeContext id="valintakoelaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
             <from uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
             <setProperty propertyName="hakemusOid">
@@ -46,16 +32,43 @@
                 <to uri="bean:laskeValintakoeosallistumisetHakemukselleKomponentti"/>
             </policy>
         </route>
-
+        <route>
+            <from uri="direct:kaynnistaHaunValintakoelaskentaReitti"/>
+            <setProperty propertyName="hakuOid">
+                <simple>${body}</simple>
+            </setProperty>
+            <policy ref="admin">
+                <to uri="bean:haeHaunHakemuksetKomponentti"/>
+                <split parallelProcessing="false">
+                    <method bean="hakemusOidSplitter" method="splitHakemusOid"/>
+                    <to uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
+                </split>
+            </policy>
+        </route>
+        <route>
+            <from uri="direct:kaynnistaHakukohteenValintakoelaskentaReitti" />
+            <setProperty propertyName="hakukohdeOid">
+                <simple>${body}</simple>
+            </setProperty>
+            <policy ref="admin">
+                <to uri="bean:haeHakukohteenHakemuksetKomponentti"/>
+                <split parallelProcessing="false">
+                    <method bean="hakemusOidSplitter" method="splitHakemusOid"/>
+                    <to uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
+                </split>
+            </policy>
+        </route>
     </routeContext>
 
-    <camelContext id="haunValintakoelaskentaCamelContext"
+    <camelContext id="valintakoelaskentaCamelContext"
                   autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
         <propertyPlaceholder id="valintakoelaskentaContextProperties" location="ref:valintakoelaskentaProperties"/>
         <proxy id="haunValintakoelaskentaAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiProxy"
                serviceUrl="direct:kaynnistaHaunValintakoelaskentaReitti"/>
-        <routeContextRef ref="haunValintakoelaskentaRoutes"/>
+        <proxy id="hakukohteenValintakoelaskentaAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.valintakokeet.HakukohteenValintakoelaskentaAktivointiProxy"
+               serviceUrl="direct:kaynnistaHakukohteenValintakoelaskentaReitti"/>
+        <routeContextRef ref="valintakoelaskentaRoutes"/>
     </camelContext>
-
 </beans>

@@ -18,6 +18,7 @@
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
 
 	<util:properties id="viestintapalveluProperties">
 		<beans:prop key="viestintapalvelu.url">${valintalaskentakoostepalvelu.viestintapalvelu.url}</beans:prop>
@@ -30,7 +31,7 @@
             	<setProperty propertyName="kielikoodi"><constant>kieli_fi</constant></setProperty>
 	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
 	            <setProperty propertyName="valintakoeOid"><simple>${body.args[1]}</simple></setProperty>
-	            <to uri="bean:haeHakemusKomponentti"/>
+	            <to uri="bean:haeHakukohteenHakemuksetKomponentti"/>
 	            <setProperty propertyName="hakemukset"><simple>${body}</simple></setProperty>
 	            <to uri="bean:osoitetarratKomponentti"/>
 	            <log 	loggingLevel="DEBUG" 
@@ -47,8 +48,6 @@
 	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
 	            <setProperty propertyName="hakuOid"><simple>${body.args[1]}</simple></setProperty>
 	            <setProperty propertyName="sijoitteluajoId"><simple>${body.args[2]}</simple></setProperty>
-	            <to uri="bean:haeHakemusKomponentti"/>
-	            <setProperty propertyName="hakemukset"><simple>${body}</simple></setProperty>
 	            <to uri="bean:hyvaksymiskirjeetKomponentti"/>
 	            <log 	loggingLevel="DEBUG" 
 	            		logName="fi.vm.sade.valinta.kooste.viestintapalvelu"
@@ -64,7 +63,7 @@
 	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
 	            <setProperty propertyName="hakuOid"><simple>${body.args[1]}</simple></setProperty>
 	            <setProperty propertyName="sijoitteluajoId"><simple>${body.args[2]}</simple></setProperty>
-	            <to uri="bean:haeHakemusKomponentti"/>
+	            <to uri="bean:haeHakukohteenHakemuksetKomponentti"/>
 	            <setProperty propertyName="hakemukset"><simple>${body}</simple></setProperty>
 	            <to uri="bean:jalkiohjauskirjeetKomponentti"/>
 	            <log 	loggingLevel="DEBUG" 

@@ -16,6 +16,7 @@
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus"/>
 
     <routeContext id="valintalaskentaTulosRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
@@ -28,7 +29,7 @@
             </policy>
         </route>
         <route>
-            <from uri="direct:valintakoekutsutExcelReitti"/>
+            <from uri="direct:kaynnistaTulostenLuontiXlsMuodossaReitti"/>
             <policy ref="admin">
 	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
 	            <setProperty propertyName="valintakoeOid"><simple>${body.args[1]}</simple></setProperty>
@@ -40,7 +41,7 @@
             </policy>
         </route>
         <route>
-            <from uri="direct:valintalaskennanTulosExcelReitti"/>
+            <from uri="direct:kaynnistaValintalaskennanTulostenLuontiXlsMuodossaReitti"/>
             <policy ref="admin">
 	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
 	            <to uri="bean:luoValintalaskennanTuloksetXlsMuodossa"/>
@@ -59,15 +60,13 @@
         <!-- 
         -->
         <proxy id="tulostenLuontiXlsMuodossaProxy"
-               serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintakoekutsutExcelProxy"
-               serviceUrl="direct:valintakoekutsutExcelReitti"/>
+               serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosProxy"
+               serviceUrl="direct:kaynnistaTulostenLuontiXlsMuodossaReitti"/>
         <!-- 
         -->
         <proxy id="valintalaskennanTulostenLuontiXlsMuodossaProxy"
                serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy"
-               serviceUrl="direct:valintalaskennanTulosExcelReitti"/>
-        <!-- 
-         -->
+               serviceUrl="direct:kaynnistaValintalaskennanTulostenLuontiXlsMuodossaReitti"/>
         <routeContextRef ref="valintalaskentaTulosRoutes"/>
     </camelContext>
 </beans>

@@ -86,10 +86,6 @@
         </dependency>
         <!-- SADE -->
         <dependency>
-            <groupId>fi.vm.sade.haku</groupId>
-            <artifactId>hakemus-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>fi.vm.sade.tarjonta</groupId>
             <artifactId>tarjonta-api</artifactId>
         </dependency>

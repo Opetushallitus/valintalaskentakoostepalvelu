@@ -14,8 +14,9 @@
 
     <ctx:annotation-config/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus"/>
 
     <routeContext id="valintalaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
@@ -31,7 +32,7 @@
                 <setProperty propertyName="valintaperusteet">
                     <simple>${body}</simple>
                 </setProperty>
-                <to uri="bean:haeHakemusKomponentti"/>
+                <to uri="bean:haeHakukohteenHakemuksetKomponentti"/>
                 <setProperty propertyName="hakemukset">
                     <simple>${body}</simple>
                 </setProperty>
