@@ -1,10 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
-
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -12,6 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 /**
  * @author Jussi Jartamo
@@ -34,16 +34,13 @@ public class ValintalaskentaAktivointiResource {
     @Value("${valintalaskentakoostepalvelu.valintaperusteService.url}")
     String valintaperusteServiceUrl;
 
-    @Value("${valintalaskentakoostepalvelu.hakemusService.url}")
-    String hakemusServiceUrl;
-
     @Value("${valintalaskentakoostepalvelu.valintalaskentaService.url}")
     String valintalaskentaServiceUrl;
 
     @GET
     @Path("aktivoi")
     public Response aktivoiHakukohteenValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid,
-            @QueryParam("valinnanvaihe") Integer valinnanvaihe) {
+                                                      @QueryParam("valinnanvaihe") Integer valinnanvaihe) {
         try {
             if (StringUtils.isBlank(hakukohdeOid) || valinnanvaihe == null) {
                 return Response.status(Response.Status.OK)
@@ -62,7 +59,7 @@ public class ValintalaskentaAktivointiResource {
     @GET
     @Path("aktivoiHaunValintalaskenta")
     public Response aktivoiHaunValintalaskenta(@QueryParam("hakuOid") String hakuOid) {
-        if(!parametriService.valintalaskentaEnabled(hakuOid)) {
+        if (!parametriService.valintalaskentaEnabled(hakuOid)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
 
