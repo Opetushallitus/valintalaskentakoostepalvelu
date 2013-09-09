@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy;
+package fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy;
 
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 

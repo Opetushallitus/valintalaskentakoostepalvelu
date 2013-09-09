@@ -1,18 +1,14 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import fi.vm.sade.service.hakemus.schema.AvainArvoTyyppi;
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-
 /**
- * 
  * @author Jussi Jartamo
- * 
  */
 public class OsoiteHakemukseltaUtil {
 
@@ -26,44 +22,45 @@ public class OsoiteHakemukseltaUtil {
     private final static String ULKOMAA_LAHIOSOITE = "osoiteUlkomaa";
     private final static String ULKOMAA_POSTINUMERO = "postinumeroUlkomaa";
     private final static String ULKOMAA_POSTITOIMIPAIKKA = "kaupunkiUlkomaa";
+    private final static String ETUNIMET = "Etunimet";
+    private final static String SUKUNIMI = "Sukunimi";
 
-    public static Osoitteet osoitteetHakemuksilta(List<HakemusTyyppi> hakemukset) {
+    public static Osoitteet osoitteetHakemuksilta(List<Hakemus> hakemukset) {
         List<Osoite> osoitteet = new ArrayList<Osoite>();
-        for (HakemusTyyppi hakemus : hakemukset) {
+        for (Hakemus hakemus : hakemukset) {
             osoitteet.add(osoiteHakemuksesta(hakemus));
         }
         return new Osoitteet(Collections.unmodifiableList(osoitteet));
     }
 
-    public static Osoite osoiteHakemuksesta(HakemusTyyppi hakemus) {
-        Map<String, String> m = arvotMappaus(hakemus.getAvainArvo());
-        String lahiosoite = null;
-        String postinumero = null;
-        String postitoimipaikka = null;
-        String maa = null;
-        String maakoodi = m.get(ASUINMAA);
-        if (SUOMI.equals(maakoodi)) { // PITAISI OLLA SUOMALAINEN OSOITE
-            lahiosoite = m.get(SUOMALAINEN_LAHIOSOITE);
-            postinumero = m.get(SUOMALAINEN_POSTINUMERO);
-            postitoimipaikka = m.get(SUOMALAINEN_POSTITOIMIPAIKKA);
-            maa = "Suomi";
-        } else { // OLETATAAN ULKOMAALAINEN OSOITE
-            lahiosoite = m.get(ULKOMAA_LAHIOSOITE);
-            postinumero = m.get(ULKOMAA_POSTINUMERO);
-            postitoimipaikka = m.get(ULKOMAA_POSTITOIMIPAIKKA);
+    public static Osoite osoiteHakemuksesta(Hakemus hakemus) {
+        String lahiosoite = "";
+        String postinumero = "";
+        String postitoimipaikka = "";
+        String maakoodi = "";
+        String maa = "";
 
+        String etunimet = "";
+        String sukunimi = "";
+
+        if (hakemus.getAnswers() != null && hakemus.getAnswers().getHenkilotiedot() != null) {
+            Map<String, String> henkilotiedot = hakemus.getAnswers().getHenkilotiedot();
+            maakoodi = henkilotiedot.get(ASUINMAA);
+            etunimet = henkilotiedot.get(ETUNIMET);
+            sukunimi = henkilotiedot.get(SUKUNIMI);
+
+            if (SUOMI.equals(maakoodi)) { // PITAISI OLLA SUOMALAINEN OSOITE
+                lahiosoite = henkilotiedot.get(SUOMALAINEN_LAHIOSOITE);
+                postinumero = henkilotiedot.get(SUOMALAINEN_POSTINUMERO);
+                postitoimipaikka = henkilotiedot.get(SUOMALAINEN_POSTITOIMIPAIKKA);
+                maa = "Suomi";
+            } else { // OLETATAAN ULKOMAALAINEN OSOITE
+                lahiosoite = henkilotiedot.get(ULKOMAA_LAHIOSOITE);
+                postinumero = henkilotiedot.get(ULKOMAA_POSTINUMERO);
+                postitoimipaikka = henkilotiedot.get(ULKOMAA_POSTITOIMIPAIKKA);
+            }
         }
 
-        String etunimi = hakemus.getHakijanEtunimi();
-        String sukunimi = hakemus.getHakijanSukunimi();
-        return new Osoite(etunimi, sukunimi, lahiosoite, null, null, postinumero, postitoimipaikka, maa, null, maakoodi);
-    }
-
-    private static Map<String, String> arvotMappaus(List<AvainArvoTyyppi> arvot) {
-        Map<String, String> mappaus = new HashMap<String, String>();
-        for (AvainArvoTyyppi a : arvot) {
-            mappaus.put(a.getAvain(), a.getArvo());
-        }
-        return Collections.unmodifiableMap(mappaus);
+        return new Osoite(etunimet, sukunimi, lahiosoite, null, null, postinumero, postitoimipaikka, maa, null, maakoodi);
     }
 }

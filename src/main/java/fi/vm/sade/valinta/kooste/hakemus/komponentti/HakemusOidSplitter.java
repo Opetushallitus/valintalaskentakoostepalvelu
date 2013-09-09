@@ -1,0 +1,26 @@
+package fi.vm.sade.valinta.kooste.hakemus.komponentti;
+
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * User: wuoti
+ * Date: 9.9.2013
+ * Time: 14.09
+ */
+@Component("hakemusOidSplitter")
+public class HakemusOidSplitter {
+
+    public List<String> splitHakemusOid(Collection<SuppeaHakemus> hakemukset) {
+        List<String> oids = new ArrayList<String>();
+        for (SuppeaHakemus h : hakemukset) {
+            oids.add(h.getOid());
+        }
+
+        return oids;
+    }
+}

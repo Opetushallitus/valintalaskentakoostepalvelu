@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.komponentti;
 
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
 import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValinnanVaiheenValintaperusteetProxy;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;

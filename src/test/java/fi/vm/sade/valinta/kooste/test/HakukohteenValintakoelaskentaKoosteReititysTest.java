@@ -7,7 +7,7 @@ import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
-import fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiResource;
+import fi.vm.sade.valinta.kooste.valintakokeet.HakukohteenValintakoelaskentaAktivointiProxy;
 import org.codehaus.jettison.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,28 +25,30 @@ import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
- * @author Jussi Jartamo
+ * User: wuoti
+ * Date: 9.9.2013
+ * Time: 9.24
  */
 @Configuration
-@ContextConfiguration(classes = HaunValintakoelaskentaKoosteReititysTest.class)
+@ContextConfiguration(classes = HakukohteenValintakoelaskentaKoosteReititysTest.class)
 @PropertySource("classpath:valintakoelaskenta-test.properties")
 @ImportResource({"classpath:META-INF/spring/context/valintakoelaskenta-context.xml", "test-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
-public class HaunValintakoelaskentaKoosteReititysTest {
-
+public class HakukohteenValintakoelaskentaKoosteReititysTest {
     @Autowired
-    private HaunValintakoelaskentaAktivointiResource haunValintakoelaskentaAktivointiResource;
+    private HakukohteenValintakoelaskentaAktivointiProxy hakukohteenValintakoelaskentaAktivointiProxy;
 
     @Autowired
     private ApplicationResource applicationResourceMock;
 
     private final static int PORT = 8097;
-
-    private final static String HAKU_OID = "hakuOid1";
 
     private final static String HAKEMUS1_OID = "1.2.3.4.5.00000000038";
     private final static String HAKEMUS2_OID = "1.2.3.4.5.00000000039";
@@ -468,14 +470,13 @@ public class HaunValintakoelaskentaKoosteReititysTest {
         return mock(ApplicationResource.class);
     }
 
-
     @Test
     public void test() throws JSONException {
-        when(applicationResourceMock.findApplications(anyString(), anyList(), anyString(), anyString(), eq(HAKU_OID), anyString(), anyInt(), anyInt())).thenReturn(new Gson().fromJson(HAKEMUKSET_RESPONSE_JSON, HakemusList.class));
+        when(applicationResourceMock.findApplications(anyString(), anyList(), anyString(), anyString(), anyString(), eq(HAKUKOHDE_OID), anyInt(), anyInt())).thenReturn(new Gson().fromJson(HAKEMUKSET_RESPONSE_JSON, HakemusList.class));
         when(applicationResourceMock.getApplicationByOid(eq(HAKEMUS1_OID))).thenReturn(new Gson().fromJson(HAKEMUS1_RESPONSE_JSON, Hakemus.class));
         when(applicationResourceMock.getApplicationByOid(eq(HAKEMUS2_OID))).thenReturn(new Gson().fromJson(HAKEMUS2_RESPONSE_JSON, Hakemus.class));
 
-        haunValintakoelaskentaAktivointiResource.aktivoiHaunValintakoelaskenta(HAKU_OID);
+        hakukohteenValintakoelaskentaAktivointiProxy.aktivoiValintakoelaskenta(HAKUKOHDE_OID);
 
         ArgumentCaptor<HakemusTyyppi> ac = ArgumentCaptor.forClass(HakemusTyyppi.class);
         verify(valintalaskentaServiceMock, times(2)).valintakokeet(ac.capture(), anyList());

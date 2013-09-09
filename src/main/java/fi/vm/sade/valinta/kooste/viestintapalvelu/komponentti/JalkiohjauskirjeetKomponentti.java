@@ -1,18 +1,15 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import java.util.List;
-
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
+import java.util.List;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
  */
 @Component("jalkiohjauskirjeetKomponentti")
 public class JalkiohjauskirjeetKomponentti {
@@ -20,9 +17,9 @@ public class JalkiohjauskirjeetKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(JalkiohjauskirjeetKomponentti.class);
 
     public String teeJalkiohjauskirjeet(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
-            @Simple("${property.hakuOid}") String hakuOid, @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
-            @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
-        LOG.debug("Jalkiohjauskirjeet for hakukohde '{}' and haku '{}'", new Object[] { hakukohdeOid, hakuOid });
+                                        @Simple("${property.hakuOid}") String hakuOid, @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
+                                        @Simple("${property.hakemukset}") List<SuppeaHakemus> hakemukset) {
+        LOG.debug("Jalkiohjauskirjeet for hakukohde '{}' and haku '{}'", new Object[]{hakukohdeOid, hakuOid});
 
         return null;// jalkiohjauskirjeet;
     }

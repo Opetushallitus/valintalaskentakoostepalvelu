@@ -7,17 +7,12 @@ import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.TavallinenValinnanVaiheTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
-import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
-import fi.vm.sade.tarjonta.service.types.TarjontaTila;
-import fi.vm.sade.tarjonta.service.types.TarjontaTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResource;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -32,25 +27,25 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
 
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
- * User: wuoti Date: 27.5.2013 Time: 9.30
+ * User: wuoti
+ * Date: 9.9.2013
+ * Time: 10.16
  */
 @Configuration
-@ContextConfiguration(classes = HaunValintalaskentaReititysTest.class)
+@ContextConfiguration(classes = HakukohteenValintalaskentaKoosteReititysTest.class)
 @PropertySource("classpath:test.properties")
 @ImportResource({"classpath:META-INF/spring/context/valintalaskenta-context.xml", "test-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
-public class HaunValintalaskentaReititysTest {
-
+public class HakukohteenValintalaskentaKoosteReititysTest {
     private static final Logger LOG = LoggerFactory.getLogger(HaunValintalaskentaReititysTest.class);
-
-    private static final String[] HAKUKOHDE_OIDS = {"hakukohdeoid1", "hakukohdeoid2", "hakukohdeoid3",
-            "hakukohdeoid4", "hakukohdeoid5", "hakukohdeoid6s"};
-
     private static final String HAKUOID = "hakuoid";
 
     private static final String HAKEMUSOID = "hakemus0";
@@ -67,28 +62,7 @@ public class HaunValintalaskentaReititysTest {
         hk.setOid(HAKEMUSOID);
         hlist.getResults().add(hk);
 
-        when(mock.findApplications(anyString(), anyList(), anyString(), anyString(), anyString(), argThat(new BaseMatcher<String>() {
-            @Override
-            public boolean matches(Object o) {
-                String s = (String) o;
-
-                boolean found = false;
-                for (String hakukohde : HAKUKOHDE_OIDS) {
-                    if (s.equals(hakukohde)) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                return found;
-
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                //To change body of implemented methods use File | Settings | File Templates.
-            }
-        }), anyInt(), anyInt())).thenReturn(hlist);
+        when(mock.findApplications(anyString(), anyList(), anyString(), anyString(), anyString(), eq(HAKUKOHDEOID), anyInt(), anyInt())).thenReturn(hlist);
 
         Hakemus hakemus = new Hakemus();
         hakemus.setOid(HAKEMUSOID);
@@ -116,24 +90,15 @@ public class HaunValintalaskentaReititysTest {
     }
 
     @Bean
-    public TarjontaPublicService getTarjontaPublicServiceMock() {
-        TarjontaPublicService tarjontaService = mock(TarjontaPublicService.class);
-        TarjontaTyyppi tarjonta = new TarjontaTyyppi();
-        for (String oid : HAKUKOHDE_OIDS) {
-            HakukohdeTyyppi hakukohde = new HakukohdeTyyppi();
-            hakukohde.setOid(oid);
-            hakukohde.setHakukohteenTila(TarjontaTila.JULKAISTU);
-            tarjonta.getHakukohde().add(hakukohde);
-        }
-        when(tarjontaService.haeTarjonta(eq(HAKUOID))).thenReturn(tarjonta);
-        return tarjontaService;
-    }
-
-    @Bean
     public ParametriService getParametriService() {
         ParametriService parametriService = mock(ParametriService.class);
         when(parametriService.valintalaskentaEnabled(HAKUOID)).thenReturn(true);
         return parametriService;
+    }
+
+    @Bean
+    public TarjontaPublicService getTarjontaPublicServiceMock() {
+        return mock(TarjontaPublicService.class);
     }
 
     @Autowired
@@ -147,15 +112,13 @@ public class HaunValintalaskentaReititysTest {
 
     @Test
     public void testLaskentaKooste() {
-        valintalaskentaResource.aktivoiHaunValintalaskenta(HAKUOID);
+        valintalaskentaResource.aktivoiHakukohteenValintalaskenta(HAKUKOHDEOID, VALINNANVAIHE);
         // verify that hakemusservice was indeed called with REST argument!
-
-        for (String hakukohdeoid : HAKUKOHDE_OIDS) {
-            verify(applicationResourceMock, times(1)).findApplications(anyString(), anyList(), anyString(), anyString(), anyString(), eq(hakukohdeoid), anyInt(), anyInt());
-        }
-
+        verify(applicationResourceMock, times(1)).findApplications(anyString(), anyList(), anyString(), anyString(), anyString(), eq(HAKUKOHDEOID), anyInt(), anyInt());
+        verify(applicationResourceMock, times(1)).getApplicationByOid(eq(HAKEMUSOID));
         // verify that the route ended calling valintalaskentaservice!
-        verify(valintalaskentaService, times(HAKUKOHDE_OIDS.length)).laske(anyListOf(HakemusTyyppi.class),
+        verify(valintalaskentaService, times(1)).laske(anyListOf(HakemusTyyppi.class),
                 anyListOf(ValintaperusteetTyyppi.class));
     }
+
 }

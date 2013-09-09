@@ -1,32 +1,25 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.google.gson.Gson;
+import fi.vm.sade.service.valintatiedot.ValintatietoService;
+import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
+import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
+import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteHakemukseltaUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintatiedot.ValintatietoService;
-import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
-import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
-import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteHakemukseltaUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
+import java.util.*;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
  */
 @Component("osoitetarratKomponentti")
 public class OsoitetarratKomponentti {
@@ -36,11 +29,14 @@ public class OsoitetarratKomponentti {
     @Autowired
     private ValintatietoService valintatietoService;
 
+    @Autowired
+    private ApplicationResource applicationResource;
+
     public String teeOsoitetarrat(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
-            @Simple("${property.valintakoeOid}") List<String> valintakoeOids,
-            @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
+                                  @Simple("${property.valintakoeOid}") List<String> valintakoeOids,
+                                  @Simple("${property.hakemukset}") List<SuppeaHakemus> hakemukset) {
         LOG.debug("Osoitetarrat for hakukohde '{}' and valintakokeet '{}'",
-                new Object[] { hakukohdeOid, Arrays.toString(valintakoeOids.toArray()) });
+                new Object[]{hakukohdeOid, Arrays.toString(valintakoeOids.toArray())});
         List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService.haeValintatiedotHakukohteelle(
                 valintakoeOids, hakukohdeOid);
 
@@ -56,9 +52,9 @@ public class OsoitetarratKomponentti {
             }
         }
         List<Osoite> osoitteet = new ArrayList<Osoite>();
-        for (HakemusTyyppi h : hakemukset) {
-            if (osallistujienHakemusOidit.contains(h.getHakemusOid())) {
-                osoitteet.add(OsoiteHakemukseltaUtil.osoiteHakemuksesta(h));
+        for (SuppeaHakemus h : hakemukset) {
+            if (osallistujienHakemusOidit.contains(h.getOid())) {
+                osoitteet.add(OsoiteHakemukseltaUtil.osoiteHakemuksesta(applicationResource.getApplicationByOid(h.getOid())));
             }
         }
 

@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.valintakokeet.komponentti;
+package fi.vm.sade.valinta.kooste.hakemus.komponentti;
 
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,17 +24,14 @@ public class HaeHaunHakemuksetKomponentti {
     @Autowired
     private ApplicationResource applicationResource;
 
-    public List<String> haeHaunHakemukset(@Simple("${property.hakuOid}") String hakuOid) {
+    public List<SuppeaHakemus> haeHaunHakemukset(@Simple("${property.hakuOid}") String hakuOid) {
         LOG.info("Haetaan haun " + hakuOid + " hakemukset");
 
-        HakemusList hakemusList = applicationResource.findApplications(null, null, null, null, hakuOid, 0,
+        HakemusList hakemusList = applicationResource.findApplications(null, null, null, null, hakuOid, null, 0,
                 Integer.MAX_VALUE);
 
-        List<String> hakemusOids = new ArrayList<String>();
-        for (SuppeaHakemus hakemus : hakemusList.getResults()) {
-            hakemusOids.add(hakemus.getOid());
-        }
+        LOG.info("Haettiin {} kpl hakemuksia", hakemusList.getResults().size());
 
-        return hakemusOids;
+        return hakemusList.getResults();
     }
 }

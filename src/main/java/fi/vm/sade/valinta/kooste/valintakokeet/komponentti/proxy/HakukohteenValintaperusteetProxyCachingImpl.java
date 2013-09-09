@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.paasykokeet.komponentti.proxy;
+package fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

@@ -33,6 +33,7 @@ public interface ApplicationResource {
                                         @QueryParam("aoid") String aoid,
                                         @QueryParam("lopoid") String lopoid,
                                         @QueryParam("asId") String asId,
+                                        @QueryParam("aoOid") String aoOid,
                                         @DefaultValue(value = "0") @QueryParam("start") int start,
                                         @DefaultValue(value = "100") @QueryParam("rows") int rows);
 }

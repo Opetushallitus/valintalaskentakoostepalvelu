@@ -7,18 +7,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
+
 
 import com.google.gson.Gson;
 
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemuksenTila;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemusDTO;
@@ -45,22 +48,22 @@ public class HyvaksymiskirjeetKomponentti {
 
     @Autowired
     private SijoitteluResource sijoitteluajoResource;
+    
     @Value("${valintalaskentakoostepalvelu.sijoitteluService.url}")
     private String sijoitteluServiceUrl;
 
     @Autowired
     private HakukohdeResource tarjontaResource;
-    @Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}")
-    private String tarjontaServiceUrl;
 
+    @Autowired
+    private ApplicationResource applicationResource;
     // private static final String KIELIKOODI = "kieli_fi";
 
     public String teeHyvaksymiskirjeet(@Simple("${property.kielikoodi}") String kielikoodi,
-            @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid,
-            @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
-            @Simple("${property.hakemukset}") List<HakemusTyyppi> hakemukset) {
-        LOG.debug("Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'", new Object[] {
-                hakukohdeOid, hakuOid, sijoitteluajoId });
+                                       @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid,
+                                       @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId) {
+        LOG.debug("Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'", new Object[]{
+                hakukohdeOid, hakuOid, sijoitteluajoId});
         assert (hakukohdeOid != null);
         assert (hakuOid != null);
         assert (sijoitteluajoId != null);
@@ -80,7 +83,6 @@ public class HyvaksymiskirjeetKomponentti {
         // Ainoastaan naista ollaan kiinnostuneita!
         //
         List<Kirje> kirjeet = new ArrayList<Kirje>();
-        Map<String, HakemusTyyppi> hakuAppHakemukset = convertToHakemusOidMap(hakemukset);
         Collection<HakemusDTO> hyvaksytytHakemukset;
         {
             LOG.debug("Haetaan hakukohde sijoittelulta!");
@@ -93,7 +95,7 @@ public class HyvaksymiskirjeetKomponentti {
         final String koulu = extractTarjoajaNimi(haeHakukohdeNimi(hakukohdeOid, nimiCache), kielikoodi);
         final String koulutus = extractHakukohdeNimi(haeHakukohdeNimi(hakukohdeOid, nimiCache), kielikoodi);
         for (HakemusDTO hakemus : hyvaksytytHakemukset) {
-            Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakuAppHakemukset.get(hakemus.getHakemusOid()));
+            Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(applicationResource.getApplicationByOid(hakemus.getHakemusOid()));
 
             List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
             List<HakemusDTO> hakemuksetDTO = sijoitteluajoResource.getHakemusBySijoitteluajo(hakuOid,
@@ -223,8 +225,7 @@ public class HyvaksymiskirjeetKomponentti {
         if (cache.containsKey(hakukohdeOid)) {
             return cache.get(hakukohdeOid);
         } else {
-            LOG.debug("Kutsutaan {} Sijoittelu getHakukohdeBySijoitteluajo({},{},{})", new Object[] {
-                    sijoitteluServiceUrl, hakuOid, sijoitteluajoId, hakukohdeOid });
+            LOG.debug("Haetaan hakukohde '{}' sijoittelulta!", hakukohdeOid);
             HakukohdeDTO kohde = sijoitteluajoResource.getHakukohdeBySijoitteluajo(hakuOid, sijoitteluajoId.toString(),
                     hakukohdeOid);// HakukohdeBySijoitteluajo(sijoitteluajoId,
                                   // hakukohdeOid);
@@ -237,18 +238,10 @@ public class HyvaksymiskirjeetKomponentti {
         if (cache.containsKey(hakukohdeOid)) {
             return cache.get(hakukohdeOid);
         } else {
-            LOG.debug("Kutsutaan {} getHakukohdeNimi({})", new Object[] { tarjontaServiceUrl, hakukohdeOid });
+            LOG.debug("Haetaan hakukohteen '{}' todellinen nimi tarjonnalta!", hakukohdeOid);
             HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
             cache.put(hakukohdeOid, nimi);
             return nimi;
         }
-    }
-
-    private Map<String, HakemusTyyppi> convertToHakemusOidMap(List<HakemusTyyppi> hakemukset) {
-        Map<String, HakemusTyyppi> tmp = new HashMap<String, HakemusTyyppi>();
-        for (HakemusTyyppi h : hakemukset) {
-            tmp.put(h.getHakemusOid(), h);
-        }
-        return tmp;
     }
 }

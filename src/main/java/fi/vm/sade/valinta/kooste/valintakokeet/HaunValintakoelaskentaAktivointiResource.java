@@ -16,21 +16,36 @@ import javax.ws.rs.QueryParam;
  * Time: 12.28
  */
 @Controller
-@Path("haunvalintakoelaskenta")
+@Path("valintakoelaskenta")
 public class HaunValintakoelaskentaAktivointiResource {
     private static final Logger LOG = LoggerFactory.getLogger(HaunValintakoelaskentaAktivointiResource.class);
 
     @Autowired
     private HaunValintakoelaskentaAktivointiProxy haunValintakoelaskentaAktivointiProxy;
 
+    @Autowired
+    private HakukohteenValintakoelaskentaAktivointiProxy hakukohteenValintakoelaskentaAktivointiProxy;
+
     @GET
     @Path("aktivoiHaunValintakoelaskenta")
     public String aktivoiHaunValintakoelaskenta(@QueryParam("hakuOid") String hakuOid) {
         if (StringUtils.isBlank(hakuOid)) {
-            return "get parameter 'hakuOid required";
+            return "get parameter 'hakuOid' required";
         } else {
             LOG.info("Valintakoelaskenta for haku {}", hakuOid);
             haunValintakoelaskentaAktivointiProxy.aktivoiValintakoelaskenta(hakuOid);
+            return "in progress";
+        }
+    }
+
+    @GET
+    @Path("aktivoiHakukohteenValintakoelaskenta")
+    public String aktivoiHakukohteenValintakoelaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid) {
+        if (StringUtils.isBlank(hakukohdeOid)) {
+            return "get parameter 'hakukohdeOid' required";
+        } else {
+            LOG.info("Valintakoelaskenta for hakukohde {}", hakukohdeOid);
+            hakukohteenValintakoelaskentaAktivointiProxy.aktivoiValintakoelaskenta(hakukohdeOid);
             return "in progress";
         }
     }
