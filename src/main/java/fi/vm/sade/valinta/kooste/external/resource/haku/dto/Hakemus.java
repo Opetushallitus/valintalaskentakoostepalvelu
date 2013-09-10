@@ -2,6 +2,9 @@ package fi.vm.sade.valinta.kooste.external.resource.haku.dto;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * User: wuoti
  * Date: 3.9.2013
@@ -12,6 +15,7 @@ public class Hakemus {
     private String type;
     private String applicationSystemId;
     private Answers answers;
+    private Map<String, String> additionalInfo = new HashMap<String, String>();
 
     private String oid;
     private String state;
@@ -63,5 +67,13 @@ public class Hakemus {
 
     public void setPersonOid(String personOid) {
         this.personOid = personOid;
+    }
+
+    public Map<String, String> getAdditionalInfo() {
+        return additionalInfo;
+    }
+
+    public void setAdditionalInfo(Map<String, String> additionalInfo) {
+        this.additionalInfo = additionalInfo;
     }
 }

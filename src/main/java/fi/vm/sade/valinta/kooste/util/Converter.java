@@ -153,6 +153,16 @@ public class Converter {
             }
         }
 
+        if (hakemus.getAdditionalInfo() != null) {
+            for (Map.Entry<String, String> e : hakemus.getAdditionalInfo().entrySet()) {
+                AvainArvoTyyppi aa = new AvainArvoTyyppi();
+                aa.setAvain(e.getKey());
+                aa.setArvo(e.getValue());
+
+                hakemusTyyppi.getAvainArvo().add(aa);
+            }
+        }
+
         return hakemusTyyppi;
     }
 }
