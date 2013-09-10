@@ -14,6 +14,7 @@ public class HakemusDTO implements Serializable {
     private Integer tasasijaJonosija;
     private Integer varasijanNumero;
     private BigDecimal pisteet;
+    private BigDecimal paasyJaSoveltuvuusKokeenTulos;
     private HakemuksenTila tila;
     private boolean hyvaksyttyHarkinnanvaraisesti = false;
     private Long sijoitteluajoId;
@@ -24,6 +25,14 @@ public class HakemusDTO implements Serializable {
 
     public BigDecimal getPisteet() {
         return pisteet;
+    }
+
+    public BigDecimal getPaasyJaSoveltuvuusKokeenTulos() {
+        return paasyJaSoveltuvuusKokeenTulos;
+    }
+
+    public void setPaasyJaSoveltuvuusKokeenTulos(BigDecimal paasyJaSoveltuvuusKokeenTulos) {
+        this.paasyJaSoveltuvuusKokeenTulos = paasyJaSoveltuvuusKokeenTulos;
     }
 
     public Integer getVarasijanNumero() {

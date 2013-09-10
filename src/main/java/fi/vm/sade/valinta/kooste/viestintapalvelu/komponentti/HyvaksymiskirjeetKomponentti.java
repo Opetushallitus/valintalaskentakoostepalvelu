@@ -11,6 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.camel.language.Simple;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,9 @@ public class HyvaksymiskirjeetKomponentti {
     @Autowired
     private ApplicationResource applicationResource;
 
+    @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
+    private String hakuAppResourceUrl;
+
     // private static final String KIELIKOODI = "kieli_fi";
 
     public String teeHyvaksymiskirjeet(@Simple("${property.kielikoodi}") String kielikoodi,
@@ -99,9 +103,17 @@ public class HyvaksymiskirjeetKomponentti {
         final String koulu = extractTarjoajaNimi(haeHakukohdeNimi(hakukohdeOid, nimiCache), kielikoodi);
         final String koulutus = extractHakukohdeNimi(haeHakukohdeNimi(hakukohdeOid, nimiCache), kielikoodi);
         for (HakemusDTO hakemus : hyvaksytytHakemukset) {
-            Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(applicationResource.getApplicationByOid(hakemus
-                    .getHakemusOid()));
-
+            String hakemusOid = hakemus.getHakemusOid();
+            LOG.debug("Yhteys {}, ApplicationResource.getApplicationByOid({})", new Object[] { hakuAppResourceUrl,
+                    hakemusOid });
+            Osoite osoite;
+            try {
+                osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(applicationResource.getApplicationByOid(hakemusOid));
+            } catch (Exception e) {
+                LOG.error("Ei voitu hakea osoitetta Haku-palvelusta hakemukselle {}! {}", new Object[] { hakemusOid,
+                        hakuAppResourceUrl });
+                throw new RuntimeException("Ei voitu hakea osoitetta Haku-palvelusta hakemukselle " + hakemusOid, e);
+            }
             List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
             LOG.debug("Yhteys {}, SijoitteluResource.getHakemusBySijoitteluajo({},{},{})", new Object[] {
                     sijoitteluResourceUrl, hakuOid, sijoitteluajoId, hakemus.getHakemusOid() });
@@ -140,7 +152,7 @@ public class HyvaksymiskirjeetKomponentti {
                     // valinnanvaiheet));
 
                     tulokset.put("organisaationNimi", extractTarjoajaNimi(tamanHakukohteenNimi, kielikoodi));
-                    tulokset.put("paasyJaSoveltuvuuskoe", "--");
+                    tulokset.put("paasyJaSoveltuvuuskoe", suomenna(hakemus.getPaasyJaSoveltuvuusKokeenTulos()));
                     tulokset.put("selite", "");
                     tulokset.put("valinnanTulos", HakemuksenTilaUtil.tilaConverter(dto.getTila().toString()));
                     tulosList.add(tulokset);
@@ -154,11 +166,11 @@ public class HyvaksymiskirjeetKomponentti {
         return hyvaksymiskirjeet;
     }
 
-    private String suomenna(BigDecimal pisteet) {
-        if (pisteet == null) {
-            return BigDecimal.ZERO.toString();
+    private String suomenna(BigDecimal arvo) {
+        if (arvo == null) {
+            return StringUtils.EMPTY;
         }
-        return NUMERO_FORMAATTI.format(pisteet);
+        return NUMERO_FORMAATTI.format(arvo);
     }
 
     private int countHyvaksytytHakemukset(HakukohdeDTO hakukohde, Map<String, Integer> hyvaksytytCache) {
