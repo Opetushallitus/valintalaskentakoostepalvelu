@@ -1,10 +1,13 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.camel.language.Simple;
@@ -23,6 +26,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluResource
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemuksenTila;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakukohdeDTO;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
@@ -42,7 +46,7 @@ public class HyvaksymiskirjeetKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetKomponentti.class);
     private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
     private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
-
+    private static final NumberFormat NUMERO_FORMAATTI = NumberFormat.getInstance(new Locale("FI"));
     @Autowired
     private SijoitteluResource sijoitteluResource;
 
@@ -81,7 +85,6 @@ public class HyvaksymiskirjeetKomponentti {
         // BigDecimal>();
         //
         // Hyvaksymiskirje koskee vain kyseiselle hakukohteelle hyvaksyttyja!
-        // Ainoastaan naista ollaan kiinnostuneita!
         //
         List<Kirje> kirjeet = new ArrayList<Kirje>();
         Collection<HakemusDTO> hyvaksytytHakemukset;
@@ -111,33 +114,37 @@ public class HyvaksymiskirjeetKomponentti {
             //
             for (HakemusDTO dto : hakemuksetDTO) {
                 HakukohdeDTO hakukohde = haeHakukohde(hakuOid, sijoitteluajoId, dto.getHakukohdeOid(), kohdeCache);
-                // List<ValinnanvaiheDTO> valinnanvaiheet =
-                // haeValinnanvaiheet(dto.getHakukohdeOid(), laskentaCache);
-                Collection<HakemusDTO> kaikkiHakemukset = haeHakemukset(hakukohde);
-                // Collection<Hakemus> tahanHyvaksytyt =
-                // filterHyvaksytytHakemukset(kaikkiHakemukset);
+                for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
+                    jono.getAlinHyvaksyttyPistemaara();
+                    // List<ValinnanvaiheDTO> valinnanvaiheet =
+                    // haeValinnanvaiheet(dto.getHakukohdeOid(), laskentaCache);
+                    Collection<HakemusDTO> kaikkiHakemukset = haeHakemuksetJonolle(jono);
+                    // Collection<Hakemus> tahanHyvaksytyt =
+                    // filterHyvaksytytHakemukset(kaikkiHakemukset);
 
-                HakukohdeNimiRDTO tamanHakukohteenNimi = haeHakukohdeNimi(dto.getHakukohdeOid(), nimiCache);
-                Map<String, String> tulokset = new HashMap<String, String>();
-                tulokset.put("alinHyvaksyttyPistemaara", "--");
+                    HakukohdeNimiRDTO tamanHakukohteenNimi = haeHakukohdeNimi(dto.getHakukohdeOid(), nimiCache);
+                    Map<String, String> tulokset = new HashMap<String, String>();
+                    tulokset.put("alinHyvaksyttyPistemaara", suomenna(jono.getAlinHyvaksyttyPistemaara()));
 
-                tulokset.put("hakukohteenNimi", extractHakukohdeNimi(tamanHakukohteenNimi, kielikoodi));
-                tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
-                                                       // hakukohdenimea joten
-                                                       // tuskin tarvii toistaa
-                tulokset.put("hylkayksenSyy", "");
-                tulokset.put("hyvaksytyt", "" + countHyvaksytytHakemukset(hakukohde, hyvaksytytCache));//
+                    tulokset.put("hakukohteenNimi", extractHakukohdeNimi(tamanHakukohteenNimi, kielikoodi));
+                    tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
+                                                           // hakukohdenimea
+                                                           // joten
+                                                           // tuskin tarvii
+                                                           // toistaa
+                    tulokset.put("hylkayksenSyy", "");
+                    tulokset.put("hyvaksytyt", "" + countHyvaksytytHakemukset(hakukohde, hyvaksytytCache));//
 
-                tulokset.put("kaikkiHakeneet", "" + kaikkiHakemukset.size());
-                tulokset.put("omatPisteet", "--");// countOmatPisteet(dto.getHakemusOid(),
-                                                  // valinnanvaiheet));
+                    tulokset.put("kaikkiHakeneet", "" + kaikkiHakemukset.size());
+                    tulokset.put("omatPisteet", suomenna(hakemus.getPisteet()));// countOmatPisteet(dto.getHakemusOid(),
+                    // valinnanvaiheet));
 
-                tulokset.put("organisaationNimi", extractTarjoajaNimi(tamanHakukohteenNimi, kielikoodi));
-                tulokset.put("paasyJaSoveltuvuuskoe", "--");
-                tulokset.put("selite", "");
-                tulokset.put("valinnanTulos", HakemuksenTilaUtil.tilaConverter(dto.getTila().toString()));
-                tulosList.add(tulokset);
-
+                    tulokset.put("organisaationNimi", extractTarjoajaNimi(tamanHakukohteenNimi, kielikoodi));
+                    tulokset.put("paasyJaSoveltuvuuskoe", "--");
+                    tulokset.put("selite", "");
+                    tulokset.put("valinnanTulos", HakemuksenTilaUtil.tilaConverter(dto.getTila().toString()));
+                    tulosList.add(tulokset);
+                }
             }
             kirjeet.add(new Kirje(osoite, "FI", koulu, koulutus, tulosList));
         }
@@ -145,6 +152,13 @@ public class HyvaksymiskirjeetKomponentti {
         String hyvaksymiskirjeet = new Gson().toJson(new Kirjeet(kirjeet));
         LOG.debug("Hyvaksymiskirjeet {}", hyvaksymiskirjeet);
         return hyvaksymiskirjeet;
+    }
+
+    private String suomenna(BigDecimal pisteet) {
+        if (pisteet == null) {
+            return BigDecimal.ZERO.toString();
+        }
+        return NUMERO_FORMAATTI.format(pisteet);
     }
 
     private int countHyvaksytytHakemukset(HakukohdeDTO hakukohde, Map<String, Integer> hyvaksytytCache) {
@@ -165,6 +179,21 @@ public class HyvaksymiskirjeetKomponentti {
         }
     }
 
+    private Collection<HakemusDTO> haeHakemuksetJonolle(ValintatapajonoDTO jono) {// String
+        // valintatapajonoOid,
+        if (jono == null) {
+            LOG.error("Ei hakukohdetta!");
+            return Collections.emptyList();
+        } else {
+            Map<String, HakemusDTO> h = new HashMap<String, HakemusDTO>();
+            for (HakemusDTO hakemus : jono.getHakemukset()) {
+                h.put(hakemus.getHakemusOid(), hakemus);// .getHakemusOid(),
+                // hakemus);
+            }
+            return h.values();
+        }
+    }
+
     private Collection<HakemusDTO> haeHakemukset(HakukohdeDTO hakukohde) {// String
         // valintatapajonoOid,
         if (hakukohde == null) {
@@ -172,8 +201,7 @@ public class HyvaksymiskirjeetKomponentti {
             return Collections.emptyList();
         } else {
             Map<String, HakemusDTO> h = new HashMap<String, HakemusDTO>();
-            for (fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.ValintatapajonoDTO jono : hakukohde
-                    .getValintatapajonot()) {
+            for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
                 // if (valintatapajonoOid.equals(jono.getOid())) {
                 for (HakemusDTO hakemus : jono.getHakemukset()) {
                     h.put(hakemus.getHakemusOid(), hakemus);// .getHakemusOid(),
