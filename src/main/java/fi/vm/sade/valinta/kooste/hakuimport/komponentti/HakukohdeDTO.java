@@ -25,6 +25,7 @@ public class HakukohdeDTO {
     private List<ValintakoeDTO> valintakoes = new ArrayList<ValintakoeDTO>();
     private Map<String, String> hakuKausi = new HashMap<String, String>();
     private String hakuVuosi;
+    private String tila;
 
 
     public Map<String, String> getTarjoajaNimi() {
@@ -114,5 +115,13 @@ public class HakukohdeDTO {
 
     public void setOid(String oid) {
         this.oid = oid;
+    }
+
+    public String getTila() {
+        return tila;
+    }
+
+    public void setTila(String tila) {
+        this.tila = tila;
     }
 }

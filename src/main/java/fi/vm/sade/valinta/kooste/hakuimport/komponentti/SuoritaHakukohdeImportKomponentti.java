@@ -70,6 +70,8 @@ public class SuoritaHakukohdeImportKomponentti {
 
         importTyyppi.setValinnanAloituspaikat(hakukohde.getValintojenAloituspaikatLkm());
 
+        importTyyppi.setTila(hakukohde.getTila());
+
         for (ValintakoeDTO valinakoe : hakukohde.getValintakoes()) {
             HakukohteenValintakoeTyyppi v = new HakukohteenValintakoeTyyppi();
             v.setOid(valinakoe.getOid());
