@@ -27,13 +27,7 @@ public class HaeHakukohteenHakemuksetKomponentti {
     private String hakuAppResourceUrl;
 
     public List<SuppeaHakemus> haeHakukohteenHakemukset(@Property("hakukohdeOid") String hakukohdeOid) {
-        assert (SecurityContextHolder.getContext().getAuthentication() != null); // <-
-                                                                                 // helps
-                                                                                 // finding
-                                                                                 // really
-                                                                                 // difficult
-                                                                                 // multithread
-                                                                                 // bugs
+        assert (SecurityContextHolder.getContext().getAuthentication() != null);
         LOG.info("Haetaan hakukohteen {} hakemukset! Osoitteesta {}", new Object[] { hakukohdeOid, hakuAppResourceUrl });
         HakemusList hakemusList = applicationResource.findApplications(null, null, null, null, null, hakukohdeOid, 0,
                 Integer.MAX_VALUE);

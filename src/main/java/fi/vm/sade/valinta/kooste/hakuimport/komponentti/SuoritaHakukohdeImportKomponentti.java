@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
-import static fi.vm.sade.valinta.kooste.security.SecurityContextProcessor.SECURITY_CONTEXT_HEADER;
+import static fi.vm.sade.valinta.kooste.security.SecurityPreprocessor.SECURITY_CONTEXT_HEADER;
 
 import org.apache.camel.Body;
 import org.apache.camel.Property;

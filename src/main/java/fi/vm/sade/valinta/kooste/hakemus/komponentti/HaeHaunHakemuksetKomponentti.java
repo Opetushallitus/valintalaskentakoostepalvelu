@@ -25,13 +25,7 @@ public class HaeHaunHakemuksetKomponentti {
     private ApplicationResource applicationResource;
 
     public List<SuppeaHakemus> haeHaunHakemukset(@Simple("${property.hakuOid}") String hakuOid) {
-        assert (SecurityContextHolder.getContext().getAuthentication() != null); // <-
-                                                                                 // helps
-                                                                                 // finding
-                                                                                 // really
-                                                                                 // difficult
-                                                                                 // multithread
-                                                                                 // bugs
+        assert (SecurityContextHolder.getContext().getAuthentication() != null);
         LOG.info("Haetaan haun " + hakuOid + " hakemukset");
 
         HakemusList hakemusList = applicationResource.findApplications(null, null, null, null, hakuOid, null, 0,

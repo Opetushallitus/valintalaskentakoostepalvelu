@@ -22,7 +22,8 @@
         <route>
             <from uri="direct:kaynnistaHakukohteenValintalaskentaReitti"/>
             <policy ref="admin">
-                <setProperty propertyName="hakukohdeOid">
+            	<process ref="securityPreprocessor"/>
+            	<setProperty propertyName="hakukohdeOid">
                     <simple>${body.args[0]}</simple>
                 </setProperty>
                 <setProperty propertyName="valinnanvaihe">
@@ -45,11 +46,19 @@
                 <simple>${body.args[0]}</simple>
             </setProperty>
             <policy ref="admin">
+                <process ref="securityPreprocessor"/>
                 <to uri="bean:hakukohteetTarjonnaltaKomponentti"/>
                 <!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
-                <split parallelProcessing="false">
+                <split parallelProcessing="true">
                     <method bean="splitHakukohteetKomponentti" method="splitHakukohteet"/>
-                    <to uri="bean:hakukohteenValintalaskentaAktivointiRajapinta"/>
+                    <process ref="securityPreprocessor"/>
+	            	<setProperty propertyName="hakukohdeOid"><simple>${body}</simple></setProperty>
+	                <!-- setProperty propertyName="valinnanvaihe"><simple>null</simple></setProperty -->
+	                <to uri="bean:haeValintaperusteetKomponentti"/>
+	                <setProperty propertyName="valintaperusteet"><simple>${body}</simple></setProperty>
+	                <to uri="bean:haeHakukohteenHakemuksetKomponentti"/>
+	                <setProperty propertyName="hakemukset"><simple>${body}</simple></setProperty>
+	                <to uri="bean:suoritaLaskentaKomponentti"/>
                 </split>
             </policy>
         </route>

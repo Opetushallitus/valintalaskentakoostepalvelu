@@ -18,13 +18,7 @@ public class HaeHakemusKomponentti {
     private ApplicationResource applicationResource;
 
     public Hakemus haeHakemus(@Simple("${property.hakemusOid}") String hakemusOid) {
-        assert (SecurityContextHolder.getContext().getAuthentication() != null); // <-
-                                                                                 // helps
-                                                                                 // finding
-                                                                                 // really
-                                                                                 // difficult
-                                                                                 // multithread
-                                                                                 // bugs
+        assert (SecurityContextHolder.getContext().getAuthentication() != null);
         return applicationResource.getApplicationByOid(hakemusOid);
     }
 }
