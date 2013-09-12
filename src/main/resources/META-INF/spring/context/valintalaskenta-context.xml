@@ -49,7 +49,7 @@
                 <process ref="securityPreprocessor"/>
                 <to uri="bean:hakukohteetTarjonnaltaKomponentti"/>
                 <!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
-                <split parallelProcessing="true">
+                <split parallelProcessing="true" stopOnException="false">
                     <method bean="splitHakukohteetKomponentti" method="splitHakukohteet"/>
                     <process ref="securityPreprocessor"/>
 	            	<setProperty propertyName="hakukohdeOid"><simple>${body}</simple></setProperty>

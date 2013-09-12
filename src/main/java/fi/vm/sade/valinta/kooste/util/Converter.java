@@ -1,17 +1,15 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import fi.vm.sade.service.hakemus.schema.AvainArvoTyyppi;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * User: wuoti
- * Date: 9.9.2013
- * Time: 10.08
+ * User: wuoti Date: 9.9.2013 Time: 10.08
  */
 public class Converter {
 
@@ -45,9 +43,9 @@ public class Converter {
     }
 
     /**
-     * Poistaa "Ei arvosanaa" -kentät hakemukselta. Tämän funkkarin voi poistaa kunhan hakemuspalveluun saadaan
-     * tehtyä filtteri näille kentille
-     *
+     * Poistaa "Ei arvosanaa" -kentät hakemukselta. Tämän funkkarin voi poistaa
+     * kunhan hakemuspalveluun saadaan tehtyä filtteri näille kentille
+     * 
      * @param arvo
      * @return
      */
@@ -112,12 +110,14 @@ public class Converter {
 
                 for (Map.Entry<Integer, Hakutoive> e : hakutoiveet.entrySet()) {
                     Hakutoive hakutoive = e.getValue();
-                    if (hakutoive.getHakukohdeOid() != null && !hakutoive.getHakukohdeOid().trim().isEmpty()) {
-                        HakukohdeTyyppi hk = new HakukohdeTyyppi();
-                        hk.setHakukohdeOid(e.getValue().getHakukohdeOid());
-                        hk.setHarkinnanvaraisuus(e.getValue().getHarkinnanvaraisuus());
-                        hk.setPrioriteetti(e.getKey());
-                        hakemusTyyppi.getHakutoive().add(hk);
+                    if (hakutoive != null) {
+                        if (hakutoive.getHakukohdeOid() != null && !hakutoive.getHakukohdeOid().trim().isEmpty()) {
+                            HakukohdeTyyppi hk = new HakukohdeTyyppi();
+                            hk.setHakukohdeOid(hakutoive.getHakukohdeOid());
+                            hk.setHarkinnanvaraisuus(Boolean.TRUE.equals(hakutoive.getHarkinnanvaraisuus()));
+                            hk.setPrioriteetti(e.getKey());
+                            hakemusTyyppi.getHakutoive().add(hk);
+                        }
                     }
                 }
             }
