@@ -17,9 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.JalkiohjaustulosExcelProxy;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.SijoittelunTulosExcelProxy;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintakoekutsutExcelProxy;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy;
 
 /**
  * 
@@ -40,6 +41,31 @@ public class ValintalaskentaExcelResource {
     private ValintakoekutsutExcelProxy valintalaskentaTulos;
     @Autowired
     private SijoittelunTulosExcelProxy sijoittelunTulosExcelProxy;
+    @Autowired
+    private JalkiohjaustulosExcelProxy jalkiohjaustulos;
+
+    @GET
+    @Path("jalkiohjaustulos/aktivoi")
+    @Produces("application/vnd.ms-excel")
+    public Response haeJalkiohjausTuloksetExcelMuodossa(@QueryParam("hakuOid") String hakuOid) {
+        try {
+            InputStream input = jalkiohjaustulos.luoXls(hakuOid);
+            return Response.ok(input, APPLICATION_VND_MS_EXCEL)
+                    .header("content-disposition", "inline; filename=jalkiohjaustulos.xls").build();
+        } catch (Exception e) {
+            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+            // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+            // Ylläpitäjä voi lukea logeista todellisen syyn!
+            LOG.error("Jälkiohjaustulosexcelin luonti epäonnistui haulle {}: {}",
+                    new Object[] { hakuOid, e.getMessage() });
+            return Response
+                    .ok(ExcelExportUtil.exportGridAsXls(new Object[][] { new Object[] {
+                            "Tarvittavien tietojen hakeminen epäonnistui!",
+                            "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!" } }),
+                            APPLICATION_VND_MS_EXCEL)
+                    .header("content-disposition", "inline; filename=yritauudelleen.xls").build();
+        }
+    }
 
     @GET
     @Path("valintakoekutsut/aktivoi")
@@ -73,7 +99,7 @@ public class ValintalaskentaExcelResource {
         try {
             InputStream input = sijoittelunTulosExcelProxy.luoXls(hakukohdeOid, sijoitteluajoId, hakuOid);
             return Response.ok(input, APPLICATION_VND_MS_EXCEL)
-                    .header("content-disposition", "inline; filename=valintalaskentatulos.xls").build();
+                    .header("content-disposition", "inline; filename=sijoitteluntulos.xls").build();
         } catch (Exception e) {
             // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
             // todennäköisin syy on sijoittelupalvelun tai hakemuspalvelun
@@ -97,7 +123,7 @@ public class ValintalaskentaExcelResource {
         try {
             InputStream input = valintalaskentaTulosProxy.luoXls(hakukohdeOid);
             return Response.ok(input, APPLICATION_VND_MS_EXCEL)
-                    .header("content-disposition", "inline; filename=valintalaskentatulos.xls").build();
+                    .header("content-disposition", "inline; filename=valintalaskennantulos.xls").build();
         } catch (Exception e) {
             // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
             // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!

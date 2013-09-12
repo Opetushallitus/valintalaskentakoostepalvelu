@@ -20,6 +20,12 @@
 
     <routeContext id="valintalaskentaTulosRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
+            <from uri="direct:kaynnistaJalkiohjaustulostenLuontiXlsMuodossaReitti"/>
+            <policy ref="admin">
+	            <to uri="bean:jalkiohjaustulosXlsKomponentti"/>
+            </policy>
+        </route>
+        <route>
             <from uri="direct:sijoittelunTulosExcelReitti"/>
             <policy ref="admin">
             	<setProperty propertyName="hakuOid"><simple>${body.args[2]}</simple></setProperty>
@@ -67,6 +73,12 @@
         <proxy id="valintalaskennanTulostenLuontiXlsMuodossaProxy"
                serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy"
                serviceUrl="direct:kaynnistaValintalaskennanTulostenLuontiXlsMuodossaReitti"/>
+		
+		<proxy id="jalkiohjaustulosXlsMuodossaProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.JalkiohjaustulosExcelProxy"
+               serviceUrl="direct:kaynnistaJalkiohjaustulostenLuontiXlsMuodossaReitti"/>
+        <!-- 
+        -->
         <routeContextRef ref="valintalaskentaTulosRoutes"/>
     </camelContext>
 </beans>
