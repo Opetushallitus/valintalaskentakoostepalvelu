@@ -1,17 +1,13 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.apache.camel.language.Simple;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +24,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemuksenTila
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.ValintatapajonoDTO;
+import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
@@ -47,7 +44,7 @@ public class HyvaksymiskirjeetKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetKomponentti.class);
     private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
     private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
-    private static final NumberFormat NUMERO_FORMAATTI = NumberFormat.getInstance(new Locale("FI"));
+
     @Autowired
     private SijoitteluResource sijoitteluResource;
 
@@ -136,7 +133,8 @@ public class HyvaksymiskirjeetKomponentti {
 
                     HakukohdeNimiRDTO tamanHakukohteenNimi = haeHakukohdeNimi(dto.getHakukohdeOid(), nimiCache);
                     Map<String, String> tulokset = new HashMap<String, String>();
-                    tulokset.put("alinHyvaksyttyPistemaara", suomenna(jono.getAlinHyvaksyttyPistemaara()));
+                    tulokset.put("alinHyvaksyttyPistemaara",
+                            Formatter.suomennaNumero(jono.getAlinHyvaksyttyPistemaara()));
 
                     tulokset.put("hakukohteenNimi", extractHakukohdeNimi(tamanHakukohteenNimi, kielikoodi));
                     tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
@@ -148,11 +146,12 @@ public class HyvaksymiskirjeetKomponentti {
                     tulokset.put("hyvaksytyt", "" + countHyvaksytytHakemukset(hakukohde, hyvaksytytCache));//
 
                     tulokset.put("kaikkiHakeneet", "" + kaikkiHakemukset.size());
-                    tulokset.put("omatPisteet", suomenna(hakemus.getPisteet()));// countOmatPisteet(dto.getHakemusOid(),
+                    tulokset.put("omatPisteet", Formatter.suomennaNumero(hakemus.getPisteet()));// countOmatPisteet(dto.getHakemusOid(),
                     // valinnanvaiheet));
 
                     tulokset.put("organisaationNimi", extractTarjoajaNimi(tamanHakukohteenNimi, kielikoodi));
-                    tulokset.put("paasyJaSoveltuvuuskoe", suomenna(hakemus.getPaasyJaSoveltuvuusKokeenTulos()));
+                    tulokset.put("paasyJaSoveltuvuuskoe",
+                            Formatter.suomennaNumero(hakemus.getPaasyJaSoveltuvuusKokeenTulos()));
                     tulokset.put("selite", "");
                     tulokset.put("valinnanTulos", HakemuksenTilaUtil.tilaConverter(dto.getTila().toString()));
                     tulosList.add(tulokset);
@@ -164,13 +163,6 @@ public class HyvaksymiskirjeetKomponentti {
         String hyvaksymiskirjeet = new Gson().toJson(new Kirjeet(kirjeet));
         LOG.debug("Hyvaksymiskirjeet {}", hyvaksymiskirjeet);
         return hyvaksymiskirjeet;
-    }
-
-    private String suomenna(BigDecimal arvo) {
-        if (arvo == null) {
-            return StringUtils.EMPTY;
-        }
-        return NUMERO_FORMAATTI.format(arvo);
     }
 
     private int countHyvaksytytHakemukset(HakukohdeDTO hakukohde, Map<String, Integer> hyvaksytytCache) {

@@ -4,28 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- *         Koska sijoittelulla ei ole omaa API:a!
- */
-public class SijoitteluAjo implements Serializable {
+public class SijoitteluajoDTO implements Serializable {
 
-    private String id;
     private Long sijoitteluajoId;
     private String hakuOid;
     private Long startMils;
     private Long endMils;
-    private List<HakukohdeItem> hakukohteet = new ArrayList<HakukohdeItem>();
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
+    private List<HakukohdeDTO> hakukohteet = new ArrayList<HakukohdeDTO>();
 
     public Long getSijoitteluajoId() {
         return sijoitteluajoId;
@@ -33,6 +18,14 @@ public class SijoitteluAjo implements Serializable {
 
     public void setSijoitteluajoId(Long sijoitteluajoId) {
         this.sijoitteluajoId = sijoitteluajoId;
+    }
+
+    public String getHakuOid() {
+        return hakuOid;
+    }
+
+    public void setHakuOid(String hakuOid) {
+        this.hakuOid = hakuOid;
     }
 
     public Long getStartMils() {
@@ -51,19 +44,11 @@ public class SijoitteluAjo implements Serializable {
         this.endMils = endMils;
     }
 
-    public List<HakukohdeItem> getHakukohteet() {
+    public List<HakukohdeDTO> getHakukohteet() {
         return hakukohteet;
     }
 
-    public void setHakukohteet(List<HakukohdeItem> hakukohteet) {
+    public void setHakukohteet(List<HakukohdeDTO> hakukohteet) {
         this.hakukohteet = hakukohteet;
-    }
-
-    public String getHakuOid() {
-        return hakuOid;
-    }
-
-    public void setHakuOid(String hakuOid) {
-        this.hakuOid = hakuOid;
     }
 }
