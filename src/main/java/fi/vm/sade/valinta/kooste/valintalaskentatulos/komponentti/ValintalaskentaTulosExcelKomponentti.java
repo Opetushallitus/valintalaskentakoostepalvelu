@@ -1,19 +1,27 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
-import fi.vm.sade.service.valintatiedot.ValintatietoService;
-import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
-import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.io.InputStream;
-import java.util.*;
+import fi.vm.sade.service.valintatiedot.ValintatietoService;
+import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
+import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
 
 /**
  * @author Jussi Jartamo
@@ -29,22 +37,16 @@ public class ValintalaskentaTulosExcelKomponentti {
     private ValintatietoService valintatietoService;
 
     public InputStream luoTuloksetXlsMuodossa(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
-                                              @Simple("${property.valintakoeOid}") List<String> valintakoeOids,
-                                              @Simple("${property.hakemukset}") List<SuppeaHakemus> hakemukset) {
-        Map<String, String> oidToName = new HashMap<String, String>();
-        for (SuppeaHakemus hakemus : hakemukset) {
-            StringBuilder b = new StringBuilder();
-            b.append(hakemus.getLastName()).append(", ").append(hakemus.getFirstNames());
-            oidToName.put(hakemus.getOid(), b.toString());
-        }
+            @Simple("${property.valintakoeOid}") List<String> valintakoeOids) {
+
         List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService.haeValintatiedotHakukohteelle(
                 valintakoeOids, hakukohdeOid);
         List<String> tunnisteet = getTunnisteet(tiedotHakukohteelle);
         if (tunnisteet.isEmpty()) {
-            return ExcelExportUtil.exportGridAsXls(new Object[][]{
-                    new Object[]{"Hakukohteelle ei löytynyt tuloksia annetuilla syötteillä!"},
-                    new Object[]{"Hakukohde OID", hakukohdeOid},
-                    new Object[]{"Valintakoe OID:it", Arrays.toString(valintakoeOids.toArray())}});
+            return ExcelExportUtil.exportGridAsXls(new Object[][] {
+                    new Object[] { "Hakukohteelle ei löytynyt tuloksia annetuilla syötteillä!" },
+                    new Object[] { "Hakukohde OID", hakukohdeOid },
+                    new Object[] { "Valintakoe OID:it", Arrays.toString(valintakoeOids.toArray()) } });
         } else {
             List<Object[]> rows = new ArrayList<Object[]>();
             LOG.debug("Creating rows for Excel file!");
@@ -60,8 +62,9 @@ public class ValintalaskentaTulosExcelKomponentti {
                     osallistumiset.put(v.getValintakoeTunniste(), v);
                 }
                 ArrayList<String> rivi = new ArrayList<String>();
-                rivi.addAll(Arrays.asList(oidToName.get(o.getHakemusOid()), o.getHakemusOid(),
-                        ExcelExportUtil.DATE_FORMAT.format(date)));
+                StringBuilder b = new StringBuilder();
+                b.append(o.getSukunimi()).append(", ").append(o.getEtunimi());
+                rivi.addAll(Arrays.asList(b.toString(), o.getHakemusOid(), ExcelExportUtil.DATE_FORMAT.format(date)));
                 for (String tunniste : tunnisteet) {
                     if (osallistumiset.containsKey(tunniste)) {
                         rivi.add(osallistumiset.get(tunniste).getOsallistuminen().toString());
@@ -72,7 +75,7 @@ public class ValintalaskentaTulosExcelKomponentti {
                 rows.add(rivi.toArray());
             }
 
-            return ExcelExportUtil.exportGridAsXls(rows.toArray(new Object[][]{}));
+            return ExcelExportUtil.exportGridAsXls(rows.toArray(new Object[][] {}));
         }
     }
 

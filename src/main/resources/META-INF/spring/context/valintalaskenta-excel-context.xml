@@ -39,10 +39,6 @@
             <policy ref="admin">
 	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
 	            <setProperty propertyName="valintakoeOid"><simple>${body.args[1]}</simple></setProperty>
-	            <to uri="bean:haeHakukohteenHakemuksetKomponentti"/>
-	            <setProperty propertyName="hakemukset">
-	                <simple>${body}</simple>
-	            </setProperty>
 	            <to uri="bean:luoTuloksetXlsMuodossa"/>
             </policy>
         </route>
