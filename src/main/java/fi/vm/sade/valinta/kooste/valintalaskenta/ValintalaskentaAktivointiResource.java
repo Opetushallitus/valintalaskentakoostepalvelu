@@ -1,6 +1,10 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
-import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 
 /**
  * @author Jussi Jartamo
@@ -40,7 +41,7 @@ public class ValintalaskentaAktivointiResource {
     @GET
     @Path("aktivoi")
     public Response aktivoiHakukohteenValintalaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid,
-                                                      @QueryParam("valinnanvaihe") Integer valinnanvaihe) {
+            @QueryParam("valinnanvaihe") Integer valinnanvaihe) {
         try {
             if (StringUtils.isBlank(hakukohdeOid) || valinnanvaihe == null) {
                 return Response.status(Response.Status.OK)
@@ -51,7 +52,8 @@ public class ValintalaskentaAktivointiResource {
                 return Response.status(Response.Status.OK).entity("in progress").build();
             }
         } catch (Exception e) {
-            LOG.error("Error aktivoi: {}", e);
+            e.printStackTrace();
+            LOG.error("Error aktivoi: {}", e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
@@ -72,7 +74,8 @@ public class ValintalaskentaAktivointiResource {
                 return Response.status(Response.Status.OK).entity("in progress").build();
             }
         } catch (Exception e) {
-            LOG.error("Error aktivoiHaunValintalaskenta: {}", e);
+            e.printStackTrace();
+            LOG.error("Error aktivoiHaunValintalaskenta: {}", e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
