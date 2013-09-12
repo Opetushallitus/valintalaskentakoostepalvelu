@@ -1,22 +1,20 @@
 package fi.vm.sade.valinta.kooste.hakuimport;
 
-import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
+
 /**
- * User: wuoti
- * Date: 20.5.2013
- * Time: 10.34
+ * User: wuoti Date: 20.5.2013 Time: 10.34
  */
 @Path("hakuimport")
 @Controller
@@ -33,7 +31,7 @@ public class HakuImportAktivointiResource {
     @GET
     @Path("aktivoi")
     public String aktivoiHakuImport(@QueryParam("hakuOid") String hakuOid) {
-        if(!parametriService.valinnanhallintaEnabled(hakuOid)) {
+        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
             return "no privileges.";
         }
 

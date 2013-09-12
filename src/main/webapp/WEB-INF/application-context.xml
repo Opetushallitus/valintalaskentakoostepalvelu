@@ -37,7 +37,6 @@
 
     <!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
     <!--<import resource="classpath:authentication-client.xml"/>-->
-	 
     <bean id="ticketInterceptor" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor" />
     <bean id="ticketInterceptorRest" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest" />
 
@@ -72,7 +71,7 @@
         </cxf:inFaultInterceptors>
     </cxf:bus>
     -->
-
+    
     <jaxws:client id="ValintaperusteServiceClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
                   address="${valintalaskentakoostepalvelu.valintaperusteService.url}" >

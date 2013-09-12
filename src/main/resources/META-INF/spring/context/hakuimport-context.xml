@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
-       xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
-       xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xsi:schemaLocation="
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
+	xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
@@ -13,70 +13,43 @@
        http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
-    <ctx:annotation-config/>
+	<ctx:annotation-config />
 
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakuimport"/>
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakuimport" />
 
-    <util:properties id="hakuimportProperties">
-        <beans:prop key="tarjonta.rest">${valintalaskentakoostepalvelu.tarjonta.rest.url}</beans:prop>
-    </util:properties>
+	<util:properties id="hakuimportProperties">
+		<beans:prop key="tarjonta.rest">${valintalaskentakoostepalvelu.tarjonta.rest.url}
+		</beans:prop>
+	</util:properties>
 
-    <camelContext id="hakukohdeImportCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
-        <propertyPlaceholder id="hakuimportContextProperties" location="ref:hakuimportProperties" />
-        <proxy id="hakuImportAktivointiRajapinta"
-               serviceInterface="fi.vm.sade.valinta.kooste.hakuimport.HakuImportAktivointiProxy"
-               serviceUrl="direct:kaynnistaHakuImportReitti"/>
-        <routeContextRef ref="hakuImportRoutes"/>
-    </camelContext>
+	<camelContext id="hakukohdeImportCamelContext"
+		autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+		<propertyPlaceholder id="hakuimportContextProperties"
+			location="ref:hakuimportProperties" />
+		<proxy id="hakuImportAktivointiRajapinta" 
+			serviceInterface="fi.vm.sade.valinta.kooste.hakuimport.HakuImportAktivointiProxy"
+			serviceUrl="direct:kaynnistaHakuImportReitti" />
+		<routeContextRef ref="hakuImportRoutes" />
+	</camelContext>
+	<beans:bean id="securitySetProcessor" class="fi.vm.sade.valinta.kooste.security.SecurityContextProcessor"/>
+	<routeContext id="hakuImportRoutes" xmlns="http://camel.apache.org/schema/spring">
+		<route id="hakuImportRoute" >
+			<from uri="direct:kaynnistaHakuImportReitti" />
+			<policy ref="admin">
+				<camel:process ref="securitySetProcessor"/>
+				<camel:recipientList>
+					<camel:simple>{{tarjonta.rest}}/haku/${body}/hakukohde?count=99999999</camel:simple>
+				</camel:recipientList>
+				<!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
+				<split parallelProcessing="false" >
+					<method bean="jsonSplitter" method="split" />
+					<to uri="bean:suoritaHakukohdeImportKomponentti" />
+				</split>
+			</policy>
 
-    <routeContext id="hakuImportRoutes" xmlns="http://camel.apache.org/schema/spring">
-        <route id="hakuImportRoute">
-            <from uri="direct:kaynnistaHakuImportReitti"/>
+		</route>
 
-            <policy ref="admin">
-
-                <camel:recipientList>
-                    <camel:simple>{{tarjonta.rest}}/haku/${body}/hakukohde?count=99999999</camel:simple>
-                </camel:recipientList>
-
-                <!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
-                <split parallelProcessing="false" >
-                    <method bean="jsonSplitter" method="split"/>
-                        <to uri="direct:kaynnistaHakukohdeImportReitti"/>
-                </split>
-            </policy>
-
-        </route>
-
-        <route id="hakukohdeImportRoute">
-            <from uri="direct:kaynnistaHakukohdeImportReitti"/>
-            <setProperty propertyName="hakukohdeOid">
-                <simple>${body}</simple>
-            </setProperty>
-             <setBody>
-                 <simple></simple>
-             </setBody>
-            <camel:recipientList>
-                <camel:simple>{{tarjonta.rest}}/hakukohde/${property.hakukohdeOid}?a=b</camel:simple>              <!--miksi a=b tarvitaan  -->
-            </camel:recipientList>
-            <setProperty propertyName="hakukohdeData">
-                <simple>${body}</simple>
-            </setProperty>
-            <setBody>
-                <simple></simple>
-            </setBody>
-            <camel:recipientList>
-                <camel:simple>{{tarjonta.rest}}/hakukohde/${property.hakukohdeOid}/nimi?a=b</camel:simple>
-            </camel:recipientList>
-            <setProperty propertyName="hakukohdeNimi">
-                <simple>${body}</simple>
-            </setProperty>
-
-            <to uri="bean:suoritaHakukohdeImportKomponentti"/>
-
-        </route>
-
-    </routeContext>
+	</routeContext>
 
 
 </beans>
