@@ -41,7 +41,9 @@ public class ExcelExportUtil {
             //
             short cellIndex = 0;
             for (Object dataCell : dataRow) {
-                assert (dataCell != null);
+                if (dataCell == null) {
+                    dataCell = "-- ei arvoa --";
+                }
                 numberOfcolumns = Math.max(numberOfcolumns, cellIndex);
                 Cell excelCell = excelRow.createCell(cellIndex);
                 String value = dataCell.toString();
