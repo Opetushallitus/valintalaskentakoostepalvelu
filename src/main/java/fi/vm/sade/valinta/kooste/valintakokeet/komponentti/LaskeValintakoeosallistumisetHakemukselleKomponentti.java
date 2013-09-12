@@ -1,5 +1,19 @@
 package fi.vm.sade.valinta.kooste.valintakokeet.komponentti;
 
+import static fi.vm.sade.valinta.kooste.security.SecurityContextProcessor.SECURITY_CONTEXT_HEADER;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.camel.Property;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
@@ -8,25 +22,15 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
-import org.apache.camel.language.Simple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
- * User: wuoti
- * Date: 29.8.2013
- * Time: 15.33
+ * User: wuoti Date: 29.8.2013 Time: 15.33
  */
 @Component("laskeValintakoeosallistumisetHakemukselleKomponentti")
 public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LaskeValintakoeosallistumisetHakemukselleKomponentti.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(LaskeValintakoeosallistumisetHakemukselleKomponentti.class);
 
     @Autowired
     private HakukohteenValintaperusteetProxy proxy;
@@ -37,7 +41,9 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
     @Autowired
     private ApplicationResource applicationResource;
 
-    public void laske(@Simple("${property.hakemusOid}") String hakemusOid) {
+    public void laske(@Property(SECURITY_CONTEXT_HEADER) Authentication auth, @Property("hakemusOid") String hakemusOid) {
+        assert (auth != null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
         LOG.info("Lasketaan valintakoeosallistumiset hakemukselle " + hakemusOid);
 
         Hakemus h = applicationResource.getApplicationByOid(hakemusOid);

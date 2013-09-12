@@ -1,20 +1,20 @@
 package fi.vm.sade.valinta.kooste.hakemus.komponentti;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+import java.util.List;
+
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 
 /**
- * User: wuoti
- * Date: 29.8.2013
- * Time: 13.50
+ * User: wuoti Date: 29.8.2013 Time: 13.50
  */
 @Component("haeHaunHakemuksetKomponentti")
 public class HaeHaunHakemuksetKomponentti {
@@ -25,6 +25,13 @@ public class HaeHaunHakemuksetKomponentti {
     private ApplicationResource applicationResource;
 
     public List<SuppeaHakemus> haeHaunHakemukset(@Simple("${property.hakuOid}") String hakuOid) {
+        assert (SecurityContextHolder.getContext().getAuthentication() != null); // <-
+                                                                                 // helps
+                                                                                 // finding
+                                                                                 // really
+                                                                                 // difficult
+                                                                                 // multithread
+                                                                                 // bugs
         LOG.info("Haetaan haun " + hakuOid + " hakemukset");
 
         HakemusList hakemusList = applicationResource.findApplications(null, null, null, null, hakuOid, null, 0,
