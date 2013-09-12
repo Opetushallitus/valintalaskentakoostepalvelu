@@ -1,15 +1,17 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.komponentti;
 
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
-import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValinnanVaiheenValintaperusteetProxy;
+import java.util.List;
+
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValinnanVaiheenValintaperusteetProxy;
 
 /**
  * @author Jussi Jartamo
@@ -35,10 +37,10 @@ public class HaeValintaperusteetKomponentti {
     private HakukohteenValintaperusteetProxy hakukohteenValintaperusteetProxy;
 
     public List<ValintaperusteetTyyppi> haeLahtotiedot(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
-                                                       @Simple("${property.valinnanvaihe}") Integer valinnanvaihe) {
-
-        LOG.info("Haetaan valintaperusteet laskentaa varten hakukohteelle({}) ja valinnanvaiheelle({})", new Object[]{
-                hakukohdeOid, valinnanvaihe});
+            @Simple("${property.valinnanvaihe}") Integer valinnanvaihe) {
+        assert (SecurityContextHolder.getContext().getAuthentication() != null);
+        LOG.info("Haetaan valintaperusteet laskentaa varten hakukohteelle({}) ja valinnanvaiheelle({})", new Object[] {
+                hakukohdeOid, valinnanvaihe });
 
         List<ValintaperusteetTyyppi> valintaperusteet = null;
         if (valinnanvaihe == null) {

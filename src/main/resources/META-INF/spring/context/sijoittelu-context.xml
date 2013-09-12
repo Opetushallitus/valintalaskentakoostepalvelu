@@ -25,6 +25,7 @@
 				<simple>${body.args[0]}</simple>
 			</setProperty>
             <policy ref="admin">
+            	<process ref="securityPreprocessor"/>
 			    <to uri="bean:suoritaSijoittelu" />
             </policy>
 			<!--

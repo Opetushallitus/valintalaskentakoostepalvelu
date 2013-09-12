@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintakokeet.komponentti;
 
-import static fi.vm.sade.valinta.kooste.security.SecurityContextProcessor.SECURITY_CONTEXT_HEADER;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,7 +8,6 @@ import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -41,9 +38,8 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
     @Autowired
     private ApplicationResource applicationResource;
 
-    public void laske(@Property(SECURITY_CONTEXT_HEADER) Authentication auth, @Property("hakemusOid") String hakemusOid) {
-        assert (auth != null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
+    public void laske(@Property("hakemusOid") String hakemusOid) {
+        assert (SecurityContextHolder.getContext().getAuthentication() != null);
         LOG.info("Lasketaan valintakoeosallistumiset hakemukselle " + hakemusOid);
 
         Hakemus h = applicationResource.getApplicationByOid(hakemusOid);

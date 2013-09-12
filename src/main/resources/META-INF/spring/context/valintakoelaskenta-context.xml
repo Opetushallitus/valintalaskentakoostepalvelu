@@ -27,6 +27,7 @@
             <from uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
             <setProperty propertyName="hakemusOid"><simple>${body}</simple></setProperty>
             <policy ref="admin">
+                <process ref="securityPreprocessor"/>
                 <to uri="bean:laskeValintakoeosallistumisetHakemukselleKomponentti"/>
             </policy>
         </route>
@@ -36,11 +37,13 @@
                 <simple>${body}</simple>
             </setProperty>
             <policy ref="admin">
+                <process ref="securityPreprocessor"/>
                 <to uri="bean:haeHaunHakemuksetKomponentti"/>
-                <process ref="securityProcessor"/>
                 <split parallelProcessing="true">
                     <method bean="hakemusOidSplitter" method="splitHakemusOid"/>
-                    <to uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
+                    <process ref="securityPreprocessor"/>
+                    <setProperty propertyName="hakemusOid"><simple>${body}</simple></setProperty>
+                    <to uri="bean:laskeValintakoeosallistumisetHakemukselleKomponentti"/>
                 </split>
             </policy>
         </route>
@@ -50,11 +53,13 @@
                 <simple>${body}</simple>
             </setProperty>
             <policy ref="admin">
+                <process ref="securityPreprocessor"/>
                 <to uri="bean:haeHakukohteenHakemuksetKomponentti"/>
-                <process ref="securityProcessor"/>
                 <split parallelProcessing="true">
                     <method bean="hakemusOidSplitter" method="splitHakemusOid"/>
-                    <to uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
+                    <process ref="securityPreprocessor"/>
+                    <setProperty propertyName="hakemusOid"><simple>${body}</simple></setProperty>
+                    <to uri="bean:laskeValintakoeosallistumisetHakemukselleKomponentti"/>
                 </split>
             </policy>
         </route>

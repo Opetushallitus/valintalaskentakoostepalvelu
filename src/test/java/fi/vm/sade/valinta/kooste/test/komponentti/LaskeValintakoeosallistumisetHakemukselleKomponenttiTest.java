@@ -233,7 +233,7 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
         when(applicationResourceMock.getApplicationByOid(eq(hakemusOid))).thenReturn(
                 new Gson().fromJson(HAKEMUS_JSON, Hakemus.class));
         when(hakukohteenValintaperusteetProxyMock.haeValintaperusteet(hakukohdeParams)).thenReturn(vps);
-        laskeValintakoeosallistumisetHakemukselleKomponentti.laske(null, hakemusOid);
+        laskeValintakoeosallistumisetHakemukselleKomponentti.laske(hakemusOid);
 
         ArgumentCaptor<HakemusTyyppi> ac = ArgumentCaptor.forClass(HakemusTyyppi.class);
         verify(valintalaskentaServiceMock).valintakokeet(ac.capture(), anyList());
