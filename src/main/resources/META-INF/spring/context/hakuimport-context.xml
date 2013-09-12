@@ -31,12 +31,12 @@
 			serviceUrl="direct:kaynnistaHakuImportReitti" />
 		<routeContextRef ref="hakuImportRoutes" />
 	</camelContext>
-	<beans:bean id="securitySetProcessor" class="fi.vm.sade.valinta.kooste.security.SecurityContextProcessor"/>
+	
 	<routeContext id="hakuImportRoutes" xmlns="http://camel.apache.org/schema/spring">
 		<route id="hakuImportRoute" >
 			<from uri="direct:kaynnistaHakuImportReitti" />
 			<policy ref="admin">
-				<camel:process ref="securitySetProcessor"/>
+				<camel:process ref="securityProcessor"/>
 				<camel:recipientList>
 					<camel:simple>{{tarjonta.rest}}/haku/${body}/hakukohde?count=99999999</camel:simple>
 				</camel:recipientList>

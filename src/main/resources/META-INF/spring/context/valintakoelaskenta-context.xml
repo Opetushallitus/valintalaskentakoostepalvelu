@@ -25,9 +25,7 @@
     <routeContext id="valintakoelaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
             <from uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
-            <setProperty propertyName="hakemusOid">
-                <simple>${body}</simple>
-            </setProperty>
+            <setProperty propertyName="hakemusOid"><simple>${body}</simple></setProperty>
             <policy ref="admin">
                 <to uri="bean:laskeValintakoeosallistumisetHakemukselleKomponentti"/>
             </policy>
@@ -39,7 +37,8 @@
             </setProperty>
             <policy ref="admin">
                 <to uri="bean:haeHaunHakemuksetKomponentti"/>
-                <split parallelProcessing="false">
+                <process ref="securityProcessor"/>
+                <split parallelProcessing="true">
                     <method bean="hakemusOidSplitter" method="splitHakemusOid"/>
                     <to uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
                 </split>
@@ -52,7 +51,8 @@
             </setProperty>
             <policy ref="admin">
                 <to uri="bean:haeHakukohteenHakemuksetKomponentti"/>
-                <split parallelProcessing="false">
+                <process ref="securityProcessor"/>
+                <split parallelProcessing="true">
                     <method bean="hakemusOidSplitter" method="splitHakemusOid"/>
                     <to uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
                 </split>
