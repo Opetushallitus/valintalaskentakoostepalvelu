@@ -19,7 +19,7 @@ import javax.annotation.Resource;
 @Component("hakukohteetTarjonnaltaKomponentti")
 public class HaeHakukohteetTarjonnaltaKomponentti {
 
-    @Resource(name="tarjontaServiceClientAsAdmin")
+    @Resource
     private TarjontaPublicService tarjontaService;
 
     /**

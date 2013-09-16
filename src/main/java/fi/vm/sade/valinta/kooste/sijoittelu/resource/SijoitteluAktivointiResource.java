@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.proxy.JatkuvanSijoittelunAktivointiProxy;
 import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluAktivointiProxy;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -29,9 +28,6 @@ public class SijoitteluAktivointiResource {
 
     @Autowired
     private SijoitteluAktivointiProxy sijoitteluAktivointiProxy;
-
-    @Autowired
-    private JatkuvanSijoittelunAktivointiProxy jatkuvanSijoittelunAktivointiProxy;
 
     @Autowired
     private ParametriService parametriService;
@@ -98,5 +94,16 @@ public class SijoitteluAktivointiResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, Sijoittelu> aktiivisetSijoittelut() {
         return JatkuvaSijoittelu.SIJOITTELU_HAUT;
+    }
+
+    @GET
+    @Path("jatkuva")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Sijoittelu jatkuvaTila(@QueryParam("hakuOid") String hakuOid) {
+        if(StringUtils.isBlank(hakuOid)) {
+            return null;
+        } else {
+            return JatkuvaSijoittelu.SIJOITTELU_HAUT.get(hakuOid);
+        }
     }
 }

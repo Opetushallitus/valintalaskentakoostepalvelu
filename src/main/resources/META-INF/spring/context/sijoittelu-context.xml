@@ -19,9 +19,9 @@
         <proxy id="sijoitteluAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluAktivointiProxy"
                serviceUrl="direct:kaynnistaSijoitteluReitti"/>
-        <proxy id="jatkuvanSijoittelunAktivointiRajapinta"
-               serviceInterface="fi.vm.sade.valinta.kooste.sijoittelu.proxy.JatkuvanSijoittelunAktivointiProxy"
-               serviceUrl="direct:kaynnistaJatkuvaSijoitteluReitti"/>
+
+        <endpoint id="quartzInput" uri="quartz://timerName?cron=${valintalaskentakoostepalvelu.jatkuvasijoittelu.cron}"/>
+
         <route>
             <from uri="direct:kaynnistaSijoitteluReitti"/>
             <setProperty propertyName="hakuOid">
@@ -32,10 +32,12 @@
                 <to uri="bean:suoritaSijoittelu"/>
             </policy>
         </route>
-        <route id="testRoute">
-            <from uri="quartz://timerName?cron=0+0/1+*+*+*+?"/>
+
+        <route id="jatkuvaSijoittelu">
+            <from uri="ref:quartzInput"/>
             <to uri="bean:jatkuvaSijoittelu"/>
         </route>
+
     </camelContext>
 
 
