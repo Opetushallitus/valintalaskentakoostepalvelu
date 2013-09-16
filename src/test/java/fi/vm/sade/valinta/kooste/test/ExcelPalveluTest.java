@@ -9,7 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 
 /**
  * 

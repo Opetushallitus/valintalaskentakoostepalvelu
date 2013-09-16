@@ -31,6 +31,11 @@
             <version>1.4</version>
         </dependency>
          -->
+         <dependency>
+			<groupId>fi.vm.sade.rajapinnat</groupId>
+			<artifactId>kela-tkuva</artifactId>
+			<version>${kela.version}</version>
+		</dependency> 
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>

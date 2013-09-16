@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.valintalaskentatulos.export;
+package fi.vm.sade.valinta.kooste.util;
 
 import java.io.IOException;
 import java.io.InputStream;

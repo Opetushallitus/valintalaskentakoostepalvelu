@@ -16,7 +16,7 @@ import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.Jarjestyskriteer
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.JonosijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 
 /**
  * 

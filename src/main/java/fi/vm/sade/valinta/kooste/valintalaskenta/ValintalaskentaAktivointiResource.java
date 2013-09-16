@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
+import fi.vm.sade.valinta.kooste.valintalaskenta.proxy.HakukohteenValintalaskentaAktivointiProxy;
+import fi.vm.sade.valinta.kooste.valintalaskenta.proxy.HaunValintalaskentaAktivointiProxy;
 
 /**
  * @author Jussi Jartamo
