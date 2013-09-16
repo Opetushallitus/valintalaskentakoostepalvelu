@@ -48,7 +48,6 @@
             <policy ref="admin">
                 <process ref="securityPreprocessor"/>
                 <to uri="bean:hakukohteetTarjonnaltaKomponentti"/>
-                <!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
                 <split parallelProcessing="true" stopOnException="false">
                     <method bean="splitHakukohteetKomponentti" method="splitHakukohteet"/>
                     <process ref="securityPreprocessor"/>

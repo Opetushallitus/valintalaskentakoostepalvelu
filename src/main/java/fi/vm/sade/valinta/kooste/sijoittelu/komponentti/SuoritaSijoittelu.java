@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.komponentti;
 
 
+import fi.vm.sade.service.sijoittelu.SijoitteluService;
+import fi.vm.sade.service.valintatiedot.ValintatietoService;
 import fi.vm.sade.service.valintatiedot.schema.HakuTyyppi;
 
 import org.apache.camel.language.Simple;
@@ -20,10 +22,10 @@ public class SuoritaSijoittelu {
     private static final Logger LOG = LoggerFactory.getLogger(SuoritaSijoittelu.class);
 
     @Autowired
-    private fi.vm.sade.service.valintatiedot.ValintatietoService valintatietoService;
+    private ValintatietoService valintatietoService;
 
     @Autowired
-    private fi.vm.sade.service.sijoittelu.SijoitteluService sijoitteluService;
+    private SijoitteluService sijoitteluService;
 
     public void haeLahtotiedot(@Simple("${property.hakuOid}") String hakuOid) {
 
@@ -32,6 +34,7 @@ public class SuoritaSijoittelu {
         LOG.info("Haettu valinnan tulokset");
         sijoitteluService.sijoittele(ht);
         LOG.info("Viety sijoittelulle valinnan tulokset");
+
     }
 }
 

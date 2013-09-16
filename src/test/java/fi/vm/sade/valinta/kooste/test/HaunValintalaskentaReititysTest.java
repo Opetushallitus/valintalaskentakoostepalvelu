@@ -128,7 +128,7 @@ public class HaunValintalaskentaReititysTest {
         return mock(ValintalaskentaService.class);
     }
 
-    @Bean
+    @Bean(name="tarjontaServiceClientAsAdmin")
     public TarjontaPublicService getTarjontaPublicServiceMock() {
         TarjontaPublicService tarjontaService = mock(TarjontaPublicService.class);
         TarjontaTyyppi tarjonta = new TarjontaTyyppi();

@@ -14,10 +14,12 @@ import com.google.common.collect.Collections2;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 
+import javax.annotation.Resource;
+
 @Component("hakukohteetTarjonnaltaKomponentti")
 public class HaeHakukohteetTarjonnaltaKomponentti {
 
-    @Autowired
+    @Resource(name="tarjontaServiceClientAsAdmin")
     private TarjontaPublicService tarjontaService;
 
     /**
@@ -27,7 +29,6 @@ public class HaeHakukohteetTarjonnaltaKomponentti {
         return Collections2.filter(tarjontaService.haeTarjonta(hakuOid).getHakukohde(),
                 new Predicate<HakukohdeTyyppi>() {
                     public boolean apply(HakukohdeTyyppi hakukohde) {
-
                         return JULKAISTU == hakukohde.getHakukohteenTila();
                     }
                 });

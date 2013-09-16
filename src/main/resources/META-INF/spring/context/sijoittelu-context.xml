@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
-	xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
-	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
-	xsi:schemaLocation="
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
+       xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
+       xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xsi:schemaLocation="
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
@@ -11,35 +11,32 @@
 
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
-	<ctx:annotation-config />
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu" />
+    <ctx:annotation-config/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu"/>
 
-	<camelContext id="sijoitteluCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
-		<!-- Proxy Jersey REST triggerin ja Camelin eriyttämiseen toisistaan -->
-		<proxy id="sijoitteluAktivointiRajapinta"
-			serviceInterface="fi.vm.sade.valinta.kooste.sijoittelu.SijoitteluAktivointiProxy"
-			serviceUrl="direct:kaynnistaSijoitteluReitti" />
-		<route>
-			<from uri="direct:kaynnistaSijoitteluReitti" />
-			<setProperty propertyName="hakuOid">
-				<simple>${body.args[0]}</simple>
-			</setProperty>
+    <camelContext id="sijoitteluCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+        <!-- Proxy Jersey REST triggerin ja Camelin eriyttämiseen toisistaan -->
+        <proxy id="sijoitteluAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluAktivointiProxy"
+               serviceUrl="direct:kaynnistaSijoitteluReitti"/>
+        <proxy id="jatkuvanSijoittelunAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.sijoittelu.proxy.JatkuvanSijoittelunAktivointiProxy"
+               serviceUrl="direct:kaynnistaJatkuvaSijoitteluReitti"/>
+        <route>
+            <from uri="direct:kaynnistaSijoitteluReitti"/>
+            <setProperty propertyName="hakuOid">
+                <simple>${body.args[0]}</simple>
+            </setProperty>
             <policy ref="admin">
-            	<process ref="securityPreprocessor"/>
-			    <to uri="bean:suoritaSijoittelu" />
+                <process ref="securityPreprocessor"/>
+                <to uri="bean:suoritaSijoittelu"/>
             </policy>
-			<!--
-            <setProperty propertyName="valintaperusteet">
-				<simple>${body}</simple>
-			</setProperty>
-			<to uri="bean:haeHakemusKomponentti" />
-			<setProperty propertyName="hakemukset">
-				<simple>${body}</simple>
-			</setProperty>
-			<to uri="bean:suoritaLaskentaKomponentti" />
-			-->
-		</route>
-	</camelContext>
+        </route>
+        <route id="testRoute">
+            <from uri="quartz://timerName?cron=0+0/1+*+*+*+?"/>
+            <to uri="bean:jatkuvaSijoittelu"/>
+        </route>
+    </camelContext>
 
 
 </beans>
