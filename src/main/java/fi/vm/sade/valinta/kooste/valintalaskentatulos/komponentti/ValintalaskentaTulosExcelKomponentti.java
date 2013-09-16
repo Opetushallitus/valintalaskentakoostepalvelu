@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.camel.language.Simple;
@@ -33,7 +34,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaTulosExcelKomponentti.class);
 
-    @Autowired
+    @Resource(name="valintatietoService")
     private ValintatietoService valintatietoService;
 
     public InputStream luoTuloksetXlsMuodossa(@Simple("${property.hakukohdeOid}") String hakukohdeOid,

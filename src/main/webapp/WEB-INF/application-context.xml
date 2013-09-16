@@ -150,7 +150,24 @@
         </jaxws:outInterceptors>
 	</jaxws:client>
 
-    <jaxws:client id="valintaTulosService"
+    <jaxws:client id="valintatietoService"
+                  serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
+                  address="${valintalaskentakoostepalvelu.valintaTulosService.url}" >
+        <jaxws:outInterceptors>
+            <ref bean="ticketInterceptor" />
+        </jaxws:outInterceptors>
+    </jaxws:client>
+
+
+    <jaxws:client id="sijoitteluService"
+                  serviceClass="fi.vm.sade.service.sijoittelu.SijoitteluService"
+                  address="${valintalaskentakoostepalvelu.sijoitteluService.url}" >
+        <jaxws:outInterceptors>
+            <ref bean="ticketInterceptor" />
+        </jaxws:outInterceptors>
+    </jaxws:client>
+
+    <jaxws:client id="valintatietoServiceAsAdmin"
                   serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
                   address="${valintalaskentakoostepalvelu.valintaTulosService.url}" >
         <jaxws:outInterceptors>
@@ -165,7 +182,7 @@
     </jaxws:client>
 
 
-    <jaxws:client id="sijoitteluService"
+    <jaxws:client id="sijoitteluServiceAsAdmin"
                   serviceClass="fi.vm.sade.service.sijoittelu.SijoitteluService"
                   address="${valintalaskentakoostepalvelu.sijoitteluService.url}" >
         <jaxws:outInterceptors>

@@ -8,6 +8,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import javax.ws.rs.GET;
@@ -22,9 +24,11 @@ import java.util.Map;
  */
 @Controller
 @Path("sijoittelu")
+@PreAuthorize("isAuthenticated()")
 public class SijoitteluAktivointiResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(SijoitteluAktivointiResource.class);
+    public static final String OPH_CRUD = "ROLE_APP_SIJOITTELU_CRUD_1.2.246.562.10.00000000001";
 
     @Autowired
     private SijoitteluAktivointiProxy sijoitteluAktivointiProxy;
@@ -50,6 +54,7 @@ public class SijoitteluAktivointiResource {
 
     @GET
     @Path("jatkuva/aktivoi")
+    @Secured({OPH_CRUD})
     public String aktivoiJatkuvassaSijoittelussa(@QueryParam("hakuOid") String hakuOid) {
         if(!parametriService.valinnanhallintaEnabled(hakuOid)) {
             return "no privileges.";
@@ -72,6 +77,7 @@ public class SijoitteluAktivointiResource {
 
     @GET
     @Path("jatkuva/poista")
+    @Secured({OPH_CRUD})
     public String poistaJatkuvastaSijoittelusta(@QueryParam("hakuOid") String hakuOid) {
         if(!parametriService.valinnanhallintaEnabled(hakuOid)) {
             return "no privileges.";
@@ -92,6 +98,7 @@ public class SijoitteluAktivointiResource {
     @GET
     @Path("jatkuva/aktiiviset")
     @Produces(MediaType.APPLICATION_JSON)
+    @Secured({OPH_CRUD})
     public Map<String, Sijoittelu> aktiivisetSijoittelut() {
         return JatkuvaSijoittelu.SIJOITTELU_HAUT;
     }
@@ -99,6 +106,7 @@ public class SijoitteluAktivointiResource {
     @GET
     @Path("jatkuva")
     @Produces(MediaType.APPLICATION_JSON)
+    @Secured({OPH_CRUD})
     public Sijoittelu jatkuvaTila(@QueryParam("hakuOid") String hakuOid) {
         if(StringUtils.isBlank(hakuOid)) {
             return null;
