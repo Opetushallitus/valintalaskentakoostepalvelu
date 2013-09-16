@@ -16,14 +16,14 @@
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.parametrit" />
 
     <bean id="parametrit" class="fi.vm.sade.valinta.kooste.parametrit.Parametrit">
-        <property name="valintakoekutsutAlkupvm" value="${valintakoekutsut.alkupvm}"/>
+        <!--<property name="valintakoekutsutAlkupvm" value="${valintakoekutsut.alkupvm}"/>
         <property name="valintakoekutsutLoppupvm" value="${valintakoekutsut.loppupvm}"/>
         <property name="valintakoekutsutkouluillePvm" value="${valintakoekutsutkouluille.pvm}"/>
         <property name="valintakoeAlkupvm" value="${valintakoe.alkupvm}"/>
-        <property name="valintakoeLoppupvm" value="${valintakoe.loppupvm}"/>
+        <property name="valintakoeLoppupvm" value="${valintakoe.loppupvm}"/>-->
         <property name="koetuloksetPvm" value="${koetulokset.pvm}"/>
-        <property name="valintajasijoitteluAlkupvm" value="${valintajasijoittelu.alkupvm}"/>
-        <property name="valintajasijoitteluLoppupvm" value="${valintajasijoittelu.loppupvm}"/>
+        <!--<property name="valintajasijoitteluAlkupvm" value="${valintajasijoittelu.alkupvm}"/>
+        <property name="valintajasijoitteluLoppupvm" value="${valintajasijoittelu.loppupvm}"/>-->
         <property name="valintaesitysPvm" value="${valintaesitys.pvm}"/>
         <property name="hakuAlkupvm" value="${haku.alkupvm}" />
         <property name="hakuLoppupvm" value="${haku.loppupvm}" />
