@@ -10,7 +10,7 @@ import org.apache.camel.Property;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluResource;
+import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 
 @Component("TKUVAYHVAKomponentti")
 public class TKUVAYHVAExportKomponentti {

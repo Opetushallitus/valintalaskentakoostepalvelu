@@ -16,14 +16,14 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
+import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemuksenTila;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemusDTO;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakukohdeDTO;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
@@ -114,9 +114,10 @@ public class HyvaksymiskirjeetKomponentti {
             List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
             LOG.debug("Yhteys {}, SijoitteluResource.getHakemusBySijoitteluajo({},{},{})", new Object[] {
                     sijoitteluResourceUrl, hakuOid, sijoitteluajoId, hakemus.getHakemusOid() });
-            List<HakemusDTO> hakemuksetDTO = sijoitteluResource.getHakemusBySijoitteluajo(hakuOid,
-                    sijoitteluajoId.toString(), hakemus.getHakemusOid());// getHakemusBySijoitteluajo(sijoitteluajoId,
 
+            HakukohdeDTO kohde = sijoitteluResource.getHakukohdeBySijoitteluajo(hakuOid, sijoitteluajoId.toString(),
+                    hakemus.getHakemusOid());// getHakemusBySijoitteluajo(sijoitteluajoId,
+            List<HakemusDTO> hakemuksetDTO = null;
             //
             // VOIKO SAMA HAKEMUS OLLA SAMASSA HAKUKOHTEESSA MUTTA ERI
             // VALINTATAPAJONOSSA?
@@ -169,8 +170,7 @@ public class HyvaksymiskirjeetKomponentti {
             return hyvaksytytCache.get(hakukohde.getOid());
         } else {
             int hyvaksytyt = 0;
-            for (fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.ValintatapajonoDTO jono : hakukohde
-                    .getValintatapajonot()) {
+            for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
                 for (HakemusDTO hakemus : jono.getHakemukset()) {
                     if (HakemuksenTila.HYVAKSYTTY.equals(hakemus.getTila())) {
                         ++hyvaksytyt;

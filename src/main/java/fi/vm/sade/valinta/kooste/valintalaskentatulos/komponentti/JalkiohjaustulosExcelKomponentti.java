@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
+import static fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource.LATEST;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,12 +18,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemuksenTila;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemusDTO;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakukohdeDTO;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.SijoitteluajoDTO;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.ValintatapajonoDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.SijoitteluajoDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
+import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 
@@ -41,7 +43,7 @@ public class JalkiohjaustulosExcelKomponentti {
 
     public InputStream luoXls(@Body String hakuOid) {
         Map<String, List<HakukohdeDTO>> hakemusHakukohde = filterHyvaksymattomatHakijatJaHakukohteet(sijoitteluajoResource
-                .getSijoitteluajo(hakuOid, SijoitteluResource.LATEST));
+                .getSijoitteluajo(hakuOid, LATEST));
         List<Object[]> rivit = new ArrayList<Object[]>();
         for (Entry<String, List<HakukohdeDTO>> jalkiohjattava : hakemusHakukohde.entrySet()) {
             String hakemusOid = jalkiohjattava.getKey();

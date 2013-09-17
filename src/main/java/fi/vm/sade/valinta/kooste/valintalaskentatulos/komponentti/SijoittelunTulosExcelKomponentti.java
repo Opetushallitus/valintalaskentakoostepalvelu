@@ -8,12 +8,12 @@ import org.apache.camel.language.Simple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemusDTO;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakukohdeDTO;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.Tasasijasaanto;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.ValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.ValintatapajonoTila;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.Tasasijasaanto;
+import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoTila;
+import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 
 /**

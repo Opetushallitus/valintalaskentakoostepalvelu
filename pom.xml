@@ -89,6 +89,11 @@
             <artifactId>sijoittelu-algoritmi-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>fi.vm.sade.sijoittelu</groupId>
+            <artifactId>sijoittelu-tulos-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- SADE -->
         <dependency>
             <groupId>fi.vm.sade.tarjonta</groupId>
