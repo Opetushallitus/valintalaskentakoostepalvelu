@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.sijoittelu;
+package fi.vm.sade.valinta.kooste.sijoittelu.proxy;
 
 
 /**
@@ -7,5 +7,4 @@ package fi.vm.sade.valinta.kooste.sijoittelu;
 public interface SijoitteluAktivointiProxy {
 
     void aktivoiSijoittelu(String hakuOid);
-
 }

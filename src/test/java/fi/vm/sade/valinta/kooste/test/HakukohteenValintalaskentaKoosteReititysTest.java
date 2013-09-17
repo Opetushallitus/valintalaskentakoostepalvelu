@@ -102,7 +102,7 @@ public class HakukohteenValintalaskentaKoosteReititysTest {
         return parametriService;
     }
 
-    @Bean
+    @Bean(name="tarjontaServiceClientAsAdmin")
     public TarjontaPublicService getTarjontaPublicServiceMock() {
         return mock(TarjontaPublicService.class);
     }
