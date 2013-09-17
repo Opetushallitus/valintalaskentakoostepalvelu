@@ -22,8 +22,8 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.SijoitteluajoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.dto.ValintatapajonoDTO;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.Formatter;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
 
 /**
  * 

@@ -124,7 +124,6 @@ public class HyvaksymiskirjeetKomponentti {
             for (HakemusDTO dto : hakemuksetDTO) {
                 HakukohdeDTO hakukohde = haeHakukohde(hakuOid, sijoitteluajoId, dto.getHakukohdeOid(), kohdeCache);
                 for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
-                    jono.getAlinHyvaksyttyPistemaara();
                     // List<ValinnanvaiheDTO> valinnanvaiheet =
                     // haeValinnanvaiheet(dto.getHakukohdeOid(), laskentaCache);
                     Collection<HakemusDTO> kaikkiHakemukset = haeHakemuksetJonolle(jono);

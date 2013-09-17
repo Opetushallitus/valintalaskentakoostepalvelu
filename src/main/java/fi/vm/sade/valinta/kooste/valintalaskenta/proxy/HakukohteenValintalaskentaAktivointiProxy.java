@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.valintalaskenta;
+package fi.vm.sade.valinta.kooste.valintalaskenta.proxy;
 
 
 /**

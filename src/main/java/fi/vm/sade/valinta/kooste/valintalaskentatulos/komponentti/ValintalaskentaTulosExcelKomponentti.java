@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.service.valintatiedot.ValintatietoService;
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.export.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 
 /**
  * @author Jussi Jartamo
