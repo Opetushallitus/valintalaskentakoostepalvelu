@@ -17,7 +17,7 @@ public class Sijoittelu implements Serializable {
 
     private String  hakuOid;
     private Date    viimeksiAjettu;
-    private String  lastError;
+    private String  virhe;
 
     public String getHakuOid() {
         return hakuOid;
@@ -35,11 +35,11 @@ public class Sijoittelu implements Serializable {
         this.viimeksiAjettu = viimeksiAjettu;
     }
 
-    public String getLastError() {
-        return lastError;
+    public String getVirhe() {
+        return virhe;
     }
 
-    public void setLastError(String lastError) {
-        this.lastError = lastError;
+    public void setVirhe(String virhe) {
+        this.virhe = virhe;
     }
 }

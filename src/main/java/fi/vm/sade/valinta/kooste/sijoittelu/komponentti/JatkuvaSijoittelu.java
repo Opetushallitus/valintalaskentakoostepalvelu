@@ -7,7 +7,6 @@ import fi.vm.sade.service.valintatiedot.schema.HakuTyyppi;
 import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -39,7 +38,7 @@ public class JatkuvaSijoittelu {
                 LOG.info("Viety sijoittelulle valinnan tulokset");
             } catch(Exception e) {
                 LOG.error("JATKUVA SIJOITTELU", e);
-                sijoittelu.setLastError(e.getMessage());
+                sijoittelu.setVirhe(e.getMessage());
             }
             sijoittelu.setViimeksiAjettu(new Date());
         }
