@@ -64,7 +64,7 @@ public class SijoitteluAktivointiResource {
             return "get parameter 'hakuOid' required";
         } else {
             LOG.info("jatkuva sijoittelu aktivoitu haulle {}", hakuOid);
-            // TODO: käyttöoikeus hakuun ja tarkastus samalla onko hakukohdetta
+            // TODO: käyttöoikeus hakuun ja tarkastus samalla onko hakukohdetta, jos vaihdetaan pois OPH_CRUDISTA
             Sijoittelu sijoittelu = JatkuvaSijoittelu.SIJOITTELU_HAUT.get(hakuOid);
             if(sijoittelu == null) {
                 sijoittelu = new Sijoittelu();
