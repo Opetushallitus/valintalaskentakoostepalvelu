@@ -1,9 +1,13 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
-import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
-import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluAktivointiProxy;
+import java.util.Map;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,18 +16,16 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import java.util.Map;
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
+import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluAktivointiProxy;
 
 /**
  *
  */
 @Controller
-@Path("sijoittelu")
+@Path("koostesijoittelu")
 @PreAuthorize("isAuthenticated()")
 public class SijoitteluAktivointiResource {
 
@@ -39,11 +41,11 @@ public class SijoitteluAktivointiResource {
     @GET
     @Path("aktivoi")
     public String aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
-        if(!parametriService.valinnanhallintaEnabled(hakuOid)) {
+        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
             return "no privileges.";
         }
 
-        if(StringUtils.isBlank(hakuOid)) {
+        if (StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";
         } else {
             LOG.info("aktivoiSijoittelu haulle {}", hakuOid);
@@ -54,19 +56,20 @@ public class SijoitteluAktivointiResource {
 
     @GET
     @Path("jatkuva/aktivoi")
-    @Secured({OPH_CRUD})
+    @Secured({ OPH_CRUD })
     public String aktivoiJatkuvassaSijoittelussa(@QueryParam("hakuOid") String hakuOid) {
-        if(!parametriService.valinnanhallintaEnabled(hakuOid)) {
+        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
             return "no privileges.";
         }
 
-        if(StringUtils.isBlank(hakuOid)) {
+        if (StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";
         } else {
             LOG.info("jatkuva sijoittelu aktivoitu haulle {}", hakuOid);
-            // TODO: käyttöoikeus hakuun ja tarkastus samalla onko hakukohdetta, jos vaihdetaan pois OPH_CRUDISTA
+            // TODO: käyttöoikeus hakuun ja tarkastus samalla onko hakukohdetta,
+            // jos vaihdetaan pois OPH_CRUDISTA
             Sijoittelu sijoittelu = JatkuvaSijoittelu.SIJOITTELU_HAUT.get(hakuOid);
-            if(sijoittelu == null) {
+            if (sijoittelu == null) {
                 sijoittelu = new Sijoittelu();
                 sijoittelu.setHakuOid(hakuOid);
                 JatkuvaSijoittelu.SIJOITTELU_HAUT.put(hakuOid, sijoittelu);
@@ -77,18 +80,18 @@ public class SijoitteluAktivointiResource {
 
     @GET
     @Path("jatkuva/poista")
-    @Secured({OPH_CRUD})
+    @Secured({ OPH_CRUD })
     public String poistaJatkuvastaSijoittelusta(@QueryParam("hakuOid") String hakuOid) {
-        if(!parametriService.valinnanhallintaEnabled(hakuOid)) {
+        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
             return "no privileges.";
         }
 
-        if(StringUtils.isBlank(hakuOid)) {
+        if (StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";
         } else {
             LOG.info("jatkuva sijoittelu poistettu haulta {}", hakuOid);
             Sijoittelu remove = JatkuvaSijoittelu.SIJOITTELU_HAUT.remove(hakuOid);
-            if(remove == null) {
+            if (remove == null) {
                 return "hakua ei löytynyt";
             }
             return "poistettu";
@@ -98,7 +101,7 @@ public class SijoitteluAktivointiResource {
     @GET
     @Path("jatkuva/aktiiviset")
     @Produces(MediaType.APPLICATION_JSON)
-    @Secured({OPH_CRUD})
+    @Secured({ OPH_CRUD })
     public Map<String, Sijoittelu> aktiivisetSijoittelut() {
         return JatkuvaSijoittelu.SIJOITTELU_HAUT;
     }
@@ -106,9 +109,9 @@ public class SijoitteluAktivointiResource {
     @GET
     @Path("jatkuva")
     @Produces(MediaType.APPLICATION_JSON)
-    @Secured({OPH_CRUD})
+    @Secured({ OPH_CRUD })
     public Sijoittelu jatkuvaTila(@QueryParam("hakuOid") String hakuOid) {
-        if(StringUtils.isBlank(hakuOid)) {
+        if (StringUtils.isBlank(hakuOid)) {
             return null;
         } else {
             return JatkuvaSijoittelu.SIJOITTELU_HAUT.get(hakuOid);
