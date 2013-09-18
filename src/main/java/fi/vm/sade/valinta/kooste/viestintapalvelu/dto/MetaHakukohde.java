@@ -18,14 +18,14 @@ public class MetaHakukohde {
     private final String hakukohdeNimi;
     private final String tarjoajaNimi;
     private BigDecimal alinHyvaksyttyPistemaara;
-    private int hyvaksytyt;
+    private int kaikkiHyvaksytyt;
     private int kaikkiHakeneet;
 
     public MetaHakukohde(String hakukohdeNimi, String tarjoajaNimi) {
         this.hakukohdeNimi = hakukohdeNimi;
         this.tarjoajaNimi = tarjoajaNimi;
         this.alinHyvaksyttyPistemaara = null;
-        this.hyvaksytyt = 0;
+        this.kaikkiHyvaksytyt = 0;
         this.kaikkiHakeneet = 0;
     }
 
@@ -46,7 +46,7 @@ public class MetaHakukohde {
      *            Hyvaksytyn hakukohteen pisteet! Saa olla null!
      */
     public void paivitaHyvaksytyt(BigDecimal pisteet) {
-        ++hyvaksytyt;
+        ++kaikkiHyvaksytyt;
         alinHyvaksyttyPistemaara = paivitaAlinHyvaksyttyPistemaara(pisteet);
     }
 
@@ -70,8 +70,8 @@ public class MetaHakukohde {
         return Formatter.NUMERO_FORMAATTI.format(alinHyvaksyttyPistemaara);
     }
 
-    public String getHyvaksytyt() {
-        return Formatter.NUMERO_FORMAATTI.format(hyvaksytyt);
+    public String getKaikkiHyvaksytyt() {
+        return Formatter.NUMERO_FORMAATTI.format(kaikkiHyvaksytyt);
     }
 
     public String getKaikkiHakeneet() {
