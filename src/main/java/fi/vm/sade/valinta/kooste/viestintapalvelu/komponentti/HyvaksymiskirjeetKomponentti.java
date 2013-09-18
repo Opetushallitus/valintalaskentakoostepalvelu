@@ -1,25 +1,25 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.language.Simple;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.gson.Gson;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
@@ -28,8 +28,11 @@ import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteHakemukseltaUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoContentException;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoReplyException;
 
 /**
  * 
@@ -74,161 +77,128 @@ public class HyvaksymiskirjeetKomponentti {
         assert (hakuOid != null);
         assert (sijoitteluajoId != null);
         //
-        // Cachetetaan kaikki ettei tarvittavia tietoja haeta palvelimilta
-        // uudestaan jokaiselle hakemukselle!
         //
-        Map<String, HakukohdeDTO> kohdeCache = new HashMap<String, HakukohdeDTO>();
-        Map<String, HakukohdeNimiRDTO> nimiCache = new HashMap<String, HakukohdeNimiRDTO>();
-        Map<String, Integer> hyvaksytytCache = new HashMap<String, Integer>();
-        // Map<String, List<ValinnanvaiheDTO>> laskentaCache = new
-        // HashMap<String, List<ValinnanvaiheDTO>>();
-        // Map<String, BigDecimal> tulosCache = new HashMap<String,
-        // BigDecimal>();
         //
-        // Hyvaksymiskirje koskee vain kyseiselle hakukohteelle hyvaksyttyja!
-        //
-        List<Kirje> kirjeet = new ArrayList<Kirje>();
-        Collection<HakemusDTO> hyvaksytytHakemukset;
-        {
-            LOG.debug("Haetaan hakukohde sijoittelulta!");
-            HakukohdeDTO kohde = haeHakukohde(hakuOid, sijoitteluajoId, hakukohdeOid, kohdeCache);
-            LOG.debug("Haetaan hakemukset sijoittelulta!");
-            Collection<HakemusDTO> dtot = haeHakemukset(kohde);
-            hyvaksytytHakemukset = filterHyvaksytytHakemukset(dtot);
-            LOG.debug("Filtteröidään hyväksytyt! Löytyi {}", hyvaksytytHakemukset.size());
+        final List<HakijaDTO> haunHakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, sijoitteluajoId.toString());
+        final List<HakijaDTO> hakukohteenHakijat = filterHakijatHakukohteelle(haunHakijat, hakukohdeOid);
+        final Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = haeKiinnostavatHakukohteet(
+                haunHakijat, hakukohteenHakijat, kielikoodi);
+        final int kaikkiHakukohteenHyvaksytyt = hakukohteenHakijat.size();
+        if (kaikkiHakukohteenHyvaksytyt == 0) {
+            LOG.error("Hyväksymiskirjeitä yritetään luoda hakukohteelle {} millä ei ole hyväksyttyjä hakijoita!",
+                    hakukohdeOid);
+            throw new NoContentException(
+                    "Hakukohteella on oltava vähintään yksi hyväksytty hakija että hyväksymiskirjeet voidaan luoda!");
         }
-        final String koulu = extractTarjoajaNimi(haeHakukohdeNimi(hakukohdeOid, nimiCache), kielikoodi);
-        final String koulutus = extractHakukohdeNimi(haeHakukohdeNimi(hakukohdeOid, nimiCache), kielikoodi);
-        for (HakemusDTO hakemus : hyvaksytytHakemukset) {
-            String hakemusOid = hakemus.getHakemusOid();
-            LOG.debug("Yhteys {}, ApplicationResource.getApplicationByOid({})", new Object[] { hakuAppResourceUrl,
-                    hakemusOid });
-            Osoite osoite;
-            try {
-                osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(applicationResource.getApplicationByOid(hakemusOid));
-            } catch (Exception e) {
-                LOG.error("Ei voitu hakea osoitetta Haku-palvelusta hakemukselle {}! {}", new Object[] { hakemusOid,
-                        hakuAppResourceUrl });
-                throw new RuntimeException("Ei voitu hakea osoitetta Haku-palvelusta hakemukselle " + hakemusOid, e);
-            }
-            List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
-            LOG.debug("Yhteys {}, SijoitteluResource.getHakemusBySijoitteluajo({},{},{})", new Object[] {
-                    sijoitteluResourceUrl, hakuOid, sijoitteluajoId, hakemus.getHakemusOid() });
+        final List<Kirje> kirjeet = new ArrayList<Kirje>();
+        final String koulu;
+        final String koulutus;
+        {
+            MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
+            koulu = metakohde.getTarjoajaNimi();
+            koulutus = metakohde.getHakukohdeNimi();
+        }
+        for (HakijaDTO hakija : hakukohteenHakijat) {
+            final String hakemusOid = hakija.getHakemusOid();
+            final Osoite osoite = haeOsoite(hakemusOid);
+            final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
+            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+                MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
+                Map<String, String> tulokset = new HashMap<String, String>();
+                tulokset.put("alinHyvaksyttyPistemaara", metakohde.getAlinHyvaksyttyPistemaara());
 
-            HakukohdeDTO kohde = sijoitteluResource.getHakukohdeBySijoitteluajo(hakuOid, sijoitteluajoId.toString(),
-                    hakemus.getHakemusOid());// getHakemusBySijoitteluajo(sijoitteluajoId,
-            List<HakemusDTO> hakemuksetDTO = null;
-            //
-            // VOIKO SAMA HAKEMUS OLLA SAMASSA HAKUKOHTEESSA MUTTA ERI
-            // VALINTATAPAJONOSSA?
-            //
-            for (HakemusDTO dto : hakemuksetDTO) {
-                HakukohdeDTO hakukohde = haeHakukohde(hakuOid, sijoitteluajoId, dto.getHakukohdeOid(), kohdeCache);
-                for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
-                    // List<ValinnanvaiheDTO> valinnanvaiheet =
-                    // haeValinnanvaiheet(dto.getHakukohdeOid(), laskentaCache);
-                    Collection<HakemusDTO> kaikkiHakemukset = haeHakemuksetJonolle(jono);
-                    // Collection<Hakemus> tahanHyvaksytyt =
-                    // filterHyvaksytytHakemukset(kaikkiHakemukset);
+                tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi());
+                tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
+                                                       // hakukohdenimea
+                                                       // joten
+                                                       // tuskin tarvii
+                                                       // toistaa
+                tulokset.put("hylkayksenSyy", StringUtils.EMPTY);
+                tulokset.put("hyvaksytyt", metakohde.getHyvaksytyt());
 
-                    HakukohdeNimiRDTO tamanHakukohteenNimi = haeHakukohdeNimi(dto.getHakukohdeOid(), nimiCache);
-                    Map<String, String> tulokset = new HashMap<String, String>();
-                    tulokset.put("alinHyvaksyttyPistemaara",
-                            Formatter.suomennaNumero(jono.getAlinHyvaksyttyPistemaara()));
+                tulokset.put("kaikkiHakeneet", metakohde.getKaikkiHakeneet());
+                tulokset.put("omatPisteet", Formatter.suomennaNumero(hakutoive.getPisteet()));
 
-                    tulokset.put("hakukohteenNimi", extractHakukohdeNimi(tamanHakukohteenNimi, kielikoodi));
-                    tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
-                                                           // hakukohdenimea
-                                                           // joten
-                                                           // tuskin tarvii
-                                                           // toistaa
-                    tulokset.put("hylkayksenSyy", "");
-                    tulokset.put("hyvaksytyt", "" + countHyvaksytytHakemukset(hakukohde, hyvaksytytCache));//
-
-                    tulokset.put("kaikkiHakeneet", "" + kaikkiHakemukset.size());
-                    tulokset.put("omatPisteet", Formatter.suomennaNumero(hakemus.getPisteet()));// countOmatPisteet(dto.getHakemusOid(),
-                    // valinnanvaiheet));
-
-                    tulokset.put("organisaationNimi", extractTarjoajaNimi(tamanHakukohteenNimi, kielikoodi));
-                    tulokset.put("paasyJaSoveltuvuuskoe",
-                            Formatter.suomennaNumero(hakemus.getPaasyJaSoveltuvuusKokeenTulos()));
-                    tulokset.put("selite", "");
-                    tulokset.put("valinnanTulos", HakemuksenTilaUtil.tilaConverter(dto.getTila().toString()));
-                    tulosList.add(tulokset);
-                }
+                tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
+                tulokset.put("paasyJaSoveltuvuuskoe",
+                        Formatter.suomennaNumero(hakutoive.getPaasyJaSoveltuvuusKokeenTulos()));
+                tulokset.put("selite", StringUtils.EMPTY);
+                tulokset.put("valinnanTulos", HakemuksenTilaUtil.tilaConverter(hakutoive.getTila().toString()));
+                tulosList.add(tulokset);
             }
             kirjeet.add(new Kirje(osoite, "FI", koulu, koulutus, tulosList));
         }
 
-        String hyvaksymiskirjeet = new Gson().toJson(new Kirjeet(kirjeet));
-        LOG.debug("Hyvaksymiskirjeet {}", hyvaksymiskirjeet);
-        return hyvaksymiskirjeet;
+        LOG.info("Yritetään luoda viestintapalvelulta hyvaksymiskirjeitä {} kappaletta!", kirjeet.size());
+        return new Gson().toJson(new Kirjeet(kirjeet));
     }
 
-    private int countHyvaksytytHakemukset(HakukohdeDTO hakukohde, Map<String, Integer> hyvaksytytCache) {
-        if (hyvaksytytCache.containsKey(hakukohde.getOid())) {
-            return hyvaksytytCache.get(hakukohde.getOid());
-        } else {
-            int hyvaksytyt = 0;
-            for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
-                for (HakemusDTO hakemus : jono.getHakemukset()) {
-                    if (HakemuksenTila.HYVAKSYTTY.equals(hakemus.getTila())) {
-                        ++hyvaksytyt;
+    //
+    // Hakee kaikki hyvaksymiskirjeen kohteena olevan hakukohteen hakijat ja
+    // niihin liittyvat hakukohteet - eli myos hakijoiden hylatyt hakukohteet!
+    // Metahakukohteille haetaan muun muassa tarjoajanimi!
+    //
+    private Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(List<HakijaDTO> haunHakijat,
+            List<HakijaDTO> hakukohteenHakijat, String kielikoodi) {
+        Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
+        for (HakijaDTO hakija : hakukohteenHakijat) {
+            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+                String hakukohdeOid = hakutoive.getHakukohdeOid();
+                if (!metaKohteet.containsKey(hakukohdeOid)) { // lisataan
+                                                              // puuttuva
+                                                              // hakukohde
+                    HakukohdeNimiRDTO nimi = haeHakukohdeNimi(hakukohdeOid);
+                    String hakukohdeNimi = extractHakukohdeNimi(nimi, kielikoodi);
+                    String tarjoajaNimi = extractTarjoajaNimi(nimi, kielikoodi);
+                    metaKohteet.put(hakukohdeOid, new MetaHakukohde(hakukohdeNimi, tarjoajaNimi));
+                }
+            }
+        }
+        // Käydään läpi koko haun hyvaksytyt hakukohteet -> hyvaksymiskirjeen
+        // kannalta kiinnostavat hakukohteet paivitetaan!
+        for (HakijaDTO hakija : haunHakijat) {
+            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+                String hakukohdeOid = hakutoive.getHakukohdeOid();
+                MetaHakukohde metakohde = metaKohteet.get(hakukohdeOid);
+                if (metakohde != null) { // <- ollaanko kohteesta
+                                         // kiinnostuneita!
+                    if (HakemuksenTila.HYVAKSYTTY.equals(hakutoive.getTila())) {
+                        metakohde.paivitaHyvaksytyt(hakutoive.getPisteet());
+                    }
+                    metakohde.paivitaKaikkiHakeneet();
+                }
+            }
+        }
+        return metaKohteet;
+    }
+
+    private List<HakijaDTO> filterHakijatHakukohteelle(List<HakijaDTO> haunHakijat, final String hakukohdeOid) {
+        List<HakijaDTO> hakijat = new ArrayList<HakijaDTO>(haunHakijat);
+        Collections2.filter(hakijat, new Predicate<HakijaDTO>() {
+            public boolean apply(HakijaDTO hakija) {
+                for (HakutoiveDTO toive : hakija.getHakutoiveet()) {
+                    if (HakemuksenTila.HYVAKSYTTY.equals(toive.getTila())) {
+                        if (hakukohdeOid.equals(toive.getHakukohdeOid())) {
+                            return true; // hyvaksytty oikeaan kohteeseen
+                        }
+                        return false; // hyvaksytty muuhun kohteeseen
                     }
                 }
+                return false; // ei hakutoiveita
             }
-            hyvaksytytCache.put(hakukohde.getOid(), hyvaksytyt);
-            return hyvaksytyt;
-        }
+        });
+        return hakijat;
     }
 
-    private Collection<HakemusDTO> haeHakemuksetJonolle(ValintatapajonoDTO jono) {// String
-        // valintatapajonoOid,
-        if (jono == null) {
-            LOG.error("Ei hakukohdetta!");
-            return Collections.emptyList();
-        } else {
-            Map<String, HakemusDTO> h = new HashMap<String, HakemusDTO>();
-            for (HakemusDTO hakemus : jono.getHakemukset()) {
-                h.put(hakemus.getHakemusOid(), hakemus);// .getHakemusOid(),
-                // hakemus);
-            }
-            return h.values();
+    private Osoite haeOsoite(String hakemusOid) {
+        try {
+            return OsoiteHakemukseltaUtil.osoiteHakemuksesta(applicationResource.getApplicationByOid(hakemusOid));
+        } catch (Exception e) {
+            LOG.error("Ei voitu hakea osoitetta Haku-palvelusta hakemukselle {}! {}", new Object[] { hakemusOid,
+                    hakuAppResourceUrl });
+            throw new NoReplyException(
+                    "Hakemuspalvelu ei anna hakijoille osoitteita! Tarkista palvelun käyttöoikeudet.");
         }
-    }
-
-    private Collection<HakemusDTO> haeHakemukset(HakukohdeDTO hakukohde) {// String
-        // valintatapajonoOid,
-        if (hakukohde == null) {
-            LOG.error("Ei hakukohdetta!");
-            return Collections.emptyList();
-        } else {
-            Map<String, HakemusDTO> h = new HashMap<String, HakemusDTO>();
-            for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
-                // if (valintatapajonoOid.equals(jono.getOid())) {
-                for (HakemusDTO hakemus : jono.getHakemukset()) {
-                    h.put(hakemus.getHakemusOid(), hakemus);// .getHakemusOid(),
-                    // hakemus);
-                }
-                // }
-            }
-            return h.values();
-        }
-    }
-
-    private Collection<HakemusDTO> filterHyvaksytytHakemukset(Collection<HakemusDTO> hakemukset) {// String
-        if (hakemukset == null) {
-            LOG.error("Ei hakemuksia!");
-            return Collections.emptyList();
-        }
-        // valintatapajonoOid,
-        List<HakemusDTO> h0 = new ArrayList<HakemusDTO>();
-        for (HakemusDTO h : hakemukset) {
-            if (HakemuksenTila.HYVAKSYTTY.equals(h.getTila())) {
-                h0.add(h);
-            }
-        }
-        return h0;
     }
 
     private String extractHakukohdeNimi(HakukohdeNimiRDTO nimi, String kielikoodi) {
@@ -255,29 +225,14 @@ public class HyvaksymiskirjeetKomponentti {
                                                                   // joku!
     }
 
-    private HakukohdeDTO haeHakukohde(String hakuOid, Long sijoitteluajoId, String hakukohdeOid,
-            Map<String, HakukohdeDTO> cache) {
-        if (cache.containsKey(hakukohdeOid)) {
-            return cache.get(hakukohdeOid);
-        } else {
-            LOG.debug("Yhteys {}, SijoitteluResource.getHakukohdeBySijoitteluajo({},{},{})", new Object[] {
-                    sijoitteluResourceUrl, hakuOid, sijoitteluajoId, hakukohdeOid });
-            HakukohdeDTO kohde = sijoitteluResource.getHakukohdeBySijoitteluajo(hakuOid, sijoitteluajoId.toString(),
-                    hakukohdeOid);// HakukohdeBySijoitteluajo(sijoitteluajoId,
-                                  // hakukohdeOid);
-            cache.put(hakukohdeOid, kohde);
-            return kohde;
-        }
-    }
-
-    private HakukohdeNimiRDTO haeHakukohdeNimi(String hakukohdeOid, Map<String, HakukohdeNimiRDTO> cache) {
-        if (cache.containsKey(hakukohdeOid)) {
-            return cache.get(hakukohdeOid);
+    private HakukohdeNimiRDTO haeHakukohdeNimi(String hakukohdeOid) {
+        if (hakukohdeOid == null) {
+            throw new NoContentException(
+                    "Sijoittelu palautti puutteellisesti luodun hakutoiveen! Hakukohteen tunniste puuttuu!");
         } else {
             LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[] { tarjontaResourceUrl,
                     hakukohdeOid });
             HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
-            cache.put(hakukohdeOid, nimi);
             return nimi;
         }
     }

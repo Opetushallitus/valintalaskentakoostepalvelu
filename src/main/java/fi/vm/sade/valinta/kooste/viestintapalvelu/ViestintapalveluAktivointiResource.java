@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.LatausUrl;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoContentException;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksymiskirjeBatchAktivointiProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.JalkiohjauskirjeBatchAktivointiProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.OsoitetarratAktivointiProxy;
@@ -102,6 +103,9 @@ public class ViestintapalveluAktivointiResource {
                     .status(Status.OK)
                     .entity(new Gson().toJson(new LatausUrl(hyvaksymiskirjeBatchProxy.hyvaksymiskirjeetAktivointi(
                             hakukohdeOid, hakuOid, sijoitteluajoId)))).build();
+        } catch (NoContentException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Vastaus.virhe("Hakukohteella ei ole hyväksyttyjä hakijoita!")).build();
         } catch (Exception e) {
             LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
             // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
