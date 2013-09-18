@@ -42,6 +42,20 @@
             </policy>
         </route>
         <route>
+            <from uri="direct:kaynnistaHyvaksyttyjenOsoitetarratReitti"/>
+            <policy ref="admin">
+            	<setProperty propertyName="kielikoodi"><constant>kieli_fi</constant></setProperty>
+	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
+	            <setProperty propertyName="valintakoeOid"><simple>${body.args[1]}</simple></setProperty>
+	            <to uri="bean:hyvaksyttyjenOsoitteetKomponentti"/>
+	            <log 	loggingLevel="DEBUG" 
+	            		logName="fi.vm.sade.valinta.kooste.viestintapalvelu"
+	            		message="Viestintapalvelin kutsu (osoitetarrat): {{viestintapalvelu.url}}/api/v1/addresslabel/pdf"/>
+	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
+	            <to uri="{{viestintapalvelu.url}}/api/v1/addresslabel/pdf"/>
+            </policy>
+        </route>
+        <route>
             <from uri="direct:kaynnistaHyvaksymiskirjeetReitti"/>
             <policy ref="admin">
             	<setProperty propertyName="kielikoodi"><constant>kieli_fi</constant></setProperty>
@@ -87,6 +101,9 @@
         <proxy id="addressLabelBatchAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.OsoitetarratAktivointiProxy"
                serviceUrl="direct:kaynnistaOsoitetarratReitti"/>
+        <proxy id="hyvaksyttyjenAddressLabelBatchAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksyttyjenOsoitetarrojenAktivointiProxy"
+               serviceUrl="direct:kaynnistaHyvaksyttyjenOsoitetarratReitti"/>
         <routeContextRef ref="viestintapalveluRoutes"/>
     </camelContext>
 </beans>

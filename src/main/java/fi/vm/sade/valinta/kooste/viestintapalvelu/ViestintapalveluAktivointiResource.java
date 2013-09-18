@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.LatausUrl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksymiskirjeBatchAktivointiProxy;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksyttyjenOsoitetarrojenAktivointiProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.JalkiohjauskirjeBatchAktivointiProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.OsoitetarratAktivointiProxy;
 
@@ -98,6 +99,27 @@ public class ViestintapalveluAktivointiResource {
             LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(Vastaus.virhe("Hyväksymiskirjeiden luonti epäonnistui! " + e.getMessage())).build();
+        }
+    }
+
+    @Autowired
+    private HyvaksyttyjenOsoitetarrojenAktivointiProxy hyvaksyttyjenOsoitetarratProxy;
+
+    @GET
+    @Path("hyvaksyttyjenosoitetarrat/aktivoi")
+    @Produces("application/json")
+    public Response aktivoiHyvaksyttyjenOsoitetarrojenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("hakuOid") String hakuOid, @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
+        try {
+            return Response
+                    .status(Status.OK)
+                    .entity(new Gson().toJson(new LatausUrl(hyvaksyttyjenOsoitetarratProxy
+                            .hyvaksyttyjenOsoitetarrojenAktivointi(hakukohdeOid, hakuOid, sijoitteluajoId)))).build();
+        } catch (Exception e) {
+            LOG.error("Hyväksyttyjen osoitetarrojen luonnissa virhe! {}", e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Vastaus.virhe("Hyväksyttyjen osoitetarrojen luonti epäonnistui! " + e.getMessage()))
+                    .build();
         }
     }
 
