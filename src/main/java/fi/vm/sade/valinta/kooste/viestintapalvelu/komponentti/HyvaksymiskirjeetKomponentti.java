@@ -1,19 +1,10 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.gson.Gson;
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
-import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.util.Formatter;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.*;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoContentException;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoReplyException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
@@ -23,10 +14,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.gson.Gson;
+
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
+import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.util.Formatter;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteHakemukseltaUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoContentException;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoReplyException;
 
 /**
  * 
@@ -96,28 +104,40 @@ public class HyvaksymiskirjeetKomponentti {
             final Osoite osoite = haeOsoite(hakemusOid);
             final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-                MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
-                Map<String, String> tulokset = new HashMap<String, String>();
-                tulokset.put("alinHyvaksyttyPistemaara", metakohde.getAlinHyvaksyttyPistemaara());
+                for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
 
-                tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi());
-                tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
-                                                       // hakukohdenimea
-                                                       // joten
-                                                       // tuskin tarvii
-                                                       // toistaa
-                tulokset.put("hylkayksenSyy", StringUtils.EMPTY);
-                tulokset.put("hyvaksytyt", metakohde.getKaikkiHyvaksytyt());
+                    MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
+                    Map<String, String> tulokset = new HashMap<String, String>();
+                    tulokset.put("alinHyvaksyttyPistemaara",
+                            Formatter.suomennaNumero(valintatapajono.getAlinHyvaksyttyPistemaara()));
 
-                tulokset.put("kaikkiHakeneet", metakohde.getKaikkiHakeneet());
-                tulokset.put("omatPisteet", Formatter.suomennaNumero(hakutoive.getPisteet()));
+                    tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi());
+                    tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
+                                                           // hakukohdenimea
+                                                           // joten
+                                                           // tuskin tarvii
+                                                           // toistaa
+                    tulokset.put("hylkayksenSyy", StringUtils.EMPTY);
+                    if (valintatapajono.getHyvaksytty() == null) {
+                        throw new NoContentException(
+                                "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
+                    }
+                    tulokset.put("hyvaksytyt", Formatter.suomennaNumero(valintatapajono.getHyvaksytty()));
+                    if (valintatapajono.getHakeneet() == null) {
+                        throw new NoContentException(
+                                "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
+                    }
+                    tulokset.put("kaikkiHakeneet", Formatter.suomennaNumero(valintatapajono.getHakeneet()));
+                    tulokset.put("omatPisteet", Formatter.suomennaNumero(valintatapajono.getPisteet()));
 
-                tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
-                tulokset.put("paasyJaSoveltuvuuskoe",
-                        Formatter.suomennaNumero(hakutoive.getPaasyJaSoveltuvuusKokeenTulos()));
-                tulokset.put("selite", StringUtils.EMPTY);
-                tulokset.put("valinnanTulos", HakemuksenTilaUtil.tilaConverter(hakutoive.getTila().toString()));
-                tulosList.add(tulokset);
+                    tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
+                    tulokset.put("paasyJaSoveltuvuuskoe",
+                            Formatter.suomennaNumero(valintatapajono.getPaasyJaSoveltuvuusKokeenTulos()));
+                    tulokset.put("selite", StringUtils.EMPTY);
+                    tulokset.put("valinnanTulos",
+                            HakemuksenTilaUtil.tilaConverter(valintatapajono.getTila().toString()));
+                    tulosList.add(tulokset);
+                }
             }
             kirjeet.add(new Kirje(osoite, "FI", koulu, koulutus, tulosList));
         }
@@ -147,21 +167,6 @@ public class HyvaksymiskirjeetKomponentti {
                 }
             }
         }
-        // Käydään läpi koko haun hyvaksytyt hakukohteet -> hyvaksymiskirjeen
-        // kannalta kiinnostavat hakukohteet paivitetaan!
-        for (HakijaDTO hakija : haunHakijat) {
-            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-                String hakukohdeOid = hakutoive.getHakukohdeOid();
-                MetaHakukohde metakohde = metaKohteet.get(hakukohdeOid);
-                if (metakohde != null) { // <- ollaanko kohteesta
-                                         // kiinnostuneita!
-                    if (HakemuksenTila.HYVAKSYTTY.equals(hakutoive.getTila())) {
-                        metakohde.paivitaHyvaksytyt(hakutoive.getPisteet());
-                    }
-                    metakohde.paivitaKaikkiHakeneet();
-                }
-            }
-        }
         return metaKohteet;
     }
 
@@ -170,11 +175,13 @@ public class HyvaksymiskirjeetKomponentti {
         Collections2.filter(hakijat, new Predicate<HakijaDTO>() {
             public boolean apply(HakijaDTO hakija) {
                 for (HakutoiveDTO toive : hakija.getHakutoiveet()) {
-                    if (HakemuksenTila.HYVAKSYTTY.equals(toive.getTila())) {
-                        if (hakukohdeOid.equals(toive.getHakukohdeOid())) {
-                            return true; // hyvaksytty oikeaan kohteeseen
+                    for (HakutoiveenValintatapajonoDTO jono : toive.getHakutoiveenValintatapajonot()) {
+                        if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila())) {
+                            if (hakukohdeOid.equals(toive.getHakukohdeOid())) {
+                                return true; // hyvaksytty oikeaan kohteeseen
+                            }
+                            return false; // hyvaksytty muuhun kohteeseen
                         }
-                        return false; // hyvaksytty muuhun kohteeseen
                     }
                 }
                 return false; // ei hakutoiveita

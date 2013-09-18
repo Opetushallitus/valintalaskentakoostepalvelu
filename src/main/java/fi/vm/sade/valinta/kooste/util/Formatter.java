@@ -16,4 +16,11 @@ public class Formatter {
         }
         return NUMERO_FORMAATTI.format(arvo);
     }
+
+    public static String suomennaNumero(Integer arvo) {
+        if (arvo == null) {
+            return StringUtils.EMPTY;
+        }
+        return NUMERO_FORMAATTI.format(arvo);
+    }
 }

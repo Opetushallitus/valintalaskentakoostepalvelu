@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.HakutoiveDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
@@ -85,28 +85,39 @@ public class JalkiohjauskirjeetKomponentti {
             final Osoite osoite = haeOsoite(hakemusOid);
             final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-                MetaHakukohde metakohde = jalkiohjauskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
-                Map<String, String> tulokset = new HashMap<String, String>();
-                tulokset.put("alinHyvaksyttyPistemaara", metakohde.getAlinHyvaksyttyPistemaara());
+                for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
+                    MetaHakukohde metakohde = jalkiohjauskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
+                    Map<String, String> tulokset = new HashMap<String, String>();
+                    tulokset.put("alinHyvaksyttyPistemaara",
+                            Formatter.suomennaNumero(valintatapajono.getAlinHyvaksyttyPistemaara()));
 
-                tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi());
-                tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
-                                                       // hakukohdenimea
-                                                       // joten
-                                                       // tuskin tarvii
-                                                       // toistaa
-                tulokset.put("hylkayksenSyy", StringUtils.EMPTY);
-                tulokset.put("hyvaksytyt", metakohde.getKaikkiHyvaksytyt());
+                    tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi());
+                    tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
+                                                           // hakukohdenimea
+                                                           // joten
+                                                           // tuskin tarvii
+                                                           // toistaa
+                    tulokset.put("hylkayksenSyy", StringUtils.EMPTY);
+                    if (valintatapajono.getHyvaksytty() == null) {
+                        throw new NoContentException(
+                                "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
+                    }
+                    tulokset.put("hyvaksytyt", Formatter.suomennaNumero(valintatapajono.getHyvaksytty()));
+                    if (valintatapajono.getHakeneet() == null) {
+                        throw new NoContentException(
+                                "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
+                    }
+                    tulokset.put("kaikkiHakeneet", Formatter.suomennaNumero(valintatapajono.getHakeneet()));
+                    tulokset.put("omatPisteet", Formatter.suomennaNumero(valintatapajono.getPisteet()));
 
-                tulokset.put("kaikkiHakeneet", metakohde.getKaikkiHakeneet());
-                tulokset.put("omatPisteet", Formatter.suomennaNumero(hakutoive.getPisteet()));
-
-                tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
-                tulokset.put("paasyJaSoveltuvuuskoe",
-                        Formatter.suomennaNumero(hakutoive.getPaasyJaSoveltuvuusKokeenTulos()));
-                tulokset.put("selite", StringUtils.EMPTY);
-                tulokset.put("valinnanTulos", HakemuksenTilaUtil.tilaConverter(hakutoive.getTila().toString()));
-                tulosList.add(tulokset);
+                    tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
+                    tulokset.put("paasyJaSoveltuvuuskoe",
+                            Formatter.suomennaNumero(valintatapajono.getPaasyJaSoveltuvuusKokeenTulos()));
+                    tulokset.put("selite", StringUtils.EMPTY);
+                    tulokset.put("valinnanTulos",
+                            HakemuksenTilaUtil.tilaConverter(valintatapajono.getTila().toString()));
+                    tulosList.add(tulokset);
+                }
             }
             kirjeet.add(new Kirje(osoite, "FI", tulosList));
         }
@@ -133,21 +144,6 @@ public class JalkiohjauskirjeetKomponentti {
                     String hakukohdeNimi = extractHakukohdeNimi(nimi, kielikoodi);
                     String tarjoajaNimi = extractTarjoajaNimi(nimi, kielikoodi);
                     metaKohteet.put(hakukohdeOid, new MetaHakukohde(hakukohdeNimi, tarjoajaNimi));
-                }
-            }
-        }
-        // Käydään läpi koko haun hyvaksytyt hakukohteet -> hyvaksymiskirjeen
-        // kannalta kiinnostavat hakukohteet paivitetaan!
-        for (HakijaDTO hakija : haunHakijat) {
-            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-                String hakukohdeOid = hakutoive.getHakukohdeOid();
-                MetaHakukohde metakohde = metaKohteet.get(hakukohdeOid);
-                if (metakohde != null) { // <- ollaanko kohteesta
-                                         // kiinnostuneita!
-                    if (HakemuksenTila.HYVAKSYTTY.equals(hakutoive.getTila())) {
-                        metakohde.paivitaHyvaksytyt(hakutoive.getPisteet());
-                    }
-                    metakohde.paivitaKaikkiHakeneet();
                 }
             }
         }

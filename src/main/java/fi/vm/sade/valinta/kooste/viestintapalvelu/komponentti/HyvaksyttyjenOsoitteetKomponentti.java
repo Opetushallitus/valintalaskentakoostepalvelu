@@ -1,11 +1,23 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.camel.language.Simple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.gson.Gson;
+
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
@@ -14,15 +26,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoContentException;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoReplyException;
-import org.apache.camel.language.Simple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 
@@ -94,11 +97,13 @@ public class HyvaksyttyjenOsoitteetKomponentti {
         Collections2.filter(hakijat, new Predicate<HakijaDTO>() {
             public boolean apply(HakijaDTO hakija) {
                 for (HakutoiveDTO toive : hakija.getHakutoiveet()) {
-                    if (HakemuksenTila.HYVAKSYTTY.equals(toive.getTila())) {
-                        if (hakukohdeOid.equals(toive.getHakukohdeOid())) {
-                            return true; // hyvaksytty oikeaan kohteeseen
+                    for (HakutoiveenValintatapajonoDTO jono : toive.getHakutoiveenValintatapajonot()) {
+                        if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila())) {
+                            if (hakukohdeOid.equals(toive.getHakukohdeOid())) {
+                                return true; // hyvaksytty oikeaan kohteeseen
+                            }
+                            return false; // hyvaksytty muuhun kohteeseen
                         }
-                        return false; // hyvaksytty muuhun kohteeseen
                     }
                 }
                 return false; // ei hakutoiveita
