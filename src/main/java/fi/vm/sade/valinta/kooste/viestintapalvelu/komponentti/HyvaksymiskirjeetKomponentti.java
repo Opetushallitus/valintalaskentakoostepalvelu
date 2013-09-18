@@ -1,10 +1,19 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.gson.Gson;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
+import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.util.Formatter;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.*;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoContentException;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoReplyException;
 import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
@@ -14,26 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.gson.Gson;
-
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.HakutoiveDTO;
-import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.util.Formatter;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteHakemukseltaUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoContentException;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoReplyException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -70,6 +63,7 @@ public class HyvaksymiskirjeetKomponentti {
     public String teeHyvaksymiskirjeet(@Property("kielikoodi") String kielikoodi,
             @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid,
             @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId) {
+
         LOG.debug("Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'", new Object[] {
                 hakukohdeOid, hakuOid, sijoitteluajoId });
         assert (hakukohdeOid != null);
