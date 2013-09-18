@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -66,9 +67,7 @@ public class HyvaksymiskirjeetKomponentti {
     @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
     private String hakuAppResourceUrl;
 
-    // private static final String KIELIKOODI = "kieli_fi";
-
-    public String teeHyvaksymiskirjeet(@Simple("${property.kielikoodi}") String kielikoodi,
+    public String teeHyvaksymiskirjeet(@Property("kielikoodi") String kielikoodi,
             @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid,
             @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId) {
         LOG.debug("Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'", new Object[] {
@@ -81,8 +80,6 @@ public class HyvaksymiskirjeetKomponentti {
         //
         final List<HakijaDTO> haunHakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, sijoitteluajoId.toString());
         final List<HakijaDTO> hakukohteenHakijat = filterHakijatHakukohteelle(haunHakijat, hakukohdeOid);
-        final Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = haeKiinnostavatHakukohteet(
-                haunHakijat, hakukohteenHakijat, kielikoodi);
         final int kaikkiHakukohteenHyvaksytyt = hakukohteenHakijat.size();
         if (kaikkiHakukohteenHyvaksytyt == 0) {
             LOG.error("Hyväksymiskirjeitä yritetään luoda hakukohteelle {} millä ei ole hyväksyttyjä hakijoita!",
@@ -90,6 +87,8 @@ public class HyvaksymiskirjeetKomponentti {
             throw new NoContentException(
                     "Hakukohteella on oltava vähintään yksi hyväksytty hakija että hyväksymiskirjeet voidaan luoda!");
         }
+        final Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = haeKiinnostavatHakukohteet(
+                haunHakijat, hakukohteenHakijat, kielikoodi);
         final List<Kirje> kirjeet = new ArrayList<Kirje>();
         final String koulu;
         final String koulutus;
@@ -114,7 +113,7 @@ public class HyvaksymiskirjeetKomponentti {
                                                        // tuskin tarvii
                                                        // toistaa
                 tulokset.put("hylkayksenSyy", StringUtils.EMPTY);
-                tulokset.put("hyvaksytyt", metakohde.getHyvaksytyt());
+                tulokset.put("hyvaksytyt", metakohde.getKaikkiHyvaksytyt());
 
                 tulokset.put("kaikkiHakeneet", metakohde.getKaikkiHakeneet());
                 tulokset.put("omatPisteet", Formatter.suomennaNumero(hakutoive.getPisteet()));
