@@ -46,7 +46,8 @@
             <policy ref="admin">
             	<setProperty propertyName="kielikoodi"><constant>kieli_fi</constant></setProperty>
 	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
-	            <setProperty propertyName="valintakoeOid"><simple>${body.args[1]}</simple></setProperty>
+	            <setProperty propertyName="hakuOid"><simple>${body.args[1]}</simple></setProperty>
+	            <setProperty propertyName="sijoitteluajoId"><simple>${body.args[2]}</simple></setProperty>
 	            <to uri="bean:hyvaksyttyjenOsoitteetKomponentti"/>
 	            <log 	loggingLevel="DEBUG" 
 	            		logName="fi.vm.sade.valinta.kooste.viestintapalvelu"
