@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.Property;
-import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,6 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
@@ -62,23 +60,18 @@ public class JalkiohjauskirjeetKomponentti {
     @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
     private String hakuAppResourceUrl;
 
-    public String teeJalkiohjauskirjeet(@Property("kielikoodi") String kielikoodi,
-            @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid,
-            @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
-            @Simple("${property.hakemukset}") List<SuppeaHakemus> hakemukset) {
-        LOG.debug("Jalkiohjauskirjeet for hakukohde '{}' and haku '{}'", new Object[] { hakukohdeOid, hakuOid });
-        final List<HakijaDTO> haunHakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, sijoitteluajoId.toString());
+    public String teeJalkiohjauskirjeet(@Property("kielikoodi") String kielikoodi, @Property("hakuOid") String hakuOid) {
+        LOG.debug("Jalkiohjauskirjeet for haku '{}'", new Object[] { hakuOid });
         final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluResource.ilmankoulutuspaikkaa(hakuOid,
-                sijoitteluajoId.toString());
+                SijoitteluResource.LATEST);
         final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
         if (kaikkiHyvaksymattomat == 0) {
-            LOG.error("Hyväksymiskirjeitä yritetään luoda hakukohteelle {} millä ei ole hyväksyttyjä hakijoita!",
-                    hakukohdeOid);
-            throw new HakemuspalveluException(
-                    "Hakukohteella on oltava vähintään yksi hyväksytty hakija että hyväksymiskirjeet voidaan luoda!");
+            LOG.error("Jälkiohjauskirjeitä yritetään luoda haulle jolla kaikki hakijat on hyväksytty koulutukseen!");
+            throw new SijoittelupalveluException(
+                    "Sijoittelupalvelun mukaan kaikki hakijat on hyväksytty johonkin koulutukseen!");
         }
         final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet = haeKiinnostavatHakukohteet(
-                haunHakijat, hyvaksymattomatHakijat, kielikoodi);
+                hyvaksymattomatHakijat, kielikoodi);
         final List<Kirje> kirjeet = new ArrayList<Kirje>();
         for (HakijaDTO hakija : hyvaksymattomatHakijat) {
             final String hakemusOid = hakija.getHakemusOid();
@@ -131,8 +124,7 @@ public class JalkiohjauskirjeetKomponentti {
     // niihin liittyvat hakukohteet - eli myos hakijoiden hylatyt hakukohteet!
     // Metahakukohteille haetaan muun muassa tarjoajanimi!
     //
-    private Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(List<HakijaDTO> haunHakijat,
-            List<HakijaDTO> hakukohteenHakijat, String kielikoodi) {
+    private Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(List<HakijaDTO> hakukohteenHakijat, String kielikoodi) {
         Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
         for (HakijaDTO hakija : hakukohteenHakijat) {
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
