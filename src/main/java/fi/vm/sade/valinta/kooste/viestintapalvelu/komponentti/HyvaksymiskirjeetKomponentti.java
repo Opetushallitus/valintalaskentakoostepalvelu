@@ -194,8 +194,9 @@ public class HyvaksymiskirjeetKomponentti {
         try {
             return OsoiteHakemukseltaUtil.osoiteHakemuksesta(applicationResource.getApplicationByOid(hakemusOid));
         } catch (Exception e) {
-            LOG.error("Ei voitu hakea osoitetta Haku-palvelusta hakemukselle {}! {}", new Object[] { hakemusOid,
-                    hakuAppResourceUrl });
+            e.printStackTrace();
+            LOG.error("Ei voitu hakea osoitetta Haku-palvelusta hakemukselle {}! {} {}", new Object[] { hakemusOid,
+                    hakuAppResourceUrl, e.getMessage() });
             throw new HakemuspalveluException(
                     "Hakemuspalvelu ei anna hakijoille osoitteita! Tarkista palvelun käyttöoikeudet.");
         }
