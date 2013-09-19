@@ -8,6 +8,7 @@ import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -38,10 +39,12 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
     @Autowired
     private ApplicationResource applicationResource;
 
+    @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
+    private String applicationResourceUrl;
+
     public void laske(@Property("hakemusOid") String hakemusOid) {
         assert (SecurityContextHolder.getContext().getAuthentication() != null);
-        LOG.info("Lasketaan valintakoeosallistumiset hakemukselle " + hakemusOid);
-
+        LOG.info("Haetaan hakemus osoitteesta {}/applications/{}", new Object[] { applicationResourceUrl, hakemusOid });
         Hakemus h = applicationResource.getApplicationByOid(hakemusOid);
         HakemusTyyppi hakemusTyyppi = Converter.hakemusToHakemusTyyppi(h);
 
