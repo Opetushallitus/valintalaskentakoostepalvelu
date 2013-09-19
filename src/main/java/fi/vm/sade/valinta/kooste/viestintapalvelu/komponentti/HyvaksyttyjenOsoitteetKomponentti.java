@@ -20,12 +20,11 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoContentException;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoReplyException;
 
 /**
  * 
@@ -77,7 +76,7 @@ public class HyvaksyttyjenOsoitteetKomponentti {
             LOG.error(
                     "Hyväksyttyjen osoitetarroja yritetään luoda hakukohteelle {} millä ei ole hyväksyttyjä hakijoita!",
                     hakukohdeOid);
-            throw new NoContentException(
+            throw new HakemuspalveluException(
                     "Hakukohteella on oltava vähintään yksi hyväksytty hakija että hyväksyttyjen osoitetarrat voidaan luoda!");
         }
         final List<Osoite> osoitteet = new ArrayList<Osoite>();
@@ -118,7 +117,7 @@ public class HyvaksyttyjenOsoitteetKomponentti {
         } catch (Exception e) {
             LOG.error("Ei voitu hakea osoitetta Haku-palvelusta hakemukselle {}! {}", new Object[] { hakemusOid,
                     hakuAppResourceUrl });
-            throw new NoReplyException(
+            throw new HakemuspalveluException(
                     "Hakemuspalvelu ei anna hakijoille osoitteita! Tarkista palvelun käyttöoikeudet.");
         }
     }

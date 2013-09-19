@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
@@ -31,7 +32,9 @@ public class HaeHakukohteenHakemuksetKomponentti {
         LOG.info("Haetaan hakukohteen {} hakemukset! Osoitteesta {}", new Object[] { hakukohdeOid, hakuAppResourceUrl });
         HakemusList hakemusList = applicationResource.findApplications(null, null, null, null, null, hakukohdeOid, 0,
                 Integer.MAX_VALUE);
-
+        if (hakemusList == null || hakemusList.getResults() == null) {
+            throw new HakemuspalveluException("Hakemuspalvelu ei palauttanut hakemuksia hakukohteelle " + hakukohdeOid);
+        }
         LOG.info("Haettiin {} kpl hakemuksia", hakemusList.getResults().size());
         return hakemusList.getResults();
     }

@@ -22,6 +22,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
+import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.util.Formatter;
@@ -31,8 +33,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteHakemukseltaUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoContentException;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.exception.NoReplyException;
 
 /**
  * @author Jussi Jartamo
@@ -74,7 +74,7 @@ public class JalkiohjauskirjeetKomponentti {
         if (kaikkiHyvaksymattomat == 0) {
             LOG.error("Hyväksymiskirjeitä yritetään luoda hakukohteelle {} millä ei ole hyväksyttyjä hakijoita!",
                     hakukohdeOid);
-            throw new NoContentException(
+            throw new HakemuspalveluException(
                     "Hakukohteella on oltava vähintään yksi hyväksytty hakija että hyväksymiskirjeet voidaan luoda!");
         }
         final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet = haeKiinnostavatHakukohteet(
@@ -99,12 +99,12 @@ public class JalkiohjauskirjeetKomponentti {
                                                            // toistaa
                     tulokset.put("hylkayksenSyy", StringUtils.EMPTY);
                     if (valintatapajono.getHyvaksytty() == null) {
-                        throw new NoContentException(
+                        throw new SijoittelupalveluException(
                                 "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
                     }
                     tulokset.put("hyvaksytyt", Formatter.suomennaNumero(valintatapajono.getHyvaksytty()));
                     if (valintatapajono.getHakeneet() == null) {
-                        throw new NoContentException(
+                        throw new SijoittelupalveluException(
                                 "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
                     }
                     tulokset.put("kaikkiHakeneet", Formatter.suomennaNumero(valintatapajono.getHakeneet()));
@@ -156,7 +156,7 @@ public class JalkiohjauskirjeetKomponentti {
         } catch (Exception e) {
             LOG.error("Ei voitu hakea osoitetta Haku-palvelusta hakemukselle {}! {}", new Object[] { hakemusOid,
                     hakuAppResourceUrl });
-            throw new NoReplyException(
+            throw new HakemuspalveluException(
                     "Hakemuspalvelu ei anna hakijoille osoitteita! Tarkista palvelun käyttöoikeudet.");
         }
     }
@@ -187,7 +187,7 @@ public class JalkiohjauskirjeetKomponentti {
 
     private HakukohdeNimiRDTO haeHakukohdeNimi(String hakukohdeOid) {
         if (hakukohdeOid == null) {
-            throw new NoContentException(
+            throw new SijoittelupalveluException(
                     "Sijoittelu palautti puutteellisesti luodun hakutoiveen! Hakukohteen tunniste puuttuu!");
         } else {
             LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[] { tarjontaResourceUrl,
