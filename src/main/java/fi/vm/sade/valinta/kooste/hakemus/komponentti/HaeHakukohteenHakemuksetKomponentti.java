@@ -25,11 +25,12 @@ public class HaeHakukohteenHakemuksetKomponentti {
     @Autowired
     private ApplicationResource applicationResource;
     @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
-    private String hakuAppResourceUrl;
+    private String applicationResourceUrl;
 
     public List<SuppeaHakemus> haeHakukohteenHakemukset(@Property("hakukohdeOid") String hakukohdeOid) {
         assert (SecurityContextHolder.getContext().getAuthentication() != null);
-        LOG.info("Haetaan hakukohteen {} hakemukset! Osoitteesta {}", new Object[] { hakukohdeOid, hakuAppResourceUrl });
+        LOG.info("Haetaan HakemusList osoitteesta {}/applications?aoOid={}&start=0&rows={}", new Object[] {
+                applicationResourceUrl, hakukohdeOid, Integer.MAX_VALUE });
         HakemusList hakemusList = applicationResource.findApplications(null, null, null, null, null, hakukohdeOid, 0,
                 Integer.MAX_VALUE);
         if (hakemusList == null || hakemusList.getResults() == null) {

@@ -1,7 +1,10 @@
 package fi.vm.sade.valinta.kooste.hakemus.komponentti;
 
 import org.apache.camel.language.Simple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +17,16 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 @Component("haeHakemusKomponentti")
 public class HaeHakemusKomponentti {
 
+    private static final Logger LOG = LoggerFactory.getLogger(HaeHakemusKomponentti.class);
+
     @Autowired
     private ApplicationResource applicationResource;
+    @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
+    private String applicationResourceUrl;
 
     public Hakemus haeHakemus(@Simple("${property.hakemusOid}") String hakemusOid) {
         assert (SecurityContextHolder.getContext().getAuthentication() != null);
+        LOG.info("Haetaan hakemus osoitteesta {}/applications/{}", new Object[] { applicationResourceUrl, hakemusOid });
         return applicationResource.getApplicationByOid(hakemusOid);
     }
 }
