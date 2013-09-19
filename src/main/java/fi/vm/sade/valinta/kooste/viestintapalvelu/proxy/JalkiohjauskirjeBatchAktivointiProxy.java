@@ -7,5 +7,5 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.proxy;
  */
 public interface JalkiohjauskirjeBatchAktivointiProxy {
 
-    String jalkiohjauskirjeetAktivoi(String hakukohdeOid, String hakuOid, Long sijoitteluajoId);
+    String jalkiohjauskirjeetAktivoi(String hakuOid);
 }

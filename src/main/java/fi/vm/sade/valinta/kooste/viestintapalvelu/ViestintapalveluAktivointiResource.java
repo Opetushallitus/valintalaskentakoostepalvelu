@@ -67,13 +67,12 @@ public class ViestintapalveluAktivointiResource {
     @GET
     @Path("jalkiohjauskirjeet/aktivoi")
     @Produces("application/json")
-    public Response aktivoiJalkiohjauskirjeidenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
-            @QueryParam("hakuOid") String hakuOid, @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
+    public Response aktivoiJalkiohjauskirjeidenLuonti(@QueryParam("hakuOid") String hakuOid) {
         try {
             return Response
                     .status(Status.OK)
-                    .entity(new Gson().toJson(new LatausUrl(jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(
-                            hakukohdeOid, hakuOid, sijoitteluajoId)))).build();
+                    .entity(new Gson().toJson(new LatausUrl(jalkiohjauskirjeBatchProxy
+                            .jalkiohjauskirjeetAktivoi(hakuOid)))).build();
 
         } catch (Exception e) {
             LOG.error("Jälkiohjauskirjeiden luonnissa virhe! {}", e.getMessage());

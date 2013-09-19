@@ -75,11 +75,7 @@
             <from uri="direct:kaynnistaJalkiohjauskirjeetReitti"/>
             <policy ref="admin">
             	<setProperty propertyName="kielikoodi"><constant>kieli_fi</constant></setProperty>
-	            <setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
-	            <setProperty propertyName="hakuOid"><simple>${body.args[1]}</simple></setProperty>
-	            <setProperty propertyName="sijoitteluajoId"><simple>${body.args[2]}</simple></setProperty>
-	            <to uri="bean:haeHakukohteenHakemuksetKomponentti"/>
-	            <setProperty propertyName="hakemukset"><simple>${body}</simple></setProperty>
+	            <setProperty propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
 	            <to uri="bean:jalkiohjauskirjeetKomponentti"/>
 	            <log 	loggingLevel="DEBUG" 
 	            		logName="fi.vm.sade.valinta.kooste.viestintapalvelu"
