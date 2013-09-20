@@ -27,14 +27,12 @@ import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteHakemukseltaUtil;
 
 /**
  * 
@@ -63,10 +61,7 @@ public class HyvaksymiskirjeetKomponentti {
     private String tarjontaResourceUrl;
 
     @Autowired
-    private ApplicationResource applicationResource;
-
-    @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
-    private String hakuAppResourceUrl;
+    private HaeOsoiteKomponentti osoiteKomponentti;
 
     public String teeHyvaksymiskirjeet(@Property("kielikoodi") String kielikoodi,
             @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid,
@@ -101,7 +96,7 @@ public class HyvaksymiskirjeetKomponentti {
         }
         for (HakijaDTO hakija : hakukohteenHakijat) {
             final String hakemusOid = hakija.getHakemusOid();
-            final Osoite osoite = haeOsoite(hakemusOid);
+            final Osoite osoite = osoiteKomponentti.haeOsoite(hakemusOid);
             final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
@@ -188,18 +183,6 @@ public class HyvaksymiskirjeetKomponentti {
             }
         });
         return hakijat;
-    }
-
-    private Osoite haeOsoite(String hakemusOid) {
-        try {
-            return OsoiteHakemukseltaUtil.osoiteHakemuksesta(applicationResource.getApplicationByOid(hakemusOid));
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOG.error("Ei voitu hakea osoitetta Haku-palvelusta hakemukselle {}! {} {}", new Object[] { hakemusOid,
-                    hakuAppResourceUrl, e.getMessage() });
-            throw new HakemuspalveluException(
-                    "Hakemuspalvelu ei anna hakijoille osoitteita! Tarkista palvelun käyttöoikeudet.");
-        }
     }
 
     private String extractHakukohdeNimi(HakukohdeNimiRDTO nimi, String kielikoodi) {

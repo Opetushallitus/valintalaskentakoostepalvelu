@@ -21,9 +21,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 
 /**
@@ -51,10 +49,7 @@ public class HyvaksyttyjenOsoitteetKomponentti {
     private String tarjontaResourceUrl;
 
     @Autowired
-    private ApplicationResource applicationResource;
-
-    @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
-    private String hakuAppResourceUrl;
+    private HaeOsoiteKomponentti osoiteKomponentti;
 
     // private static final String KIELIKOODI = "kieli_fi";
 
@@ -82,7 +77,7 @@ public class HyvaksyttyjenOsoitteetKomponentti {
         final List<Osoite> osoitteet = new ArrayList<Osoite>();
         for (HakijaDTO hakija : hakukohteenHakijat) {
             final String hakemusOid = hakija.getHakemusOid();
-            final Osoite osoite = haeOsoite(hakemusOid);
+            final Osoite osoite = osoiteKomponentti.haeOsoite(hakemusOid);
             osoitteet.add(osoite);
         }
 
@@ -109,17 +104,6 @@ public class HyvaksyttyjenOsoitteetKomponentti {
             }
         });
         return hakijat;
-    }
-
-    private Osoite haeOsoite(String hakemusOid) {
-        try {
-            return OsoiteHakemukseltaUtil.osoiteHakemuksesta(applicationResource.getApplicationByOid(hakemusOid));
-        } catch (Exception e) {
-            LOG.error("Ei voitu hakea osoitetta Haku-palvelusta hakemukselle {}! {}", new Object[] { hakemusOid,
-                    hakuAppResourceUrl });
-            throw new HakemuspalveluException(
-                    "Hakemuspalvelu ei anna hakijoille osoitteita! Tarkista palvelun käyttöoikeudet.");
-        }
     }
 
 }

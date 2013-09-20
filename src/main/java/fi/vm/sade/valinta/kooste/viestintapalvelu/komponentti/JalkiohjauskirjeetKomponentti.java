@@ -21,16 +21,13 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
-import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteHakemukseltaUtil;
 
 /**
  * @author Jussi Jartamo
@@ -55,10 +52,7 @@ public class JalkiohjauskirjeetKomponentti {
     private String tarjontaResourceUrl;
 
     @Autowired
-    private ApplicationResource applicationResource;
-
-    @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
-    private String hakuAppResourceUrl;
+    private HaeOsoiteKomponentti osoiteKomponentti;
 
     public String teeJalkiohjauskirjeet(@Property("kielikoodi") String kielikoodi, @Property("hakuOid") String hakuOid) {
         LOG.debug("Jalkiohjauskirjeet for haku '{}'", new Object[] { hakuOid });
@@ -75,7 +69,7 @@ public class JalkiohjauskirjeetKomponentti {
         final List<Kirje> kirjeet = new ArrayList<Kirje>();
         for (HakijaDTO hakija : hyvaksymattomatHakijat) {
             final String hakemusOid = hakija.getHakemusOid();
-            final Osoite osoite = haeOsoite(hakemusOid);
+            final Osoite osoite = osoiteKomponentti.haeOsoite(hakemusOid);
             final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
@@ -140,17 +134,6 @@ public class JalkiohjauskirjeetKomponentti {
             }
         }
         return metaKohteet;
-    }
-
-    private Osoite haeOsoite(String hakemusOid) {
-        try {
-            return OsoiteHakemukseltaUtil.osoiteHakemuksesta(applicationResource.getApplicationByOid(hakemusOid));
-        } catch (Exception e) {
-            LOG.error("Ei voitu hakea osoitetta Haku-palvelusta hakemukselle {}! {}", new Object[] { hakemusOid,
-                    hakuAppResourceUrl });
-            throw new HakemuspalveluException(
-                    "Hakemuspalvelu ei anna hakijoille osoitteita! Tarkista palvelun käyttöoikeudet.");
-        }
     }
 
     private String extractHakukohdeNimi(HakukohdeNimiRDTO nimi, String kielikoodi) {
