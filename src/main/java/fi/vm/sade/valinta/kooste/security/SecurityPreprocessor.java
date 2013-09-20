@@ -8,9 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
+ *         <p/>
  *         Asentaa autentikaation workerille jos tarpeen. Taltioi autentikaation
  *         propertyyn workeria varten!
  */
@@ -31,7 +30,9 @@ public class SecurityPreprocessor implements Processor {
             assert (newAuth != null); // <- should never be null!
 
             SecurityContextHolder.getContext().setAuthentication(newAuth);
+            LOG.info("New auth: {}", newAuth);
         } else {
+            LOG.info("Current auth: {}", currentAuth);
             exchange.setProperty(SECURITY_CONTEXT_HEADER, currentAuth);
         }
 
