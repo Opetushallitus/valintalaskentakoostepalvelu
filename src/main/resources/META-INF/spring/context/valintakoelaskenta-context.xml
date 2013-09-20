@@ -39,7 +39,7 @@
             <policy ref="admin">
                 <process ref="securityPreprocessor"/>
                 <to uri="bean:haeHaunHakemuksetKomponentti"/>
-                <split parallelProcessing="true">
+                <split parallelProcessing="false">
                     <method bean="hakemusOidSplitter" method="splitHakemusOid"/>
                     <process ref="securityPreprocessor"/>
                     <setProperty propertyName="hakemusOid"><simple>${body}</simple></setProperty>
@@ -55,7 +55,7 @@
             <policy ref="admin">
                 <process ref="securityPreprocessor"/>
                 <to uri="bean:haeHakukohteenHakemuksetKomponentti"/>
-                <split parallelProcessing="true">
+                <split parallelProcessing="false">
                     <method bean="hakemusOidSplitter" method="splitHakemusOid"/>
                     <process ref="securityPreprocessor"/>
                     <setProperty propertyName="hakemusOid"><simple>${body}</simple></setProperty>
