@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
+import fi.vm.sade.valinta.kooste.dto.DateParam;
 import fi.vm.sade.valinta.kooste.kela.proxy.TKUVAYHVAExportProxy;
 
 @Path("kela")
@@ -26,10 +27,13 @@ public class KelaAktivointiResource {
 
     @GET
     @Path("TKUVAYHVA/aktivoi")
-    public Response aktivoiKelaTiedostonluonti(@QueryParam("hakuOid") String hakuOid) {
+    public Response aktivoiKelaTiedostonluonti(@QueryParam("hakuOid") String hakuOid,
+            @QueryParam("hakukohdeOid") String hakukohdeOid, @QueryParam("lukuvuosi") DateParam lukuvuosi,
+            @QueryParam("poimintapaivamaara") DateParam poimintapaivamaara,
+            @QueryParam("oppilaitos") String oppilaitos, @QueryParam("linjakoodi") String linjakoodi) {
         try {
-
-            InputStream input = kelaExportProxy.luoTKUVAYHVA(hakuOid);
+            InputStream input = kelaExportProxy.luoTKUVAYHVA(hakuOid, hakukohdeOid, lukuvuosi.getDate(),
+                    poimintapaivamaara.getDate(), oppilaitos, linjakoodi);
             return Response.ok(input, APPLICATION_TKUVAYHVA)
                     .header("content-disposition", "inline; filename=" + KelaUtil.createTiedostoNimiYhva14(new Date()))
                     .build();

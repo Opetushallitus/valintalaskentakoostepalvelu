@@ -14,7 +14,7 @@
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.komponentti" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.proxy" />
-
+    
 	<camelContext id="kelaCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
 		<proxy id="kelaAktivointiRajapinta"
 			serviceInterface="fi.vm.sade.valinta.kooste.kela.proxy.TKUVAYHVAExportProxy"
@@ -22,6 +22,18 @@
 		<route>
 			<from uri="direct:kaynnistaKelaReitti" />
 			<setProperty propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
+			<setProperty propertyName="hakukohdeOid"><simple>${body.args[1]}</simple></setProperty>
+			<!-- 
+		    @Property("lukuvuosi") Date lukuvuosi, 
+		    @Property("poimintapaivamaara") Date poimintapaivamaara,
+		    @Property("oppilaitos") String oppilaitos, 
+		    @Property("linjakoodi") String linjakoodi
+		     -->
+			<setProperty propertyName="lukuvuosi"><simple>${body.args[2]}</simple></setProperty>
+			<setProperty propertyName="poimintapaivamaara"><simple>${body.args[3]}</simple></setProperty>
+			<setProperty propertyName="oppilaitos"><simple>${body.args[4]}</simple></setProperty>
+			<setProperty propertyName="linjakoodi"><simple>${body.args[5]}</simple></setProperty>
+			
             <policy ref="admin">
             	<process ref="securityPreprocessor"/>
 			    <to uri="bean:TKUVAYHVAKomponentti" />
