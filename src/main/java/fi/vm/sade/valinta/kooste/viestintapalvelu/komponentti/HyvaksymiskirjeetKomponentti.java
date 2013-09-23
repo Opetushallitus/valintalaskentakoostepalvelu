@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +77,7 @@ public class HyvaksymiskirjeetKomponentti {
         //
         //
         final List<HakijaDTO> haunHakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, sijoitteluajoId.toString());
-        final List<HakijaDTO> hakukohteenHakijat = filterHakijatHakukohteelle(haunHakijat, hakukohdeOid);
+        final Collection<HakijaDTO> hakukohteenHakijat = filterHakijatHakukohteelle(haunHakijat, hakukohdeOid);
         final int kaikkiHakukohteenHyvaksytyt = hakukohteenHakijat.size();
         if (kaikkiHakukohteenHyvaksytyt == 0) {
             LOG.error("Hyväksymiskirjeitä yritetään luoda hakukohteelle {} millä ei ole hyväksyttyjä hakijoita!",
@@ -147,7 +148,7 @@ public class HyvaksymiskirjeetKomponentti {
     // Metahakukohteille haetaan muun muassa tarjoajanimi!
     //
     private Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(List<HakijaDTO> haunHakijat,
-            List<HakijaDTO> hakukohteenHakijat, String kielikoodi) {
+            Collection<HakijaDTO> hakukohteenHakijat, String kielikoodi) {
         Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
         for (HakijaDTO hakija : hakukohteenHakijat) {
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
@@ -165,9 +166,9 @@ public class HyvaksymiskirjeetKomponentti {
         return metaKohteet;
     }
 
-    private List<HakijaDTO> filterHakijatHakukohteelle(List<HakijaDTO> haunHakijat, final String hakukohdeOid) {
+    private Collection<HakijaDTO> filterHakijatHakukohteelle(List<HakijaDTO> haunHakijat, final String hakukohdeOid) {
         List<HakijaDTO> hakijat = new ArrayList<HakijaDTO>(haunHakijat);
-        Collections2.filter(hakijat, new Predicate<HakijaDTO>() {
+        Collection<HakijaDTO> h = Collections2.filter(hakijat, new Predicate<HakijaDTO>() {
             public boolean apply(HakijaDTO hakija) {
                 for (HakutoiveDTO toive : hakija.getHakutoiveet()) {
                     for (HakutoiveenValintatapajonoDTO jono : toive.getHakutoiveenValintatapajonot()) {
@@ -182,7 +183,7 @@ public class HyvaksymiskirjeetKomponentti {
                 return false; // ei hakutoiveita
             }
         });
-        return hakijat;
+        return h;
     }
 
     private String extractHakukohdeNimi(HakukohdeNimiRDTO nimi, String kielikoodi) {
