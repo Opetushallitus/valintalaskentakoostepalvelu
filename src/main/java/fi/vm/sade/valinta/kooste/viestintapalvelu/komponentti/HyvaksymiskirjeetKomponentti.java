@@ -15,11 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.gson.Gson;
 
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
@@ -76,8 +73,8 @@ public class HyvaksymiskirjeetKomponentti {
         //
         //
         //
-        final List<HakijaDTO> haunHakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, sijoitteluajoId.toString());
-        final Collection<HakijaDTO> hakukohteenHakijat = filterHakijatHakukohteelle(haunHakijat, hakukohdeOid);
+        final Collection<HakijaDTO> hakukohteenHakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, hakukohdeOid,
+                sijoitteluajoId.toString());
         final int kaikkiHakukohteenHyvaksytyt = hakukohteenHakijat.size();
         if (kaikkiHakukohteenHyvaksytyt == 0) {
             LOG.error("Hyväksymiskirjeitä yritetään luoda hakukohteelle {} millä ei ole hyväksyttyjä hakijoita!",
@@ -86,7 +83,7 @@ public class HyvaksymiskirjeetKomponentti {
                     "Hakukohteella on oltava vähintään yksi hyväksytty hakija että hyväksymiskirjeet voidaan luoda!");
         }
         final Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = haeKiinnostavatHakukohteet(
-                haunHakijat, hakukohteenHakijat, kielikoodi);
+                hakukohteenHakijat, kielikoodi);
         final List<Kirje> kirjeet = new ArrayList<Kirje>();
         final String koulu;
         final String koulutus;
@@ -147,8 +144,8 @@ public class HyvaksymiskirjeetKomponentti {
     // niihin liittyvat hakukohteet - eli myos hakijoiden hylatyt hakukohteet!
     // Metahakukohteille haetaan muun muassa tarjoajanimi!
     //
-    private Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(List<HakijaDTO> haunHakijat,
-            Collection<HakijaDTO> hakukohteenHakijat, String kielikoodi) {
+    private Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(Collection<HakijaDTO> hakukohteenHakijat,
+            String kielikoodi) {
         Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
         for (HakijaDTO hakija : hakukohteenHakijat) {
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
@@ -164,26 +161,6 @@ public class HyvaksymiskirjeetKomponentti {
             }
         }
         return metaKohteet;
-    }
-
-    private Collection<HakijaDTO> filterHakijatHakukohteelle(List<HakijaDTO> haunHakijat, final String hakukohdeOid) {
-        List<HakijaDTO> hakijat = new ArrayList<HakijaDTO>(haunHakijat);
-        Collection<HakijaDTO> h = Collections2.filter(hakijat, new Predicate<HakijaDTO>() {
-            public boolean apply(HakijaDTO hakija) {
-                for (HakutoiveDTO toive : hakija.getHakutoiveet()) {
-                    for (HakutoiveenValintatapajonoDTO jono : toive.getHakutoiveenValintatapajonot()) {
-                        if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila())) {
-                            if (hakukohdeOid.equals(toive.getHakukohdeOid())) {
-                                return true; // hyvaksytty oikeaan kohteeseen
-                            }
-                            return false; // hyvaksytty muuhun kohteeseen
-                        }
-                    }
-                }
-                return false; // ei hakutoiveita
-            }
-        });
-        return h;
     }
 
     private String extractHakukohdeNimi(HakukohdeNimiRDTO nimi, String kielikoodi) {

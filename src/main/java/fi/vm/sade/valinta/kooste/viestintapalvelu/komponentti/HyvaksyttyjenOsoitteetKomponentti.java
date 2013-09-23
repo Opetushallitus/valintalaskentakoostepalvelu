@@ -11,14 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.gson.Gson;
 
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
@@ -65,8 +60,8 @@ public class HyvaksyttyjenOsoitteetKomponentti {
         //
         //
         //
-        final List<HakijaDTO> haunHakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, sijoitteluajoId.toString());
-        final Collection<HakijaDTO> hakukohteenHakijat = filterHakijatHakukohteelle(haunHakijat, hakukohdeOid);
+        final Collection<HakijaDTO> hakukohteenHakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, hakukohdeOid,
+                sijoitteluajoId.toString());
         final int kaikkiHakukohteenHyvaksytyt = hakukohteenHakijat.size();
         if (kaikkiHakukohteenHyvaksytyt == 0) {
             LOG.error(
@@ -85,26 +80,6 @@ public class HyvaksyttyjenOsoitteetKomponentti {
         LOG.info("Yritetään luoda viestintapalvelulta osoitteita hyväksytyille hakijoille {} kappaletta!",
                 osoitteet.size());
         return new Gson().toJson(new Osoitteet(osoitteet));
-    }
-
-    private Collection<HakijaDTO> filterHakijatHakukohteelle(List<HakijaDTO> haunHakijat, final String hakukohdeOid) {
-        List<HakijaDTO> hakijat = new ArrayList<HakijaDTO>(haunHakijat);
-        Collection<HakijaDTO> h = Collections2.filter(hakijat, new Predicate<HakijaDTO>() {
-            public boolean apply(HakijaDTO hakija) {
-                for (HakutoiveDTO toive : hakija.getHakutoiveet()) {
-                    for (HakutoiveenValintatapajonoDTO jono : toive.getHakutoiveenValintatapajonot()) {
-                        if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila())) {
-                            if (hakukohdeOid.equals(toive.getHakukohdeOid())) {
-                                return true; // hyvaksytty oikeaan kohteeseen
-                            }
-                            return false; // hyvaksytty muuhun kohteeseen
-                        }
-                    }
-                }
-                return false; // ei hakutoiveita
-            }
-        });
-        return h;
     }
 
 }
