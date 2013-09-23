@@ -29,9 +29,9 @@ public class ParametriServiceImpl implements ParametriService {
     @Override
     public boolean pistesyottoEnabled(String hakuOid) {
         Date now = Calendar.getInstance().getTime();
+        Date hakuLoppupvm = new Date(parametrit.getHakuLoppupvm() * 1000);
         Date koetulokset = new Date(parametrit.getKoetuloksetPvm() * 1000);
-        Date valintaesitys = new Date(parametrit.getValintaesitysPvm() * 1000);
-        return isOPH() || (now.after(koetulokset) && now.before(valintaesitys));
+        return isOPH() || (now.before(koetulokset) && now.after(hakuLoppupvm));
     }
 
     @Override
