@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.camel.language.Simple;
@@ -65,7 +66,7 @@ public class HyvaksyttyjenOsoitteetKomponentti {
         //
         //
         final List<HakijaDTO> haunHakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, sijoitteluajoId.toString());
-        final List<HakijaDTO> hakukohteenHakijat = filterHakijatHakukohteelle(haunHakijat, hakukohdeOid);
+        final Collection<HakijaDTO> hakukohteenHakijat = filterHakijatHakukohteelle(haunHakijat, hakukohdeOid);
         final int kaikkiHakukohteenHyvaksytyt = hakukohteenHakijat.size();
         if (kaikkiHakukohteenHyvaksytyt == 0) {
             LOG.error(
@@ -86,9 +87,9 @@ public class HyvaksyttyjenOsoitteetKomponentti {
         return new Gson().toJson(new Osoitteet(osoitteet));
     }
 
-    private List<HakijaDTO> filterHakijatHakukohteelle(List<HakijaDTO> haunHakijat, final String hakukohdeOid) {
+    private Collection<HakijaDTO> filterHakijatHakukohteelle(List<HakijaDTO> haunHakijat, final String hakukohdeOid) {
         List<HakijaDTO> hakijat = new ArrayList<HakijaDTO>(haunHakijat);
-        Collections2.filter(hakijat, new Predicate<HakijaDTO>() {
+        Collection<HakijaDTO> h = Collections2.filter(hakijat, new Predicate<HakijaDTO>() {
             public boolean apply(HakijaDTO hakija) {
                 for (HakutoiveDTO toive : hakija.getHakutoiveet()) {
                     for (HakutoiveenValintatapajonoDTO jono : toive.getHakutoiveenValintatapajonot()) {
@@ -103,7 +104,7 @@ public class HyvaksyttyjenOsoitteetKomponentti {
                 return false; // ei hakutoiveita
             }
         });
-        return hakijat;
+        return h;
     }
 
 }
