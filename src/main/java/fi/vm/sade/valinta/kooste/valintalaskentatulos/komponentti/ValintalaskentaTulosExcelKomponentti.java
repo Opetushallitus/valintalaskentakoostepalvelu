@@ -14,17 +14,20 @@ import javax.annotation.Resource;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.camel.language.Simple;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.service.valintatiedot.ValintatietoService;
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
+import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 
 /**
+ * KOEKUTSUEXCEL
+ * 
  * @author Jussi Jartamo
  *         <p/>
  *         Komponentti tulosten kasaamiseen Excel-muodossa
@@ -34,7 +37,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaTulosExcelKomponentti.class);
 
-    @Resource(name="valintatietoService")
+    @Resource(name = "valintatietoService")
     private ValintatietoService valintatietoService;
 
     public InputStream luoTuloksetXlsMuodossa(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
@@ -68,7 +71,7 @@ public class ValintalaskentaTulosExcelKomponentti {
                 rivi.addAll(Arrays.asList(b.toString(), o.getHakemusOid(), ExcelExportUtil.DATE_FORMAT.format(date)));
                 for (String tunniste : tunnisteet) {
                     if (osallistumiset.containsKey(tunniste)) {
-                        rivi.add(osallistumiset.get(tunniste).getOsallistuminen().toString());
+                        rivi.add(suomenna(osallistumiset.get(tunniste).getOsallistuminen()));
                     } else {
                         rivi.add("----");
                     }
@@ -78,6 +81,19 @@ public class ValintalaskentaTulosExcelKomponentti {
 
             return ExcelExportUtil.exportGridAsXls(rows.toArray(new Object[][] {}));
         }
+    }
+
+    private String suomenna(Osallistuminen osallistuminen) {
+        if (osallistuminen != null) {
+            if (Osallistuminen.EI_OSALLISTU.equals(osallistuminen)) {
+                return "Ei kutsuta";
+            } else if (Osallistuminen.OSALLISTUU.equals(osallistuminen)) {
+                return "Kutsutaan";
+            } else if (Osallistuminen.VIRHE.equals(osallistuminen)) {
+                return "Virheellinen";
+            }
+        }
+        return StringUtils.EMPTY;
     }
 
     private List<String> getTunnisteet(List<HakemusOsallistuminenTyyppi> osallistujat) {
