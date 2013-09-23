@@ -1,23 +1,28 @@
 package fi.vm.sade.valinta.kooste.external.resource.haku;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import java.util.List;
 
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
+
 /**
- * User: wuoti
- * Date: 3.9.2013
- * Time: 9.40
+ * User: wuoti Date: 3.9.2013 Time: 9.40
  */
 @Path("/applications")
 public interface ApplicationResource {
     public static final String CHARSET_UTF_8 = ";charset=UTF-8";
     public static final String OID = "oid";
-
+    public static final String HENKILOTUNNUS = "Henkilotunnus";
 
     @GET
     @Path("{oid}")
@@ -29,11 +34,8 @@ public interface ApplicationResource {
     @Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD')")
     public HakemusList findApplications(@DefaultValue(value = "") @QueryParam("q") String query,
-                                        @QueryParam("appState") List<String> state,
-                                        @QueryParam("aoid") String aoid,
-                                        @QueryParam("lopoid") String lopoid,
-                                        @QueryParam("asId") String asId,
-                                        @QueryParam("aoOid") String aoOid,
-                                        @DefaultValue(value = "0") @QueryParam("start") int start,
-                                        @DefaultValue(value = "100") @QueryParam("rows") int rows);
+            @QueryParam("appState") List<String> state, @QueryParam("aoid") String aoid,
+            @QueryParam("lopoid") String lopoid, @QueryParam("asId") String asId, @QueryParam("aoOid") String aoOid,
+            @DefaultValue(value = "0") @QueryParam("start") int start,
+            @DefaultValue(value = "100") @QueryParam("rows") int rows);
 }
