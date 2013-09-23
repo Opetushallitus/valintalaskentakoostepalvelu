@@ -30,8 +30,8 @@ public class ParametriServiceImpl implements ParametriService {
     public boolean pistesyottoEnabled(String hakuOid) {
         Date now = Calendar.getInstance().getTime();
         Date koetulokset = new Date(parametrit.getKoetuloksetPvm() * 1000);
-        Date hakuLoppupvm = new Date(parametrit.getHakuLoppupvm() * 1000);
-        return isOPH() || (now.before(koetulokset) && now.after(hakuLoppupvm));
+        Date valintaesitys = new Date(parametrit.getValintaesitysPvm() * 1000);
+        return isOPH() || (now.after(koetulokset) && now.before(valintaesitys));
     }
 
     @Override
@@ -53,7 +53,8 @@ public class ParametriServiceImpl implements ParametriService {
     public boolean valintakoekutsutEnabled(String hakuOid) {
         Date now = Calendar.getInstance().getTime();
         Date hakuLoppupvm = new Date(parametrit.getHakuLoppupvm() * 1000);
-        return now.after(hakuLoppupvm) || isOPH();
+        Date koetuloksetPvm = new Date(parametrit.getKoetuloksetPvm() * 1000);
+        return (now.after(hakuLoppupvm) && now.before(koetuloksetPvm)) || isOPH();
     }
 
     @Override
