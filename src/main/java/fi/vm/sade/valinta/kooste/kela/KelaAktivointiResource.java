@@ -29,11 +29,10 @@ public class KelaAktivointiResource {
     @Path("TKUVAYHVA/aktivoi")
     public Response aktivoiKelaTiedostonluonti(@QueryParam("hakuOid") String hakuOid,
             @QueryParam("hakukohdeOid") String hakukohdeOid, @QueryParam("lukuvuosi") DateParam lukuvuosi,
-            @QueryParam("poimintapaivamaara") DateParam poimintapaivamaara,
-            @QueryParam("oppilaitos") String oppilaitos, @QueryParam("linjakoodi") String linjakoodi) {
+            @QueryParam("poimintapaivamaara") DateParam poimintapaivamaara) {
         try {
             InputStream input = kelaExportProxy.luoTKUVAYHVA(hakuOid, hakukohdeOid, lukuvuosi.getDate(),
-                    poimintapaivamaara.getDate(), oppilaitos, linjakoodi);
+                    poimintapaivamaara.getDate());
             return Response.ok(input, APPLICATION_TKUVAYHVA)
                     .header("content-disposition", "inline; filename=" + KelaUtil.createTiedostoNimiYhva14(new Date()))
                     .build();

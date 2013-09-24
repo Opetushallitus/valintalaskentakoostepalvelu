@@ -32,6 +32,11 @@
         </dependency>
          -->
          <dependency>
+            <groupId>fi.vm.sade.organisaatio</groupId>
+            <artifactId>organisaatio-api</artifactId>
+            <version>${organisaatio.api.version}</version>
+        </dependency>
+         <dependency>
 			<groupId>fi.vm.sade.rajapinnat</groupId>
 			<artifactId>kela-tkuva</artifactId>
 			<version>${kela.version}</version>
