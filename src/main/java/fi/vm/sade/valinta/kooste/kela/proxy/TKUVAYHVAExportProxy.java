@@ -11,6 +11,5 @@ import java.util.Date;
  */
 public interface TKUVAYHVAExportProxy {
 
-    InputStream luoTKUVAYHVA(String hakuOid, String hakukohdeOid, Date lukuvuosi, Date poimintapaivamaara,
-            String oppilaitos, String linjakoodi);
+    InputStream luoTKUVAYHVA(String hakuOid, String hakukohdeOid, Date lukuvuosi, Date poimintapaivamaara);
 }

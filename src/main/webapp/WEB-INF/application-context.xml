@@ -139,7 +139,6 @@
         </jaxrs:providers>
     </jaxrs:client>
     
-    
     <jaxws:client id="ValintalaskentaServiceClient"
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
                   address="${valintalaskentakoostepalvelu.valintalaskentaService.url}" >
@@ -147,7 +146,21 @@
             <ref bean="ticketInterceptor" />
         </jaxws:outInterceptors>
     </jaxws:client>
-
+    <!-- 
+	<jaxws:client id="organisaatioServiceClient"
+                  serviceClass="fi.vm.sade.organisaatio.api.model.OrganisaatioService"
+                  address="${valintalaskentakoostepalvelu.organisaatioService.url}">
+        <jaxws:outInterceptors>
+            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+                <property name="webCasUrl" value="${web.url.cas}"/>
+                <property name="targetService"
+                          value="${cas.service.organisaatio-service}/j_spring_cas_security_check"/>
+                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.organisaatio}"/>
+                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.organisaatio}"/>
+            </bean>
+        </jaxws:outInterceptors>
+	</jaxws:client>
+	-->
     <jaxws:client id="tarjontaServiceClient"
                   serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
                   address="${valintalaskentakoostepalvelu.tarjontaService.url}">

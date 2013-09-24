@@ -18,9 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import fi.vm.sade.organisaatio.api.model.OrganisaatioService;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
+import fi.vm.sade.tarjonta.service.TarjontaPublicService;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -40,20 +42,29 @@ public class TKUVAYHVAExportKomponentti {
     @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
     private String applicationResourceUrl;
 
+    @Autowired
+    private TarjontaPublicService tarjontaService;
+
+    private OrganisaatioService organisaatioService;
+
     public InputStream luoTKUVAYHVA(@Property("hakuOid") String hakuOid, @Property("hakukohdeOid") String hakukohdeOid,
-            @Property("lukuvuosi") Date lukuvuosi, @Property("poimintapaivamaara") Date poimintapaivamaara,
-            @Property("oppilaitos") String oppilaitos, @Property("linjakoodi") String linjakoodi) {
+            @Property("lukuvuosi") Date lukuvuosi, @Property("poimintapaivamaara") Date poimintapaivamaara) {
         List<HakijaDTO> hakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, SijoitteluResource.LATEST);
         if (hakijat == null || hakijat.isEmpty()) {
             throw new SijoittelupalveluException(
                     "Haku ei sisällä koulutuspaikallisia hakijoita! Tarkista että sijoittelu on suoritettu haulle!");
         }
+
+        String oppilaitos = "0000";
+        String linjakoodi = "000";
         List<InputStream> streams = new ArrayList<InputStream>();
         for (HakijaDTO hakija : hakijat) {
             TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
-            builder.setLinjakoodi(linjakoodi);
             builder.setOppilaitos(oppilaitos);
-            // builder.setValintapaivamaara(valintapaivamaara);
+            builder.setLinjakoodi(linjakoodi);
+            builder.setValintapaivamaara(new Date()); // TODO: Sijoittelun
+                                                      // täytyy osata kertoa
+                                                      // tämä!
             builder.setSukunimi(hakija.getSukunimi());
             builder.setEtunimet(hakija.getEtunimi());
             try {

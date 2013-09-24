@@ -25,14 +25,10 @@
 			<setProperty propertyName="hakukohdeOid"><simple>${body.args[1]}</simple></setProperty>
 			<!-- 
 		    @Property("lukuvuosi") Date lukuvuosi, 
-		    @Property("poimintapaivamaara") Date poimintapaivamaara,
-		    @Property("oppilaitos") String oppilaitos, 
-		    @Property("linjakoodi") String linjakoodi
+		    @Property("poimintapaivamaara") Date poimintapaivamaara
 		     -->
 			<setProperty propertyName="lukuvuosi"><simple>${body.args[2]}</simple></setProperty>
 			<setProperty propertyName="poimintapaivamaara"><simple>${body.args[3]}</simple></setProperty>
-			<setProperty propertyName="oppilaitos"><simple>${body.args[4]}</simple></setProperty>
-			<setProperty propertyName="linjakoodi"><simple>${body.args[5]}</simple></setProperty>
 			
             <policy ref="admin">
             	<process ref="securityPreprocessor"/>
