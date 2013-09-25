@@ -16,6 +16,7 @@ import java.util.Date;
 public class Sijoittelu implements Serializable {
 
     private String  hakuOid;
+    private boolean ajossa;
     private Date    viimeksiAjettu;
     private String  virhe;
 
@@ -41,5 +42,13 @@ public class Sijoittelu implements Serializable {
 
     public void setVirhe(String virhe) {
         this.virhe = virhe;
+    }
+
+    public boolean isAjossa() {
+        return ajossa;
+    }
+
+    public void setAjossa(boolean ajossa) {
+        this.ajossa = ajossa;
     }
 }

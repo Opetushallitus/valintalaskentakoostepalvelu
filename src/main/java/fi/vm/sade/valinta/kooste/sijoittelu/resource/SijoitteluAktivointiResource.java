@@ -71,9 +71,10 @@ public class SijoitteluAktivointiResource {
             Sijoittelu sijoittelu = JatkuvaSijoittelu.SIJOITTELU_HAUT.get(hakuOid);
             if (sijoittelu == null) {
                 sijoittelu = new Sijoittelu();
-                sijoittelu.setHakuOid(hakuOid);
-                JatkuvaSijoittelu.SIJOITTELU_HAUT.put(hakuOid, sijoittelu);
             }
+            sijoittelu.setHakuOid(hakuOid);
+            sijoittelu.setAjossa(true);
+            JatkuvaSijoittelu.SIJOITTELU_HAUT.put(hakuOid, sijoittelu);
             return "aktivoitu";
         }
     }
@@ -90,16 +91,19 @@ public class SijoitteluAktivointiResource {
             return "get parameter 'hakuOid' required";
         } else {
             LOG.info("jatkuva sijoittelu poistettu haulta {}", hakuOid);
-            Sijoittelu remove = JatkuvaSijoittelu.SIJOITTELU_HAUT.remove(hakuOid);
-            if (remove == null) {
-                return "hakua ei löytynyt";
+            Sijoittelu sijoittelu = JatkuvaSijoittelu.SIJOITTELU_HAUT.get(hakuOid);
+            if (sijoittelu == null) {
+                sijoittelu = new Sijoittelu();
             }
+            sijoittelu.setHakuOid(hakuOid);
+            sijoittelu.setAjossa(false);
+            JatkuvaSijoittelu.SIJOITTELU_HAUT.put(hakuOid, sijoittelu);
             return "poistettu";
         }
     }
 
     @GET
-    @Path("jatkuva/aktiiviset")
+    @Path("jatkuva/kaiki")
     @Produces(MediaType.APPLICATION_JSON)
     @Secured({ OPH_CRUD })
     public Map<String, Sijoittelu> aktiivisetSijoittelut() {

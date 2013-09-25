@@ -30,17 +30,19 @@ public class JatkuvaSijoittelu {
     public void suorita() {
         LOG.debug("JATKUVA SIJOITTELU KÄYNNISTETTY");
         for (Sijoittelu sijoittelu : SIJOITTELU_HAUT.values()) {
-            LOG.debug("JATKUVA SIJOITTELU: {}", sijoittelu.getHakuOid());
-            try {
-                HakuTyyppi ht = valintatietoService.haeValintatiedot(sijoittelu.getHakuOid());
-                LOG.info("Haettu valinnan tulokset");
-                sijoitteluService.sijoittele(ht);
-                LOG.info("Viety sijoittelulle valinnan tulokset");
-            } catch(Exception e) {
-                LOG.error("JATKUVA SIJOITTELU", e);
-                sijoittelu.setVirhe(e.getMessage());
+            if(sijoittelu.isAjossa()) {
+                LOG.debug("JATKUVA SIJOITTELU: {}", sijoittelu.getHakuOid());
+                try {
+                    HakuTyyppi ht = valintatietoService.haeValintatiedot(sijoittelu.getHakuOid());
+                    LOG.info("Haettu valinnan tulokset");
+                    sijoitteluService.sijoittele(ht);
+                    LOG.info("Viety sijoittelulle valinnan tulokset");
+                } catch(Exception e) {
+                    LOG.error("JATKUVA SIJOITTELU", e);
+                    sijoittelu.setVirhe(e.getMessage());
+                }
+                sijoittelu.setViimeksiAjettu(new Date());
             }
-            sijoittelu.setViimeksiAjettu(new Date());
         }
         LOG.debug("JATKUVA SIJOITTELU LOPETETTU");
     }
