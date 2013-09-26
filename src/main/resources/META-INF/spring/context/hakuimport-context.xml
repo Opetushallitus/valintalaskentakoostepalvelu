@@ -41,7 +41,7 @@
 					<camel:simple>{{tarjonta.rest}}/haku/${body}/hakukohde?count=99999999</camel:simple>
 				</camel:recipientList>
 				<!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
-				<split parallelProcessing="true" >
+				<split parallelProcessing="false" >
 					<method bean="jsonSplitter" method="split" />
 					<to uri="bean:suoritaHakukohdeImportKomponentti" />
 				</split>
