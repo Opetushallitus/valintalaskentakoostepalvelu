@@ -48,7 +48,7 @@
             <policy ref="admin">
                 <process ref="securityPreprocessor"/>
                 <to uri="bean:hakukohteetTarjonnaltaKomponentti"/>
-                <split parallelProcessing="false" stopOnException="false">
+                <split parallelProcessing="true" stopOnException="false">
                     <method bean="splitHakukohteetKomponentti" method="splitHakukohteet"/>
                     <process ref="securityPreprocessor"/>
 	            	<setProperty propertyName="hakukohdeOid"><simple>${body}</simple></setProperty>
