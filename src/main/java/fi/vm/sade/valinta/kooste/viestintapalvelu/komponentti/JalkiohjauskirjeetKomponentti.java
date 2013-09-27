@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.camel.Property;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -13,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
@@ -22,7 +22,9 @@ import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
+import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
 import fi.vm.sade.valinta.kooste.util.Formatter;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
@@ -54,7 +56,10 @@ public class JalkiohjauskirjeetKomponentti {
     @Autowired
     private HaeOsoiteKomponentti osoiteKomponentti;
 
-    public String teeJalkiohjauskirjeet(@Property("kielikoodi") String kielikoodi, @Property("hakuOid") String hakuOid) {
+    @Autowired
+    private ViestintapalveluResource viestintapalvelu;
+
+    public Object teeJalkiohjauskirjeet(@Property("kielikoodi") String kielikoodi, @Property("hakuOid") String hakuOid) {
         LOG.debug("Jalkiohjauskirjeet for haku '{}'", new Object[] { hakuOid });
         final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluResource.ilmankoulutuspaikkaa(hakuOid,
                 SijoitteluResource.LATEST);
@@ -110,7 +115,13 @@ public class JalkiohjauskirjeetKomponentti {
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!", kirjeet.size());
-        return new Gson().toJson(new Kirjeet(kirjeet));
+        Response response = viestintapalvelu.haeJalkiohjauskirjeet(new Kirjeet(kirjeet));
+        LOG.debug("Status {} \r\n {} \r\n {}", new Object[] { response.getStatus() });
+        if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
+            throw new ViestintapalveluException(
+                    "Viestintäpalvelu epäonnistui jälkiohjauskirjeiden luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon!");
+        }
+        return response.getEntity();
     }
 
     //

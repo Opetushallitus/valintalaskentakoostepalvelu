@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -9,7 +10,8 @@ import java.util.List;
  *         Koska Viestintapalvelulla ei ole API:a
  * 
  */
-public class Osoitteet {
+
+public class Osoitteet implements Serializable {
 
     private List<Osoite> addressLabels;
 
@@ -20,4 +22,7 @@ public class Osoitteet {
     public List<Osoite> getAddressLabels() {
         return addressLabels;
     }
+
+    private static final long serialVersionUID = -7777955308444290462L;
+
 }

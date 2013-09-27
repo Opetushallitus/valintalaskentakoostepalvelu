@@ -34,11 +34,6 @@
 	            <to uri="bean:haeHakukohteenHakemuksetKomponentti"/>
 	            <setProperty propertyName="hakemukset"><simple>${body}</simple></setProperty>
 	            <to uri="bean:osoitetarratKomponentti"/>
-	            <log 	loggingLevel="DEBUG" 
-	            		logName="fi.vm.sade.valinta.kooste.viestintapalvelu"
-	            		message="Viestintapalvelin kutsu (osoitetarrat): {{viestintapalvelu.url}}/api/v1/addresslabel/pdf"/>
-	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
-	            <to uri="{{viestintapalvelu.url}}/api/v1/addresslabel/pdf"/>
             </policy>
         </route>
         <route>
@@ -49,11 +44,6 @@
 	            <setProperty propertyName="hakuOid"><simple>${body.args[1]}</simple></setProperty>
 	            <setProperty propertyName="sijoitteluajoId"><simple>${body.args[2]}</simple></setProperty>
 	            <to uri="bean:hyvaksyttyjenOsoitteetKomponentti"/>
-	            <log 	loggingLevel="DEBUG" 
-	            		logName="fi.vm.sade.valinta.kooste.viestintapalvelu"
-	            		message="Viestintapalvelin kutsu (osoitetarrat): {{viestintapalvelu.url}}/api/v1/addresslabel/pdf"/>
-	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
-	            <to uri="{{viestintapalvelu.url}}/api/v1/addresslabel/pdf"/>
             </policy>
         </route>
         <route>
@@ -64,11 +54,6 @@
 	            <setProperty propertyName="hakuOid"><simple>${body.args[1]}</simple></setProperty>
 	            <setProperty propertyName="sijoitteluajoId"><simple>${body.args[2]}</simple></setProperty>
 	            <to uri="bean:hyvaksymiskirjeetKomponentti"/>
-	            <log 	loggingLevel="DEBUG" 
-	            		logName="fi.vm.sade.valinta.kooste.viestintapalvelu"
-	            		message="Viestintapalvelin kutsu (hyvaksymiskirjeet): {{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/pdf"/>
-	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
-	            <to uri="{{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/pdf"/>
             </policy>
         </route>
         <route>
@@ -77,11 +62,6 @@
             	<setProperty propertyName="kielikoodi"><constant>kieli_fi</constant></setProperty>
 	            <setProperty propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
 	            <to uri="bean:jalkiohjauskirjeetKomponentti"/>
-	            <log 	loggingLevel="DEBUG" 
-	            		logName="fi.vm.sade.valinta.kooste.viestintapalvelu"
-	            		message="Viestintapalvelin kutsu (jalkiohjauskirjeet): {{viestintapalvelu.url}}/api/v1/jalkiohjauskirje/pdf"/>
-	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
-	            <to uri="{{viestintapalvelu.url}}/api/v1/jalkiohjauskirje/zip"/>
 	        </policy>
         </route>
     </routeContext>

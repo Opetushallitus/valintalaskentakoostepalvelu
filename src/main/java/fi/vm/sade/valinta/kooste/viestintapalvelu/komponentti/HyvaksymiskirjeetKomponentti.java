@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
@@ -15,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
@@ -25,7 +25,10 @@ import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
+import fi.vm.sade.valinta.kooste.exception.TarjontaException;
+import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
 import fi.vm.sade.valinta.kooste.util.Formatter;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
@@ -61,7 +64,10 @@ public class HyvaksymiskirjeetKomponentti {
     @Autowired
     private HaeOsoiteKomponentti osoiteKomponentti;
 
-    public String teeHyvaksymiskirjeet(@Property("kielikoodi") String kielikoodi,
+    @Autowired
+    private ViestintapalveluResource viestintapalvelu;
+
+    public Object teeHyvaksymiskirjeet(@Property("kielikoodi") String kielikoodi,
             @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid,
             @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId) {
 
@@ -136,7 +142,13 @@ public class HyvaksymiskirjeetKomponentti {
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta hyvaksymiskirjeitä {} kappaletta!", kirjeet.size());
-        return new Gson().toJson(new Kirjeet(kirjeet));
+        Response response = viestintapalvelu.haeHyvaksymiskirjeet(new Kirjeet(kirjeet));
+        LOG.debug("Status {} \r\n {} \r\n {}", new Object[] { response.getStatus() });
+        if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
+            throw new ViestintapalveluException(
+                    "Viestintäpalvelu epäonnistui hyväksymiskirjeiden luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon!");
+        }
+        return response.getEntity();
     }
 
     //
@@ -194,8 +206,12 @@ public class HyvaksymiskirjeetKomponentti {
         } else {
             LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[] { tarjontaResourceUrl,
                     hakukohdeOid });
-            HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
-            return nimi;
+            try {
+                HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
+                return nimi;
+            } catch (Exception e) {
+                throw new TarjontaException("Tarjonnasta ei löydy hakukohdetta " + hakukohdeOid);
+            }
         }
     }
 }

@@ -6,19 +6,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-
 import fi.vm.sade.service.valintatiedot.ValintatietoService;
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
+import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 
@@ -36,7 +38,10 @@ public class OsoitetarratKomponentti {
     @Autowired
     private HaeOsoiteKomponentti osoiteKomponentti;
 
-    public String teeOsoitetarrat(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
+    @Autowired
+    private ViestintapalveluResource viestintapalvelu;
+
+    public Object teeOsoitetarrat(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
             @Simple("${property.valintakoeOid}") List<String> valintakoeOids,
             @Simple("${property.hakemukset}") List<SuppeaHakemus> hakemukset) {
         LOG.debug("Osoitetarrat for hakukohde '{}' and valintakokeet '{}'",
@@ -61,9 +66,16 @@ public class OsoitetarratKomponentti {
                 osoitteet.add(osoiteKomponentti.haeOsoite(h.getOid()));
             }
         }
-
-        String osoitetarrat = new Gson().toJson(new Osoitteet(osoitteet));
-        LOG.debug("Osoitetarrat {}", osoitetarrat);
-        return osoitetarrat;
+        if (osoitteet.isEmpty()) {
+            throw new ViestintapalveluException("Yritetään luoda nolla kappaletta osoitetarroja!");
+        }
+        LOG.debug("Luodaan {}kpl osoitetarroja!", osoitteet.size());
+        Response response = viestintapalvelu.haeOsoitetarrat(new Osoitteet(osoitteet));
+        LOG.debug("Status {} \r\n {} \r\n {}", new Object[] { response.getStatus() });
+        if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
+            throw new ViestintapalveluException(
+                    "Viestintäpalvelu epäonnistui osoitetarrojen luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon!");
+        }
+        return response.getEntity();
     }
 }

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.Gson;
-
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
+import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 
@@ -46,10 +48,12 @@ public class HyvaksyttyjenOsoitteetKomponentti {
 
     @Autowired
     private HaeOsoiteKomponentti osoiteKomponentti;
+    @Autowired
+    private ViestintapalveluResource viestintapalvelu;
 
     // private static final String KIELIKOODI = "kieli_fi";
 
-    public String teeHyvaksymiskirjeet(@Simple("${property.kielikoodi}") String kielikoodi,
+    public Object teeHyvaksymiskirjeet(@Simple("${property.kielikoodi}") String kielikoodi,
             @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid,
             @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId) {
         LOG.debug("Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'", new Object[] {
@@ -79,7 +83,13 @@ public class HyvaksyttyjenOsoitteetKomponentti {
 
         LOG.info("Yritetään luoda viestintapalvelulta osoitteita hyväksytyille hakijoille {} kappaletta!",
                 osoitteet.size());
-        return new Gson().toJson(new Osoitteet(osoitteet));
+        Response response = viestintapalvelu.haeOsoitetarrat(new Osoitteet(osoitteet));
+        LOG.debug("Status {} \r\n {} \r\n {}", new Object[] { response.getStatus() });
+        if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
+            throw new ViestintapalveluException(
+                    "Viestintäpalvelu epäonnistui osoitetarrojen luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon!");
+        }
+        return response.getEntity();
     }
 
 }

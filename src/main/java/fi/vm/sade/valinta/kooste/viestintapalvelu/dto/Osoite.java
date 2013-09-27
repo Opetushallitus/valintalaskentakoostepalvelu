@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
+import java.io.Serializable;
 
 /**
  * 
@@ -8,7 +9,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
  *         Koska Viestintapalvelulla ei ole API:a
  * 
  */
-public class Osoite {
+public class Osoite implements Serializable {
 
     private String firstName; // "Etunimi",
     private String lastName; // ":"Sukunimi",
@@ -75,4 +76,5 @@ public class Osoite {
         return region;
     }
 
+    private static final long serialVersionUID = -1734664942239974134L;
 }
