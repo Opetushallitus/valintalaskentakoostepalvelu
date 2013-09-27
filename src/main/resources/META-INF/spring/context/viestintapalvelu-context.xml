@@ -68,7 +68,7 @@
 	            		logName="fi.vm.sade.valinta.kooste.viestintapalvelu"
 	            		message="Viestintapalvelin kutsu (hyvaksymiskirjeet): {{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/pdf"/>
 	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
-	            <to uri="{{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/pdf"/>
+	            <to uri="{{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/zip"/>
             </policy>
         </route>
         <route>
@@ -81,7 +81,7 @@
 	            		logName="fi.vm.sade.valinta.kooste.viestintapalvelu"
 	            		message="Viestintapalvelin kutsu (jalkiohjauskirjeet): {{viestintapalvelu.url}}/api/v1/jalkiohjauskirje/pdf"/>
 	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
-	            <to uri="{{viestintapalvelu.url}}/api/v1/jalkiohjauskirje/pdf"/>
+	            <to uri="{{viestintapalvelu.url}}/api/v1/jalkiohjauskirje/zip"/>
 	        </policy>
         </route>
     </routeContext>
