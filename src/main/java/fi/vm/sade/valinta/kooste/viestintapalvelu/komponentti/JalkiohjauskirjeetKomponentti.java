@@ -22,6 +22,7 @@ import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
+import fi.vm.sade.valinta.kooste.exception.TarjontaException;
 import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
@@ -178,8 +179,12 @@ public class JalkiohjauskirjeetKomponentti {
         } else {
             LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[] { tarjontaResourceUrl,
                     hakukohdeOid });
-            HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
-            return nimi;
+            try {
+                HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
+                return nimi;
+            } catch (Exception e) {
+                throw new TarjontaException("Tarjonnasta ei löydy hakukohdetta " + hakukohdeOid);
+            }
         }
     }
 }
