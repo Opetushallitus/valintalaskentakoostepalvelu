@@ -68,7 +68,7 @@
 	            		logName="fi.vm.sade.valinta.kooste.viestintapalvelu"
 	            		message="Viestintapalvelin kutsu (hyvaksymiskirjeet): {{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/pdf"/>
 	            <setHeader headerName="Content-Type"><constant>application/json</constant></setHeader>
-	            <to uri="{{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/pdf"/>
+	            <to uri="{{viestintapalvelu.url}}/api/v1/hyvaksymiskirje/zip"/>
             </policy>
         </route>
         <route>
