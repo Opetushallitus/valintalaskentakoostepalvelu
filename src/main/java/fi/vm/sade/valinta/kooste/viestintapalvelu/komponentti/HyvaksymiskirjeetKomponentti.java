@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
@@ -127,8 +128,11 @@ public class HyvaksymiskirjeetKomponentti {
                                 "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
                     }
                     tulokset.put("kaikkiHakeneet", Formatter.suomennaNumero(valintatapajono.getHakeneet()));
-                    tulokset.put("omatPisteet", Formatter.suomennaNumero(valintatapajono.getPisteet()));
-
+                    StringBuilder pisteet = new StringBuilder();
+                    for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
+                        pisteet.append(pistetieto.getArvo()).append(" ");
+                    }
+                    tulokset.put("omatPisteet", pisteet.toString().trim());
                     tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
                     tulokset.put("paasyJaSoveltuvuuskoe",
                             Formatter.suomennaNumero(valintatapajono.getPaasyJaSoveltuvuusKokeenTulos()));
