@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
@@ -37,8 +38,8 @@ public class JalkiohjaustulosExcelKomponentti {
         List<Object[]> rivit = new ArrayList<Object[]>();
         for (HakijaDTO jalkiohjattava : hyvaksymattomatHakijat) {
             boolean otsikko = true;
-            for (HakutoiveDTO hakukohde : jalkiohjattava.getHakutoiveet()) {
-                for (HakutoiveenValintatapajonoDTO jono : hakukohde.getHakutoiveenValintatapajonot()) {
+            for (HakutoiveDTO hakutoive : jalkiohjattava.getHakutoiveet()) {
+                for (HakutoiveenValintatapajonoDTO jono : hakutoive.getHakutoiveenValintatapajonot()) {
 
                     // HakemusDTO hakemus = filterHakemus(hakemusOid,
                     // jono.getHakemukset());
@@ -49,9 +50,13 @@ public class JalkiohjaustulosExcelKomponentti {
                         rivit.add(new Object[] { "Hakija", nimi.toString() });
                         otsikko = false;
                     }
-                    rivit.add(new Object[] { "Hakukohde", hakukohde.getHakukohdeOid(), "Valintatapajono",
-                            jono.getValintatapajonoOid(), "Pisteet", Formatter.suomennaNumero(jono.getPisteet()),
-                            "Valinnan tulos", jono.getTila() });
+                    StringBuilder pisteet = new StringBuilder();
+                    for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
+                        pisteet.append(pistetieto.getArvo()).append(" ");
+                    }
+                    rivit.add(new Object[] { "Hakukohde", hakutoive.getHakukohdeOid(), "Valintatapajono",
+                            jono.getValintatapajonoOid(), "Pisteet", pisteet.toString().trim(), "Valinnan tulos",
+                            jono.getTila() });
                 }
             }
         }
