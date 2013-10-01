@@ -11,43 +11,52 @@ public class Parametrit {
     private long valintakoekutsutkouluillePvm;
     private long valintakoeAlkupvm;
     private long valintakoeLoppupvm;*/
-    private long koetuloksetPvm;
+    private String koetuloksetPvm;
     /*private long valintajasijoitteluAlkupvm;
     private long valintajasijoitteluLoppupvm;*/
-    private long valintaesitysPvm;
-    private long hakuAlkupvm;
-    private long hakuLoppupvm;
+    private String valintaesitysPvm;
+    private String hakuAlkupvm;
+    private String hakuLoppupvm;
+    private String koetuloksetAlkupvm;
 
 
-    public long getKoetuloksetPvm() {
+    public String getKoetuloksetLoppupvm() {
         return koetuloksetPvm;
     }
 
-    public void setKoetuloksetPvm(long koetuloksetPvm) {
+    public void setKoetuloksetLoppupvm(String koetuloksetPvm) {
         this.koetuloksetPvm = koetuloksetPvm;
     }
 
-    public long getValintaesitysPvm() {
+    public String getValintaesitysPvm() {
         return valintaesitysPvm;
     }
 
-    public void setValintaesitysPvm(long valintaesitysPvm) {
+    public void setValintaesitysPvm(String valintaesitysPvm) {
         this.valintaesitysPvm = valintaesitysPvm;
     }
 
-    public void setHakuAlkupvm(long hakuAlkupvm) {
+    public void setHakuAlkupvm(String hakuAlkupvm) {
         this.hakuAlkupvm = hakuAlkupvm;
     }
 
-    public long getHakuAlkupvm() {
+    public String getHakuAlkupvm() {
         return hakuAlkupvm;
     }
 
-    public void setHakuLoppupvm(long hakuLoppupvm) {
+    public void setHakuLoppupvm(String hakuLoppupvm) {
         this.hakuLoppupvm = hakuLoppupvm;
     }
 
-    public long getHakuLoppupvm() {
+    public String getHakuLoppupvm() {
         return hakuLoppupvm;
+    }
+
+    public void setKoetuloksetAlkupvm(String koetuloksetAlkupvm) {
+        this.koetuloksetAlkupvm = koetuloksetAlkupvm;
+    }
+
+    public String getKoetuloksetAlkupvm() {
+        return koetuloksetAlkupvm;
     }
 }
