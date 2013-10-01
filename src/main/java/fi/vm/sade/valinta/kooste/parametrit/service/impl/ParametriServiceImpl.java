@@ -9,6 +9,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -26,49 +28,65 @@ public class ParametriServiceImpl implements ParametriService {
     @Value("${root.organisaatio.oid}")
     private String rootOrganisaatioOid;
 
+    private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     @Override
     public boolean pistesyottoEnabled(String hakuOid) {
+        if(isOPH()) {
+            return true;
+        }
         Date now = Calendar.getInstance().getTime();
-        Date hakuLoppupvm = new Date(parametrit.getHakuLoppupvm() * 1000);
-        Date koetulokset = new Date(parametrit.getKoetuloksetPvm() * 1000);
-        return isOPH() || (now.before(koetulokset) && now.after(hakuLoppupvm));
+        Date koetuloksetAlkupvm = parseDate(parametrit.getKoetuloksetAlkupvm());
+        Date koetuloksetLoppupvm = parseDate(parametrit.getKoetuloksetLoppupvm());
+        return now.before(koetuloksetLoppupvm) && now.after(koetuloksetAlkupvm);
     }
 
     @Override
     public boolean hakeneetEnabled(String hakuOid) {
+        if(isOPH()) {
+            return true;
+        }
         Date now = Calendar.getInstance().getTime();
-        Date hakuAlkupvm = new Date(parametrit.getHakuAlkupvm() * 1000);
-        return now.after(hakuAlkupvm) || isOPH();
+        Date hakuAlkupvm = parseDate(parametrit.getHakuAlkupvm());
+        return now.after(hakuAlkupvm);
     }
 
     @Override
     public boolean harkinnanvaraisetEnabled(String hakuOid) {
+        if(isOPH()) {
+            return true;
+        }
         Date now = Calendar.getInstance().getTime();
-        Date hakuLoppupvm = new Date(parametrit.getHakuLoppupvm() * 1000);
-        Date koetuloksetPvm = new Date(parametrit.getKoetuloksetPvm() * 1000);
-        return isOPH() || (now.after(hakuLoppupvm) && now.before(koetuloksetPvm));
+        Date hakuLoppupvm = parseDate(parametrit.getHakuLoppupvm());
+        Date koetuloksetPvm = parseDate(parametrit.getKoetuloksetLoppupvm());
+        return now.after(hakuLoppupvm) && now.before(koetuloksetPvm);
     }
 
     @Override
     public boolean valintakoekutsutEnabled(String hakuOid) {
+        if(isOPH()) {
+            return true;
+        }
         Date now = Calendar.getInstance().getTime();
-        Date hakuLoppupvm = new Date(parametrit.getHakuLoppupvm() * 1000);
-        Date koetuloksetPvm = new Date(parametrit.getKoetuloksetPvm() * 1000);
-        return (now.after(hakuLoppupvm) && now.before(koetuloksetPvm)) || isOPH();
+        Date koetuloksetAlkupvm = parseDate(parametrit.getKoetuloksetAlkupvm());
+        return now.after(koetuloksetAlkupvm);
     }
 
     @Override
     public boolean valintalaskentaEnabled(String hakuOid) {
         //Date now = Calendar.getInstance().getTime();
-        //Date hakuAlkupvm = new Date(parametrit.getHakuAlkupvm() * 1000);
+        //Date hakuAlkupvm = new Date(parametrit.getHakuAlkupvm());
         return isOPH(); //now.after(hakuAlkupvm) && isOPH();
     }
 
     @Override
     public boolean valinnanhallintaEnabled(String hakuOid) {
+        if(isOPH()) {
+            return true;
+        }
         Date now = Calendar.getInstance().getTime();
-        Date valintaesitysPvm = new Date(parametrit.getValintaesitysPvm() * 1000);
-        return isOPH() || now.after(valintaesitysPvm);
+        Date valintaesitysPvm = parseDate(parametrit.getValintaesitysPvm());
+        return now.after(valintaesitysPvm);
     }
 
     private boolean isOPH() {
@@ -80,5 +98,13 @@ public class ParametriServiceImpl implements ParametriService {
         }
 
         return false;
+    }
+    
+    private Date parseDate(String source) {
+        try {
+            return format.parse(source);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
