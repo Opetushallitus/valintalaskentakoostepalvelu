@@ -1,5 +1,9 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.proxy;
 
+import java.util.concurrent.Future;
+
+import org.springframework.security.core.Authentication;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -7,5 +11,5 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.proxy;
  */
 public interface JalkiohjauskirjeBatchAktivointiProxy {
 
-    String jalkiohjauskirjeetAktivoi(String hakuOid);
+    Future<Void> jalkiohjauskirjeetAktivoi(String hakuOid, Authentication auth);
 }
