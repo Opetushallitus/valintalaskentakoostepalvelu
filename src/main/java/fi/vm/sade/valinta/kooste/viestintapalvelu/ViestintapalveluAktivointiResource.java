@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.google.gson.Gson;
@@ -69,10 +70,13 @@ public class ViestintapalveluAktivointiResource {
     @Produces("application/json")
     public Response aktivoiJalkiohjauskirjeidenLuonti(@QueryParam("hakuOid") String hakuOid) {
         try {
+            jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(hakuOid, SecurityContextHolder.getContext()
+                    .getAuthentication());
             return Response
                     .status(Status.OK)
-                    .entity(new Gson().toJson(new LatausUrl(jalkiohjauskirjeBatchProxy
-                            .jalkiohjauskirjeetAktivoi(hakuOid)))).build();
+                    .entity(Vastaus
+                            .viesti("Jälkiohjauskirjeen luonti on käynnistetty. Valmis kirje tulee näkyviin yhteisvalinnan hallinta välilehdelle."))
+                    .build();
 
         } catch (Exception e) {
             LOG.error("Jälkiohjauskirjeiden luonnissa virhe! {}", e.getMessage());

@@ -58,6 +58,8 @@
         </route>
         <route>
             <from uri="direct:kaynnistaJalkiohjauskirjeetReitti"/>
+            <setProperty propertyName="authentication"><simple>${body.args[1]}</simple></setProperty>
+	        <process ref="securityPreprocessor"/>
             <policy ref="admin">
             	<setProperty propertyName="kielikoodi"><constant>kieli_fi</constant></setProperty>
 	            <setProperty propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
