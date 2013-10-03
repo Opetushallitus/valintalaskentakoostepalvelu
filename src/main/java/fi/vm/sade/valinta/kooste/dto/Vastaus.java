@@ -36,4 +36,10 @@ public class Vastaus {
         vastaus.viesti = virheViesti;
         return vastaus;
     }
+
+    public static Vastaus viesti(String viesti) {
+        Vastaus vastaus = new Vastaus();
+        vastaus.viesti = viesti;
+        return vastaus;
+    }
 }
