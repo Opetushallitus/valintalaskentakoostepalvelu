@@ -25,17 +25,20 @@
     <routeContext id="valintakoelaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
             <from uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
+            <log message="kaynnistaHakemuksenValintakoelaskentaReitti: ${body}" />
             <setProperty propertyName="hakemusOid"><simple>${body}</simple></setProperty>
             <policy ref="admin">
                 <process ref="securityPreprocessor"/>
                 <to uri="bean:laskeValintakoeosallistumisetHakemukselleKomponentti"/>
             </policy>
+            <log message="kaynnistaHaunValintakoelaskentaReitti ajettu" />
         </route>
         <route>
             <from uri="direct:kaynnistaHaunValintakoelaskentaReitti"/>
             <setProperty propertyName="hakuOid">
                 <simple>${body}</simple>
             </setProperty>
+            <log message="kaynnistaHaunValintakoelaskentaReitti: ${body}" />
             <policy ref="admin">
                 <process ref="securityPreprocessor"/>
                 <to uri="bean:haeHaunHakemuksetKomponentti"/>
@@ -46,9 +49,11 @@
                     <to uri="bean:laskeValintakoeosallistumisetHakemukselleKomponentti"/>
                 </split>
             </policy>
+            <log message="kaynnistaHaunValintakoelaskentaReitti ajettu" />
         </route>
         <route>
             <from uri="direct:kaynnistaHakukohteenValintakoelaskentaReitti" />
+            <log message="kaynnistaHakukohteenValintakoelaskentaReitti: ${body}" />
             <setProperty propertyName="hakukohdeOid">
                 <simple>${body}</simple>
             </setProperty>
@@ -59,9 +64,10 @@
                     <method bean="hakemusOidSplitter" method="splitHakemusOid"/>
                     <process ref="securityPreprocessor"/>
                     <setProperty propertyName="hakemusOid"><simple>${body}</simple></setProperty>
-                    <to uri="bean:laskeValintakoeosallistumisetHakemukselleKomponentti"/>
+                    <to uri="bean:laskeValintakoeosallistumisetHakemukselleKomponentti" />
                 </split>
             </policy>
+            <log message="kaynnistaHakukohteenValintakoelaskentaReitti ajettu" />
         </route>
     </routeContext>
 

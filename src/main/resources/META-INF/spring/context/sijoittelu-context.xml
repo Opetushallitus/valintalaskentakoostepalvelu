@@ -18,24 +18,28 @@
         <!-- Proxy Jersey REST triggerin ja Camelin eriyttämiseen toisistaan -->
         <proxy id="sijoitteluAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluAktivointiProxy"
-               serviceUrl="direct:kaynnistaSijoitteluReitti"/>
+               serviceUrl="direct:kaynnistaSijoitteluReitti" />
 
         <endpoint id="quartzInput" uri="quartz://timerName?cron=${valintalaskentakoostepalvelu.jatkuvasijoittelu.cron}"/>
 
         <route>
             <from uri="direct:kaynnistaSijoitteluReitti"/>
+            <log message="Sijoitetlu käynnistetty: ${body.args[0]}" />
             <setProperty propertyName="hakuOid">
                 <simple>${body.args[0]}</simple>
             </setProperty>
             <policy ref="admin">
                 <process ref="securityPreprocessor"/>
-                <to uri="bean:suoritaSijoittelu"/>
+                <to uri="bean:suoritaSijoittelu" />
             </policy>
+            <log message="Sijoittelu valmis" />
         </route>
 
         <route id="jatkuvaSijoittelu">
             <from uri="ref:quartzInput"/>
+            <log message="Jatkuva sijoittelu käynnistetty" />
             <to uri="bean:jatkuvaSijoittelu"/>
+            <log message="Jatkuva sijoittelu valmis" />
         </route>
 
     </camelContext>

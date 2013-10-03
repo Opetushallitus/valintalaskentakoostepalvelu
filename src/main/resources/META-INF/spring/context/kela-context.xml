@@ -21,6 +21,7 @@
 			serviceUrl="direct:kaynnistaKelaReitti" />
 		<route>
 			<from uri="direct:kaynnistaKelaReitti" />
+            <log message="kaynnistaKelaReitti" />
 			<setProperty propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
 			<setProperty propertyName="hakukohdeOid"><simple>${body.args[1]}</simple></setProperty>
 			<!-- 
@@ -34,6 +35,7 @@
             	<process ref="securityPreprocessor"/>
 			    <to uri="bean:TKUVAYHVAKomponentti" />
             </policy>
+            <log message="kaynnistaKelaReitti ajettu" />
 		</route>
 	</camelContext>
 

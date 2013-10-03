@@ -28,11 +28,14 @@
 	<routeContext id="tarjontaCamelRoutes" xmlns="http://camel.apache.org/schema/spring">
 		<route id="ajastinReitti" autoStartup="{{tarjonta.ajastinReitti.aktivoi}}">
 			<from uri="quartz://timerName?cron={{tarjonta.ajastinReitti.cron}}" />
+            <log message="tarjonta ajastinReitti" />
 			<setBody><simple>${bean:tarjontaTiedotPalvelu?method=haeHakuOid}</simple></setBody>
+
             <policy ref="admin">
             	<process ref="securityPreprocessor"/>
                 <to uri="bean:haunValintakoelaskentaAktivointiRajapinta"/>
             </policy>
+            <log message="tarjonta ajastinReitti ajettu" />
 		</route>
 	</routeContext>
 	

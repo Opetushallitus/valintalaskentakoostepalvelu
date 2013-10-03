@@ -28,7 +28,6 @@ public class JatkuvaSijoittelu {
     private SijoitteluService sijoitteluService;
 
     public void suorita() {
-        LOG.debug("JATKUVA SIJOITTELU KÄYNNISTETTY");
         for (Sijoittelu sijoittelu : SIJOITTELU_HAUT.values()) {
             if(sijoittelu.isAjossa()) {
                 LOG.debug("JATKUVA SIJOITTELU: {}", sijoittelu.getHakuOid());
@@ -44,7 +43,6 @@ public class JatkuvaSijoittelu {
                 sijoittelu.setViimeksiAjettu(new Date());
             }
         }
-        LOG.debug("JATKUVA SIJOITTELU LOPETETTU");
     }
 }
 

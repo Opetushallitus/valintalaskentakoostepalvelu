@@ -21,6 +21,7 @@
     <routeContext id="valintalaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
         <route>
             <from uri="direct:kaynnistaHakukohteenValintalaskentaReitti"/>
+            <log message="kaynnistaHakukohteenValintalaskentaReitti hakukohde: ${body.args[0]} valinnanvaihe: ${body.args[1]}" />
             <policy ref="admin">
             	<process ref="securityPreprocessor"/>
             	<setProperty propertyName="hakukohdeOid">
@@ -39,9 +40,11 @@
                 </setProperty>
                 <to uri="bean:suoritaLaskentaKomponentti"/>
             </policy>
+            <log message="kaynnistaHakukohteenValintalaskentaReitti ajettu" />
         </route>
         <route>
             <from uri="direct:kaynnistaHaunValintalaskentaReitti"/>
+            <log message="kaynnistaHaunValintalaskentaReitti haku: ${body.args[0]}" />
             <setProperty propertyName="hakuOid">
                 <simple>${body.args[0]}</simple>
             </setProperty>
@@ -60,6 +63,7 @@
 	                <to uri="bean:suoritaLaskentaKomponentti"/>
                 </split>
             </policy>
+            <log message="kaynnistaHaunValintalaskentaReitti ajettu" />
         </route>
     </routeContext>
 
