@@ -55,7 +55,8 @@
 
     <!--fetching valintatieto takes ages, consider removing this once valinnan tulokset service has been optimized-->
     <http:conduit name="*.http-conduit">
-        <http:client Connection="Keep-Alive" ConnectionTimeout="0" ReceiveTimeout="0"/>
+        <!-- AllowChunking="false" Nginx fails without this -->
+        <http:client Connection="Keep-Alive" ConnectionTimeout="0" ReceiveTimeout="0" AllowChunking="false"/>
     </http:conduit>
 
 
