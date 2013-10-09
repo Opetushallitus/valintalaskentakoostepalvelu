@@ -144,10 +144,15 @@ public class HyvaksymiskirjeetKomponentti {
         LOG.info("Yritetään luoda viestintapalvelulta hyvaksymiskirjeitä {} kappaletta!", kirjeet.size());
         Response response = viestintapalvelu.haeHyvaksymiskirjeet(new Kirjeet(kirjeet));
         LOG.debug("Status {} \r\n {} \r\n {}", new Object[] { response.getStatus() });
+        if (response.getStatus() == 302) { // FOUND
+            throw new ViestintapalveluException("Sinulla ei ole käyttöoikeuksia viestintäpalveluun!");
+        }
         if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
             throw new ViestintapalveluException(
-                    "Viestintäpalvelu epäonnistui hyväksymiskirjeiden luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon!");
+                    "Viestintäpalvelu epäonnistui hyväksymiskirjeiden luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon! "
+                            + response.getEntity());
         }
+
         return response.getEntity();
     }
 

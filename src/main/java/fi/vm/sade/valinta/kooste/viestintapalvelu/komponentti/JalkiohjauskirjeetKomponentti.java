@@ -119,6 +119,9 @@ public class JalkiohjauskirjeetKomponentti {
         LOG.info("Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!", kirjeet.size());
         Response response = viestintapalvelu.haeJalkiohjauskirjeet(new Kirjeet(kirjeet));
         LOG.debug("Status {} \r\n {} \r\n {}", new Object[] { response.getStatus() });
+        if (response.getStatus() == 302) { // FOUND
+            throw new ViestintapalveluException("Sinulla ei ole käyttöoikeuksia viestintäpalveluun!");
+        }
         if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
             throw new ViestintapalveluException(
                     "Viestintäpalvelu epäonnistui jälkiohjauskirjeiden luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon!");
