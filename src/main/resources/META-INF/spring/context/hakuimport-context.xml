@@ -29,10 +29,7 @@
 		<proxy id="hakuImportAktivointiRajapinta" 
 			serviceInterface="fi.vm.sade.valinta.kooste.hakuimport.HakuImportAktivointiProxy"
 			serviceUrl="direct:kaynnistaHakuImportReitti" />
-		<routeContextRef ref="hakuImportRoutes" />
-	</camelContext>
-	
-	<routeContext id="hakuImportRoutes" xmlns="http://camel.apache.org/schema/spring">
+			
 		<route id="hakuImportRoute" >
 			<from uri="direct:kaynnistaHakuImportReitti" />
 			<policy ref="admin">
@@ -40,7 +37,6 @@
 				<camel:recipientList>
 					<camel:simple>{{tarjonta.rest}}/haku/${body}/hakukohde?count=99999999</camel:simple>
 				</camel:recipientList>
-				<!-- TODO: selvitä miten parellelProcessing saa toimimaan -->
 				<split parallelProcessing="false" >
 					<method bean="jsonSplitter" method="split" />
 					<to uri="bean:suoritaHakukohdeImportKomponentti" />
@@ -48,8 +44,8 @@
 			</policy>
 
 		</route>
-
-	</routeContext>
+	</camelContext>
+	
 
 
 </beans>
