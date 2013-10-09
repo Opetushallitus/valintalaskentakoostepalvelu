@@ -17,6 +17,7 @@
         <relativePath>..</relativePath>
     </parent>
 
+
     <build>
         <finalName>${project.artifactId}</finalName>
     </build>
@@ -213,6 +214,7 @@
             <artifactId>camel-quartz</artifactId>
             <version>${camel.version}</version>
         </dependency>
+        
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring</artifactId>
