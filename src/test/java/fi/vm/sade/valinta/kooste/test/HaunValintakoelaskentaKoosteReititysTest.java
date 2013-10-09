@@ -44,7 +44,8 @@ import fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiR
 @Configuration
 @ContextConfiguration(classes = HaunValintakoelaskentaKoosteReititysTest.class)
 @PropertySource("classpath:valintakoelaskenta-test.properties")
-@ImportResource({ "classpath:META-INF/spring/context/valintakoelaskenta-context.xml", "test-context.xml" })
+@ImportResource({ "classpath:META-INF/spring/context/haku-context.xml",
+        "classpath:META-INF/spring/context/valintakoelaskenta-context.xml", "test-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HaunValintakoelaskentaKoosteReititysTest {
 

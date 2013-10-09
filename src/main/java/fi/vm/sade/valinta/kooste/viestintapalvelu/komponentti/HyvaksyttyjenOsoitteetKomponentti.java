@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
@@ -39,12 +38,6 @@ public class HyvaksyttyjenOsoitteetKomponentti {
 
     @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}")
     private String sijoitteluResourceUrl;
-
-    @Autowired
-    private HakukohdeResource tarjontaResource;
-
-    @Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}")
-    private String tarjontaResourceUrl;
 
     @Autowired
     private HaeOsoiteKomponentti osoiteKomponentti;

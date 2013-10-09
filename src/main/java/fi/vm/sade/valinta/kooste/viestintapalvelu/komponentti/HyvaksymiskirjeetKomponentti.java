@@ -22,12 +22,11 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
-import fi.vm.sade.valinta.kooste.exception.TarjontaException;
 import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
+import fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
@@ -57,10 +56,7 @@ public class HyvaksymiskirjeetKomponentti {
     private String sijoitteluResourceUrl;
 
     @Autowired
-    private HakukohdeResource tarjontaResource;
-
-    @Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}")
-    private String tarjontaResourceUrl;
+    private TarjontaProxy tarjontaProxy;
 
     @Autowired
     private HaeOsoiteKomponentti osoiteKomponentti;
@@ -169,7 +165,7 @@ public class HyvaksymiskirjeetKomponentti {
                 if (!metaKohteet.containsKey(hakukohdeOid)) { // lisataan
                                                               // puuttuva
                                                               // hakukohde
-                    HakukohdeNimiRDTO nimi = haeHakukohdeNimi(hakukohdeOid);
+                    HakukohdeNimiRDTO nimi = tarjontaProxy.haeHakukohdeNimi(hakukohdeOid);
                     String hakukohdeNimi = extractHakukohdeNimi(nimi, kielikoodi);
                     String tarjoajaNimi = extractTarjoajaNimi(nimi, kielikoodi);
                     metaKohteet.put(hakukohdeOid, new MetaHakukohde(hakukohdeNimi, tarjoajaNimi));
@@ -203,19 +199,4 @@ public class HyvaksymiskirjeetKomponentti {
                                                                   // joku!
     }
 
-    private HakukohdeNimiRDTO haeHakukohdeNimi(String hakukohdeOid) {
-        if (hakukohdeOid == null) {
-            throw new SijoittelupalveluException(
-                    "Sijoittelu palautti puutteellisesti luodun hakutoiveen! Hakukohteen tunniste puuttuu!");
-        } else {
-            LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[] { tarjontaResourceUrl,
-                    hakukohdeOid });
-            try {
-                HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
-                return nimi;
-            } catch (Exception e) {
-                throw new TarjontaException("Tarjonnasta ei löydy hakukohdetta " + hakukohdeOid);
-            }
-        }
-    }
 }
