@@ -247,6 +247,7 @@
 	</jaxws:client>
 	
 	<beans:import resource="classpath:META-INF/spring/context/haku-context.xml"/>
+	<beans:import resource="classpath:META-INF/spring/context/tarjonta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/hakuimport-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/kela-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/tarjonta-ajastus-context.xml"/>

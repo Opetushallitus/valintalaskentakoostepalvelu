@@ -33,6 +33,7 @@ import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.TavallinenValinnanVaiheTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
@@ -46,15 +47,21 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResour
 @Configuration
 @ContextConfiguration(classes = HakukohteenValintalaskentaKoosteReititysTest.class)
 @PropertySource({ "classpath:META-INF/valintalaskentakoostepalvelu.properties", "classpath:test.properties" })
-@ImportResource({ "classpath:META-INF/spring/context/valintalaskenta-context.xml", "test-context.xml" })
+@ImportResource({ "classpath:META-INF/spring/context/haku-context.xml",
+        "classpath:META-INF/spring/context/valintalaskenta-context.xml", "test-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HakukohteenValintalaskentaKoosteReititysTest {
-    private static final Logger LOG = LoggerFactory.getLogger(HaunValintalaskentaReititysTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HakukohteenValintalaskentaKoosteReititysTest.class);
     private static final String HAKUOID = "hakuoid";
 
     private static final String HAKEMUSOID = "hakemus0";
     private static final String HAKUKOHDEOID = "hakukohde0";
     private static final Integer VALINNANVAIHE = 6;
+
+    @Bean
+    public HakukohdeResource getHakukohdeResource() {
+        return mock(HakukohdeResource.class);
+    }
 
     @Bean
     public ApplicationResource getApplicationResourceMock() {
@@ -102,7 +109,7 @@ public class HakukohteenValintalaskentaKoosteReititysTest {
         return parametriService;
     }
 
-    @Bean(name="tarjontaServiceClientAsAdmin")
+    @Bean(name = "tarjontaServiceClientAsAdmin")
     public TarjontaPublicService getTarjontaPublicServiceMock() {
         return mock(TarjontaPublicService.class);
     }
