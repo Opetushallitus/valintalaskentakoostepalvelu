@@ -2,16 +2,14 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
        xmlns:beans="http://www.springframework.org/schema/beans"
-       xmlns:cxf="http://camel.apache.org/schema/cxf"
        xmlns:jaxws="http://cxf.apache.org/jaxws"
        xmlns:jaxrs="http://cxf.apache.org/jaxrs"
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:http="http://cxf.apache.org/transports/http/configuration"
-       xsi:schemaLocation="
-           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-           http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+
            http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
            http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
@@ -37,9 +35,10 @@
 
     <!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
     <!--<import resource="classpath:authentication-client.xml"/>-->
-    <bean id="ticketInterceptor" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor" />
-    <bean id="ticketInterceptorRest" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest" />
-	<bean id="securityPreprocessor" class="fi.vm.sade.valinta.kooste.security.SecurityPreprocessor"/>
+    <bean id="ticketInterceptor" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor"/>
+    <bean id="ticketInterceptorRest" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest"/>
+    <bean id="securityPreprocessor" class="fi.vm.sade.valinta.kooste.security.SecurityPreprocessor"/>
+    <bean id="objectMapperProvider" class="fi.vm.sade.valinta.kooste.ObjectMapperProvider"/>
 
 
     <authorizationPolicy id="admin" access="isAuthenticated()"
@@ -74,25 +73,27 @@
     -->
     <jaxrs:client id="viestintapalveluClient"
                   serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource"
-                  address="${valintalaskentakoostepalvelu.viestintapalvelu.url}" >
-		<jaxrs:providers>
-	        <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider">
-	            <property name="mapper" ref="jacksonMapper" />
-	        </bean>
-    	</jaxrs:providers>
+                  address="${valintalaskentakoostepalvelu.viestintapalvelu.url}">
+        <jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider">
+                <property name="mapper" ref="jacksonMapper"/>
+            </bean>
+        </jaxrs:providers>
     </jaxrs:client>
     <beans:bean id="jacksonMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
-    
+
     <jaxws:client id="ValintaperusteServiceClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
-                  address="${valintalaskentakoostepalvelu.valintaperusteService.url}" >
+                  address="${valintalaskentakoostepalvelu.valintaperusteService.url}">
         <jaxws:outInterceptors>
             <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}"/>
-                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}"/>
+                <property name="appClientUsername"
+                          value="${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}"/>
+                <property name="appClientPassword"
+                          value="${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}"/>
             </bean>
         </jaxws:outInterceptors>
     </jaxws:client>
@@ -114,25 +115,25 @@
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
         </jaxrs:providers>
     </jaxrs:client>
-     
+
     <jaxrs:client id="TarjontaServiceRestClient"
                   address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
                   serviceClass="fi.vm.sade.tarjonta.service.resources.HakukohdeResource"
                   inheritHeaders="true">
         <jaxrs:outInterceptors>
-            <ref bean="ticketInterceptorRest" />
+            <ref bean="ticketInterceptorRest"/>
         </jaxrs:outInterceptors>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
         </jaxrs:providers>
     </jaxrs:client>
-    
-	<jaxrs:client id="SijoitteluServiceRestClient"
+
+    <jaxrs:client id="SijoitteluServiceRestClient"
                   address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
                   serviceClass="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource"
                   inheritHeaders="true">
         <jaxrs:outInterceptors>
-            <ref bean="ticketInterceptorRest" />
+            <ref bean="ticketInterceptorRest"/>
         </jaxrs:outInterceptors>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
@@ -143,21 +144,21 @@
                   serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource"
                   inheritHeaders="true">
         <jaxrs:outInterceptors>
-            <ref bean="ticketInterceptorRest" />
+            <ref bean="ticketInterceptorRest"/>
         </jaxrs:outInterceptors>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
         </jaxrs:providers>
     </jaxrs:client>
-    
+
     <jaxws:client id="ValintalaskentaServiceClient"
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
-                  address="${valintalaskentakoostepalvelu.valintalaskentaService.url}" >
+                  address="${valintalaskentakoostepalvelu.valintalaskentaService.url}">
         <jaxws:outInterceptors>
-            <ref bean="ticketInterceptor" />
+            <ref bean="ticketInterceptor"/>
         </jaxws:outInterceptors>
     </jaxws:client>
-    
+
     <jaxws:client id="tarjontaServiceClient"
                   serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
                   address="${valintalaskentakoostepalvelu.tarjontaService.url}">
@@ -170,9 +171,9 @@
                 <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.tarjonta}"/>
             </bean>
         </jaxws:outInterceptors>
-	</jaxws:client>
-	
-	<jaxws:client id="organisaatioServiceClient"
+    </jaxws:client>
+
+    <jaxws:client id="organisaatioServiceClient"
                   serviceClass="fi.vm.sade.organisaatio.api.model.OrganisaatioService"
                   address="${valintalaskentakoostepalvelu.organisaatioService.url}">
         <jaxws:outInterceptors>
@@ -180,38 +181,42 @@
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.tarjonta-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.organisaatio}"/>
-                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.organisaatio}"/>
+                <property name="appClientUsername"
+                          value="${valintalaskentakoostepalvelu.app.username.to.organisaatio}"/>
+                <property name="appClientPassword"
+                          value="${valintalaskentakoostepalvelu.app.password.to.organisaatio}"/>
             </bean>
         </jaxws:outInterceptors>
-	</jaxws:client>
-	
+    </jaxws:client>
+
     <jaxws:client id="valintatietoService"
                   serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
-                  address="${valintalaskentakoostepalvelu.valintaTulosService.url}" >
+                  address="${valintalaskentakoostepalvelu.valintaTulosService.url}">
         <jaxws:outInterceptors>
-            <ref bean="ticketInterceptor" />
+            <ref bean="ticketInterceptor"/>
         </jaxws:outInterceptors>
     </jaxws:client>
 
     <jaxws:client id="sijoitteluService"
                   serviceClass="fi.vm.sade.service.sijoittelu.SijoitteluService"
-                  address="${valintalaskentakoostepalvelu.sijoitteluService.url}" >
+                  address="${valintalaskentakoostepalvelu.sijoitteluService.url}">
         <jaxws:outInterceptors>
-            <ref bean="ticketInterceptor" />
+            <ref bean="ticketInterceptor"/>
         </jaxws:outInterceptors>
     </jaxws:client>
 
     <jaxws:client id="valintatietoServiceAsAdmin"
                   serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
-                  address="${valintalaskentakoostepalvelu.valintaTulosService.url}" >
+                  address="${valintalaskentakoostepalvelu.valintaTulosService.url}">
         <jaxws:outInterceptors>
             <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.valintalaskenta-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}"/>
-                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}"/>
+                <property name="appClientUsername"
+                          value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}"/>
+                <property name="appClientPassword"
+                          value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}"/>
             </bean>
         </jaxws:outInterceptors>
     </jaxws:client>
@@ -219,7 +224,7 @@
 
     <jaxws:client id="sijoitteluServiceAsAdmin"
                   serviceClass="fi.vm.sade.service.sijoittelu.SijoitteluService"
-                  address="${valintalaskentakoostepalvelu.sijoitteluService.url}" >
+                  address="${valintalaskentakoostepalvelu.sijoitteluService.url}">
         <jaxws:outInterceptors>
             <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
                 <property name="webCasUrl" value="${web.url.cas}"/>
@@ -243,10 +248,10 @@
                 <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.koodisto}"/>
             </bean>
         </jaxws:outInterceptors>
-	</jaxws:client>
-	
-	<beans:import resource="classpath:META-INF/spring/context/haku-context.xml"/>
-	<beans:import resource="classpath:META-INF/spring/context/tarjonta-context.xml"/>
+    </jaxws:client>
+
+    <beans:import resource="classpath:META-INF/spring/context/haku-context.xml"/>
+    <beans:import resource="classpath:META-INF/spring/context/tarjonta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/hakuimport-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/kela-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/tarjonta-ajastus-context.xml"/>
