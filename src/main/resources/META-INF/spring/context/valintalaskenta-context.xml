@@ -20,6 +20,9 @@
 
     <camelContext id="valintalaskentaCamelContext"
                   autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+        <proxy id="valintalaskentaProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintalaskentaProxy"
+               serviceUrl="direct:valintalaskentaReitti"/>
         <proxy id="hakukohteenValintalaskentaAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.valintalaskenta.proxy.HakukohteenValintalaskentaAktivointiProxy"
                serviceUrl="direct:kaynnistaHakukohteenValintalaskentaReitti"/>
@@ -27,6 +30,18 @@
                serviceInterface="fi.vm.sade.valinta.kooste.valintalaskenta.proxy.HaunValintalaskentaAktivointiProxy"
                serviceUrl="direct:kaynnistaHaunValintalaskentaReitti"/>
         
+        <errorHandler  id="valintalaskentaRetryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
+        <redeliveryPolicyProfile id="retryPolicy"
+       							maximumRedeliveries="10" 
+       							redeliveryDelay="100" 
+       							retryAttemptedLogLevel="WARN"/>
+       							
+        <route errorHandlerRef="valintalaskentaRetryHandler">
+        	<from uri="direct:valintalaskentaReitti"/>
+            <setProperty propertyName="hakemustyypit"><simple>${body.args[0]}</simple></setProperty>
+            <setProperty propertyName="valintaperusteet"><simple>${body.args[1]}</simple></setProperty>
+            <to uri="bean:valintalaskentaKomponentti"/>
+        </route>
         <!--
         	Ylatasolla halutaan vaan failata! Jos kokonaisuus ei onnistu niin ei yriteta uudestaan! 
         	Yksittaisia osia paukutetaan siina toivossa etta kokonaisuus saataisiin toimimaan! 

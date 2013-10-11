@@ -11,13 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import fi.vm.sade.valinta.kooste.haku.HakukohdeProxy;
 import fi.vm.sade.valinta.kooste.util.Converter;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintalaskentaProxy;
 
 /**
  * @author Jussi Jartamo
@@ -26,12 +26,11 @@ import fi.vm.sade.valinta.kooste.util.Converter;
 public class SuoritaLaskentaKomponentti {
 
     @Autowired
-    private ValintalaskentaService valintalaskentaService;
-
-    @Autowired
     private HakukohdeProxy hakukohdeProxy;
     @Autowired
     private HakemusProxy hakemusProxy;
+    @Autowired
+    private ValintalaskentaProxy valintalaskentaProxy;
 
     private static final Logger LOG = LoggerFactory.getLogger(SuoritaLaskentaKomponentti.class);
 
@@ -57,7 +56,7 @@ public class SuoritaLaskentaKomponentti {
         }
 
         LOG.info("Hakemukset haettu, käynnistetään laskenta");
-        valintalaskentaService.laske(hakemustyypit, valintaperusteet);
+        valintalaskentaProxy.laske(hakemustyypit, valintaperusteet);
     }
 
 }
