@@ -21,37 +21,40 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.gson.Gson;
 
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.ValintakoelaskentaProxy;
 
 /**
  * User: wuoti Date: 29.8.2013 Time: 14.28
+ * 
+ * @Deprecated pitaisi olla Spring testi!
  */
+@Deprecated
 public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
 
     private LaskeValintakoeosallistumisetHakemukselleKomponentti laskeValintakoeosallistumisetHakemukselleKomponentti;
 
     private HakukohteenValintaperusteetProxy hakukohteenValintaperusteetProxyMock;
-    private ValintalaskentaService valintalaskentaServiceMock;
-    private ApplicationResource applicationResourceMock;
+    private ValintakoelaskentaProxy valintakoelaskentaProxyMock;
+    private HakemusProxy hakemusProxyMock;
 
     @Before
     public void setUp() {
         laskeValintakoeosallistumisetHakemukselleKomponentti = new LaskeValintakoeosallistumisetHakemukselleKomponentti();
         hakukohteenValintaperusteetProxyMock = mock(HakukohteenValintaperusteetProxy.class);
-        valintalaskentaServiceMock = mock(ValintalaskentaService.class);
-        applicationResourceMock = mock(ApplicationResource.class);
+        valintakoelaskentaProxyMock = mock(ValintakoelaskentaProxy.class);
+        hakemusProxyMock = mock(HakemusProxy.class);
 
         ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "proxy",
                 hakukohteenValintaperusteetProxyMock);
-        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "valintalaskentaService",
-                valintalaskentaServiceMock);
-        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "applicationResource",
-                applicationResourceMock);
+        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "valintalaskentaProxy",
+                valintakoelaskentaProxyMock);
+        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "hakemusProxy",
+                hakemusProxyMock);
     }
 
     private final static String HAKUKOHDE_OID = "1.2.246.562.5.01245_01_114_0125";
@@ -230,13 +233,12 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
 
         List<ValintaperusteetTyyppi> vps = Arrays.asList(vp);
 
-        when(applicationResourceMock.getApplicationByOid(eq(hakemusOid))).thenReturn(
-                new Gson().fromJson(HAKEMUS_JSON, Hakemus.class));
+        when(hakemusProxyMock.haeHakemus(eq(hakemusOid))).thenReturn(new Gson().fromJson(HAKEMUS_JSON, Hakemus.class));
         when(hakukohteenValintaperusteetProxyMock.haeValintaperusteet(hakukohdeParams)).thenReturn(vps);
         laskeValintakoeosallistumisetHakemukselleKomponentti.laske(hakemusOid);
 
         ArgumentCaptor<HakemusTyyppi> ac = ArgumentCaptor.forClass(HakemusTyyppi.class);
-        verify(valintalaskentaServiceMock).valintakokeet(ac.capture(), anyList());
+        verify(valintakoelaskentaProxyMock).valintakokeet(ac.capture(), anyList());
 
         HakemusTyyppi hakemus = ac.getValue();
         assertEquals(hakemusOid, hakemus.getHakemusOid());

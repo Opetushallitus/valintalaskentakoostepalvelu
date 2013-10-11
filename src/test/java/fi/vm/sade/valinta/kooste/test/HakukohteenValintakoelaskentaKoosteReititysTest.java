@@ -30,6 +30,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.gson.Gson;
 
+import fi.vm.sade.organisaatio.api.model.OrganisaatioService;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
@@ -405,6 +406,11 @@ public class HakukohteenValintakoelaskentaKoosteReititysTest {
 
     @Autowired
     private ValintalaskentaService valintalaskentaServiceMock;
+
+    @Bean
+    public OrganisaatioService getOrganisaatioServiceMock() {
+        return mock(OrganisaatioService.class);
+    }
 
     @Bean
     public ValintaperusteService getValintaperusteServiceMock() {
