@@ -18,7 +18,6 @@ public class HaeOsoiteKomponentti {
 
     @Autowired
     private HakemusProxy hakemusProxy;
-    // private ApplicationResource applicationResource;
 
     @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
     private String applicationResourceUrl;

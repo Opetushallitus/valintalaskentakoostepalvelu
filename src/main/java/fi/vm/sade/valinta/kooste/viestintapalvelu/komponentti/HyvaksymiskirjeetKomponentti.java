@@ -21,19 +21,18 @@ import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
-import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
+import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluKoulutuspaikallisetProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy;
 import fi.vm.sade.valinta.kooste.util.Formatter;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluHyvaksymiskirjeetProxy;
 
 /**
  * 
@@ -50,7 +49,7 @@ public class HyvaksymiskirjeetKomponentti {
     private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
     @Autowired
-    private SijoitteluResource sijoitteluResource;
+    private SijoitteluKoulutuspaikallisetProxy sijoitteluProxy;
 
     @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}")
     private String sijoitteluResourceUrl;
@@ -62,7 +61,7 @@ public class HyvaksymiskirjeetKomponentti {
     private HaeOsoiteKomponentti osoiteKomponentti;
 
     @Autowired
-    private ViestintapalveluResource viestintapalvelu;
+    private ViestintapalveluHyvaksymiskirjeetProxy viestintapalveluProxy;
 
     public Object teeHyvaksymiskirjeet(@Property("kielikoodi") String kielikoodi,
             @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid,
@@ -76,7 +75,7 @@ public class HyvaksymiskirjeetKomponentti {
         //
         //
         //
-        final Collection<HakijaDTO> hakukohteenHakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, hakukohdeOid,
+        final Collection<HakijaDTO> hakukohteenHakijat = sijoitteluProxy.koulutuspaikalliset(hakuOid, hakukohdeOid,
                 sijoitteluajoId.toString());
         final int kaikkiHakukohteenHyvaksytyt = hakukohteenHakijat.size();
         if (kaikkiHakukohteenHyvaksytyt == 0) {
@@ -142,17 +141,7 @@ public class HyvaksymiskirjeetKomponentti {
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta hyvaksymiskirjeitä {} kappaletta!", kirjeet.size());
-        Response response = viestintapalvelu.haeHyvaksymiskirjeet(new Kirjeet(kirjeet));
-        LOG.debug("Status {} \r\n {} \r\n {}", new Object[] { response.getStatus() });
-        if (response.getStatus() == 302) { // FOUND
-            throw new ViestintapalveluException("Sinulla ei ole käyttöoikeuksia viestintäpalveluun!");
-        }
-        if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
-            throw new ViestintapalveluException(
-                    "Viestintäpalvelu epäonnistui hyväksymiskirjeiden luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon! "
-                            + response.getEntity());
-        }
-
+        Response response = viestintapalveluProxy.haeHyvaksymiskirjeet(new Kirjeet(kirjeet));
         return response.getEntity();
     }
 

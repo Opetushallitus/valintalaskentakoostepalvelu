@@ -14,12 +14,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
-import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
+import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluKoulutuspaikallisetProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluOsoitetarratProxy;
 
 /**
  * 
@@ -34,7 +33,8 @@ public class HyvaksyttyjenOsoitteetKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksyttyjenOsoitteetKomponentti.class);
 
     @Autowired
-    private SijoitteluResource sijoitteluResource;
+    // private SijoitteluResource sijoitteluResource;
+    private SijoitteluKoulutuspaikallisetProxy sijoitteluProxy;
 
     @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}")
     private String sijoitteluResourceUrl;
@@ -42,7 +42,7 @@ public class HyvaksyttyjenOsoitteetKomponentti {
     @Autowired
     private HaeOsoiteKomponentti osoiteKomponentti;
     @Autowired
-    private ViestintapalveluResource viestintapalvelu;
+    private ViestintapalveluOsoitetarratProxy viestintapalveluProxy;
 
     // private static final String KIELIKOODI = "kieli_fi";
 
@@ -57,7 +57,7 @@ public class HyvaksyttyjenOsoitteetKomponentti {
         //
         //
         //
-        final Collection<HakijaDTO> hakukohteenHakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, hakukohdeOid,
+        final Collection<HakijaDTO> hakukohteenHakijat = sijoitteluProxy.koulutuspaikalliset(hakuOid, hakukohdeOid,
                 sijoitteluajoId.toString());
         final int kaikkiHakukohteenHyvaksytyt = hakukohteenHakijat.size();
         if (kaikkiHakukohteenHyvaksytyt == 0) {
@@ -76,15 +76,7 @@ public class HyvaksyttyjenOsoitteetKomponentti {
 
         LOG.info("Yritetään luoda viestintapalvelulta osoitteita hyväksytyille hakijoille {} kappaletta!",
                 osoitteet.size());
-        Response response = viestintapalvelu.haeOsoitetarrat(new Osoitteet(osoitteet));
-        LOG.debug("Status {} \r\n {} \r\n {}", new Object[] { response.getStatus() });
-        if (response.getStatus() == 302) { // FOUND
-            throw new ViestintapalveluException("Sinulla ei ole käyttöoikeuksia viestintäpalveluun!");
-        }
-        if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
-            throw new ViestintapalveluException(
-                    "Viestintäpalvelu epäonnistui osoitetarrojen luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon!");
-        }
+        Response response = viestintapalveluProxy.haeOsoitetarrat(new Osoitteet(osoitteet));
         return response.getEntity();
     }
 

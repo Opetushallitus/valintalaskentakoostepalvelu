@@ -20,11 +20,55 @@
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
 
-	<util:properties id="viestintapalveluProperties">
-		<beans:prop key="viestintapalvelu.url">${valintalaskentakoostepalvelu.viestintapalvelu.url}</beans:prop>
-	</util:properties>
-
-    <routeContext id="viestintapalveluRoutes" xmlns="http://camel.apache.org/schema/spring">
+    <camelContext id="viestintapalveluCamelContext"
+                  autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+        <propertyPlaceholder id="viestintapalveluContextProperties" location="ref:viestintapalveluProperties" />
+        <proxy id="hyvaksymiskirjeBatchAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksymiskirjeBatchAktivointiProxy"
+               serviceUrl="direct:kaynnistaHyvaksymiskirjeetReitti"/>
+        <proxy id="jalkiohjauskirjeBatchAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.JalkiohjauskirjeBatchAktivointiProxy"
+               serviceUrl="direct:kaynnistaJalkiohjauskirjeetReitti"/>
+        <proxy id="addressLabelBatchAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.OsoitetarratAktivointiProxy"
+               serviceUrl="direct:kaynnistaOsoitetarratReitti"/>
+        <proxy id="hyvaksyttyjenAddressLabelBatchAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksyttyjenOsoitetarrojenAktivointiProxy"
+               serviceUrl="direct:kaynnistaHyvaksyttyjenOsoitetarratReitti"/>
+        
+        <proxy id="viestintapalveluHyvaksymiskirjeetProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluHyvaksymiskirjeetProxy"
+               serviceUrl="direct:viestintapalveluHyvaksymiskirjeetReitti"/>
+        <proxy id="viestintapalveluJalkiohjauskirjeetProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluJalkiohjauskirjeetProxy"
+               serviceUrl="direct:viestintapalveluJalkiohjauskirjeetReitti"/>
+        <proxy id="viestintapalveluOsoitetarratProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluOsoitetarratProxy"
+               serviceUrl="direct:viestintapalveluOsoitetarratReitti"/>
+        
+        <errorHandler  id="retryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
+        <redeliveryPolicyProfile id="retryPolicy"
+       							maximumRedeliveries="10" 
+       							redeliveryDelay="100" 
+       							retryAttemptedLogLevel="WARN"/>
+        
+		<route errorHandlerRef="retryHandler">
+            <from uri="direct:viestintapalveluOsoitetarratReitti"/>
+            <to uri="bean:viestintapalveluClient?method=haeOsoitetarrat"/>
+            <process ref="viestintapalveluProcessor"/>
+        </route>
+        <route errorHandlerRef="retryHandler">
+            <from uri="direct:viestintapalveluJalkiohjauskirjeetReitti"/>
+            <to uri="bean:viestintapalveluClient?method=haeJalkiohjauskirjeet"/>
+            <process ref="viestintapalveluProcessor"/>
+        </route>
+        <route errorHandlerRef="retryHandler">
+            <from uri="direct:viestintapalveluHyvaksymiskirjeetReitti"/>
+            <to uri="bean:viestintapalveluClient?method=haeHyvaksymiskirjeet"/>
+            <process ref="viestintapalveluProcessor"/>
+        </route>
+        
+        
         <route>
             <from uri="direct:kaynnistaOsoitetarratReitti"/>
             <policy ref="admin">
@@ -66,23 +110,5 @@
 	            <to uri="bean:jalkiohjauskirjeetKomponentti"/>
 	        </policy>
         </route>
-    </routeContext>
-
-    <camelContext id="viestintapalveluCamelContext"
-                  autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
-        <propertyPlaceholder id="viestintapalveluContextProperties" location="ref:viestintapalveluProperties" />
-        <proxy id="hyvaksymiskirjeBatchAktivointiRajapinta"
-               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksymiskirjeBatchAktivointiProxy"
-               serviceUrl="direct:kaynnistaHyvaksymiskirjeetReitti"/>
-        <proxy id="jalkiohjauskirjeBatchAktivointiRajapinta"
-               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.JalkiohjauskirjeBatchAktivointiProxy"
-               serviceUrl="direct:kaynnistaJalkiohjauskirjeetReitti"/>
-        <proxy id="addressLabelBatchAktivointiRajapinta"
-               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.OsoitetarratAktivointiProxy"
-               serviceUrl="direct:kaynnistaOsoitetarratReitti"/>
-        <proxy id="hyvaksyttyjenAddressLabelBatchAktivointiRajapinta"
-               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksyttyjenOsoitetarrojenAktivointiProxy"
-               serviceUrl="direct:kaynnistaHyvaksyttyjenOsoitetarratReitti"/>
-        <routeContextRef ref="viestintapalveluRoutes"/>
     </camelContext>
 </beans>

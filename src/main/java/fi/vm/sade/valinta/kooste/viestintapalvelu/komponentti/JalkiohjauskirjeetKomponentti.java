@@ -22,15 +22,15 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
-import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
+import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluIlmankoulutuspaikkaaProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy;
 import fi.vm.sade.valinta.kooste.util.Formatter;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluJalkiohjauskirjeetProxy;
 
 /**
  * @author Jussi Jartamo
@@ -43,7 +43,8 @@ public class JalkiohjauskirjeetKomponentti {
     private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
     @Autowired
-    private SijoitteluResource sijoitteluResource;
+    private SijoitteluIlmankoulutuspaikkaaProxy sijoitteluProxy;
+    // private SijoitteluResource sijoitteluResource;
 
     @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}")
     private String sijoitteluResourceUrl;
@@ -55,11 +56,11 @@ public class JalkiohjauskirjeetKomponentti {
     private HaeOsoiteKomponentti osoiteKomponentti;
 
     @Autowired
-    private ViestintapalveluResource viestintapalvelu;
+    private ViestintapalveluJalkiohjauskirjeetProxy viestintapalveluProxy;
 
     public Object teeJalkiohjauskirjeet(@Property("kielikoodi") String kielikoodi, @Property("hakuOid") String hakuOid) {
         LOG.debug("Jalkiohjauskirjeet for haku '{}'", new Object[] { hakuOid });
-        final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluResource.ilmankoulutuspaikkaa(hakuOid,
+        final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluProxy.ilmankoulutuspaikkaa(hakuOid,
                 SijoitteluResource.LATEST);
         final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
         if (kaikkiHyvaksymattomat == 0) {
@@ -117,15 +118,7 @@ public class JalkiohjauskirjeetKomponentti {
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!", kirjeet.size());
-        Response response = viestintapalvelu.haeJalkiohjauskirjeet(new Kirjeet(kirjeet));
-        LOG.debug("Status {} \r\n {} \r\n {}", new Object[] { response.getStatus() });
-        if (response.getStatus() == 302) { // FOUND
-            throw new ViestintapalveluException("Sinulla ei ole käyttöoikeuksia viestintäpalveluun!");
-        }
-        if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
-            throw new ViestintapalveluException(
-                    "Viestintäpalvelu epäonnistui jälkiohjauskirjeiden luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon!");
-        }
+        Response response = viestintapalveluProxy.haeJalkiohjauskirjeet(new Kirjeet(kirjeet));
         return response.getEntity();
     }
 
