@@ -38,8 +38,6 @@
     <bean id="ticketInterceptor" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor"/>
     <bean id="ticketInterceptorRest" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest"/>
     <bean id="securityPreprocessor" class="fi.vm.sade.valinta.kooste.security.SecurityPreprocessor"/>
-    <!--<bean id="objectMapperProvider" class="fi.vm.sade.valinta.kooste.ObjectMapperProvider"/>-->
-
 
     <authorizationPolicy id="admin" access="isAuthenticated()"
                          authenticationManager="authenticationManager"
@@ -113,6 +111,7 @@
         </jaxrs:outInterceptors>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
         </jaxrs:providers>
     </jaxrs:client>
 
@@ -125,6 +124,7 @@
         </jaxrs:outInterceptors>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
         </jaxrs:providers>
     </jaxrs:client>
 
@@ -137,6 +137,7 @@
         </jaxrs:outInterceptors>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
         </jaxrs:providers>
     </jaxrs:client>
     <jaxrs:client id="ValintalaskentaServiceRestClient"
@@ -148,6 +149,7 @@
         </jaxrs:outInterceptors>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
         </jaxrs:providers>
     </jaxrs:client>
 
