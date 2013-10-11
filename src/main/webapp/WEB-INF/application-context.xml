@@ -193,8 +193,8 @@
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.tarjonta-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.tarjonta}"/>
-                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.tarjonta}"/>
+                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.organisaatio}"/>
+                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.organisaatio}"/>
             </bean>
         </jaxws:outInterceptors>
 	</jaxws:client>
