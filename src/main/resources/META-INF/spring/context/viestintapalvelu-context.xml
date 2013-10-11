@@ -50,7 +50,7 @@
         <redeliveryPolicyProfile id="retryPolicy"
        							maximumRedeliveries="10" 
        							redeliveryDelay="100" 
-       							retryAttemptedLogLevel="WARN"/>
+       							retryAttemptedLogLevel="ERROR"/>
         
 		<route errorHandlerRef="retryHandler">
             <from uri="direct:viestintapalveluOsoitetarratReitti"/>

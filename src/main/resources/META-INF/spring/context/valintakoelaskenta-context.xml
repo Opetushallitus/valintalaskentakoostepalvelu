@@ -40,7 +40,7 @@
         <redeliveryPolicyProfile id="retryPolicy"
        							maximumRedeliveries="10" 
        							redeliveryDelay="100" 
-       							retryAttemptedLogLevel="WARN"/>
+       							retryAttemptedLogLevel="ERROR"/>
        							
         <route errorHandlerRef="valintakoelaskentaRetryHandler">
             <from uri="direct:valintakoelaskentaReitti"/>

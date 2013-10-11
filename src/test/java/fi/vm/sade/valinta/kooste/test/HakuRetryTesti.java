@@ -25,7 +25,7 @@ import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
  */
 @Configuration
 @ContextConfiguration(classes = HakuRetryTesti.class)
-@ImportResource({ "classpath:META-INF/spring/context/haku-context.xml" })
+@ImportResource({ "classpath:test-context.xml", "classpath:META-INF/spring/context/haku-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HakuRetryTesti {
 
