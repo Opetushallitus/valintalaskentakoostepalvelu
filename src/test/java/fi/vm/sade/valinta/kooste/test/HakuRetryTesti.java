@@ -21,7 +21,7 @@ import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
  * 
  * @author Jussi Jartamo
  * 
- *         Testaa uudelleen yrityksia! A.k.a Chaos Monkey testi.
+ *         Testaa uudelleen yrityksia, eli epavarmaa verkkoyhteytta!
  */
 @Configuration
 @ContextConfiguration(classes = HakuRetryTesti.class)
@@ -35,18 +35,20 @@ public class HakuRetryTesti {
             final boolean[] fail = { true, true, false, true, false, false, true };
             volatile int counter = 0;
 
-            public Hakemus getApplicationByOid(String oid) {
+            public void failRandomly() {
                 ++counter;
                 if (fail[counter % fail.length])
-                    throw new RuntimeException("random chaos!");
+                    throw new RuntimeException("satunnainen verkkovirhe!");
+            }
+
+            public Hakemus getApplicationByOid(String oid) {
+                failRandomly();
                 return new Hakemus();
             }
 
             public HakemusList findApplications(String query, List<String> state, String aoid, String lopoid,
                     String asId, String aoOid, int start, int rows) {
-                ++counter;
-                if (fail[counter % fail.length])
-                    throw new RuntimeException("random chaos!");
+                failRandomly();
                 return new HakemusList();
             }
         };

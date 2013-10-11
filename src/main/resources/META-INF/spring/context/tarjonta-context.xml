@@ -25,7 +25,10 @@
 		<proxy id="tarjontaProxy" 
 			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy"
 			serviceUrl="direct:tarjontaReitti" />
-		
+		<proxy id="organisaatioProxy" 
+			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioProxy"
+			serviceUrl="direct:organisaatioReitti" />
+			
         <errorHandler  id="tarjontaRetryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
         <redeliveryPolicyProfile id="retryPolicy"
        							maximumRedeliveries="10" 
@@ -37,6 +40,12 @@
 			<setProperty propertyName="hakukohdeOid"><simple>${body}</simple></setProperty>
 			<setBody><constant></constant></setBody>
 			<to uri="bean:hakukohdeTarjonnaltaKomponentti"/>
+		</route>
+		<route errorHandlerRef="tarjontaRetryHandler">
+			<from uri="direct:organisaatioReitti"/>
+			<setProperty propertyName="tarjoajaOid"><simple>${body}</simple></setProperty>
+			<setBody><constant></constant></setBody>
+			<to uri="bean:organisaatioKomponentti"/>
 		</route>
 	</camelContext>
 
