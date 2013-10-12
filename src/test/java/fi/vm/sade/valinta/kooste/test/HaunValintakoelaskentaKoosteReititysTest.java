@@ -37,6 +37,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintaperusteProxy;
 
 /**
  * @author Jussi Jartamo
@@ -422,6 +423,11 @@ public class HaunValintakoelaskentaKoosteReititysTest {
     @Bean
     public ApplicationResource getApplicationResourceMock() {
         return mock(ApplicationResource.class);
+    }
+
+    @Bean
+    public ValintaperusteProxy getValintaperusteProxyMock() {
+        return mock(ValintaperusteProxy.class);
     }
 
     @Test

@@ -38,6 +38,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.valintakokeet.HakukohteenValintakoelaskentaAktivointiProxy;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintaperusteProxy;
 
 /**
  * User: wuoti Date: 9.9.2013 Time: 9.24
@@ -420,6 +421,11 @@ public class HakukohteenValintakoelaskentaKoosteReititysTest {
     @Bean
     public ValintalaskentaService getValintalaskentaServiceMock() {
         return mock(ValintalaskentaService.class);
+    }
+
+    @Bean
+    public ValintaperusteProxy getValintaperusteProxyMock() {
+        return mock(ValintaperusteProxy.class);
     }
 
     @Bean

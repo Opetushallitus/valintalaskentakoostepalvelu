@@ -29,13 +29,21 @@
         <proxy id="haunValintalaskentaAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.valintalaskenta.proxy.HaunValintalaskentaAktivointiProxy"
                serviceUrl="direct:kaynnistaHaunValintalaskentaReitti"/>
+        <proxy id="valintaperusteProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintaperusteProxy"
+               serviceUrl="direct:valintaperusteReitti"/>
         
         <errorHandler  id="valintalaskentaRetryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
         <redeliveryPolicyProfile id="retryPolicy"
        							maximumRedeliveries="10" 
        							redeliveryDelay="100" 
        							retryAttemptedLogLevel="ERROR"/>
-       							
+		
+		<route errorHandlerRef="valintalaskentaRetryHandler">
+        	<from uri="direct:valintaperusteReitti"/>
+            <setProperty propertyName="hakuparametrit"><simple>${body.args[0]}</simple></setProperty>
+            <to uri="bean:valintaperusteKomponentti"/>
+        </route>
         <route errorHandlerRef="valintalaskentaRetryHandler">
         	<from uri="direct:valintalaskentaReitti"/>
             <setProperty propertyName="hakemustyypit"><simple>${body.args[0]}</simple></setProperty>
