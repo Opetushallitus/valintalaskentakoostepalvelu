@@ -39,7 +39,7 @@
 		<route errorHandlerRef="retryHandler">
 			<from uri="direct:valintatietoReitti"/>
 			<setProperty propertyName="hakuOid"><simple>${body}</simple></setProperty>
-			<to uri="bean:valintatietoKomponentti"/>
+			<to uri="bean:valintatietokomponentti"/>
 		</route>
 	</camelContext>
 
