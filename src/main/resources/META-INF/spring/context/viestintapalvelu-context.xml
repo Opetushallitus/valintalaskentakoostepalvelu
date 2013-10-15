@@ -19,9 +19,15 @@
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
-
-    <camelContext id="viestintapalveluCamelContext"
+	
+	<bean id="viestintapalveluRetryHandler" class="org.apache.camel.builder.DefaultErrorHandlerBuilder" >
+		<property name="redeliveryPolicy" ref="redeliveryPolicy"/>
+	</bean>
+	
+    <camelContext depends-on="viestintapalveluRetryHandler" id="viestintapalveluCamelContext"
                   autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+        
+        
         <propertyPlaceholder id="viestintapalveluContextProperties" location="ref:viestintapalveluProperties" />
         <proxy id="hyvaksymiskirjeBatchAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksymiskirjeBatchAktivointiProxy"
@@ -45,24 +51,18 @@
         <proxy id="viestintapalveluOsoitetarratProxy"
                serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluOsoitetarratProxy"
                serviceUrl="direct:viestintapalveluOsoitetarratReitti"/>
-        
-        <errorHandler  id="retryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
-        <redeliveryPolicyProfile id="retryPolicy"
-       							maximumRedeliveries="10" 
-       							redeliveryDelay="100" 
-       							retryAttemptedLogLevel="ERROR"/>
-        
-		<route errorHandlerRef="retryHandler">
+            
+		<route errorHandlerRef="viestintapalveluRetryHandler">
             <from uri="direct:viestintapalveluOsoitetarratReitti"/>
             <to uri="bean:viestintapalveluClient?method=haeOsoitetarrat"/>
             <process ref="viestintapalveluProcessor"/>
         </route>
-        <route errorHandlerRef="retryHandler">
+        <route errorHandlerRef="viestintapalveluRetryHandler">
             <from uri="direct:viestintapalveluJalkiohjauskirjeetReitti"/>
             <to uri="bean:viestintapalveluClient?method=haeJalkiohjauskirjeet"/>
             <process ref="viestintapalveluProcessor"/>
         </route>
-        <route errorHandlerRef="retryHandler">
+        <route errorHandlerRef="viestintapalveluRetryHandler">
             <from uri="direct:viestintapalveluHyvaksymiskirjeetReitti"/>
             <to uri="bean:viestintapalveluClient?method=haeHyvaksymiskirjeet"/>
             <process ref="viestintapalveluProcessor"/>

@@ -11,6 +11,7 @@
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
 	<ctx:annotation-config />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.util" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.komponentti" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.proxy" />
@@ -27,10 +28,15 @@
 			
             <policy ref="admin">
             	<process ref="securityPreprocessor"/>
-			    <to uri="bean:TKUVAYHVAKomponentti" />
+            	<to uri="bean:sijoitteluKaikkiKoulutuspaikkallisetKomponentti"/>
+            	<split strategyRef="aggregatorStrategy" parallelProcessing="true" stopOnException="true">
+	                <simple>${body}</simple>
+	                <to uri="bean:TKUVAYHVAKomponentti" />
+	            </split>
+			    <process ref="aggregateInBody"/>
             </policy>
 		</route>
 	</camelContext>
 
-
+	<bean id="aggregatorStrategy" class="org.apache.camel.processor.aggregate.GroupedExchangeAggregationStrategy"/>
 </beans>

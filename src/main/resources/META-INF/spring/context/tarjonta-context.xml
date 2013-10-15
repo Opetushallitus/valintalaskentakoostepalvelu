@@ -20,7 +20,12 @@
 	<ctx:annotation-config />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
 	
-	<camelContext id="tarjontaProxyCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+	<bean id="tarjontaRetryHandler" class="org.apache.camel.builder.DefaultErrorHandlerBuilder" >
+		<property name="redeliveryPolicy" ref="redeliveryPolicy"/>
+	</bean>
+	
+	
+	<camelContext depends-on="tarjontaRetryHandler" id="tarjontaProxyCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
 		
 		<proxy id="tarjontaProxy" 
 			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy"
@@ -28,13 +33,7 @@
 		<proxy id="organisaatioProxy" 
 			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioProxy"
 			serviceUrl="direct:organisaatioReitti" />
-			
-        <errorHandler  id="tarjontaRetryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
-        <redeliveryPolicyProfile id="retryPolicy"
-       							maximumRedeliveries="10" 
-       							redeliveryDelay="100" 
-       							retryAttemptedLogLevel="ERROR"/>
-        
+						
 		<route errorHandlerRef="tarjontaRetryHandler">
 			<from uri="direct:tarjontaReitti"/>
 			<setProperty propertyName="hakukohdeOid"><simple>${body}</simple></setProperty>
