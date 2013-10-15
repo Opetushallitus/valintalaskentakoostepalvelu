@@ -16,27 +16,25 @@
 	<ctx:annotation-config />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatieto.komponentti" />
 
-	<camelContext id="valintatietoCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+	<bean id="valintatietoRetryHandler" class="org.apache.camel.builder.DefaultErrorHandlerBuilder" >
+		<property name="redeliveryPolicy" ref="redeliveryPolicy"/>
+	</bean>
+
+	<camelContext depends-on="valintatietoRetryHandler" id="valintatietoCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
 		<proxy id="valintatietoProxy"
 			serviceInterface="fi.vm.sade.valinta.kooste.valintatieto.komponentti.proxy.ValintatietoProxy"
 			serviceUrl="direct:valintatietoReitti" />
 		<proxy id="valintatietohakukohteelleProxy"
 			serviceInterface="fi.vm.sade.valinta.kooste.valintatieto.komponentti.proxy.ValintatietoHakukohteelleProxy"
 			serviceUrl="direct:valintatietoHakukohteelleReitti" />
-			
-        <errorHandler  id="retryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
-        <redeliveryPolicyProfile id="retryPolicy"
-       							maximumRedeliveries="10" 
-       							redeliveryDelay="100" 
-       							retryAttemptedLogLevel="ERROR"/>
-        
-        <route errorHandlerRef="retryHandler">
+		
+        <route errorHandlerRef="valintatietoRetryHandler">
 			<from uri="direct:valintatietoHakukohteelleReitti"/>
 			<setProperty propertyName="valintakoeOid"><simple>${body.args[0]}</simple></setProperty>
 			<setProperty propertyName="hakukohdeOid"><simple>${body.args[1]}</simple></setProperty>
 			<to uri="bean:valintatietoHakukohteelleKomponentti"/>
 		</route>
-		<route errorHandlerRef="retryHandler">
+		<route errorHandlerRef="valintatietoRetryHandler">
 			<from uri="direct:valintatietoReitti"/>
 			<setProperty propertyName="hakuOid"><simple>${body}</simple></setProperty>
 			<to uri="bean:valintatietokomponentti"/>
