@@ -48,8 +48,8 @@ public class TKUVAYHVAExportKomponentti {
     @Autowired
     private OrganisaatioProxy organisaatioProxy;
 
-    public InputStream luoTKUVAYHVA(@Property("hakuOid") String hakuOid, @Property("hakukohdeOid") String hakukohdeOid,
-            @Property("lukuvuosi") Date lukuvuosi, @Property("poimintapaivamaara") Date poimintapaivamaara) {
+    public InputStream luoTKUVAYHVA(@Property("hakuOid") String hakuOid, @Property("lukuvuosi") Date lukuvuosi,
+            @Property("poimintapaivamaara") Date poimintapaivamaara) {
         List<HakijaDTO> hakijat = sijoitteluResource.koulutuspaikalliset(hakuOid, SijoitteluResource.LATEST);
         if (hakijat == null || hakijat.isEmpty()) {
             throw new SijoittelupalveluException(
