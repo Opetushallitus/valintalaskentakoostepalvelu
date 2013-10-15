@@ -31,8 +31,8 @@ public class KelaAktivointiResource {
             @QueryParam("hakukohdeOid") String hakukohdeOid, @QueryParam("lukuvuosi") DateParam lukuvuosi,
             @QueryParam("poimintapaivamaara") DateParam poimintapaivamaara) {
         try {
-            InputStream input = kelaExportProxy.luoTKUVAYHVA(hakuOid, hakukohdeOid, lukuvuosi.getDate(),
-                    poimintapaivamaara.getDate());
+            InputStream input = kelaExportProxy
+                    .luoTKUVAYHVA(hakuOid, lukuvuosi.getDate(), poimintapaivamaara.getDate());
             return Response.ok(input, APPLICATION_TKUVAYHVA)
                     .header("content-disposition", "inline; filename=" + KelaUtil.createTiedostoNimiYhva14(new Date()))
                     .build();
