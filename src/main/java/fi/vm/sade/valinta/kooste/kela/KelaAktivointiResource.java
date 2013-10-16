@@ -1,70 +1,100 @@
 package fi.vm.sade.valinta.kooste.kela;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.SequenceInputStream;
-import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Deque;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
-import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAALKU;
-import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVALOPPU;
-import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
-import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
 import fi.vm.sade.valinta.kooste.dto.DateParam;
-import fi.vm.sade.valinta.kooste.kela.proxy.TKUVAYHVAExportProxy;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaCacheDocument;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaHeader;
+import fi.vm.sade.valinta.kooste.kela.proxy.KelaExportProxy;
+import fi.vm.sade.valinta.kooste.kela.proxy.KelaFtpProxy;
 
 @Path("kela")
 @Controller
 public class KelaAktivointiResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(KelaAktivointiResource.class);
-    public final static MediaType APPLICATION_TKUVAYHVA = new MediaType("application", "TKUVA.YHVA14");
 
     @Autowired
-    private TKUVAYHVAExportProxy kelaExportProxy;
+    private KelaExportProxy kelaExportProxy;
+
+    @Autowired
+    private KelaCache kelaCache;
+    @Autowired
+    private KelaFtpProxy kelaFtpProxy;
 
     @GET
-    @Path("TKUVAYHVA/aktivoi")
+    @Path("aktivoi")
     public Response aktivoiKelaTiedostonluonti(@QueryParam("hakuOid") String hakuOid,
             @QueryParam("hakukohdeOid") String hakukohdeOid, @QueryParam("lukuvuosi") DateParam lukuvuosi,
             @QueryParam("poimintapaivamaara") DateParam poimintapaivamaara) {
         try {
+            kelaCache.addDocument(KelaCacheDocument.createInfoMessage("Dokumentin luonti aloitettu"));
+            kelaExportProxy.luoTKUVAYHVA(hakuOid, lukuvuosi.getDate(), poimintapaivamaara.getDate(),
+                    SecurityContextHolder.getContext().getAuthentication());
 
-            Collection<TKUVAYHVA> input = kelaExportProxy.luoTKUVAYHVA(hakuOid, lukuvuosi.getDate(),
-                    poimintapaivamaara.getDate());
-            Integer count = input.size();
-            Deque<InputStream> streams = new ArrayDeque<InputStream>();
-            for (TKUVAYHVA t : input) {
-                streams.add(new ByteArrayInputStream(t.toByteArray()));
-            }
-            streams.addFirst(new ByteArrayInputStream(new TKUVAALKU.Builder().setAjopaivamaara(new Date())
-                    .setAineistonnimi(StringUtils.EMPTY).setOrganisaationimi(StringUtils.EMPTY).build().toByteArray()));
-            streams.addLast(new ByteArrayInputStream(new TKUVALOPPU.Builder().setAjopaivamaara(new Date())
-                    .setTietuelukumaara(count).build().toByteArray()));
-            LOG.info("Palautetaan onnistuneesti luotu KELA-tiedosto");
-            return Response.ok(new SequenceInputStream(Collections.enumeration(streams)), APPLICATION_TKUVAYHVA)
-                    .header("content-disposition", "inline; filename=" + KelaUtil.createTiedostoNimiYhva14(new Date()))
-                    .build();
+            return Response.ok().build();
         } catch (Exception e) {
             LOG.error("Kelatiedoston luonti epäonnistui {}", e.getMessage());
-            return Response.noContent().build();
-            // ok(input, APPLICATION_TKUVAYHVA).header("content-disposition",
-            // "inline; filename=").build();
+            kelaCache.addDocument(KelaCacheDocument.createErrorMessage("Dokumentin luonti epäonnistui!"));
+            return Response.serverError().build();
         }
+    }
+
+    @GET
+    @Path("lataa/{documentId}")
+    public Response lataa(@PathParam("documentId") String input, @Context HttpServletResponse response) {
+        KelaCacheDocument document = kelaCache.getDocument(input);
+        if (document == null) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+        response.setHeader("Content-Type", "application/TKUVA.YHVA14");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + document.getHeader() + "\"");
+        response.setHeader("Content-Length", String.valueOf(document.getData().length));
+        return Response.ok(document.getData()).type("application/TKUVA.YHVA14").build();
+    }
+
+    @PUT
+    @Path("laheta/{documentId}")
+    public Response laheta(@PathParam("documentId") String input) {
+        KelaCacheDocument document = kelaCache.getDocument(input);
+        if (document == null) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+        try {
+            kelaFtpProxy.lahetaTiedosto(document.getHeader(), new ByteArrayInputStream(document.getData()));
+        } catch (Exception e) {
+            kelaCache.addDocument(KelaCacheDocument.createErrorMessage("FTP-lähetys epäonnistui!"));
+            return Response.serverError().build();
+        }
+        kelaCache.addDocument(KelaCacheDocument.createInfoMessage("Dokumentti " + document.getHeader()
+                + " lähetetty Kelan FTP-palvelimelle"));
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("listaus")
+    @Produces(APPLICATION_JSON)
+    public Collection<KelaHeader> listaus() {
+        return kelaCache.getHeaders();
     }
 }
