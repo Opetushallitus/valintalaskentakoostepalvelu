@@ -1,8 +1,7 @@
 package fi.vm.sade.valinta.kooste.kela.proxy;
 
-import java.io.InputStream;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 
@@ -12,5 +11,5 @@ import java.util.List;
  */
 public interface TKUVAYHVAExportProxy {
 
-    List<InputStream> luoTKUVAYHVA(String hakuOid, Date lukuvuosi, Date poimintapaivamaara);
+    Collection luoTKUVAYHVA(String hakuOid, Date lukuvuosi, Date poimintapaivamaara);
 }

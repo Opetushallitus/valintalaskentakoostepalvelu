@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.komponentti;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.camel.Property;
@@ -20,7 +21,8 @@ public class SijoitteluKaikkiKoulutuspaikkallisetKomponentti {
     private String sijoitteluResourceUrl;
 
     public Collection<HakijaDTO> ilmankoulutuspaikkaa(@Property("hakuOid") String hakuOid) {
-        return sijoitteluResource.koulutuspaikalliset(hakuOid, SijoitteluResource.LATEST);
+        System.err.println("DEBUG DEBUG DEBUG");
+        return Arrays.asList(sijoitteluResource.koulutuspaikalliset(hakuOid, SijoitteluResource.LATEST).get(0));
     }
 
 }

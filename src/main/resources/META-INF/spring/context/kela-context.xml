@@ -25,16 +25,18 @@
 			<setProperty propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
 			<setProperty propertyName="lukuvuosi"><simple>${body.args[1]}</simple></setProperty>
 			<setProperty propertyName="poimintapaivamaara"><simple>${body.args[2]}</simple></setProperty>
-			
             <policy ref="admin">
             	<process ref="securityPreprocessor"/>
             	<to uri="bean:sijoitteluKaikkiKoulutuspaikkallisetKomponentti"/>
             	<split strategyRef="aggregatorStrategy" parallelProcessing="true" stopOnException="true">
-	                <simple>${body}</simple>
+                	<simple>${body}</simple>
+	                <process ref="securityPreprocessor"/>
 	                <to uri="bean:TKUVAYHVAKomponentti" />
+	                <convertBodyTo type="fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA"/>
 	            </split>
-			    <process ref="aggregateInBody"/>
             </policy>
+            <process ref="aggregateInBody"/>
+            <convertBodyTo type="java.util.Collection"/>
 		</route>
 	</camelContext>
 
