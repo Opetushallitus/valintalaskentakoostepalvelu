@@ -29,7 +29,11 @@
     
     <s:authentication-manager alias="authenticationManager">
     </s:authentication-manager>
-    
+    <bean id="redeliveryPolicy" class="org.apache.camel.processor.RedeliveryPolicy">
+		<property name="maximumRedeliveries" value="5" />
+		<property name="redeliveryDelay" value="25" />
+		<property name="retryAttemptedLogLevel" value="ERROR" />
+	</bean>
     <bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
         <property name="allowIfAllAbstainDecisions" value="true"/>
         <property name="decisionVoters">
