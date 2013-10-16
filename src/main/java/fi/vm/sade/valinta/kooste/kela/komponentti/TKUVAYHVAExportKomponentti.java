@@ -3,8 +3,6 @@ package fi.vm.sade.valinta.kooste.kela.komponentti;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
 import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.HENKILOTUNNUS;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Date;
 
 import org.apache.camel.Body;
@@ -37,8 +35,8 @@ public class TKUVAYHVAExportKomponentti {
     @Autowired
     private OrganisaatioProxy organisaatioProxy;
 
-    public InputStream luoTKUVAYHVA(@Body HakijaDTO hakija, // @Property("hakuOid")
-                                                            // String hakuOid,
+    public TKUVAYHVA luoTKUVAYHVA(@Body HakijaDTO hakija, // @Property("hakuOid")
+                                                          // String hakuOid,
             @Property("lukuvuosi") Date lukuvuosi, @Property("poimintapaivamaara") Date poimintapaivamaara) {
         String linjakoodi = "000";
         for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
@@ -108,7 +106,8 @@ public class TKUVAYHVAExportKomponentti {
                     } else {
                         builder.setKevaallaAlkavaKoulutus();
                     }
-                    return new ByteArrayInputStream(builder.build().toByteArray());
+                    LOG.info("Tietue KELA-tiedostoon luotu onnistuneesti henkilölle {}", hakija.getHakemusOid());
+                    return builder.build();
                 }
             }
         }

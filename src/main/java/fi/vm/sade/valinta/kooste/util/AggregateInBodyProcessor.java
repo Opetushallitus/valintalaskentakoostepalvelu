@@ -1,9 +1,13 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.impl.DefaultExchange;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,10 +22,32 @@ import org.springframework.stereotype.Component;
 @Component("aggregateInBody")
 public class AggregateInBodyProcessor implements Processor {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AggregateInBodyProcessor.class);
+
     public void process(Exchange exchange) throws Exception {
         List<?> list = (List<?>) exchange.removeProperty(Exchange.GROUPED_EXCHANGE);
         if (list != null) {
-            exchange.getIn().setBody(list);
+            if (!list.isEmpty() && list.get(0) != null) {
+                if (list.get(0) instanceof DefaultExchange) {
+                    List<Object> bodies = new ArrayList<Object>();
+                    for (DefaultExchange e : (List<DefaultExchange>) list) {
+                        bodies.add(e.getIn().getBody());
+                    }
+                    exchange.getOut().setBody(bodies);
+                } else {
+                    exchange.getOut().setBody(list); // not
+                                                     // List<DefaultExchange>
+                }
+                LOG.info("Setting collection with size {} as grouped exchange body. Collection type List<{}>.",
+                        new Object[] { list.size(), list.get(0).getClass() });
+
+            } else {
+                LOG.info("Setting empty collection as grouped exchange body!");
+                exchange.getOut().setBody(list);
+            }
+
+        } else {
+            LOG.error("No grouped exchange found!");
         }
     }
 }
