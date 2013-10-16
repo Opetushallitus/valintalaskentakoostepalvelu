@@ -11,5 +11,5 @@ import org.springframework.security.core.Authentication;
  */
 public interface JalkiohjauskirjeBatchAktivointiProxy {
 
-    Future<Void> jalkiohjauskirjeetAktivoi(String hakuOid, Authentication auth);
+    Future<Object> jalkiohjauskirjeetAktivoi(String hakuOid, Authentication auth);
 }
