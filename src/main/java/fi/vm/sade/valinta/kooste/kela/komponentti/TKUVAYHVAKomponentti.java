@@ -24,9 +24,9 @@ import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioProxy;
 
 @Component("TKUVAYHVAKomponentti")
-public class TKUVAYHVAExportKomponentti {
+public class TKUVAYHVAKomponentti {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TKUVAYHVAExportKomponentti.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TKUVAYHVAKomponentti.class);
     private static final Integer KESAKUU = 6;
 
     @Autowired
