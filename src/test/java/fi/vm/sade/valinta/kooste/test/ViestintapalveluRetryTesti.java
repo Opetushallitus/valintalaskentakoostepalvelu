@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.test;
 
 import javax.ws.rs.core.Response;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -38,6 +39,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluOsoiteta
 @ImportResource({ "classpath:test-auth-context.xml", "classpath:META-INF/spring/context/valintatieto-context.xml",
         "classpath:META-INF/spring/context/viestintapalvelu-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
+@Ignore
 public class ViestintapalveluRetryTesti {
 
     @Bean(name = "viestintapalveluClient")
