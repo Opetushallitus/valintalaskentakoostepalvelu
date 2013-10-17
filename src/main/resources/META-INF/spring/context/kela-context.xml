@@ -42,7 +42,7 @@
 		<proxy id="kelaFtpProxy"
 			serviceInterface="fi.vm.sade.valinta.kooste.kela.proxy.KelaFtpProxy"
 			serviceUrl="direct:kelaTiedostopalvelin" />
-		<route>
+		<route errorHandlerRef="kelaDeadLetterHandler">
 			<from uri="direct:kaynnistaKelaReitti" />
 			<setProperty propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
 			<setProperty propertyName="lukuvuosi"><simple>${body.args[1]}</simple></setProperty>
