@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -10,8 +12,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-
-import com.sun.xml.messaging.saaj.util.ByteOutputStream;
 
 /**
  * 
@@ -59,14 +59,15 @@ public class ExcelExportUtil {
             sheet.autoSizeColumn(column);
         }
 
-        ByteOutputStream bytesOut = new ByteOutputStream();
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         try {
             wb.write(bytesOut);
         } catch (IOException e) {
             e.printStackTrace(); // <- not going to happen since not using real
                                  // I/O
         }
-        return bytesOut.newInputStream();
+
+        return new ByteArrayInputStream(bytesOut.toByteArray());// bytesOut.newInputStream();
     }
 
     private static boolean isInteger(String str) {
