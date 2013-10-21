@@ -50,17 +50,17 @@ public class TKUVAYHVAKomponentti {
                     TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
                     // LINJAKOODI
                     try {
-                        String linjakoodi = tarjontaProxy.haeHakukohdeNimi(hakutoive.getTarjoajaOid())
+                        String linjakoodi = tarjontaProxy.haeHakukohdeNimi(hakutoive.getHakukohdeOid())
                                 .getHakukohdeNameUri().split("_")[1];
                         if (linjakoodi != null && linjakoodi.length() == 3) {
                             builder.setLinjakoodi(linjakoodi);
                         } else {
                             LOG.error("Linjakoodia ei saatu tarjonnan kohteelle {}: linjakoodi={}", new Object[] {
-                                    hakutoive.getTarjoajaOid(), linjakoodi });
+                                    hakutoive.getHakukohdeOid(), linjakoodi });
                             builder.setLinjakoodi("000");
                         }
                     } catch (Exception e) {
-                        LOG.error("Linjakoodia ei saatu tarjonnan kohteelle {}", hakutoive.getTarjoajaOid());
+                        LOG.error("Linjakoodia ei saatu tarjonnan kohteelle {}", hakutoive.getHakukohdeOid());
                         builder.setLinjakoodi("000");
                     }
                     // YHTEISHAUNKOULUKOODI
@@ -69,7 +69,7 @@ public class TKUVAYHVAKomponentti {
                         if (organisaatio == null) {
                             // new
                             // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
-                            LOG.error("Yhteishaun koulukoodia ei voitu hakea organisaatiolle {}",
+                            LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}",
                                     hakutoive.getTarjoajaOid());
                             builder.setOppilaitos("0000");
                         } else {
