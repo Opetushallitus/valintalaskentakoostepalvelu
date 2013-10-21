@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.organisaatio.api.model.types.OrganisaatioDTO;
+import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
@@ -45,7 +45,7 @@ public class TKUVAYHVAKomponentti {
                     TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
                     // organisaatioService.findByOid(arg0)
                     try {
-                        OrganisaatioDTO organisaatio = organisaatioProxy.haeOrganisaatio(hakutoive.getTarjoajaOid());
+                        OrganisaatioRDTO organisaatio = organisaatioProxy.haeOrganisaatio(hakutoive.getTarjoajaOid());
                         if (organisaatio == null) {
                             // new
                             // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");

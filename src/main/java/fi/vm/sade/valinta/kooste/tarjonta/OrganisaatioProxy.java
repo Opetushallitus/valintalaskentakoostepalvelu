@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.tarjonta;
 
-import fi.vm.sade.organisaatio.api.model.types.OrganisaatioDTO;
+import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 
 /**
  * 
@@ -10,5 +10,5 @@ import fi.vm.sade.organisaatio.api.model.types.OrganisaatioDTO;
  */
 public interface OrganisaatioProxy {
 
-    OrganisaatioDTO haeOrganisaatio(String tarjoajaOid);
+    OrganisaatioRDTO haeOrganisaatio(String tarjoajaOid);
 }
