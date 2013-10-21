@@ -22,6 +22,7 @@ import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioProxy;
+import fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy;
 
 @Component("TKUVAYHVAKomponentti")
 public class TKUVAYHVAKomponentti {
@@ -33,17 +34,36 @@ public class TKUVAYHVAKomponentti {
     private HakemusProxy hakemusProxy;
 
     @Autowired
+    private TarjontaProxy tarjontaProxy;
+
+    @Autowired
     private OrganisaatioProxy organisaatioProxy;
 
     public TKUVAYHVA luoTKUVAYHVA(@Body HakijaDTO hakija, // @Property("hakuOid")
                                                           // String hakuOid,
             @Property("lukuvuosi") Date lukuvuosi, @Property("poimintapaivamaara") Date poimintapaivamaara) {
-        String linjakoodi = "000";
+        // String linjakoodi = "000";
+
         for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
             for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
                 if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
                     TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
-                    // organisaatioService.findByOid(arg0)
+                    // LINJAKOODI
+                    try {
+                        String linjakoodi = tarjontaProxy.haeHakukohdeNimi(hakutoive.getTarjoajaOid())
+                                .getHakukohdeNameUri().split("_")[1];
+                        if (linjakoodi != null && linjakoodi.length() == 3) {
+                            builder.setLinjakoodi(linjakoodi);
+                        } else {
+                            LOG.error("Linjakoodia ei saatu tarjonnan kohteelle {}: linjakoodi={}", new Object[] {
+                                    hakutoive.getTarjoajaOid(), linjakoodi });
+                            builder.setLinjakoodi("000");
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Linjakoodia ei saatu tarjonnan kohteelle {}", hakutoive.getTarjoajaOid());
+                        builder.setLinjakoodi("000");
+                    }
+                    // YHTEISHAUNKOULUKOODI
                     try {
                         OrganisaatioRDTO organisaatio = organisaatioProxy.haeOrganisaatio(hakutoive.getTarjoajaOid());
                         if (organisaatio == null) {
@@ -70,7 +90,6 @@ public class TKUVAYHVAKomponentti {
                         builder.setOppilaitos("0000");
                     }
 
-                    builder.setLinjakoodi(linjakoodi);
                     builder.setValintapaivamaara(new Date()); // TODO:
                                                               // Sijoittelun
                                                               // täytyy
