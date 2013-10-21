@@ -4,8 +4,8 @@ import org.apache.camel.Property;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.organisaatio.api.model.OrganisaatioService;
-import fi.vm.sade.organisaatio.api.model.types.OrganisaatioDTO;
+import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioResource;
 
 /**
  * 
@@ -17,9 +17,12 @@ import fi.vm.sade.organisaatio.api.model.types.OrganisaatioDTO;
 public class OrganisaatioKomponentti {
 
     @Autowired
-    private OrganisaatioService organisaatioService;
+    // fi.vm.sade.valinta.kooste.tarjonta.
+    private OrganisaatioResource organisaatioResource;
 
-    public OrganisaatioDTO haeOrganisaatio(@Property("tarjoajaOid") String tarjoajaOid) {
-        return organisaatioService.findByOid(tarjoajaOid);
+    public OrganisaatioRDTO haeOrganisaatio(@Property("tarjoajaOid") String tarjoajaOid) {
+        // OrganisaatioResourceClient
+        OrganisaatioRDTO o = organisaatioResource.getOrganisaatioByOID(tarjoajaOid);
+        return o; // organisaatioService.findByOid(tarjoajaOid);
     }
 }

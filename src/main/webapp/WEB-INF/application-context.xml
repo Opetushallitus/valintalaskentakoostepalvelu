@@ -155,6 +155,20 @@
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
         </jaxrs:providers>
     </jaxrs:client>
+    <!-- fi.vm.sade.organisaatio.resource.OrganisaatioResource vai fi.vm.sade.valinta.kooste.tarjonta-->
+    <jaxrs:client id="OrganisaatioResourceClient"
+                  address="${valintalaskentakoostepalvelu.organisaatioService.rest.url}"
+                  serviceClass="fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioResource"
+                  inheritHeaders="true">
+        <jaxrs:outInterceptors>
+            <ref bean="ticketInterceptorRest"/>
+        </jaxrs:outInterceptors>
+        <jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+        </jaxrs:providers>
+    </jaxrs:client>
+
 
     <jaxws:client id="ValintalaskentaServiceClient"
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
@@ -177,7 +191,9 @@
             </bean>
         </jaxws:outInterceptors>
     </jaxws:client>
-
+<!--
+ 	Kaytetaan REST rajapintaa koska se on tuetumpi!
+  
     <jaxws:client id="organisaatioServiceClient"
                   serviceClass="fi.vm.sade.organisaatio.api.model.OrganisaatioService"
                   address="${valintalaskentakoostepalvelu.organisaatioService.url}">
@@ -193,7 +209,7 @@
             </bean>
         </jaxws:outInterceptors>
     </jaxws:client>
-
+ -->
     <jaxws:client id="valintatietoService"
                   serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
                   address="${valintalaskentakoostepalvelu.valintaTulosService.url}">
