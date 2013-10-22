@@ -4,6 +4,10 @@ import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
 import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.HENKILOTUNNUS;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.camel.Body;
 import org.apache.camel.Property;
@@ -39,50 +43,85 @@ public class TKUVAYHVAKomponentti {
     @Autowired
     private OrganisaatioProxy organisaatioProxy;
 
+    private String haeLinjakoodi(String hakukohdeOid, Map<String, String> linjakoodiCache,
+            Set<String> linjakoodiErrorSet) {
+        if (linjakoodiCache.containsKey(hakukohdeOid)) {
+            return linjakoodiCache.get(hakukohdeOid);
+        } else {
+            if (linjakoodiErrorSet.contains(hakukohdeOid)) {
+                LOG.error("Linjakoodia ei saada tarjonnan kohteelle {}", hakukohdeOid);
+            } else {
+                try {
+                    String linjakoodi = linjakoodiProxy.haeLinjakoodi(hakukohdeOid);
+                    linjakoodiCache.put(hakukohdeOid, linjakoodi);
+                    return linjakoodi;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LOG.error("Linjakoodia ei saatu tarjonnan kohteelle {}: Syystä {}",
+                            new Object[] { hakukohdeOid, e.getMessage() });
+                    linjakoodiErrorSet.add(hakukohdeOid);
+                }
+            }
+        }
+        return "000";
+    }
+
+    private String haeOppilaitos(String tarjoajaOid, Map<String, String> oppilaitosCache, Set<String> oppilaitosErrorSet) {
+        if (oppilaitosCache.containsKey(tarjoajaOid)) {
+            return oppilaitosCache.get(tarjoajaOid);
+        } else {
+            if (oppilaitosErrorSet.contains(tarjoajaOid)) {
+                LOG.error("Yhteishaun koulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
+            } else {
+                try {
+                    OrganisaatioRDTO organisaatio = organisaatioProxy.haeOrganisaatio(tarjoajaOid);
+                    if (organisaatio == null) {
+                        // new
+                        // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
+                        LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
+                        oppilaitosErrorSet.add(tarjoajaOid);
+                    } else {
+                        if (organisaatio.getYhteishaunKoulukoodi() == null) {
+                            // new
+                            // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
+                            LOG.error("Yhteishaun koulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
+                            oppilaitosErrorSet.add(tarjoajaOid);
+                        } else {
+                            oppilaitosCache.put(tarjoajaOid, organisaatio.getYhteishaunKoulukoodi());
+                            return organisaatio.getYhteishaunKoulukoodi();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LOG.error("Yhteishaun koulukoodia ei voitu hakea organisaatiolle {}: Virhe {}", new Object[] {
+                            tarjoajaOid, e.getMessage() });
+                    // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
+                    oppilaitosErrorSet.add(tarjoajaOid);
+                }
+            }
+            return "0000";
+        }
+    }
+
     public TKUVAYHVA luoTKUVAYHVA(@Body HakijaDTO hakija, // @Property("hakuOid")
                                                           // String hakuOid,
             @Property("lukuvuosi") Date lukuvuosi, @Property("poimintapaivamaara") Date poimintapaivamaara) {
         // String linjakoodi = "000";
-
+        Set<String> linjakoodiErrorSet = new HashSet<String>();
+        Map<String, String> linjakoodiCache = new HashMap<String, String>();
+        Set<String> oppilaitosErrorSet = new HashSet<String>();
+        Map<String, String> oppilaitosCache = new HashMap<String, String>();
         for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
             for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
                 if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
                     TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
+                    String hakukohdeOid = hakutoive.getHakukohdeOid();
+                    String tarjoajaOid = hakutoive.getTarjoajaOid();
                     // LINJAKOODI
-                    try {
-                        builder.setLinjakoodi(linjakoodiProxy.haeLinjakoodi(hakutoive.getHakukohdeOid()));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        LOG.error("Linjakoodia ei saatu tarjonnan kohteelle {}: Syystä {}",
-                                new Object[] { hakutoive.getHakukohdeOid(), e.getMessage() });
-                        builder.setLinjakoodi("000");
-                    }
+                    builder.setLinjakoodi(haeLinjakoodi(hakukohdeOid, linjakoodiCache, linjakoodiErrorSet));
+
                     // YHTEISHAUNKOULUKOODI
-                    try {
-                        OrganisaatioRDTO organisaatio = organisaatioProxy.haeOrganisaatio(hakutoive.getTarjoajaOid());
-                        if (organisaatio == null) {
-                            // new
-                            // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
-                            LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}",
-                                    hakutoive.getTarjoajaOid());
-                            builder.setOppilaitos("0000");
-                        } else {
-                            if (organisaatio.getYhteishaunKoulukoodi() == null) {
-                                // new
-                                // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
-                                LOG.error("Yhteishaun koulukoodia ei voitu hakea organisaatiolle {}",
-                                        hakutoive.getTarjoajaOid());
-                                builder.setOppilaitos("0000");
-                            } else {
-                                builder.setOppilaitos(organisaatio.getYhteishaunKoulukoodi());
-                            }
-                        }
-                    } catch (Exception e) {
-                        LOG.error("Yhteishaun koulukoodia ei voitu hakea organisaatiolle {}",
-                                hakutoive.getTarjoajaOid());
-                        // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
-                        builder.setOppilaitos("0000");
-                    }
+                    builder.setOppilaitos(haeOppilaitos(tarjoajaOid, oppilaitosCache, oppilaitosErrorSet));
 
                     builder.setValintapaivamaara(new Date()); // TODO:
                                                               // Sijoittelun
@@ -124,14 +163,6 @@ public class TKUVAYHVAKomponentti {
                 }
             }
         }
-        // Integer count = streams.size();
-        // streams.addFirst(new ByteArrayInputStream(new
-        // TKUVAALKU.Builder().setAjopaivamaara(new Date())
-        // .setAineistonnimi(StringUtils.EMPTY).setOrganisaationimi(StringUtils.EMPTY).build().toByteArray()));
-        // streams.addLast(new ByteArrayInputStream(new
-        // TKUVALOPPU.Builder().setAjopaivamaara(new Date())
-        // .setTietuelukumaara(count).build().toByteArray()));
-        // return new SequenceInputStream(Collections.enumeration(streams));
         throw new SijoittelupalveluException("Sijoittelulta palautui hakija (hakemusoid: " + hakija.getHakemusOid()
                 + ") joka ei oikeasti ollut hyväksyttynä koulutukseen!");
     }
