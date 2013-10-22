@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,16 +103,24 @@ public class JalkiohjauskirjeetKomponentti {
                     tulokset.put("kaikkiHakeneet", Formatter.suomennaNumero(valintatapajono.getHakeneet()));
                     StringBuilder pisteet = new StringBuilder();
                     for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
-                        pisteet.append(pistetieto.getArvo()).append(" ");
+                        if (pistetieto.getArvo() != null) {
+                            pisteet.append(pistetieto.getArvo()).append(" ");
+                        }
                     }
                     tulokset.put("omatPisteet", pisteet.toString().trim());
 
                     tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
                     tulokset.put("paasyJaSoveltuvuuskoe",
                             Formatter.suomennaNumero(valintatapajono.getPaasyJaSoveltuvuusKokeenTulos()));
-                    tulokset.put("selite", StringUtils.EMPTY);
-                    tulokset.put("valinnanTulos",
-                            HakemuksenTilaUtil.tilaConverter(valintatapajono.getTila().toString()));
+                    if (VARALLA.equals(valintatapajono.getTila())) {
+                        tulokset.put("selite", "Varasijan numero on " + valintatapajono.getVarasijanNumero());
+                    } else {
+                        tulokset.put("selite", StringUtils.EMPTY);
+                    }
+                    tulokset.put(
+                            "valinnanTulos",
+                            HakemuksenTilaUtil.tilaConverter(valintatapajono.getTila(),
+                                    valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
                     tulosList.add(tulokset);
                 }
             }

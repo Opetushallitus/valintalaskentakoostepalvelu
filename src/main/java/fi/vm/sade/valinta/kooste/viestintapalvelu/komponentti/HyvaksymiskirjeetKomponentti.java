@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -131,9 +133,15 @@ public class HyvaksymiskirjeetKomponentti {
                     tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
                     tulokset.put("paasyJaSoveltuvuuskoe",
                             Formatter.suomennaNumero(valintatapajono.getPaasyJaSoveltuvuusKokeenTulos()));
-                    tulokset.put("selite", StringUtils.EMPTY);
-                    tulokset.put("valinnanTulos",
-                            HakemuksenTilaUtil.tilaConverter(valintatapajono.getTila().toString()));
+                    if (VARALLA.equals(valintatapajono.getTila())) {
+                        tulokset.put("selite", "Varasijan numero on " + valintatapajono.getVarasijanNumero());
+                    } else {
+                        tulokset.put("selite", StringUtils.EMPTY);
+                    }
+                    tulokset.put(
+                            "valinnanTulos",
+                            HakemuksenTilaUtil.tilaConverter(valintatapajono.getTila(),
+                                    valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
                     tulosList.add(tulokset);
                 }
             }
