@@ -19,7 +19,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluIlmankoulutuspaikkaaProxy;
 import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluKoulutuspaikallisetProxy;
-import fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy;
+import fi.vm.sade.valinta.kooste.tarjonta.TarjontaNimiProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
@@ -87,8 +87,8 @@ public class ViestintapalveluRetryTesti {
     }
 
     @Bean
-    public TarjontaProxy getTarjontaProxy() {
-        return Mockito.mock(TarjontaProxy.class);
+    public TarjontaNimiProxy getTarjontaProxy() {
+        return Mockito.mock(TarjontaNimiProxy.class);
     }
 
     @Bean

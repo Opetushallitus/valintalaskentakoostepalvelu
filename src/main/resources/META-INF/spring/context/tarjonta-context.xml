@@ -26,14 +26,22 @@
 	
 	
 	<camelContext depends-on="tarjontaRetryHandler" id="tarjontaProxyCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
-		
 		<proxy id="tarjontaProxy" 
 			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy"
-			serviceUrl="direct:tarjontaReitti" />
+			serviceUrl="direct:tarjontaNimiReitti" />
+		<proxy id="tarjontaNimiProxy" 
+			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.TarjontaNimiProxy"
+			serviceUrl="direct:tarjontaNimiReitti" />
 		<proxy id="organisaatioProxy" 
 			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioProxy"
 			serviceUrl="direct:organisaatioReitti" />
-						
+			
+		<route errorHandlerRef="tarjontaRetryHandler">
+			<from uri="direct:tarjontaNimiReitti"/>
+			<setProperty propertyName="hakukohdeOid"><simple>${body}</simple></setProperty>
+			<setBody><constant></constant></setBody>
+			<to uri="bean:hakukohdeNimiTarjonnaltaKomponentti"/>
+		</route>			
 		<route errorHandlerRef="tarjontaRetryHandler">
 			<from uri="direct:tarjontaReitti"/>
 			<setProperty propertyName="hakukohdeOid"><simple>${body}</simple></setProperty>
