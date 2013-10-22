@@ -50,15 +50,12 @@ public class TKUVAYHVAKomponentti {
                     TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
                     // LINJAKOODI
                     try {
-                        String linjakoodi = tarjontaProxy.haeHakukohdeNimi(hakutoive.getHakukohdeOid())
-                                .getHakukohdeNameUri().split("_")[1];
-                        if (linjakoodi != null && linjakoodi.length() == 3) {
-                            builder.setLinjakoodi(linjakoodi);
-                        } else {
-                            LOG.error("Linjakoodia ei saatu tarjonnan kohteelle {}: linjakoodi={}", new Object[] {
-                                    hakutoive.getHakukohdeOid(), linjakoodi });
-                            builder.setLinjakoodi("000");
-                        }
+                        String uri = tarjontaProxy.haeHakukohdeNimi(hakutoive.getHakukohdeOid()).getHakukohdeNameUri();
+                        LOG.debug("Hakukohde URI {}", uri);
+                        String h0 = "hakukohteet_583#1"; // "hakukohteet_583#1"
+                        String h1 = h0.split("_")[1]; // {"hakukohteet","583#1"}
+                        String linjakoodi = h1.substring(0, 3); // "583"
+                        builder.setLinjakoodi(linjakoodi);
                     } catch (Exception e) {
                         LOG.error("Linjakoodia ei saatu tarjonnan kohteelle {}", hakutoive.getHakukohdeOid());
                         builder.setLinjakoodi("000");
