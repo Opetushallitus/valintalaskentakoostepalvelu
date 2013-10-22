@@ -30,6 +30,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.gson.Gson;
 
+import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
@@ -428,6 +429,11 @@ public class HaunValintakoelaskentaKoosteReititysTest {
     @Bean
     public ValintaperusteProxy getValintaperusteProxyMock() {
         return mock(ValintaperusteProxy.class);
+    }
+
+    @Bean
+    public KoodiService getKoodiService() {
+        return mock(KoodiService.class);
     }
 
     @Test

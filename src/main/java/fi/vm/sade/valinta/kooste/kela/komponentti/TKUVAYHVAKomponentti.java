@@ -21,8 +21,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
+import fi.vm.sade.valinta.kooste.tarjonta.LinjakoodiProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioProxy;
-import fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy;
 
 @Component("TKUVAYHVAKomponentti")
 public class TKUVAYHVAKomponentti {
@@ -34,7 +34,7 @@ public class TKUVAYHVAKomponentti {
     private HakemusProxy hakemusProxy;
 
     @Autowired
-    private TarjontaProxy tarjontaProxy;
+    private LinjakoodiProxy linjakoodiProxy;
 
     @Autowired
     private OrganisaatioProxy organisaatioProxy;
@@ -50,14 +50,11 @@ public class TKUVAYHVAKomponentti {
                     TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
                     // LINJAKOODI
                     try {
-                        String uri = tarjontaProxy.getByOID(hakutoive.getHakukohdeOid()).getHakukohdeNimiUri();
-                        LOG.debug("Hakukohde URI {}", uri);
-                        String h0 = "hakukohteet_583#1"; // "hakukohteet_583#1"
-                        String h1 = h0.split("_")[1]; // {"hakukohteet","583#1"}
-                        String linjakoodi = h1.substring(0, 3); // "583"
-                        builder.setLinjakoodi(linjakoodi);
+                        builder.setLinjakoodi(linjakoodiProxy.haeLinjakoodi(hakutoive.getHakukohdeOid()));
                     } catch (Exception e) {
-                        LOG.error("Linjakoodia ei saatu tarjonnan kohteelle {}", hakutoive.getHakukohdeOid());
+                        e.printStackTrace();
+                        LOG.error("Linjakoodia ei saatu tarjonnan kohteelle {}: Syystä {}",
+                                new Object[] { hakutoive.getHakukohdeOid(), e.getMessage() });
                         builder.setLinjakoodi("000");
                     }
                     // YHTEISHAUNKOULUKOODI
