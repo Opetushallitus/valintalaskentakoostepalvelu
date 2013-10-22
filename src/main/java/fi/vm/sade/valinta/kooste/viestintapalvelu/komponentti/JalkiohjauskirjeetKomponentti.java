@@ -23,7 +23,7 @@ import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluIlmankoulutuspaikkaaProxy;
-import fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy;
+import fi.vm.sade.valinta.kooste.tarjonta.TarjontaNimiProxy;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
@@ -50,7 +50,7 @@ public class JalkiohjauskirjeetKomponentti {
     private String sijoitteluResourceUrl;
 
     @Autowired
-    private TarjontaProxy tarjontaProxy;
+    private TarjontaNimiProxy tarjontaProxy;
 
     @Autowired
     private HaeOsoiteKomponentti osoiteKomponentti;

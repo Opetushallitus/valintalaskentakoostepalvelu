@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.tarjonta;
 
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 
 /**
  * 
@@ -10,5 +10,5 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
  */
 public interface TarjontaProxy {
 
-    HakukohdeNimiRDTO haeHakukohdeNimi(String hakukohdeOid);
+    HakukohdeDTO getByOID(String hakukohdeOid);
 }

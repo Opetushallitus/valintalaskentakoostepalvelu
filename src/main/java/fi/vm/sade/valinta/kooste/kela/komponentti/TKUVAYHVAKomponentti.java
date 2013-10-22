@@ -50,7 +50,7 @@ public class TKUVAYHVAKomponentti {
                     TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
                     // LINJAKOODI
                     try {
-                        String uri = tarjontaProxy.haeHakukohdeNimi(hakutoive.getHakukohdeOid()).getHakukohdeNameUri();
+                        String uri = tarjontaProxy.getByOID(hakutoive.getHakukohdeOid()).getHakukohdeNimiUri();
                         LOG.debug("Hakukohde URI {}", uri);
                         String h0 = "hakukohteet_583#1"; // "hakukohteet_583#1"
                         String h1 = h0.split("_")[1]; // {"hakukohteet","583#1"}
