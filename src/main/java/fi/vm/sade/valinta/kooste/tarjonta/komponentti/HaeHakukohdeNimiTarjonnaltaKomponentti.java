@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.exception.TarjontaException;
 
@@ -19,10 +19,10 @@ import fi.vm.sade.valinta.kooste.exception.TarjontaException;
  *         Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti!
  *         Proxy provides retries!
  */
-@Component("hakukohdeTarjonnaltaKomponentti")
-public class HaeHakukohdeTarjonnaltaKomponentti {
+@Component("hakukohdeNimiTarjonnaltaKomponentti")
+public class HaeHakukohdeNimiTarjonnaltaKomponentti {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HaeHakukohdeTarjonnaltaKomponentti.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HaeHakukohdeNimiTarjonnaltaKomponentti.class);
 
     @Autowired
     private HakukohdeResource tarjontaResource;
@@ -30,7 +30,7 @@ public class HaeHakukohdeTarjonnaltaKomponentti {
     @Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}")
     private String tarjontaResourceUrl;
 
-    public HakukohdeDTO haeHakukohdeNimi(@Property("hakukohdeOid") String hakukohdeOid) {
+    public HakukohdeNimiRDTO haeHakukohdeNimi(@Property("hakukohdeOid") String hakukohdeOid) {
         if (hakukohdeOid == null) {
             throw new SijoittelupalveluException(
                     "Sijoittelu palautti puutteellisesti luodun hakutoiveen! Hakukohteen tunniste puuttuu!");
@@ -38,8 +38,8 @@ public class HaeHakukohdeTarjonnaltaKomponentti {
             LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[] { tarjontaResourceUrl,
                     hakukohdeOid });
             try {
-                HakukohdeDTO dto = tarjontaResource.getByOID(hakukohdeOid);
-                return dto;
+                HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
+                return nimi;
             } catch (Exception e) {
                 throw new TarjontaException("Tarjonnasta ei löydy hakukohdetta " + hakukohdeOid);
             }
