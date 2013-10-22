@@ -29,6 +29,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
@@ -161,6 +162,11 @@ public class HaunValintalaskentaReititysTest {
     @Bean
     public OrganisaatioResource getOrganisaatioResourceMock() {
         return mock(OrganisaatioResource.class);
+    }
+
+    @Bean
+    public KoodiService getKoodiService() {
+        return mock(KoodiService.class);
     }
 
     @Autowired

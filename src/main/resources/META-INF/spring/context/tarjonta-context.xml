@@ -27,7 +27,7 @@
 	
 	<camelContext depends-on="tarjontaRetryHandler" id="tarjontaProxyCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
 		<proxy id="tarjontaProxy" 
-			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy"
+			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.LinjakoodiProxy"
 			serviceUrl="direct:tarjontaNimiReitti" />
 		<proxy id="tarjontaNimiProxy" 
 			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.TarjontaNimiProxy"
