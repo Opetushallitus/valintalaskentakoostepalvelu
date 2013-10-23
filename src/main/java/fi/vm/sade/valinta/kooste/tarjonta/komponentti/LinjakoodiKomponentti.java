@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
-import static fi.vm.sade.koodisto.service.types.SearchKoodisByKoodistoVersioSelectionType.LATEST;
-import static fi.vm.sade.koodisto.service.types.SearchKoodisByKoodistoVersioSelectionType.SPECIFIC;
+import static fi.vm.sade.koodisto.service.types.SearchKoodisVersioSelectionType.LATEST;
+import static fi.vm.sade.koodisto.service.types.SearchKoodisVersioSelectionType.SPECIFIC;
 
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.koodisto.service.KoodiService;
-import fi.vm.sade.koodisto.service.types.SearchKoodisByKoodistoCriteriaType;
+import fi.vm.sade.koodisto.service.types.SearchKoodisCriteriaType;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
@@ -61,26 +61,26 @@ public class LinjakoodiKomponentti {
                 throw new TarjontaException("Tarjonnalla ei ollut hakukohteelle " + hakukohdeOid
                         + " hakukohteenNimiUri:a!");
             }
-            SearchKoodisByKoodistoCriteriaType koodistoHaku = new SearchKoodisByKoodistoCriteriaType();
+            SearchKoodisCriteriaType koodistoHaku = new SearchKoodisCriteriaType();
             if (uri.contains("#")) {
                 String[] puolikkaat = uri.split("#");
                 try {
                     int versio = Integer.parseInt(puolikkaat[1]);
-                    koodistoHaku.setKoodistoVersio(versio);
+                    koodistoHaku.setKoodiVersio(versio);
+                    koodistoHaku.setKoodiVersioSelection(SPECIFIC);
                 } catch (Exception e) {
                     e.printStackTrace();
                     LOG.error("Versionumeroa ei voitu parsia uri:sta {}", uri);
-                    koodistoHaku.setKoodistoVersioSelection(LATEST);
+                    koodistoHaku.setKoodiVersioSelection(LATEST);
                 }
                 String todellinenUri = puolikkaat[0];
-                koodistoHaku.setKoodistoVersioSelection(SPECIFIC);
-                koodistoHaku.setKoodistoUri(todellinenUri); // hakukohteet_654#1
+                koodistoHaku.getKoodiUris().add(todellinenUri); // hakukohteet_654#1
             } else {
-                koodistoHaku.setKoodistoUri(uri);
-                koodistoHaku.setKoodistoVersioSelection(LATEST);
+                koodistoHaku.getKoodiUris().add(uri);
+                koodistoHaku.setKoodiVersioSelection(LATEST);
             }
             try {
-                for (KoodiType koodi : koodiService.searchKoodisByKoodisto(koodistoHaku)) {
+                for (KoodiType koodi : koodiService.searchKoodis(koodistoHaku)) {
                     String arvo = koodi.getKoodiArvo();
                     if (arvo != null) {
                         if (arvo.length() == 3) {
