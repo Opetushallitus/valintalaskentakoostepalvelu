@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
 import static fi.vm.sade.koodisto.service.types.SearchKoodisByKoodistoVersioSelectionType.LATEST;
+import static fi.vm.sade.koodisto.service.types.SearchKoodisByKoodistoVersioSelectionType.SPECIFIC;
 
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -61,8 +62,23 @@ public class LinjakoodiKomponentti {
                         + " hakukohteenNimiUri:a!");
             }
             SearchKoodisByKoodistoCriteriaType koodistoHaku = new SearchKoodisByKoodistoCriteriaType();
-            koodistoHaku.setKoodistoUri(uri);
-            koodistoHaku.setKoodistoVersioSelection(LATEST);
+            if (uri.contains("#")) {
+                String[] puolikkaat = uri.split("#");
+                try {
+                    int versio = Integer.parseInt(puolikkaat[1]);
+                    koodistoHaku.setKoodistoVersio(versio);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LOG.error("Versionumeroa ei voitu parsia uri:sta {}", uri);
+                    koodistoHaku.setKoodistoVersioSelection(LATEST);
+                }
+                String todellinenUri = puolikkaat[0];
+                koodistoHaku.setKoodistoVersioSelection(SPECIFIC);
+                koodistoHaku.setKoodistoUri(todellinenUri); // hakukohteet_654#1
+            } else {
+                koodistoHaku.setKoodistoUri(uri);
+                koodistoHaku.setKoodistoVersioSelection(LATEST);
+            }
             try {
                 for (KoodiType koodi : koodiService.searchKoodisByKoodisto(koodistoHaku)) {
                     String arvo = koodi.getKoodiArvo();
