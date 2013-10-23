@@ -112,7 +112,7 @@ public class JalkiohjauskirjeetKomponentti {
                     tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
                     tulokset.put("paasyJaSoveltuvuuskoe",
                             Formatter.suomennaNumero(valintatapajono.getPaasyJaSoveltuvuusKokeenTulos()));
-                    if (VARALLA.equals(valintatapajono.getTila())) {
+                    if (VARALLA.equals(valintatapajono.getTila()) && valintatapajono.getVarasijanNumero() != null) {
                         tulokset.put("selite", "Varasijan numero on " + valintatapajono.getVarasijanNumero());
                     } else {
                         tulokset.put("selite", StringUtils.EMPTY);
