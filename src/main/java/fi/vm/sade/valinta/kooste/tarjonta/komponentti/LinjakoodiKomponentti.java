@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
-import static fi.vm.sade.koodisto.service.types.SearchKoodisVersioSelectionType.LATEST;
-import static fi.vm.sade.koodisto.service.types.SearchKoodisVersioSelectionType.SPECIFIC;
+import java.util.List;
 
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.SearchKoodisCriteriaType;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
+import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.exception.KoodistoException;
@@ -61,43 +61,47 @@ public class LinjakoodiKomponentti {
                 throw new TarjontaException("Tarjonnalla ei ollut hakukohteelle " + hakukohdeOid
                         + " hakukohteenNimiUri:a!");
             }
-            SearchKoodisCriteriaType koodistoHaku = new SearchKoodisCriteriaType();
-            if (uri.contains("#")) {
+
+            SearchKoodisCriteriaType koodistoHaku;// = new
+                                                  // SearchKoodisCriteriaType();
+            String koodiUri = uri;
+            Integer koodiVersio = null;
+            if (uri.contains("#")) { // hakukohteet_654#1
                 String[] puolikkaat = uri.split("#");
+                koodiUri = puolikkaat[0];
                 try {
-                    int versio = Integer.parseInt(puolikkaat[1]);
-                    koodistoHaku.setKoodiVersio(versio);
-                    koodistoHaku.setKoodiVersioSelection(SPECIFIC);
+                    koodiVersio = Integer.parseInt(puolikkaat[1]);
+                    koodistoHaku = KoodiServiceSearchCriteriaBuilder.koodiByUriAndVersion(koodiUri, koodiVersio);
                 } catch (Exception e) {
                     e.printStackTrace();
                     LOG.error("Versionumeroa ei voitu parsia uri:sta {}", uri);
-                    koodistoHaku.setKoodiVersioSelection(LATEST);
+                    koodistoHaku = KoodiServiceSearchCriteriaBuilder.latestAcceptedKoodiByUri(koodiUri); // koodiByUriAndVersion(koodiUri,
+                                                                                                         // koodiVersio);
                 }
-                String todellinenUri = puolikkaat[0];
-                koodistoHaku.getKoodiUris().add(todellinenUri); // hakukohteet_654#1
             } else {
-                koodistoHaku.getKoodiUris().add(uri);
-                koodistoHaku.setKoodiVersioSelection(LATEST);
+                koodistoHaku = KoodiServiceSearchCriteriaBuilder.latestAcceptedKoodiByUri(koodiUri);
             }
-            try {
-                for (KoodiType koodi : koodiService.searchKoodis(koodistoHaku)) {
-                    String arvo = koodi.getKoodiArvo();
-                    if (arvo != null) {
-                        if (arvo.length() == 3) {
-                            return arvo;
-                        } else {
-                            LOG.error("Koodistosta palautui virheellinen arvo {} uri:lle {}",
-                                    new Object[] { arvo, uri });
-                        }
+            List<KoodiType> koodiTypes = koodiService.searchKoodis(koodistoHaku);
+            if (koodiTypes.isEmpty()) {
+                throw new KoodistoException("Koodisto palautti tyhjän koodijoukon urille " + koodiUri
+                        + " ja käytetylle versiolle " + koodiVersio);
+            }
+            for (KoodiType koodi : koodiTypes) {
+                String arvo = koodi.getKoodiArvo();
+                if (arvo != null) {
+                    if (arvo.length() == 3) {
+                        return arvo;
                     } else {
-                        LOG.error("Koodistosta palautui null arvo uri:lle {}", new Object[] { uri });
+                        LOG.error("Koodistosta palautui virheellinen arvo {} uri:lle {}, versio {}", new Object[] {
+                                arvo, koodiUri, koodiVersio });
                     }
+                } else {
+                    LOG.error("Koodistosta palautui null arvo uri:lle {}, versio {}", new Object[] { koodiUri,
+                            koodiVersio });
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                LOG.error("Koodistosta ei saatu arvoa urille {}: Virhe {}", new Object[] { uri, e.getMessage() });
             }
-            throw new KoodistoException("Koodistosta ei saatu arvoa urille " + uri);
+            throw new KoodistoException("Koodistosta ei saatu arvoa urille " + koodiUri + " ja käytetylle versiolle "
+                    + koodiVersio);
         }
     }
 }
