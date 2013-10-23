@@ -127,13 +127,15 @@ public class HyvaksymiskirjeetKomponentti {
                     tulokset.put("kaikkiHakeneet", Formatter.suomennaNumero(valintatapajono.getHakeneet()));
                     StringBuilder pisteet = new StringBuilder();
                     for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
-                        pisteet.append(pistetieto.getArvo()).append(" ");
+                        if (pistetieto.getArvo() != null) {
+                            pisteet.append(pistetieto.getArvo()).append(" ");
+                        }
                     }
                     tulokset.put("omatPisteet", pisteet.toString().trim());
                     tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
                     tulokset.put("paasyJaSoveltuvuuskoe",
                             Formatter.suomennaNumero(valintatapajono.getPaasyJaSoveltuvuusKokeenTulos()));
-                    if (VARALLA.equals(valintatapajono.getTila())) {
+                    if (VARALLA.equals(valintatapajono.getTila()) && valintatapajono.getVarasijanNumero() != null) {
                         tulokset.put("selite", "Varasijan numero on " + valintatapajono.getVarasijanNumero());
                     } else {
                         tulokset.put("selite", StringUtils.EMPTY);
