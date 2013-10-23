@@ -34,7 +34,7 @@ public class HakemuksenTilaUtil {
             return "Peruuntunut";
         case HYVAKSYTTY:
             if (harkinnanvarainen) {
-                return "Hyväksytty harkinnanvaraisesti";
+                return "Harkinnanvaraisesti hyväksytty";
             }
             return "Hyväksytty";
         case PERUNUT:
