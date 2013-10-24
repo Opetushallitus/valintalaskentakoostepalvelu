@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Deque;
@@ -45,7 +47,14 @@ public class KelaExportKomponentti {
                 .setAineistonnimi(StringUtils.EMPTY).setOrganisaationimi(StringUtils.EMPTY).build().toByteArray()));
         streams.addLast(new ByteArrayInputStream(new TKUVALOPPU.Builder().setAjopaivamaara(new Date())
                 .setTietuelukumaara(count).build().toByteArray()));
-        InputStream input = new SequenceInputStream(Collections.enumeration(streams));
+        //
+        // Add line ending '\n' between every stream
+        //
+        Collection<InputStream> withLineEndings = new ArrayList<InputStream>();
+        for (InputStream stream : streams) {
+            withLineEndings.add(new SequenceInputStream(stream, new ByteArrayInputStream(KelaUtil.RIVINVAIHTO)));
+        }
+        InputStream input = new SequenceInputStream(Collections.enumeration(withLineEndings));
 
         kelaCache.addDocument(KelaCacheDocument.createFile(KelaUtil.createTiedostoNimiYhva14(new Date()), count,
                 IOUtils.toByteArray(input)));
