@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.kela;
 
+import static fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil.toSearchCriteria;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.io.ByteArrayInputStream;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
+import fi.vm.sade.koodisto.service.KoodiService;
+import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.valinta.kooste.dto.DateParam;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaCacheDocument;
@@ -46,6 +50,8 @@ public class KelaAktivointiResource {
     private KelaFtpProxy kelaFtpProxy;
     @Autowired
     private TarjontaHakuProxy hakuProxy;
+    @Autowired
+    private KoodiService koodiService;
 
     @GET
     @Path("aktivoi")
@@ -53,10 +59,18 @@ public class KelaAktivointiResource {
             @QueryParam("hakukohdeOid") String hakukohdeOid, @QueryParam("lukuvuosi") DateParam l,
             @QueryParam("poimintapaivamaara") DateParam poimintapaivamaara) {
         int lukuvuosi = 2014;
+        int kuukausi = 1;
         try {
             HakuDTO hakuDTO = hakuProxy.haeHaku(hakuOid);
             lukuvuosi = hakuDTO.getKoulutuksenAlkamisVuosi();
-            LOG.error("Viallinen alkamisuri: {}", hakuDTO.getKoulutuksenAlkamiskausiUri());
+            // kausi_k
+            for (KoodiType koodi : koodiService.searchKoodis(toSearchCriteria(hakuDTO.getKoulutuksenAlkamiskausiUri()))) {
+                if ("S".equals(StringUtils.upperCase(koodi.getKoodiArvo()))) { // syksy
+                    kuukausi = 8;
+                }
+                LOG.error("Viallinen arvo {}, koodilla {} ",
+                        new Object[] { koodi.getKoodiArvo(), hakuDTO.getKoulutuksenAlkamiskausiUri() });
+            }
         } catch (Exception e) {
             e.printStackTrace();
             LOG.error("Ei voitu hakea lukuvuotta tarjonnalta syystä {}", e.getMessage());
@@ -68,7 +82,7 @@ public class KelaAktivointiResource {
             // kerralla
             //
 
-            kelaExportProxy.luoTKUVAYHVA(hakuOid, new DateTime(lukuvuosi, 1, 1, 1, 1).toDate(),
+            kelaExportProxy.luoTKUVAYHVA(hakuOid, new DateTime(lukuvuosi, kuukausi, 1, 1, 1).toDate(),
                     poimintapaivamaara.getDate(), SecurityContextHolder.getContext().getAuthentication());
 
             return Response.ok().build();
