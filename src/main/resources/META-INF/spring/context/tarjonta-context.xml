@@ -35,7 +35,16 @@
 		<proxy id="organisaatioProxy" 
 			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioProxy"
 			serviceUrl="direct:organisaatioReitti" />
-			
+		<proxy id="tarjontaHakuProxy" 
+			serviceInterface="fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakuProxy"
+			serviceUrl="direct:tarjontaHakuReitti" />	
+		
+		<route errorHandlerRef="tarjontaRetryHandler">
+			<from uri="direct:tarjontaHakuReitti"/>
+			<setProperty propertyName="hakuOid"><simple>${body}</simple></setProperty>
+			<setBody><constant></constant></setBody>
+			<to uri="bean:hakuTarjonnaltaKomponentti"/>
+		</route>	
 		<route errorHandlerRef="tarjontaRetryHandler">
 			<from uri="direct:tarjontaNimiReitti"/>
 			<setProperty propertyName="hakukohdeOid"><simple>${body}</simple></setProperty>

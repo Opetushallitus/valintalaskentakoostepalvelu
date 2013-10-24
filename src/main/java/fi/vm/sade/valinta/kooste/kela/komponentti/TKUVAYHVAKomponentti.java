@@ -27,6 +27,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.LinjakoodiProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioProxy;
+import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakuProxy;
 
 @Component("TKUVAYHVAKomponentti")
 public class TKUVAYHVAKomponentti {
@@ -42,6 +43,71 @@ public class TKUVAYHVAKomponentti {
 
     @Autowired
     private OrganisaatioProxy organisaatioProxy;
+
+    @Autowired
+    private TarjontaHakuProxy hakuProxy;
+
+    public TKUVAYHVA luoTKUVAYHVA(@Body HakijaDTO hakija, @Property("lukuvuosi") Date lukuvuosi,
+            @Property("poimintapaivamaara") Date poimintapaivamaara) {
+        Set<String> linjakoodiErrorSet = new HashSet<String>();
+        Map<String, String> linjakoodiCache = new HashMap<String, String>();
+        Set<String> oppilaitosErrorSet = new HashSet<String>();
+        Map<String, String> oppilaitosCache = new HashMap<String, String>();
+        for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+            for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
+                if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
+                    TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
+                    String hakukohdeOid = hakutoive.getHakukohdeOid();
+                    String tarjoajaOid = hakutoive.getTarjoajaOid();
+                    // LINJAKOODI
+                    builder.setLinjakoodi(haeLinjakoodi(hakukohdeOid, linjakoodiCache, linjakoodiErrorSet));
+                    // KOULUTUKSEN ALKAMISVUOSI
+                    builder.setLukuvuosi(lukuvuosi);
+                    // YHTEISHAUNKOULUKOODI
+                    builder.setOppilaitos(haeOppilaitos(tarjoajaOid, oppilaitosCache, oppilaitosErrorSet));
+
+                    builder.setValintapaivamaara(new Date()); // TODO:
+                                                              // Sijoittelun
+                                                              // täytyy
+                                                              // osata
+                                                              // kertoa
+                                                              // tämä!
+                    builder.setSukunimi(hakija.getSukunimi());
+                    builder.setEtunimet(hakija.getEtunimi());
+
+                    try {
+                        Hakemus hakemus = hakemusProxy.haeHakemus(hakija.getHakemusOid());
+                        String standardinMukainenHenkilotunnus = hakemus.getAnswers().getHenkilotiedot()
+                                .get(HENKILOTUNNUS);
+                        // KELA ei halua vuosisata merkkia
+                        // henkilotunnukseen!
+                        StringBuilder kelanVaatimaHenkilotunnus = new StringBuilder();
+                        kelanVaatimaHenkilotunnus.append(standardinMukainenHenkilotunnus.substring(0, 6)).append(
+                                standardinMukainenHenkilotunnus.substring(7, 11));
+                        builder.setHenkilotunnus(kelanVaatimaHenkilotunnus.toString());
+                    } catch (Exception e) {
+                        LOG.error("Henkilötunnuksen hakeminen hakemuspalvelulta hakemukselle {} epäonnistui!",
+                                hakija.getHakemusOid());
+                        // e.printStackTrace();
+                        builder.setHenkilotunnus("XXXXXXXXXX");
+                    }
+                    builder.setPoimintapaivamaara(poimintapaivamaara);
+                    DateTime dateTime = new DateTime(lukuvuosi);
+                    if (dateTime.getMonthOfYear() > KESAKUU) { // myohemmin
+                                                               // kuin
+                                                               // kesakuussa!
+                        builder.setSyksyllaAlkavaKoulutus();
+                    } else {
+                        builder.setKevaallaAlkavaKoulutus();
+                    }
+                    LOG.info("Tietue KELA-tiedostoon luotu onnistuneesti henkilölle {}", hakija.getHakemusOid());
+                    return builder.build();
+                }
+            }
+        }
+        throw new SijoittelupalveluException("Sijoittelulta palautui hakija (hakemusoid: " + hakija.getHakemusOid()
+                + ") joka ei oikeasti ollut hyväksyttynä koulutukseen!");
+    }
 
     private String haeLinjakoodi(String hakukohdeOid, Map<String, String> linjakoodiCache,
             Set<String> linjakoodiErrorSet) {
@@ -71,7 +137,7 @@ public class TKUVAYHVAKomponentti {
             return oppilaitosCache.get(tarjoajaOid);
         } else {
             if (oppilaitosErrorSet.contains(tarjoajaOid)) {
-                LOG.error("Yhteishaun koulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
+                LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
             } else {
                 try {
                     OrganisaatioRDTO organisaatio = organisaatioProxy.haeOrganisaatio(tarjoajaOid);
@@ -84,7 +150,7 @@ public class TKUVAYHVAKomponentti {
                         if (organisaatio.getYhteishaunKoulukoodi() == null) {
                             // new
                             // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
-                            LOG.error("Yhteishaun koulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
+                            LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
                             oppilaitosErrorSet.add(tarjoajaOid);
                         } else {
                             oppilaitosCache.put(tarjoajaOid, organisaatio.getYhteishaunKoulukoodi());
@@ -93,7 +159,7 @@ public class TKUVAYHVAKomponentti {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    LOG.error("Yhteishaun koulukoodia ei voitu hakea organisaatiolle {}: Virhe {}", new Object[] {
+                    LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}: Virhe {}", new Object[] {
                             tarjoajaOid, e.getMessage() });
                     // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
                     oppilaitosErrorSet.add(tarjoajaOid);
@@ -101,69 +167,5 @@ public class TKUVAYHVAKomponentti {
             }
             return "0000";
         }
-    }
-
-    public TKUVAYHVA luoTKUVAYHVA(@Body HakijaDTO hakija, // @Property("hakuOid")
-                                                          // String hakuOid,
-            @Property("lukuvuosi") Date lukuvuosi, @Property("poimintapaivamaara") Date poimintapaivamaara) {
-        // String linjakoodi = "000";
-        Set<String> linjakoodiErrorSet = new HashSet<String>();
-        Map<String, String> linjakoodiCache = new HashMap<String, String>();
-        Set<String> oppilaitosErrorSet = new HashSet<String>();
-        Map<String, String> oppilaitosCache = new HashMap<String, String>();
-        for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-            for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
-                if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
-                    TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
-                    String hakukohdeOid = hakutoive.getHakukohdeOid();
-                    String tarjoajaOid = hakutoive.getTarjoajaOid();
-                    // LINJAKOODI
-                    builder.setLinjakoodi(haeLinjakoodi(hakukohdeOid, linjakoodiCache, linjakoodiErrorSet));
-
-                    // YHTEISHAUNKOULUKOODI
-                    builder.setOppilaitos(haeOppilaitos(tarjoajaOid, oppilaitosCache, oppilaitosErrorSet));
-
-                    builder.setValintapaivamaara(new Date()); // TODO:
-                                                              // Sijoittelun
-                                                              // täytyy
-                                                              // osata
-                                                              // kertoa
-                                                              // tämä!
-                    builder.setSukunimi(hakija.getSukunimi());
-                    builder.setEtunimet(hakija.getEtunimi());
-
-                    try {
-                        Hakemus hakemus = hakemusProxy.haeHakemus(hakija.getHakemusOid());
-                        String standardinMukainenHenkilotunnus = hakemus.getAnswers().getHenkilotiedot()
-                                .get(HENKILOTUNNUS);
-                        // KELA ei halua vuosisata merkkia
-                        // henkilotunnukseen!
-                        StringBuilder kelanVaatimaHenkilotunnus = new StringBuilder();
-                        kelanVaatimaHenkilotunnus.append(standardinMukainenHenkilotunnus.substring(0, 6)).append(
-                                standardinMukainenHenkilotunnus.substring(7, 11));
-                        builder.setHenkilotunnus(kelanVaatimaHenkilotunnus.toString());
-                    } catch (Exception e) {
-                        LOG.error("Henkilötunnuksen hakeminen hakemuspalvelulta hakemukselle {} epäonnistui!",
-                                hakija.getHakemusOid());
-                        // e.printStackTrace();
-                        builder.setHenkilotunnus("XXXXXXXXXX");
-                    }
-                    builder.setLukuvuosi(lukuvuosi);
-                    builder.setPoimintapaivamaara(poimintapaivamaara);
-                    DateTime dateTime = new DateTime(lukuvuosi);
-                    if (dateTime.getMonthOfYear() > KESAKUU) { // myohemmin
-                                                               // kuin
-                                                               // kesakuussa!
-                        builder.setSyksyllaAlkavaKoulutus();
-                    } else {
-                        builder.setKevaallaAlkavaKoulutus();
-                    }
-                    LOG.info("Tietue KELA-tiedostoon luotu onnistuneesti henkilölle {}", hakija.getHakemusOid());
-                    return builder.build();
-                }
-            }
-        }
-        throw new SijoittelupalveluException("Sijoittelulta palautui hakija (hakemusoid: " + hakija.getHakemusOid()
-                + ") joka ei oikeasti ollut hyväksyttynä koulutukseen!");
     }
 }
