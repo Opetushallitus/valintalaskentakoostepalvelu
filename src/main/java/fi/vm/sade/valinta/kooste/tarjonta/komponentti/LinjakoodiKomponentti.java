@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.SearchKoodisCriteriaType;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
-import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.exception.KoodistoException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.exception.TarjontaException;
+import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 
 /**
  * 
@@ -62,25 +62,10 @@ public class LinjakoodiKomponentti {
                         + " hakukohteenNimiUri:a!");
             }
 
-            SearchKoodisCriteriaType koodistoHaku;// = new
-                                                  // SearchKoodisCriteriaType();
-            String koodiUri = uri;
-            Integer koodiVersio = null;
-            if (uri.contains("#")) { // hakukohteet_654#1
-                String[] puolikkaat = uri.split("#");
-                koodiUri = puolikkaat[0];
-                try {
-                    koodiVersio = Integer.parseInt(puolikkaat[1]);
-                    koodistoHaku = KoodiServiceSearchCriteriaBuilder.koodiByUriAndVersion(koodiUri, koodiVersio);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    LOG.error("Versionumeroa ei voitu parsia uri:sta {}", uri);
-                    koodistoHaku = KoodiServiceSearchCriteriaBuilder.latestAcceptedKoodiByUri(koodiUri); // koodiByUriAndVersion(koodiUri,
-                                                                                                         // koodiVersio);
-                }
-            } else {
-                koodistoHaku = KoodiServiceSearchCriteriaBuilder.latestAcceptedKoodiByUri(koodiUri);
-            }
+            String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(uri);
+            Integer koodiVersio = TarjontaUriToKoodistoUtil.stripVersion(uri);
+            SearchKoodisCriteriaType koodistoHaku = TarjontaUriToKoodistoUtil.toSearchCriteria(koodiUri, koodiVersio);
+
             List<KoodiType> koodiTypes = koodiService.searchKoodis(koodistoHaku);
             if (koodiTypes.isEmpty()) {
                 throw new KoodistoException("Koodisto palautti tyhjän koodijoukon urille " + koodiUri
