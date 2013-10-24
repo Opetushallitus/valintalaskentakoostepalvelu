@@ -37,6 +37,7 @@ import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.TavallinenValinnanVaiheTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
+import fi.vm.sade.tarjonta.service.resources.HakuResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.tarjonta.service.types.TarjontaTila;
@@ -167,6 +168,11 @@ public class HaunValintalaskentaReititysTest {
     @Bean
     public KoodiService getKoodiService() {
         return mock(KoodiService.class);
+    }
+
+    @Bean
+    public HakuResource getHakuResource() {
+        return mock(HakuResource.class);
     }
 
     @Autowired

@@ -34,6 +34,7 @@ import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.TavallinenValinnanVaiheTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
+import fi.vm.sade.tarjonta.service.resources.HakuResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -63,6 +64,11 @@ public class HakukohteenValintalaskentaKoosteReititysTest {
     @Bean
     public HakukohdeResource getHakukohdeResource() {
         return mock(HakukohdeResource.class);
+    }
+
+    @Bean
+    public HakuResource getHakuResource() {
+        return mock(HakuResource.class);
     }
 
     @Bean
