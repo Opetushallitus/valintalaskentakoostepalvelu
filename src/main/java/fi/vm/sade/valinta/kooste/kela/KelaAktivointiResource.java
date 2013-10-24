@@ -16,17 +16,20 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
+import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.valinta.kooste.dto.DateParam;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaCacheDocument;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaHeader;
 import fi.vm.sade.valinta.kooste.kela.proxy.KelaExportProxy;
 import fi.vm.sade.valinta.kooste.kela.proxy.KelaFtpProxy;
+import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakuProxy;
 
 @Path("kela")
 @Controller
@@ -41,16 +44,32 @@ public class KelaAktivointiResource {
     private KelaCache kelaCache;
     @Autowired
     private KelaFtpProxy kelaFtpProxy;
+    @Autowired
+    private TarjontaHakuProxy hakuProxy;
 
     @GET
     @Path("aktivoi")
     public Response aktivoiKelaTiedostonluonti(@QueryParam("hakuOid") String hakuOid,
-            @QueryParam("hakukohdeOid") String hakukohdeOid, @QueryParam("lukuvuosi") DateParam lukuvuosi,
+            @QueryParam("hakukohdeOid") String hakukohdeOid, @QueryParam("lukuvuosi") DateParam l,
             @QueryParam("poimintapaivamaara") DateParam poimintapaivamaara) {
+        int lukuvuosi = 2014;
+        try {
+            HakuDTO hakuDTO = hakuProxy.haeHaku(hakuOid);
+            lukuvuosi = hakuDTO.getKoulutuksenAlkamisVuosi();
+            LOG.error("Viallinen alkamisuri: {}", hakuDTO.getKoulutuksenAlkamiskausiUri());
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOG.error("Ei voitu hakea lukuvuotta tarjonnalta syystä {}", e.getMessage());
+        }
         try {
             kelaCache.addDocument(KelaCacheDocument.createInfoMessage("Dokumentin luonti aloitettu"));
-            kelaExportProxy.luoTKUVAYHVA(hakuOid, lukuvuosi.getDate(), poimintapaivamaara.getDate(),
-                    SecurityContextHolder.getContext().getAuthentication());
+            //
+            // HUOM! Muuttuu niin etta kela tiedostoja luodaan useammalle haulle
+            // kerralla
+            //
+
+            kelaExportProxy.luoTKUVAYHVA(hakuOid, new DateTime(lukuvuosi, 1, 1, 1, 1).toDate(),
+                    poimintapaivamaara.getDate(), SecurityContextHolder.getContext().getAuthentication());
 
             return Response.ok().build();
         } catch (Exception e) {
