@@ -47,12 +47,7 @@
                          accessDecisionManager="accessDecisionManager"
                          xmlns="http://camel.apache.org/schema/spring-security"/>
 
-    <!--
-        Implementoi TarjontaHakuTiedotPalvelu kun määritelmä tarkentuu! Ajastettu Camel-reitti käyttää sitä!
-     -->
-    <beans:bean id="tarjontaTiedotPalvelu"
-                class="fi.vm.sade.valinta.kooste.tarjonta.stub.TarjontaHakuTiedotPalveluImpl"/>
-
+    
     <!--fetching valintatieto takes ages, consider removing this once valinnan tulokset service has been optimized-->
     <http:conduit name="*.http-conduit">
         <!-- AllowChunking="false" Nginx fails without this -->
@@ -294,7 +289,6 @@
     <beans:import resource="classpath:META-INF/spring/context/tarjonta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/hakuimport-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/kela-context.xml"/>
-    <beans:import resource="classpath:META-INF/spring/context/tarjonta-ajastus-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintakoelaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-excel-context.xml"/>
