@@ -3,11 +3,14 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class Kirje {
 
     /**
