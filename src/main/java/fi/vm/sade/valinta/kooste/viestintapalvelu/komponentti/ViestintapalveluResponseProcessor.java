@@ -19,8 +19,8 @@ public class ViestintapalveluResponseProcessor implements Processor {
                 throw new ViestintapalveluException("Sinulla ei ole käyttöoikeuksia viestintäpalveluun!");
             }
             if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
-                throw new ViestintapalveluException(
-                        "Viestintäpalvelu epäonnistui osoitetarrojen luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon!");
+                throw new ViestintapalveluException("Viestintäpalvelu epäonnistui (status " + response.getStatus()
+                        + ") osoitetarrojen luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon!");
             }
         }
         exchange.setOut(exchange.getIn());
