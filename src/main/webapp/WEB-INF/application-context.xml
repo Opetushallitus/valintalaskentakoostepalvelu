@@ -67,16 +67,17 @@
         </cxf:inFaultInterceptors>
     </cxf:bus>
     -->
+    <beans:bean id="viestintapalveluMapper" class="fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluMapper"/>
     <jaxrs:client id="viestintapalveluClient"
                   serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource"
                   address="${valintalaskentakoostepalvelu.viestintapalvelu.url}">
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider">
-                <property name="mapper" ref="jacksonMapper"/>
+                <property name="mapper" ref="viestintapalveluMapper"/>
             </bean>
         </jaxrs:providers>
     </jaxrs:client>
-    <beans:bean id="jacksonMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
+    
 
     <jaxws:client id="ValintaperusteServiceClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
