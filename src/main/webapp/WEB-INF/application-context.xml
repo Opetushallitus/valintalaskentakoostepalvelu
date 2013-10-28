@@ -54,7 +54,6 @@
         <http:client Connection="Keep-Alive" ConnectionTimeout="0" ReceiveTimeout="0" AllowChunking="false"/>
     </http:conduit>
 
-
     <!-- Configure CXF bus to contain ticketInterceptor -->
     <!--
     <cxf:bus>
@@ -67,16 +66,14 @@
         </cxf:inFaultInterceptors>
     </cxf:bus>
     -->
-    
+    <bean id="jacksonMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
     <jaxrs:client id="viestintapalveluClient"
                   serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource"
                   address="${valintalaskentakoostepalvelu.viestintapalvelu.url}">
-        <jaxrs:outInterceptors>
-            <ref bean="ticketInterceptorRest"/>
-        </jaxrs:outInterceptors>
         <jaxrs:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean id="viestintapalveluMapper" class="fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluMapper"/>
+	        <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider">
+	            <property name="mapper" ref="jacksonMapper" />
+	        </bean>
         </jaxrs:providers>
     </jaxrs:client>
     

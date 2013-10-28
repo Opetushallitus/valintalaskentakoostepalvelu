@@ -20,14 +20,16 @@
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
 	
+	<util:properties id="viestintapalveluProperties">
+		<beans:prop key="viestintapalveluUrl">${valintalaskentakoostepalvelu.viestintapalvelu.url}</beans:prop>
+	</util:properties>
+	
 	<bean id="viestintapalveluRetryHandler" class="org.apache.camel.builder.DefaultErrorHandlerBuilder" >
 		<property name="redeliveryPolicy" ref="redeliveryPolicy"/>
 	</bean>
 	
     <camelContext depends-on="viestintapalveluRetryHandler" id="viestintapalveluCamelContext"
                   autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
-        
-        
         <propertyPlaceholder id="viestintapalveluContextProperties" location="ref:viestintapalveluProperties" />
         <proxy id="hyvaksymiskirjeBatchAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksymiskirjeBatchAktivointiProxy"
@@ -51,20 +53,23 @@
         <proxy id="viestintapalveluOsoitetarratProxy"
                serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluOsoitetarratProxy"
                serviceUrl="direct:viestintapalveluOsoitetarratReitti"/>
-            
+        
 		<route errorHandlerRef="viestintapalveluRetryHandler">
             <from uri="direct:viestintapalveluOsoitetarratReitti"/>
-            <to uri="bean:viestintapalveluClient?method=haeOsoitetarrat"/>
+            <log message="Osoitetarrat osoitteesta {{viestintapalveluUrl}}/api/v1/addresslabel/pdf" loggingLevel="INFO"/>
+            <to uri="bean:viestintapalveluRestKomponentti?method=haeOsoitetarrat(${body})"/>
             <process ref="viestintapalveluProcessor"/>
         </route>
         <route errorHandlerRef="viestintapalveluRetryHandler">
             <from uri="direct:viestintapalveluJalkiohjauskirjeetReitti"/>
-            <to uri="bean:viestintapalveluClient?method=haeJalkiohjauskirjeet"/>
+            <log message="Jälkiohjauskirjeet osoitteesta {{viestintapalveluUrl}}/api/v1/jalkiohjauskirje/zip" loggingLevel="INFO"/>
+            <to uri="bean:viestintapalveluRestKomponentti?method=haeJalkiohjauskirjeet(${body})"/>
             <process ref="viestintapalveluProcessor"/>
         </route>
         <route errorHandlerRef="viestintapalveluRetryHandler">
             <from uri="direct:viestintapalveluHyvaksymiskirjeetReitti"/>
-            <to uri="bean:viestintapalveluClient?method=haeHyvaksymiskirjeet"/>
+            <log message="Hyväksymiskirjeet osoitteesta {{viestintapalveluUrl}}/api/v1/hyvaksymiskirje/pdf" loggingLevel="INFO"/>
+            <to uri="bean:viestintapalveluRestKomponentti?method=haeHyvaksymiskirjeet(${body})"/>
             <process ref="viestintapalveluProcessor"/>
         </route>
         

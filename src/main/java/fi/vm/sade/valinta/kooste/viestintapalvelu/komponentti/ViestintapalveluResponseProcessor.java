@@ -35,8 +35,8 @@ public class ViestintapalveluResponseProcessor implements Processor {
                             "Response {}, \r\n{}, \r\n{}, \r\n{}",
                             new Object[] { response.getStatus(), response.getEntity(), response.getMetadata(), response });
                 }
-                throw new ViestintapalveluException("Viestintäpalvelu epäonnistui (status " + response.getStatus()
-                        + ") osoitetarrojen luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon!");
+                throw new ViestintapalveluException("Viestintäpalvelun käyttö epäonnistui (status "
+                        + response.getStatus() + "). Yritä uudelleen tai ota yhteyttä ylläpitoon!");
             }
         }
         exchange.setOut(exchange.getIn());
