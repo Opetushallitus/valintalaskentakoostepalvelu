@@ -76,7 +76,9 @@ public class HyvaksyttyjenOsoitteetKomponentti {
 
         LOG.info("Yritetään luoda viestintapalvelulta osoitteita hyväksytyille hakijoille {} kappaletta!",
                 osoitteet.size());
-        Response response = viestintapalveluProxy.haeOsoitetarrat(new Osoitteet(osoitteet));
+        Osoitteet viesti = new Osoitteet(osoitteet);
+        LOG.debug("\r\n{}", new ViestiWrapper(viesti));
+        Response response = viestintapalveluProxy.haeOsoitetarrat(viesti);
         return response.getEntity();
     }
 
