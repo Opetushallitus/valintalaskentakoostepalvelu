@@ -128,7 +128,9 @@ public class JalkiohjauskirjeetKomponentti {
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!", kirjeet.size());
-        Response response = viestintapalveluProxy.haeJalkiohjauskirjeet(new Kirjeet(kirjeet));
+        Kirjeet viesti = new Kirjeet(kirjeet);
+        LOG.debug("\r\n{}", new ViestiWrapper(viesti));
+        Response response = viestintapalveluProxy.haeJalkiohjauskirjeet(viesti);
         return response.getEntity();
     }
 

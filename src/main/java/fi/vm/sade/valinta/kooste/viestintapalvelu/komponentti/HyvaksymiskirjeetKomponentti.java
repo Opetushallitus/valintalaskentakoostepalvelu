@@ -151,7 +151,9 @@ public class HyvaksymiskirjeetKomponentti {
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta hyvaksymiskirjeitä {} kappaletta!", kirjeet.size());
-        Response response = viestintapalveluProxy.haeHyvaksymiskirjeet(new Kirjeet(kirjeet));
+        Kirjeet viesti = new Kirjeet(kirjeet);
+        LOG.debug("\r\n{}", new ViestiWrapper(viesti));
+        Response response = viestintapalveluProxy.haeHyvaksymiskirjeet(viesti);
         return response.getEntity();
     }
 
