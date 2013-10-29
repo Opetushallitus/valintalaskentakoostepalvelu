@@ -53,7 +53,6 @@
         <!-- AllowChunking="false" Nginx fails without this -->
         <http:client Connection="Keep-Alive" ConnectionTimeout="0" ReceiveTimeout="0" AllowChunking="false"/>
     </http:conduit>
-
     <!-- Configure CXF bus to contain ticketInterceptor -->
     <!--
     <cxf:bus>
@@ -68,6 +67,7 @@
     -->
     <bean id="jacksonMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
     <jaxrs:client id="viestintapalveluClient"
+    			  name="ViestintapalveluRestClient"
                   serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource"
                   address="${valintalaskentakoostepalvelu.viestintapalvelu.url}">
         <jaxrs:providers>
