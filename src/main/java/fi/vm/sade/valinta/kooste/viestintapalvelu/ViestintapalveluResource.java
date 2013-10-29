@@ -24,7 +24,7 @@ public interface ViestintapalveluResource {
     @POST
     @Produces(TEXT_PLAIN)
     @Consumes(APPLICATION_JSON)
-    @Path("jalkiohjauskirje/zip")
+    @Path("jalkiohjauskirje/asynczip")
     Response haeJalkiohjauskirjeet(Kirjeet kirjeet);
 
     @POST
