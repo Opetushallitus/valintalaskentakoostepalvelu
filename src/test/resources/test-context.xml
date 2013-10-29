@@ -26,5 +26,9 @@
             ignore-resource-not-found="true" properties-ref="defaultProps"/>
 
     <bean id="defaultProps" class="org.springframework.beans.factory.config.PropertiesFactoryBean" />
-    
+    <bean id="redeliveryPolicy" class="org.apache.camel.processor.RedeliveryPolicy">
+		<property name="maximumRedeliveries" value="5" />
+		<property name="redeliveryDelay" value="25" />
+		<property name="retryAttemptedLogLevel" value="ERROR" />
+	</bean>
 </beans>

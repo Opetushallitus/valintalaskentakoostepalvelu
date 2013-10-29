@@ -18,7 +18,11 @@
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus"/>
 
-    <camelContext id="valintalaskentaCamelContext"
+	<bean id="valintalaskentaRetryHandler" class="org.apache.camel.builder.DefaultErrorHandlerBuilder" >
+		<property name="redeliveryPolicy" ref="redeliveryPolicy"/>
+	</bean>
+
+    <camelContext depends-on="valintalaskentaRetryHandler" id="valintalaskentaCamelContext"
                   autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
         <proxy id="valintalaskentaProxy"
                serviceInterface="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintalaskentaProxy"
@@ -29,13 +33,15 @@
         <proxy id="haunValintalaskentaAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.valintalaskenta.proxy.HaunValintalaskentaAktivointiProxy"
                serviceUrl="direct:kaynnistaHaunValintalaskentaReitti"/>
+        <proxy id="valintaperusteProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintaperusteProxy"
+               serviceUrl="direct:valintaperusteReitti"/>
         
-        <errorHandler  id="valintalaskentaRetryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
-        <redeliveryPolicyProfile id="retryPolicy"
-       							maximumRedeliveries="10" 
-       							redeliveryDelay="100" 
-       							retryAttemptedLogLevel="ERROR"/>
-       							
+		<route errorHandlerRef="valintalaskentaRetryHandler">
+        	<from uri="direct:valintaperusteReitti"/>
+            <setProperty propertyName="hakuparametrit"><simple>${body.args[0]}</simple></setProperty>
+            <to uri="bean:valintaperusteKomponentti"/>
+        </route>
         <route errorHandlerRef="valintalaskentaRetryHandler">
         	<from uri="direct:valintalaskentaReitti"/>
             <setProperty propertyName="hakemustyypit"><simple>${body.args[0]}</simple></setProperty>

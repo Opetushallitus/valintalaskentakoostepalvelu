@@ -19,10 +19,10 @@ import fi.vm.sade.valinta.kooste.exception.TarjontaException;
  *         Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti!
  *         Proxy provides retries!
  */
-@Component("hakukohdeTarjonnaltaKomponentti")
-public class HaeHakukohdeTarjonnaltaKomponentti {
+@Component("hakukohdeNimiTarjonnaltaKomponentti")
+public class HaeHakukohdeNimiTarjonnaltaKomponentti {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HaeHakukohdeTarjonnaltaKomponentti.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HaeHakukohdeNimiTarjonnaltaKomponentti.class);
 
     @Autowired
     private HakukohdeResource tarjontaResource;

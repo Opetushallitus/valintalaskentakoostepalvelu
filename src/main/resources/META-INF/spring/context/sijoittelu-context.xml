@@ -14,7 +14,11 @@
     <ctx:annotation-config/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu"/>
 
-    <camelContext id="sijoitteluCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+	<bean id="sijoitteluRetryHandler" class="org.apache.camel.builder.DefaultErrorHandlerBuilder" >
+		<property name="redeliveryPolicy" ref="redeliveryPolicy"/>
+	</bean>
+	
+    <camelContext depends-on="sijoitteluRetryHandler" id="sijoitteluCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
         <!-- Proxy Jersey REST triggerin ja Camelin eriyttämiseen toisistaan -->
         <proxy id="sijoitteluSuoritaProxy"
                serviceInterface="fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluSuoritaProxy"
@@ -29,28 +33,22 @@
                serviceInterface="fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluAktivointiProxy"
                serviceUrl="direct:kaynnistaSijoitteluReitti"/>
 		
-		<errorHandler  id="retryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
-        <endpoint id="quartzInput" uri="quartz://timerName?cron=${valintalaskentakoostepalvelu.jatkuvasijoittelu.cron}"/>
-		<redeliveryPolicyProfile id="retryPolicy"
-       							maximumRedeliveries="10" 
-       							redeliveryDelay="100" 
-       							retryAttemptedLogLevel="ERROR"/>
-       							
-        
-		<route errorHandlerRef="retryHandler">
+		<endpoint id="quartzInput" uri="quartz://timerName?cron=${valintalaskentakoostepalvelu.jatkuvasijoittelu.cron}"/>
+		
+		<route errorHandlerRef="sijoitteluRetryHandler">
             <from uri="direct:sijoitteluKoulutuspaikallisetReitti"/>
             <setProperty propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
             <setProperty propertyName="hakukohdeOid"><simple>${body.args[1]}</simple></setProperty>
             <setProperty propertyName="sijoitteluajoId"><simple>${body.args[2]}</simple></setProperty>
             <to uri="bean:sijoitteluKoulutuspaikkallisetKomponentti"/>
         </route>
-		<route errorHandlerRef="retryHandler">
+		<route errorHandlerRef="sijoitteluRetryHandler">
             <from uri="direct:sijoitteluIlmankoulutuspaikkaaReitti"/>
             <setProperty propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
             <setProperty propertyName="sijoitteluajoId"><simple>${body.args[1]}</simple></setProperty>
             <to uri="bean:sijoitteluIlmankoulutuspaikkaaKomponentti"/>
         </route>
-        <route errorHandlerRef="retryHandler">
+        <route errorHandlerRef="sijoitteluRetryHandler">
             <from uri="direct:sijoitteluSuoritaReitti"/>
             <setProperty propertyName="hakutyyppi"><simple>${body}</simple></setProperty>
             <to uri="bean:sijoitteluSuoritaKomponentti"/>

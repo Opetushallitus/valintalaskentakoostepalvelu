@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +25,7 @@ import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluIlmankoulutuspaikkaaProxy;
-import fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy;
+import fi.vm.sade.valinta.kooste.tarjonta.TarjontaNimiProxy;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
@@ -50,7 +52,7 @@ public class JalkiohjauskirjeetKomponentti {
     private String sijoitteluResourceUrl;
 
     @Autowired
-    private TarjontaProxy tarjontaProxy;
+    private TarjontaNimiProxy tarjontaProxy;
 
     @Autowired
     private HaeOsoiteKomponentti osoiteKomponentti;
@@ -101,16 +103,24 @@ public class JalkiohjauskirjeetKomponentti {
                     tulokset.put("kaikkiHakeneet", Formatter.suomennaNumero(valintatapajono.getHakeneet()));
                     StringBuilder pisteet = new StringBuilder();
                     for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
-                        pisteet.append(pistetieto.getArvo()).append(" ");
+                        if (pistetieto.getArvo() != null) {
+                            pisteet.append(pistetieto.getArvo()).append(" ");
+                        }
                     }
                     tulokset.put("omatPisteet", pisteet.toString().trim());
 
                     tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
                     tulokset.put("paasyJaSoveltuvuuskoe",
                             Formatter.suomennaNumero(valintatapajono.getPaasyJaSoveltuvuusKokeenTulos()));
-                    tulokset.put("selite", StringUtils.EMPTY);
-                    tulokset.put("valinnanTulos",
-                            HakemuksenTilaUtil.tilaConverter(valintatapajono.getTila().toString()));
+                    if (VARALLA.equals(valintatapajono.getTila()) && valintatapajono.getVarasijanNumero() != null) {
+                        tulokset.put("selite", "Varasijan numero on " + valintatapajono.getVarasijanNumero());
+                    } else {
+                        tulokset.put("selite", StringUtils.EMPTY);
+                    }
+                    tulokset.put(
+                            "valinnanTulos",
+                            HakemuksenTilaUtil.tilaConverter(valintatapajono.getTila(),
+                                    valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
                     tulosList.add(tulokset);
                 }
             }
@@ -118,7 +128,9 @@ public class JalkiohjauskirjeetKomponentti {
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!", kirjeet.size());
-        Response response = viestintapalveluProxy.haeJalkiohjauskirjeet(new Kirjeet(kirjeet));
+        Kirjeet viesti = new Kirjeet(kirjeet);
+        LOG.debug("\r\n{}", new ViestiWrapper(viesti));
+        Response response = viestintapalveluProxy.haeJalkiohjauskirjeet(viesti);
         return response.getEntity();
     }
 

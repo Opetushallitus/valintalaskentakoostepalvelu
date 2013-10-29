@@ -8,7 +8,7 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
  * 
  *         10 retries!
  */
-public interface TarjontaProxy {
+public interface TarjontaNimiProxy {
 
     HakukohdeNimiRDTO haeHakukohdeNimi(String hakukohdeOid);
 }

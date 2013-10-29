@@ -16,40 +16,48 @@
 	<ctx:annotation-config />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti" />
 
-	<camelContext id="hakuAppCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
-		<proxy id="hakemusProxy"
-			serviceInterface="fi.vm.sade.valinta.kooste.haku.HakemusProxy"
+    <bean id="hakuRetryHandler" class="org.apache.camel.builder.DefaultErrorHandlerBuilder" >
+		<property name="redeliveryPolicy" ref="redeliveryPolicy"/>
+	</bean>
+	
+	<camelContext depends-on="hakuRetryHandler" id="hakuAppCamelContext" autoStartup="true"
+		xmlns="http://camel.apache.org/schema/spring">
+		<proxy id="hakemusProxy" serviceInterface="fi.vm.sade.valinta.kooste.haku.HakemusProxy"
 			serviceUrl="direct:hakemusReitti" />
-		<proxy id="hakukohdeProxy" 
-			serviceInterface="fi.vm.sade.valinta.kooste.haku.HakukohdeProxy"
+		<proxy id="hakukohdeProxy" serviceInterface="fi.vm.sade.valinta.kooste.haku.HakukohdeProxy"
 			serviceUrl="direct:hakukohdeReitti" />
-		<proxy id="hakuProxy" 
-			serviceInterface="fi.vm.sade.valinta.kooste.haku.HakuProxy"
+		<proxy id="hakuProxy" serviceInterface="fi.vm.sade.valinta.kooste.haku.HakuProxy"
 			serviceUrl="direct:hakuReitti" />
-		
-        <errorHandler  id="retryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
-        <redeliveryPolicyProfile id="retryPolicy"
-       							maximumRedeliveries="10" 
-       							redeliveryDelay="100" 
-       							retryAttemptedLogLevel="ERROR"/>
-        
-		<route errorHandlerRef="retryHandler">
-			<from uri="direct:hakemusReitti"/>
-			<setProperty propertyName="hakemusOid"><simple>${body}</simple></setProperty>
-			<setBody><constant></constant></setBody>
-			<to uri="bean:haeHakemusKomponentti"/>
+
+		<route errorHandlerRef="hakuRetryHandler">
+			<from uri="direct:hakemusReitti" />
+			<setProperty propertyName="hakemusOid">
+				<simple>${body}</simple>
+			</setProperty>
+			<setBody>
+				<constant></constant>
+			</setBody>
+			<to uri="bean:haeHakemusKomponentti" />
 		</route>
-		<route errorHandlerRef="retryHandler">
-			<from uri="direct:hakukohdeReitti"/>
-			<setProperty propertyName="hakukohdeOid"><simple>${body}</simple></setProperty>
-			<setBody><constant></constant></setBody>
-			<to uri="bean:haeHakukohteenHakemuksetKomponentti"/>
+		<route errorHandlerRef="hakuRetryHandler">
+			<from uri="direct:hakukohdeReitti" />
+			<setProperty propertyName="hakukohdeOid">
+				<simple>${body}</simple>
+			</setProperty>
+			<setBody>
+				<constant></constant>
+			</setBody>
+			<to uri="bean:haeHakukohteenHakemuksetKomponentti" />
 		</route>
-		<route errorHandlerRef="retryHandler">
-			<from uri="direct:hakuReitti"/>
-			<setProperty propertyName="hakuOid"><simple>${body}</simple></setProperty>
-			<setBody><constant></constant></setBody>
-			<to uri="bean:haeHaunHakemuksetKomponentti"/>
+		<route errorHandlerRef="hakuRetryHandler">
+			<from uri="direct:hakuReitti" />
+			<setProperty propertyName="hakuOid">
+				<simple>${body}</simple>
+			</setProperty>
+			<setBody>
+				<constant></constant>
+			</setBody>
+			<to uri="bean:haeHaunHakemuksetKomponentti" />
 		</route>
 	</camelContext>
 

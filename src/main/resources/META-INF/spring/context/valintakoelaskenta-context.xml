@@ -21,9 +21,13 @@
     <util:properties id="valintakoelaskentaProperties">
         <beans:prop key="hakemus.rest.url">${valintalaskentakoostepalvelu.hakemus.rest.url}</beans:prop>
     </util:properties>
+	
+	<bean id="valintakoelaskentaRetryHandler" class="org.apache.camel.builder.DefaultErrorHandlerBuilder" >
+		<property name="redeliveryPolicy" ref="redeliveryPolicy"/>
+	</bean>
 
 
-    <camelContext id="valintakoelaskentaCamelContext"
+    <camelContext depends-on="valintakoelaskentaRetryHandler" id="valintakoelaskentaCamelContext"
                   autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
         <propertyPlaceholder id="valintakoelaskentaContextProperties" location="ref:valintakoelaskentaProperties"/>
         <proxy id="valintakoelaskentaProxy"
@@ -35,13 +39,7 @@
         <proxy id="hakukohteenValintakoelaskentaAktivointiRajapinta"
                serviceInterface="fi.vm.sade.valinta.kooste.valintakokeet.HakukohteenValintakoelaskentaAktivointiProxy"
                serviceUrl="direct:kaynnistaHakukohteenValintakoelaskentaReitti"/>
-        
-        <errorHandler  id="valintakoelaskentaRetryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
-        <redeliveryPolicyProfile id="retryPolicy"
-       							maximumRedeliveries="10" 
-       							redeliveryDelay="100" 
-       							retryAttemptedLogLevel="ERROR"/>
-       							
+        						
         <route errorHandlerRef="valintakoelaskentaRetryHandler">
             <from uri="direct:valintakoelaskentaReitti"/>
             <setProperty propertyName="hakemustyyppi"><simple>${body.args[0]}</simple></setProperty>

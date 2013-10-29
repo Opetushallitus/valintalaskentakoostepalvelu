@@ -2,6 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
        xmlns:beans="http://www.springframework.org/schema/beans"
+       xmlns:camel="http://camel.apache.org/schema/spring" 
        xmlns:jaxws="http://cxf.apache.org/jaxws"
        xmlns:jaxrs="http://cxf.apache.org/jaxrs"
        xmlns:util="http://www.springframework.org/schema/util"
@@ -9,7 +10,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-
+		   http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
            http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
            http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
@@ -18,8 +19,10 @@
     <ctx:annotation-config/>
 
     <ctx:property-placeholder
-            location="classpath:META-INF/valintalaskentakoostepalvelu.properties, classpath:META-INF/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valinta.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/override.properties"
+            location="classpath:META-INF/kela.properties, classpath:META-INF/valintalaskentakoostepalvelu.properties, classpath:META-INF/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valinta.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/override.properties"
             ignore-resource-not-found="true" properties-ref="defaultProps"/>
+	
+	
 
     <bean id="defaultProps" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
         <property name="properties">
@@ -44,18 +47,12 @@
                          accessDecisionManager="accessDecisionManager"
                          xmlns="http://camel.apache.org/schema/spring-security"/>
 
-    <!--
-        Implementoi TarjontaHakuTiedotPalvelu kun määritelmä tarkentuu! Ajastettu Camel-reitti käyttää sitä!
-     -->
-    <beans:bean id="tarjontaTiedotPalvelu"
-                class="fi.vm.sade.valinta.kooste.tarjonta.stub.TarjontaHakuTiedotPalveluImpl"/>
-
+    
     <!--fetching valintatieto takes ages, consider removing this once valinnan tulokset service has been optimized-->
     <http:conduit name="*.http-conduit">
         <!-- AllowChunking="false" Nginx fails without this -->
         <http:client Connection="Keep-Alive" ConnectionTimeout="0" ReceiveTimeout="0" AllowChunking="false"/>
     </http:conduit>
-
 
     <!-- Configure CXF bus to contain ticketInterceptor -->
     <!--
@@ -69,16 +66,17 @@
         </cxf:inFaultInterceptors>
     </cxf:bus>
     -->
+    <bean id="jacksonMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
     <jaxrs:client id="viestintapalveluClient"
                   serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource"
                   address="${valintalaskentakoostepalvelu.viestintapalvelu.url}">
         <jaxrs:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider">
-                <property name="mapper" ref="jacksonMapper"/>
-            </bean>
+	        <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider">
+	            <property name="mapper" ref="jacksonMapper" />
+	        </bean>
         </jaxrs:providers>
     </jaxrs:client>
-    <beans:bean id="jacksonMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
+    
 
     <jaxws:client id="ValintaperusteServiceClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
@@ -127,7 +125,19 @@
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
         </jaxrs:providers>
     </jaxrs:client>
-
+	<jaxrs:client id="TarjontaHakuResourceRestClient"
+                  address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
+                  serviceClass="fi.vm.sade.tarjonta.service.resources.HakuResource"
+                  inheritHeaders="true">
+        <jaxrs:outInterceptors>
+            <ref bean="ticketInterceptorRest"/>
+        </jaxrs:outInterceptors>
+        <jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+        </jaxrs:providers>
+    </jaxrs:client>
+    
     <jaxrs:client id="SijoitteluServiceRestClient"
                   address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
                   serviceClass="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource"
@@ -152,6 +162,20 @@
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
         </jaxrs:providers>
     </jaxrs:client>
+    <!-- fi.vm.sade.organisaatio.resource.OrganisaatioResource vai fi.vm.sade.valinta.kooste.tarjonta-->
+    <jaxrs:client id="OrganisaatioResourceClient"
+                  address="${valintalaskentakoostepalvelu.organisaatioService.rest.url}"
+                  serviceClass="fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioResource"
+                  inheritHeaders="true">
+        <jaxrs:outInterceptors>
+            <ref bean="ticketInterceptorRest"/>
+        </jaxrs:outInterceptors>
+        <jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+        </jaxrs:providers>
+    </jaxrs:client>
+
 
     <jaxws:client id="ValintalaskentaServiceClient"
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
@@ -174,7 +198,9 @@
             </bean>
         </jaxws:outInterceptors>
     </jaxws:client>
-
+<!--
+ 	Kaytetaan REST rajapintaa koska se on tuetumpi!
+  
     <jaxws:client id="organisaatioServiceClient"
                   serviceClass="fi.vm.sade.organisaatio.api.model.OrganisaatioService"
                   address="${valintalaskentakoostepalvelu.organisaatioService.url}">
@@ -190,7 +216,7 @@
             </bean>
         </jaxws:outInterceptors>
     </jaxws:client>
-
+ -->
     <jaxws:client id="valintatietoService"
                   serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
                   address="${valintalaskentakoostepalvelu.valintaTulosService.url}">
@@ -252,18 +278,24 @@
         </jaxws:outInterceptors>
     </jaxws:client>
 	
+	<bean id="redeliveryPolicy" class="org.apache.camel.processor.RedeliveryPolicy">
+		<property name="maximumRedeliveries" value="5" />
+		<property name="redeliveryDelay" value="25" />
+		<property name="retryAttemptedLogLevel" value="ERROR" />
+	</bean>
+	
 	<beans:import resource="classpath:META-INF/spring/context/valintatieto-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/haku-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/tarjonta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/hakuimport-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/kela-context.xml"/>
-    <beans:import resource="classpath:META-INF/spring/context/tarjonta-ajastus-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintakoelaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-excel-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/viestintapalvelu-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/parametrit-context.xml"/>
-
-
+	
+	
+	
 </beans>

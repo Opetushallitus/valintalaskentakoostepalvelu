@@ -7,6 +7,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
+
 public class HakemuksenTilaUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(HakemuksenTilaUtil.class);
@@ -22,12 +24,24 @@ public class HakemuksenTilaUtil {
         return Collections.unmodifiableMap(tmp);
     }
 
-    public static String tilaConverter(String tila) {
-        if (TILAT.containsKey(tila)) {
-            return TILAT.get(tila);
-        } else {
-            LOG.debug("Hakemuksen tila utiliteetilla ei ole konversiota enumille: {}", tila);
-            return tila;
+    public static String tilaConverter(HakemuksenTila tila, boolean harkinnanvarainen) {
+        switch (tila) {
+        case HYLATTY:
+            return "Hylätty";
+        case VARALLA:
+            return "Varalla";
+        case PERUUNTUNUT:
+            return "Peruuntunut";
+        case HYVAKSYTTY:
+            if (harkinnanvarainen) {
+                return "Harkinnanvaraisesti hyväksytty";
+            }
+            return "Hyväksytty";
+        case PERUNUT:
+            return "Perunut";
+        default:
+            LOG.error("Hakemuksen tila utiliteetilla ei ole konversiota enumille: {}", tila);
+            return tila.toString();
         }
     }
 }

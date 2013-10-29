@@ -2,42 +2,73 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
 	xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:util="http://www.springframework.org/schema/util"
 	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
 	xsi:schemaLocation="
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
 	<ctx:annotation-config />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.util" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.komponentti" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.proxy" />
     
-	<camelContext id="kelaCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+    <bean id="kelaDeadLetterHandler" class="org.apache.camel.builder.DeadLetterChannelBuilder" >
+		<property name="deadLetterUri" value="bean:failedKelaExport"/>
+	</bean>
+    <!--
+		Camel-reitin konfiguraatio. Tarkoitus on siis ylikirjoittaa arvot propertyplaceholderin konfiguraatioilla! 
+	 -->
+	<util:properties id="kelaProperties">
+		<beans:prop key="username">${kela.ftp.username}</beans:prop>
+		<beans:prop key="password">${kela.ftp.password}</beans:prop>
+		<beans:prop key="host">${kela.ftp.host}</beans:prop>
+		<beans:prop key="port">${kela.ftp.port}</beans:prop>
+		<beans:prop key="protocol">${kela.ftp.protocol}</beans:prop>
+		<beans:prop key="path">${kela.ftp.path}</beans:prop>
+	</util:properties>
+	
+	<camelContext depends-on="kelaDeadLetterHandler" id="kelaCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+		<propertyPlaceholder id="kelaCamelProperties"
+			location="ref:kelaProperties" />
 		<proxy id="kelaAktivointiRajapinta"
-			serviceInterface="fi.vm.sade.valinta.kooste.kela.proxy.TKUVAYHVAExportProxy"
+			serviceInterface="fi.vm.sade.valinta.kooste.kela.proxy.KelaExportProxy"
 			serviceUrl="direct:kaynnistaKelaReitti" />
-		<route>
+		<proxy id="kelaFtpProxy"
+			serviceInterface="fi.vm.sade.valinta.kooste.kela.proxy.KelaFtpProxy"
+			serviceUrl="direct:kelaTiedostopalvelin" />
+		<route errorHandlerRef="kelaDeadLetterHandler">
 			<from uri="direct:kaynnistaKelaReitti" />
-            <log message="kaynnistaKelaReitti" />
 			<setProperty propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
-			<setProperty propertyName="hakukohdeOid"><simple>${body.args[1]}</simple></setProperty>
-			<!-- 
-		    @Property("lukuvuosi") Date lukuvuosi, 
-		    @Property("poimintapaivamaara") Date poimintapaivamaara
-		     -->
-			<setProperty propertyName="lukuvuosi"><simple>${body.args[2]}</simple></setProperty>
-			<setProperty propertyName="poimintapaivamaara"><simple>${body.args[3]}</simple></setProperty>
-			
+			<setProperty propertyName="lukuvuosi"><simple>${body.args[1]}</simple></setProperty>
+			<setProperty propertyName="poimintapaivamaara"><simple>${body.args[2]}</simple></setProperty>
+            <setProperty propertyName="authentication"><simple>${body.args[3]}</simple></setProperty>
+            <process ref="securityPreprocessor"/>
             <policy ref="admin">
-            	<process ref="securityPreprocessor"/>
-			    <to uri="bean:TKUVAYHVAKomponentti" />
+            	<to uri="bean:sijoitteluKaikkiKoulutuspaikkallisetKomponentti"/>
+            	<split strategyRef="aggregatorStrategy" parallelProcessing="false" stopOnException="true">
+                	<simple>${body}</simple>
+	                <process ref="securityPreprocessor"/>
+	                <to uri="bean:TKUVAYHVAKomponentti" />
+	                <convertBodyTo type="fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA"/>
+	            </split>
             </policy>
-            <log message="kaynnistaKelaReitti ajettu" />
+            <process ref="aggregateInBody"/>
+            <convertBodyTo type="java.util.Collection"/>
+            <to uri="bean:kelaExportKomponentti" />
+		</route>
+		<route>
+			<from uri="direct:kelaTiedostopalvelin" />
+			<setHeader headerName="CamelFileName"><simple>${body.args[0]}</simple></setHeader>
+			<setBody><simple>${body.args[1]}</simple></setBody>
+			<to uri="{{protocol}}://{{username}}@{{host}}:{{port}}{{path}}?password={{password}}&amp;ftpClient.dataTimeout=30000&amp;passiveMode=true" />
 		</route>
 	</camelContext>
 
-
+	<bean id="aggregatorStrategy" class="org.apache.camel.processor.aggregate.GroupedExchangeAggregationStrategy"/>
 </beans>

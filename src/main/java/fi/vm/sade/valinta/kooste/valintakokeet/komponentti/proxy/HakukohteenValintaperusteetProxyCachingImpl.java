@@ -1,39 +1,42 @@
 package fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
+import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintaperusteProxy;
 
 /**
- * User: wuoti
- * Date: 5.8.2013
- * Time: 12.59
+ * User: wuoti Date: 5.8.2013 Time: 12.59
  * <p/>
- * Cachettava proxy valintaperusteille. Tallentaa välimuistiin hakukohteen kaikkien valinnan vaiheiden valintaperusteet.
+ * Cachettava proxy valintaperusteille. Tallentaa välimuistiin hakukohteen
+ * kaikkien valinnan vaiheiden valintaperusteet.
  */
 @Component
 public class HakukohteenValintaperusteetProxyCachingImpl implements HakukohteenValintaperusteetProxy {
 
     @Autowired
-    private ValintaperusteService valintaperusteService;
+    private ValintaperusteProxy valintaperusteProxy;
 
     private Cache<String, List<ValintaperusteetTyyppi>> valintaperusteetCache;
 
     @PostConstruct
     public void init() {
-        valintaperusteetCache = CacheBuilder
-                .newBuilder()
-                .recordStats()
-                .expireAfterWrite(24, TimeUnit.HOURS)
-                .build();
+        valintaperusteetCache = CacheBuilder.newBuilder().recordStats().expireAfterWrite(24, TimeUnit.HOURS).build();
     }
 
     @Override
@@ -76,7 +79,7 @@ public class HakukohteenValintaperusteetProxyCachingImpl implements HakukohteenV
         List<ValintaperusteetTyyppi> result = new ArrayList<ValintaperusteetTyyppi>();
 
         if (!notCached.isEmpty()) {
-            List<ValintaperusteetTyyppi> vps = valintaperusteService.haeValintaperusteet(notCached);
+            List<ValintaperusteetTyyppi> vps = valintaperusteProxy.haeValintaperusteet(notCached);
 
             Map<String, List<ValintaperusteetTyyppi>> map = new HashMap<String, List<ValintaperusteetTyyppi>>();
             for (ValintaperusteetTyyppi vp : vps) {

@@ -70,7 +70,9 @@ public class OsoitetarratKomponentti {
             throw new ViestintapalveluException("Yritetään luoda nolla kappaletta osoitetarroja!");
         }
         LOG.debug("Luodaan {}kpl osoitetarroja!", osoitteet.size());
-        Response response = viestintapalveluProxy.haeOsoitetarrat(new Osoitteet(osoitteet));
+        Osoitteet viesti = new Osoitteet(osoitteet);
+        LOG.debug("\r\n{}", new ViestiWrapper(viesti));
+        Response response = viestintapalveluProxy.haeOsoitetarrat(viesti);
         return response.getEntity();
     }
 }

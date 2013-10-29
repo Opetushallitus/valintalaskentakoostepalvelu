@@ -30,6 +30,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.gson.Gson;
 
+import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
@@ -37,6 +38,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintaperusteProxy;
 
 /**
  * @author Jussi Jartamo
@@ -422,6 +424,16 @@ public class HaunValintakoelaskentaKoosteReititysTest {
     @Bean
     public ApplicationResource getApplicationResourceMock() {
         return mock(ApplicationResource.class);
+    }
+
+    @Bean
+    public ValintaperusteProxy getValintaperusteProxyMock() {
+        return mock(ValintaperusteProxy.class);
+    }
+
+    @Bean
+    public KoodiService getKoodiService() {
+        return mock(KoodiService.class);
     }
 
     @Test

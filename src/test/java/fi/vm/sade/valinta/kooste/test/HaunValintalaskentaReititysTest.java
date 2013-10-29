@@ -29,7 +29,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import fi.vm.sade.organisaatio.api.model.OrganisaatioService;
+import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
@@ -37,6 +37,7 @@ import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.TavallinenValinnanVaiheTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
+import fi.vm.sade.tarjonta.service.resources.HakuResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.tarjonta.service.types.TarjontaTila;
@@ -46,6 +47,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
+import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResource;
 
 /**
@@ -159,8 +161,18 @@ public class HaunValintalaskentaReititysTest {
     }
 
     @Bean
-    public OrganisaatioService getOrganisaatioServiceMock() {
-        return mock(OrganisaatioService.class);
+    public OrganisaatioResource getOrganisaatioResourceMock() {
+        return mock(OrganisaatioResource.class);
+    }
+
+    @Bean
+    public KoodiService getKoodiService() {
+        return mock(KoodiService.class);
+    }
+
+    @Bean
+    public HakuResource getHakuResource() {
+        return mock(HakuResource.class);
     }
 
     @Autowired

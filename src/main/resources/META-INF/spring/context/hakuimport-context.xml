@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
-	xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
-	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
-	xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
+       xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
+       xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
@@ -13,14 +13,14 @@
        http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
        http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
 
-	<ctx:annotation-config />
+    <ctx:annotation-config />
 
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakuimport" />
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakuimport" />
 
-	<util:properties id="hakuimportProperties">
-		<beans:prop key="tarjonta.rest">${valintalaskentakoostepalvelu.tarjonta.rest.url}
-		</beans:prop>
-	</util:properties>
+    <util:properties id="hakuimportProperties">
+        <beans:prop key="tarjonta.rest">${valintalaskentakoostepalvelu.tarjonta.rest.url}
+        </beans:prop>
+    </util:properties>
 
 	<camelContext id="hakukohdeImportCamelContext"
 		autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
@@ -32,7 +32,6 @@
 			
 		<route id="hakuImportRoute" >
 			<from uri="direct:kaynnistaHakuImportReitti" />
-            <log message="kaynnistaHakuImportReitti: {{tarjonta.rest}}/haku/${body}/hakukohde?count=99999999" />
 			<policy ref="admin">
 				<process ref="securityPreprocessor"/>
 				<camel:recipientList>
@@ -43,7 +42,7 @@
 					<to uri="bean:suoritaHakukohdeImportKomponentti" />
 				</split>
 			</policy>
-            <log message="kaynnistaHakuImportReitti ajettu" />
+
 		</route>
 	</camelContext>
 	
