@@ -34,9 +34,7 @@
 			<from uri="direct:kaynnistaHakuImportReitti" />
 			<policy ref="admin">
 				<process ref="securityPreprocessor"/>
-				<camel:recipientList>
-					<camel:simple>{{tarjonta.rest}}/haku/${body}/hakukohde?count=99999999</camel:simple>
-				</camel:recipientList>
+				<to uri="{{tarjonta.rest}}/haku/${body}/hakukohde?count=99999999"/>
 				<split parallelProcessing="false" >
 					<method bean="jsonSplitter" method="split" />
 					<to uri="bean:suoritaHakukohdeImportKomponentti" />
