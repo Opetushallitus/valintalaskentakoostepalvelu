@@ -53,10 +53,6 @@
         <!-- AllowChunking="false" Nginx fails without this -->
         <http:client Connection="Keep-Alive" ConnectionTimeout="0" ReceiveTimeout="0" AllowChunking="false"/>
     </http:conduit>
-	<http:conduit  name="ViestintapalveluRestClient.http-conduit">
-        <!-- AllowChunking="false" Nginx fails without this -->
-        <http:client ReceiveTimeout="3000000" ConnectionTimeout="3000000"/>
-    </http:conduit>
     <!-- Configure CXF bus to contain ticketInterceptor -->
     <!--
     <cxf:bus>
