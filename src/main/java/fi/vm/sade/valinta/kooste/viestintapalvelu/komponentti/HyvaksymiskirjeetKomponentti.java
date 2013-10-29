@@ -171,10 +171,18 @@ public class HyvaksymiskirjeetKomponentti {
                 if (!metaKohteet.containsKey(hakukohdeOid)) { // lisataan
                                                               // puuttuva
                                                               // hakukohde
-                    HakukohdeNimiRDTO nimi = tarjontaProxy.haeHakukohdeNimi(hakukohdeOid);
-                    String hakukohdeNimi = extractHakukohdeNimi(nimi, kielikoodi);
-                    String tarjoajaNimi = extractTarjoajaNimi(nimi, kielikoodi);
-                    metaKohteet.put(hakukohdeOid, new MetaHakukohde(hakukohdeNimi, tarjoajaNimi));
+                    try {
+                        HakukohdeNimiRDTO nimi = tarjontaProxy.haeHakukohdeNimi(hakukohdeOid);
+                        String hakukohdeNimi = extractHakukohdeNimi(nimi, kielikoodi);
+                        String tarjoajaNimi = extractTarjoajaNimi(nimi, kielikoodi);
+                        metaKohteet.put(hakukohdeOid, new MetaHakukohde(hakukohdeNimi, tarjoajaNimi));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        LOG.error("Tarjonnasta ei saatu hakukohdetta {}: {}",
+                                new Object[] { hakukohdeOid, e.getMessage() });
+                        metaKohteet.put(hakukohdeOid, new MetaHakukohde(new StringBuilder().append("Hakukohde ")
+                                .append(hakukohdeOid).append(" ei löydy tarjonnasta!").toString(), TYHJA_TARJOAJANIMI));
+                    }
                 }
             }
         }
