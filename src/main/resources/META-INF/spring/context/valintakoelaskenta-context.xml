@@ -22,7 +22,33 @@
         <beans:prop key="hakemus.rest.url">${valintalaskentakoostepalvelu.hakemus.rest.url}</beans:prop>
     </util:properties>
 
-    <routeContext id="valintakoelaskentaRoutes" xmlns="http://camel.apache.org/schema/spring">
+
+    <camelContext id="valintakoelaskentaCamelContext"
+                  autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+        <propertyPlaceholder id="valintakoelaskentaContextProperties" location="ref:valintakoelaskentaProperties"/>
+        <proxy id="valintakoelaskentaProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.ValintakoelaskentaProxy"
+               serviceUrl="direct:valintakoelaskentaReitti"/>
+        <proxy id="haunValintakoelaskentaAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiProxy"
+               serviceUrl="direct:kaynnistaHaunValintakoelaskentaReitti"/>
+        <proxy id="hakukohteenValintakoelaskentaAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.valintakokeet.HakukohteenValintakoelaskentaAktivointiProxy"
+               serviceUrl="direct:kaynnistaHakukohteenValintakoelaskentaReitti"/>
+        
+        <errorHandler  id="valintakoelaskentaRetryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
+        <redeliveryPolicyProfile id="retryPolicy"
+       							maximumRedeliveries="10" 
+       							redeliveryDelay="100" 
+       							retryAttemptedLogLevel="ERROR"/>
+       							
+        <route errorHandlerRef="valintakoelaskentaRetryHandler">
+            <from uri="direct:valintakoelaskentaReitti"/>
+            <setProperty propertyName="hakemustyyppi"><simple>${body.args[0]}</simple></setProperty>
+            <setProperty propertyName="valintaperusteet"><simple>${body.args[1]}</simple></setProperty>
+            <process ref="securityPreprocessor"/>
+            <to uri="bean:valintakoelaskentakomponentti"/>
+        </route>
         <route>
             <from uri="direct:kaynnistaHakemuksenValintakoelaskentaReitti"/>
             <log message="kaynnistaHakemuksenValintakoelaskentaReitti: ${body}" />
@@ -69,17 +95,5 @@
             </policy>
             <log message="kaynnistaHakukohteenValintakoelaskentaReitti ajettu" />
         </route>
-    </routeContext>
-
-    <camelContext id="valintakoelaskentaCamelContext"
-                  autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
-        <propertyPlaceholder id="valintakoelaskentaContextProperties" location="ref:valintakoelaskentaProperties"/>
-        <proxy id="haunValintakoelaskentaAktivointiRajapinta"
-               serviceInterface="fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiProxy"
-               serviceUrl="direct:kaynnistaHaunValintakoelaskentaReitti"/>
-        <proxy id="hakukohteenValintakoelaskentaAktivointiRajapinta"
-               serviceInterface="fi.vm.sade.valinta.kooste.valintakokeet.HakukohteenValintakoelaskentaAktivointiProxy"
-               serviceUrl="direct:kaynnistaHakukohteenValintakoelaskentaReitti"/>
-        <routeContextRef ref="valintakoelaskentaRoutes"/>
     </camelContext>
 </beans>

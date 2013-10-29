@@ -30,6 +30,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.gson.Gson;
 
+import fi.vm.sade.organisaatio.api.model.OrganisaatioService;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
@@ -44,7 +45,8 @@ import fi.vm.sade.valinta.kooste.valintakokeet.HakukohteenValintakoelaskentaAkti
 @Configuration
 @ContextConfiguration(classes = HakukohteenValintakoelaskentaKoosteReititysTest.class)
 @PropertySource("classpath:valintakoelaskenta-test.properties")
-@ImportResource({ "classpath:META-INF/spring/context/valintakoelaskenta-context.xml", "test-context.xml" })
+@ImportResource({ "classpath:META-INF/spring/context/haku-context.xml",
+        "classpath:META-INF/spring/context/valintakoelaskenta-context.xml", "test-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HakukohteenValintakoelaskentaKoosteReititysTest {
     @Autowired
@@ -404,6 +406,11 @@ public class HakukohteenValintakoelaskentaKoosteReititysTest {
 
     @Autowired
     private ValintalaskentaService valintalaskentaServiceMock;
+
+    @Bean
+    public OrganisaatioService getOrganisaatioServiceMock() {
+        return mock(OrganisaatioService.class);
+    }
 
     @Bean
     public ValintaperusteService getValintaperusteServiceMock() {

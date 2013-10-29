@@ -20,18 +20,17 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
-import fi.vm.sade.valinta.kooste.exception.TarjontaException;
-import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
+import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluIlmankoulutuspaikkaaProxy;
+import fi.vm.sade.valinta.kooste.tarjonta.TarjontaProxy;
 import fi.vm.sade.valinta.kooste.util.Formatter;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluJalkiohjauskirjeetProxy;
 
 /**
  * @author Jussi Jartamo
@@ -44,26 +43,24 @@ public class JalkiohjauskirjeetKomponentti {
     private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
     @Autowired
-    private SijoitteluResource sijoitteluResource;
+    private SijoitteluIlmankoulutuspaikkaaProxy sijoitteluProxy;
+    // private SijoitteluResource sijoitteluResource;
 
     @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}")
     private String sijoitteluResourceUrl;
 
     @Autowired
-    private HakukohdeResource tarjontaResource;
-
-    @Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}")
-    private String tarjontaResourceUrl;
+    private TarjontaProxy tarjontaProxy;
 
     @Autowired
     private HaeOsoiteKomponentti osoiteKomponentti;
 
     @Autowired
-    private ViestintapalveluResource viestintapalvelu;
+    private ViestintapalveluJalkiohjauskirjeetProxy viestintapalveluProxy;
 
     public Object teeJalkiohjauskirjeet(@Property("kielikoodi") String kielikoodi, @Property("hakuOid") String hakuOid) {
         LOG.debug("Jalkiohjauskirjeet for haku '{}'", new Object[] { hakuOid });
-        final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluResource.ilmankoulutuspaikkaa(hakuOid,
+        final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluProxy.ilmankoulutuspaikkaa(hakuOid,
                 SijoitteluResource.LATEST);
         final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
         if (kaikkiHyvaksymattomat == 0) {
@@ -121,12 +118,7 @@ public class JalkiohjauskirjeetKomponentti {
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!", kirjeet.size());
-        Response response = viestintapalvelu.haeJalkiohjauskirjeet(new Kirjeet(kirjeet));
-        LOG.debug("Status {} \r\n {} \r\n {}", new Object[] { response.getStatus() });
-        if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
-            throw new ViestintapalveluException(
-                    "Viestintäpalvelu epäonnistui jälkiohjauskirjeiden luonnissa. Yritä uudelleen tai ota yhteyttä ylläpitoon!");
-        }
+        Response response = viestintapalveluProxy.haeJalkiohjauskirjeet(new Kirjeet(kirjeet));
         return response.getEntity();
     }
 
@@ -143,7 +135,7 @@ public class JalkiohjauskirjeetKomponentti {
                 if (!metaKohteet.containsKey(hakukohdeOid)) { // lisataan
                                                               // puuttuva
                                                               // hakukohde
-                    HakukohdeNimiRDTO nimi = haeHakukohdeNimi(hakukohdeOid);
+                    HakukohdeNimiRDTO nimi = tarjontaProxy.haeHakukohdeNimi(hakukohdeOid);
                     String hakukohdeNimi = extractHakukohdeNimi(nimi, kielikoodi);
                     String tarjoajaNimi = extractTarjoajaNimi(nimi, kielikoodi);
                     metaKohteet.put(hakukohdeOid, new MetaHakukohde(hakukohdeNimi, tarjoajaNimi));
@@ -177,19 +169,4 @@ public class JalkiohjauskirjeetKomponentti {
                                                                   // joku!
     }
 
-    private HakukohdeNimiRDTO haeHakukohdeNimi(String hakukohdeOid) {
-        if (hakukohdeOid == null) {
-            throw new SijoittelupalveluException(
-                    "Sijoittelu palautti puutteellisesti luodun hakutoiveen! Hakukohteen tunniste puuttuu!");
-        } else {
-            LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[] { tarjontaResourceUrl,
-                    hakukohdeOid });
-            try {
-                HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
-                return nimi;
-            } catch (Exception e) {
-                throw new TarjontaException("Tarjonnasta ei löydy hakukohdetta " + hakukohdeOid);
-            }
-        }
-    }
 }

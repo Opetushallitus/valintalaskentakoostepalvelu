@@ -29,6 +29,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import fi.vm.sade.organisaatio.api.model.OrganisaatioService;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
@@ -36,6 +37,7 @@ import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.TavallinenValinnanVaiheTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.tarjonta.service.types.TarjontaTila;
 import fi.vm.sade.tarjonta.service.types.TarjontaTyyppi;
@@ -52,7 +54,9 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.ValintalaskentaAktivointiResour
 @Configuration
 @ContextConfiguration(classes = HaunValintalaskentaReititysTest.class)
 @PropertySource({ "classpath:META-INF/valintalaskentakoostepalvelu.properties", "classpath:test.properties" })
-@ImportResource({ "classpath:META-INF/spring/context/valintalaskenta-context.xml", "test-context.xml" })
+@ImportResource({ "classpath:META-INF/spring/context/haku-context.xml",
+        "classpath:META-INF/spring/context/tarjonta-context.xml",
+        "classpath:META-INF/spring/context/valintalaskenta-context.xml", "test-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HaunValintalaskentaReititysTest {
 
@@ -66,6 +70,11 @@ public class HaunValintalaskentaReititysTest {
     private static final String HAKEMUSOID = "hakemus0";
     private static final String HAKUKOHDEOID = "hakukohde0";
     private static final Integer VALINNANVAIHE = 6;
+
+    @Bean
+    public HakukohdeResource getHakukohdeResource() {
+        return mock(HakukohdeResource.class);
+    }
 
     @Bean
     public ApplicationResource getApplicationResourceMock() {
@@ -128,7 +137,7 @@ public class HaunValintalaskentaReititysTest {
         return mock(ValintalaskentaService.class);
     }
 
-    @Bean(name="tarjontaServiceClientAsAdmin")
+    @Bean(name = "tarjontaServiceClientAsAdmin")
     public TarjontaPublicService getTarjontaPublicServiceMock() {
         TarjontaPublicService tarjontaService = mock(TarjontaPublicService.class);
         TarjontaTyyppi tarjonta = new TarjontaTyyppi();
@@ -147,6 +156,11 @@ public class HaunValintalaskentaReititysTest {
         ParametriService parametriService = mock(ParametriService.class);
         when(parametriService.valintalaskentaEnabled(HAKUOID)).thenReturn(true);
         return parametriService;
+    }
+
+    @Bean
+    public OrganisaatioService getOrganisaatioServiceMock() {
+        return mock(OrganisaatioService.class);
     }
 
     @Autowired

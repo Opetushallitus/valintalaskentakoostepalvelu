@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
+	xmlns:cxf="http://camel.apache.org/schema/cxf" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:camel="http://camel.apache.org/schema/spring" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
+       http://cxf.apache.org/transports/camel http://cxf.apache.org/transports/camel.xsd http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<ctx:annotation-config />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatieto.komponentti" />
+
+	<camelContext id="valintatietoCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+		<proxy id="valintatietoProxy"
+			serviceInterface="fi.vm.sade.valinta.kooste.valintatieto.komponentti.proxy.ValintatietoProxy"
+			serviceUrl="direct:valintatietoReitti" />
+		<proxy id="valintatietohakukohteelleProxy"
+			serviceInterface="fi.vm.sade.valinta.kooste.valintatieto.komponentti.proxy.ValintatietoHakukohteelleProxy"
+			serviceUrl="direct:valintatietoHakukohteelleReitti" />
+			
+        <errorHandler  id="retryHandler" type="DefaultErrorHandler" redeliveryPolicyRef="retryPolicy" />
+        <redeliveryPolicyProfile id="retryPolicy"
+       							maximumRedeliveries="10" 
+       							redeliveryDelay="100" 
+       							retryAttemptedLogLevel="ERROR"/>
+        
+        <route errorHandlerRef="retryHandler">
+			<from uri="direct:valintatietoHakukohteelleReitti"/>
+			<setProperty propertyName="valintakoeOid"><simple>${body.args[0]}</simple></setProperty>
+			<setProperty propertyName="hakukohdeOid"><simple>${body.args[1]}</simple></setProperty>
+			<to uri="bean:valintatietoHakukohteelleKomponentti"/>
+		</route>
+		<route errorHandlerRef="retryHandler">
+			<from uri="direct:valintatietoReitti"/>
+			<setProperty propertyName="hakuOid"><simple>${body}</simple></setProperty>
+			<to uri="bean:valintatietoKomponentti"/>
+		</route>
+	</camelContext>
+
+</beans>

@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 
@@ -17,7 +17,7 @@ public class HaeOsoiteKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HaeOsoiteKomponentti.class);
 
     @Autowired
-    private ApplicationResource applicationResource;
+    private HakemusProxy hakemusProxy;
 
     @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
     private String applicationResourceUrl;
@@ -25,7 +25,7 @@ public class HaeOsoiteKomponentti {
     public Osoite haeOsoite(String hakemusOid) {
         try {
             LOG.info("Haetaan hakemus {}/applications/{}", new Object[] { applicationResourceUrl, hakemusOid });
-            Hakemus hakemus = applicationResource.getApplicationByOid(hakemusOid);
+            Hakemus hakemus = hakemusProxy.haeHakemus(hakemusOid);
             if (hakemus == null) {
                 LOG.error("Hakemus {}/applications/{} null-arvo!", new Object[] { applicationResourceUrl, hakemusOid, });
             }

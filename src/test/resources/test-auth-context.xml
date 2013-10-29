@@ -27,4 +27,17 @@
 
     <bean id="defaultProps" class="org.springframework.beans.factory.config.PropertiesFactoryBean" />
     
+    <s:authentication-manager alias="authenticationManager">
+    </s:authentication-manager>
+    
+    <bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+        <property name="allowIfAllAbstainDecisions" value="true"/>
+        <property name="decisionVoters">
+            <list>
+                <bean class="org.springframework.security.access.vote.RoleVoter"/>
+            </list>
+        </property>
+    </bean>
+    <authorizationPolicy id="admin" access="permitAll"
+                         xmlns="http://camel.apache.org/schema/spring-security"/>
 </beans>

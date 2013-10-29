@@ -37,6 +37,7 @@ public class ValintalaskennanTulosExcelKomponentti {
     public InputStream luoXls(@Simple("${property.hakukohdeOid}") String hakukohdeOid) {
         LOG.debug("Yhteys {} HakukohdeResource.hakukohde({})",
                 new Object[] { valintalaskentaResourceUrl, hakukohdeOid });
+
         List<ValinnanvaiheDTO> valinnanVaiheet = hakukohdeResource.hakukohde(hakukohdeOid);
         // -jonosija
         // -nimi
