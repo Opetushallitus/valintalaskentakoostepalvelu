@@ -60,18 +60,15 @@
         </route>
         <route>
             <from uri="direct:kaynnistaHakukohteenValintalaskentaReitti"/>
-            <log message="kaynnistaHakukohteenValintalaskentaReitti hakukohde: ${body.args[0]} valinnanvaihe: ${body.args[1]}" />
             <policy ref="admin">
             	<process ref="securityPreprocessor"/>
             	<setProperty propertyName="hakukohdeOid"><simple>${body.args[0]}</simple></setProperty>
             	<setProperty propertyName="valinnanvaihe"><simple>${body.args[1]}</simple></setProperty>
             	<to uri="direct:suoritaLaskenta"/>
             </policy>
-            <log message="kaynnistaHakukohteenValintalaskentaReitti ajettu" />
         </route>
         <route>
             <from uri="direct:kaynnistaHaunValintalaskentaReitti"/>
-            <log message="kaynnistaHaunValintalaskentaReitti haku: ${body.args[0]}" />
             <setProperty propertyName="hakuOid">
                 <simple>${body.args[0]}</simple>
             </setProperty>
@@ -85,7 +82,6 @@
 	            	<to uri="direct:suoritaLaskenta"/>
                 </split>
             </policy>
-            <log message="kaynnistaHaunValintalaskentaReitti ajettu" />
         </route>
     </camelContext>
 </beans>

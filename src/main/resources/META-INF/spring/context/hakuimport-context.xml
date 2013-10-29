@@ -22,30 +22,25 @@
         </beans:prop>
     </util:properties>
 
-	<camelContext id="hakukohdeImportCamelContext"
-		autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
-		<propertyPlaceholder id="hakuimportContextProperties"
-			location="ref:hakuimportProperties" />
-		<proxy id="hakuImportAktivointiRajapinta" 
-			serviceInterface="fi.vm.sade.valinta.kooste.hakuimport.HakuImportAktivointiProxy"
-			serviceUrl="direct:kaynnistaHakuImportReitti" />
-			
-		<route id="hakuImportRoute" >
-			<from uri="direct:kaynnistaHakuImportReitti" />
-			<policy ref="admin">
-				<process ref="securityPreprocessor"/>
-				<camel:recipientList>
-					<camel:simple>{{tarjonta.rest}}/haku/${body}/hakukohde?count=99999999</camel:simple>
-				</camel:recipientList>
-				<split parallelProcessing="false" >
-					<method bean="jsonSplitter" method="split" />
-					<to uri="bean:suoritaHakukohdeImportKomponentti" />
-				</split>
-			</policy>
+    <camelContext id="hakukohdeImportCamelContext"
+                  autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
+        <propertyPlaceholder id="hakuimportContextProperties"
+                             location="ref:hakuimportProperties" />
+        <proxy id="hakuImportAktivointiRajapinta"
+               serviceInterface="fi.vm.sade.valinta.kooste.hakuimport.HakuImportAktivointiProxy"
+               serviceUrl="direct:kaynnistaHakuImportReitti" />
+        <routeContextRef ref="hakuImportRoutes" />
+    </camelContext>
 
-		</route>
-	</camelContext>
-	
+    <routeContext id="hakuImportRoutes" xmlns="http://camel.apache.org/schema/spring">
+        <route id="hakuImportRoute" >
+            <from uri="direct:kaynnistaHakuImportReitti" />
+            <policy ref="admin">
+                <process ref="securityPreprocessor"/>
+                    <to uri="bean:suoritaHakuImportKomponentti" />
+            </policy>
+        </route>
+    </routeContext>
 
 
 </beans>
