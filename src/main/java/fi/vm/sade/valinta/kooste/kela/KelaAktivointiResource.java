@@ -5,6 +5,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -58,6 +59,9 @@ public class KelaAktivointiResource {
     public Response aktivoiKelaTiedostonluonti(@QueryParam("hakuOid") String hakuOid,
             @QueryParam("hakukohdeOid") String hakukohdeOid, @QueryParam("lukuvuosi") DateParam l,
             @QueryParam("poimintapaivamaara") DateParam poimintapaivamaara) {
+        // tietoe ei ole viela saatavilla
+        String aineistonnimi = "Toisen asteen vastaanottotiedot";
+        String organisaationnimi = "OPH";
         int lukuvuosi = 2014;
         int kuukausi = 1;
         try {
@@ -82,8 +86,8 @@ public class KelaAktivointiResource {
             // kerralla
             //
 
-            kelaExportProxy.luoTKUVAYHVA(hakuOid, new DateTime(lukuvuosi, kuukausi, 1, 1, 1).toDate(),
-                    poimintapaivamaara.getDate(), SecurityContextHolder.getContext().getAuthentication());
+            kelaExportProxy.luoTKUVAYHVA(hakuOid, new DateTime(lukuvuosi, kuukausi, 1, 1, 1).toDate(), new Date(),
+                    SecurityContextHolder.getContext().getAuthentication());
 
             return Response.ok().build();
         } catch (Exception e) {
