@@ -13,5 +13,6 @@ import org.springframework.security.core.Authentication;
  */
 public interface KelaExportProxy {
 
-    Future<Object> luoTKUVAYHVA(String hakuOid, Date lukuvuosi, Date poimintapaivamaara, Authentication authentication);
+    Future<Object> luoTKUVAYHVA(String hakuOid, Date lukuvuosi, Date poimintapaivamaara, String aineistonNimi,
+            String organisaationNimi, Authentication authentication);
 }

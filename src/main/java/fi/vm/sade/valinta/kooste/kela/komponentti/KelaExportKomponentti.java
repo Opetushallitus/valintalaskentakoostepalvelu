@@ -13,8 +13,8 @@ import java.util.Deque;
 import java.util.List;
 
 import org.apache.camel.Body;
+import org.apache.camel.Property;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,8 @@ public class KelaExportKomponentti {
     @Autowired
     private KelaCache kelaCache;
 
-    public void exportKela(@Body List<TKUVAYHVA> data) throws IOException {
+    public void exportKela(@Property("aineistonNimi") String aineistonNimi,
+            @Property("organisaationNimi") String organisaationNimi, @Body List<TKUVAYHVA> data) throws IOException {
         int count = data.size();
         LOG.info("KELA-dokumentin luonti {} tietueelle", count);
 
@@ -44,7 +45,7 @@ public class KelaExportKomponentti {
             streams.add(new ByteArrayInputStream(t.toByteArray()));
         }
         streams.addFirst(new ByteArrayInputStream(new TKUVAALKU.Builder().setAjopaivamaara(new Date())
-                .setAineistonnimi(StringUtils.EMPTY).setOrganisaationimi(StringUtils.EMPTY).build().toByteArray()));
+                .setAineistonnimi(aineistonNimi).setOrganisaationimi(organisaationNimi).build().toByteArray()));
         streams.addLast(new ByteArrayInputStream(new TKUVALOPPU.Builder().setAjopaivamaara(new Date())
                 .setTietuelukumaara(count).build().toByteArray()));
         //
