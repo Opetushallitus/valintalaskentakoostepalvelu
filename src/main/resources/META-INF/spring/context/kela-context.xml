@@ -47,7 +47,9 @@
 			<setProperty propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
 			<setProperty propertyName="lukuvuosi"><simple>${body.args[1]}</simple></setProperty>
 			<setProperty propertyName="poimintapaivamaara"><simple>${body.args[2]}</simple></setProperty>
-            <setProperty propertyName="authentication"><simple>${body.args[3]}</simple></setProperty>
+            <setProperty propertyName="aineistonNimi"><simple>${body.args[3]}</simple></setProperty>
+			<setProperty propertyName="organisaationNimi"><simple>${body.args[4]}</simple></setProperty>
+            <setProperty propertyName="authentication"><simple>${body.args[5]}</simple></setProperty>
             <process ref="securityPreprocessor"/>
             <policy ref="admin">
             	<to uri="bean:sijoitteluKaikkiKoulutuspaikkallisetKomponentti"/>
