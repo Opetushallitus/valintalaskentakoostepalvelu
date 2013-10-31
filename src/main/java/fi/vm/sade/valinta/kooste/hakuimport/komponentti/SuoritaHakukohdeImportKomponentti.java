@@ -1,7 +1,14 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
-import static fi.vm.sade.valinta.kooste.security.SecurityPreprocessor.SECURITY_CONTEXT_HEADER;
-
+import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
+import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.HakukohdekoodiTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.HakukohteenValintakoeTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.MonikielinenTekstiTyyppi;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.tarjonta.service.resources.dto.ValintakoeRDTO;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -12,15 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.HakukohdekoodiTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.HakukohteenValintakoeTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.MonikielinenTekstiTyyppi;
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.ValintakoeRDTO;
+import static fi.vm.sade.valinta.kooste.security.SecurityPreprocessor.SECURITY_CONTEXT_HEADER;
 
 /**
  * User: wuoti Date: 20.5.2013 Time: 10.46
@@ -67,10 +66,6 @@ public class SuoritaHakukohdeImportKomponentti {
         }
 
         importTyyppi.setHakuVuosi(new Integer(hakukohdeNimi.getHakuVuosi()).toString());
-
-        for (String s : hakukohdeData.getOpetuskielet()) {
-            importTyyppi.getOpetuskielet().add(s);
-        }
 
         HakukohdekoodiTyyppi hkt = new HakukohdekoodiTyyppi();
         hkt.setKoodiUri(hakukohdeData.getHakukohdeNimiUri());
