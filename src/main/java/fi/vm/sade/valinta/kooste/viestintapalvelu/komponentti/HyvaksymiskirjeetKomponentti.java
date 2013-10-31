@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
+import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +29,6 @@ import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluKoulutuspaikallisetProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.TarjontaNimiProxy;
-import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
@@ -101,40 +101,31 @@ public class HyvaksymiskirjeetKomponentti {
             final Osoite osoite = osoiteKomponentti.haeOsoite(hakemusOid);
             final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+
+                MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
+                Map<String, String> tulokset = new HashMap<String, String>();
+
+                tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi());
+                tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
+                                                       // hakukohdenimea
+                                                       // joten
+                                                       // tuskin tarvii
+                                                       // toistaa
+                tulokset.put("hylkayksenSyy", StringUtils.EMPTY);
+
+                StringBuilder pisteet = new StringBuilder();
+                for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
+                    if (pistetieto.getArvo() != null) {
+                        pisteet.append(pistetieto.getArvo()).append(" ");
+                    }
+                }
+                tulokset.put("paasyJaSoveltuvuuskoe", pisteet.toString().trim());
+                tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
+                StringBuilder omatPisteet = new StringBuilder();
+                StringBuilder hyvaksytyt = new StringBuilder();
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
-
-                    MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
-                    Map<String, String> tulokset = new HashMap<String, String>();
-                    tulokset.put("alinHyvaksyttyPistemaara",
-                            Formatter.suomennaNumero(valintatapajono.getAlinHyvaksyttyPistemaara()));
-
-                    tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi());
-                    tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
-                                                           // hakukohdenimea
-                                                           // joten
-                                                           // tuskin tarvii
-                                                           // toistaa
-                    tulokset.put("hylkayksenSyy", StringUtils.EMPTY);
-                    if (valintatapajono.getHyvaksytty() == null) {
-                        throw new SijoittelupalveluException(
-                                "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
-                    }
-                    tulokset.put("hyvaksytyt", Formatter.suomennaNumero(valintatapajono.getHyvaksytty()));
-                    if (valintatapajono.getHakeneet() == null) {
-                        throw new SijoittelupalveluException(
-                                "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
-                    }
-                    tulokset.put("kaikkiHakeneet", Formatter.suomennaNumero(valintatapajono.getHakeneet()));
-                    StringBuilder pisteet = new StringBuilder();
-                    for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
-                        if (pistetieto.getArvo() != null) {
-                            pisteet.append(pistetieto.getArvo()).append(" ");
-                        }
-                    }
-                    tulokset.put("omatPisteet", pisteet.toString().trim());
-                    tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
-                    tulokset.put("paasyJaSoveltuvuuskoe",
-                            Formatter.suomennaNumero(valintatapajono.getPaasyJaSoveltuvuusKokeenTulos()));
+                    omatPisteet.append(suomennaNumero(valintatapajono.getPisteet())).append("/")
+                            .append(suomennaNumero(valintatapajono.getAlinHyvaksyttyPistemaara())).append(" ");
                     if (VARALLA.equals(valintatapajono.getTila()) && valintatapajono.getVarasijanNumero() != null) {
                         tulokset.put("selite", "Varasijan numero on " + valintatapajono.getVarasijanNumero());
                     } else {
@@ -144,8 +135,24 @@ public class HyvaksymiskirjeetKomponentti {
                             "valinnanTulos",
                             HakemuksenTilaUtil.tilaConverter(valintatapajono.getTila(),
                                     valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
-                    tulosList.add(tulokset);
+                    if (valintatapajono.getHyvaksytty() == null) {
+                        throw new SijoittelupalveluException(
+                                "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
+                    }
+                    hyvaksytyt.append(suomennaNumero(valintatapajono.getHyvaksytty())).append("/")
+                            .append(suomennaNumero(valintatapajono.getHakeneet()));
+                    if (valintatapajono.getHakeneet() == null) {
+                        throw new SijoittelupalveluException(
+                                "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
+                    }
                 }
+                tulokset.put("omatPisteet", omatPisteet.toString());
+                tulokset.put("hyvaksytyt", hyvaksytyt.toString());
+                tulokset.put("alinHyvaksyttyPistemaara", StringUtils.EMPTY);
+                tulokset.put("kaikkiHakeneet", StringUtils.EMPTY);
+
+                tulosList.add(tulokset);
+
             }
             kirjeet.add(new Kirje(osoite, "FI", koulu, koulutus, tulosList));
         }
