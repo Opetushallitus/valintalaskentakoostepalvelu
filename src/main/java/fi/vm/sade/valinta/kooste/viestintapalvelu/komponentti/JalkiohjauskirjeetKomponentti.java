@@ -33,6 +33,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluJalkiohjauskirjeetProxy;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluMessageProxy;
 
 /**
  * @author Jussi Jartamo
@@ -59,6 +60,8 @@ public class JalkiohjauskirjeetKomponentti {
 
     @Autowired
     private ViestintapalveluJalkiohjauskirjeetProxy viestintapalveluProxy;
+    @Autowired
+    private ViestintapalveluMessageProxy messageProxy;
 
     public Object teeJalkiohjauskirjeet(@Property("kielikoodi") String kielikoodi, @Property("hakuOid") String hakuOid) {
         LOG.debug("Jalkiohjauskirjeet for haku '{}'", new Object[] { hakuOid });
@@ -108,7 +111,6 @@ public class JalkiohjauskirjeetKomponentti {
                         }
                     }
                     tulokset.put("omatPisteet", pisteet.toString().trim());
-
                     tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
                     tulokset.put("paasyJaSoveltuvuuskoe",
                             Formatter.suomennaNumero(valintatapajono.getPaasyJaSoveltuvuusKokeenTulos()));
@@ -156,6 +158,11 @@ public class JalkiohjauskirjeetKomponentti {
                         e.printStackTrace();
                         LOG.error("Tarjonnasta ei saatu hakukohdetta {}: {}",
                                 new Object[] { hakukohdeOid, e.getMessage() });
+                        try {
+                            messageProxy.message("Tarjonnasta ei löytynyt hakukohdetta oid:lla " + hakukohdeOid);
+                        } catch (Exception ex) {
+                            LOG.error("Viestintäpalvelun message rajapinta ei ole käytettävissä!");
+                        }
                         metaKohteet.put(hakukohdeOid, new MetaHakukohde(new StringBuilder().append("Hakukohde ")
                                 .append(hakukohdeOid).append(" ei löydy tarjonnasta!").toString(), TYHJA_TARJOAJANIMI));
                     }

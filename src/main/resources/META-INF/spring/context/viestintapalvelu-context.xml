@@ -53,6 +53,11 @@
         <proxy id="viestintapalveluOsoitetarratProxy"
                serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluOsoitetarratProxy"
                serviceUrl="direct:viestintapalveluOsoitetarratReitti"/>
+        <proxy id="viestintapalveluMessageProxy"
+               serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluMessageProxy"
+               serviceUrl="direct:direct:viestintapalveluMessageReitti"/>
+        
+        
         
 		<route errorHandlerRef="viestintapalveluRetryHandler">
             <from uri="direct:viestintapalveluOsoitetarratReitti"/>
@@ -72,7 +77,10 @@
             <to uri="bean:viestintapalveluRestKomponentti?method=haeHyvaksymiskirjeet(${body})"/>
             <process ref="viestintapalveluProcessor"/>
         </route>
-        
+        <route errorHandlerRef="viestintapalveluRetryHandler">
+            <from uri="direct:viestintapalveluMessageReitti"/>
+            <to uri="bean:viestintapalveluClient?method=message(${body})"/>
+        </route>
         
         <route>
             <from uri="direct:kaynnistaOsoitetarratReitti"/>
