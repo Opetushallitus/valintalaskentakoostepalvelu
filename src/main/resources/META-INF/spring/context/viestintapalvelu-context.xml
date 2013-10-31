@@ -55,7 +55,7 @@
                serviceUrl="direct:viestintapalveluOsoitetarratReitti"/>
         <proxy id="viestintapalveluMessageProxy"
                serviceInterface="fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluMessageProxy"
-               serviceUrl="direct:direct:viestintapalveluMessageReitti"/>
+               serviceUrl="direct:viestintapalveluMessageReitti"/>
         
         
         
