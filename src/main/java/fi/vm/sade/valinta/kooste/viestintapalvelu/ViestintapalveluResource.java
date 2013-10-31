@@ -32,4 +32,10 @@ public interface ViestintapalveluResource {
     @Consumes(APPLICATION_JSON)
     @Path("hyvaksymiskirje/pdf")
     Response haeHyvaksymiskirjeet(Kirjeet kirjeet);
+
+    @POST
+    @Produces(TEXT_PLAIN)
+    @Path("message")
+    Response message(String message);
+
 }
