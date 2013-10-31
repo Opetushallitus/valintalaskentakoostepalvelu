@@ -23,6 +23,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksymiskirjeBatchAkti
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksyttyjenOsoitetarrojenAktivointiProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.JalkiohjauskirjeBatchAktivointiProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.OsoitetarratAktivointiProxy;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluMessageProxy;
 
 /**
  * 
@@ -65,6 +66,9 @@ public class ViestintapalveluAktivointiResource {
     @Autowired
     private JalkiohjauskirjeBatchAktivointiProxy jalkiohjauskirjeBatchProxy;
 
+    @Autowired
+    private ViestintapalveluMessageProxy messageProxy;
+
     @GET
     @Path("jalkiohjauskirjeet/aktivoi")
     @Produces("application/json")
@@ -72,6 +76,7 @@ public class ViestintapalveluAktivointiResource {
         try {
             jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(hakuOid, SecurityContextHolder.getContext()
                     .getAuthentication());
+            messageProxy.message("Jälkiohjauskirjeen luonti on aloitettu.");
             return Response
                     .status(Status.OK)
                     .entity(Vastaus
