@@ -68,6 +68,11 @@ public class ViestintapalveluRetryTesti {
                 failRandomly();
                 return null;
             }
+
+            public Response message(String message) {
+                failRandomly();
+                return null;
+            }
         };
     }
 
