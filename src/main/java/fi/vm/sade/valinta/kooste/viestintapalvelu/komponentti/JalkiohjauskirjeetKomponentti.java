@@ -133,6 +133,11 @@ public class JalkiohjauskirjeetKomponentti {
         Kirjeet viesti = new Kirjeet(kirjeet);
         LOG.debug("\r\n{}", new ViestiWrapper(viesti));
         Response response = viestintapalveluProxy.haeJalkiohjauskirjeet(viesti);
+        try {
+            messageProxy.message("Tiedot jälkiohjauskirjeen luontiin on välitetty viestintäpalvelulle.");
+        } catch (Exception e) {
+            LOG.error("Viestintäpalvelun message rajapinta ei ole käytettävissä!");
+        }
         return response.getEntity();
     }
 
