@@ -34,7 +34,7 @@ public interface ViestintapalveluResource {
     Response haeHyvaksymiskirjeet(Kirjeet kirjeet);
 
     @POST
-    @Produces(TEXT_PLAIN)
+    @Consumes(TEXT_PLAIN)
     @Path("message")
     Response message(String message);
 
