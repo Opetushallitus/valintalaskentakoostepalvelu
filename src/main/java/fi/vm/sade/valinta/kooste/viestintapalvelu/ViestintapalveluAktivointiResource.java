@@ -76,7 +76,12 @@ public class ViestintapalveluAktivointiResource {
         try {
             jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(hakuOid, SecurityContextHolder.getContext()
                     .getAuthentication());
-            messageProxy.message("Jälkiohjauskirjeen luonti on aloitettu.");
+            try {
+                messageProxy.message("Jälkiohjauskirjeen luonti on aloitettu.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                LOG.error("Viestintäpalvelun viestirajapinta ei ole käytettävissä! {}", e.getMessage());
+            }
             return Response
                     .status(Status.OK)
                     .entity(Vastaus
