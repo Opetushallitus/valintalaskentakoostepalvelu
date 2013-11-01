@@ -1,6 +1,9 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
+import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_EROTIN;
+import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
+import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
 import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
 
 import java.util.ArrayList;
@@ -95,7 +98,7 @@ public class JalkiohjauskirjeetKomponentti {
                 StringBuilder pisteet = new StringBuilder();
                 for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
                     if (pistetieto.getArvo() != null) {
-                        pisteet.append(pistetieto.getArvo()).append(" ");
+                        pisteet.append(pistetieto.getArvo()).append(ARVO_VALI);
                     }
                 }
                 tulokset.put("paasyJaSoveltuvuuskoe", pisteet.toString().trim());
@@ -103,8 +106,15 @@ public class JalkiohjauskirjeetKomponentti {
                 StringBuilder omatPisteet = new StringBuilder();
                 StringBuilder hyvaksytyt = new StringBuilder();
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
-                    omatPisteet.append(suomennaNumero(valintatapajono.getPisteet())).append("/")
-                            .append(suomennaNumero(valintatapajono.getAlinHyvaksyttyPistemaara())).append(" ");
+                    omatPisteet.append(suomennaNumero(valintatapajono.getPisteet(), ARVO_VAKIO)).append(ARVO_EROTIN)
+                            .append(suomennaNumero(valintatapajono.getAlinHyvaksyttyPistemaara(), ARVO_VAKIO))
+                            .append(ARVO_VALI);
+                    hyvaksytyt.append(suomennaNumero(valintatapajono.getHyvaksytty(), ARVO_VAKIO)).append(ARVO_EROTIN)
+                            .append(suomennaNumero(valintatapajono.getHakeneet(), ARVO_VAKIO)).append(ARVO_VALI);
+                    // Ylikirjoittuu viimeisella arvolla jos valintatapajonoja
+                    // on useampi
+                    // Nykyinen PDF formaatti ei kykene esittamaan usean jonon
+                    // selitteita jarkevasti
                     if (VARALLA.equals(valintatapajono.getTila()) && valintatapajono.getVarasijanNumero() != null) {
                         tulokset.put("selite", "Varasijan numero on " + valintatapajono.getVarasijanNumero());
                     } else {
@@ -118,8 +128,6 @@ public class JalkiohjauskirjeetKomponentti {
                         throw new SijoittelupalveluException(
                                 "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
                     }
-                    hyvaksytyt.append(suomennaNumero(valintatapajono.getHyvaksytty())).append("/")
-                            .append(suomennaNumero(valintatapajono.getHakeneet()));
                     if (valintatapajono.getHakeneet() == null) {
                         throw new SijoittelupalveluException(
                                 "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
