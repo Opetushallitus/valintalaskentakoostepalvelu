@@ -87,7 +87,7 @@ public class KelaAktivointiResource {
             //
 
             kelaExportProxy.luoTKUVAYHVA(hakuOid, new DateTime(lukuvuosi, kuukausi, 1, 1, 1).toDate(), new Date(),
-                    SecurityContextHolder.getContext().getAuthentication());
+                    aineistonnimi, organisaationnimi, SecurityContextHolder.getContext().getAuthentication());
 
             return Response.ok().build();
         } catch (Exception e) {
