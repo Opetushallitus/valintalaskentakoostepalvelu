@@ -10,6 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluMessageProxy;
 
 @Component
 public class HaeOsoiteKomponentti {
@@ -22,11 +23,23 @@ public class HaeOsoiteKomponentti {
     @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
     private String applicationResourceUrl;
 
+    @Autowired
+    private ViestintapalveluMessageProxy messageProxy;
+
+    private void notFound(String hakemusOid) {
+        try {
+            messageProxy.message("Haku-palvelusta ei löytynyt hakemusta oid:lla " + hakemusOid);
+        } catch (Exception ex) {
+            LOG.error("Viestintäpalvelun message rajapinta ei ole käytettävissä! Hakemusta {} ei löydy!", hakemusOid);
+        }
+    }
+
     public Osoite haeOsoite(String hakemusOid) {
         try {
             LOG.info("Haetaan hakemus {}/applications/{}", new Object[] { applicationResourceUrl, hakemusOid });
             Hakemus hakemus = hakemusProxy.haeHakemus(hakemusOid);
             if (hakemus == null) {
+                notFound(hakemusOid);
                 LOG.error("Hakemus {}/applications/{} null-arvo!", new Object[] { applicationResourceUrl, hakemusOid, });
             }
             return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus);
@@ -34,6 +47,7 @@ public class HaeOsoiteKomponentti {
             e.printStackTrace();
             LOG.error("Hakemus {}/applications/{} sisälsi virheellistä tietoa!", new Object[] { applicationResourceUrl,
                     hakemusOid, });
+            notFound(hakemusOid);
             // throw new
             // HakemuspalveluException("Hakemuspalvelu ei anna hakemusta " +
             // hakemusOid + "!");
