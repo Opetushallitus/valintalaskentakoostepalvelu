@@ -73,6 +73,7 @@ public class JalkiohjauskirjeetKomponentti {
         final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
         if (kaikkiHyvaksymattomat == 0) {
             LOG.error("Jälkiohjauskirjeitä yritetään luoda haulle jolla kaikki hakijat on hyväksytty koulutukseen!");
+            viestintapalveluLogi("Sijoittelupalvelun mukaan kaikki hakijat on hyväksytty johonkin koulutukseen!");
             throw new SijoittelupalveluException(
                     "Sijoittelupalvelun mukaan kaikki hakijat on hyväksytty johonkin koulutukseen!");
         }
@@ -125,10 +126,12 @@ public class JalkiohjauskirjeetKomponentti {
                             HakemuksenTilaUtil.tilaConverter(valintatapajono.getTila(),
                                     valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
                     if (valintatapajono.getHyvaksytty() == null) {
+                        viestintapalveluLogi("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
                         throw new SijoittelupalveluException(
                                 "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
                     }
                     if (valintatapajono.getHakeneet() == null) {
+                        viestintapalveluLogi("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
                         throw new SijoittelupalveluException(
                                 "Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
                     }
@@ -146,12 +149,16 @@ public class JalkiohjauskirjeetKomponentti {
         Kirjeet viesti = new Kirjeet(kirjeet);
         LOG.debug("\r\n{}", new ViestiWrapper(viesti));
         Response response = viestintapalveluProxy.haeJalkiohjauskirjeet(viesti);
-        try {
-            messageProxy.message("Tiedot jälkiohjauskirjeen luontiin on välitetty viestintäpalvelulle.");
-        } catch (Exception e) {
-            LOG.error("Viestintäpalvelun message rajapinta ei ole käytettävissä!");
-        }
+        viestintapalveluLogi("Tiedot jälkiohjauskirjeen luontiin on välitetty viestintäpalvelulle.");
         return response.getEntity();
+    }
+
+    private void viestintapalveluLogi(String logiViesti) {
+        try {
+            messageProxy.message(logiViesti);
+        } catch (Exception ex) {
+            LOG.error("Viestintäpalvelun message rajapinta ei ole käytettävissä! {}", logiViesti);
+        }
     }
 
     //
@@ -176,11 +183,7 @@ public class JalkiohjauskirjeetKomponentti {
                         e.printStackTrace();
                         LOG.error("Tarjonnasta ei saatu hakukohdetta {}: {}",
                                 new Object[] { hakukohdeOid, e.getMessage() });
-                        try {
-                            messageProxy.message("Tarjonnasta ei löytynyt hakukohdetta oid:lla " + hakukohdeOid);
-                        } catch (Exception ex) {
-                            LOG.error("Viestintäpalvelun message rajapinta ei ole käytettävissä!");
-                        }
+                        viestintapalveluLogi("Tarjonnasta ei löytynyt hakukohdetta oid:lla " + hakukohdeOid);
                         metaKohteet.put(hakukohdeOid, new MetaHakukohde(new StringBuilder().append("Hakukohde ")
                                 .append(hakukohdeOid).append(" ei löydy tarjonnasta!").toString(), TYHJA_TARJOAJANIMI));
                     }
