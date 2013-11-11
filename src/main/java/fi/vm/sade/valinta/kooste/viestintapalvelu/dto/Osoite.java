@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
 import java.io.Serializable;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -21,9 +23,12 @@ public class Osoite implements Serializable {
     private String region;// ":"Kallio",
     private String country; // ":"Suomi",
     private String countryCode; // ":"FI"
+    @JsonIgnore
+    private boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
 
     public Osoite(String firstName, String lastName, String addressline, String addressline2, String addressline3,
-            String postalCode, String city, String region, String country, String countryCode) {
+            String postalCode, String city, String region, String country, String countryCode,
+            boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.addressline = addressline;
@@ -34,6 +39,11 @@ public class Osoite implements Serializable {
         this.region = region;
         this.country = country;
         this.countryCode = countryCode;
+    }
+
+    @JsonIgnore
+    public boolean isUlkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt() {
+        return ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
     }
 
     public String getAddressline() {

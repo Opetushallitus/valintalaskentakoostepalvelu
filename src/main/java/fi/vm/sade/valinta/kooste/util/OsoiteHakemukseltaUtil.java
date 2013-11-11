@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.util;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,10 @@ public class OsoiteHakemukseltaUtil {
 
     // KOVAKOODATTUJA ARVOJA JOTKA TULEE KOODISTOLTA MUTTA JOIDEN HANKKIMISEEN
     // EI OLE TOISTAISEKSI OLEMASSA OLEVAA KAYTANTOA!
+    private final static String POHJAKOULUTUS = "POHJAKOULUTUS";
+    private final static String POHJAKOULUTUS_ULKOMAILLA = "0";
+    private final static String POHJAKOULUTUS_KESKEYTETTY = "7";
+
     private final static String ASUINMAA = "asuinmaa";
     private final static String SUOMI = "FIN";
     private final static String SUOMALAINEN_LAHIOSOITE = "lahiosoite";
@@ -38,12 +43,22 @@ public class OsoiteHakemukseltaUtil {
 
         String etunimet = "";
         String sukunimi = "";
+        boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = false;
         if (hakemus != null) {
             if (hakemus.getAnswers() != null && hakemus.getAnswers().getHenkilotiedot() != null) {
-                Map<String, String> henkilotiedot = hakemus.getAnswers().getHenkilotiedot();
-                if (henkilotiedot == null) {
-                    LOG.error("Hakemuksella {} ei ole henkilötietoja!", hakemus.getOid());
+
+                Map<String, String> henkilotiedot = // hakemus.getAnswers().getHenkilotiedot();
+                new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+                henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
+
+                //
+                // OVT-6334 : Logiikka ei kuulu koostepalveluun!
+                //
+                String pohjakoulutus = henkilotiedot.get(POHJAKOULUTUS);
+                if (POHJAKOULUTUS_ULKOMAILLA.equals(pohjakoulutus) || POHJAKOULUTUS_KESKEYTETTY.equals(pohjakoulutus)) {
+                    ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = true;
                 }
+
                 maakoodi = henkilotiedot.get(ASUINMAA);
                 etunimet = henkilotiedot.get(ETUNIMET);
                 sukunimi = henkilotiedot.get(SUKUNIMI);
@@ -64,7 +79,8 @@ public class OsoiteHakemukseltaUtil {
             sukunimi = "Hakemus ei ole olemassa!";
             LOG.error("Null-hakemukselle yritetään luoda osoitetta!");
         }
+
         return new Osoite(etunimet, sukunimi, lahiosoite, null, null, postinumero, postitoimipaikka, maakunta, maa,
-                maakoodi);
+                maakoodi, ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt);
     }
 }
