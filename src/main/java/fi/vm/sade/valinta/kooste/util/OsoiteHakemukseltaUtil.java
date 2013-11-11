@@ -55,6 +55,7 @@ public class OsoiteHakemukseltaUtil {
                 // OVT-6334 : Logiikka ei kuulu koostepalveluun!
                 //
                 String pohjakoulutus = henkilotiedot.get(POHJAKOULUTUS);
+                LOG.debug("Pohjakoulutus OID({}) {}", new Object[] { hakemus.getOid(), pohjakoulutus });
                 if (POHJAKOULUTUS_ULKOMAILLA.equals(pohjakoulutus) || POHJAKOULUTUS_KESKEYTETTY.equals(pohjakoulutus)) {
                     ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = true;
                 }
