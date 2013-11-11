@@ -51,13 +51,18 @@ public class OsoiteHakemukseltaUtil {
                 new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
                 henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
 
-                //
-                // OVT-6334 : Logiikka ei kuulu koostepalveluun!
-                //
-                String pohjakoulutus = henkilotiedot.get(POHJAKOULUTUS);
-                LOG.debug("Pohjakoulutus OID({}) {}", new Object[] { hakemus.getOid(), pohjakoulutus });
-                if (POHJAKOULUTUS_ULKOMAILLA.equals(pohjakoulutus) || POHJAKOULUTUS_KESKEYTETTY.equals(pohjakoulutus)) {
-                    ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = true;
+                if (hakemus.getAnswers().getKoulutustausta() != null) {
+                    Map<String, String> koulutustausta = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+                    koulutustausta.putAll(hakemus.getAnswers().getKoulutustausta());
+                    //
+                    // OVT-6334 : Logiikka ei kuulu koostepalveluun!
+                    //
+                    String pohjakoulutus = koulutustausta.get(POHJAKOULUTUS);
+                    LOG.debug("Pohjakoulutus OID({}) {}", new Object[] { hakemus.getOid(), pohjakoulutus });
+                    if (POHJAKOULUTUS_ULKOMAILLA.equals(pohjakoulutus)
+                            || POHJAKOULUTUS_KESKEYTETTY.equals(pohjakoulutus)) {
+                        ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = true;
+                    }
                 }
 
                 maakoodi = henkilotiedot.get(ASUINMAA);
