@@ -6,6 +6,7 @@ import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
 import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -119,7 +120,12 @@ public class HyvaksymiskirjeetKomponentti {
                 StringBuilder pisteet = new StringBuilder();
                 for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
                     if (pistetieto.getArvo() != null) {
-                        pisteet.append(pistetieto.getArvo()).append(ARVO_VALI);
+                        try {
+                            BigDecimal ehkaNumeroEhkaTotuusarvo = new BigDecimal(pistetieto.getArvo());
+                            pisteet.append(suomennaNumero(ehkaNumeroEhkaTotuusarvo)).append(ARVO_VALI);
+                        } catch (NumberFormatException notNumber) {
+                            // OVT-6340 filtteroidaan totuusarvot pois
+                        }
                     }
                 }
                 tulokset.put("paasyJaSoveltuvuuskoe", pisteet.toString().trim());
