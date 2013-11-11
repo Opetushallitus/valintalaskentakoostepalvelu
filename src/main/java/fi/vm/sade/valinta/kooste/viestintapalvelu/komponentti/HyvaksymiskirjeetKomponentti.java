@@ -127,9 +127,20 @@ public class HyvaksymiskirjeetKomponentti {
                 StringBuilder omatPisteet = new StringBuilder();
                 StringBuilder hyvaksytyt = new StringBuilder();
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
-                    omatPisteet.append(suomennaNumero(valintatapajono.getPisteet(), ARVO_VAKIO)).append(ARVO_EROTIN)
-                            .append(suomennaNumero(valintatapajono.getAlinHyvaksyttyPistemaara(), ARVO_VAKIO))
-                            .append(ARVO_VALI);
+                    //
+                    // OVT-6334 : Logiikka ei kuulu koostepalveluun!
+                    //
+                    if (osoite.isUlkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt()) { // ei
+                                                                                                    // pisteita
+                        omatPisteet.append(ARVO_VAKIO).append(ARVO_EROTIN)
+                                .append(suomennaNumero(valintatapajono.getAlinHyvaksyttyPistemaara(), ARVO_VAKIO))
+                                .append(ARVO_VALI);
+                    } else {
+                        omatPisteet.append(suomennaNumero(valintatapajono.getPisteet(), ARVO_VAKIO))
+                                .append(ARVO_EROTIN)
+                                .append(suomennaNumero(valintatapajono.getAlinHyvaksyttyPistemaara(), ARVO_VAKIO))
+                                .append(ARVO_VALI);
+                    }
                     hyvaksytyt.append(suomennaNumero(valintatapajono.getHyvaksytty(), ARVO_VAKIO)).append(ARVO_EROTIN)
                             .append(suomennaNumero(valintatapajono.getHakeneet(), ARVO_VAKIO)).append(ARVO_VALI);
                     // Ylikirjoittuu viimeisella arvolla jos valintatapajonoja
