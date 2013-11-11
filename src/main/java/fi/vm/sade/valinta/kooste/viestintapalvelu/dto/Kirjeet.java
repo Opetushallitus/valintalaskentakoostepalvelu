@@ -1,9 +1,9 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  * 

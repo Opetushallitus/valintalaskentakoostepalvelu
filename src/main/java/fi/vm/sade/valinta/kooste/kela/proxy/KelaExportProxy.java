@@ -1,9 +1,9 @@
 package fi.vm.sade.valinta.kooste.kela.proxy;
 
+import org.springframework.security.core.Authentication;
+
 import java.util.Date;
 import java.util.concurrent.Future;
-
-import org.springframework.security.core.Authentication;
 
 /**
  * 

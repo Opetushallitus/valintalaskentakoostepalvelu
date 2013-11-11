@@ -1,13 +1,12 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import javax.ws.rs.core.Response;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.core.Response;
 
 /**
  * 

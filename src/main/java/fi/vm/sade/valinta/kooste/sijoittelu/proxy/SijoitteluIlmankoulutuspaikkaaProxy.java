@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.proxy;
 
-import java.util.List;
-
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+
+import java.util.List;
 
 /**
  * 

@@ -1,25 +1,6 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.codehaus.jettison.json.JSONException;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import com.google.gson.Gson;
-
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -27,6 +8,21 @@ import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.ValintakoelaskentaProxy;
+import org.codehaus.jettison.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * User: wuoti Date: 29.8.2013 Time: 14.28

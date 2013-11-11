@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.kela.dto;
 
-import java.util.Date;
-
 import fi.vm.sade.valinta.kooste.kela.KelaCache;
+
+import java.util.Date;
 
 public class KelaHeader implements Comparable<KelaHeader> {
 

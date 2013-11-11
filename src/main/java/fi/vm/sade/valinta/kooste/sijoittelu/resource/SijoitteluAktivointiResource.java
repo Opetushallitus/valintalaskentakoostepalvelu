@@ -1,13 +1,9 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
-import java.util.Map;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
+import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluAktivointiProxy;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +12,12 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
-import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluAktivointiProxy;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import java.util.Map;
 
 /**
  *

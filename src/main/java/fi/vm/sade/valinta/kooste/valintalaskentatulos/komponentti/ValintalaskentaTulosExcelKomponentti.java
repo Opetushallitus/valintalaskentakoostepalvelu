@@ -1,29 +1,20 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Resource;
-import javax.xml.datatype.XMLGregorianCalendar;
-
+import fi.vm.sade.service.valintatiedot.ValintatietoService;
+import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
+import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
+import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.valintatiedot.ValintatietoService;
-import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
-import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
-import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
-import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import javax.annotation.Resource;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * KOEKUTSUEXCEL

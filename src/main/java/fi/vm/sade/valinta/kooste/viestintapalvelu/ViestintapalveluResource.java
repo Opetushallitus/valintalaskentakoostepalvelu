@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -9,8 +9,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
 @Path("api/v1")
 public interface ViestintapalveluResource {

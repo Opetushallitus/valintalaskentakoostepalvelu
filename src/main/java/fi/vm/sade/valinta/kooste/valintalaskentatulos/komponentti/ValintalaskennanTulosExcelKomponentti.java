@@ -1,9 +1,11 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.JarjestyskriteerituloksenTila;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.JonosijaDTO;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValinnanvaiheDTO;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValintatapajonoDTO;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.JarjestyskriteerituloksenTila;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.JonosijaDTO;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValinnanvaiheDTO;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 

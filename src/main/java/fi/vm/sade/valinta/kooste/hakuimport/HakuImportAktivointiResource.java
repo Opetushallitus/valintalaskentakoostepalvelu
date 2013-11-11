@@ -1,9 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakuimport;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 
 /**
  * User: wuoti Date: 20.5.2013 Time: 10.34

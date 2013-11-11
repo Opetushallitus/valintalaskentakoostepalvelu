@@ -1,14 +1,13 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.komponentti;
 
-import java.util.List;
-
+import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
+import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import org.apache.camel.Property;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import java.util.List;
 
 @Component("valintaperusteKomponentti")
 public class ValintaperusteKomponentti {

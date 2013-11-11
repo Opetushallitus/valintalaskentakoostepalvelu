@@ -1,19 +1,5 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import javax.ws.rs.core.Response;
-
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import fi.vm.sade.service.valintatiedot.ValintatietoService;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
@@ -26,6 +12,19 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluHyvaksymiskirjeetProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluJalkiohjauskirjeetProxy;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluOsoitetarratProxy;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import javax.ws.rs.core.Response;
 
 /**
  * 

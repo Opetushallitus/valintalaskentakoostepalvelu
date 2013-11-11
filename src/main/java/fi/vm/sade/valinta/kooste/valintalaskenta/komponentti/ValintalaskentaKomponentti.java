@@ -1,14 +1,13 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.komponentti;
 
-import java.util.List;
-
+import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
+import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import org.apache.camel.Property;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import java.util.List;
 
 /**
  * 

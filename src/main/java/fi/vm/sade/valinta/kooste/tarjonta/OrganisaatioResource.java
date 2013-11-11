@@ -1,16 +1,11 @@
 package fi.vm.sade.valinta.kooste.tarjonta;
 
+import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.util.Date;
 import java.util.List;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-
-import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 
 /**
  * 

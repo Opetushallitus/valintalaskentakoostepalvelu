@@ -1,20 +1,16 @@
 package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
-import static fi.vm.sade.tarjonta.service.types.TarjontaTila.JULKAISTU;
-
-import java.util.Collection;
-
-import org.apache.camel.language.Simple;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
+import org.apache.camel.language.Simple;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Collection;
+
+import static fi.vm.sade.tarjonta.service.types.TarjontaTila.JULKAISTU;
 
 @Component("hakukohteetTarjonnaltaKomponentti")
 public class HaeHakukohteetTarjonnaltaKomponentti {

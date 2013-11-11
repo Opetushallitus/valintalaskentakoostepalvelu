@@ -1,12 +1,11 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.komponentti;
 
-import javax.annotation.Resource;
-
+import fi.vm.sade.service.sijoittelu.SijoitteluService;
+import fi.vm.sade.service.valintatiedot.schema.HakuTyyppi;
 import org.apache.camel.Property;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.sijoittelu.SijoitteluService;
-import fi.vm.sade.service.valintatiedot.schema.HakuTyyppi;
+import javax.annotation.Resource;
 
 @Component("sijoitteluSuoritaKomponentti")
 public class SijoitteluSuoritaKomponentti {

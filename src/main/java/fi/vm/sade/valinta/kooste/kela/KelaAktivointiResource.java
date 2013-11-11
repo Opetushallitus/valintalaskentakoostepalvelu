@@ -1,31 +1,5 @@
 package fi.vm.sade.valinta.kooste.kela;
 
-import static fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil.toSearchCriteria;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-
-import java.io.ByteArrayInputStream;
-import java.util.Collection;
-import java.util.Date;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
-
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
@@ -35,6 +9,25 @@ import fi.vm.sade.valinta.kooste.kela.dto.KelaHeader;
 import fi.vm.sade.valinta.kooste.kela.proxy.KelaExportProxy;
 import fi.vm.sade.valinta.kooste.kela.proxy.KelaFtpProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakuProxy;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.io.ByteArrayInputStream;
+import java.util.Collection;
+import java.util.Date;
+
+import static fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil.toSearchCriteria;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("kela")
 @Controller

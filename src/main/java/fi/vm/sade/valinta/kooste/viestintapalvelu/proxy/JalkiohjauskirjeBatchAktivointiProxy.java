@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.proxy;
 
-import java.util.concurrent.Future;
-
 import org.springframework.security.core.Authentication;
+
+import java.util.concurrent.Future;
 
 /**
  * 

@@ -1,14 +1,13 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.komponentti;
 
+import fi.vm.sade.service.valintatiedot.schema.HakuTyyppi;
+import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluSuoritaProxy;
+import fi.vm.sade.valinta.kooste.valintatieto.komponentti.proxy.ValintatietoProxy;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import fi.vm.sade.service.valintatiedot.schema.HakuTyyppi;
-import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluSuoritaProxy;
-import fi.vm.sade.valinta.kooste.valintatieto.komponentti.proxy.ValintatietoProxy;
 
 /**
  *

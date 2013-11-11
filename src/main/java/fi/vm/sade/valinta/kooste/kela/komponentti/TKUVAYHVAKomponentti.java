@@ -1,22 +1,5 @@
 package fi.vm.sade.valinta.kooste.kela.komponentti;
 
-import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
-import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.HENKILOTUNNUS;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.camel.Body;
-import org.apache.camel.Property;
-import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
@@ -28,6 +11,18 @@ import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.LinjakoodiProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakuProxy;
+import org.apache.camel.Body;
+import org.apache.camel.Property;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
+import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.HENKILOTUNNUS;
 
 @Component("TKUVAYHVAKomponentti")
 public class TKUVAYHVAKomponentti {

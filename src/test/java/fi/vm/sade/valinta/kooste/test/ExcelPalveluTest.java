@@ -1,15 +1,14 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 

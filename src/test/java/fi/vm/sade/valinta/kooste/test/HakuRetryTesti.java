@@ -1,7 +1,9 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import java.util.List;
-
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,10 +14,7 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
-import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
+import java.util.List;
 
 /**
  * 

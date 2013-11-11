@@ -1,19 +1,15 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
+import com.google.gson.Gson;
+import fi.vm.sade.organisaatio.api.model.OrganisaatioService;
+import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
+import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
+import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.valintakokeet.HakukohteenValintakoelaskentaAktivointiProxy;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintaperusteProxy;
 import org.codehaus.jettison.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,17 +24,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.google.gson.Gson;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
-import fi.vm.sade.organisaatio.api.model.OrganisaatioService;
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
-import fi.vm.sade.valinta.kooste.valintakokeet.HakukohteenValintakoelaskentaAktivointiProxy;
-import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintaperusteProxy;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * User: wuoti Date: 9.9.2013 Time: 9.24

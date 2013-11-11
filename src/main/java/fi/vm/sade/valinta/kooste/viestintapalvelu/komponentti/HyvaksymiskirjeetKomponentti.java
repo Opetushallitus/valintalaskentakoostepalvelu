@@ -1,28 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
-import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_EROTIN;
-import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
-import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
-import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.Response;
-
-import org.apache.camel.Property;
-import org.apache.camel.language.Simple;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
@@ -32,12 +9,22 @@ import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluKoulutuspaikallisetProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.TarjontaNimiProxy;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluHyvaksymiskirjeetProxy;
+import org.apache.camel.Property;
+import org.apache.camel.language.Simple;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.core.Response;
+import java.util.*;
+
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
+import static fi.vm.sade.valinta.kooste.util.Formatter.*;
 
 /**
  * 

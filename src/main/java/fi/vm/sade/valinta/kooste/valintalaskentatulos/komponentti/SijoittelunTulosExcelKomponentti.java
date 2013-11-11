@@ -1,20 +1,15 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
+import fi.vm.sade.sijoittelu.tulos.dto.*;
+import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import org.apache.camel.language.Simple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.Tasasijasaanto;
-import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoTila;
-import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
-import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 

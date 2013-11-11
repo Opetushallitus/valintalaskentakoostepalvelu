@@ -1,7 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.komponentti;
 
-import java.util.List;
-
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValinnanVaiheenValintaperusteetProxy;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
-import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValinnanVaiheenValintaperusteetProxy;
+import java.util.List;
 
 /**
  * @author Jussi Jartamo

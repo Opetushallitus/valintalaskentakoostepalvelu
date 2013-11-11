@@ -1,22 +1,19 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-
-import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import javax.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * User: wuoti Date: 5.8.2013 Time: 9.28

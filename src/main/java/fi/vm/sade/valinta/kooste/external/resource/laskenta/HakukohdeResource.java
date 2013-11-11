@@ -1,14 +1,13 @@
 package fi.vm.sade.valinta.kooste.external.resource.laskenta;
 
-import java.util.List;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValinnanvaiheDTO;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValinnanvaiheDTO;
+import java.util.List;
 
 public interface HakukohdeResource {
 

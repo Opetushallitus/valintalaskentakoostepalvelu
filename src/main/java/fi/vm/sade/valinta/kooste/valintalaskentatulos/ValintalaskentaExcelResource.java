@@ -1,8 +1,14 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.JalkiohjaustulosExcelProxy;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.SijoittelunTulosExcelProxy;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintakoekutsutExcelProxy;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -10,17 +16,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-
-import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.JalkiohjaustulosExcelProxy;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.SijoittelunTulosExcelProxy;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintakoekutsutExcelProxy;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 

@@ -1,10 +1,10 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
-
-import org.apache.commons.lang.StringUtils;
 
 public class Formatter {
 

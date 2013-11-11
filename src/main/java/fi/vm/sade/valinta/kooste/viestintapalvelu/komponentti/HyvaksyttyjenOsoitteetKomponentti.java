@@ -1,11 +1,11 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
+import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluKoulutuspaikallisetProxy;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluOsoitetarratProxy;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
-import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluKoulutuspaikallisetProxy;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluOsoitetarratProxy;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 

@@ -1,10 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response;
-
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
+import fi.vm.sade.valinta.kooste.valintalaskenta.proxy.HakukohteenValintalaskentaAktivointiProxy;
+import fi.vm.sade.valinta.kooste.valintalaskenta.proxy.HaunValintalaskentaAktivointiProxy;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
-import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
-import fi.vm.sade.valinta.kooste.valintalaskenta.proxy.HakukohteenValintalaskentaAktivointiProxy;
-import fi.vm.sade.valinta.kooste.valintalaskenta.proxy.HaunValintalaskentaAktivointiProxy;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 /**
  * @author Jussi Jartamo

@@ -1,13 +1,12 @@
 package fi.vm.sade.valinta.kooste.valintatieto.komponentti;
 
-import java.util.List;
-
+import fi.vm.sade.service.valintatiedot.ValintatietoService;
+import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import org.apache.camel.Property;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.valintatiedot.ValintatietoService;
-import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
+import java.util.List;
 
 @Component("valintatietoHakukohteelleKomponentti")
 public class ValintatietoHakukohteelleKomponentti {

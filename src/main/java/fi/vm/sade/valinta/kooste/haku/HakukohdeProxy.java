@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.haku;
 
-import java.util.List;
-
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+
+import java.util.List;
 
 /**
  * 

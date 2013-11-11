@@ -1,12 +1,11 @@
 package fi.vm.sade.valinta.kooste.util;
 
-import java.util.Map;
-
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import java.util.Map;
 
 /**
  * @author Jussi Jartamo

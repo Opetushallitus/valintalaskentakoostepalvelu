@@ -1,16 +1,15 @@
 package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
+import fi.vm.sade.valinta.kooste.exception.TarjontaException;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
-import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
-import fi.vm.sade.valinta.kooste.exception.TarjontaException;
 
 /**
  * 

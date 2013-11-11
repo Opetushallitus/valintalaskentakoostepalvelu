@@ -1,14 +1,5 @@
 package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
-import java.util.List;
-
-import org.apache.camel.Property;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.SearchKoodisCriteriaType;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
@@ -18,6 +9,14 @@ import fi.vm.sade.valinta.kooste.exception.KoodistoException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.exception.TarjontaException;
 import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
+import org.apache.camel.Property;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 

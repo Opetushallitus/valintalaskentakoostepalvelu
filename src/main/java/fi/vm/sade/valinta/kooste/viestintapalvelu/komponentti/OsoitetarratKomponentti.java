@@ -1,19 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.ws.rs.core.Response;
-
-import org.apache.camel.language.Simple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
@@ -23,6 +9,14 @@ import fi.vm.sade.valinta.kooste.valintatieto.komponentti.proxy.ValintatietoHaku
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluOsoitetarratProxy;
+import org.apache.camel.language.Simple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.core.Response;
+import java.util.*;
 
 /**
  * @author Jussi Jartamo
