@@ -39,6 +39,7 @@ public class Osoite implements Serializable {
         this.region = region;
         this.country = country;
         this.countryCode = countryCode;
+        this.ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
     }
 
     @JsonIgnore
