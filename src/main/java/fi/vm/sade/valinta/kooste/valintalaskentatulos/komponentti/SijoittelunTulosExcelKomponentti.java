@@ -56,7 +56,7 @@ public class SijoittelunTulosExcelKomponentti {
                 //
                 // OVT-6335
                 //
-                List<Valintatulos> valintaTulos = null;
+                List<Valintatulos> valintaTulos = Collections.<Valintatulos> emptyList();
                 if (valintatulosCache.containsKey(hakemusOid)) {
                     valintaTulos = valintatulosCache.get(hakemusOid);
                 } else {
@@ -79,7 +79,9 @@ public class SijoittelunTulosExcelKomponentti {
                 String valintaTieto = "--";
                 for (Valintatulos valinta : valintaTulos) {
                     if (jono.getOid().equals(valinta.getValintatapajonoOid())) {
-                        valintaTieto = valinta.getTila().toString();
+                        if (valinta.getTila() != null) {
+                            valintaTieto = valinta.getTila().toString();
+                        }
                         break;
                     }
                 }
