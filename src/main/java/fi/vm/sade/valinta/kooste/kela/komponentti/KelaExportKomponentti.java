@@ -1,11 +1,17 @@
 package fi.vm.sade.valinta.kooste.kela.komponentti;
 
-import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAALKU;
-import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVALOPPU;
-import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
-import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
-import fi.vm.sade.valinta.kooste.kela.KelaCache;
-import fi.vm.sade.valinta.kooste.kela.dto.KelaCacheDocument;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Deque;
+import java.util.List;
+
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.apache.commons.io.IOUtils;
@@ -14,11 +20,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.SequenceInputStream;
-import java.util.*;
+import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAALKU;
+import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVALOPPU;
+import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
+import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
+import fi.vm.sade.valinta.kooste.kela.KelaCache;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaCacheDocument;
 
 @Component("kelaExportKomponentti")
 public class KelaExportKomponentti {

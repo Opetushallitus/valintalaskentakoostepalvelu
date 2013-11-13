@@ -1,15 +1,16 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
-import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluMessageProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
+import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluMessageProxy;
 
 @Component
 public class HaeOsoiteKomponentti {

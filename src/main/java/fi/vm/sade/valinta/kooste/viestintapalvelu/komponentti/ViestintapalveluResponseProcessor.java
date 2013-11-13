@@ -1,6 +1,9 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
+import java.io.InputStream;
+
+import javax.ws.rs.core.Response;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.io.IOUtils;
@@ -8,8 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.core.Response;
-import java.io.InputStream;
+import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
 
 @Component("viestintapalveluProcessor")
 public class ViestintapalveluResponseProcessor implements Processor {

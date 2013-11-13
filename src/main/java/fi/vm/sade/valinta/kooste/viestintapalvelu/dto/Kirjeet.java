@@ -5,6 +5,8 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
 /**
  * 
  * @author Jussi Jartamo

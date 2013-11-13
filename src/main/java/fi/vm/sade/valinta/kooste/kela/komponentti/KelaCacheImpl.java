@@ -1,21 +1,23 @@
 package fi.vm.sade.valinta.kooste.kela.komponentti;
 
-import com.google.common.base.Function;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Collections2;
-import fi.vm.sade.valinta.kooste.kela.KelaCache;
-import fi.vm.sade.valinta.kooste.kela.dto.KelaCacheDocument;
-import fi.vm.sade.valinta.kooste.kela.dto.KelaHeader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.google.common.base.Function;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Collections2;
+
+import fi.vm.sade.valinta.kooste.kela.KelaCache;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaCacheDocument;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaHeader;
 
 @Component
 public class KelaCacheImpl implements KelaCache {

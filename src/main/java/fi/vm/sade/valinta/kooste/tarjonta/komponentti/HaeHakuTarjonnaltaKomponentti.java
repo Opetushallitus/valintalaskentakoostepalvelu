@@ -1,10 +1,11 @@
 package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
-import fi.vm.sade.tarjonta.service.resources.HakuResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import org.apache.camel.Property;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import fi.vm.sade.tarjonta.service.resources.HakuResource;
+import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 
 @Component("hakuTarjonnaltaKomponentti")
 public class HaeHakuTarjonnaltaKomponentti {

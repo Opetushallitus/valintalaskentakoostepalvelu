@@ -1,10 +1,11 @@
 package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
-import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
-import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioResource;
 import org.apache.camel.Property;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioResource;
 
 /**
  * 
