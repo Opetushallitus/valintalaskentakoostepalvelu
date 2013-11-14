@@ -1,11 +1,21 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
+import static fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil.ASUINMAA;
+import static fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil.SUOMI;
+
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import fi.vm.sade.koodisto.service.KoodiService;
+import fi.vm.sade.koodisto.service.types.common.KieliType;
+import fi.vm.sade.koodisto.service.types.common.KoodiMetadataType;
+import fi.vm.sade.koodisto.service.types.common.KoodiType;
+import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
@@ -16,7 +26,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluMessageP
 public class HaeOsoiteKomponentti {
 
     private static final Logger LOG = LoggerFactory.getLogger(HaeOsoiteKomponentti.class);
-
+    private static final String MAAT_JA_VALTIOT_PREFIX = "maatjavaltiot1_";
     @Autowired
     private HakemusProxy hakemusProxy;
 
@@ -26,12 +36,41 @@ public class HaeOsoiteKomponentti {
     @Autowired
     private ViestintapalveluMessageProxy messageProxy;
 
+    @Autowired
+    private KoodiService koodiService;
+
     private void notFound(String hakemusOid) {
         try {
             messageProxy.message("Haku-palvelusta ei löytynyt hakemusta oid:lla " + hakemusOid);
         } catch (Exception ex) {
             LOG.error("Viestintäpalvelun message rajapinta ei ole käytettävissä! Hakemusta {} ei löydy!", hakemusOid);
         }
+    }
+
+    private void countryNotFound(String hakemusOid, String countryCode, String uri) {
+        try {
+            messageProxy.message("Koodistosta ei saatu maata urilla " + uri + " hakemukselle " + hakemusOid);
+        } catch (Exception ex) {
+            LOG.error(
+                    "Viestintäpalvelun message rajapinta ei ole käytettävissä! Koodistosta ei löydy maata {} hakemukselle {}!",
+                    new Object[] { uri, hakemusOid });
+        }
+    }
+
+    private static String getKuvaus(List<KoodiMetadataType> meta) {
+        for (KoodiMetadataType data : meta) {
+            return data.getKuvaus();
+        }
+        return null;
+    }
+
+    private static String getKuvaus(List<KoodiMetadataType> meta, KieliType kieli) {
+        for (KoodiMetadataType data : meta) {
+            if (kieli.equals(data.getKieli())) {
+                return data.getKuvaus();
+            }
+        }
+        return null;
     }
 
     public Osoite haeOsoite(String hakemusOid) {
@@ -42,15 +81,49 @@ public class HaeOsoiteKomponentti {
                 notFound(hakemusOid);
                 LOG.error("Hakemus {}/applications/{} null-arvo!", new Object[] { applicationResourceUrl, hakemusOid, });
             }
+            try {
+                // onko ulkomaalainen?
+                if (!SUOMI.equals(hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA))) {
+                    // hae koodistosta maa
+                    String countryCode = hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA);
+                    String uri = new StringBuilder().append(MAAT_JA_VALTIOT_PREFIX).append(countryCode.toLowerCase())
+                            .toString();
+                    try {
+                        for (KoodiType koodi : koodiService.searchKoodis(KoodiServiceSearchCriteriaBuilder
+                                .latestAcceptedKoodiByUri(uri))) {
+                            if (koodi.getMetadata() == null) {
+                                LOG.error("Koodistosta palautuu tyhjiä koodeja! Koodisto uri {}", uri);
+                                continue;
+                            }
+                            // preferoidaan suomea
+                            String maa = getKuvaus(koodi.getMetadata(), KieliType.FI);
+                            if (maa == null) {
+                                maa = getKuvaus(koodi.getMetadata()); // jos
+                                                                      // suomea
+                                                                      // ei
+                                                                      // loydy
+                                                                      // kaikki
+                                                                      // kay
+                            }
+                            LOG.debug("Haettiin maa {} urille {}", new Object[] { maa, uri });
+                        }
+                    } catch (Exception e) {
+                        LOG.error(
+                                "Hakemukselle {}/applications/{} ei saatu haettua maata koodistosta! Koodisto URI {}",
+                                new Object[] { applicationResourceUrl, hakemusOid, uri });
+                        countryNotFound(hakemusOid, countryCode, uri);
+                    }
+                }
+            } catch (Exception e) { // ei tarvita mutta pidetaan kunnes
+                                    // todennettu
+                                    // etta lisays tuotannossa toimii
+            }
             return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus);
         } catch (Exception e) {
             e.printStackTrace();
             LOG.error("Hakemus {}/applications/{} sisälsi virheellistä tietoa!", new Object[] { applicationResourceUrl,
                     hakemusOid, });
             notFound(hakemusOid);
-            // throw new
-            // HakemuspalveluException("Hakemuspalvelu ei anna hakemusta " +
-            // hakemusOid + "!");
         }
         return OsoiteHakemukseltaUtil.osoiteHakemuksesta(null);
     }

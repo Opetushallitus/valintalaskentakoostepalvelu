@@ -22,8 +22,8 @@ public class OsoiteHakemukseltaUtil {
     private final static String POHJAKOULUTUS_ULKOMAILLA = "0";
     private final static String POHJAKOULUTUS_KESKEYTETTY = "7";
 
-    private final static String ASUINMAA = "asuinmaa";
-    private final static String SUOMI = "FIN";
+    public final static String ASUINMAA = "asuinmaa";
+    public final static String SUOMI = "FIN";
     private final static String SUOMALAINEN_LAHIOSOITE = "lahiosoite";
     private final static String SUOMALAINEN_POSTINUMERO = "Postinumero";
     private final static String SUOMALAINEN_POSTITOIMIPAIKKA = "postitoimipaikka";
