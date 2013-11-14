@@ -33,12 +33,12 @@ public class OsoiteHakemukseltaUtil {
     private final static String ETUNIMET = "Etunimet";
     private final static String SUKUNIMI = "Sukunimi";
 
-    public static Osoite osoiteHakemuksesta(Hakemus hakemus) {
+    public static Osoite osoiteHakemuksesta(Hakemus hakemus, String maa) {
         String lahiosoite = "";
         String postinumero = "";
         String postitoimipaikka = "";
         String maakoodi = "";
-        String maa = "";
+        // String maa = "";
         String maakunta = "";
 
         String etunimet = "";
@@ -85,7 +85,9 @@ public class OsoiteHakemukseltaUtil {
             sukunimi = "Hakemus ei ole olemassa!";
             LOG.error("Null-hakemukselle yritetään luoda osoitetta!");
         }
-
+        if (maa == null) {
+            maa = "";
+        }
         return new Osoite(etunimet, sukunimi, lahiosoite, null, null, postinumero, postitoimipaikka, maakunta, maa,
                 maakoodi, ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt);
     }

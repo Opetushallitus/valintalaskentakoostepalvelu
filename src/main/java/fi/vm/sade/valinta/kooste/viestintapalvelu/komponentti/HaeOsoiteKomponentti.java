@@ -81,6 +81,7 @@ public class HaeOsoiteKomponentti {
                 notFound(hakemusOid);
                 LOG.error("Hakemus {}/applications/{} null-arvo!", new Object[] { applicationResourceUrl, hakemusOid, });
             }
+            String maa = null;
             try {
                 // onko ulkomaalainen?
                 if (!SUOMI.equals(hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA))) {
@@ -88,15 +89,16 @@ public class HaeOsoiteKomponentti {
                     String countryCode = hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA);
                     String uri = new StringBuilder().append(MAAT_JA_VALTIOT_PREFIX).append(countryCode.toLowerCase())
                             .toString();
+
                     try {
                         for (KoodiType koodi : koodiService.searchKoodis(KoodiServiceSearchCriteriaBuilder
-                                .latestAcceptedKoodiByUri(uri))) {
+                                .latestKoodisByUris(uri))) {
                             if (koodi.getMetadata() == null) {
                                 LOG.error("Koodistosta palautuu tyhjiä koodeja! Koodisto uri {}", uri);
                                 continue;
                             }
-                            // preferoidaan suomea
-                            String maa = getKuvaus(koodi.getMetadata(), KieliType.FI);
+                            // preferoidaan englantia
+                            maa = getKuvaus(koodi.getMetadata(), KieliType.EN);
                             if (maa == null) {
                                 maa = getKuvaus(koodi.getMetadata()); // jos
                                                                       // suomea
@@ -106,6 +108,9 @@ public class HaeOsoiteKomponentti {
                                                                       // kay
                             }
                             LOG.debug("Haettiin maa {} urille {}", new Object[] { maa, uri });
+                            if (maa != null) {
+                                break;
+                            }
                         }
                     } catch (Exception e) {
                         LOG.error(
@@ -118,14 +123,14 @@ public class HaeOsoiteKomponentti {
                                     // todennettu
                                     // etta lisays tuotannossa toimii
             }
-            return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus);
+            return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maa);
         } catch (Exception e) {
             e.printStackTrace();
             LOG.error("Hakemus {}/applications/{} sisälsi virheellistä tietoa!", new Object[] { applicationResourceUrl,
                     hakemusOid, });
             notFound(hakemusOid);
         }
-        return OsoiteHakemukseltaUtil.osoiteHakemuksesta(null);
+        return OsoiteHakemukseltaUtil.osoiteHakemuksesta(null, null);
     }
 
 }
