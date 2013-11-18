@@ -1,13 +1,13 @@
 package fi.vm.sade.valinta.cache.dao;
 
 import java.io.InputStream;
-import java.util.List;
+import java.util.Collection;
 
 import fi.vm.sade.valinta.cache.domain.MetaData;
 
-public interface GridFsDao {
+public interface DocumentDao {
 
     void put(MetaData documentMetaData, InputStream document);
 
-    List<MetaData> getAll();
+    Collection<MetaData> getAll();
 }
