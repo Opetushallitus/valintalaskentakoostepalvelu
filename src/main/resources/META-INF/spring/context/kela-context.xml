@@ -52,7 +52,7 @@
             <setProperty propertyName="authentication"><simple>${body.args[5]}</simple></setProperty>
             <process ref="securityPreprocessor"/>
             <policy ref="admin">
-            	<to uri="bean:sijoitteluKaikkiKoulutuspaikkallisetKomponentti"/>
+            	<to uri="bean:sijoitteluKaikkiPaikanVastaanottaneetKomponentti"/>
             	<split strategyRef="aggregatorStrategy" parallelProcessing="false" stopOnException="true">
                 	<simple>${body}</simple>
 	                <process ref="securityPreprocessor"/>
