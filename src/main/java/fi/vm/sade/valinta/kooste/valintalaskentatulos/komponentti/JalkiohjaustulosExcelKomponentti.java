@@ -1,22 +1,20 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.camel.Body;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
-import fi.vm.sade.valinta.kooste.util.Formatter;
+import org.apache.camel.Body;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -33,7 +31,7 @@ public class JalkiohjaustulosExcelKomponentti {
     private SijoitteluResource sijoitteluResource;
 
     public InputStream luoXls(@Body String hakuOid) {
-        final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluResource.ilmankoulutuspaikkaa(hakuOid,
+        final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluResource.ilmanhyvaksyntaa(hakuOid,
                 SijoitteluResource.LATEST);
         List<Object[]> rivit = new ArrayList<Object[]>();
         for (HakijaDTO jalkiohjattava : hyvaksymattomatHakijat) {
