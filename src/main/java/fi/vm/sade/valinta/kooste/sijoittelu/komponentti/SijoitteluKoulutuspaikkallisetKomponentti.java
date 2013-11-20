@@ -19,8 +19,9 @@ public class SijoitteluKoulutuspaikkallisetKomponentti {
     private String sijoitteluResourceUrl;
 
     public Collection<HakijaDTO> ilmankoulutuspaikkaa(@Property("hakuOid") String hakuOid,
-            @Property("hakukohdeOid") String hakukohdeOid, @Property("sijoitteluajoId") String sijoitteluajoId) {
-        return sijoitteluResource.koulutuspaikalliset(hakuOid, hakukohdeOid, sijoitteluajoId);
+                                                      @Property("hakukohdeOid") String hakukohdeOid,
+                                                      @Property("sijoitteluajoId") String sijoitteluajoId) {
+        return sijoitteluResource.hyvaksytyt(hakuOid, hakukohdeOid, sijoitteluajoId);
     }
 
 }

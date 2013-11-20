@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 
-@Component("sijoitteluKaikkiKoulutuspaikkallisetKomponentti")
-public class SijoitteluKaikkiKoulutuspaikkallisetKomponentti {
+@Component("sijoitteluKaikkiPaikanVastaanottaneetKomponentti")
+public class SijoitteluKaikkiPaikanVastaanottaneetKomponentti {
 
     @Autowired
     private SijoitteluResource sijoitteluResource;
@@ -18,8 +18,8 @@ public class SijoitteluKaikkiKoulutuspaikkallisetKomponentti {
     @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}")
     private String sijoitteluResourceUrl;
 
-    public Collection<HakijaDTO> ilmankoulutuspaikkaa(@Property("hakuOid") String hakuOid) {
-        return sijoitteluResource.hyvaksytyt(hakuOid, SijoitteluResource.LATEST);
+    public Collection<HakijaDTO> vastaanottaneet(@Property("hakuOid") String hakuOid) {
+        return sijoitteluResource.vastaanottaneet(hakuOid, SijoitteluResource.LATEST);
     }
 
 }

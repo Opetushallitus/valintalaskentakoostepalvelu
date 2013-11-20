@@ -31,7 +31,7 @@ public class JalkiohjaustulosExcelKomponentti {
     private SijoitteluResource sijoitteluResource;
 
     public InputStream luoXls(@Body String hakuOid) {
-        final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluResource.ilmankoulutuspaikkaa(hakuOid,
+        final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluResource.ilmanhyvaksyntaa(hakuOid,
                 SijoitteluResource.LATEST);
         List<Object[]> rivit = new ArrayList<Object[]>();
         for (HakijaDTO jalkiohjattava : hyvaksymattomatHakijat) {

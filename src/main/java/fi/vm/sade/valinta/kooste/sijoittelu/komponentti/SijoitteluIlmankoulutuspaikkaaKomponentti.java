@@ -20,6 +20,6 @@ public class SijoitteluIlmankoulutuspaikkaaKomponentti {
 
     public List<HakijaDTO> ilmankoulutuspaikkaa(@Property("hakuOid") String hakuOid,
             @Property("sijoitteluajoId") String sijoitteluajoId) {
-        return sijoitteluResource.ilmankoulutuspaikkaa(hakuOid, sijoitteluajoId);
+        return sijoitteluResource.ilmanhyvaksyntaa(hakuOid, sijoitteluajoId);
     }
 }
