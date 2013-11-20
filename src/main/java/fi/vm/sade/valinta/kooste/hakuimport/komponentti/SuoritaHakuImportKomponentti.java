@@ -35,10 +35,12 @@ public class SuoritaHakuImportKomponentti {
     @Autowired
     private SuoritaHakukohdeImportKomponentti suoritaHakukohdeImportKomponentti;
 
+    private static final int MAX_COUNT = 100000;
+
     public void suoritaHakukohdeImport(@Property(SECURITY_CONTEXT_HEADER) Authentication auth, @Body String hakuOid) {
         assert (auth != null);
         SecurityContextHolder.getContext().setAuthentication(auth);
-        List<OidRDTO> a = hakuResource.getByOIDHakukohde(hakuOid, null, Integer.MAX_VALUE, 0, null, null, null, null);
+        List<OidRDTO> a = hakuResource.getByOIDHakukohde(hakuOid, null, MAX_COUNT, 0, null, null, null, null);
         LOG.info("Importoidaan hakukohteita yhteensä {} kpl", a.size());
 
         for (OidRDTO o : a) {
