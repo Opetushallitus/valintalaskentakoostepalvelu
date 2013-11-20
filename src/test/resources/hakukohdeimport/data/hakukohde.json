@@ -1,0 +1,62 @@
+{
+  "modified" : 1382604568555,
+  "modifiedBy" : "1.2.246.562.24.53859318893",
+  "oid" : "1.2.246.562.5.50425195448",
+  "version" : 3,
+  "aloituspaikatLkm" : 53,
+  "tila" : "JULKAISTU",
+  "hakukohdeNimi" : {
+    "kieli_sv" : "Gymnasium",
+    "kieli_fi" : "Lukio"
+  },
+  "hakuOid" : "1.2.246.562.5.2013080813081926341927",
+  "sahkoinenToimitusOsoite" : "",
+  "lisatiedot" : {
+  },
+  "tarjoajaOid" : "1.2.246.562.10.55228285676",
+  "tarjoajaNimi" : {
+    "kieli_fi" : "Tampereen teknillinen lukio"
+  },
+  "valintakoes" : [ {
+    "modified" : 1382604568770,
+    "modifiedBy" : "1.2.246.562.24.53859318893",
+    "oid" : "156588",
+    "version" : 0,
+    "kuvaus" : {
+    },
+    "valintakoeAjankohtas" : [ ],
+    "lisanaytot" : {
+    },
+    "valintakoePisterajas" : [ ]
+  } ],
+  "hakukohdeKoulutusOids" : [ "1.2.246.562.5.51632258755" ],
+  "valintaperustekuvausKoodiUri" : "valintaperustekuvausryhma_1#1",
+  "hakukohdeKoodistoNimi" : "Lukio, Kevät 2014, valmis",
+  "kaytetaanHaunPaattymisenAikaa" : false,
+  "alinHyvaksyttavaKeskiarvo" : 7.0,
+  "hakuaikaAlkuPvm" : 1393218000000,
+  "hakuaikaLoppuPvm" : 1394802000000,
+  "valintojenAloituspaikatLkm" : 53,
+  "alinValintaPistemaara" : 0,
+  "edellisenVuodenHakijatLkm" : 0,
+  "hakukohdeNimiUri" : "hakukohteet_000#1",
+  "liitteidenToimitusosoite" : {
+    "version" : 0,
+    "osoiterivi1" : "Opiskelijankatu 31",
+    "postinumero" : "posti_33720",
+    "postitoimipaikka" : "TAMPERE"
+  },
+  "ylinValintapistemaara" : 0,
+  "kaytetaanHakukohdekohtaistaHakuaikaa" : false,
+  "hakukelpoisuusvaatimusUris" : [ "hakukelpoisuusvaatimusta_5#1" ],
+  "hakukelpoisuusvaatimus" : {
+    "kieli_sv" : "Om du har slutfört den grundläggande utbildningens lärokurs eller motsvarande lärokurs kan du söka till gymnasieutbildning. Om du har avlagt din examen utomlands eller avbrutit läroplikten kan du söka till gymnasieutbildning genom ansökan enligt prövning. Utbildningsanordnaren bedömer då skilt ditt utbildningsbehov och förutsättningar att klara av studierna.",
+    "kieli_fi" : "Perusopetuksen tai sitä vastaavan aiemman oppimäärän suorittaneet voivat hakea lukiokoulutukseen. Jos hakijalla on ulkomailla suoritettu tutkinto tai hänen oppivelvollisuutensa on keskeytynyt, hän voi hakea lukiokoulutukseen harkintaan perustuvan haun kautta. Tällöin koulutuksen järjestäjä arvioi erikseen hakijan koulutustarpeen ja edellytykset suoriutua opinnoista."
+  },
+  "valintaperustekuvaus" : {
+    "kieli_fi#1" : "<h1>Lukiokoulutuksen valintaperusteet</h1> <p>Voit hakea lukioon peruskoulun päättötodistuksella tai vastaavalla todistuksella.</p> <p>Lukioon voidaan ottaa opiskelijaksi myös hakija, jolla on riittävät edellytykset lukio-opinnoista suoriutumiseen, vaikka peruskoulun päättötodistusta tai vastaavaa todistusta ei olisikaan.</p> <h2>Keskiarvo valintaperusteena</h2> <p>Lukioon pääsyn ratkaisee peruskoulun päättötodistuksen seuraavien arvosanojen keskiarvo:</p> <ul> <li>äidinkieli ja kirjallisuus</li> <li>toinen kotimainen kieli</li> <li>vieraat kielet</li> <li>uskonto tai elämänkatsomustieto</li> <li>historia</li> <li>yhteiskuntaoppi</li> <li>matematiikka</li> <li>fysiikka</li> <li>kemia</li> <li>biologia</li> <li>terveystieto</li> <li>maantieto</li> </ul> <p>Korotetut arvosanat otetaan huomioon, jos korotuksista on erillinen koulun antama todistus.</p> <p>Lukiot valitsevat opiskelijat keskiarvon osoittamassa järjestyksessä. Mikäli useammalla hakijalla on sama keskiarvo, valinnan ratkaisee</p> <ul> <li>hakutoivejärjestys</li> <li>keskiarvo, johon lasketaan edellä mainittujen arvosanojen lisäksi myös liikunnan, käsityön, kotitalouden, musiikin ja kuvataiteen arvosanat.</li> </ul> <p>Tämän jälkeen saman pistemäärän saaneet hakijat otetaan sattumanvaraisessa järjestyksessä eli arvotaan.</p> <p>Lukiot voivat halutessaan määrätä etukäteen alarajan keskiarvolle.</p> <h2>Painotettavat oppiaineet</h2> <p>Joissain lukiokoulutuksissa painotetaan yhtä tai useampaa oppiainetta. Näissä tapauksissa lukiot voivat keskiarvoa laskiessaan ottaa huomioon erityisesti painotettavien oppiaineiden arvosanat.</p> <h2>Pääsy- ja soveltuvuuskokeet</h2> <p>Lukioissa voi olla myös pääsy- ja soveltuvuuskokeita. Niiden pistemäärä voi olla korkeintaan puolet enimmäispistemäärästä. Lukiot voivat myös päättää koepisteiden alarajan, jota alemmilla pisteillä ei voi tulla valituksi vaikka hakijan kokonaispistemäärä näyttäisi riittävän opiskelijaksi ottamiseen.</p> <h2>Muu koulutus, harrastukset tai muut lisänäytöt</h2> <p>Lukiot voivat ottaa huomioon myös hakijan muun koulutuksen, harrastukset tai muita lisänäyttöjä. Lisänäyttöjen pistemäärä yhdessä pääsy- ja soveltuvuuskokeiden kanssa voi olla korkeintaan puolet enimmäispistemäärästä.</p> <p><strong>ESIMERKKI:</strong></p> <p>Haet lukioon, jonka keskiarvoraja on 7 ja pääsykokeiden ja lisänäyttöjen alaraja 6 pistettä. Keskiarvorajan ylittämisen lisäksi sinun on osallistuttava pääsykokeeseen, josta voit saada 0-5 pistettä. Ilmoitat myös lukion omalla lisätietolomakkeella aiemmat harrastuksesi ja saavutuksesi, joista voit saada 0-5 pistettä. Tarvitset siis pisteitä sekä pääsykokeesta että lisänäytöistä, vaikka keskiarvosi olisi enemmän kuin 7.</p> <p> </p> <h6>Lukiokoulutuksen opiskelijavalinnassa noudatetaan opetus- ja kulttuuriministeriön päätöstä lukion opiskelijaksi ottamisen perusteista (856/2006, muutosasetus 948/2007.</h6>",
+    "kieli_sv#1" : "<h1><strong>Antagningsgrunder till gymnasium</strong></h1> <p>Du kan söka till gymnasium med grundläggande utbildningens avgångsbetyg eller motsvarande betyg.</p> <p>Som studerande kan också antas sökande som saknar grundläggande utbildningens avgångsbetyg eller motsvarande betyg men som annars har tillräckliga förutsättningar för gymnasiestudier.</p> <h2><strong>Medeltalet som antagningsgrund</strong></h2> <p>Medeltalet av vitsorden i följande ämnen på den grundläggande utbildningens avgångsbetyg beaktas vid antagningen till gymnasium:</p> <ul> <li>Modersmål och litteratur</li> <li>Det andra inhemska språket</li> <li>Främmande språk</li> <li>Religion eller livsåskådningskunskap</li> <li>Historia</li> <li>Samhällslära</li> <li>Matematik</li> <li>Fysik </li> <li>Kemi </li> <li>Biologi </li> <li>Hälsokunskap </li> <li>Geografi.</li> </ul> <p>Du kan anteckna höjda vitsord utgående från ett särskilt intyg som du får från skolan. Gymnasierna antar de studerande enligt medeltalet på betyget. Om flera sökande har samma medeltal, avgörs antagningen enligt följande:</p> <ol> <li>Enligt ansökningsönskemål</li> <li>Medeltalet uträknat på ovan nämnda vitsord och vitsorden i gymnastik, slöjd, huslig ekonomi, musik och bildkonst.</li> </ol> <p>Efter detta placeras de som fått samma antal poäng i slumpmässig ordning.</p> <p>Gymnasierna kan på förhand bestämma en undre gräns för medeltalet.</p> <h2><strong>Läroämnen som betonas</strong></h2> <p>I en del gymnasier betonas ett eller flera läroämnen. Vid uträkningen av medeltalet kan gymnasierna då särskilt beakta vitsorden i dessa ämnen.</p> <h2><strong>Inträdes- och lämplighetsprov</strong></h2> <p>Gymnasierna kan ordna inträdes- och lämplighetsprov. Poängen för provet kan utgöra högst hälften av det maximala poängantalet. Dessutom kan gymnasierna bestämma en undre gräns för antalet poäng för inträdesprov, vilket innebär att en sökande som inte uppnår gränsen för provpoäng inte kan antas till utbildning fastän hans eller hennes totala poängantal skulle räcka till för antagning.</p> <h2><strong>Annan utbildning, fritidsaktiviteter och andra tilläggsprestationer</strong></h2> <p>Gymnasierna kan beakta annan utbildning, fritidsaktiviteter eller andra tilläggsprestationer vid antagningen. Poängen för dessa och ett eventuellt inträdes- eller lämplighetsprov kan vara högst hälften av maximipoängen.</p>"
+  },
+  "opetuskielet" : [ "kieli_fi#1" ],
+  "kaytetaanJarjestelmanValintaPalvelua" : false
+}

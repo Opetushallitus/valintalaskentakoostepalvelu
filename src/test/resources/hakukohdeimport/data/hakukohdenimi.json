@@ -1,0 +1,24 @@
+{
+  "hakukohdeOid" : "1.2.246.562.5.50425195448",
+  "tarjoajaOid" : "1.2.246.562.10.55228285676",
+  "tarjoajaNimi" : {
+    "kieli_fi" : "Tampereen teknillinen lukio"
+  },
+  "hakukohdeNimi" : {
+    "kieli_sv" : "Gymnasium",
+    "kieli_fi" : "Lukio"
+  },
+  "hakukohdeTila" : "JULKAISTU",
+  "hakuVuosi" : 2014,
+  "koulutusVuosi" : 2014,
+  "hakuKausi" : {
+    "kieli_sv" : "Vår",
+    "kieli_en" : "Spring",
+    "kieli_fi" : "Kevät"
+  },
+  "koulutusKausi" : {
+    "kieli_sv" : "Höst",
+    "kieli_en" : "Autumn",
+    "kieli_fi" : "Syksy"
+  }
+}

@@ -43,6 +43,8 @@ public class SuoritaHakukohdeImportKomponentti {
         HakukohdeDTO hakukohdeData = hakukohdeResource.getByOID(hakukohdeOid);
         HakukohdeImportTyyppi importTyyppi = new HakukohdeImportTyyppi();
 
+        LOG.info("Importoidaan hakukohde {}", hakukohdeNimi.getTarjoajaNimi().get("kieli_fi"));
+
         importTyyppi.setTarjoajaOid(hakukohdeNimi.getTarjoajaOid());
 
         for (String s : hakukohdeNimi.getTarjoajaNimi().keySet()) {
@@ -73,9 +75,7 @@ public class SuoritaHakukohdeImportKomponentti {
 
         importTyyppi.setHakukohdeOid(hakukohdeData.getOid());
         importTyyppi.setHakuOid(hakukohdeData.getHakuOid());
-
         importTyyppi.setValinnanAloituspaikat(hakukohdeData.getValintojenAloituspaikatLkm());
-
         importTyyppi.setTila(hakukohdeData.getTila());
         if (hakukohdeData.getValintakoes() != null) {
             LOG.debug("Valintakokeita löytyi {}!", hakukohdeData.getValintakoes().size());

@@ -39,7 +39,9 @@ public class SuoritaHakuImportKomponentti {
         assert (auth != null);
         SecurityContextHolder.getContext().setAuthentication(auth);
         List<OidRDTO> a = hakuResource.getByOIDHakukohde(hakuOid, null, Integer.MAX_VALUE, 0, null, null, null, null);
-        for(OidRDTO o : a) {
+        LOG.info("Importoidaan hakukohteita yhteensä {} kpl", a.size());
+
+        for (OidRDTO o : a) {
             suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(auth, o.getOid());
         }
     }
