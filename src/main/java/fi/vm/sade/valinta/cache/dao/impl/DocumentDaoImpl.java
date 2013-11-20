@@ -7,7 +7,7 @@ import java.io.InputStream;
  * @author Jussi Jartamo
  * 
  */
-public class GridFsDaoImpl {
+public class DocumentDaoImpl {
 
     public void save(InputStream document) {
 

@@ -1,8 +1,14 @@
 package fi.vm.sade.valinta.cache.resource;
 
+import java.io.InputStream;
+import java.util.Collection;
+
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+
+import fi.vm.sade.valinta.cache.domain.MetaData;
+import fi.vm.sade.valinta.cache.dto.DocumentDto;
 
 /**
  * 
@@ -11,7 +17,7 @@ import javax.ws.rs.core.Response;
  *         Portaali tilapaisdokumenteille
  */
 @Path("cache")
-public interface CacheResource {
+public interface DocumentCacheResource {
 
     /**
      * Lataa dokumentin
@@ -22,7 +28,7 @@ public interface CacheResource {
      */
     @GET
     @Path("lataa/{documentId}")
-    Response lataa(String documentId);
+    InputStream lataa(String documentId);
 
     /**
      * Hakee listan kaikista dokumenteista
@@ -31,7 +37,7 @@ public interface CacheResource {
      */
     @GET
     @Path("hae")
-    Response hae();
+    Collection<DocumentDto> hae();
 
     /**
      * Hakee listan dokumenteista palvelunnimella ja dokumentin tyypilla.
@@ -46,6 +52,9 @@ public interface CacheResource {
      */
     @GET
     @Path("hae/{serviceName}/{documentType}")
-    Response hae(String serviceName, String documentType);
+    Collection<DocumentDto> hae(String serviceName, String documentType);
 
+    @PUT
+    @Path("tallenna")
+    void tallenna(MetaData metaData, InputStream tiedosto);
 }

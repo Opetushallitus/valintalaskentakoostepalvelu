@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import org.joda.time.DateTime;
 
+import fi.vm.sade.valinta.cache.dto.DocumentDto;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -17,14 +19,15 @@ public class MetaData {
     private String mimeType;
     private String documentId;
     private String filename;
+    private Date createdAt;
     private Date expirationDate;
     private String serviceName; // viestintapalvelu, koostepalvelu, ...
     private String documentType; // hyvaksymiskirje, jalkiohjauskirje, ...
     private Map<String, String> data;
     private long size;
 
-    public MetaData(String documentId, String filename, String mimeType, String serviceName, String documentType,
-            Date expirationDate, Map<String, String> data, long size) {
+    private MetaData(String documentId, String filename, String mimeType, String serviceName, String documentType,
+            Date createdAt, Date expirationDate, Map<String, String> data, long size) {
         this.documentId = documentId;
         this.mimeType = mimeType;
         this.expirationDate = expirationDate;
@@ -33,6 +36,7 @@ public class MetaData {
         this.serviceName = serviceName;
         this.documentType = documentType;
         this.size = size;
+        this.createdAt = createdAt;
     }
 
     public Map<String, String> getData() {
@@ -55,6 +59,10 @@ public class MetaData {
         return filename;
     }
 
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
     public Date getExpirationDate() {
         return expirationDate;
     }
@@ -65,6 +73,11 @@ public class MetaData {
 
     public String getMimeType() {
         return mimeType;
+    }
+
+    public DocumentDto toDocumentDto() {
+        return new DocumentDto(documentId, filename, mimeType, serviceName, documentType, createdAt, expirationDate,
+                data, size);
     }
 
     /**
@@ -85,6 +98,7 @@ public class MetaData {
         private String mimeType;
         private String documentId;
         private String filename;
+        private Date createdAt;
         private Date expirationDate;
         private Map<String, String> data;
         private String serviceName;
@@ -92,6 +106,11 @@ public class MetaData {
         private long size;
 
         public MetaDataBuilder() {
+        }
+
+        public MetaDataBuilder setCreatedAt(Date createdAt) {
+            this.createdAt = createdAt;
+            return this;
         }
 
         public MetaDataBuilder setHoursUntilExpire(int hours) {
@@ -153,7 +172,11 @@ public class MetaData {
             if (expirationDate == null) {
                 expirationDate = DateTime.now().plusDays(ONE_DAY).toDate();
             }
-            return new MetaData(documentId, filename, mimeType, serviceName, documentType, expirationDate, data, size);
+            if (createdAt == null) {
+                createdAt = new Date();
+            }
+            return new MetaData(documentId, filename, mimeType, serviceName, documentType, createdAt, expirationDate,
+                    data, size);
         }
     }
 
