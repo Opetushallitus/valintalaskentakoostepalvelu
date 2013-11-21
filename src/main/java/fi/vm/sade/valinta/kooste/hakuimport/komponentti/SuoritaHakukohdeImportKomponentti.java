@@ -73,9 +73,7 @@ public class SuoritaHakukohdeImportKomponentti {
 
         importTyyppi.setHakukohdeOid(hakukohdeData.getOid());
         importTyyppi.setHakuOid(hakukohdeData.getHakuOid());
-
         importTyyppi.setValinnanAloituspaikat(hakukohdeData.getValintojenAloituspaikatLkm());
-
         importTyyppi.setTila(hakukohdeData.getTila());
         if (hakukohdeData.getValintakoes() != null) {
             LOG.debug("Valintakokeita löytyi {}!", hakukohdeData.getValintakoes().size());
