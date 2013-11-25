@@ -4,6 +4,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.PaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import org.apache.camel.Body;
@@ -17,9 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
+ *
  * @author Jussi Jartamo
- * 
+ *
  *         Komponentti tulosten kasaamiseen Excel-muodossa
  */
 @Component("jalkiohjaustulosXlsKomponentti")
@@ -31,10 +32,11 @@ public class JalkiohjaustulosExcelKomponentti {
     private SijoitteluResource sijoitteluResource;
 
     public InputStream luoXls(@Body String hakuOid) {
-        final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluResource.ilmanhyvaksyntaa(hakuOid,
-                SijoitteluResource.LATEST);
+
+        final PaginationObject<HakijaDTO> hyvaksymattomatHakijat =sijoitteluResource.hakemukset(hakuOid, SijoitteluResource.LATEST, null, true, null, null,null,null);
+
         List<Object[]> rivit = new ArrayList<Object[]>();
-        for (HakijaDTO jalkiohjattava : hyvaksymattomatHakijat) {
+        for (HakijaDTO jalkiohjattava : hyvaksymattomatHakijat.getResults()) {
             boolean otsikko = true;
             for (HakutoiveDTO hakutoive : jalkiohjattava.getHakutoiveet()) {
                 for (HakutoiveenValintatapajonoDTO jono : hakutoive.getHakutoiveenValintatapajonot()) {

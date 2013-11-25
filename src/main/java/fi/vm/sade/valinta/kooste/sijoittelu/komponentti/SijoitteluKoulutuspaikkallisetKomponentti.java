@@ -1,13 +1,16 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.komponentti;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.PaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import org.apache.camel.Property;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Component("sijoitteluKoulutuspaikkallisetKomponentti")
 public class SijoitteluKoulutuspaikkallisetKomponentti {
@@ -21,7 +24,17 @@ public class SijoitteluKoulutuspaikkallisetKomponentti {
     public Collection<HakijaDTO> ilmankoulutuspaikkaa(@Property("hakuOid") String hakuOid,
                                                       @Property("hakukohdeOid") String hakukohdeOid,
                                                       @Property("sijoitteluajoId") String sijoitteluajoId) {
-        return sijoitteluResource.hyvaksytyt(hakuOid, hakukohdeOid, sijoitteluajoId);
+        List<String> hakukohteet = new ArrayList<String>();
+        hakukohteet.add(hakukohdeOid);
+        final PaginationObject<HakijaDTO> result =sijoitteluResource.hakemukset(hakuOid,
+                SijoitteluResource.LATEST,
+                true,
+                null,
+                null,
+                hakukohteet,
+                null,
+                null);
+        return result.getResults();
     }
 
 }
