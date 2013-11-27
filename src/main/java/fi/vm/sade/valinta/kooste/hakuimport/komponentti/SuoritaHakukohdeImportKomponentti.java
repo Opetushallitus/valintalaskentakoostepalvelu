@@ -45,24 +45,31 @@ public class SuoritaHakukohdeImportKomponentti {
 
         importTyyppi.setTarjoajaOid(hakukohdeNimi.getTarjoajaOid());
 
-        for (String s : hakukohdeNimi.getTarjoajaNimi().keySet()) {
-            MonikielinenTekstiTyyppi m = new MonikielinenTekstiTyyppi();
-            m.setLang(s);
-            m.setText(hakukohdeNimi.getTarjoajaNimi().get(s));
-            importTyyppi.getTarjoajaNimi().add(m);
-        }
-        for (String s : hakukohdeNimi.getHakukohdeNimi().keySet()) {
-            MonikielinenTekstiTyyppi m = new MonikielinenTekstiTyyppi();
-            m.setLang(s);
-            m.setText(hakukohdeNimi.getHakukohdeNimi().get(s));
-            importTyyppi.getHakukohdeNimi().add(m);
+        if (hakukohdeNimi.getTarjoajaNimi() != null) {
+            for (String s : hakukohdeNimi.getTarjoajaNimi().keySet()) {
+                MonikielinenTekstiTyyppi m = new MonikielinenTekstiTyyppi();
+                m.setLang(s);
+                m.setText(hakukohdeNimi.getTarjoajaNimi().get(s));
+                importTyyppi.getTarjoajaNimi().add(m);
+            }
         }
 
-        for (String s : hakukohdeNimi.getHakuKausi().keySet()) {
-            MonikielinenTekstiTyyppi m = new MonikielinenTekstiTyyppi();
-            m.setLang(s);
-            m.setText(hakukohdeNimi.getHakuKausi().get(s));
-            importTyyppi.getHakuKausi().add(m);
+        if (hakukohdeNimi.getHakukohdeNimi() != null) {
+            for (String s : hakukohdeNimi.getHakukohdeNimi().keySet()) {
+                MonikielinenTekstiTyyppi m = new MonikielinenTekstiTyyppi();
+                m.setLang(s);
+                m.setText(hakukohdeNimi.getHakukohdeNimi().get(s));
+                importTyyppi.getHakukohdeNimi().add(m);
+            }
+        }
+
+        if (hakukohdeNimi.getHakuKausi() != null) {
+            for (String s : hakukohdeNimi.getHakuKausi().keySet()) {
+                MonikielinenTekstiTyyppi m = new MonikielinenTekstiTyyppi();
+                m.setLang(s);
+                m.setText(hakukohdeNimi.getHakuKausi().get(s));
+                importTyyppi.getHakuKausi().add(m);
+            }
         }
 
         importTyyppi.setHakuVuosi(new Integer(hakukohdeNimi.getHakuVuosi()).toString());
