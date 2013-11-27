@@ -24,27 +24,38 @@
 
     <dependencies>
     	<dependency>
+    		<groupId>javax.ws.rs</groupId>
+    		<artifactId>jsr311-api</artifactId>
+    		<version>1.1.1</version>
+    		<scope>provided</scope>
+    	</dependency>
+    	<dependency>
+	        <groupId>org.jboss.spec</groupId>
+	        <artifactId>jboss-javaee-6.0</artifactId>
+	        <version>1.0.0.Final</version>
+	        <type>pom</type>
+	        <scope>provided</scope>
+	     </dependency>
+    	<!-- SADE -->
+        <dependency>
+            <groupId>fi.vm.sade.tarjonta</groupId>
+            <artifactId>tarjonta-api</artifactId>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>swagger-jaxrs_2.10</artifactId>
+            		<groupId>com.wordnik</groupId>
+            	</exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>fi.vm.sade.koodisto</groupId>
+            <artifactId>koodisto-api</artifactId>
+        </dependency>
+    	<dependency>
 			<groupId>fi.vm.sade.dokumenttipalvelu</groupId>
 			<artifactId>dokumenttipalvelu-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-        <dependency>
-            	<groupId>com.google.code.morphia</groupId>
-            	<artifactId>morphia</artifactId>
-            	<version>0.102</version>
-        </dependency>
-		<dependency>
-	    		<groupId>org.mongodb</groupId>
-	    		<artifactId>mongo-java-driver</artifactId>
-	    		<version>2.11.2</version>
-	    	</dependency>
-	    <dependency>
-            <groupId>de.flapdoodle.embed</groupId>
-            <artifactId>de.flapdoodle.embed.mongo</artifactId>
-            <version>1.26</version>
-            <scope>test</scope>
-        </dependency>
-        
          <dependency>
             <groupId>fi.vm.sade.organisaatio</groupId>
             <artifactId>organisaatio-api</artifactId>
@@ -55,12 +66,8 @@
 			<artifactId>kela-tkuva</artifactId>
 			<version>${kela.version}</version>
 		</dependency> 
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-            <scope>test</scope>
-        </dependency>
+		
+		<!-- POI -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
@@ -113,15 +120,7 @@
             <artifactId>sijoittelu-tulos-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- SADE -->
-        <dependency>
-            <groupId>fi.vm.sade.tarjonta</groupId>
-            <artifactId>tarjonta-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.koodisto</groupId>
-            <artifactId>koodisto-api</artifactId>
-        </dependency>
+        
 
         <dependency>
             <groupId>com.sun.jersey.contribs</groupId>
@@ -198,6 +197,12 @@
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-core</artifactId>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>geronimo-javamail_1.4_spec</artifactId>
+            		<groupId>org.apache.geronimo.specs</groupId>
+            	</exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
@@ -220,11 +225,6 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-ftp</artifactId>
-            <version>${camel.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-servlet</artifactId>
             <version>${camel.version}</version>
         </dependency>
         <dependency>
@@ -313,6 +313,44 @@
                 	<artifactId>commons-logging</artifactId>
                 	<groupId>commons-logging</groupId>
                 </exclusion>
+                <exclusion>
+                	<artifactId>geronimo-servlet_2.5_spec</artifactId>
+                	<groupId>org.apache.geronimo.specs</groupId>
+                </exclusion>
+                <exclusion>
+                	<artifactId>geronimo-javamail_1.4_spec</artifactId>
+                	<groupId>org.apache.geronimo.specs</groupId>
+                </exclusion>
+                <exclusion>
+                	<artifactId>geronimo-jms_1.1_spec</artifactId>
+                	<groupId>org.apache.geronimo.specs</groupId>
+                </exclusion>
+                <exclusion>
+                	<artifactId>
+                		geronimo-annotation_1.0_spec
+                	</artifactId>
+                	<groupId>org.apache.geronimo.specs</groupId>
+                </exclusion>
+                <exclusion>
+                	<artifactId>
+                		geronimo-activation_1.1_spec
+                	</artifactId>
+                	<groupId>org.apache.geronimo.specs</groupId>
+                </exclusion>
+                <exclusion>
+                	<artifactId>
+                		geronimo-ws-metadata_2.0_spec
+                	</artifactId>
+                	<groupId>org.apache.geronimo.specs</groupId>
+                </exclusion>
+                <exclusion>
+                	<artifactId>saaj-api</artifactId>
+                	<groupId>javax.xml.soap</groupId>
+                </exclusion>
+                <exclusion>
+                	<artifactId>saaj-impl</artifactId>
+                	<groupId>com.sun.xml.messaging.saaj</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -345,6 +383,10 @@
             		<artifactId>commons-logging</artifactId>
             		<groupId>commons-logging</groupId>
             	</exclusion>
+            	<exclusion>
+            		<artifactId>geronimo-servlet_2.5_spec</artifactId>
+            		<groupId>org.apache.geronimo.specs</groupId>
+            	</exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -358,16 +400,8 @@
             	</exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
-        </dependency>
+        
+        
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
@@ -393,7 +427,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
-            <!--<scope>test</scope>-->
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -403,16 +436,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-expression</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+        
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -482,10 +506,22 @@
         <dependency>
             <groupId>fi.vm.sade.generic</groupId>
             <artifactId>generic-common</artifactId>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>validation-api</artifactId>
+            		<groupId>javax.validation</groupId>
+            	</exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
+            <exclusions>
+            	<exclusion>
+            		<artifactId>validation-api</artifactId>
+            		<groupId>javax.validation</groupId>
+            	</exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.sf.ehcache</groupId>
@@ -506,6 +542,28 @@
             		<groupId>commons-logging</groupId>
             	</exclusion>
             </exclusions>
+        </dependency>
+        
+        <!-- Tests -->
+         <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
