@@ -24,6 +24,7 @@ import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAALKU;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVALOPPU;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
+import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.kela.KelaCache;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaCacheDocument;
 
@@ -31,9 +32,13 @@ import fi.vm.sade.valinta.kooste.kela.dto.KelaCacheDocument;
 public class KelaExportKomponentti {
 
     private static final Logger LOG = LoggerFactory.getLogger(KelaExportKomponentti.class);
-
+    private static final String KELA_KOOSTEPALVELU = "koostepalvelu";
+    private static final String KELA_DOKUMENTTI = "kela";
     @Autowired
     private KelaCache kelaCache;
+
+    @Autowired
+    private DokumenttiResource dokumenttiResource;
 
     public void exportKela(@Property("aineistonNimi") String aineistonNimi,
             @Property("organisaationNimi") String organisaationNimi, @Body List<TKUVAYHVA> data) throws IOException {
@@ -59,6 +64,11 @@ public class KelaExportKomponentti {
 
         kelaCache.addDocument(KelaCacheDocument.createFile(KelaUtil.createTiedostoNimiYhva14(new Date()), count,
                 IOUtils.toByteArray(input)));
+
+        // dokumenttiResource.tallenna(input, new
+        // FileDescription(KelaUtil.createTiedostoNimiYhva14(new Date()),
+        // KELA_KOOSTEPALVELU, KELA_DOKUMENTTI,
+        // DateTime.now().plusDays(1).toDate()));
         LOG.info("Palautetaan onnistuneesti luotu KELA-tiedosto");
     }
 }
