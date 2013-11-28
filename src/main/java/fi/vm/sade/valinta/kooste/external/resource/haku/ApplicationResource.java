@@ -16,6 +16,7 @@ public interface ApplicationResource {
     public static final String CHARSET_UTF_8 = ";charset=UTF-8";
     public static final String OID = "oid";
     public static final String HENKILOTUNNUS = "Henkilotunnus";
+    public static final String SYNTYMAAIKA = "syntymaaika";
 
     @GET
     @Path("{oid}")

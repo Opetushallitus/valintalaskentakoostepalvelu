@@ -2,12 +2,14 @@ package fi.vm.sade.valinta.kooste.kela.komponentti;
 
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
 import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.HENKILOTUNNUS;
+import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.SYNTYMAAIKA;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.camel.Body;
 import org.apache.camel.Property;
@@ -77,14 +79,25 @@ public class TKUVAYHVAKomponentti {
 
                     try {
                         Hakemus hakemus = hakemusProxy.haeHakemus(hakija.getHakemusOid());
-                        String standardinMukainenHenkilotunnus = hakemus.getAnswers().getHenkilotiedot()
-                                .get(HENKILOTUNNUS);
-                        // KELA ei halua vuosisata merkkia
-                        // henkilotunnukseen!
-                        StringBuilder kelanVaatimaHenkilotunnus = new StringBuilder();
-                        kelanVaatimaHenkilotunnus.append(standardinMukainenHenkilotunnus.substring(0, 6)).append(
-                                standardinMukainenHenkilotunnus.substring(7, 11));
-                        builder.setHenkilotunnus(kelanVaatimaHenkilotunnus.toString());
+
+                        Map<String, String> henkilotiedot = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+                        henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
+
+                        if (henkilotiedot.containsKey(HENKILOTUNNUS)) {
+                            String standardinMukainenHenkilotunnus = henkilotiedot.get(HENKILOTUNNUS);
+                            // KELA ei halua vuosisata merkkia
+                            // henkilotunnukseen!
+                            StringBuilder kelanVaatimaHenkilotunnus = new StringBuilder();
+                            kelanVaatimaHenkilotunnus.append(standardinMukainenHenkilotunnus.substring(0, 6)).append(
+                                    standardinMukainenHenkilotunnus.substring(7, 11));
+                            builder.setHenkilotunnus(kelanVaatimaHenkilotunnus.toString());
+                        } else { // Ulkomaalaisille syntyma-aika hetun sijaan
+                            String syntymaAika = henkilotiedot.get(SYNTYMAAIKA); // esim
+                                                                                 // 04.05.1965
+                            // Poistetaan pisteet ja tyhjaa loppuun
+                            String syntymaAikaIlmanPisteita = syntymaAika.replace(".", "");
+                            builder.setHenkilotunnus(syntymaAikaIlmanPisteita.toString());
+                        }
                     } catch (Exception e) {
                         LOG.error("Henkilötunnuksen hakeminen hakemuspalvelulta hakemukselle {} epäonnistui!",
                                 hakija.getHakemusOid());
