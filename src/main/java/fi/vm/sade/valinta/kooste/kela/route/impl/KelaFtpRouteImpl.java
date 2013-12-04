@@ -72,7 +72,7 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
         // prosessin kuvaus
                 .setProperty(kuvaus(), constant("Kela-siirto")).setProperty(prosessi(), method(luoUusiProsessi))
                 // Start prosessi valvomoon dokumentin luonnin aloittamisesta
-                .wireTap(start()).end()
+                .to(start())
                 // Kayttajalle ilmoitus
                 .setHeader(MESSAGE, constant("Kela-dokumentin siirto aloitettu.")).bean(messageService)
                 // Hae dokumentti
@@ -80,7 +80,7 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
                 // FTP-SIIRTO
                 .to(ftpKelaSiirto())
                 // Done valvomoon
-                .wireTap(finish()).end();
+                .to(finish());
     }
 
     /**
