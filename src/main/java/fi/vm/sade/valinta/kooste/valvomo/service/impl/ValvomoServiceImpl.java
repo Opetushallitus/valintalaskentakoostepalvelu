@@ -43,7 +43,7 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
     }
 
     public ValvomoServiceImpl(int capacity) {
-        this.processBuffer = BufferUtils.synchronizedBuffer(new CircularFifoBuffer(5));
+        this.processBuffer = BufferUtils.synchronizedBuffer(new CircularFifoBuffer(capacity));
     }
 
     @Override

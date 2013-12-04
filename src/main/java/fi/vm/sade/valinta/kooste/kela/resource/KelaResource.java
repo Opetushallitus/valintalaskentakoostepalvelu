@@ -7,14 +7,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletResponse;
+import javax.annotation.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
@@ -29,8 +28,11 @@ import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.MetaData;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakuProxy;
+import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
+import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 
 @Path("kela")
 @Controller
@@ -46,6 +48,16 @@ public class KelaResource {
 
     @Autowired
     private KelaRoute kelaRoute;
+
+    @Resource(name = "kelaValvomo")
+    private ValvomoService<KelaProsessi> kelaValvomo;
+
+    @GET
+    @Path("status")
+    @Produces(APPLICATION_JSON)
+    public Collection<ProsessiJaStatus<KelaProsessi>> status() {
+        return kelaValvomo.getUusimmatProsessitJaStatukset();
+    }
 
     @GET
     @Path("aktivoi")
@@ -79,21 +91,6 @@ public class KelaResource {
         kelaRoute.aloitaKelaLuonti(hakuOid, new DateTime(lukuvuosi, kuukausi, 1, 1, 1).toDate(), new Date(),
                 aineistonNimi, organisaationNimi);
         return Response.ok().build();
-    }
-
-    @GET
-    @Path("lataa/{documentId}")
-    public Response lataa(@PathParam("documentId") String input, @Context HttpServletResponse response) {
-        // KelaCacheDocument document = kelaCache.getDocument(input);
-        // if (document == null) {
-        // return Response.status(Status.BAD_REQUEST).build();
-        // }
-        // response.setHeader("Content-Type", "application/TKUVA.YHVA14");
-        // response.setHeader("Content-Disposition", "attachment; filename=\"" +
-        // document.getHeader() + "\"");
-        // response.setHeader("Content-Length",
-        // String.valueOf(document.getData().length));
-        return Response.ok().build();// Response.ok(document.getData()).type("application/TKUVA.YHVA14").build();
     }
 
     @PUT

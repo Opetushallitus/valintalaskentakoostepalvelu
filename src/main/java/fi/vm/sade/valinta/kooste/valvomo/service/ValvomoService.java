@@ -14,4 +14,5 @@ public interface ValvomoService<T> {
     Collection<T> getUusimmatProsessit();
 
     Collection<ProsessiJaStatus<T>> getUusimmatProsessitJaStatukset();
+
 }
