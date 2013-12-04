@@ -50,74 +50,84 @@ public class TKUVAYHVAKomponentti {
     private TarjontaHakuProxy hakuProxy;
 
     public TKUVAYHVA luoTKUVAYHVA(@Body HakijaDTO hakija, @Property("lukuvuosi") Date lukuvuosi,
-            @Property("poimintapaivamaara") Date poimintapaivamaara) {
-        Set<String> linjakoodiErrorSet = new HashSet<String>();
-        Map<String, String> linjakoodiCache = new HashMap<String, String>();
-        Set<String> oppilaitosErrorSet = new HashSet<String>();
-        Map<String, String> oppilaitosCache = new HashMap<String, String>();
-        for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-            for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
-                if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
-                    TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
-                    String hakukohdeOid = hakutoive.getHakukohdeOid();
-                    String tarjoajaOid = hakutoive.getTarjoajaOid();
-                    // LINJAKOODI
-                    builder.setLinjakoodi(haeLinjakoodi(hakukohdeOid, linjakoodiCache, linjakoodiErrorSet));
-                    // KOULUTUKSEN ALKAMISVUOSI
-                    builder.setLukuvuosi(lukuvuosi);
-                    // YHTEISHAUNKOULUKOODI
-                    builder.setOppilaitos(haeOppilaitos(tarjoajaOid, oppilaitosCache, oppilaitosErrorSet));
+            @Property("poimintapaivamaara") Date poimintapaivamaara) throws Exception {
+        try {
+            Set<String> linjakoodiErrorSet = new HashSet<String>();
+            Map<String, String> linjakoodiCache = new HashMap<String, String>();
+            Set<String> oppilaitosErrorSet = new HashSet<String>();
+            Map<String, String> oppilaitosCache = new HashMap<String, String>();
+            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+                for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
+                    if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
+                        TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
+                        String hakukohdeOid = hakutoive.getHakukohdeOid();
+                        String tarjoajaOid = hakutoive.getTarjoajaOid();
+                        // LINJAKOODI
+                        builder.setLinjakoodi(haeLinjakoodi(hakukohdeOid, linjakoodiCache, linjakoodiErrorSet));
+                        // KOULUTUKSEN ALKAMISVUOSI
+                        builder.setLukuvuosi(lukuvuosi);
+                        // YHTEISHAUNKOULUKOODI
+                        builder.setOppilaitos(haeOppilaitos(tarjoajaOid, oppilaitosCache, oppilaitosErrorSet));
 
-                    builder.setValintapaivamaara(new Date()); // TODO:
-                                                              // Sijoittelun
-                                                              // täytyy
-                                                              // osata
-                                                              // kertoa
-                                                              // tämä!
-                    builder.setSukunimi(hakija.getSukunimi());
-                    builder.setEtunimet(hakija.getEtunimi());
+                        builder.setValintapaivamaara(new Date()); // TODO:
+                                                                  // Sijoittelun
+                                                                  // täytyy
+                                                                  // osata
+                                                                  // kertoa
+                                                                  // tämä!
+                        builder.setSukunimi(hakija.getSukunimi());
+                        builder.setEtunimet(hakija.getEtunimi());
 
-                    try {
-                        Hakemus hakemus = hakemusProxy.haeHakemus(hakija.getHakemusOid());
+                        try {
+                            Hakemus hakemus = hakemusProxy.haeHakemus(hakija.getHakemusOid());
 
-                        Map<String, String> henkilotiedot = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-                        henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
+                            Map<String, String> henkilotiedot = new TreeMap<String, String>(
+                                    String.CASE_INSENSITIVE_ORDER);
+                            henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
 
-                        if (henkilotiedot.containsKey(HENKILOTUNNUS)) {
-                            String standardinMukainenHenkilotunnus = henkilotiedot.get(HENKILOTUNNUS);
-                            // KELA ei halua vuosisata merkkia
-                            // henkilotunnukseen!
-                            StringBuilder kelanVaatimaHenkilotunnus = new StringBuilder();
-                            kelanVaatimaHenkilotunnus.append(standardinMukainenHenkilotunnus.substring(0, 6)).append(
-                                    standardinMukainenHenkilotunnus.substring(7, 11));
-                            builder.setHenkilotunnus(kelanVaatimaHenkilotunnus.toString());
-                        } else { // Ulkomaalaisille syntyma-aika hetun sijaan
-                            String syntymaAika = henkilotiedot.get(SYNTYMAAIKA); // esim
-                                                                                 // 04.05.1965
-                            // Poistetaan pisteet ja tyhjaa loppuun
-                            String syntymaAikaIlmanPisteita = syntymaAika.replace(".", "");
-                            builder.setHenkilotunnus(syntymaAikaIlmanPisteita.toString());
+                            if (henkilotiedot.containsKey(HENKILOTUNNUS)) {
+                                String standardinMukainenHenkilotunnus = henkilotiedot.get(HENKILOTUNNUS);
+                                // KELA ei halua vuosisata merkkia
+                                // henkilotunnukseen!
+                                StringBuilder kelanVaatimaHenkilotunnus = new StringBuilder();
+                                kelanVaatimaHenkilotunnus.append(standardinMukainenHenkilotunnus.substring(0, 6))
+                                        .append(standardinMukainenHenkilotunnus.substring(7, 11));
+                                builder.setHenkilotunnus(kelanVaatimaHenkilotunnus.toString());
+                            } else { // Ulkomaalaisille syntyma-aika hetun
+                                     // sijaan
+                                String syntymaAika = henkilotiedot.get(SYNTYMAAIKA); // esim
+                                                                                     // 04.05.1965
+                                // Poistetaan pisteet ja tyhjaa loppuun
+                                String syntymaAikaIlmanPisteita = syntymaAika.replace(".", "");
+                                builder.setHenkilotunnus(syntymaAikaIlmanPisteita.toString());
+                            }
+                        } catch (Exception e) {
+                            LOG.error("Henkilötunnuksen hakeminen hakemuspalvelulta hakemukselle {} epäonnistui!",
+                                    hakija.getHakemusOid());
+                            // e.printStackTrace();
+                            builder.setHenkilotunnus("XXXXXXXXXX");
                         }
-                    } catch (Exception e) {
-                        LOG.error("Henkilötunnuksen hakeminen hakemuspalvelulta hakemukselle {} epäonnistui!",
-                                hakija.getHakemusOid());
-                        // e.printStackTrace();
-                        builder.setHenkilotunnus("XXXXXXXXXX");
+                        builder.setPoimintapaivamaara(poimintapaivamaara);
+                        DateTime dateTime = new DateTime(lukuvuosi);
+                        if (dateTime.getMonthOfYear() > KESAKUU) { // myohemmin
+                                                                   // kuin
+                                                                   // kesakuussa!
+                            builder.setSyksyllaAlkavaKoulutus();
+                        } else {
+                            builder.setKevaallaAlkavaKoulutus();
+                        }
+                        LOG.info("Tietue KELA-tiedostoon luotu onnistuneesti henkilölle {}", hakija.getHakemusOid());
+                        return builder.build();
                     }
-                    builder.setPoimintapaivamaara(poimintapaivamaara);
-                    DateTime dateTime = new DateTime(lukuvuosi);
-                    if (dateTime.getMonthOfYear() > KESAKUU) { // myohemmin
-                                                               // kuin
-                                                               // kesakuussa!
-                        builder.setSyksyllaAlkavaKoulutus();
-                    } else {
-                        builder.setKevaallaAlkavaKoulutus();
-                    }
-                    LOG.info("Tietue KELA-tiedostoon luotu onnistuneesti henkilölle {}", hakija.getHakemusOid());
-                    return builder.build();
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOG.error("Odottamaton virhe {}", e.getMessage());
+            throw e;
         }
+        LOG.error("Sijoittelulta palautui hakija (hakemusoid: {}) joka ei oikeasti ollut hyväksyttynä koulutukseen!",
+                hakija.getHakemusOid());
         throw new SijoittelupalveluException("Sijoittelulta palautui hakija (hakemusoid: " + hakija.getHakemusOid()
                 + ") joka ei oikeasti ollut hyväksyttynä koulutukseen!");
     }
