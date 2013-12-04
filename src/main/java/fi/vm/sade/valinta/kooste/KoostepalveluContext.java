@@ -1,0 +1,56 @@
+package fi.vm.sade.valinta.kooste;
+
+import org.apache.camel.RoutesBuilder;
+import org.apache.camel.spring.SpringCamelContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+
+import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig;
+
+/**
+ * @author Jussi Jartamo.
+ */
+@Configuration
+@Import({ KelaRouteConfig.class, KoostepalveluContext.CamelConfig.class })
+public class KoostepalveluContext {
+
+    private static final Logger LOG = LoggerFactory.getLogger(KoostepalveluContext.class);
+
+    /**
+     * Camel only Context (helps unit testing).
+     */
+    @Configuration
+    public static class CamelConfig {
+
+        /**
+         * @param applicationContext
+         * @param routes
+         * @return Spring Camel Context koko koostepalvelulle refaktoroinnin
+         *         jalkeen!
+         * @throws Exception
+         */
+        @Bean(name = "javaDslCamelContext")
+        public static SpringCamelContext getSpringCamelContext(ApplicationContext applicationContext,
+                RoutesBuilder[] routes) throws Exception {
+            SpringCamelContext camelContext = new SpringCamelContext(applicationContext);
+
+            camelContext.disableJMX();
+            camelContext.setAutoStartup(true);
+            for (RoutesBuilder route : routes) {
+                camelContext.addRoutes(route);
+            }
+            return camelContext;
+        }
+
+        @Bean
+        public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
+            return new PropertySourcesPlaceholderConfigurer();
+        }
+    }
+
+}

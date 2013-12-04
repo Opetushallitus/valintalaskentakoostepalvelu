@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.kela.komponentti;
+package fi.vm.sade.valinta.kooste.kela.komponentti.impl;
 
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
 import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.HENKILOTUNNUS;
@@ -27,14 +27,15 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
+import fi.vm.sade.valinta.kooste.kela.komponentti.KelaHakijaRiviKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.LinjakoodiProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakuProxy;
 
-@Component("TKUVAYHVAKomponentti")
-public class TKUVAYHVAKomponentti {
+@Component
+public class KelaHakijaRiviKomponenttiImpl implements KelaHakijaRiviKomponentti {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TKUVAYHVAKomponentti.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KelaHakijaRiviKomponenttiImpl.class);
     private static final Integer KESAKUU = 6;
 
     @Autowired
@@ -49,7 +50,7 @@ public class TKUVAYHVAKomponentti {
     @Autowired
     private TarjontaHakuProxy hakuProxy;
 
-    public TKUVAYHVA luoTKUVAYHVA(@Body HakijaDTO hakija, @Property("lukuvuosi") Date lukuvuosi,
+    public TKUVAYHVA luo(@Body HakijaDTO hakija, @Property("lukuvuosi") Date lukuvuosi,
             @Property("poimintapaivamaara") Date poimintapaivamaara) {
         Set<String> linjakoodiErrorSet = new HashSet<String>();
         Map<String, String> linjakoodiCache = new HashMap<String, String>();
@@ -181,4 +182,5 @@ public class TKUVAYHVAKomponentti {
             return "0000";
         }
     }
+
 }

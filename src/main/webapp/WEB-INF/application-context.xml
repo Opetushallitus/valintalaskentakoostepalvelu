@@ -112,7 +112,19 @@
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
         </jaxrs:providers>
     </jaxrs:client>
-
+    
+	<jaxrs:client id="dokumenttipalveluRestClient"
+                  address="${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}"
+                  serviceClass="fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource"
+                  inheritHeaders="true">
+        <jaxrs:outInterceptors>
+            <ref bean="ticketInterceptorRest"/>
+        </jaxrs:outInterceptors>
+        <jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+        </jaxrs:providers>
+    </jaxrs:client>
     <jaxrs:client id="TarjontaServiceRestClient"
                   address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
                   serviceClass="fi.vm.sade.tarjonta.service.resources.HakukohdeResource"
@@ -293,7 +305,6 @@
     <beans:import resource="classpath:META-INF/spring/context/haku-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/tarjonta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/hakuimport-context.xml"/>
-    <beans:import resource="classpath:META-INF/spring/context/kela-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintakoelaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-excel-context.xml"/>
@@ -301,6 +312,11 @@
     <beans:import resource="classpath:META-INF/spring/context/viestintapalvelu-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/parametrit-context.xml"/>
 	
-	
+	<beans:bean class="fi.vm.sade.valinta.kooste.KoostepalveluContext"/>
+	<beans:bean class="fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig"/>
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.resource"/>
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.route.impl"/>
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.komponentti.impl"/>
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.dokumenttipalvelu"/>
 	
 </beans>
