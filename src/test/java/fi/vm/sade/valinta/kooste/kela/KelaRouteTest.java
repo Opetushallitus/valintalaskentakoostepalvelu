@@ -68,7 +68,7 @@ public class KelaRouteTest {
     }
 
     @Bean
-    public KelaHakijaRiviKomponentti mockKelaHakijaKomponentti() {
+    public KelaHakijaRiviKomponentti mockKelaHakijaKomponentti() throws Exception {
 
         TKUVAYHVA t = new TKUVAYHVA.Builder().setAjankohtaSyksy(true).setEtunimet("J").setSukunimi("J")
                 .setHenkilotunnus("021293-915F").setLinjakoodi("0000").setOppilaitos("0000")
@@ -116,7 +116,7 @@ public class KelaRouteTest {
     private PrepareKelaProcessDescription processFactory;
 
     @Test
-    public void testKelaRouteGetsAllVariables() {
+    public void testKelaRouteGetsAllVariables() throws Exception {
         KelaProsessi prosessi = new KelaProsessi("", "", "");
         when(processFactory.prepareProcess(anyString(), anyString(), anyString())).thenReturn(prosessi);
         when(sijoitteluVastaanottaneet.vastaanottaneet(anyString())).thenReturn(

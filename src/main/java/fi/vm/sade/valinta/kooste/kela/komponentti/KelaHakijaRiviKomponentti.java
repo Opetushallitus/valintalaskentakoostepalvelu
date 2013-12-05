@@ -17,5 +17,5 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 public interface KelaHakijaRiviKomponentti {
 
     TKUVAYHVA luo(@Body HakijaDTO hakija, @Property("lukuvuosi") Date lukuvuosi,
-            @Property("poimintapaivamaara") Date poimintapaivamaara);
+            @Property("poimintapaivamaara") Date poimintapaivamaara) throws Exception;
 }
