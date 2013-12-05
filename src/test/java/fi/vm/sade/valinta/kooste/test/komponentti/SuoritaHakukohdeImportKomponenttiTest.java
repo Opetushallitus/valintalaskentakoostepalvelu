@@ -7,6 +7,7 @@ import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -29,6 +30,7 @@ public class SuoritaHakukohdeImportKomponenttiTest {
 
     private static final String HAKUKOHDE_JSON = "hakukohdeimport/data/hakukohde.json";
     private static final String HAKUKOHDE_NIMI_JSON = "hakukohdeimport/data/hakukohdenimi.json";
+    private static final String HAKUKOHDE_VALINTAPERUSTEET_JSON = "hakukohdeimport/data/hakukohdevalintaperusteet.json";
 
     private SuoritaHakukohdeImportKomponentti suoritaHakukohdeImportKomponentti;
 
@@ -55,9 +57,11 @@ public class SuoritaHakukohdeImportKomponenttiTest {
 
         HakukohdeNimiRDTO nimi = mapper.readValue(Resources.toString(Resources.getResource(HAKUKOHDE_NIMI_JSON), Charsets.UTF_8), HakukohdeNimiRDTO.class);
         HakukohdeDTO hakukohde = mapper.readValue(Resources.toString(Resources.getResource(HAKUKOHDE_JSON), Charsets.UTF_8), HakukohdeDTO.class);
+        HakukohdeValintaperusteetDTO valintaperusteet = mapper.readValue(Resources.toString(Resources.getResource(HAKUKOHDE_VALINTAPERUSTEET_JSON), Charsets.UTF_8), HakukohdeValintaperusteetDTO.class);
 
         when(hakukohdeResourceMock.getHakukohdeNimi(hakukohdeOid)).thenReturn(nimi);
         when(hakukohdeResourceMock.getByOID(hakukohdeOid)).thenReturn(hakukohde);
+        when(hakukohdeResourceMock.getHakukohdeValintaperusteet(hakukohdeOid)).thenReturn(valintaperusteet);
 
         ArgumentCaptor<HakukohdeImportTyyppi> captor = ArgumentCaptor.forClass(HakukohdeImportTyyppi.class);
         suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(mock(Authentication.class), hakukohdeOid);
