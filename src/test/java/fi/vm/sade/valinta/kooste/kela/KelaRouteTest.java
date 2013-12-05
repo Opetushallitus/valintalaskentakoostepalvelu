@@ -143,7 +143,7 @@ public class KelaRouteTest {
         List<ProsessiJaStatus<KelaProsessi>> prosessit = haeProsessit(prosessi.getId());
 
         // START JA FINISH Prosessit
-        Assert.assertTrue(prosessit.size() == 2);
+        Assert.assertEquals(2, prosessit.size());
 
         Assert.assertEquals(Status.STARTED, prosessit.get(1).getStatus());
         Assert.assertEquals(Status.FINISHED, prosessit.get(0).getStatus());
@@ -171,7 +171,7 @@ public class KelaRouteTest {
 
         List<ProsessiJaStatus<KelaProsessi>> prosessit = haeProsessit(prosessi.getId());
         // START JA FAILURE Prosessit
-        Assert.assertTrue(prosessit.size() == 2);
+        Assert.assertEquals(2, prosessit.size());
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         for (ProsessiJaStatus<KelaProsessi> p : prosessit) {
             LOG.info("{}", gson.toJson(p));

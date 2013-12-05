@@ -1,11 +1,15 @@
 package fi.vm.sade.valinta.kooste.kela.route.impl;
 
 import static fi.vm.sade.valinta.kooste.dokumenttipalvelu.SendMessageToDocumentService.MESSAGE;
+import static fi.vm.sade.valinta.kooste.kela.route.KelaRoute.PROPERTY_DOKUMENTTI_ID;
 import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.finish;
 import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.kuvaus;
 import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.prosessi;
 import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.start;
 
+import java.io.InputStream;
+
+import org.apache.camel.Property;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.dokumenttipalvelu.SendMessageToDocumentService;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.PrepareKelaProcessDescription;
@@ -48,6 +53,16 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
         this.luoUusiProsessi = new PrepareKelaProcessDescription();
     }
 
+    @Autowired
+    private DokumenttiResource dokumenttiResource;
+
+    public class DownloadDocumentWithDocumentId {
+
+        public InputStream download(@Property(PROPERTY_DOKUMENTTI_ID) String documentId) {
+            return dokumenttiResource.lataa(documentId);
+        }
+    }
+
     @Override
     public void configure() throws Exception {
         /**
@@ -55,16 +70,17 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
          */
         from(kelaSiirto())
         // prosessin kuvaus
-                .setHeader(kuvaus(), constant("Kela-siirto")).setProperty(prosessi(), method(luoUusiProsessi))
+                .setProperty(kuvaus(), constant("Kela-siirto")).setProperty(prosessi(), method(luoUusiProsessi))
                 // Start prosessi valvomoon dokumentin luonnin aloittamisesta
-                .wireTap(start()).end()
+                .to(start())
                 // Kayttajalle ilmoitus
                 .setHeader(MESSAGE, constant("Kela-dokumentin siirto aloitettu.")).bean(messageService)
+                // Hae dokumentti
+                .bean(new DownloadDocumentWithDocumentId())
                 // FTP-SIIRTO
-                .log("SIIRTO")
-                // .to(ftpKelaSiirto())
+                .to(ftpKelaSiirto())
                 // Done valvomoon
-                .wireTap(finish()).end();
+                .to(finish());
     }
 
     /**
@@ -79,5 +95,9 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
      */
     private String kelaSiirto() {
         return KelaRoute.DIRECT_KELA_SIIRTO;
+    }
+
+    public String getFtpKelaSiirto() {
+        return ftpKelaSiirto;
     }
 }

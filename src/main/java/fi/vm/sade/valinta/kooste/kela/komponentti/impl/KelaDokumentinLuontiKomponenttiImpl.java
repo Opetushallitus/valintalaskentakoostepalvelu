@@ -6,8 +6,8 @@ import static fi.vm.sade.valinta.kooste.kela.route.KelaRoute.PROPERTY_ORGANISAAT
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -42,21 +42,26 @@ public class KelaDokumentinLuontiKomponenttiImpl implements KelaDokumentinLuonti
         int count = rivit.size();
 
         Deque<InputStream> streams = new ArrayDeque<InputStream>();
+        ByteBuffer buffer = ByteBuffer.allocate(150 + KelaUtil.RIVINVAIHTO.length);
         for (TKUVAYHVA t : rivit) {
-            streams.add(new ByteArrayInputStream(t.toByteArray()));
+            streams.add(new ByteArrayInputStream(addLineEnding(t.toByteArray(), buffer)));
         }
-        streams.addFirst(new ByteArrayInputStream(new TKUVAALKU.Builder().setAjopaivamaara(new Date())
-                .setAineistonnimi(aineistonNimi).setOrganisaationimi(organisaationNimi).build().toByteArray()));
-        streams.addLast(new ByteArrayInputStream(new TKUVALOPPU.Builder().setAjopaivamaara(new Date())
-                .setTietuelukumaara(count).build().toByteArray()));
-        //
-        // Add line ending '\n' between every stream
-        //
-        Collection<InputStream> withLineEndings = new ArrayList<InputStream>();
-        for (InputStream stream : streams) {
-            withLineEndings.add(new SequenceInputStream(stream, new ByteArrayInputStream(KelaUtil.RIVINVAIHTO)));
-        }
-        InputStream input = new SequenceInputStream(Collections.enumeration(withLineEndings));
+        streams.addFirst(new ByteArrayInputStream(addLineEnding(new TKUVAALKU.Builder().setAjopaivamaara(new Date())
+                .setAineistonnimi(aineistonNimi).setOrganisaationimi(organisaationNimi).build().toByteArray(), buffer)));
+        streams.addLast(new ByteArrayInputStream(addLineEnding(new TKUVALOPPU.Builder().setAjopaivamaara(new Date())
+                .setTietuelukumaara(count).build().toByteArray(), buffer)));
+
+        InputStream input = new SequenceInputStream(Collections.enumeration(streams));
         return input;
+    }
+
+    //
+    // Add line ending '\n' between every stream
+    //
+    private byte[] addLineEnding(byte[] tietue, ByteBuffer buffer) {
+        buffer.clear();
+        buffer.put(tietue);
+        buffer.put(KelaUtil.RIVINVAIHTO);
+        return buffer.array();
     }
 }

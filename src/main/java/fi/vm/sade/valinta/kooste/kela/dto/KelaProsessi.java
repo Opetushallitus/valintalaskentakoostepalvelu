@@ -15,7 +15,7 @@ public class KelaProsessi extends Prosessi {
     private String dokumenttiId;
 
     public KelaProsessi(String toiminto, String hakuOid, String dokumenttiId) {
-        super("Kela", "Dokumentin luonti", hakuOid);
+        super("Kela", toiminto, hakuOid);
         this.dokumenttiId = dokumenttiId;
     }
 

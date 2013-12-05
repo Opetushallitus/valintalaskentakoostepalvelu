@@ -102,9 +102,9 @@ public class KelaRouteImpl extends SpringRouteBuilder {
          */
         from(kelaLuonti())
         // RESURSSI
-                .setHeader(kuvaus(), constant("Dokumentin luonti")).setProperty(prosessi(), method(luoUusiProsessi))
+                .setProperty(kuvaus(), constant("Dokumentin luonti")).setProperty(prosessi(), method(luoUusiProsessi))
                 // Start prosessi valvomoon dokumentin luonnin aloittamisesta
-                .wireTap(start()).end()
+                .to(start())
                 // ilmoitetaan dokumenttipalveluun aloitetusta luonnista
                 // (informoi kayttajaa)
                 .setHeader(MESSAGE, constant("Kela-dokumentin luonti aloitettu.")).bean(messageService)
@@ -120,7 +120,7 @@ public class KelaRouteImpl extends SpringRouteBuilder {
                 // ladattavaksi. Body == InputStream ->
                 .bean(new SendKelaDocument())
                 // Done valvomoon
-                .wireTap(finish()).end();
+                .to(finish());
 
     }
 
