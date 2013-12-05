@@ -84,9 +84,7 @@ public class SuoritaHakukohdeImportKomponentti {
         importTyyppi.setHakukohdeOid(data.getOid());
         importTyyppi.setHakuOid(data.getHakuOid());
         importTyyppi.setValinnanAloituspaikat(data.getValintojenAloituspaikatLkm());
-        // Korjaa seuraavan deployauksen yhteydessä
-        //importTyyppi.setTila(data.getTila());
-        importTyyppi.setTila("JULKAISTU");
+        importTyyppi.setTila(data.getTila());
         if (data.getValintakokeet() != null) {
             LOG.debug("Valintakokeita löytyi {}!", data.getValintakokeet().size());
             for (ValintakoeRDTO valinakoe : data.getValintakokeet()) {
@@ -103,70 +101,86 @@ public class SuoritaHakukohdeImportKomponentti {
         avainArvo.setArvo(data.getPaasykoeMin().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("paasykoe_max");
         avainArvo.setArvo(data.getPaasykoeMax().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("paasykoe_hylkays_min");
         avainArvo.setArvo(data.getPaasykoeHylkaysMin().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("paasykoe_hylkays_max");
         avainArvo.setArvo(data.getPaasykoeHylkaysMax().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("lisanaytto_min");
         avainArvo.setArvo(data.getLisanayttoMin().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("lisanaytto_max");
         avainArvo.setArvo(data.getLisanayttoMax().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("lisanaytto_hylkays_min");
         avainArvo.setArvo(data.getLisanayttoHylkaysMin().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("lisanaytto_hylkays_max");
         avainArvo.setArvo(data.getLisanayttoHylkaysMax().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("paasykoe_ja_lisanaytto_hylkays_min");
         avainArvo.setArvo(data.getHylkaysMin().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("paasykoe_ja_lisanaytto_hylkays_max");
         avainArvo.setArvo(data.getHylkaysMax().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("painotettu_keskiarvo_hylkays_min");
         avainArvo.setArvo(data.getPainotettuKeskiarvoHylkaysMin().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("painotettu_keskiarvo_hylkays_max");
         avainArvo.setArvo(data.getPainotettuKeskiarvoHylkaysMax().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("paasykoe_tunniste");
-        avainArvo.setArvo(data.getPaasykoeTunniste() != null ? data.getPaasykoeTunniste() : importTyyppi.getHakukohdeNimi().get(0) + "_paasykoe");
+        avainArvo.setArvo(data.getPaasykoeTunniste() != null ? data.getPaasykoeTunniste() : importTyyppi.getHakukohdeNimi().get(0).getText() + "_paasykoe");
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("lisanaytto_tunniste");
-        avainArvo.setArvo(data.getLisanayttoTunniste() != null ? data.getLisanayttoTunniste() : importTyyppi.getHakukohdeNimi().get(0) + "_lisanaytto");
+        avainArvo.setArvo(data.getLisanayttoTunniste() != null ? data.getLisanayttoTunniste() : importTyyppi.getHakukohdeNimi().get(0).getText() + "_lisanaytto");
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("lisapiste_tunniste");
-        avainArvo.setArvo(data.getLisapisteTunniste() != null ? data.getLisapisteTunniste() : importTyyppi.getHakukohdeNimi().get(0) + "_lisapiste");
+        avainArvo.setArvo(data.getLisapisteTunniste() != null ? data.getLisapisteTunniste() : importTyyppi.getHakukohdeNimi().get(0).getText() + "_lisapiste");
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("kielikoe_tunniste");
-        avainArvo.setArvo(data.getKielikoeTunniste() != null ? data.getKielikoeTunniste() : importTyyppi.getHakukohdeNimi().get(0) + "_kielikoe");
+        avainArvo.setArvo(data.getKielikoeTunniste() != null ? data.getKielikoeTunniste() : importTyyppi.getHakukohdeNimi().get(0).getText() + "_kielikoe");
         importTyyppi.getValintaperuste().add(avainArvo);
 
         for (String avain : data.getPainokertoimet().keySet()) {
-           avainArvo.setAvain(avain);
-           avainArvo.setArvo(data.getPainokertoimet().get(avain));
-           importTyyppi.getValintaperuste().add(avainArvo);
+            avainArvo = new AvainArvoTyyppi();
+            avainArvo.setAvain(avain);
+            avainArvo.setArvo(data.getPainokertoimet().get(avain));
+            importTyyppi.getValintaperuste().add(avainArvo);
         }
 
         valintaperusteService.tuoHakukohde(importTyyppi);
