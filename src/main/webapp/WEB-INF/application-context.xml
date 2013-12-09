@@ -304,7 +304,6 @@
 	<beans:import resource="classpath:META-INF/spring/context/valintatieto-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/haku-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/tarjonta-context.xml"/>
-    <beans:import resource="classpath:META-INF/spring/context/hakuimport-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintakoelaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-excel-context.xml"/>
@@ -318,5 +317,14 @@
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.route.impl"/>
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.komponentti.impl"/>
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.dokumenttipalvelu"/>
+	
+	<!--
+		Haku Import 
+	 -->
+	<beans:bean class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti"/>
+	<beans:bean class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti"/>
+	<beans:bean class="fi.vm.sade.valinta.kooste.hakuimport.resource.HakuImportResource"/>
+	<beans:bean class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteConfig"/>
+	<beans:bean class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteImpl"/>
 	
 </beans>

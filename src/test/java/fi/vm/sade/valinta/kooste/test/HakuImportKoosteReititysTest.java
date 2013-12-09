@@ -10,7 +10,8 @@ import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.tarjonta.service.types.TarjontaTyyppi;
-import fi.vm.sade.valinta.kooste.hakuimport.HakuImportAktivointiResource;
+import fi.vm.sade.valinta.kooste.hakuimport.resource.HakuImportResource;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,7 +52,7 @@ public class HakuImportKoosteReititysTest {
             {"hakukohdekoodiuri6", "hakukohdeoid6s"}};
 
     @Autowired
-    private HakuImportAktivointiResource hakuImportAktivointiResource;
+    private HakuImportResource hakuImportAktivointiResource;
 
     @Bean
     public ValintaperusteService getValintaperusteServiceMock() {

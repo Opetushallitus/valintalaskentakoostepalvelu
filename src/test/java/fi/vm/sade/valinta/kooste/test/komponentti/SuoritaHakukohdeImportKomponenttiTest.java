@@ -1,7 +1,22 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+
+import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
@@ -9,22 +24,9 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.springframework.security.core.Authentication;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.io.IOException;
-
-import static org.mockito.Mockito.*;
 
 /**
- * User: wuoti
- * Date: 20.11.2013
- * Time: 12.59
+ * User: wuoti Date: 20.11.2013 Time: 12.59
  */
 public class SuoritaHakukohdeImportKomponenttiTest {
 
@@ -44,7 +46,8 @@ public class SuoritaHakukohdeImportKomponenttiTest {
         hakukohdeResourceMock = mock(HakukohdeResource.class);
         valintaperusteServiceMock = mock(ValintaperusteService.class);
 
-        ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti, "valintaperusteService", valintaperusteServiceMock);
+        ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti, "valintaperusteService",
+                valintaperusteServiceMock);
         ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti, "hakukohdeResource", hakukohdeResourceMock);
     }
 
@@ -55,16 +58,21 @@ public class SuoritaHakukohdeImportKomponenttiTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        HakukohdeNimiRDTO nimi = mapper.readValue(Resources.toString(Resources.getResource(HAKUKOHDE_NIMI_JSON), Charsets.UTF_8), HakukohdeNimiRDTO.class);
-        HakukohdeDTO hakukohde = mapper.readValue(Resources.toString(Resources.getResource(HAKUKOHDE_JSON), Charsets.UTF_8), HakukohdeDTO.class);
-        HakukohdeValintaperusteetDTO valintaperusteet = mapper.readValue(Resources.toString(Resources.getResource(HAKUKOHDE_VALINTAPERUSTEET_JSON), Charsets.UTF_8), HakukohdeValintaperusteetDTO.class);
+        HakukohdeNimiRDTO nimi = mapper
+                .readValue(Resources.toString(Resources.getResource(HAKUKOHDE_NIMI_JSON), Charsets.UTF_8),
+                        HakukohdeNimiRDTO.class);
+        HakukohdeDTO hakukohde = mapper.readValue(
+                Resources.toString(Resources.getResource(HAKUKOHDE_JSON), Charsets.UTF_8), HakukohdeDTO.class);
+        HakukohdeValintaperusteetDTO valintaperusteet = mapper.readValue(
+                Resources.toString(Resources.getResource(HAKUKOHDE_VALINTAPERUSTEET_JSON), Charsets.UTF_8),
+                HakukohdeValintaperusteetDTO.class);
 
         when(hakukohdeResourceMock.getHakukohdeNimi(hakukohdeOid)).thenReturn(nimi);
         when(hakukohdeResourceMock.getByOID(hakukohdeOid)).thenReturn(hakukohde);
         when(hakukohdeResourceMock.getHakukohdeValintaperusteet(hakukohdeOid)).thenReturn(valintaperusteet);
 
         ArgumentCaptor<HakukohdeImportTyyppi> captor = ArgumentCaptor.forClass(HakukohdeImportTyyppi.class);
-        suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(mock(Authentication.class), hakukohdeOid);
+        suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(hakukohdeOid);
         verify(valintaperusteServiceMock, times(1)).tuoHakukohde(captor.capture());
     }
 

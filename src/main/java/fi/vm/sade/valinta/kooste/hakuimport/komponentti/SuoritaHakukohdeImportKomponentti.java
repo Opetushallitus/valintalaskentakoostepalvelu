@@ -1,27 +1,21 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
-import fi.vm.sade.service.valintaperusteet.schema.AvainArvoTyyppi;
+import org.apache.camel.Body;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Component;
+
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
+import fi.vm.sade.service.valintaperusteet.schema.AvainArvoTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.HakukohdekoodiTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.HakukohteenValintakoeTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.MonikielinenTekstiTyyppi;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeValintaperusteetDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.ValintakoeRDTO;
-import org.apache.camel.Body;
-import org.apache.camel.Property;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-
-import static fi.vm.sade.valinta.kooste.security.SecurityPreprocessor.SECURITY_CONTEXT_HEADER;
 
 /**
  * User: wuoti Date: 20.5.2013 Time: 10.46
@@ -38,11 +32,11 @@ public class SuoritaHakukohdeImportKomponentti {
     @Autowired
     private HakukohdeResource hakukohdeResource;
 
-    public void suoritaHakukohdeImport(@Property(SECURITY_CONTEXT_HEADER) Authentication auth, @Body String hakukohdeOid) {
-        assert (auth != null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        //HakukohdeNimiRDTO hakukohdeNimi = hakukohdeResource.getHakukohdeNimi(hakukohdeOid);
-        //HakukohdeDTO hakukohdeData = hakukohdeResource.getByOID(hakukohdeOid);
+    public void suoritaHakukohdeImport(@Body// @Property(OPH.HAKUKOHDEOID)
+            String hakukohdeOid) {
+        if (hakukohdeOid == null) {
+            throw new RuntimeException("Mitä!");
+        }
         HakukohdeValintaperusteetDTO data = hakukohdeResource.getHakukohdeValintaperusteet(hakukohdeOid);
         HakukohdeImportTyyppi importTyyppi = new HakukohdeImportTyyppi();
 
@@ -158,22 +152,30 @@ public class SuoritaHakukohdeImportKomponentti {
 
         avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("paasykoe_tunniste");
-        avainArvo.setArvo(data.getPaasykoeTunniste() != null ? data.getPaasykoeTunniste() : importTyyppi.getHakukohdeNimi().get(0).getText() + "_paasykoe");
+        avainArvo.setArvo(data.getPaasykoeTunniste() != null ? data.getPaasykoeTunniste() : importTyyppi
+                .getHakukohdeNimi().get(0).getText()
+                + "_paasykoe");
         importTyyppi.getValintaperuste().add(avainArvo);
 
         avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("lisanaytto_tunniste");
-        avainArvo.setArvo(data.getLisanayttoTunniste() != null ? data.getLisanayttoTunniste() : importTyyppi.getHakukohdeNimi().get(0).getText() + "_lisanaytto");
+        avainArvo.setArvo(data.getLisanayttoTunniste() != null ? data.getLisanayttoTunniste() : importTyyppi
+                .getHakukohdeNimi().get(0).getText()
+                + "_lisanaytto");
         importTyyppi.getValintaperuste().add(avainArvo);
 
         avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("lisapiste_tunniste");
-        avainArvo.setArvo(data.getLisapisteTunniste() != null ? data.getLisapisteTunniste() : importTyyppi.getHakukohdeNimi().get(0).getText() + "_lisapiste");
+        avainArvo.setArvo(data.getLisapisteTunniste() != null ? data.getLisapisteTunniste() : importTyyppi
+                .getHakukohdeNimi().get(0).getText()
+                + "_lisapiste");
         importTyyppi.getValintaperuste().add(avainArvo);
 
         avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("kielikoe_tunniste");
-        avainArvo.setArvo(data.getKielikoeTunniste() != null ? data.getKielikoeTunniste() : importTyyppi.getHakukohdeNimi().get(0).getText() + "_kielikoe");
+        avainArvo.setArvo(data.getKielikoeTunniste() != null ? data.getKielikoeTunniste() : importTyyppi
+                .getHakukohdeNimi().get(0).getText()
+                + "_kielikoe");
         importTyyppi.getValintaperuste().add(avainArvo);
 
         for (String avain : data.getPainokertoimet().keySet()) {
