@@ -34,9 +34,6 @@ public class SuoritaHakukohdeImportKomponentti {
 
     public void suoritaHakukohdeImport(@Body// @Property(OPH.HAKUKOHDEOID)
             String hakukohdeOid) {
-        if (hakukohdeOid == null) {
-            throw new RuntimeException("Mitä!");
-        }
         HakukohdeValintaperusteetDTO data = hakukohdeResource.getHakukohdeValintaperusteet(hakukohdeOid);
         HakukohdeImportTyyppi importTyyppi = new HakukohdeImportTyyppi();
 
