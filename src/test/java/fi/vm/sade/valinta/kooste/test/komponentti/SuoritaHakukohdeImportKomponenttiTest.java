@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -11,14 +9,12 @@ import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
@@ -46,8 +42,9 @@ public class SuoritaHakukohdeImportKomponenttiTest {
         hakukohdeResourceMock = mock(HakukohdeResource.class);
         valintaperusteServiceMock = mock(ValintaperusteService.class);
 
-        ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti, "valintaperusteService",
-                valintaperusteServiceMock);
+        // ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti,
+        // "valintaperusteService",
+        // valintaperusteServiceMock);
         ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti, "hakukohdeResource", hakukohdeResourceMock);
     }
 
@@ -71,9 +68,11 @@ public class SuoritaHakukohdeImportKomponenttiTest {
         when(hakukohdeResourceMock.getByOID(hakukohdeOid)).thenReturn(hakukohde);
         when(hakukohdeResourceMock.getHakukohdeValintaperusteet(hakukohdeOid)).thenReturn(valintaperusteet);
 
-        ArgumentCaptor<HakukohdeImportTyyppi> captor = ArgumentCaptor.forClass(HakukohdeImportTyyppi.class);
+        // ArgumentCaptor<HakukohdeImportTyyppi> captor =
+        // ArgumentCaptor.forClass(HakukohdeImportTyyppi.class);
         suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(hakukohdeOid);
-        verify(valintaperusteServiceMock, times(1)).tuoHakukohde(captor.capture());
+        // verify(valintaperusteServiceMock,
+        // times(1)).tuoHakukohde(captor.capture());
     }
 
 }
