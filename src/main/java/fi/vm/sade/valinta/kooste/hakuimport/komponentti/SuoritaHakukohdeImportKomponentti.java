@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.service.valintaperusteet.schema.AvainArvoTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.HakukohdekoodiTyyppi;
@@ -27,12 +26,9 @@ public class SuoritaHakukohdeImportKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(SuoritaHakukohdeImportKomponentti.class);
 
     @Autowired
-    private ValintaperusteService valintaperusteService;
-
-    @Autowired
     private HakukohdeResource hakukohdeResource;
 
-    public void suoritaHakukohdeImport(@Body// @Property(OPH.HAKUKOHDEOID)
+    public HakukohdeImportTyyppi suoritaHakukohdeImport(@Body// @Property(OPH.HAKUKOHDEOID)
             String hakukohdeOid) {
         HakukohdeValintaperusteetDTO data = hakukohdeResource.getHakukohdeValintaperusteet(hakukohdeOid);
         HakukohdeImportTyyppi importTyyppi = new HakukohdeImportTyyppi();
@@ -182,7 +178,7 @@ public class SuoritaHakukohdeImportKomponentti {
             importTyyppi.getValintaperuste().add(avainArvo);
         }
 
-        valintaperusteService.tuoHakukohde(importTyyppi);
+        return importTyyppi;
     }
 
 }
