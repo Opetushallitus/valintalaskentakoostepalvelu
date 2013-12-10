@@ -23,51 +23,51 @@
     </build>
 
     <dependencies>
-    	<dependency>
-    		<groupId>javax.ws.rs</groupId>
-    		<artifactId>jsr311-api</artifactId>
-    		<version>1.1.1</version>
-    		<scope>provided</scope>
-    	</dependency>
-    	<dependency>
-	        <groupId>org.jboss.spec</groupId>
-	        <artifactId>jboss-javaee-6.0</artifactId>
-	        <version>1.0.0.Final</version>
-	        <type>pom</type>
-	        <scope>provided</scope>
-	     </dependency>
-    	<!-- SADE -->
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>jsr311-api</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec</groupId>
+            <artifactId>jboss-javaee-6.0</artifactId>
+            <version>1.0.0.Final</version>
+            <type>pom</type>
+            <scope>provided</scope>
+        </dependency>
+        <!-- SADE -->
         <dependency>
             <groupId>fi.vm.sade.tarjonta</groupId>
             <artifactId>tarjonta-api</artifactId>
             <exclusions>
-            	<exclusion>
-            		<artifactId>swagger-jaxrs_2.10</artifactId>
-            		<groupId>com.wordnik</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>swagger-jaxrs_2.10</artifactId>
+                    <groupId>com.wordnik</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.koodisto</groupId>
             <artifactId>koodisto-api</artifactId>
         </dependency>
-    	<dependency>
-			<groupId>fi.vm.sade.dokumenttipalvelu</groupId>
-			<artifactId>dokumenttipalvelu-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-         <dependency>
+        <dependency>
+            <groupId>fi.vm.sade.dokumenttipalvelu</groupId>
+            <artifactId>dokumenttipalvelu-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>fi.vm.sade.organisaatio</groupId>
             <artifactId>organisaatio-api</artifactId>
             <version>${organisaatio.api.version}</version>
         </dependency>
-         <dependency>
-			<groupId>fi.vm.sade.rajapinnat</groupId>
-			<artifactId>kela-tkuva</artifactId>
-			<version>${kela.version}</version>
-		</dependency> 
-		
-		<!-- POI -->
+        <dependency>
+            <groupId>fi.vm.sade.rajapinnat</groupId>
+            <artifactId>kela-tkuva</artifactId>
+            <version>${kela.version}</version>
+        </dependency>
+
+        <!-- POI -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
@@ -92,7 +92,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>14.0.1</version>
         </dependency>
         <!-- Internal -->
         <dependency>
@@ -120,7 +119,7 @@
             <artifactId>sijoittelu-tulos-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+
 
         <dependency>
             <groupId>com.sun.jersey.contribs</groupId>
@@ -198,10 +197,10 @@
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-core</artifactId>
             <exclusions>
-            	<exclusion>
-            		<artifactId>geronimo-javamail_1.4_spec</artifactId>
-            		<groupId>org.apache.geronimo.specs</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>geronimo-javamail_1.4_spec</artifactId>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -235,6 +234,7 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring</artifactId>
+            <version>${camel.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>spring-context</artifactId>
@@ -261,15 +261,17 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-csv</artifactId>
+            <version>${camel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-castor</artifactId>
+            <version>${camel.version}</version>
             <exclusions>
-            	<exclusion>
-            		<artifactId>commons-logging</artifactId>
-            		<groupId>commons-logging</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -280,6 +282,7 @@
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-bundle</artifactId>
+            <version>${cxf.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>spring-web</artifactId>
@@ -310,56 +313,52 @@
                     <groupId>org.springframework</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>commons-logging</artifactId>
-                	<groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>geronimo-servlet_2.5_spec</artifactId>
-                	<groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-servlet_2.5_spec</artifactId>
+                    <groupId>org.apache.geronimo.specs</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>geronimo-javamail_1.4_spec</artifactId>
-                	<groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-javamail_1.4_spec</artifactId>
+                    <groupId>org.apache.geronimo.specs</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>geronimo-jms_1.1_spec</artifactId>
-                	<groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-jms_1.1_spec</artifactId>
+                    <groupId>org.apache.geronimo.specs</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>
-                		geronimo-annotation_1.0_spec
-                	</artifactId>
-                	<groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-annotation_1.0_spec</artifactId>
+                    <groupId>org.apache.geronimo.specs</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>
-                		geronimo-activation_1.1_spec
-                	</artifactId>
-                	<groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-activation_1.1_spec</artifactId>
+                    <groupId>org.apache.geronimo.specs</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>
-                		geronimo-ws-metadata_2.0_spec
-                	</artifactId>
-                	<groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
+                    <groupId>org.apache.geronimo.specs</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>saaj-api</artifactId>
-                	<groupId>javax.xml.soap</groupId>
+                    <artifactId>saaj-api</artifactId>
+                    <groupId>javax.xml.soap</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>saaj-impl</artifactId>
-                	<groupId>com.sun.xml.messaging.saaj</groupId>
+                    <artifactId>saaj-impl</artifactId>
+                    <groupId>com.sun.xml.messaging.saaj</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-common-utilities</artifactId>
+            <version>${cxf.common-utilities.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-cxf</artifactId>
+            <version>${camel.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>spring-context</artifactId>
@@ -378,15 +377,16 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-http</artifactId>
+            <version>${camel.version}</version>
             <exclusions>
-            	<exclusion>
-            		<artifactId>commons-logging</artifactId>
-            		<groupId>commons-logging</groupId>
-            	</exclusion>
-            	<exclusion>
-            		<artifactId>geronimo-servlet_2.5_spec</artifactId>
-            		<groupId>org.apache.geronimo.specs</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>geronimo-servlet_2.5_spec</artifactId>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -394,22 +394,22 @@
             <artifactId>httpclient</artifactId>
             <version>4.2.5</version>
             <exclusions>
-            	<exclusion>
-            		<artifactId>commons-logging</artifactId>
-            		<groupId>commons-logging</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
-        
-        
+
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
             <exclusions>
-            	<exclusion>
-            		<artifactId>commons-logging</artifactId>
-            		<groupId>commons-logging</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -436,15 +436,15 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-expression</artifactId>
         </dependency>
-        
+
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-<!-- Commons-Logging on loggaus jarjestelma siina missa SLF4J 
-        jos halutaan logitus SLF4J:lla niin taytyy kayttaa JCL-OVER-SLF4J:ta 
-        eli java commons logging over slf4j !!! -->
+        <!-- Commons-Logging on loggaus jarjestelma siina missa SLF4J
+                jos halutaan logitus SLF4J:lla niin taytyy kayttaa JCL-OVER-SLF4J:ta
+                eli java commons logging over slf4j !!! -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
@@ -461,9 +461,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-        	<groupId>commons-io</groupId>
-        	<artifactId>commons-io</artifactId>
-        	<version>2.4</version>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
@@ -493,10 +493,10 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-cas</artifactId>
             <exclusions>
-            	<exclusion>
-            		<artifactId>commons-logging</artifactId>
-            		<groupId>commons-logging</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -507,20 +507,20 @@
             <groupId>fi.vm.sade.generic</groupId>
             <artifactId>generic-common</artifactId>
             <exclusions>
-            	<exclusion>
-            		<artifactId>validation-api</artifactId>
-            		<groupId>javax.validation</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>validation-api</artifactId>
+                    <groupId>javax.validation</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
             <exclusions>
-            	<exclusion>
-            		<artifactId>validation-api</artifactId>
-            		<groupId>javax.validation</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>validation-api</artifactId>
+                    <groupId>javax.validation</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -537,15 +537,15 @@
             <artifactId>camel-spring-security</artifactId>
             <version>${camel.version}</version>
             <exclusions>
-            	<exclusion>
-            		<artifactId>commons-logging</artifactId>
-            		<groupId>commons-logging</groupId>
-            	</exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
-        
+
         <!-- Tests -->
-         <dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -563,6 +563,7 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-test</artifactId>
+            <version>${camel.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
