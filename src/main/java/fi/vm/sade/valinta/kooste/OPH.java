@@ -10,5 +10,6 @@ public interface OPH {
 
     public final String HAKUOID = "hakuOid";
     public final String HAKUKOHDEOID = "hakukohdeOid";
+    public final String HAKEMUSOID = "hakemusOid";
 
 }

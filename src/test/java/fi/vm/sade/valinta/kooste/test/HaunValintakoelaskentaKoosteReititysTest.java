@@ -21,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.core.Authentication;
@@ -30,32 +31,30 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.gson.Gson;
 
-import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
+import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
-import fi.vm.sade.valinta.kooste.valintakokeet.HaunValintakoelaskentaAktivointiResource;
-import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintaperusteProxy;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxyCachingImpl;
+import fi.vm.sade.valinta.kooste.valintakokeet.route.HaunValintakoelaskentaRoute;
+import fi.vm.sade.valinta.kooste.valintakokeet.route.impl.HaunValintakoelaskentaRouteImpl;
+import fi.vm.sade.valinta.kooste.valintakokeet.route.impl.ValintakoelaskentaConfig;
 
 /**
  * @author Jussi Jartamo
  */
 @Configuration
-@ContextConfiguration(classes = HaunValintakoelaskentaKoosteReititysTest.class)
+@Import(HaunValintakoelaskentaRouteImpl.class)
+@ContextConfiguration(classes = { HaunValintakoelaskentaKoosteReititysTest.class,
+        KoostepalveluContext.CamelConfig.class, ValintakoelaskentaConfig.class })
 @PropertySource("classpath:valintakoelaskenta-test.properties")
-@ImportResource({ "classpath:META-INF/spring/context/haku-context.xml",
-        "classpath:META-INF/spring/context/valintakoelaskenta-context.xml", "test-context.xml" })
+@ImportResource({ "classpath:META-INF/spring/context/haku-context.xml", "test-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HaunValintakoelaskentaKoosteReititysTest {
-
-    @Autowired
-    private HaunValintakoelaskentaAktivointiResource haunValintakoelaskentaAktivointiResource;
-
-    @Autowired
-    private ApplicationResource applicationResourceMock;
 
     private final static int PORT = 8097;
 
@@ -63,6 +62,73 @@ public class HaunValintakoelaskentaKoosteReititysTest {
 
     private final static String HAKEMUS1_OID = "1.2.3.4.5.00000000038";
     private final static String HAKEMUS2_OID = "1.2.3.4.5.00000000039";
+
+    @Autowired
+    private HaunValintakoelaskentaRoute haunValintakoelaskentaRoute;
+
+    @Autowired
+    private ApplicationResource applicationResourceMock;
+
+    @Autowired
+    private ValintaperusteService valintaperusteServiceMock;
+
+    @Autowired
+    private ValintalaskentaService valintalaskentaServiceMock;
+
+    @Bean
+    public ValintaperusteService getValintaperusteServiceMock() {
+        return mock(ValintaperusteService.class);
+    }
+
+    @Bean
+    public ValintalaskentaService getValintalaskentaServiceMock() {
+        return mock(ValintalaskentaService.class);
+    }
+
+    @Bean
+    public ApplicationResource getApplicationResourceMock() {
+        return mock(ApplicationResource.class);
+    }
+
+    @Bean
+    public LaskeValintakoeosallistumisetHakemukselleKomponentti getLaskeValintakoeosallistumisetHakemukselleKomponentti() {
+        return new LaskeValintakoeosallistumisetHakemukselleKomponentti();
+    }
+
+    @Bean
+    public HakukohteenValintaperusteetProxyCachingImpl getHakukohteenValintaperusteetProxyCachingImpl() {
+        return new HakukohteenValintaperusteetProxyCachingImpl();
+    }
+
+    @Test
+    public void test() throws JSONException {
+        SecurityContextHolder.getContext().setAuthentication(mock(Authentication.class));
+        when(
+                applicationResourceMock.findApplications(anyString(), anyList(), anyString(), anyString(),
+                        eq(HAKU_OID), anyString(), anyInt(), anyInt())).thenReturn(
+                new Gson().fromJson(HAKEMUKSET_RESPONSE_JSON, HakemusList.class));
+        when(applicationResourceMock.getApplicationByOid(eq(HAKEMUS1_OID))).thenReturn(
+                new Gson().fromJson(HAKEMUS1_RESPONSE_JSON, Hakemus.class));
+        when(applicationResourceMock.getApplicationByOid(eq(HAKEMUS2_OID))).thenReturn(
+                new Gson().fromJson(HAKEMUS2_RESPONSE_JSON, Hakemus.class));
+
+        haunValintakoelaskentaRoute.aktivoiValintakoelaskenta(HAKU_OID);
+
+        ArgumentCaptor<HakemusTyyppi> ac = ArgumentCaptor.forClass(HakemusTyyppi.class);
+        verify(valintalaskentaServiceMock, times(2)).valintakokeet(ac.capture(), anyList());
+
+        List<HakemusTyyppi> lasketutHakemukset = ac.getAllValues();
+        assertEquals(2, lasketutHakemukset.size());
+        Collections.sort(lasketutHakemukset, new Comparator<HakemusTyyppi>() {
+            @Override
+            public int compare(HakemusTyyppi o1, HakemusTyyppi o2) {
+                return o1.getHakemusOid().compareTo(o2.getHakemusOid());
+            }
+        });
+
+        assertEquals(HAKEMUS1_OID, lasketutHakemukset.get(0).getHakemusOid());
+        assertEquals(HAKEMUS2_OID, lasketutHakemukset.get(1).getHakemusOid());
+    }
 
     private final static String HAKEMUKSET_RESPONSE_JSON = "{" + "totalCount: 2," + "results: [" + "{" + "oid: \""
             + HAKEMUS1_OID + "\"," + "state: \"ACTIVE\"," + "firstNames: \"VXCVX XccVrVr\","
@@ -404,65 +470,4 @@ public class HaunValintakoelaskentaKoosteReititysTest {
             + "time: 1377088669000,\n"
             + "new: false,\n"
             + "inc: 42510648,\n" + "machine: -458164698,\n" + "timeSecond: 1377088669\n" + "}\n" + "}";
-
-    @Autowired
-    private ValintaperusteService valintaperusteServiceMock;
-
-    @Autowired
-    private ValintalaskentaService valintalaskentaServiceMock;
-
-    @Bean
-    public ValintaperusteService getValintaperusteServiceMock() {
-        return mock(ValintaperusteService.class);
-    }
-
-    @Bean
-    public ValintalaskentaService getValintalaskentaServiceMock() {
-        return mock(ValintalaskentaService.class);
-    }
-
-    @Bean
-    public ApplicationResource getApplicationResourceMock() {
-        return mock(ApplicationResource.class);
-    }
-
-    @Bean
-    public ValintaperusteProxy getValintaperusteProxyMock() {
-        return mock(ValintaperusteProxy.class);
-    }
-
-    @Bean
-    public KoodiService getKoodiService() {
-        return mock(KoodiService.class);
-    }
-
-    @Test
-    public void test() throws JSONException {
-        SecurityContextHolder.getContext().setAuthentication(mock(Authentication.class));
-        when(
-                applicationResourceMock.findApplications(anyString(), anyList(), anyString(), anyString(),
-                        eq(HAKU_OID), anyString(), anyInt(), anyInt())).thenReturn(
-                new Gson().fromJson(HAKEMUKSET_RESPONSE_JSON, HakemusList.class));
-        when(applicationResourceMock.getApplicationByOid(eq(HAKEMUS1_OID))).thenReturn(
-                new Gson().fromJson(HAKEMUS1_RESPONSE_JSON, Hakemus.class));
-        when(applicationResourceMock.getApplicationByOid(eq(HAKEMUS2_OID))).thenReturn(
-                new Gson().fromJson(HAKEMUS2_RESPONSE_JSON, Hakemus.class));
-
-        haunValintakoelaskentaAktivointiResource.aktivoiHaunValintakoelaskenta(HAKU_OID);
-
-        ArgumentCaptor<HakemusTyyppi> ac = ArgumentCaptor.forClass(HakemusTyyppi.class);
-        verify(valintalaskentaServiceMock, times(2)).valintakokeet(ac.capture(), anyList());
-
-        List<HakemusTyyppi> lasketutHakemukset = ac.getAllValues();
-        assertEquals(2, lasketutHakemukset.size());
-        Collections.sort(lasketutHakemukset, new Comparator<HakemusTyyppi>() {
-            @Override
-            public int compare(HakemusTyyppi o1, HakemusTyyppi o2) {
-                return o1.getHakemusOid().compareTo(o2.getHakemusOid());
-            }
-        });
-
-        assertEquals(HAKEMUS1_OID, lasketutHakemukset.get(0).getHakemusOid());
-        assertEquals(HAKEMUS2_OID, lasketutHakemukset.get(1).getHakemusOid());
-    }
 }

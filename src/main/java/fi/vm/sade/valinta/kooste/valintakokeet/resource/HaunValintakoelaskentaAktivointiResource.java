@@ -1,4 +1,8 @@
-package fi.vm.sade.valinta.kooste.valintakokeet;
+package fi.vm.sade.valinta.kooste.valintakokeet.resource;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -6,14 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import fi.vm.sade.valinta.kooste.valintakokeet.route.HakukohteenValintakoelaskentaRoute;
+import fi.vm.sade.valinta.kooste.valintakokeet.route.HaunValintakoelaskentaRoute;
 
 /**
- * User: wuoti
- * Date: 2.9.2013
- * Time: 12.28
+ * User: wuoti Date: 2.9.2013 Time: 12.28
  */
 @Controller
 @Path("valintakoelaskenta")
@@ -21,10 +22,10 @@ public class HaunValintakoelaskentaAktivointiResource {
     private static final Logger LOG = LoggerFactory.getLogger(HaunValintakoelaskentaAktivointiResource.class);
 
     @Autowired
-    private HaunValintakoelaskentaAktivointiProxy haunValintakoelaskentaAktivointiProxy;
+    private HaunValintakoelaskentaRoute haunValintakoelaskentaRoute;
 
     @Autowired
-    private HakukohteenValintakoelaskentaAktivointiProxy hakukohteenValintakoelaskentaAktivointiProxy;
+    private HakukohteenValintakoelaskentaRoute hakukohteenValintakoelaskentaRoute;
 
     @GET
     @Path("aktivoiHaunValintakoelaskenta")
@@ -33,7 +34,7 @@ public class HaunValintakoelaskentaAktivointiResource {
             return "get parameter 'hakuOid' required";
         } else {
             LOG.info("Valintakoelaskenta for haku {}", hakuOid);
-            haunValintakoelaskentaAktivointiProxy.aktivoiValintakoelaskenta(hakuOid);
+            haunValintakoelaskentaRoute.aktivoiValintakoelaskenta(hakuOid);
             return "in progress";
         }
     }
@@ -45,7 +46,7 @@ public class HaunValintakoelaskentaAktivointiResource {
             return "get parameter 'hakukohdeOid' required";
         } else {
             LOG.info("Valintakoelaskenta for hakukohde {}", hakukohdeOid);
-            hakukohteenValintakoelaskentaAktivointiProxy.aktivoiValintakoelaskenta(hakukohdeOid);
+            hakukohteenValintakoelaskentaRoute.aktivoiValintakoelaskenta(hakukohdeOid);
             return "in progress";
         }
     }

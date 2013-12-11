@@ -1,56 +1,104 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
-import com.google.gson.Gson;
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
-import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
-import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
-import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.ValintakoelaskentaProxy;
-import org.codehaus.jettison.json.JSONException;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.springframework.test.util.ReflectionTestUtils;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import org.codehaus.jettison.json.JSONException;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.google.gson.Gson;
+
+import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
+import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
+import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
+import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxyCachingImpl;
 
 /**
  * User: wuoti Date: 29.8.2013 Time: 14.28
  * 
- * @Deprecated pitaisi olla Spring testi!
  */
-@Deprecated
+@Configuration
+@Import({ HakukohteenValintaperusteetProxyCachingImpl.class,
+        LaskeValintakoeosallistumisetHakemukselleKomponentti.class, HaeHakukohteenHakemuksetKomponentti.class })
+@ContextConfiguration(classes = { LaskeValintakoeosallistumisetHakemukselleKomponenttiTest.class })
+@RunWith(SpringJUnit4ClassRunner.class)
 public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
 
+    @Autowired
     private LaskeValintakoeosallistumisetHakemukselleKomponentti laskeValintakoeosallistumisetHakemukselleKomponentti;
-
+    @Autowired
     private HakukohteenValintaperusteetProxy hakukohteenValintaperusteetProxyMock;
-    private ValintakoelaskentaProxy valintakoelaskentaProxyMock;
+    @Autowired
+    private ValintalaskentaService valintakoelaskentaProxyMock;
+    @Autowired
     private HakemusProxy hakemusProxyMock;
 
-    @Before
-    public void setUp() {
-        laskeValintakoeosallistumisetHakemukselleKomponentti = new LaskeValintakoeosallistumisetHakemukselleKomponentti();
-        hakukohteenValintaperusteetProxyMock = mock(HakukohteenValintaperusteetProxy.class);
-        valintakoelaskentaProxyMock = mock(ValintakoelaskentaProxy.class);
-        hakemusProxyMock = mock(HakemusProxy.class);
+    @Bean
+    public HakemusProxy getHakemusProxy() {
+        return mock(HakemusProxy.class);
+    }
 
-        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "proxy",
-                hakukohteenValintaperusteetProxyMock);
-        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "valintalaskentaProxy",
-                valintakoelaskentaProxyMock);
-        ReflectionTestUtils.setField(laskeValintakoeosallistumisetHakemukselleKomponentti, "hakemusProxy",
-                hakemusProxyMock);
+    @Bean
+    public ValintalaskentaService getValintalaskentaService() {
+        return mock(ValintalaskentaService.class);
+    }
+
+    @Bean
+    public ValintaperusteService getValintaperusteService() {
+        return mock(ValintaperusteService.class);
+    }
+
+    @Bean
+    public ApplicationResource getApplicationResourceMock() {
+        return mock(ApplicationResource.class);
+    }
+
+    @Test
+    public void test() throws JSONException {
+        final String hakemusOid = "1.2.3.4.5.00000000039";
+        Set<String> hakukohdeParams = new HashSet<String>(Arrays.asList(HAKUKOHDE_OID));
+
+        ValintaperusteetTyyppi vp = new ValintaperusteetTyyppi();
+        vp.setHakukohdeOid(HAKUKOHDE_OID);
+
+        List<ValintaperusteetTyyppi> vps = Arrays.asList(vp);
+
+        when(hakemusProxyMock.haeHakemus(eq(hakemusOid))).thenReturn(new Gson().fromJson(HAKEMUS_JSON, Hakemus.class));
+        when(hakukohteenValintaperusteetProxyMock.haeValintaperusteet(hakukohdeParams)).thenReturn(vps);
+        laskeValintakoeosallistumisetHakemukselleKomponentti.laske(hakemusOid);
+
+        ArgumentCaptor<HakemusTyyppi> ac = ArgumentCaptor.forClass(HakemusTyyppi.class);
+        verify(valintakoelaskentaProxyMock).valintakokeet(ac.capture(), anyList());
+
+        HakemusTyyppi hakemus = ac.getValue();
+        assertEquals(hakemusOid, hakemus.getHakemusOid());
+        assertEquals(1, hakemus.getHakutoive().size());
+        assertEquals(HAKUKOHDE_OID, hakemus.getHakutoive().get(0).getHakukohdeOid());
+        assertEquals(1, hakemus.getHakutoive().get(0).getPrioriteetti());
     }
 
     private final static String HAKUKOHDE_OID = "1.2.246.562.5.01245_01_114_0125";
@@ -218,28 +266,4 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
             + "time: 1377088669000,\n"
             + "new: false,\n"
             + "inc: 42510648,\n" + "machine: -458164698,\n" + "timeSecond: 1377088669\n" + "}\n" + "}";
-
-    @Test
-    public void test() throws JSONException {
-        final String hakemusOid = "1.2.3.4.5.00000000039";
-        Set<String> hakukohdeParams = new HashSet<String>(Arrays.asList(HAKUKOHDE_OID));
-
-        ValintaperusteetTyyppi vp = new ValintaperusteetTyyppi();
-        vp.setHakukohdeOid(HAKUKOHDE_OID);
-
-        List<ValintaperusteetTyyppi> vps = Arrays.asList(vp);
-
-        when(hakemusProxyMock.haeHakemus(eq(hakemusOid))).thenReturn(new Gson().fromJson(HAKEMUS_JSON, Hakemus.class));
-        when(hakukohteenValintaperusteetProxyMock.haeValintaperusteet(hakukohdeParams)).thenReturn(vps);
-        laskeValintakoeosallistumisetHakemukselleKomponentti.laske(hakemusOid);
-
-        ArgumentCaptor<HakemusTyyppi> ac = ArgumentCaptor.forClass(HakemusTyyppi.class);
-        verify(valintakoelaskentaProxyMock).valintakokeet(ac.capture(), anyList());
-
-        HakemusTyyppi hakemus = ac.getValue();
-        assertEquals(hakemusOid, hakemus.getHakemusOid());
-        assertEquals(1, hakemus.getHakutoive().size());
-        assertEquals(HAKUKOHDE_OID, hakemus.getHakutoive().get(0).getHakukohdeOid());
-        assertEquals(1, hakemus.getHakutoive().get(0).getPrioriteetti());
-    }
 }
