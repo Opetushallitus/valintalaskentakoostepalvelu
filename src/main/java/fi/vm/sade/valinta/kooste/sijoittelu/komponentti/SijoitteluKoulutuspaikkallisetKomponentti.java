@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.komponentti;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.PaginationObject;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import org.apache.camel.Property;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class SijoitteluKoulutuspaikkallisetKomponentti {
                                                       @Property("sijoitteluajoId") String sijoitteluajoId) {
         List<String> hakukohteet = new ArrayList<String>();
         hakukohteet.add(hakukohdeOid);
-        final PaginationObject<HakijaDTO> result =sijoitteluResource.hakemukset(hakuOid,
+        final HakijaPaginationObject result =sijoitteluResource.hakemukset(hakuOid,
                 SijoitteluResource.LATEST,
                 true,
                 null,

@@ -2,9 +2,9 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.PaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import org.apache.camel.Body;
@@ -33,7 +33,7 @@ public class JalkiohjaustulosExcelKomponentti {
 
     public InputStream luoXls(@Body String hakuOid) {
 
-        final PaginationObject<HakijaDTO> hyvaksymattomatHakijat =sijoitteluResource.hakemukset(hakuOid, SijoitteluResource.LATEST, null, true, null, null,null,null);
+        final HakijaPaginationObject hyvaksymattomatHakijat =sijoitteluResource.hakemukset(hakuOid, SijoitteluResource.LATEST, null, true, null, null,null,null);
 
         List<Object[]> rivit = new ArrayList<Object[]>();
         for (HakijaDTO jalkiohjattava : hyvaksymattomatHakijat.getResults()) {
