@@ -6,15 +6,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
+import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.route.HakuImportRoute;
+import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 
 @Configuration
 public class HakuImportRouteConfig {
 
-    // @Bean(name = "hakuImportValvomo")
-    // public ValvomoServiceImpl<KelaProsessi> getValvomoServiceImpl() {
-    // return new ValvomoServiceImpl<KelaProsessi>();
-    // }
+    @Bean(name = "hakuImportValvomo")
+    public ValvomoServiceImpl<HakuImportProsessi> getValvomoServiceImpl() {
+        return new ValvomoServiceImpl<HakuImportProsessi>();
+    }
 
     @Bean
     public HakuImportRoute getHakuImportAktivointiRoute(@Qualifier("javaDslCamelContext") CamelContext context)

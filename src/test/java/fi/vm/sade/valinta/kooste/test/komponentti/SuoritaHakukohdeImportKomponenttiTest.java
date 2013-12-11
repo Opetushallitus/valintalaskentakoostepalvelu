@@ -19,6 +19,7 @@ import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeValintaperusteetDTO;
+import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
 
 /**
@@ -70,7 +71,7 @@ public class SuoritaHakukohdeImportKomponenttiTest {
 
         // ArgumentCaptor<HakukohdeImportTyyppi> captor =
         // ArgumentCaptor.forClass(HakukohdeImportTyyppi.class);
-        suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(hakukohdeOid);
+        suoritaHakukohdeImportKomponentti.suoritaHakukohdeImport(hakukohdeOid, new HakuImportProsessi("", ""));
         // verify(valintaperusteServiceMock,
         // times(1)).tuoHakukohde(captor.capture());
     }

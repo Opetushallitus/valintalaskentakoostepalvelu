@@ -1,6 +1,9 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
+import static fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI;
+
 import org.apache.camel.Body;
+import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import fi.vm.sade.service.valintaperusteet.schema.MonikielinenTekstiTyyppi;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeValintaperusteetDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.ValintakoeRDTO;
+import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 
 /**
  * User: wuoti Date: 20.5.2013 Time: 10.46
@@ -29,7 +33,7 @@ public class SuoritaHakukohdeImportKomponentti {
     private HakukohdeResource hakukohdeResource;
 
     public HakukohdeImportTyyppi suoritaHakukohdeImport(@Body// @Property(OPH.HAKUKOHDEOID)
-            String hakukohdeOid) {
+            String hakukohdeOid, @Property(PROPERTY_VALVOMO_PROSESSI) HakuImportProsessi prosessi) {
         HakukohdeValintaperusteetDTO data = hakukohdeResource.getHakukohdeValintaperusteet(hakukohdeOid);
         HakukohdeImportTyyppi importTyyppi = new HakukohdeImportTyyppi();
 
@@ -177,7 +181,7 @@ public class SuoritaHakukohdeImportKomponentti {
             avainArvo.setArvo(data.getPainokertoimet().get(avain));
             importTyyppi.getValintaperuste().add(avainArvo);
         }
-
+        prosessi.lisaaImportoitu();
         return importTyyppi;
     }
 

@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
+import static fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -13,11 +15,13 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Sets;
 
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.tarjonta.service.resources.HakuResource;
 import fi.vm.sade.tarjonta.service.resources.dto.OidRDTO;
 import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 
 /**
  * User: wuoti Date: 20.5.2013 Time: 10.46
@@ -36,19 +40,23 @@ public class SuoritaHakuImportKomponentti {
 
     private static final int MAX_COUNT = 100000;
 
-    public Collection<String> suoritaHakukohdeImport(@Property(OPH.HAKUOID) String hakuOid) {
+    public Collection<String> suoritaHakukohdeImport(@Property(PROPERTY_VALVOMO_PROSESSI) HakuImportProsessi prosessi,
+            @Property(OPH.HAKUOID) String hakuOid) {
         List<OidRDTO> a = hakuResource.getByOIDHakukohde(hakuOid, null, MAX_COUNT, 0, null, null, null, null);
         LOG.info("Importoidaan hakukohteita yhteensä {} kpl", a.size());
 
-        Collection<String> hakukohdeOids = Collections2.filter(
+        Collection<String> hakukohdeOids = Sets.newHashSet(Collections2.filter(
                 Collections2.transform(a, new Function<OidRDTO, String>() {
                     public String apply(OidRDTO input) {
                         return input.getOid();
                     }
-                }), Predicates.notNull());
+                }), Predicates.notNull()));
         if (hakukohdeOids.size() != a.size()) {
-            LOG.error("Tarjonnasta palautui null hakukohdeoideja haulla {}", hakuOid);
+            LOG.error(
+                    "Tarjonnasta palautui null tai duplikaatti hakukohdeoideja haulla {}. Alkuperäinen koko on {} ja siivouksen jälkeen {}.",
+                    new Object[] { hakuOid, a.size(), hakukohdeOids.size() });
         }
+        prosessi.setHakukohteita(hakukohdeOids.size());
         return hakukohdeOids;
     }
 }
