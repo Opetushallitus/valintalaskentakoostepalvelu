@@ -17,60 +17,27 @@ import fi.vm.sade.koodisto.service.types.common.KoodiMetadataType;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluMessageProxy;
 
 @Component
 public class HaeOsoiteKomponentti {
 
     private static final Logger LOG = LoggerFactory.getLogger(HaeOsoiteKomponentti.class);
     private static final String MAAT_JA_VALTIOT_PREFIX = "maatjavaltiot1_";
-    @Autowired
-    private HakemusProxy hakemusProxy;
 
-    @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
+    private HaeHakemusKomponentti hakemusProxy;
     private String applicationResourceUrl;
-
-    @Autowired
-    private ViestintapalveluMessageProxy messageProxy;
-
-    @Autowired
     private KoodiService koodiService;
 
-    private void notFound(String hakemusOid) {
-        try {
-            messageProxy.message("Haku-palvelusta ei löytynyt hakemusta oid:lla " + hakemusOid);
-        } catch (Exception ex) {
-            LOG.error("Viestintäpalvelun message rajapinta ei ole käytettävissä! Hakemusta {} ei löydy!", hakemusOid);
-        }
-    }
-
-    private void countryNotFound(String hakemusOid, String countryCode, String uri) {
-        try {
-            messageProxy.message("Koodistosta ei saatu maata urilla " + uri + " hakemukselle " + hakemusOid);
-        } catch (Exception ex) {
-            LOG.error(
-                    "Viestintäpalvelun message rajapinta ei ole käytettävissä! Koodistosta ei löydy maata {} hakemukselle {}!",
-                    new Object[] { uri, hakemusOid });
-        }
-    }
-
-    private static String getKuvaus(List<KoodiMetadataType> meta) {
-        for (KoodiMetadataType data : meta) {
-            return data.getKuvaus();
-        }
-        return null;
-    }
-
-    private static String getKuvaus(List<KoodiMetadataType> meta, KieliType kieli) {
-        for (KoodiMetadataType data : meta) {
-            if (kieli.equals(data.getKieli())) {
-                return data.getKuvaus();
-            }
-        }
-        return null;
+    @Autowired
+    public HaeOsoiteKomponentti(KoodiService koodiService,
+            @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String applicationResourceUrl,
+            HaeHakemusKomponentti hakemusProxy) {
+        this.hakemusProxy = hakemusProxy;
+        this.applicationResourceUrl = applicationResourceUrl;
+        this.koodiService = koodiService;
     }
 
     public Osoite haeOsoite(String hakemusOid) {
@@ -133,4 +100,39 @@ public class HaeOsoiteKomponentti {
         return OsoiteHakemukseltaUtil.osoiteHakemuksesta(null, null);
     }
 
+    private void notFound(String hakemusOid) {
+        try {
+            // messageProxy.message("Haku-palvelusta ei löytynyt hakemusta oid:lla "
+            // + hakemusOid);
+        } catch (Exception ex) {
+            LOG.error("Viestintäpalvelun message rajapinta ei ole käytettävissä! Hakemusta {} ei löydy!", hakemusOid);
+        }
+    }
+
+    private void countryNotFound(String hakemusOid, String countryCode, String uri) {
+        try {
+            // messageProxy.message("Koodistosta ei saatu maata urilla " + uri +
+            // " hakemukselle " + hakemusOid);
+        } catch (Exception ex) {
+            LOG.error(
+                    "Viestintäpalvelun message rajapinta ei ole käytettävissä! Koodistosta ei löydy maata {} hakemukselle {}!",
+                    new Object[] { uri, hakemusOid });
+        }
+    }
+
+    private static String getKuvaus(List<KoodiMetadataType> meta) {
+        for (KoodiMetadataType data : meta) {
+            return data.getKuvaus();
+        }
+        return null;
+    }
+
+    private static String getKuvaus(List<KoodiMetadataType> meta, KieliType kieli) {
+        for (KoodiMetadataType data : meta) {
+            if (kieli.equals(data.getKieli())) {
+                return data.getKuvaus();
+            }
+        }
+        return null;
+    }
 }

@@ -1,0 +1,63 @@
+package fi.vm.sade.valinta.kooste.viestintapalvelu;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import fi.vm.sade.valinta.kooste.KoostepalveluContext;
+import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
+import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluIlmankoulutuspaikkaaProxy;
+import fi.vm.sade.valinta.kooste.tarjonta.TarjontaNimiProxy;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.JalkiohjauskirjeetKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.JalkiohjauskirjeRouteImpl;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.ViestintapalveluConfig;
+
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
+@Configuration
+@Import({ JalkiohjauskirjeetKomponentti.class, JalkiohjauskirjeRouteImpl.class })
+@ContextConfiguration(classes = { JalkiohjauskirjeetTest.class, KoostepalveluContext.CamelConfig.class,
+        ViestintapalveluConfig.class })
+@RunWith(SpringJUnit4ClassRunner.class)
+public class JalkiohjauskirjeetTest {
+
+    @Autowired
+    private JalkiohjauskirjeRoute jalkiohjauskirjeRoute;
+
+    @Test(expected = SijoittelupalveluException.class)
+    public void testaaJalkiohjauskirjeReitti() {
+        jalkiohjauskirjeRoute.jalkiohjauskirjeetAktivoi("1");
+    }
+
+    @Bean
+    public ViestintapalveluResource getViestintapalveluResource() {
+        return Mockito.mock(ViestintapalveluResource.class);
+    }
+
+    @Bean
+    public SijoitteluIlmankoulutuspaikkaaProxy getSijoitteluIlmankoulutuspaikkaaProxy() {
+        return Mockito.mock(SijoitteluIlmankoulutuspaikkaaProxy.class);
+    }
+
+    @Bean
+    public TarjontaNimiProxy getTarjontaNimiProxy() {
+        return Mockito.mock(TarjontaNimiProxy.class);
+    }
+
+    @Bean
+    public HaeOsoiteKomponentti getHaeOsoiteKomponentti() {
+        return Mockito.mock(HaeOsoiteKomponentti.class);
+    }
+}

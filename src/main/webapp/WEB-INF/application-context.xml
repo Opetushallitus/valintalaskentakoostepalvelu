@@ -68,7 +68,7 @@
     <bean id="jacksonMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
     <jaxrs:client id="viestintapalveluClient"
     			  name="ViestintapalveluRestClient"
-                  serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.ViestintapalveluResource"
+                  serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource"
                   address="${valintalaskentakoostepalvelu.viestintapalvelu.url}">
         <jaxrs:providers>
 	        <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider">
@@ -307,10 +307,16 @@
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-excel-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
-    <beans:import resource="classpath:META-INF/spring/context/viestintapalvelu-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/parametrit-context.xml"/>
+	
 	<!--
-		Valintatieto 
+		Viestintapalvelu 
+	 -->
+	<bean class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluAktivointiResource"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl"/>
+	<!--
+		Valintakoelaskenta 
 	 -->
 	<bean class="fi.vm.sade.valinta.kooste.valintakokeet.resource.HaunValintakoelaskentaAktivointiResource"/>
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintakokeet.route.impl"/>

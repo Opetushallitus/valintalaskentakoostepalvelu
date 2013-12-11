@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.viestintapalvelu;
+package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;

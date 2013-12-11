@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.viestintapalvelu;
+package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 
 import java.util.List;
 
@@ -12,18 +12,13 @@ import javax.ws.rs.core.Response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
-import com.google.gson.Gson;
-
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.LatausUrl;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksymiskirjeBatchAktivointiProxy;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.HyvaksyttyjenOsoitetarrojenAktivointiProxy;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.JalkiohjauskirjeBatchAktivointiProxy;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.OsoitetarratAktivointiProxy;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluMessageProxy;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksyttyjenOsoitetarratRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
 
 /**
  * 
@@ -41,7 +36,7 @@ public class ViestintapalveluAktivointiResource {
     private static final Logger LOG = LoggerFactory.getLogger(ViestintapalveluAktivointiResource.class);
 
     @Autowired
-    private OsoitetarratAktivointiProxy addressLabelBatchProxy;
+    private OsoitetarratRoute addressLabelBatchProxy;
 
     @GET
     @Path("osoitetarrat/aktivoi")
@@ -49,10 +44,8 @@ public class ViestintapalveluAktivointiResource {
     public Response aktivoiOsoitetarrojenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valintakoeOid") List<String> valintakoeOids) {
         try {
-            return Response
-                    .status(Status.OK)
-                    .entity(new Gson().toJson(new LatausUrl(addressLabelBatchProxy.osoitetarratAktivointi(hakukohdeOid,
-                            valintakoeOids)))).build();
+            addressLabelBatchProxy.osoitetarratAktivointi(hakukohdeOid, valintakoeOids);
+            return Response.status(Status.OK).build();
         } catch (Exception e) {
             LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
             // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
@@ -64,20 +57,16 @@ public class ViestintapalveluAktivointiResource {
     }
 
     @Autowired
-    private JalkiohjauskirjeBatchAktivointiProxy jalkiohjauskirjeBatchProxy;
-
-    @Autowired
-    private ViestintapalveluMessageProxy messageProxy;
+    private JalkiohjauskirjeRoute jalkiohjauskirjeBatchProxy;
 
     @GET
     @Path("jalkiohjauskirjeet/aktivoi")
     @Produces("application/json")
     public Response aktivoiJalkiohjauskirjeidenLuonti(@QueryParam("hakuOid") String hakuOid) {
         try {
-            jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(hakuOid, SecurityContextHolder.getContext()
-                    .getAuthentication());
+            jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(hakuOid);
             try {
-                messageProxy.message("Jälkiohjauskirjeen luonti on aloitettu.");
+                // messageProxy.message("Jälkiohjauskirjeen luonti on aloitettu.");
             } catch (Exception e) {
                 e.printStackTrace();
                 LOG.error("Viestintäpalvelun viestirajapinta ei ole käytettävissä! {}", e.getMessage());
@@ -96,7 +85,7 @@ public class ViestintapalveluAktivointiResource {
     }
 
     @Autowired
-    private HyvaksymiskirjeBatchAktivointiProxy hyvaksymiskirjeBatchProxy;
+    private HyvaksymiskirjeRoute hyvaksymiskirjeBatchProxy;
 
     @GET
     @Path("hyvaksymiskirjeet/aktivoi")
@@ -104,10 +93,8 @@ public class ViestintapalveluAktivointiResource {
     public Response aktivoiHyvaksymiskirjeidenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("hakuOid") String hakuOid, @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
         try {
-            return Response
-                    .status(Status.OK)
-                    .entity(new Gson().toJson(new LatausUrl(hyvaksymiskirjeBatchProxy.hyvaksymiskirjeetAktivointi(
-                            hakukohdeOid, hakuOid, sijoitteluajoId)))).build();
+            hyvaksymiskirjeBatchProxy.hyvaksymiskirjeetAktivointi(hakukohdeOid, hakuOid, sijoitteluajoId);
+            return Response.ok().build();
         } catch (Exception e) {
             LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -116,7 +103,7 @@ public class ViestintapalveluAktivointiResource {
     }
 
     @Autowired
-    private HyvaksyttyjenOsoitetarrojenAktivointiProxy hyvaksyttyjenOsoitetarratProxy;
+    private HyvaksyttyjenOsoitetarratRoute hyvaksyttyjenOsoitetarratProxy;
 
     @GET
     @Path("hyvaksyttyjenosoitetarrat/aktivoi")
@@ -124,10 +111,9 @@ public class ViestintapalveluAktivointiResource {
     public Response aktivoiHyvaksyttyjenOsoitetarrojenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("hakuOid") String hakuOid, @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
         try {
-            return Response
-                    .status(Status.OK)
-                    .entity(new Gson().toJson(new LatausUrl(hyvaksyttyjenOsoitetarratProxy
-                            .hyvaksyttyjenOsoitetarrojenAktivointi(hakukohdeOid, hakuOid, sijoitteluajoId)))).build();
+            hyvaksyttyjenOsoitetarratProxy
+                    .hyvaksyttyjenOsoitetarrojenAktivointi(hakukohdeOid, hakuOid, sijoitteluajoId);
+            return Response.ok().build();
         } catch (Exception e) {
             LOG.error("Hyväksyttyjen osoitetarrojen luonnissa virhe! {}", e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

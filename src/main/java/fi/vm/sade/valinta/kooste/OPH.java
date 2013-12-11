@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste;
 
+
 /**
  * 
  * @author Jussi Jartamo
@@ -11,5 +12,5 @@ public interface OPH {
     public final String HAKUOID = "hakuOid";
     public final String HAKUKOHDEOID = "hakukohdeOid";
     public final String HAKEMUSOID = "hakemusOid";
-
+    public final String SIJOITTELUAJOID = "sijoitteluajoId";
 }

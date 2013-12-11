@@ -13,6 +13,14 @@ import org.springframework.stereotype.Component;
 
 import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ * @Deprecated Kaikki lataukset on jatkossa epasuoria joten paluuarvolla ei
+ *             valia!
+ */
+@Deprecated
 @Component("viestintapalveluProcessor")
 public class ViestintapalveluResponseProcessor implements Processor {
 

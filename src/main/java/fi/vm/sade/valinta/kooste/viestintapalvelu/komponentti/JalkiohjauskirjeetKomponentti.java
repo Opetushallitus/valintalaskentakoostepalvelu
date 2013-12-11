@@ -12,14 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.camel.Property;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
@@ -28,6 +25,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluIlmankoulutuspaikkaaProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.TarjontaNimiProxy;
@@ -36,38 +34,31 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluJalkiohjauskirjeetProxy;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluMessageProxy;
 
 /**
  * @author Jussi Jartamo
  */
-@Component("jalkiohjauskirjeetKomponentti")
+@Component
 public class JalkiohjauskirjeetKomponentti {
 
     private static final Logger LOG = LoggerFactory.getLogger(JalkiohjauskirjeetKomponentti.class);
     private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
     private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
-    @Autowired
     private SijoitteluIlmankoulutuspaikkaaProxy sijoitteluProxy;
-    // private SijoitteluResource sijoitteluResource;
-
-    @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}")
-    private String sijoitteluResourceUrl;
-
-    @Autowired
     private TarjontaNimiProxy tarjontaProxy;
-
-    @Autowired
     private HaeOsoiteKomponentti osoiteKomponentti;
 
     @Autowired
-    private ViestintapalveluJalkiohjauskirjeetProxy viestintapalveluProxy;
-    @Autowired
-    private ViestintapalveluMessageProxy messageProxy;
+    public JalkiohjauskirjeetKomponentti(SijoitteluIlmankoulutuspaikkaaProxy sijoitteluProxy,
+            TarjontaNimiProxy tarjontaProxy, HaeOsoiteKomponentti osoiteKomponentti) {
+        this.sijoitteluProxy = sijoitteluProxy;
+        this.tarjontaProxy = tarjontaProxy;
+        this.osoiteKomponentti = osoiteKomponentti;
+    }
 
-    public Object teeJalkiohjauskirjeet(@Property("kielikoodi") String kielikoodi, @Property("hakuOid") String hakuOid) {
+    public Kirjeet teeJalkiohjauskirjeet(@Property("kielikoodi") String kielikoodi,
+            @Property(OPH.HAKUOID) String hakuOid) {
         LOG.debug("Jalkiohjauskirjeet for haku '{}'", new Object[] { hakuOid });
         final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluProxy.ilmankoulutuspaikkaa(hakuOid,
                 SijoitteluResource.LATEST);
@@ -165,14 +156,15 @@ public class JalkiohjauskirjeetKomponentti {
         LOG.info("Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!", kirjeet.size());
         Kirjeet viesti = new Kirjeet(kirjeet);
         LOG.debug("\r\n{}", new ViestiWrapper(viesti));
-        Response response = viestintapalveluProxy.haeJalkiohjauskirjeet(viesti);
+        // Response response =
+        // viestintapalveluProxy.haeJalkiohjauskirjeet(viesti);
         viestintapalveluLogi("Tiedot jälkiohjauskirjeen luontiin on välitetty viestintäpalvelulle.");
-        return response.getEntity();
+        return viesti; // response.getEntity();
     }
 
     private void viestintapalveluLogi(String logiViesti) {
         try {
-            messageProxy.message(logiViesti);
+            // messageProxy.message(logiViesti);
         } catch (Exception ex) {
             LOG.error("Viestintäpalvelun message rajapinta ei ole käytettävissä! {}", logiViesti);
         }

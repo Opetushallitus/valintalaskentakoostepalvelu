@@ -13,15 +13,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
@@ -38,7 +35,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluHyvaksymiskirjeetProxy;
 
 /**
  * 
@@ -47,29 +43,26 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.proxy.ViestintapalveluHyvaksym
  *         OLETTAA ETTA KAIKILLE VALINTATAPAJONOILLE TEHDAAN HYVAKSYMISKIRJE JOS
  *         HAKEMUS ON HYVAKSYTTY YHDESSAKIN!
  */
-@Component("hyvaksymiskirjeetKomponentti")
+@Component
 public class HyvaksymiskirjeetKomponentti {
 
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetKomponentti.class);
     private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
     private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
-    @Autowired
     private SijoitteluKoulutuspaikallisetProxy sijoitteluProxy;
-
-    @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}")
-    private String sijoitteluResourceUrl;
-
-    @Autowired
     private TarjontaNimiProxy tarjontaProxy;
-
-    @Autowired
     private HaeOsoiteKomponentti osoiteKomponentti;
 
     @Autowired
-    private ViestintapalveluHyvaksymiskirjeetProxy viestintapalveluProxy;
+    public HyvaksymiskirjeetKomponentti(SijoitteluKoulutuspaikallisetProxy sijoitteluProxy,
+            TarjontaNimiProxy tarjontaProxy, HaeOsoiteKomponentti osoiteKomponentti) {
+        this.osoiteKomponentti = osoiteKomponentti;
+        this.sijoitteluProxy = sijoitteluProxy;
+        this.tarjontaProxy = tarjontaProxy;
+    }
 
-    public Object teeHyvaksymiskirjeet(@Property("kielikoodi") String kielikoodi,
+    public Kirjeet teeHyvaksymiskirjeet(@Property("kielikoodi") String kielikoodi,
             @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid,
             @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId) {
 
@@ -185,8 +178,7 @@ public class HyvaksymiskirjeetKomponentti {
         LOG.info("Yritetään luoda viestintapalvelulta hyvaksymiskirjeitä {} kappaletta!", kirjeet.size());
         Kirjeet viesti = new Kirjeet(kirjeet);
         LOG.debug("\r\n{}", new ViestiWrapper(viesti));
-        Response response = viestintapalveluProxy.haeHyvaksymiskirjeet(viesti);
-        return response.getEntity();
+        return viesti;
     }
 
     //
