@@ -17,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.route.HakuImportRoute;
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
@@ -29,6 +32,7 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 @Path("hakuimport")
 @Controller
 @PreAuthorize("isAuthenticated()")
+@Api(value = "/hakuimport", description = "Haun tuontiin tarjonnalta")
 public class HakuImportResource {
     private static final Logger LOG = LoggerFactory.getLogger(HakuImportResource.class);
 
@@ -42,14 +46,16 @@ public class HakuImportResource {
     private ValvomoService<HakuImportProsessi> hakuImportValvomo;
 
     @GET
-    @Path("status")
+    @Path("/status")
     @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Hauntuontireitin tila", response = Collection.class)
     public Collection<ProsessiJaStatus<HakuImportProsessi>> status() {
         return hakuImportValvomo.getUusimmatProsessitJaStatukset();
     }
 
     @GET
-    @Path("aktivoi")
+    @Path("/aktivoi")
+    @ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
     public String aktivoiHakuImport(@QueryParam("hakuOid") String hakuOid) {
         if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
             return "no privileges.";

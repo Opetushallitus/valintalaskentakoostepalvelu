@@ -23,6 +23,10 @@
     </build>
 
     <dependencies>
+    <dependency>
+  <groupId>com.wordnik</groupId>
+  <artifactId>swagger-jersey-jaxrs_2.10</artifactId>
+  </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>jsr311-api</artifactId>

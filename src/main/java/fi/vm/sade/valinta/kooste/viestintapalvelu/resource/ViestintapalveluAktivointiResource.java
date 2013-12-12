@@ -12,7 +12,11 @@ import javax.ws.rs.core.Response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
@@ -31,6 +35,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
  */
 @Controller
 @Path("viestintapalvelu")
+@PreAuthorize("isAuthenticated()")
+@Api(value = "/viestintapalvelu", description = "Osoitetarrojen, jälkiohjauskirjeiden ja hyväksymiskirjeiden tuottaminen")
 public class ViestintapalveluAktivointiResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(ViestintapalveluAktivointiResource.class);
@@ -39,8 +45,9 @@ public class ViestintapalveluAktivointiResource {
     private OsoitetarratRoute addressLabelBatchProxy;
 
     @GET
-    @Path("osoitetarrat/aktivoi")
+    @Path("/osoitetarrat/aktivoi")
     @Produces("application/json")
+    @ApiOperation(value = "Aktivoi osoitetarrojen luonnin hakukohteelle", response = Response.class)
     public Response aktivoiOsoitetarrojenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valintakoeOid") List<String> valintakoeOids) {
         try {
@@ -60,8 +67,9 @@ public class ViestintapalveluAktivointiResource {
     private JalkiohjauskirjeRoute jalkiohjauskirjeBatchProxy;
 
     @GET
-    @Path("jalkiohjauskirjeet/aktivoi")
+    @Path("/jalkiohjauskirjeet/aktivoi")
     @Produces("application/json")
+    @ApiOperation(value = "Aktivoi jälkiohjauskirjeiden luonnin valitsemattomille", response = Response.class)
     public Response aktivoiJalkiohjauskirjeidenLuonti(@QueryParam("hakuOid") String hakuOid) {
         try {
             jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(hakuOid);
@@ -88,8 +96,9 @@ public class ViestintapalveluAktivointiResource {
     private HyvaksymiskirjeRoute hyvaksymiskirjeBatchProxy;
 
     @GET
-    @Path("hyvaksymiskirjeet/aktivoi")
+    @Path("/hyvaksymiskirjeet/aktivoi")
     @Produces("application/json")
+    @ApiOperation(value = "Aktivoi hyväksymiskirjeiden luonnin hakukohteelle haussa", response = Response.class)
     public Response aktivoiHyvaksymiskirjeidenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("hakuOid") String hakuOid, @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
         try {
@@ -106,8 +115,9 @@ public class ViestintapalveluAktivointiResource {
     private HyvaksyttyjenOsoitetarratRoute hyvaksyttyjenOsoitetarratProxy;
 
     @GET
-    @Path("hyvaksyttyjenosoitetarrat/aktivoi")
+    @Path("/hyvaksyttyjenosoitetarrat/aktivoi")
     @Produces("application/json")
+    @ApiOperation(value = "Aktivoi hyväksyttyjen osoitteiden luonnin hakukohteelle haussa", response = Response.class)
     public Response aktivoiHyvaksyttyjenOsoitetarrojenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("hakuOid") String hakuOid, @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
         try {

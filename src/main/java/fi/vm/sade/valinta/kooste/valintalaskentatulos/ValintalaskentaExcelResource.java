@@ -1,14 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
-import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.JalkiohjaustulosExcelProxy;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.SijoittelunTulosExcelProxy;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintakoekutsutExcelProxy;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -16,9 +10,21 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.JalkiohjaustulosExcelProxy;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.SijoittelunTulosExcelProxy;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintakoekutsutExcelProxy;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy;
 
 /**
  * 
@@ -28,6 +34,8 @@ import java.util.List;
  */
 @Controller
 @Path("valintalaskentaexcel")
+@PreAuthorize("isAuthenticated()")
+@Api(value = "/valintalaskentaexcel", description = "Excel-raportteja")
 public class ValintalaskentaExcelResource {
 
     private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaExcelResource.class);
@@ -43,8 +51,9 @@ public class ValintalaskentaExcelResource {
     private JalkiohjaustulosExcelProxy jalkiohjaustulos;
 
     @GET
-    @Path("jalkiohjaustulos/aktivoi")
+    @Path("/jalkiohjaustulos/aktivoi")
     @Produces("application/vnd.ms-excel")
+    @ApiOperation(value = "Haun jälkiohjattavat Excel-raporttina", response = Response.class)
     public Response haeJalkiohjausTuloksetExcelMuodossa(@QueryParam("hakuOid") String hakuOid) {
         try {
             InputStream input = jalkiohjaustulos.luoXls(hakuOid);
@@ -66,8 +75,9 @@ public class ValintalaskentaExcelResource {
     }
 
     @GET
-    @Path("valintakoekutsut/aktivoi")
+    @Path("/valintakoekutsut/aktivoi")
     @Produces("application/vnd.ms-excel")
+    @ApiOperation(value = "Hakukohteen hyväksytyt Excel-raporttina", response = Response.class)
     public Response haeTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid,
             @QueryParam("valintakoeOid") List<String> valintakoeOids) {
         try {
@@ -90,8 +100,9 @@ public class ValintalaskentaExcelResource {
     }
 
     @GET
-    @Path("sijoitteluntulos/aktivoi")
+    @Path("/sijoitteluntulos/aktivoi")
     @Produces("application/vnd.ms-excel")
+    @ApiOperation(value = "Sijoittelun tulokset Excel-raporttina", response = Response.class)
     public Response haeSijoittelunTuloksetExcelMuodossa(@QueryParam("sijoitteluajoId") Long sijoitteluajoId,
             @QueryParam("hakukohdeOid") String hakukohdeOid, @QueryParam("hakuOid") String hakuOid) {
         try {
@@ -115,8 +126,9 @@ public class ValintalaskentaExcelResource {
     }
 
     @GET
-    @Path("valintalaskennantulos/aktivoi")
+    @Path("/valintalaskennantulos/aktivoi")
     @Produces("application/vnd.ms-excel")
+    @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
     public Response haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid) {
         try {
             InputStream input = valintalaskentaTulosProxy.luoXls(hakukohdeOid);

@@ -21,7 +21,11 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
@@ -34,8 +38,10 @@ import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakuProxy;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 
-@Path("kela")
 @Controller
+@Path("kela")
+@PreAuthorize("isAuthenticated()")
+@Api(value = "/kela", description = "Kela-dokumentin luontiin ja FTP-siirtoon")
 public class KelaResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(KelaResource.class);
@@ -53,14 +59,16 @@ public class KelaResource {
     private ValvomoService<KelaProsessi> kelaValvomo;
 
     @GET
-    @Path("status")
+    @Path("/status")
     @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Kela-reitin tila", response = Collection.class)
     public Collection<ProsessiJaStatus<KelaProsessi>> status() {
         return kelaValvomo.getUusimmatProsessitJaStatukset();
     }
 
     @GET
-    @Path("aktivoi")
+    @Path("/aktivoi")
+    @ApiOperation(value = "Kela-reitin aktivointi", response = Response.class)
     public Response aktivoiKelaTiedostonluonti(@QueryParam("hakuOid") String hakuOid) {
         // tietoe ei ole viela saatavilla
         if (hakuOid == null) {
@@ -94,7 +102,8 @@ public class KelaResource {
     }
 
     @PUT
-    @Path("laheta/{documentId}")
+    @Path("/laheta/{documentId}")
+    @ApiOperation(value = "FTP-siirto", response = Response.class)
     public Response laheta(@PathParam("documentId") String input) {
         // KelaCacheDocument document = kelaCache.getDocument(input);
         // if (document == null) {
@@ -117,8 +126,9 @@ public class KelaResource {
     private DokumenttiResource dokumenttiResource;
 
     @GET
-    @Path("listaus")
+    @Path("/listaus")
     @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Listaus Kela-dokumenteista", response = Collection.class)
     public Collection<MetaData> listaus() {
         return dokumenttiResource.hae(Arrays.asList("kela"));
     }

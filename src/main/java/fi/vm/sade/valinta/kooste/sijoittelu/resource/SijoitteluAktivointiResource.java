@@ -1,9 +1,13 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
-import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
-import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluAktivointiProxy;
+import java.util.Map;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,12 +16,13 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import java.util.Map;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
+import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluAktivointiProxy;
 
 /**
  *
@@ -25,6 +30,7 @@ import java.util.Map;
 @Controller
 @Path("koostesijoittelu")
 @PreAuthorize("isAuthenticated()")
+@Api(value = "/koostesijoittelu", description = "Ohjausparametrit palveluiden aktiviteettipäivämäärille")
 public class SijoitteluAktivointiResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(SijoitteluAktivointiResource.class);
@@ -37,7 +43,8 @@ public class SijoitteluAktivointiResource {
     private ParametriService parametriService;
 
     @GET
-    @Path("aktivoi")
+    @Path("/aktivoi")
+    @ApiOperation(value = "Sijoittelun aktivointi", response = String.class)
     public String aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
         if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
             return "no privileges.";
@@ -53,8 +60,9 @@ public class SijoitteluAktivointiResource {
     }
 
     @GET
-    @Path("jatkuva/aktivoi")
+    @Path("/jatkuva/aktivoi")
     @Secured({ OPH_CRUD })
+    @ApiOperation(value = "Ajastetun sijoittelun aktivointi", response = String.class)
     public String aktivoiJatkuvassaSijoittelussa(@QueryParam("hakuOid") String hakuOid) {
         if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
             return "no privileges.";
@@ -78,8 +86,9 @@ public class SijoitteluAktivointiResource {
     }
 
     @GET
-    @Path("jatkuva/poista")
+    @Path("/jatkuva/poista")
     @Secured({ OPH_CRUD })
+    @ApiOperation(value = "Ajastetun sijoittelun deaktivointi", response = String.class)
     public String poistaJatkuvastaSijoittelusta(@QueryParam("hakuOid") String hakuOid) {
         if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
             return "no privileges.";
@@ -101,17 +110,19 @@ public class SijoitteluAktivointiResource {
     }
 
     @GET
-    @Path("jatkuva/kaiki")
+    @Path("/jatkuva/kaikki")
     @Produces(MediaType.APPLICATION_JSON)
     @Secured({ OPH_CRUD })
+    @ApiOperation(value = "Kaikki aktiiviset sijoittelut", response = Map.class)
     public Map<String, Sijoittelu> aktiivisetSijoittelut() {
         return JatkuvaSijoittelu.SIJOITTELU_HAUT;
     }
 
     @GET
-    @Path("jatkuva")
+    @Path("/jatkuva")
     @Produces(MediaType.APPLICATION_JSON)
     @Secured({ OPH_CRUD })
+    @ApiOperation(value = "Haun aktiiviset sijoittelut", response = Sijoittelu.class)
     public Sijoittelu jatkuvaTila(@QueryParam("hakuOid") String hakuOid) {
         if (StringUtils.isBlank(hakuOid)) {
             return null;

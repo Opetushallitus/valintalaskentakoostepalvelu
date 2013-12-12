@@ -8,7 +8,11 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.valintakokeet.route.HakukohteenValintakoelaskentaRoute;
 import fi.vm.sade.valinta.kooste.valintakokeet.route.HaunValintakoelaskentaRoute;
@@ -18,6 +22,8 @@ import fi.vm.sade.valinta.kooste.valintakokeet.route.HaunValintakoelaskentaRoute
  */
 @Controller
 @Path("valintakoelaskenta")
+@PreAuthorize("isAuthenticated()")
+@Api(value = "/valintakoelaskenta", description = "Valintakoelaskennan aktivointi")
 public class HaunValintakoelaskentaAktivointiResource {
     private static final Logger LOG = LoggerFactory.getLogger(HaunValintakoelaskentaAktivointiResource.class);
 
@@ -29,6 +35,7 @@ public class HaunValintakoelaskentaAktivointiResource {
 
     @GET
     @Path("aktivoiHaunValintakoelaskenta")
+    @ApiOperation(value = "Aktivoi valintakoelaskenta koko haulle", response = String.class)
     public String aktivoiHaunValintakoelaskenta(@QueryParam("hakuOid") String hakuOid) {
         if (StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";
@@ -41,6 +48,7 @@ public class HaunValintakoelaskentaAktivointiResource {
 
     @GET
     @Path("aktivoiHakukohteenValintakoelaskenta")
+    @ApiOperation(value = "Aktivoi valintakoelaskenta hakukohteelle", response = String.class)
     public String aktivoiHakukohteenValintakoelaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid) {
         if (StringUtils.isBlank(hakukohdeOid)) {
             return "get parameter 'hakukohdeOid' required";
