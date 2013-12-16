@@ -28,7 +28,7 @@ public class HaeHakukohteenHakemuksetKomponentti {
 
     @Autowired
     private ApplicationResource applicationResource;
-    @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}")
+    @Value("${valintalaskentakoostepalvelu.hakemus.rest.url:''}")
     private String applicationResourceUrl;
 
     public List<SuppeaHakemus> haeHakukohteenHakemukset(@Property(OPH.HAKUKOHDEOID) String hakukohdeOid) {

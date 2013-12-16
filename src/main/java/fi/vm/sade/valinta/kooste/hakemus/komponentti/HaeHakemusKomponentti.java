@@ -24,7 +24,7 @@ public class HaeHakemusKomponentti {
 
     @Autowired
     public HaeHakemusKomponentti(ApplicationResource applicationResource,
-            @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String applicationResourceUrl) {
+            @Value("${valintalaskentakoostepalvelu.hakemus.rest.url:''}") String applicationResourceUrl) {
         this.applicationResource = applicationResource;
         this.applicationResourceUrl = applicationResourceUrl;
     }
