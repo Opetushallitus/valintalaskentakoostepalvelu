@@ -54,13 +54,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         /**
          * Tanne tullaan jos retry:t ei riita importoinnin loppuun vientiin
          */
-        from("direct:tuoHakukohdeDead").process(new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
-                int v = prosessi.lisaaVirhe();
-                LOG.error("Virhe (numero {}) hakukohteiden importoinnissa! {}", exchange.getException().getMessage());
-            }
-        });
+        from("direct:tuoHakukohdeDead").process(logFailedHakuImport());
 
         /**
          * Erillinen reitti viennille(tuonnille). Reitilla oma errorhandler.
@@ -73,16 +67,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
                                 .logExhaustedMessageHistory(true).logStackTrace(false).logExhausted(true)
                                 .logRetryStackTrace(false).logHandled(false))
                 //
-                .bean(valintaperusteService, "tuoHakukohde").process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
-                        HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI,
-                                HakuImportProsessi.class);
-                        int t = prosessi.lisaaTuonti();
-
-                        LOG.info("Hakukohde on tuotu onnistuneesti ({}/{}).",
-                                new Object[] { t, prosessi.getHakukohteita() });
-                    }
-                });
+                .bean(valintaperusteService, "tuoHakukohde").process(logSuccessfulHakuImport());
 
         from(hakuImport())
                 // .policy(admin)
@@ -91,33 +76,12 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
                 //
                 .to(start())
                 //
-                .bean(suoritaHakuImportKomponentti)
-                //
-                .process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
-                        HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI,
-                                HakuImportProsessi.class);
-                        @SuppressWarnings("unchecked")
-                        Collection<String> hakukohdeOids = (Collection<String>) exchange.getIn().getBody(
-                                Collection.class);
-                        prosessi.setHakukohteita(hakukohdeOids.size());
-                        LOG.info("Hakukohteita importoitavana {}", hakukohdeOids.size());
-                    }
-                })
+                .bean(suoritaHakuImportKomponentti).process(logSuccessfulHakuGet())
                 //
                 .split(body(), createAccumulatingAggregation()).parallelProcessing()
                 //
-                .bean(suoritaHakukohdeImportKomponentti).process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
-                        HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI,
-                                HakuImportProsessi.class);
-                        int i = prosessi.lisaaImportoitu();
-                        if (i == prosessi.getHakukohteita()) {
-                            LOG.info("Kaikki hakukohteet ({}) importoitu!", i);
-                        }
-                    }
-                }).end()
-                //
+                .bean(suoritaHakukohdeImportKomponentti).process(logSuccessfulHakukohdeGet()).end()
+                // aika turha loggaus. voisi poistaa
                 .process(new Processor() {
                     public void process(Exchange exchange) throws Exception {
                         LOG.info("Viedään hakukohteita {} kpl valintaperusteet-servicen kantaan", exchange.getIn()
@@ -153,5 +117,50 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
     public static String finish() {
         return "bean:hakuImportValvomo?method=finish(*)";
+    }
+
+    private Processor logSuccessfulHakukohdeGet() {
+        return new Processor() {
+            public void process(Exchange exchange) throws Exception {
+                HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+                int i = prosessi.lisaaImportoitu();
+                if (i == prosessi.getHakukohteita()) {
+                    LOG.info("Kaikki hakukohteet ({}) importoitu!", i);
+                }
+            }
+        };
+    }
+
+    private Processor logSuccessfulHakuGet() {
+        return new Processor() {
+            public void process(Exchange exchange) throws Exception {
+                HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+                @SuppressWarnings("unchecked")
+                Collection<String> hakukohdeOids = (Collection<String>) exchange.getIn().getBody(Collection.class);
+                prosessi.setHakukohteita(hakukohdeOids.size());
+                LOG.info("Hakukohteita importoitavana {}", hakukohdeOids.size());
+            }
+        };
+    }
+
+    private Processor logSuccessfulHakuImport() {
+        return new Processor() {
+            public void process(Exchange exchange) throws Exception {
+                HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+                int t = prosessi.lisaaTuonti();
+
+                LOG.info("Hakukohde on tuotu onnistuneesti ({}/{}).", new Object[] { t, prosessi.getHakukohteita() });
+            }
+        };
+    }
+
+    private Processor logFailedHakuImport() {
+        return new Processor() {
+            public void process(Exchange exchange) throws Exception {
+                HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+                int v = prosessi.lisaaVirhe();
+                LOG.error("Virhe (numero {}) hakukohteiden importoinnissa! {}", exchange.getException().getMessage());
+            }
+        };
     }
 }
