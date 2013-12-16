@@ -16,12 +16,14 @@
 	
 	<camelContext depends-on="hakuRetryHandler" id="hakuAppCamelContext" autoStartup="true"
 		xmlns="http://camel.apache.org/schema/spring">
+		<!-- 
 		<proxy id="hakemusProxy" serviceInterface="fi.vm.sade.valinta.kooste.haku.HakemusProxy"
 			serviceUrl="direct:hakemusReitti" />
 		<proxy id="hakukohdeProxy" serviceInterface="fi.vm.sade.valinta.kooste.haku.HakukohdeProxy"
 			serviceUrl="direct:hakukohdeReitti" />
 		<proxy id="hakuProxy" serviceInterface="fi.vm.sade.valinta.kooste.haku.HakuProxy"
 			serviceUrl="direct:hakuReitti" />
+			-->
 
 		<route errorHandlerRef="hakuRetryHandler">
 			<from uri="direct:hakemusReitti" />

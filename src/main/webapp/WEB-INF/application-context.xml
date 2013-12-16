@@ -304,11 +304,16 @@
 	<beans:import resource="classpath:META-INF/spring/context/valintatieto-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/haku-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/tarjonta-context.xml"/>
-    <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-excel-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/parametrit-context.xml"/>
-	
+	<!--
+		Valintalaskenta
+	 -->
+	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaAktivointiResource"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.route.impl"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus"/>
 	<!--
 		Viestintapalvelu 
 	 -->

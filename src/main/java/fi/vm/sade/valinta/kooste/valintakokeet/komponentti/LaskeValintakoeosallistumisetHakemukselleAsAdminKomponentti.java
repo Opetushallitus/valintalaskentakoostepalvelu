@@ -15,7 +15,7 @@ import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
 
@@ -35,7 +35,7 @@ public class LaskeValintakoeosallistumisetHakemukselleAsAdminKomponentti {
     private ValintalaskentaService valintalaskentaService;
 
     @Autowired
-    private HakemusProxy hakemusProxy;
+    private HaeHakemusKomponentti hakemusProxy;
 
     public void laske(@Property("hakemusOid") String hakemusOid) {
         LOG.info("Lasketaan valintakoeosallistumiset hakemukselle " + hakemusOid);

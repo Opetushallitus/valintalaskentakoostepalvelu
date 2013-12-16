@@ -31,8 +31,8 @@ import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
-import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxyCachingImpl;
@@ -55,11 +55,11 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponenttiTest {
     @Autowired
     private ValintalaskentaService valintakoelaskentaProxyMock;
     @Autowired
-    private HakemusProxy hakemusProxyMock;
+    private HaeHakemusKomponentti hakemusProxyMock;
 
     @Bean
-    public HakemusProxy getHakemusProxy() {
-        return mock(HakemusProxy.class);
+    public HaeHakemusKomponentti getHakemusProxy() {
+        return mock(HaeHakemusKomponentti.class);
     }
 
     @Bean

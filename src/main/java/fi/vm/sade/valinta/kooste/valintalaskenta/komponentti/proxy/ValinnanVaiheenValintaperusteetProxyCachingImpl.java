@@ -1,19 +1,23 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
+import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
+import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 
 /**
  * User: wuoti Date: 5.8.2013 Time: 9.28
@@ -25,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class ValinnanVaiheenValintaperusteetProxyCachingImpl implements ValinnanVaiheenValintaperusteetProxy {
 
     @Autowired
-    private ValintaperusteProxy valintaperusteProxy;
+    private ValintaperusteService valintaperusteProxy;
 
     private LoadingCache<ValintaperusteetCacheKey, List<ValintaperusteetTyyppi>> valintaperusteetCache;
 

@@ -1,10 +1,9 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
-import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +13,20 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.List;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 
 /**
  * 
  * @author Jussi Jartamo
  * 
  *         Testaa uudelleen yrityksia, eli epavarmaa verkkoyhteytta!
+ * 
+ * @Ignore NGinx ongelma on ratkaistu. Ei tarvi toistaiseksi varautua näihin!
  */
+@Ignore
 @Configuration
 @ContextConfiguration(classes = HakuRetryTesti.class)
 @ImportResource({ "classpath:test-context.xml", "classpath:META-INF/spring/context/haku-context.xml" })
@@ -56,7 +61,7 @@ public class HakuRetryTesti {
     }
 
     @Autowired
-    HakemusProxy hakemusProxy;
+    HaeHakemusKomponentti hakemusProxy;
 
     @Test
     public void hakuWithRandomChaos() {

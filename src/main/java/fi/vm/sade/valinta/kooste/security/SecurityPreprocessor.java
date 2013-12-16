@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Jussi Jartamo
@@ -13,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  *         Asentaa autentikaation workerille jos tarpeen. Taltioi autentikaation
  *         propertyyn workeria varten!
  */
+@Component
 public class SecurityPreprocessor implements Processor {
 
     public static final String SECURITY_CONTEXT_HEADER = "authentication";

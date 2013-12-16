@@ -1,13 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.komponentti;
 
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
-import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
-import fi.vm.sade.valinta.kooste.haku.HakukohdeProxy;
-import fi.vm.sade.valinta.kooste.util.Converter;
-import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValintalaskentaProxy;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
@@ -15,8 +10,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
+import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
+import fi.vm.sade.valinta.kooste.util.Converter;
 
 /**
  * @author Jussi Jartamo
@@ -25,11 +26,11 @@ import java.util.List;
 public class SuoritaLaskentaKomponentti {
 
     @Autowired
-    private HakukohdeProxy hakukohdeProxy;
+    private HaeHakukohteenHakemuksetKomponentti hakukohdeProxy;
     @Autowired
-    private HakemusProxy hakemusProxy;
+    private HaeHakemusKomponentti hakemusProxy;
     @Autowired
-    private ValintalaskentaProxy valintalaskentaProxy;
+    private ValintalaskentaService valintalaskentaProxy;
 
     private static final Logger LOG = LoggerFactory.getLogger(SuoritaLaskentaKomponentti.class);
 

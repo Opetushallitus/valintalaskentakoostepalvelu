@@ -26,7 +26,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.haku.HakemusProxy;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.LinjakoodiProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioProxy;
 import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakuProxy;
@@ -38,7 +38,7 @@ public class TKUVAYHVAKomponentti {
     private static final Integer KESAKUU = 6;
 
     @Autowired
-    private HakemusProxy hakemusProxy;
+    private HaeHakemusKomponentti hakemusProxy;
 
     @Autowired
     private LinjakoodiProxy linjakoodiProxy;
