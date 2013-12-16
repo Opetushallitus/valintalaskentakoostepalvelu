@@ -24,6 +24,7 @@ import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
 import fi.vm.sade.valinta.kooste.hakuimport.route.HakuImportRoute;
+import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 
@@ -37,6 +38,9 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
     @Autowired
     private SuoritaHakukohdeImportKomponentti suoritaHakukohdeImportKomponentti;
+
+    @Autowired
+    private SecurityPreprocessor securityProcessor;
 
     @Autowired
     private ValintaperusteService valintaperusteService;
@@ -67,10 +71,12 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
                                 .logExhaustedMessageHistory(true).logStackTrace(false).logExhausted(true)
                                 .logRetryStackTrace(false).logHandled(false))
                 //
-                .bean(valintaperusteService, "tuoHakukohde").process(logSuccessfulHakuImport());
+                .bean(securityProcessor).bean(valintaperusteService, "tuoHakukohde").process(logSuccessfulHakuImport());
 
         from(hakuImport())
                 // .policy(admin)
+                .bean(securityProcessor)
+                //
                 .setProperty(kuvaus(), constant("Haun importointi"))
                 .setProperty(prosessi(), method(new PrepareHakuImportProcessDescription()))
                 //
@@ -80,7 +86,8 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
                 //
                 .split(body(), createAccumulatingAggregation()).parallelProcessing()
                 //
-                .bean(suoritaHakukohdeImportKomponentti).process(logSuccessfulHakukohdeGet()).end()
+                .bean(securityProcessor).bean(suoritaHakukohdeImportKomponentti).process(logSuccessfulHakukohdeGet())
+                .end()
                 // aika turha loggaus. voisi poistaa
                 .process(new Processor() {
                     public void process(Exchange exchange) throws Exception {
