@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste;
 
 import org.apache.camel.RoutesBuilder;
+import org.apache.camel.ThreadPoolRejectedPolicy;
+import org.apache.camel.spi.ThreadPoolProfile;
 import org.apache.camel.spring.SpringCamelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,20 @@ public class KoostepalveluContext {
         public static SpringCamelContext getSpringCamelContext(ApplicationContext applicationContext,
                 RoutesBuilder[] routes) throws Exception {
             SpringCamelContext camelContext = new SpringCamelContext(applicationContext);
+            ThreadPoolProfile t = new ThreadPoolProfile();
+            t.setId("ValintalaskentakoostepalveluThreadPool");
+            t.setDefaultProfile(true);
+            t.setPoolSize(50);
+            t.setMaxPoolSize(50);
+            t.setMaxQueueSize(1000);
+            t.setRejectedPolicy(ThreadPoolRejectedPolicy.CallerRuns);
+            // defaultThreadPoolProfile
+            camelContext.getExecutorServiceManager().setDefaultThreadPoolProfile(t);
+            // <threadPoolProfile id="defaultThreadPoolProfile"
+            // defaultProfile="true"
+            // poolSize="10" maxPoolSize="20" maxQueueSize="1000"
+            // rejectedPolicy="CallerRuns"/>
+            //
 
             camelContext.disableJMX();
             camelContext.setAutoStartup(true);
