@@ -79,7 +79,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
                                 HakuImportProsessi.class);
                         int t = prosessi.lisaaTuonti();
 
-                        LOG.info("Kaikki on tuotu onnistuneesti ({}/{}).",
+                        LOG.info("Hakukohde on tuotu onnistuneesti ({}/{}).",
                                 new Object[] { t, prosessi.getHakukohteita() });
                     }
                 });
