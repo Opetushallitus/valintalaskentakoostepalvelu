@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
-import static fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI;
-
 import java.util.Collection;
 import java.util.List;
 
@@ -21,7 +19,6 @@ import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.tarjonta.service.resources.HakuResource;
 import fi.vm.sade.tarjonta.service.resources.dto.OidRDTO;
 import fi.vm.sade.valinta.kooste.OPH;
-import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 
 /**
  * User: wuoti Date: 20.5.2013 Time: 10.46
@@ -40,8 +37,7 @@ public class SuoritaHakuImportKomponentti {
 
     private static final int MAX_COUNT = 100000;
 
-    public Collection<String> suoritaHakukohdeImport(@Property(PROPERTY_VALVOMO_PROSESSI) HakuImportProsessi prosessi,
-            @Property(OPH.HAKUOID) String hakuOid) {
+    public Collection<String> suoritaHakukohdeImport(@Property(OPH.HAKUOID) String hakuOid) {
         List<OidRDTO> a = hakuResource.getByOIDHakukohde(hakuOid, null, MAX_COUNT, 0, null, null, null, null);
         LOG.info("Importoidaan hakukohteita yhteensä {} kpl", a.size());
 
@@ -56,7 +52,6 @@ public class SuoritaHakuImportKomponentti {
                     "Tarjonnasta palautui null tai duplikaatti hakukohdeoideja haulla {}. Alkuperäinen koko on {} ja siivouksen jälkeen {}.",
                     new Object[] { hakuOid, a.size(), hakukohdeOids.size() });
         }
-        prosessi.setHakukohteita(hakukohdeOids.size());
         return hakukohdeOids;
     }
 }
