@@ -114,15 +114,15 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         return HakuImportRoute.DIRECT_HAKU_IMPORT;
     }
 
-    public static String fail() {
+    private static String fail() {
         return "bean:hakuImportValvomo?method=fail(*,*)";
     }
 
-    public static String start() {
+    private static String start() {
         return "bean:hakuImportValvomo?method=start(*)";
     }
 
-    public static String finish() {
+    private static String finish() {
         return "bean:hakuImportValvomo?method=finish(*)";
     }
 
