@@ -58,7 +58,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         /**
          * Tanne tullaan jos retry:t ei riita importoinnin loppuun vientiin
          */
-        from("direct:tuoHakukohdeDead").process(logFailedHakuImport());
+        from("direct:tuoHakukohdeDead").to(fail()).process(logFailedHakuImport());
 
         /**
          * Erillinen reitti viennille(tuonnille). Reitilla oma errorhandler.
