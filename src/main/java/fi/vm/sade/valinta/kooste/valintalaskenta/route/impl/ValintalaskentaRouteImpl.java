@@ -25,11 +25,18 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 
     @Override
     public void configure() throws Exception {
+        from("direct:suorita_laskenta_dead").to(fail());
         /**
          * Alireitti yhden kohteen laskentaan
          */
         from("direct:suorita_valintalaskenta")
         //
+                .errorHandler(
+                        deadLetterChannel("direct:suorita_laskenta_dead").maximumRedeliveries(15).redeliveryDelay(100L)
+                                //
+                                .logExhaustedMessageHistory(true).logStackTrace(false).logExhausted(true)
+                                .logRetryStackTrace(false).logHandled(false))
+                //
                 .bean(securityProcessor)
                 //
                 .to("bean:suoritaLaskentaKomponentti");
