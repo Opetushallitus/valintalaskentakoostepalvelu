@@ -75,8 +75,13 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
         // </policy>
         // </route>
 
-        from(hakukohteenValintalaskenta()).to("bean:haeValintaperusteetKomponentti")
-                .setProperty("valintaperusteet", body()).to("direct:suorita_valintalaskenta");
+        from(hakukohteenValintalaskenta())
+        //
+                .to("bean:haeValintaperusteetKomponentti")
+                //
+                .setProperty("valintaperusteet", body())
+                //
+                .to("direct:suorita_valintalaskenta");
 
     }
 
