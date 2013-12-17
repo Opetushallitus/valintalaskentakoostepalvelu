@@ -22,8 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportResource;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,6 +36,7 @@ import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxyCachingImpl;
@@ -49,12 +48,11 @@ import fi.vm.sade.valinta.kooste.valintakokeet.route.impl.ValintakoelaskentaConf
  * User: wuoti Date: 9.9.2013 Time: 9.24
  */
 @Configuration
-@Import({ HakukohteenValintakoelaskentaRouteImpl.class, HakukohteenValintaperusteetProxyCachingImpl.class,
-        LaskeValintakoeosallistumisetHakemukselleKomponentti.class, HaeHakukohteenHakemuksetKomponentti.class })
+@Import({ HakukohteenValintakoelaskentaRouteImpl.class, HaeHakemusKomponentti.class,
+        HakukohteenValintaperusteetProxyCachingImpl.class, LaskeValintakoeosallistumisetHakemukselleKomponentti.class,
+        HaeHakukohteenHakemuksetKomponentti.class })
 @ContextConfiguration(classes = { HakukohteenValintakoelaskentaKoosteReititysTest.class,
         KoostepalveluContext.CamelConfig.class, ValintakoelaskentaConfig.class })
-@PropertySource("classpath:valintakoelaskenta-test.properties")
-@ImportResource({ "classpath:META-INF/spring/context/haku-context.xml", "test-context.xml" })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HakukohteenValintakoelaskentaKoosteReititysTest {
 

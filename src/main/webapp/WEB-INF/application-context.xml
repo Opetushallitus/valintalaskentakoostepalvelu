@@ -302,7 +302,6 @@
 	</bean>
 	
 	<beans:import resource="classpath:META-INF/spring/context/valintatieto-context.xml"/>
-    <beans:import resource="classpath:META-INF/spring/context/haku-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/tarjonta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-excel-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
