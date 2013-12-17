@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 /**
  * @author Jussi Jartamo
  *         <p/>
- *         Asentaa autentikaation workerille jos tarpeen. Taltioi autentikaation
- *         propertyyn workeria varten!
+ *         Asentaa autentikaation workerille jos tarpeen ja taltioi
+ *         autentikaation propertyyn workeria varten.
  */
 @Component
 public class SecurityPreprocessor implements Processor {
