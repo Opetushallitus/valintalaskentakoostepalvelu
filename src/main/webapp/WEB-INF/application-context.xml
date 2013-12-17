@@ -53,19 +53,9 @@
         <!-- AllowChunking="false" Nginx fails without this -->
         <http:client Connection="Keep-Alive" ConnectionTimeout="0" ReceiveTimeout="0" AllowChunking="false"/>
     </http:conduit>
-    <!-- Configure CXF bus to contain ticketInterceptor -->
-    <!--
-    <cxf:bus>
-        <cxf:outInterceptors>
-            <ref bean="ticketInterceptor" />
-        </cxf:outInterceptors>
-        <cxf:inFaultInterceptors>
-            <bean class="org.apache.cxf.interceptor.LoggingOutInterceptor"/>
-            <bean class="org.apache.cxf.interceptor.LoggingInInterceptor"/>
-        </cxf:inFaultInterceptors>
-    </cxf:bus>
-    -->
+
     <bean id="jacksonMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
+    
     <jaxrs:client id="viestintapalveluClient"
     			  name="ViestintapalveluRestClient"
                   serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource"
@@ -215,25 +205,7 @@
             </bean>
         </jaxws:outInterceptors>
     </jaxws:client>
-<!--
- 	Kaytetaan REST rajapintaa koska se on tuetumpi!
 
-    <jaxws:client id="organisaatioServiceClient"
-                  serviceClass="fi.vm.sade.organisaatio.api.model.OrganisaatioService"
-                  address="${valintalaskentakoostepalvelu.organisaatioService.url}">
-        <jaxws:outInterceptors>
-            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-                <property name="webCasUrl" value="${web.url.cas}"/>
-                <property name="targetService"
-                          value="${cas.service.tarjonta-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername"
-                          value="${valintalaskentakoostepalvelu.app.username.to.organisaatio}"/>
-                <property name="appClientPassword"
-                          value="${valintalaskentakoostepalvelu.app.password.to.organisaatio}"/>
-            </bean>
-        </jaxws:outInterceptors>
-    </jaxws:client>
- -->
     <jaxws:client id="valintatietoService"
                   serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
                   address="${valintalaskentakoostepalvelu.valintaTulosService.url}">
@@ -305,12 +277,30 @@
     <beans:import resource="classpath:META-INF/spring/context/tarjonta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-excel-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
-    <beans:import resource="classpath:META-INF/spring/context/parametrit-context.xml"/>
+    <!-- Parametrit -->
+    <bean class="fi.vm.sade.valinta.kooste.parametrit.resource.ParametritResource" />
+    <bean class="fi.vm.sade.valinta.kooste.parametrit.service.impl.ParametriServiceImpl" />
+    <bean id="parametrit" class="fi.vm.sade.valinta.kooste.parametrit.Parametrit">
+        <!--<property name="valintakoekutsutAlkupvm" value="${valintakoekutsut.alkupvm}"/>
+        <property name="valintakoekutsutLoppupvm" value="${valintakoekutsut.loppupvm}"/>
+        <property name="valintakoekutsutkouluillePvm" value="${valintakoekutsutkouluille.pvm}"/>
+        <property name="valintakoeAlkupvm" value="${valintakoe.alkupvm}"/>
+        <property name="valintakoeLoppupvm" value="${valintakoe.loppupvm}"/>-->
+        <property name="koetuloksetAlkupvm" value="${koetulokset.alkupvm}"/>
+        <property name="koetuloksetLoppupvm" value="${koetulokset.loppupvm}"/>
+        <!--<property name="valintajasijoitteluAlkupvm" value="${valintajasijoittelu.alkupvm}"/>
+        <property name="valintajasijoitteluLoppupvm" value="${valintajasijoittelu.loppupvm}"/>-->
+        <property name="valintaesitysPvm" value="${valintaesitys.pvm}"/>
+        <property name="hakuAlkupvm" value="${haku.alkupvm}" />
+        <property name="hakuLoppupvm" value="${haku.loppupvm}" />
+    </bean>
 	<!--
 		Valintalaskenta
 	 -->
 	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaAktivointiResource"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.route.impl"/>
+	<bean name="suoritaLaskentaKomponentti" class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.SuoritaLaskentaKomponentti"/>
+	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaConfig"/>
+	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaRouteImpl"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus"/>
 	<!--
