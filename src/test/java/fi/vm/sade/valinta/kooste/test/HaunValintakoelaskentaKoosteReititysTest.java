@@ -22,8 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportResource;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,6 +36,8 @@ import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHaunHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxyCachingImpl;
 import fi.vm.sade.valinta.kooste.valintakokeet.route.HaunValintakoelaskentaRoute;
@@ -49,14 +49,10 @@ import fi.vm.sade.valinta.kooste.valintakokeet.route.impl.ValintakoelaskentaConf
  */
 @Configuration
 @Import(HaunValintakoelaskentaRouteImpl.class)
-@ContextConfiguration(classes = { HaunValintakoelaskentaKoosteReititysTest.class,
-        KoostepalveluContext.CamelConfig.class, ValintakoelaskentaConfig.class })
-@PropertySource("classpath:valintakoelaskenta-test.properties")
-@ImportResource({ "classpath:META-INF/spring/context/haku-context.xml", "test-context.xml" })
+@ContextConfiguration(classes = { HaunValintakoelaskentaKoosteReititysTest.class, HaeHakemusKomponentti.class,
+        HaeHaunHakemuksetKomponentti.class, KoostepalveluContext.CamelConfig.class, ValintakoelaskentaConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HaunValintakoelaskentaKoosteReititysTest {
-
-    private final static int PORT = 8097;
 
     private final static String HAKU_OID = "hakuOid1";
 
