@@ -1,7 +1,10 @@
 package fi.vm.sade.valinta.kooste.parametrit.service.impl;
 
-import fi.vm.sade.valinta.kooste.parametrit.Parametrit;
-import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -9,15 +12,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import fi.vm.sade.valinta.kooste.parametrit.Parametrit;
+import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 
 /**
- * User: tommiha
- * Date: 8/21/13
- * Time: 10:05 AM
+ * User: tommiha Date: 8/21/13 Time: 10:05 AM
  */
 @Service
 public class ParametriServiceImpl implements ParametriService {
@@ -28,11 +27,9 @@ public class ParametriServiceImpl implements ParametriService {
     @Value("${root.organisaatio.oid}")
     private String rootOrganisaatioOid;
 
-    private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     @Override
     public boolean pistesyottoEnabled(String hakuOid) {
-        if(isOPH()) {
+        if (isOPH()) {
             return true;
         }
         Date now = Calendar.getInstance().getTime();
@@ -43,7 +40,7 @@ public class ParametriServiceImpl implements ParametriService {
 
     @Override
     public boolean hakeneetEnabled(String hakuOid) {
-        if(isOPH()) {
+        if (isOPH()) {
             return true;
         }
         Date now = Calendar.getInstance().getTime();
@@ -53,7 +50,7 @@ public class ParametriServiceImpl implements ParametriService {
 
     @Override
     public boolean harkinnanvaraisetEnabled(String hakuOid) {
-        if(isOPH()) {
+        if (isOPH()) {
             return true;
         }
         Date now = Calendar.getInstance().getTime();
@@ -64,7 +61,7 @@ public class ParametriServiceImpl implements ParametriService {
 
     @Override
     public boolean valintakoekutsutEnabled(String hakuOid) {
-        if(isOPH()) {
+        if (isOPH()) {
             return true;
         }
         Date now = Calendar.getInstance().getTime();
@@ -74,14 +71,14 @@ public class ParametriServiceImpl implements ParametriService {
 
     @Override
     public boolean valintalaskentaEnabled(String hakuOid) {
-        //Date now = Calendar.getInstance().getTime();
-        //Date hakuAlkupvm = new Date(parametrit.getHakuAlkupvm());
-        return isOPH(); //now.after(hakuAlkupvm) && isOPH();
+        // Date now = Calendar.getInstance().getTime();
+        // Date hakuAlkupvm = new Date(parametrit.getHakuAlkupvm());
+        return isOPH(); // now.after(hakuAlkupvm) && isOPH();
     }
 
     @Override
     public boolean valinnanhallintaEnabled(String hakuOid) {
-        if(isOPH()) {
+        if (isOPH()) {
             return true;
         }
         Date now = Calendar.getInstance().getTime();
@@ -91,18 +88,18 @@ public class ParametriServiceImpl implements ParametriService {
 
     private boolean isOPH() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        for(GrantedAuthority authority : authentication.getAuthorities()) {
-            if(authority.getAuthority().contains(rootOrganisaatioOid)) {
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            if (authority.getAuthority().contains(rootOrganisaatioOid)) {
                 return true;
             }
         }
 
         return false;
     }
-    
+
     private Date parseDate(String source) {
         try {
-            return format.parse(source);
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(source);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
