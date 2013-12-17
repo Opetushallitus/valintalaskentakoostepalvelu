@@ -273,6 +273,8 @@
 		<property name="retryAttemptedLogLevel" value="ERROR" />
 	</bean>
 	
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy"/>
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy"/>
 	<beans:import resource="classpath:META-INF/spring/context/valintatieto-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/tarjonta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-excel-context.xml"/>
@@ -299,8 +301,6 @@
 	 -->
 	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaAktivointiResource"/>
 	<bean name="suoritaLaskentaKomponentti" class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.SuoritaLaskentaKomponentti"/>
-	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValinnanVaiheenValintaperusteetProxyCachingImpl"/>
-	<bean class="fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxyCachingImpl"/>
 	<bean name="haeValintaperusteetKomponentti" class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.HaeValintaperusteetKomponentti"/>
 	<bean name="valintalaskentaKomponentti" class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.ValintalaskentaKomponentti"/>
 	<bean name="valintaperusteKomponentti" class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.ValintaperusteKomponentti"/>
