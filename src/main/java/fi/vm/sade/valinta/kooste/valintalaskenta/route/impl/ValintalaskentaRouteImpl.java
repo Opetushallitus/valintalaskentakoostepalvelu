@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -12,14 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HakemusOidSplitter;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.SplitHakukohteetKomponentti;
@@ -91,19 +87,9 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 //
                 .bean(haeHakukohteenHakemuksetKomponentti)
                 //
-                .process(new Processor() { // TODO: Refaktoroi
-                            public void process(Exchange exchange) throws Exception {
-                                LOG.debug("Hakemukset haettu");
-                                Collection<SuppeaHakemus> c = exchange.getIn().getBody(Collection.class);
-                                LOG.debug("Hakemuksia {}", c);
-                                exchange.getOut().setBody(
-                                        Collections2.transform(c, new Function<SuppeaHakemus, String>() {
-                                            public String apply(SuppeaHakemus o) {
-                                                return o.getOid();
-                                            }
-                                        }));
-                            }
-                        })
+                .bean(new HakemusOidSplitter())
+                //
+                .to("log:direct_suorita_valintalaskenta_pre_split_hakemukset?level=INFO")
                 //
                 .split(body(),
                         new FlexibleAggregationStrategy<HakemusTyyppi>().storeInHeader("hakemustyypit")
