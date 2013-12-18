@@ -60,20 +60,23 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
          */
 
         from(suoritaValintalaskentaKomponenttiDeadLetterChannel()).setHeader("message",
-                simple("Valinta ei toimi: Hakukohteelle ${property.hakukohdeOid}")).to(fail());
+                simple("${property.authentication.name}: Valinta ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
+                .to(fail());
         from(suoritaValintalaskentaDeadLetterChannel()).setHeader("message",
-                simple("Tarjonta ei toimi: Hakukohteelle ${property.hakukohdeOid}")).to(fail());
-        from(suoritaValintalaskentaHaeHakemusDeadLetterChannel()).setHeader("message",
-                simple("Haku-app ei toimi! Hakemus ${header.hakemusOid}, hakukohteelle ${property.hakukohdeOid}")).to(
-                fail());
-
+                simple("${property.authentication.name}: Tarjonta ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
+                .to(fail());
+        from(suoritaValintalaskentaHaeHakemusDeadLetterChannel())
+                .setHeader(
+                        "message",
+                        simple("${property.authentication.name}: Haku-app ei toimi! Hakemus ${header.hakemusOid}, hakukohteelle ${property.hakukohdeOid}"))
+                .to(fail());
         from(suoritaHakukohteelleValintalaskentaDeadLetterChannel())
                 .setHeader(
                         "message",
-                        simple("Valintaperusteiden haku ei toimi: Hakukohteelle ${property.hakukohdeOid} ja valinnanvaiheelle ${property.valinnanvaihe}"))
+                        simple("${property.authentication.name}: Valintaperusteiden haku ei toimi: Hakukohteelle ${property.hakukohdeOid} ja valinnanvaiheelle ${property.valinnanvaihe}"))
                 .to(fail());
         from(suoritaHaulleValintalaskentaDeadLetterChannel()).setHeader("message",
-                simple("Tarjonta ei toimi: Haulle ${property.hakuOid}")).to(fail());
+                simple("${property.authentication.name}: Tarjonta ei toimi: Haulle ${property.hakuOid}")).to(fail());
 
         from("direct:suorita_haehakemus")
                 .errorHandler(
