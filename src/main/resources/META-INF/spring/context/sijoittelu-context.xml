@@ -12,7 +12,7 @@
 	<bean id="sijoitteluRetryHandler" class="org.apache.camel.builder.DefaultErrorHandlerBuilder" >
 		<property name="redeliveryPolicy" ref="redeliveryPolicy"/>
 	</bean>
-	
+	<bean id="securityPreprocessor" class="fi.vm.sade.valinta.kooste.security.SecurityPreprocessori"/>
     <camelContext depends-on="sijoitteluRetryHandler" id="sijoitteluCamelContext" autoStartup="true" xmlns="http://camel.apache.org/schema/spring">
         <!-- Proxy Jersey REST triggerin ja Camelin eriyttämiseen toisistaan -->
         <proxy id="sijoitteluSuoritaProxy"
