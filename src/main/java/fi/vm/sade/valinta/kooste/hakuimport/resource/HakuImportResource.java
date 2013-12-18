@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.wordnik.swagger.annotations.Api;
@@ -65,7 +66,8 @@ public class HakuImportResource {
             return "get parameter 'hakuOid' required";
         } else {
             LOG.info("Haku import haulle {}", hakuOid);
-            hakuImportAktivointiRoute.aktivoiHakuImport(hakuOid);
+            hakuImportAktivointiRoute.asyncAktivoiHakuImport(hakuOid, SecurityContextHolder.getContext()
+                    .getAuthentication());
             return "in progress";
         }
     }
