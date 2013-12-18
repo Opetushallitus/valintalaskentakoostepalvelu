@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakemus.komponentti;
 
-import org.apache.camel.Property;
+import org.apache.camel.Header;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class HaeHakemusKomponentti {
         this.applicationResourceUrl = applicationResourceUrl;
     }
 
-    public Hakemus haeHakemus(@Property(OPH.HAKEMUSOID) String hakemusOid) {
+    public Hakemus haeHakemus(@Header(OPH.HAKEMUSOID) String hakemusOid) {
         LOG.info("Haetaan hakemus osoitteesta {}/applications/{}", new Object[] { applicationResourceUrl, hakemusOid });
         return applicationResource.getApplicationByOid(hakemusOid);
     }

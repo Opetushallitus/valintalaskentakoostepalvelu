@@ -53,14 +53,10 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
         StringBuffer buffer = newBufferWithDate("VIRHE");
         if (exception == null) {
             LOG.info("Process failed {}", process);
-
+            buffer.append(", ").append("<< null exception >>");
         } else {
             LOG.error("Process failed {} with exception {}", new Object[] { process, exception });
-            if (exception == null) {
-                buffer.append(", ").append("<< null exception >>");
-            } else {
-                buffer.append(", ").append(exception.getMessage());
-            }
+            buffer.append(", ").append(exception.getMessage());
         }
         if (process instanceof ExceptionStack) {
             if (!((ExceptionStack) process).addException(exception)) { // already
