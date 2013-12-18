@@ -7,6 +7,8 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,8 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
  */
 @Component
 public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaRouteImpl.class);
 
     @Autowired
     private SecurityPreprocessor securityProcessor;
@@ -62,18 +66,26 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
         from(suoritaLaskentaDeadLetterChannel()).to(fail());
 
         from("direct:suorita_haehakemus")
-                .errorHandler(defaultErrorHandler().maximumRedeliveries(15).redeliveryDelay(100L)
-                // log exhausted stacktrace
-                        .logExhaustedMessageHistory(true).logExhausted(true)
-                        // hide retry/handled stacktrace
-                        .logStackTrace(false).logRetryStackTrace(false).logHandled(false))
+                .errorHandler(
+                        deadLetterChannel(suoritaLaskentaDeadLetterChannel()).maximumRedeliveries(15)
+                                .redeliveryDelay(100L)
+                                // log exhausted stacktrace
+                                .logExhaustedMessageHistory(true).logExhausted(true)
+                                // hide retry/handled stacktrace
+                                .logStackTrace(false).logRetryStackTrace(false).logHandled(false))
                 //
-                .setProperty(OPH.HAKEMUSOID, body()).bean(haeHakemusKomponentti).convertBodyTo(HakemusTyyppi.class);
+                .setProperty(OPH.HAKEMUSOID, body())
+                //
+                .to("log:direct_suorita_haehakemus?level=INFO&showProperties=true").bean(securityProcessor)
+                //
+                .bean(haeHakemusKomponentti).convertBodyTo(HakemusTyyppi.class);
         /**
          * Alireitti yhden kohteen laskentaan
          */
         from("direct:suorita_valintalaskenta") // jos reitti epaonnistuu parent
                                                // failaa
+                //
+                .to("log:direct_suorita_valintalaskenta?level=INFO")
                 //
                 .bean(securityProcessor)
                 //
@@ -81,7 +93,9 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 //
                 .process(new Processor() { // TODO: Refaktoroi
                             public void process(Exchange exchange) throws Exception {
+                                LOG.debug("Hakemukset haettu");
                                 Collection<SuppeaHakemus> c = exchange.getIn().getBody(Collection.class);
+                                LOG.debug("Hakemuksia {}", c);
                                 exchange.getOut().setBody(
                                         Collections2.transform(c, new Function<SuppeaHakemus, String>() {
                                             public String apply(SuppeaHakemus o) {

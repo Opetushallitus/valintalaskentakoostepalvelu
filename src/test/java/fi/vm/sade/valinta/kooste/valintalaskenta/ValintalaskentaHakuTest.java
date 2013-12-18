@@ -54,10 +54,7 @@ public class ValintalaskentaHakuTest {
     @Autowired
     private ValintalaskentaService valintalaskentaService;
 
-    @Test
-    public void testaaPalvelutToimiiReitti() {
-        HakukohdeTyyppi h = new HakukohdeTyyppi();
-        h.setOid("hakukohdeOid1");
+    private SuppeaHakemus create() {
         SuppeaHakemus s = new SuppeaHakemus();
         s.setFirstNames("f");
         s.setLastName("l");
@@ -65,11 +62,19 @@ public class ValintalaskentaHakuTest {
         s.setPersonOid("personoid1");
         s.setSsn("ssn");
         s.setState("state");
+        return s;
+    }
+
+    @Test
+    public void testaaPalvelutToimiiReitti() {
+        HakukohdeTyyppi h = new HakukohdeTyyppi();
+        h.setOid("hakukohdeOid1");
+        SuppeaHakemus s = create();
 
         Hakemus hakemus = new Hakemus();
         hakemus.setOid("hakemusoid1");
 
-        Mockito.reset(haeHakukohteetTarjonnaltaKomponentti, haeHakukohteenHakemuksetKomponentti);
+        Mockito.reset(haeHakukohteetTarjonnaltaKomponentti, haeHakukohteenHakemuksetKomponentti, haeHakemusKomponentti);
         Mockito.when(haeHakukohteetTarjonnaltaKomponentti.haeHakukohteetTarjonnalta(Mockito.anyString()))
         //
                 .thenReturn(Arrays.asList(h));
@@ -105,17 +110,24 @@ public class ValintalaskentaHakuTest {
         HakukohdeTyyppi h = new HakukohdeTyyppi();
         h.setOid("hakukohdeOid1");
 
-        Mockito.reset(haeHakukohteetTarjonnaltaKomponentti, haeHakukohteenHakemuksetKomponentti);
+        Mockito.reset(haeHakukohteetTarjonnaltaKomponentti, haeHakukohteenHakemuksetKomponentti, haeHakemusKomponentti);
 
         Mockito.when(haeHakukohteetTarjonnaltaKomponentti.haeHakukohteetTarjonnalta(Mockito.anyString()))
         //
                 .thenReturn(Arrays.asList(h, h, h));
 
+        SuppeaHakemus s = create();
         Mockito.when(haeHakukohteenHakemuksetKomponentti.haeHakukohteenHakemukset(Mockito.anyString()))
         //
-                .thenThrow(new RuntimeException("Hakukohteen hakemuksten haku epäonnistui!"));
+                .thenReturn(Arrays.asList(s));
+
+        Mockito.when(haeHakemusKomponentti.haeHakemus(Mockito.anyString()))
+        //
+                .thenThrow(new RuntimeException("Hakemuksen haku epäonnistui!"));
 
         valintalaskentaRoute.aktivoiValintalaskenta("h0");
+
+        Mockito.verify(haeHakemusKomponentti, Mockito.atLeastOnce()).haeHakemus(Mockito.anyString());
     }
 
     public void testaaValintalaskentaEpaonnistuuSatunnaisestiReitti() {
