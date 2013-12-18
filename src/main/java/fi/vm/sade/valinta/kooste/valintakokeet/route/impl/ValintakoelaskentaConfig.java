@@ -8,6 +8,9 @@ import org.springframework.context.annotation.Configuration;
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.valintakokeet.route.HakukohteenValintakoelaskentaRoute;
 import fi.vm.sade.valinta.kooste.valintakokeet.route.HaunValintakoelaskentaRoute;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
+import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
+import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 
 /**
  * 
@@ -16,6 +19,11 @@ import fi.vm.sade.valinta.kooste.valintakokeet.route.HaunValintakoelaskentaRoute
  */
 @Configuration
 public class ValintakoelaskentaConfig {
+
+    @Bean(name = "valintakoelaskentaValvomo")
+    public ValvomoService<Prosessi> getValvomoServiceImpl() {
+        return new ValvomoServiceImpl<Prosessi>();
+    }
 
     @Bean
     public HakukohteenValintakoelaskentaRoute getHakukohteenValintakoelaskentaRoute(

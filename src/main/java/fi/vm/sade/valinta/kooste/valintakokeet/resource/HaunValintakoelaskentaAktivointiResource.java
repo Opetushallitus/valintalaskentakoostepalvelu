@@ -1,7 +1,13 @@
 package fi.vm.sade.valinta.kooste.valintakokeet.resource;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
+import java.util.Collection;
+
+import javax.annotation.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,6 +22,9 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.valintakokeet.route.HakukohteenValintakoelaskentaRoute;
 import fi.vm.sade.valinta.kooste.valintakokeet.route.HaunValintakoelaskentaRoute;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
+import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
+import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 
 /**
  * User: wuoti Date: 2.9.2013 Time: 12.28
@@ -33,8 +42,19 @@ public class HaunValintakoelaskentaAktivointiResource {
     @Autowired
     private HakukohteenValintakoelaskentaRoute hakukohteenValintakoelaskentaRoute;
 
+    @Resource(name = "valintakoelaskentaValvomo")
+    private ValvomoService<Prosessi> valintakoelaskentaValvomo;
+
     @GET
-    @Path("aktivoiHaunValintakoelaskenta")
+    @Path("/status")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Valintalaskenta-reitin tila", response = Collection.class)
+    public Collection<ProsessiJaStatus<Prosessi>> status() {
+        return valintakoelaskentaValvomo.getUusimmatProsessitJaStatukset();
+    }
+
+    @GET
+    @Path("/aktivoiHaunValintakoelaskenta")
     @ApiOperation(value = "Aktivoi valintakoelaskenta koko haulle", response = String.class)
     public String aktivoiHaunValintakoelaskenta(@QueryParam("hakuOid") String hakuOid) {
         if (StringUtils.isBlank(hakuOid)) {
@@ -47,7 +67,7 @@ public class HaunValintakoelaskentaAktivointiResource {
     }
 
     @GET
-    @Path("aktivoiHakukohteenValintakoelaskenta")
+    @Path("/aktivoiHakukohteenValintakoelaskenta")
     @ApiOperation(value = "Aktivoi valintakoelaskenta hakukohteelle", response = String.class)
     public String aktivoiHakukohteenValintakoelaskenta(@QueryParam("hakukohdeOid") String hakukohdeOid) {
         if (StringUtils.isBlank(hakukohdeOid)) {
