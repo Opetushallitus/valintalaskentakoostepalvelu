@@ -38,7 +38,12 @@ public abstract class Prosessi implements Comparable<Prosessi>, Timestamped, Exc
         if (e == null) {
             exceptions.add("<< null exception >>");
         } else {
-            exceptions.add(e.getMessage());
+            if (e.getMessage() == null) {
+                exceptions.add(new StringBuilder().append(e.getClass().getSimpleName()).append(": ")
+                        .append(e.getCause()).toString());
+            } else {
+                exceptions.add(e.getMessage());
+            }
         }
         return wasFirst.compareAndSet(true, false);
     }
