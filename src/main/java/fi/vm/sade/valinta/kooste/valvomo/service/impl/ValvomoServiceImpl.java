@@ -56,7 +56,11 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
 
         } else {
             LOG.error("Process failed {} with exception {}", new Object[] { process, exception });
-            buffer.append(", ").append(exception.getMessage());
+            if (exception == null) {
+                buffer.append(", ").append("<< null exception >>");
+            } else {
+                buffer.append(", ").append(exception.getMessage());
+            }
         }
         if (process instanceof ExceptionStack) {
             if (!((ExceptionStack) process).addException(exception)) { // already
