@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -9,8 +10,12 @@ import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
@@ -63,7 +68,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                         // hide retry/handled stacktrace
                         .logStackTrace(false).logRetryStackTrace(false).logHandled(false))
                 //
-                .bean(haeHakemusKomponentti).convertBodyTo(HakemusTyyppi.class);
+                .setProperty(OPH.HAKEMUSOID, body()).bean(haeHakemusKomponentti).convertBodyTo(HakemusTyyppi.class);
         /**
          * Alireitti yhden kohteen laskentaan
          */
@@ -73,7 +78,18 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 .bean(securityProcessor)
                 //
                 .bean(haeHakukohteenHakemuksetKomponentti)
-
+                //
+                .process(new Processor() { // TODO: Refaktoroi
+                            public void process(Exchange exchange) throws Exception {
+                                Collection<SuppeaHakemus> c = exchange.getIn().getBody(Collection.class);
+                                exchange.getOut().setBody(
+                                        Collections2.transform(c, new Function<SuppeaHakemus, String>() {
+                                            public String apply(SuppeaHakemus o) {
+                                                return o.getOid();
+                                            }
+                                        }));
+                            }
+                        })
                 //
                 .split(body(),
                         new FlexibleAggregationStrategy<HakemusTyyppi>().storeInHeader("hakemustyypit")

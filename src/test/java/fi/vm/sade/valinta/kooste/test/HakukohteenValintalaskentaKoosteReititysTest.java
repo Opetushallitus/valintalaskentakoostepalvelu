@@ -42,7 +42,6 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
-import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioResource;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxyCachingImpl;
@@ -68,7 +67,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaRoute
 // @RunWith(SpringJUnit4ClassRunner.class)
 
 @Configuration
-@Import({ SecurityPreprocessor.class, ValintalaskentaRouteImpl.class, HaeValintaperusteetKomponentti.class,
+@Import({ ValintalaskentaRouteImpl.class, HaeValintaperusteetKomponentti.class,
         ValinnanVaiheenValintaperusteetProxyCachingImpl.class, HaeHakukohteenHakemuksetKomponentti.class,
         HakukohteenValintaperusteetProxyCachingImpl.class, HaeHakemusKomponentti.class,
         HaeHakukohteetTarjonnaltaKomponentti.class, SuoritaLaskentaKomponentti.class })
@@ -161,12 +160,12 @@ public class HakukohteenValintalaskentaKoosteReititysTest {
     private ApplicationResource applicationResourceMock;
 
     @Autowired
-    private HakukohteenValintalaskentaRoute valintalaskentaResource;
+    private HakukohteenValintalaskentaRoute hakukohteenValintalaskentaRoute;
 
     @Test
     public void testLaskentaKooste() {
         SecurityContextHolder.getContext().setAuthentication(mock(Authentication.class));
-        valintalaskentaResource.aktivoiValintalaskenta(HAKUKOHDEOID, VALINNANVAIHE);
+        hakukohteenValintalaskentaRoute.aktivoiValintalaskenta(HAKUKOHDEOID, VALINNANVAIHE);
         // verify that hakemusservice was indeed called with REST argument!
         verify(applicationResourceMock, times(1)).findApplications(anyString(), anyListOf(String.class), anyString(),
                 anyString(), anyString(), eq(HAKUKOHDEOID), anyInt(), anyInt());

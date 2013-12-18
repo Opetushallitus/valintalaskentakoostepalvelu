@@ -46,10 +46,12 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
-import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioResource;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxyCachingImpl;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.HaeValintaperusteetKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.SuoritaLaskentaKomponentti;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValinnanVaiheenValintaperusteetProxyCachingImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.HaunValintalaskentaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaConfig;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaRouteImpl;
@@ -68,8 +70,10 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaRoute
 // "test-context.xml" })
 // @RunWith(SpringJUnit4ClassRunner.class)
 @Configuration
-@Import({ SecurityPreprocessor.class, ValintalaskentaRouteImpl.class, HaeHakukohteenHakemuksetKomponentti.class,
-        HaeHakemusKomponentti.class, HaeHakukohteetTarjonnaltaKomponentti.class, SuoritaLaskentaKomponentti.class })
+@Import({ ValintalaskentaRouteImpl.class, HaeHakukohteenHakemuksetKomponentti.class, HaeHakemusKomponentti.class,
+        HaeValintaperusteetKomponentti.class, HaeHakukohteetTarjonnaltaKomponentti.class,
+        ValinnanVaiheenValintaperusteetProxyCachingImpl.class, HakukohteenValintaperusteetProxyCachingImpl.class,
+        SuoritaLaskentaKomponentti.class })
 @ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class, HaunValintalaskentaReititysTest.class,
         ValintalaskentaConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
