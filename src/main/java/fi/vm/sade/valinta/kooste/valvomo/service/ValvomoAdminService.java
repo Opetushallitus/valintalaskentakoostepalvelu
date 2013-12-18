@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valvomo.service;
 
+
 /**
  * 
  * @author Jussi Jartamo
@@ -16,7 +17,7 @@ public interface ValvomoAdminService<T> {
      * @param exception
      *            null if none
      */
-    void fail(T prosessi, Exception exception);
+    void fail(T prosessi, Exception exception, String message);
 
     /**
      * @param prosessi

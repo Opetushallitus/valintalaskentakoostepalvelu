@@ -10,5 +10,5 @@ public interface ExceptionStack {
     /**
      * @return true if first
      */
-    boolean addException(Exception e);
+    boolean addException(String e);
 }

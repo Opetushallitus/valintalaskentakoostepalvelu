@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Header;
 import org.apache.camel.Property;
 import org.apache.commons.collections.Buffer;
 import org.apache.commons.collections.BufferUtils;
@@ -49,7 +50,7 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
 
     @Override
     public void fail(@Property(PROPERTY_VALVOMO_PROSESSI) T process,
-            @Property(Exchange.EXCEPTION_CAUGHT) Exception exception) {
+            @Property(Exchange.EXCEPTION_CAUGHT) Exception exception, @Header("message") String message) {
         StringBuffer buffer = newBufferWithDate("VIRHE");
         if (exception == null) {
             LOG.info("Process failed {}", process);
@@ -59,8 +60,10 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
             buffer.append(", ").append(exception.getMessage());
         }
         if (process instanceof ExceptionStack) {
-            if (!((ExceptionStack) process).addException(exception)) { // already
-                                                                       // in
+            StringBuffer s = new StringBuffer().append(message).append(": ").append(exception.getClass()).append(": ")
+                    .append(exception.getMessage());
+            if (!((ExceptionStack) process).addException(s.toString())) { // already
+                // in
                 // process buffer
                 return; // was not first
             }

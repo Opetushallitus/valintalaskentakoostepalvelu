@@ -54,17 +54,27 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        errorHandler(deadLetterChannel(suoritaLaskentaDeadLetterChannel()));
         /**
          * Laskenta dead-letter-channel. Nyt ainoastaan paattaa prosessin.
          * Jatkossa lisaa metadataa paatettyyn prosessiin yllapitajalle.
          */
-        from(suoritaLaskentaDeadLetterChannel()).to(fail());
+
+        from(suoritaValintalaskentaDeadLetterChannel()).setHeader("message",
+                simple("Hakukohteelle ${property.hakukohdeOid} epäonnistui valintalaskennan suoritus.")).to(fail());
+        from(suoritaValintalaskentaHaeHakemusDeadLetterChannel()).setHeader("message",
+                simple("Hakukohteelle ${property.hakukohdeOid} epäonnistui hakea hakemus ${header.hakemusOid}.")).to(
+                fail());
+
+        from(suoritaHakukohteelleValintalaskentaDeadLetterChannel()).setHeader("message",
+                simple("Hakukohteelle ${property.hakukohdeOid} ei voitu käynnistää valintalaskennan suoritusta.")).to(
+                fail());
+        from(suoritaHaulleValintalaskentaDeadLetterChannel()).setHeader("message",
+                simple("Haulle ${property.hakuOid} ei voitu käynnistää valintalaskennan suoritusta.")).to(fail());
 
         from("direct:suorita_haehakemus")
                 .errorHandler(
-                        deadLetterChannel(suoritaLaskentaDeadLetterChannel()).maximumRedeliveries(15)
-                                .redeliveryDelay(100L)
+                        deadLetterChannel(suoritaValintalaskentaHaeHakemusDeadLetterChannel()).maximumRedeliveries(10)
+                                .redeliveryDelay(300L)
                                 // log exhausted stacktrace
                                 .logExhaustedMessageHistory(true).logExhausted(true)
                                 // hide retry/handled stacktrace
@@ -80,6 +90,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
          */
         from("direct:suorita_valintalaskenta") // jos reitti epaonnistuu parent
                                                // failaa
+                //
+                .errorHandler(deadLetterChannel(suoritaValintalaskentaDeadLetterChannel()))
                 //
                 .to("log:direct_suorita_valintalaskenta?level=INFO")
                 //
@@ -103,6 +115,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 
         from(haunValintalaskenta())
         //
+                .errorHandler(deadLetterChannel(suoritaHaulleValintalaskentaDeadLetterChannel()))
+                //
                 .process(luoProsessiHaunValintalaskennalle()).to(start())
                 //
                 .bean(securityProcessor)
@@ -121,6 +135,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 
         from(hakukohteenValintalaskenta())
         //
+                .errorHandler(deadLetterChannel(suoritaHakukohteelleValintalaskentaDeadLetterChannel()))
+                //
                 .process(luoProsessiHakukohteenValintalaskennalle()).to(start())
                 //
                 .bean(haeValintaperusteetKomponentti)
@@ -167,19 +183,31 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
     }
 
     private static String fail() {
-        return "bean:valintalaskentaValvomo?method=fail(*,*)";
+        return "bean:valintalaskentaValvomo?method=fail";
     }
 
     private static String start() {
-        return "bean:valintalaskentaValvomo?method=start(*)";
+        return "bean:valintalaskentaValvomo?method=start";
     }
 
     private static String finish() {
-        return "bean:valintalaskentaValvomo?method=finish(*)";
+        return "bean:valintalaskentaValvomo?method=finish";
     }
 
-    private static String suoritaLaskentaDeadLetterChannel() {
-        return "direct:suorita_laskenta_deadletterchannel";
+    private static String suoritaHakukohteelleValintalaskentaDeadLetterChannel() {
+        return "direct:suorita_hakukohteelle_valintalaskenta_deadletterchannel";
+    }
+
+    private static String suoritaHaulleValintalaskentaDeadLetterChannel() {
+        return "direct:suorita_haulle_valintalaskenta_deadletterchannel";
+    }
+
+    private static String suoritaValintalaskentaDeadLetterChannel() {
+        return "direct:suorita_valintalaskenta_deadletterchannel";
+    }
+
+    private static String suoritaValintalaskentaHaeHakemusDeadLetterChannel() {
+        return "direct:suorita_laskenta_haehakemus_deadletterchannel";
     }
 
     private String hakukohteenValintalaskenta() {
