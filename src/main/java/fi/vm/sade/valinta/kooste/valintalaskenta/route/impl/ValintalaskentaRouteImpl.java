@@ -59,17 +59,21 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
          * Jatkossa lisaa metadataa paatettyyn prosessiin yllapitajalle.
          */
 
+        from(suoritaValintalaskentaKomponenttiDeadLetterChannel()).setHeader("message",
+                simple("Valinta ei toimi: Hakukohteelle ${property.hakukohdeOid}")).to(fail());
         from(suoritaValintalaskentaDeadLetterChannel()).setHeader("message",
-                simple("Hakukohteelle ${property.hakukohdeOid} epäonnistui valintalaskennan suoritus.")).to(fail());
+                simple("Tarjonta ei toimi: Hakukohteelle ${property.hakukohdeOid}")).to(fail());
         from(suoritaValintalaskentaHaeHakemusDeadLetterChannel()).setHeader("message",
-                simple("Hakukohteelle ${property.hakukohdeOid} epäonnistui hakea hakemus ${header.hakemusOid}.")).to(
+                simple("Haku-app ei toimi! Hakemus ${header.hakemusOid}, hakukohteelle ${property.hakukohdeOid}")).to(
                 fail());
 
-        from(suoritaHakukohteelleValintalaskentaDeadLetterChannel()).setHeader("message",
-                simple("Hakukohteelle ${property.hakukohdeOid} ei voitu käynnistää valintalaskennan suoritusta.")).to(
-                fail());
+        from(suoritaHakukohteelleValintalaskentaDeadLetterChannel())
+                .setHeader(
+                        "message",
+                        simple("Valintaperusteiden haku ei toimi: Hakukohteelle ${property.hakukohdeOid} ja valinnanvaiheelle ${property.valinnanvaihe}"))
+                .to(fail());
         from(suoritaHaulleValintalaskentaDeadLetterChannel()).setHeader("message",
-                simple("Haulle ${property.hakuOid} ei voitu käynnistää valintalaskennan suoritusta.")).to(fail());
+                simple("Tarjonta ei toimi: Haulle ${property.hakuOid}")).to(fail());
 
         from("direct:suorita_haehakemus")
                 .errorHandler(
@@ -82,9 +86,17 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 //
                 .setHeader(OPH.HAKEMUSOID, body())
                 //
-                .to("log:direct_suorita_haehakemus?level=INFO&showProperties=true").bean(securityProcessor)
+                .to("log:direct_suorita_haehakemus?level=INFO&showProperties=true")
+                //
+                .bean(securityProcessor)
                 //
                 .bean(haeHakemusKomponentti).convertBodyTo(HakemusTyyppi.class);
+
+        from("direct:suorita_valintalaskenta_komponentti")
+        //
+                .errorHandler(deadLetterChannel(suoritaValintalaskentaKomponenttiDeadLetterChannel()))
+                //
+                .bean(suoritaLaskentaKomponentti);
         /**
          * Alireitti yhden kohteen laskentaan
          */
@@ -111,7 +123,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 //
                 .to("direct:suorita_haehakemus").end()
                 //
-                .bean(suoritaLaskentaKomponentti);
+                .to("direct:suorita_valintalaskenta_komponentti");
 
         from(haunValintalaskenta())
         //
@@ -138,6 +150,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 .errorHandler(deadLetterChannel(suoritaHakukohteelleValintalaskentaDeadLetterChannel()))
                 //
                 .process(luoProsessiHakukohteenValintalaskennalle()).to(start())
+                //
+                .bean(securityProcessor)
                 //
                 .bean(haeValintaperusteetKomponentti)
                 //
@@ -192,6 +206,10 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 
     private static String finish() {
         return "bean:valintalaskentaValvomo?method=finish";
+    }
+
+    private static String suoritaValintalaskentaKomponenttiDeadLetterChannel() {
+        return "direct:suorita_valintalaskenta_komponentti_deadletterchannel";
     }
 
     private static String suoritaHakukohteelleValintalaskentaDeadLetterChannel() {
