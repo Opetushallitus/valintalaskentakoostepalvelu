@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
+import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -82,7 +83,8 @@ public class ValintalaskentaHakuTest {
         Hakemus hakemus = new Hakemus();
         hakemus.setOid("hakemusoid1");
 
-        Mockito.reset(haeHakukohteetTarjonnaltaKomponentti, haeHakukohteenHakemuksetKomponentti, haeHakemusKomponentti);
+        reset();
+
         Mockito.when(haeHakukohteetTarjonnaltaKomponentti.haeHakukohteetTarjonnalta(Mockito.anyString()))
         //
                 .thenReturn(Arrays.asList(h));
@@ -109,9 +111,14 @@ public class ValintalaskentaHakuTest {
     @Resource(name = "valintalaskentaValvomo")
     private ValvomoService<ValintalaskentaProsessi> valintalaskentaValvomo;
 
+    private void reset() {
+        Mockito.reset(haeHakukohteetTarjonnaltaKomponentti, haeHakukohteenHakemuksetKomponentti, haeHakemusKomponentti,
+                valintalaskentaService);
+    }
+
     @Test
     public void testaaTarjontaEpaonnistuuSatunnaisestiReitti() {
-        Mockito.reset(haeHakukohteetTarjonnaltaKomponentti, haeHakukohteenHakemuksetKomponentti);
+        reset();
 
         Mockito.when(haeHakukohteetTarjonnaltaKomponentti.haeHakukohteetTarjonnalta(Mockito.anyString()))
         //
@@ -121,7 +128,7 @@ public class ValintalaskentaHakuTest {
         HakukohdeTyyppi h = new HakukohdeTyyppi();
         h.setOid("hakukohdeOid1");
 
-        Mockito.reset(haeHakukohteetTarjonnaltaKomponentti, haeHakukohteenHakemuksetKomponentti, haeHakemusKomponentti);
+        reset();
 
         Mockito.when(haeHakukohteetTarjonnaltaKomponentti.haeHakukohteetTarjonnalta(Mockito.anyString()))
         //
@@ -140,13 +147,46 @@ public class ValintalaskentaHakuTest {
 
         Mockito.verify(haeHakemusKomponentti, Mockito.atLeastOnce()).haeHakemus(Mockito.anyString());
 
-        ValintalaskentaProsessi p = valintalaskentaValvomo.getUusimmatProsessit().iterator().next();
-
-        LOG.info("Virheet {}", Arrays.toString(p.getExceptions().toArray()));
+        LOG.info(
+                "Tarjonnan epäonnistumisvirhe {}",
+                Arrays.toString(valintalaskentaValvomo.getUusimmatProsessit().iterator().next().getExceptions()
+                        .toArray()));
     }
 
+    @Test
     public void testaaValintalaskentaEpaonnistuuSatunnaisestiReitti() {
+        HakukohdeTyyppi h = new HakukohdeTyyppi();
+        h.setOid("hakukohdeOid1");
+        SuppeaHakemus s = create();
 
+        Hakemus hakemus = new Hakemus();
+        hakemus.setOid("hakemusoid1");
+
+        reset();
+
+        Mockito.when(haeHakukohteetTarjonnaltaKomponentti.haeHakukohteetTarjonnalta(Mockito.anyString()))
+        //
+                .thenReturn(Arrays.asList(h));
+
+        Mockito.when(haeHakukohteenHakemuksetKomponentti.haeHakukohteenHakemukset(Mockito.anyString()))
+        //
+                .thenReturn(Arrays.asList(s));
+
+        Mockito.when(haeHakemusKomponentti.haeHakemus(Mockito.anyString()))
+        //
+                .thenReturn(hakemus);
+
+        Mockito.when(
+                valintalaskentaService.laske(Mockito.anyListOf(HakemusTyyppi.class),
+                        Mockito.anyListOf(ValintaperusteetTyyppi.class))).thenThrow(
+                new RuntimeException("Valintalaskenta epäonnistui!"));
+
+        valintalaskentaRoute.aktivoiValintalaskenta("h0");
+
+        LOG.info(
+                "Valintalaskennan epäonnistumisvirhe {}",
+                Arrays.toString(valintalaskentaValvomo.getUusimmatProsessit().iterator().next().getExceptions()
+                        .toArray()));
     }
 
     @Bean

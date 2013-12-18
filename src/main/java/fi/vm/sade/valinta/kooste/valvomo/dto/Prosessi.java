@@ -34,17 +34,8 @@ public abstract class Prosessi implements Comparable<Prosessi>, Timestamped, Exc
     }
 
     @Override
-    public boolean addException(Exception e) {
-        if (e == null) {
-            exceptions.add("<< null exception >>");
-        } else {
-            if (e.getMessage() == null) {
-                exceptions.add(new StringBuilder().append(e.getClass().getSimpleName()).append(": ")
-                        .append(e.getCause()).toString());
-            } else {
-                exceptions.add(e.getMessage());
-            }
-        }
+    public boolean addException(String e) {
+        exceptions.add(e);
         return wasFirst.compareAndSet(true, false);
     }
 
