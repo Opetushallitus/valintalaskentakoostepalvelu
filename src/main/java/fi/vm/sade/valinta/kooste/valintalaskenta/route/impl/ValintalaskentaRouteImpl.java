@@ -70,7 +70,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                                 // hide retry/handled stacktrace
                                 .logStackTrace(false).logRetryStackTrace(false).logHandled(false))
                 //
-                .setProperty(OPH.HAKEMUSOID, body())
+                .setHeader(OPH.HAKEMUSOID, body())
                 //
                 .to("log:direct_suorita_haehakemus?level=INFO&showProperties=true").bean(securityProcessor)
                 //

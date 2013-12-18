@@ -3,9 +3,13 @@ package fi.vm.sade.valinta.kooste.valintalaskenta;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,11 +26,13 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaProsessi;
 import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.HaeValintaperusteetKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.SuoritaLaskentaKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.HaunValintalaskentaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaConfig;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaRouteImpl;
+import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 
 /**
  * 
@@ -39,6 +45,8 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaRoute
         ValintalaskentaConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ValintalaskentaHakuTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaHakuTest.class);
 
     @Autowired
     private HaunValintalaskentaRoute valintalaskentaRoute;
@@ -98,6 +106,9 @@ public class ValintalaskentaHakuTest {
 
     }
 
+    @Resource(name = "valintalaskentaValvomo")
+    private ValvomoService<ValintalaskentaProsessi> valintalaskentaValvomo;
+
     @Test
     public void testaaTarjontaEpaonnistuuSatunnaisestiReitti() {
         Mockito.reset(haeHakukohteetTarjonnaltaKomponentti, haeHakukohteenHakemuksetKomponentti);
@@ -128,6 +139,10 @@ public class ValintalaskentaHakuTest {
         valintalaskentaRoute.aktivoiValintalaskenta("h0");
 
         Mockito.verify(haeHakemusKomponentti, Mockito.atLeastOnce()).haeHakemus(Mockito.anyString());
+
+        ValintalaskentaProsessi p = valintalaskentaValvomo.getUusimmatProsessit().iterator().next();
+
+        LOG.info("Virheet {}", Arrays.toString(p.getExceptions().toArray()));
     }
 
     public void testaaValintalaskentaEpaonnistuuSatunnaisestiReitti() {
