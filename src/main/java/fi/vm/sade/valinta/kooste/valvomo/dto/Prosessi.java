@@ -1,8 +1,11 @@
 package fi.vm.sade.valinta.kooste.valvomo.dto;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,7 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  *         luojan tiedot metatiedoiksi. Valvomolle voi antaa minka tahansa olion
  *         prosessin kuvaukseksi joten kaytto on valinnaista.
  */
-public abstract class Prosessi implements Comparable<Prosessi>, Timestamped {
+public abstract class Prosessi implements Comparable<Prosessi>, Timestamped, ExceptionStack {
 
     private String id;
     private String resurssi;
@@ -23,9 +26,17 @@ public abstract class Prosessi implements Comparable<Prosessi>, Timestamped {
     private String createdBy;
     private Date createdAt;
     private String hakuOid;
+    private AtomicBoolean wasFirst = new AtomicBoolean(true);
+    private CopyOnWriteArrayList<String> exceptions = new CopyOnWriteArrayList<String>();
 
     public Prosessi() {
         this("<< tuntematon resurssi >>", "<< tuntematon toiminto >>", "<< tuntematon haku >>");
+    }
+
+    @Override
+    public boolean addException(Exception e) {
+        exceptions.add(e.getMessage());
+        return wasFirst.compareAndSet(true, false);
     }
 
     public int compareTo(Prosessi o) {
@@ -55,6 +66,10 @@ public abstract class Prosessi implements Comparable<Prosessi>, Timestamped {
 
     public String getResurssi() {
         return resurssi;
+    }
+
+    public Collection<String> getExceptions() {
+        return exceptions;
     }
 
     @Override

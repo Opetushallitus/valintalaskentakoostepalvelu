@@ -1,15 +1,24 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 
+import java.util.ArrayList;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.spring.SpringRouteBuilder;
+import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
+import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.SplitHakukohteetKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaProsessi;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.HaeValintaperusteetKomponentti;
+import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.SuoritaLaskentaKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.HakukohteenValintalaskentaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.HaunValintalaskentaRoute;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
@@ -23,23 +32,58 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
     @Autowired
     private SecurityPreprocessor securityProcessor;
 
+    @Autowired
+    private SuoritaLaskentaKomponentti suoritaLaskentaKomponentti;
+
+    @Autowired
+    private HaeHakukohteetTarjonnaltaKomponentti haeHakukohteetTarjonnaltaKomponentti;
+
+    @Autowired
+    private HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
+
+    @Autowired
+    private HaeHakemusKomponentti haeHakemusKomponentti;
+
+    @Autowired
+    private HaeValintaperusteetKomponentti haeValintaperusteetKomponentti;
+
     @Override
     public void configure() throws Exception {
-        from("direct:suorita_laskenta_dead").to(fail());
+        errorHandler(deadLetterChannel(suoritaLaskentaDeadLetterChannel()));
+        /**
+         * Laskenta dead-letter-channel. Nyt ainoastaan paattaa prosessin.
+         * Jatkossa lisaa metadataa paatettyyn prosessiin yllapitajalle.
+         */
+        from(suoritaLaskentaDeadLetterChannel()).to(fail());
+
+        from("direct:suorita_haehakemus")
+                .errorHandler(defaultErrorHandler().maximumRedeliveries(15).redeliveryDelay(100L)
+                // log exhausted stacktrace
+                        .logExhaustedMessageHistory(true).logExhausted(true)
+                        // hide retry/handled stacktrace
+                        .logStackTrace(false).logRetryStackTrace(false).logHandled(false))
+                //
+                .bean(haeHakemusKomponentti).convertBodyTo(HakemusTyyppi.class);
         /**
          * Alireitti yhden kohteen laskentaan
          */
-        from("direct:suorita_valintalaskenta")
-        //
-                .errorHandler(
-                        deadLetterChannel("direct:suorita_laskenta_dead").maximumRedeliveries(15).redeliveryDelay(100L)
-                                //
-                                .logExhaustedMessageHistory(true).logStackTrace(false).logExhausted(true)
-                                .logRetryStackTrace(false).logHandled(false))
+        from("direct:suorita_valintalaskenta") // jos reitti epaonnistuu parent
+                                               // failaa
                 //
                 .bean(securityProcessor)
                 //
-                .to("bean:suoritaLaskentaKomponentti");
+                .bean(haeHakukohteenHakemuksetKomponentti)
+
+                //
+                .split(body(),
+                        new FlexibleAggregationStrategy<HakemusTyyppi>().storeInHeader("hakemustyypit")
+                                .accumulateInCollection(ArrayList.class))
+                //
+                .parallelProcessing().stopOnException()
+                //
+                .to("direct:suorita_haehakemus").end()
+                //
+                .bean(suoritaLaskentaKomponentti);
 
         from(haunValintalaskenta())
         //
@@ -47,7 +91,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 //
                 .bean(securityProcessor)
                 //
-                .to("bean:hakukohteetTarjonnaltaKomponentti")
+                .bean(haeHakukohteetTarjonnaltaKomponentti)
                 // Collection<HakukohdeTyyppi>
                 .bean(new SplitHakukohteetKomponentti())
                 // Collection<String>
@@ -63,10 +107,11 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
         //
                 .process(luoProsessiHakukohteenValintalaskennalle()).to(start())
                 //
-                .to("bean:haeValintaperusteetKomponentti")
+                .bean(haeValintaperusteetKomponentti)
                 //
                 .setProperty("valintaperusteet", body())
                 //
+
                 .to("direct:suorita_valintalaskenta").to(finish());
 
     }
@@ -115,6 +160,10 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 
     private static String finish() {
         return "bean:valintalaskentaValvomo?method=finish(*)";
+    }
+
+    private static String suoritaLaskentaDeadLetterChannel() {
+        return "direct:suorita_laskenta_deadletterchannel";
     }
 
     private String hakukohteenValintalaskenta() {

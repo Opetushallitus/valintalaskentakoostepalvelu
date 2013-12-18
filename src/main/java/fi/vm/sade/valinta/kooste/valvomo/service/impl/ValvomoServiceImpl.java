@@ -17,6 +17,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
+import fi.vm.sade.valinta.kooste.valvomo.dto.ExceptionStack;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus.Status;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
@@ -56,6 +57,13 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
         } else {
             LOG.error("Process failed {} with exception {}", new Object[] { process, exception });
             buffer.append(", ").append(exception.getMessage());
+        }
+        if (process instanceof ExceptionStack) {
+            if (!((ExceptionStack) process).addException(exception)) { // already
+                                                                       // in
+                // process buffer
+                return; // was not first
+            }
         }
         processBuffer.add(new ProsessiJaStatus<T>(process, buffer.toString(), Status.FAILED));
     }
