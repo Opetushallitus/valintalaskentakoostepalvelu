@@ -273,17 +273,17 @@
 		<property name="retryAttemptedLogLevel" value="ERROR" />
 	</bean>
 	
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy"/>
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy"/>
-	
-    
-    <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-excel-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
+    
+    <!-- Valintalaskennan tulokset (Excel) -->
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.resource"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.impl"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti"/>
     
     <!-- Tarjonta reitit -->
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.route.impl"/>
-    
     
     <!-- Valintatieto -->
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatieto.komponentti"/>
@@ -318,7 +318,7 @@
 	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaConfig"/>
 	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaRouteImpl"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus"/>
+    
 	<!--
 		Viestintapalvelu 
 	 -->
