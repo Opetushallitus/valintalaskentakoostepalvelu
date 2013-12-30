@@ -34,7 +34,7 @@ import fi.vm.sade.valinta.dokumenttipalvelu.dto.MetaData;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
-import fi.vm.sade.valinta.kooste.tarjonta.TarjontaHakuProxy;
+import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaHakuRoute;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 
@@ -47,7 +47,7 @@ public class KelaResource {
     private static final Logger LOG = LoggerFactory.getLogger(KelaResource.class);
 
     @Autowired
-    private TarjontaHakuProxy hakuProxy;
+    private TarjontaHakuRoute hakuProxy;
 
     @Autowired
     private KoodiService koodiService;

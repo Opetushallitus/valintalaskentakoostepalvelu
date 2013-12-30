@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
-import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioResource;
+import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 
 /**
  * 

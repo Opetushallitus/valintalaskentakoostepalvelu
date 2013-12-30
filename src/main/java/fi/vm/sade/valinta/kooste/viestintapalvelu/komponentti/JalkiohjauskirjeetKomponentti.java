@@ -28,7 +28,7 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluIlmankoulutuspaikkaaProxy;
-import fi.vm.sade.valinta.kooste.tarjonta.TarjontaNimiProxy;
+import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaNimiRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
@@ -46,12 +46,12 @@ public class JalkiohjauskirjeetKomponentti {
     private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
     private SijoitteluIlmankoulutuspaikkaaProxy sijoitteluProxy;
-    private TarjontaNimiProxy tarjontaProxy;
+    private TarjontaNimiRoute tarjontaProxy;
     private HaeOsoiteKomponentti osoiteKomponentti;
 
     @Autowired
     public JalkiohjauskirjeetKomponentti(SijoitteluIlmankoulutuspaikkaaProxy sijoitteluProxy,
-            TarjontaNimiProxy tarjontaProxy, HaeOsoiteKomponentti osoiteKomponentti) {
+            TarjontaNimiRoute tarjontaProxy, HaeOsoiteKomponentti osoiteKomponentti) {
         this.sijoitteluProxy = sijoitteluProxy;
         this.tarjontaProxy = tarjontaProxy;
         this.osoiteKomponentti = osoiteKomponentti;
