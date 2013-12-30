@@ -8,9 +8,7 @@
 
 
     <ctx:annotation-config/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti"/>
+    
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus"/>
 
     <routeContext id="valintalaskentaTulosRoutes" xmlns="http://camel.apache.org/schema/spring">

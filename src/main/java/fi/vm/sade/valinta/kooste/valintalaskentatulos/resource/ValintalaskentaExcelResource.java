@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.valintalaskentatulos;
+package fi.vm.sade.valinta.kooste.valintalaskentatulos.resource;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -21,10 +21,10 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.JalkiohjaustulosExcelProxy;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.SijoittelunTulosExcelProxy;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintakoekutsutExcelProxy;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.proxy.ValintalaskentaTulosExcelProxy;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExcelRoute;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintakoekutsutExcelRoute;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute;
 
 /**
  * 
@@ -42,13 +42,13 @@ public class ValintalaskentaExcelResource {
 
     public final static MediaType APPLICATION_VND_MS_EXCEL = new MediaType("application", "vnd.ms-excel");
     @Autowired
-    private ValintalaskentaTulosExcelProxy valintalaskentaTulosProxy;
+    private ValintalaskentaTulosExcelRoute valintalaskentaTulosProxy;
     @Autowired
-    private ValintakoekutsutExcelProxy valintalaskentaTulos;
+    private ValintakoekutsutExcelRoute valintalaskentaTulos;
     @Autowired
-    private SijoittelunTulosExcelProxy sijoittelunTulosExcelProxy;
+    private SijoittelunTulosExcelRoute sijoittelunTulosExcelProxy;
     @Autowired
-    private JalkiohjaustulosExcelProxy jalkiohjaustulos;
+    private JalkiohjaustulosExcelRoute jalkiohjaustulos;
 
     @GET
     @Path("/jalkiohjaustulos/aktivoi")
