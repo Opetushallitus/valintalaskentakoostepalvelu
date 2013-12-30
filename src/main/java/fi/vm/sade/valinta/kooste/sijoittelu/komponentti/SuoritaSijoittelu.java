@@ -2,7 +2,8 @@ package fi.vm.sade.valinta.kooste.sijoittelu.komponentti;
 
 import fi.vm.sade.service.valintatiedot.schema.HakuTyyppi;
 import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluSuoritaProxy;
-import fi.vm.sade.valinta.kooste.valintatieto.komponentti.proxy.ValintatietoProxy;
+import fi.vm.sade.valinta.kooste.valintatieto.route.ValintatietoRoute;
+
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,7 @@ public class SuoritaSijoittelu {
     private static final Logger LOG = LoggerFactory.getLogger(SuoritaSijoittelu.class);
 
     @Autowired
-    private ValintatietoProxy valintatietoProxy;
+    private ValintatietoRoute valintatietoProxy;
 
     @Autowired
     private SijoitteluSuoritaProxy sijoitteluProxy;
