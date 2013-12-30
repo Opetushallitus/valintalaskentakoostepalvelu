@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.sijoittelu.proxy;
+package fi.vm.sade.valinta.kooste.sijoittelu.route;
 
 import java.util.Collection;
 
@@ -13,7 +13,9 @@ import fi.vm.sade.valinta.kooste.OPH;
  * 
  *         TODO: Refaktoroi yhdeksi proxyksi sijoittelun operaatiot!
  */
-public interface SijoitteluKoulutuspaikallisetProxy {
+public interface SijoitteluKoulutuspaikallisetRoute {
+
+    final String DIRECT_SIJOITTELU_KAIKKI_KOULUTUSPAIKALLISET = "direct:sijoitteluKoulutuspaikallisetReitti";
 
     Collection<HakijaDTO> koulutuspaikalliset(@Property(OPH.HAKUOID) String hakuOid,
             @Property(OPH.HAKUKOHDEOID) String hakukohdeOid, @Property(OPH.SIJOITTELUAJOID) String sijoitteluajoId);

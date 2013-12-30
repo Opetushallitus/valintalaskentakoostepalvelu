@@ -22,7 +22,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluAktivointiProxy;
+import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 
 /**
  *
@@ -37,7 +37,7 @@ public class SijoitteluAktivointiResource {
     public static final String OPH_CRUD = "ROLE_APP_SIJOITTELU_CRUD_1.2.246.562.10.00000000001";
 
     @Autowired
-    private SijoitteluAktivointiProxy sijoitteluAktivointiProxy;
+    private SijoitteluAktivointiRoute sijoitteluAktivointiProxy;
 
     @Autowired
     private ParametriService parametriService;

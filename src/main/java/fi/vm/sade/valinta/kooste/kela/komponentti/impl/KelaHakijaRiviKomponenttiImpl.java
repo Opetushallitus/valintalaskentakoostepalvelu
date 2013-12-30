@@ -28,9 +28,9 @@ import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.kela.komponentti.KelaHakijaRiviKomponentti;
-import fi.vm.sade.valinta.kooste.tarjonta.route.LinjakoodiRoute;
-import fi.vm.sade.valinta.kooste.tarjonta.route.OrganisaatioRoute;
-import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaHakuRoute;
+import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.tarjonta.komponentti.LinjakoodiKomponentti;
+import fi.vm.sade.valinta.kooste.tarjonta.komponentti.OrganisaatioKomponentti;
 
 @Component
 public class KelaHakijaRiviKomponenttiImpl implements KelaHakijaRiviKomponentti {
@@ -42,13 +42,13 @@ public class KelaHakijaRiviKomponenttiImpl implements KelaHakijaRiviKomponentti 
     private HaeHakemusKomponentti hakemusProxy;
 
     @Autowired
-    private LinjakoodiRoute linjakoodiProxy;
+    private LinjakoodiKomponentti linjakoodiProxy;
 
     @Autowired
-    private OrganisaatioRoute organisaatioProxy;
+    private OrganisaatioKomponentti organisaatioProxy;
 
     @Autowired
-    private TarjontaHakuRoute hakuProxy;
+    private HaeHakuTarjonnaltaKomponentti hakuProxy;
 
     public TKUVAYHVA luo(@Body HakijaDTO hakija, @Property("lukuvuosi") Date lukuvuosi,
             @Property("poimintapaivamaara") Date poimintapaivamaara) throws Exception {
