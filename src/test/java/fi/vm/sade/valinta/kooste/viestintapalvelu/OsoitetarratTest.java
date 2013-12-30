@@ -19,7 +19,7 @@ import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
-import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluKoulutuspaikallisetProxy;
+import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluKoulutuspaikallisetRoute;
 import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
@@ -86,8 +86,8 @@ public class OsoitetarratTest {
     }
 
     @Bean
-    public SijoitteluKoulutuspaikallisetProxy getSijoitteluKoulutuspaikallisetProxy() {
-        return Mockito.mock(SijoitteluKoulutuspaikallisetProxy.class);
+    public SijoitteluKoulutuspaikallisetRoute getSijoitteluKoulutuspaikallisetProxy() {
+        return Mockito.mock(SijoitteluKoulutuspaikallisetRoute.class);
     }
 
     @Bean

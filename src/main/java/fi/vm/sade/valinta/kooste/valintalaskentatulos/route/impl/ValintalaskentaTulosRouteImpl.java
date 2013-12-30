@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.route.impl;
 
 import org.apache.camel.spring.SpringRouteBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.JalkiohjaustulosExcelKomponentti;
@@ -25,6 +26,7 @@ public class ValintalaskentaTulosRouteImpl extends SpringRouteBuilder {
     private ValintalaskennanTulosExcelKomponentti valintalaskennanTulosExcelKomponentti;
     private ValintalaskentaTulosExcelKomponentti valintalaskentaTulosExcelKomponentti;
 
+    @Autowired
     public ValintalaskentaTulosRouteImpl(JalkiohjaustulosExcelKomponentti jalkiohjaustulosExcelKomponentti,
             SijoittelunTulosExcelKomponentti sijoittelunTulosExcelKomponentti,
             ValintalaskennanTulosExcelKomponentti valintalaskennanTulosExcelKomponentti,

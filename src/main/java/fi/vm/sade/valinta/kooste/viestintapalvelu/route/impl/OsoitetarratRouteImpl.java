@@ -16,7 +16,7 @@ import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
-import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluKoulutuspaikallisetProxy;
+import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
@@ -44,7 +44,7 @@ public class OsoitetarratRouteImpl extends SpringRouteBuilder {
     private HaeOsoiteKomponentti osoiteKomponentti;
 
     @Autowired
-    private SijoitteluKoulutuspaikallisetProxy sijoitteluProxy;
+    private SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 
     public static class LuoOsoitteet {
         public Osoitteet luo(List<Osoite> osoitteet) {

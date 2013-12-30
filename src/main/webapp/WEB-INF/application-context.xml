@@ -172,7 +172,7 @@
     <!-- fi.vm.sade.organisaatio.resource.OrganisaatioResource vai fi.vm.sade.valinta.kooste.tarjonta-->
     <jaxrs:client id="OrganisaatioResourceClient"
                   address="${valintalaskentakoostepalvelu.organisaatioService.rest.url}"
-                  serviceClass="fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioResource"
+                  serviceClass="fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource"
                   inheritHeaders="true">
         <jaxrs:outInterceptors>
             <ref bean="ticketInterceptorRest"/>
@@ -273,13 +273,18 @@
 		<property name="retryAttemptedLogLevel" value="ERROR" />
 	</bean>
 	
-    <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy"/>
+    
+    <!--  Sijoittelu -->
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.komponentti"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.route.impl"/>
+    
     
     <!-- Valintalaskennan tulokset (Excel) -->
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.resource"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.impl"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.impl"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.resource"/>
     
     <!-- Tarjonta reitit -->
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti"/>

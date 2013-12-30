@@ -42,7 +42,7 @@ public class TarjontaRouteConfig {
     @Bean
     public TarjontaNimiRoute getTarjontaNimiRoute(@Qualifier("javaDslCamelContext") CamelContext context)
             throws Exception {
-        return ProxyWithAnnotationHelper.createProxy(context.getEndpoint("direct:tarjontaNimiReitti"),
+        return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(TarjontaNimiRoute.DIRECT_TARJONTA_NIMI),
                 TarjontaNimiRoute.class);
     }
 }

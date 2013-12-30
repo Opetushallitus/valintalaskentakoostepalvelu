@@ -28,8 +28,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
-import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluKoulutuspaikallisetProxy;
-import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaNimiRoute;
+import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
+import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
@@ -50,13 +50,13 @@ public class HyvaksymiskirjeetKomponentti {
     private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
     private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
-    private SijoitteluKoulutuspaikallisetProxy sijoitteluProxy;
-    private TarjontaNimiRoute tarjontaProxy;
+    private SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
+    private HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
     private HaeOsoiteKomponentti osoiteKomponentti;
 
     @Autowired
-    public HyvaksymiskirjeetKomponentti(SijoitteluKoulutuspaikallisetProxy sijoitteluProxy,
-            TarjontaNimiRoute tarjontaProxy, HaeOsoiteKomponentti osoiteKomponentti) {
+    public HyvaksymiskirjeetKomponentti(SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
+            HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy, HaeOsoiteKomponentti osoiteKomponentti) {
         this.osoiteKomponentti = osoiteKomponentti;
         this.sijoitteluProxy = sijoitteluProxy;
         this.tarjontaProxy = tarjontaProxy;

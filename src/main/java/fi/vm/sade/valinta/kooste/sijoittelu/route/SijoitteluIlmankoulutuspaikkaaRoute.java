@@ -1,0 +1,22 @@
+package fi.vm.sade.valinta.kooste.sijoittelu.route;
+
+import java.util.List;
+
+import org.apache.camel.Property;
+
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.valinta.kooste.OPH;
+
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ *         TODO: Refaktoroi yhdeksi proxyksi sijoittelun operaatiot!
+ */
+public interface SijoitteluIlmankoulutuspaikkaaRoute {
+
+    final String DIRECT_SIJOITTELU_ILMAN_KOULUTUSPAIKKAA = "direct:sijoitteluIlmankoulutuspaikkaaReitti";
+
+    List<HakijaDTO> ilmankoulutuspaikkaa(@Property(OPH.HAKUOID) String hakuOid,
+            @Property(OPH.SIJOITTELUAJOID) String sijoitteluAjoId);
+}
