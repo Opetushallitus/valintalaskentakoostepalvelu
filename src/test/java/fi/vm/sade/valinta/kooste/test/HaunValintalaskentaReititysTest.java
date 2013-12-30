@@ -46,7 +46,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
-import fi.vm.sade.valinta.kooste.tarjonta.OrganisaatioResource;
+import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxyCachingImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.HaeValintaperusteetKomponentti;

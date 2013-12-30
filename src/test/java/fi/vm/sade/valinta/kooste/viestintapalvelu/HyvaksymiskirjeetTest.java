@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.sijoittelu.proxy.SijoitteluKoulutuspaikallisetProxy;
-import fi.vm.sade.valinta.kooste.tarjonta.TarjontaNimiProxy;
+import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaNimiRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
@@ -52,8 +52,8 @@ public class HyvaksymiskirjeetTest {
     }
 
     @Bean
-    public TarjontaNimiProxy getTarjontaNimiProxy() {
-        return Mockito.mock(TarjontaNimiProxy.class);
+    public TarjontaNimiRoute getTarjontaNimiProxy() {
+        return Mockito.mock(TarjontaNimiRoute.class);
     }
 
     @Bean

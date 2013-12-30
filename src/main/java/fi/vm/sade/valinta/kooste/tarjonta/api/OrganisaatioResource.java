@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.tarjonta;
+package fi.vm.sade.valinta.kooste.tarjonta.api;
 
 import java.util.Date;
 import java.util.List;

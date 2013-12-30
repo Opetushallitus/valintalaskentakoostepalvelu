@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.tarjonta;
+package fi.vm.sade.valinta.kooste.tarjonta.route;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 
@@ -8,7 +8,7 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
  * 
  *         10 retries!
  */
-public interface TarjontaNimiProxy {
+public interface TarjontaNimiRoute {
 
     HakukohdeNimiRDTO haeHakukohdeNimi(String hakukohdeOid);
 }
