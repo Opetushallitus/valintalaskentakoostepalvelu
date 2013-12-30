@@ -40,7 +40,7 @@ public class HaeHakukohteenHakemuksetKomponentti {
                 applicationResourceUrl, hakukohdeOid, Integer.MAX_VALUE });
         HakemusList hakemusList = applicationResource.findApplications(null, ACTIVE_AND_INCOMPLETE, null, null, null,
                 hakukohdeOid, 0, Integer.MAX_VALUE);
-        if (hakemusList == null || hakemusList.getResults() == null) {
+        if (hakemusList == null || hakemusList.getResults() == null || hakemusList.getResults().isEmpty()) {
             throw new HakemuspalveluException("Hakemuspalvelu ei palauttanut hakemuksia hakukohteelle " + hakukohdeOid);
         }
         LOG.info("Haettiin {} kpl hakemuksia", hakemusList.getResults().size());

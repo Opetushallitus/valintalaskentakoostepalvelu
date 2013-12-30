@@ -275,10 +275,14 @@
 	
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy"/>
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy"/>
-	<beans:import resource="classpath:META-INF/spring/context/valintatieto-context.xml"/>
+	
     <beans:import resource="classpath:META-INF/spring/context/tarjonta-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/valintalaskenta-excel-context.xml"/>
     <beans:import resource="classpath:META-INF/spring/context/sijoittelu-context.xml"/>
+    <!-- Valintatieto -->
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatieto.komponentti"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatieto.route.impl"/>
+    
     <!-- Parametrit -->
     <bean class="fi.vm.sade.valinta.kooste.parametrit.resource.ParametritResource" />
     <bean class="fi.vm.sade.valinta.kooste.parametrit.service.impl.ParametriServiceImpl" />
@@ -296,6 +300,7 @@
         <property name="hakuAlkupvm" value="${haku.alkupvm}" />
         <property name="hakuLoppupvm" value="${haku.loppupvm}" />
     </bean>
+    
 	<!--
 		Valintalaskenta
 	 -->
