@@ -280,7 +280,7 @@
     <!--  Sijoittelu -->
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.komponentti"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.route.impl"/>
-    
+    <bean class="fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluAktivointiResource"/>
     
     <!-- Valintalaskennan tulokset (Excel) -->
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti"/>
