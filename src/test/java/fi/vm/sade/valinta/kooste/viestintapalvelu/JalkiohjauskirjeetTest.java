@@ -12,7 +12,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
-import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluIlmankoulutuspaikkaaRoute;
+import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluIlmankoulutuspaikkaaKomponentti;
+import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaNimiRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.JalkiohjauskirjeetKomponentti;
@@ -47,8 +48,13 @@ public class JalkiohjauskirjeetTest {
     }
 
     @Bean
-    public SijoitteluIlmankoulutuspaikkaaRoute getSijoitteluIlmankoulutuspaikkaaProxy() {
-        return Mockito.mock(SijoitteluIlmankoulutuspaikkaaRoute.class);
+    public HaeHakukohdeNimiTarjonnaltaKomponentti getHaeHakukohdeNimiTarjonnaltaKomponentti() {
+        return Mockito.mock(HaeHakukohdeNimiTarjonnaltaKomponentti.class);
+    }
+
+    @Bean
+    public SijoitteluIlmankoulutuspaikkaaKomponentti getSijoitteluIlmankoulutuspaikkaaProxy() {
+        return Mockito.mock(SijoitteluIlmankoulutuspaikkaaKomponentti.class);
     }
 
     @Bean
