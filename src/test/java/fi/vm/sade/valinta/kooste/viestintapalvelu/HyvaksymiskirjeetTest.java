@@ -12,7 +12,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
-import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluKoulutuspaikallisetRoute;
+import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
+import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaNimiRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
@@ -47,8 +48,13 @@ public class HyvaksymiskirjeetTest {
     }
 
     @Bean
-    public SijoitteluKoulutuspaikallisetRoute getSijoitteluKoulutuspaikallisetProxy() {
-        return Mockito.mock(SijoitteluKoulutuspaikallisetRoute.class);
+    public HaeHakukohdeNimiTarjonnaltaKomponentti getHaeHakukohdeNimiTarjonnaltaKomponentti() {
+        return Mockito.mock(HaeHakukohdeNimiTarjonnaltaKomponentti.class);
+    }
+
+    @Bean
+    public SijoitteluKoulutuspaikkallisetKomponentti getSijoitteluKoulutuspaikallisetProxy() {
+        return Mockito.mock(SijoitteluKoulutuspaikkallisetKomponentti.class);
     }
 
     @Bean

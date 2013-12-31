@@ -13,14 +13,23 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 @Component("sijoitteluKoulutuspaikkallisetKomponentti")
 public class SijoitteluKoulutuspaikkallisetKomponentti {
 
-    @Autowired
     private SijoitteluResource sijoitteluResource;
-
-    @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}")
     private String sijoitteluResourceUrl;
+
+    @Autowired
+    public SijoitteluKoulutuspaikkallisetKomponentti(SijoitteluResource sijoitteluResource,
+            @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String sijoitteluResourceUrl) {
+        this.sijoitteluResource = sijoitteluResource;
+        this.sijoitteluResourceUrl = sijoitteluResourceUrl;
+    }
 
     public Collection<HakijaDTO> koulutuspaikalliset(@Property("hakuOid") String hakuOid,
             @Property("hakukohdeOid") String hakukohdeOid, @Property("sijoitteluajoId") String sijoitteluajoId) {
