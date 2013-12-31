@@ -30,6 +30,7 @@
                 <prop key="cas_mode">front</prop>
                 <prop key="cas_key">valintalaskentakoostepalvelu</prop>
                 <prop key="cas_service">${cas.service.valintalaskentakoostepalvelu}</prop>
+                <prop key="cas_callback_url">${cas.callback.valintalaskentakoostepalvelu}</prop>
                 <prop key="spring_security_default_access">isAuthenticated()</prop>
             </util:properties>
         </property>
