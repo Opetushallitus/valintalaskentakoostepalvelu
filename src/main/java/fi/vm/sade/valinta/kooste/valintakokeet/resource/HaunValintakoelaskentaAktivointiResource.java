@@ -42,13 +42,13 @@ public class HaunValintakoelaskentaAktivointiResource {
     @Autowired
     private HakukohteenValintakoelaskentaRoute hakukohteenValintakoelaskentaRoute;
 
-    @Resource(name = "valintakoelaskentaValvomo")
+    @Resource(name = "haunValintakoelaskentaValvomo")
     private ValvomoService<Prosessi> valintakoelaskentaValvomo;
 
     @GET
     @Path("/status")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Valintalaskenta-reitin tila", response = Collection.class)
+    @ApiOperation(value = "Valintakoelaskennan reitityksen tila", response = Collection.class)
     public Collection<ProsessiJaStatus<Prosessi>> status() {
         return valintakoelaskentaValvomo.getUusimmatProsessitJaStatukset();
     }

@@ -132,9 +132,11 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
         //
                 .errorHandler(deadLetterChannel(suoritaHaulleValintalaskentaDeadLetterChannel()))
                 //
-                .process(luoProsessiHaunValintalaskennalle()).to(start())
-                //
                 .bean(securityProcessor)
+                //
+                .process(luoProsessiHaunValintalaskennalle())
+                //
+                .to(start())
                 //
                 .bean(haeHakukohteetTarjonnaltaKomponentti)
                 // Collection<HakukohdeTyyppi>
@@ -152,16 +154,19 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
         //
                 .errorHandler(deadLetterChannel(suoritaHakukohteelleValintalaskentaDeadLetterChannel()))
                 //
-                .process(luoProsessiHakukohteenValintalaskennalle()).to(start())
-                //
                 .bean(securityProcessor)
+                //
+                .process(luoProsessiHakukohteenValintalaskennalle())
+                //
+                .to(start())
                 //
                 .bean(haeValintaperusteetKomponentti)
                 //
                 .setProperty("valintaperusteet", body())
                 //
-
-                .to("direct:suorita_valintalaskenta").to(finish());
+                .to("direct:suorita_valintalaskenta")
+                //
+                .to(finish());
 
     }
 
