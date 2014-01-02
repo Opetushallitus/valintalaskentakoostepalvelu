@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HakemusOidSplitter;
+import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.LaskeValintakoeosallistumisetHakemukselleKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.route.HakukohteenValintakoelaskentaRoute;
 
@@ -28,6 +29,8 @@ public class HakukohteenValintakoelaskentaRouteImpl extends SpringRouteBuilder {
     public void configure() throws Exception {
         from(hakukohteenValintakoelaskenta())
         //
+                .bean(new SecurityPreprocessor())
+                //
                 .bean(haeHakukohteenHakemuksetKomponentti)
                 //
                 .bean(new HakemusOidSplitter())

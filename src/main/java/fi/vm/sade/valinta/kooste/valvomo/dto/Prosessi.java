@@ -18,7 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  *         luojan tiedot metatiedoiksi. Valvomolle voi antaa minka tahansa olion
  *         prosessin kuvaukseksi joten kaytto on valinnaista.
  */
-public abstract class Prosessi implements Comparable<Prosessi>, Timestamped, ExceptionStack {
+public class Prosessi implements Comparable<Prosessi>, Timestamped, ExceptionStack {
 
     private String id;
     private String resurssi;

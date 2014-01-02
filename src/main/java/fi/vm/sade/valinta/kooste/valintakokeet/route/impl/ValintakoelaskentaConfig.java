@@ -20,7 +20,7 @@ import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 @Configuration
 public class ValintakoelaskentaConfig {
 
-    @Bean(name = "valintakoelaskentaValvomo")
+    @Bean(name = "haunValintakoelaskentaValvomo")
     public ValvomoService<Prosessi> getValvomoServiceImpl() {
         return new ValvomoServiceImpl<Prosessi>();
     }
