@@ -1,20 +1,15 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
+import fi.vm.sade.service.valintaperusteet.schema.*;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeValintaperusteetDTO;
+import fi.vm.sade.tarjonta.service.resources.dto.ValintakoeRDTO;
 import org.apache.camel.Body;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
-
-import fi.vm.sade.service.valintaperusteet.schema.AvainArvoTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.HakukohdekoodiTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.HakukohteenValintakoeTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.MonikielinenTekstiTyyppi;
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeValintaperusteetDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.ValintakoeRDTO;
 
 /**
  * User: wuoti Date: 20.5.2013 Time: 10.46
@@ -29,7 +24,7 @@ public class SuoritaHakukohdeImportKomponentti {
     private HakukohdeResource hakukohdeResource;
 
     public HakukohdeImportTyyppi suoritaHakukohdeImport(@Body// @Property(OPH.HAKUKOHDEOID)
-            String hakukohdeOid) {
+                                                                String hakukohdeOid) {
         HakukohdeValintaperusteetDTO data = hakukohdeResource.getHakukohdeValintaperusteet(hakukohdeOid);
         HakukohdeImportTyyppi importTyyppi = new HakukohdeImportTyyppi();
 
@@ -170,6 +165,14 @@ public class SuoritaHakukohdeImportKomponentti {
                 .getHakukohdeNimi().get(0).getText()
                 + "_kielikoe");
         importTyyppi.getValintaperuste().add(avainArvo);
+
+
+        if (data.getOpetuskielet().size() > 0) {
+            avainArvo = new AvainArvoTyyppi();
+            avainArvo.setAvain("opetuskieli");
+            avainArvo.setArvo(data.getOpetuskielet().get(0));
+            importTyyppi.getValintaperuste().add(avainArvo);
+        }
 
         for (String avain : data.getPainokertoimet().keySet()) {
             avainArvo = new AvainArvoTyyppi();
