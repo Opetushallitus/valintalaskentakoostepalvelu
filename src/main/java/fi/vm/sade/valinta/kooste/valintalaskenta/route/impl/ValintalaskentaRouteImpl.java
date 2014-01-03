@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -105,7 +106,9 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                                 // hide retry/handled stacktrace
                                 .logStackTrace(false).logRetryStackTrace(false).logHandled(false))
                 //
-                .bean(suoritaLaskentaKomponentti);
+                .bean(suoritaLaskentaKomponentti)
+                //
+                .bean(hakukohdeKasiteltyProsessille());
         /**
          * Alireitti yhden kohteen laskentaan
          */
@@ -145,12 +148,16 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 .to(start())
                 //
                 .bean(haeHakukohteetTarjonnaltaKomponentti)
+                //
+                .process(paivitaHakukohteidenMaaraProsessille())
                 // Collection<HakukohdeTyyppi>
                 .bean(new SplitHakukohteetKomponentti())
                 // Collection<String>
                 .split(body()).parallelProcessing()
                 //
-                .setProperty("hakukohdeOid", body()).to("direct:suorita_valintalaskenta")
+                .setProperty("hakukohdeOid", body())
+                //
+                .to("direct:suorita_valintalaskenta")
                 // end splitter
                 .end()
                 // route done
@@ -161,6 +168,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 .errorHandler(deadLetterChannel(suoritaHakukohteelleValintalaskentaDeadLetterChannel()))
                 //
                 .bean(securityProcessor)
+                //
+                .setHeader("hakukohteitaYhteensa", constant(1))
                 //
                 .process(luoProsessiHakukohteenValintalaskennalle())
                 //
@@ -176,15 +185,40 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 
     }
 
+    private Processor paivitaHakukohteidenMaaraProsessille() {
+        return new Processor() {
+            public void process(Exchange exchange) throws Exception {
+                ValintalaskentaProsessi valintalaskentaProsessi = exchange.getProperty(prosessi(),
+                        ValintalaskentaProsessi.class);
+                try {
+                    valintalaskentaProsessi.setHakukohteitaYhteensa(exchange.getIn().getBody(List.class).size());
+                } catch (Exception e) {
+                    LOG.error("Tarjonnasta palautui tyhjä joukko hakukohteita haulle!");
+                }
+            }
+        };
+    }
+
+    private Processor hakukohdeKasiteltyProsessille() {
+        return new Processor() {
+            public void process(Exchange exchange) throws Exception {
+                ValintalaskentaProsessi valintalaskentaProsessi = exchange.getProperty(prosessi(),
+                        ValintalaskentaProsessi.class);
+                valintalaskentaProsessi.addHakukohde(exchange.getProperty(OPH.HAKUKOHDEOID, String.class));
+            }
+        };
+    }
+
     private Processor luoProsessiHaunValintalaskennalle() {
         return new Processor() {
             public void process(Exchange exchange) throws Exception {
+
                 exchange.setProperty(kuvaus(), "Valintalaskenta haulle");
                 exchange.setProperty(
                         prosessi(),
                         new ValintalaskentaProsessi("Valintalaskenta", "Haulle", exchange.getProperty(OPH.HAKUOID,
-                                String.class), exchange.getProperty(OPH.HAKUKOHDEOID, String.class), exchange
-                                .getProperty(OPH.VALINNANVAIHE, Integer.class)));
+                                String.class), exchange.getIn().getHeader("hakukohteitaYhteensa", Integer.class),
+                                exchange.getProperty(OPH.VALINNANVAIHE, Integer.class)));
             }
         };
     }
@@ -196,8 +230,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 exchange.setProperty(
                         prosessi(),
                         new ValintalaskentaProsessi("Valintalaskenta", "Hakukohteelle", exchange.getProperty(
-                                OPH.HAKUOID, String.class), exchange.getProperty(OPH.HAKUKOHDEOID, String.class),
-                                exchange.getProperty(OPH.VALINNANVAIHE, Integer.class)));
+                                OPH.HAKUOID, String.class), exchange.getIn().getHeader("hakukohteitaYhteensa",
+                                Integer.class), exchange.getProperty(OPH.VALINNANVAIHE, Integer.class)));
             }
         };
     }
