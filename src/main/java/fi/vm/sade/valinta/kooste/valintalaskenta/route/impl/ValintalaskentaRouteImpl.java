@@ -60,6 +60,12 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
          * Jatkossa lisaa metadataa paatettyyn prosessiin yllapitajalle.
          */
 
+        from(suoritaValintalaskentaHaeValintaperusteetDeadLetterChannel())
+                .setHeader(
+                        "message",
+                        simple("${property.authentication.name}: Valintaperusteiden haku ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
+                .to(fail());
+
         from(suoritaValintalaskentaKomponenttiDeadLetterChannel()).setHeader("message",
                 simple("${property.authentication.name}: Valinta ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
                 .to(fail());
@@ -110,7 +116,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 //
                 .bean(hakukohdeKasiteltyProsessille());
         /**
-         * Alireitti yhden kohteen laskentaan
+         * Alireitti yhden hakukohteen laskentaan
          */
         from("direct:suorita_valintalaskenta") // jos reitti epaonnistuu parent
                                                // failaa
@@ -120,6 +126,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 .to("log:direct_suorita_valintalaskenta?level=INFO")
                 //
                 .bean(securityProcessor)
+                // hakee valintaperusteet hakukohdeOid:lla
+                .to("direct:valintalaskenta_haeValintaperusteet")
                 //
                 .bean(haeHakukohteenHakemuksetKomponentti)
                 //
@@ -132,6 +140,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                                 .accumulateInCollection(ArrayList.class))
                 //
                 .parallelProcessing().stopOnException()
+
                 //
                 .to("direct:suorita_haehakemus").end()
                 //
@@ -162,7 +171,19 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 .end()
                 // route done
                 .to(finish());
-
+        from("direct:valintalaskenta_haeValintaperusteet")
+        //
+                .errorHandler(
+                        deadLetterChannel(suoritaValintalaskentaHaeValintaperusteetDeadLetterChannel())
+                                .maximumRedeliveries(10).redeliveryDelay(300L)
+                                // log exhausted stacktrace
+                                .logExhaustedMessageHistory(true).logExhausted(true)
+                                // hide retry/handled stacktrace
+                                .logStackTrace(false).logRetryStackTrace(false).logHandled(false))
+                //
+                .bean(haeValintaperusteetKomponentti)
+                //
+                .setProperty("valintaperusteet", body());
         from(hakukohteenValintalaskenta())
         //
                 .errorHandler(deadLetterChannel(suoritaHakukohteelleValintalaskentaDeadLetterChannel()))
@@ -174,10 +195,6 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 .process(luoProsessiHakukohteenValintalaskennalle())
                 //
                 .to(start())
-                //
-                .bean(haeValintaperusteetKomponentti)
-                //
-                .setProperty("valintaperusteet", body())
                 //
                 .to("direct:suorita_valintalaskenta")
                 //
@@ -254,6 +271,10 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 
     private static String finish() {
         return "bean:valintalaskentaValvomo?method=finish";
+    }
+
+    private static String suoritaValintalaskentaHaeValintaperusteetDeadLetterChannel() {
+        return "direct:suorita_valintalaskenta_haevalintaperusteet_deadletterchannel";
     }
 
     private static String suoritaValintalaskentaKomponenttiDeadLetterChannel() {
