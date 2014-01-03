@@ -97,7 +97,13 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 
         from("direct:suorita_valintalaskenta_komponentti")
         //
-                .errorHandler(deadLetterChannel(suoritaValintalaskentaKomponenttiDeadLetterChannel()))
+                .errorHandler(
+                        deadLetterChannel(suoritaValintalaskentaKomponenttiDeadLetterChannel()).maximumRedeliveries(10)
+                                .redeliveryDelay(300L)
+                                // log exhausted stacktrace
+                                .logExhaustedMessageHistory(true).logExhausted(true)
+                                // hide retry/handled stacktrace
+                                .logStackTrace(false).logRetryStackTrace(false).logHandled(false))
                 //
                 .bean(suoritaLaskentaKomponentti);
         /**
