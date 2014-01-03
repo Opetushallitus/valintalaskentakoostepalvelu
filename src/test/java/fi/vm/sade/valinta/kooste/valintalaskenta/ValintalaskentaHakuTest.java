@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
 import java.util.Arrays;
-import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -54,6 +53,7 @@ public class ValintalaskentaHakuTest {
 
     @Autowired
     private HaeHakukohteetTarjonnaltaKomponentti haeHakukohteetTarjonnaltaKomponentti;
+
     @Autowired
     private HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
 
@@ -62,6 +62,9 @@ public class ValintalaskentaHakuTest {
 
     @Autowired
     private ValintalaskentaService valintalaskentaService;
+
+    @Autowired
+    private HaeValintaperusteetKomponentti haeValintaperusteetKomponentti;
 
     private SuppeaHakemus create() {
         SuppeaHakemus s = new SuppeaHakemus();
@@ -100,7 +103,7 @@ public class ValintalaskentaHakuTest {
         valintalaskentaRoute.aktivoiValintalaskenta("h0");
 
         Mockito.verify(valintalaskentaService, Mockito.atLeastOnce()).laske(Mockito.anyListOf(HakemusTyyppi.class),
-                Mockito.isNull(List.class));
+                Mockito.anyListOf(ValintaperusteetTyyppi.class));
 
     }
 
