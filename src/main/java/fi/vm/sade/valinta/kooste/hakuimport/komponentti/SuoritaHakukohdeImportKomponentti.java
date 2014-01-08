@@ -5,6 +5,7 @@ import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeValintaperusteetDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.ValintakoeRDTO;
 import org.apache.camel.Body;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,20 +160,32 @@ public class SuoritaHakukohdeImportKomponentti {
                 + "_lisapiste");
         importTyyppi.getValintaperuste().add(avainArvo);
 
-        avainArvo = new AvainArvoTyyppi();
-        avainArvo.setAvain("kielikoe_tunniste");
-        avainArvo.setArvo(data.getKielikoeTunniste() != null ? data.getKielikoeTunniste() : importTyyppi
-                .getHakukohdeNimi().get(0).getText()
-                + "_kielikoe");
-        importTyyppi.getValintaperuste().add(avainArvo);
-
-
+        String opetuskieli = null;
         if (data.getOpetuskielet().size() > 0) {
             avainArvo = new AvainArvoTyyppi();
+            opetuskieli = data.getOpetuskielet().get(0);
             avainArvo.setAvain("opetuskieli");
-            avainArvo.setArvo(data.getOpetuskielet().get(0));
+            avainArvo.setArvo(opetuskieli);
             importTyyppi.getValintaperuste().add(avainArvo);
         }
+
+
+        // Kielikoetunnisteen selvittäminen
+        String kielikoetunniste = null;
+        if (StringUtils.isNotBlank(data.getKielikoeTunniste())) {
+            kielikoetunniste = data.getKielikoeTunniste();
+        } else if (StringUtils.isNotBlank(opetuskieli)) {
+            kielikoetunniste = "kielikoe_" + opetuskieli;
+        } else {
+            kielikoetunniste = importTyyppi
+                    .getHakukohdeNimi().get(0).getText()
+                    + "_kielikoe";
+        }
+
+        avainArvo = new AvainArvoTyyppi();
+        avainArvo.setAvain("kielikoe_tunniste");
+        avainArvo.setArvo(kielikoetunniste);
+        importTyyppi.getValintaperuste().add(avainArvo);
 
         for (String avain : data.getPainokertoimet().keySet()) {
             avainArvo = new AvainArvoTyyppi();
