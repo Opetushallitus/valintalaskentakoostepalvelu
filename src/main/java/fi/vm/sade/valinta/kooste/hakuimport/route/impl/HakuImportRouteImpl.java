@@ -165,7 +165,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         return new Processor() {
             public void process(Exchange exchange) throws Exception {
                 HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
-                int v = prosessi.lisaaVirhe();
+                prosessi.lisaaVirhe();
                 LOG.error("Virhe (numero {}) hakukohteiden importoinnissa! {}", exchange.getException().getMessage());
             }
         };
