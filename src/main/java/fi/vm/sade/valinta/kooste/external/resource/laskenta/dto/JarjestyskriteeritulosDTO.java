@@ -12,7 +12,7 @@ public class JarjestyskriteeritulosDTO implements Comparable<Jarjestyskriteeritu
 
     @Override
     public int compareTo(JarjestyskriteeritulosDTO o) {
-        return new Integer(prioriteetti).compareTo(o.getPrioriteetti());
+        return Integer.valueOf(prioriteetti).compareTo(o.getPrioriteetti());
     }
 
     public BigDecimal getArvo() {
