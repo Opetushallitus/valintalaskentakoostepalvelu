@@ -49,12 +49,12 @@ public class KelaFtpRouteTest {
     private static final String FTP_CONFIG = "retainFirst=1";
 
     @Bean
-    public KelaFtpRouteImpl getKelaRouteImpl() {
+    public KelaFtpRouteImpl getKelaRouteImpl(DokumenttiResource dokumenttiResource) {
         /**
          * Ylikirjoitetaan kela-ftp endpoint logitusreitilla yksikkotestia
          * varten!
          */
-        return new KelaFtpRouteImpl(FTP_MOCK, FTP_CONFIG);
+        return new KelaFtpRouteImpl(FTP_MOCK, FTP_CONFIG, dokumenttiResource);
     }
 
     @Bean
