@@ -58,6 +58,9 @@ public class KelaResource {
     @Resource(name = "kelaValvomo")
     private ValvomoService<KelaProsessi> kelaValvomo;
 
+    @Resource(name = "dokumenttipalveluRestClient")
+    private DokumenttiResource dokumenttiResource;
+
     @GET
     @Path("/status")
     @Produces(APPLICATION_JSON)
@@ -121,9 +124,6 @@ public class KelaResource {
         // + " lähetetty Kelan FTP-palvelimelle"));
         return Response.ok().build();
     }
-
-    @Autowired
-    private DokumenttiResource dokumenttiResource;
 
     @GET
     @Path("/listaus")

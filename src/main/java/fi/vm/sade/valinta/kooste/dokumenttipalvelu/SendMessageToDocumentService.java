@@ -8,6 +8,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -22,8 +23,12 @@ public class SendMessageToDocumentService {
     public final static String MESSAGE = "message";
     private static final Logger LOG = LoggerFactory.getLogger(SendMessageToDocumentService.class);
 
+    private final DokumenttiResource dokumenttiResource;
+
     @Autowired
-    private DokumenttiResource dokumenttiResource;
+    public SendMessageToDocumentService(@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource) {
+        this.dokumenttiResource = dokumenttiResource;
+    }
 
     public void start(@Header(MESSAGE) String message, @Property(OPH.HAKUOID) String hakuOid) {
         List<String> tags = Lists.newArrayList();

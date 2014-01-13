@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.dokumenttipalvelu.route.impl;
 
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,7 @@ public class DokumenttipalveluRouteImpl extends SpringRouteBuilder {
     @Autowired
     public DokumenttipalveluRouteImpl(
             @Value("quartz://documentServiceFlush?cron=0+0+0/2+*+*+?") String quartzDocumentServiceFlush,
-            DokumenttiResource dokumenttiResource) {
+            @Qualifier("adminDokumenttipalveluRestClient") DokumenttiResource dokumenttiResource) {
         this.quartzDocumentServiceFlush = quartzDocumentServiceFlush;
         this.dokumenttiResource = dokumenttiResource;
     }
