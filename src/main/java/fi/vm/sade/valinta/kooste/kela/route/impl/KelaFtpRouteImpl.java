@@ -9,6 +9,8 @@ import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.start;
 
 import java.io.InputStream;
 
+import javax.annotation.Resource;
+
 import org.apache.camel.Property;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.slf4j.Logger;
@@ -37,6 +39,9 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
     private final String ftpKelaSiirto;
     private PrepareKelaProcessDescription luoUusiProsessi;
 
+    @Resource(name = "dokumenttipalveluRestClient")
+    private DokumenttiResource dokumenttiResource;
+
     /**
      * @param host
      *            esim ftp://user@host:port
@@ -52,9 +57,6 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
         this.ftpKelaSiirto = builder.toString();
         this.luoUusiProsessi = new PrepareKelaProcessDescription();
     }
-
-    @Autowired
-    private DokumenttiResource dokumenttiResource;
 
     public class DownloadDocumentWithDocumentId {
 

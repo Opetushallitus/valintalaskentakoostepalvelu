@@ -103,7 +103,24 @@
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
         </jaxrs:providers>
     </jaxrs:client>
-    
+    <jaxrs:client id="adminDokumenttipalveluRestClient"
+                  address="${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}"
+                  serviceClass="fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource"
+                  inheritHeaders="true">
+        <jaxrs:outInterceptors>
+            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+                <property name="webCasUrl" value="${web.url.cas}"/>
+                <property name="targetService"
+                          value="${cas.service.dokumenttipalvelu}/j_spring_cas_security_check"/>
+                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}"/>
+                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}"/>
+            </bean>
+        </jaxrs:outInterceptors>
+        <jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+        </jaxrs:providers>
+    </jaxrs:client>
 	<jaxrs:client id="dokumenttipalveluRestClient"
                   address="${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}"
                   serviceClass="fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource"

@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
@@ -54,7 +56,7 @@ public class KelaRouteImpl extends SpringRouteBuilder {
     @Autowired
     private SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet;
 
-    @Autowired
+    @Resource(name = "dokumenttipalveluRestClient")
     private DokumenttiResource dokumenttiResource;
 
     @Autowired

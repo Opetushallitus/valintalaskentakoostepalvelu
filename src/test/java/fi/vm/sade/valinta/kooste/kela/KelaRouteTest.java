@@ -81,8 +81,8 @@ public class KelaRouteTest {
     }
 
     @Bean
-    public SendMessageToDocumentService getSendMessageToDocumentService() {
-        return new SendMessageToDocumentService();
+    public SendMessageToDocumentService getSendMessageToDocumentService(DokumenttiResource dokumenttiResource) {
+        return new SendMessageToDocumentService(dokumenttiResource);
     }
 
     @Bean
