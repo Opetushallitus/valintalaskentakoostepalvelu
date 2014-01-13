@@ -9,13 +9,12 @@ import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.start;
 
 import java.io.InputStream;
 
-import javax.annotation.Resource;
-
 import org.apache.camel.Property;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +38,6 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
     private final String ftpKelaSiirto;
     private PrepareKelaProcessDescription luoUusiProsessi;
 
-    @Resource(name = "dokumenttipalveluRestClient")
     private DokumenttiResource dokumenttiResource;
 
     /**
@@ -51,11 +49,13 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
     @Autowired
     public KelaFtpRouteImpl(
             @Value("${kela.ftp.protocol}://${kela.ftp.username}@${kela.ftp.host}:${kela.ftp.port}${kela.ftp.path}") final String host,
-            @Value("password=${kela.ftp.password}&ftpClient.dataTimeout=30000&passiveMode=true") final String params) {
+            @Value("password=${kela.ftp.password}&ftpClient.dataTimeout=30000&passiveMode=true") final String params,
+            @Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource) {
         StringBuilder builder = new StringBuilder();
         builder.append(host).append("?").append(params);
         this.ftpKelaSiirto = builder.toString();
         this.luoUusiProsessi = new PrepareKelaProcessDescription();
+        this.dokumenttiResource = dokumenttiResource;
     }
 
     public class DownloadDocumentWithDocumentId {

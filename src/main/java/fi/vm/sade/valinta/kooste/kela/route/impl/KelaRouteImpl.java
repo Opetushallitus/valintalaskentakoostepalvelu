@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
@@ -23,6 +21,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -56,7 +55,6 @@ public class KelaRouteImpl extends SpringRouteBuilder {
     @Autowired
     private SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet;
 
-    @Resource(name = "dokumenttipalveluRestClient")
     private DokumenttiResource dokumenttiResource;
 
     @Autowired
@@ -71,8 +69,10 @@ public class KelaRouteImpl extends SpringRouteBuilder {
      * @param processFactory
      *            For unit tests
      */
-    public KelaRouteImpl(PrepareKelaProcessDescription processFactory) {
+    public KelaRouteImpl(PrepareKelaProcessDescription processFactory,
+            @Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource) {
         this.luoUusiProsessi = processFactory;
+        this.dokumenttiResource = dokumenttiResource;
     }
 
     public class SendKelaDocument {

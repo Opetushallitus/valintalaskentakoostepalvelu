@@ -58,8 +58,9 @@ public class KelaRouteTest {
     private static final Logger LOG = LoggerFactory.getLogger(KelaRouteTest.class);
 
     @Bean
-    public KelaRouteImpl getKelaRouteImpl(PrepareKelaProcessDescription processFactory) {
-        return new KelaRouteImpl(processFactory);
+    public KelaRouteImpl getKelaRouteImpl(PrepareKelaProcessDescription processFactory,
+            DokumenttiResource dokumenttiResource) {
+        return new KelaRouteImpl(processFactory, dokumenttiResource);
     }
 
     @Bean
