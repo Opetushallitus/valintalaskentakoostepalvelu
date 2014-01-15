@@ -14,6 +14,7 @@ public class KieliUtil {
 
     public static final String SUOMI = "FI";
     public static final String RUOTSI = "SE";
+    public static final String RUOTSI_2 = "SV";
     public static final String ENGLANTI = "EN";
 
     /**
@@ -39,7 +40,7 @@ public class KieliUtil {
         String uppercaseKielikoodi = kielikoodi.toUpperCase();
         if (uppercaseKielikoodi.contains(SUOMI)) {
             return SUOMI;
-        } else if (uppercaseKielikoodi.contains(RUOTSI)) {
+        } else if (uppercaseKielikoodi.contains(RUOTSI) || uppercaseKielikoodi.contains(RUOTSI_2)) {
             return RUOTSI;
         }
         return ENGLANTI; // Tuntematon ulkomaa => englanti
