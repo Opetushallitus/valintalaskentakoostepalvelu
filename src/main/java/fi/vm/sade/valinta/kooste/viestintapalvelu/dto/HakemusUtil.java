@@ -9,10 +9,11 @@ import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 
-public class HakemuksenTilaUtil {
+public class HakemusUtil {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HakemuksenTilaUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HakemusUtil.class);
     private final static Map<String, String> TILAT = valmistaTilat();
+    public static final String ASIOINTIKIELI = "asiointikieli";
 
     private static Map<String, String> valmistaTilat() {
         Map<String, String> tmp = new HashMap<String, String>();

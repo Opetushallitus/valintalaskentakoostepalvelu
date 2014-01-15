@@ -5,6 +5,7 @@ import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_EROTIN;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
 import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
+import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemusUtil.ASIOINTIKIELI;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,13 +29,17 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksenTilaUtil;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemusUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 
 /**
  * 
@@ -47,19 +52,33 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 public class HyvaksymiskirjeetKomponentti {
 
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetKomponentti.class);
+
     private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
     private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
     private SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
     private HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
     private HaeOsoiteKomponentti osoiteKomponentti;
+    private HaeHakemusKomponentti hakemusProxy;
 
     @Autowired
     public HyvaksymiskirjeetKomponentti(SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
-            HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy, HaeOsoiteKomponentti osoiteKomponentti) {
+            HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy, HaeOsoiteKomponentti osoiteKomponentti,
+            HaeHakemusKomponentti hakemusProxy) {
         this.osoiteKomponentti = osoiteKomponentti;
         this.sijoitteluProxy = sijoitteluProxy;
         this.tarjontaProxy = tarjontaProxy;
+        this.hakemusProxy = hakemusProxy;
+    }
+
+    private String vakioHakukohteenNimi(String hakukohdeOid) {
+        return new StringBuilder().append("Hakukohteella ").append(hakukohdeOid).append(" ei ole hakukohteennimeä")
+                .toString();
+    }
+
+    private String vakioTarjoajanNimi(String hakukohdeOid) {
+        return new StringBuilder().append("Hakukohteella ").append(hakukohdeOid).append(" ei ole tarjojannimeä")
+                .toString();
     }
 
     public Kirjeet teeHyvaksymiskirjeet(@Property("kielikoodi") String kielikoodi,
@@ -83,11 +102,10 @@ public class HyvaksymiskirjeetKomponentti {
             throw new HakemuspalveluException(
                     "Hakukohteella on oltava vähintään yksi hyväksytty hakija että hyväksymiskirjeet voidaan luoda!");
         }
-        final Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = haeKiinnostavatHakukohteet(
-                hakukohteenHakijat, kielikoodi);
+        final Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = haeKiinnostavatHakukohteet(hakukohteenHakijat);
         final List<Kirje> kirjeet = new ArrayList<Kirje>();
-        final String koulu;
-        final String koulutus;
+        final Teksti koulu;
+        final Teksti koulutus;
         {
             MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
             koulu = metakohde.getTarjoajaNimi();
@@ -95,14 +113,26 @@ public class HyvaksymiskirjeetKomponentti {
         }
         for (HakijaDTO hakija : hakukohteenHakijat) {
             final String hakemusOid = hakija.getHakemusOid();
-            final Osoite osoite = osoiteKomponentti.haeOsoite(hakemusOid);
+            final Hakemus hakemus = hakemusProxy.haeHakemus(hakemusOid);
+            final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
             final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
+
+            String preferoituKielikoodi;
+            try {
+                preferoituKielikoodi = KieliUtil.normalisoiKielikoodi(hakemus.getAnswers().getLisatiedot()
+                        .get(ASIOINTIKIELI));
+            } catch (Exception e) {
+                LOG.error("Hakemuksella {} ei ollut asiointikielta!", hakemusOid);
+                preferoituKielikoodi = KieliUtil.SUOMI;
+            }
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
 
                 MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
                 Map<String, String> tulokset = new HashMap<String, String>();
 
-                tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi());
+                tulokset.put("hakukohteenNimi",
+                        metakohde.getHakukohdeNimi()
+                                .getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
                 tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
                                                        // hakukohdenimea
                                                        // joten
@@ -122,7 +152,8 @@ public class HyvaksymiskirjeetKomponentti {
                     }
                 }
                 tulokset.put("paasyJaSoveltuvuuskoe", pisteet.toString().trim());
-                tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi());
+                tulokset.put("organisaationNimi",
+                        metakohde.getTarjoajaNimi().getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(hakukohdeOid)));
                 StringBuilder omatPisteet = new StringBuilder();
                 StringBuilder hyvaksytyt = new StringBuilder();
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
@@ -153,7 +184,7 @@ public class HyvaksymiskirjeetKomponentti {
                     }
                     tulokset.put(
                             "valinnanTulos",
-                            HakemuksenTilaUtil.tilaConverter(valintatapajono.getTila(),
+                            HakemusUtil.tilaConverter(valintatapajono.getTila(),
                                     valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
                     if (valintatapajono.getHyvaksytty() == null) {
                         throw new SijoittelupalveluException(
@@ -172,7 +203,9 @@ public class HyvaksymiskirjeetKomponentti {
                 tulosList.add(tulokset);
 
             }
-            kirjeet.add(new Kirje(osoite, "FI", koulu, koulutus, tulosList));
+            kirjeet.add(new Kirje(osoite, preferoituKielikoodi, koulu.getTeksti(preferoituKielikoodi,
+                    vakioTarjoajanNimi(hakukohdeOid)), koulutus.getTeksti(preferoituKielikoodi,
+                    vakioHakukohteenNimi(hakukohdeOid)), tulosList));
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta hyvaksymiskirjeitä {} kappaletta!", kirjeet.size());
@@ -186,8 +219,7 @@ public class HyvaksymiskirjeetKomponentti {
     // niihin liittyvat hakukohteet - eli myos hakijoiden hylatyt hakukohteet!
     // Metahakukohteille haetaan muun muassa tarjoajanimi!
     //
-    private Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(Collection<HakijaDTO> hakukohteenHakijat,
-            String kielikoodi) {
+    private Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(Collection<HakijaDTO> hakukohteenHakijat) {
         Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
         for (HakijaDTO hakija : hakukohteenHakijat) {
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
@@ -197,44 +229,25 @@ public class HyvaksymiskirjeetKomponentti {
                                                               // hakukohde
                     try {
                         HakukohdeNimiRDTO nimi = tarjontaProxy.haeHakukohdeNimi(hakukohdeOid);
-                        String hakukohdeNimi = extractHakukohdeNimi(nimi, kielikoodi);
-                        String tarjoajaNimi = extractTarjoajaNimi(nimi, kielikoodi);
+                        Teksti hakukohdeNimi = new Teksti(nimi.getHakukohdeNimi());// extractHakukohdeNimi(nimi,
+                                                                                   // kielikoodi);
+                        Teksti tarjoajaNimi = new Teksti(nimi.getTarjoajaNimi());
+                        // extractTarjoajaNimi(nimi, kielikoodi);
                         metaKohteet.put(hakukohdeOid, new MetaHakukohde(hakukohdeNimi, tarjoajaNimi));
                     } catch (Exception e) {
                         e.printStackTrace();
                         LOG.error("Tarjonnasta ei saatu hakukohdetta {}: {}",
                                 new Object[] { hakukohdeOid, e.getMessage() });
-                        metaKohteet.put(hakukohdeOid, new MetaHakukohde(new StringBuilder().append("Hakukohde ")
-                                .append(hakukohdeOid).append(" ei löydy tarjonnasta!").toString(), TYHJA_TARJOAJANIMI));
+                        metaKohteet.put(
+                                hakukohdeOid,
+                                new MetaHakukohde(new Teksti(new StringBuilder().append("Hakukohde ")
+                                        .append(hakukohdeOid).append(" ei löydy tarjonnasta!").toString()), new Teksti(
+                                        TYHJA_TARJOAJANIMI)));
                     }
                 }
             }
         }
         return metaKohteet;
-    }
-
-    private String extractHakukohdeNimi(HakukohdeNimiRDTO nimi, String kielikoodi) {
-        if (nimi.getHakukohdeNimi().containsKey(kielikoodi)) {
-            return nimi.getHakukohdeNimi().get(kielikoodi);
-        }
-        if (nimi.getHakukohdeNimi().isEmpty()) { // <- Ei tarjoaja nimia!
-            return TYHJA_HAKUKOHDENIMI;
-        }
-        return nimi.getHakukohdeNimi().values().iterator().next(); // <-
-                                                                   // Palautetaan
-                                                                   // joku!
-    }
-
-    private String extractTarjoajaNimi(HakukohdeNimiRDTO nimi, String kielikoodi) {
-        if (nimi.getTarjoajaNimi().containsKey(kielikoodi)) {
-            return nimi.getTarjoajaNimi().get(kielikoodi);
-        }
-        if (nimi.getTarjoajaNimi().isEmpty()) { // <- Ei tarjoaja nimia!
-            return TYHJA_TARJOAJANIMI;
-        }
-        return nimi.getTarjoajaNimi().values().iterator().next(); // <-
-                                                                  // Palautetaan
-                                                                  // joku!
     }
 
 }

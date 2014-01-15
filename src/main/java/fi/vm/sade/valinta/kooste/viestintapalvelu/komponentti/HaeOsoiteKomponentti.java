@@ -42,55 +42,17 @@ public class HaeOsoiteKomponentti {
 
     public Osoite haeOsoite(String hakemusOid) {
         try {
+            /**
+             * Osoitteen formatointi kirjeeseen. Esimerkiksi ulkomaille
+             * lahtevaan kirjeeseen haetaan englanninkielinen maan nimi.
+             */
             LOG.info("Haetaan hakemus {}/applications/{}", new Object[] { applicationResourceUrl, hakemusOid });
             Hakemus hakemus = hakemusProxy.haeHakemus(hakemusOid);
             if (hakemus == null) {
                 notFound(hakemusOid);
                 LOG.error("Hakemus {}/applications/{} null-arvo!", new Object[] { applicationResourceUrl, hakemusOid, });
             }
-            String maa = null;
-            try {
-                // onko ulkomaalainen?
-                if (!SUOMI.equals(hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA))) {
-                    // hae koodistosta maa
-                    String countryCode = hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA);
-                    String uri = new StringBuilder().append(MAAT_JA_VALTIOT_PREFIX).append(countryCode.toLowerCase())
-                            .toString();
-
-                    try {
-                        for (KoodiType koodi : koodiService.searchKoodis(KoodiServiceSearchCriteriaBuilder
-                                .latestKoodisByUris(uri))) {
-                            if (koodi.getMetadata() == null) {
-                                LOG.error("Koodistosta palautuu tyhjiä koodeja! Koodisto uri {}", uri);
-                                continue;
-                            }
-                            // preferoidaan englantia
-                            maa = getKuvaus(koodi.getMetadata(), KieliType.EN);
-                            if (maa == null) {
-                                maa = getKuvaus(koodi.getMetadata()); // jos
-                                                                      // suomea
-                                                                      // ei
-                                                                      // loydy
-                                                                      // kaikki
-                                                                      // kay
-                            }
-                            LOG.debug("Haettiin maa {} urille {}", new Object[] { maa, uri });
-                            if (maa != null) {
-                                break;
-                            }
-                        }
-                    } catch (Exception e) {
-                        LOG.error(
-                                "Hakemukselle {}/applications/{} ei saatu haettua maata koodistosta! Koodisto URI {}",
-                                new Object[] { applicationResourceUrl, hakemusOid, uri });
-                        countryNotFound(hakemusOid, countryCode, uri);
-                    }
-                }
-            } catch (Exception e) { // ei tarvita mutta pidetaan kunnes
-                                    // todennettu
-                                    // etta lisays tuotannossa toimii
-            }
-            return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maa);
+            return haeOsoite(hakemus);
         } catch (Exception e) {
             e.printStackTrace();
             LOG.error("Hakemus {}/applications/{} sisälsi virheellistä tietoa!", new Object[] { applicationResourceUrl,
@@ -98,6 +60,53 @@ public class HaeOsoiteKomponentti {
             notFound(hakemusOid);
         }
         return OsoiteHakemukseltaUtil.osoiteHakemuksesta(null, null);
+    }
+
+    public Osoite haeOsoite(Hakemus hakemus) {
+        String hakemusOid = hakemus.getOid();
+        String maa = null;
+        try {
+            // onko ulkomaalainen?
+            if (!SUOMI.equals(hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA))) {
+                // hae koodistosta maa
+                String countryCode = hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA);
+                String uri = new StringBuilder().append(MAAT_JA_VALTIOT_PREFIX).append(countryCode.toLowerCase())
+                        .toString();
+
+                try {
+                    for (KoodiType koodi : koodiService.searchKoodis(KoodiServiceSearchCriteriaBuilder
+                            .latestKoodisByUris(uri))) {
+                        if (koodi.getMetadata() == null) {
+                            LOG.error("Koodistosta palautuu tyhjiä koodeja! Koodisto uri {}", uri);
+                            continue;
+                        }
+                        // preferoidaan englantia
+                        maa = getKuvaus(koodi.getMetadata(), KieliType.EN);
+                        if (maa == null) {
+                            maa = getKuvaus(koodi.getMetadata()); // jos
+                                                                  // suomea
+                                                                  // ei
+                                                                  // loydy
+                                                                  // kaikki
+                                                                  // kay
+                        }
+                        LOG.debug("Haettiin maa {} urille {}", new Object[] { maa, uri });
+                        if (maa != null) {
+                            break;
+                        }
+                    }
+                } catch (Exception e) {
+                    LOG.error("Hakemukselle {}/applications/{} ei saatu haettua maata koodistosta! Koodisto URI {}",
+                            new Object[] { applicationResourceUrl, hakemusOid, uri });
+                    countryNotFound(hakemusOid, countryCode, uri);
+                }
+            }
+        } catch (Exception e) { // ei tarvita mutta pidetaan kunnes
+                                // todennettu
+                                // etta lisays tuotannossa toimii
+        }
+        return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maa);
+
     }
 
     private void notFound(String hakemusOid) {

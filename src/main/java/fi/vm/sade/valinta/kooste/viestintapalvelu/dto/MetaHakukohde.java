@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
-
 /**
  * 
  * @author Jussi Jartamo
@@ -10,19 +9,19 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
  */
 public class MetaHakukohde {
 
-    private final String hakukohdeNimi;
-    private final String tarjoajaNimi;
+    private final Teksti hakukohdeNimi;
+    private final Teksti tarjoajaNimi;
 
-    public MetaHakukohde(String hakukohdeNimi, String tarjoajaNimi) {
+    public MetaHakukohde(Teksti hakukohdeNimi, Teksti tarjoajaNimi) {
         this.hakukohdeNimi = hakukohdeNimi;
         this.tarjoajaNimi = tarjoajaNimi;
     }
 
-    public String getHakukohdeNimi() {
+    public Teksti getHakukohdeNimi() {
         return hakukohdeNimi;
     }
 
-    public String getTarjoajaNimi() {
+    public Teksti getTarjoajaNimi() {
         return tarjoajaNimi;
     }
 
