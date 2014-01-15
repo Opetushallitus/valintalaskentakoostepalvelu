@@ -57,10 +57,12 @@ public class JalkiohjauskirjeetKomponentti {
 
     @Autowired
     public JalkiohjauskirjeetKomponentti(SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy,
-            HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy, HaeOsoiteKomponentti osoiteKomponentti) {
+            HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy, HaeOsoiteKomponentti osoiteKomponentti,
+            HaeHakemusKomponentti hakemusProxy) {
         this.sijoitteluProxy = sijoitteluProxy;
         this.tarjontaProxy = tarjontaProxy;
         this.osoiteKomponentti = osoiteKomponentti;
+        this.hakemusProxy = hakemusProxy;
     }
 
     private String vakioHakukohteenNimi(String hakukohdeOid) {

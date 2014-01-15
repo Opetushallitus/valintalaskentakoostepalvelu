@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaNimiRoute;
@@ -40,6 +41,11 @@ public class HyvaksymiskirjeetTest {
     @Test(expected = HakemuspalveluException.class)
     public void testaaHyvaksymiskirjeetReitti() {
         hyvaksymiskirjeRoute.hyvaksymiskirjeetAktivointi("1", "2", 3L);
+    }
+
+    @Bean
+    public HaeHakemusKomponentti getHaeHakemusKomponentti() {
+        return Mockito.mock(HaeHakemusKomponentti.class);
     }
 
     @Bean
