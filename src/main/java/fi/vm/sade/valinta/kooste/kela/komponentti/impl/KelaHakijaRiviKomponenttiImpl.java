@@ -27,13 +27,12 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
-import fi.vm.sade.valinta.kooste.kela.komponentti.KelaHakijaRiviKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.LinjakoodiKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.OrganisaatioKomponentti;
 
 @Component
-public class KelaHakijaRiviKomponenttiImpl implements KelaHakijaRiviKomponentti {
+public class KelaHakijaRiviKomponenttiImpl {
 
     private static final Logger LOG = LoggerFactory.getLogger(KelaHakijaRiviKomponenttiImpl.class);
     private static final Integer KESAKUU = 6;

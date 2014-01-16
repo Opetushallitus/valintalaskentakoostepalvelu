@@ -21,7 +21,6 @@ import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAALKU;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVALOPPU;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
-import fi.vm.sade.valinta.kooste.kela.komponentti.KelaDokumentinLuontiKomponentti;
 
 /**
  * 
@@ -31,9 +30,8 @@ import fi.vm.sade.valinta.kooste.kela.komponentti.KelaDokumentinLuontiKomponentt
  *         luotaessa stream on auki dokumenttipalveluun
  */
 @Component
-public class KelaDokumentinLuontiKomponenttiImpl implements KelaDokumentinLuontiKomponentti {
+public class KelaDokumentinLuontiKomponenttiImpl {
 
-    @Override
     public InputStream luo(@Body Collection<TKUVAYHVA> rivit,
     //
             @Property(PROPERTY_AINEISTONNIMI) String aineistonNimi,

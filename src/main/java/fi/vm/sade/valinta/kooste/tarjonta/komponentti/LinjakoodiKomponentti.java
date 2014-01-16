@@ -31,14 +31,17 @@ public class LinjakoodiKomponentti {
 
     private static final Logger LOG = LoggerFactory.getLogger(LinjakoodiKomponentti.class);
 
-    @Autowired
-    private HakukohdeResource tarjontaResource;
-
-    @Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}")
-    private String tarjontaResourceUrl;
+    private final HakukohdeResource tarjontaResource;
+    private final String tarjontaResourceUrl;
+    private final KoodiService koodiService;
 
     @Autowired
-    private KoodiService koodiService;
+    public LinjakoodiKomponentti(HakukohdeResource tarjontaResource, KoodiService koodiService,
+            @Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}") String tarjontaResourceUrl) {
+        this.tarjontaResource = tarjontaResource;
+        this.koodiService = koodiService;
+        this.tarjontaResourceUrl = tarjontaResourceUrl;
+    }
 
     public String haeLinjakoodi(@Property("hakukohdeOid") String hakukohdeOid) {
         if (hakukohdeOid == null) {
