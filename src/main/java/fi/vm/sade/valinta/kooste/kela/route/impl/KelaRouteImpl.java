@@ -12,8 +12,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.camel.Body;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.Property;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
 import org.apache.camel.spring.SpringRouteBuilder;
@@ -90,12 +93,18 @@ public class KelaRouteImpl extends SpringRouteBuilder {
                 //
                 .to(fail())
                 //
+                // Vaan eka virhe logataan
                 //
-                .setBody(
-                        constant(new Message("Kela-dokumentin luonti epäonnistui.", Arrays.asList(
-                                "valintalaskentakoostepalvelu", "kela"), DateTime.now().plusDays(1).toDate())))
-                //
-                .bean(dokumenttiResource, "viesti");
+                .process(new Processor() {
+                    public void process(Exchange exchange) throws Exception {
+                        AtomicBoolean onkoEnsimmainenVirhe = exchange.getProperty("ensimmainen_virhe_reitilla",
+                                AtomicBoolean.class);
+                        if (onkoEnsimmainenVirhe.compareAndSet(true, false)) {
+                            dokumenttiResource.viesti(new Message("Kela-dokumentin luonti epäonnistui.", Arrays.asList(
+                                    "valintalaskentakoostepalvelu", "kela"), DateTime.now().plusDays(1).toDate()));
+                        }
+                    }
+                });
 
         from("direct:kela_yksittainen_rivi")
         //
@@ -123,6 +132,8 @@ public class KelaRouteImpl extends SpringRouteBuilder {
                 .errorHandler(deadLetterChannel(kelaFailed()))
                 //
                 .process(new SecurityPreprocessor())
+                //
+                .setProperty("ensimmainen_virhe_reitilla", constant(new AtomicBoolean(true)))
                 // RESURSSI
                 .setProperty(kuvaus(), constant("Dokumentin luonti"))
                 //
