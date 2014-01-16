@@ -60,15 +60,19 @@ public class KelaRouteTest {
 
     @Bean
     public KelaHakijaRiviKomponenttiImpl mockKelaHakijaKomponentti() throws Exception {
-
-        TKUVAYHVA t = new TKUVAYHVA.Builder().setAjankohtaSyksy(true).setEtunimet("J").setSukunimi("J")
-                .setHenkilotunnus("021293-915F").setLinjakoodi("0000").setOppilaitos("0000")
-                .setPoimintapaivamaara(new Date()).setLukuvuosi(new Date()).setValintapaivamaara(new Date()).build();
-
-        KelaHakijaRiviKomponenttiImpl hakija = mock(KelaHakijaRiviKomponenttiImpl.class);
-        when(hakija.luo(Mockito.notNull(HakijaDTO.class), Mockito.notNull(Date.class), Mockito.notNull(Date.class)))
-                .thenReturn(t);
-        return hakija;
+        //
+        // TKUVAYHVA t = new
+        // TKUVAYHVA.Builder().setAjankohtaSyksy(true).setEtunimet("J").setSukunimi("J")
+        // .setHenkilotunnus("021293-915F").setLinjakoodi("0000").setOppilaitos("0000")
+        // .setPoimintapaivamaara(new Date()).setLukuvuosi(new
+        // Date()).setValintapaivamaara(new Date()).build();
+        //
+        // KelaHakijaRiviKomponenttiImpl hakija =
+        // mock(KelaHakijaRiviKomponenttiImpl.class);
+        // when(hakija.luo(Mockito.notNull(HakijaDTO.class),
+        // Mockito.notNull(Date.class), Mockito.notNull(Date.class)))
+        // .thenReturn(Arrays.asList(new TKUVAYHVA()));
+        return mock(KelaHakijaRiviKomponenttiImpl.class);
     }
 
     @Bean
@@ -145,7 +149,8 @@ public class KelaRouteTest {
         when(kelaHakijaKomponentti.luo(Mockito.eq(virheellinen), any(Date.class), any(Date.class))).thenThrow(
                 new RuntimeException("Should fails once!"));
 
-        when(kelaHakijaKomponentti.luo(Mockito.eq(ok), any(Date.class), any(Date.class))).thenReturn(new TKUVAYHVA());
+        when(kelaHakijaKomponentti.luo(Mockito.eq(ok), any(Date.class), any(Date.class))).thenReturn(
+                Arrays.asList(new TKUVAYHVA(), new TKUVAYHVA()));
     }
 
     final String okAineistonNimi = "testaaEttaOikeinSuoritetustaReitistaSeuraaDokumentti";
@@ -164,9 +169,10 @@ public class KelaRouteTest {
         kelaSiirtoDokumentinLuonti.aloitaKelaLuonti(hakuOid, lukuvuosi, poimintapaivamaara, okAineistonNimi,
                 organisaationNimi);
 
-        // verify(kelaDokumentinLuontiKomponentti,
-        // only()).luo(anyCollectionOf(TKUVAYHVA.class),
-        // Mockito.eq(okAineistonNimi), anyString());
+        // Mockito.verify(kelaDokumentinLuontiKomponentti,
+        // Mockito.only()).luo(Mockito.anyCollectionOf(TKUVAYHVA.class),
+        // // Mockito.eq(okAineistonNimi)
+        // anyString(), anyString());
     }
 
     final String virheAineistonNimi = "testaaEtteiVirheellisestaReitityksestaSeuraaVirheellistaDokumenttia";

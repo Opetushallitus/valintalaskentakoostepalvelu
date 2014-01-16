@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
@@ -127,7 +128,11 @@ public class KelaRouteImpl extends SpringRouteBuilder {
          */
         from(kelaLuonti())
         //
-                .errorHandler(deadLetterChannel(kelaFailed()))
+                .errorHandler(deadLetterChannel(kelaFailed())
+                //
+                        .logExhaustedMessageHistory(true).logExhausted(true)
+                        // hide retry/handled stacktrace
+                        .logStackTrace(true).logRetryStackTrace(true).logHandled(true))
                 //
                 .process(new SecurityPreprocessor())
                 //
@@ -162,8 +167,14 @@ public class KelaRouteImpl extends SpringRouteBuilder {
 
                 // HakijaDTO -->
                 .to("direct:kela_yksittainen_rivi").end()
+                // Collection<Collection<TKUVAYHVA>> ->
+                .process(new Processor() { // FLATTEN
+                            @Override
+                            public void process(Exchange exchange) throws Exception {
+                                exchange.getOut().setBody(Iterables.concat((List<?>) exchange.getIn().getBody()));
+                            }
+                        })
                 // Collection<TKUVAYHVA> ->
-                //
                 .bean(kelaDokumentinLuontiKomponentti)
                 // lahetetaan valmis inputstream dokumenttipalveluun kayttajan
                 // ladattavaksi. Body == InputStream ->

@@ -7,6 +7,7 @@ import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResour
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -19,12 +20,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
+
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
@@ -49,13 +51,15 @@ public class KelaHakijaRiviKomponenttiImpl {
     @Autowired
     private HaeHakuTarjonnaltaKomponentti hakuProxy;
 
-    public TKUVAYHVA luo(@Body HakijaDTO hakija, @Property("lukuvuosi") Date lukuvuosi,
+    public List<TKUVAYHVA> luo(@Body HakijaDTO hakija, @Property("lukuvuosi") Date lukuvuosi,
             @Property("poimintapaivamaara") Date poimintapaivamaara) throws Exception {
+        List<TKUVAYHVA> hakijanVastaanottamat = Lists.newArrayList();
         try {
             Set<String> linjakoodiErrorSet = new HashSet<String>();
             Map<String, String> linjakoodiCache = new HashMap<String, String>();
             Set<String> oppilaitosErrorSet = new HashSet<String>();
             Map<String, String> oppilaitosCache = new HashMap<String, String>();
+
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
                     if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
@@ -117,19 +121,26 @@ public class KelaHakijaRiviKomponenttiImpl {
                             builder.setKevaallaAlkavaKoulutus();
                         }
                         LOG.info("Tietue KELA-tiedostoon luotu onnistuneesti henkilölle {}", hakija.getHakemusOid());
-                        return builder.build();
+                        hakijanVastaanottamat.add(builder.build());
                     }
                 }
             }
+            if (hakijanVastaanottamat.isEmpty()) {
+                LOG.error(
+                        "Sijoittelulta palautui hakija (hakemusoid: {}) joka ei oikeasti ollut hyväksyttynä koulutukseen!",
+                        hakija.getHakemusOid());
+            }
+            return hakijanVastaanottamat;
         } catch (Exception e) {
             e.printStackTrace();
             LOG.error("Odottamaton virhe {}", e.getMessage());
             throw e;
         }
-        LOG.error("Sijoittelulta palautui hakija (hakemusoid: {}) joka ei oikeasti ollut hyväksyttynä koulutukseen!",
-                hakija.getHakemusOid());
-        throw new SijoittelupalveluException("Sijoittelulta palautui hakija (hakemusoid: " + hakija.getHakemusOid()
-                + ") joka ei oikeasti ollut hyväksyttynä koulutukseen!");
+        //
+        // throw new
+        // SijoittelupalveluException("Sijoittelulta palautui hakija (hakemusoid: "
+        // + hakija.getHakemusOid()
+        // + ") joka ei oikeasti ollut hyväksyttynä koulutukseen!");
     }
 
     private String haeLinjakoodi(String hakukohdeOid, Map<String, String> linjakoodiCache,
