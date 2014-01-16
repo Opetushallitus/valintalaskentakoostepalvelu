@@ -50,7 +50,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKaikkiPaikanVa
 public class KelaRouteImpl extends SpringRouteBuilder {
 
     private static final Logger LOG = LoggerFactory.getLogger(KelaRouteImpl.class);
-
+    private static final String ENSIMMAINEN_VIRHE = "ensimmainen_virhe_reitilla";
     private final KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti;
     private final KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti;
     private final SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet;
@@ -85,33 +85,31 @@ public class KelaRouteImpl extends SpringRouteBuilder {
      */
     public final void configure() {
 
-        from(kelaFailed())
+        from(kelaFailed()).process(new Processor() {
+            public void process(Exchange exchange) throws Exception {
+                AtomicBoolean onkoEnsimmainenVirhe = exchange.getProperty(ENSIMMAINEN_VIRHE, AtomicBoolean.class);
+                if (onkoEnsimmainenVirhe != null && onkoEnsimmainenVirhe.compareAndSet(true, false)) {
+                    dokumenttiResource.viesti(new Message("Kela-dokumentin luonti epäonnistui.", Arrays.asList(
+                            "valintalaskentakoostepalvelu", "kela"), DateTime.now().plusDays(1).toDate()));
+                }
+            }
+        })
         // merkkaa prosessi failediksi
 
                 // informoi kayttajaa
                 .setHeader(MESSAGE, constant("Kela-dokumentin luonti epäonnistui."))
                 //
-                .to(fail())
-                //
-                // Vaan eka virhe logataan
-                //
-                .process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
-                        AtomicBoolean onkoEnsimmainenVirhe = exchange.getProperty("ensimmainen_virhe_reitilla",
-                                AtomicBoolean.class);
-                        if (onkoEnsimmainenVirhe.compareAndSet(true, false)) {
-                            dokumenttiResource.viesti(new Message("Kela-dokumentin luonti epäonnistui.", Arrays.asList(
-                                    "valintalaskentakoostepalvelu", "kela"), DateTime.now().plusDays(1).toDate()));
-                        }
-                    }
-                });
+                .to(fail());
+        //
+        // Vaan eka virhe logataan
+        //
 
         from("direct:kela_yksittainen_rivi")
         //
-                .errorHandler(deadLetterChannel(kelaFailed())
-                //
-                // (kelaFailed())
-                //
+                .errorHandler(deadLetterChannel(kelaFailed())// .useOriginalMessage()
+                        //
+                        // (kelaFailed())
+                        //
                         .maximumRedeliveries(10).redeliveryDelay(300L)
                         // log exhausted stacktrace
                         .logExhaustedMessageHistory(true).logExhausted(true)
@@ -133,7 +131,7 @@ public class KelaRouteImpl extends SpringRouteBuilder {
                 //
                 .process(new SecurityPreprocessor())
                 //
-                .setProperty("ensimmainen_virhe_reitilla", constant(new AtomicBoolean(true)))
+                .setProperty(ENSIMMAINEN_VIRHE, constant(new AtomicBoolean(true)))
                 // RESURSSI
                 .setProperty(kuvaus(), constant("Dokumentin luonti"))
                 //
@@ -154,6 +152,8 @@ public class KelaRouteImpl extends SpringRouteBuilder {
                 .split(body(), createAccumulatingAggregation())
                 //
                 .shareUnitOfWork()
+                //
+
                 //
                 .parallelProcessing()
                 //

@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.kela.route;
 
 import java.util.Date;
+import java.util.concurrent.Future;
 
 import org.apache.camel.Property;
 
@@ -14,7 +15,17 @@ public interface KelaRoute {
     /**
      * Aloittaa Kela-siirtodokumentin luonnin.
      */
-    void aloitaKelaLuonti(@Property(OPH.HAKUOID) String hakuOid,
+    Object aloitaKelaLuonti(@Property(OPH.HAKUOID) String hakuOid,
+    //
+            @Property(PROPERTY_LUKUVUOSI) Date lukuvuosi,
+            //
+            @Property(PROPERTY_POIMINTAPAIVAMAARA) Date poimintapaivamaara,
+            //
+            @Property(PROPERTY_AINEISTONNIMI) String aineistonNimi,
+            //
+            @Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi);
+
+    Future<Object> aloitaAsyncKelaLuonti(@Property(OPH.HAKUOID) String hakuOid,
     //
             @Property(PROPERTY_LUKUVUOSI) Date lukuvuosi,
             //
