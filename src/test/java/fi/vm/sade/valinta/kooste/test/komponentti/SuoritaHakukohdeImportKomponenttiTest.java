@@ -62,7 +62,7 @@ public class SuoritaHakukohdeImportKomponenttiTest {
     @Test
     public void test() throws IOException {
         final String hakukohdeOid = "1.2.246.562.5.50425195448";
-        final String hakukohdeNimirUri = "hakukohteet_535#1";
+        final String hakukohdeNimirUri = "hakukohteet_535";
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
