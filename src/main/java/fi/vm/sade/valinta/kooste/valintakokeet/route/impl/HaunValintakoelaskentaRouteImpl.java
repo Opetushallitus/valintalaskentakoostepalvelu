@@ -23,6 +23,8 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 @Component
 public class HaunValintakoelaskentaRouteImpl extends SpringRouteBuilder {
 
+    private static final String ENSIMMAINEN_VIRHE = "ensimmainen_virhe_reitilla";
+
     @Autowired
     private HaeHaunHakemuksetKomponentti haeHaunHakemuksetKomponentti;
 
@@ -58,8 +60,13 @@ public class HaunValintakoelaskentaRouteImpl extends SpringRouteBuilder {
                 //
                 .bean(new HakemusOidSplitter())
                 //
-                .split(body()).parallelProcessing() // <- moniajetaan jokainen
-                                                    // hakemus sisaan
+                .split(body())
+                //
+                .shareUnitOfWork()
+                //
+                .parallelProcessing()
+                //
+                .stopOnException()
                 //
                 .to(yksittainenValintakoelaskenta())
                 //
