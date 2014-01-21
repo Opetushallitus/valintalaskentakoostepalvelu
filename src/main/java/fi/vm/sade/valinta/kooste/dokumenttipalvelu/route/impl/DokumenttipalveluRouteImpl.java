@@ -1,6 +1,10 @@
 package fi.vm.sade.valinta.kooste.dokumenttipalvelu.route.impl;
 
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.spring.SpringRouteBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +14,7 @@ import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 
 @Component
 public class DokumenttipalveluRouteImpl extends SpringRouteBuilder {
-
+    private static final Logger LOG = LoggerFactory.getLogger(DokumenttipalveluRouteImpl.class);
     private final String quartzDocumentServiceFlush;
     private final DokumenttiResource dokumenttiResource;
 
@@ -24,7 +28,21 @@ public class DokumenttipalveluRouteImpl extends SpringRouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        from(quartzDocumentServiceFlush).bean(dokumenttiResource, "tyhjenna");
+        from(quartzDocumentServiceFlush)
+        //
+                .process(new Processor() {
+
+                    @Override
+                    public void process(Exchange exchange) throws Exception {
+                        try {
+                            dokumenttiResource.tyhjenna();
+                        } catch (Exception e) {
+                            LOG.error("Dokumenttipalvelun tyhjennys-kutsu epäonnistui! {}", e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+
+                });
     }
 
 }

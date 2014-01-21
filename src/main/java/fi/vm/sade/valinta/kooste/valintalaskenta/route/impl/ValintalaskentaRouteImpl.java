@@ -34,6 +34,8 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaRouteImpl.class);
+    // private static final String ENSIMMAINEN_VIRHE =
+    // "ensimmainen_virhe_reitilla";
 
     @Autowired
     private SecurityPreprocessor securityProcessor;
@@ -61,29 +63,41 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
          */
 
         from(suoritaValintalaskentaHaeValintaperusteetDeadLetterChannel())
+                //
                 .setHeader(
                         "message",
                         simple("${property.authentication.name}: Valintaperusteiden haku ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
                 .to(fail());
 
-        from(suoritaValintalaskentaKomponenttiDeadLetterChannel()).setHeader("message",
-                simple("${property.authentication.name}: Valinta ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
+        from(suoritaValintalaskentaKomponenttiDeadLetterChannel())
+                //
+                .setHeader(
+                        "message",
+                        simple("${property.authentication.name}: Valinta ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
                 .to(fail());
-        from(suoritaValintalaskentaDeadLetterChannel()).setHeader("message",
-                simple("${property.authentication.name}: Tarjonta ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
+        from(suoritaValintalaskentaDeadLetterChannel())
+                //
+                .setHeader(
+                        "message",
+                        simple("${property.authentication.name}: Tarjonta ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
                 .to(fail());
         from(suoritaValintalaskentaHaeHakemusDeadLetterChannel())
+                //
                 .setHeader(
                         "message",
                         simple("${property.authentication.name}: Haku-app ei toimi! Hakemus ${header.hakemusOid}, hakukohteelle ${property.hakukohdeOid}"))
                 .to(fail());
         from(suoritaHakukohteelleValintalaskentaDeadLetterChannel())
+                //
                 .setHeader(
                         "message",
                         simple("${property.authentication.name}: Valintaperusteiden haku ei toimi: Hakukohteelle ${property.hakukohdeOid} ja valinnanvaiheelle ${property.valinnanvaihe}"))
                 .to(fail());
-        from(suoritaHaulleValintalaskentaDeadLetterChannel()).setHeader("message",
-                simple("${property.authentication.name}: Tarjonta ei toimi: Haulle ${property.hakuOid}")).to(fail());
+        from(suoritaHaulleValintalaskentaDeadLetterChannel())
+        //
+                .setHeader("message",
+                        simple("${property.authentication.name}: Tarjonta ei toimi: Haulle ${property.hakuOid}")).to(
+                        fail());
 
         from("direct:suorita_haehakemus")
                 .errorHandler(
@@ -139,8 +153,11 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                         new FlexibleAggregationStrategy<HakemusTyyppi>().storeInHeader("hakemustyypit")
                                 .accumulateInCollection(ArrayList.class))
                 //
-                .parallelProcessing().stopOnException()
-
+                .shareUnitOfWork()
+                //
+                .parallelProcessing()
+                //
+                .stopOnException()
                 //
                 .to("direct:suorita_haehakemus").end()
                 //
@@ -152,6 +169,9 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 //
                 .bean(securityProcessor)
                 //
+                // .setProperty(ENSIMMAINEN_VIRHE, constant(new
+                // AtomicBoolean(true)))
+                //
                 .process(luoProsessiHaunValintalaskennalle())
                 //
                 .to(start())
@@ -162,7 +182,13 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 // Collection<HakukohdeTyyppi>
                 .bean(new SplitHakukohteetKomponentti())
                 // Collection<String>
-                .split(body()).parallelProcessing()
+                .split(body())
+                //
+                .shareUnitOfWork()
+                //
+                .parallelProcessing()
+                //
+                .stopOnException()
                 //
                 .setProperty("hakukohdeOid", body())
                 //

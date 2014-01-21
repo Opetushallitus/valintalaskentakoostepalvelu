@@ -23,6 +23,9 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 @Component
 public class HaunValintakoelaskentaRouteImpl extends SpringRouteBuilder {
 
+    // private static final String ENSIMMAINEN_VIRHE =
+    // "ensimmainen_virhe_reitilla";
+
     @Autowired
     private HaeHaunHakemuksetKomponentti haeHaunHakemuksetKomponentti;
 
@@ -32,13 +35,17 @@ public class HaunValintakoelaskentaRouteImpl extends SpringRouteBuilder {
     @Override
     public void configure() throws Exception {
         from(yksittainenValintakoelaskentaDeadLetterChannel())
+                //
                 .setHeader(
                         "message",
                         simple("[${property.authentication.name}] Valintakoelaskenta ei toimi. Hakemus ${property.hakemusOid}, haku ${property.hakuOid}"))
                 .to(fail());
 
-        from(haunValintakoelaskentaDeadLetterChannel()).setHeader("message",
-                simple("[${property.authentication.name}] HakuApp ei toimi. Hakemukset haulle ${property.hakuOid}"))
+        from(haunValintakoelaskentaDeadLetterChannel())
+                //
+                .setHeader(
+                        "message",
+                        simple("[${property.authentication.name}] HakuApp ei toimi. Hakemukset haulle ${property.hakuOid}"))
                 .to(fail());
 
         /**
@@ -50,6 +57,9 @@ public class HaunValintakoelaskentaRouteImpl extends SpringRouteBuilder {
                 //
                 .bean(new SecurityPreprocessor())
                 //
+                // .setProperty(ENSIMMAINEN_VIRHE, constant(new
+                // AtomicBoolean(true)))
+                //
                 .process(luoProsessiHaunValintakoelaskennalle())
                 //
                 .to(start())
@@ -58,8 +68,13 @@ public class HaunValintakoelaskentaRouteImpl extends SpringRouteBuilder {
                 //
                 .bean(new HakemusOidSplitter())
                 //
-                .split(body()).parallelProcessing() // <- moniajetaan jokainen
-                                                    // hakemus sisaan
+                .split(body())
+                //
+                .shareUnitOfWork()
+                //
+                .parallelProcessing()
+                //
+                .stopOnException()
                 //
                 .to(yksittainenValintakoelaskenta())
                 //
