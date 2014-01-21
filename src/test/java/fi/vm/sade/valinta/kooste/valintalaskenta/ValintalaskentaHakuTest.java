@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import javax.annotation.Resource;
 
+import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -216,4 +217,5 @@ public class ValintalaskentaHakuTest {
     public HaeHakukohteetTarjonnaltaKomponentti getHaeHakukohteetTarjonnaltaKomponentti() {
         return Mockito.mock(HaeHakukohteetTarjonnaltaKomponentti.class);
     }
+
 }

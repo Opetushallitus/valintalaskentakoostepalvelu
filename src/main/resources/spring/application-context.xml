@@ -151,6 +151,15 @@
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
         </jaxrs:providers>
     </jaxrs:client>
+    <jaxrs:client id="KoodistoServiceRestClient"
+                  address="${valintalaskentakoostepalvelu.koodisto.rest.url}"
+                  serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.KoodistoJsonRESTResource"
+                  inheritHeaders="true">
+        <jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+        </jaxrs:providers>
+    </jaxrs:client>
     <jaxrs:client id="sijoitteluTilaServiceRestClient"
                   address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
                   serviceClass="fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource"

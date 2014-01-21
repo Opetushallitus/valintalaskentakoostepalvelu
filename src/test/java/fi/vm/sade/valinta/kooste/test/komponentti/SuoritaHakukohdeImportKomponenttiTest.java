@@ -1,14 +1,20 @@
 package fi.vm.sade.valinta.kooste.test.komponentti;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.List;
 
+import fi.vm.sade.valinta.kooste.external.resource.haku.KoodistoJsonRESTResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.KoodistoUrheilija;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.type.TypeFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.stereotype.Component;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.base.Charsets;
@@ -24,33 +30,39 @@ import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKo
 /**
  * User: wuoti Date: 20.11.2013 Time: 12.59
  */
+@Component("suoritaHakukohdeImportKomponenttiTest")
 public class SuoritaHakukohdeImportKomponenttiTest {
 
     private static final String HAKUKOHDE_JSON = "hakukohdeimport/data/hakukohde.json";
     private static final String HAKUKOHDE_NIMI_JSON = "hakukohdeimport/data/hakukohdenimi.json";
     private static final String HAKUKOHDE_VALINTAPERUSTEET_JSON = "hakukohdeimport/data/hakukohdevalintaperusteet.json";
+    private static final String KOODISTO_ALAKOODIT_JSON = "hakukohdeimport/data/koodistoalakoodit.json";
 
     private SuoritaHakukohdeImportKomponentti suoritaHakukohdeImportKomponentti;
 
     private ValintaperusteService valintaperusteServiceMock;
     private HakukohdeResource hakukohdeResourceMock;
+    private KoodistoJsonRESTResource koodistoJsonRESTResourceMock;
 
     @Before
     public void setUp() {
-        suoritaHakukohdeImportKomponentti = new SuoritaHakukohdeImportKomponentti();
+        suoritaHakukohdeImportKomponentti = new SuoritaHakukohdeImportKomponentti(koodistoJsonRESTResourceMock, "");
 
         hakukohdeResourceMock = mock(HakukohdeResource.class);
         valintaperusteServiceMock = mock(ValintaperusteService.class);
+        koodistoJsonRESTResourceMock = mock(KoodistoJsonRESTResource.class);
 
         // ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti,
         // "valintaperusteService",
         // valintaperusteServiceMock);
+        ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti, "koodistoJsonRESTResource", koodistoJsonRESTResourceMock);
         ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti, "hakukohdeResource", hakukohdeResourceMock);
     }
 
     @Test
     public void test() throws IOException {
         final String hakukohdeOid = "1.2.246.562.5.50425195448";
+        final String hakukohdeNimirUri = "hakukohteet_535#1";
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -63,10 +75,15 @@ public class SuoritaHakukohdeImportKomponenttiTest {
         HakukohdeValintaperusteetDTO valintaperusteet = mapper.readValue(
                 Resources.toString(Resources.getResource(HAKUKOHDE_VALINTAPERUSTEET_JSON), Charsets.UTF_8),
                 HakukohdeValintaperusteetDTO.class);
+        List<KoodistoUrheilija> alakoodit = mapper.readValue(
+                Resources.toString(Resources.getResource(KOODISTO_ALAKOODIT_JSON), Charsets.UTF_8),
+                TypeFactory.defaultInstance().constructCollectionType(List.class,
+                        KoodistoUrheilija.class));
 
         when(hakukohdeResourceMock.getHakukohdeNimi(hakukohdeOid)).thenReturn(nimi);
         when(hakukohdeResourceMock.getByOID(hakukohdeOid)).thenReturn(hakukohde);
         when(hakukohdeResourceMock.getHakukohdeValintaperusteet(hakukohdeOid)).thenReturn(valintaperusteet);
+        when(koodistoJsonRESTResourceMock.getAlakoodis(hakukohdeNimirUri, 1)).thenReturn(alakoodit);
 
         // ArgumentCaptor<HakukohdeImportTyyppi> captor =
         // ArgumentCaptor.forClass(HakukohdeImportTyyppi.class);

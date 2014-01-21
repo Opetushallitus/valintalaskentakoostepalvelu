@@ -4,13 +4,19 @@ import fi.vm.sade.service.valintaperusteet.schema.*;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeValintaperusteetDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.ValintakoeRDTO;
+import fi.vm.sade.valinta.kooste.exception.KoodistoException;
+import fi.vm.sade.valinta.kooste.external.resource.haku.KoodistoJsonRESTResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.KoodistoUrheilija;
 import org.apache.camel.Body;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * User: wuoti Date: 20.5.2013 Time: 10.46
@@ -24,7 +30,19 @@ public class SuoritaHakukohdeImportKomponentti {
     @Autowired
     private HakukohdeResource hakukohdeResource;
 
-    public HakukohdeImportTyyppi suoritaHakukohdeImport(@Body// @Property(OPH.HAKUKOHDEOID)
+    private KoodistoJsonRESTResource koodistoJsonRESTResource;
+    private String koodistoResourceUrl;
+
+    private final String KOODISTO_HAKUKOHDE_URHEILIJAHAKU_SALLITTU = "urheilijankoulutus_1";
+
+    @Autowired
+    public SuoritaHakukohdeImportKomponentti(KoodistoJsonRESTResource koodistoJsonRESTResource,
+                                               @Value("${valintalaskentakoostepalvelu.koodisto.rest.url:''}") String koodistoResourceUrl) {
+        this.koodistoJsonRESTResource = koodistoJsonRESTResource;
+        this.koodistoResourceUrl = koodistoResourceUrl;
+    }
+
+    public HakukohdeImportTyyppi suoritaHakukohdeImport(@Body //@Property(OPH.HAKUKOHDEOID)
                                                                 String hakukohdeOid) {
         HakukohdeValintaperusteetDTO data = hakukohdeResource.getHakukohdeValintaperusteet(hakukohdeOid);
         HakukohdeImportTyyppi importTyyppi = new HakukohdeImportTyyppi();
@@ -139,25 +157,30 @@ public class SuoritaHakukohdeImportKomponentti {
         avainArvo.setArvo(data.getPainotettuKeskiarvoHylkaysMax().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
 
+        String nimiUri = data.getHakukohdeNimiUri().split("#")[0];
+
         avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("paasykoe_tunniste");
-        avainArvo.setArvo(data.getPaasykoeTunniste() != null ? data.getPaasykoeTunniste() : importTyyppi
-                .getHakukohdeNimi().get(0).getText()
+        avainArvo.setArvo(data.getPaasykoeTunniste() != null ? data.getPaasykoeTunniste() : nimiUri
                 + "_paasykoe");
         importTyyppi.getValintaperuste().add(avainArvo);
 
         avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("lisanaytto_tunniste");
-        avainArvo.setArvo(data.getLisanayttoTunniste() != null ? data.getLisanayttoTunniste() : importTyyppi
-                .getHakukohdeNimi().get(0).getText()
+        avainArvo.setArvo(data.getLisanayttoTunniste() != null ? data.getLisanayttoTunniste() : nimiUri
                 + "_lisanaytto");
         importTyyppi.getValintaperuste().add(avainArvo);
 
         avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("lisapiste_tunniste");
-        avainArvo.setArvo(data.getLisapisteTunniste() != null ? data.getLisapisteTunniste() : importTyyppi
-                .getHakukohdeNimi().get(0).getText()
+        avainArvo.setArvo(data.getLisapisteTunniste() != null ? data.getLisapisteTunniste() : nimiUri
                 + "_lisapiste");
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoTyyppi();
+        avainArvo.setAvain("urheilija_lisapiste_tunniste");
+        avainArvo.setArvo(data.getUrheilijaLisapisteTunniste() != null ? data.getUrheilijaLisapisteTunniste() : nimiUri
+                + "urheilija_lisapiste");
         importTyyppi.getValintaperuste().add(avainArvo);
 
         String opetuskieli = null;
@@ -177,9 +200,7 @@ public class SuoritaHakukohdeImportKomponentti {
         } else if (StringUtils.isNotBlank(opetuskieli)) {
             kielikoetunniste = "kielikoe_" + opetuskieli;
         } else {
-            kielikoetunniste = importTyyppi
-                    .getHakukohdeNimi().get(0).getText()
-                    + "_kielikoe";
+            kielikoetunniste = nimiUri + "_kielikoe";
         }
 
         avainArvo = new AvainArvoTyyppi();
@@ -193,6 +214,35 @@ public class SuoritaHakukohdeImportKomponentti {
             avainArvo.setArvo(data.getPainokertoimet().get(avain));
             importTyyppi.getValintaperuste().add(avainArvo);
         }
+
+        int versioNumero = Integer.parseInt(data.getHakukohdeNimiUri().split("#")[1]);
+        LOG.info("Haetaan alakoodit osoitteesta {}/json/relaatio/sisaltyy-alakoodit/{} versiolla {}", new Object[]{koodistoResourceUrl, nimiUri, versioNumero});
+        List<KoodistoUrheilija> urheilijaList = null;
+        try {
+            urheilijaList = koodistoJsonRESTResource.getAlakoodis(nimiUri,versioNumero);
+        } catch (Exception e) {
+            LOG.error("Alakoodien haku koodistosta hakukohteelle "+nimiUri+" päättyi virheeseen");
+            e.printStackTrace();
+        }
+        if (urheilijaList == null || urheilijaList.isEmpty()) {
+            throw new KoodistoException("Koodisto ei palauttanut yhtään koodia hakukohteelle " + nimiUri);
+        }
+        LOG.debug("Haettiin {} kpl koodeja", urheilijaList.size());
+
+        boolean urheilijaHaku = false;
+
+        for (KoodistoUrheilija urheilija : urheilijaList) {
+            LOG.debug("hakukohde: {} - alakoodi: {}", new Object[]{nimiUri, urheilija.getKoodiUri()});
+            if(urheilija.getKoodiUri().equals(KOODISTO_HAKUKOHDE_URHEILIJAHAKU_SALLITTU)) {
+                urheilijaHaku = true;
+            }
+        }
+
+        avainArvo = new AvainArvoTyyppi();
+        avainArvo.setAvain("urheilija_haku_sallittu");
+        avainArvo.setArvo(String.valueOf(urheilijaHaku));
+        importTyyppi.getValintaperuste().add(avainArvo);
+
         return importTyyppi;
     }
 

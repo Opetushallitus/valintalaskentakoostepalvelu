@@ -1,0 +1,65 @@
+
+[ {
+  "koodiUri" : "urheilijankoulutus_1",
+  "resourceUri" : "http://koodistopalvelu.opintopolku.fi/urheilijankoulutus/koodi/urheilijankoulutus_1",
+  "versio" : 1,
+  "koodisto" : {
+    "koodistoUri" : "urheilijankoulutus",
+    "organisaatioOid" : "1.2.246.562.10.00000000001",
+    "koodistoVersios" : [ 1 ]
+  },
+  "koodiArvo" : "1",
+  "paivitysPvm" : 1382967167915,
+  "voimassaAlkuPvm" : "2013-06-26",
+  "voimassaLoppuPvm" : null,
+  "tila" : "LUONNOS",
+  "metadata" : [ {
+    "nimi" : "Järjestää urheilijoille koulutusta",
+    "kuvaus" : "Järjestää urheilijoille koulutusta",
+    "lyhytNimi" : "Järjestää urheilijoille koulutusta",
+    "kayttoohje" : null,
+    "kasite" : null,
+    "sisaltaaMerkityksen" : null,
+    "eiSisallaMerkitysta" : null,
+    "huomioitavaKoodi" : null,
+    "sisaltaaKoodiston" : null,
+    "kieli" : "FI"
+  } ]
+}, {
+  "koodiUri" : "hakukelpoisuusvaatimusta_5",
+  "resourceUri" : "http://koodistopalvelu.opintopolku.fi/hakukelpoisuusvaatimusta/koodi/hakukelpoisuusvaatimusta_5",
+  "versio" : 1,
+  "koodisto" : {
+    "koodistoUri" : "hakukelpoisuusvaatimusta",
+    "organisaatioOid" : "1.2.246.562.10.00000000001",
+    "koodistoVersios" : [ 1 ]
+  },
+  "koodiArvo" : "5",
+  "paivitysPvm" : 1382966647298,
+  "voimassaAlkuPvm" : "2013-05-27",
+  "voimassaLoppuPvm" : null,
+  "tila" : "LUONNOS",
+  "metadata" : [ {
+    "nimi" : "Lukiokoulutus, peruskoulupohjainen",
+    "kuvaus" : "Perusopetuksen tai sitä vastaavan aiemman oppimäärän suorittaneet voivat hakea lukiokoulutukseen. Jos hakijalla on ulkomailla suoritettu tutkinto tai hänen oppivelvollisuutensa on keskeytynyt, hän voi hakea lukiokoulutukseen harkintaan perustuvan haun kautta. Tällöin koulutuksen järjestäjä arvioi erikseen hakijan koulutustarpeen ja edellytykset suoriutua opinnoista.",
+    "lyhytNimi" : "Lukiokoulutus, peruskoulupohjainen",
+    "kayttoohje" : null,
+    "kasite" : null,
+    "sisaltaaMerkityksen" : null,
+    "eiSisallaMerkitysta" : null,
+    "huomioitavaKoodi" : null,
+    "sisaltaaKoodiston" : null,
+    "kieli" : "FI"
+  }, {
+    "nimi" : "Gymnasieutbildning, grundskolebaserad",
+    "kuvaus" : "Om du har slutfört den grundläggande utbildningens lärokurs eller motsvarande lärokurs kan du söka till gymnasieutbildning. Om du har avlagt din examen utomlands eller avbrutit läroplikten kan du söka till gymnasieutbildning genom ansökan enligt prövning. Utbildningsanordnaren bedömer då skilt ditt utbildningsbehov och förutsättningar att klara av studierna.",
+    "lyhytNimi" : "Gymnasieutbildning, grundskolebaserad",
+    "kayttoohje" : null,
+    "kasite" : null,
+    "sisaltaaMerkityksen" : null,
+    "eiSisallaMerkitysta" : null,
+    "huomioitavaKoodi" : null,
+    "sisaltaaKoodiston" : null,
+    "kieli" : "SV"
+  } ]
+} ]
