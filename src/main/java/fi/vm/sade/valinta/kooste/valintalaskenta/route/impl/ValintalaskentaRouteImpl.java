@@ -159,7 +159,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                 //
                 .stopOnException()
                 //
-                .to("direct:suorita_haehakemus").end()
+                .bean(securityProcessor).to("direct:suorita_haehakemus").end()
                 //
                 .to("direct:suorita_valintalaskenta_komponentti");
 
