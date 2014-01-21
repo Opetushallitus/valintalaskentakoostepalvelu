@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * User: wuoti Date: 20.5.2013 Time: 10.46
  */
-@Component("suoritaHakukohdeImportKomponentti")
+//@Component("suoritaHakukohdeImportKomponentti")
 @PreAuthorize("isAuthenticated()")
 public class SuoritaHakukohdeImportKomponentti {
 
@@ -30,17 +30,12 @@ public class SuoritaHakukohdeImportKomponentti {
     @Autowired
     private HakukohdeResource hakukohdeResource;
 
+    @Autowired
     private KoodistoJsonRESTResource koodistoJsonRESTResource;
+
     private String koodistoResourceUrl;
 
     private final String KOODISTO_HAKUKOHDE_URHEILIJAHAKU_SALLITTU = "urheilijankoulutus_1";
-
-    @Autowired
-    public SuoritaHakukohdeImportKomponentti(KoodistoJsonRESTResource koodistoJsonRESTResource,
-                                               @Value("${valintalaskentakoostepalvelu.koodisto.rest.url:''}") String koodistoResourceUrl) {
-        this.koodistoJsonRESTResource = koodistoJsonRESTResource;
-        this.koodistoResourceUrl = koodistoResourceUrl;
-    }
 
     public HakukohdeImportTyyppi suoritaHakukohdeImport(@Body //@Property(OPH.HAKUKOHDEOID)
                                                                 String hakukohdeOid) {

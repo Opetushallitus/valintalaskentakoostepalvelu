@@ -46,7 +46,7 @@ public class SuoritaHakukohdeImportKomponenttiTest {
 
     @Before
     public void setUp() {
-        suoritaHakukohdeImportKomponentti = new SuoritaHakukohdeImportKomponentti(koodistoJsonRESTResourceMock, "");
+        suoritaHakukohdeImportKomponentti = new SuoritaHakukohdeImportKomponentti();
 
         hakukohdeResourceMock = mock(HakukohdeResource.class);
         valintaperusteServiceMock = mock(ValintaperusteService.class);
