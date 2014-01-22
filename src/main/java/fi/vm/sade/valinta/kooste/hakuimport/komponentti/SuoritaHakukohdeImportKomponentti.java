@@ -93,6 +93,11 @@ public class SuoritaHakukohdeImportKomponentti {
 
         AvainArvoTyyppi avainArvo = new AvainArvoTyyppi();
 
+        avainArvo.setAvain("hakukohde_oid");
+        avainArvo.setArvo(data.getOid());
+        importTyyppi.getValintaperuste().add(avainArvo);
+
+        avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("paasykoe_min");
         avainArvo.setArvo(data.getPaasykoeMin().toString());
         importTyyppi.getValintaperuste().add(avainArvo);
