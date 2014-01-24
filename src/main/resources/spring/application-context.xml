@@ -5,6 +5,7 @@
        xmlns:camel="http://camel.apache.org/schema/spring" 
        xmlns:jaxws="http://cxf.apache.org/jaxws"
        xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xmlns:p="http://www.springframework.org/schema/p"
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:http="http://cxf.apache.org/transports/http/configuration"
        xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
@@ -39,8 +40,19 @@
 
     <!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
     <!--<import resource="classpath:authentication-client.xml"/>-->
-    <bean id="ticketInterceptor" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor"/>
-    <bean id="ticketInterceptorRest" class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest"/>
+    <bean 	id="ticketCachePolicy" 
+    		class="fi.vm.sade.authentication.cas.SimpleTicketCachePolicy"/>
+    <bean 	id="proxyAuthenticator" 
+    		class="fi.vm.sade.generic.ui.portlet.security.ProxyAuthenticator"
+    		p:ticketCachePolicy-ref="ticketCachePolicy"/>
+    <bean 	id="ticketInterceptor" 
+    		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor"
+    		p:proxyAuthenticator-ref="proxyAuthenticator"/>
+    <bean 	id="ticketInterceptorRest" 
+    		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest"
+    		p:proxyAuthenticator-ref="proxyAuthenticator"/>
+    
+    
     <!-- bean id="securityPreprocessor" class="fi.vm.sade.valinta.kooste.security.SecurityPreprocessor"/-->
 
     <authorizationPolicy id="admin" access="isAuthenticated()"
