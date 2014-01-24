@@ -13,6 +13,10 @@ import org.springframework.stereotype.Component;
  *         <p/>
  *         Asentaa autentikaation workerille jos tarpeen ja taltioi
  *         autentikaation propertyyn workeria varten.
+ * 
+ *         TODO: Komponentin kaytto pitaisi jotenkin liittaa implisiittisesti
+ *         osaksi reitteja Nykyinen malli luottaa liikaa etta reitin luoja
+ *         muistaa laittaa prosessorin kaikkiin oikeisiin paikkoihin.
  */
 @Component
 public class SecurityPreprocessor implements Processor {
