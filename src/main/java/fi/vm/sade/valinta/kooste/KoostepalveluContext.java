@@ -6,6 +6,7 @@ import org.apache.camel.spi.ThreadPoolProfile;
 import org.apache.camel.spring.SpringCamelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,15 +42,16 @@ public class KoostepalveluContext {
          * @throws Exception
          */
         @Bean(name = "javaDslCamelContext")
-        public static SpringCamelContext getSpringCamelContext(ApplicationContext applicationContext,
-                RoutesBuilder[] routes) throws Exception {
+        public static SpringCamelContext getSpringCamelContext(
+                @Value("${valintakoostepalvelu.camel.threadpoolsize:50}") Integer threadPoolSize,
+                ApplicationContext applicationContext, RoutesBuilder[] routes) throws Exception {
             SpringCamelContext camelContext = new SpringCamelContext(applicationContext);
             ThreadPoolProfile t = new ThreadPoolProfile();
             t.setId("ValintalaskentakoostepalveluThreadPool");
             t.setDefaultProfile(true);
-            t.setPoolSize(50);
-            t.setMaxPoolSize(50);
-            t.setMaxQueueSize(1000);
+            t.setPoolSize(threadPoolSize);
+            t.setMaxPoolSize(threadPoolSize);
+            t.setMaxQueueSize(10000);
             t.setRejectedPolicy(ThreadPoolRejectedPolicy.CallerRuns);
             // defaultThreadPoolProfile
             camelContext.getExecutorServiceManager().setDefaultThreadPoolProfile(t);
