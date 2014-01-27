@@ -11,10 +11,22 @@ public class MetaHakukohde {
 
     private final Teksti hakukohdeNimi;
     private final Teksti tarjoajaNimi;
+    private final String hakukohteenKieli;
 
     public MetaHakukohde(Teksti hakukohdeNimi, Teksti tarjoajaNimi) {
         this.hakukohdeNimi = hakukohdeNimi;
         this.tarjoajaNimi = tarjoajaNimi;
+        this.hakukohteenKieli = null;
+    }
+
+    public MetaHakukohde(Teksti hakukohdeNimi, Teksti tarjoajaNimi, String hakukohteenKieli) {
+        this.hakukohdeNimi = hakukohdeNimi;
+        this.tarjoajaNimi = tarjoajaNimi;
+        this.hakukohteenKieli = hakukohteenKieli;
+    }
+
+    public String getHakukohteenKieli() {
+        return hakukohteenKieli;
     }
 
     public Teksti getHakukohdeNimi() {

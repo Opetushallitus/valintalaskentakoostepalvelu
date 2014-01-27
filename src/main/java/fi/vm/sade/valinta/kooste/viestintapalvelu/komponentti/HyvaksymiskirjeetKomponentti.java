@@ -1,11 +1,11 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_EROTIN;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
 import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
-import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemusUtil.ASIOINTIKIELI;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -117,17 +117,14 @@ public class HyvaksymiskirjeetKomponentti {
             final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
             final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
 
-            String preferoituKielikoodi;
-            try {
-                preferoituKielikoodi = KieliUtil.normalisoiKielikoodi(hakemus.getAnswers().getLisatiedot()
-                        .get(ASIOINTIKIELI));
-            } catch (Exception e) {
-                LOG.error("Hakemuksella {} ei ollut asiointikielta!", hakemusOid);
-                preferoituKielikoodi = KieliUtil.SUOMI;
-            }
+            // Hyvaksymiskirjeilla preferoitukieli tulee hakukohteen kielesta
+            // jarjestyksessa suomi,ruotsi,englanti
+            String preferoituKielikoodi = KieliUtil.SUOMI;
+
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
 
                 MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
+
                 Map<String, String> tulokset = new HashMap<String, String>();
 
                 tulokset.put("hakukohteenNimi",
@@ -157,6 +154,11 @@ public class HyvaksymiskirjeetKomponentti {
                 StringBuilder omatPisteet = new StringBuilder();
                 StringBuilder hyvaksytyt = new StringBuilder();
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
+                    // Hyvaksytty valintatapajonossa -- oletataan etta
+                    // hyvaksytty hakukohteeseen
+                    if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
+                        preferoituKielikoodi = metakohde.getHakukohdeNimi().getKieli();
+                    }
                     //
                     // OVT-6334 : Logiikka ei kuulu koostepalveluun!
                     //
