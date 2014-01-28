@@ -30,12 +30,9 @@ public class SuoritaHakuImportKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(SuoritaHakuImportKomponentti.class);
 
     @Autowired
-    private ValintaperusteService valintaperusteService;
-
-    @Autowired
     private HakuResource hakuResource;
 
-    private static final int MAX_COUNT = 100000;
+    private static final int MAX_COUNT = -1;
 
     public Collection<String> suoritaHakukohdeImport(@Property(OPH.HAKUOID) String hakuOid) {
         List<OidRDTO> a = hakuResource.getByOIDHakukohde(hakuOid, null, MAX_COUNT, 0, null, null, null, null);
