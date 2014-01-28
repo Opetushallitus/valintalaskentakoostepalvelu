@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,19 +12,19 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
  *         DTO hyvaksymis- ja jalkiohjauskirjeille
  */
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
-public class Kirjeet {
+public class Kirjeet<T> {
 
-    private List<Kirje> letters;
+    private List<T> letters;
 
     public Kirjeet() {
-        this.letters = new ArrayList<Kirje>();
+        this.letters = new ArrayList<T>();
     }
 
-    public Kirjeet(List<Kirje> kirjeet) {
+    public Kirjeet(List<T> kirjeet) {
         this.letters = kirjeet;
     }
 
-    public List<Kirje> getLetters() {
+    public List<T> getLetters() {
         return letters;
     }
 }
