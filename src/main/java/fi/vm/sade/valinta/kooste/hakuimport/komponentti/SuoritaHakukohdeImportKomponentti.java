@@ -216,7 +216,7 @@ public class SuoritaHakukohdeImportKomponentti {
         }
 
         int versioNumero = Integer.parseInt(data.getHakukohdeNimiUri().split("#")[1]);
-        LOG.info("Haetaan alakoodit osoitteesta {}/json/relaatio/sisaltyy-alakoodit/{} versiolla {}", new Object[]{koodistoResourceUrl, nimiUri, versioNumero});
+        LOG.debug("Haetaan alakoodit versiolla {}", new Object[]{versioNumero});
         List<KoodistoUrheilija> urheilijaList = null;
         try {
             urheilijaList = koodistoJsonRESTResource.getAlakoodis(nimiUri,versioNumero);
