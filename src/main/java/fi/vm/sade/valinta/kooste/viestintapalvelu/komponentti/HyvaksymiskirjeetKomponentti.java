@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -81,9 +80,8 @@ public class HyvaksymiskirjeetKomponentti {
                 .toString();
     }
 
-    public Kirjeet teeHyvaksymiskirjeet(@Property("kielikoodi") String kielikoodi,
-            @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid,
-            @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId) {
+    public Kirjeet<Kirje> teeHyvaksymiskirjeet(@Simple("${property.hakukohdeOid}") String hakukohdeOid,
+            @Simple("${property.hakuOid}") String hakuOid, @Simple("${property.sijoitteluajoId}") Long sijoitteluajoId) {
 
         LOG.debug("Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'", new Object[] {
                 hakukohdeOid, hakuOid, sijoitteluajoId });
@@ -211,7 +209,7 @@ public class HyvaksymiskirjeetKomponentti {
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta hyvaksymiskirjeitä {} kappaletta!", kirjeet.size());
-        Kirjeet viesti = new Kirjeet(kirjeet);
+        Kirjeet<Kirje> viesti = new Kirjeet<Kirje>(kirjeet);
         LOG.debug("\r\n{}", new ViestiWrapper(viesti));
         return viesti;
     }

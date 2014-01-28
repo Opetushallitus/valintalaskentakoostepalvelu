@@ -75,7 +75,7 @@ public class JalkiohjauskirjeetKomponentti {
                 .toString();
     }
 
-    public Kirjeet teeJalkiohjauskirjeet(@Property(OPH.HAKUOID) String hakuOid) {
+    public Kirjeet<Kirje> teeJalkiohjauskirjeet(@Property(OPH.HAKUOID) String hakuOid) {
         LOG.debug("Jalkiohjauskirjeet for haku '{}'", new Object[] { hakuOid });
         final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluProxy.ilmankoulutuspaikkaa(hakuOid,
                 SijoitteluResource.LATEST);
@@ -185,7 +185,7 @@ public class JalkiohjauskirjeetKomponentti {
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!", kirjeet.size());
-        Kirjeet viesti = new Kirjeet(kirjeet);
+        Kirjeet<Kirje> viesti = new Kirjeet<Kirje>(kirjeet);
         LOG.debug("\r\n{}", new ViestiWrapper(viesti));
         // Response response =
         // viestintapalveluProxy.haeJalkiohjauskirjeet(viesti);
