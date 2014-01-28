@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.cxf.message.Message;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 
@@ -21,6 +22,7 @@ public class GuavaTicketCachePolicy implements TicketCachePolicy {
 
     private final Cache<String, String> ticketCache;
 
+    @Autowired
     public GuavaTicketCachePolicy(
             @Value("${valintalaskentakoostepalvelu.guavaTicketCachePolicy.cacheExpirationTimeoutMinutes:10}") Long cacheExpirationTimeoutMinutes) {
         this.ticketCache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpirationTimeoutMinutes, TimeUnit.MINUTES)
