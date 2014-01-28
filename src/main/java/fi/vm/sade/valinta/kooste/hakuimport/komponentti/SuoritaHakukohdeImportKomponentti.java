@@ -91,6 +91,8 @@ public class SuoritaHakukohdeImportKomponentti {
             }
         }
 
+        String hakukohdeKoodiTunniste = data.getOid().replaceAll(".", "_");
+
         AvainArvoTyyppi avainArvo = new AvainArvoTyyppi();
 
         avainArvo.setAvain("hakukohde_oid");
@@ -161,26 +163,26 @@ public class SuoritaHakukohdeImportKomponentti {
 
         avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("paasykoe_tunniste");
-        avainArvo.setArvo(data.getPaasykoeTunniste() != null ? data.getPaasykoeTunniste() : nimiUri
+        avainArvo.setArvo(data.getPaasykoeTunniste() != null ? data.getPaasykoeTunniste() : hakukohdeKoodiTunniste
                 + "_paasykoe");
         importTyyppi.getValintaperuste().add(avainArvo);
 
         avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("lisanaytto_tunniste");
-        avainArvo.setArvo(data.getLisanayttoTunniste() != null ? data.getLisanayttoTunniste() : nimiUri
+        avainArvo.setArvo(data.getLisanayttoTunniste() != null ? data.getLisanayttoTunniste() : hakukohdeKoodiTunniste
                 + "_lisanaytto");
         importTyyppi.getValintaperuste().add(avainArvo);
 
         avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("lisapiste_tunniste");
-        avainArvo.setArvo(data.getLisapisteTunniste() != null ? data.getLisapisteTunniste() : nimiUri
+        avainArvo.setArvo(data.getLisapisteTunniste() != null ? data.getLisapisteTunniste() : hakukohdeKoodiTunniste
                 + "_lisapiste");
         importTyyppi.getValintaperuste().add(avainArvo);
 
         avainArvo = new AvainArvoTyyppi();
         avainArvo.setAvain("urheilija_lisapiste_tunniste");
-        avainArvo.setArvo(data.getUrheilijaLisapisteTunniste() != null ? data.getUrheilijaLisapisteTunniste() : nimiUri
-                + "urheilija_lisapiste");
+        avainArvo.setArvo(data.getUrheilijaLisapisteTunniste() != null ? data.getUrheilijaLisapisteTunniste() : hakukohdeKoodiTunniste
+                + "_urheilija_lisapiste");
         importTyyppi.getValintaperuste().add(avainArvo);
 
         String opetuskieli = null;
@@ -200,7 +202,7 @@ public class SuoritaHakukohdeImportKomponentti {
         } else if (StringUtils.isNotBlank(opetuskieli)) {
             kielikoetunniste = "kielikoe_" + opetuskieli;
         } else {
-            kielikoetunniste = nimiUri + "_kielikoe";
+            kielikoetunniste = hakukohdeKoodiTunniste + "_kielikoe";
         }
 
         avainArvo = new AvainArvoTyyppi();
