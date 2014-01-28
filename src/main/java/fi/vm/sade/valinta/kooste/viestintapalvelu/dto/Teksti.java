@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
+import static fi.vm.sade.valinta.kooste.util.KieliUtil.ENGLANTI;
+import static fi.vm.sade.valinta.kooste.util.KieliUtil.RUOTSI;
 import static fi.vm.sade.valinta.kooste.util.KieliUtil.SUOMI;
 import static fi.vm.sade.valinta.kooste.util.KieliUtil.normalisoiKielikoodi;
 
@@ -41,6 +43,16 @@ public class Teksti {
 
     public Teksti(String suomenkielinenTeksti) {
         this(asMap(SUOMI, suomenkielinenTeksti));
+    }
+
+    public String getKieli() {
+        if (normalisoituKieliJaKoodi.containsKey(SUOMI)) {
+            return SUOMI;
+        } else if (normalisoituKieliJaKoodi.containsKey(RUOTSI)) {
+            return RUOTSI;
+        } else {
+            return ENGLANTI;
+        }
     }
 
     /**
