@@ -91,7 +91,7 @@ public class SuoritaHakukohdeImportKomponentti {
             }
         }
 
-        String hakukohdeKoodiTunniste = data.getOid().replaceAll(".", "_");
+        String hakukohdeKoodiTunniste = data.getOid().replaceAll("\\.", "_");
 
         AvainArvoTyyppi avainArvo = new AvainArvoTyyppi();
 
