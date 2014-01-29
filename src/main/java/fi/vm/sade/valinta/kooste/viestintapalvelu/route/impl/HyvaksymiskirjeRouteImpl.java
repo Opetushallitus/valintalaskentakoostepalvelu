@@ -20,10 +20,8 @@ public class HyvaksymiskirjeRouteImpl extends SpringRouteBuilder {
     @Override
     public void configure() throws Exception {
         from(hyvaksymiskirjeet())
-        //
-                .setProperty("kielikoodi", constant("kieli_fi"))
-                // TODO: Hae osoitteet erikseen
-                // TODO: Cache ulkopuolisiin palvelukutsuihin
+        // TODO: Hae osoitteet erikseen
+        // TODO: Cache ulkopuolisiin palvelukutsuihin
                 .bean(hyvaksymiskirjeetKomponentti)
                 //
                 .bean(viestintapalveluResource, "haeHyvaksymiskirjeet");

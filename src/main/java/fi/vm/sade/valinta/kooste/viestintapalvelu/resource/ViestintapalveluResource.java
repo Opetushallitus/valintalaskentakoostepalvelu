@@ -9,7 +9,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Koekutsukirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 
 @Path("/api/v1")
@@ -25,12 +27,17 @@ public interface ViestintapalveluResource {
     @Produces(TEXT_PLAIN)
     @Consumes(APPLICATION_JSON)
     @Path("/jalkiohjauskirje/async/zip")
-    Response haeJalkiohjauskirjeet(Kirjeet kirjeet);
+    Response haeJalkiohjauskirjeet(Kirjeet<Kirje> kirjeet);
 
     @POST
     @Produces(TEXT_PLAIN)
     @Consumes(APPLICATION_JSON)
     @Path("/hyvaksymiskirje/async/zip")
-    Response haeHyvaksymiskirjeet(Kirjeet kirjeet);
+    Response haeHyvaksymiskirjeet(Kirjeet<Kirje> kirjeet);
 
+    @POST
+    @Produces(TEXT_PLAIN)
+    @Consumes(APPLICATION_JSON)
+    @Path("/koekutsukirje/async/pdf")
+    Response haeKoekutsukirjeet(Kirjeet<Koekutsukirje> kirjeet);
 }

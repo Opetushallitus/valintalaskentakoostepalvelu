@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksyttyjenOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
 
 /**
@@ -46,5 +47,12 @@ public class ViestintapalveluConfig {
         return ProxyWithAnnotationHelper.createProxy(
                 context.getEndpoint(HyvaksyttyjenOsoitetarratRoute.DIRECT_HYVAKSYTTYJEN_OSOITETARRAT),
                 HyvaksyttyjenOsoitetarratRoute.class);
+    }
+
+    @Bean
+    public KoekutsukirjeRoute getKoekutsukirjeRoute(@Qualifier("javaDslCamelContext") CamelContext context)
+            throws Exception {
+        return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(KoekutsukirjeRoute.DIRECT_KOEKUTSUKIRJEET),
+                KoekutsukirjeRoute.class);
     }
 }

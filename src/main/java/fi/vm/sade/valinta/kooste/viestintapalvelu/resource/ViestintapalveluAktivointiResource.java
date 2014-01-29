@@ -22,6 +22,7 @@ import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksyttyjenOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
 
 /**
@@ -43,6 +44,14 @@ public class ViestintapalveluAktivointiResource {
 
     @Autowired
     private OsoitetarratRoute addressLabelBatchProxy;
+    @Autowired
+    private JalkiohjauskirjeRoute jalkiohjauskirjeBatchProxy;
+    @Autowired
+    private HyvaksymiskirjeRoute hyvaksymiskirjeBatchProxy;
+    @Autowired
+    private HyvaksyttyjenOsoitetarratRoute hyvaksyttyjenOsoitetarratProxy;
+    @Autowired
+    private KoekutsukirjeRoute koekutsukirjeRoute;
 
     @GET
     @Path("/osoitetarrat/aktivoi")
@@ -62,9 +71,6 @@ public class ViestintapalveluAktivointiResource {
                     .entity(Vastaus.virhe("Osoitetarrojen luonti epäonnistui! " + e.getMessage())).build();
         }
     }
-
-    @Autowired
-    private JalkiohjauskirjeRoute jalkiohjauskirjeBatchProxy;
 
     @GET
     @Path("/jalkiohjauskirjeet/aktivoi")
@@ -92,9 +98,6 @@ public class ViestintapalveluAktivointiResource {
         }
     }
 
-    @Autowired
-    private HyvaksymiskirjeRoute hyvaksymiskirjeBatchProxy;
-
     @GET
     @Path("/hyvaksymiskirjeet/aktivoi")
     @Produces("application/json")
@@ -110,9 +113,6 @@ public class ViestintapalveluAktivointiResource {
                     .entity(Vastaus.virhe("Hyväksymiskirjeiden luonti epäonnistui! " + e.getMessage())).build();
         }
     }
-
-    @Autowired
-    private HyvaksyttyjenOsoitetarratRoute hyvaksyttyjenOsoitetarratProxy;
 
     @GET
     @Path("/hyvaksyttyjenosoitetarrat/aktivoi")
@@ -132,4 +132,20 @@ public class ViestintapalveluAktivointiResource {
         }
     }
 
+    /**
+     * 
+     * @param hakukohdeOid
+     * @param hakuOid
+     * @param sijoitteluajoId
+     * @return 200 OK
+     */
+    @GET
+    @Path("/koekutsukirjeet/aktivoi")
+    @Produces("application/json")
+    @ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa", response = Response.class)
+    public Response aktivoiKoekutsukirjeidenLuonti(@QueryParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("hakuOid") String hakuOid, @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
+        koekutsukirjeRoute.koekutsukirjeetAktivointiAsync(hakukohdeOid, hakuOid, sijoitteluajoId);
+        return Response.ok().build();
+    }
 }
