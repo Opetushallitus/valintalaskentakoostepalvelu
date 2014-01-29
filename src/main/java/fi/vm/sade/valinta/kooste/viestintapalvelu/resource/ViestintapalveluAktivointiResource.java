@@ -42,22 +42,16 @@ public class ViestintapalveluAktivointiResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(ViestintapalveluAktivointiResource.class);
 
-    private final OsoitetarratRoute addressLabelBatchProxy;
-    private final JalkiohjauskirjeRoute jalkiohjauskirjeBatchProxy;
-    private final HyvaksymiskirjeRoute hyvaksymiskirjeBatchProxy;
-    private final HyvaksyttyjenOsoitetarratRoute hyvaksyttyjenOsoitetarratProxy;
-    private final KoekutsukirjeRoute koekutsukirjeRoute;
-
     @Autowired
-    public ViestintapalveluAktivointiResource(OsoitetarratRoute addressLabelBatchProxy,
-            JalkiohjauskirjeRoute jalkiohjauskirjeBatchProxy, HyvaksymiskirjeRoute hyvaksymiskirjeBatchProxy,
-            HyvaksyttyjenOsoitetarratRoute hyvaksyttyjenOsoitetarratProxy, KoekutsukirjeRoute koekutsukirjeRoute) {
-        this.addressLabelBatchProxy = addressLabelBatchProxy;
-        this.jalkiohjauskirjeBatchProxy = jalkiohjauskirjeBatchProxy;
-        this.hyvaksymiskirjeBatchProxy = hyvaksymiskirjeBatchProxy;
-        this.hyvaksyttyjenOsoitetarratProxy = hyvaksyttyjenOsoitetarratProxy;
-        this.koekutsukirjeRoute = koekutsukirjeRoute;
-    }
+    private OsoitetarratRoute addressLabelBatchProxy;
+    @Autowired
+    private JalkiohjauskirjeRoute jalkiohjauskirjeBatchProxy;
+    @Autowired
+    private HyvaksymiskirjeRoute hyvaksymiskirjeBatchProxy;
+    @Autowired
+    private HyvaksyttyjenOsoitetarratRoute hyvaksyttyjenOsoitetarratProxy;
+    @Autowired
+    private KoekutsukirjeRoute koekutsukirjeRoute;
 
     @GET
     @Path("/osoitetarrat/aktivoi")
