@@ -40,21 +40,14 @@
 
     <!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
     <!--<import resource="classpath:authentication-client.xml"/>-->
-    <bean 	id="ticketCachePolicy"
-    		scope="prototype" 
-    		class="fi.vm.sade.valinta.kooste.GuavaTicketCachePolicy"/>
-    <bean 	id="proxyAuthenticator" 
-    		class="fi.vm.sade.generic.ui.portlet.security.ProxyAuthenticator"
-    		scope="prototype"
-    		p:ticketCachePolicy-ref="ticketCachePolicy"/>
     <bean 	id="ticketInterceptor" 
     		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor"
     		scope="prototype"
-    		p:proxyAuthenticator-ref="proxyAuthenticator"/>
+    		/>
     <bean 	id="ticketInterceptorRest"
     		scope="prototype" 
     		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest"
-    		p:proxyAuthenticator-ref="proxyAuthenticator"/>
+    		/>
     
     
     <!-- bean id="securityPreprocessor" class="fi.vm.sade.valinta.kooste.security.SecurityPreprocessor"/-->
@@ -90,7 +83,6 @@
                   address="${valintalaskentakoostepalvelu.valintaperusteService.url}">
         <jaxws:outInterceptors>
             <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-            	<property name="ticketCachePolicy" ref="ticketCachePolicy"/>
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check"/>
@@ -108,7 +100,6 @@
                   inheritHeaders="true">
         <jaxrs:outInterceptors>
             <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-            	<property name="ticketCachePolicy" ref="ticketCachePolicy"/>
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.haku-service}/j_spring_cas_security_check"/>
@@ -127,7 +118,6 @@
                   inheritHeaders="true">
         <jaxrs:outInterceptors>
             <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-            	<property name="ticketCachePolicy" ref="ticketCachePolicy"/>
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.dokumenttipalvelu}/j_spring_cas_security_check"/>
@@ -246,7 +236,6 @@
         
         jaxws:outInterceptors>
             <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-            	<property name="ticketCachePolicy" ref="ticketCachePolicy"/>
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.tarjonta-service}/j_spring_cas_security_check"/>
@@ -277,7 +266,6 @@
                   address="${valintalaskentakoostepalvelu.valintaTulosService.url}">
         <jaxws:outInterceptors>
             <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-            	<property name="ticketCachePolicy" ref="ticketCachePolicy"/>
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.valintalaskenta-service}/j_spring_cas_security_check"/>
@@ -295,7 +283,6 @@
                   address="${valintalaskentakoostepalvelu.sijoitteluService.url}">
         <jaxws:outInterceptors>
             <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-            	<property name="ticketCachePolicy" ref="ticketCachePolicy"/>
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>
@@ -310,7 +297,6 @@
                   address="${valintalaskentakoostepalvelu.koodiService.url}">
         <jaxws:outInterceptors>
             <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-            	<property name="ticketCachePolicy" ref="ticketCachePolicy"/>
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.koodisto-service}/j_spring_cas_security_check"/>
