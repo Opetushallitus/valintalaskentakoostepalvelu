@@ -40,15 +40,19 @@
 
     <!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
     <!--<import resource="classpath:authentication-client.xml"/>-->
-    <bean 	id="ticketCachePolicy" 
+    <bean 	id="ticketCachePolicy"
+    		scope="prototype" 
     		class="fi.vm.sade.valinta.kooste.GuavaTicketCachePolicy"/>
     <bean 	id="proxyAuthenticator" 
     		class="fi.vm.sade.generic.ui.portlet.security.ProxyAuthenticator"
+    		scope="prototype"
     		p:ticketCachePolicy-ref="ticketCachePolicy"/>
     <bean 	id="ticketInterceptor" 
     		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor"
+    		scope="prototype"
     		p:proxyAuthenticator-ref="proxyAuthenticator"/>
-    <bean 	id="ticketInterceptorRest" 
+    <bean 	id="ticketInterceptorRest"
+    		scope="prototype" 
     		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest"
     		p:proxyAuthenticator-ref="proxyAuthenticator"/>
     
