@@ -170,9 +170,10 @@ public class ViestintapalveluAktivointiResource {
 	@ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa", response = Response.class)
 	public Response aktivoiKoekutsukirjeidenLuonti(
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
+			@QueryParam("valintakoeOid") List<String> valintakoeOids,
 			String letterBodyText) {
 		koekutsukirjeRoute.koekutsukirjeetAktivointiAsync(hakukohdeOid,
-				letterBodyText);
+				valintakoeOids, letterBodyText);
 		return Response.ok().build();
 	}
 }
