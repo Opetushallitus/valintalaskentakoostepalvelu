@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.camel.Header;
+import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ public class KoekutsukirjeetKomponentti {
 	}
 
 	public Kirjeet<Koekutsukirje> valmistaKoekutsukirjeet(
-			@Header("hakemukset") List<Hakemus> hakemukset,
+			@Body List<Hakemus> hakemukset,
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
 			@Property(OPH.LETTER_BODY_TEXT) String letterBodyText)
 			throws Exception {
