@@ -172,8 +172,12 @@ public class ViestintapalveluAktivointiResource {
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintakoeOid") List<String> valintakoeOids,
 			String letterBodyText) {
-		koekutsukirjeRoute.koekutsukirjeetAktivointiAsync(hakukohdeOid,
-				valintakoeOids, letterBodyText);
+		try {
+			koekutsukirjeRoute.koekutsukirjeetAktivointiAsync(hakukohdeOid,
+					valintakoeOids, letterBodyText);
+		} catch (Exception e) {
+			return Response.serverError().entity(e.getMessage()).build();
+		}
 		return Response.ok().build();
 	}
 }
