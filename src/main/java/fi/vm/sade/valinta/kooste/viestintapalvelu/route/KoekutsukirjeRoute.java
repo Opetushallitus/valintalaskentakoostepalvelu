@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 import org.apache.camel.Property;
@@ -13,11 +14,15 @@ import fi.vm.sade.valinta.kooste.OPH;
  */
 public interface KoekutsukirjeRoute {
 
-    void koekutsukirjeetAktivointi(@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
-            @Property(OPH.HAKUOID) String hakuOid, @Property(OPH.SIJOITTELUAJOID) Long sijoitteluajoId);
+	void koekutsukirjeetAktivointi(
+			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
+			@Property("valintakoeOid") List<String> valintakoeOid,
+			@Property(OPH.LETTER_BODY_TEXT) String letterBodyText);
 
-    Future<Void> koekutsukirjeetAktivointiAsync(@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
-            @Property(OPH.HAKUOID) String hakuOid, @Property(OPH.SIJOITTELUAJOID) Long sijoitteluajoId);
+	Future<Void> koekutsukirjeetAktivointiAsync(
+			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
+			@Property("valintakoeOid") List<String> valintakoeOid,
+			@Property(OPH.LETTER_BODY_TEXT) String letterBodyText);
 
-    final String DIRECT_KOEKUTSUKIRJEET = "direct:koekutsukirjeet";
+	final String DIRECT_KOEKUTSUKIRJEET = "direct:koekutsukirjeet";
 }

@@ -13,16 +13,24 @@ import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 @Component("valintatietoHakukohteelleKomponentti")
 public class ValintatietoHakukohteelleKomponentti {
 
-    private ValintatietoService valintatietoService;
+	private ValintatietoService valintatietoService;
 
-    @Autowired
-    public ValintatietoHakukohteelleKomponentti(
-            @Qualifier("valintatietoServiceAsAdmin") ValintatietoService valintatietoService) {
-        this.valintatietoService = valintatietoService;
-    }
+	@Autowired
+	public ValintatietoHakukohteelleKomponentti(
+			@Qualifier("valintatietoServiceAsAdmin") ValintatietoService valintatietoService) {
+		this.valintatietoService = valintatietoService;
+	}
 
-    public List<HakemusOsallistuminenTyyppi> valintatiedotHakukohteelle(
-            @Property("valintakoeOid") List<String> valintakoeOids, @Property("hakukohdeOid") String hakukohdeOid) {
-        return valintatietoService.haeValintatiedotHakukohteelle(valintakoeOids, hakukohdeOid);
-    }
+	public List<HakemusOsallistuminenTyyppi> valintatiedotHakukohteelle(
+			@Property("valintakoeOid") List<String> valintakoeOids,
+			@Property("hakukohdeOid") String hakukohdeOid) {
+
+		List<HakemusOsallistuminenTyyppi> osallistujat = valintatietoService
+				.haeValintatiedotHakukohteelle(valintakoeOids, hakukohdeOid);
+		if (osallistujat == null || osallistujat.isEmpty()) {
+			throw new RuntimeException(
+					"ValintatietoService palautti tyhjan osallistujajoukon.");
+		}
+		return osallistujat;
+	}
 }
