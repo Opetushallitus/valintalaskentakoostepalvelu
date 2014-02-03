@@ -1,0 +1,16 @@
+package fi.vm.sade.valinta.kooste;
+
+import org.apache.cxf.message.Message;
+
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ * @Deprecated Ainoastaan Cache-ongelmien poistotarkoituksiin.
+ */
+@Deprecated
+public class SecurityTicketOutInterceptorRest extends
+		AbstractSecurityTicketOutInterceptor<Message> {
+	public SecurityTicketOutInterceptorRest() {
+	}
+}
