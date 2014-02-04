@@ -42,10 +42,10 @@
     <!--<import resource="classpath:authentication-client.xml"/>-->
     <bean 	id="ticketInterceptor" 
     		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor"
-    		scope="session"
+    		scope="prototype"
     		/>
     <bean 	id="ticketInterceptorRest"
-    		scope="session" 
+    		scope="prototype" 
     		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest"
     		/>
     
