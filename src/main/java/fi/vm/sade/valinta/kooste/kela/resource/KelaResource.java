@@ -6,7 +6,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,8 +19,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
-import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +79,8 @@ public class KelaResource {
 	 */
 	@Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}")
 	String baseAddress;
+	@Autowired
+	HakuResource hakuResource;
 
 	@GET
 	@Path("/test")
@@ -89,26 +88,26 @@ public class KelaResource {
 	public Response performanceTest(@QueryParam("threads") Integer threads,
 			@QueryParam("works") Integer works,
 			final @QueryParam("hakuOid") String hakuOid) {
-		LOG.info("Number of threads {} and number of works {} hakuOid",
+		LOG.info("Number of threads {} and number of works {} hakuOid {}",
 				new Object[] { threads, works, hakuOid });
 		if (works == null || threads == null || hakuOid == null) {
 			LOG.error("Threads and works query parameter is mandatory!");
 			return Response.serverError().build();
 		}
 
-		List<?> providers = Arrays.asList(new JacksonJsonProvider());
-		final HakuResource hakuResource = JAXRSClientFactory.create(
-				baseAddress, HakuResource.class, providers, true);
 		ExecutorService e = Executors.newFixedThreadPool(threads);
-		for (int i = 0; i < works; ++i) {
-			e.submit(new Runnable() {
+		final Runnable r = new Runnable() {
 
-				@Override
-				public void run() {
-					hakuResource.getByOID(hakuOid);
-				}
-			});
+			@Override
+			public void run() {
+
+				hakuResource.getByOID(hakuOid);
+			}
+		};
+		for (int i = 0; i < works; ++i) {
+			e.submit(r);
 		}
+		LOG.info("Tyot submitattu!");
 		return Response.ok().build();
 	}
 

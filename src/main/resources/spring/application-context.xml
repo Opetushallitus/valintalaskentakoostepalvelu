@@ -48,7 +48,10 @@
     		scope="prototype" 
     		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest"
     		/>
-    
+    <bean 	id="noCacheTicketInterceptorRest"
+    		scope="prototype" 
+    		class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptorRest"
+    		/>
     
     <!-- bean id="securityPreprocessor" class="fi.vm.sade.valinta.kooste.security.SecurityPreprocessor"/-->
 
@@ -162,6 +165,9 @@
                   serviceClass="fi.vm.sade.tarjonta.service.resources.HakuResource"
                   inheritHeaders="true">
         <jaxrs:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"/></jaxrs:properties>
+        <jaxrs:outInterceptors>
+            <ref bean="noCacheTicketInterceptorRest"/>
+        </jaxrs:outInterceptors>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
