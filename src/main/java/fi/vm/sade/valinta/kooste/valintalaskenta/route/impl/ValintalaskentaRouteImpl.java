@@ -33,315 +33,384 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 @Component
 public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaRouteImpl.class);
-    // private static final String ENSIMMAINEN_VIRHE =
-    // "ensimmainen_virhe_reitilla";
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ValintalaskentaRouteImpl.class);
+	// private static final String ENSIMMAINEN_VIRHE =
+	// "ensimmainen_virhe_reitilla";
 
-    @Autowired
-    private SecurityPreprocessor securityProcessor;
+	@Autowired
+	private SecurityPreprocessor securityProcessor;
 
-    @Autowired
-    private SuoritaLaskentaKomponentti suoritaLaskentaKomponentti;
+	@Autowired
+	private SuoritaLaskentaKomponentti suoritaLaskentaKomponentti;
 
-    @Autowired
-    private HaeHakukohteetTarjonnaltaKomponentti haeHakukohteetTarjonnaltaKomponentti;
+	@Autowired
+	private HaeHakukohteetTarjonnaltaKomponentti haeHakukohteetTarjonnaltaKomponentti;
 
-    @Autowired
-    private HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
+	@Autowired
+	private HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
 
-    @Autowired
-    private HaeHakemusKomponentti haeHakemusKomponentti;
+	@Autowired
+	private HaeHakemusKomponentti haeHakemusKomponentti;
 
-    @Autowired
-    private HaeValintaperusteetKomponentti haeValintaperusteetKomponentti;
+	@Autowired
+	private HaeValintaperusteetKomponentti haeValintaperusteetKomponentti;
 
-    @Override
-    public void configure() throws Exception {
-        /**
-         * Laskenta dead-letter-channel. Nyt ainoastaan paattaa prosessin.
-         * Jatkossa lisaa metadataa paatettyyn prosessiin yllapitajalle.
-         */
+	@Override
+	public void configure() throws Exception {
+		/**
+		 * Laskenta dead-letter-channel. Nyt ainoastaan paattaa prosessin.
+		 * Jatkossa lisaa metadataa paatettyyn prosessiin yllapitajalle.
+		 */
 
-        from(suoritaValintalaskentaHaeValintaperusteetDeadLetterChannel())
-        //
-                .setHeader(
-                        "message",
-                        simple("[${property.authentication.name}] Valintaperusteiden haku ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
-                //
-                .to(fail());
+		from(suoritaValintalaskentaHaeValintaperusteetDeadLetterChannel())
+		//
+				.setHeader(
+						"message",
+						simple("[${property.authentication.name}] Valintaperusteiden haku ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
+				//
+				.to(fail());
 
-        from(suoritaValintalaskentaKomponenttiDeadLetterChannel())
-        //
-                .setHeader(
-                        "message",
-                        simple("[${property.authentication.name}] Valinta ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
-                //
-                .to(fail());
-        from(suoritaValintalaskentaDeadLetterChannel())
-        //
-                .setHeader(
-                        "message",
-                        simple("[${property.authentication.name}] Valintalaskennan suoritus ei toimi hakukohteelle ${property.hakukohdeOid} ja valinnanvaiheelle ${property.valinnanvaihe}"))
-                //
-                .to(fail());
-        from(suoritaValintalaskentaHaeHakemusDeadLetterChannel())
-        //
-                .setHeader(
-                        "message",
-                        simple("[${property.authentication.name}] Haku-app ei toimi hakemukselle ${header.hakemusOid} hakukohteessa ${property.hakukohdeOid}"))
-                //
-                .to(fail());
-        from(suoritaHakukohteelleValintalaskentaDeadLetterChannel())
-        //
-                .setHeader(
-                        "message",
-                        simple("[${property.authentication.name}] Valintaperusteiden haku ei toimi: Hakukohteelle ${property.hakukohdeOid} ja valinnanvaiheelle ${property.valinnanvaihe}"))
-                //
-                .to(fail());
-        from(suoritaHaulleValintalaskentaDeadLetterChannel())
-        //
-                .setHeader("message",
-                        simple("[${property.authentication.name}] Tarjonta ei toimi: Haulle ${property.hakuOid}"))
-                //
-                .to(fail());
+		from(suoritaValintalaskentaKomponenttiDeadLetterChannel())
+		//
+				.setHeader(
+						"message",
+						simple("[${property.authentication.name}] Valinta ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
+				//
+				.to(fail());
+		from(suoritaValintalaskentaDeadLetterChannel())
+		//
+				.setHeader(
+						"message",
+						simple("[${property.authentication.name}] Valintalaskennan suoritus ei toimi hakukohteelle ${property.hakukohdeOid} ja valinnanvaiheelle ${property.valinnanvaihe}"))
+				//
+				.to(fail());
+		from(suoritaValintalaskentaHaeHakemusDeadLetterChannel())
+		//
+				.setHeader(
+						"message",
+						simple("[${property.authentication.name}] Haku-app ei toimi hakemukselle ${header.hakemusOid} hakukohteessa ${property.hakukohdeOid}"))
+				//
+				.to(fail());
+		from(suoritaHakukohteelleValintalaskentaDeadLetterChannel())
+		//
+				.setHeader(
+						"message",
+						simple("[${property.authentication.name}] Valintaperusteiden haku ei toimi: Hakukohteelle ${property.hakukohdeOid} ja valinnanvaiheelle ${property.valinnanvaihe}"))
+				//
+				.to(fail());
+		from(suoritaHaulleValintalaskentaDeadLetterChannel())
+		//
+				.setHeader(
+						"message",
+						simple("[${property.authentication.name}] Tarjonta ei toimi: Haulle ${property.hakuOid}"))
+				//
+				.to(fail());
 
-        from("direct:suorita_haehakemus")
-                .errorHandler(
-                        deadLetterChannel(suoritaValintalaskentaHaeHakemusDeadLetterChannel()).maximumRedeliveries(10)
-                                .redeliveryDelay(300L)
-                                // log exhausted stacktrace
-                                .logExhaustedMessageHistory(true).logExhausted(true)
-                                // hide retry/handled stacktrace
-                                .logStackTrace(false).logRetryStackTrace(false).logHandled(false))
-                //
-                .setHeader(OPH.HAKEMUSOID, body())
-                //
-                .to("log:direct_suorita_haehakemus?level=INFO&showProperties=true")
-                //
-                .bean(securityProcessor)
-                //
-                .bean(haeHakemusKomponentti).convertBodyTo(HakemusTyyppi.class);
+		from("direct:suorita_haehakemus")
+				.errorHandler(
+						deadLetterChannel(
+								suoritaValintalaskentaHaeHakemusDeadLetterChannel())
+								.maximumRedeliveries(10)
+								.redeliveryDelay(300L)
+								// log exhausted stacktrace
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true)
+								// hide retry/handled stacktrace
+								.logStackTrace(false).logRetryStackTrace(false)
+								.logHandled(false))
+				//
+				.setHeader(OPH.HAKEMUSOID, body())
+				//
+				.to("log:direct_suorita_haehakemus?level=INFO&showProperties=true")
+				//
+				.bean(securityProcessor)
+				//
+				.bean(haeHakemusKomponentti).convertBodyTo(HakemusTyyppi.class);
 
-        from("direct:suorita_valintalaskenta_komponentti")
-        //
-                .errorHandler(
-                        deadLetterChannel(suoritaValintalaskentaKomponenttiDeadLetterChannel()).maximumRedeliveries(10)
-                                .redeliveryDelay(300L)
-                                // log exhausted stacktrace
-                                .logExhaustedMessageHistory(true).logExhausted(true)
-                                // hide retry/handled stacktrace
-                                .logStackTrace(false).logRetryStackTrace(false).logHandled(false))
-                //
-                .bean(suoritaLaskentaKomponentti)
-                //
-                .bean(hakukohdeKasiteltyProsessille());
-        /**
-         * Alireitti yhden hakukohteen laskentaan
-         */
-        from(suoritaValintalaskenta()) // jos reitti epaonnistuu parent
-                                       // failaa
-                //
-                .errorHandler(deadLetterChannel(suoritaValintalaskentaDeadLetterChannel()))
-                //
-                .to("log:direct_suorita_valintalaskenta?level=INFO")
-                //
-                .bean(securityProcessor)
-                // hakee valintaperusteet hakukohdeOid:lla
-                .to("direct:valintalaskenta_haeValintaperusteet")
-                //
-                .bean(haeHakukohteenHakemuksetKomponentti)
-                //
-                .bean(new HakemusOidSplitter())
-                //
-                .to("log:direct_suorita_valintalaskenta_pre_split_hakemukset?level=INFO")
-                //
-                .split(body(),
-                        new FlexibleAggregationStrategy<HakemusTyyppi>().storeInHeader("hakemustyypit")
-                                .accumulateInCollection(ArrayList.class))
-                //
-                .shareUnitOfWork()
-                //
-                .parallelProcessing()
-                //
-                .stopOnException()
-                //
-                .bean(securityProcessor)
-                //
-                .to("direct:suorita_haehakemus").end()
-                //
-                .bean(securityProcessor)
-                //
-                .to("direct:suorita_valintalaskenta_komponentti");
+		from("direct:suorita_valintalaskenta_komponentti")
+		//
+				.errorHandler(
+						deadLetterChannel(
+								suoritaValintalaskentaKomponenttiDeadLetterChannel())
+								//
+								.maximumRedeliveries(3)
+								//
+								.redeliveryDelay(300L)
+								// log exhausted stacktrace
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true)
+								// hide retry/handled stacktrace
+								.logStackTrace(false).logRetryStackTrace(false)
+								.logHandled(false))
+				//
+				.bean(suoritaLaskentaKomponentti)
+				//
+				.bean(hakukohdeKasiteltyProsessille());
 
-        from(haunValintalaskenta())
-        //
-                .errorHandler(deadLetterChannel(suoritaHaulleValintalaskentaDeadLetterChannel()))
-                //
-                .bean(securityProcessor)
-                //
-                // .setProperty(ENSIMMAINEN_VIRHE, constant(new
-                // AtomicBoolean(true)))
-                //
-                .process(luoProsessiHaunValintalaskennalle())
-                //
-                .to(start())
-                //
-                .bean(haeHakukohteetTarjonnaltaKomponentti)
-                //
-                .process(paivitaHakukohteidenMaaraProsessille())
-                // Collection<HakukohdeTyyppi>
-                .bean(new SplitHakukohteetKomponentti())
-                // Collection<String>
-                .split(body())
-                //
-                .shareUnitOfWork()
-                //
-                .parallelProcessing()
-                //
-                .stopOnException()
-                //
-                .setProperty("hakukohdeOid", body())
-                //
-                .to(suoritaValintalaskenta())
-                // end splitter
-                .end()
-                // route done
-                .to(finish());
-        from("direct:valintalaskenta_haeValintaperusteet")
-        //
-                .errorHandler(
-                        deadLetterChannel(suoritaValintalaskentaHaeValintaperusteetDeadLetterChannel())
-                                .maximumRedeliveries(10).redeliveryDelay(300L)
-                                // log exhausted stacktrace
-                                .logExhaustedMessageHistory(true).logExhausted(true)
-                                // hide retry/handled stacktrace
-                                .logStackTrace(false).logRetryStackTrace(false).logHandled(false))
-                //
-                .bean(haeValintaperusteetKomponentti)
-                //
-                .setProperty("valintaperusteet", body());
-        from(hakukohteenValintalaskenta())
-        //
-                .errorHandler(deadLetterChannel(suoritaHakukohteelleValintalaskentaDeadLetterChannel()))
-                //
-                .bean(securityProcessor)
-                //
-                .setHeader("hakukohteitaYhteensa", constant(1))
-                //
-                .process(luoProsessiHakukohteenValintalaskennalle())
-                //
-                .to(start())
-                //
-                .to(suoritaValintalaskenta())
-                //
-                .to(finish());
+		from("direct:hae_hakukohteen_hakemusten_oidit")
+		//
+				.errorHandler(
+						deadLetterChannel(
+								suoritaValintalaskentaKomponenttiDeadLetterChannel())
+								//
+								.maximumRedeliveries(3)
+								//
+								.redeliveryDelay(300L)
+								// log exhausted stacktrace
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true)
+								// hide retry/handled stacktrace
+								.logStackTrace(false).logRetryStackTrace(false)
+								.logHandled(false))
+				//
+				.bean(haeHakukohteenHakemuksetKomponentti)
+				//
+				.bean(new HakemusOidSplitter())
+				//
+				.setHeader("hakemusOidit", body());
 
-    }
+		from("direct:suorita_valintalaskenta_loppuun")
+				//
+				.errorHandler(
+						deadLetterChannel(suoritaValintalaskentaDeadLetterChannel()))
+				// hakee valintaperusteet hakukohdeOid:lla
+				.to("direct:valintalaskenta_haeValintaperusteet")
+				//
+				.to("log:direct_suorita_valintalaskenta_pre_split_hakemukset?level=INFO")
+				//
+				.split(header("hakemusOidit"),
+						new FlexibleAggregationStrategy<HakemusTyyppi>()
+								.storeInHeader("hakemustyypit")
+								.accumulateInCollection(ArrayList.class))
+				//
+				.shareUnitOfWork()
+				//
+				.parallelProcessing()
+				//
+				.stopOnException()
+				//
+				.bean(securityProcessor)
+				//
+				.to("direct:suorita_haehakemus").end()
+				//
+				.bean(securityProcessor)
+				//
+				.to("direct:suorita_valintalaskenta_komponentti");
 
-    private String suoritaValintalaskenta() {
-        return "direct:suorita_valintalaskenta";
-    }
+		/**
+		 * Alireitti yhden hakukohteen laskentaan
+		 */
+		from(suoritaValintalaskenta())
+				// jos reitti epaonnistuu parent
+				// failaa
+				//
+				.errorHandler(
+						deadLetterChannel(suoritaValintalaskentaDeadLetterChannel()))
+				//
+				.to("log:direct_suorita_valintalaskenta?level=INFO")
+				//
+				.bean(securityProcessor)
+				//
+				.to("direct:hae_hakukohteen_hakemusten_oidit")
+				//
+				.choice()
+				.when(simple("in.header.hakemusOidit.isEmpty()"))
+				// VT-797
+				.log("Hakukohteessa ${property.hakukohdeOid} ei ole hakemuksia!")
+				//
+				.otherwise()
+				//
+				.to("direct:suorita_valintalaskenta_loppuun")
+				//
+				.end();
 
-    private Processor paivitaHakukohteidenMaaraProsessille() {
-        return new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                ValintalaskentaProsessi valintalaskentaProsessi = exchange.getProperty(prosessi(),
-                        ValintalaskentaProsessi.class);
-                try {
-                    valintalaskentaProsessi.setHakukohteitaYhteensa(exchange.getIn().getBody(List.class).size());
-                } catch (Exception e) {
-                    LOG.error("Tarjonnasta palautui tyhjä joukko hakukohteita haulle!");
-                }
-            }
-        };
-    }
+		from(haunValintalaskenta())
+		//
+				.errorHandler(
+						deadLetterChannel(suoritaHaulleValintalaskentaDeadLetterChannel()))
+				//
+				.bean(securityProcessor)
+				//
+				// .setProperty(ENSIMMAINEN_VIRHE, constant(new
+				// AtomicBoolean(true)))
+				//
+				.process(luoProsessiHaunValintalaskennalle())
+				//
+				.to(start())
+				//
+				.bean(haeHakukohteetTarjonnaltaKomponentti)
+				//
+				.process(paivitaHakukohteidenMaaraProsessille())
+				// Collection<HakukohdeTyyppi>
+				.bean(new SplitHakukohteetKomponentti())
+				// Collection<String>
+				.split(body())
+				//
+				.shareUnitOfWork()
+				//
+				.parallelProcessing()
+				//
+				.stopOnException()
+				//
+				.setProperty("hakukohdeOid", body())
+				//
+				.to(suoritaValintalaskenta())
+				// end splitter
+				.end()
+				// route done
+				.to(finish());
+		from("direct:valintalaskenta_haeValintaperusteet")
+		//
+				.errorHandler(
+						deadLetterChannel(
+								suoritaValintalaskentaHaeValintaperusteetDeadLetterChannel())
+								.maximumRedeliveries(10)
+								.redeliveryDelay(300L)
+								// log exhausted stacktrace
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true)
+								// hide retry/handled stacktrace
+								.logStackTrace(false).logRetryStackTrace(false)
+								.logHandled(false))
+				//
+				.bean(haeValintaperusteetKomponentti)
+				//
+				.setProperty("valintaperusteet", body());
+		from(hakukohteenValintalaskenta())
+		//
+				.errorHandler(
+						deadLetterChannel(suoritaHakukohteelleValintalaskentaDeadLetterChannel()))
+				//
+				.bean(securityProcessor)
+				//
+				.setHeader("hakukohteitaYhteensa", constant(1))
+				//
+				.process(luoProsessiHakukohteenValintalaskennalle())
+				//
+				.to(start())
+				//
+				.to(suoritaValintalaskenta())
+				//
+				.to(finish());
 
-    private Processor hakukohdeKasiteltyProsessille() {
-        return new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                ValintalaskentaProsessi valintalaskentaProsessi = exchange.getProperty(prosessi(),
-                        ValintalaskentaProsessi.class);
-                valintalaskentaProsessi.addHakukohde(exchange.getProperty(OPH.HAKUKOHDEOID, String.class));
-            }
-        };
-    }
+	}
 
-    private Processor luoProsessiHaunValintalaskennalle() {
-        return new Processor() {
-            public void process(Exchange exchange) throws Exception {
+	private String suoritaValintalaskenta() {
+		return "direct:suorita_valintalaskenta";
+	}
 
-                exchange.setProperty(kuvaus(), "Valintalaskenta haulle");
-                exchange.setProperty(
-                        prosessi(),
-                        new ValintalaskentaProsessi("Valintalaskenta", "Haulle", exchange.getProperty(OPH.HAKUOID,
-                                String.class), exchange.getIn().getHeader("hakukohteitaYhteensa", Integer.class),
-                                exchange.getProperty(OPH.VALINNANVAIHE, Integer.class)));
-            }
-        };
-    }
+	private Processor paivitaHakukohteidenMaaraProsessille() {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				ValintalaskentaProsessi valintalaskentaProsessi = exchange
+						.getProperty(prosessi(), ValintalaskentaProsessi.class);
+				try {
+					valintalaskentaProsessi.setHakukohteitaYhteensa(exchange
+							.getIn().getBody(List.class).size());
+				} catch (Exception e) {
+					LOG.error("Tarjonnasta palautui tyhjä joukko hakukohteita haulle!");
+				}
+			}
+		};
+	}
 
-    private Processor luoProsessiHakukohteenValintalaskennalle() {
-        return new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                exchange.setProperty(kuvaus(), "Valintalaskenta hakukohteelle");
-                exchange.setProperty(
-                        prosessi(),
-                        new ValintalaskentaProsessi("Valintalaskenta", "Hakukohteelle", exchange.getProperty(
-                                OPH.HAKUOID, String.class), exchange.getIn().getHeader("hakukohteitaYhteensa",
-                                Integer.class), exchange.getProperty(OPH.VALINNANVAIHE, Integer.class)));
-            }
-        };
-    }
+	private Processor hakukohdeKasiteltyProsessille() {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				ValintalaskentaProsessi valintalaskentaProsessi = exchange
+						.getProperty(prosessi(), ValintalaskentaProsessi.class);
+				valintalaskentaProsessi.addHakukohde(exchange.getProperty(
+						OPH.HAKUKOHDEOID, String.class));
+			}
+		};
+	}
 
-    private static String kuvaus() {
-        return ValvomoAdminService.PROPERTY_VALVOMO_PROSESSIKUVAUS;
-    }
+	private Processor luoProsessiHaunValintalaskennalle() {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
 
-    private static String prosessi() {
-        return ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI;
-    }
+				exchange.setProperty(kuvaus(), "Valintalaskenta haulle");
+				exchange.setProperty(
+						prosessi(),
+						new ValintalaskentaProsessi("Valintalaskenta",
+								"Haulle", exchange.getProperty(OPH.HAKUOID,
+										String.class), exchange.getIn()
+										.getHeader("hakukohteitaYhteensa",
+												Integer.class), exchange
+										.getProperty(OPH.VALINNANVAIHE,
+												Integer.class)));
+			}
+		};
+	}
 
-    private static String fail() {
-        return "bean:valintalaskentaValvomo?method=fail";
-    }
+	private Processor luoProsessiHakukohteenValintalaskennalle() {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				exchange.setProperty(kuvaus(), "Valintalaskenta hakukohteelle");
+				exchange.setProperty(
+						prosessi(),
+						new ValintalaskentaProsessi("Valintalaskenta",
+								"Hakukohteelle", exchange.getProperty(
+										OPH.HAKUOID, String.class), exchange
+										.getIn().getHeader(
+												"hakukohteitaYhteensa",
+												Integer.class), exchange
+										.getProperty(OPH.VALINNANVAIHE,
+												Integer.class)));
+			}
+		};
+	}
 
-    private static String start() {
-        return "bean:valintalaskentaValvomo?method=start";
-    }
+	private static String kuvaus() {
+		return ValvomoAdminService.PROPERTY_VALVOMO_PROSESSIKUVAUS;
+	}
 
-    private static String finish() {
-        return "bean:valintalaskentaValvomo?method=finish";
-    }
+	private static String prosessi() {
+		return ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI;
+	}
 
-    private static String suoritaValintalaskentaHaeValintaperusteetDeadLetterChannel() {
-        return "direct:suorita_valintalaskenta_haevalintaperusteet_deadletterchannel";
-    }
+	private static String fail() {
+		return "bean:valintalaskentaValvomo?method=fail";
+	}
 
-    private static String suoritaValintalaskentaKomponenttiDeadLetterChannel() {
-        return "direct:suorita_valintalaskenta_komponentti_deadletterchannel";
-    }
+	private static String start() {
+		return "bean:valintalaskentaValvomo?method=start";
+	}
 
-    private static String suoritaHakukohteelleValintalaskentaDeadLetterChannel() {
-        return "direct:suorita_hakukohteelle_valintalaskenta_deadletterchannel";
-    }
+	private static String finish() {
+		return "bean:valintalaskentaValvomo?method=finish";
+	}
 
-    private static String suoritaHaulleValintalaskentaDeadLetterChannel() {
-        return "direct:suorita_haulle_valintalaskenta_deadletterchannel";
-    }
+	private static String suoritaValintalaskentaHaeValintaperusteetDeadLetterChannel() {
+		return "direct:suorita_valintalaskenta_haevalintaperusteet_deadletterchannel";
+	}
 
-    private static String suoritaValintalaskentaDeadLetterChannel() {
-        return "direct:suorita_valintalaskenta_deadletterchannel";
-    }
+	private static String suoritaValintalaskentaKomponenttiDeadLetterChannel() {
+		return "direct:suorita_valintalaskenta_komponentti_deadletterchannel";
+	}
 
-    private static String suoritaValintalaskentaHaeHakemusDeadLetterChannel() {
-        return "direct:suorita_laskenta_haehakemus_deadletterchannel";
-    }
+	private static String suoritaHakukohteelleValintalaskentaDeadLetterChannel() {
+		return "direct:suorita_hakukohteelle_valintalaskenta_deadletterchannel";
+	}
 
-    private String hakukohteenValintalaskenta() {
-        return HakukohteenValintalaskentaRoute.DIRECT_VALINTALASKENTA_HAKUKOHTEELLE;
-    }
+	private static String suoritaHaulleValintalaskentaDeadLetterChannel() {
+		return "direct:suorita_haulle_valintalaskenta_deadletterchannel";
+	}
 
-    private String haunValintalaskenta() {
-        return HaunValintalaskentaRoute.DIRECT_VALINTALASKENTA_HAULLE;
-    }
+	private static String suoritaValintalaskentaDeadLetterChannel() {
+		return "direct:suorita_valintalaskenta_deadletterchannel";
+	}
+
+	private static String suoritaValintalaskentaHaeHakemusDeadLetterChannel() {
+		return "direct:suorita_laskenta_haehakemus_deadletterchannel";
+	}
+
+	private String hakukohteenValintalaskenta() {
+		return HakukohteenValintalaskentaRoute.DIRECT_VALINTALASKENTA_HAKUKOHTEELLE;
+	}
+
+	private String haunValintalaskenta() {
+		return HaunValintalaskentaRoute.DIRECT_VALINTALASKENTA_HAULLE;
+	}
 }
