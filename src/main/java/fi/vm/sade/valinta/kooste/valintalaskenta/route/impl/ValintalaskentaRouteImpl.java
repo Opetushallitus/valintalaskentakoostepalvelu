@@ -221,6 +221,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				.log(LoggingLevel.WARN,
 						"Hakukohteessa ${property.hakukohdeOid} ei ole hakemuksia!")
 				//
+				.bean(hakukohdeKasiteltyProsessille())
+				//
 				.otherwise()
 				//
 				.to("direct:suorita_valintalaskenta_loppuun")
