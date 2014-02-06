@@ -217,33 +217,36 @@ public class SuoritaHakukohdeImportKomponentti {
             importTyyppi.getValintaperuste().add(avainArvo);
         }
 
-        int versioNumero = Integer.parseInt(data.getHakukohdeNimiUri().split("#")[1]);
-        LOG.debug("Haetaan alakoodit versiolla {}", new Object[]{versioNumero});
-        List<KoodistoUrheilija> urheilijaList = null;
-        try {
-            urheilijaList = koodistoJsonRESTResource.getAlakoodis(nimiUri,versioNumero);
-        } catch (Exception e) {
-            LOG.error("Alakoodien haku koodistosta hakukohteelle "+nimiUri+" päättyi virheeseen");
-            e.printStackTrace();
-        }
-        if (urheilijaList == null || urheilijaList.isEmpty()) {
-            throw new KoodistoException("Koodisto ei palauttanut yhtään koodia hakukohteelle " + nimiUri);
-        }
-        LOG.debug("Haettiin {} kpl koodeja", urheilijaList.size());
+        // Koodisto-relaation tarkistus poistettu, koska tieto tulee eripaikasta ammattilliseen ja lukiokoulutukseen
+        // Lisätään tieto tarjontaan
 
-        boolean urheilijaHaku = false;
-
-        for (KoodistoUrheilija urheilija : urheilijaList) {
-            LOG.debug("hakukohde: {} - alakoodi: {}", new Object[]{nimiUri, urheilija.getKoodiUri()});
-            if(urheilija.getKoodiUri().equals(KOODISTO_HAKUKOHDE_URHEILIJAHAKU_SALLITTU)) {
-                urheilijaHaku = true;
-            }
-        }
-
-        avainArvo = new AvainArvoTyyppi();
-        avainArvo.setAvain("urheilija_haku_sallittu");
-        avainArvo.setArvo(String.valueOf(urheilijaHaku));
-        importTyyppi.getValintaperuste().add(avainArvo);
+//        int versioNumero = Integer.parseInt(data.getHakukohdeNimiUri().split("#")[1]);
+//        LOG.debug("Haetaan alakoodit versiolla {}", new Object[]{versioNumero});
+//        List<KoodistoUrheilija> urheilijaList = null;
+//        try {
+//            urheilijaList = koodistoJsonRESTResource.getAlakoodis(nimiUri,versioNumero);
+//        } catch (Exception e) {
+//            LOG.error("Alakoodien haku koodistosta hakukohteelle "+nimiUri+" päättyi virheeseen");
+//            e.printStackTrace();
+//        }
+//        if (urheilijaList == null || urheilijaList.isEmpty()) {
+//            throw new KoodistoException("Koodisto ei palauttanut yhtään koodia hakukohteelle " + nimiUri);
+//        }
+//        LOG.debug("Haettiin {} kpl koodeja", urheilijaList.size());
+//
+//        boolean urheilijaHaku = false;
+//
+//        for (KoodistoUrheilija urheilija : urheilijaList) {
+//            LOG.debug("hakukohde: {} - alakoodi: {}", new Object[]{nimiUri, urheilija.getKoodiUri()});
+//            if(urheilija.getKoodiUri().equals(KOODISTO_HAKUKOHDE_URHEILIJAHAKU_SALLITTU)) {
+//                urheilijaHaku = true;
+//            }
+//        }
+//
+//        avainArvo = new AvainArvoTyyppi();
+//        avainArvo.setAvain("urheilija_haku_sallittu");
+//        avainArvo.setArvo(String.valueOf(urheilijaHaku));
+//        importTyyppi.getValintaperuste().add(avainArvo);
 
         return importTyyppi;
     }
