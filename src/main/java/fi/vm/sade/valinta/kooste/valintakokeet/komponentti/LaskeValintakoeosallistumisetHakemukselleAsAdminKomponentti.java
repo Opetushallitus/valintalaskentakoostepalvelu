@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.valintakokeet.komponentti;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -25,31 +26,34 @@ import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenVali
 @Component("laskeValintakoeosallistumisetHakemukselleAsAdminKomponentti")
 public class LaskeValintakoeosallistumisetHakemukselleAsAdminKomponentti {
 
-    private static final Logger LOG = LoggerFactory
-            .getLogger(LaskeValintakoeosallistumisetHakemukselleAsAdminKomponentti.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(LaskeValintakoeosallistumisetHakemukselleAsAdminKomponentti.class);
 
-    @Autowired
-    private HakukohteenValintaperusteetProxy proxy;
+	@Autowired
+	private HakukohteenValintaperusteetProxy proxy;
 
-    @Autowired
-    private ValintalaskentaService valintalaskentaService;
+	@Autowired
+	private ValintalaskentaService valintalaskentaService;
 
-    @Autowired
-    private HaeHakemusKomponentti hakemusProxy;
+	@Autowired
+	private HaeHakemusKomponentti hakemusProxy;
 
-    public void laske(@Property("hakemusOid") String hakemusOid) {
-        LOG.info("Lasketaan valintakoeosallistumiset hakemukselle " + hakemusOid);
+	public void laske(@Property("hakemusOid") String hakemusOid)
+			throws ExecutionException {
+		LOG.info("Lasketaan valintakoeosallistumiset hakemukselle "
+				+ hakemusOid);
 
-        Hakemus h = hakemusProxy.haeHakemus(hakemusOid);
-        HakemusTyyppi hakemusTyyppi = Converter.hakemusToHakemusTyyppi(h);
+		Hakemus h = hakemusProxy.haeHakemus(hakemusOid);
+		HakemusTyyppi hakemusTyyppi = Converter.hakemusToHakemusTyyppi(h);
 
-        Set<String> hakutoiveOids = new HashSet<String>();
-        for (HakukohdeTyyppi ht : hakemusTyyppi.getHakutoive()) {
-            hakutoiveOids.add(ht.getHakukohdeOid());
-        }
+		Set<String> hakutoiveOids = new HashSet<String>();
+		for (HakukohdeTyyppi ht : hakemusTyyppi.getHakutoive()) {
+			hakutoiveOids.add(ht.getHakukohdeOid());
+		}
 
-        List<ValintaperusteetTyyppi> valintaperusteet = proxy.haeValintaperusteet(hakutoiveOids);
-        valintalaskentaService.valintakokeet(hakemusTyyppi, valintaperusteet);
+		List<ValintaperusteetTyyppi> valintaperusteet = proxy
+				.haeValintaperusteet(hakutoiveOids);
+		valintalaskentaService.valintakokeet(hakemusTyyppi, valintaperusteet);
 
-    }
+	}
 }

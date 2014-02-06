@@ -1,15 +1,18 @@
 package fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,75 +30,66 @@ import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
  * kaikkien valinnan vaiheiden valintaperusteet.
  */
 @Component
-public class HakukohteenValintaperusteetProxyCachingImpl implements HakukohteenValintaperusteetProxy {
+public class HakukohteenValintaperusteetProxyCachingImpl implements
+		HakukohteenValintaperusteetProxy {
 
-    @Autowired
-    private ValintaperusteService valintaperusteService;
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HakukohteenValintaperusteetProxyCachingImpl.class);
 
-    private Cache<String, List<ValintaperusteetTyyppi>> valintaperusteetCache;
+	@Autowired
+	private ValintaperusteService valintaperusteService;
 
-    @PostConstruct
-    public void init() {
-        valintaperusteetCache = CacheBuilder.newBuilder().recordStats().expireAfterWrite(24, TimeUnit.HOURS).build();
-    }
+	private Cache<String, List<ValintaperusteetTyyppi>> valintaperusteetCache;
 
-    @Override
-    public List<ValintaperusteetTyyppi> haeValintaperusteet(String hakukohdeOid) {
-        Set<String> oids = new HashSet<String>();
-        oids.add(hakukohdeOid);
+	@PostConstruct
+	public void init() {
+		valintaperusteetCache = CacheBuilder.newBuilder().recordStats()
+				.expireAfterWrite(10, TimeUnit.MINUTES).build();
+	}
 
-        return haeValintaperusteet(oids);
-    }
+	@Override
+	public List<ValintaperusteetTyyppi> haeValintaperusteet(String hakukohdeOid)
+			throws ExecutionException {
+		Set<String> oids = new HashSet<String>();
+		oids.add(hakukohdeOid);
 
-    @Override
-    public List<ValintaperusteetTyyppi> haeValintaperusteet(Set<String> hakukohdeOids) {
-        try {
+		return haeValintaperusteet(oids);
+	}
 
-            List<ValintaperusteetTyyppi> result = new ArrayList<ValintaperusteetTyyppi>();
+	@Override
+	public List<ValintaperusteetTyyppi> haeValintaperusteet(
+			Set<String> hakukohdeOids) throws ExecutionException {
 
-            List<HakuparametritTyyppi> notCached = new ArrayList<HakuparametritTyyppi>();
-            for (String hk : hakukohdeOids) {
-                List<ValintaperusteetTyyppi> vps = valintaperusteetCache.getIfPresent(hk);
-                if (vps == null) {
-                    HakuparametritTyyppi param = new HakuparametritTyyppi();
-                    param.setHakukohdeOid(hk);
-                    notCached.add(param);
-                } else {
-                    result.addAll(vps);
-                }
-            }
+		List<ValintaperusteetTyyppi> result = new ArrayList<ValintaperusteetTyyppi>();
 
-            if (!notCached.isEmpty()) {
-                result.addAll(fetchAndCacheResults(notCached));
-            }
+		for (final String hk : hakukohdeOids) {
+			List<ValintaperusteetTyyppi> vps = valintaperusteetCache.get(hk,
+					new Callable<List<ValintaperusteetTyyppi>>() {
+						@Override
+						public List<ValintaperusteetTyyppi> call()
+								throws Exception {
+							try {
+								HakuparametritTyyppi param = new HakuparametritTyyppi();
+								param.setHakukohdeOid(hk);
 
-            return result;
-        } catch (Exception e) {
-            throw new RuntimeException("Can't fetch valintaperusteet, hakukohdeOids " + hakukohdeOids, e);
-        }
-    }
+								return valintaperusteService
+										.haeValintaperusteet(Arrays
+												.asList(param));
+							} catch (Exception e) {
+								LOG.error(
+										"VALINTAPERUSTEETCACHE EPAONNISTUI[{}]: {}",
+										new Object[] { hk, e.getMessage() });
+								e.printStackTrace();
+								throw e;
+							}
+						}
+					});
 
-    private List<ValintaperusteetTyyppi> fetchAndCacheResults(List<HakuparametritTyyppi> notCached) {
-        List<ValintaperusteetTyyppi> result = new ArrayList<ValintaperusteetTyyppi>();
+			result.addAll(vps);
+		}
 
-        if (!notCached.isEmpty()) {
-            List<ValintaperusteetTyyppi> vps = valintaperusteService.haeValintaperusteet(notCached);
+		return result;
 
-            Map<String, List<ValintaperusteetTyyppi>> map = new HashMap<String, List<ValintaperusteetTyyppi>>();
-            for (ValintaperusteetTyyppi vp : vps) {
-                if (!map.containsKey(vp.getHakukohdeOid())) {
-                    map.put(vp.getHakukohdeOid(), new ArrayList());
-                }
+	}
 
-                result.add(vp);
-                map.get(vp.getHakukohdeOid()).add(vp);
-            }
-
-            for (Map.Entry<String, List<ValintaperusteetTyyppi>> e : map.entrySet()) {
-                valintaperusteetCache.put(e.getKey(), e.getValue());
-            }
-        }
-
-        return result;
-    }
 }
