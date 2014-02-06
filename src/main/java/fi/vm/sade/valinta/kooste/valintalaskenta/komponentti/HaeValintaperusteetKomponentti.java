@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.komponentti;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -27,32 +28,39 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy.ValinnanVaihe
 @Component("haeValintaperusteetKomponentti")
 public class HaeValintaperusteetKomponentti {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HaeValintaperusteetKomponentti.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HaeValintaperusteetKomponentti.class);
 
-    private ValinnanVaiheenValintaperusteetProxy valinnanVaiheenValintaperusteetProxy;
-    private HakukohteenValintaperusteetProxy hakukohteenValintaperusteetProxy;
+	private ValinnanVaiheenValintaperusteetProxy valinnanVaiheenValintaperusteetProxy;
+	private HakukohteenValintaperusteetProxy hakukohteenValintaperusteetProxy;
 
-    @Autowired
-    public HaeValintaperusteetKomponentti(HakukohteenValintaperusteetProxy hakukohteenValintaperusteetProxy,
-            ValinnanVaiheenValintaperusteetProxy valinnanVaiheenValintaperusteetProxy) {
-        this.valinnanVaiheenValintaperusteetProxy = valinnanVaiheenValintaperusteetProxy;
-        this.hakukohteenValintaperusteetProxy = hakukohteenValintaperusteetProxy;
-    }
+	@Autowired
+	public HaeValintaperusteetKomponentti(
+			HakukohteenValintaperusteetProxy hakukohteenValintaperusteetProxy,
+			ValinnanVaiheenValintaperusteetProxy valinnanVaiheenValintaperusteetProxy) {
+		this.valinnanVaiheenValintaperusteetProxy = valinnanVaiheenValintaperusteetProxy;
+		this.hakukohteenValintaperusteetProxy = hakukohteenValintaperusteetProxy;
+	}
 
-    public List<ValintaperusteetTyyppi> haeLahtotiedot(@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
-            @Property(OPH.VALINNANVAIHE) Integer valinnanvaihe) {
-        LOG.info("Haetaan valintaperusteet laskentaa varten hakukohteelle({}) ja valinnanvaiheelle({})", new Object[] {
-                hakukohdeOid, valinnanvaihe });
+	public List<ValintaperusteetTyyppi> haeLahtotiedot(
+			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
+			@Property(OPH.VALINNANVAIHE) Integer valinnanvaihe)
+			throws ExecutionException {
+		LOG.info(
+				"Haetaan valintaperusteet laskentaa varten hakukohteelle({}) ja valinnanvaiheelle({})",
+				new Object[] { hakukohdeOid, valinnanvaihe });
 
-        List<ValintaperusteetTyyppi> valintaperusteet = null;
-        if (valinnanvaihe == null) {
-            valintaperusteet = hakukohteenValintaperusteetProxy.haeValintaperusteet(hakukohdeOid);
-        } else {
-            valintaperusteet = valinnanVaiheenValintaperusteetProxy.haeValintaperusteet(hakukohdeOid, valinnanvaihe);
-        }
+		List<ValintaperusteetTyyppi> valintaperusteet = null;
+		if (valinnanvaihe == null) {
+			valintaperusteet = hakukohteenValintaperusteetProxy
+					.haeValintaperusteet(hakukohdeOid);
+		} else {
+			valintaperusteet = valinnanVaiheenValintaperusteetProxy
+					.haeValintaperusteet(hakukohdeOid, valinnanvaihe);
+		}
 
-        LOG.info("valintaperusteet haettu: " + valintaperusteet.size());
+		LOG.info("valintaperusteet haettu: " + valintaperusteet.size());
 
-        return valintaperusteet;
-    }
+		return valintaperusteet;
+	}
 }

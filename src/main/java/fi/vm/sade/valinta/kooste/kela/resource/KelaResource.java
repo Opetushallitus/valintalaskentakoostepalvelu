@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.wordnik.swagger.annotations.Api;
@@ -32,7 +33,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
-import fi.vm.sade.tarjonta.service.resources.HakuResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.MetaData;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
@@ -80,28 +80,34 @@ public class KelaResource {
 	@Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}")
 	String baseAddress;
 	@Autowired
-	HakuResource hakuResource;
+	fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource hakuResource;
 
 	@GET
 	@Path("/test")
 	@ApiOperation(value = "CAS:n performanssi testaukseen. Varmistetaan etta kaikki palvelut vapauttaa tiketit.", response = Response.class)
 	public Response performanceTest(@QueryParam("threads") Integer threads,
 			@QueryParam("works") Integer works,
-			final @QueryParam("hakuOid") String hakuOid) {
-		LOG.info("Number of threads {} and number of works {} hakuOid {}",
-				new Object[] { threads, works, hakuOid });
-		if (works == null || threads == null || hakuOid == null) {
+			final @QueryParam("hakemusOid") String hakemusOid) {
+		LOG.info("Number of threads {} and number of works {} hakemusOid {}",
+				new Object[] { threads, works, hakemusOid });
+		if (works == null || threads == null || hakemusOid == null) {
 			LOG.error("Threads and works query parameter is mandatory!");
 			return Response.serverError().build();
 		}
-
+		final org.springframework.security.core.Authentication auth = SecurityContextHolder
+				.getContext().getAuthentication();
 		ExecutorService e = Executors.newFixedThreadPool(threads);
 		final Runnable r = new Runnable() {
-
 			@Override
 			public void run() {
-
-				hakuResource.getByOID(hakuOid);
+				try {
+					SecurityContextHolder.getContext().setAuthentication(auth);
+					hakuResource.getApplicationByOid(hakemusOid);
+					LOG.info("tehtiin haku kysely");
+				} catch (Exception e) {
+					e.printStackTrace();
+					LOG.error("{}", e.getMessage());
+				}
 			}
 		};
 		for (int i = 0; i < works; ++i) {
