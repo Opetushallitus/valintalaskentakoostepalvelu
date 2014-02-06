@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
@@ -215,9 +216,10 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				.to("direct:hae_hakukohteen_hakemusten_oidit")
 				//
 				.choice()
-				.when(simple("in.header.hakemusOidit.isEmpty()"))
+				.when(simple("${in.header.hakemusOidit.isEmpty()}"))
 				// VT-797
-				.log("Hakukohteessa ${property.hakukohdeOid} ei ole hakemuksia!")
+				.log(LoggingLevel.WARN,
+						"Hakukohteessa ${property.hakukohdeOid} ei ole hakemuksia!")
 				//
 				.otherwise()
 				//
