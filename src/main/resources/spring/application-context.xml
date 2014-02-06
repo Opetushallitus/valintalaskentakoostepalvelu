@@ -44,7 +44,6 @@
     		class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptor"
     		/>
     <bean 	id="ticketInterceptorRest"
-    		scope="prototype" 
     		class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptorRest"
     		/>
     

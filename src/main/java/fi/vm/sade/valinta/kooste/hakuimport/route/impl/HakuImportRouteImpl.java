@@ -4,21 +4,18 @@ import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.kuvaus;
 import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.prosessi;
 import static fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.Property;
 import org.apache.camel.spring.SpringRouteBuilder;
-import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti;
@@ -31,143 +28,184 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 @Component
 public class HakuImportRouteImpl extends SpringRouteBuilder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HakuImportRouteImpl.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HakuImportRouteImpl.class);
 
-    @Autowired
-    private SuoritaHakuImportKomponentti suoritaHakuImportKomponentti;
+	@Autowired
+	private SuoritaHakuImportKomponentti suoritaHakuImportKomponentti;
 
-    @Autowired
-    private SuoritaHakukohdeImportKomponentti suoritaHakukohdeImportKomponentti;
+	@Autowired
+	private SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti;
 
-    @Autowired
-    private SecurityPreprocessor securityProcessor;
+	@Autowired
+	private SecurityPreprocessor securityProcessor;
 
-    @Autowired
-    private ValintaperusteService valintaperusteService;
+	@Autowired
+	private ValintaperusteService valintaperusteService;
 
-    public static class PrepareHakuImportProcessDescription {
+	public static class PrepareHakuImportProcessDescription {
 
-        public Prosessi prepareProcess(@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSIKUVAUS) String kuvaus,
-                @Property(OPH.HAKUOID) String hakuOid) {
-            return new HakuImportProsessi(kuvaus, hakuOid);
-        }
-    }
+		public Prosessi prepareProcess(
+				@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSIKUVAUS) String kuvaus,
+				@Property(OPH.HAKUOID) String hakuOid) {
+			return new HakuImportProsessi(kuvaus, hakuOid);
+		}
+	}
 
-    @Override
-    public void configure() throws Exception {
-        /**
-         * Tanne tullaan jos retry:t ei riita importoinnin loppuun vientiin
-         */
-        from("direct:tuoHakukohdeDead").to(fail()).process(logFailedHakuImport());
+	@Override
+	public void configure() throws Exception {
+		/**
+		 * Tanne tullaan jos retry:t ei riita importoinnin loppuun vientiin
+		 */
+		from("direct:tuoHakukohdeDead")
+				.setHeader(
+						"message",
+						simple("[${property.authentication.name}] Valintaperusteiden vienti epäonnistui hakukohteelle ${body}"))
+				.to(fail())
+				//
+				.process(logFailedHakuImport());
+		from("direct:hakuimport_epaonnistui")
+				.setHeader(
+						"message",
+						simple("[${property.authentication.name}] Tarjonnasta ei saatu hakua(${property.hakuOid}) tai haun hakukohteiden prosessointi ei mennyt oikein"))
+				.to(fail())
+				//
+				.process(logFailedHakuImport());
+		/**
+		 * Erillinen reitti viennille(tuonnille). Reitilla oma errorhandler.
+		 */
 
-        /**
-         * Erillinen reitti viennille(tuonnille). Reitilla oma errorhandler.
-         */
-        from("direct:tuoHakukohdeWithRetry")
-        //
-                .errorHandler(
-                        deadLetterChannel("direct:tuoHakukohdeDead").maximumRedeliveries(15).redeliveryDelay(100L)
-                                //
-                                .logExhaustedMessageHistory(true).logStackTrace(false).logExhausted(true)
-                                .logRetryStackTrace(false).logHandled(false))
-                //
-                .bean(securityProcessor).bean(valintaperusteService, "tuoHakukohde").process(logSuccessfulHakuImport());
+		from("direct:hakuimport_koostepalvelulta_valinnoille")
+		//
+				.errorHandler(
+						deadLetterChannel("direct:tuoHakukohdeDead")
+								.maximumRedeliveries(5)
+								.redeliveryDelay(200L)
+								//
+								.logExhaustedMessageHistory(true)
+								.logStackTrace(false).logExhausted(true)
+								.logRetryStackTrace(false).logHandled(false))
+				//
+				.bean(valintaperusteService, "tuoHakukohde")
+				//
+				.process(logSuccessfulHakuImport());
 
-        from(hakuImport())
-                // .policy(admin)
-                .bean(securityProcessor)
-                //
-                .setProperty(kuvaus(), constant("Haun importointi"))
-                .setProperty(prosessi(), method(new PrepareHakuImportProcessDescription()))
-                //
-                .to(start())
-                //
-                .bean(suoritaHakuImportKomponentti).process(logSuccessfulHakuGet())
-                //
-                .split(body(), createAccumulatingAggregation()).parallelProcessing()
-                //
-                .bean(securityProcessor).bean(suoritaHakukohdeImportKomponentti).process(logSuccessfulHakukohdeGet())
-                .end()
-                // aika turha loggaus. voisi poistaa
-                .process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
-                        LOG.info("Viedään hakukohteita {} kpl valintaperusteet-servicen kantaan", exchange.getIn()
-                                .getBody(Collection.class).size());
-                    }
-                })
-                // valinnoille
-                .split(body()).parallelProcessing()
-                //
-                .to("direct:tuoHakukohdeWithRetry")
-                // .bean(valintaperusteService, "tuoHakukohde")
-                .end()
-                //
-                .to(finish());
-    }
+		from("direct:hakuimport_tarjonnasta_koostepalvelulle")
+		//
+				.errorHandler(
+						deadLetterChannel("direct:tuoHakukohdeDead")
+								.maximumRedeliveries(5)
+								.redeliveryDelay(200L)
+								//
+								.logExhaustedMessageHistory(true)
+								.logStackTrace(false).logExhausted(true)
+								.logRetryStackTrace(false).logHandled(false))
+				//
+				.bean(securityProcessor)
+				//
+				.bean(tarjontaJaKoodistoHakukohteenHakuKomponentti)
+				//
+				.process(logSuccessfulHakukohdeGet())
+				//
+				.to("direct:hakuimport_koostepalvelulta_valinnoille");
 
-    private FlexibleAggregationStrategy<HakukohdeImportTyyppi> createAccumulatingAggregation() {
-        return new FlexibleAggregationStrategy<HakukohdeImportTyyppi>().storeInBody().accumulateInCollection(
-                ArrayList.class);
-    }
+		from(hakuImport())
+				.errorHandler(
+						deadLetterChannel("direct:hakuimport_epaonnistui"))
+				// .policy(admin)
+				.bean(securityProcessor)
+				//
+				.setProperty(kuvaus(), constant("Haun importointi"))
+				.setProperty(prosessi(),
+						method(new PrepareHakuImportProcessDescription()))
+				//
+				.to(start())
+				//
+				.bean(suoritaHakuImportKomponentti)
+				//
+				.process(logSuccessfulHakuGet())
+				//
+				.split(body())
+				//
+				.shareUnitOfWork()
+				//
+				.parallelProcessing()
+				//
+				.stopOnException()
+				//
+				.to("direct:hakuimport_tarjonnasta_koostepalvelulle")
+				//
+				.end()
+				//
+				.to(finish());
 
-    private String hakuImport() {
-        return HakuImportRoute.DIRECT_HAKU_IMPORT;
-    }
+	}
 
-    private static String fail() {
-        return "bean:hakuImportValvomo?method=fail(*,*)";
-    }
+	private String hakuImport() {
+		return HakuImportRoute.DIRECT_HAKU_IMPORT;
+	}
 
-    private static String start() {
-        return "bean:hakuImportValvomo?method=start(*)";
-    }
+	private static String fail() {
+		return "bean:hakuImportValvomo?method=fail(*,*)";
+	}
 
-    private static String finish() {
-        return "bean:hakuImportValvomo?method=finish(*)";
-    }
+	private static String start() {
+		return "bean:hakuImportValvomo?method=start(*)";
+	}
 
-    private Processor logSuccessfulHakukohdeGet() {
-        return new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
-                int i = prosessi.lisaaImportoitu();
-                if (i == prosessi.getHakukohteita()) {
-                    LOG.info("Kaikki hakukohteet ({}) importoitu!", i);
-                }
-            }
-        };
-    }
+	private static String finish() {
+		return "bean:hakuImportValvomo?method=finish(*)";
+	}
 
-    private Processor logSuccessfulHakuGet() {
-        return new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
-                @SuppressWarnings("unchecked")
-                Collection<String> hakukohdeOids = (Collection<String>) exchange.getIn().getBody(Collection.class);
-                prosessi.setHakukohteita(hakukohdeOids.size());
-                LOG.info("Hakukohteita importoitavana {}", hakukohdeOids.size());
-            }
-        };
-    }
+	private Processor logSuccessfulHakukohdeGet() {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				HakuImportProsessi prosessi = exchange.getProperty(
+						PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+				int i = prosessi.lisaaImportoitu();
+				if (i == prosessi.getHakukohteita()) {
+					LOG.info("Kaikki hakukohteet ({}) importoitu!", i);
+				}
+			}
+		};
+	}
 
-    private Processor logSuccessfulHakuImport() {
-        return new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
-                int t = prosessi.lisaaTuonti();
+	private Processor logSuccessfulHakuGet() {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				HakuImportProsessi prosessi = exchange.getProperty(
+						PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+				@SuppressWarnings("unchecked")
+				Collection<String> hakukohdeOids = (Collection<String>) exchange
+						.getIn().getBody(Collection.class);
+				prosessi.setHakukohteita(hakukohdeOids.size());
+				LOG.info("Hakukohteita importoitavana {}", hakukohdeOids.size());
+			}
+		};
+	}
 
-                LOG.info("Hakukohde on tuotu onnistuneesti ({}/{}).", new Object[] { t, prosessi.getHakukohteita() });
-            }
-        };
-    }
+	private Processor logSuccessfulHakuImport() {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				HakuImportProsessi prosessi = exchange.getProperty(
+						PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+				int t = prosessi.lisaaTuonti();
 
-    private Processor logFailedHakuImport() {
-        return new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
-                prosessi.lisaaVirhe();
-                LOG.error("Virhe (numero {}) hakukohteiden importoinnissa! {}", exchange.getException().getMessage());
-            }
-        };
-    }
+				LOG.info("Hakukohde on tuotu onnistuneesti ({}/{}).",
+						new Object[] { t, prosessi.getHakukohteita() });
+			}
+		};
+	}
+
+	private Processor logFailedHakuImport() {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				HakuImportProsessi prosessi = exchange.getProperty(
+						PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+				prosessi.lisaaVirhe();
+				LOG.error("Virhe (numero {}) hakukohteiden importoinnissa! {}",
+						exchange.getException().getMessage());
+			}
+		};
+	}
 }

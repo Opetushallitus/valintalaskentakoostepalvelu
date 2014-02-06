@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.wordnik.swagger.annotations.Api;
@@ -170,11 +171,18 @@ public class ViestintapalveluAktivointiResource {
 	@ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa", response = Response.class)
 	public Response aktivoiKoekutsukirjeidenLuonti(
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("valintakoeOid") List<String> valintakoeOids,
+			@QueryParam("valintakoeOids") List<String> valintakoeOids,
 			String letterBodyText) {
+		if (valintakoeOids == null || valintakoeOids.isEmpty()) {
+			return Response
+					.serverError()
+					.entity("Valintakoe ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!")
+					.build();
+		}
 		try {
 			koekutsukirjeRoute.koekutsukirjeetAktivointiAsync(hakukohdeOid,
-					valintakoeOids, letterBodyText);
+					valintakoeOids, letterBodyText, SecurityContextHolder
+							.getContext().getAuthentication());
 		} catch (Exception e) {
 			return Response.serverError().entity(e.getMessage()).build();
 		}
