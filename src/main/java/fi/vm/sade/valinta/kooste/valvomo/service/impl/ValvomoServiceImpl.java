@@ -38,7 +38,7 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
     private static final Logger LOG = LoggerFactory.getLogger(ValvomoServiceImpl.class);
     private static final int DEFAULT_CAPACITY = 10;
     private final Buffer processBuffer;
-    private final static FastDateFormat FORMATTER = FastDateFormat.getInstance("dd.MM.yyyy hh:mm:ss");
+    private final static FastDateFormat FORMATTER = FastDateFormat.getInstance("dd.MM.yyyy HH:mm:ss");
 
     public ValvomoServiceImpl() {
         this(DEFAULT_CAPACITY);

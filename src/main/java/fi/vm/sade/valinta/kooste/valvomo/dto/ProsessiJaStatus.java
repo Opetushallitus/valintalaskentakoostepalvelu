@@ -55,12 +55,7 @@ public class ProsessiJaStatus<T> {
             DateTime createdAt = new DateTime(((Timestamped) prosessi).getCreatedAt().getTime());
             Duration duration = new Interval(createdAt, DateTime.now()).toDuration();
             long seconds = duration.getStandardSeconds();
-            if (seconds >= 60) {
-                long minutes = seconds / 60;
-                seconds = seconds % 60;
-                return new StringBuffer().append(minutes).append("min ").append(seconds).append("sec").toString();
-            }
-            return new StringBuffer().append(seconds).append("sec").toString();
+            return new StringBuffer().append(seconds).toString();
         }
         return "<< process is not timestamped >>";
     }
