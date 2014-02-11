@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
@@ -50,9 +51,21 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 
 	@Override
 	public void configure() throws Exception {
+		from(kirjeidenLuontiEpaonnistui())
+		//
+				.log(LoggingLevel.ERROR,
+						"Koekutsukirjeiden luonti epaonnistui: ${property.CamelExceptionCaught}");
 		//
 		from(koekutsukirjeet())
 		//
+				.errorHandler(
+				//
+						deadLetterChannel(kirjeidenLuontiEpaonnistui())
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
+				//
 				.bean(new SecurityPreprocessor())
 				//
 				.bean(valintatietoHakukohteelleKomponentti)
@@ -104,7 +117,14 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 				//
 				.bean(koekutsukirjeetKomponentti)
 				//
+				.log(LoggingLevel.INFO,
+						"Koekutsukirjeet (${body.letters.size()} kpl) viestintapalvelulle!")
+				//
 				.bean(viestintapalveluResource, "vieKoekutsukirjeet");
+	}
+
+	private String kirjeidenLuontiEpaonnistui() {
+		return "direct:koekutsukirjeet_epaonnistui";
 	}
 
 	private String koekutsukirjeet() {

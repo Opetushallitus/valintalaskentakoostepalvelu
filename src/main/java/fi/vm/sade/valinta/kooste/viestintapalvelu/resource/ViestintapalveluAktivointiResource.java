@@ -173,17 +173,23 @@ public class ViestintapalveluAktivointiResource {
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintakoeOids") List<String> valintakoeOids,
 			String letterBodyText) {
-		if (valintakoeOids == null || valintakoeOids.isEmpty()) {
+		if (hakukohdeOid == null || valintakoeOids == null
+				|| valintakoeOids.isEmpty()) {
+			LOG.error("Valintakoe ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
 			return Response
 					.serverError()
 					.entity("Valintakoe ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!")
 					.build();
 		}
 		try {
+			LOG.info("Koekutsukirjeiden luonti aloitettu");
 			koekutsukirjeRoute.koekutsukirjeetAktivointiAsync(hakukohdeOid,
 					valintakoeOids, letterBodyText, SecurityContextHolder
 							.getContext().getAuthentication());
 		} catch (Exception e) {
+			LOG.error("Koekutsukirjeiden luonti epäonnistui! {}",
+					e.getMessage());
+			e.printStackTrace();
 			return Response.serverError().entity(e.getMessage()).build();
 		}
 		return Response.ok().build();
