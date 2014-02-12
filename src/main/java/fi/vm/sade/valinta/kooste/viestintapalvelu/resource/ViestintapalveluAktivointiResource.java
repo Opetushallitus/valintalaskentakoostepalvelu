@@ -170,6 +170,7 @@ public class ViestintapalveluAktivointiResource {
 	@Produces("application/json")
 	@ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa", response = Response.class)
 	public Response aktivoiKoekutsukirjeidenLuonti(
+			@QueryParam("hakemusOid") String hakemusOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintakoeOids") List<String> valintakoeOids,
 			String letterBodyText) {
@@ -182,10 +183,17 @@ public class ViestintapalveluAktivointiResource {
 					.build();
 		}
 		try {
-			LOG.info("Koekutsukirjeiden luonti aloitettu");
-			koekutsukirjeRoute.koekutsukirjeetAktivointiAsync(hakukohdeOid,
-					valintakoeOids, letterBodyText, SecurityContextHolder
-							.getContext().getAuthentication());
+
+			if (hakemusOid != null) {
+				LOG.info(
+						"Koekutsukirjeiden luonti aloitettu yksittaiselle hakemukselle {}",
+						hakemusOid);
+			} else {
+				LOG.info("Koekutsukirjeiden luonti aloitettu");
+			}
+			koekutsukirjeRoute.koekutsukirjeetAktivointiAsync(hakemusOid,
+					hakukohdeOid, valintakoeOids, letterBodyText,
+					SecurityContextHolder.getContext().getAuthentication());
 		} catch (Exception e) {
 			LOG.error("Koekutsukirjeiden luonti epäonnistui! {}",
 					e.getMessage());

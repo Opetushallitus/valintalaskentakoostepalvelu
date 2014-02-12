@@ -24,6 +24,7 @@ import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.Message;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
@@ -77,18 +78,7 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 				//
 				.bean(dokumenttiResource, "viesti");
 		//
-		from(koekutsukirjeet())
-		//
-				.errorHandler(
-				//
-						deadLetterChannel(kirjeidenLuontiEpaonnistui())
-								.logExhaustedMessageHistory(true)
-								.logExhausted(true).logStackTrace(true)
-								// hide retry/handled stacktrace
-								.logRetryStackTrace(false).logHandled(false))
-				//
-				.process(new SecurityPreprocessor())
-				//
+		from("direct:koekutsukirjeet_hae_valintatiedot_hakemuksille")
 				.bean(valintatietoHakukohteelleKomponentti)
 				//
 				.process(new Processor() {
@@ -135,6 +125,40 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 												.getHakemusOid()));
 					}
 				})
+				//
+				.end();
+
+		from(koekutsukirjeet())
+		//
+				.errorHandler(
+				//
+						deadLetterChannel(kirjeidenLuontiEpaonnistui())
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
+				//
+				.process(new SecurityPreprocessor())
+				//
+				.choice()
+				// Jos luodaan vain yksittaiselle hakemukselle...
+				.when(property(OPH.HAKEMUSOID).isNotNull())
+				//
+				// ... haetaan yksittainen hakemus
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						exchange.getOut().setBody(
+								Arrays.asList(applicationResource
+										.getApplicationByOid(exchange
+												.getProperty(OPH.HAKEMUSOID,
+														String.class))));
+					}
+				})
+				//
+				.otherwise() // ...muuten
+				// ...haetaan kaikille osallistujille
+				.to("direct:koekutsukirjeet_hae_valintatiedot_hakemuksille")
 				//
 				.end()
 				//
