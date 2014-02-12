@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.camel.Exchange;
@@ -8,10 +9,13 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Collections2;
+import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
@@ -20,6 +24,8 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Koekutsukirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
@@ -31,7 +37,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
  */
 @Component
 public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
-
+	private static final Logger LOG = LoggerFactory
+			.getLogger(KoekutsukirjeRouteImpl.class);
 	private final ViestintapalveluResource viestintapalveluResource;
 	private final KoekutsukirjeetKomponentti koekutsukirjeetKomponentti;
 	private final ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti;
@@ -66,7 +73,7 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.bean(new SecurityPreprocessor())
+				.process(new SecurityPreprocessor())
 				//
 				.bean(valintatietoHakukohteelleKomponentti)
 				//
@@ -75,9 +82,10 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 					public void process(Exchange exchange) throws Exception {
 						List<HakemusOsallistuminenTyyppi> unfiltered = (List<HakemusOsallistuminenTyyppi>) exchange
 								.getIn().getBody();
+						Collection<HakemusOsallistuminenTyyppi> filtered;
 						exchange.getOut()
 								.setBody(
-										Collections2
+										filtered = Collections2
 												.filter(unfiltered,
 														new com.google.common.base.Predicate<HakemusOsallistuminenTyyppi>() {
 															public boolean apply(
@@ -93,7 +101,8 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 																return false;
 															}
 														}));
-
+						LOG.info("Osallistumattomien pois filtterointi: {}/{}",
+								filtered.size(), unfiltered.size());
 					}
 				})
 				//
@@ -117,8 +126,17 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 				//
 				.bean(koekutsukirjeetKomponentti)
 				//
-				.log(LoggingLevel.INFO,
-						"Koekutsukirjeet (${body.letters.size()} kpl) viestintapalvelulle!")
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						Kirjeet<Koekutsukirje> kirjeet = exchange.getIn()
+								.getBody(Kirjeet.class);
+						String kirjeetJson = new GsonBuilder()
+								.setPrettyPrinting().create().toJson(kirjeet);
+						LOG.info("Kirjeet\r\n{}", kirjeetJson);
+						exchange.getOut().setBody(kirjeetJson);
+					}
+				})
 				//
 				.bean(viestintapalveluResource, "vieKoekutsukirjeet");
 	}

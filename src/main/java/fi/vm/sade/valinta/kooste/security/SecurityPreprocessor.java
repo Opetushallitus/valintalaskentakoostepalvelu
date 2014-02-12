@@ -13,32 +13,30 @@ import org.springframework.stereotype.Component;
  *         <p/>
  *         Asentaa autentikaation workerille jos tarpeen ja taltioi
  *         autentikaation propertyyn workeria varten.
- * 
- *         TODO: Komponentin kaytto pitaisi jotenkin liittaa implisiittisesti
- *         osaksi reitteja Nykyinen malli luottaa liikaa etta reitin luoja
- *         muistaa laittaa prosessorin kaikkiin oikeisiin paikkoihin.
  */
 @Component
 public class SecurityPreprocessor implements Processor {
 
-    public static final String SECURITY_CONTEXT_HEADER = "authentication";
+	public static final String SECURITY_CONTEXT_HEADER = "authentication";
 
-    private static final Logger LOG = LoggerFactory.getLogger(SecurityPreprocessor.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SecurityPreprocessor.class);
 
-    @Override
-    public void process(Exchange exchange) throws Exception {
-        exchange.setOut(exchange.getIn());
-        Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
-        if (currentAuth == null) {
-            // should current auth be null
-            Authentication newAuth = (Authentication) exchange
-                    .getProperty(SecurityPreprocessor.SECURITY_CONTEXT_HEADER);
-            assert (newAuth != null); // <- should never be null!
+	@Override
+	public void process(Exchange exchange) throws Exception {
+		exchange.setOut(exchange.getIn());
+		Authentication currentAuth = SecurityContextHolder.getContext()
+				.getAuthentication();
+		if (currentAuth == null) {
+			// should current auth be null
+			Authentication newAuth = (Authentication) exchange
+					.getProperty(SecurityPreprocessor.SECURITY_CONTEXT_HEADER);
+			assert (newAuth != null); // <- should never be null!
 
-            SecurityContextHolder.getContext().setAuthentication(newAuth);
-        } else {
-            exchange.setProperty(SECURITY_CONTEXT_HEADER, currentAuth);
-        }
+			SecurityContextHolder.getContext().setAuthentication(newAuth);
+		} else {
+			exchange.setProperty(SECURITY_CONTEXT_HEADER, currentAuth);
+		}
 
-    }
+	}
 }

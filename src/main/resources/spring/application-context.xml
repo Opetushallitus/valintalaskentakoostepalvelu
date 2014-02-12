@@ -47,8 +47,6 @@
     		class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptorRest"
     		/>
     
-    <!-- bean id="securityPreprocessor" class="fi.vm.sade.valinta.kooste.security.SecurityPreprocessor"/-->
-
     <authorizationPolicy id="admin" access="isAuthenticated()"
                          authenticationManager="authenticationManager"
                          accessDecisionManager="accessDecisionManager"
