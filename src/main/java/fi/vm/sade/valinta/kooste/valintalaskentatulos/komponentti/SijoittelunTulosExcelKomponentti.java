@@ -21,6 +21,8 @@ import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 
+import javax.ws.rs.core.Response;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -41,9 +43,17 @@ public class SijoittelunTulosExcelKomponentti {
     public InputStream luoXls(@Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
             @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid) {
         Map<String, List<Valintatulos>> valintatulosCache = new HashMap<String, List<Valintatulos>>();
-        HakukohdeDTO hakukohde = sijoitteluajoResource.getHakukohdeBySijoitteluajo(hakuOid, sijoitteluajoId.toString(),
+
+        Response hakukohdeBySijoitteluajo = sijoitteluajoResource.getHakukohdeBySijoitteluajo(hakuOid, sijoitteluajoId.toString(),
                 hakukohdeOid);
-        List<Object[]> rivit = new ArrayList<Object[]>();
+        HakukohdeDTO hakukohde = null;
+        if(hakukohdeBySijoitteluajo.getStatus() == Response.Status.OK.getStatusCode()){
+            hakukohde = (HakukohdeDTO) hakukohdeBySijoitteluajo.getEntity();
+        } else {
+            throw new RuntimeException("sijoittelua ei löytynyt.");
+        }
+
+                List<Object[]> rivit = new ArrayList<Object[]>();
         for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
             rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
             rivit.add(new Object[] { "Jonosija", "Tasasijan jonosija", "Hakija", "Hakemus", "Hakutoive",

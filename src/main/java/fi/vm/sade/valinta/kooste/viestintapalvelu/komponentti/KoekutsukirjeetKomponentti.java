@@ -43,32 +43,41 @@ public class KoekutsukirjeetKomponentti {
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
 			@Property(OPH.LETTER_BODY_TEXT) String letterBodyText)
 			throws Exception {
-		final List<Koekutsukirje> kirjeet = Lists.newArrayList();
-		// Custom contents?
-		final List<Map<String, String>> customLetterContents = Collections
-				.emptyList();
-
-		final HakukohdeNimiRDTO nimi;
 		try {
-			nimi = tarjontaProxy.haeHakukohdeNimi(hakukohdeOid);
+			LOG.info("Luodaan koekutsukirjeet {} hakemukselle. Hakukohde({})",
+					hakemukset.size(), hakukohdeOid);
+			final List<Koekutsukirje> kirjeet = Lists.newArrayList();
+			// Custom contents?
+			final List<Map<String, String>> customLetterContents = Collections
+					.emptyList();
+
+			final HakukohdeNimiRDTO nimi;
+			try {
+				nimi = tarjontaProxy.haeHakukohdeNimi(hakukohdeOid);
+			} catch (Exception e) {
+				LOG.error("Tarjonnalta ei saatu hakukohteelle({}) nimea!",
+						hakukohdeOid);
+				throw e;
+			}
+			final Teksti hakukohdeNimi = new Teksti(nimi.getHakukohdeNimi());
+
+			for (Hakemus hakemus : hakemukset) {
+				Osoite addressLabel = osoiteKomponentti.haeOsoite(hakemus);
+				String languageCode = hakukohdeNimi.getKieli(); // hakukohteen
+																// kieli
+																// koekutsuissa
+				String hakukohde = hakukohdeNimi.getTeksti();
+
+				kirjeet.add(new Koekutsukirje(addressLabel, languageCode,
+						hakukohde, letterBodyText, customLetterContents));
+			}
+			LOG.info("Luodaan koekutsukirjeet {} henkilolle", kirjeet.size());
+			return new Kirjeet<Koekutsukirje>(kirjeet);
 		} catch (Exception e) {
-			LOG.error("Tarjonnalta ei saatu hakukohteelle({}) nimea!",
-					hakukohdeOid);
+			LOG.error("Koekutsukirjeiden luonti epäonnistui!");
+			e.printStackTrace();
 			throw e;
 		}
-		final Teksti hakukohdeNimi = new Teksti(nimi.getHakukohdeNimi());
-
-		for (Hakemus hakemus : hakemukset) {
-			Osoite addressLabel = osoiteKomponentti.haeOsoite(hakemus);
-			String languageCode = hakukohdeNimi.getKieli(); // hakukohteen kieli
-															// koekutsuissa
-			String hakukohde = hakukohdeNimi.getTeksti();
-
-			kirjeet.add(new Koekutsukirje(addressLabel, languageCode,
-					hakukohde, letterBodyText, customLetterContents));
-		}
-
-		return new Kirjeet<Koekutsukirje>(kirjeet);
 	}
 
 }

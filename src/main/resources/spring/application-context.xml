@@ -47,8 +47,6 @@
     		class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptorRest"
     		/>
     
-    <!-- bean id="securityPreprocessor" class="fi.vm.sade.valinta.kooste.security.SecurityPreprocessor"/-->
-
     <authorizationPolicy id="admin" access="isAuthenticated()"
                          authenticationManager="authenticationManager"
                          accessDecisionManager="accessDecisionManager"
@@ -68,6 +66,9 @@
                   serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource"
                   address="${valintalaskentakoostepalvelu.viestintapalvelu.url}">
 		<jaxrs:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"/></jaxrs:properties>
+        <jaxrs:outInterceptors>
+            <ref bean="ticketInterceptorRest"/>
+        </jaxrs:outInterceptors>
         <jaxrs:providers>
 	        <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider">
 	            <property name="mapper" ref="jacksonMapper" />
