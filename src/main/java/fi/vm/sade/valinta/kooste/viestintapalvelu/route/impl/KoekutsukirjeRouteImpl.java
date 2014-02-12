@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Collections2;
-import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
@@ -24,8 +23,6 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Koekutsukirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
@@ -125,18 +122,6 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 				.end()
 				//
 				.bean(koekutsukirjeetKomponentti)
-				//
-				.process(new Processor() {
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						Kirjeet<Koekutsukirje> kirjeet = exchange.getIn()
-								.getBody(Kirjeet.class);
-						String kirjeetJson = new GsonBuilder()
-								.setPrettyPrinting().create().toJson(kirjeet);
-						LOG.info("Kirjeet\r\n{}", kirjeetJson);
-						exchange.getOut().setBody(kirjeetJson);
-					}
-				})
 				//
 				.bean(viestintapalveluResource, "vieKoekutsukirjeet");
 	}

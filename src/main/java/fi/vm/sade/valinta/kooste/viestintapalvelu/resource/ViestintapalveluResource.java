@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Koekutsukirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 
 @Path("/api/v1")
@@ -38,5 +39,5 @@ public interface ViestintapalveluResource {
 	@Produces(TEXT_PLAIN)
 	@Consumes(APPLICATION_JSON)
 	@Path("/koekutsukirje/async/pdf")
-	Response vieKoekutsukirjeet(String kirjeet);
+	Response vieKoekutsukirjeet(Kirjeet<Koekutsukirje> kirjeet);
 }
