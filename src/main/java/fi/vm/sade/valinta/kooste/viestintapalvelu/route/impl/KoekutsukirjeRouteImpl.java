@@ -18,13 +18,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.Message;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
-import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
@@ -84,6 +84,7 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 				.process(new Processor() {
 					@Override
 					public void process(Exchange exchange) throws Exception {
+						@SuppressWarnings("unchecked")
 						List<HakemusOsallistuminenTyyppi> unfiltered = (List<HakemusOsallistuminenTyyppi>) exchange
 								.getIn().getBody();
 						Collection<HakemusOsallistuminenTyyppi> filtered;
@@ -142,17 +143,21 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 				//
 				.choice()
 				// Jos luodaan vain yksittaiselle hakemukselle...
-				.when(property(OPH.HAKEMUSOID).isNotNull())
+				.when(property("hakemusOids").isNotNull())
 				//
 				// ... haetaan yksittainen hakemus
 				.process(new Processor() {
 					@Override
 					public void process(Exchange exchange) throws Exception {
-						exchange.getOut().setBody(
-								Arrays.asList(applicationResource
-										.getApplicationByOid(exchange
-												.getProperty(OPH.HAKEMUSOID,
-														String.class))));
+						@SuppressWarnings("unchecked")
+						List<String> hakemusOids = exchange.getProperty(
+								"hakemusOids", List.class);
+						List<Hakemus> h = Lists.newArrayList();
+						for (String hakemusOid : hakemusOids) {
+							h.add(applicationResource
+									.getApplicationByOid(hakemusOid));
+						}
+						exchange.getOut().setBody(h);
 					}
 				})
 				//

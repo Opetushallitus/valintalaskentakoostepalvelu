@@ -170,7 +170,7 @@ public class ViestintapalveluAktivointiResource {
 	@Produces("application/json")
 	@ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa", response = Response.class)
 	public Response aktivoiKoekutsukirjeidenLuonti(
-			@QueryParam("hakemusOid") String hakemusOid,
+			@QueryParam("hakemusOids") List<String> hakemusOids,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintakoeOids") List<String> valintakoeOids,
 			String letterBodyText) {
@@ -184,14 +184,14 @@ public class ViestintapalveluAktivointiResource {
 		}
 		try {
 
-			if (hakemusOid != null) {
+			if (hakemusOids != null) {
 				LOG.info(
 						"Koekutsukirjeiden luonti aloitettu yksittaiselle hakemukselle {}",
-						hakemusOid);
+						hakemusOids);
 			} else {
 				LOG.info("Koekutsukirjeiden luonti aloitettu");
 			}
-			koekutsukirjeRoute.koekutsukirjeetAktivointiAsync(hakemusOid,
+			koekutsukirjeRoute.koekutsukirjeetAktivointiAsync(hakemusOids,
 					hakukohdeOid, valintakoeOids, letterBodyText,
 					SecurityContextHolder.getContext().getAuthentication());
 		} catch (Exception e) {
