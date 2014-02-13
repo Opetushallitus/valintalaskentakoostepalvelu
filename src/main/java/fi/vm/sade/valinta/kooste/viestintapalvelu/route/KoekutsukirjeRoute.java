@@ -17,11 +17,13 @@ import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 public interface KoekutsukirjeRoute {
 
 	void koekutsukirjeetAktivointi(
+			@Property("hakemusOids") List<String> hakemusOids,
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
 			@Property("valintakoeOid") List<String> valintakoeOid,
 			@Property(OPH.LETTER_BODY_TEXT) String letterBodyText);
 
 	Future<Void> koekutsukirjeetAktivointiAsync(
+			@Property("hakemusOids") List<String> hakemusOids,
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
 			@Property("valintakoeOid") List<String> valintakoeOid,
 			@Property(OPH.LETTER_BODY_TEXT) String letterBodyText,

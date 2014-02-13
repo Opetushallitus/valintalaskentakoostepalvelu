@@ -12,9 +12,11 @@ import fi.vm.sade.valinta.kooste.OPH;
  * 
  */
 public interface OsoitetarratRoute {
-    final String DIRECT_OSOITETARRAT = "direct:osoitetarrat";
+	final String DIRECT_OSOITETARRAT = "direct:osoitetarrat";
 
-    void osoitetarratAktivointi(@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
-    // pitaisikohan olla vain bodyssa ja kasitella yksi oid kerrallaan?
-            @Property("valintakoeOid") List<String> valintakoeOid);
+	void osoitetarratAktivointi(
+			@Property("hakemusOids") List<String> hakemusOids,
+			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
+			// pitaisikohan olla vain bodyssa ja kasitella yksi oid kerrallaan?
+			@Property("valintakoeOid") List<String> valintakoeOid);
 }
