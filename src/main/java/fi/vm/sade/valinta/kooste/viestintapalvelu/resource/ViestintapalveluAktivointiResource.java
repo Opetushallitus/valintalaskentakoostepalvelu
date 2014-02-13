@@ -56,16 +56,17 @@ public class ViestintapalveluAktivointiResource {
 	@Autowired
 	private KoekutsukirjeRoute koekutsukirjeRoute;
 
-	@GET
+	@POST
 	@Path("/osoitetarrat/aktivoi")
 	@Produces("application/json")
 	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin hakukohteelle", response = Response.class)
 	public Response aktivoiOsoitetarrojenLuonti(
+	/* OPTIONAL */@QueryParam("hakemusOids") List<String> hakemusOids,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintakoeOid") List<String> valintakoeOids) {
 		try {
-			addressLabelBatchProxy.osoitetarratAktivointi(hakukohdeOid,
-					valintakoeOids);
+			addressLabelBatchProxy.osoitetarratAktivointi(hakemusOids,
+					hakukohdeOid, valintakoeOids);
 			return Response.status(Status.OK).build();
 		} catch (Exception e) {
 			LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
@@ -134,18 +135,19 @@ public class ViestintapalveluAktivointiResource {
 		}
 	}
 
-	@GET
+	@POST
 	@Path("/hyvaksyttyjenosoitetarrat/aktivoi")
 	@Produces("application/json")
 	@ApiOperation(value = "Aktivoi hyväksyttyjen osoitteiden luonnin hakukohteelle haussa", response = Response.class)
 	public Response aktivoiHyvaksyttyjenOsoitetarrojenLuonti(
+	/* OPTIONAL */@QueryParam("hakemusOids") List<String> hakemusOids,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
 		try {
 			hyvaksyttyjenOsoitetarratProxy
-					.hyvaksyttyjenOsoitetarrojenAktivointi(hakukohdeOid,
-							hakuOid, sijoitteluajoId);
+					.hyvaksyttyjenOsoitetarrojenAktivointi(hakemusOids,
+							hakukohdeOid, hakuOid, sijoitteluajoId);
 			return Response.ok().build();
 		} catch (Exception e) {
 			LOG.error("Hyväksyttyjen osoitetarrojen luonnissa virhe! {}",
@@ -170,7 +172,7 @@ public class ViestintapalveluAktivointiResource {
 	@Produces("application/json")
 	@ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa", response = Response.class)
 	public Response aktivoiKoekutsukirjeidenLuonti(
-			@QueryParam("hakemusOids") List<String> hakemusOids,
+	/* OPTIONAL */@QueryParam("hakemusOids") List<String> hakemusOids,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintakoeOids") List<String> valintakoeOids,
 			String letterBodyText) {

@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.google.common.collect.Lists;
 
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
@@ -65,11 +66,32 @@ public class OsoitetarratRouteImpl extends SpringRouteBuilder {
 	private void configureHyvaksyttyjenOsoitetarrat() throws Exception {
 		from(hyvaksyttyjenOsoitetarrat())
 		//
+				.choice()
+				// Jos luodaan vain yksittaiselle hakemukselle...
+				.when(property("hakemusOids").isNotNull())
+				//
+				.setBody(property("hakemusOids"))
+				//
+				.otherwise()
+				//
 				.bean(sijoitteluProxy)
 				//
+				.process(new Processor() {
+					@SuppressWarnings("unchecked")
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						List<String> l = Lists.newArrayList();
+						for (HakijaDTO hakija : (List<HakijaDTO>) exchange
+								.getIn().getBody(List.class)) {
+							l.add(hakija.getHakemusOid());
+						}
+						exchange.getOut().setBody(l);
+					}
+				})
+				//
+				.end()
+				//
 				.split(body(), osoiteAggregation())
-				// filter OSALLISTUU
-				.to(kasitteleHakija())
 				//
 				.bean(osoiteKomponentti)
 				//
@@ -79,25 +101,45 @@ public class OsoitetarratRouteImpl extends SpringRouteBuilder {
 				//
 				.bean(viestintapalveluResource, "haeOsoitetarrat");
 
-		from(kasitteleHakija())
-		// enrich to hakemusOid
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						exchange.getOut().setBody(
-								exchange.getIn().getBody(HakijaDTO.class)
-										.getHakemusOid());
-					}
-				});
 	}
 
 	private void configureOsoitetarrat() throws Exception {
 		from(osoitetarrat())
 		//
+				.choice()
+				// Jos luodaan vain yksittaiselle hakemukselle...
+				.when(property("hakemusOids").isNotNull())
+				//
+				.setBody(property("hakemusOids"))
+				//
+				.otherwise()
+				//
 				.bean(valintatietoHakukohteelleKomponentti)
 				//
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						@SuppressWarnings("unchecked")
+						List<HakemusOsallistuminenTyyppi> h = exchange.getIn()
+								.getBody(List.class);
+						List<String> hakemusOids = Lists.newArrayList();
+						for (HakemusOsallistuminenTyyppi h0 : h) {
+							for (ValintakoeOsallistuminenTyyppi o0 : h0
+									.getOsallistumiset()) {
+								if (Osallistuminen.OSALLISTUU.equals(o0
+										.getOsallistuminen())) {
+									// add
+									hakemusOids.add(h0.getHakemusOid());
+								}
+							}
+						}
+						exchange.getOut().setBody(hakemusOids);
+					}
+				})
+				//
+				.end()
+				//
 				.split(body(), osoiteAggregation())
-				// filter OSALLISTUU
-				.to(kasitteleHakemusOsallistuminen())
 				//
 				.bean(osoiteKomponentti)
 				//
@@ -107,33 +149,6 @@ public class OsoitetarratRouteImpl extends SpringRouteBuilder {
 				//
 				.bean(viestintapalveluResource, "haeOsoitetarrat");
 
-		from(kasitteleHakemusOsallistuminen())
-		//
-				.filter(new Predicate() {
-					public boolean matches(Exchange exchange) {
-						HakemusOsallistuminenTyyppi o = exchange.getIn()
-								.getBody(HakemusOsallistuminenTyyppi.class);
-						for (ValintakoeOsallistuminenTyyppi o1 : o
-								.getOsallistumiset()) {
-							if (Osallistuminen.OSALLISTUU.equals(o1
-									.getOsallistuminen())) {
-								return true;
-							}
-						}
-						return false;
-					}
-				})
-				// enrich to hakemusOid
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						exchange.getOut()
-								.setBody(
-										exchange.getIn()
-												.getBody(
-														HakemusOsallistuminenTyyppi.class)
-												.getHakemusOid());
-					}
-				});
 	}
 
 	private FlexibleAggregationStrategy<Osoite> osoiteAggregation() {
