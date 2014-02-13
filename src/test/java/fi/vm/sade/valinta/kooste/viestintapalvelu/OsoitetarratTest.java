@@ -35,78 +35,90 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.ViestintapalveluCon
  */
 @Configuration
 @Import({ OsoitetarratRouteImpl.class })
-@ContextConfiguration(classes = { OsoitetarratTest.class, KoostepalveluContext.CamelConfig.class,
-        ViestintapalveluConfig.class })
+@ContextConfiguration(classes = { OsoitetarratTest.class,
+		KoostepalveluContext.CamelConfig.class, ViestintapalveluConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class OsoitetarratTest {
 
-    @Autowired
-    private ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti;
+	@Autowired
+	private ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti;
 
-    @Autowired
-    private OsoitetarratRoute osoitetarratRoute;
+	@Autowired
+	private OsoitetarratRoute osoitetarratRoute;
 
-    @Autowired
-    private HaeOsoiteKomponentti osoiteKomponentti;
+	@Autowired
+	private HaeOsoiteKomponentti osoiteKomponentti;
 
-    @Test
-    public void testaaOsoitetarratReittiPaastaPaahan() {
-        HakemusOsallistuminenTyyppi h0 = createValintatieto("1", Osallistuminen.EI_OSALLISTU);
-        HakemusOsallistuminenTyyppi h1 = createValintatieto("2", Osallistuminen.OSALLISTUU);
+	@Test
+	public void testaaOsoitetarratReittiPaastaPaahan() {
+		HakemusOsallistuminenTyyppi h0 = createValintatieto("1",
+				Osallistuminen.EI_OSALLISTU);
+		HakemusOsallistuminenTyyppi h1 = createValintatieto("2",
+				Osallistuminen.OSALLISTUU);
 
-        Mockito.when(
-                valintatietoHakukohteelleKomponentti.valintatiedotHakukohteelle(Mockito.anyListOf(String.class),
-                        Mockito.anyString())).thenReturn(Arrays.asList(h0, h1));
+		Mockito.when(
+				valintatietoHakukohteelleKomponentti
+						.valintatiedotHakukohteelle(
+								Mockito.anyListOf(String.class),
+								Mockito.anyString())).thenReturn(
+				Arrays.asList(h0, h1));
 
-        Osoite o = Mockito.mock(Osoite.class);
+		Osoite o = Mockito.mock(Osoite.class);
 
-        Mockito.when(osoiteKomponentti.haeOsoite(Mockito.anyString())).thenReturn(o);
+		Mockito.when(osoiteKomponentti.haeOsoite(Mockito.anyString()))
+				.thenReturn(o);
 
-        osoitetarratRoute.osoitetarratAktivointi("h0", Arrays.asList("v0", "v1"));
+		osoitetarratRoute.osoitetarratAktivointi(null, "h0",
+				Arrays.asList("v0", "v1"));
 
-    }
+	}
 
-    @Test(expected = ViestintapalveluException.class)
-    public void testaaFailaakoOikein() {
-        Mockito.when(
-                valintatietoHakukohteelleKomponentti.valintatiedotHakukohteelle(Mockito.anyListOf(String.class),
-                        Mockito.anyString())).thenReturn(Collections.<HakemusOsallistuminenTyyppi> emptyList());
+	@Test(expected = ViestintapalveluException.class)
+	public void testaaFailaakoOikein() {
+		Mockito.when(
+				valintatietoHakukohteelleKomponentti
+						.valintatiedotHakukohteelle(
+								Mockito.anyListOf(String.class),
+								Mockito.anyString())).thenReturn(
+				Collections.<HakemusOsallistuminenTyyppi> emptyList());
 
-        osoitetarratRoute.osoitetarratAktivointi("h0", Arrays.asList("v0", "v1"));
+		osoitetarratRoute.osoitetarratAktivointi(null, "h0",
+				Arrays.asList("v0", "v1"));
 
-    }
+	}
 
-    private HakemusOsallistuminenTyyppi createValintatieto(String oid, Osallistuminen o) {
-        HakemusOsallistuminenTyyppi h = new HakemusOsallistuminenTyyppi();
-        h.setHakemusOid(oid);
-        ValintakoeOsallistuminenTyyppi o0 = new ValintakoeOsallistuminenTyyppi();
-        o0.setOsallistuminen(o);
-        h.getOsallistumiset().add(o0);
-        return h;
-    }
+	private HakemusOsallistuminenTyyppi createValintatieto(String oid,
+			Osallistuminen o) {
+		HakemusOsallistuminenTyyppi h = new HakemusOsallistuminenTyyppi();
+		h.setHakemusOid(oid);
+		ValintakoeOsallistuminenTyyppi o0 = new ValintakoeOsallistuminenTyyppi();
+		o0.setOsallistuminen(o);
+		h.getOsallistumiset().add(o0);
+		return h;
+	}
 
-    @Bean
-    public SijoitteluKoulutuspaikkallisetKomponentti getSijoitteluKoulutuspaikallisetProxy() {
-        return Mockito.mock(SijoitteluKoulutuspaikkallisetKomponentti.class);
-    }
+	@Bean
+	public SijoitteluKoulutuspaikkallisetKomponentti getSijoitteluKoulutuspaikallisetProxy() {
+		return Mockito.mock(SijoitteluKoulutuspaikkallisetKomponentti.class);
+	}
 
-    @Bean
-    public ViestintapalveluResource getViestintapalveluResource() {
-        return Mockito.mock(ViestintapalveluResource.class);
-    }
+	@Bean
+	public ViestintapalveluResource getViestintapalveluResource() {
+		return Mockito.mock(ViestintapalveluResource.class);
+	}
 
-    @Bean
-    public ValintatietoHakukohteelleKomponentti getValintatietoHakukohteelleKomponentti() {
-        return Mockito.mock(ValintatietoHakukohteelleKomponentti.class);
-    }
+	@Bean
+	public ValintatietoHakukohteelleKomponentti getValintatietoHakukohteelleKomponentti() {
+		return Mockito.mock(ValintatietoHakukohteelleKomponentti.class);
+	}
 
-    @Bean
-    public HaeHakemusKomponentti getHaeHakemusKomponentti() {
-        return Mockito.mock(HaeHakemusKomponentti.class);
-    }
+	@Bean
+	public HaeHakemusKomponentti getHaeHakemusKomponentti() {
+		return Mockito.mock(HaeHakemusKomponentti.class);
+	}
 
-    @Bean
-    public HaeOsoiteKomponentti getHaeOsoiteKomponentti() {
-        return Mockito.mock(HaeOsoiteKomponentti.class);
-    }
+	@Bean
+	public HaeOsoiteKomponentti getHaeOsoiteKomponentti() {
+		return Mockito.mock(HaeOsoiteKomponentti.class);
+	}
 }
