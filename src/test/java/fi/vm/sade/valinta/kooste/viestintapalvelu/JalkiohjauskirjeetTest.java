@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -29,6 +30,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.ViestintapalveluCon
  * @author Jussi Jartamo
  * 
  */
+@Ignore
 @Configuration
 @Import({ JalkiohjauskirjeetKomponentti.class, JalkiohjauskirjeRouteImpl.class })
 @ContextConfiguration(classes = { JalkiohjauskirjeetTest.class,
