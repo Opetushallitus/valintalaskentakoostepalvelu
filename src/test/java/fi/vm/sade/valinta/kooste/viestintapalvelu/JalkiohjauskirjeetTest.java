@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
@@ -41,6 +42,11 @@ public class JalkiohjauskirjeetTest {
 	@Test(expected = SijoittelupalveluException.class)
 	public void testaaJalkiohjauskirjeReitti() {
 		jalkiohjauskirjeRoute.jalkiohjauskirjeetAktivoi(null, "1");
+	}
+
+	@Bean
+	public SijoitteluResource getSijoitteluResource() {
+		return Mockito.mock(SijoitteluResource.class);
 	}
 
 	@Bean
