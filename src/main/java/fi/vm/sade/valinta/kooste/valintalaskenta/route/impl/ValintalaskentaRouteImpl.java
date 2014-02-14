@@ -112,8 +112,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				.errorHandler(
 						deadLetterChannel(
 								suoritaValintalaskentaHaeHakemusDeadLetterChannel())
-								.maximumRedeliveries(10)
-								.redeliveryDelay(300L)
+								.maximumRedeliveries(4)
+								.redeliveryDelay(3000L)
 								// log exhausted stacktrace
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true)
@@ -135,9 +135,9 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 						deadLetterChannel(
 								suoritaValintalaskentaKomponenttiDeadLetterChannel())
 								//
-								.maximumRedeliveries(3)
+								.maximumRedeliveries(4)
 								//
-								.redeliveryDelay(300L)
+								.redeliveryDelay(3000L)
 								// log exhausted stacktrace
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true)
@@ -155,9 +155,9 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 						deadLetterChannel(
 								suoritaValintalaskentaKomponenttiDeadLetterChannel())
 								//
-								.maximumRedeliveries(3)
+								.maximumRedeliveries(4)
 								//
-								.redeliveryDelay(300L)
+								.redeliveryDelay(3000L)
 								// log exhausted stacktrace
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true)
@@ -269,8 +269,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				.errorHandler(
 						deadLetterChannel(
 								suoritaValintalaskentaHaeValintaperusteetDeadLetterChannel())
-								.maximumRedeliveries(10)
-								.redeliveryDelay(300L)
+								.maximumRedeliveries(4)
+								.redeliveryDelay(3000L)
 								// log exhausted stacktrace
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true)
