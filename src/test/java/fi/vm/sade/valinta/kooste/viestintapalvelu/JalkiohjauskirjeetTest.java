@@ -30,46 +30,46 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.ViestintapalveluCon
  */
 @Configuration
 @Import({ JalkiohjauskirjeetKomponentti.class, JalkiohjauskirjeRouteImpl.class })
-@ContextConfiguration(classes = { JalkiohjauskirjeetTest.class, KoostepalveluContext.CamelConfig.class,
-        ViestintapalveluConfig.class })
+@ContextConfiguration(classes = { JalkiohjauskirjeetTest.class,
+		KoostepalveluContext.CamelConfig.class, ViestintapalveluConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class JalkiohjauskirjeetTest {
 
-    @Autowired
-    private JalkiohjauskirjeRoute jalkiohjauskirjeRoute;
+	@Autowired
+	private JalkiohjauskirjeRoute jalkiohjauskirjeRoute;
 
-    @Test(expected = SijoittelupalveluException.class)
-    public void testaaJalkiohjauskirjeReitti() {
-        jalkiohjauskirjeRoute.jalkiohjauskirjeetAktivoi("1");
-    }
+	@Test(expected = SijoittelupalveluException.class)
+	public void testaaJalkiohjauskirjeReitti() {
+		jalkiohjauskirjeRoute.jalkiohjauskirjeetAktivoi(null, "1");
+	}
 
-    @Bean
-    public HaeHakemusKomponentti getHaeHakemusKomponentti() {
-        return Mockito.mock(HaeHakemusKomponentti.class);
-    }
+	@Bean
+	public HaeHakemusKomponentti getHaeHakemusKomponentti() {
+		return Mockito.mock(HaeHakemusKomponentti.class);
+	}
 
-    @Bean
-    public ViestintapalveluResource getViestintapalveluResource() {
-        return Mockito.mock(ViestintapalveluResource.class);
-    }
+	@Bean
+	public ViestintapalveluResource getViestintapalveluResource() {
+		return Mockito.mock(ViestintapalveluResource.class);
+	}
 
-    @Bean
-    public HaeHakukohdeNimiTarjonnaltaKomponentti getHaeHakukohdeNimiTarjonnaltaKomponentti() {
-        return Mockito.mock(HaeHakukohdeNimiTarjonnaltaKomponentti.class);
-    }
+	@Bean
+	public HaeHakukohdeNimiTarjonnaltaKomponentti getHaeHakukohdeNimiTarjonnaltaKomponentti() {
+		return Mockito.mock(HaeHakukohdeNimiTarjonnaltaKomponentti.class);
+	}
 
-    @Bean
-    public SijoitteluIlmankoulutuspaikkaaKomponentti getSijoitteluIlmankoulutuspaikkaaProxy() {
-        return Mockito.mock(SijoitteluIlmankoulutuspaikkaaKomponentti.class);
-    }
+	@Bean
+	public SijoitteluIlmankoulutuspaikkaaKomponentti getSijoitteluIlmankoulutuspaikkaaProxy() {
+		return Mockito.mock(SijoitteluIlmankoulutuspaikkaaKomponentti.class);
+	}
 
-    @Bean
-    public TarjontaNimiRoute getTarjontaNimiProxy() {
-        return Mockito.mock(TarjontaNimiRoute.class);
-    }
+	@Bean
+	public TarjontaNimiRoute getTarjontaNimiProxy() {
+		return Mockito.mock(TarjontaNimiRoute.class);
+	}
 
-    @Bean
-    public HaeOsoiteKomponentti getHaeOsoiteKomponentti() {
-        return Mockito.mock(HaeOsoiteKomponentti.class);
-    }
+	@Bean
+	public HaeOsoiteKomponentti getHaeOsoiteKomponentti() {
+		return Mockito.mock(HaeOsoiteKomponentti.class);
+	}
 }

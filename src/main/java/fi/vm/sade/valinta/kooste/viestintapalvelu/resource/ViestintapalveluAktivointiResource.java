@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 
 import java.util.List;
 
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -80,14 +79,18 @@ public class ViestintapalveluAktivointiResource {
 		}
 	}
 
-	@GET
+	@POST
 	@Path("/jalkiohjauskirjeet/aktivoi")
 	@Produces("application/json")
 	@ApiOperation(value = "Aktivoi jälkiohjauskirjeiden luonnin valitsemattomille", response = Response.class)
 	public Response aktivoiJalkiohjauskirjeidenLuonti(
+	/* OPTIONAL */@QueryParam("hakemusOids") List<String> hakemusOids,
 			@QueryParam("hakuOid") String hakuOid) {
 		try {
-			jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(hakuOid);
+			jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoiAsync(
+					hakemusOids, hakuOid,
+					//
+					SecurityContextHolder.getContext().getAuthentication());
 			try {
 				// messageProxy.message("Jälkiohjauskirjeen luonti on aloitettu.");
 			} catch (Exception e) {
@@ -113,7 +116,7 @@ public class ViestintapalveluAktivointiResource {
 		}
 	}
 
-	@GET
+	@POST
 	@Path("/hyvaksymiskirjeet/aktivoi")
 	@Produces("application/json")
 	@ApiOperation(value = "Aktivoi hyväksymiskirjeiden luonnin hakukohteelle haussa", response = Response.class)
