@@ -14,6 +14,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.cache.Cache;
@@ -41,10 +42,13 @@ public class HakukohteenValintaperusteetProxyCachingImpl implements
 
 	private Cache<String, List<ValintaperusteetTyyppi>> valintaperusteetCache;
 
+    @Value("${valintakoostepalvelu.cache.hakukohteenvalintaperusteet.size:5000}")
+    private int cacheSize;
+
 	@PostConstruct
 	public void init() {
 		valintaperusteetCache = CacheBuilder.newBuilder().recordStats()
-				.expireAfterWrite(10, TimeUnit.MINUTES).build();
+				.maximumSize(cacheSize).build();
 	}
 
 	@Override
@@ -87,6 +91,10 @@ public class HakukohteenValintaperusteetProxyCachingImpl implements
 
 			result.addAll(vps);
 		}
+
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(valintaperusteetCache.stats().toString());
+        }
 
 		return result;
 
