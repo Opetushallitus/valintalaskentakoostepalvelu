@@ -23,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
+import com.google.gson.Gson;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -133,9 +134,19 @@ public class ValintalaskentaAktivointiResource {
 			return Response.status(Response.Status.OK)
 					.entity("get parameter 'hakuoid' required").build();
 		} else {
+
+			ProsessiJaStatus<?> ajossaOlevaLaskenta = valintalaskentaValvomo
+					.getAjossaOlevaProsessiJaStatus();
+			if (ajossaOlevaLaskenta != null) {
+				LOG.error("Valintalaskenta on jo ajossa!\r\n {}",
+						new Gson().toJson(ajossaOlevaLaskenta));
+				return Response.serverError().entity(ajossaOlevaLaskenta)
+						.build();
+			}
 			LOG.info(
 					"Suoritetaan valintalaskenta haulle {}: Ilman seuraavia hakukohteita {}",
 					hakuOid, Arrays.toString(hakukohdeOids.toArray()));
+
 			haunValintalaskentaAktivointiProxy.aktivoiValintalaskentaAsync(
 					hakukohdeOids, hakuOid, SecurityContextHolder.getContext()
 							.getAuthentication());
