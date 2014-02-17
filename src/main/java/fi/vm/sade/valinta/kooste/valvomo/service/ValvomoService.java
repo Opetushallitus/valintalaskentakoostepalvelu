@@ -11,8 +11,13 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
  */
 public interface ValvomoService<T> {
 
-    Collection<T> getUusimmatProsessit();
+	/**
+	 * @return null if idle
+	 */
+	ProsessiJaStatus<T> getAjossaOlevaProsessiJaStatus();
 
-    Collection<ProsessiJaStatus<T>> getUusimmatProsessitJaStatukset();
+	Collection<T> getUusimmatProsessit();
+
+	Collection<ProsessiJaStatus<T>> getUusimmatProsessitJaStatukset();
 
 }
