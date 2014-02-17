@@ -70,153 +70,162 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaRoute
 // "test-context.xml" })
 // @RunWith(SpringJUnit4ClassRunner.class)
 @Configuration
-@Import({ ValintalaskentaRouteImpl.class, HaeHakukohteenHakemuksetKomponentti.class, HaeHakemusKomponentti.class,
-        HaeValintaperusteetKomponentti.class, HaeHakukohteetTarjonnaltaKomponentti.class,
-        ValinnanVaiheenValintaperusteetProxyCachingImpl.class, HakukohteenValintaperusteetProxyCachingImpl.class,
-        SuoritaLaskentaKomponentti.class })
-@ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class, HaunValintalaskentaReititysTest.class,
-        ValintalaskentaConfig.class })
+@Import({ ValintalaskentaRouteImpl.class,
+		HaeHakukohteenHakemuksetKomponentti.class, HaeHakemusKomponentti.class,
+		HaeValintaperusteetKomponentti.class,
+		HaeHakukohteetTarjonnaltaKomponentti.class,
+		ValinnanVaiheenValintaperusteetProxyCachingImpl.class,
+		HakukohteenValintaperusteetProxyCachingImpl.class,
+		SuoritaLaskentaKomponentti.class })
+@ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class,
+		HaunValintalaskentaReititysTest.class, ValintalaskentaConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HaunValintalaskentaReititysTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HaunValintalaskentaReititysTest.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HaunValintalaskentaReititysTest.class);
 
-    private static final String[] HAKUKOHDE_OIDS = { "hakukohdeoid1", "hakukohdeoid2", "hakukohdeoid3",
-            "hakukohdeoid4", "hakukohdeoid5", "hakukohdeoid6s" };
+	private static final String[] HAKUKOHDE_OIDS = { "hakukohdeoid1",
+			"hakukohdeoid2", "hakukohdeoid3", "hakukohdeoid4", "hakukohdeoid5",
+			"hakukohdeoid6s" };
 
-    private static final String HAKUOID = "hakuoid";
+	private static final String HAKUOID = "hakuoid";
 
-    private static final String HAKEMUSOID = "hakemus0";
-    private static final String HAKUKOHDEOID = "hakukohde0";
-    private static final Integer VALINNANVAIHE = 6;
+	private static final String HAKEMUSOID = "hakemus0";
+	private static final String HAKUKOHDEOID = "hakukohde0";
+	private static final Integer VALINNANVAIHE = 6;
 
-    @Bean
-    public HakukohdeResource getHakukohdeResource() {
-        return mock(HakukohdeResource.class);
-    }
+	@Bean
+	public HakukohdeResource getHakukohdeResource() {
+		return mock(HakukohdeResource.class);
+	}
 
-    @Bean
-    public ApplicationResource getApplicationResourceMock() {
-        ApplicationResource mock = mock(ApplicationResource.class);
+	@Bean
+	public ApplicationResource getApplicationResourceMock() {
+		ApplicationResource mock = mock(ApplicationResource.class);
 
-        HakemusList hlist = new HakemusList();
-        hlist.setTotalCount(1);
-        SuppeaHakemus hk = new SuppeaHakemus();
-        hk.setOid(HAKEMUSOID);
-        hlist.getResults().add(hk);
+		HakemusList hlist = new HakemusList();
+		hlist.setTotalCount(1);
+		SuppeaHakemus hk = new SuppeaHakemus();
+		hk.setOid(HAKEMUSOID);
+		hlist.getResults().add(hk);
 
-        when(
-                mock.findApplications(anyString(), anyListOf(String.class), anyString(), anyString(), anyString(),
-                        argThat(new BaseMatcher<String>() {
-                            @Override
-                            public boolean matches(Object o) {
-                                String s = (String) o;
+		when(
+				mock.findApplications(anyString(), anyListOf(String.class),
+						anyString(), anyString(), anyString(),
+						argThat(new BaseMatcher<String>() {
+							@Override
+							public boolean matches(Object o) {
+								String s = (String) o;
 
-                                boolean found = false;
-                                for (String hakukohde : HAKUKOHDE_OIDS) {
-                                    if (s.equals(hakukohde)) {
-                                        found = true;
-                                        break;
-                                    }
-                                }
+								boolean found = false;
+								for (String hakukohde : HAKUKOHDE_OIDS) {
+									if (s.equals(hakukohde)) {
+										found = true;
+										break;
+									}
+								}
 
-                                return found;
+								return found;
 
-                            }
+							}
 
-                            @Override
-                            public void describeTo(Description description) {
-                                // To change body of implemented methods use
-                                // File | Settings | File Templates.
-                            }
-                        }), anyInt(), anyInt())).thenReturn(hlist);
+							@Override
+							public void describeTo(Description description) {
+								// To change body of implemented methods use
+								// File | Settings | File Templates.
+							}
+						}), anyInt(), anyInt())).thenReturn(hlist);
 
-        Hakemus hakemus = new Hakemus();
-        hakemus.setOid(HAKEMUSOID);
+		Hakemus hakemus = new Hakemus();
+		hakemus.setOid(HAKEMUSOID);
 
-        when(mock.getApplicationByOid(eq(HAKEMUSOID))).thenReturn(hakemus);
+		when(mock.getApplicationByOid(eq(HAKEMUSOID))).thenReturn(hakemus);
 
-        return mock;
-    }
+		return mock;
+	}
 
-    @Bean
-    public ValintaperusteService getValintaperusteServiceMock() {
-        ValintaperusteService valintaperusteMock = mock(ValintaperusteService.class);
-        ValintaperusteetTyyppi vtyyppi = new ValintaperusteetTyyppi();
-        vtyyppi.setHakukohdeOid(HAKUKOHDEOID);
-        TavallinenValinnanVaiheTyyppi vaihe = new TavallinenValinnanVaiheTyyppi();
-        vaihe.setValinnanVaiheJarjestysluku(VALINNANVAIHE);
+	@Bean
+	public ValintaperusteService getValintaperusteServiceMock() {
+		ValintaperusteService valintaperusteMock = mock(ValintaperusteService.class);
+		ValintaperusteetTyyppi vtyyppi = new ValintaperusteetTyyppi();
+		vtyyppi.setHakukohdeOid(HAKUKOHDEOID);
+		TavallinenValinnanVaiheTyyppi vaihe = new TavallinenValinnanVaiheTyyppi();
+		vaihe.setValinnanVaiheJarjestysluku(VALINNANVAIHE);
 
-        when(valintaperusteMock.haeValintaperusteet(anyListOf(HakuparametritTyyppi.class))).thenReturn(
-                Arrays.asList(vtyyppi));
-        return valintaperusteMock;
-    }
+		when(
+				valintaperusteMock
+						.haeValintaperusteet(anyListOf(HakuparametritTyyppi.class)))
+				.thenReturn(Arrays.asList(vtyyppi));
+		return valintaperusteMock;
+	}
 
-    @Bean
-    public ValintalaskentaService getValintalaskentaService() {
-        return mock(ValintalaskentaService.class);
-    }
+	@Bean
+	public ValintalaskentaService getValintalaskentaService() {
+		return mock(ValintalaskentaService.class);
+	}
 
-    @Bean(name = "tarjontaServiceClientAsAdmin")
-    public TarjontaPublicService getTarjontaPublicServiceMock() {
-        TarjontaPublicService tarjontaService = mock(TarjontaPublicService.class);
-        TarjontaTyyppi tarjonta = new TarjontaTyyppi();
-        for (String oid : HAKUKOHDE_OIDS) {
-            HakukohdeTyyppi hakukohde = new HakukohdeTyyppi();
-            hakukohde.setOid(oid);
-            hakukohde.setHakukohteenTila(TarjontaTila.JULKAISTU);
-            tarjonta.getHakukohde().add(hakukohde);
-        }
-        when(tarjontaService.haeTarjonta(eq(HAKUOID))).thenReturn(tarjonta);
-        return tarjontaService;
-    }
+	@Bean(name = "tarjontaServiceClientAsAdmin")
+	public TarjontaPublicService getTarjontaPublicServiceMock() {
+		TarjontaPublicService tarjontaService = mock(TarjontaPublicService.class);
+		TarjontaTyyppi tarjonta = new TarjontaTyyppi();
+		for (String oid : HAKUKOHDE_OIDS) {
+			HakukohdeTyyppi hakukohde = new HakukohdeTyyppi();
+			hakukohde.setOid(oid);
+			hakukohde.setHakukohteenTila(TarjontaTila.JULKAISTU);
+			tarjonta.getHakukohde().add(hakukohde);
+		}
+		when(tarjontaService.haeTarjonta(eq(HAKUOID))).thenReturn(tarjonta);
+		return tarjontaService;
+	}
 
-    @Bean
-    public ParametriService getParametriService() {
-        ParametriService parametriService = mock(ParametriService.class);
-        when(parametriService.valintalaskentaEnabled(HAKUOID)).thenReturn(true);
-        return parametriService;
-    }
+	@Bean
+	public ParametriService getParametriService() {
+		ParametriService parametriService = mock(ParametriService.class);
+		when(parametriService.valintalaskentaEnabled(HAKUOID)).thenReturn(true);
+		return parametriService;
+	}
 
-    @Bean
-    public OrganisaatioResource getOrganisaatioResourceMock() {
-        return mock(OrganisaatioResource.class);
-    }
+	@Bean
+	public OrganisaatioResource getOrganisaatioResourceMock() {
+		return mock(OrganisaatioResource.class);
+	}
 
-    @Bean
-    public KoodiService getKoodiService() {
-        return mock(KoodiService.class);
-    }
+	@Bean
+	public KoodiService getKoodiService() {
+		return mock(KoodiService.class);
+	}
 
-    @Bean
-    public HakuResource getHakuResource() {
-        return mock(HakuResource.class);
-    }
+	@Bean
+	public HakuResource getHakuResource() {
+		return mock(HakuResource.class);
+	}
 
-    @Autowired
-    private ValintalaskentaService valintalaskentaService;
+	@Autowired
+	private ValintalaskentaService valintalaskentaService;
 
-    @Autowired
-    private ApplicationResource applicationResourceMock;
+	@Autowired
+	private ApplicationResource applicationResourceMock;
 
-    @Autowired
-    private HaunValintalaskentaRoute haunValintalaskentaAktivointiProxy;
+	@Autowired
+	private HaunValintalaskentaRoute haunValintalaskentaAktivointiProxy;
 
-    @Test
-    public void testLaskentaKooste() {
-        haunValintalaskentaAktivointiProxy.aktivoiValintalaskenta(HAKUOID);
+	@Test
+	public void testLaskentaKooste() {
+		haunValintalaskentaAktivointiProxy.aktivoiValintalaskenta(HAKUOID);
 
-        // verify that hakemusservice was indeed called with REST argument!
+		// verify that hakemusservice was indeed called with REST argument!
 
-        // for (String hakukohdeoid : HAKUKOHDE_OIDS) {
-        // verify(applicationResourceMock,
-        // times(1)).findApplications(anyString(), anyListOf(String.class),
-        // anyString(), anyString(), anyString(), eq(hakukohdeoid), anyInt(),
-        // anyInt());
-        // }
+		// for (String hakukohdeoid : HAKUKOHDE_OIDS) {
+		// verify(applicationResourceMock,
+		// times(1)).findApplications(anyString(), anyListOf(String.class),
+		// anyString(), anyString(), anyString(), eq(hakukohdeoid), anyInt(),
+		// anyInt());
+		// }
 
-        // verify that the route ended calling valintalaskentaservice!
-        verify(valintalaskentaService, times(HAKUKOHDE_OIDS.length)).laske(anyListOf(HakemusTyyppi.class),
-                anyListOf(ValintaperusteetTyyppi.class));
-    }
+		// verify that the route ended calling valintalaskentaservice!
+		verify(valintalaskentaService, times(HAKUKOHDE_OIDS.length)).laske(
+				anyListOf(HakemusTyyppi.class),
+				anyListOf(ValintaperusteetTyyppi.class));
+	}
 }
