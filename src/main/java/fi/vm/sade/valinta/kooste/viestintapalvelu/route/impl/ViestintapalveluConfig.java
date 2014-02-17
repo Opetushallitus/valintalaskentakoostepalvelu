@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeHakemuksilleRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratHakemuksilleRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
@@ -75,5 +76,15 @@ public class ViestintapalveluConfig {
 		return ProxyWithAnnotationHelper.createProxy(
 				context.getEndpoint(KoekutsukirjeRoute.DIRECT_KOEKUTSUKIRJEET),
 				KoekutsukirjeRoute.class);
+	}
+
+	@Bean
+	public KoekutsukirjeHakemuksilleRoute getKoekutsukirjeHakemuksilleRoute(
+			@Qualifier("javaDslCamelContext") CamelContext context)
+			throws Exception {
+		return ProxyWithAnnotationHelper
+				.createProxy(
+						context.getEndpoint(KoekutsukirjeHakemuksilleRoute.DIRECT_KOEKUTSUKIRJEET_HAKEMUKSILLE),
+						KoekutsukirjeHakemuksilleRoute.class);
 	}
 }

@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.Resource;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -24,8 +26,10 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.Message;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsukirjeHakemuksille;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeHakemuksilleRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratHakemuksilleRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
@@ -62,6 +66,8 @@ public class ViestintapalveluAktivointiResource {
 	@Autowired
 	private KoekutsukirjeRoute koekutsukirjeRoute;
 	@Autowired
+	private KoekutsukirjeHakemuksilleRoute koekutsukirjeetHakemuksille;
+	@Resource(name = "dokumenttipalveluRestClient")
 	private DokumenttiResource dokumenttiResource;
 
 	@POST
@@ -245,6 +251,27 @@ public class ViestintapalveluAktivointiResource {
 			e.printStackTrace();
 			return Response.serverError().entity(e.getMessage()).build();
 		}
+		return Response.ok().build();
+	}
+
+	/**
+	 * 
+	 * @param hakukohdeOid
+	 * @param hakuOid
+	 * @param sijoitteluajoId
+	 * @return 200 OK
+	 */
+	@POST
+	@Path("/koekutsukirjeet/hakemuksille/aktivoi")
+	@Consumes("application/json")
+	@ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin yksittaisille hakemuksille", response = Response.class)
+	public Response aktivoiKoekutsukirjeidenLuontiHakemuksille(
+			KoekutsukirjeHakemuksille koekutsukirjeHakemuksille,
+			@QueryParam("hakukohdeOid") String hakukohdeOid) {
+		koekutsukirjeetHakemuksille.koekutsukirjeetAktivointiHakemuksilleAsync(
+				koekutsukirjeHakemuksille.getHakemusOid(), hakukohdeOid,
+				koekutsukirjeHakemuksille.getLetterBodyText(),
+				SecurityContextHolder.getContext().getAuthentication());
 		return Response.ok().build();
 	}
 }
