@@ -159,8 +159,6 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 				//
 				.process(security)
 				//
-				.split(property("hakemusOids"))
-				//
 				.split(property("hakemusOids"),
 						new FlexibleAggregationStrategy<Hakemus>()
 								.storeInBody().accumulateInCollection(
