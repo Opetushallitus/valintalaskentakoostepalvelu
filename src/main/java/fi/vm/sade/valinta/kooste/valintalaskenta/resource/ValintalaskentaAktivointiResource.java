@@ -112,6 +112,15 @@ public class ValintalaskentaAktivointiResource {
 			return Response.status(Response.Status.OK)
 					.entity("get parameter 'hakuoid' required").build();
 		} else {
+			ProsessiJaStatus<?> ajossaOlevaLaskenta = valintalaskentaValvomo
+					.getAjossaOlevaProsessiJaStatus();
+			if (ajossaOlevaLaskenta != null) {
+				LOG.error("Valintalaskenta on jo ajossa!\r\n {}",
+						new Gson().toJson(ajossaOlevaLaskenta));
+				return Response.serverError().entity(ajossaOlevaLaskenta)
+						.build();
+			}
+
 			LOG.info("Suoritetaan valintalaskenta haulle {}", hakuOid);
 			haunValintalaskentaAktivointiProxy.aktivoiValintalaskentaAsync(
 					null, hakuOid, SecurityContextHolder.getContext()

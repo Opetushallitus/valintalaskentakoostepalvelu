@@ -223,7 +223,7 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 	}
 
 	private String koekutsukirjeetHakemuksista() {
-		return "direct_koekutsukirjeet_hakemuksista";
+		return "direct:koekutsukirjeet_hakemuksista";
 	}
 
 	private String hakemusOiditHakemuksiksi() {
