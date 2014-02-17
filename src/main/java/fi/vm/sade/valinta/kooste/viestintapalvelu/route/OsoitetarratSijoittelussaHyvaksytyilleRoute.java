@@ -11,7 +11,7 @@ import fi.vm.sade.valinta.kooste.OPH;
  * @author Jussi Jartamo
  * 
  */
-public interface HyvaksyttyjenOsoitetarratRoute {
+public interface OsoitetarratSijoittelussaHyvaksytyilleRoute {
 	final String DIRECT_HYVAKSYTTYJEN_OSOITETARRAT = "direct:hyvaksyttyjen_osoitetarrat";
 
 	void hyvaksyttyjenOsoitetarrojenAktivointi(

@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.POST;
@@ -9,6 +10,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +21,15 @@ import org.springframework.stereotype.Controller;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
+import fi.vm.sade.valinta.dokumenttipalvelu.dto.Message;
+import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksyttyjenOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratHakemuksilleRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratSijoittelussaHyvaksytyilleRoute;
 
 /**
  * 
@@ -47,13 +52,17 @@ public class ViestintapalveluAktivointiResource {
 	@Autowired
 	private OsoitetarratRoute addressLabelBatchProxy;
 	@Autowired
+	private OsoitetarratHakemuksilleRoute osoitetarratHakemuksille;
+	@Autowired
 	private JalkiohjauskirjeRoute jalkiohjauskirjeBatchProxy;
 	@Autowired
 	private HyvaksymiskirjeRoute hyvaksymiskirjeBatchProxy;
 	@Autowired
-	private HyvaksyttyjenOsoitetarratRoute hyvaksyttyjenOsoitetarratProxy;
+	private OsoitetarratSijoittelussaHyvaksytyilleRoute hyvaksyttyjenOsoitetarratProxy;
 	@Autowired
 	private KoekutsukirjeRoute koekutsukirjeRoute;
+	@Autowired
+	private DokumenttiResource dokumenttiResource;
 
 	@POST
 	@Path("/osoitetarrat/aktivoi")
@@ -66,6 +75,37 @@ public class ViestintapalveluAktivointiResource {
 		try {
 			addressLabelBatchProxy.osoitetarratAktivointi(hakemusOids,
 					hakukohdeOid, valintakoeOids);
+			dokumenttiResource.viesti(new Message(
+					"Osoitetarrojen luonti aloitettu", Arrays
+							.asList("osoitetarra"), DateTime.now().plusDays(1)
+							.toDate()));
+			return Response.status(Status.OK).build();
+		} catch (Exception e) {
+			LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
+			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+			// todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+			// Ylläpitäjä voi lukea logeista todellisen syyn!
+			return Response
+					.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(Vastaus.virhe("Osoitetarrojen luonti epäonnistui! "
+							+ e.getMessage())).build();
+		}
+	}
+
+	@POST
+	@Path("/osoitetarrat/hakemuksille/aktivoi")
+	@Produces("application/json")
+	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
+	public Response aktivoiOsoitetarrojenLuontiHakemuksille(
+			@QueryParam("hakemusOids") List<String> hakemusOids) {
+		try {
+			osoitetarratHakemuksille.osoitetarrotHakemuksilleAktivointiAsync(
+					hakemusOids, SecurityContextHolder.getContext()
+							.getAuthentication());
+			dokumenttiResource.viesti(new Message(
+					"Osoitetarrojen luonti hakemuksille aloitettu", Arrays
+							.asList("osoitetarrat"), DateTime.now().plusDays(1)
+							.toDate()));
 			return Response.status(Status.OK).build();
 		} catch (Exception e) {
 			LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
