@@ -17,14 +17,16 @@ import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
+import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksyttyjenOsoitetarratRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratHakemuksilleRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratSijoittelussaHyvaksytyilleRoute;
 
 /**
  * 
@@ -47,6 +49,8 @@ public class OsoitetarratRouteImpl extends SpringRouteBuilder {
 	@Autowired
 	private SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 
+	private final SecurityPreprocessor security = new SecurityPreprocessor();
+
 	public static class LuoOsoitteet {
 		public Osoitteet luo(List<Osoite> osoitteet) {
 			if (osoitteet == null || osoitteet.isEmpty()) {
@@ -60,7 +64,8 @@ public class OsoitetarratRouteImpl extends SpringRouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		configureHyvaksyttyjenOsoitetarrat();
-		configureOsoitetarrat();
+		configureValintakokeenOsoitetarrat();
+		configureHakemuksenOsoitetarrat();
 	}
 
 	private void configureHyvaksyttyjenOsoitetarrat() throws Exception {
@@ -103,8 +108,23 @@ public class OsoitetarratRouteImpl extends SpringRouteBuilder {
 
 	}
 
-	private void configureOsoitetarrat() throws Exception {
-		from(osoitetarrat())
+	private void configureHakemuksenOsoitetarrat() throws Exception {
+		from(hakemustenOsoitetarrat())
+		//
+				.process(security)
+				//
+				.bean(osoiteKomponentti)
+				//
+				.end()
+				// enrich to Osoitteet
+				.bean(new LuoOsoitteet())
+				//
+				.bean(viestintapalveluResource, "haeOsoitetarrat");
+
+	}
+
+	private void configureValintakokeenOsoitetarrat() throws Exception {
+		from(valintakokeenOsoitetarrat())
 		//
 				.choice()
 				// Jos luodaan vain yksittaiselle hakemukselle...
@@ -156,24 +176,16 @@ public class OsoitetarratRouteImpl extends SpringRouteBuilder {
 				.accumulateInCollection(ArrayList.class);
 	}
 
-	private String osoitetarrat() {
+	private String hakemustenOsoitetarrat() {
+		return OsoitetarratHakemuksilleRoute.DIRECT_OSOITETARRAT_HAKEMUKSILLE;
+	}
+
+	private String valintakokeenOsoitetarrat() {
 		return OsoitetarratRoute.DIRECT_OSOITETARRAT;
 	}
 
 	private String hyvaksyttyjenOsoitetarrat() {
-		return HyvaksyttyjenOsoitetarratRoute.DIRECT_HYVAKSYTTYJEN_OSOITETARRAT;
-	}
-
-	private final String DIRECT_KASITTELE_OSALLISTUMINEN = "direct:osoitetarrat_osallistuminen";
-
-	private String kasitteleHakemusOsallistuminen() {
-		return DIRECT_KASITTELE_OSALLISTUMINEN;
-	}
-
-	private final String DIRECT_KASITTELE_HAKIJA = "direct:osoitetarrat_hakija";
-
-	private String kasitteleHakija() {
-		return DIRECT_KASITTELE_HAKIJA;
+		return OsoitetarratSijoittelussaHyvaksytyilleRoute.DIRECT_HYVAKSYTTYJEN_OSOITETARRAT;
 	}
 
 }
