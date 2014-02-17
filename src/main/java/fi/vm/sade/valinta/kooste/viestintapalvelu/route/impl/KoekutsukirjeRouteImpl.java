@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
@@ -31,6 +30,7 @@ import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeHakemuksilleRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
 
 /**
@@ -47,6 +47,7 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 	private final ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti;
 	private final ApplicationResource applicationResource;
 	private final DokumenttiResource dokumenttiResource;
+	private final SecurityPreprocessor security = new SecurityPreprocessor();
 
 	@Autowired
 	public KoekutsukirjeRouteImpl(
@@ -129,6 +130,54 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 				//
 				.end();
 
+		from(hakemusOiditHakemuksiksi())
+		//
+				.errorHandler(
+				//
+						deadLetterChannel(kirjeidenLuontiEpaonnistui())
+								//
+								.maximumRedeliveries(5)
+								//
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
+				//
+				.process(security)
+				//
+				.bean(applicationResource, "getApplicationByOid");
+
+		from(hakemuksilleKoekutsukirjeet())
+		//
+				.errorHandler(
+				//
+						deadLetterChannel(kirjeidenLuontiEpaonnistui())
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
+				//
+				.process(security)
+				//
+				.split(property("hakemusOids"))
+				//
+				.split(property("hakemusOids"),
+						new FlexibleAggregationStrategy<Hakemus>()
+								.storeInBody().accumulateInCollection(
+										ArrayList.class))
+				//
+				.shareUnitOfWork()
+				//
+				.parallelProcessing()
+				//
+				.stopOnException()
+				//
+				.to(hakemusOiditHakemuksiksi())
+				//
+				.end()
+				//
+				.to(koekutsukirjeetHakemuksista());
+
 		from(koekutsukirjeet())
 		//
 				.errorHandler(
@@ -139,34 +188,25 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.process(new SecurityPreprocessor())
+				.process(security)
 				//
 				.choice()
 				// Jos luodaan vain yksittaiselle hakemukselle...
 				.when(property("hakemusOids").isNotNull())
 				//
-				// ... haetaan yksittainen hakemus
-				.process(new Processor() {
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						@SuppressWarnings("unchecked")
-						List<String> hakemusOids = exchange.getProperty(
-								"hakemusOids", List.class);
-						List<Hakemus> h = Lists.newArrayList();
-						for (String hakemusOid : hakemusOids) {
-							h.add(applicationResource
-									.getApplicationByOid(hakemusOid));
-						}
-						exchange.getOut().setBody(h);
-					}
-				})
+				// ... tehdaankin koekutsukirjeet yksittaisille hakemuksille
+				.to(hakemuksilleKoekutsukirjeet())
 				//
 				.otherwise() // ...muuten
 				// ...haetaan kaikille osallistujille
 				.to("direct:koekutsukirjeet_hae_valintatiedot_hakemuksille")
 				//
-				.end()
+				.to(koekutsukirjeetHakemuksista())
 				//
+				.end();
+
+		from(koekutsukirjeetHakemuksista())
+		//
 				.bean(koekutsukirjeetKomponentti)
 				//
 				.bean(viestintapalveluResource, "vieKoekutsukirjeet")
@@ -182,8 +222,20 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 
 	}
 
+	private String koekutsukirjeetHakemuksista() {
+		return "direct_koekutsukirjeet_hakemuksista";
+	}
+
+	private String hakemusOiditHakemuksiksi() {
+		return "direct:koekutsukirjeet_hakemusoidit_hakemuksiksi";
+	}
+
 	private String kirjeidenLuontiEpaonnistui() {
 		return "direct:koekutsukirjeet_epaonnistui";
+	}
+
+	private String hakemuksilleKoekutsukirjeet() {
+		return KoekutsukirjeHakemuksilleRoute.DIRECT_KOEKUTSUKIRJEET_HAKEMUKSILLE;
 	}
 
 	private String koekutsukirjeet() {
