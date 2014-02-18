@@ -20,6 +20,7 @@ import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
+import fi.vm.sade.valinta.kooste.CacheInvalidatorMock;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
@@ -40,7 +41,8 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
  * 
  */
 @Configuration
-@Import({ ValintalaskentaRouteImpl.class, SuoritaLaskentaKomponentti.class })
+@Import({ ValintalaskentaRouteImpl.class, SuoritaLaskentaKomponentti.class,
+		CacheInvalidatorMock.class })
 @ContextConfiguration(classes = { ValintalaskentaHakuTest.class,
 		KoostepalveluContext.CamelConfig.class, ValintalaskentaConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)

@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
@@ -12,6 +14,7 @@ import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
@@ -20,12 +23,14 @@ import com.google.common.collect.Collections2;
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.external.resource.haku.proxy.HakemusCacheInvalidator;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HakemusOidSplitter;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.SplitHakukohteetKomponentti;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetCacheInvalidator;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaProsessi;
 import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.HaeValintaperusteetKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.SuoritaLaskentaKomponentti;
@@ -44,26 +49,58 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 	// private static final String ENSIMMAINEN_VIRHE =
 	// "ensimmainen_virhe_reitilla";
 
-	@Autowired
-	private SecurityPreprocessor securityProcessor;
+	private final SuoritaLaskentaKomponentti suoritaLaskentaKomponentti;
+	private final HaeHakukohteetTarjonnaltaKomponentti haeHakukohteetTarjonnaltaKomponentti;
+	private final HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
+	private final HaeHakemusKomponentti haeHakemusKomponentti;
+	private final HaeValintaperusteetKomponentti haeValintaperusteetKomponentti;
+	private final Processor invalidateAllCaches;
+	private final SecurityPreprocessor securityProcessor;
+	private final ExecutorService valintalaskentaExecutorService;// Integer
+																	// valintalaskentaThreadPoolSize;
+	private final ExecutorService hakukohdeValintalaskentaExecutorService;// Integer
 
+	// valintalaskentaThreadPoolSize;
 	@Autowired
-	private SuoritaLaskentaKomponentti suoritaLaskentaKomponentti;
-
-	@Autowired
-	private HaeHakukohteetTarjonnaltaKomponentti haeHakukohteetTarjonnaltaKomponentti;
-
-	@Autowired
-	private HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
-
-	@Autowired
-	private HaeHakemusKomponentti haeHakemusKomponentti;
-
-	@Autowired
-	private HaeValintaperusteetKomponentti haeValintaperusteetKomponentti;
+	public ValintalaskentaRouteImpl(
+			@Value("${valintalaskentakoostepalvelu.valintalaskenta.threadpoolsize:10}") Integer valintalaskentaThreadPoolSize,
+			SuoritaLaskentaKomponentti suoritaLaskentaKomponentti,
+			HaeHakukohteetTarjonnaltaKomponentti haeHakukohteetTarjonnaltaKomponentti,
+			HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti,
+			HaeValintaperusteetKomponentti haeValintaperusteetKomponentti,
+			HaeHakemusKomponentti haeHakemusKomponentti,
+			final HakemusCacheInvalidator hakemusCacheInvalidator,
+			final HakukohteenValintaperusteetCacheInvalidator hakukohteenValintaperusteetCacheInvalidator) {
+		this.suoritaLaskentaKomponentti = suoritaLaskentaKomponentti;
+		this.haeHakukohteetTarjonnaltaKomponentti = haeHakukohteetTarjonnaltaKomponentti;
+		this.haeHakukohteenHakemuksetKomponentti = haeHakukohteenHakemuksetKomponentti;
+		this.haeValintaperusteetKomponentti = haeValintaperusteetKomponentti;
+		this.haeHakemusKomponentti = haeHakemusKomponentti;
+		this.securityProcessor = new SecurityPreprocessor();
+		this.valintalaskentaExecutorService = Executors
+				.newFixedThreadPool(valintalaskentaThreadPoolSize);
+		this.hakukohdeValintalaskentaExecutorService = Executors
+				.newFixedThreadPool(valintalaskentaThreadPoolSize);
+		// processor to invalidate all caches. called when valintalaskenta
+		// starts and ends
+		this.invalidateAllCaches = new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				hakemusCacheInvalidator.invalidateAll();
+				hakukohteenValintaperusteetCacheInvalidator.invalidateAll();
+			}
+		};
+	}
 
 	@Override
 	public void configure() throws Exception {
+
+		from(preprocessFail())
+		//
+				.to(fail())
+				//
+				.bean(invalidateAllCaches);
+		//
+
 		/**
 		 * Laskenta dead-letter-channel. Nyt ainoastaan paattaa prosessin.
 		 * Jatkossa lisaa metadataa paatettyyn prosessiin yllapitajalle.
@@ -75,7 +112,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 						"message",
 						simple("[${property.authentication.name}] Valintaperusteiden haku ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
 				//
-				.to(fail());
+				.to(preprocessFail());
 
 		from(suoritaValintalaskentaKomponenttiDeadLetterChannel())
 		//
@@ -83,35 +120,35 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 						"message",
 						simple("[${property.authentication.name}] Valinta ei toimi: Hakukohteelle ${property.hakukohdeOid}"))
 				//
-				.to(fail());
+				.to(preprocessFail());
 		from(suoritaValintalaskentaDeadLetterChannel())
 		//
 				.setHeader(
 						"message",
 						simple("[${property.authentication.name}] Valintalaskennan suoritus ei toimi hakukohteelle ${property.hakukohdeOid} ja valinnanvaiheelle ${property.valinnanvaihe}"))
 				//
-				.to(fail());
+				.to(preprocessFail());
 		from(suoritaValintalaskentaHaeHakemusDeadLetterChannel())
 		//
 				.setHeader(
 						"message",
 						simple("[${property.authentication.name}] Haku-app ei toimi hakemukselle ${header.hakemusOid} hakukohteessa ${property.hakukohdeOid}"))
 				//
-				.to(fail());
+				.to(preprocessFail());
 		from(suoritaHakukohteelleValintalaskentaDeadLetterChannel())
 		//
 				.setHeader(
 						"message",
 						simple("[${property.authentication.name}] Valintaperusteiden haku ei toimi: Hakukohteelle ${property.hakukohdeOid} ja valinnanvaiheelle ${property.valinnanvaihe}"))
 				//
-				.to(fail());
+				.to(preprocessFail());
 		from(suoritaHaulleValintalaskentaDeadLetterChannel())
 		//
 				.setHeader(
 						"message",
 						simple("[${property.authentication.name}] Tarjonta ei toimi: Haulle ${property.hakuOid}"))
 				//
-				.to(fail());
+				.to(preprocessFail());
 
 		from("direct:suorita_haehakemus")
 				.errorHandler(
@@ -190,6 +227,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 								.storeInHeader("hakemustyypit")
 								.accumulateInCollection(ArrayList.class))
 				//
+				.executorService(valintalaskentaExecutorService)
+				//
 				.shareUnitOfWork()
 				//
 				.parallelProcessing()
@@ -241,6 +280,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				//
 				.bean(securityProcessor)
 				//
+				.bean(invalidateAllCaches)
 				// .setProperty(ENSIMMAINEN_VIRHE, constant(new
 				// AtomicBoolean(true)))
 				//
@@ -287,6 +327,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				// Collection<String>
 				.split(body())
 				//
+				.executorService(hakukohdeValintalaskentaExecutorService)
+				//
 				.shareUnitOfWork()
 				//
 				.parallelProcessing()
@@ -298,6 +340,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				.to(suoritaValintalaskenta())
 				// end splitter
 				.end()
+				//
+				.bean(invalidateAllCaches)
 				// route done
 				.to(finish());
 		from("direct:valintalaskenta_haeValintaperusteet")
@@ -324,6 +368,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				//
 				.bean(securityProcessor)
 				//
+				.bean(invalidateAllCaches)
+				//
 				.setHeader("hakukohteitaYhteensa", constant(1))
 				//
 				.process(luoProsessiHakukohteenValintalaskennalle())
@@ -331,6 +377,8 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				.to(start())
 				//
 				.to(suoritaValintalaskenta())
+				//
+				.bean(invalidateAllCaches)
 				//
 				.to(finish());
 
@@ -408,6 +456,10 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 
 	private static String prosessi() {
 		return ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI;
+	}
+
+	private static String preprocessFail() {
+		return "direct:suorita_valintalaskenta_preprocess_fail";
 	}
 
 	private static String fail() {
