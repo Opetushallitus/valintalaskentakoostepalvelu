@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import fi.vm.sade.valinta.kooste.external.resource.haku.proxy.HakemusProxyCachingImpl;
 import org.codehaus.jettison.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,7 +51,7 @@ import fi.vm.sade.valinta.kooste.valintakokeet.route.impl.ValintakoelaskentaConf
 @Configuration
 @Import(HaunValintakoelaskentaRouteImpl.class)
 @ContextConfiguration(classes = { HaunValintakoelaskentaKoosteReititysTest.class, HaeHakemusKomponentti.class,
-        HaeHaunHakemuksetKomponentti.class, KoostepalveluContext.CamelConfig.class, ValintakoelaskentaConfig.class })
+        HaeHaunHakemuksetKomponentti.class, KoostepalveluContext.CamelConfig.class, ValintakoelaskentaConfig.class, HakemusProxyCachingImpl.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HaunValintakoelaskentaKoosteReititysTest {
 

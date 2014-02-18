@@ -95,11 +95,15 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>,
 	public ProsessiJaStatus<T> getAjossaOlevaProsessiJaStatus() {
 		Iterator<ProsessiJaStatus<T>> uusimmat = getUusimmatProsessitJaStatukset()
 				.iterator();
-		if (!uusimmat.hasNext()) {
-			return null;
-		} else {
-			return uusimmat.next();
+		// loytyyko prosesseja
+		if (uusimmat.hasNext()) {
+			ProsessiJaStatus<T> uusin = uusimmat.next();
+			// onko uusin prosessi kaynnissa
+			if (Status.STARTED.equals(uusin.getStatus())) {
+				return uusin;
+			}
 		}
+		return null;
 	}
 
 	@Override

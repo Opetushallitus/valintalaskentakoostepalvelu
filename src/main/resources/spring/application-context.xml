@@ -41,10 +41,10 @@
     <!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
     <!--<import resource="classpath:authentication-client.xml"/>-->
     <bean 	id="ticketInterceptor" 
-    		class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptor"
+    		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor"
     		/>
     <bean 	id="ticketInterceptorRest"
-    		class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptorRest"
+    		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest"
     		/>
     
     <authorizationPolicy id="admin" access="isAuthenticated()"
@@ -82,7 +82,7 @@
                   address="${valintalaskentakoostepalvelu.valintaperusteService.url}">
 		<jaxws:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"/></jaxws:properties>
         <jaxws:outInterceptors>
-            <bean class="fi.vm.sade.valinta.kooste.CasApplicationAsAUserInterceptor">
+            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check"/>
@@ -100,7 +100,7 @@
                   inheritHeaders="true">
 		<jaxrs:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"/></jaxrs:properties>
         <jaxrs:outInterceptors>
-            <bean class="fi.vm.sade.valinta.kooste.CasApplicationAsAUserInterceptor">
+            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.haku-service}/j_spring_cas_security_check"/>
@@ -119,7 +119,7 @@
                   inheritHeaders="true">
         <jaxrs:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"/></jaxrs:properties>
         <jaxrs:outInterceptors>
-            <bean class="fi.vm.sade.valinta.kooste.CasApplicationAsAUserInterceptor">
+            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.dokumenttipalvelu}/j_spring_cas_security_check"/>
@@ -281,7 +281,7 @@
                   address="${valintalaskentakoostepalvelu.valintaTulosService.url}">
         <jaxws:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"></entry></jaxws:properties> 
         <jaxws:outInterceptors>
-            <bean class="fi.vm.sade.valinta.kooste.CasApplicationAsAUserInterceptor">
+            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.valintalaskenta-service}/j_spring_cas_security_check"/>
@@ -299,7 +299,7 @@
                   address="${valintalaskentakoostepalvelu.sijoitteluService.url}">
         <jaxws:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"></entry></jaxws:properties>
         <jaxws:outInterceptors>
-            <bean class="fi.vm.sade.valinta.kooste.CasApplicationAsAUserInterceptor">
+            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>
@@ -315,7 +315,7 @@
                   address="${valintalaskentakoostepalvelu.koodiService.url}">
         <jaxws:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"></entry></jaxws:properties>
         <jaxws:outInterceptors>
-            <bean class="fi.vm.sade.valinta.kooste.CasApplicationAsAUserInterceptor">
+            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
                 <property name="webCasUrl" value="${web.url.cas}"/>
                 <property name="targetService"
                           value="${cas.service.koodisto-service}/j_spring_cas_security_check"/>
@@ -332,6 +332,8 @@
 	</bean>
 	
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
+    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.external.resource.haku.proxy"/>
+
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy"/>
     
     <!--  Sijoittelu -->

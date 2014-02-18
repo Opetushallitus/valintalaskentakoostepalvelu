@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
+import fi.vm.sade.valinta.kooste.external.resource.haku.proxy.HakemusProxyCachingImpl;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Test;
@@ -76,7 +77,8 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaRoute
 		HaeHakukohteetTarjonnaltaKomponentti.class,
 		ValinnanVaiheenValintaperusteetProxyCachingImpl.class,
 		HakukohteenValintaperusteetProxyCachingImpl.class,
-		SuoritaLaskentaKomponentti.class })
+		SuoritaLaskentaKomponentti.class,
+        HakemusProxyCachingImpl.class })
 @ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class,
 		HaunValintalaskentaReititysTest.class, ValintalaskentaConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
