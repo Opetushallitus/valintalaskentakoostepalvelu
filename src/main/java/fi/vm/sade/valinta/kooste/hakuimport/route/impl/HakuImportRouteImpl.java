@@ -34,11 +34,11 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HakuImportRouteImpl.class);
 
-	private SuoritaHakuImportKomponentti suoritaHakuImportKomponentti;
-	private SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti;
-	private SecurityPreprocessor securityProcessor;
+	private final SuoritaHakuImportKomponentti suoritaHakuImportKomponentti;
+	private final SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti;
+	private final SecurityPreprocessor securityProcessor;
 	private final ValintaperusteService valintaperusteService;
-	private ExecutorService hakuImportThreadPool;
+	private final ExecutorService hakuImportThreadPool;
 
 	@Autowired
 	public HakuImportRouteImpl(
@@ -46,6 +46,8 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 			SuoritaHakuImportKomponentti suoritaHakuImportKomponentti,
 			ValintaperusteService valintaperusteService,
 			SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti) {
+		this.suoritaHakuImportKomponentti = suoritaHakuImportKomponentti;
+		this.tarjontaJaKoodistoHakukohteenHakuKomponentti = tarjontaJaKoodistoHakukohteenHakuKomponentti;
 		this.valintaperusteService = valintaperusteService;
 		this.securityProcessor = new SecurityPreprocessor();
 		this.hakuImportThreadPool = Executors
