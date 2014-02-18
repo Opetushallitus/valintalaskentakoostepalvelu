@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -132,6 +133,7 @@ public class ValintalaskentaAktivointiResource {
 
 	@POST
 	@Path("/aktivoiHaunValintalaskenta")
+	@Consumes("application/json")
 	@ApiOperation(value = "Valintalaskennan aktivointi haulle ilman annettuja hakukohteita", response = Response.class)
 	public Response aktivoiHaunValintalaskentaIlmanAnnettujaHakukohteita(
 			@QueryParam("hakuOid") String hakuOid, List<String> hakukohdeOids) {

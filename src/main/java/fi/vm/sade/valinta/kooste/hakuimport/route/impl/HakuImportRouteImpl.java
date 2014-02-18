@@ -5,6 +5,8 @@ import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.prosessi;
 import static fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI;
 
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -13,6 +15,7 @@ import org.apache.camel.spring.SpringRouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
@@ -31,17 +34,23 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HakuImportRouteImpl.class);
 
-	@Autowired
 	private SuoritaHakuImportKomponentti suoritaHakuImportKomponentti;
-
-	@Autowired
 	private SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti;
-
-	@Autowired
 	private SecurityPreprocessor securityProcessor;
+	private final ValintaperusteService valintaperusteService;
+	private ExecutorService hakuImportThreadPool;
 
 	@Autowired
-	private ValintaperusteService valintaperusteService;
+	public HakuImportRouteImpl(
+			@Value("${valintalaskentakoostepalvelu.hakuimport.threadpoolsize:100}") Integer hakuImportThreadpoolSize,
+			SuoritaHakuImportKomponentti suoritaHakuImportKomponentti,
+			ValintaperusteService valintaperusteService,
+			SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti) {
+		this.valintaperusteService = valintaperusteService;
+		this.securityProcessor = new SecurityPreprocessor();
+		this.hakuImportThreadPool = Executors
+				.newFixedThreadPool(hakuImportThreadpoolSize);
+	}
 
 	public static class PrepareHakuImportProcessDescription {
 
@@ -126,6 +135,8 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 				.process(logSuccessfulHakuGet())
 				//
 				.split(body())
+				//
+				.executorService(hakuImportThreadPool)
 				//
 				.shareUnitOfWork()
 				//
