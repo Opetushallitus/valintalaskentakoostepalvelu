@@ -8,7 +8,10 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.cache.CacheBuilder;
@@ -28,15 +31,20 @@ import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 @Component
 public class ValinnanVaiheenValintaperusteetProxyCachingImpl implements ValinnanVaiheenValintaperusteetProxy {
 
+    private static final Logger LOG = LoggerFactory
+            .getLogger(ValinnanVaiheenValintaperusteetProxyCachingImpl.class);
+
     @Autowired
     private ValintaperusteService valintaperusteProxy;
 
     private LoadingCache<ValintaperusteetCacheKey, List<ValintaperusteetTyyppi>> valintaperusteetCache;
 
+    @Value("${valintakoostepalvelu.cache.valinnanvaiheenvalintaperusteet.size:5000}")
+    private int cacheSize;
+
     @PostConstruct
     public void init() {
-        valintaperusteetCache = CacheBuilder.newBuilder().recordStats().refreshAfterWrite(10, TimeUnit.MINUTES)
-                .expireAfterWrite(20, TimeUnit.MINUTES)
+        valintaperusteetCache = CacheBuilder.newBuilder().recordStats().maximumSize(cacheSize)
                 .build(new CacheLoader<ValintaperusteetCacheKey, List<ValintaperusteetTyyppi>>() {
                     @Override
                     public List<ValintaperusteetTyyppi> load(ValintaperusteetCacheKey key) throws Exception {
@@ -54,6 +62,9 @@ public class ValinnanVaiheenValintaperusteetProxyCachingImpl implements Valinnan
     public List<ValintaperusteetTyyppi> haeValintaperusteet(String hakukohdeOid, int valinnanVaiheJarjestysluku) {
 
         try {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(valintaperusteetCache.stats().toString());
+            }
             return valintaperusteetCache.get(new ValintaperusteetCacheKey(hakukohdeOid, valinnanVaiheJarjestysluku));
 
         } catch (Exception e) {

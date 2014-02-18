@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
+import fi.vm.sade.valinta.kooste.external.resource.haku.proxy.HakemusProxyCachingImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -70,7 +71,8 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaRoute
 @Import({ ValintalaskentaRouteImpl.class, HaeValintaperusteetKomponentti.class,
         ValinnanVaiheenValintaperusteetProxyCachingImpl.class, HaeHakukohteenHakemuksetKomponentti.class,
         HakukohteenValintaperusteetProxyCachingImpl.class, HaeHakemusKomponentti.class,
-        HaeHakukohteetTarjonnaltaKomponentti.class, SuoritaLaskentaKomponentti.class })
+        HaeHakukohteetTarjonnaltaKomponentti.class, SuoritaLaskentaKomponentti.class,
+        HakemusProxyCachingImpl.class})
 @ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class,
         HakukohteenValintalaskentaKoosteReititysTest.class, ValintalaskentaConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
