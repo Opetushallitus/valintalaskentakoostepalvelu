@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,22 +29,21 @@ import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
  */
 @Component
 public class HakukohteenValintaperusteetProxyCachingImpl implements
-		HakukohteenValintaperusteetProxy {
+		HakukohteenValintaperusteetProxy,
+		HakukohteenValintaperusteetCacheInvalidator {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HakukohteenValintaperusteetProxyCachingImpl.class);
 
+	private final ValintaperusteService valintaperusteService;
+	private final Cache<String, List<ValintaperusteetTyyppi>> valintaperusteetCache;
+
 	@Autowired
-	private ValintaperusteService valintaperusteService;
-
-	private Cache<String, List<ValintaperusteetTyyppi>> valintaperusteetCache;
-
-    @Value("${valintakoostepalvelu.cache.hakukohteenvalintaperusteet.size:5000}")
-    private int cacheSize;
-
-	@PostConstruct
-	public void init() {
-		valintaperusteetCache = CacheBuilder.newBuilder().recordStats()
+	public HakukohteenValintaperusteetProxyCachingImpl(
+			ValintaperusteService valintaperusteService,
+			@Value("${valintakoostepalvelu.cache.hakukohteenvalintaperusteet.size:5000}") int cacheSize) {
+		this.valintaperusteService = valintaperusteService;
+		this.valintaperusteetCache = CacheBuilder.newBuilder().recordStats()
 				.maximumSize(cacheSize).build();
 	}
 
@@ -56,7 +52,6 @@ public class HakukohteenValintaperusteetProxyCachingImpl implements
 			throws ExecutionException {
 		Set<String> oids = new HashSet<String>();
 		oids.add(hakukohdeOid);
-
 		return haeValintaperusteet(oids);
 	}
 
@@ -92,12 +87,17 @@ public class HakukohteenValintaperusteetProxyCachingImpl implements
 			result.addAll(vps);
 		}
 
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(valintaperusteetCache.stats().toString());
-        }
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(valintaperusteetCache.stats().toString());
+		}
 
 		return result;
 
+	}
+
+	@Override
+	public void invalidateAll() {
+		valintaperusteetCache.invalidateAll();
 	}
 
 }

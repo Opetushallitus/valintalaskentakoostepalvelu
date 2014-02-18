@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
-import org.apache.camel.builder.ValueBuilder;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.slf4j.Logger;
@@ -28,6 +27,7 @@ import fi.vm.sade.valinta.kooste.hakemus.komponentti.HakemusOidSplitter;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.SplitHakukohteetKomponentti;
+import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetCacheInvalidator;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaProsessi;
 import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.HaeValintaperusteetKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.SuoritaLaskentaKomponentti;
@@ -51,7 +51,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 	private final HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
 	private final HaeHakemusKomponentti haeHakemusKomponentti;
 	private final HaeValintaperusteetKomponentti haeValintaperusteetKomponentti;
-	private final ValueBuilder invalidateHakemusCache;
+	private final Processor invalidateAllCaches;
 	private final SecurityPreprocessor securityProcessor;
 
 	@Autowired
@@ -61,15 +61,22 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 			HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti,
 			HaeValintaperusteetKomponentti haeValintaperusteetKomponentti,
 			HaeHakemusKomponentti haeHakemusKomponentti,
-			HakemusCacheInvalidator hakemusCacheInvalidator) {
+			final HakemusCacheInvalidator hakemusCacheInvalidator,
+			final HakukohteenValintaperusteetCacheInvalidator hakukohteenValintaperusteetCacheInvalidator) {
 		this.suoritaLaskentaKomponentti = suoritaLaskentaKomponentti;
 		this.haeHakukohteetTarjonnaltaKomponentti = haeHakukohteetTarjonnaltaKomponentti;
 		this.haeHakukohteenHakemuksetKomponentti = haeHakukohteenHakemuksetKomponentti;
 		this.haeValintaperusteetKomponentti = haeValintaperusteetKomponentti;
 		this.haeHakemusKomponentti = haeHakemusKomponentti;
-		this.invalidateHakemusCache = method(hakemusCacheInvalidator,
-				"invalidateAll");
 		this.securityProcessor = new SecurityPreprocessor();
+		// processor to invalidate all caches. called when valintalaskenta
+		// starts and ends
+		this.invalidateAllCaches = new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				hakemusCacheInvalidator.invalidateAll();
+				hakukohteenValintaperusteetCacheInvalidator.invalidateAll();
+			}
+		};
 	}
 
 	@Override
@@ -79,7 +86,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 		//
 				.to(fail())
 				//
-				.bean(invalidateHakemusCache);
+				.bean(invalidateAllCaches);
 		//
 
 		/**
@@ -259,7 +266,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				//
 				.bean(securityProcessor)
 				//
-				.bean(invalidateHakemusCache)
+				.bean(invalidateAllCaches)
 				// .setProperty(ENSIMMAINEN_VIRHE, constant(new
 				// AtomicBoolean(true)))
 				//
@@ -318,7 +325,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				// end splitter
 				.end()
 				//
-				.bean(invalidateHakemusCache)
+				.bean(invalidateAllCaches)
 				// route done
 				.to(finish());
 		from("direct:valintalaskenta_haeValintaperusteet")
@@ -345,7 +352,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				//
 				.bean(securityProcessor)
 				//
-				.bean(invalidateHakemusCache)
+				.bean(invalidateAllCaches)
 				//
 				.setHeader("hakukohteitaYhteensa", constant(1))
 				//
@@ -355,7 +362,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				//
 				.to(suoritaValintalaskenta())
 				//
-				.bean(invalidateHakemusCache)
+				.bean(invalidateAllCaches)
 				//
 				.to(finish());
 
