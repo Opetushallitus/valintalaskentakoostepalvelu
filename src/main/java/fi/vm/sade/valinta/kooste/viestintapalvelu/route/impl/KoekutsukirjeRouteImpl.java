@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Collections2;
 
+import fi.vm.sade.service.valintaperusteet.resource.ValintakoeResource;
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
@@ -48,14 +49,17 @@ public class KoekutsukirjeRouteImpl extends SpringRouteBuilder {
 	private final ApplicationResource applicationResource;
 	private final DokumenttiResource dokumenttiResource;
 	private final SecurityPreprocessor security = new SecurityPreprocessor();
+	private final ValintakoeResource valintakoeResource;
 
 	@Autowired
 	public KoekutsukirjeRouteImpl(
 			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource,
+			ValintakoeResource valintakoeResource,
 			ViestintapalveluResource viestintapalveluResource,
 			KoekutsukirjeetKomponentti koekutsukirjeetKomponentti,
 			ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti,
 			ApplicationResource applicationResource) {
+		this.valintakoeResource = valintakoeResource;
 		this.viestintapalveluResource = viestintapalveluResource;
 		this.koekutsukirjeetKomponentti = koekutsukirjeetKomponentti;
 		this.valintatietoHakukohteelleKomponentti = valintatietoHakukohteelleKomponentti;

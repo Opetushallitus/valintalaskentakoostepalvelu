@@ -2,10 +2,25 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
 import java.util.List;
 
-public class HakemuksillaRajaus {
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ *         Metadataa luotavan dokumentin mukauttamiseen
+ */
+public class DokumentinLisatiedot {
 
+	private String tag;
 	private String letterBodyText;
 	private List<String> hakemusOids;
+
+	public String getTag() {
+		return tag;
+	}
+
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
 
 	public List<String> getHakemusOids() {
 		if (hakemusOids == null || hakemusOids.isEmpty()) {
