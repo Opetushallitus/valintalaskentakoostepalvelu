@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -54,6 +55,11 @@ public class HakuRetryTesti {
                     String asId, String aoOid, int start, int rows) {
                 failRandomly();
                 return new HakemusList();
+            }
+
+            public List<Hakemus> getApplicationsByOids(List<String> oids) {
+                failRandomly();
+                return new ArrayList<Hakemus>();
             }
         };
 
