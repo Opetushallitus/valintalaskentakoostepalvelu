@@ -6,7 +6,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.Property;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,11 +24,13 @@ import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaMuistissaProsessi;
+import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaMuistissaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.HakuAppHakemus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.HakuAppHakemusOids;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.TarjonnanHakukohdeOids;
@@ -44,6 +48,15 @@ public class ValintalaskentaMuistissaConfig {
 	@Bean(name = "valintalaskentaMuistissaValvomo")
 	public ValvomoService<ValintalaskentaMuistissaProsessi> getValvomoServiceImpl() {
 		return new ValvomoServiceImpl<ValintalaskentaMuistissaProsessi>();
+	}
+
+	@Bean
+	public ValintalaskentaMuistissaRoute getValintalaskentaMuistissaRoute(
+			@Qualifier("javaDslCamelContext") CamelContext context)
+			throws Exception {
+		return ProxyWithAnnotationHelper.createProxy(
+				context.getEndpoint("direct:valintalaskenta_muistissa"),
+				ValintalaskentaMuistissaRoute.class);
 	}
 
 	@Bean
