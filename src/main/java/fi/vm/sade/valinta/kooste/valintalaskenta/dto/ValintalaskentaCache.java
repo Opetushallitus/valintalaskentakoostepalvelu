@@ -93,6 +93,10 @@ public class ValintalaskentaCache {
 		 */
 	}
 
+	public int getHakemattomienHakemustenMaara() {
+		return hakemattomatHakemusOids.size();
+	}
+
 	/**
 	 * @return list of ready works or null if none is ready
 	 */

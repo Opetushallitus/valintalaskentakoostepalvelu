@@ -212,7 +212,15 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.to(haeHakemusOidit)
 				//
-				.end();
+				.end()
+				// Paivitetaan tyomaarat
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						prosessi(exchange).getHakemukset().setKokonaismaara(
+								cache(exchange)
+										.getHakemattomienHakemustenMaara());
+					}
+				});
 
 		from(haeHakemusOidit)
 		//
