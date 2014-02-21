@@ -44,7 +44,7 @@ public class KoostepalveluContext {
 		 */
 		@Bean(name = "javaDslCamelContext")
 		public static SpringCamelContext getSpringCamelContext(
-				@Value("${valintalaskentakoostepalvelu.camelContext.threadpoolsize:100}") Integer threadPoolSize,
+				@Value("${valintalaskentakoostepalvelu.camelContext.threadpoolsize:10}") Integer threadPoolSize,
 				ApplicationContext applicationContext, RoutesBuilder[] routes)
 				throws Exception {
 			SpringCamelContext camelContext = new SpringCamelContext(
