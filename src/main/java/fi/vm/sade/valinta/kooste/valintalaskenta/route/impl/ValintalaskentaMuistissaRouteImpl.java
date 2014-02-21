@@ -48,9 +48,9 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 @Component
 public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 
-	private final String fail; // bean:valintalaskentaValvomo?method=fail;
-	private final String start; // bean:valintalaskentaValvomo?method=fail;
-	private final String finish; // bean:valintalaskentaValvomo?method=fail;
+	private final String fail;
+	private final String start;
+	private final String finish;
 	private final String deadLetterChannelHaeHakukohteenHakemukset;
 	private final String deadLetterChannelHaeHakemus;
 	private final String deadLetterChannelHaeValintaperusteet;
@@ -60,24 +60,18 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	private final String valvomoKuvaus;
 	private final String valvomoProsessi;
 	private final String valintalaskentaMuistissa;
-	private final String tarjonnanHakukohteet;
 	private final String aloitaLaskenta;
 	private final String haeHakukohteidenHakemukset;
 	private final String haeHakemukset;
 	private final String haeValintaperusteet;
 	private final SecurityPreprocessor security;
-	// private final ApplicationResource applicationResource;
 	private final HakuAppHakemus hakuAppHakemus;
 	private final HakuAppHakemusOids hakuAppHakemusOids;
 	private final TarjonnanHakukohdeOids tarjontaHakukohdeOids;
 	private final Valintaperusteet valintaperusteet;
 	private final Valintalaskenta valintalaskenta;
-	//
 	private final ExecutorService hakuAppExecutorService;
-	// private final ExecutorService tarjontaExecutorService;
 	private final ExecutorService valintaperusteetExecutorService;
-
-	// private final TarjontaPublicService tarjontaService;
 
 	private void configureValintalaskentaMuistissa() {
 
@@ -108,7 +102,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.otherwise()
 				//
-				.to(tarjonnanHakukohteet)
+				.process(tarjonnastaJulkaistutHakukohdeOidit())
 				//
 				.end()
 				// List<String>
@@ -184,7 +178,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 								// hide retry/handled stacktrace
 								.logStackTrace(false).logRetryStackTrace(false)
 								.logHandled(false))
-				// // /applications
+				// applications
 				.process(security)
 				//
 				.process(hakemusOiditHakuApplta())
@@ -383,12 +377,6 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 
 	}
 
-	private void configureTarjonnaltaHakukohteet() {
-		from(tarjonnanHakukohteet)
-		//
-				.process(tarjonnastaJulkaistutHakukohdeOidit());
-	}
-
 	private void configureDeadLetterChannels() {
 		from(deadLetterChannelHaeHakukohteenHakemukset)
 		//
@@ -419,7 +407,6 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 		configureHaeHakemukset();
 		configureHaeValintaperusteet();
 		configureAloitaLaskenta();
-		configureTarjonnaltaHakukohteet();
 		configureHaeHakukohteidenHakemukset();
 		configureDeadLetterChannels();
 	}
@@ -452,7 +439,6 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 			@Value("direct:valintalaskenta_muistissa_aloita_laskenta") String direct_aloita_laskenta,
 			@Value("direct:valintalaskenta_muistissa_hae_muistiin") String direct_hae_hakemukset,
 			@Value("direct:valintalaskenta_muistissa_hae_valintaperusteet") String direct_hae_valintaperusteet,
-			@Value("direct:valintalaskenta_muistissa_tarjonnalta_hakukohteet") String direct_tarjonnalta_hakukohteet,
 			@Value("direct:valintalaskenta_muistissa") String direct_valintalaskenta_muistissa,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_hakukohteiden_hakemukset") String deadLetterChannelHaeHakukohteenHakemukset,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_hakemus") String deadLetterChannelHaeHakemus,
@@ -484,7 +470,6 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 		this.haeHakemukset = direct_hae_hakemukset;
 		this.haeValintaperusteet = direct_hae_valintaperusteet;
 		this.valintalaskentaMuistissa = direct_valintalaskenta_muistissa;
-		this.tarjonnanHakukohteet = direct_tarjonnalta_hakukohteet;
 	}
 
 	private Processor hakemusHakuApplta() {

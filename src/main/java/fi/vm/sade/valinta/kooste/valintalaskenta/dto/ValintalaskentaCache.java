@@ -41,7 +41,11 @@ public class ValintalaskentaCache {
 		this.hakuOid = hakuOid;
 		this.tarjonnanHakukohteet = Collections.synchronizedList(Lists
 				.<String> newArrayList());
-		this.hakukohdeMask = Collections.synchronizedList(hakukohdeMask);
+		if (hakukohdeMask == null) {
+			this.hakukohdeMask = Collections.emptyList();
+		} else {
+			this.hakukohdeMask = Collections.synchronizedList(hakukohdeMask);
+		}
 		this.hakukohdeEmpty = Collections.synchronizedList(Lists
 				.<String> newArrayList());
 		// this.hakukohdeHakemuksetOids = Collections.synchronizedMap(Maps
