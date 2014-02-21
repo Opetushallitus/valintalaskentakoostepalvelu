@@ -52,6 +52,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	private final String start; // bean:valintalaskentaValvomo?method=fail;
 	private final String finish; // bean:valintalaskentaValvomo?method=fail;
 	private final String deadLetterChannelHaeHakukohteenHakemukset;
+	private final String deadLetterChannelHaeHakemus;
+	private final String deadLetterChannelHaeValintaperusteet;
+	private final String deadLetterChannelTeeValintalaskenta;
 	private final String valintalaskentaTyojonoon;
 	private final String valintalaskentaCache;
 	private final String valvomoKuvaus;
@@ -161,6 +164,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 
 	}
 
+	/**
+	 * Hakukohteen hakemusoidit
+	 */
 	private void configureHaeHakukohteidenHakemukset() {
 		// 2.1 hae jokaisen hakukohteen hakemusoidit
 		from(haeHakukohteidenHakemukset)
@@ -187,6 +193,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 
 	}
 
+	/**
+	 * Hakemukset
+	 */
 	private void configureHaeHakemukset() {
 		final String haeHakemus = haeHakemukset + "_yksittainen";
 		final String haeHakemusOidit = haeHakemukset + "_oidit_hakukohteesta";
@@ -245,6 +254,19 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 
 		from(haeHakemus)
 				//
+				.errorHandler(
+						deadLetterChannel(deadLetterChannelHaeHakemus)
+								//
+								.maximumRedeliveries(4)
+								//
+								.redeliveryDelay(300L)
+								// log exhausted stacktrace
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true)
+								// hide retry/handled stacktrace
+								.logStackTrace(false).logRetryStackTrace(false)
+								.logHandled(false))
+				// // /applications
 				.process(security)
 				//
 				.process(hakemusHakuApplta())
@@ -262,6 +284,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				.end();
 	}
 
+	/**
+	 * Valintaperusteet
+	 */
 	private void configureHaeValintaperusteet() {
 		final String haeValintaperuste = haeValintaperusteet + "_yksittainen";
 		// 2.2 jokaisen hakukohteen valintaperusteet
@@ -286,7 +311,20 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				.end();
 
 		from(haeValintaperuste)
-		//
+		// //
+				.errorHandler(
+						deadLetterChannel(deadLetterChannelHaeValintaperusteet)
+								//
+								.maximumRedeliveries(4)
+								//
+								.redeliveryDelay(300L)
+								// log exhausted stacktrace
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true)
+								// hide retry/handled stacktrace
+								.logStackTrace(false).logRetryStackTrace(false)
+								.logHandled(false))
+				// // /applications
 				.process(security)
 				//
 				.process(valintaperusteet())
@@ -306,6 +344,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				.end();
 	}
 
+	/**
+	 * Valintalaskenta
+	 */
 	private void configureAloitaLaskenta() {
 		from(aloitaLaskenta)
 		// List<HakukohdeKey>
@@ -317,7 +358,18 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 
 		from(valintalaskentaTyojonoon)
 		//
-				.process(security)
+				.errorHandler(
+						deadLetterChannel(deadLetterChannelTeeValintalaskenta)
+								//
+								.maximumRedeliveries(4)
+								//
+								.redeliveryDelay(300L)
+								// log exhausted stacktrace
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true)
+								// hide retry/handled stacktrace
+								.logStackTrace(false).logRetryStackTrace(false)
+								.logHandled(false)).process(security)
 				//
 				.process(valintalaskenta())
 				//
@@ -340,7 +392,23 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	private void configureDeadLetterChannels() {
 		from(deadLetterChannelHaeHakukohteenHakemukset)
 		//
-				.log(ERROR, "Hakukohteen hakemuksia ei voitu hakea")
+				.log(ERROR, "Hakukohteen hakemusten oideja ei voitu hakea")
+				//
+				.to(fail);
+		from(deadLetterChannelHaeHakemus)
+		//
+				.log(ERROR, "Hakukohteen hakemusta ei saatu haettua")
+				//
+				.to(fail);
+		from(deadLetterChannelHaeValintaperusteet)
+		//
+				.log(ERROR,
+						"Hakukohteen valintaperusteita ei onnistuttu haettua")
+				//
+				.to(fail);
+		from(deadLetterChannelTeeValintalaskenta)
+		//
+				.log(ERROR, "Valintalaskentaa ei voitu tehdä")
 				//
 				.to(fail);
 	}
@@ -386,7 +454,13 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 			@Value("direct:valintalaskenta_muistissa_hae_valintaperusteet") String direct_hae_valintaperusteet,
 			@Value("direct:valintalaskenta_muistissa_tarjonnalta_hakukohteet") String direct_tarjonnalta_hakukohteet,
 			@Value("direct:valintalaskenta_muistissa") String direct_valintalaskenta_muistissa,
-			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_hakukohteiden_hakemukset") String deadLetterChannelHaeHakukohteenHakemukset) {
+			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_hakukohteiden_hakemukset") String deadLetterChannelHaeHakukohteenHakemukset,
+			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_hakemus") String deadLetterChannelHaeHakemus,
+			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_valintaperusteet") String deadLetterChannelHaeValintaperusteet,
+			@Value("direct:valintalaskenta_muistissa_deadletterchannel_tee_valintalaskenta") String deadLetterChannelTeeValintalaskenta) {
+		this.deadLetterChannelHaeHakemus = deadLetterChannelHaeHakemus;
+		this.deadLetterChannelHaeValintaperusteet = deadLetterChannelHaeValintaperusteet;
+		this.deadLetterChannelTeeValintalaskenta = deadLetterChannelTeeValintalaskenta;
 		this.hakuAppExecutorService = Executors
 				.newFixedThreadPool(hakuAppThreadPoolSize);
 		this.valintaperusteetExecutorService = Executors

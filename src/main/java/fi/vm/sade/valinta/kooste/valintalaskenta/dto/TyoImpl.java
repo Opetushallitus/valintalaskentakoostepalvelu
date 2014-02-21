@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -16,8 +17,8 @@ import com.google.common.collect.TreeMultiset;
  */
 public class TyoImpl extends Tyo {
 
-	private volatile int kokonaismaara = -1;
-	private volatile int ohitettu = 0;
+	private final AtomicInteger kokonaismaara;
+	private final AtomicInteger ohitettu;
 	private final String nimi;
 	private final Collection<Long> kestot;
 	private final Collection<Long> epaonnistuneet;
@@ -27,7 +28,8 @@ public class TyoImpl extends Tyo {
 	// Collections.synchronizedList(Lists.<Long> newArrayList());
 
 	public TyoImpl(String nimi) {
-
+		this.kokonaismaara = new AtomicInteger(-1);
+		this.ohitettu = new AtomicInteger(0);
 		this.kestot = Collections.synchronizedCollection(TreeMultiset
 				.<Long> create());
 		this.epaonnistuneet = Collections.synchronizedCollection(TreeMultiset
@@ -46,7 +48,7 @@ public class TyoImpl extends Tyo {
 	}
 
 	public int getOhitettu() {
-		return ohitettu;
+		return ohitettu.get();
 	}
 
 	@Override
@@ -56,10 +58,10 @@ public class TyoImpl extends Tyo {
 	}
 
 	public int getJaljellaOlevienToidenMaara() {
-		if (kokonaismaara == -1) { // kokonaismaaraa ei tiedeta
+		if (kokonaismaara.get() == -1) { // kokonaismaaraa ei tiedeta
 			return -1;
 		}
-		return kokonaismaara - kestot.size();
+		return kokonaismaara.get() - kestot.size();
 	}
 
 	@Override
@@ -72,11 +74,11 @@ public class TyoImpl extends Tyo {
 	}
 
 	public void setKokonaismaara(int kokonaismaara) {
-		this.kokonaismaara = kokonaismaara;
+		this.kokonaismaara.set(kokonaismaara);
 	}
 
 	public int getKokonaismaara() {
-		return kokonaismaara;
+		return kokonaismaara.get();
 	}
 
 	public String getNimi() {
@@ -93,11 +95,14 @@ public class TyoImpl extends Tyo {
 
 	public void tyoOhitettu() {
 		kestot.add(0L);
-		++ohitettu;
+		ohitettu.incrementAndGet();
 	}
 
 	public boolean isValmis() {
-		return kokonaismaara == kestot.size();
+		if (kokonaismaara.get() == -1) {
+			return false;
+		}
+		return kokonaismaara.get() == kestot.size();
 	}
 
 	@JsonIgnore
