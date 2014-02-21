@@ -7,9 +7,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.collect.TreeMultiset;
 
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
@@ -21,14 +23,15 @@ import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
  *         Threadsafe cache for valintalaskennat
  */
 public class ValintalaskentaCache {
-
+	private final static Logger LOG = LoggerFactory
+			.getLogger(ValintalaskentaCache.class);
 	// HakuOidilla voi tarkistaa ettei cachea käytetä useassa eri haussa
 	// yhtäaikaa
 	private final String hakuOid;
 	private final List<String> tarjonnanHakukohteet;
 	private final List<String> hakukohdeMask;
 	private final List<String> hakukohdeEmpty;
-	private final Collection<HakukohdeKey> sizeComparableHakukohdeOids;
+	private final List<HakukohdeKey> kaikkiKasiteltavatHakukohteet;
 	private final Set<String> hakemattomatHakemusOids;
 	// hakemusoids + hakukohdeoid => HakukohdeKey. this is used to keep track
 	// when hakukohde becomes available for calculation
@@ -53,8 +56,8 @@ public class ValintalaskentaCache {
 				.<String> newHashSet());
 		this.hakukohdeTyot = new ConcurrentHashMap<String, List<HakukohdeKey>>();
 
-		this.sizeComparableHakukohdeOids = Collections
-				.synchronizedCollection(TreeMultiset.<HakukohdeKey> create());
+		this.kaikkiKasiteltavatHakukohteet = Collections.synchronizedList(Lists
+				.<HakukohdeKey> newArrayList());
 
 	}
 
@@ -69,12 +72,23 @@ public class ValintalaskentaCache {
 
 	public void putHakemusOids(String hakukohdeOid,
 			Collection<String> hakemusOids) {
+		if (hakukohdeOid == null) {
+			throw new RuntimeException(
+					"Yritetään valmistaa HakukohdeKey:tä null hakukohdeOidilla!");
+		}
 		if (hakemusOids == null || hakemusOids.isEmpty()) {
 			throw new RuntimeException(
 					"Tyhjää hakemusoidjoukkoa yritettiin syöttää cacheen!");
 		}
 		final HakukohdeKey hakukohdeKey = new HakukohdeKey(hakukohdeOid,
 				hakemusOids);
+		if (hakukohdeTyot.putIfAbsent(hakukohdeOid,
+				Collections.synchronizedList(Lists.newArrayList(hakukohdeKey))) != null) {
+			throw new RuntimeException(
+					"Hakukohde("
+							+ hakukohdeOid
+							+ ") on jo työjonossa vaikka hakukohteet tuodaan suunnitelman mukaan vain kerran työjonoon!");
+		}
 		for (String hakemusOid : hakemusOids) {
 			List<HakukohdeKey> h = hakukohdeTyot.putIfAbsent(hakemusOid,
 					Collections.synchronizedList(Lists
@@ -83,13 +97,9 @@ public class ValintalaskentaCache {
 				h.add(hakukohdeKey);
 			}
 		}
-		List<HakukohdeKey> h = hakukohdeTyot.putIfAbsent(hakukohdeOid,
-				Collections.synchronizedList(Lists.newArrayList(hakukohdeKey)));
-		if (h != null) {
-			h.add(hakukohdeKey);
-		}
+
 		hakemattomatHakemusOids.addAll(hakemusOids);
-		sizeComparableHakukohdeOids.add(hakukohdeKey);
+		kaikkiKasiteltavatHakukohteet.add(hakukohdeKey);
 		/*
 		 * hakukohdeHakemuksetOids.put(hakukohdeOid,
 		 * Collections.synchronizedCollection(hakemusOids));
@@ -137,6 +147,10 @@ public class ValintalaskentaCache {
 			throw new RuntimeException(
 					"Valintaperusteet lista ei saa olla null!");
 		}
+		if (hakukohdeOid == null) {
+			throw new RuntimeException(
+					"HakukohdeOid on null putValintaperusteet metodissa!");
+		}
 		List<HakukohdeKey> valmiit = Lists.newArrayList();
 		try {
 			for (HakukohdeKey h : hakukohdeTyot.remove(hakukohdeOid)) {
@@ -159,8 +173,8 @@ public class ValintalaskentaCache {
 		return valmiit;
 	}
 
-	public Collection<HakukohdeKey> getKasiteltavatHakukohteetOrderedByHakemustenMaaraAscending() {
-		return sizeComparableHakukohdeOids;
+	public List<HakukohdeKey> getKasiteltavatHakukohteet() {
+		return kaikkiKasiteltavatHakukohteet;
 	}
 
 	/**
@@ -193,6 +207,11 @@ public class ValintalaskentaCache {
 		return notHaetut;
 	}
 
+	/**
+	 * 
+	 * @author Jussi Jartamo
+	 * 
+	 */
 	public static class HakukohdeKey implements Comparable<HakukohdeKey> {
 		private final String hakukohdeOid;
 		private final int hakukohdeHakijaMaara;

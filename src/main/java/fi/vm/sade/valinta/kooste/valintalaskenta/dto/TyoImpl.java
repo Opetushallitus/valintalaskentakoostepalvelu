@@ -26,9 +26,8 @@ public class TyoImpl extends Tyo {
 	private final Collection<Exception> poikkeukset;
 
 	// Collections.synchronizedList(Lists.<Long> newArrayList());
-
-	public TyoImpl(String nimi) {
-		this.kokonaismaara = new AtomicInteger(-1);
+	public TyoImpl(String nimi, int kokonaismaara) {
+		this.kokonaismaara = new AtomicInteger(kokonaismaara);
 		this.ohitettu = new AtomicInteger(0);
 		this.kestot = Collections.synchronizedCollection(TreeMultiset
 				.<Long> create());
@@ -37,6 +36,10 @@ public class TyoImpl extends Tyo {
 		this.poikkeukset = Collections.synchronizedCollection(Lists
 				.<Exception> newArrayList());
 		this.nimi = nimi;
+	}
+
+	public TyoImpl(String nimi) {
+		this(nimi, -1);
 	}
 
 	@Override

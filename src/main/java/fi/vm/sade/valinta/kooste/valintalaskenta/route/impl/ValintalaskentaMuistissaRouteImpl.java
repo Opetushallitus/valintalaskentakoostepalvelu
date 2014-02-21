@@ -6,7 +6,9 @@ import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,6 +16,9 @@ import java.util.concurrent.Executors;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.spring.SpringRouteBuilder;
+import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -47,7 +52,8 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
  */
 @Component
 public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
-
+	private final static Logger LOG = LoggerFactory
+			.getLogger(ValintalaskentaMuistissaRouteImpl.class);
 	private final String fail;
 	private final String start;
 	private final String finish;
@@ -85,8 +91,14 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				.setProperty(valvomoKuvaus,
 						constant("Muistinvarainen valintalaskenta haulle"))
 				//
+				.choice()
+				//
+				.when(property(valvomoProsessi).isNull())
+				//
 				.setProperty(valvomoProsessi,
 						constant(new ValintalaskentaMuistissaProsessi()))
+				//
+				.end()
 				//
 				.to(start)
 				// 1. hae tarjonnalta haun hakukohteet
@@ -110,12 +122,18 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						exchange.getOut().setBody(
-								cache(exchange).getFilteredHakukohteet());
+						Collection<String> c = cache(exchange)
+								.getFilteredHakukohteet();
+						exchange.getOut().setBody(c);
+						// update work
+						prosessi(exchange).getHakukohteilleHakemukset()
+								.setKokonaismaara(c.size());
 					}
 				})
 				//
-				.split(body())
+				.split(body(),
+						new FlexibleAggregationStrategy().storeInBody()
+								.accumulateInCollection(ArrayList.class))
 				//
 				// .setExecutorService(executorService);
 				//
@@ -139,6 +157,10 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 								.setKokonaismaara(tyomaarat);
 						prosessi(exchange).getValintaperusteet()
 								.setKokonaismaara(tyomaarat);
+
+						prosessi(exchange).getHakemukset().setKokonaismaara(
+								cache(exchange)
+										.getHakemattomienHakemustenMaara());
 					}
 				})
 				// List<String>
@@ -192,10 +214,11 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	 */
 	private void configureHaeHakemukset() {
 		final String haeHakemus = haeHakemukset + "_yksittainen";
-		final String haeHakemusOidit = haeHakemukset + "_oidit_hakukohteesta";
+		final String haeHakemusOiditCachesta = haeHakemukset
+				+ "_oidit_hakukohteesta";
 		// 2.1.1 resolvaa yksilölliset hakemusoidit joka kohteesta
 		from(haeHakemukset)
-		//
+		// <- Null body
 				.process(security)
 				// update hakemus works
 				.process(getHakukohteetInOrder())
@@ -210,19 +233,11 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.parallelProcessing()
 				//
-				.to(haeHakemusOidit)
+				.to(haeHakemusOiditCachesta)
 				//
-				.end()
-				// Paivitetaan tyomaarat
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						prosessi(exchange).getHakemukset().setKokonaismaara(
-								cache(exchange)
-										.getHakemattomienHakemustenMaara());
-					}
-				});
+				.end();
 
-		from(haeHakemusOidit)
+		from(haeHakemusOiditCachesta)
 		//
 				.process(security)
 				//
@@ -340,8 +355,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.otherwise()
 				//
-				.log(DEBUG,
-						"Yksikään työ ei valmistunut valintaperusteen saapuessa!")
+				.log(DEBUG, "Työ ei valmistunut valintaperusteen saapuessa!")
 				//
 				.end();
 	}
@@ -510,6 +524,10 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 		return new Processor() {
 			public void process(Exchange exchange) throws Exception {
 				String hakukohdeOid = exchange.getIn().getBody(String.class);
+				if (hakukohdeOid == null) {
+					throw new RuntimeException(
+							"HakukohdeOid valintaperusteet reitillä on null");
+				}
 				long kesto = System.currentTimeMillis();
 				try {
 					List<ValintaperusteetTyyppi> v = valintaperusteet
@@ -557,7 +575,8 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 						cache(exchange).putHakemusOids(hakukohdeOid,
 								hakemusOids);
 					}
-					exchange.getOut().setBody(hakemusOids);
+					// TODO: hakemusOids
+					exchange.getOut().setBody(new Object());
 				} catch (Exception e) {
 					kesto = System.currentTimeMillis() - kesto;
 					prosessi(exchange).getHakukohteilleHakemukset()
@@ -636,10 +655,10 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				 * fetched in same order and calculation starts as soon as first
 				 * valintaperusteet+hakemukset pair exists for some hakukohde!
 				 */
-				exchange.getOut()
-						.setBody(
-								cache(exchange)
-										.getKasiteltavatHakukohteetOrderedByHakemustenMaaraAscending());
+				List<HakukohdeKey> hakukohteet = cache(exchange)
+						.getKasiteltavatHakukohteet();
+				Collections.sort(hakukohteet);
+				exchange.getOut().setBody(hakukohteet);
 
 			}
 		};

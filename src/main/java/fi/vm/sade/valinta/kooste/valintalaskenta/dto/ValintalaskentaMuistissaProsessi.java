@@ -28,11 +28,21 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 			.synchronizedList(Lists.<String> newArrayList());
 
 	public ValintalaskentaMuistissaProsessi() {
-		this.valintalaskenta = new TyoImpl("Valintalaskenta");
-		this.tarjonnastaHakukohteet = new TyoImpl("Tarjonnasta hakukohteet");
-		this.hakukohteilleHakemukset = new TyoImpl("Hakukohteille hakemukset");
-		this.hakemukset = new TyoImpl("Hakemukset");
-		this.valintaperusteet = new TyoImpl("Valintaperusteet");
+		this(new TyoImpl("Valintalaskenta"), new TyoImpl(
+				"Tarjonnasta hakukohteet", 1), new TyoImpl(
+				"Hakukohteille hakemukset"), new TyoImpl("Hakemukset"),
+				new TyoImpl("Valintaperusteet"));
+	}
+
+	public ValintalaskentaMuistissaProsessi(final TyoImpl valintalaskenta,
+			final TyoImpl tarjonnastaHakukohteet,
+			final TyoImpl hakukohteilleHakemukset, final TyoImpl hakemukset,
+			final TyoImpl valintaperusteet) {
+		this.valintalaskenta = valintalaskenta;
+		this.tarjonnastaHakukohteet = tarjonnastaHakukohteet;
+		this.hakukohteilleHakemukset = hakukohteilleHakemukset;
+		this.hakemukset = hakemukset;
+		this.valintaperusteet = valintaperusteet;
 		this.kokonaistyo = new Tyo() {
 			final Tyo[] tyot = new Tyo[] { valintalaskenta, valintaperusteet,
 					tarjonnastaHakukohteet, hakukohteilleHakemukset, hakemukset };
