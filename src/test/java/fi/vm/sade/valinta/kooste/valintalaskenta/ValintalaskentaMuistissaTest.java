@@ -41,12 +41,20 @@ public class ValintalaskentaMuistissaTest {
 	private CamelContext camelContext;
 	@Autowired
 	private TarjonnanHakukohdeOids tarjonnanHakukohdeOids;
+	@Autowired
+	private HakuAppHakemusOids hakuAppHakemusOids;
+	@Autowired
+	private HakuAppHakemus hakuAppHakemus;
 
 	@Test
 	public void testaaMaskaus() throws Exception {
 		Mockito.when(
 				tarjonnanHakukohdeOids.getHakukohdeOids(Mockito.anyString()))
 				.thenReturn(hakukohdeOids);
+
+		Mockito.when(hakuAppHakemusOids.getHakemusOids(Mockito.anyString()))
+				.thenReturn(Arrays.asList("hak1", "hak2"));
+
 		String hakuOid = "h0";
 		ValintalaskentaMuistissaRoute l = ProxyWithAnnotationHelper
 				.createProxy(camelContext

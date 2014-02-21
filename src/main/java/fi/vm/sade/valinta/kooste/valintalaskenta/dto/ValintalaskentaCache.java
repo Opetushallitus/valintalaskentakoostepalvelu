@@ -139,7 +139,7 @@ public class ValintalaskentaCache {
 		}
 		List<HakukohdeKey> valmiit = Lists.newArrayList();
 		try {
-			for (HakukohdeKey h : hakukohdeTyot.get(hakukohdeOid)) {
+			for (HakukohdeKey h : hakukohdeTyot.remove(hakukohdeOid)) {
 				if (h.markkaaTyoValmiiksi(v)) {
 					valmiit.add(h);
 				}
@@ -243,14 +243,15 @@ public class ValintalaskentaCache {
 				wasEmpty = oids.isEmpty();
 			}
 			if (didRemove) {
+				if (!valintaperusteet.compareAndSet(null, v)) {
+					throw new RuntimeException(
+							"HakukohdeKey:n oids listan synkronointi pettää!");
+				}
+				return wasEmpty;
+			} else {
 				throw new RuntimeException(
 						"Samaa valintaperustetta syötettiin hakukohteeseen useaan kertaan! Tarkista ettei useampi säie työstä samaa hakukohdetta!");
 			}
-			if (!valintaperusteet.compareAndSet(null, v)) {
-				throw new RuntimeException(
-						"Tätä ei pitäisi koskaan tulla ellei ylempi synkronointi petä jostain syystä!");
-			}
-			return wasEmpty;
 		}
 
 		public boolean markkaaTyoValmiiksi(HakemusTyyppi hakemus) {
