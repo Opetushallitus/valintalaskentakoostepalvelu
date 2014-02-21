@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.collect.Lists;
@@ -70,6 +69,10 @@ public class ValintalaskentaCache {
 
 	public void putHakemusOids(String hakukohdeOid,
 			Collection<String> hakemusOids) {
+		if (hakemusOids == null || hakemusOids.isEmpty()) {
+			throw new RuntimeException(
+					"Tyhjää hakemusoidjoukkoa yritettiin syöttää cacheen!");
+		}
 		final HakukohdeKey hakukohdeKey = new HakukohdeKey(hakukohdeOid,
 				hakemusOids);
 		for (String hakemusOid : hakemusOids) {
@@ -101,6 +104,10 @@ public class ValintalaskentaCache {
 	 * @return list of ready works or null if none is ready
 	 */
 	public List<HakukohdeKey> putHakemus(HakemusTyyppi v) {
+		if (v == null) {
+			throw new RuntimeException(
+					"Tyhjää hakemustyyppiä yritettiin syöttää cacheen!");
+		}
 		List<HakukohdeKey> valmiit = Lists.newArrayList();
 		try {
 			for (HakukohdeKey h : hakukohdeTyot.remove(v.getHakemusOid())) {
@@ -126,6 +133,10 @@ public class ValintalaskentaCache {
 	 */
 	public List<HakukohdeKey> putValintaperusteet(String hakukohdeOid,
 			List<ValintaperusteetTyyppi> v) {
+		if (v == null) {
+			throw new RuntimeException(
+					"Valintaperusteet lista ei saa olla null!");
+		}
 		List<HakukohdeKey> valmiit = Lists.newArrayList();
 		try {
 			for (HakukohdeKey h : hakukohdeTyot.get(hakukohdeOid)) {
@@ -185,9 +196,9 @@ public class ValintalaskentaCache {
 	public static class HakukohdeKey implements Comparable<HakukohdeKey> {
 		private final String hakukohdeOid;
 		private final int hakukohdeHakijaMaara;
-		private final Collection<String> hakemusOids;
+		private final Collection<String> oids;
 		private final List<HakemusTyyppi> hakemukset;
-		private final AtomicInteger tyotaJaljella;
+		// private final AtomicInteger tyotaJaljella;
 		private final AtomicReference<List<ValintaperusteetTyyppi>> valintaperusteet;
 
 		public List<HakemusTyyppi> getHakemukset() {
@@ -199,10 +210,21 @@ public class ValintalaskentaCache {
 		}
 
 		public HakukohdeKey(String hakukohdeOid, Collection<String> hakemusOids) {
+			if (hakukohdeOid == null) {
+				throw new RuntimeException("Hakukohde oiditon hakukohdeKey!");
+			}
+			if (hakemusOids == null || hakemusOids.isEmpty()) {
+				throw new RuntimeException("Hakemukseton hakukohde "
+						+ hakukohdeOid);
+			}
 			this.hakukohdeOid = hakukohdeOid;
 			this.hakukohdeHakijaMaara = hakemusOids.size();
-			this.hakemusOids = Collections.synchronizedCollection(hakemusOids);
-			this.tyotaJaljella = new AtomicInteger(hakemusOids.size() + 1);
+
+			List<String> l = Lists.newArrayList(hakemusOids);
+			l.add(hakukohdeOid);
+			this.oids = Collections.synchronizedCollection(l);
+
+			// this.tyotaJaljella = new AtomicInteger(hakemusOids.size() + 1);
 			this.hakemukset = Collections.synchronizedList(Lists
 					.<HakemusTyyppi> newArrayList());
 			this.valintaperusteet = new AtomicReference<List<ValintaperusteetTyyppi>>(
@@ -210,29 +232,49 @@ public class ValintalaskentaCache {
 		}
 
 		public boolean markkaaTyoValmiiksi(List<ValintaperusteetTyyppi> v) {
-			if (!valintaperusteet.compareAndSet(null, v)) {
+			if (v == null) {
+				throw new RuntimeException(
+						"Valintaperusteet lista ei saa olla null!");
+			}
+			boolean didRemove;
+			boolean wasEmpty;
+			synchronized (oids) {
+				didRemove = oids.remove(hakukohdeOid);
+				wasEmpty = oids.isEmpty();
+			}
+			if (didRemove) {
 				throw new RuntimeException(
 						"Samaa valintaperustetta syötettiin hakukohteeseen useaan kertaan! Tarkista ettei useampi säie työstä samaa hakukohdetta!");
 			}
-			return markkaaTyoValmiiksi();
+			if (!valintaperusteet.compareAndSet(null, v)) {
+				throw new RuntimeException(
+						"Tätä ei pitäisi koskaan tulla ellei ylempi synkronointi petä jostain syystä!");
+			}
+			return wasEmpty;
 		}
 
 		public boolean markkaaTyoValmiiksi(HakemusTyyppi hakemus) {
-			hakemukset.add(hakemus);
-			return markkaaTyoValmiiksi();
-		}
-
-		/**
-		 * 
-		 * @return true if all is done
-		 */
-		private boolean markkaaTyoValmiiksi() {
-			int j = tyotaJaljella.decrementAndGet();
-			if (j < 0) {
+			if (hakemus == null) {
 				throw new RuntimeException(
-						"Työtä on merkattu enemmän valmiiksi kuin sitä voi olla valmiina! Synkronointi pettää ja joitain hakemuksia tai valintaperusteita haetaan useaan otteeseen!");
+						"Yritetään merkata null hakemusta valmiiksi työksi hakukohteeseen "
+								+ hakukohdeOid);
 			}
-			return j == 0;
+			boolean didRemove;
+			boolean wasEmpty;
+			synchronized (oids) {
+				didRemove = oids.remove(hakemus.getHakemusOid());
+				wasEmpty = oids.isEmpty();
+			}
+			if (didRemove) {
+				hakemukset.add(hakemus);
+				return wasEmpty;
+			} else {
+
+				throw new RuntimeException(
+						"Hakukohteelle "
+								+ hakukohdeOid
+								+ " yritettiin tuoda hakemusta joka ei kuulu kyseiseen hakukohteeseen tai se oli jo tuotu tähän hakukohteeseen!");
+			}
 		}
 
 		public String getHakukohdeOid() {
@@ -240,7 +282,7 @@ public class ValintalaskentaCache {
 		}
 
 		public Collection<String> getHakemusOids() {
-			return hakemusOids;
+			return oids;
 		}
 
 		public int compareTo(HakukohdeKey o) {

@@ -515,6 +515,14 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 					List<ValintaperusteetTyyppi> v = valintaperusteet
 							.getValintaperusteet(hakukohdeOid);
 					kesto = System.currentTimeMillis() - kesto;
+					if (v == null) {
+						throw new RuntimeException(
+								"ValintaperusteetService palautti null valintaperusteet listan");
+					}
+					if (v.isEmpty()) {
+						throw new RuntimeException("Hakukohteella ("
+								+ hakukohdeOid + ") ei ole valintaperusteita!");
+					}
 					prosessi(exchange).getValintaperusteet()
 							.tyoValmistui(kesto);
 					exchange.getOut().setBody(
