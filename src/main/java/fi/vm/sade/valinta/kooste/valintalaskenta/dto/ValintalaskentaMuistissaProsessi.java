@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -12,14 +14,15 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
 
 public class ValintalaskentaMuistissaProsessi extends Prosessi {
-
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ValintalaskentaMuistissaProsessi.class);
 	private final TyoImpl tarjonnastaHakukohteet;
 	private final TyoImpl hakukohteilleHakemukset;
 	private final TyoImpl hakemukset;
 	private final TyoImpl valintaperusteet;
 	private final TyoImpl valintalaskenta;
 	private final Tyo kokonaistyo;
-
+	private final boolean peruutaProsessiPoikkeuksesta;
 	@JsonIgnore
 	private List<Palvelukutsu> palvelukutsut = Collections
 			.synchronizedList(Lists.<Palvelukutsu> newArrayList());
@@ -38,6 +41,7 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 			final TyoImpl tarjonnastaHakukohteet,
 			final TyoImpl hakukohteilleHakemukset, final TyoImpl hakemukset,
 			final TyoImpl valintaperusteet) {
+		this.peruutaProsessiPoikkeuksesta = true;
 		this.valintalaskenta = valintalaskenta;
 		this.tarjonnastaHakukohteet = tarjonnastaHakukohteet;
 		this.hakukohteilleHakemukset = hakukohteilleHakemukset;
@@ -141,5 +145,17 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 	@JsonIgnore
 	public List<String> getKasitellytHakukohteet() {
 		return kasitellytHakukohteet;
+	}
+
+	public boolean hasPoikkeuksia() {
+		if (peruutaProsessiPoikkeuksesta) {
+			return !kokonaistyo.getPoikkeukset().isEmpty();
+		} else {
+			return false;
+		}
+	}
+
+	public boolean isPeruutaProsessiPoikkeuksesta() {
+		return peruutaProsessiPoikkeuksesta;
 	}
 }

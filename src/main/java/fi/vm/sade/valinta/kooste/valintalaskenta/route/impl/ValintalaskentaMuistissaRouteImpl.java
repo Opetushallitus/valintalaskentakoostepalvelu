@@ -10,10 +10,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
@@ -70,14 +69,19 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	private final String haeHakukohteidenHakemukset;
 	private final String haeHakemukset;
 	private final String haeValintaperusteet;
+	private final String haeHakemus;
+	private final String haeHakemusYksittainen;
+	private final String haeValintaperuste;
+	private final String haeValintaperusteetYksittainen;
 	private final SecurityPreprocessor security;
 	private final HakuAppHakemus hakuAppHakemus;
 	private final HakuAppHakemusOids hakuAppHakemusOids;
 	private final TarjonnanHakukohdeOids tarjontaHakukohdeOids;
 	private final Valintaperusteet valintaperusteet;
 	private final Valintalaskenta valintalaskenta;
-	private final ExecutorService hakuAppExecutorService;
-	private final ExecutorService valintaperusteetExecutorService;
+
+	// private final ExecutorService hakuAppExecutorService;
+	// private final ExecutorService valintaperusteetExecutorService;
 
 	private void configureValintalaskentaMuistissa() {
 
@@ -213,7 +217,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	 * Hakemukset
 	 */
 	private void configureHaeHakemukset() {
-		final String haeHakemus = haeHakemukset + "_yksittainen";
+		// final String haeHakemus = haeHakemukset + "_yksittainen";
 		final String haeHakemusOiditCachesta = haeHakemukset
 				+ "_oidit_hakukohteesta";
 		// 2.1.1 resolvaa yksilölliset hakemusoidit joka kohteesta
@@ -231,7 +235,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.shareUnitOfWork()
 				//
-				.parallelProcessing()
+				// .parallelProcessing()
 				//
 				.to(haeHakemusOiditCachesta)
 				//
@@ -257,19 +261,33 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.split(body())
 				//
-				.executorService(hakuAppExecutorService)
+				// .executorService(hakuAppExecutorService)
 				//
 				.stopOnException()
 				//
 				.shareUnitOfWork()
 				//
-				.parallelProcessing()
+				// .parallelProcessing()
 				//
 				.to(haeHakemus)
 				//
 				.end();
 
 		from(haeHakemus)
+		//
+				.choice()
+				//
+				.when(hasPoikkeuksia())
+				//
+				.log("Peruutetaan hakemuksen haku poikkeusten vuoksi!")
+				//
+				.otherwise()
+				//
+				.to(haeHakemusYksittainen)
+				//
+				.end();
+
+		from(haeHakemusYksittainen)
 				//
 				.errorHandler(
 						deadLetterChannel(deadLetterChannelHaeHakemus)
@@ -305,7 +323,6 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	 * Valintaperusteet
 	 */
 	private void configureHaeValintaperusteet() {
-		final String haeValintaperuste = haeValintaperusteet + "_yksittainen";
 		// 2.2 jokaisen hakukohteen valintaperusteet
 		from(haeValintaperusteet)
 		//
@@ -315,13 +332,13 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.split(body())
 				//
-				.executorService(valintaperusteetExecutorService)
+				// .executorService(valintaperusteetExecutorService)
 				//
 				.stopOnException()
 				//
 				.shareUnitOfWork()
 				//
-				.parallelProcessing()
+				// .parallelProcessing()
 				//
 				.to(haeValintaperuste)
 				//
@@ -329,6 +346,22 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 
 		from(haeValintaperuste)
 		// //
+
+				//
+				.choice()
+				//
+				.when(hasPoikkeuksia())
+				//
+				.log("Peruutetaan valintaperusteiden haku poikkeusten vuoksi!")
+				//
+				.otherwise()
+				//
+				.to(haeValintaperusteetYksittainen)
+				//
+				.end();
+
+		from(haeValintaperusteetYksittainen)
+		//
 				.errorHandler(
 						deadLetterChannel(deadLetterChannelHaeValintaperusteet)
 								//
@@ -360,10 +393,17 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				.end();
 	}
 
+	private Predicate hasPoikkeuksia() {
+		return simple("${property." + valvomoProsessi + ".hasPoikkeuksia()}");
+	}
+
 	/**
 	 * Valintalaskenta
 	 */
 	private void configureAloitaLaskenta() {
+		final String aloitaLaskentaYksittainen = aloitaLaskenta
+				+ "_yksittainen";
+
 		from(aloitaLaskenta)
 		// List<HakukohdeKey>
 				.split(body())
@@ -373,6 +413,22 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				.end();
 
 		from(valintalaskentaTyojonoon)
+		//
+
+				//
+				.choice()
+				//
+				.when(hasPoikkeuksia())
+				//
+				.log("Peruutetaan valintalaskenta poikkeusten vuoksi!")
+				//
+				.otherwise()
+				//
+				.to(aloitaLaskentaYksittainen)
+				//
+				.end();
+
+		from(aloitaLaskentaYksittainen)
 		//
 				.errorHandler(
 						deadLetterChannel(deadLetterChannelTeeValintalaskenta)
@@ -385,7 +441,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 								.logExhausted(true)
 								// hide retry/handled stacktrace
 								.logStackTrace(false).logRetryStackTrace(false)
-								.logHandled(false)).process(security)
+								.logHandled(false))
+				//
+				.process(security)
 				//
 				.process(valintalaskenta())
 				//
@@ -450,17 +508,19 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 			HakuAppHakemus hakuAppHakemus,
 			HakuAppHakemusOids hakuAppHakemusOids,
 			Valintalaskenta valintalaskenta,
-			@Value("${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakuapp.threadpoolsize:4}") Integer hakuAppThreadPoolSize,
-			@Value("${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintaperusteet.threadpoolsize:4}") Integer valintaperusteetThreadPoolSize,
 			@Value("bean:valintalaskentaMuistissaValvomo?method=start") String start,
 			@Value("bean:valintalaskentaMuistissaValvomo?method=finish") String finish,
 			@Value("bean:valintalaskentaMuistissaValvomo?method=fail") String fail,
 			@Value("seda:valintalaskentaTyojono?concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintalaskenta.threadpoolsize:4}") String seda_valintalaskenta_tyojonoon,
+			@Value("seda:haeHakemus?concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakemus.threadpoolsize:4}") String haeHakemus,
+			@Value("seda:haeValintaperuste?concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintaperusteet.threadpoolsize:4}") String haeValintaperuste,
 			@Value("valintalaskentaCache") String valintalaskentaCache,
 			@Value("direct:valintalaskenta_muistissa_hae_hakukohteiden_hakemukset") String direct_hae_hakukohteiden_hakemukset,
 			@Value("direct:valintalaskenta_muistissa_aloita_laskenta") String direct_aloita_laskenta,
 			@Value("direct:valintalaskenta_muistissa_hae_muistiin") String direct_hae_hakemukset,
 			@Value("direct:valintalaskenta_muistissa_hae_valintaperusteet") String direct_hae_valintaperusteet,
+			@Value("direct:valintalaskenta_muistissa_hae_valintaperusteet_yksittainen") String direct_hae_valintaperusteet_yksittainen,
+			@Value("direct:valintalaskenta_muistissa_hae_hakemus_yksittainen") String haeHakemusYksittainen,
 			@Value("direct:valintalaskenta_muistissa") String direct_valintalaskenta_muistissa,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_hakukohteiden_hakemukset") String deadLetterChannelHaeHakukohteenHakemukset,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_hakemus") String deadLetterChannelHaeHakemus,
@@ -469,10 +529,8 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 		this.deadLetterChannelHaeHakemus = deadLetterChannelHaeHakemus;
 		this.deadLetterChannelHaeValintaperusteet = deadLetterChannelHaeValintaperusteet;
 		this.deadLetterChannelTeeValintalaskenta = deadLetterChannelTeeValintalaskenta;
-		this.hakuAppExecutorService = Executors
-				.newFixedThreadPool(hakuAppThreadPoolSize);
-		this.valintaperusteetExecutorService = Executors
-				.newFixedThreadPool(valintaperusteetThreadPoolSize);
+		this.haeValintaperuste = haeValintaperuste;
+		this.haeHakemus = haeHakemus;
 		this.finish = finish;
 		this.start = start;
 		this.fail = fail;
@@ -491,6 +549,8 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 		this.aloitaLaskenta = direct_aloita_laskenta;
 		this.haeHakemukset = direct_hae_hakemukset;
 		this.haeValintaperusteet = direct_hae_valintaperusteet;
+		this.haeHakemusYksittainen = haeHakemusYksittainen;
+		this.haeValintaperusteetYksittainen = direct_hae_valintaperusteet_yksittainen;
 		this.valintalaskentaMuistissa = direct_valintalaskenta_muistissa;
 	}
 
