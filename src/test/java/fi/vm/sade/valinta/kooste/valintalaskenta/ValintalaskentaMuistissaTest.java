@@ -119,6 +119,13 @@ public class ValintalaskentaMuistissaTest {
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
 						.times(1)) // only()
 				.setKokonaismaara(Mockito.eq(2)); // 2
+		// kaksi hakemusta haetaan
+		Mockito.verify(
+				hakemuksetTyo,
+				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
+						.times(2)) // only()
+				.tyoValmistui(Mockito.anyLong());
+
 		Mockito.verify(
 				hakukohteilleHakemuksetTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
@@ -129,11 +136,37 @@ public class ValintalaskentaMuistissaTest {
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
 						.times(1)) // only()
 				.setKokonaismaara(Mockito.eq(3)); // eq(3)
+		// yksi ohitetaan
+		Mockito.verify(
+				valintaperusteetTyo,
+				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
+						.times(1)) // only()
+				.tyoOhitettu();
+		// kolme valmistuu
+		Mockito.verify(
+				valintaperusteetTyo,
+				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
+						.times(3)) // only()
+				.tyoValmistui(Mockito.anyLong());
+
 		Mockito.verify(
 				valintalaskentaTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
 						.times(1)) // only
 				.setKokonaismaara(Mockito.eq(3)); // .eq(3)
+		// yksi tyo ohitetaan
+		Mockito.verify(
+				valintalaskentaTyo,
+				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
+						.times(1)) // only
+				.tyoOhitettu();
+
+		// kolme tyota valmistuu
+		Mockito.verify(
+				valintalaskentaTyo,
+				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
+						.times(3)) // only
+				.tyoValmistui(Mockito.anyLong());
 		Mockito.verify(
 				valintalaskenta,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
