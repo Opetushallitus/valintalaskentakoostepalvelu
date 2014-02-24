@@ -76,7 +76,8 @@ public class ValintalaskentaMuistissaResource {
 	public Response aktivoiHaunValintalaskentaIlmanAnnettujaHakukohteita(
 			@QueryParam("hakuOid") String hakuOid, List<String> hakukohdeOids) {
 		valintalaskentaMuistissa.aktivoiValintalaskentaAsync(
-				ValintalaskentaCache.create(hakuOid, hakukohdeOids),
+				ValintalaskentaCache
+						.createWithBlacklist(hakuOid, hakukohdeOids),
 				hakukohdeOids, hakuOid, SecurityContextHolder.getContext()
 						.getAuthentication());
 		return Response.ok().build();

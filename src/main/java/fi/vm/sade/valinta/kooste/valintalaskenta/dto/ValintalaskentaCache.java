@@ -39,10 +39,11 @@ public class ValintalaskentaCache {
 
 	// private final Map<String, Collection<String>> hakukohdeHakemuksetOids;
 
-	private ValintalaskentaCache(String hakuOid, List<String> hakukohdeMask) {
+	private ValintalaskentaCache(String hakuOid, List<String> hakukohdeMask,
+			List<String> tarjonnanHakukohteet) {
 		this.hakuOid = hakuOid;
-		this.tarjonnanHakukohteet = Collections.synchronizedList(Lists
-				.<String> newArrayList());
+		this.tarjonnanHakukohteet = Collections
+				.synchronizedList(tarjonnanHakukohteet);
 		if (hakukohdeMask == null) {
 			this.hakukohdeMask = Collections.emptyList();
 		} else {
@@ -61,9 +62,32 @@ public class ValintalaskentaCache {
 
 	}
 
-	public static ValintalaskentaCache create(String hakuOid,
+	/**
+	 * Ohittaa tarjonnan kutsun ja kayttaa annettuja hakukohteita
+	 * valintalaskennan suorittamiseen
+	 * 
+	 * @param hakuOid
+	 * @param hakukohdeWhitelist
+	 * @return
+	 */
+	public static ValintalaskentaCache createWithWhitelist(String hakuOid,
+			List<String> hakukohdeWhitelist) {
+		return new ValintalaskentaCache(hakuOid,
+				Collections.<String> emptyList(), hakukohdeWhitelist);
+	}
+
+	/**
+	 * Hakee tarjonnalta hakuun liittyvat hakukohteet erottaen niista annetut
+	 * hakukohteet
+	 * 
+	 * @param hakuOid
+	 * @param hakukohdeMask
+	 * @return
+	 */
+	public static ValintalaskentaCache createWithBlacklist(String hakuOid,
 			List<String> hakukohdeMask) {
-		return new ValintalaskentaCache(hakuOid, hakukohdeMask);
+		return new ValintalaskentaCache(hakuOid, hakukohdeMask,
+				Lists.<String> newArrayList());
 	}
 
 	public boolean hasTarjonnanHakukohteet() {

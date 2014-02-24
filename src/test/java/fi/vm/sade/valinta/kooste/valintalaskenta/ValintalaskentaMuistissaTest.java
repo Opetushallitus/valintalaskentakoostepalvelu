@@ -106,9 +106,11 @@ public class ValintalaskentaMuistissaTest {
 						hakukohteilleHakemuksetTyo, hakemuksetTyo,
 						valintaperusteetTyo));
 
-		l.aktivoiValintalaskenta(prosessi,
-				ValintalaskentaCache.create(hakuOid, Arrays.<String> asList()),
-				Arrays.<String> asList(), hakuOid);
+		l.aktivoiValintalaskenta(
+				prosessi,
+				ValintalaskentaCache.createWithBlacklist(hakuOid,
+						Arrays.<String> asList()), Arrays.<String> asList(),
+				hakuOid);
 		/**
 		 * Oletetaan kymmenessä sekunnissa kolme valintalaskentaa tai epäillään
 		 * ongelmia. Jos koodi toimii niin oikea arvo tulee millisekunneissa.
