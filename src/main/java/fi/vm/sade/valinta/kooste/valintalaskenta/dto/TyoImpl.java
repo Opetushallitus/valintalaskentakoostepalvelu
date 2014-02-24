@@ -108,7 +108,6 @@ public class TyoImpl extends Tyo {
 		return kokonaismaara.get() == kestot.size();
 	}
 
-	@JsonIgnore
 	public Collection<Exception> getPoikkeukset() {
 		return poikkeukset;
 	}

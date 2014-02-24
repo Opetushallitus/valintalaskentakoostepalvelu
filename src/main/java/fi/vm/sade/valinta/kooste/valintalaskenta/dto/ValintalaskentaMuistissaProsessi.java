@@ -24,9 +24,6 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 	private final Tyo kokonaistyo;
 	private final boolean peruutaProsessiPoikkeuksesta;
 	@JsonIgnore
-	private List<Palvelukutsu> palvelukutsut = Collections
-			.synchronizedList(Lists.<Palvelukutsu> newArrayList());
-	@JsonIgnore
 	private List<String> kasitellytHakukohteet = Collections
 			.synchronizedList(Lists.<String> newArrayList());
 
@@ -136,20 +133,13 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 		return valintalaskenta;
 	}
 
-	@JsonIgnore
-	public List<Palvelukutsu> getPalvelukutsut() {
-		Collections.sort(palvelukutsut);
-		return palvelukutsut;
-	}
-
-	@JsonIgnore
 	public List<String> getKasitellytHakukohteet() {
 		return kasitellytHakukohteet;
 	}
 
 	public boolean hasPoikkeuksia() {
 		if (peruutaProsessiPoikkeuksesta) {
-			return !kokonaistyo.getPoikkeukset().isEmpty();
+			return !getExceptions().isEmpty();// !kokonaistyo.getPoikkeukset().isEmpty();
 		} else {
 			return false;
 		}

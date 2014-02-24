@@ -279,7 +279,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.when(hasPoikkeuksia())
 				//
-				.log("Peruutetaan hakemuksen haku poikkeusten vuoksi!")
+				.log(ERROR, "Peruutetaan hakemuksen haku poikkeusten vuoksi!")
 				//
 				.otherwise()
 				//
@@ -345,14 +345,15 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				.end();
 
 		from(haeValintaperuste)
-		// //
+				// //
 
 				//
 				.choice()
 				//
 				.when(hasPoikkeuksia())
 				//
-				.log("Peruutetaan valintaperusteiden haku poikkeusten vuoksi!")
+				.log(ERROR,
+						"Peruutetaan valintaperusteiden haku poikkeusten vuoksi!")
 				//
 				.otherwise()
 				//
@@ -420,7 +421,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.when(hasPoikkeuksia())
 				//
-				.log("Peruutetaan valintalaskenta poikkeusten vuoksi!")
+				.log(ERROR, "Peruutetaan valintalaskenta poikkeusten vuoksi!")
 				//
 				.otherwise()
 				//
