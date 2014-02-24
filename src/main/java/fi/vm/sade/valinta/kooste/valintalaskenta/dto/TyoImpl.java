@@ -22,7 +22,6 @@ public class TyoImpl extends Tyo {
 	private final String nimi;
 	private final Collection<Long> kestot;
 	private final Collection<Long> epaonnistuneet;
-	@JsonIgnore
 	private final Collection<Exception> poikkeukset;
 
 	// Collections.synchronizedList(Lists.<Long> newArrayList());
@@ -108,6 +107,7 @@ public class TyoImpl extends Tyo {
 		return kokonaismaara.get() == kestot.size();
 	}
 
+	@JsonIgnore
 	public Collection<Exception> getPoikkeukset() {
 		return poikkeukset;
 	}
