@@ -599,14 +599,14 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				try {
 					hakukohdeOids = tarjontaHakukohdeOids
 							.getHakukohdeOids(hakuOid);
-					kesto = kesto - System.currentTimeMillis();
+					kesto = System.currentTimeMillis() - kesto;
 					prosessi(exchange).getTarjonnastaHakukohteet()
 							.tyoValmistui(kesto);
 					cache(exchange).getTarjonnanHakukohteet().addAll(
 							hakukohdeOids);
 					exchange.getOut().setBody(hakukohdeOids);
 				} catch (Exception e) {
-					kesto = kesto - System.currentTimeMillis();
+					kesto = System.currentTimeMillis() - kesto;
 					prosessi(exchange).getTarjonnastaHakukohteet()
 							.tyoEpaonnistui(kesto, e);
 					e.printStackTrace();
@@ -627,7 +627,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 					valintalaskenta.teeValintalaskenta(
 							hakukohdeKey.getHakemukset(),
 							hakukohdeKey.getValintaperusteet());
-					kesto = kesto - System.currentTimeMillis();
+					kesto = System.currentTimeMillis() - kesto;
 					prosessi(exchange).getValintalaskenta().tyoValmistui(kesto);
 					if (prosessi(exchange).getValintalaskenta().isValmis()) {
 						exchange.getOut().setBody(TRUE);
@@ -635,7 +635,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 						exchange.getOut().setBody(null);
 					}
 				} catch (Exception e) {
-					kesto = kesto - System.currentTimeMillis();
+					kesto = System.currentTimeMillis() - kesto;
 					prosessi(exchange).getValintalaskenta().tyoEpaonnistui(
 							kesto, e);
 					e.printStackTrace();
