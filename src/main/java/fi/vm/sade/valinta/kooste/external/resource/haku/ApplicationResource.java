@@ -39,4 +39,11 @@ public interface ApplicationResource {
             @QueryParam("lopoid") String lopoid, @QueryParam("asId") String asId, @QueryParam("aoOid") String aoOid,
             @DefaultValue(value = "0") @QueryParam("start") int start,
             @DefaultValue(value = "100") @QueryParam("rows") int rows);
+
+    @GET
+    @Path("list")
+    @Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    public List<Hakemus> getApplicationsByOids(@QueryParam("oid") List<String> oids);
+
 }

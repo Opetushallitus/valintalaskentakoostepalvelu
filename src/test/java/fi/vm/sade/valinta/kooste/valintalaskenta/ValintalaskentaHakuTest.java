@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import javax.annotation.Resource;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -39,7 +40,10 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
  * 
  * @author Jussi Jartamo
  * 
+ * @Deprecated ValintalaskentaMuistissa on uusi valintalaskenta reitti
  */
+@Deprecated
+@Ignore
 @Configuration
 @Import({ ValintalaskentaRouteImpl.class, SuoritaLaskentaKomponentti.class,
 		CacheInvalidatorMock.class })

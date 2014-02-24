@@ -26,7 +26,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.Message;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemuksillaRajaus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeHakemuksilleRoute;
@@ -75,12 +75,12 @@ public class ViestintapalveluAktivointiResource {
 	@Consumes("application/json")
 	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin hakukohteelle", response = Response.class)
 	public Response aktivoiOsoitetarrojenLuonti(
-	/* OPTIONAL */HakemuksillaRajaus hakemuksillaRajaus,
+	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintakoeOid") List<String> valintakoeOids) {
 		try {
 			if (hakemuksillaRajaus == null) {
-				hakemuksillaRajaus = new HakemuksillaRajaus();
+				hakemuksillaRajaus = new DokumentinLisatiedot();
 			}
 			addressLabelBatchProxy.osoitetarratAktivointi(
 					hakemuksillaRajaus.getHakemusOids(), hakukohdeOid,
@@ -107,10 +107,10 @@ public class ViestintapalveluAktivointiResource {
 	@Consumes("application/json")
 	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
 	public Response aktivoiOsoitetarrojenLuontiHakemuksille(
-			HakemuksillaRajaus hakemuksillaRajaus) {
+			DokumentinLisatiedot hakemuksillaRajaus) {
 		try {
 			if (hakemuksillaRajaus == null) {
-				hakemuksillaRajaus = new HakemuksillaRajaus();
+				hakemuksillaRajaus = new DokumentinLisatiedot();
 			}
 			osoitetarratHakemuksille.osoitetarrotHakemuksilleAktivointiAsync(
 					hakemuksillaRajaus.getHakemusOids(), SecurityContextHolder
@@ -137,11 +137,11 @@ public class ViestintapalveluAktivointiResource {
 	@Consumes("application/json")
 	@ApiOperation(value = "Aktivoi jälkiohjauskirjeiden luonnin valitsemattomille", response = Response.class)
 	public Response aktivoiJalkiohjauskirjeidenLuonti(
-	/* OPTIONAL */HakemuksillaRajaus hakemuksillaRajaus,
+	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
 			@QueryParam("hakuOid") String hakuOid) {
 		try {
 			if (hakemuksillaRajaus == null) {
-				hakemuksillaRajaus = new HakemuksillaRajaus();
+				hakemuksillaRajaus = new DokumentinLisatiedot();
 			}
 			jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoiAsync(
 					hakemuksillaRajaus.getHakemusOids(), hakuOid,
@@ -198,13 +198,13 @@ public class ViestintapalveluAktivointiResource {
 	@Consumes("application/json")
 	@ApiOperation(value = "Aktivoi hyväksyttyjen osoitteiden luonnin hakukohteelle haussa", response = Response.class)
 	public Response aktivoiHyvaksyttyjenOsoitetarrojenLuonti(
-	/* OPTIONAL */HakemuksillaRajaus hakemuksillaRajaus,
+	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
 		try {
 			if (hakemuksillaRajaus == null) {
-				hakemuksillaRajaus = new HakemuksillaRajaus();
+				hakemuksillaRajaus = new DokumentinLisatiedot();
 			}
 			hyvaksyttyjenOsoitetarratProxy
 					.hyvaksyttyjenOsoitetarrojenAktivointi(
@@ -236,7 +236,7 @@ public class ViestintapalveluAktivointiResource {
 	public Response aktivoiKoekutsukirjeidenLuonti(
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintakoeOids") List<String> valintakoeOids,
-			HakemuksillaRajaus hakemuksillaRajaus) {
+			DokumentinLisatiedot hakemuksillaRajaus) {
 		if (hakukohdeOid == null || valintakoeOids == null
 				|| valintakoeOids.isEmpty()) {
 			LOG.error("Valintakoe ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
@@ -247,7 +247,7 @@ public class ViestintapalveluAktivointiResource {
 		}
 		try {
 			if (hakemuksillaRajaus == null) {
-				hakemuksillaRajaus = new HakemuksillaRajaus();
+				hakemuksillaRajaus = new DokumentinLisatiedot();
 			}
 			if (hakemuksillaRajaus.getHakemusOids() != null) {
 				LOG.info(
@@ -281,7 +281,7 @@ public class ViestintapalveluAktivointiResource {
 	@Consumes("application/json")
 	@ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin yksittaisille hakemuksille", response = Response.class)
 	public Response aktivoiKoekutsukirjeidenLuontiHakemuksille(
-			HakemuksillaRajaus koekutsukirjeHakemuksille,
+			DokumentinLisatiedot koekutsukirjeHakemuksille,
 			@QueryParam("hakukohdeOid") String hakukohdeOid) {
 		koekutsukirjeetHakemuksille.koekutsukirjeetAktivointiHakemuksilleAsync(
 				koekutsukirjeHakemuksille.getHakemusOids(), hakukohdeOid,
