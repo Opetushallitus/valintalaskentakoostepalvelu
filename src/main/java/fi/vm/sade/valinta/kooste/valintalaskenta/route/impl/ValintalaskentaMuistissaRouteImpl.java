@@ -242,7 +242,6 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				// // /applications
 				.process(security)
 				//
-				.log("${body} YKSITTAINEN HAKEMUS")
 				// => hakemusOid
 				.process(hakemusHakuApplta())
 				//
