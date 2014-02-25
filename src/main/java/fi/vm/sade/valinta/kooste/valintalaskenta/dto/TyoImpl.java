@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeMultiset;
@@ -46,7 +44,9 @@ public class TyoImpl extends Tyo {
 		if (kestot.isEmpty()) {
 			return 0L;
 		}
-		return Iterables.get(kestot, (kestot.size() - 1) / 2);
+		synchronized (kestot) {
+			return Iterables.get(kestot, (kestot.size() - 1) / 2);
+		}
 	}
 
 	public int getOhitettu() {
@@ -69,10 +69,12 @@ public class TyoImpl extends Tyo {
 	@Override
 	public long getKesto() {
 		long kokonaiskesto = 0L;
-		for (Long kesto : kestot) {
-			kokonaiskesto += kesto;
+		synchronized (kestot) {
+			for (Long kesto : kestot) {
+				kokonaiskesto += kesto;
+			}
+			return kokonaiskesto;
 		}
-		return kokonaiskesto;
 	}
 
 	public void setKokonaismaara(int kokonaismaara) {
@@ -111,7 +113,7 @@ public class TyoImpl extends Tyo {
 		return kokonaismaara.get() == kestot.size();
 	}
 
-	@JsonIgnore
+	@com.fasterxml.jackson.annotation.JsonIgnore
 	public Collection<Exception> getPoikkeukset() {
 		return poikkeukset;
 	}

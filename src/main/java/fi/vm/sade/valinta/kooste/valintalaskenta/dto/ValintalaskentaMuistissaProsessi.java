@@ -1,18 +1,22 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class ValintalaskentaMuistissaProsessi extends Prosessi {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaMuistissaProsessi.class);
@@ -20,89 +24,38 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 	private final TyoImpl hakemukset;
 	private final TyoImpl valintaperusteet;
 	private final TyoImpl valintalaskenta;
-	private final Tyo kokonaistyo;
+	private final KokonaisTyo kokonaistyo;
 	private final boolean peruutaProsessiPoikkeuksesta;
-	@JsonIgnore
+	private final Collection<Varoitus> varoitukset;
+
 	private List<String> kasitellytHakukohteet = Collections
 			.synchronizedList(Lists.<String> newArrayList());
 
-	public ValintalaskentaMuistissaProsessi() {
-		this(new TyoImpl("Valintalaskenta", 0), new TyoImpl(
+	public ValintalaskentaMuistissaProsessi(String hakuOid) {
+		this(hakuOid, new TyoImpl("Valintalaskenta", 0), new TyoImpl(
 				"Hakukohteille hakemukset"), new TyoImpl("Hakemukset", 0),
 				new TyoImpl("Valintaperusteet", 0));
 	}
 
-	public ValintalaskentaMuistissaProsessi(final TyoImpl valintalaskenta,
+	public ValintalaskentaMuistissaProsessi(String hakuOid,
+			final TyoImpl valintalaskenta,
 			final TyoImpl hakukohteilleHakemukset, final TyoImpl hakemukset,
 			final TyoImpl valintaperusteet) {
+		super("Valintalaskentamuistissa", "Haulle", hakuOid);
+		this.varoitukset = Collections.synchronizedList(Lists
+				.<Varoitus> newArrayList());
 		this.peruutaProsessiPoikkeuksesta = true;
 		this.valintalaskenta = valintalaskenta;
 		this.hakukohteilleHakemukset = hakukohteilleHakemukset;
 		this.hakemukset = hakemukset;
 		this.valintaperusteet = valintaperusteet;
-		this.kokonaistyo = new Tyo() {
-			final Tyo[] tyot = new Tyo[] { valintalaskenta, valintaperusteet,
-					hakukohteilleHakemukset, hakemukset };
+		this.kokonaistyo = new KokonaisTyo(Arrays.asList(valintalaskenta,
+				valintaperusteet, hakukohteilleHakemukset, hakemukset));
 
-			@JsonIgnore
-			public Collection<Exception> getPoikkeukset() {
-				Collection<Collection<Exception>> c = Lists.newArrayList();
-				for (Tyo t : tyot) {
-					c.add(t.getPoikkeukset());
-				}
-				return Lists.newArrayList(Iterables.concat(c));
-			}
+	}
 
-			public int getKokonaismaara() {
-				int k = 0;
-				for (Tyo t : tyot) {
-					k += t.getKokonaismaara();
-				}
-				return k;
-			}
-
-			@Override
-			public long getArvioituJaljellaOlevaKokonaiskesto() {
-				int k = 0;
-				for (Tyo t : tyot) {
-					k += t.getArvioituJaljellaOlevaKokonaiskesto();
-				}
-				return k;
-			}
-
-			@Override
-			public long getKesto() {
-				int k = 0;
-				for (Tyo t : tyot) {
-					k += t.getKesto();
-				}
-				return k;
-			}
-
-			/**
-			 * Palauttaa töiden mediaanikestojen keskiarvon
-			 */
-			@Override
-			public long getYksittaisenTyonArvioituKesto() {
-				int k = 0;
-				for (Tyo t : tyot) {
-					k += t.getYksittaisenTyonArvioituKesto();
-				}
-				return k / tyot.length;
-			}
-
-			public String getNimi() {
-				return "kokonaistyo";
-			}
-
-			public int getTehty() {
-				int k = 0;
-				for (Tyo t : tyot) {
-					k += t.getTehty();
-				}
-				return k;
-			}
-		};
+	public Collection<Varoitus> getVaroitukset() {
+		return varoitukset;
 	}
 
 	public TyoImpl getValintaperusteet() {
@@ -117,7 +70,7 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 		return hakemukset;
 	}
 
-	public Tyo getKokonaistyo() {
+	public KokonaisTyo getKokonaistyo() {
 		return kokonaistyo;
 	}
 
@@ -125,6 +78,7 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 		return valintalaskenta;
 	}
 
+	@com.fasterxml.jackson.annotation.JsonIgnore
 	public List<String> getKasitellytHakukohteet() {
 		return kasitellytHakukohteet;
 	}

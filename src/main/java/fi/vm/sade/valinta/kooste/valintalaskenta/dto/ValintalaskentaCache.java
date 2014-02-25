@@ -40,7 +40,8 @@ public class ValintalaskentaCache {
 	public Collection<? extends AbstraktiTyo> hakukohteenEsitiedotOnSelvitettyJaSeuraavaksiEsitiedotTyojonoihin(
 			String hakukohdeOid, Collection<String> hakemusOids) {
 		final Collection<AbstraktiTyo> tyot = Lists.newArrayList();
-		final ValintalaskentaTyo hakukohdeTyo = new ValintalaskentaTyo();
+		final ValintalaskentaTyo hakukohdeTyo = new ValintalaskentaTyo(
+				hakukohdeOid);
 		ValintaperusteetTyo valintaperusteetEsitieto = new ValintaperusteetTyo(
 				hakukohdeOid);
 		if (valintaperusteetEsitiedot.putIfAbsent(hakukohdeOid,
@@ -83,6 +84,10 @@ public class ValintalaskentaCache {
 	public Collection<ValintalaskentaTyo> esitietoHaettu(String oid,
 			List<ValintaperusteetTyyppi> e) {
 		return valintaperusteetEsitiedot.get(oid).setEsitieto(e);
+	}
+
+	public Collection<ValintalaskentaTyo> esitietoOhitettu(String oid) {
+		return valintaperusteetEsitiedot.get(oid).setEsitieto(null);
 	}
 
 	public Collection<ValintalaskentaTyo> esitietoHaettu(String oid,

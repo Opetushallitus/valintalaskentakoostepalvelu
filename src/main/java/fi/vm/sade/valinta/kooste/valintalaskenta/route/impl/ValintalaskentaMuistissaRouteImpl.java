@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.HakemusTyo;
@@ -26,6 +27,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaCache;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaMuistissaProsessi;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 
 /**
@@ -93,8 +95,14 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.when(property(valvomoProsessi).isNull())
 				//
-				.setProperty(valvomoProsessi,
-						constant(new ValintalaskentaMuistissaProsessi()))
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						exchange.setProperty(
+								valvomoProsessi,
+								new ValintalaskentaMuistissaProsessi(exchange
+										.getProperty(OPH.HAKUOID, String.class)));
+					}
+				})
 				//
 				.end()
 				//
@@ -467,7 +475,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 						HakemusTyo.class);
 				if (hakemusTyo == null) {
 					throw new RuntimeException(
-							"Yritetään tehdä null hakemusOidilla hakua haku-app:sta!");
+							"Yritetään tehdä null hakemusTyolla hakua haku-app:sta!");
 				}
 				long kesto = System.currentTimeMillis();
 				try {
@@ -507,31 +515,29 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 						.getBody(ValintaperusteetTyo.class);
 				if (valintaperusteetTyo == null) {
 					throw new RuntimeException(
-							"HakukohdeOid valintaperusteet reitillä on null");
+							"ValintaperusteetTyo reitillä on null");
 				}
 				long kesto = System.currentTimeMillis();
 				try {
 					List<ValintaperusteetTyyppi> v = valintaperusteet
 							.getValintaperusteet(valintaperusteetTyo.getOid());
 					kesto = System.currentTimeMillis() - kesto;
-					if (v == null) {
-						throw new RuntimeException(
-								"ValintaperusteetService palautti null valintaperusteet listan");
+					if (v == null || v.isEmpty()) {
+						prosessi(exchange)
+								.getVaroitukset()
+								.add(new Varoitus(valintaperusteetTyo.getOid(),
+										"Hakukohteella ei ole valintaperusteita"));
+						prosessi(exchange).getValintaperusteet().tyoOhitettu();
+						exchange.getIn().setBody(
+								cache(exchange).esitietoOhitettu(
+										valintaperusteetTyo.getOid()));
+					} else {
+						prosessi(exchange).getValintaperusteet().tyoValmistui(
+								kesto);
+						exchange.getIn().setBody(
+								cache(exchange).esitietoHaettu(
+										valintaperusteetTyo.getOid(), v));
 					}
-					if (v.isEmpty()) {
-						throw new RuntimeException("Hakukohteella ("
-								+ valintaperusteetTyo.getOid()
-								+ ") ei ole valintaperusteita!");
-					}
-					prosessi(exchange).getValintaperusteet()
-							.tyoValmistui(kesto);
-					/**
-					 * Valintalaskentatyojonoon
-					 */
-					exchange.getIn().setBody(
-							cache(exchange).esitietoHaettu(
-									valintaperusteetTyo.getOid(), v));
-
 				} catch (Exception e) {
 					kesto = System.currentTimeMillis() - kesto;
 					prosessi(exchange).getValintaperusteet().tyoEpaonnistui(
@@ -593,13 +599,22 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 			@Override
 			public boolean matches(Exchange exchange) {
 
-				ValintalaskentaTyo hakukohdeKey = exchange.getIn().getBody(
-						ValintalaskentaTyo.class);
+				ValintalaskentaTyo valintalaskentaTyo = exchange.getIn()
+						.getBody(ValintalaskentaTyo.class);
+				if (valintalaskentaTyo.isOhitettu()) {
+					prosessi(exchange)
+							.getVaroitukset()
+							.add(new Varoitus(valintalaskentaTyo
+									.getHakukohdeOid(),
+									"Valintalaskentaa ei tehty hakukohteelle puuttuvien tietojen vuoksi."));
+					prosessi(exchange).getValintalaskenta().tyoOhitettu();
+					return prosessi(exchange).getValintalaskenta().isValmis();
+				}
 				long kesto = System.currentTimeMillis();
 				try {
 					valintalaskenta.teeValintalaskenta(
-							hakukohdeKey.getHakemustyypit(),
-							hakukohdeKey.getValintaperusteet());
+							valintalaskentaTyo.getHakemustyypit(),
+							valintalaskentaTyo.getValintaperusteet());
 					kesto = System.currentTimeMillis() - kesto;
 					prosessi(exchange).getValintalaskenta().tyoValmistui(kesto);
 					return prosessi(exchange).getValintalaskenta().isValmis();
