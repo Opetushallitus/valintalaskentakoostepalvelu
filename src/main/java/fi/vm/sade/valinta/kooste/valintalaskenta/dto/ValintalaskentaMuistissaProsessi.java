@@ -16,7 +16,6 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
 public class ValintalaskentaMuistissaProsessi extends Prosessi {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaMuistissaProsessi.class);
-	private final TyoImpl tarjonnastaHakukohteet;
 	private final TyoImpl hakukohteilleHakemukset;
 	private final TyoImpl hakemukset;
 	private final TyoImpl valintaperusteet;
@@ -28,25 +27,22 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 			.synchronizedList(Lists.<String> newArrayList());
 
 	public ValintalaskentaMuistissaProsessi() {
-		this(new TyoImpl("Valintalaskenta"), new TyoImpl(
-				"Tarjonnasta hakukohteet", 1), new TyoImpl(
-				"Hakukohteille hakemukset"), new TyoImpl("Hakemukset"),
-				new TyoImpl("Valintaperusteet"));
+		this(new TyoImpl("Valintalaskenta", 0), new TyoImpl(
+				"Hakukohteille hakemukset"), new TyoImpl("Hakemukset", 0),
+				new TyoImpl("Valintaperusteet", 0));
 	}
 
 	public ValintalaskentaMuistissaProsessi(final TyoImpl valintalaskenta,
-			final TyoImpl tarjonnastaHakukohteet,
 			final TyoImpl hakukohteilleHakemukset, final TyoImpl hakemukset,
 			final TyoImpl valintaperusteet) {
 		this.peruutaProsessiPoikkeuksesta = true;
 		this.valintalaskenta = valintalaskenta;
-		this.tarjonnastaHakukohteet = tarjonnastaHakukohteet;
 		this.hakukohteilleHakemukset = hakukohteilleHakemukset;
 		this.hakemukset = hakemukset;
 		this.valintaperusteet = valintaperusteet;
 		this.kokonaistyo = new Tyo() {
 			final Tyo[] tyot = new Tyo[] { valintalaskenta, valintaperusteet,
-					tarjonnastaHakukohteet, hakukohteilleHakemukset, hakemukset };
+					hakukohteilleHakemukset, hakemukset };
 
 			@JsonIgnore
 			public Collection<Exception> getPoikkeukset() {
@@ -115,10 +111,6 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 
 	public TyoImpl getHakukohteilleHakemukset() {
 		return hakukohteilleHakemukset;
-	}
-
-	public TyoImpl getTarjonnastaHakukohteet() {
-		return tarjonnastaHakukohteet;
 	}
 
 	public TyoImpl getHakemukset() {

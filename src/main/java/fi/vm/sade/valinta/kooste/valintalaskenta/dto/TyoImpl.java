@@ -79,6 +79,10 @@ public class TyoImpl extends Tyo {
 		this.kokonaismaara.set(kokonaismaara);
 	}
 
+	public void inkrementoiKokonaismaaraa() {
+		this.kokonaismaara.incrementAndGet();
+	}
+
 	public int getKokonaismaara() {
 		return kokonaismaara.get();
 	}

@@ -27,7 +27,6 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaMuistissaR
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.HakuAppHakemus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.HakuAppHakemusOids;
-import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.TarjonnanHakukohdeOids;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.Valintalaskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.Valintaperusteet;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
@@ -43,8 +42,6 @@ public class ValintalaskentaMuistissaTest {
 			.toMillis(10);
 	@Autowired
 	private CamelContext camelContext;
-	@Autowired
-	private TarjonnanHakukohdeOids tarjonnanHakukohdeOids;
 	@Autowired
 	private HakuAppHakemusOids hakuAppHakemusOids;
 	@Autowired
@@ -62,9 +59,6 @@ public class ValintalaskentaMuistissaTest {
 		hak1.setOid("hak1");
 		Hakemus hak2 = new Hakemus();
 		hak2.setOid("hak2");
-		Mockito.when(
-				tarjonnanHakukohdeOids.getHakukohdeOids(Mockito.anyString()))
-				.thenReturn(Arrays.asList("h1", "h2", "h3", "h4"));
 
 		Mockito.when(hakuAppHakemusOids.getHakemusOids("h1")).thenReturn(
 				Arrays.asList("hak1", "hak2"));
@@ -100,16 +94,13 @@ public class ValintalaskentaMuistissaTest {
 		TyoImpl valintaperusteetTyo = Mockito.spy(p.getValintaperusteet());
 		TyoImpl valintalaskentaTyo = Mockito.spy(p.getValintalaskenta());
 
-		prosessi = Mockito
-				.spy(new ValintalaskentaMuistissaProsessi(valintalaskentaTyo, p
-						.getTarjonnastaHakukohteet(),
-						hakukohteilleHakemuksetTyo, hakemuksetTyo,
-						valintaperusteetTyo));
+		prosessi = Mockito.spy(new ValintalaskentaMuistissaProsessi(
+				valintalaskentaTyo, hakukohteilleHakemuksetTyo, hakemuksetTyo,
+				valintaperusteetTyo));
 
 		l.aktivoiValintalaskenta(
 				prosessi,
-				ValintalaskentaCache.createWithBlacklist(hakuOid,
-						Arrays.<String> asList()), Arrays.<String> asList(),
+				new ValintalaskentaCache(Arrays.asList("h1", "h2", "h3", "h4")),
 				hakuOid);
 		/**
 		 * Oletetaan kymmenessä sekunnissa kolme valintalaskentaa tai epäillään
@@ -119,8 +110,8 @@ public class ValintalaskentaMuistissaTest {
 		Mockito.verify(
 				hakemuksetTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
-						.times(1)) // only()
-				.setKokonaismaara(Mockito.eq(2)); // 2
+						.times(2)) // only()
+				.inkrementoiKokonaismaaraa();
 		// kaksi hakemusta haetaan
 		Mockito.verify(
 				hakemuksetTyo,
@@ -136,8 +127,8 @@ public class ValintalaskentaMuistissaTest {
 		Mockito.verify(
 				valintaperusteetTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
-						.times(1)) // only()
-				.setKokonaismaara(Mockito.eq(3)); // eq(3)
+						.times(3)) // only()
+				.inkrementoiKokonaismaaraa();
 		// yksi ohitetaan
 		Mockito.verify(
 				valintaperusteetTyo,
@@ -154,8 +145,8 @@ public class ValintalaskentaMuistissaTest {
 		Mockito.verify(
 				valintalaskentaTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
-						.times(1)) // only
-				.setKokonaismaara(Mockito.eq(3)); // .eq(3)
+						.times(3)) // only
+				.inkrementoiKokonaismaaraa();
 		// yksi tyo ohitetaan
 		Mockito.verify(
 				valintalaskentaTyo,
@@ -199,12 +190,8 @@ public class ValintalaskentaMuistissaTest {
 	}
 
 	@Bean
-	public TarjonnanHakukohdeOids getTarjonnanHakukohdeOids() {
-		return Mockito.mock(TarjonnanHakukohdeOids.class);
-	}
-
-	@Bean
 	public Valintaperusteet getValintaperusteet() {
 		return Mockito.mock(Valintaperusteet.class);
 	}
+
 }
