@@ -16,6 +16,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.apache.camel.Property;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,7 +48,8 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/valintalaskentamuistissa", description = "Valintalaskenta muistinvaraisesti")
 public class ValintalaskentaMuistissaResource {
-
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ValintalaskentaMuistissaResource.class);
 	@Autowired
 	private ValintalaskentaTila valintalaskentaTila;
 
@@ -136,13 +139,15 @@ public class ValintalaskentaMuistissaResource {
 				kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
 				kasiteltavatHakukohteet.removeAll(blacklistOids);
 			}
-
+			LOG.info("Käynnistetään valintalaskenta prosessille {}",
+					prosessi.getId());
 			valintalaskentaMuistissa.aktivoiValintalaskenta(prosessi,
 					new ValintalaskentaCache(kasiteltavatHakukohteet), hakuOid,
 					SecurityContextHolder.getContext().getAuthentication());
 		} else {
 			throw new RuntimeException("Valintalaskenta on jo käynnissä");
 		}
+		LOG.info("Valintalaskenta käynnissä");
 		return Vastaus.uudelleenOhjaus(prosessi.getId());
 	}
 
