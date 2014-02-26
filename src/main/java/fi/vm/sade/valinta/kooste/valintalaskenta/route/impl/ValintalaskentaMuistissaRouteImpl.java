@@ -28,6 +28,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaMuistissaPro
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
+import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaMuistissaRoute;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 
 /**
@@ -76,6 +77,8 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	private final Valintaperusteet valintaperusteet;
 	private final Valintalaskenta valintalaskenta;
 
+	private ValintalaskentaTila valintalaskentaTila;
+
 	// private final ExecutorService hakuAppExecutorService;
 	// private final ExecutorService valintaperusteetExecutorService;
 
@@ -118,8 +121,10 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 						// update work
 						prosessi(exchange).getHakukohteilleHakemukset()
 								.setKokonaismaara(c.size());
-						prosessi(exchange).getValintalaskenta();
-						prosessi(exchange).getValintaperusteet();
+						prosessi(exchange).getValintalaskenta()
+								.setKokonaismaara(c.size());
+						prosessi(exchange).getValintaperusteet()
+								.setKokonaismaara(c.size());
 					}
 				})
 				//
@@ -177,8 +182,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						prosessi(exchange).getValintaperusteet()
-								.inkrementoiKokonaismaaraa();
+						// prosessi(exchange).getValintaperusteet().inkrementoiKokonaismaaraa();
 					}
 				}).to(valintaperusteetTyojono)
 				//
@@ -196,8 +200,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						prosessi(exchange).getValintalaskenta()
-								.inkrementoiKokonaismaaraa();
+						// prosessi(exchange).getValintalaskenta().inkrementoiKokonaismaaraa();
 					}
 				}).to(valintalaskentaTyojono)
 				//
@@ -257,8 +260,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						prosessi(exchange).getValintalaskenta()
-								.inkrementoiKokonaismaaraa();
+						// prosessi(exchange).getValintalaskenta().inkrementoiKokonaismaaraa();
 					}
 				}).to(valintalaskentaTyojono)
 				//
@@ -302,8 +304,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						prosessi(exchange).getValintalaskenta()
-								.inkrementoiKokonaismaaraa();
+						// prosessi(exchange).getValintalaskenta().inkrementoiKokonaismaaraa();
 					}
 				}).to(valintalaskentaTyojono)
 				//
@@ -369,7 +370,12 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.when(valintalaskenta())
 				//
-				.to(finish)
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
+								.set(null);
+					}
+				}).to(finish)
 				//
 				.end();
 
@@ -421,6 +427,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 
 	@Autowired
 	public ValintalaskentaMuistissaRouteImpl(
+			ValintalaskentaTila valintalaskentaTila,
 			Valintaperusteet valintaperusteet,
 			HakuAppHakemus hakuAppHakemus,
 			HakuAppHakemusOids hakuAppHakemusOids,
@@ -428,20 +435,21 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 			@Value("bean:valintalaskentaMuistissaValvomo?method=start") String start,
 			@Value("bean:valintalaskentaMuistissaValvomo?method=finish") String finish,
 			@Value("bean:valintalaskentaMuistissaValvomo?method=fail") String fail,
-			@Value("seda:valintalaskentaTyojono?purgeWhenStopping=true&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintalaskenta.threadpoolsize:4}") String valintalaskentaTyojono,
-			@Value("seda:haeHakemus?purgeWhenStopping=true&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakemus.threadpoolsize:4}") String hakemusTyojono,
-			@Value("seda:haeValintaperuste?purgeWhenStopping=true&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintaperusteet.threadpoolsize:4}") String valintaperusteetTyojono,
-			@Value("seda:haeHakukohteidenHakemukset?purgeWhenStopping=true&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakukohteidenhakemukset.threadpoolsize:4}") String hakukohteidenHakemuksetTyojono,
+			@Value("seda:valintalaskentaTyojono?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintalaskenta.threadpoolsize:4}") String valintalaskentaTyojono,
+			@Value("seda:haeHakemus?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakemus.threadpoolsize:4}") String hakemusTyojono,
+			@Value("seda:haeValintaperuste?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintaperusteet.threadpoolsize:4}") String valintaperusteetTyojono,
+			@Value("seda:haeHakukohteidenHakemukset?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakukohteidenhakemukset.threadpoolsize:4}") String hakukohteidenHakemuksetTyojono,
 			@Value("valintalaskentaCache") String valintalaskentaCache,
 			@Value("direct:valintalaskenta_muistissa_aloita_laskenta") String direct_aloita_laskenta,
 			@Value("direct:valintalaskenta_muistissa_hae_valintaperusteet_yksittainen") String direct_hae_valintaperusteet_yksittainen,
 			@Value("direct:valintalaskenta_muistissa_hae_hakemus_yksittainen") String haeHakemusYksittainen,
-			@Value("direct:valintalaskenta_muistissa") String direct_valintalaskenta_muistissa,
+			@Value(ValintalaskentaMuistissaRoute.SEDA_VALINTALASKENTA_MUISTISSA) String valintalaskentaMuistissa,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_hakukohteiden_hakemukset") String deadLetterChannelHaeHakukohteenHakemukset,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_hakemus") String deadLetterChannelHaeHakemus,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_valintaperusteet") String deadLetterChannelHaeValintaperusteet,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_tee_valintalaskenta") String deadLetterChannelTeeValintalaskenta) {
 		// deadletterchannelit
+		this.valintalaskentaTila = valintalaskentaTila;
 		this.deadLetterChannelHaeHakemus = deadLetterChannelHaeHakemus;
 		this.deadLetterChannelHaeValintaperusteet = deadLetterChannelHaeValintaperusteet;
 		this.deadLetterChannelTeeValintalaskenta = deadLetterChannelTeeValintalaskenta;
@@ -460,8 +468,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 		this.aloitaLaskenta = direct_aloita_laskenta;
 		this.haeHakemusYksittainen = haeHakemusYksittainen;
 		this.haeValintaperusteetYksittainen = direct_hae_valintaperusteet_yksittainen;
-		this.valintalaskentaMuistissa = direct_valintalaskenta_muistissa;
+
 		// tyojonot
+		this.valintalaskentaMuistissa = valintalaskentaMuistissa;
 		this.valintalaskentaTyojono = valintalaskentaTyojono;
 		this.hakukohteidenHakemuksetTyojono = hakukohteidenHakemuksetTyojono;
 		this.valintaperusteetTyojono = valintaperusteetTyojono;

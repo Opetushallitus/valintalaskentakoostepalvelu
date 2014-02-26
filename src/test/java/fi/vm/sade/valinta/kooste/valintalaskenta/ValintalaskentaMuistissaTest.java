@@ -9,9 +9,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -29,6 +31,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuist
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.HakuAppHakemusOids;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.Valintalaskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.Valintaperusteet;
+import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaTila;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 
@@ -39,7 +42,7 @@ import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ValintalaskentaMuistissaTest {
 	private final int VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST = (int) TimeUnit.SECONDS
-			.toMillis(5);
+			.toMillis(8);
 	@Autowired
 	private CamelContext camelContext;
 	@Autowired
@@ -52,6 +55,9 @@ public class ValintalaskentaMuistissaTest {
 	private Valintalaskenta valintalaskenta;
 	@Autowired
 	private ValvomoService<ValintalaskentaMuistissaProsessi> valvomo;
+
+	@Value(ValintalaskentaMuistissaRoute.SEDA_VALINTALASKENTA_MUISTISSA)
+	private String routeId;
 
 	@Test
 	public void testaaMaskaus() throws Exception {
@@ -81,8 +87,7 @@ public class ValintalaskentaMuistissaTest {
 
 		String hakuOid = "h0";
 		ValintalaskentaMuistissaRoute l = ProxyWithAnnotationHelper
-				.createProxy(camelContext
-						.getEndpoint("direct:valintalaskenta_muistissa"),
+				.createProxy(camelContext.getEndpoint(routeId),
 						ValintalaskentaMuistissaRoute.class);
 
 		ValintalaskentaMuistissaProsessi prosessi;
@@ -103,7 +108,7 @@ public class ValintalaskentaMuistissaTest {
 		l.aktivoiValintalaskenta(
 				prosessi,
 				new ValintalaskentaCache(Arrays.asList("h1", "h2", "h3", "h4")),
-				hakuOid);
+				hakuOid, Mockito.mock(Authentication.class));
 
 		/**
 		 * Oletetaan kymmenessä sekunnissa kolme valintalaskentaa tai epäillään
@@ -130,8 +135,8 @@ public class ValintalaskentaMuistissaTest {
 		Mockito.verify(
 				valintaperusteetTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
-						.times(3)) // only()
-				.inkrementoiKokonaismaaraa();
+						.times(1)) // only()
+				.setKokonaismaara(Mockito.eq(4));
 		// yksi ohitetaan
 		Mockito.verify(
 				valintaperusteetTyo,
@@ -148,8 +153,8 @@ public class ValintalaskentaMuistissaTest {
 		Mockito.verify(
 				valintalaskentaTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
-						.times(3)) // only
-				.inkrementoiKokonaismaaraa();
+						.times(1)) // only
+				.setKokonaismaara(4);
 
 		Mockito.verify(
 				valintalaskentaTyo,
@@ -175,6 +180,11 @@ public class ValintalaskentaMuistissaTest {
 	@Bean(name = "valintalaskentaMuistissaValvomo")
 	public ValvomoService<ValintalaskentaMuistissaProsessi> getValvomoServiceImpl() {
 		return new ValvomoServiceImpl<ValintalaskentaMuistissaProsessi>();
+	}
+
+	@Bean
+	public ValintalaskentaTila getValintalaskentaTila() {
+		return new ValintalaskentaTila();
 	}
 
 	@Bean
