@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.camel.CamelContext;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -49,10 +50,11 @@ public class ValintalaskentaMuistissaConfig {
 
 	@Bean
 	public ValintalaskentaMuistissaRoute getValintalaskentaMuistissaRoute(
+			@Value(ValintalaskentaMuistissaRoute.SEDA_VALINTALASKENTA_MUISTISSA) String routeId,
 			@Qualifier("javaDslCamelContext") CamelContext context)
 			throws Exception {
 		return ProxyWithAnnotationHelper.createProxy(
-				context.getEndpoint("direct:valintalaskenta_muistissa"),
+				context.getEndpoint(routeId),
 				ValintalaskentaMuistissaRoute.class);
 	}
 

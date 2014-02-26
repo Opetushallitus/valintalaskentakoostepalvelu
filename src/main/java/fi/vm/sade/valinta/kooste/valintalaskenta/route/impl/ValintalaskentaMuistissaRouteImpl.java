@@ -28,6 +28,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaMuistissaPro
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
+import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaMuistissaRoute;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 
 /**
@@ -442,7 +443,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 			@Value("direct:valintalaskenta_muistissa_aloita_laskenta") String direct_aloita_laskenta,
 			@Value("direct:valintalaskenta_muistissa_hae_valintaperusteet_yksittainen") String direct_hae_valintaperusteet_yksittainen,
 			@Value("direct:valintalaskenta_muistissa_hae_hakemus_yksittainen") String haeHakemusYksittainen,
-			@Value("direct:valintalaskenta_muistissa") String direct_valintalaskenta_muistissa,
+			@Value(ValintalaskentaMuistissaRoute.SEDA_VALINTALASKENTA_MUISTISSA) String valintalaskentaMuistissa,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_hakukohteiden_hakemukset") String deadLetterChannelHaeHakukohteenHakemukset,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_hakemus") String deadLetterChannelHaeHakemus,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_valintaperusteet") String deadLetterChannelHaeValintaperusteet,
@@ -467,8 +468,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 		this.aloitaLaskenta = direct_aloita_laskenta;
 		this.haeHakemusYksittainen = haeHakemusYksittainen;
 		this.haeValintaperusteetYksittainen = direct_hae_valintaperusteet_yksittainen;
-		this.valintalaskentaMuistissa = direct_valintalaskenta_muistissa;
+
 		// tyojonot
+		this.valintalaskentaMuistissa = valintalaskentaMuistissa;
 		this.valintalaskentaTyojono = valintalaskentaTyojono;
 		this.hakukohteidenHakemuksetTyojono = hakukohteidenHakemuksetTyojono;
 		this.valintaperusteetTyojono = valintaperusteetTyojono;

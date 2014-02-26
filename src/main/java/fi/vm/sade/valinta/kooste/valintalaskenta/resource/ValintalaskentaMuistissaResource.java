@@ -137,7 +137,7 @@ public class ValintalaskentaMuistissaResource {
 				kasiteltavatHakukohteet.removeAll(blacklistOids);
 			}
 
-			valintalaskentaMuistissa.aktivoiValintalaskentaAsync(prosessi,
+			valintalaskentaMuistissa.aktivoiValintalaskenta(prosessi,
 					new ValintalaskentaCache(kasiteltavatHakukohteet), hakuOid,
 					SecurityContextHolder.getContext().getAuthentication());
 		} else {

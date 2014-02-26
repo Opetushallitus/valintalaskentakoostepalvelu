@@ -9,9 +9,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -54,6 +56,9 @@ public class ValintalaskentaMuistissaTest {
 	@Autowired
 	private ValvomoService<ValintalaskentaMuistissaProsessi> valvomo;
 
+	@Value(ValintalaskentaMuistissaRoute.SEDA_VALINTALASKENTA_MUISTISSA)
+	private String routeId;
+
 	@Test
 	public void testaaMaskaus() throws Exception {
 		Hakemus hak1 = new Hakemus();
@@ -82,8 +87,7 @@ public class ValintalaskentaMuistissaTest {
 
 		String hakuOid = "h0";
 		ValintalaskentaMuistissaRoute l = ProxyWithAnnotationHelper
-				.createProxy(camelContext
-						.getEndpoint("direct:valintalaskenta_muistissa"),
+				.createProxy(camelContext.getEndpoint(routeId),
 						ValintalaskentaMuistissaRoute.class);
 
 		ValintalaskentaMuistissaProsessi prosessi;
@@ -104,7 +108,7 @@ public class ValintalaskentaMuistissaTest {
 		l.aktivoiValintalaskenta(
 				prosessi,
 				new ValintalaskentaCache(Arrays.asList("h1", "h2", "h3", "h4")),
-				hakuOid);
+				hakuOid, Mockito.mock(Authentication.class));
 
 		/**
 		 * Oletetaan kymmenessä sekunnissa kolme valintalaskentaa tai epäillään
