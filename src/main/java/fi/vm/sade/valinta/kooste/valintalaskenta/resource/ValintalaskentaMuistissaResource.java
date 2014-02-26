@@ -96,7 +96,8 @@ public class ValintalaskentaMuistissaResource {
 
 	@GET
 	@Path("/aktiivinenValintalaskenta")
-	@Consumes("application/json")
+	@Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
 	@ApiOperation(value = "Palauttaa suorituksessa olevan valintalaskentaprosessin", response = Vastaus.class)
 	public Vastaus aktiivinenValintalaskentaProsessi() {
 		return Vastaus.uudelleenOhjaus(valintalaskentaTila
@@ -105,7 +106,8 @@ public class ValintalaskentaMuistissaResource {
 
 	@POST
 	@Path("/keskeytaAktiivinenValintalaskenta")
-	@Consumes("application/json")
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
 	@ApiOperation(value = "Keskeyttää suorituksessa olevan valintalaskentaprosessin", response = Vastaus.class)
 	public Response keskeytaValintalaskentaProsessi() {
 		valintalaskentaTila.getKaynnissaOlevaValintalaskenta().getAndSet(null)
@@ -115,7 +117,8 @@ public class ValintalaskentaMuistissaResource {
 
 	@POST
 	@Path("/aktivoi")
-	@Consumes("application/json")
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
 	@ApiOperation(value = "Valintalaskennan aktivointi haulle ilman annettuja hakukohteita", response = Vastaus.class)
 	public Vastaus aktivoiHaunValintalaskentaIlmanAnnettujaHakukohteita(
 			@QueryParam("hakuOid") String hakuOid,
