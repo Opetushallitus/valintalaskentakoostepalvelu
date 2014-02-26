@@ -43,6 +43,11 @@ public class ValintalaskentaMuistissaConfig {
 	}
 
 	@Bean
+	public ValintalaskentaTila getValintalaskentaTila() {
+		return new ValintalaskentaTila();
+	}
+
+	@Bean
 	public ValintalaskentaMuistissaRoute getValintalaskentaMuistissaRoute(
 			@Qualifier("javaDslCamelContext") CamelContext context)
 			throws Exception {

@@ -10,6 +10,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -29,9 +30,11 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaCache;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaMuistissaProsessi;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaMuistissaRoute;
+import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaTila;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 
@@ -43,6 +46,9 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/valintalaskentamuistissa", description = "Valintalaskenta muistinvaraisesti")
 public class ValintalaskentaMuistissaResource {
+
+	@Autowired
+	private ValintalaskentaTila valintalaskentaTila;
 
 	@Resource(name = "valintalaskentaMuistissaValvomo")
 	private ValvomoService<ValintalaskentaMuistissaProsessi> valintalaskentaMuistissaValvomo;
@@ -61,6 +67,15 @@ public class ValintalaskentaMuistissaResource {
 	}
 
 	@GET
+	@Path("/status/{uuid}")
+	@Produces(APPLICATION_JSON)
+	@ApiOperation(value = "Muistinvaraisen valintalaskennan tila", response = Collection.class)
+	public ProsessiJaStatus<ValintalaskentaMuistissaProsessi> status(
+			@PathParam("uuid") String uuid) {
+		return valintalaskentaMuistissaValvomo.getProsessiJaStatus(uuid);
+	}
+
+	@GET
 	@Path("/exceptions")
 	@Produces(APPLICATION_JSON)
 	@ApiOperation(value = "Muistinvaraisen valintalaskennan poikkeukset", response = Collection.class)
@@ -76,24 +91,59 @@ public class ValintalaskentaMuistissaResource {
 						});
 	}
 
+	@GET
+	@Path("/aktiivinenValintalaskenta")
+	@Consumes("application/json")
+	@ApiOperation(value = "Palauttaa suorituksessa olevan valintalaskentaprosessin", response = Vastaus.class)
+	public Vastaus aktiivinenValintalaskentaProsessi() {
+		return Vastaus.uudelleenOhjaus(valintalaskentaTila
+				.getKaynnissaOlevaValintalaskenta().get().getId());
+	}
+
+	@POST
+	@Path("/keskeytaAktiivinenValintalaskenta")
+	@Consumes("application/json")
+	@ApiOperation(value = "Keskeyttää suorituksessa olevan valintalaskentaprosessin", response = Vastaus.class)
+	public Response keskeytaValintalaskentaProsessi() {
+		valintalaskentaTila.getKaynnissaOlevaValintalaskenta().getAndSet(null)
+				.peruuta();
+		return Response.ok().build();
+	}
+
 	@POST
 	@Path("/aktivoi")
 	@Consumes("application/json")
-	@ApiOperation(value = "Valintalaskennan aktivointi haulle ilman annettuja hakukohteita", response = Response.class)
-	public Response aktivoiHaunValintalaskentaIlmanAnnettujaHakukohteita(
+	@ApiOperation(value = "Valintalaskennan aktivointi haulle ilman annettuja hakukohteita", response = Vastaus.class)
+	public Vastaus aktivoiHaunValintalaskentaIlmanAnnettujaHakukohteita(
 			@QueryParam("hakuOid") String hakuOid,
 			Collection<String> blacklistOids) throws Exception {
-		Collection<String> kasiteltavatHakukohteet;
-		if (blacklistOids == null || blacklistOids.isEmpty()) {
-			kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
-		} else {
-			kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
-			kasiteltavatHakukohteet.removeAll(blacklistOids);
+		ValintalaskentaMuistissaProsessi prosessi = new ValintalaskentaMuistissaProsessi(
+				hakuOid);
+		ValintalaskentaMuistissaProsessi vanhaProsessi = valintalaskentaTila
+				.getKaynnissaOlevaValintalaskenta().get();
+		/**
+		 * Vanha prosessi ylikirjoitetaan surutta jos siinä oli poikkeuksia
+		 */
+		if (vanhaProsessi != null && vanhaProsessi.hasPoikkeuksia()) {
+			valintalaskentaTila.getKaynnissaOlevaValintalaskenta().set(null);
 		}
-		valintalaskentaMuistissa.aktivoiValintalaskentaAsync(
-				new ValintalaskentaCache(kasiteltavatHakukohteet), hakuOid,
-				SecurityContextHolder.getContext().getAuthentication());
-		return Response.ok().build();
+		if (valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
+				.compareAndSet(null, prosessi)) {
+			Collection<String> kasiteltavatHakukohteet;
+			if (blacklistOids == null || blacklistOids.isEmpty()) {
+				kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
+			} else {
+				kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
+				kasiteltavatHakukohteet.removeAll(blacklistOids);
+			}
+
+			valintalaskentaMuistissa.aktivoiValintalaskentaAsync(prosessi,
+					new ValintalaskentaCache(kasiteltavatHakukohteet), hakuOid,
+					SecurityContextHolder.getContext().getAuthentication());
+		} else {
+			throw new RuntimeException("Valintalaskenta on jo käynnissä");
+		}
+		return Vastaus.uudelleenOhjaus(prosessi.getId());
 	}
 
 	private Collection<String> getHakukohdeOids(

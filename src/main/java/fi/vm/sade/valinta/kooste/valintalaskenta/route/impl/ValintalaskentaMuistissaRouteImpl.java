@@ -76,6 +76,8 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	private final Valintaperusteet valintaperusteet;
 	private final Valintalaskenta valintalaskenta;
 
+	private ValintalaskentaTila valintalaskentaTila;
+
 	// private final ExecutorService hakuAppExecutorService;
 	// private final ExecutorService valintaperusteetExecutorService;
 
@@ -118,8 +120,10 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 						// update work
 						prosessi(exchange).getHakukohteilleHakemukset()
 								.setKokonaismaara(c.size());
-						prosessi(exchange).getValintalaskenta();
-						prosessi(exchange).getValintaperusteet();
+						prosessi(exchange).getValintalaskenta()
+								.setKokonaismaara(c.size());
+						prosessi(exchange).getValintaperusteet()
+								.setKokonaismaara(c.size());
 					}
 				})
 				//
@@ -177,8 +181,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						prosessi(exchange).getValintaperusteet()
-								.inkrementoiKokonaismaaraa();
+						// prosessi(exchange).getValintaperusteet().inkrementoiKokonaismaaraa();
 					}
 				}).to(valintaperusteetTyojono)
 				//
@@ -196,8 +199,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						prosessi(exchange).getValintalaskenta()
-								.inkrementoiKokonaismaaraa();
+						// prosessi(exchange).getValintalaskenta().inkrementoiKokonaismaaraa();
 					}
 				}).to(valintalaskentaTyojono)
 				//
@@ -257,8 +259,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						prosessi(exchange).getValintalaskenta()
-								.inkrementoiKokonaismaaraa();
+						// prosessi(exchange).getValintalaskenta().inkrementoiKokonaismaaraa();
 					}
 				}).to(valintalaskentaTyojono)
 				//
@@ -302,8 +303,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						prosessi(exchange).getValintalaskenta()
-								.inkrementoiKokonaismaaraa();
+						// prosessi(exchange).getValintalaskenta().inkrementoiKokonaismaaraa();
 					}
 				}).to(valintalaskentaTyojono)
 				//
@@ -369,7 +369,12 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.when(valintalaskenta())
 				//
-				.to(finish)
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
+								.set(null);
+					}
+				}).to(finish)
 				//
 				.end();
 
@@ -421,6 +426,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 
 	@Autowired
 	public ValintalaskentaMuistissaRouteImpl(
+			ValintalaskentaTila valintalaskentaTila,
 			Valintaperusteet valintaperusteet,
 			HakuAppHakemus hakuAppHakemus,
 			HakuAppHakemusOids hakuAppHakemusOids,
@@ -442,6 +448,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_valintaperusteet") String deadLetterChannelHaeValintaperusteet,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_tee_valintalaskenta") String deadLetterChannelTeeValintalaskenta) {
 		// deadletterchannelit
+		this.valintalaskentaTila = valintalaskentaTila;
 		this.deadLetterChannelHaeHakemus = deadLetterChannelHaeHakemus;
 		this.deadLetterChannelHaeValintaperusteet = deadLetterChannelHaeValintaperusteet;
 		this.deadLetterChannelTeeValintalaskenta = deadLetterChannelTeeValintalaskenta;

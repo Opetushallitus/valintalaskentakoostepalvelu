@@ -20,6 +20,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.kooste.valvomo.dto.ExceptionStack;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus.Status;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
@@ -122,6 +123,21 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>,
 
 		return Collections.unmodifiableCollection(Lists.reverse(Lists
 				.newArrayList(processBuffer)));
+	}
+
+	@Override
+	public ProsessiJaStatus<T> getProsessiJaStatus(String uuid) {
+		for (Object t : processBuffer) {
+			ProsessiJaStatus<T> p = (ProsessiJaStatus<T>) t;
+			if (p.getProsessi() instanceof Prosessi) {
+				Prosessi p0 = (Prosessi) p.getProsessi();
+				if (uuid.equals(p0.getId())) {
+					return p;
+				}
+			}
+
+		}
+		return null;
 	}
 
 	private static StringBuffer newBufferWithDate(String status) {

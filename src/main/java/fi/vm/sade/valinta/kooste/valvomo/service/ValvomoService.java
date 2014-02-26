@@ -16,6 +16,8 @@ public interface ValvomoService<T> {
 	 */
 	ProsessiJaStatus<T> getAjossaOlevaProsessiJaStatus();
 
+	ProsessiJaStatus<T> getProsessiJaStatus(String uuid);
+
 	Collection<T> getUusimmatProsessit();
 
 	Collection<ProsessiJaStatus<T>> getUusimmatProsessitJaStatukset();

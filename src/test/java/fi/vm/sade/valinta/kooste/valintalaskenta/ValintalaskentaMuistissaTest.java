@@ -29,6 +29,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuist
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.HakuAppHakemusOids;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.Valintalaskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.Valintaperusteet;
+import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaTila;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 
@@ -39,7 +40,7 @@ import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ValintalaskentaMuistissaTest {
 	private final int VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST = (int) TimeUnit.SECONDS
-			.toMillis(5);
+			.toMillis(8);
 	@Autowired
 	private CamelContext camelContext;
 	@Autowired
@@ -130,8 +131,8 @@ public class ValintalaskentaMuistissaTest {
 		Mockito.verify(
 				valintaperusteetTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
-						.times(3)) // only()
-				.inkrementoiKokonaismaaraa();
+						.times(1)) // only()
+				.setKokonaismaara(Mockito.eq(4));
 		// yksi ohitetaan
 		Mockito.verify(
 				valintaperusteetTyo,
@@ -148,8 +149,8 @@ public class ValintalaskentaMuistissaTest {
 		Mockito.verify(
 				valintalaskentaTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
-						.times(3)) // only
-				.inkrementoiKokonaismaaraa();
+						.times(1)) // only
+				.setKokonaismaara(4);
 
 		Mockito.verify(
 				valintalaskentaTyo,
@@ -175,6 +176,11 @@ public class ValintalaskentaMuistissaTest {
 	@Bean(name = "valintalaskentaMuistissaValvomo")
 	public ValvomoService<ValintalaskentaMuistissaProsessi> getValvomoServiceImpl() {
 		return new ValvomoServiceImpl<ValintalaskentaMuistissaProsessi>();
+	}
+
+	@Bean
+	public ValintalaskentaTila getValintalaskentaTila() {
+		return new ValintalaskentaTila();
 	}
 
 	@Bean

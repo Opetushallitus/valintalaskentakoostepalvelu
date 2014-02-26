@@ -21,6 +21,7 @@ public interface ValintalaskentaMuistissaRoute {
 			@Property(OPH.HAKUOID) String hakuOid);
 
 	Future<Void> aktivoiValintalaskentaAsync(
+			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) ValintalaskentaMuistissaProsessi prosessi,
 			@Property("valintalaskentaCache") ValintalaskentaCache valintalaskentaCache,
 			// @Property("hakukohdeOids") Collection<String> hakukohdeOids,
 			@Property(OPH.HAKUOID) String hakuOid,

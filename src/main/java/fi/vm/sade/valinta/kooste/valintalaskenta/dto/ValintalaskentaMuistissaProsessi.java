@@ -37,6 +37,10 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 				new TyoImpl("Valintaperusteet", 0));
 	}
 
+	public void peruuta() {
+		getExceptions().add("Valintalaskenta peruutettu");
+	}
+
 	public ValintalaskentaMuistissaProsessi(String hakuOid,
 			final TyoImpl valintalaskenta,
 			final TyoImpl hakukohteilleHakemukset, final TyoImpl hakemukset,
