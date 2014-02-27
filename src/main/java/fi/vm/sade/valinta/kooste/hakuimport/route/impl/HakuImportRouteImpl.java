@@ -42,7 +42,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
 	@Autowired
 	public HakuImportRouteImpl(
-			@Value("${valintalaskentakoostepalvelu.hakuimport.threadpoolsize:100}") Integer hakuImportThreadpoolSize,
+			@Value("${valintalaskentakoostepalvelu.hakuimport.threadpoolsize:10}") Integer hakuImportThreadpoolSize,
 			SuoritaHakuImportKomponentti suoritaHakuImportKomponentti,
 			ValintaperusteService valintaperusteService,
 			SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti) {

@@ -216,16 +216,16 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 		from("direct:suorita_valintalaskenta_loppuun")
 				//
 				.errorHandler(
-						deadLetterChannel(suoritaValintalaskentaDeadLetterChannel()))
+                        deadLetterChannel(suoritaValintalaskentaDeadLetterChannel()))
 				// hakee valintaperusteet hakukohdeOid:lla
 				.to("direct:valintalaskenta_haeValintaperusteet")
 				//
 				.to("log:direct_suorita_valintalaskenta_pre_split_hakemukset?level=INFO")
 				//
 				.split(header("hakemusOidit"),
-						new FlexibleAggregationStrategy<HakemusTyyppi>()
-								.storeInHeader("hakemustyypit")
-								.accumulateInCollection(ArrayList.class))
+                        new FlexibleAggregationStrategy<HakemusTyyppi>()
+                                .storeInHeader("hakemustyypit")
+                                .accumulateInCollection(ArrayList.class))
 				//
 				.executorService(valintalaskentaExecutorService)
 				//
