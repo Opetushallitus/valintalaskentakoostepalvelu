@@ -12,7 +12,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
@@ -34,7 +33,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 public class SijoitteluAktivointiResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(SijoitteluAktivointiResource.class);
-    public static final String OPH_CRUD = "ROLE_APP_SIJOITTELU_CRUD_1.2.246.562.10.00000000001";
+    public static final String OPH_CRUD = "hasAnyRole('ROLE_APP_SIJOITTELU_CRUD_1.2.246.562.10.00000000001')";
 
     @Autowired
     private SijoitteluAktivointiRoute sijoitteluAktivointiProxy;
@@ -61,7 +60,7 @@ public class SijoitteluAktivointiResource {
 
     @GET
     @Path("/jatkuva/aktivoi")
-    @Secured({ OPH_CRUD })
+    @PreAuthorize(OPH_CRUD)
     @ApiOperation(value = "Ajastetun sijoittelun aktivointi", response = String.class)
     public String aktivoiJatkuvassaSijoittelussa(@QueryParam("hakuOid") String hakuOid) {
         if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
@@ -87,7 +86,7 @@ public class SijoitteluAktivointiResource {
 
     @GET
     @Path("/jatkuva/poista")
-    @Secured({ OPH_CRUD })
+    @PreAuthorize(OPH_CRUD)
     @ApiOperation(value = "Ajastetun sijoittelun deaktivointi", response = String.class)
     public String poistaJatkuvastaSijoittelusta(@QueryParam("hakuOid") String hakuOid) {
         if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
@@ -112,7 +111,7 @@ public class SijoitteluAktivointiResource {
     @GET
     @Path("/jatkuva/kaikki")
     @Produces(MediaType.APPLICATION_JSON)
-    @Secured({ OPH_CRUD })
+    @PreAuthorize(OPH_CRUD)
     @ApiOperation(value = "Kaikki aktiiviset sijoittelut", response = Map.class)
     public Map<String, Sijoittelu> aktiivisetSijoittelut() {
         return JatkuvaSijoittelu.SIJOITTELU_HAUT;
@@ -121,7 +120,7 @@ public class SijoitteluAktivointiResource {
     @GET
     @Path("/jatkuva")
     @Produces(MediaType.APPLICATION_JSON)
-    @Secured({ OPH_CRUD })
+    @PreAuthorize(OPH_CRUD)
     @ApiOperation(value = "Haun aktiiviset sijoittelut", response = Sijoittelu.class)
     public Sijoittelu jatkuvaTila(@QueryParam("hakuOid") String hakuOid) {
         if (StringUtils.isBlank(hakuOid)) {
