@@ -3,8 +3,6 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
@@ -14,7 +12,6 @@ import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
@@ -56,14 +53,10 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 	private final HaeValintaperusteetKomponentti haeValintaperusteetKomponentti;
 	private final Processor invalidateAllCaches;
 	private final SecurityPreprocessor securityProcessor;
-	private final ExecutorService valintalaskentaExecutorService;// Integer
-																	// valintalaskentaThreadPoolSize;
-	private final ExecutorService hakukohdeValintalaskentaExecutorService;// Integer
 
 	// valintalaskentaThreadPoolSize;
 	@Autowired
 	public ValintalaskentaRouteImpl(
-			@Value("${valintalaskentakoostepalvelu.valintalaskenta.threadpoolsize:10}") Integer valintalaskentaThreadPoolSize,
 			SuoritaLaskentaKomponentti suoritaLaskentaKomponentti,
 			HaeHakukohteetTarjonnaltaKomponentti haeHakukohteetTarjonnaltaKomponentti,
 			HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti,
@@ -77,10 +70,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 		this.haeValintaperusteetKomponentti = haeValintaperusteetKomponentti;
 		this.haeHakemusKomponentti = haeHakemusKomponentti;
 		this.securityProcessor = new SecurityPreprocessor();
-		this.valintalaskentaExecutorService = Executors
-				.newFixedThreadPool(valintalaskentaThreadPoolSize);
-		this.hakukohdeValintalaskentaExecutorService = Executors
-				.newFixedThreadPool(valintalaskentaThreadPoolSize);
+
 		// processor to invalidate all caches. called when valintalaskenta
 		// starts and ends
 		this.invalidateAllCaches = new Processor() {
@@ -227,7 +217,6 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
                                 .storeInHeader("hakemustyypit")
                                 .accumulateInCollection(ArrayList.class))
 				//
-				.executorService(valintalaskentaExecutorService)
 				//
 				.shareUnitOfWork()
 				//
@@ -327,7 +316,6 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				// Collection<String>
 				.split(body())
 				//
-				.executorService(hakukohdeValintalaskentaExecutorService)
 				//
 				.shareUnitOfWork()
 				//
@@ -361,6 +349,7 @@ public class ValintalaskentaRouteImpl extends SpringRouteBuilder {
 				.bean(haeValintaperusteetKomponentti)
 				//
 				.setProperty("valintaperusteet", body());
+
 		from(hakukohteenValintalaskenta())
 		//
 				.errorHandler(

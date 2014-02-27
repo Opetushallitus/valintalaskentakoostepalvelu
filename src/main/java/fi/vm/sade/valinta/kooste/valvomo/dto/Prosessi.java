@@ -34,6 +34,15 @@ public class Prosessi implements Comparable<Prosessi>, Timestamped,
 			.synchronizedCollection(Lists.<String> newArrayList());// new
 																	// CopyOnWriteArrayList<String>();
 
+	public Prosessi(String resurssi, String toiminto, String hakuOid) {
+		this.id = UUID.randomUUID().toString();
+		this.createdBy = getAuthenticatedUserName();
+		this.createdAt = new Date();
+		this.resurssi = resurssi;
+		this.toiminto = toiminto;
+		this.hakuOid = hakuOid;
+	}
+
 	public Prosessi() {
 		this("<< tuntematon resurssi >>", "<< tuntematon toiminto >>",
 				"<< tuntematon haku >>");
@@ -51,15 +60,6 @@ public class Prosessi implements Comparable<Prosessi>, Timestamped,
 			return id.compareTo(o.id);
 		}
 		return times;
-	}
-
-	public Prosessi(String resurssi, String toiminto, String hakuOid) {
-		this.id = UUID.randomUUID().toString();
-		this.createdBy = getAuthenticatedUserName();
-		this.createdAt = new Date();
-		this.resurssi = resurssi;
-		this.toiminto = toiminto;
-		this.hakuOid = hakuOid;
 	}
 
 	public String getId() {

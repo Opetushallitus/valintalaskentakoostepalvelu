@@ -2,8 +2,6 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 
 import java.util.Collection;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-
 /**
  * 
  * @author Jussi Jartamo
@@ -25,7 +23,6 @@ public abstract class Tyo {
 	 */
 	abstract public long getKesto();
 
-	@JsonIgnore
 	abstract public Collection<Exception> getPoikkeukset();
 
 	//

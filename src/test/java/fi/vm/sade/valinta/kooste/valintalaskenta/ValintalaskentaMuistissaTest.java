@@ -9,9 +9,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -27,9 +29,9 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaMuistissaR
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.HakuAppHakemus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.HakuAppHakemusOids;
-import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.TarjonnanHakukohdeOids;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.Valintalaskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.Valintaperusteet;
+import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaTila;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 
@@ -40,11 +42,9 @@ import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ValintalaskentaMuistissaTest {
 	private final int VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST = (int) TimeUnit.SECONDS
-			.toMillis(10);
+			.toMillis(8);
 	@Autowired
 	private CamelContext camelContext;
-	@Autowired
-	private TarjonnanHakukohdeOids tarjonnanHakukohdeOids;
 	@Autowired
 	private HakuAppHakemusOids hakuAppHakemusOids;
 	@Autowired
@@ -56,15 +56,15 @@ public class ValintalaskentaMuistissaTest {
 	@Autowired
 	private ValvomoService<ValintalaskentaMuistissaProsessi> valvomo;
 
+	@Value(ValintalaskentaMuistissaRoute.SEDA_VALINTALASKENTA_MUISTISSA)
+	private String routeId;
+
 	@Test
 	public void testaaMaskaus() throws Exception {
 		Hakemus hak1 = new Hakemus();
 		hak1.setOid("hak1");
 		Hakemus hak2 = new Hakemus();
 		hak2.setOid("hak2");
-		Mockito.when(
-				tarjonnanHakukohdeOids.getHakukohdeOids(Mockito.anyString()))
-				.thenReturn(Arrays.asList("h1", "h2", "h3", "h4"));
 
 		Mockito.when(hakuAppHakemusOids.getHakemusOids("h1")).thenReturn(
 				Arrays.asList("hak1", "hak2"));
@@ -81,36 +81,35 @@ public class ValintalaskentaMuistissaTest {
 		Mockito.when(valintaperusteet.getValintaperusteet("h1")).thenReturn(
 				Arrays.asList(new ValintaperusteetTyyppi()));
 		Mockito.when(valintaperusteet.getValintaperusteet("h2")).thenReturn(
-				Arrays.asList(new ValintaperusteetTyyppi()));
+				Collections.<ValintaperusteetTyyppi> emptyList());
 		Mockito.when(valintaperusteet.getValintaperusteet("h3")).thenReturn(
 				Arrays.asList(new ValintaperusteetTyyppi()));
 
 		String hakuOid = "h0";
 		ValintalaskentaMuistissaRoute l = ProxyWithAnnotationHelper
-				.createProxy(camelContext
-						.getEndpoint("direct:valintalaskenta_muistissa"),
+				.createProxy(camelContext.getEndpoint(routeId),
 						ValintalaskentaMuistissaRoute.class);
 
 		ValintalaskentaMuistissaProsessi prosessi;
 
-		ValintalaskentaMuistissaProsessi p = new ValintalaskentaMuistissaProsessi();
+		ValintalaskentaMuistissaProsessi p = new ValintalaskentaMuistissaProsessi(
+				hakuOid);
 		TyoImpl hakemuksetTyo = Mockito.spy(p.getHakemukset());
 		TyoImpl hakukohteilleHakemuksetTyo = Mockito.spy(p
 				.getHakukohteilleHakemukset());
 		TyoImpl valintaperusteetTyo = Mockito.spy(p.getValintaperusteet());
 		TyoImpl valintalaskentaTyo = Mockito.spy(p.getValintalaskenta());
 
-		prosessi = Mockito
-				.spy(new ValintalaskentaMuistissaProsessi(valintalaskentaTyo, p
-						.getTarjonnastaHakukohteet(),
-						hakukohteilleHakemuksetTyo, hakemuksetTyo,
-						valintaperusteetTyo));
+		ValintalaskentaMuistissaProsessi oikeaProsessi = new ValintalaskentaMuistissaProsessi(
+				hakuOid, valintalaskentaTyo, hakukohteilleHakemuksetTyo,
+				hakemuksetTyo, valintaperusteetTyo);
+		prosessi = Mockito.spy(oikeaProsessi);
 
 		l.aktivoiValintalaskenta(
 				prosessi,
-				ValintalaskentaCache.createWithBlacklist(hakuOid,
-						Arrays.<String> asList()), Arrays.<String> asList(),
-				hakuOid);
+				new ValintalaskentaCache(Arrays.asList("h1", "h2", "h3", "h4")),
+				hakuOid, Mockito.mock(Authentication.class));
+
 		/**
 		 * Oletetaan kymmenessä sekunnissa kolme valintalaskentaa tai epäillään
 		 * ongelmia. Jos koodi toimii niin oikea arvo tulee millisekunneissa.
@@ -119,8 +118,8 @@ public class ValintalaskentaMuistissaTest {
 		Mockito.verify(
 				hakemuksetTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
-						.times(1)) // only()
-				.setKokonaismaara(Mockito.eq(2)); // 2
+						.times(2)) // only()
+				.inkrementoiKokonaismaaraa();
 		// kaksi hakemusta haetaan
 		Mockito.verify(
 				hakemuksetTyo,
@@ -137,26 +136,26 @@ public class ValintalaskentaMuistissaTest {
 				valintaperusteetTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
 						.times(1)) // only()
-				.setKokonaismaara(Mockito.eq(3)); // eq(3)
+				.setKokonaismaara(Mockito.eq(4));
 		// yksi ohitetaan
 		Mockito.verify(
 				valintaperusteetTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
-						.times(1)) // only()
+						.times(2)) // only()
 				.tyoOhitettu();
 		// kolme valmistuu
 		Mockito.verify(
 				valintaperusteetTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
-						.times(3)) // only()
+						.times(2)) // only()
 				.tyoValmistui(Mockito.anyLong());
 
 		Mockito.verify(
 				valintalaskentaTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
 						.times(1)) // only
-				.setKokonaismaara(Mockito.eq(3)); // .eq(3)
-		// yksi tyo ohitetaan
+				.setKokonaismaara(4);
+
 		Mockito.verify(
 				valintalaskentaTyo,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
@@ -184,6 +183,11 @@ public class ValintalaskentaMuistissaTest {
 	}
 
 	@Bean
+	public ValintalaskentaTila getValintalaskentaTila() {
+		return new ValintalaskentaTila();
+	}
+
+	@Bean
 	public Valintalaskenta getValintalaskenta() {
 		return Mockito.mock(Valintalaskenta.class);
 	}
@@ -199,12 +203,8 @@ public class ValintalaskentaMuistissaTest {
 	}
 
 	@Bean
-	public TarjonnanHakukohdeOids getTarjonnanHakukohdeOids() {
-		return Mockito.mock(TarjonnanHakukohdeOids.class);
-	}
-
-	@Bean
 	public Valintaperusteet getValintaperusteet() {
 		return Mockito.mock(Valintaperusteet.class);
 	}
+
 }
