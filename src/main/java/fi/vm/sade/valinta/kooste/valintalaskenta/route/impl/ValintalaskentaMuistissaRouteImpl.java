@@ -165,26 +165,41 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 								.logHandled(false))
 				// applications
 				.process(security)
+				//
+				.choice()
+				//
+				.when(hasNoPoikkeuksia())
 				// hakukohteella hakemuksia?
 				.process(hakemusOiditHakuApplta())
-				// Collection< TYO >
-				.split(body())
 				//
-				.to("direct:split_to_tyojono")
+				.to("direct:haeHakukohteidenHakemukset_splitter")
+				//
+				.otherwise()
+				//
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						// LOG.debug("Prosessin suoritus peruutettu. Tyhjennetään työjonoa!");
+					}
+				})
 				//
 				.end();
+		// Collection< TYO >
 
-		from("direct:split_to_tyojono")
+		from("direct:haeHakukohteidenHakemukset_splitter")
+		//
+				.split(body())
+				//
+				.to("direct:haeHakukohteidenHakemukset_split_to_tyojono")
+				//
+				.end();
+		from("direct:haeHakukohteidenHakemukset_split_to_tyojono")
 		//
 				.choice()
 				//
 				.when(body().isInstanceOf(ValintaperusteetTyo.class))
 				//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						// prosessi(exchange).getValintaperusteet().inkrementoiKokonaismaaraa();
-					}
-				}).to(valintaperusteetTyojono)
+				.to(valintaperusteetTyojono)
 				//
 				.when(body().isInstanceOf(HakemusTyo.class))
 				//
@@ -197,12 +212,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				//
 				.when(body().isInstanceOf(ValintalaskentaTyo.class))
 				//
-				//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						// prosessi(exchange).getValintalaskenta().inkrementoiKokonaismaaraa();
-					}
-				}).to(valintalaskentaTyojono)
+				.to(valintalaskentaTyojono)
 				//
 				.otherwise()
 				//
@@ -435,9 +445,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 			@Value("bean:valintalaskentaMuistissaValvomo?method=start") String start,
 			@Value("bean:valintalaskentaMuistissaValvomo?method=finish") String finish,
 			@Value("bean:valintalaskentaMuistissaValvomo?method=fail") String fail,
-			@Value("seda:valintalaskentaTyojono?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintalaskenta.threadpoolsize:4}") String valintalaskentaTyojono,
+			@Value("seda:valintalaskentaTyojono?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintalaskenta.threadpoolsize:1}") String valintalaskentaTyojono,
 			@Value("seda:haeHakemus?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakemus.threadpoolsize:4}") String hakemusTyojono,
-			@Value("seda:haeValintaperuste?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintaperusteet.threadpoolsize:4}") String valintaperusteetTyojono,
+			@Value("seda:haeValintaperuste?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintaperusteet.threadpoolsize:1}") String valintaperusteetTyojono,
 			@Value("seda:haeHakukohteidenHakemukset?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakukohteidenhakemukset.threadpoolsize:4}") String hakukohteidenHakemuksetTyojono,
 			@Value("valintalaskentaCache") String valintalaskentaCache,
 			@Value("direct:valintalaskenta_muistissa_aloita_laskenta") String direct_aloita_laskenta,
@@ -449,10 +459,10 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_hae_valintaperusteet") String deadLetterChannelHaeValintaperusteet,
 			@Value("direct:valintalaskenta_muistissa_deadletterchannel_tee_valintalaskenta") String deadLetterChannelTeeValintalaskenta) {
 		// deadletterchannelit
-		this.valintalaskentaTila = valintalaskentaTila;
 		this.deadLetterChannelHaeHakemus = deadLetterChannelHaeHakemus;
 		this.deadLetterChannelHaeValintaperusteet = deadLetterChannelHaeValintaperusteet;
 		this.deadLetterChannelTeeValintalaskenta = deadLetterChannelTeeValintalaskenta;
+		this.valintalaskentaTila = valintalaskentaTila;
 		this.finish = finish;
 		this.start = start;
 		this.fail = fail;
@@ -592,16 +602,6 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 		};
 
 	}
-
-	/*
-	 * private Processor hakemusOiditHakuApplta() {
-	 * 
-	 * return new Processor() { public void process(Exchange exchange) throws
-	 * Exception {
-	 * 
-	 * 
-	 * } }; }
-	 */
 
 	private Predicate valintalaskenta() {
 		return new Predicate() {
