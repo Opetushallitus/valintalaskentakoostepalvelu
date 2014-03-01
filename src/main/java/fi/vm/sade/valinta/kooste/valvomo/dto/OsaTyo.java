@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
+package fi.vm.sade.valinta.kooste.valvomo.dto;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -13,7 +13,7 @@ import com.google.common.collect.TreeMultiset;
  * @author Jussi Jartamo
  * 
  */
-public class TyoImpl extends Tyo {
+public class OsaTyo extends Tyo {
 
 	private final AtomicInteger kokonaismaara;
 	private final AtomicInteger ohitettu;
@@ -23,7 +23,7 @@ public class TyoImpl extends Tyo {
 	private final Collection<Exception> poikkeukset;
 
 	// Collections.synchronizedList(Lists.<Long> newArrayList());
-	public TyoImpl(String nimi, int kokonaismaara) {
+	public OsaTyo(String nimi, int kokonaismaara) {
 		this.kokonaismaara = new AtomicInteger(kokonaismaara);
 		this.ohitettu = new AtomicInteger(0);
 		this.kestot = Collections.synchronizedCollection(TreeMultiset
@@ -35,7 +35,7 @@ public class TyoImpl extends Tyo {
 		this.nimi = nimi;
 	}
 
-	public TyoImpl(String nimi) {
+	public OsaTyo(String nimi) {
 		this(nimi, -1);
 	}
 
@@ -81,8 +81,14 @@ public class TyoImpl extends Tyo {
 		this.kokonaismaara.set(kokonaismaara);
 	}
 
+	/**
+	 * Inkrementoi -1:stä suoraan 1:een. Olettaen että -1 tarkoittaa ettei
+	 * työmääräarviota ollut vielä tehty
+	 */
 	public void inkrementoiKokonaismaaraa() {
-		this.kokonaismaara.incrementAndGet();
+		if (!this.kokonaismaara.compareAndSet(-1, 1)) {
+			this.kokonaismaara.incrementAndGet();
+		}
 	}
 
 	public int getKokonaismaara() {

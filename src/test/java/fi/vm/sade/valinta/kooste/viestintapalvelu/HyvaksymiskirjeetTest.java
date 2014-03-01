@@ -11,11 +11,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
-import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaNimiRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
@@ -30,47 +30,49 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.ViestintapalveluCon
  */
 @Configuration
 @Import({ HyvaksymiskirjeetKomponentti.class, HyvaksymiskirjeRouteImpl.class })
-@ContextConfiguration(classes = { HyvaksymiskirjeetTest.class, KoostepalveluContext.CamelConfig.class,
-        ViestintapalveluConfig.class })
+@ContextConfiguration(classes = { HyvaksymiskirjeetTest.class,
+		KoostepalveluContext.CamelConfig.class, ViestintapalveluConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class HyvaksymiskirjeetTest {
 
-    @Autowired
-    private HyvaksymiskirjeRoute hyvaksymiskirjeRoute;
+	@Autowired
+	private HyvaksymiskirjeRoute hyvaksymiskirjeRoute;
 
-    @Test(expected = HakemuspalveluException.class)
-    public void testaaHyvaksymiskirjeetReitti() {
-        hyvaksymiskirjeRoute.hyvaksymiskirjeetAktivointi("1", "2", 3L);
-    }
+	// @Test(expected = HakemuspalveluException.class)
+	@Test
+	public void testaaHyvaksymiskirjeetReitti() {
+		DokumenttiProsessi p = new DokumenttiProsessi("", "", "", null);
+		hyvaksymiskirjeRoute.hyvaksymiskirjeetAktivointi(p, "1", "2", 3L, null);
+	}
 
-    @Bean
-    public HaeHakemusKomponentti getHaeHakemusKomponentti() {
-        return Mockito.mock(HaeHakemusKomponentti.class);
-    }
+	@Bean
+	public HaeHakemusKomponentti getHaeHakemusKomponentti() {
+		return Mockito.mock(HaeHakemusKomponentti.class);
+	}
 
-    @Bean
-    public ViestintapalveluResource getViestintapalveluResource() {
-        return Mockito.mock(ViestintapalveluResource.class);
-    }
+	@Bean
+	public ViestintapalveluResource getViestintapalveluResource() {
+		return Mockito.mock(ViestintapalveluResource.class);
+	}
 
-    @Bean
-    public HaeHakukohdeNimiTarjonnaltaKomponentti getHaeHakukohdeNimiTarjonnaltaKomponentti() {
-        return Mockito.mock(HaeHakukohdeNimiTarjonnaltaKomponentti.class);
-    }
+	@Bean
+	public HaeHakukohdeNimiTarjonnaltaKomponentti getHaeHakukohdeNimiTarjonnaltaKomponentti() {
+		return Mockito.mock(HaeHakukohdeNimiTarjonnaltaKomponentti.class);
+	}
 
-    @Bean
-    public SijoitteluKoulutuspaikkallisetKomponentti getSijoitteluKoulutuspaikallisetProxy() {
-        return Mockito.mock(SijoitteluKoulutuspaikkallisetKomponentti.class);
-    }
+	@Bean
+	public SijoitteluKoulutuspaikkallisetKomponentti getSijoitteluKoulutuspaikallisetProxy() {
+		return Mockito.mock(SijoitteluKoulutuspaikkallisetKomponentti.class);
+	}
 
-    @Bean
-    public TarjontaNimiRoute getTarjontaNimiProxy() {
-        return Mockito.mock(TarjontaNimiRoute.class);
-    }
+	@Bean
+	public TarjontaNimiRoute getTarjontaNimiProxy() {
+		return Mockito.mock(TarjontaNimiRoute.class);
+	}
 
-    @Bean
-    public HaeOsoiteKomponentti getHaeOsoiteKomponentti() {
-        return Mockito.mock(HaeOsoiteKomponentti.class);
-    }
+	@Bean
+	public HaeOsoiteKomponentti getHaeOsoiteKomponentti() {
+		return Mockito.mock(HaeOsoiteKomponentti.class);
+	}
 
 }

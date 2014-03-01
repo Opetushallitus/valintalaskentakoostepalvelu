@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.spring.SpringRouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -20,23 +20,32 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResou
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
 
 @Component
-public class JalkiohjauskirjeRouteImpl extends SpringRouteBuilder {
+public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRoute {
+
+	private final ViestintapalveluResource viestintapalveluResource;
+	private final JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti;
+	private final SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy;
+	private final SijoitteluResource sijoitteluResource;
+	private final String jalkiohjauskirjeet;
 
 	@Autowired
-	private ViestintapalveluResource viestintapalveluResource;
-
-	@Autowired
-	private JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti;
-
-	@Autowired
-	private SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy;
-
-	@Autowired
-	private SijoitteluResource sijoitteluResource;
+	public JalkiohjauskirjeRouteImpl(
+			@Value(JalkiohjauskirjeRoute.SEDA_JALKIOHJAUSKIRJEET) String jalkiohjauskirjeet,
+			ViestintapalveluResource viestintapalveluResource,
+			JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti,
+			SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy,
+			SijoitteluResource sijoitteluResource) {
+		super();
+		this.viestintapalveluResource = viestintapalveluResource;
+		this.jalkiohjauskirjeetKomponentti = jalkiohjauskirjeetKomponentti;
+		this.sijoitteluProxy = sijoitteluProxy;
+		this.sijoitteluResource = sijoitteluResource;
+		this.jalkiohjauskirjeet = jalkiohjauskirjeet;
+	}
 
 	@Override
 	public void configure() throws Exception {
-		from(jalkiohjauskirjeet())
+		from(jalkiohjauskirjeet)
 		//
 				.bean(new SecurityPreprocessor())
 				//
@@ -86,7 +95,4 @@ public class JalkiohjauskirjeRouteImpl extends SpringRouteBuilder {
 				.bean(viestintapalveluResource, "haeJalkiohjauskirjeet");
 	}
 
-	private String jalkiohjauskirjeet() {
-		return JalkiohjauskirjeRoute.DIRECT_JALKIOHJAUSKIRJEET;
-	}
 }

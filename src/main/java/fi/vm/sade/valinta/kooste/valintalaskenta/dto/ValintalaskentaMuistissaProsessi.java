@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
+import fi.vm.sade.valinta.kooste.valvomo.dto.KokonaisTyo;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
+import fi.vm.sade.valinta.kooste.valvomo.dto.OsaTyo;
 
 /**
  * 
@@ -20,10 +22,10 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
 public class ValintalaskentaMuistissaProsessi extends Prosessi {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaMuistissaProsessi.class);
-	private final TyoImpl hakukohteilleHakemukset;
-	private final TyoImpl hakemukset;
-	private final TyoImpl valintaperusteet;
-	private final TyoImpl valintalaskenta;
+	private final OsaTyo hakukohteilleHakemukset;
+	private final OsaTyo hakemukset;
+	private final OsaTyo valintaperusteet;
+	private final OsaTyo valintalaskenta;
 	private final KokonaisTyo kokonaistyo;
 	private final boolean peruutaProsessiPoikkeuksesta;
 	private final Collection<Varoitus> varoitukset;
@@ -32,9 +34,9 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 			.synchronizedList(Lists.<String> newArrayList());
 
 	public ValintalaskentaMuistissaProsessi(String hakuOid) {
-		this(hakuOid, new TyoImpl("Valintalaskenta", 0), new TyoImpl(
-				"Hakukohteille hakemukset"), new TyoImpl("Hakemukset", 0),
-				new TyoImpl("Valintaperusteet", 0));
+		this(hakuOid, new OsaTyo("Valintalaskenta", 0), new OsaTyo(
+				"Hakukohteille hakemukset"), new OsaTyo("Hakemukset", 0),
+				new OsaTyo("Valintaperusteet", 0));
 	}
 
 	public void peruuta() {
@@ -42,9 +44,9 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 	}
 
 	public ValintalaskentaMuistissaProsessi(String hakuOid,
-			final TyoImpl valintalaskenta,
-			final TyoImpl hakukohteilleHakemukset, final TyoImpl hakemukset,
-			final TyoImpl valintaperusteet) {
+			final OsaTyo valintalaskenta,
+			final OsaTyo hakukohteilleHakemukset, final OsaTyo hakemukset,
+			final OsaTyo valintaperusteet) {
 		super("Valintalaskentamuistissa", "Haulle", hakuOid);
 		this.varoitukset = Collections.synchronizedList(Lists
 				.<Varoitus> newArrayList());
@@ -62,15 +64,15 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 		return varoitukset;
 	}
 
-	public TyoImpl getValintaperusteet() {
+	public OsaTyo getValintaperusteet() {
 		return valintaperusteet;
 	}
 
-	public TyoImpl getHakukohteilleHakemukset() {
+	public OsaTyo getHakukohteilleHakemukset() {
 		return hakukohteilleHakemukset;
 	}
 
-	public TyoImpl getHakemukset() {
+	public OsaTyo getHakemukset() {
 		return hakemukset;
 	}
 
@@ -78,7 +80,7 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 		return kokonaistyo;
 	}
 
-	public TyoImpl getValintalaskenta() {
+	public OsaTyo getValintalaskenta() {
 		return valintalaskenta;
 	}
 

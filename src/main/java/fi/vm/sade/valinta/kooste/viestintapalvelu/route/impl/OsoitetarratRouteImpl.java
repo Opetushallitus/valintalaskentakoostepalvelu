@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -35,21 +35,29 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratSijoitteluss
  *         Hyvaksyttyjen Osoitetarrat ja osoitetarrat koekutsua varten
  */
 @Component
-public class OsoitetarratRouteImpl extends SpringRouteBuilder {
+public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 
-	@Autowired
-	private ViestintapalveluResource viestintapalveluResource;
-
-	@Autowired
-	private ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti;
-
-	@Autowired
-	private HaeOsoiteKomponentti osoiteKomponentti;
-
-	@Autowired
-	private SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
-
+	private final ViestintapalveluResource viestintapalveluResource;
+	private final ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti;
+	private final HaeOsoiteKomponentti osoiteKomponentti;
+	private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 	private final SecurityPreprocessor security = new SecurityPreprocessor();
+	private final String osoitetarrat;
+
+	@Autowired
+	public OsoitetarratRouteImpl(
+			@Value(OsoitetarratRoute.SEDA_OSOITETARRAT) String osoitetarrat,
+			ViestintapalveluResource viestintapalveluResource,
+			ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti,
+			HaeOsoiteKomponentti osoiteKomponentti,
+			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy) {
+		super();
+		this.osoitetarrat = osoitetarrat;
+		this.viestintapalveluResource = viestintapalveluResource;
+		this.valintatietoHakukohteelleKomponentti = valintatietoHakukohteelleKomponentti;
+		this.osoiteKomponentti = osoiteKomponentti;
+		this.sijoitteluProxy = sijoitteluProxy;
+	}
 
 	public static class LuoOsoitteet {
 		public Osoitteet luo(List<Osoite> osoitteet) {
@@ -124,7 +132,7 @@ public class OsoitetarratRouteImpl extends SpringRouteBuilder {
 	}
 
 	private void configureValintakokeenOsoitetarrat() throws Exception {
-		from(valintakokeenOsoitetarrat())
+		from(osoitetarrat)
 		//
 				.choice()
 				// Jos luodaan vain yksittaiselle hakemukselle...
@@ -181,7 +189,7 @@ public class OsoitetarratRouteImpl extends SpringRouteBuilder {
 	}
 
 	private String valintakokeenOsoitetarrat() {
-		return OsoitetarratRoute.DIRECT_OSOITETARRAT;
+		return OsoitetarratRoute.SEDA_OSOITETARRAT;
 	}
 
 	private String hyvaksyttyjenOsoitetarrat() {

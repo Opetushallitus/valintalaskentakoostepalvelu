@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
+package fi.vm.sade.valinta.kooste.valvomo.dto;
 
 import java.util.Collection;
 
