@@ -22,7 +22,6 @@ import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.TyoImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaCache;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaMuistissaProsessi;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaMuistissaRoute;
@@ -32,6 +31,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuist
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.Valintalaskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.Valintaperusteet;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaTila;
+import fi.vm.sade.valinta.kooste.valvomo.dto.OsaTyo;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 
@@ -94,11 +94,11 @@ public class ValintalaskentaMuistissaTest {
 
 		ValintalaskentaMuistissaProsessi p = new ValintalaskentaMuistissaProsessi(
 				hakuOid);
-		TyoImpl hakemuksetTyo = Mockito.spy(p.getHakemukset());
-		TyoImpl hakukohteilleHakemuksetTyo = Mockito.spy(p
+		OsaTyo hakemuksetTyo = Mockito.spy(p.getHakemukset());
+		OsaTyo hakukohteilleHakemuksetTyo = Mockito.spy(p
 				.getHakukohteilleHakemukset());
-		TyoImpl valintaperusteetTyo = Mockito.spy(p.getValintaperusteet());
-		TyoImpl valintalaskentaTyo = Mockito.spy(p.getValintalaskenta());
+		OsaTyo valintaperusteetTyo = Mockito.spy(p.getValintaperusteet());
+		OsaTyo valintalaskentaTyo = Mockito.spy(p.getValintalaskenta());
 
 		ValintalaskentaMuistissaProsessi oikeaProsessi = new ValintalaskentaMuistissaProsessi(
 				hakuOid, valintalaskentaTyo, hakukohteilleHakemuksetTyo,

@@ -79,7 +79,7 @@ public class KelaRouteImpl extends SpringRouteBuilder {
 			tags.add(hakuOid);
 			tags.add("kela");
 			tags.add("valintalaskentakoostepalvelu");
-			dokumenttiResource.tallenna(
+			dokumenttiResource.tallenna(null,
 					KelaUtil.createTiedostoNimiYhva14(new Date()), DateTime
 							.now().plusDays(1).getMillis(), tags, "", filedata);
 		}
@@ -209,7 +209,7 @@ public class KelaRouteImpl extends SpringRouteBuilder {
 						InputStream filedata = exchange.getIn().getBody(
 								InputStream.class);
 
-						dokumenttiResource.tallenna(
+						dokumenttiResource.tallenna(null,
 								KelaUtil.createTiedostoNimiYhva14(new Date()),
 								DateTime.now().plusDays(1).getMillis(),
 								Arrays.asList("kela"), "kela", filedata);

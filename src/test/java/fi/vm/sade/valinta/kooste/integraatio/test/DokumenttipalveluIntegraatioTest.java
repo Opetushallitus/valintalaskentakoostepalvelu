@@ -28,19 +28,22 @@ import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class DokumenttipalveluIntegraatioTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DokumenttipalveluIntegraatioTest.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(DokumenttipalveluIntegraatioTest.class);
 
-    @Autowired
-    private DokumenttiResource dokumenttiResource;
+	@Autowired
+	private DokumenttiResource dokumenttiResource;
 
-    @Test
-    public void testIt() throws IOException {
+	@Test
+	public void testIt() throws IOException {
 
-        LOG.info("Montako dokumenttia? {}", dokumenttiResource.hae(Arrays.asList("hep", "skep")).size());
-        dokumenttiResource.tallenna("filez", DateTime.now().toDate().getTime(), Arrays.asList("hep", "skep"), "",
-                new ByteArrayInputStream("adfgafdg".getBytes()));
-        //
-        //
-    }
+		LOG.info("Montako dokumenttia? {}",
+				dokumenttiResource.hae(Arrays.asList("hep", "skep")).size());
+		dokumenttiResource.tallenna(null, "filez", DateTime.now().toDate()
+				.getTime(), Arrays.asList("hep", "skep"), "",
+				new ByteArrayInputStream("adfgafdg".getBytes()));
+		//
+		//
+	}
 
 }

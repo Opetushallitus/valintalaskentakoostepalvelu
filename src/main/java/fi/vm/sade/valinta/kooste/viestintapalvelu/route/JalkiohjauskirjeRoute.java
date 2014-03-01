@@ -1,13 +1,14 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route;
 
 import java.util.List;
-import java.util.concurrent.Future;
 
 import org.apache.camel.Property;
 import org.springframework.security.core.Authentication;
 
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
+import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 
 /**
  * 
@@ -15,13 +16,16 @@ import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
  * 
  */
 public interface JalkiohjauskirjeRoute {
-	final String DIRECT_JALKIOHJAUSKIRJEET = "direct:jalkiohjauskirjeet";
+	final String SEDA_JALKIOHJAUSKIRJEET = "seda:jalkiohjauskirjeet?" +
+	// jos palvelin sammuu niin ei suorita loppuun tyojonoa
+			"purgeWhenStopping=true" +
+			// reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
+			"&waitForTaskToComplete=Never" +
+			// tyojonossa on yksi tyostaja
+			"&concurrentConsumers=1";
 
 	void jalkiohjauskirjeetAktivoi(
-			@Property("hakemusOidit") List<String> hakemusOidit,
-			@Property(OPH.HAKUOID) String hakuOid);
-
-	Future<Void> jalkiohjauskirjeetAktivoiAsync(
+			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
 			@Property("hakemusOidit") List<String> hakemusOidit,
 			@Property(OPH.HAKUOID) String hakuOid,
 			@Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);

@@ -405,6 +405,7 @@
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
     <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl"/>
 	<bean class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluAktivointiResource"/>
+	<bean class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.DokumenttiProsessiResource"/>
 	<!--
 		Valintakoelaskenta 
 	 -->

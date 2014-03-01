@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluIlmankoulutuspaikkaaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaNimiRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.JalkiohjauskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
@@ -43,7 +44,8 @@ public class JalkiohjauskirjeetTest {
 
 	@Test(expected = SijoittelupalveluException.class)
 	public void testaaJalkiohjauskirjeReitti() {
-		jalkiohjauskirjeRoute.jalkiohjauskirjeetAktivoi(null, "1");
+		DokumenttiProsessi p = new DokumenttiProsessi("", "", "", null);
+		jalkiohjauskirjeRoute.jalkiohjauskirjeetAktivoi(p, null, "1", null);
 	}
 
 	@Bean

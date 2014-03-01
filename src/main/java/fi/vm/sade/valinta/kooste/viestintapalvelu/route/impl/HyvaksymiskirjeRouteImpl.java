@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
-import org.apache.camel.spring.SpringRouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
@@ -9,25 +9,31 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResou
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 
 @Component
-public class HyvaksymiskirjeRouteImpl extends SpringRouteBuilder {
+public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRoute {
 
-    @Autowired
-    private ViestintapalveluResource viestintapalveluResource;
+	private final ViestintapalveluResource viestintapalveluResource;
+	private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
+	private final String hyvaksymiskirjeet;
 
-    @Autowired
-    private HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
+	@Autowired
+	public HyvaksymiskirjeRouteImpl(
+			@Value(HyvaksymiskirjeRoute.SEDA_HYVAKSYMISKIRJEET) String hyvaksymiskirjeet,
+			ViestintapalveluResource viestintapalveluResource,
+			HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti) {
+		super();
+		this.hyvaksymiskirjeet = hyvaksymiskirjeet;
+		this.viestintapalveluResource = viestintapalveluResource;
+		this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
+	}
 
-    @Override
-    public void configure() throws Exception {
-        from(hyvaksymiskirjeet())
-        // TODO: Hae osoitteet erikseen
-        // TODO: Cache ulkopuolisiin palvelukutsuihin
-                .bean(hyvaksymiskirjeetKomponentti)
-                //
-                .bean(viestintapalveluResource, "haeHyvaksymiskirjeet");
-    }
+	@Override
+	public void configure() throws Exception {
+		from(hyvaksymiskirjeet)
+		// TODO: Hae osoitteet erikseen
+		// TODO: Cache ulkopuolisiin palvelukutsuihin
+				.bean(hyvaksymiskirjeetKomponentti)
+				//
+				.bean(viestintapalveluResource, "haeHyvaksymiskirjeet");
+	}
 
-    private String hyvaksymiskirjeet() {
-        return HyvaksymiskirjeRoute.DIRECT_HYVAKSYMISKIRJEET;
-    }
 }
