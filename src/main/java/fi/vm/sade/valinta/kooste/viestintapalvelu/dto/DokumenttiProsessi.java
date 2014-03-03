@@ -42,6 +42,10 @@ public class DokumenttiProsessi extends Prosessi {
 		return poikkeukset;
 	}
 
+	public OsaTyo getKokonaistyo() {
+		return kokonaistyo;
+	}
+
 	public List<String> getTags() {
 		return tags;
 	}
