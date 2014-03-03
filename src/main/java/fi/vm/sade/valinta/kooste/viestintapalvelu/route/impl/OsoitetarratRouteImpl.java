@@ -35,9 +35,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratHakemuksilleRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratSijoittelussaHyvaksytyilleRoute;
 
 /**
  * 
@@ -86,14 +84,15 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 
 	@Override
 	public void configure() throws Exception {
-		configureHyvaksyttyjenOsoitetarrat();
 		configureValintakokeenOsoitetarrat();
-		configureHakemuksenOsoitetarrat();
 	}
 
-	private void configureHyvaksyttyjenOsoitetarrat() throws Exception {
-		from(hyvaksyttyjenOsoitetarrat())
+	private void configureValintakokeenOsoitetarrat() throws Exception {
+
+		from(osoitetarrat)
 		//
+				.process(security)
+				//
 				.choice()
 				// Jos luodaan vain yksittaiselle hakemukselle...
 				.when(property("hakemusOids").isNotNull())
@@ -102,53 +101,97 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				//
 				.otherwise()
 				//
-				.bean(sijoitteluProxy)
+				.to("direct:osoitetarrat_resolve_hakemukset")
 				//
-				.process(new Processor() {
-					@SuppressWarnings("unchecked")
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						List<String> l = Lists.newArrayList();
-						for (HakijaDTO hakija : (List<HakijaDTO>) exchange
-								.getIn().getBody(List.class)) {
-							l.add(hakija.getHakemusOid());
-						}
-						exchange.getOut().setBody(l);
-					}
-				})
+
 				//
 				.end()
 				//
 				.split(body(), osoiteAggregation())
 				//
-				.bean(osoiteKomponentti)
+				.process(security).process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						String oid = exchange.getIn().getBody(String.class);
+						try {
+							exchange.getOut().setBody(
+									osoiteKomponentti.haeOsoite(oid));
+							dokumenttiprosessi(exchange)
+									.inkrementoiTehtyjaToita();
+						} catch (Exception e) {
+							e.printStackTrace();
+							LOG.error(
+									"Osallistujen hakeminen haku-app:lta epäonnistui: {}. applicationResource.getApplicationByOid({})",
+									e.getMessage(), oid);
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.HAKU,
+											"Yritettiin hakea hakemus oidilla (get application by oid)",
+											e.getMessage(), Poikkeus
+													.hakemusOid(oid)));
+							throw e;
+						}
+					}
+				})
 				//
 				.end()
 				// enrich to Osoitteet
 				.bean(new LuoOsoitteet())
 				//
-				.bean(viestintapalveluResource, "haeOsoitetarrat");
-
-	}
-
-	private void configureHakemuksenOsoitetarrat() throws Exception {
-		from(hakemustenOsoitetarrat())
-		//
 				.process(security)
 				//
-				.bean(osoiteKomponentti)
-				//
-				.end()
-				// enrich to Osoitteet
-				.bean(new LuoOsoitteet())
-				//
-				.bean(viestintapalveluResource, "haeOsoitetarrat");
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						DokumenttiProsessi prosessi = dokumenttiprosessi(exchange);
+						Osoitteet osoitteet = exchange.getIn().getBody(
+								Osoitteet.class);
+						InputStream pdf;
+						try {
+							pdf = viestintapalveluResource
+									.haeOsoitetarratSync(osoitteet);
+							dokumenttiprosessi(exchange)
+									.inkrementoiTehtyjaToita();
 
-	}
-
-	private void configureValintakokeenOsoitetarrat() throws Exception {
+						} catch (Exception e) {
+							e.printStackTrace();
+							LOG.error(
+									"Viestintäpalvelulta pdf:n haussa tapahtui virhe: {}",
+									e.getMessage());
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.VIESTINTAPALVELU,
+											"Koekutsukirjeiden synkroninen haku",
+											e.getMessage()));
+							throw e;
+						}
+						try {
+							String id = generateId();
+							dokumenttiResource.tallenna(id,
+									"koekutsukirje.pdf",
+									defaultExpirationDate().getTime(),
+									prosessi.getTags(), "application/pdf", pdf);
+							dokumenttiprosessi(exchange)
+									.inkrementoiTehtyjaToita();
+							prosessi.setDokumenttiId(id);
+						} catch (Exception e) {
+							e.printStackTrace();
+							LOG.error(
+									"Dokumenttipalvelulle tiedonsiirrossa tapahtui virhe: {}",
+									e.getMessage());
+							dokumenttiprosessi(exchange).getPoikkeukset().add(
+									new Poikkeus(Poikkeus.DOKUMENTTIPALVELU,
+											"Dokumentin tallennus", e
+													.getMessage()));
+							throw e;
+						}
+					}
+				});
+		// .bean(viestintapalveluResource, "haeOsoitetarrat");
 		// "DokumenttiTyyppi"
 		from("direct:osoitetarrat_resolve_hakemukset")
+				//
+				.process(security)
 				//
 				.choice()
 				//
@@ -238,102 +281,6 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				.otherwise()
 				//
 				.end();
-		from(osoitetarrat)
-		//
-				.choice()
-				// Jos luodaan vain yksittaiselle hakemukselle...
-				.when(property("hakemusOids").isNotNull())
-				//
-				.setBody(property("hakemusOids"))
-				//
-				.otherwise()
-				//
-				.to("direct:osoitetarrat_resolve_hakemukset")
-				//
-
-				//
-				.end()
-				//
-				.split(body(), osoiteAggregation())
-				//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						String oid = exchange.getIn().getBody(String.class);
-						try {
-							exchange.getOut().setBody(
-									osoiteKomponentti.haeOsoite(oid));
-							dokumenttiprosessi(exchange)
-									.inkrementoiTehtyjaToita();
-						} catch (Exception e) {
-							e.printStackTrace();
-							LOG.error(
-									"Osallistujen hakeminen haku-app:lta epäonnistui: {}. applicationResource.getApplicationByOid({})",
-									e.getMessage(), oid);
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(
-											Poikkeus.HAKU,
-											"Yritettiin hakea hakemus oidilla (get application by oid)",
-											e.getMessage(), Poikkeus
-													.hakemusOid(oid)));
-							throw e;
-						}
-					}
-				})
-				//
-				.end()
-				// enrich to Osoitteet
-				.bean(new LuoOsoitteet())
-				//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						DokumenttiProsessi prosessi = dokumenttiprosessi(exchange);
-						Osoitteet osoitteet = exchange.getIn().getBody(
-								Osoitteet.class);
-						InputStream pdf;
-						try {
-							pdf = viestintapalveluResource
-									.haeOsoitetarratSync(osoitteet);
-							dokumenttiprosessi(exchange)
-									.inkrementoiTehtyjaToita();
-
-						} catch (Exception e) {
-							e.printStackTrace();
-							LOG.error(
-									"Viestintäpalvelulta pdf:n haussa tapahtui virhe: {}",
-									e.getMessage());
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(
-											Poikkeus.VIESTINTAPALVELU,
-											"Koekutsukirjeiden synkroninen haku",
-											e.getMessage()));
-							throw e;
-						}
-						try {
-							String id = generateId();
-							dokumenttiResource.tallenna(id,
-									"koekutsukirje.pdf",
-									defaultExpirationDate().getTime(),
-									prosessi.getTags(), "application/pdf", pdf);
-							dokumenttiprosessi(exchange)
-									.inkrementoiTehtyjaToita();
-							prosessi.setDokumenttiId(id);
-						} catch (Exception e) {
-							e.printStackTrace();
-							LOG.error(
-									"Dokumenttipalvelulle tiedonsiirrossa tapahtui virhe: {}",
-									e.getMessage());
-							dokumenttiprosessi(exchange).getPoikkeukset().add(
-									new Poikkeus(Poikkeus.DOKUMENTTIPALVELU,
-											"Dokumentin tallennus", e
-													.getMessage()));
-							throw e;
-						}
-					}
-				});
-		// .bean(viestintapalveluResource, "haeOsoitetarrat");
-
 	}
 
 	private FlexibleAggregationStrategy<Osoite> osoiteAggregation() {
@@ -341,16 +288,8 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				.accumulateInCollection(ArrayList.class);
 	}
 
-	private String hakemustenOsoitetarrat() {
-		return OsoitetarratHakemuksilleRoute.DIRECT_OSOITETARRAT_HAKEMUKSILLE;
-	}
-
 	private String valintakokeenOsoitetarrat() {
 		return OsoitetarratRoute.SEDA_OSOITETARRAT;
-	}
-
-	private String hyvaksyttyjenOsoitetarrat() {
-		return OsoitetarratSijoittelussaHyvaksytyilleRoute.DIRECT_HYVAKSYTTYJEN_OSOITETARRAT;
 	}
 
 }
