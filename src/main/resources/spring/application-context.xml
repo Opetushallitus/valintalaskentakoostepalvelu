@@ -65,8 +65,8 @@
     			  name="ViestintapalveluRestClient"
                   serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource"
                   address="${valintalaskentakoostepalvelu.viestintapalvelu.url}">
+		<!--
 		<jaxrs:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"/></jaxrs:properties>
-        <!--
         Pelkkia synkronisia kutsuja ei tarvita autentikaatiota koska autentikaatio vain async dokumenttipavlelulle kayttotunnuksilla valitysta varten
         <jaxrs:outInterceptors>
             <ref bean="ticketInterceptorRest"/>
