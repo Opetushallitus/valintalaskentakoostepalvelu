@@ -63,7 +63,8 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
 
 		public InputStream download(
 				@Property(PROPERTY_DOKUMENTTI_ID) String documentId) {
-			return dokumenttiResource.lataa(documentId, null);
+			return (InputStream) dokumenttiResource.lataa(documentId)
+					.getEntity();
 		}
 	}
 
