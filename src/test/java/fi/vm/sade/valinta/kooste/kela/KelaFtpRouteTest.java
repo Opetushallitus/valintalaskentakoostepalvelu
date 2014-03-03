@@ -6,7 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Collection;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -87,10 +87,10 @@ public class KelaFtpRouteTest {
 	public void testKelaFtpSiirto() {
 
 		String dokumenttiId = "dokumenttiId";
-		Mockito.when(
-				dokumenttiResource.lataa(Mockito.anyString(), Mockito
-						.<HttpServletResponse> any(HttpServletResponse.class)))
-				.thenReturn(new ByteArrayInputStream(dokumenttiId.getBytes()));
+		Mockito.when(dokumenttiResource.lataa(Mockito.anyString())).thenReturn(
+				Response.ok()
+						.entity(new ByteArrayInputStream(dokumenttiId
+								.getBytes())).build());
 
 		kelaFtpRoute.aloitaKelaSiirto(dokumenttiId);
 
@@ -105,10 +105,8 @@ public class KelaFtpRouteTest {
 
 		MockEndpoint resultEndpoint = context.getEndpoint(
 				ftpRouteImpl.getFtpKelaSiirto(), MockEndpoint.class);
-		resultEndpoint.assertExchangeReceived(0).getIn(
-				ByteArrayInputStream.class);
-		Mockito.verify(dokumenttiResource).lataa(Mockito.eq(dokumenttiId),
-				Mockito.any(HttpServletResponse.class));
+		resultEndpoint.assertExchangeReceived(0).getIn(Response.class);
+		Mockito.verify(dokumenttiResource).lataa(Mockito.eq(dokumenttiId));
 	}
 
 }
