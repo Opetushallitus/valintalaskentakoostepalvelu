@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.camel.Body;
 import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -30,7 +31,6 @@ import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemusUtil;
@@ -56,19 +56,16 @@ public class HyvaksymiskirjeetKomponentti {
 	private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
 	private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
-	private SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 	private HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
 	private HaeOsoiteKomponentti osoiteKomponentti;
 	private HaeHakemusKomponentti hakemusProxy;
 
 	@Autowired
 	public HyvaksymiskirjeetKomponentti(
-			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
 			HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy,
 			HaeOsoiteKomponentti osoiteKomponentti,
 			HaeHakemusKomponentti hakemusProxy) {
 		this.osoiteKomponentti = osoiteKomponentti;
-		this.sijoitteluProxy = sijoitteluProxy;
 		this.tarjontaProxy = tarjontaProxy;
 		this.hakemusProxy = hakemusProxy;
 	}
@@ -86,6 +83,7 @@ public class HyvaksymiskirjeetKomponentti {
 	}
 
 	public Kirjeet<Kirje> teeHyvaksymiskirjeet(
+			@Body Collection<HakijaDTO> hakukohteenHakijat,
 			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
 			@Simple("${property.hakuOid}") String hakuOid,
 			@Simple("${property.sijoitteluajoId}") Long sijoitteluajoId) {
@@ -96,12 +94,7 @@ public class HyvaksymiskirjeetKomponentti {
 		assert (hakukohdeOid != null);
 		assert (hakuOid != null);
 		assert (sijoitteluajoId != null);
-		//
-		//
-		//
-		final Collection<HakijaDTO> hakukohteenHakijat = sijoitteluProxy
-				.koulutuspaikalliset(hakuOid, hakukohdeOid,
-						sijoitteluajoId.toString());
+
 		final int kaikkiHakukohteenHyvaksytyt = hakukohteenHakijat.size();
 		if (kaikkiHakukohteenHyvaksytyt == 0) {
 			LOG.error(
@@ -120,8 +113,10 @@ public class HyvaksymiskirjeetKomponentti {
 			koulu = metakohde.getTarjoajaNimi();
 			koulutus = metakohde.getHakukohdeNimi();
 		}
+
 		for (HakijaDTO hakija : hakukohteenHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
+
 			final Hakemus hakemus = hakemusProxy.haeHakemus(hakemusOid);
 			final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
 			final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();

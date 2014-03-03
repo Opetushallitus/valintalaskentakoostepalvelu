@@ -194,19 +194,6 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 							prosessi.setDokumenttiId(id);
 						} catch (Exception e) {
 							e.printStackTrace();
-							// int MAX_CHAR = 20;
-							//
-							// String inputString = IOUtils
-							// .toString(new Base64InputStream(pdf));
-							// int maxLength = (inputString.length() < MAX_CHAR)
-							// ? inputString
-							// .length() : MAX_CHAR;
-							// inputString = inputString.substring(0,
-							// maxLength);
-							// LOG.error("\r\n{}\r\n{}\r\n{}\r\n{}", id,
-							// expirationTime,
-							// Arrays.toString(tags.toArray()),
-							// inputString);
 							LOG.error(
 									"Dokumenttipalvelulle tiedonsiirrossa tapahtui virhe: {}",
 									e.getMessage());
