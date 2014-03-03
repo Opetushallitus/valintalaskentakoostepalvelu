@@ -112,52 +112,9 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				//
 				.split(body(), osoiteAggregation())
 				//
-				.process(security).process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						String oid = exchange.getIn().getBody(String.class);
-						Hakemus hakemus;
-						try {
-							hakemus = applicationResource
-									.getApplicationByOid(oid);
-						} catch (Exception e) {
-							e.printStackTrace();
-							LOG.error(
-									"Hakemuksen hakeminen haku-app:lta epäonnistui: {}. applicationResource.getApplicationByOid({})",
-									e.getMessage(), oid);
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(
-											Poikkeus.HAKU,
-											"Yritettiin hakea hakemus oidilla (get application by oid)",
-											e.getMessage(), Poikkeus
-													.hakemusOid(oid)));
-							throw e;
-						}
-
-						try {
-							exchange.getOut().setBody(
-									osoiteKomponentti.haeOsoite(hakemus));
-
-						} catch (Exception e) {
-							e.printStackTrace();
-							LOG.error(
-									"Koodistopalvelukutsun tekevässä lohkossa tapahtui poikkeus: {}",
-									e.getMessage());
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(
-											Poikkeus.KOODISTO,
-											"Koodistopalvelukutsun tekevässä lohkossa tapahtui poikkeus",
-											e.getMessage(), Poikkeus
-													.hakemusOid(oid)));
-							throw e;
-						}
-						//
-						// Yksi työ valmistui
-						//
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-					}
-				})
+				.process(security)
+				//
+				.process(haeHakemuksetJaOsoitteet())
 				//
 				.end()
 				// enrich to Osoitteet
@@ -317,6 +274,80 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 	private FlexibleAggregationStrategy<Osoite> osoiteAggregation() {
 		return new FlexibleAggregationStrategy<Osoite>().storeInBody()
 				.accumulateInCollection(ArrayList.class);
+	}
+
+	private Processor haeHakemuksetJaOsoitteet() {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				String oid = exchange.getIn().getBody(String.class);
+				Hakemus hakemus;
+				try {
+					hakemus = applicationResource.getApplicationByOid(oid);
+				} catch (Exception e) {
+					e.printStackTrace();
+					LOG.error(
+							"Hakemuksen hakeminen haku-app:lta epäonnistui: {}. applicationResource.getApplicationByOid({})",
+							e.getMessage(), oid);
+					dokumenttiprosessi(exchange)
+							.getPoikkeukset()
+							.add(new Poikkeus(
+									Poikkeus.HAKU,
+									"Yritettiin hakea hakemus oidilla (get application by oid)",
+									e.getMessage(), Poikkeus.hakemusOid(oid)));
+					throw e;
+				}
+
+				try {
+					exchange.getOut().setBody(
+							osoiteKomponentti.haeOsoite(hakemus));
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					LOG.error(
+							"Koodistopalvelukutsun tekevässä lohkossa tapahtui poikkeus: {}",
+							e.getMessage());
+					dokumenttiprosessi(exchange)
+							.getPoikkeukset()
+							.add(new Poikkeus(
+									Poikkeus.KOODISTO,
+									"Koodistopalvelukutsun tekevässä lohkossa tapahtui poikkeus",
+									e.getMessage(), Poikkeus.hakemusOid(oid)));
+					throw e;
+				}
+				//
+				// Yksi työ valmistui
+				//
+				dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+			}
+		};
+	}
+
+	private Processor haeOsoitteetValittamattaSaadaankoHakemusta() {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				String oid = exchange.getIn().getBody(String.class);
+				try {
+					exchange.getOut().setBody(osoiteKomponentti.haeOsoite(oid));
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					LOG.error(
+							"Koodistopalvelukutsun tekevässä lohkossa tapahtui poikkeus: {}",
+							e.getMessage());
+					dokumenttiprosessi(exchange)
+							.getPoikkeukset()
+							.add(new Poikkeus(
+									Poikkeus.KOODISTO,
+									"Koodistopalvelukutsun tekevässä lohkossa tapahtui poikkeus",
+									e.getMessage(), Poikkeus.hakemusOid(oid)));
+					throw e;
+				}
+				//
+				// Yksi työ valmistui
+				//
+				dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+			}
+		};
 	}
 
 }
