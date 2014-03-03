@@ -114,7 +114,9 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				//
 				.process(security)
 				//
-				.process(haeHakemuksetJaOsoitteet())
+				// .process(haeHakemuksetJaOsoitteet()) //
+				// haeOsoitteetValittamattaSaadaankoHakemusta())
+				.process(haeOsoitteetValittamattaSaadaankoHakemusta())
 				//
 				.end()
 				// enrich to Osoitteet
