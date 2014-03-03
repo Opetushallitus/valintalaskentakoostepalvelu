@@ -116,7 +116,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				//
 				// .process(haeHakemuksetJaOsoitteet()) //
 				// haeOsoitteetValittamattaSaadaankoHakemusta())
-				.process(haeOsoitteetValittamattaSaadaankoHakemusta())
+				.process(haeHakemuksetJaOsoitteet()) // haeOsoitteetValittamattaSaadaankoHakemusta())
 				//
 				.end()
 				// enrich to Osoitteet
@@ -129,14 +129,16 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 						DokumenttiProsessi prosessi = dokumenttiprosessi(exchange);
 						Osoitteet osoitteet = exchange.getIn().getBody(
 								Osoitteet.class);
+
 						InputStream pdf;
 						try {
 
 							// LOG.error("\r\n{}",
 							// new GsonBuilder().setPrettyPrinting()
 							// .create().toJson(osoitteet));
-							pdf = viestintapalveluResource
-									.haeOsoitetarratSync(osoitteet);
+							pdf = pipeInputStreams(viestintapalveluResource
+									.haeOsoitetarratSync(osoitteet));
+
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 
@@ -155,8 +157,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 						}
 						try {
 							String id = generateId();
-							dokumenttiResource.tallenna(id,
-									"koekutsukirje.pdf",
+							dokumenttiResource.tallenna(id, "osoitetarrat.pdf",
 									defaultExpirationDate().getTime(),
 									prosessi.getTags(), "application/pdf", pdf);
 							dokumenttiprosessi(exchange)
