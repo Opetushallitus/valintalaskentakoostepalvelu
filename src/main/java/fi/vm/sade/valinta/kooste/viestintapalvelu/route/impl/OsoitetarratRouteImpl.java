@@ -165,16 +165,48 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 											e.getMessage()));
 							throw e;
 						}
+						String id = generateId();
+						Long expirationTime = defaultExpirationDate().getTime();
+						List<String> tags = prosessi.getTags();
+						if (id == null || expirationTime == null
+								|| tags == null || pdf == null) {
+							String tila = new StringBuilder().append(id)
+									.append(expirationTime).append(" tags=")
+									.append(tags == null).append(" pdf=")
+									.append(pdf == null).toString();
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.DOKUMENTTIPALVELU,
+											"Dokumenttipalvelun kutsumisen esiehdot ei täyty!",
+											tila));
+							throw new RuntimeException(
+									"Dokumenttipalvelun kutsumisen esiehdot ei täyty!"
+											+ tila);
+						}
 						try {
-							String id = generateId();
+
 							dokumenttiResource.tallenna(id, "osoitetarrat.pdf",
-									defaultExpirationDate().getTime(),
-									prosessi.getTags(), "application/pdf", pdf);
+									expirationTime, tags, "application/pdf",
+									pdf);
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 							prosessi.setDokumenttiId(id);
 						} catch (Exception e) {
 							e.printStackTrace();
+							// int MAX_CHAR = 20;
+							//
+							// String inputString = IOUtils
+							// .toString(new Base64InputStream(pdf));
+							// int maxLength = (inputString.length() < MAX_CHAR)
+							// ? inputString
+							// .length() : MAX_CHAR;
+							// inputString = inputString.substring(0,
+							// maxLength);
+							// LOG.error("\r\n{}\r\n{}\r\n{}\r\n{}", id,
+							// expirationTime,
+							// Arrays.toString(tags.toArray()),
+							// inputString);
 							LOG.error(
 									"Dokumenttipalvelulle tiedonsiirrossa tapahtui virhe: {}",
 									e.getMessage());
@@ -248,8 +280,9 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void process(Exchange exchange) throws Exception {
+						List<String> l = Lists.newArrayList();
 						try {
-							List<String> l = Lists.newArrayList();
+
 							for (HakijaDTO hakija : sijoitteluProxy
 									.koulutuspaikalliset(hakuOid(exchange),
 											hakukohdeOid(exchange),
@@ -257,6 +290,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 								l.add(hakija.getHakemusOid());
 							}
 							exchange.getOut().setBody(l);
+
 						} catch (Exception e) {
 							e.printStackTrace();
 							LOG.error(
@@ -274,6 +308,19 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 											"Sijoittelussa hyväksyttyjä ei saatu haettua hakukohteelle",
 											e.getMessage(), oidit));
 							throw e;
+						}
+						if (l.isEmpty()) {
+							Collection<Oid> oidit = Lists.newArrayList(Poikkeus
+									.hakuOid(hakuOid(exchange)), Poikkeus
+									.hakukohdeOid(hakukohdeOid(exchange)));
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.SIJOITTELU,
+											"Tässä sijoittelussa yksikään hakemus ei ollut hyväksyttynä",
+											"", oidit));
+							throw new RuntimeException(
+									"Tässä sijoittelussa yksikään hakemus ei ollut hyväksyttynä");
 						}
 					}
 				})

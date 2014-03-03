@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route;
 
+import java.util.List;
+
 import org.apache.camel.Property;
 import org.springframework.security.core.Authentication;
 
@@ -26,6 +28,7 @@ public interface HyvaksymiskirjeRoute {
 	void hyvaksymiskirjeetAktivointi(
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
+			@Property("hakemusOids") List<String> hakemusOids,
 			@Property(OPH.HAKUOID) String hakuOid,
 			@Property(OPH.SIJOITTELUAJOID) Long sijoitteluajoId,
 			@Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
