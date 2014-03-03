@@ -41,7 +41,7 @@ public interface ViestintapalveluResource {
 	@POST
 	@Produces(APPLICATION_OCTET_STREAM)
 	@Consumes(APPLICATION_JSON)
-	@Path("/hyvaksymiskirje/sync/zip")
+	@Path("/hyvaksymiskirje/sync/pdf")
 	InputStream haeHyvaksymiskirjeetSync(Kirjeet<Kirje> kirjeet);
 
 	@POST

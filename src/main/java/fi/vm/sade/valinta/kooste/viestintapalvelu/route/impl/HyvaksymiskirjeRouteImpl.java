@@ -94,8 +94,7 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRoute {
 										});
 							}
 							exchange.getOut().setBody(hakukohteenHakijat);
-							dokumenttiprosessi(exchange).setKokonaistyo(
-									hakukohteenHakijat.size() + 2);
+							dokumenttiprosessi(exchange).setKokonaistyo(2);
 						} catch (Exception e) {
 							e.printStackTrace();
 							Collection<Oid> oidit = Lists.newArrayList(Poikkeus
