@@ -110,6 +110,14 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				//
 				.end()
 				//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						dokumenttiprosessi(exchange).setKokonaistyo(
+								exchange.getIn().getBody(Collection.class)
+										.size() + 2);
+					}
+				})
+				//
 				.split(body(), osoiteAggregation())
 				//
 				.process(security)
@@ -120,13 +128,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				//
 				.end()
 				//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						dokumenttiprosessi(exchange).setKokonaistyo(
-								exchange.getIn().getBody(Collection.class)
-										.size() + 2);
-					}
-				})
+
 				// enrich to Osoitteet
 				.bean(new LuoOsoitteet())
 				//
