@@ -39,6 +39,12 @@ public interface ViestintapalveluResource {
 	Response haeHyvaksymiskirjeet(Kirjeet<Kirje> kirjeet);
 
 	@POST
+	@Produces(APPLICATION_OCTET_STREAM)
+	@Consumes(APPLICATION_JSON)
+	@Path("/hyvaksymiskirje/sync/pdf")
+	InputStream haeHyvaksymiskirjeetSync(Kirjeet<Kirje> kirjeet);
+
+	@POST
 	@Produces(TEXT_PLAIN)
 	@Consumes(APPLICATION_JSON)
 	@Path("/koekutsukirje/async/pdf")

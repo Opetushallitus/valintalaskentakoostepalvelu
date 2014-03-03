@@ -81,12 +81,20 @@ public abstract class AbstractDokumenttiRoute extends SpringRouteBuilder {
 				Collections.<String> emptyList(), List.class);
 	}
 
+	protected List<String> hakemusOids(Exchange exchange) {
+		return exchange.getProperty("hakemusOids", List.class);
+	}
+
 	protected String hakukohdeOid(Exchange exchange) {
 		return exchange.getProperty(OPH.HAKUKOHDEOID, String.class);
 	}
 
 	protected String hakuOid(Exchange exchange) {
 		return exchange.getProperty(OPH.HAKUOID, String.class);
+	}
+
+	protected String sijoitteluajoId(Exchange exchange) {
+		return exchange.getProperty(OPH.SIJOITTELUAJOID, String.class);
 	}
 
 	protected Date defaultExpirationDate() {
@@ -99,7 +107,12 @@ public abstract class AbstractDokumenttiRoute extends SpringRouteBuilder {
 
 	protected InputStream pipeInputStreams(InputStream incoming)
 			throws IOException {
-		InputStream p = new ByteArrayInputStream(IOUtils.toByteArray(incoming));
+		byte[] dokumentti = IOUtils.toByteArray(incoming);
+		if (dokumentti == null || dokumentti.length == 0) {
+			throw new RuntimeException(
+					"Viestintäpalvelu palautti tyhjän dokumentin!");
+		}
+		InputStream p = new ByteArrayInputStream(dokumentti);
 		incoming.close();
 		return p;
 	}
