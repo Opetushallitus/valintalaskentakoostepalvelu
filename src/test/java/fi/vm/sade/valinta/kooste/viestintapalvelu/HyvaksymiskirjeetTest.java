@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
@@ -75,4 +76,8 @@ public class HyvaksymiskirjeetTest {
 		return Mockito.mock(HaeOsoiteKomponentti.class);
 	}
 
+	@Bean(name = "dokumenttipalveluRestClient")
+	public DokumenttiResource getDokumenttiResource() {
+		return Mockito.mock(DokumenttiResource.class);
+	}
 }

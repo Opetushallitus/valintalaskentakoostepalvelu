@@ -77,4 +77,8 @@ public class DokumenttiProsessi extends Prosessi {
 	public void setKokonaistyo(int arvo) {
 		this.kokonaistyo.setKokonaismaara(arvo);
 	}
+
+	public ProsessiId toProsessiId() {
+		return new ProsessiId(getId());
+	}
 }

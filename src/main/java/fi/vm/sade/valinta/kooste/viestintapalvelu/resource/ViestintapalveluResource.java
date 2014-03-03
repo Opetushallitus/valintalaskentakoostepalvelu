@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
 import java.io.InputStream;
@@ -43,9 +44,16 @@ public interface ViestintapalveluResource {
 	@Path("/koekutsukirje/async/pdf")
 	Response vieKoekutsukirjeet(Kirjeet<Koekutsukirje> kirjeet);
 
+	// sync
 	@POST
-	@Produces(TEXT_PLAIN)
+	@Produces(APPLICATION_OCTET_STREAM)
 	@Consumes(APPLICATION_JSON)
 	@Path("/koekutsukirje/sync/pdf")
 	InputStream haeKoekutsukirjeet(Kirjeet<Koekutsukirje> kirjeet);
+
+	@POST
+	@Produces(APPLICATION_OCTET_STREAM)
+	@Consumes(APPLICATION_JSON)
+	@Path("/addresslabel/sync/pdf")
+	InputStream haeOsoitetarratSync(Osoitteet osoitteet);
 }

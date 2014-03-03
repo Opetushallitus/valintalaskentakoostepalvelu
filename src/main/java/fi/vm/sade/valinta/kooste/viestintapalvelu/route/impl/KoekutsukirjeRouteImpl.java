@@ -349,12 +349,15 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRoute {
 						} catch (Exception e) {
 							e.printStackTrace();
 							LOG.error(
-									"Osallistujen hakeminen haku-app:lta epäonnistui: {}",
-									e.getMessage());
-							dokumenttiprosessi(exchange).getPoikkeukset().add(
-									new Poikkeus(Poikkeus.HAKU,
-											"Hakemus oidilla", e.getMessage(),
-											Poikkeus.hakemusOid(oid)));
+									"Osallistujen hakeminen haku-app:lta epäonnistui: {}. applicationResource.getApplicationByOid({})",
+									e.getMessage(), oid);
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.HAKU,
+											"Yritettiin hakea hakemus oidilla (get application by oid)",
+											e.getMessage(), Poikkeus
+													.hakemusOid(oid)));
 							throw e;
 						}
 					}

@@ -9,7 +9,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,17 +21,15 @@ import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratHakemuksilleRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratSijoittelussaHyvaksytyilleRoute;
 
 /**
  * 
@@ -53,15 +50,11 @@ public class ViestintapalveluAktivointiResource {
 			.getLogger(ViestintapalveluAktivointiResource.class);
 
 	@Autowired
-	private OsoitetarratRoute addressLabelBatchProxy;
-	@Autowired
-	private OsoitetarratHakemuksilleRoute osoitetarratHakemuksille;
+	private OsoitetarratRoute osoitetarratRoute;
 	@Autowired
 	private JalkiohjauskirjeRoute jalkiohjauskirjeBatchProxy;
 	@Autowired
 	private HyvaksymiskirjeRoute hyvaksymiskirjeBatchProxy;
-	@Autowired
-	private OsoitetarratSijoittelussaHyvaksytyilleRoute hyvaksyttyjenOsoitetarratProxy;
 	@Autowired
 	private KoekutsukirjeRoute koekutsukirjeRoute;
 	@Autowired
@@ -82,10 +75,12 @@ public class ViestintapalveluAktivointiResource {
 			DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi(
 					"Osoitetarrat", "Luo osoitetarrat", null, Arrays.asList(
 							"osoitetarrat", hakemuksillaRajaus.getTag()));
-			addressLabelBatchProxy.osoitetarratAktivointi(osoiteProsessi,
-					hakemuksillaRajaus.getHakemusOids(), hakukohdeOid,
-					valintakoeOids, SecurityContextHolder.getContext()
-							.getAuthentication());
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
+			osoitetarratRoute.osoitetarratAktivointi(
+					DokumenttiTyyppi.VALINTAKOKEESEEN_OSALLISTUJAT,
+					osoiteProsessi, hakemuksillaRajaus.getHakemusOids(),
+					hakukohdeOid, valintakoeOids, SecurityContextHolder
+							.getContext().getAuthentication());
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
 			return new ProsessiId(osoiteProsessi.getId());
 		} catch (Exception e) {
@@ -112,30 +107,35 @@ public class ViestintapalveluAktivointiResource {
 	@Path("/osoitetarrat/hakemuksille/aktivoi")
 	@Consumes("application/json")
 	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
-	public Response aktivoiOsoitetarrojenLuontiHakemuksille(
+	public ProsessiId aktivoiOsoitetarrojenLuontiHakemuksille(
 			DokumentinLisatiedot hakemuksillaRajaus) {
 		try {
 			if (hakemuksillaRajaus == null) {
 				hakemuksillaRajaus = new DokumentinLisatiedot();
 			}
-			osoitetarratHakemuksille.osoitetarrotHakemuksilleAktivointiAsync(
-					hakemuksillaRajaus.getHakemusOids(), SecurityContextHolder
-							.getContext().getAuthentication());
+			DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi(
+					"Osoitetarrat", "Luo osoitetarrat", null, Arrays.asList(
+							"osoitetarrat", hakemuksillaRajaus.getTag()));
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
+			osoitetarratRoute.osoitetarratAktivointi(
+					DokumenttiTyyppi.HAKEMUKSILLE, osoiteProsessi,
+					hakemuksillaRajaus.getHakemusOids(),
+
+					SecurityContextHolder.getContext().getAuthentication());
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
+			return new ProsessiId(osoiteProsessi.getId());
 			/*
 			 * dokumenttiResource.viesti(new Message(
 			 * "Osoitetarrojen luonti hakemuksille aloitettu", Arrays
 			 * .asList("osoitetarrat"), DateTime.now().plusDays(1) .toDate()));
 			 */
-			return Response.status(Status.OK).build();
 		} catch (Exception e) {
 			LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
 			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
 			// todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
 			// Ylläpitäjä voi lukea logeista todellisen syyn!
-			return Response
-					.status(Response.Status.INTERNAL_SERVER_ERROR)
-					.entity(Vastaus.virhe("Osoitetarrojen luonti epäonnistui! "
-							+ e.getMessage())).build();
+			throw new RuntimeException("Osoitetarrojen luonnissa virhe!", e);
+
 		}
 	}
 
@@ -154,6 +154,8 @@ public class ViestintapalveluAktivointiResource {
 					"Jälkiohjauskirjeet", "Luo jälkiohjauskirjeet", null,
 					Arrays.asList("jalkiohjauskirjeet",
 							hakemuksillaRajaus.getTag()));
+			dokumenttiProsessiKomponentti
+					.tuoUusiProsessi(jalkiohjauskirjeetProsessi);
 			jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(
 					jalkiohjauskirjeetProsessi,
 					hakemuksillaRajaus.getHakemusOids(), hakuOid,
@@ -180,6 +182,8 @@ public class ViestintapalveluAktivointiResource {
 			DokumenttiProsessi hyvaksymiskirjeetProsessi = new DokumenttiProsessi(
 					"Hyväksymiskirjeet", "Hyväksymiskirjeet", null,
 					Arrays.asList("hyvaksymiskirjeet"));
+			dokumenttiProsessiKomponentti
+					.tuoUusiProsessi(hyvaksymiskirjeetProsessi);
 			hyvaksymiskirjeBatchProxy.hyvaksymiskirjeetAktivointi(
 					hyvaksymiskirjeetProsessi, hakukohdeOid, hakuOid,
 					sijoitteluajoId, SecurityContextHolder.getContext()
@@ -207,7 +211,7 @@ public class ViestintapalveluAktivointiResource {
 	@Path("/hyvaksyttyjenosoitetarrat/aktivoi")
 	@Consumes("application/json")
 	@ApiOperation(value = "Aktivoi hyväksyttyjen osoitteiden luonnin hakukohteelle haussa", response = Response.class)
-	public Response aktivoiHyvaksyttyjenOsoitetarrojenLuonti(
+	public ProsessiId aktivoiHyvaksyttyjenOsoitetarrojenLuonti(
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("hakuOid") String hakuOid,
@@ -216,19 +220,22 @@ public class ViestintapalveluAktivointiResource {
 			if (hakemuksillaRajaus == null) {
 				hakemuksillaRajaus = new DokumentinLisatiedot();
 			}
-			hyvaksyttyjenOsoitetarratProxy
-					.hyvaksyttyjenOsoitetarrojenAktivointi(
-							hakemuksillaRajaus.getHakemusOids(), hakukohdeOid,
-							hakuOid, sijoitteluajoId);
-			return Response.ok().build();
+			DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi(
+					"Osoitetarrat", "Sijoittelussa hyväksytyille", null,
+					Arrays.asList("osoitetarrat", hakemuksillaRajaus.getTag()));
+			osoitetarratRoute.osoitetarratAktivointi(
+					DokumenttiTyyppi.SIJOITTELUSSA_HYVAKSYTYT, osoiteProsessi,
+					hakemuksillaRajaus.getHakemusOids(), hakukohdeOid, hakuOid,
+					sijoitteluajoId, SecurityContextHolder.getContext()
+							.getAuthentication());
+			return osoiteProsessi.toProsessiId();
 		} catch (Exception e) {
 			LOG.error("Hyväksyttyjen osoitetarrojen luonnissa virhe! {}",
 					e.getMessage());
-			return Response
-					.status(Response.Status.INTERNAL_SERVER_ERROR)
-					.entity(Vastaus
-							.virhe("Hyväksyttyjen osoitetarrojen luonti epäonnistui! "
-									+ e.getMessage())).build();
+			e.printStackTrace();
+			throw new RuntimeException(
+					"Hyväksyttyjen osoitetarrojen luonnissa virhe!", e);
+
 		}
 	}
 

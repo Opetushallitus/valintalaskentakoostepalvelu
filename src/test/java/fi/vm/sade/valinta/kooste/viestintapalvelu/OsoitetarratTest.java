@@ -16,6 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
+import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
@@ -98,6 +99,11 @@ public class OsoitetarratTest {
 		o0.setOsallistuminen(o);
 		h.getOsallistumiset().add(o0);
 		return h;
+	}
+
+	@Bean(name = "dokumenttipalveluRestClient")
+	public DokumenttiResource getDokumenttiResource() {
+		return Mockito.mock(DokumenttiResource.class);
 	}
 
 	@Bean
