@@ -119,6 +119,14 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				.process(haeHakemuksetJaOsoitteet()) // haeOsoitteetValittamattaSaadaankoHakemusta())
 				//
 				.end()
+				//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						dokumenttiprosessi(exchange).setKokonaistyo(
+								exchange.getIn().getBody(Collection.class)
+										.size() + 2);
+					}
+				})
 				// enrich to Osoitteet
 				.bean(new LuoOsoitteet())
 				//
@@ -209,8 +217,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 								}
 							}
 							exchange.getOut().setBody(hakemusOids);
-							dokumenttiprosessi(exchange).setKokonaistyo(
-									hakemusOids.size() + 2);
+
 						} catch (Exception e) {
 							e.printStackTrace();
 							LOG.error(

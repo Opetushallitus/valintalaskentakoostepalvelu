@@ -81,7 +81,6 @@ public class ViestintapalveluAktivointiResource {
 					osoiteProsessi, hakemuksillaRajaus.getHakemusOids(),
 					hakukohdeOid, valintakoeOids, SecurityContextHolder
 							.getContext().getAuthentication());
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
 			return new ProsessiId(osoiteProsessi.getId());
 		} catch (Exception e) {
 			LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
@@ -102,7 +101,6 @@ public class ViestintapalveluAktivointiResource {
 	 * @param hakemuksillaRajaus
 	 * @return
 	 */
-	@Deprecated
 	@POST
 	@Path("/osoitetarrat/hakemuksille/aktivoi")
 	@Consumes("application/json")
@@ -122,7 +120,7 @@ public class ViestintapalveluAktivointiResource {
 					hakemuksillaRajaus.getHakemusOids(),
 
 					SecurityContextHolder.getContext().getAuthentication());
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
+
 			return new ProsessiId(osoiteProsessi.getId());
 			/*
 			 * dokumenttiResource.viesti(new Message(
@@ -255,11 +253,17 @@ public class ViestintapalveluAktivointiResource {
 			@QueryParam("valintakoeOids") List<String> valintakoeOids,
 			DokumentinLisatiedot hakemuksillaRajaus) {
 		DokumenttiProsessi kirjeProsessi = null;
-		if (hakukohdeOid == null || valintakoeOids == null
-				|| valintakoeOids.isEmpty()) {
-			LOG.error("Valintakoe ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
-			throw new RuntimeException(
-					"Valintakoe ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
+		if (hakemuksillaRajaus != null
+				&& hakemuksillaRajaus.getHakemusOids() != null
+				&& !hakemuksillaRajaus.getHakemusOids().isEmpty()) {
+			// luodaan koekutsukirjeet rajauksella
+		} else {
+			if (hakukohdeOid == null || valintakoeOids == null
+					|| valintakoeOids.isEmpty()) {
+				LOG.error("Valintakoe ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
+				throw new RuntimeException(
+						"Valintakoe ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
+			}
 		}
 		try {
 			if (hakemuksillaRajaus == null) {
