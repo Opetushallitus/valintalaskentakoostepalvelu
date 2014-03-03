@@ -30,76 +30,81 @@ import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.PrepareKelaProce
  */
 @Component
 public class KelaFtpRouteImpl extends SpringRouteBuilder {
-    private static final Logger LOG = LoggerFactory.getLogger(KelaFtpRouteImpl.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(KelaFtpRouteImpl.class);
 
-    @Autowired
-    private SendMessageToDocumentService messageService;
+	@Autowired
+	private SendMessageToDocumentService messageService;
 
-    private final String ftpKelaSiirto;
-    private PrepareKelaProcessDescription luoUusiProsessi;
+	private final String ftpKelaSiirto;
+	private PrepareKelaProcessDescription luoUusiProsessi;
 
-    private DokumenttiResource dokumenttiResource;
+	private DokumenttiResource dokumenttiResource;
 
-    /**
-     * @param host
-     *            esim ftp://user@host:port
-     * @param params
-     *            esim passiveMode=true&password=...
-     */
-    @Autowired
-    public KelaFtpRouteImpl(
-            @Value("${kela.ftp.protocol}://${kela.ftp.username}@${kela.ftp.host}:${kela.ftp.port}${kela.ftp.path}") final String host,
-            @Value("password=${kela.ftp.password}&ftpClient.dataTimeout=30000&passiveMode=true") final String params,
-            @Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(host).append("?").append(params);
-        this.ftpKelaSiirto = builder.toString();
-        this.luoUusiProsessi = new PrepareKelaProcessDescription();
-        this.dokumenttiResource = dokumenttiResource;
-    }
+	/**
+	 * @param host
+	 *            esim ftp://user@host:port
+	 * @param params
+	 *            esim passiveMode=true&password=...
+	 */
+	@Autowired
+	public KelaFtpRouteImpl(
+			@Value("${kela.ftp.protocol}://${kela.ftp.username}@${kela.ftp.host}:${kela.ftp.port}${kela.ftp.path}") final String host,
+			@Value("password=${kela.ftp.password}&ftpClient.dataTimeout=30000&passiveMode=true") final String params,
+			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource) {
+		StringBuilder builder = new StringBuilder();
+		builder.append(host).append("?").append(params);
+		this.ftpKelaSiirto = builder.toString();
+		this.luoUusiProsessi = new PrepareKelaProcessDescription();
+		this.dokumenttiResource = dokumenttiResource;
+	}
 
-    public class DownloadDocumentWithDocumentId {
+	public class DownloadDocumentWithDocumentId {
 
-        public InputStream download(@Property(PROPERTY_DOKUMENTTI_ID) String documentId) {
-            return dokumenttiResource.lataa(documentId);
-        }
-    }
+		public InputStream download(
+				@Property(PROPERTY_DOKUMENTTI_ID) String documentId) {
+			return dokumenttiResource.lataa(documentId, null);
+		}
+	}
 
-    @Override
-    public void configure() throws Exception {
-        /**
-         * Kela-dokkarin siirto ftp:lla Kelalle
-         */
-        from(kelaSiirto())
-        // prosessin kuvaus
-                .setProperty(kuvaus(), constant("Kela-siirto")).setProperty(prosessi(), method(luoUusiProsessi))
-                // Start prosessi valvomoon dokumentin luonnin aloittamisesta
-                .to(start())
-                // Kayttajalle ilmoitus
-                .setHeader(MESSAGE, constant("Kela-dokumentin siirto aloitettu.")).bean(messageService)
-                // Hae dokumentti
-                .bean(new DownloadDocumentWithDocumentId())
-                // FTP-SIIRTO
-                .to(ftpKelaSiirto())
-                // Done valvomoon
-                .to(finish());
-    }
+	@Override
+	public void configure() throws Exception {
+		/**
+		 * Kela-dokkarin siirto ftp:lla Kelalle
+		 */
+		from(kelaSiirto())
+				// prosessin kuvaus
+				.setProperty(kuvaus(), constant("Kela-siirto"))
+				.setProperty(prosessi(), method(luoUusiProsessi))
+				// Start prosessi valvomoon dokumentin luonnin aloittamisesta
+				.to(start())
+				// Kayttajalle ilmoitus
+				.setHeader(MESSAGE,
+						constant("Kela-dokumentin siirto aloitettu."))
+				.bean(messageService)
+				// Hae dokumentti
+				.bean(new DownloadDocumentWithDocumentId())
+				// FTP-SIIRTO
+				.to(ftpKelaSiirto())
+				// Done valvomoon
+				.to(finish());
+	}
 
-    /**
-     * @return ftps://...
-     */
-    private String ftpKelaSiirto() {
-        return ftpKelaSiirto;
-    }
+	/**
+	 * @return ftps://...
+	 */
+	private String ftpKelaSiirto() {
+		return ftpKelaSiirto;
+	}
 
-    /**
-     * @return direct:kela_siirto
-     */
-    private String kelaSiirto() {
-        return KelaRoute.DIRECT_KELA_SIIRTO;
-    }
+	/**
+	 * @return direct:kela_siirto
+	 */
+	private String kelaSiirto() {
+		return KelaRoute.DIRECT_KELA_SIIRTO;
+	}
 
-    public String getFtpKelaSiirto() {
-        return ftpKelaSiirto;
-    }
+	public String getFtpKelaSiirto() {
+		return ftpKelaSiirto;
+	}
 }

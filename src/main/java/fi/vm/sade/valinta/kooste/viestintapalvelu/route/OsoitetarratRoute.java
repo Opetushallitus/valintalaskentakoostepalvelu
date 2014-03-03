@@ -16,6 +16,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
  * 
  */
 public interface OsoitetarratRoute {
+
 	final String SEDA_OSOITETARRAT = "seda:osoitetarrat?" +
 	// jos palvelin sammuu niin ei suorita loppuun tyojonoa
 			"purgeWhenStopping=true" +
@@ -25,10 +26,26 @@ public interface OsoitetarratRoute {
 			"&concurrentConsumers=1";
 
 	void osoitetarratAktivointi(
+			@Property("DokumenttiTyyppi") DokumenttiTyyppi tyyppi,
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
 			@Property("hakemusOids") List<String> hakemusOids,
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
 			// pitaisikohan olla vain bodyssa ja kasitella yksi oid kerrallaan?
 			@Property("valintakoeOid") List<String> valintakoeOid,
+			@Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
+
+	void osoitetarratAktivointi(
+			@Property("DokumenttiTyyppi") DokumenttiTyyppi tyyppi,
+			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
+			@Property("hakemusOids") List<String> hakemusOids,
+			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
+			@Property(OPH.HAKUOID) String hakuOid,
+			@Property(OPH.SIJOITTELUAJOID) Long sijoitteluajoId,
+			@Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
+
+	void osoitetarratAktivointi(
+			@Property("DokumenttiTyyppi") DokumenttiTyyppi tyyppi,
+			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
+			@Property("hakemusOids") List<String> hakemusOids,
 			@Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
 }

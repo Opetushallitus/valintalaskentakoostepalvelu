@@ -18,10 +18,12 @@ public class Poikkeus {
 	public static final String HAKUKOHDEOID = "Hakukohde";
 	public static final String VALINTAKOEOID = "Valintakoe";
 
+	public static final String SIJOITTELU = "Sijoittelupalvelu";
 	public static final String VALINTATIETO = "Valintatietopalvelu";
 	public static final String VIESTINTAPALVELU = "Viestintäpalvelu";
 	public static final String DOKUMENTTIPALVELU = "Dokumenttipalvelu";
 	public static final String HAKU = "Hakupalvelu";
+	public static final String KOODISTO = "Koodistopalvelu";
 	public static final String TARJONTA = "Tarjontapalvelu";
 	public static final String VALINTALASKENTA = "Valintalaskentapalvelu";
 

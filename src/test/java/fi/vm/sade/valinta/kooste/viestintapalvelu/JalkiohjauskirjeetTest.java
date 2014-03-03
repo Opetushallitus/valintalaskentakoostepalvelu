@@ -12,6 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
+import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
@@ -81,5 +82,10 @@ public class JalkiohjauskirjeetTest {
 	@Bean
 	public HaeOsoiteKomponentti getHaeOsoiteKomponentti() {
 		return Mockito.mock(HaeOsoiteKomponentti.class);
+	}
+
+	@Bean(name = "dokumenttipalveluRestClient")
+	public DokumenttiResource getDokumenttiResource() {
+		return Mockito.mock(DokumenttiResource.class);
 	}
 }

@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Collection;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -40,64 +41,74 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
  * 
  */
 @Configuration
-@ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class, KelaFtpRouteTest.class, KelaRouteConfig.class })
+@ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class,
+		KelaFtpRouteTest.class, KelaRouteConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class KelaFtpRouteTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KelaFtpRouteTest.class);
-    private static final String FTP_MOCK = "mock:ftpMock";
-    private static final String FTP_CONFIG = "retainFirst=1";
+	private static final Logger LOG = LoggerFactory
+			.getLogger(KelaFtpRouteTest.class);
+	private static final String FTP_MOCK = "mock:ftpMock";
+	private static final String FTP_CONFIG = "retainFirst=1";
 
-    @Bean
-    public KelaFtpRouteImpl getKelaRouteImpl(DokumenttiResource dokumenttiResource) {
-        /**
-         * Ylikirjoitetaan kela-ftp endpoint logitusreitilla yksikkotestia
-         * varten!
-         */
-        return new KelaFtpRouteImpl(FTP_MOCK, FTP_CONFIG, dokumenttiResource);
-    }
+	@Bean
+	public KelaFtpRouteImpl getKelaRouteImpl(
+			DokumenttiResource dokumenttiResource) {
+		/**
+		 * Ylikirjoitetaan kela-ftp endpoint logitusreitilla yksikkotestia
+		 * varten!
+		 */
+		return new KelaFtpRouteImpl(FTP_MOCK, FTP_CONFIG, dokumenttiResource);
+	}
 
-    @Bean
-    public SendMessageToDocumentService getSendMessageToDocumentService(DokumenttiResource dokumenttiResource) {
-        return new SendMessageToDocumentService(dokumenttiResource);
-    }
+	@Bean
+	public SendMessageToDocumentService getSendMessageToDocumentService(
+			DokumenttiResource dokumenttiResource) {
+		return new SendMessageToDocumentService(dokumenttiResource);
+	}
 
-    @Bean
-    public DokumenttiResource mockDokumenttiResource() {
-        return mock(DokumenttiResource.class);
-    }
+	@Bean
+	public DokumenttiResource mockDokumenttiResource() {
+		return mock(DokumenttiResource.class);
+	}
 
-    @Autowired
-    private KelaFtpRoute kelaFtpRoute;
-    @Autowired
-    private DokumenttiResource dokumenttiResource;
-    @Autowired
-    private CamelContext context;
-    @Resource(name = "kelaValvomo")
-    private ValvomoService<KelaProsessi> kelaValvomo;
-    @Autowired
-    private KelaFtpRouteImpl ftpRouteImpl;
+	@Autowired
+	private KelaFtpRoute kelaFtpRoute;
+	@Autowired
+	private DokumenttiResource dokumenttiResource;
+	@Autowired
+	private CamelContext context;
+	@Resource(name = "kelaValvomo")
+	private ValvomoService<KelaProsessi> kelaValvomo;
+	@Autowired
+	private KelaFtpRouteImpl ftpRouteImpl;
 
-    @Test
-    public void testKelaFtpSiirto() {
+	@Test
+	public void testKelaFtpSiirto() {
 
-        String dokumenttiId = "dokumenttiId";
-        Mockito.when(dokumenttiResource.lataa(Mockito.anyString())).thenReturn(
-                new ByteArrayInputStream(dokumenttiId.getBytes()));
+		String dokumenttiId = "dokumenttiId";
+		Mockito.when(
+				dokumenttiResource.lataa(Mockito.anyString(), Mockito
+						.<HttpServletResponse> any(HttpServletResponse.class)))
+				.thenReturn(new ByteArrayInputStream(dokumenttiId.getBytes()));
 
-        kelaFtpRoute.aloitaKelaSiirto(dokumenttiId);
+		kelaFtpRoute.aloitaKelaSiirto(dokumenttiId);
 
-        Collection<ProsessiJaStatus<KelaProsessi>> prosessit = kelaValvomo.getUusimmatProsessitJaStatukset();
-        // START JA FAILURE Prosessit
-        Assert.assertTrue(prosessit.size() == 2);
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        for (ProsessiJaStatus<KelaProsessi> p : prosessit) {
-            LOG.info("{}", gson.toJson(p));
-        }
+		Collection<ProsessiJaStatus<KelaProsessi>> prosessit = kelaValvomo
+				.getUusimmatProsessitJaStatukset();
+		// START JA FAILURE Prosessit
+		Assert.assertTrue(prosessit.size() == 2);
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		for (ProsessiJaStatus<KelaProsessi> p : prosessit) {
+			LOG.info("{}", gson.toJson(p));
+		}
 
-        MockEndpoint resultEndpoint = context.getEndpoint(ftpRouteImpl.getFtpKelaSiirto(), MockEndpoint.class);
-        resultEndpoint.assertExchangeReceived(0).getIn(ByteArrayInputStream.class);
-        Mockito.verify(dokumenttiResource).lataa(Mockito.eq(dokumenttiId));
-    }
+		MockEndpoint resultEndpoint = context.getEndpoint(
+				ftpRouteImpl.getFtpKelaSiirto(), MockEndpoint.class);
+		resultEndpoint.assertExchangeReceived(0).getIn(
+				ByteArrayInputStream.class);
+		Mockito.verify(dokumenttiResource).lataa(Mockito.eq(dokumenttiId),
+				Mockito.any(HttpServletResponse.class));
+	}
 
 }

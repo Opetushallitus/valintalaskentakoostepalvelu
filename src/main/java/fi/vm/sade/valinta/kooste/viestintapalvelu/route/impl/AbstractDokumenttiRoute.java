@@ -81,6 +81,10 @@ public abstract class AbstractDokumenttiRoute extends SpringRouteBuilder {
 		return exchange.getProperty(OPH.HAKUKOHDEOID, String.class);
 	}
 
+	protected String hakuOid(Exchange exchange) {
+		return exchange.getProperty(OPH.HAKUOID, String.class);
+	}
+
 	protected Date defaultExpirationDate() {
 		return DateTime.now().plusHours(2).toDate();
 	}

@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +15,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
+import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
@@ -24,6 +25,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.OsoitetarratRouteImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.ViestintapalveluConfig;
@@ -69,24 +71,8 @@ public class OsoitetarratTest {
 				.thenReturn(o);
 
 		DokumenttiProsessi p = new DokumenttiProsessi("", "", "", null);
-		osoitetarratRoute.osoitetarratAktivointi(p, null, "h0",
-				Arrays.asList("v0", "v1"), null);
-
-	}
-
-	@Test
-	// (expected = ViestintapalveluException.class)
-	public void testaaFailaakoOikein() {
-		Mockito.when(
-				valintatietoHakukohteelleKomponentti
-						.valintatiedotHakukohteelle(
-								Mockito.anyListOf(String.class),
-								Mockito.anyString())).thenReturn(
-				Collections.<HakemusOsallistuminenTyyppi> emptyList());
-
-		DokumenttiProsessi p = new DokumenttiProsessi("", "", "", null);
-		osoitetarratRoute.osoitetarratAktivointi(p, null, "h0",
-				Arrays.asList("v0", "v1"), null);
+		osoitetarratRoute.osoitetarratAktivointi(DokumenttiTyyppi.HAKEMUKSILLE,
+				p, null, "h0", Arrays.asList("v0", "v1"), null);
 
 	}
 
@@ -100,9 +86,19 @@ public class OsoitetarratTest {
 		return h;
 	}
 
+	@Bean(name = "dokumenttipalveluRestClient")
+	public DokumenttiResource getDokumenttiResource() {
+		return Mockito.mock(DokumenttiResource.class);
+	}
+
 	@Bean
 	public SijoitteluKoulutuspaikkallisetKomponentti getSijoitteluKoulutuspaikallisetProxy() {
 		return Mockito.mock(SijoitteluKoulutuspaikkallisetKomponentti.class);
+	}
+
+	@Bean
+	public ApplicationResource getApplicationResource() {
+		return Mockito.mock(ApplicationResource.class);
 	}
 
 	@Bean
