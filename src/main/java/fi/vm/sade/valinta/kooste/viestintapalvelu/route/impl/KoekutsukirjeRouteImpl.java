@@ -262,6 +262,8 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRoute {
 
 		from(koekutsukirjeetHakemuksista())
 		//
+				.process(security)
+				//
 				.bean(koekutsukirjeetKomponentti)
 				//
 				.process(new Processor() {
@@ -269,6 +271,12 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRoute {
 						DokumenttiProsessi prosessi = dokumenttiprosessi(exchange);
 						InputStream pdf;
 						try {
+
+							// LOG.error(
+							// "\r\n{}",
+							// new GsonBuilder().setPrettyPrinting()
+							// .create()
+							// .toJson(koekutsukirjeet(exchange)));
 							pdf = viestintapalveluResource
 									.haeKoekutsukirjeet(koekutsukirjeet(exchange));
 							dokumenttiprosessi(exchange)

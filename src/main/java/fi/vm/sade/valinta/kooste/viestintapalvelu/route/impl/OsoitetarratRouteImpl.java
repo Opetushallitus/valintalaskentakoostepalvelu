@@ -24,6 +24,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
@@ -54,6 +56,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 	private final SecurityPreprocessor security = new SecurityPreprocessor();
 	private final String osoitetarrat;
 	private final DokumenttiResource dokumenttiResource;
+	private final ApplicationResource applicationResource;
 
 	@Autowired
 	public OsoitetarratRouteImpl(
@@ -62,8 +65,10 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 			ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti,
 			HaeOsoiteKomponentti osoiteKomponentti,
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
+			ApplicationResource applicationResource,
 			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource) {
 		super();
+		this.applicationResource = applicationResource;
 		this.osoitetarrat = osoitetarrat;
 		this.dokumenttiResource = dokumenttiResource;
 		this.viestintapalveluResource = viestintapalveluResource;
@@ -103,8 +108,6 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				//
 				.to("direct:osoitetarrat_resolve_hakemukset")
 				//
-
-				//
 				.end()
 				//
 				.split(body(), osoiteAggregation())
@@ -112,15 +115,14 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				.process(security).process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						String oid = exchange.getIn().getBody(String.class);
+						Hakemus hakemus;
 						try {
-							exchange.getOut().setBody(
-									osoiteKomponentti.haeOsoite(oid));
-							dokumenttiprosessi(exchange)
-									.inkrementoiTehtyjaToita();
+							hakemus = applicationResource
+									.getApplicationByOid(oid);
 						} catch (Exception e) {
 							e.printStackTrace();
 							LOG.error(
-									"Osallistujen hakeminen haku-app:lta epäonnistui: {}. applicationResource.getApplicationByOid({})",
+									"Hakemuksen hakeminen haku-app:lta epäonnistui: {}. applicationResource.getApplicationByOid({})",
 									e.getMessage(), oid);
 							dokumenttiprosessi(exchange)
 									.getPoikkeukset()
@@ -131,6 +133,29 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 													.hakemusOid(oid)));
 							throw e;
 						}
+
+						try {
+							exchange.getOut().setBody(
+									osoiteKomponentti.haeOsoite(hakemus));
+
+						} catch (Exception e) {
+							e.printStackTrace();
+							LOG.error(
+									"Koodistopalvelukutsun tekevässä lohkossa tapahtui poikkeus: {}",
+									e.getMessage());
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.KOODISTO,
+											"Koodistopalvelukutsun tekevässä lohkossa tapahtui poikkeus",
+											e.getMessage(), Poikkeus
+													.hakemusOid(oid)));
+							throw e;
+						}
+						//
+						// Yksi työ valmistui
+						//
+						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
 					}
 				})
 				//
@@ -147,6 +172,10 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 								Osoitteet.class);
 						InputStream pdf;
 						try {
+
+							// LOG.error("\r\n{}",
+							// new GsonBuilder().setPrettyPrinting()
+							// .create().toJson(osoitteet));
 							pdf = viestintapalveluResource
 									.haeOsoitetarratSync(osoitteet);
 							dokumenttiprosessi(exchange)
@@ -161,7 +190,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 									.getPoikkeukset()
 									.add(new Poikkeus(
 											Poikkeus.VIESTINTAPALVELU,
-											"Koekutsukirjeiden synkroninen haku",
+											"Osoitteet pdf:n synkroninen haku viestintäpalvelulta",
 											e.getMessage()));
 							throw e;
 						}
@@ -179,10 +208,12 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 							LOG.error(
 									"Dokumenttipalvelulle tiedonsiirrossa tapahtui virhe: {}",
 									e.getMessage());
-							dokumenttiprosessi(exchange).getPoikkeukset().add(
-									new Poikkeus(Poikkeus.DOKUMENTTIPALVELU,
-											"Dokumentin tallennus", e
-													.getMessage()));
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.DOKUMENTTIPALVELU,
+											"Osoitteet pdf:n tallennus dokumenttipalvelulle",
+											e.getMessage()));
 							throw e;
 						}
 					}
@@ -286,10 +317,6 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 	private FlexibleAggregationStrategy<Osoite> osoiteAggregation() {
 		return new FlexibleAggregationStrategy<Osoite>().storeInBody()
 				.accumulateInCollection(ArrayList.class);
-	}
-
-	private String valintakokeenOsoitetarrat() {
-		return OsoitetarratRoute.SEDA_OSOITETARRAT;
 	}
 
 }

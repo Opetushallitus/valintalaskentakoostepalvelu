@@ -23,6 +23,7 @@ public class Poikkeus {
 	public static final String VIESTINTAPALVELU = "Viestintäpalvelu";
 	public static final String DOKUMENTTIPALVELU = "Dokumenttipalvelu";
 	public static final String HAKU = "Hakupalvelu";
+	public static final String KOODISTO = "Koodistopalvelu";
 	public static final String TARJONTA = "Tarjontapalvelu";
 	public static final String VALINTALASKENTA = "Valintalaskentapalvelu";
 
