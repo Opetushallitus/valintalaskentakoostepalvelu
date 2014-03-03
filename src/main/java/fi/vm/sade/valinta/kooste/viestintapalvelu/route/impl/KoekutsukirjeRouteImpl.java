@@ -277,8 +277,8 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRoute {
 							// new GsonBuilder().setPrettyPrinting()
 							// .create()
 							// .toJson(koekutsukirjeet(exchange)));
-							pdf = viestintapalveluResource
-									.haeKoekutsukirjeet(koekutsukirjeet(exchange));
+							pdf = pipeInputStreams(viestintapalveluResource
+									.haeKoekutsukirjeet(koekutsukirjeet(exchange)));
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 

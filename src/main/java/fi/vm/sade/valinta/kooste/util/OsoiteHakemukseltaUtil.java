@@ -14,81 +14,98 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
  */
 public class OsoiteHakemukseltaUtil {
 
-    private final static Logger LOG = LoggerFactory.getLogger(OsoiteHakemukseltaUtil.class);
+	private final static Logger LOG = LoggerFactory
+			.getLogger(OsoiteHakemukseltaUtil.class);
 
-    // KOVAKOODATTUJA ARVOJA JOTKA TULEE KOODISTOLTA MUTTA JOIDEN HANKKIMISEEN
-    // EI OLE TOISTAISEKSI OLEMASSA OLEVAA KAYTANTOA!
-    private final static String POHJAKOULUTUS = "POHJAKOULUTUS";
-    private final static String POHJAKOULUTUS_ULKOMAILLA = "0";
-    private final static String POHJAKOULUTUS_KESKEYTETTY = "7";
+	// KOVAKOODATTUJA ARVOJA JOTKA TULEE KOODISTOLTA MUTTA JOIDEN HANKKIMISEEN
+	// EI OLE TOISTAISEKSI OLEMASSA OLEVAA KAYTANTOA!
+	private final static String POHJAKOULUTUS = "POHJAKOULUTUS";
+	private final static String POHJAKOULUTUS_ULKOMAILLA = "0";
+	private final static String POHJAKOULUTUS_KESKEYTETTY = "7";
 
-    public final static String ASUINMAA = "asuinmaa";
-    public final static String SUOMI = "FIN";
-    private final static String SUOMALAINEN_LAHIOSOITE = "lahiosoite";
-    private final static String SUOMALAINEN_POSTINUMERO = "Postinumero";
-    private final static String SUOMALAINEN_POSTITOIMIPAIKKA = "postitoimipaikka";
-    private final static String ULKOMAA_LAHIOSOITE = "osoiteUlkomaa";
-    private final static String ULKOMAA_POSTINUMERO = "postinumeroUlkomaa";
-    private final static String ULKOMAA_POSTITOIMIPAIKKA = "kaupunkiUlkomaa";
-    private final static String ETUNIMET = "Etunimet";
-    private final static String SUKUNIMI = "Sukunimi";
+	public final static String ASUINMAA = "asuinmaa";
+	public final static String SUOMI = "FIN";
+	private final static String SUOMALAINEN_LAHIOSOITE = "lahiosoite";
+	public final static String SUOMALAINEN_POSTINUMERO = "Postinumero";
+	// private final static String SUOMALAINEN_POSTITOIMIPAIKKA =
+	// "postitoimipaikka";
 
-    public static Osoite osoiteHakemuksesta(Hakemus hakemus, String maa) {
-        String lahiosoite = "";
-        String postinumero = "";
-        String postitoimipaikka = "";
-        String maakoodi = "";
-        // String maa = "";
-        String maakunta = "";
+	private final static String ULKOMAA_LAHIOSOITE = "osoiteUlkomaa";
+	private final static String ULKOMAA_POSTINUMERO = "postinumeroUlkomaa";
+	private final static String ULKOMAA_POSTITOIMIPAIKKA = "kaupunkiUlkomaa";
+	private final static String ETUNIMET = "Etunimet";
+	private final static String SUKUNIMI = "Sukunimi";
 
-        String etunimet = "";
-        String sukunimi = "";
-        boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = false;
-        if (hakemus != null) {
-            if (hakemus.getAnswers() != null && hakemus.getAnswers().getHenkilotiedot() != null) {
+	public static Osoite osoiteHakemuksesta(Hakemus hakemus, String maa,
+			String postitoimipaikka) {
+		if (postitoimipaikka == null) {
+			postitoimipaikka = "";
+		}
+		String lahiosoite = "";
+		String postinumero = "";
 
-                Map<String, String> henkilotiedot = // hakemus.getAnswers().getHenkilotiedot();
-                new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-                henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
+		String maakoodi = "";
+		// String maa = "";
+		String maakunta = "";
 
-                if (hakemus.getAnswers().getKoulutustausta() != null) {
-                    Map<String, String> koulutustausta = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-                    koulutustausta.putAll(hakemus.getAnswers().getKoulutustausta());
-                    //
-                    // OVT-6334 : Logiikka ei kuulu koostepalveluun!
-                    //
-                    String pohjakoulutus = koulutustausta.get(POHJAKOULUTUS);
-                    LOG.debug("Pohjakoulutus OID({}) {}", new Object[] { hakemus.getOid(), pohjakoulutus });
-                    if (POHJAKOULUTUS_ULKOMAILLA.equals(pohjakoulutus)
-                            || POHJAKOULUTUS_KESKEYTETTY.equals(pohjakoulutus)) {
-                        ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = true;
-                    }
-                }
+		String etunimet = "";
+		String sukunimi = "";
+		boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = false;
+		if (hakemus != null) {
+			if (hakemus.getAnswers() != null
+					&& hakemus.getAnswers().getHenkilotiedot() != null) {
 
-                maakoodi = henkilotiedot.get(ASUINMAA);
-                etunimet = henkilotiedot.get(ETUNIMET);
-                sukunimi = henkilotiedot.get(SUKUNIMI);
+				Map<String, String> henkilotiedot = // hakemus.getAnswers().getHenkilotiedot();
+				new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+				henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
 
-                if (SUOMI.equals(maakoodi)) { // PITAISI OLLA SUOMALAINEN OSOITE
-                    lahiosoite = henkilotiedot.get(SUOMALAINEN_LAHIOSOITE);
-                    postinumero = henkilotiedot.get(SUOMALAINEN_POSTINUMERO);
-                    postitoimipaikka = henkilotiedot.get(SUOMALAINEN_POSTITOIMIPAIKKA);
-                    maa = "Suomi";
-                } else { // OLETATAAN ULKOMAALAINEN OSOITE
-                    lahiosoite = henkilotiedot.get(ULKOMAA_LAHIOSOITE);
-                    postinumero = henkilotiedot.get(ULKOMAA_POSTINUMERO);
-                    postitoimipaikka = henkilotiedot.get(ULKOMAA_POSTITOIMIPAIKKA);
-                }
-            }
-        } else {
-            etunimet = "Hakemus ei ole olemassa!";
-            sukunimi = "Hakemus ei ole olemassa!";
-            LOG.error("Null-hakemukselle yritetään luoda osoitetta!");
-        }
-        if (maa == null) {
-            maa = "";
-        }
-        return new Osoite(etunimet, sukunimi, lahiosoite, null, null, postinumero, postitoimipaikka, maakunta, maa,
-                maakoodi, ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt);
-    }
+				if (hakemus.getAnswers().getKoulutustausta() != null) {
+					Map<String, String> koulutustausta = new TreeMap<String, String>(
+							String.CASE_INSENSITIVE_ORDER);
+					koulutustausta.putAll(hakemus.getAnswers()
+							.getKoulutustausta());
+					//
+					// OVT-6334 : Logiikka ei kuulu koostepalveluun!
+					//
+					String pohjakoulutus = koulutustausta.get(POHJAKOULUTUS);
+					LOG.debug("Pohjakoulutus OID({}) {}", new Object[] {
+							hakemus.getOid(), pohjakoulutus });
+					if (POHJAKOULUTUS_ULKOMAILLA.equals(pohjakoulutus)
+							|| POHJAKOULUTUS_KESKEYTETTY.equals(pohjakoulutus)) {
+						ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = true;
+					}
+				}
+
+				maakoodi = henkilotiedot.get(ASUINMAA);
+				etunimet = henkilotiedot.get(ETUNIMET);
+				sukunimi = henkilotiedot.get(SUKUNIMI);
+
+				if (SUOMI.equalsIgnoreCase(maakoodi)) { // PITAISI OLLA
+					// SUOMALAINEN OSOITE
+					lahiosoite = henkilotiedot.get(SUOMALAINEN_LAHIOSOITE);
+					postinumero = henkilotiedot.get(SUOMALAINEN_POSTINUMERO);
+					/*
+					 * Haetaan nykyisin koodistosta! postitoimipaikka =
+					 * henkilotiedot .get(SUOMALAINEN_POSTITOIMIPAIKKA);
+					 */
+					maa = "Suomi";
+				} else { // OLETATAAN ULKOMAALAINEN OSOITE
+					lahiosoite = henkilotiedot.get(ULKOMAA_LAHIOSOITE);
+					postinumero = henkilotiedot.get(ULKOMAA_POSTINUMERO);
+					postitoimipaikka = henkilotiedot
+							.get(ULKOMAA_POSTITOIMIPAIKKA);
+				}
+			}
+		} else {
+			etunimet = "Hakemus ei ole olemassa!";
+			sukunimi = "Hakemus ei ole olemassa!";
+			LOG.error("Null-hakemukselle yritetään luoda osoitetta!");
+		}
+		if (maa == null) {
+			maa = "";
+		}
+		return new Osoite(etunimet, sukunimi, lahiosoite, null, null,
+				postinumero, postitoimipaikka, maakunta, maa, maakoodi,
+				ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt);
+	}
 }

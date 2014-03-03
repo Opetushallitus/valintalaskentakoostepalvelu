@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -8,6 +11,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.spring.SpringRouteBuilder;
+import org.apache.poi.util.IOUtils;
 import org.jgroups.util.UUID;
 import org.joda.time.DateTime;
 
@@ -91,5 +95,12 @@ public abstract class AbstractDokumenttiRoute extends SpringRouteBuilder {
 
 	protected String generateId() {
 		return UUID.randomUUID().toString();
+	}
+
+	protected InputStream pipeInputStreams(InputStream incoming)
+			throws IOException {
+		InputStream p = new ByteArrayInputStream(IOUtils.toByteArray(incoming));
+		incoming.close();
+		return p;
 	}
 }
