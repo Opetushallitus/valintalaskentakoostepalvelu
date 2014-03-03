@@ -181,9 +181,9 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRoute {
 						}
 						try {
 
-							dokumenttiResource.tallenna(id, "osoitetarrat.pdf",
-									expirationTime, tags, "application/pdf",
-									pdf);
+							dokumenttiResource.tallenna(id,
+									"hyvaksymiskirjeet.pdf", expirationTime,
+									tags, "application/pdf", pdf);
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 							prosessi.setDokumenttiId(id);
