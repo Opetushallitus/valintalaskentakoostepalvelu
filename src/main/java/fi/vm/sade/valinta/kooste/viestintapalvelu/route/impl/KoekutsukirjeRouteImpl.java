@@ -254,7 +254,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRoute {
 				//
 				.stopOnException()
 				//
-				.to(hakemusOiditHakemuksiksi())
+				.process(security).to(hakemusOiditHakemuksiksi())
 				//
 				.end()
 				//
