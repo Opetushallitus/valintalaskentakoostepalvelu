@@ -43,156 +43,172 @@ import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponen
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.LinjakoodiKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.OrganisaatioKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 
 @Configuration
 @Import(KelaRouteImpl.class)
-@ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class, KelaRouteTest.class, KelaRouteConfig.class })
+@ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class,
+		KelaRouteTest.class, KelaRouteConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 // @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class KelaRouteTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KelaRouteTest.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(KelaRouteTest.class);
 
-    @Bean
-    public HaeHakemusKomponentti getHaeHakemusKomponentti() {
-        return mock(HaeHakemusKomponentti.class);
-    }
+	@Bean
+	public HaeHakemusKomponentti getHaeHakemusKomponentti() {
+		return mock(HaeHakemusKomponentti.class);
+	}
 
-    @Bean
-    public KelaHakijaRiviKomponenttiImpl mockKelaHakijaKomponentti() throws Exception {
-        //
-        // TKUVAYHVA t = new
-        // TKUVAYHVA.Builder().setAjankohtaSyksy(true).setEtunimet("J").setSukunimi("J")
-        // .setHenkilotunnus("021293-915F").setLinjakoodi("0000").setOppilaitos("0000")
-        // .setPoimintapaivamaara(new Date()).setLukuvuosi(new
-        // Date()).setValintapaivamaara(new Date()).build();
-        //
-        // KelaHakijaRiviKomponenttiImpl hakija =
-        // mock(KelaHakijaRiviKomponenttiImpl.class);
-        // when(hakija.luo(Mockito.notNull(HakijaDTO.class),
-        // Mockito.notNull(Date.class), Mockito.notNull(Date.class)))
-        // .thenReturn(Arrays.asList(new TKUVAYHVA()));
-        return mock(KelaHakijaRiviKomponenttiImpl.class);
-    }
+	@Bean
+	public KelaHakijaRiviKomponenttiImpl mockKelaHakijaKomponentti()
+			throws Exception {
+		//
+		// TKUVAYHVA t = new
+		// TKUVAYHVA.Builder().setAjankohtaSyksy(true).setEtunimet("J").setSukunimi("J")
+		// .setHenkilotunnus("021293-915F").setLinjakoodi("0000").setOppilaitos("0000")
+		// .setPoimintapaivamaara(new Date()).setLukuvuosi(new
+		// Date()).setValintapaivamaara(new Date()).build();
+		//
+		// KelaHakijaRiviKomponenttiImpl hakija =
+		// mock(KelaHakijaRiviKomponenttiImpl.class);
+		// when(hakija.luo(Mockito.notNull(HakijaDTO.class),
+		// Mockito.notNull(Date.class), Mockito.notNull(Date.class)))
+		// .thenReturn(Arrays.asList(new TKUVAYHVA()));
+		return mock(KelaHakijaRiviKomponenttiImpl.class);
+	}
 
-    @Bean
-    public HakuResource getHakuResource() {
-        return mock(HakuResource.class);
-    }
+	@Bean
+	public HakuResource getHakuResource() {
+		return mock(HakuResource.class);
+	}
 
-    @Bean
-    public HaeHakuTarjonnaltaKomponentti getHaeHakuTarjonnaltaKomponentti() {
-        return mock(HaeHakuTarjonnaltaKomponentti.class);
-    }
+	@Bean
+	public HaeHakuTarjonnaltaKomponentti getHaeHakuTarjonnaltaKomponentti() {
+		return mock(HaeHakuTarjonnaltaKomponentti.class);
+	}
 
-    @Bean(name = "dokumenttipalveluRestClient")
-    public DokumenttiResource mockDokumenttiResource() {
-        return mock(DokumenttiResource.class);
-    }
+	@Bean(name = "dokumenttipalveluRestClient")
+	public DokumenttiResource mockDokumenttiResource() {
+		return mock(DokumenttiResource.class);
+	}
 
-    @Bean
-    public KelaDokumentinLuontiKomponenttiImpl getKelaDokumentinLuontiKomponentti() {
-        return mock(KelaDokumentinLuontiKomponenttiImpl.class);
-    }
+	@Bean
+	public KelaDokumentinLuontiKomponenttiImpl getKelaDokumentinLuontiKomponentti() {
+		return mock(KelaDokumentinLuontiKomponenttiImpl.class);
+	}
 
-    @Bean
-    public SijoitteluKaikkiPaikanVastaanottaneet mockSijoitteluKaikkiPaikanVastaanottaneet() {
-        return mock(SijoitteluKaikkiPaikanVastaanottaneet.class);
-    }
+	@Bean
+	public SijoitteluKaikkiPaikanVastaanottaneet mockSijoitteluKaikkiPaikanVastaanottaneet() {
+		return mock(SijoitteluKaikkiPaikanVastaanottaneet.class);
+	}
 
-    @Bean
-    public LinjakoodiKomponentti getLinjakoodiKomponentti() {
-        return mock(LinjakoodiKomponentti.class);
-    }
+	@Bean
+	public LinjakoodiKomponentti getLinjakoodiKomponentti() {
+		return mock(LinjakoodiKomponentti.class);
+	}
 
-    @Bean
-    public OrganisaatioResource getOrganisaatioResource() {
-        return mock(OrganisaatioResource.class);
-    }
+	@Bean
+	public OrganisaatioResource getOrganisaatioResource() {
+		return mock(OrganisaatioResource.class);
+	}
 
-    @Bean
-    public OrganisaatioKomponentti getOrganisaatioKomponentti() {
-        return mock(OrganisaatioKomponentti.class);
-    }
+	@Bean
+	public OrganisaatioKomponentti getOrganisaatioKomponentti() {
+		return mock(OrganisaatioKomponentti.class);
+	}
 
-    @Bean
-    public HakukohdeResource getHakukohdeResource() {
-        return mock(HakukohdeResource.class);
-    }
+	@Bean
+	public HakukohdeResource getHakukohdeResource() {
+		return mock(HakukohdeResource.class);
+	}
 
-    @Autowired
-    private KelaRoute kelaSiirtoDokumentinLuonti;
+	@Autowired
+	private KelaRoute kelaSiirtoDokumentinLuonti;
 
-    @Autowired
-    private SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet;
+	@Autowired
+	private SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet;
 
-    @Autowired
-    private KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti;
+	@Autowired
+	private KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti;
 
-    @Resource(name = "kelaValvomo")
-    private ValvomoService<KelaProsessi> kelaValvomo;
+	@Resource(name = "kelaValvomo")
+	private ValvomoService<KelaProsessi> kelaValvomo;
 
-    @Autowired
-    private KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti;
+	@Autowired
+	private KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti;
 
-    // VAKIO TESTI MUUTTUJIA
-    private final HakijaDTO virheellinen = new HakijaDTO();
-    private final HakijaDTO ok = new HakijaDTO();
-    private final Date lukuvuosi = new DateTime(2013, 11, 1, 1, 1).toDate();
-    private final Date poimintapaivamaara = new Date();
-    private final String hakuOid = "hakuOid";
-    private final String organisaationNimi = "organisaationNimi";
+	// VAKIO TESTI MUUTTUJIA
+	private final HakijaDTO virheellinen = new HakijaDTO();
+	private final HakijaDTO ok = new HakijaDTO();
+	private final Date lukuvuosi = new DateTime(2013, 11, 1, 1, 1).toDate();
+	private final Date poimintapaivamaara = new Date();
+	private final String hakuOid = "hakuOid";
+	private final String organisaationNimi = "organisaationNimi";
 
-    @Before
-    public void setupMocks() throws Exception {
+	@Before
+	public void setupMocks() throws Exception {
 
-        when(kelaHakijaKomponentti.luo(Mockito.eq(virheellinen), any(Date.class), any(Date.class))).thenThrow(
-                new RuntimeException("Should fails once!"));
+		when(
+				kelaHakijaKomponentti.luo(Mockito.eq(virheellinen),
+						any(Date.class), any(Date.class))).thenThrow(
+				new RuntimeException("Should fails once!"));
 
-        when(kelaHakijaKomponentti.luo(Mockito.eq(ok), any(Date.class), any(Date.class))).thenReturn(
-                Arrays.asList(new TKUVAYHVA(), new TKUVAYHVA()));
-    }
+		when(
+				kelaHakijaKomponentti.luo(Mockito.eq(ok), any(Date.class),
+						any(Date.class))).thenReturn(
+				Arrays.asList(new TKUVAYHVA(), new TKUVAYHVA()));
+	}
 
-    final String okAineistonNimi = "testaaEttaOikeinSuoritetustaReitistaSeuraaDokumentti";
+	final String okAineistonNimi = "testaaEttaOikeinSuoritetustaReitistaSeuraaDokumentti";
 
-    @Test
-    public void testaaEttaOikeinSuoritetustaReitistaSeuraaDokumentti() throws Exception {
-        // yksiloidaan kutsu aineistonnimella etta yksikkotestit voidaan
-        // suorittaa moniajoisesti ilman etta mockit hajoo
+	@Test
+	public void testaaEttaOikeinSuoritetustaReitistaSeuraaDokumentti()
+			throws Exception {
+		// yksiloidaan kutsu aineistonnimella etta yksikkotestit voidaan
+		// suorittaa moniajoisesti ilman etta mockit hajoo
 
-        /**
-         * pelkkia ok hakijoita
-         */
-        when(sijoitteluVastaanottaneet.vastaanottaneet(anyString())).thenReturn(
-                Arrays.asList(ok, ok, ok, ok, ok, ok, ok, ok, ok, ok, ok, ok, ok, ok, ok));
+		/**
+		 * pelkkia ok hakijoita
+		 */
+		when(sijoitteluVastaanottaneet.vastaanottaneet(anyString()))
+				.thenReturn(
+						Arrays.asList(ok, ok, ok, ok, ok, ok, ok, ok, ok, ok,
+								ok, ok, ok, ok, ok));
+		DokumenttiProsessi p = new DokumenttiProsessi("", "", hakuOid,
+				Arrays.asList("kela"));
+		kelaSiirtoDokumentinLuonti.aloitaKelaLuonti(p, hakuOid, lukuvuosi,
+				poimintapaivamaara, okAineistonNimi, organisaationNimi, null);
 
-        kelaSiirtoDokumentinLuonti.aloitaKelaLuonti(hakuOid, lukuvuosi, poimintapaivamaara, okAineistonNimi,
-                organisaationNimi);
+		// Mockito.verify(kelaDokumentinLuontiKomponentti,
+		// Mockito.only()).luo(Mockito.anyCollectionOf(TKUVAYHVA.class),
+		// // Mockito.eq(okAineistonNimi)
+		// anyString(), anyString());
+	}
 
-        // Mockito.verify(kelaDokumentinLuontiKomponentti,
-        // Mockito.only()).luo(Mockito.anyCollectionOf(TKUVAYHVA.class),
-        // // Mockito.eq(okAineistonNimi)
-        // anyString(), anyString());
-    }
+	final String virheAineistonNimi = "testaaEtteiVirheellisestaReitityksestaSeuraaVirheellistaDokumenttia";
 
-    final String virheAineistonNimi = "testaaEtteiVirheellisestaReitityksestaSeuraaVirheellistaDokumenttia";
+	@Test
+	public void testaaEtteiVirheellisestaReitityksestaSeuraaVirheellistaDokumenttia()
+			throws Exception {
+		// yksiloidaan kutsu aineistonnimella etta yksikkotestit voidaan
+		// suorittaa moniajoisesti ilman etta mockit hajoo
 
-    @Test
-    public void testaaEtteiVirheellisestaReitityksestaSeuraaVirheellistaDokumenttia() throws Exception {
-        // yksiloidaan kutsu aineistonnimella etta yksikkotestit voidaan
-        // suorittaa moniajoisesti ilman etta mockit hajoo
+		/**
+		 * virheellisia ja ok hakijoita sekaisin
+		 */
+		when(sijoitteluVastaanottaneet.vastaanottaneet(anyString()))
+				.thenReturn(Arrays.asList(ok, ok, ok, virheellinen, ok, ok, ok));
+		DokumenttiProsessi p = new DokumenttiProsessi("", "", hakuOid,
+				Arrays.asList("kela"));
+		kelaSiirtoDokumentinLuonti
+				.aloitaKelaLuonti(p, hakuOid, lukuvuosi, poimintapaivamaara,
+						virheAineistonNimi, organisaationNimi, null);
 
-        /**
-         * virheellisia ja ok hakijoita sekaisin
-         */
-        when(sijoitteluVastaanottaneet.vastaanottaneet(anyString())).thenReturn(
-                Arrays.asList(ok, ok, ok, virheellinen, ok, ok, ok));
-
-        kelaSiirtoDokumentinLuonti.aloitaKelaLuonti(hakuOid, lukuvuosi, poimintapaivamaara, virheAineistonNimi,
-                organisaationNimi);
-
-        Mockito.verify(kelaDokumentinLuontiKomponentti, Mockito.never()).luo(Mockito.anyCollectionOf(TKUVAYHVA.class),
-                Mockito.eq(virheAineistonNimi), anyString());
-    }
+		Mockito.verify(kelaDokumentinLuontiKomponentti, Mockito.never()).luo(
+				Mockito.anyCollectionOf(TKUVAYHVA.class),
+				Mockito.eq(virheAineistonNimi), anyString());
+	}
 
 }

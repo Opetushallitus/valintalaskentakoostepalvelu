@@ -109,7 +109,6 @@
                   address="${valintalaskentakoostepalvelu.hakemus.rest.url}"
                   serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource"
                   inheritHeaders="true">
-		<jaxrs:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"/></jaxrs:properties>
         <jaxrs:outInterceptors>
             <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
                 <property name="webCasUrl" value="${web.url.cas}"/>

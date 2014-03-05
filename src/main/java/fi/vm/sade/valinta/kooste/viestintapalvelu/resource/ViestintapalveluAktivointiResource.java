@@ -201,7 +201,7 @@ public class ViestintapalveluAktivointiResource {
 					hakemuksillaRajaus.getHakemusOids(), hakuOid,
 					//
 					SecurityContextHolder.getContext().getAuthentication());
-			return new ProsessiId(jalkiohjauskirjeetProsessi.getId());
+			return jalkiohjauskirjeetProsessi.toProsessiId();
 		} catch (Exception e) {
 			LOG.error("Jälkiohjauskirjeiden luonnissa virhe! {}",
 					e.getMessage());
