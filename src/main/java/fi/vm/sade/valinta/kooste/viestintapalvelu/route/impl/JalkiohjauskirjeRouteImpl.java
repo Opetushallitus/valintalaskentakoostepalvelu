@@ -177,9 +177,9 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRoute {
 						try {
 							String id = generateId();
 							dokumenttiResource.tallenna(id,
-									"koekutsukirje.pdf",
+									"jalkiohjauskirjeet.zip",
 									defaultExpirationDate().getTime(),
-									prosessi.getTags(), "application/pdf", pdf);
+									prosessi.getTags(), "application/zip", pdf);
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 							prosessi.setDokumenttiId(id);
