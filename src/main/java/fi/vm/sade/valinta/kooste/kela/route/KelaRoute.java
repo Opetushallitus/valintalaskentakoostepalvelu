@@ -36,37 +36,49 @@ public interface KelaRoute {
 	/**
 	 * Camel route description.
 	 */
-	String DIRECT_KELA_LUONTI = "direct:kela_luonti";
+	final String SEDA_KELA_LUONTI = "seda:kela_luonti?" +
+	// jos palvelin sammuu niin ei suorita loppuun tyojonoa
+			"purgeWhenStopping=true" +
+			// reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
+			"&waitForTaskToComplete=Never" +
+			// tyojonossa on yksi tyostaja
+			"&concurrentConsumers=1";
 	/**
 	 * Camel route description.
 	 */
-	String DIRECT_KELA_SIIRTO = "direct:kela_siirto";
+	final String SEDA_KELA_SIIRTO = "seda:kela_siirto?" +
+	// jos palvelin sammuu niin ei suorita loppuun tyojonoa
+			"purgeWhenStopping=true" +
+			// reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
+			"&waitForTaskToComplete=Never" +
+			// tyojonossa on yksi tyostaja
+			"&concurrentConsumers=1";
 	/**
 	 * Camel route description.
 	 */
-	String DIRECT_KELA_FAILED = "direct:kela_failed";
+	final String DIRECT_KELA_FAILED = "direct:kela_failed";
 	/**
 	 * Property hakuOid
 	 */
-	String PROPERTY_HAKUOID = "hakuOid";
+	final String PROPERTY_HAKUOID = "hakuOid";
 	/**
 	 * Property lukuvuosi
 	 */
-	String PROPERTY_LUKUVUOSI = "lukuvuosi";
+	final String PROPERTY_LUKUVUOSI = "lukuvuosi";
 	/**
 	 * Property poimintapaivamaara
 	 */
-	String PROPERTY_POIMINTAPAIVAMAARA = "poimintapaivamaara";
+	final String PROPERTY_POIMINTAPAIVAMAARA = "poimintapaivamaara";
 	/**
 	 * Property aineistonNimi
 	 */
-	String PROPERTY_AINEISTONNIMI = "aineistonNimi";
+	final String PROPERTY_AINEISTONNIMI = "aineistonNimi";
 	/**
 	 * Property organisaationNimi
 	 */
-	String PROPERTY_ORGANISAATIONNIMI = "organisaationNimi";
+	final String PROPERTY_ORGANISAATIONNIMI = "organisaationNimi";
 	/**
 	 * Property lukuvuosi
 	 */
-	String PROPERTY_DOKUMENTTI_ID = "dokumenttiId";
+	final String PROPERTY_DOKUMENTTI_ID = "dokumenttiId";
 }
