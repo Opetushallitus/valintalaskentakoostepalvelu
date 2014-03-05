@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
@@ -16,7 +17,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
@@ -95,33 +99,8 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRoute {
 
 		from("direct:jalkiohjauskirjeet_jatketaan")
 		//
-		//
-				.choice().when(property("hakemusOidit").isNotNull())
-				//
-				// Yksittaisille hakemuksille jalkiohjauskirje
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						final String hakuOid = exchange.getProperty(
-								OPH.HAKUOID, String.class);
-						@SuppressWarnings("unchecked")
-						List<String> hakemusOidit = exchange.getProperty(
-								"hakemusOidit", List.class);
-						final List<HakijaDTO> hyvaksymattomatHakijat = Lists
-								.newArrayList();
-						for (String hakemusOid : hakemusOidit) {
-							hyvaksymattomatHakijat.add(sijoitteluResource
-									.hakemus(hakuOid,
-											SijoitteluResource.LATEST,
-											hakemusOid));
-						}
-						exchange.getOut().setBody(hyvaksymattomatHakijat);
-					}
-				})
-				//
-				.otherwise()
-				//
-				// Kaikille sijoittelun antamille valitsemattomille
-				// jalkiohjauskirje
+		// Kaikille sijoittelun antamille valitsemattomille
+		// jalkiohjauskirje
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluProxy
@@ -132,15 +111,59 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRoute {
 					}
 
 				})
-				//
-				.end()
-				//
 				// TODO: Hae osoitteet erikseen
 				// TODO: Cache ulkopuolisiin palvelukutsuihin
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						List<HakijaDTO> hyvaksymattomatHakijat = exchange
+
+						@SuppressWarnings("unchecked")
+						Collection<HakijaDTO> hyvaksymattomatHakijat = exchange
 								.getIn().getBody(List.class);
+
+						Predicate<HakijaDTO> puutteellisetTiedot = new Predicate<HakijaDTO>() {
+							public boolean apply(HakijaDTO input) {
+								if (input == null
+										|| input.getHakutoiveet() == null
+										|| input.getHakutoiveet().isEmpty()) {
+									LOG.error("Hakija ilman hakutoiveita!");
+									return false;
+								}
+								return true;
+							}
+						};
+						//
+						// Filtteröidään puutteellisilla tiedoilla olevat
+						// hakijat pois
+						//
+						hyvaksymattomatHakijat = Collections2.filter(
+								hyvaksymattomatHakijat, puutteellisetTiedot);
+
+						final Set<String> filterOids = Sets
+								.<String> newHashSet(hakemusOids(exchange));
+						if (!filterOids.isEmpty()) {
+							Predicate<HakijaDTO> hakemusOidsWhitelist = new Predicate<HakijaDTO>() {
+								public boolean apply(HakijaDTO input) {
+
+									return filterOids.contains(input
+											.getHakemusOid());
+								}
+							};
+							hyvaksymattomatHakijat = Collections2.filter(
+									hyvaksymattomatHakijat,
+									hakemusOidsWhitelist);
+						}
+
+						if (hyvaksymattomatHakijat.isEmpty()) {
+							LOG.error("Jälkiohjauskirjeitä ei voida luoda kun ei ole hakijoita!");
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(Poikkeus.KOOSTEPALVELU,
+											"Jälkiohjauskirjeiden luonti",
+											"Jälkiohjauskirjeitä ei voida luoda kun ei ole jälkiohjattavaa hakijaa!"));
+							throw new RuntimeException(
+									"Jälkiohjauskirjeitä ei voida luoda kun ei ole hakijoita!");
+						}
+
 						dokumenttiprosessi(exchange).setKokonaistyo(
 								hyvaksymattomatHakijat.size() + 3); // hakemukset
 																	// +

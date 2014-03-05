@@ -74,7 +74,7 @@ public class JalkiohjauskirjeetKomponentti {
 	}
 
 	public Kirjeet<Kirje> teeJalkiohjauskirjeet(
-			@Body final List<HakijaDTO> hyvaksymattomatHakijat,
+			@Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
 			final Collection<Hakemus> hakemukset,
 			final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet) {// @Property(OPH.HAKUOID)
 																						// String
