@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,9 +64,24 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRoute {
 	@Override
 	public void configure() throws Exception {
 		from(hyvaksymiskirjeet)
-		// TODO: Hae osoitteet erikseen
+				// TODO: Hae osoitteet erikseen
 				.process(security)
-				// TODO: Cache ulkopuolisiin palvelukutsuihin
+				//
+				.choice()
+				//
+				.when(prosessiOnKeskeytetty())
+				//
+				.log(LoggingLevel.WARN,
+						"Ohitetaan prosessi ${property.property_valvomo_prosessi} koska se on merkitty keskeytetyksi!")
+				//
+				.otherwise()
+				//
+				.to("direct:hyvaksymiskirjeet_jatketaan")
+				//
+				.end();
+
+		from("direct:hyvaksymiskirjeet_jatketaan")
+		// TODO: Cache ulkopuolisiin palvelukutsuihin
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						List<String> hakemusOids = hakemusOids(exchange);

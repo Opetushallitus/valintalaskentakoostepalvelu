@@ -6,11 +6,10 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.annotation.Resource;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -23,7 +22,6 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -34,13 +32,15 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
-import fi.vm.sade.valinta.dokumenttipalvelu.dto.MetaData;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaHakuRoute;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 
 @Controller
 @Path("kela")
@@ -65,6 +65,8 @@ public class KelaResource {
 
 	@Resource(name = "dokumenttipalveluRestClient")
 	private DokumenttiResource dokumenttiResource;
+	@Autowired
+	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 
 	@GET
 	@Path("/status")
@@ -74,62 +76,14 @@ public class KelaResource {
 		return kelaValvomo.getUusimmatProsessitJaStatukset();
 	}
 
-	/**
-	 * CAS TEST
-	 */
-	@Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}")
-	String baseAddress;
-	@Autowired
-	fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource hakuResource;
-
-	@GET
-	@Path("/test")
-	@ApiOperation(value = "CAS:n performanssi testaukseen. Varmistetaan etta kaikki palvelut vapauttaa tiketit.", response = Response.class)
-	public Response performanceTest(@QueryParam("threads") Integer threads,
-			@QueryParam("works") Integer works,
-			final @QueryParam("hakemusOid") String hakemusOid) {
-		LOG.info("Number of threads {} and number of works {} hakemusOid {}",
-				new Object[] { threads, works, hakemusOid });
-		if (works == null || threads == null || hakemusOid == null) {
-			LOG.error("Threads and works query parameter is mandatory!");
-			return Response.serverError().build();
-		}
-		final org.springframework.security.core.Authentication auth = SecurityContextHolder
-				.getContext().getAuthentication();
-		ExecutorService e = Executors.newFixedThreadPool(threads);
-		final Runnable r = new Runnable() {
-			@Override
-			public void run() {
-				try {
-					SecurityContextHolder.getContext().setAuthentication(auth);
-					hakuResource.getApplicationByOid(hakemusOid);
-					LOG.info("tehtiin haku kysely");
-				} catch (Exception e) {
-					e.printStackTrace();
-					LOG.error("{}", e.getMessage());
-				}
-			}
-		};
-		for (int i = 0; i < works; ++i) {
-			e.submit(r);
-		}
-		LOG.info("Tyot submitattu!");
-		return Response.ok().build();
-	}
-
-	/**
-	 * CAS TEST
-	 */
-
-	@GET
+	@POST
 	@Path("/aktivoi")
-	@ApiOperation(value = "Kela-reitin aktivointi", response = Response.class)
-	public Response aktivoiKelaTiedostonluonti(
+	@ApiOperation(value = "Kela-reitin aktivointi", response = ProsessiId.class)
+	public ProsessiId aktivoiKelaTiedostonluonti(
 			@QueryParam("hakuOid") String hakuOid) {
 		// tietoe ei ole viela saatavilla
 		if (hakuOid == null) {
-			return Response.serverError().entity("HakuOid on pakollinen!")
-					.build();
+			throw new RuntimeException("Haku-parametri on pakollinen");
 		}
 		String aineistonNimi = "Toisen asteen vastaanottotiedot";
 		String organisaationNimi = "OPH";
@@ -159,11 +113,15 @@ public class KelaResource {
 			LOG.error("Ei voitu hakea lukuvuotta tarjonnalta syystä {}",
 					e.getMessage());
 		}
-		kelaRoute
-				.aloitaKelaLuonti(hakuOid, new DateTime(lukuvuosi, kuukausi, 1,
-						1, 1).toDate(), new Date(), aineistonNimi,
-						organisaationNimi);
-		return Response.ok().build();
+		DokumenttiProsessi kelaProsessi = new DokumenttiProsessi("Kela",
+				"Kela-dokumentin luonti", hakuOid, Arrays.asList("kela"));
+
+		kelaRoute.aloitaKelaLuonti(kelaProsessi, hakuOid, new DateTime(
+				lukuvuosi, kuukausi, 1, 1, 1).toDate(), new Date(),
+				aineistonNimi, organisaationNimi, SecurityContextHolder
+						.getContext().getAuthentication());
+		dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
+		return kelaProsessi.toProsessiId();
 	}
 
 	@PUT
@@ -187,11 +145,4 @@ public class KelaResource {
 		return Response.ok().build();
 	}
 
-	@GET
-	@Path("/listaus")
-	@Produces(APPLICATION_JSON)
-	@ApiOperation(value = "Listaus Kela-dokumenteista", response = Collection.class)
-	public Collection<MetaData> listaus() {
-		return dokumenttiResource.hae(Arrays.asList("kela"));
-	}
 }

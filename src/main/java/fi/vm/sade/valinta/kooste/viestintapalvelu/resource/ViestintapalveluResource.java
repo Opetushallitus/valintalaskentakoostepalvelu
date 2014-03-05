@@ -60,6 +60,12 @@ public interface ViestintapalveluResource {
 	@POST
 	@Produces(APPLICATION_OCTET_STREAM)
 	@Consumes(APPLICATION_JSON)
+	@Path("/jalkiohjauskirje/sync/zip")
+	InputStream haeJalkiohjauskirjeetSync(Kirjeet<Kirje> kirjeet);
+
+	@POST
+	@Produces(APPLICATION_OCTET_STREAM)
+	@Consumes(APPLICATION_JSON)
 	@Path("/addresslabel/sync/pdf")
 	InputStream haeOsoitetarratSync(Osoitteet osoitteet);
 }

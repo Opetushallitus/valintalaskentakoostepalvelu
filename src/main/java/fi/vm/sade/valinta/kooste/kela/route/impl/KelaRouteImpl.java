@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Iterables;
@@ -58,13 +59,16 @@ public class KelaRouteImpl extends SpringRouteBuilder {
 	private final SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet;
 	private final DokumenttiResource dokumenttiResource;
 	private final PrepareKelaProcessDescription luoUusiProsessi;
+	private final String kelaLuonti;
 
 	@Autowired
 	public KelaRouteImpl(
+			@Value(KelaRoute.SEDA_KELA_LUONTI) String kelaLuonti,
 			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource,
 			KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti,
 			KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti,
 			SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet) {
+		this.kelaLuonti = kelaLuonti;
 		this.luoUusiProsessi = new PrepareKelaProcessDescription();
 		this.dokumenttiResource = dokumenttiResource;
 		this.kelaHakijaKomponentti = kelaHakijaKomponentti;
@@ -141,7 +145,7 @@ public class KelaRouteImpl extends SpringRouteBuilder {
 		/**
 		 * Kela-dokkarin luonti reitti
 		 */
-		from(kelaLuonti())
+		from(kelaLuonti)
 				//
 				.errorHandler(
 						deadLetterChannel(kelaFailed())
@@ -242,13 +246,6 @@ public class KelaRouteImpl extends SpringRouteBuilder {
 	 */
 	private String kelaFailed() {
 		return KelaRoute.DIRECT_KELA_FAILED;
-	}
-
-	/**
-	 * @return direct:kela_luonti
-	 */
-	private String kelaLuonti() {
-		return KelaRoute.DIRECT_KELA_LUONTI;
 	}
 
 }

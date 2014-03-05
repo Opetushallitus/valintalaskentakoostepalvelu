@@ -82,7 +82,8 @@ public abstract class AbstractDokumenttiRoute extends SpringRouteBuilder {
 	}
 
 	protected List<String> hakemusOids(Exchange exchange) {
-		return exchange.getProperty("hakemusOids", List.class);
+		return exchange.getProperty("hakemusOids", Collections.emptyList(),
+				List.class);
 	}
 
 	protected String hakukohdeOid(Exchange exchange) {

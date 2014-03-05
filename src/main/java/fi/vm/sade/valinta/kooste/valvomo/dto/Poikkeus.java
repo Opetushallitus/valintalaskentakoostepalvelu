@@ -26,6 +26,7 @@ public class Poikkeus {
 	public static final String KOODISTO = "Koodistopalvelu";
 	public static final String TARJONTA = "Tarjontapalvelu";
 	public static final String VALINTALASKENTA = "Valintalaskentapalvelu";
+	public static final String KOOSTEPALVELU = "Koostepalvelu";
 
 	private final Collection<Oid> oidit;
 	private final String palvelu;

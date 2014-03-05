@@ -9,6 +9,7 @@ import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemusUtil.ASIOINT
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,22 +21,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Maps;
+
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemusUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 
 /**
  * @author Jussi Jartamo
@@ -45,21 +44,12 @@ public class JalkiohjauskirjeetKomponentti {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(JalkiohjauskirjeetKomponentti.class);
-	private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
-	private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
-	private HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
 	private HaeOsoiteKomponentti osoiteKomponentti;
-	private HaeHakemusKomponentti hakemusProxy;
 
 	@Autowired
-	public JalkiohjauskirjeetKomponentti(
-			HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy,
-			HaeOsoiteKomponentti osoiteKomponentti,
-			HaeHakemusKomponentti hakemusProxy) {
-		this.tarjontaProxy = tarjontaProxy;
+	public JalkiohjauskirjeetKomponentti(HaeOsoiteKomponentti osoiteKomponentti) {
 		this.osoiteKomponentti = osoiteKomponentti;
-		this.hakemusProxy = hakemusProxy;
 	}
 
 	private String vakioHakukohteenNimi(String hakukohdeOid) {
@@ -74,11 +64,22 @@ public class JalkiohjauskirjeetKomponentti {
 				.toString();
 	}
 
+	private Map<String, Hakemus> hakemuksistaOidMap(
+			final Collection<Hakemus> hakemukset) {
+		Map<String, Hakemus> m = Maps.newHashMap();
+		for (Hakemus h : hakemukset) {
+			m.put(h.getOid(), h);
+		}
+		return m;
+	}
+
 	public Kirjeet<Kirje> teeJalkiohjauskirjeet(
-			@Body final List<HakijaDTO> hyvaksymattomatHakijat) {// @Property(OPH.HAKUOID)
-																	// String
-																	// hakuOid)
-																	// {
+			@Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
+			final Collection<Hakemus> hakemukset,
+			final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet) {// @Property(OPH.HAKUOID)
+																						// String
+																						// hakuOid)
+																						// {
 		final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
 		if (kaikkiHyvaksymattomat == 0) {
 			LOG.error("Jälkiohjauskirjeitä yritetään luoda haulle jolla kaikki hakijat on hyväksytty koulutukseen!");
@@ -86,11 +87,14 @@ public class JalkiohjauskirjeetKomponentti {
 			throw new SijoittelupalveluException(
 					"Sijoittelupalvelun mukaan kaikki hakijat on hyväksytty johonkin koulutukseen!");
 		}
-		final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet = haeKiinnostavatHakukohteet(hyvaksymattomatHakijat);
+		// final Map<String, MetaHakukohde>
+		// jalkiohjauskirjeessaKaytetytHakukohteet =
+		// haeKiinnostavatHakukohteet(hyvaksymattomatHakijat);
+		final Map<String, Hakemus> hakemusOidHakemukset = hakemuksistaOidMap(hakemukset);
 		final List<Kirje> kirjeet = new ArrayList<Kirje>();
 		for (HakijaDTO hakija : hyvaksymattomatHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
-			final Hakemus hakemus = hakemusProxy.haeHakemus(hakemusOid);
+			final Hakemus hakemus = hakemusOidHakemukset.get(hakemusOid); // hakemusProxy.haeHakemus(hakemusOid);
 			final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
 			final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
 
@@ -228,54 +232,6 @@ public class JalkiohjauskirjeetKomponentti {
 					"Viestintäpalvelun message rajapinta ei ole käytettävissä! {}",
 					logiViesti);
 		}
-	}
-
-	//
-	// Hakee kaikki hyvaksymiskirjeen kohteena olevan hakukohteen hakijat ja
-	// niihin liittyvat hakukohteet - eli myos hakijoiden hylatyt hakukohteet!
-	// Metahakukohteille haetaan muun muassa tarjoajanimi!
-	//
-	private Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(
-			List<HakijaDTO> hakukohteenHakijat) {
-		Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
-		for (HakijaDTO hakija : hakukohteenHakijat) {
-			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-				String hakukohdeOid = hakutoive.getHakukohdeOid();
-				if (!metaKohteet.containsKey(hakukohdeOid)) { // lisataan
-																// puuttuva
-																// hakukohde
-					try {
-						HakukohdeNimiRDTO nimi = tarjontaProxy
-								.haeHakukohdeNimi(hakukohdeOid);
-						Teksti hakukohdeNimi = new Teksti(
-								nimi.getHakukohdeNimi());// extractHakukohdeNimi(nimi,
-															// kielikoodi);
-						Teksti tarjoajaNimi = new Teksti(nimi.getTarjoajaNimi());// extractTarjoajaNimi(nimi,
-																					// kielikoodi);
-						metaKohteet.put(hakukohdeOid, new MetaHakukohde(
-								hakukohdeNimi, tarjoajaNimi));
-					} catch (Exception e) {
-						e.printStackTrace();
-						LOG.error("Tarjonnasta ei saatu hakukohdetta {}: {}",
-								new Object[] { hakukohdeOid, e.getMessage() });
-						viestintapalveluLogi("Tarjonnasta ei löytynyt hakukohdetta oid:lla "
-								+ hakukohdeOid);
-						metaKohteet
-								.put(hakukohdeOid,
-										new MetaHakukohde(
-												new Teksti(
-														new StringBuilder()
-																.append("Hakukohde ")
-																.append(hakukohdeOid)
-																.append(" ei löydy tarjonnasta!")
-																.toString()),
-												new Teksti(TYHJA_TARJOAJANIMI)));
-					}
-
-				}
-			}
-		}
-		return metaKohteet;
 	}
 
 }

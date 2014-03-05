@@ -8,15 +8,17 @@ import java.util.Collection;
 import javax.annotation.Resource;
 import javax.ws.rs.core.Response;
 
+import junit.framework.Assert;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -27,13 +29,14 @@ import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
+import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.dokumenttipalvelu.SendMessageToDocumentService;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.route.KelaFtpRoute;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaFtpRouteImpl;
-import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
+import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 
 /**
  * 
@@ -42,7 +45,7 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
  */
 @Configuration
 @ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class,
-		KelaFtpRouteTest.class, KelaRouteConfig.class })
+		KelaFtpRouteTest.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class KelaFtpRouteTest {
 
@@ -50,15 +53,31 @@ public class KelaFtpRouteTest {
 			.getLogger(KelaFtpRouteTest.class);
 	private static final String FTP_MOCK = "mock:ftpMock";
 	private static final String FTP_CONFIG = "retainFirst=1";
+	private static final String KELA_SIIRTO = "direct:kela_siirto";
+
+	@Bean(name = "kelaValvomo")
+	public ValvomoServiceImpl<KelaProsessi> getValvomoServiceImpl() {
+		return new ValvomoServiceImpl<KelaProsessi>();
+	}
+
+	@Bean
+	public KelaFtpRoute getKelaFtpRoute(
+
+	@Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
+		return ProxyWithAnnotationHelper.createProxy(
+				context.getEndpoint(KELA_SIIRTO), KelaFtpRoute.class);
+	}
 
 	@Bean
 	public KelaFtpRouteImpl getKelaRouteImpl(
-			DokumenttiResource dokumenttiResource) {
+
+	DokumenttiResource dokumenttiResource) {
 		/**
 		 * Ylikirjoitetaan kela-ftp endpoint logitusreitilla yksikkotestia
 		 * varten!
 		 */
-		return new KelaFtpRouteImpl(FTP_MOCK, FTP_CONFIG, dokumenttiResource);
+		return new KelaFtpRouteImpl(KELA_SIIRTO, FTP_MOCK, FTP_CONFIG,
+				dokumenttiResource);
 	}
 
 	@Bean

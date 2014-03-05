@@ -38,7 +38,7 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
 
 	private final String ftpKelaSiirto;
 	private PrepareKelaProcessDescription luoUusiProsessi;
-
+	private final String kelaSiirto;
 	private DokumenttiResource dokumenttiResource;
 
 	/**
@@ -49,11 +49,13 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
 	 */
 	@Autowired
 	public KelaFtpRouteImpl(
+			@Value(KelaRoute.SEDA_KELA_SIIRTO) String kelaSiirto,
 			@Value("${kela.ftp.protocol}://${kela.ftp.username}@${kela.ftp.host}:${kela.ftp.port}${kela.ftp.path}") final String host,
 			@Value("password=${kela.ftp.password}&ftpClient.dataTimeout=30000&passiveMode=true") final String params,
 			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(host).append("?").append(params);
+		this.kelaSiirto = kelaSiirto;
 		this.ftpKelaSiirto = builder.toString();
 		this.luoUusiProsessi = new PrepareKelaProcessDescription();
 		this.dokumenttiResource = dokumenttiResource;
@@ -73,7 +75,7 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
 		/**
 		 * Kela-dokkarin siirto ftp:lla Kelalle
 		 */
-		from(kelaSiirto())
+		from(kelaSiirto)
 				// prosessin kuvaus
 				.setProperty(kuvaus(), constant("Kela-siirto"))
 				.setProperty(prosessi(), method(luoUusiProsessi))
@@ -96,13 +98,6 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
 	 */
 	private String ftpKelaSiirto() {
 		return ftpKelaSiirto;
-	}
-
-	/**
-	 * @return direct:kela_siirto
-	 */
-	private String kelaSiirto() {
-		return KelaRoute.DIRECT_KELA_SIIRTO;
 	}
 
 	public String getFtpKelaSiirto() {
