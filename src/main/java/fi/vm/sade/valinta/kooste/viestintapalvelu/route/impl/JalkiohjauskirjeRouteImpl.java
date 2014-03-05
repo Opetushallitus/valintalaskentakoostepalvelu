@@ -165,14 +165,15 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRoute {
 						}
 
 						dokumenttiprosessi(exchange).setKokonaistyo(
-								hyvaksymattomatHakijat.size() + 3); // hakemukset
+								hyvaksymattomatHakijat.size() + 4); // hakemukset
 																	// +
 																	// tarjonnasta
 																	// haku +
-																	// dokumentin
-																	// luonti +
-																	// dokumentin
-																	// vienti
+						// osoitteiden haku +
+						// dokumentin
+						// luonti +
+						// dokumentin
+						// vienti
 						final Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
 						for (HakijaDTO hakija : hyvaksymattomatHakijat) {
 							for (HakutoiveDTO hakutoive : hakija
