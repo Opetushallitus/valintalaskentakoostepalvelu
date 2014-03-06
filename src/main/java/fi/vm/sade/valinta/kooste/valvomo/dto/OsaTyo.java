@@ -116,7 +116,7 @@ public class OsaTyo extends Tyo {
 		if (kokonaismaara.get() == -1) {
 			return false;
 		}
-		return kokonaismaara.get() == kestot.size();
+		return kokonaismaara.get() <= kestot.size();
 	}
 
 	@com.fasterxml.jackson.annotation.JsonIgnore
