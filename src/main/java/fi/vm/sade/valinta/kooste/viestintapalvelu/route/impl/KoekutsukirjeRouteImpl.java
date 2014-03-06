@@ -271,7 +271,6 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRoute {
 						DokumenttiProsessi prosessi = dokumenttiprosessi(exchange);
 						InputStream pdf;
 						try {
-
 							// LOG.error(
 							// "\r\n{}",
 							// new GsonBuilder().setPrettyPrinting()
