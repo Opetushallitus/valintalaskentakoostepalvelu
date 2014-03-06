@@ -12,7 +12,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.service.valintatiedot.ValintatietoService;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
@@ -75,6 +77,16 @@ public class KoekutsukirjeetTest {
 	@Bean
 	public HaeHakukohdeNimiTarjonnaltaKomponentti getHaeHakukohdeNimiTarjonnaltaKomponentti() {
 		return Mockito.mock(HaeHakukohdeNimiTarjonnaltaKomponentti.class);
+	}
+
+	@Bean
+	public KoodiService getKoodiService() {
+		return Mockito.mock(KoodiService.class);
+	}
+
+	@Bean
+	public HakukohdeResource getTarjontaResource() {
+		return Mockito.mock(HakukohdeResource.class);
 	}
 
 	@Bean

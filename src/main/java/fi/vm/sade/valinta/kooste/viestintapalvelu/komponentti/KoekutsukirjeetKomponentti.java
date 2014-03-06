@@ -12,8 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
+import com.google.gson.GsonBuilder;
 
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.koodisto.service.KoodiService;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeLiiteDTO;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
@@ -30,12 +34,18 @@ public class KoekutsukirjeetKomponentti {
 
 	private final HaeOsoiteKomponentti osoiteKomponentti;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
+	private final HakukohdeResource tarjontaResource;
+	private final KoodiService koodiService;
 
 	@Autowired
-	public KoekutsukirjeetKomponentti(HaeOsoiteKomponentti osoiteKomponentti,
-			HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy) {
+	public KoekutsukirjeetKomponentti(KoodiService koodiService,
+			HaeOsoiteKomponentti osoiteKomponentti,
+			HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy,
+			HakukohdeResource tarjontaResource) {
+		this.koodiService = koodiService;
 		this.osoiteKomponentti = osoiteKomponentti;
 		this.tarjontaProxy = tarjontaProxy;
+		this.tarjontaResource = tarjontaResource;
 	}
 
 	public Kirjeet<Koekutsukirje> valmistaKoekutsukirjeet(
@@ -51,25 +61,47 @@ public class KoekutsukirjeetKomponentti {
 			final List<Map<String, String>> customLetterContents = Collections
 					.emptyList();
 
-			final HakukohdeNimiRDTO nimi;
+			// final HakukohdeNimiRDTO nimi;
+			final HakukohdeDTO nimi;
 			try {
-				nimi = tarjontaProxy.haeHakukohdeNimi(hakukohdeOid);
+				// hakukohde =
+				nimi = tarjontaResource.getByOID(hakukohdeOid);
+				// tarjontaProxy.haeHakukohdeNimi(hakukohdeOid);
+				// hakukohde.getHakukohdeNimi()
 			} catch (Exception e) {
 				LOG.error("Tarjonnalta ei saatu hakukohteelle({}) nimea!",
 						hakukohdeOid);
 				throw e;
 			}
 			final Teksti hakukohdeNimi = new Teksti(nimi.getHakukohdeNimi());
+			final Teksti tarjoajaNimi = new Teksti(nimi.getTarjoajaNimi());
+
+			try {
+				if (nimi.getLiitteet() != null) {
+					for (HakukohdeLiiteDTO l : nimi.getLiitteet()) {
+						LOG.error("\r\n{}\r\n", new GsonBuilder()
+								.setPrettyPrinting().create().toJson(l));
+					}
+				} else {
+					LOG.error("NULL LIITTEET!");
+				}
+			} catch (Exception e) {
+				LOG.error("Ei voitu tulostaa liitteitä!");
+			}
 
 			for (Hakemus hakemus : hakemukset) {
 				Osoite addressLabel = osoiteKomponentti.haeOsoite(hakemus);
 				String languageCode = hakukohdeNimi.getKieli(); // hakukohteen
 																// kieli
 																// koekutsuissa
-				String hakukohde = hakukohdeNimi.getTeksti();
+				String hakukohdeNimiTietyllaKielella = hakukohdeNimi
+						.getTeksti();
+				String tarjoajaNimiTietyllaKielella = tarjoajaNimi.getTeksti();
 
 				kirjeet.add(new Koekutsukirje(addressLabel, languageCode,
-						hakukohde, letterBodyText, customLetterContents));
+						hakukohdeNimiTietyllaKielella,
+						tarjoajaNimiTietyllaKielella, letterBodyText,
+						customLetterContents));
 			}
 			LOG.info("Luodaan koekutsukirjeet {} henkilolle", kirjeet.size());
 			return new Kirjeet<Koekutsukirje>(kirjeet);

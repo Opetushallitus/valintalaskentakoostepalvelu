@@ -154,11 +154,7 @@ public class HyvaksymiskirjeetKomponentti {
 					}
 				}
 				tulokset.put("paasyJaSoveltuvuuskoe", pisteet.toString().trim());
-				tulokset.put(
-						"organisaationNimi",
-						metakohde.getTarjoajaNimi().getTeksti(
-								preferoituKielikoodi,
-								vakioTarjoajanNimi(hakukohdeOid)));
+
 				StringBuilder omatPisteet = new StringBuilder();
 				StringBuilder hyvaksytyt = new StringBuilder();
 				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
@@ -221,6 +217,11 @@ public class HyvaksymiskirjeetKomponentti {
 								"Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
 					}
 				}
+				tulokset.put(
+						"organisaationNimi",
+						metakohde.getTarjoajaNimi().getTeksti(
+								preferoituKielikoodi,
+								vakioTarjoajanNimi(hakukohdeOid)));
 				tulokset.put("omatPisteet", omatPisteet.toString());
 				tulokset.put("hyvaksytyt", hyvaksytyt.toString());
 				tulokset.put("alinHyvaksyttyPistemaara", StringUtils.EMPTY);
