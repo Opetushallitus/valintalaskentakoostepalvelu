@@ -385,7 +385,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 						valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
 								.set(null);
 					}
-				}).to(finish)
+				})
+				//
+				.to(finish)
 				//
 				.end();
 

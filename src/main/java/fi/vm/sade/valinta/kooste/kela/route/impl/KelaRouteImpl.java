@@ -3,13 +3,12 @@ package fi.vm.sade.valinta.kooste.kela.route.impl;
 import static fi.vm.sade.valinta.kooste.dokumenttipalvelu.SendMessageToDocumentService.MESSAGE;
 import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.fail;
 import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.finish;
-import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.kuvaus;
-import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.prosessi;
 import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.start;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,7 +18,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.Property;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
-import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -33,6 +31,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.Message;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.OPH;
@@ -42,6 +41,8 @@ import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.PrepareKelaProcessDescription;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKaikkiPaikanVastaanottaneet;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRoute;
 
 /**
  * @author Jussi Jartamo
@@ -49,7 +50,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKaikkiPaikanVa
  *         Route to Kela.
  */
 @Component
-public class KelaRouteImpl extends SpringRouteBuilder {
+public class KelaRouteImpl extends AbstractDokumenttiRoute {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(KelaRouteImpl.class);
@@ -60,6 +61,7 @@ public class KelaRouteImpl extends SpringRouteBuilder {
 	private final DokumenttiResource dokumenttiResource;
 	private final PrepareKelaProcessDescription luoUusiProsessi;
 	private final String kelaLuonti;
+	private final SecurityPreprocessor security = new SecurityPreprocessor();
 
 	@Autowired
 	public KelaRouteImpl(
@@ -94,21 +96,26 @@ public class KelaRouteImpl extends SpringRouteBuilder {
 	 */
 	public final void configure() {
 
-		from(kelaFailed()).process(new Processor() {
-			public void process(Exchange exchange) throws Exception {
-				AtomicBoolean onkoEnsimmainenVirhe = exchange.getProperty(
-						ENSIMMAINEN_VIRHE, AtomicBoolean.class);
-				if (onkoEnsimmainenVirhe != null
-						&& onkoEnsimmainenVirhe.compareAndSet(true, false)) {
-					dokumenttiResource.viesti(new Message(
-							"Kela-dokumentin luonti epäonnistui.", Arrays
-									.asList("valintalaskentakoostepalvelu",
+		from(kelaFailed())
+		//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						AtomicBoolean onkoEnsimmainenVirhe = exchange
+								.getProperty(ENSIMMAINEN_VIRHE,
+										AtomicBoolean.class);
+						if (onkoEnsimmainenVirhe != null
+								&& onkoEnsimmainenVirhe.compareAndSet(true,
+										false)) {
+							dokumenttiResource.viesti(new Message(
+									"Kela-dokumentin luonti epäonnistui.",
+									Arrays.asList(
+											"valintalaskentakoostepalvelu",
 											"kela"), DateTime.now().plusDays(1)
-									.toDate()));
-				}
-			}
-		})
-		// merkkaa prosessi failediksi
+											.toDate()));
+						}
+					}
+				})
+				// merkkaa prosessi failediksi
 
 				// informoi kayttajaa
 				.setHeader(MESSAGE,
@@ -138,15 +145,23 @@ public class KelaRouteImpl extends SpringRouteBuilder {
 				//
 				)
 				//
-				.process(new SecurityPreprocessor())
+				.process(security)
 				//
-				.bean(kelaHakijaKomponentti);
+				.bean(kelaHakijaKomponentti)
+				//
+				.process(new Processor() {
+
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+					}
+				});
 
 		/**
 		 * Kela-dokkarin luonti reitti
 		 */
 		from(kelaLuonti)
-				//
+		//
 				.errorHandler(
 						deadLetterChannel(kelaFailed())
 								//
@@ -156,29 +171,53 @@ public class KelaRouteImpl extends SpringRouteBuilder {
 								.logStackTrace(true).logRetryStackTrace(true)
 								.logHandled(true))
 				//
-				.process(new SecurityPreprocessor())
+				.process(security)
 				//
-				.setProperty(ENSIMMAINEN_VIRHE,
-						constant(new AtomicBoolean(true)))
-				// RESURSSI
-				.setProperty(kuvaus(), constant("Dokumentin luonti"))
-				//
-				.setProperty(prosessi(), method(luoUusiProsessi))
 				// Start prosessi valvomoon dokumentin luonnin aloittamisesta
 				.to(start())
 				// ilmoitetaan dokumenttipalveluun aloitetusta luonnista
 				// (informoi kayttajaa)
 				//
-				.setBody(
-						constant(new Message(
-								"Kela-dokumentin luonti aloitettu.", Arrays
-										.asList("valintalaskentakoostepalvelu",
-												"kela"), DateTime.now()
-										.plusDays(1).toDate())))
-				//
-				.bean(dokumenttiResource, "viesti")
 				// haetaan sijoittelusta vastaanottaneet hakijat
-				.bean(sijoitteluVastaanottaneet)
+				.process(new Processor() {
+
+					@Override
+					public void process(Exchange exchange) throws Exception {
+
+						Collection<HakijaDTO> hakijat;
+						try {
+							exchange.getOut()
+									.setBody(
+											hakijat = sijoitteluVastaanottaneet
+													.vastaanottaneet(hakuOid(exchange)));
+
+						} catch (Exception e) {
+							e.printStackTrace();
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(Poikkeus.SIJOITTELU,
+											"vastaanottaneet", e.getMessage(),
+											Poikkeus.hakuOid(hakuOid(exchange))));
+							LOG.error(
+									"Sijoittelusta ei saatu paikanvastaanottaneita {}",
+									e.getMessage());
+							throw e;
+						}
+						if (hakijat.isEmpty()) {
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(Poikkeus.SIJOITTELU,
+											"Ei paikan vastaanottaneita",
+											"Ei paikan vastaanottaneita",
+											Poikkeus.hakuOid(hakuOid(exchange))));
+							throw new RuntimeException(
+									"Ei paikan vastaanottaneita");
+						}
+						dokumenttiprosessi(exchange).setKokonaistyo(
+								hakijat.size() + 1);
+					}
+				})
+
 				// List<HakijaDTO> -->
 				.split(body(), createAccumulatingAggregation())
 				//
@@ -192,7 +231,9 @@ public class KelaRouteImpl extends SpringRouteBuilder {
 				//
 
 				// HakijaDTO -->
-				.to("direct:kela_yksittainen_rivi").end()
+				.to("direct:kela_yksittainen_rivi")
+				//
+				.end()
 				// Collection<Collection<TKUVAYHVA>> ->
 				.process(new Processor() { // FLATTEN
 							@Override
@@ -212,22 +253,31 @@ public class KelaRouteImpl extends SpringRouteBuilder {
 					public void process(Exchange exchange) throws Exception {
 						InputStream filedata = exchange.getIn().getBody(
 								InputStream.class);
-
-						dokumenttiResource.tallenna(null,
-								KelaUtil.createTiedostoNimiYhva14(new Date()),
-								DateTime.now().plusDays(1).getMillis(),
-								Arrays.asList("kela"), "kela", filedata);
+						try {
+							String id = generateId();
+							dokumenttiResource.tallenna(id, KelaUtil
+									.createTiedostoNimiYhva14(new Date()),
+									DateTime.now().plusDays(1).getMillis(),
+									Arrays.asList("kela"), "kela", filedata);
+							dokumenttiprosessi(exchange).setDokumenttiId(id);
+							dokumenttiprosessi(exchange)
+									.inkrementoiTehtyjaToita();
+						} catch (Exception e) {
+							e.printStackTrace();
+							LOG.error(
+									"Dokumenttipalveluun tallennus epäonnistui: {} {}",
+									e.getMessage(), e.getCause());
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.DOKUMENTTIPALVELU,
+											"Dokumentin tallennus", e
+													.getMessage(), Poikkeus
+													.hakuOid(hakuOid(exchange))));
+							throw e;
+						}
 					}
 				})
-				// dokumenttiResource.viesti(new Message(message, tags,
-				// DateTime.now().plusDays(1).toDate()));
-				.setBody(
-						constant(new Message("Dokumentinluonti onnistui",
-								Arrays.asList("valintalaskentakoostepalvelu",
-										"kela"), DateTime.now().plusDays(1)
-										.toDate())))
-				//
-				.bean(dokumenttiResource, "viesti")
 				// Done valvomoon
 				.to(finish());
 
