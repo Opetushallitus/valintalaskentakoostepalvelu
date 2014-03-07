@@ -61,20 +61,21 @@ public class ValintalaskentaMuistissaTest {
 
 	@Test
 	public void testaaMaskaus() throws Exception {
+		String hakuOid = "h0";
 		Hakemus hak1 = new Hakemus();
 		hak1.setOid("hak1");
 		Hakemus hak2 = new Hakemus();
 		hak2.setOid("hak2");
 
-		Mockito.when(hakuAppHakemusOids.getHakemusOids("h1")).thenReturn(
-				Arrays.asList("hak1", "hak2"));
+		Mockito.when(hakuAppHakemusOids.getHakemusOids(hakuOid, "h1"))
+				.thenReturn(Arrays.asList("hak1", "hak2"));
 
-		Mockito.when(hakuAppHakemusOids.getHakemusOids("h2")).thenReturn(
-				Arrays.asList("hak1", "hak2"));
-		Mockito.when(hakuAppHakemusOids.getHakemusOids("h3")).thenReturn(
-				Arrays.asList("hak1", "hak2"));
-		Mockito.when(hakuAppHakemusOids.getHakemusOids("h4")).thenReturn(
-				Collections.<String> emptyList());
+		Mockito.when(hakuAppHakemusOids.getHakemusOids(hakuOid, "h2"))
+				.thenReturn(Arrays.asList("hak1", "hak2"));
+		Mockito.when(hakuAppHakemusOids.getHakemusOids(hakuOid, "h3"))
+				.thenReturn(Arrays.asList("hak1", "hak2"));
+		Mockito.when(hakuAppHakemusOids.getHakemusOids(hakuOid, "h4"))
+				.thenReturn(Collections.<String> emptyList());
 
 		Mockito.when(hakuAppHakemus.getHakemus("hak1")).thenReturn(hak1);
 		Mockito.when(hakuAppHakemus.getHakemus("hak2")).thenReturn(hak2);
@@ -85,7 +86,6 @@ public class ValintalaskentaMuistissaTest {
 		Mockito.when(valintaperusteet.getValintaperusteet("h3")).thenReturn(
 				Arrays.asList(new ValintaperusteetTyyppi()));
 
-		String hakuOid = "h0";
 		ValintalaskentaMuistissaRoute l = ProxyWithAnnotationHelper
 				.createProxy(camelContext.getEndpoint(routeId),
 						ValintalaskentaMuistissaRoute.class);
