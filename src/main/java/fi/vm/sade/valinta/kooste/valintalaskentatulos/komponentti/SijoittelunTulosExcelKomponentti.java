@@ -21,8 +21,6 @@ import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 
-import javax.ws.rs.core.Response;
-
 /**
  * 
  * @author Jussi Jartamo
@@ -32,76 +30,100 @@ import javax.ws.rs.core.Response;
 @Component("sijoittelunTulosXlsKomponentti")
 public class SijoittelunTulosExcelKomponentti {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SijoittelunTulosExcelKomponentti.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SijoittelunTulosExcelKomponentti.class);
 
-    @Autowired
-    private SijoitteluResource sijoitteluajoResource;
+	@Autowired
+	private SijoitteluResource sijoitteluajoResource;
 
-    @Autowired
-    private TilaResource tilaResource;
+	@Autowired
+	private TilaResource tilaResource;
 
-    public InputStream luoXls(@Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
-            @Simple("${property.hakukohdeOid}") String hakukohdeOid, @Simple("${property.hakuOid}") String hakuOid) {
-        Map<String, List<Valintatulos>> valintatulosCache = new HashMap<String, List<Valintatulos>>();
+	public InputStream luoXls(
+			@Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
+			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
+			@Simple("${property.hakuOid}") String hakuOid) {
+		Map<String, List<Valintatulos>> valintatulosCache = new HashMap<String, List<Valintatulos>>();
 
-        Response hakukohdeBySijoitteluajo = sijoitteluajoResource.getHakukohdeBySijoitteluajo(hakuOid, sijoitteluajoId.toString(),
-                hakukohdeOid);
-        HakukohdeDTO hakukohde = null;
-        if(hakukohdeBySijoitteluajo.getStatus() == Response.Status.OK.getStatusCode()){
-            hakukohde = (HakukohdeDTO) hakukohdeBySijoitteluajo.getEntity();
-        } else {
-            throw new RuntimeException("sijoittelua ei löytynyt.");
-        }
+		HakukohdeDTO hakukohde = sijoitteluajoResource
+				.getHakukohdeBySijoitteluajo(hakuOid,
+						sijoitteluajoId.toString(), hakukohdeOid);
 
-                List<Object[]> rivit = new ArrayList<Object[]>();
-        for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
-            rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
-            rivit.add(new Object[] { "Jonosija", "Tasasijan jonosija", "Hakija", "Hakemus", "Hakutoive",
-                    "Sijoittelun tila", "Vastaanottotieto" });
-            for (HakemusDTO hakemus : jono.getHakemukset()) {
-                // Jonosija Tasasijan jonosija Hakija Hakemus Hakutoive
-                // Sijoittelun tila Vastaanottotieto
-                StringBuilder nimi = new StringBuilder();
-                String hakemusOid = hakemus.getHakemusOid();
-                //
-                // OVT-6335
-                //
-                List<Valintatulos> valintaTulos = Collections.<Valintatulos> emptyList();
-                if (valintatulosCache.containsKey(hakemusOid)) {
-                    valintaTulos = valintatulosCache.get(hakemusOid);
-                } else {
-                    try {
-                        valintaTulos = tilaResource.hakemus(hakemusOid);
-                        if (valintaTulos == null) {
-                            LOG.error("Hakemukselle {} ei saatu valintatuloksia sijoittelusta!",
-                                    new Object[] { hakemusOid });
-                            valintatulosCache.put(hakemusOid, Collections.<Valintatulos> emptyList());
-                        } else {
-                            valintatulosCache.put(hakemusOid, valintaTulos);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        LOG.error("Hakemukselle {} ei saatu valintatuloksia sijoittelusta! {}", new Object[] {
-                                hakemusOid, e.getMessage() });
-                        valintatulosCache.put(hakemusOid, Collections.<Valintatulos> emptyList());
-                    }
-                }
-                String valintaTieto = "--";
-                for (Valintatulos valinta : valintaTulos) {
-                    if (jono.getOid().equals(valinta.getValintatapajonoOid())) {
-                        if (valinta.getTila() != null) {
-                            valintaTieto = valinta.getTila().toString();
-                        }
-                        break;
-                    }
-                }
-                nimi.append(hakemus.getSukunimi()).append(", ").append(hakemus.getEtunimi());
-                rivit.add(new Object[] { hakemus.getJonosija(), hakemus.getTasasijaJonosija(), nimi.toString(),
-                        hakemusOid, hakemus.getPrioriteetti(), hakemus.getTila(), valintaTieto });
-            }
-            rivit.add(new Object[] {});
-        }
-        return ExcelExportUtil.exportGridAsXls(rivit.toArray(new Object[][] {}));
-    }
+		// if (hakukohdeBySijoitteluajo.getStatus() == Response.Status.OK
+		// .getStatusCode()) {
+		// Object ehkaHakukohdeDto = hakukohdeBySijoitteluajo.getEntity();
+		// if (ehkaHakukohdeDto == null) {
+		// throw new RuntimeException(
+		// "Sijoittelupalvelu ei anna tuloksia!");
+		// } else if (ehkaHakukohdeDto instanceof HakukohdeDTO) {
+		// hakukohde = (HakukohdeDTO) ehkaHakukohdeDto;
+		// } else {
+		// throw new RuntimeException(
+		// "Sijoittelupalvelun rajapinta on päivittynyt! "
+		// + ehkaHakukohdeDto.getClass());
+		// }
+		// } else {
+		// throw new RuntimeException("sijoittelua ei löytynyt.");
+		// }
 
+		List<Object[]> rivit = new ArrayList<Object[]>();
+		for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
+			rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
+			rivit.add(new Object[] { "Jonosija", "Tasasijan jonosija",
+					"Hakija", "Hakemus", "Hakutoive", "Sijoittelun tila",
+					"Vastaanottotieto" });
+			for (HakemusDTO hakemus : jono.getHakemukset()) {
+				// Jonosija Tasasijan jonosija Hakija Hakemus Hakutoive
+				// Sijoittelun tila Vastaanottotieto
+				StringBuilder nimi = new StringBuilder();
+				String hakemusOid = hakemus.getHakemusOid();
+				//
+				// OVT-6335
+				//
+				List<Valintatulos> valintaTulos = Collections
+						.<Valintatulos> emptyList();
+				if (valintatulosCache.containsKey(hakemusOid)) {
+					valintaTulos = valintatulosCache.get(hakemusOid);
+				} else {
+					try {
+						valintaTulos = tilaResource.hakemus(hakemusOid);
+						if (valintaTulos == null) {
+							LOG.error(
+									"Hakemukselle {} ei saatu valintatuloksia sijoittelusta!",
+									new Object[] { hakemusOid });
+							valintatulosCache.put(hakemusOid,
+									Collections.<Valintatulos> emptyList());
+						} else {
+							valintatulosCache.put(hakemusOid, valintaTulos);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						LOG.error(
+								"Hakemukselle {} ei saatu valintatuloksia sijoittelusta! {}",
+								new Object[] { hakemusOid, e.getMessage() });
+						valintatulosCache.put(hakemusOid,
+								Collections.<Valintatulos> emptyList());
+					}
+				}
+				String valintaTieto = "--";
+				for (Valintatulos valinta : valintaTulos) {
+					if (jono.getOid().equals(valinta.getValintatapajonoOid())) {
+						if (valinta.getTila() != null) {
+							valintaTieto = valinta.getTila().toString();
+						}
+						break;
+					}
+				}
+				nimi.append(hakemus.getSukunimi()).append(", ")
+						.append(hakemus.getEtunimi());
+				rivit.add(new Object[] { hakemus.getJonosija(),
+						hakemus.getTasasijaJonosija(), nimi.toString(),
+						hakemusOid, hakemus.getPrioriteetti(),
+						hakemus.getTila(), valintaTieto });
+			}
+			rivit.add(new Object[] {});
+		}
+		return ExcelExportUtil
+				.exportGridAsXls(rivit.toArray(new Object[][] {}));
+	}
 }
