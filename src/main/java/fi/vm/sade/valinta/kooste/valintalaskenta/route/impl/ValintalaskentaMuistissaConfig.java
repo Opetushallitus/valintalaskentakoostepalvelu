@@ -96,10 +96,10 @@ public class ValintalaskentaMuistissaConfig {
 		final List<String> ACTIVE_AND_INCOMPLETE = Arrays.asList("ACTIVE",
 				"INCOMPLETE");
 		return new HakuAppHakemusOids() {
-			public Collection<String> getHakemusOids(String hakukohdeOid)
-					throws Exception {
+			public Collection<String> getHakemusOids(String hakuOid,
+					String hakukohdeOid) throws Exception {
 				HakemusList hakemusList = applicationResource.findApplications(
-						null, ACTIVE_AND_INCOMPLETE, null, null, null,
+						null, ACTIVE_AND_INCOMPLETE, null, null, hakuOid,
 						hakukohdeOid, 0, Integer.MAX_VALUE);
 
 				return Collections2.transform(hakemusList.getResults(),

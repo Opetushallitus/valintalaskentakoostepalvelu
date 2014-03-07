@@ -572,11 +572,12 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	private Processor hakemusOiditHakuApplta() {
 		return new Processor() {
 			public void process(Exchange exchange) throws Exception {
+				String hakuOid = hakuOid(exchange); // .getIn().getBody(String.class);
 				String hakukohdeOid = exchange.getIn().getBody(String.class);
 				long kesto = System.currentTimeMillis();
 				try {
 					Collection<String> hakemusOids = hakuAppHakemusOids
-							.getHakemusOids(hakukohdeOid);
+							.getHakemusOids(hakuOid, hakukohdeOid);
 					kesto = System.currentTimeMillis() - kesto;
 					prosessi(exchange).getHakukohteilleHakemukset()
 							.tyoValmistui(kesto);
@@ -648,7 +649,8 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	 */
 	public static interface HakuAppHakemusOids {
 
-		Collection<String> getHakemusOids(String hakukohdeOid) throws Exception;
+		Collection<String> getHakemusOids(String hakuOid, String hakukohdeOid)
+				throws Exception;
 	}
 
 	public static interface HakuAppHakemus {
@@ -667,4 +669,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				List<ValintaperusteetTyyppi> valintaperusteet);
 	}
 
+	protected String hakuOid(Exchange exchange) {
+		return exchange.getProperty(OPH.HAKUOID, String.class);
+	}
 }
