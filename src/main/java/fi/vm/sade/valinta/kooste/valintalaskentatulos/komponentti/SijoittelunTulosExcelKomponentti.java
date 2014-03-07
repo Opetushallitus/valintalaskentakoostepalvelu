@@ -44,27 +44,19 @@ public class SijoittelunTulosExcelKomponentti {
 			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
 			@Simple("${property.hakuOid}") String hakuOid) {
 		Map<String, List<Valintatulos>> valintatulosCache = new HashMap<String, List<Valintatulos>>();
-
-		HakukohdeDTO hakukohde = sijoitteluajoResource
-				.getHakukohdeBySijoitteluajo(hakuOid,
-						sijoitteluajoId.toString(), hakukohdeOid);
-
-		// if (hakukohdeBySijoitteluajo.getStatus() == Response.Status.OK
-		// .getStatusCode()) {
-		// Object ehkaHakukohdeDto = hakukohdeBySijoitteluajo.getEntity();
-		// if (ehkaHakukohdeDto == null) {
-		// throw new RuntimeException(
-		// "Sijoittelupalvelu ei anna tuloksia!");
-		// } else if (ehkaHakukohdeDto instanceof HakukohdeDTO) {
-		// hakukohde = (HakukohdeDTO) ehkaHakukohdeDto;
-		// } else {
-		// throw new RuntimeException(
-		// "Sijoittelupalvelun rajapinta on päivittynyt! "
-		// + ehkaHakukohdeDto.getClass());
-		// }
-		// } else {
-		// throw new RuntimeException("sijoittelua ei löytynyt.");
-		// }
+		HakukohdeDTO hakukohde;
+		try {
+			hakukohde = sijoitteluajoResource
+					.getHakukohdeBySijoitteluajoPlainDTO(hakuOid,
+							sijoitteluajoId.toString(), hakukohdeOid);
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOG.error(
+					"Sijoittelulta ei saa tuloksia. Tarkista että sijoittelu on ajettu. {} {}",
+					e.getMessage(), e.getCause());
+			throw new RuntimeException(
+					"Sijoittelulta ei saa tuloksia. Tarkista että sijoittelu on ajettu.");
+		}
 
 		List<Object[]> rivit = new ArrayList<Object[]>();
 		for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
