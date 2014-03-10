@@ -93,6 +93,50 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 	}
 
 	private void configureValintakokeenOsoitetarrat() throws Exception {
+		from("direct:osoitetarrat_hakemustenhaku_epaonnistui_deadletterchannel")
+		//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						// Ei haluta poikkeustapauksesta raportoinnissa enaa
+						// uutta poikkeusta
+						Object oid = exchange.getIn().getBody();
+						if (oid == null) {
+							oid = "null";
+						}
+						LOG.error(
+								"Hakemuksen hakeminen haku-app:lta epäonnistui: {}. applicationResource.getApplicationByOid({})",
+								exchange.getException().getMessage(),
+								oid.toString());
+						dokumenttiprosessi(exchange)
+								.getPoikkeukset()
+								.add(new Poikkeus(
+										Poikkeus.HAKU,
+										"Yritettiin hakea hakemus oidilla (get application by oid)",
+										exchange.getException().getMessage(),
+										Poikkeus.hakemusOid(oid.toString())));
+					}
+
+				});
+
+		from("direct:osoitetarrat_haeHakemuksetJaOsoitteet")
+		//
+				.errorHandler(
+				//
+						deadLetterChannel(
+								"direct:osoitetarrat_hakemustenhaku_epaonnistui_deadletterchannel")
+								//
+								.maximumRedeliveries(2)
+								//
+								.redeliveryDelay(1500L)
+								//
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
+				//
+				.process(security)
+				//
+				.process(haeHakemuksetJaOsoitteet());
 
 		from(osoitetarrat)
 		//
@@ -120,11 +164,17 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				//
 				.split(body(), osoiteAggregation())
 				//
-				.process(security)
+				.shareUnitOfWork()
 				//
 				// .process(haeHakemuksetJaOsoitteet()) //
 				// haeOsoitteetValittamattaSaadaankoHakemusta())
-				.process(haeHakemuksetJaOsoitteet()) // haeOsoitteetValittamattaSaadaankoHakemusta())
+
+				//
+				// .parallelProcessing()
+				//
+				.stopOnException()
+				//
+				.to("direct:osoitetarrat_haeHakemuksetJaOsoitteet")
 				//
 				.end()
 				//
@@ -331,19 +381,15 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 					hakemus = applicationResource.getApplicationByOid(oid);
 				} catch (Exception e) {
 					e.printStackTrace();
-					LOG.error(
-							"Hakemuksen hakeminen haku-app:lta epäonnistui: {}. applicationResource.getApplicationByOid({})",
-							e.getMessage(), oid);
-					dokumenttiprosessi(exchange)
-							.getPoikkeukset()
-							.add(new Poikkeus(
-									Poikkeus.HAKU,
-									"Yritettiin hakea hakemus oidilla (get application by oid)",
-									e.getMessage(), Poikkeus.hakemusOid(oid)));
+
 					throw e;
 				}
 
 				try {
+					//
+					// Koodisto ei kayta autentikaatiota. Tama tapahtuu vain jos
+					// koodistopalvelu on alhaalla
+					//
 					exchange.getOut().setBody(
 							osoiteKomponentti.haeOsoite(hakemus));
 

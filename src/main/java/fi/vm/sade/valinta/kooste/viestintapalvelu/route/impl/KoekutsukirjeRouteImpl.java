@@ -250,7 +250,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRoute {
 				//
 				.shareUnitOfWork()
 				//
-				.parallelProcessing()
+				// .parallelProcessing()
 				//
 				.stopOnException()
 				//
@@ -259,6 +259,62 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRoute {
 				.end()
 				//
 				.to(koekutsukirjeetHakemuksista());
+		//
+		// Haku-app kutsu täällä
+		//
+		from(hakemusOiditHakemuksiksi())
+		//
+				.errorHandler(
+				//
+						deadLetterChannel(kirjeidenLuontiEpaonnistui())
+								//
+								.maximumRedeliveries(2)
+								//
+								.redeliveryDelay(1500L)
+								//
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
+				//
+				.process(security)
+				//
+				.choice()
+				//
+				.when(not(prosessiOnKeskeytetty()))
+				//
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						String oid = exchange.getIn().getBody(String.class);
+						try {
+
+							exchange.getOut().setBody(
+									applicationResource
+											.getApplicationByOid(oid));
+							//
+							// yksi tyo valmistui
+							//
+							dokumenttiprosessi(exchange)
+									.inkrementoiTehtyjaToita();
+						} catch (Exception e) {
+							e.printStackTrace();
+							LOG.error(
+									"Osallistujen hakeminen haku-app:lta epäonnistui: {}. applicationResource.getApplicationByOid({})",
+									e.getMessage(), oid);
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.HAKU,
+											"Yritettiin hakea hakemus oidilla (get application by oid)",
+											e.getMessage(), Poikkeus
+													.hakemusOid(oid)));
+							throw e;
+						}
+					}
+				})
+				//
+				.end();
 
 		from(koekutsukirjeetHakemuksista())
 		//
@@ -318,59 +374,6 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRoute {
 				});
 		//
 
-		from(hakemusOiditHakemuksiksi())
-		//
-				.errorHandler(
-				//
-						deadLetterChannel(kirjeidenLuontiEpaonnistui())
-								//
-								.maximumRedeliveries(0)
-								//
-								// .redeliveryDelay(300L)
-								//
-								.logExhaustedMessageHistory(true)
-								.logExhausted(true).logStackTrace(true)
-								// hide retry/handled stacktrace
-								.logRetryStackTrace(false).logHandled(false))
-				//
-				.process(security)
-				//
-				.choice()
-				//
-				.when(not(prosessiOnKeskeytetty()))
-				//
-				.process(new Processor() {
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						String oid = exchange.getIn().getBody(String.class);
-						try {
-
-							exchange.getOut().setBody(
-									applicationResource
-											.getApplicationByOid(oid));
-							//
-							// yksi tyo valmistui
-							//
-							dokumenttiprosessi(exchange)
-									.inkrementoiTehtyjaToita();
-						} catch (Exception e) {
-							e.printStackTrace();
-							LOG.error(
-									"Osallistujen hakeminen haku-app:lta epäonnistui: {}. applicationResource.getApplicationByOid({})",
-									e.getMessage(), oid);
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(
-											Poikkeus.HAKU,
-											"Yritettiin hakea hakemus oidilla (get application by oid)",
-											e.getMessage(), Poikkeus
-													.hakemusOid(oid)));
-							throw e;
-						}
-					}
-				})
-				//
-				.end();
 	}
 
 	private String koekutsukirjeetHakemuksista() {
