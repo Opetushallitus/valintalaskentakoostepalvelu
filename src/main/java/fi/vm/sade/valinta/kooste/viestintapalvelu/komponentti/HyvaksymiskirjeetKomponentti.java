@@ -82,6 +82,20 @@ public class HyvaksymiskirjeetKomponentti {
 				.toString();
 	}
 
+	private Hakemus hakemusWithRetryTwice(String hakemusOid) {
+		Hakemus h = null;
+		try {
+			h = hakemusProxy.haeHakemus(hakemusOid);
+			return h;
+		} catch (Exception e) {
+			try {
+				Thread.sleep(1500L);
+			} catch (InterruptedException e1) {
+			}
+		}
+		return hakemusProxy.haeHakemus(hakemusOid);
+	}
+
 	public Kirjeet<Kirje> teeHyvaksymiskirjeet(
 			@Body Collection<HakijaDTO> hakukohteenHakijat,
 			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
@@ -116,8 +130,9 @@ public class HyvaksymiskirjeetKomponentti {
 
 		for (HakijaDTO hakija : hakukohteenHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
+			final Hakemus hakemus;
+			hakemus = hakemusWithRetryTwice(hakemusOid);
 
-			final Hakemus hakemus = hakemusProxy.haeHakemus(hakemusOid);
 			final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
 			final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
 
