@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.camel.Exchange;
@@ -83,6 +85,16 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 				throw new ViestintapalveluException(
 						"Yritetään luoda nolla kappaletta osoitetarroja!");
 			}
+			Collections.sort(osoitteet, new Comparator<Osoite>() {
+				@Override
+				public int compare(Osoite o1, Osoite o2) {
+					try {
+						return o1.getLastName().compareTo(o2.getLastName());
+					} catch (Exception e) {
+						return 0;
+					}
+				}
+			});
 			return new Osoitteet(osoitteet);
 		}
 	}
