@@ -19,7 +19,7 @@ import java.util.List;
 @Component
 @Provider
 public class CacheFilterFactory implements ResourceFilterFactory {
-    private static final List<ResourceFilter> NO_CACHE_FILTER = Collections.<ResourceFilter>singletonList(new CacheResponseFilter("no-cache"));
+    private static final List<ResourceFilter> NO_CACHE_FILTER = Collections.<ResourceFilter>singletonList(new CacheResponseFilter("no-cache, no-store, must-revalidate"));
 
     @Override
     public List<ResourceFilter> create(AbstractMethod am) {
@@ -52,7 +52,6 @@ public class CacheFilterFactory implements ResourceFilterFactory {
         public ContainerResponse filter(ContainerRequest request, ContainerResponse response) {
             // attache Cache Control header to each response based on the annotation value
             response.getHttpHeaders().putSingle(HttpHeaders.CACHE_CONTROL, headerValue);
-            System.out.println(response.getHttpHeaders());
             return response;
         }
     }
