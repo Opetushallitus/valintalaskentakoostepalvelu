@@ -10,6 +10,8 @@ import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -259,6 +261,17 @@ public class HyvaksymiskirjeetKomponentti {
 		LOG.info(
 				"Yritetään luoda viestintapalvelulta hyvaksymiskirjeitä {} kappaletta!",
 				kirjeet.size());
+		Collections.sort(kirjeet, new Comparator<Kirje>() {
+			@Override
+			public int compare(Kirje o1, Kirje o2) {
+				try {
+					return o1.getAddressLabel().getLastName()
+							.compareTo(o2.getAddressLabel().getLastName());
+				} catch (Exception e) {
+					return 0;
+				}
+			}
+		});
 		Kirjeet<Kirje> viesti = new Kirjeet<Kirje>(kirjeet);
 		LOG.debug("\r\n{}", new ViestiWrapper(viesti));
 		return viesti;
