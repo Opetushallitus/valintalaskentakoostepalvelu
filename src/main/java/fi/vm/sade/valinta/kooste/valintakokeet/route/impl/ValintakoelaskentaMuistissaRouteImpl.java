@@ -10,7 +10,9 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
@@ -34,6 +36,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
  * @author Jussi Jartamo
  * 
  */
+@Component
 public class ValintakoelaskentaMuistissaRouteImpl extends
 		AbstractDokumenttiRoute {
 	private final static Logger LOG = LoggerFactory
@@ -48,6 +51,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 	private final ValintaperusteService valintaperusteService;
 	private final ValintalaskentaService valintalaskentaService;
 
+	@Autowired
 	public ValintakoelaskentaMuistissaRouteImpl(
 			@Value("seda:valintakoelaskenta_hakemusTyojono?" +
 			//
@@ -102,6 +106,9 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 						kirjaaPoikkeus(new Poikkeus(Poikkeus.TARJONTA,
 								"Tarjonnasta ei saatu haettua hakemuksia haulle")))
 				//
+				.log(LoggingLevel.ERROR,
+						"Tarjonnasta ei saatu hakemuksia haulle!")
+				//
 				.stop()
 				//
 				.end()
@@ -110,7 +117,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.when(isEmpty(body()))
 				// .
-				.log("Valintakoelaskentaa ei voida suorittaa haulle jossa ei ole hakemuksia!")
+				.log(LoggingLevel.ERROR,
+						"Valintakoelaskentaa ei voida suorittaa haulle jossa ei ole hakemuksia!")
 				//
 				.stop()
 				//
@@ -304,9 +312,18 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 		//
 		from("direct:valintakoelaskentamuistissa_haun_hakemukset")
 		//
-				.onException(Exception.class)
-				//
-				.maximumRedeliveries(2).redeliveryDelay(1500L)
+				.errorHandler(
+						deadLetterChannel(
+								"direct:valintakoelaskentamuistissa_hakemusTyojono_deadletterchannel")
+								//
+								.maximumRedeliveries(2)
+								//
+								.redeliveryDelay(1500L)
+								//
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
 				//
 				.choice()
 				//

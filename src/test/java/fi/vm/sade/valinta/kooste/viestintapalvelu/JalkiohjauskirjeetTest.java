@@ -15,7 +15,7 @@ import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
-import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluIlmankoulutuspaikkaaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaNimiRoute;
@@ -55,8 +55,8 @@ public class JalkiohjauskirjeetTest {
 	}
 
 	@Bean
-	public HaeHakemusKomponentti getHaeHakemusKomponentti() {
-		return Mockito.mock(HaeHakemusKomponentti.class);
+	public ApplicationResource getHaeHakemusKomponentti() {
+		return Mockito.mock(ApplicationResource.class);
 	}
 
 	@Bean

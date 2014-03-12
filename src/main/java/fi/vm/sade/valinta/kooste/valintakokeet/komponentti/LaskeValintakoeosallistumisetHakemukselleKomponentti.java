@@ -16,8 +16,8 @@ import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
 import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
 import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valinta.kooste.valintakokeet.komponentti.proxy.HakukohteenValintaperusteetProxy;
 
@@ -37,12 +37,12 @@ public class LaskeValintakoeosallistumisetHakemukselleKomponentti {
 	private ValintalaskentaService valintalaskentaService;
 
 	@Autowired
-	private HaeHakemusKomponentti hakemusProxy;
+	private ApplicationResource hakemusProxy;
 
 	public void laske(@Property(OPH.HAKEMUSOID) String hakemusOid)
 			throws ExecutionException {
 		LOG.info("Haetaan hakemus osoitteesta {}", new Object[] { hakemusOid });
-		Hakemus h = hakemusProxy.haeHakemus(hakemusOid);
+		Hakemus h = hakemusProxy.getApplicationByOid(hakemusOid);
 		HakemusTyyppi hakemusTyyppi = Converter.hakemusToHakemusTyyppi(h);
 
 		Set<String> hakutoiveOids = new HashSet<String>();
