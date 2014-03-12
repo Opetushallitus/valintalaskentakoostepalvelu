@@ -74,6 +74,10 @@ public class DokumenttiProsessi extends Prosessi {
 		this.kokonaistyo.inkrementoiKokonaismaaraa();
 	}
 
+	public void inkrementoiKokonaistyota(int delta) {
+		this.kokonaistyo.inkrementoiKokonaismaaraa(delta);
+	}
+
 	public void inkrementoiTehtyjaToita() {
 		this.kokonaistyo.tyoValmistui(0L);
 	}

@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import javax.annotation.Resource;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -33,6 +34,7 @@ import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaHakuFiltteri;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaHakuRoute;
@@ -78,9 +80,11 @@ public class KelaResource {
 
 	@POST
 	@Path("/aktivoi")
+	@Consumes("application/json")
 	@ApiOperation(value = "Kela-reitin aktivointi", response = ProsessiId.class)
 	public ProsessiId aktivoiKelaTiedostonluonti(
-			@QueryParam("hakuOid") String hakuOid) {
+			@QueryParam("hakuOid") String hakuOid,
+			KelaHakuFiltteri kelaHakuFiltteri) {
 		// tietoe ei ole viela saatavilla
 		if (hakuOid == null) {
 			throw new RuntimeException("Haku-parametri on pakollinen");

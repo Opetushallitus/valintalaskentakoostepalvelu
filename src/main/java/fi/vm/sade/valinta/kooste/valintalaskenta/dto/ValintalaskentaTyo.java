@@ -67,16 +67,20 @@ public class ValintalaskentaTyo extends AbstraktiTyo {
 		return hakemustyypit;
 	}
 
+	/**
+	 * 
+	 * @return this jos tyo on valmis. null jos tyo ei ole viela valmis
+	 */
 	public ValintalaskentaTyo rekisteroiKuuntelijat(
-			ValintaperusteetTyo valintaperusteetEsitieto,
-			Collection<HakemusTyo> hakemustyyppiEsitiedot) {
+			ValintaperusteetTyo<ValintalaskentaTyo> valintaperusteetEsitieto,
+			Collection<HakemusTyo<ValintalaskentaTyo>> hakemustyyppiEsitiedot) {
 		if (hakemustyyppiEsitiedot == null || hakemustyyppiEsitiedot.isEmpty()) {
 			throw new RuntimeException(
 					"Hakukohdetyotä ei tarvitse luoda jos hakukohteella ei ole hakemuksia!");
 		}
 		this.laskuri.set(1 + hakemustyyppiEsitiedot.size());
 		if (null != valintaperusteetEsitieto
-				.rekisteroiKuuntelija(new EsitiedonKuuntelija<List<ValintaperusteetTyyppi>>() {
+				.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintalaskentaTyo, List<ValintaperusteetTyyppi>>() {
 					public ValintalaskentaTyo esitietoOhitettu() {
 						ohitettu.set(true); // Voi olla ohitettu kahdenkin eri
 											// esitiedon puuttumisen vuoksi
@@ -97,9 +101,9 @@ public class ValintalaskentaTyo extends AbstraktiTyo {
 				})) {
 			return this;
 		}
-		for (HakemusTyo h : hakemustyyppiEsitiedot) {
+		for (HakemusTyo<ValintalaskentaTyo> h : hakemustyyppiEsitiedot) {
 			if (null != h
-					.rekisteroiKuuntelija(new EsitiedonKuuntelija<HakemusTyyppi>() {
+					.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintalaskentaTyo, HakemusTyyppi>() {
 						public ValintalaskentaTyo esitietoOhitettu() {
 							ohitettu.set(true); // Voi olla ohitettu kahdenkin
 												// eri esitiedon puuttumisen

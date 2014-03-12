@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 
-public interface EsitiedonKuuntelija<T> {
+public interface EsitiedonKuuntelija<A, T> {
 
-	ValintalaskentaTyo esitietoSaatavilla(T esitieto);
+	A esitietoSaatavilla(T esitieto);
 
-	ValintalaskentaTyo esitietoOhitettu();
+	A esitietoOhitettu();
 }

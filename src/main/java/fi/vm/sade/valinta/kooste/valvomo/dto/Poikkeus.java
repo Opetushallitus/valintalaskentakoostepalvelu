@@ -20,6 +20,7 @@ public class Poikkeus {
 
 	public static final String SIJOITTELU = "Sijoittelupalvelu";
 	public static final String VALINTATIETO = "Valintatietopalvelu";
+	public static final String VALINTAPERUSTEET = "Valintaperustepalvelu";
 	public static final String VIESTINTAPALVELU = "Viestintäpalvelu";
 	public static final String DOKUMENTTIPALVELU = "Dokumenttipalvelu";
 	public static final String HAKU = "Hakupalvelu";
@@ -32,6 +33,13 @@ public class Poikkeus {
 	private final String palvelu;
 	private final String viesti;
 	private final String palvelukutsu;
+
+	public Poikkeus(String palvelu, String palvelukutsu, Oid... oidit) {
+		this.oidit = new CopyOnWriteArrayList<Oid>(oidit);
+		this.palvelu = palvelu;
+		this.viesti = "";
+		this.palvelukutsu = palvelukutsu;
+	}
 
 	public Poikkeus(String palvelu, String palvelukutsu, String viesti,
 			Oid... oidit) {

@@ -404,7 +404,7 @@
 	<!--
 		Valintakoelaskenta 
 	 -->
-	<bean class="fi.vm.sade.valinta.kooste.valintakokeet.resource.HaunValintakoelaskentaAktivointiResource"/>
+	<bean class="fi.vm.sade.valinta.kooste.valintakokeet.resource.ValintakoelaskentaAktivointiResource"/>
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintakokeet.route.impl"/>
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintakokeet.komponentti"/>
 	

@@ -91,6 +91,12 @@ public class OsaTyo extends Tyo {
 		}
 	}
 
+	public void inkrementoiKokonaismaaraa(int delta) {
+		if (!this.kokonaismaara.compareAndSet(-1, delta)) {
+			this.kokonaismaara.addAndGet(delta);
+		}
+	}
+
 	public int getKokonaismaara() {
 		return kokonaismaara.get();
 	}
