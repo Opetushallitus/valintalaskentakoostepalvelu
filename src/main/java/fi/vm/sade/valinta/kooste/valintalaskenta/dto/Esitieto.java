@@ -17,17 +17,17 @@ import com.google.common.collect.Lists;
  * 
  *         Synkronoitu kuuntelijat listan kautta
  */
-public class Esitieto<T> extends AbstraktiTyo {
+public class Esitieto<A, T> extends AbstraktiTyo {
 
 	private final AtomicReference<T> esitieto;
 	private final AtomicBoolean ohitettu;
-	private final Collection<EsitiedonKuuntelija<T>> kuuntelijat;
+	private final Collection<EsitiedonKuuntelija<A, T>> kuuntelijat;
 	private final String oid;
 
 	public Esitieto(String oid) {
 		this.ohitettu = new AtomicBoolean(false);
 		this.kuuntelijat = Collections.synchronizedCollection(Lists
-				.<EsitiedonKuuntelija<T>> newArrayList());
+				.<EsitiedonKuuntelija<A, T>> newArrayList());
 		this.esitieto = new AtomicReference<T>(null);
 		this.oid = oid;
 	}
@@ -39,8 +39,7 @@ public class Esitieto<T> extends AbstraktiTyo {
 	/**
 	 * HAKUKOHDETYO VOI VALMISTUA TASSA
 	 */
-	public ValintalaskentaTyo rekisteroiKuuntelija(
-			EsitiedonKuuntelija<T> kuuntelija) {
+	public A rekisteroiKuuntelija(EsitiedonKuuntelija<A, T> kuuntelija) {
 		T tieto = null;
 		// synkronoidaan kuuntelijat listan kautta
 		synchronized (this.kuuntelijat) {
@@ -62,10 +61,10 @@ public class Esitieto<T> extends AbstraktiTyo {
 	/**
 	 * HAKUKOHDETYO VOI VALMISTUA TASSA
 	 */
-	public Collection<ValintalaskentaTyo> setEsitieto(T esitieto) {
-		Collection<EsitiedonKuuntelija<T>> k = Lists.newArrayList();
+	public Collection<A> setEsitieto(T esitieto) {
+		Collection<EsitiedonKuuntelija<A, T>> k = Lists.newArrayList();
 		synchronized (this.kuuntelijat) {
-			for (EsitiedonKuuntelija<T> k0 : this.kuuntelijat) {
+			for (EsitiedonKuuntelija<A, T> k0 : this.kuuntelijat) {
 				k.add(k0);
 			}
 			if (!this.esitieto.compareAndSet(null, esitieto)) {
@@ -74,9 +73,9 @@ public class Esitieto<T> extends AbstraktiTyo {
 								+ oid);
 			}
 		}
-		Collection<ValintalaskentaTyo> valmistuneet = Lists.newArrayList();
-		for (EsitiedonKuuntelija<T> e : k) {
-			ValintalaskentaTyo t = e.esitietoSaatavilla(esitieto);
+		Collection<A> valmistuneet = Lists.newArrayList();
+		for (EsitiedonKuuntelija<A, T> e : k) {
+			A t = e.esitietoSaatavilla(esitieto);
 			if (t != null) {
 				valmistuneet.add(t);
 			}
@@ -88,10 +87,10 @@ public class Esitieto<T> extends AbstraktiTyo {
 	 * HAKUKOHDETYO VOI VALMISTUA TASSA. Joissain virhetilanteissa halutaan
 	 * jatkaa valintalaskennan suorittamista. Merkataan esitieto valmistuneeksi.
 	 */
-	public Collection<ValintalaskentaTyo> setEsitietoOhitettu() {
-		Collection<EsitiedonKuuntelija<T>> k = Lists.newArrayList();
+	public Collection<A> setEsitietoOhitettu() {
+		Collection<EsitiedonKuuntelija<A, T>> k = Lists.newArrayList();
 		synchronized (this.kuuntelijat) {
-			for (EsitiedonKuuntelija<T> k0 : this.kuuntelijat) {
+			for (EsitiedonKuuntelija<A, T> k0 : this.kuuntelijat) {
 				k.add(k0);
 			}
 
@@ -101,9 +100,9 @@ public class Esitieto<T> extends AbstraktiTyo {
 								+ oid);
 			}
 		}
-		Collection<ValintalaskentaTyo> valmistuneet = Lists.newArrayList();
-		for (EsitiedonKuuntelija<T> e : k) {
-			ValintalaskentaTyo t = e.esitietoOhitettu();
+		Collection<A> valmistuneet = Lists.newArrayList();
+		for (EsitiedonKuuntelija<A, T> e : k) {
+			A t = e.esitietoOhitettu();
 			if (t != null) {
 				valmistuneet.add(t);
 			}

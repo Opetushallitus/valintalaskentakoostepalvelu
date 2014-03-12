@@ -25,15 +25,15 @@ public class ValintalaskentaCache {
 	// HakuOidilla voi tarkistaa ettei cachea käytetä useassa eri haussa
 	// yhtäaikaa
 	private final Collection<String> hakukohteet;
-	private final ConcurrentHashMap<String, ValintaperusteetTyo> valintaperusteetEsitiedot;
-	private final ConcurrentHashMap<String, HakemusTyo> hakemusTyyppiEsitiedot;
+	private final ConcurrentHashMap<String, ValintaperusteetTyo<ValintalaskentaTyo>> valintaperusteetEsitiedot;
+	private final ConcurrentHashMap<String, HakemusTyo<ValintalaskentaTyo>> hakemusTyyppiEsitiedot;
 
 	// private final ConcurrentHashMap<String, Esitieto<?>>
 	// valintalaskennanEsitiedot;
 
 	public ValintalaskentaCache(Collection<String> hakukohteet) {
-		this.valintaperusteetEsitiedot = new ConcurrentHashMap<String, ValintaperusteetTyo>();
-		this.hakemusTyyppiEsitiedot = new ConcurrentHashMap<String, HakemusTyo>();
+		this.valintaperusteetEsitiedot = new ConcurrentHashMap<String, ValintaperusteetTyo<ValintalaskentaTyo>>();
+		this.hakemusTyyppiEsitiedot = new ConcurrentHashMap<String, HakemusTyo<ValintalaskentaTyo>>();
 		this.hakukohteet = Collections.unmodifiableCollection(hakukohteet);
 	}
 
@@ -42,7 +42,7 @@ public class ValintalaskentaCache {
 		final Collection<AbstraktiTyo> tyot = Lists.newArrayList();
 		final ValintalaskentaTyo hakukohdeTyo = new ValintalaskentaTyo(
 				hakukohdeOid);
-		ValintaperusteetTyo valintaperusteetEsitieto = new ValintaperusteetTyo(
+		ValintaperusteetTyo<ValintalaskentaTyo> valintaperusteetEsitieto = new ValintaperusteetTyo<ValintalaskentaTyo>(
 				hakukohdeOid);
 		if (valintaperusteetEsitiedot.putIfAbsent(hakukohdeOid,
 				valintaperusteetEsitieto) != null) {
@@ -50,13 +50,14 @@ public class ValintalaskentaCache {
 					"Samalle hakukohteelle yritettiin työstää toistumiseen esitietoja!");
 		}
 		tyot.add(valintaperusteetEsitieto);
-		Collection<HakemusTyo> kaikkiHakemusTyyppiEsitiedot = Lists
+		Collection<HakemusTyo<ValintalaskentaTyo>> kaikkiHakemusTyyppiEsitiedot = Lists
 				.newArrayList();
 		for (String hakemusOid : hakemusOids) {
-			HakemusTyo uusiEsitieto = new HakemusTyo(hakemusOid);
+			HakemusTyo<ValintalaskentaTyo> uusiEsitieto = new HakemusTyo<ValintalaskentaTyo>(
+					hakemusOid);
 			@SuppressWarnings("unchecked")
-			HakemusTyo aiempiTyosto = hakemusTyyppiEsitiedot.putIfAbsent(
-					hakemusOid, uusiEsitieto);
+			HakemusTyo<ValintalaskentaTyo> aiempiTyosto = hakemusTyyppiEsitiedot
+					.putIfAbsent(hakemusOid, uusiEsitieto);
 			if (aiempiTyosto != null) {
 				// Jokin säie on jo hakemassa tätä hakemusta. Joten ei laiteta
 				// sitä työjonoon mutta laitetaan se riippuvuudeksi tälle
@@ -74,9 +75,13 @@ public class ValintalaskentaCache {
 						kaikkiHakemusTyyppiEsitiedot);
 
 		if (valmisValintalaskentaTyo != null) {
+			// Jos tyo valmistui niin voidaan olettaa tekemättömiä esitietoja ei
+			// ollut ja siten ei myöskään muita palautettavia töitä kuin tämä
+			// valmistunut työ
 			return Lists.newArrayList(valmisValintalaskentaTyo);
 
 		} else {
+			// Palautetaan toistaiseksi hakemattomat esitiedot tyojonoon
 			return tyot;
 		}
 	}
