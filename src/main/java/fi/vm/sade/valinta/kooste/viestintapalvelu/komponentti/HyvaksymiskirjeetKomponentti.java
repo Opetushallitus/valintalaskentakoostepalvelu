@@ -10,6 +10,8 @@ import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +84,20 @@ public class HyvaksymiskirjeetKomponentti {
 				.toString();
 	}
 
+	private Hakemus hakemusWithRetryTwice(String hakemusOid) {
+		Hakemus h = null;
+		try {
+			h = hakemusProxy.haeHakemus(hakemusOid);
+			return h;
+		} catch (Exception e) {
+			try {
+				Thread.sleep(1500L);
+			} catch (InterruptedException e1) {
+			}
+		}
+		return hakemusProxy.haeHakemus(hakemusOid);
+	}
+
 	public Kirjeet<Kirje> teeHyvaksymiskirjeet(
 			@Body Collection<HakijaDTO> hakukohteenHakijat,
 			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
@@ -116,8 +132,9 @@ public class HyvaksymiskirjeetKomponentti {
 
 		for (HakijaDTO hakija : hakukohteenHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
+			final Hakemus hakemus;
+			hakemus = hakemusWithRetryTwice(hakemusOid);
 
-			final Hakemus hakemus = hakemusProxy.haeHakemus(hakemusOid);
 			final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
 			final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
 
@@ -244,6 +261,17 @@ public class HyvaksymiskirjeetKomponentti {
 		LOG.info(
 				"Yritetään luoda viestintapalvelulta hyvaksymiskirjeitä {} kappaletta!",
 				kirjeet.size());
+		Collections.sort(kirjeet, new Comparator<Kirje>() {
+			@Override
+			public int compare(Kirje o1, Kirje o2) {
+				try {
+					return o1.getAddressLabel().getLastName()
+							.compareTo(o2.getAddressLabel().getLastName());
+				} catch (Exception e) {
+					return 0;
+				}
+			}
+		});
 		Kirjeet<Kirje> viesti = new Kirjeet<Kirje>(kirjeet);
 		LOG.debug("\r\n{}", new ViestiWrapper(viesti));
 		return viesti;

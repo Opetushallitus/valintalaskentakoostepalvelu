@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -10,12 +11,16 @@ import java.util.List;
 import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
+import org.apache.camel.builder.ValueBuilder;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.poi.util.IOUtils;
 import org.jgroups.util.UUID;
 import org.joda.time.DateTime;
 
+import com.google.common.collect.Lists;
+
 import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 
@@ -106,6 +111,15 @@ public abstract class AbstractDokumenttiRoute extends SpringRouteBuilder {
 		return UUID.randomUUID().toString();
 	}
 
+	protected Processor kirjaaPoikkeus(final Poikkeus... poikkeus) {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				dokumenttiprosessi(exchange).getPoikkeukset().addAll(
+						Lists.newArrayList(poikkeus));
+			}
+		};
+	}
+
 	protected InputStream pipeInputStreams(InputStream incoming)
 			throws IOException {
 		byte[] dokumentti = IOUtils.toByteArray(incoming);
@@ -116,5 +130,22 @@ public abstract class AbstractDokumenttiRoute extends SpringRouteBuilder {
 		InputStream p = new ByteArrayInputStream(dokumentti);
 		incoming.close();
 		return p;
+	}
+
+	protected Predicate isEmpty(final ValueBuilder v) {
+		return new Predicate() {
+			@Override
+			public boolean matches(Exchange exchange) {
+				try {
+					Collection<?> c = v.evaluate(exchange, Collection.class);
+					if (c == null) {
+						return true;
+					}
+					return c.isEmpty();
+				} catch (Exception e) {
+					return true;
+				}
+			}
+		};
 	}
 }
