@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.codehaus.jettison.json.JSONException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -50,6 +51,7 @@ import fi.vm.sade.valinta.kooste.valintakokeet.route.impl.ValintakoelaskentaMuis
 /**
  * @author Jussi Jartamo
  */
+@Ignore
 @Configuration
 @Import(ValintakoelaskentaMuistissaRouteImpl.class)
 @ContextConfiguration(classes = {
