@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeCache;
 import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeProsessi;
 import fi.vm.sade.valinta.kooste.valintakokeet.route.ValintakoelaskentaMuistissaRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 
 /**
  * User: wuoti Date: 2.9.2013 Time: 12.28
@@ -32,6 +33,8 @@ public class ValintakoelaskentaAktivointiResource {
 
 	@Autowired
 	private ValintakoelaskentaMuistissaRoute valintakoelaskentaRoute;
+	@Autowired
+	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 
 	/**
 	 * Jos hakukohdeOid on annettu niin ainoastaan annetulle hakukohteelle
@@ -58,6 +61,7 @@ public class ValintakoelaskentaAktivointiResource {
 					new ValintakoeCache(), prosessi = new ValintakoeProsessi(
 							hakuOid), hakuOid, hakukohdeOid,
 					SecurityContextHolder.getContext().getAuthentication());
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 			return prosessi.toProsessiId(); // "in progress";
 		}
 	}
