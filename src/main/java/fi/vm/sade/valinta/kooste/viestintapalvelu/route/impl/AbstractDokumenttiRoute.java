@@ -116,6 +116,11 @@ public abstract class AbstractDokumenttiRoute extends SpringRouteBuilder {
 			public void process(Exchange exchange) throws Exception {
 				dokumenttiprosessi(exchange).getPoikkeukset().addAll(
 						Lists.newArrayList(poikkeus));
+				if (exchange.getException() != null) {
+					dokumenttiprosessi(exchange).getPoikkeukset().add(
+							new Poikkeus("", "", exchange.getException()
+									.getMessage()));
+				}
 			}
 		};
 	}

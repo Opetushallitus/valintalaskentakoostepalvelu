@@ -447,10 +447,26 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 			@Value("bean:valintalaskentaMuistissaValvomo?method=start") String start,
 			@Value("bean:valintalaskentaMuistissaValvomo?method=finish") String finish,
 			@Value("bean:valintalaskentaMuistissaValvomo?method=fail") String fail,
-			@Value("seda:valintalaskentaTyojono?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintalaskenta.threadpoolsize:1}") String valintalaskentaTyojono,
-			@Value("seda:haeHakemus?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakemus.threadpoolsize:4}") String hakemusTyojono,
-			@Value("seda:haeValintaperuste?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintaperusteet.threadpoolsize:1}") String valintaperusteetTyojono,
-			@Value("seda:haeHakukohteidenHakemukset?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakukohteidenhakemukset.threadpoolsize:4}") String hakukohteidenHakemuksetTyojono,
+			@Value("seda:valintalaskentaTyojono?" +
+			//
+					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
+					//
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintalaskenta.threadpoolsize:1}") String valintalaskentaTyojono,
+			@Value("seda:haeHakemus?" +
+			//
+					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
+					//
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakemus.threadpoolsize:4}") String hakemusTyojono,
+			@Value("seda:haeValintaperuste?" +
+			//
+					"purgeWhenStopping=true&waitForTaskToComplete=Never&"
+					//
+					+ "concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintaperusteet.threadpoolsize:1}") String valintaperusteetTyojono,
+			@Value("seda:haeHakukohteidenHakemukset?" +
+			//
+					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
+					//
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakukohteidenhakemukset.threadpoolsize:4}") String hakukohteidenHakemuksetTyojono,
 			@Value("valintalaskentaCache") String valintalaskentaCache,
 			@Value("direct:valintalaskenta_muistissa_aloita_laskenta") String direct_aloita_laskenta,
 			@Value("direct:valintalaskenta_muistissa_hae_valintaperusteet_yksittainen") String direct_hae_valintaperusteet_yksittainen,
