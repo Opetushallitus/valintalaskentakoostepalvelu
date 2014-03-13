@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 import static fi.vm.sade.tarjonta.service.types.TarjontaTila.JULKAISTU;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.annotation.Resource;
@@ -97,7 +98,7 @@ public class ValintalaskentaMuistissaResource {
 	@GET
 	@Path("/aktiivinenValintalaskenta")
 	@Consumes(APPLICATION_JSON)
-    @Produces(APPLICATION_JSON)
+	@Produces(APPLICATION_JSON)
 	@ApiOperation(value = "Palauttaa suorituksessa olevan valintalaskentaprosessin", response = Vastaus.class)
 	public Vastaus aktiivinenValintalaskentaProsessi() {
 		return Vastaus.uudelleenOhjaus(valintalaskentaTila
@@ -106,8 +107,8 @@ public class ValintalaskentaMuistissaResource {
 
 	@POST
 	@Path("/keskeytaAktiivinenValintalaskenta")
-    @Consumes(APPLICATION_JSON)
-    @Produces(APPLICATION_JSON)
+	@Consumes(APPLICATION_JSON)
+	@Produces(APPLICATION_JSON)
 	@ApiOperation(value = "Keskeyttää suorituksessa olevan valintalaskentaprosessin", response = Vastaus.class)
 	public Response keskeytaValintalaskentaProsessi() {
 		valintalaskentaTila.getKaynnissaOlevaValintalaskenta().getAndSet(null)
@@ -117,11 +118,13 @@ public class ValintalaskentaMuistissaResource {
 
 	@POST
 	@Path("/aktivoi")
-    @Consumes(APPLICATION_JSON)
-    @Produces(APPLICATION_JSON)
+	@Consumes(APPLICATION_JSON)
+	@Produces(APPLICATION_JSON)
 	@ApiOperation(value = "Valintalaskennan aktivointi haulle ilman annettuja hakukohteita", response = Vastaus.class)
 	public Vastaus aktivoiHaunValintalaskentaIlmanAnnettujaHakukohteita(
 			@QueryParam("hakuOid") String hakuOid,
+			@QueryParam("hakukohdeOid") String hakukohdeOid,
+			@QueryParam("valinnanvaihe") Integer valinnanvaihe,
 			Collection<String> blacklistOids) throws Exception {
 		ValintalaskentaMuistissaProsessi prosessi = new ValintalaskentaMuistissaProsessi(
 				hakuOid);
@@ -137,7 +140,12 @@ public class ValintalaskentaMuistissaResource {
 				.compareAndSet(null, prosessi)) {
 			Collection<String> kasiteltavatHakukohteet;
 			if (blacklistOids == null || blacklistOids.isEmpty()) {
-				kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
+				if (hakukohdeOid != null) {
+					// Vain yhdelle hakukohteelle
+					kasiteltavatHakukohteet = Arrays.asList(hakukohdeOid);
+				} else {
+					kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
+				}
 			} else {
 				kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
 				kasiteltavatHakukohteet.removeAll(blacklistOids);
@@ -146,7 +154,8 @@ public class ValintalaskentaMuistissaResource {
 					prosessi.getId());
 			valintalaskentaMuistissa.aktivoiValintalaskenta(prosessi,
 					new ValintalaskentaCache(kasiteltavatHakukohteet), hakuOid,
-					SecurityContextHolder.getContext().getAuthentication());
+					valinnanvaihe, SecurityContextHolder.getContext()
+							.getAuthentication());
 		} else {
 			throw new RuntimeException("Valintalaskenta on jo käynnissä");
 		}

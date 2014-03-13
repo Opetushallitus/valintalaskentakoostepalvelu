@@ -79,12 +79,12 @@ public class ValintalaskentaMuistissaTest {
 
 		Mockito.when(hakuAppHakemus.getHakemus("hak1")).thenReturn(hak1);
 		Mockito.when(hakuAppHakemus.getHakemus("hak2")).thenReturn(hak2);
-		Mockito.when(valintaperusteet.getValintaperusteet("h1")).thenReturn(
-				Arrays.asList(new ValintaperusteetTyyppi()));
-		Mockito.when(valintaperusteet.getValintaperusteet("h2")).thenReturn(
-				Collections.<ValintaperusteetTyyppi> emptyList());
-		Mockito.when(valintaperusteet.getValintaperusteet("h3")).thenReturn(
-				Arrays.asList(new ValintaperusteetTyyppi()));
+		Mockito.when(valintaperusteet.getValintaperusteet("h1", null))
+				.thenReturn(Arrays.asList(new ValintaperusteetTyyppi()));
+		Mockito.when(valintaperusteet.getValintaperusteet("h2", null))
+				.thenReturn(Collections.<ValintaperusteetTyyppi> emptyList());
+		Mockito.when(valintaperusteet.getValintaperusteet("h3", null))
+				.thenReturn(Arrays.asList(new ValintaperusteetTyyppi()));
 
 		ValintalaskentaMuistissaRoute l = ProxyWithAnnotationHelper
 				.createProxy(camelContext.getEndpoint(routeId),
@@ -108,7 +108,7 @@ public class ValintalaskentaMuistissaTest {
 		l.aktivoiValintalaskenta(
 				prosessi,
 				new ValintalaskentaCache(Arrays.asList("h1", "h2", "h3", "h4")),
-				hakuOid, Mockito.mock(Authentication.class));
+				hakuOid, null, Mockito.mock(Authentication.class));
 
 		/**
 		 * Oletetaan kymmenessä sekunnissa kolme valintalaskentaa tai epäillään

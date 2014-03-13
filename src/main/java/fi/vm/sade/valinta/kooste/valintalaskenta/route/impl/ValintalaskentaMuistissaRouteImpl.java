@@ -557,7 +557,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				long kesto = System.currentTimeMillis();
 				try {
 					List<ValintaperusteetTyyppi> v = valintaperusteet
-							.getValintaperusteet(valintaperusteetTyo.getOid());
+							.getValintaperusteet(valintaperusteetTyo.getOid(),
+									exchange.getProperty("valinnanvaihe", null,
+											Integer.class));
 					kesto = System.currentTimeMillis() - kesto;
 					if (v == null || v.isEmpty()) {
 						prosessi(exchange)
@@ -676,7 +678,8 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 
 	public static interface Valintaperusteet {
 
-		List<ValintaperusteetTyyppi> getValintaperusteet(String hakukohdeOid);
+		List<ValintaperusteetTyyppi> getValintaperusteet(String hakukohdeOid,
+				Integer valinnanvaihe);
 	}
 
 	public static interface Valintalaskenta {
