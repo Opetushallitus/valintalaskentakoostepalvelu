@@ -59,7 +59,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					// Hakemustyojonon kasittelijoiden maara. Oletuksena 1
-					"concurrentConsumers=${valintalaskentakoostepalvelu.valintakoelaskenta.hakemus.threadpoolsize:1}") String hakemusTyojono,
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintakoelaskenta.hakemus.threadpoolsize:2}") String hakemusTyojono,
 			@Value("seda:valintakoelaskenta_valintaperusteetTyojono?" +
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
