@@ -19,8 +19,8 @@ import fi.vm.sade.koodisto.service.types.common.KieliType;
 import fi.vm.sade.koodisto.service.types.common.KoodiMetadataType;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 
@@ -32,7 +32,7 @@ public class HaeOsoiteKomponentti {
 	private static final String MAAT_JA_VALTIOT_PREFIX = "maatjavaltiot1_";
 	private static final String POSTI = "posti_";
 
-	private HaeHakemusKomponentti hakemusProxy;
+	private ApplicationResource applicationResource;
 	private String applicationResourceUrl;
 	private KoodiService koodiService;
 
@@ -40,8 +40,8 @@ public class HaeOsoiteKomponentti {
 	public HaeOsoiteKomponentti(
 			KoodiService koodiService,
 			@Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String applicationResourceUrl,
-			HaeHakemusKomponentti hakemusProxy) {
-		this.hakemusProxy = hakemusProxy;
+			ApplicationResource applicationResource) {
+		this.applicationResource = applicationResource;
 		this.applicationResourceUrl = applicationResourceUrl;
 		this.koodiService = koodiService;
 	}
@@ -54,7 +54,8 @@ public class HaeOsoiteKomponentti {
 			 */
 			LOG.info("Haetaan hakemus {}/applications/{}", new Object[] {
 					applicationResourceUrl, hakemusOid });
-			Hakemus hakemus = hakemusProxy.haeHakemus(hakemusOid);
+			Hakemus hakemus = applicationResource
+					.getApplicationByOid(hakemusOid);
 			if (hakemus == null) {
 				notFound(hakemusOid);
 				LOG.error("Hakemus {}/applications/{} null-arvo!",

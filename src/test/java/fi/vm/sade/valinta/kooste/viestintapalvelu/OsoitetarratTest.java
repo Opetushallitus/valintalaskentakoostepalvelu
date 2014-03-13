@@ -18,7 +18,6 @@ import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -109,11 +108,6 @@ public class OsoitetarratTest {
 	@Bean
 	public ValintatietoHakukohteelleKomponentti getValintatietoHakukohteelleKomponentti() {
 		return Mockito.mock(ValintatietoHakukohteelleKomponentti.class);
-	}
-
-	@Bean
-	public HaeHakemusKomponentti getHaeHakemusKomponentti() {
-		return Mockito.mock(HaeHakemusKomponentti.class);
 	}
 
 	@Bean

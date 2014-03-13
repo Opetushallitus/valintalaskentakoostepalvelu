@@ -31,8 +31,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemusUtil;
@@ -60,16 +60,16 @@ public class HyvaksymiskirjeetKomponentti {
 
 	private HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
 	private HaeOsoiteKomponentti osoiteKomponentti;
-	private HaeHakemusKomponentti hakemusProxy;
+	private ApplicationResource applicationResource;
 
 	@Autowired
 	public HyvaksymiskirjeetKomponentti(
 			HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy,
 			HaeOsoiteKomponentti osoiteKomponentti,
-			HaeHakemusKomponentti hakemusProxy) {
+			ApplicationResource applicationResource) {
 		this.osoiteKomponentti = osoiteKomponentti;
 		this.tarjontaProxy = tarjontaProxy;
-		this.hakemusProxy = hakemusProxy;
+		this.applicationResource = applicationResource;
 	}
 
 	private String vakioHakukohteenNimi(String hakukohdeOid) {
@@ -87,7 +87,7 @@ public class HyvaksymiskirjeetKomponentti {
 	private Hakemus hakemusWithRetryTwice(String hakemusOid) {
 		Hakemus h = null;
 		try {
-			h = hakemusProxy.haeHakemus(hakemusOid);
+			h = applicationResource.getApplicationByOid(hakemusOid);
 			return h;
 		} catch (Exception e) {
 			try {
@@ -95,7 +95,7 @@ public class HyvaksymiskirjeetKomponentti {
 			} catch (InterruptedException e1) {
 			}
 		}
-		return hakemusProxy.haeHakemus(hakemusOid);
+		return applicationResource.getApplicationByOid(hakemusOid);
 	}
 
 	public Kirjeet<Kirje> teeHyvaksymiskirjeet(

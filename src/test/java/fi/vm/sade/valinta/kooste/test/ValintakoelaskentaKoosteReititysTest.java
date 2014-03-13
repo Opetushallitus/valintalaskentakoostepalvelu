@@ -37,8 +37,6 @@ import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
-import fi.vm.sade.valinta.kooste.external.resource.haku.proxy.HakemusProxyCachingImpl;
-import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHaunHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeCache;
 import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeProsessi;
@@ -54,13 +52,11 @@ import fi.vm.sade.valinta.kooste.valintakokeet.route.impl.ValintakoelaskentaMuis
 @Ignore
 @Configuration
 @Import(ValintakoelaskentaMuistissaRouteImpl.class)
-@ContextConfiguration(classes = {
-		HaunValintakoelaskentaKoosteReititysTest.class,
-		HaeHakemusKomponentti.class, HaeHaunHakemuksetKomponentti.class,
-		KoostepalveluContext.CamelConfig.class, ValintakoelaskentaConfig.class,
-		HakemusProxyCachingImpl.class })
+@ContextConfiguration(classes = { ValintakoelaskentaKoosteReititysTest.class,
+		HaeHaunHakemuksetKomponentti.class,
+		KoostepalveluContext.CamelConfig.class, ValintakoelaskentaConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
-public class HaunValintakoelaskentaKoosteReititysTest {
+public class ValintakoelaskentaKoosteReititysTest {
 
 	private final static String HAKU_OID = "hakuOid1";
 

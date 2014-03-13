@@ -30,7 +30,7 @@ import fi.vm.sade.tarjonta.service.resources.HakuResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
-import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakemusKomponentti;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaDokumentinLuontiKomponenttiImpl;
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaHakijaRiviKomponenttiImpl;
@@ -57,8 +57,8 @@ public class KelaRouteTest {
 			.getLogger(KelaRouteTest.class);
 
 	@Bean
-	public HaeHakemusKomponentti getHaeHakemusKomponentti() {
-		return mock(HaeHakemusKomponentti.class);
+	public ApplicationResource getHaeHakemusKomponentti() {
+		return mock(ApplicationResource.class);
 	}
 
 	@Bean
