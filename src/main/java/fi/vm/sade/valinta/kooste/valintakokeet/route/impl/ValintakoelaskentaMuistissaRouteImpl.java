@@ -24,6 +24,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHaunHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HakemusOidSplitter;
+import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeCache;
 import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeTyo;
 import fi.vm.sade.valinta.kooste.valintakokeet.route.ValintakoelaskentaMuistissaRoute;
@@ -50,6 +51,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 	private final ApplicationResource applicationResource;
 	private final ValintaperusteService valintaperusteService;
 	private final ValintalaskentaService valintalaskentaService;
+	private final SecurityPreprocessor security = new SecurityPreprocessor();
 
 	@Autowired
 	public ValintakoelaskentaMuistissaRouteImpl(
@@ -94,6 +96,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 		//
 		from(valintakoelaskenta)
 		//
+				.process(security)
+				//
 				.doTry()
 				//
 				// Collection<String> hakemusOids
@@ -138,8 +142,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				.to(hakemusTyojono);
 
 		from(hakemusTyojono)
-				//
-				// when keskeytetty ohita
+		//
+		// when keskeytetty ohita
 				.errorHandler(
 						deadLetterChannel(
 								"direct:valintakoelaskentamuistissa_hakemusTyojono_deadletterchannel")
@@ -152,6 +156,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 								.logExhausted(true).logStackTrace(true)
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
+
 				.choice()
 				//
 				.when(prosessiOnKeskeytetty())
@@ -160,7 +165,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.otherwise()
 				//
-
+				.process(security)
+				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						HakemusTyyppi hakemusTyyppi = exchange
@@ -230,6 +236,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.otherwise()
 				//
+				.process(security)
+				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						ValintaperusteetTyo<ValintakoeTyo> valintaperusteetTyo = exchange
@@ -293,6 +301,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.otherwise()
 				//
+				.process(security)
+				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						ValintakoeTyo valintakoeTyo = exchange.getIn().getBody(
@@ -324,6 +334,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 								.logExhausted(true).logStackTrace(true)
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
+				//
+				.process(security)
 				//
 				.choice()
 				//
