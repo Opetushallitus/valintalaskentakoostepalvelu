@@ -307,9 +307,17 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 					public void process(Exchange exchange) throws Exception {
 						ValintakoeTyo valintakoeTyo = exchange.getIn().getBody(
 								ValintakoeTyo.class);
-						valintalaskentaService.valintakokeet(
-								valintakoeTyo.getHakemus(),
-								valintakoeTyo.getValintaperusteet());
+						List<ValintaperusteetTyyppi> v = valintakoeTyo
+								.getValintaperusteet();
+						if (!v.isEmpty()) {
+							valintalaskentaService.valintakokeet(
+									valintakoeTyo.getHakemus(),
+									valintakoeTyo.getValintaperusteet());
+						} else {
+							LOG.error(
+									"Hakemuksen {} yhdellekään hakutoiveelle ei ollut valintaperusteita.",
+									valintakoeTyo.getHakemus().getHakemusOid());
+						}
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
 
 					}
