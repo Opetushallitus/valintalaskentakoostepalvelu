@@ -385,7 +385,6 @@
 	<!--
 		Valintalaskenta
 	 -->
-	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaAktivointiResource"/>
 	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaMuistissaResource"/>
 	<bean name="suoritaLaskentaKomponentti" class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.SuoritaLaskentaKomponentti"/>
 	<bean name="haeValintaperusteetKomponentti" class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.HaeValintaperusteetKomponentti"/>
