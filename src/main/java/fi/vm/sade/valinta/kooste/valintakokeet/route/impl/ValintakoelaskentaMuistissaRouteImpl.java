@@ -199,7 +199,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.to(valintaperusteetTyojono)
 				//
-				.when(body().isInstanceOf(ValintaperusteetTyo.class))
+				.when(body().isInstanceOf(ValintakoeTyo.class))
 				//
 				.to(valintakoelaskentaTyojono)
 				//
