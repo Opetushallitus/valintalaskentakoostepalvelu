@@ -393,7 +393,11 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 					hakemus = applicationResource.getApplicationByOid(oid);
 				} catch (Exception e) {
 					e.printStackTrace();
-
+					dokumenttiprosessi(exchange).getPoikkeukset().add(
+							new Poikkeus(Poikkeus.HAKU,
+									"Hakemuspalvelulta ei saatu hakemuksia", e
+											.getMessage(), Poikkeus
+											.hakemusOid(oid)));
 					throw e;
 				}
 
@@ -404,34 +408,6 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
 					//
 					exchange.getOut().setBody(
 							osoiteKomponentti.haeOsoite(hakemus));
-
-				} catch (Exception e) {
-					e.printStackTrace();
-					LOG.error(
-							"Koodistopalvelukutsun tekevässä lohkossa tapahtui poikkeus: {}",
-							e.getMessage());
-					dokumenttiprosessi(exchange)
-							.getPoikkeukset()
-							.add(new Poikkeus(
-									Poikkeus.KOODISTO,
-									"Koodistopalvelukutsun tekevässä lohkossa tapahtui poikkeus",
-									e.getMessage(), Poikkeus.hakemusOid(oid)));
-					throw e;
-				}
-				//
-				// Yksi työ valmistui
-				//
-				dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-			}
-		};
-	}
-
-	private Processor haeOsoitteetValittamattaSaadaankoHakemusta() {
-		return new Processor() {
-			public void process(Exchange exchange) throws Exception {
-				String oid = exchange.getIn().getBody(String.class);
-				try {
-					exchange.getOut().setBody(osoiteKomponentti.haeOsoite(oid));
 
 				} catch (Exception e) {
 					e.printStackTrace();
