@@ -19,7 +19,7 @@ public interface ValintalaskentaMuistissaRoute {
 			@Property("valintalaskentaCache") ValintalaskentaCache valintalaskentaCache,
 			// @Property("hakukohdeOids") Collection<String> hakukohdeOids,
 			@Property(OPH.HAKUOID) String hakuOid,
-
+			@Property("valinnanvaihe") Integer valinnanvaihe,
 			@Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
 
 }

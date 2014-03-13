@@ -74,16 +74,12 @@ public class ValintalaskentaMuistissaConfig {
 	public Valintaperusteet getValintaperusteet(
 			final ValintaperusteService valintaperusteService) {
 		return new Valintaperusteet() {
+			@Override
 			public List<ValintaperusteetTyyppi> getValintaperusteet(
-					String hakukohdeOid) {
+					String hakukohdeOid, Integer valinnanvaihe) {
 				HakuparametritTyyppi params = new HakuparametritTyyppi();
 				params.setHakukohdeOid(hakukohdeOid);
-				params.setValinnanVaiheJarjestysluku(/*
-													 * Haetaan kaikki
-													 * hakukohteen
-													 * valintaperusteet
-													 */null);
-
+				params.setValinnanVaiheJarjestysluku(valinnanvaihe);
 				return valintaperusteService.haeValintaperusteet(Arrays
 						.asList(params));
 			}
