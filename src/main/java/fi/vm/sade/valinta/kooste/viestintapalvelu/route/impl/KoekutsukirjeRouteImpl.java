@@ -45,7 +45,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
  * 
  */
 @Component
-public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRoute {
+public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(KoekutsukirjeRouteImpl.class);
 	private final ViestintapalveluResource viestintapalveluResource;

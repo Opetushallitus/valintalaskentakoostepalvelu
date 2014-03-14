@@ -4,7 +4,9 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -15,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.wordnik.swagger.annotations.Api;
@@ -25,6 +28,10 @@ import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExce
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintakoekutsutExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 
 /**
  * 
@@ -38,115 +45,162 @@ import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulos
 @Api(value = "/valintalaskentaexcel", description = "Excel-raportteja")
 public class ValintalaskentaExcelResource {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaExcelResource.class);
+	private final static Logger LOG = LoggerFactory
+			.getLogger(ValintalaskentaExcelResource.class);
 
-    public final static MediaType APPLICATION_VND_MS_EXCEL = new MediaType("application", "vnd.ms-excel");
-    @Autowired
-    private ValintalaskentaTulosExcelRoute valintalaskentaTulosProxy;
-    @Autowired
-    private ValintakoekutsutExcelRoute valintalaskentaTulos;
-    @Autowired
-    private SijoittelunTulosExcelRoute sijoittelunTulosExcelProxy;
-    @Autowired
-    private JalkiohjaustulosExcelRoute jalkiohjaustulos;
+	public final static MediaType APPLICATION_VND_MS_EXCEL = new MediaType(
+			"application", "vnd.ms-excel");
+	@Autowired
+	private ValintalaskentaTulosExcelRoute valintalaskentaTulosProxy;
+	@Autowired
+	private ValintakoekutsutExcelRoute valintalaskentaTulos;
+	@Autowired
+	private SijoittelunTulosExcelRoute sijoittelunTulosExcelProxy;
+	@Autowired
+	private JalkiohjaustulosExcelRoute jalkiohjaustulos;
+	@Autowired
+	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 
-    @GET
-    @Path("/jalkiohjaustulos/aktivoi")
-    @Produces("application/vnd.ms-excel")
-    @ApiOperation(value = "Haun jälkiohjattavat Excel-raporttina", response = Response.class)
-    public Response haeJalkiohjausTuloksetExcelMuodossa(@QueryParam("hakuOid") String hakuOid) {
-        try {
-            InputStream input = jalkiohjaustulos.luoXls(hakuOid);
-            return Response.ok(input, APPLICATION_VND_MS_EXCEL)
-                    .header("content-disposition", "inline; filename=jalkiohjaustulos.xls").build();
-        } catch (Exception e) {
-            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
-            // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
-            // Ylläpitäjä voi lukea logeista todellisen syyn!
-            LOG.error("Jälkiohjaustulosexcelin luonti epäonnistui haulle {}: {}",
-                    new Object[] { hakuOid, e.getMessage() });
-            return Response
-                    .ok(ExcelExportUtil.exportGridAsXls(new Object[][] { new Object[] {
-                            "Tarvittavien tietojen hakeminen epäonnistui!",
-                            "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!" } }),
-                            APPLICATION_VND_MS_EXCEL)
-                    .header("content-disposition", "inline; filename=yritauudelleen.xls").build();
-        }
-    }
+	@GET
+	@Path("/jalkiohjaustulos/aktivoi")
+	@Produces("application/vnd.ms-excel")
+	@ApiOperation(value = "Haun jälkiohjattavat Excel-raporttina", response = Response.class)
+	public Response haeJalkiohjausTuloksetExcelMuodossa(
+			@QueryParam("hakuOid") String hakuOid) {
+		try {
+			InputStream input = jalkiohjaustulos.luoXls(hakuOid);
+			return Response
+					.ok(input, APPLICATION_VND_MS_EXCEL)
+					.header("content-disposition",
+							"inline; filename=jalkiohjaustulos.xls").build();
+		} catch (Exception e) {
+			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+			// todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+			// Ylläpitäjä voi lukea logeista todellisen syyn!
+			LOG.error(
+					"Jälkiohjaustulosexcelin luonti epäonnistui haulle {}: {}",
+					new Object[] { hakuOid, e.getMessage() });
+			return Response
+					.ok(ExcelExportUtil.exportGridAsXls(new Object[][] { new Object[] {
+							"Tarvittavien tietojen hakeminen epäonnistui!",
+							"Hakemuspalvelu saattaa olla ylikuormittunut!",
+							"Yritä uudelleen!" } }), APPLICATION_VND_MS_EXCEL)
+					.header("content-disposition",
+							"inline; filename=yritauudelleen.xls").build();
+		}
+	}
 
-    @GET
-    @Path("/valintakoekutsut/aktivoi")
-    @Produces("application/vnd.ms-excel")
-    @ApiOperation(value = "Hakukohteen hyväksytyt Excel-raporttina", response = Response.class)
-    public Response haeTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid,
-            @QueryParam("valintakoeOid") List<String> valintakoeOids) {
-        try {
-            InputStream input = valintalaskentaTulos.luoXls(hakukohdeOid, valintakoeOids);
-            return Response.ok(input, APPLICATION_VND_MS_EXCEL)
-                    .header("content-disposition", "inline; filename=valintakoetulos.xls").build();
-        } catch (Exception e) {
-            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
-            // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
-            // Ylläpitäjä voi lukea logeista todellisen syyn!
-            LOG.error("Valintakoekutsut excelin luonti epäonnistui hakukohteelle {}, valintakoeoideille {}: {}",
-                    new Object[] { hakukohdeOid, Arrays.toString(valintakoeOids.toArray()), e.getMessage() });
-            return Response
-                    .ok(ExcelExportUtil.exportGridAsXls(new Object[][] { new Object[] {
-                            "Tarvittavien tietojen hakeminen epäonnistui!",
-                            "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!" } }),
-                            APPLICATION_VND_MS_EXCEL)
-                    .header("content-disposition", "inline; filename=yritauudelleen.xls").build();
-        }
-    }
+	@POST
+	@Path("/valintakoekutsut/aktivoi")
+	@Consumes("application/json")
+	@Produces("application/json")
+	@ApiOperation(value = "Hakukohteen hyväksytyt Excel-raporttina", response = Response.class)
+	public ProsessiId haeTuloksetExcelMuodossa(
+	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
+			@QueryParam("hakukohdeOid") String hakukohdeOid,
+			@QueryParam("valintakoeOids") List<String> valintakoeOids) {
+		if (hakemuksillaRajaus == null) {
+			hakemuksillaRajaus = new DokumentinLisatiedot();
+		}
+		try {
+			DokumenttiProsessi p = new DokumenttiProsessi(
+					"Valintalaskentaexcel",
+					"Valintakoekutsut taulukkolaskenta tiedosto", "",
+					Arrays.asList("valintakoekutsut", "taulukkolaskenta"));
+			valintalaskentaTulos.luoXls(p, hakukohdeOid, valintakoeOids,
+					hakemuksillaRajaus.getHakemusOids(), SecurityContextHolder
+							.getContext().getAuthentication());
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(p);
+			return p.toProsessiId();
+			/*
+			 * return Response .ok(input, APPLICATION_VND_MS_EXCEL)
+			 * .header("content-disposition",
+			 * "inline; filename=valintakoetulos.xls").build();
+			 */
+		} catch (Exception e) {
+			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+			// todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+			// Ylläpitäjä voi lukea logeista todellisen syyn!
+			LOG.error(
+					"Valintakoekutsut excelin luonti epäonnistui hakukohteelle {}, valintakoeoideille {}: {}",
+					new Object[] { hakukohdeOid,
+							Arrays.toString(valintakoeOids.toArray()),
+							e.getMessage() });
+			throw new RuntimeException(
+					"Valintakoekutsut excelin luonti epäonnistui!", e);
+			// return Response
+			// .ok(ExcelExportUtil.exportGridAsXls(new Object[][] { new Object[]
+			// {
+			// "Tarvittavien tietojen hakeminen epäonnistui!",
+			// "Hakemuspalvelu saattaa olla ylikuormittunut!",
+			// "Yritä uudelleen!" } }), APPLICATION_VND_MS_EXCEL)
+			// .header("content-disposition",
+			// "inline; filename=yritauudelleen.xls").build();
+		}
+	}
 
-    @GET
-    @Path("/sijoitteluntulos/aktivoi")
-    @Produces("application/vnd.ms-excel")
-    @ApiOperation(value = "Sijoittelun tulokset Excel-raporttina", response = Response.class)
-    public Response haeSijoittelunTuloksetExcelMuodossa(@QueryParam("sijoitteluajoId") Long sijoitteluajoId,
-            @QueryParam("hakukohdeOid") String hakukohdeOid, @QueryParam("hakuOid") String hakuOid) {
-        try {
-            InputStream input = sijoittelunTulosExcelProxy.luoXls(hakukohdeOid, sijoitteluajoId, hakuOid);
-            return Response.ok(input, APPLICATION_VND_MS_EXCEL)
-                    .header("content-disposition", "inline; filename=sijoitteluntulos.xls").build();
-        } catch (Exception e) {
-            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
-            // todennäköisin syy on sijoittelupalvelun tai hakemuspalvelun
-            // ylikuormittumisessa!
-            // Ylläpitäjä voi lukea logeista todellisen syyn!
-            LOG.error("Sijoitteluntulos excelin luonti epäonnistui hakukohteelle {} ja sijoitteluajolle {}: {}",
-                    new Object[] { hakukohdeOid, sijoitteluajoId, e.getMessage() });
-            return Response
-                    .ok(ExcelExportUtil.exportGridAsXls(new Object[][] { new Object[] {
-                            "Tarvittavien tietojen hakeminen epäonnistui!",
-                            "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!" } }),
-                            APPLICATION_VND_MS_EXCEL)
-                    .header("content-disposition", "inline; filename=yritauudelleen.xls").build();
-        }
-    }
+	@GET
+	@Path("/sijoitteluntulos/aktivoi")
+	@Produces("application/vnd.ms-excel")
+	@ApiOperation(value = "Sijoittelun tulokset Excel-raporttina", response = Response.class)
+	public Response haeSijoittelunTuloksetExcelMuodossa(
+			@QueryParam("sijoitteluajoId") Long sijoitteluajoId,
+			@QueryParam("hakukohdeOid") String hakukohdeOid,
+			@QueryParam("hakuOid") String hakuOid) {
+		try {
+			InputStream input = sijoittelunTulosExcelProxy.luoXls(hakukohdeOid,
+					sijoitteluajoId, hakuOid);
+			return Response
+					.ok(input, APPLICATION_VND_MS_EXCEL)
+					.header("content-disposition",
+							"inline; filename=sijoitteluntulos.xls").build();
+		} catch (Exception e) {
+			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+			// todennäköisin syy on sijoittelupalvelun tai hakemuspalvelun
+			// ylikuormittumisessa!
+			// Ylläpitäjä voi lukea logeista todellisen syyn!
+			LOG.error(
+					"Sijoitteluntulos excelin luonti epäonnistui hakukohteelle {} ja sijoitteluajolle {}: {}",
+					new Object[] { hakukohdeOid, sijoitteluajoId,
+							e.getMessage() });
+			return Response
+					.ok(ExcelExportUtil.exportGridAsXls(new Object[][] { new Object[] {
+							"Tarvittavien tietojen hakeminen epäonnistui!",
+							"Hakemuspalvelu saattaa olla ylikuormittunut!",
+							"Yritä uudelleen!" } }), APPLICATION_VND_MS_EXCEL)
+					.header("content-disposition",
+							"inline; filename=yritauudelleen.xls").build();
+		}
+	}
 
-    @GET
-    @Path("/valintalaskennantulos/aktivoi")
-    @Produces("application/vnd.ms-excel")
-    @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
-    public Response haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid) {
-        try {
-            InputStream input = valintalaskentaTulosProxy.luoXls(hakukohdeOid);
-            return Response.ok(input, APPLICATION_VND_MS_EXCEL)
-                    .header("content-disposition", "inline; filename=valintalaskennantulos.xls").build();
-        } catch (Exception e) {
-            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
-            // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
-            // Ylläpitäjä voi lukea logeista todellisen syyn!
-            LOG.error("Valintakoekutsut excelin luonti epäonnistui hakukohteelle {}: {}", new Object[] { hakukohdeOid,
-                    e.getMessage() });
-            return Response
-                    .ok(ExcelExportUtil.exportGridAsXls(new Object[][] { new Object[] {
-                            "Tarvittavien tietojen hakeminen epäonnistui!",
-                            "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!" } }),
-                            APPLICATION_VND_MS_EXCEL)
-                    .header("content-disposition", "inline; filename=yritauudelleen.xls").build();
-        }
-    }
+	@GET
+	@Path("/valintalaskennantulos/aktivoi")
+	@Produces("application/vnd.ms-excel")
+	@ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
+	public Response haeValintalaskentaTuloksetExcelMuodossa(
+			@QueryParam("hakukohdeOid") String hakukohdeOid) {
+		try {
+			InputStream input = valintalaskentaTulosProxy.luoXls(hakukohdeOid);
+			return Response
+					.ok(input, APPLICATION_VND_MS_EXCEL)
+					.header("content-disposition",
+							"inline; filename=valintalaskennantulos.xls")
+					.build();
+		} catch (Exception e) {
+			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+			// todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+			// Ylläpitäjä voi lukea logeista todellisen syyn!
+			LOG.error(
+					"Valintakoekutsut excelin luonti epäonnistui hakukohteelle {}: {}",
+					new Object[] { hakukohdeOid, e.getMessage() });
+			return Response
+					.ok(ExcelExportUtil.exportGridAsXls(new Object[][] { new Object[] {
+							"Tarvittavien tietojen hakeminen epäonnistui!",
+							"Hakemuspalvelu saattaa olla ylikuormittunut!",
+							"Yritä uudelleen!" } }), APPLICATION_VND_MS_EXCEL)
+					.header("content-disposition",
+							"inline; filename=yritauudelleen.xls").build();
+		}
+	}
 
 }
