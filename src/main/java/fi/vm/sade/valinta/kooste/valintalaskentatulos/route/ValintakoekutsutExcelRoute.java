@@ -23,7 +23,7 @@ public interface ValintakoekutsutExcelRoute {
 	void luoXls(
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
-			@Property("valintakoeOids") List<String> valintakoeOids,
+			@Property("valintakoeOid") List<String> valintakoeOids,
 			@Property("hakemusOids") List<String> hakemusOids,
 			@Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.JalkiohjaustulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.ValintalaskennanTulosExcelKomponentti;
@@ -34,6 +35,7 @@ public class ValintalaskentaTulosRouteImpl extends
 	private SijoittelunTulosExcelKomponentti sijoittelunTulosExcelKomponentti;
 	private ValintalaskennanTulosExcelKomponentti valintalaskennanTulosExcelKomponentti;
 	private ValintalaskentaTulosExcelKomponentti valintalaskentaTulosExcelKomponentti;
+	private final SecurityPreprocessor security = new SecurityPreprocessor();
 	private final DokumenttiResource dokumenttiResource;
 	private final String valintakoekutsutXls;
 
@@ -77,6 +79,8 @@ public class ValintalaskentaTulosRouteImpl extends
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
+				.process(security)
+				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						dokumenttiprosessi(exchange).setKokonaistyo(1);
@@ -99,10 +103,13 @@ public class ValintalaskentaTulosRouteImpl extends
 		//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
+						String message = null;
+						if (null != exchange.getException()) {
+							message = exchange.getException().getMessage();
+						}
 						dokumenttiprosessi(exchange).getPoikkeukset().add(
 								new Poikkeus(Poikkeus.VALINTALASKENTA,
-										"Valintatiedotpalvelukutsu", exchange
-												.getException().getMessage()));
+										"Valintatiedotpalvelukutsu", message));
 					}
 				});
 	}
