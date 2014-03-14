@@ -42,7 +42,7 @@ import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.PrepareKelaProce
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKaikkiPaikanVastaanottaneet;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 
 /**
  * @author Jussi Jartamo
@@ -50,7 +50,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
  *         Route to Kela.
  */
 @Component
-public class KelaRouteImpl extends AbstractDokumenttiRoute {
+public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(KelaRouteImpl.class);

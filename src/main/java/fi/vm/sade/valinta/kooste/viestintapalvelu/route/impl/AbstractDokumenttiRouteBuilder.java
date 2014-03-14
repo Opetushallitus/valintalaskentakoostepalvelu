@@ -31,12 +31,12 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
  *         Dokumenttiprosessin käsittelyyn valmiit camel dsl:t
  *         dokumenttireittejä varten
  */
-public abstract class AbstractDokumenttiRoute extends SpringRouteBuilder {
+public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder {
 
 	private final Processor inkrementoiKokonaistyota;
 	private final Processor inkrementoiTehtyjaToita;
 
-	public AbstractDokumenttiRoute() {
+	public AbstractDokumenttiRouteBuilder() {
 		this.inkrementoiKokonaistyota = new Processor() {
 			public void process(Exchange exchange) throws Exception {
 				dokumenttiprosessi(exchange).inkrementoiKokonaistyota();

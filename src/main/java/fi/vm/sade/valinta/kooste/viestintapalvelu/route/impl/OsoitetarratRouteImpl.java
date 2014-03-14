@@ -48,7 +48,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
  *         Hyvaksyttyjen Osoitetarrat ja osoitetarrat koekutsua varten
  */
 @Component
-public class OsoitetarratRouteImpl extends AbstractDokumenttiRoute {
+public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(OsoitetarratRouteImpl.class);
 	private final ViestintapalveluResource viestintapalveluResource;

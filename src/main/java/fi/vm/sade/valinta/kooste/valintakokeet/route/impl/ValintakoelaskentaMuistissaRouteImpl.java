@@ -30,7 +30,7 @@ import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeTyo;
 import fi.vm.sade.valinta.kooste.valintakokeet.route.ValintakoelaskentaMuistissaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 
 /**
  * 
@@ -39,7 +39,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
  */
 @Component
 public class ValintakoelaskentaMuistissaRouteImpl extends
-		AbstractDokumenttiRoute {
+		AbstractDokumenttiRouteBuilder {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintakoelaskentaMuistissaRouteImpl.class);
 	private final String valintakoelaskenta;

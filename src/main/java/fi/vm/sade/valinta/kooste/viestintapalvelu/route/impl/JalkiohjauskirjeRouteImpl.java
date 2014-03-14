@@ -44,7 +44,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResou
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
 
 @Component
-public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRoute {
+public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(JalkiohjauskirjeRouteImpl.class);
 	private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";

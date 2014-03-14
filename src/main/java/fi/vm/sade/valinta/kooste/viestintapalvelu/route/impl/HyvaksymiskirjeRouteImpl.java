@@ -36,7 +36,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResou
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 
 @Component
-public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRoute {
+public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HyvaksymiskirjeRouteImpl.class);
 	private final ViestintapalveluResource viestintapalveluResource;
