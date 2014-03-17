@@ -18,6 +18,7 @@ import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -66,8 +67,9 @@ public class OsoitetarratTest {
 
 		Osoite o = Mockito.mock(Osoite.class);
 
-		Mockito.when(osoiteKomponentti.haeOsoite(Mockito.anyString()))
-				.thenReturn(o);
+		Mockito.when(
+				osoiteKomponentti.haeOsoite(Mockito
+						.<Hakemus> any(Hakemus.class))).thenReturn(o);
 
 		DokumenttiProsessi p = new DokumenttiProsessi("", "", "", null);
 		osoitetarratRoute.osoitetarratAktivointi(DokumenttiTyyppi.HAKEMUKSILLE,

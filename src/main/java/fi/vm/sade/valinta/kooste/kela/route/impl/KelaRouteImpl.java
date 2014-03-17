@@ -95,68 +95,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	 * Kela Camel Configuration: Siirto and document generation.
 	 */
 	public final void configure() {
-
-		from(kelaFailed())
-		//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						AtomicBoolean onkoEnsimmainenVirhe = exchange
-								.getProperty(ENSIMMAINEN_VIRHE,
-										AtomicBoolean.class);
-						if (onkoEnsimmainenVirhe != null
-								&& onkoEnsimmainenVirhe.compareAndSet(true,
-										false)) {
-							dokumenttiResource.viesti(new Message(
-									"Kela-dokumentin luonti epäonnistui.",
-									Arrays.asList(
-											"valintalaskentakoostepalvelu",
-											"kela"), DateTime.now().plusDays(1)
-											.toDate()));
-						}
-					}
-				})
-				// merkkaa prosessi failediksi
-
-				// informoi kayttajaa
-				.setHeader(MESSAGE,
-						constant("Kela-dokumentin luonti epäonnistui."))
-				//
-				.to(fail());
-		//
-		// Vaan eka virhe logataan
-		//
-
-		from("direct:kela_yksittainen_rivi")
-		//
-				.errorHandler(
-						deadLetterChannel(kelaFailed())
-								// .useOriginalMessage()
-								//
-								// (kelaFailed())
-								//
-								.maximumRedeliveries(10)
-								.redeliveryDelay(300L)
-								// log exhausted stacktrace
-								.logExhaustedMessageHistory(true)
-								.logExhausted(true)
-								// hide retry/handled stacktrace
-								.logStackTrace(false).logRetryStackTrace(false)
-								.logHandled(false)
-				//
-				)
-				//
-				.process(security)
-				//
-				.bean(kelaHakijaKomponentti)
-				//
-				.process(new Processor() {
-
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-					}
-				});
-
 		/**
 		 * Kela-dokkarin luonti reitti
 		 */
@@ -280,7 +218,66 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				})
 				// Done valvomoon
 				.to(finish());
+		from("direct:kela_yksittainen_rivi")
+		//
+				.errorHandler(
+						deadLetterChannel(kelaFailed())
+								// .useOriginalMessage()
+								//
+								// (kelaFailed())
+								//
+								.maximumRedeliveries(10)
+								.redeliveryDelay(300L)
+								// log exhausted stacktrace
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true)
+								// hide retry/handled stacktrace
+								.logStackTrace(false).logRetryStackTrace(false)
+								.logHandled(false)
+				//
+				)
+				//
+				.process(security)
+				//
+				.bean(kelaHakijaKomponentti)
+				//
+				.process(new Processor() {
 
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+					}
+				});
+
+		from(kelaFailed())
+		//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						AtomicBoolean onkoEnsimmainenVirhe = exchange
+								.getProperty(ENSIMMAINEN_VIRHE,
+										AtomicBoolean.class);
+						if (onkoEnsimmainenVirhe != null
+								&& onkoEnsimmainenVirhe.compareAndSet(true,
+										false)) {
+							dokumenttiResource.viesti(new Message(
+									"Kela-dokumentin luonti epäonnistui.",
+									Arrays.asList(
+											"valintalaskentakoostepalvelu",
+											"kela"), DateTime.now().plusDays(1)
+											.toDate()));
+						}
+					}
+				})
+				// merkkaa prosessi failediksi
+
+				// informoi kayttajaa
+				.setHeader(MESSAGE,
+						constant("Kela-dokumentin luonti epäonnistui."))
+				//
+				.to(fail());
+		//
+		// Vaan eka virhe logataan
+		//
 	}
 
 	/**

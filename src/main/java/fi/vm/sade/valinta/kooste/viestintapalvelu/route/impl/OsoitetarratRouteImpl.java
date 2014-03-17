@@ -51,6 +51,9 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
 public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(OsoitetarratRouteImpl.class);
+	private final static int UUDELLEEN_YRITYSTEN_MAARA = 3;
+	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 1500L;
+
 	private final ViestintapalveluResource viestintapalveluResource;
 	private final ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti;
 	private final HaeOsoiteKomponentti osoiteKomponentti;
@@ -137,9 +140,9 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 						deadLetterChannel(
 								"direct:osoitetarrat_hakemustenhaku_epaonnistui_deadletterchannel")
 								//
-								.maximumRedeliveries(2)
+								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
-								.redeliveryDelay(1500L)
+								.redeliveryDelay(UUDELLEEN_YRITYSTEN_ODOTUSAIKA)
 								//
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true).logStackTrace(true)
