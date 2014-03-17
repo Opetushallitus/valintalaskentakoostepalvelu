@@ -139,16 +139,22 @@ public class ValintalaskentaMuistissaResource {
 		if (valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
 				.compareAndSet(null, prosessi)) {
 			Collection<String> kasiteltavatHakukohteet;
-			if (blacklistOids == null || blacklistOids.isEmpty()) {
-				if (hakukohdeOid != null) {
-					// Vain yhdelle hakukohteelle
-					kasiteltavatHakukohteet = Arrays.asList(hakukohdeOid);
+			try {
+				if (blacklistOids == null || blacklistOids.isEmpty()) {
+					if (hakukohdeOid != null) {
+						// Vain yhdelle hakukohteelle
+						kasiteltavatHakukohteet = Arrays.asList(hakukohdeOid);
+					} else {
+						kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
+					}
 				} else {
 					kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
+					kasiteltavatHakukohteet.removeAll(blacklistOids);
 				}
-			} else {
-				kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
-				kasiteltavatHakukohteet.removeAll(blacklistOids);
+			} catch (Exception e) {
+				prosessi.addException("Tarjonnalta ei saatu haulle hakukohteita! "
+						+ e.getMessage());
+				throw e;
 			}
 			LOG.info("Käynnistetään valintalaskenta prosessille {}",
 					prosessi.getId());
@@ -157,6 +163,7 @@ public class ValintalaskentaMuistissaResource {
 					valinnanvaihe, SecurityContextHolder.getContext()
 							.getAuthentication());
 		} else {
+
 			throw new RuntimeException("Valintalaskenta on jo käynnissä");
 		}
 		LOG.info("Valintalaskenta käynnissä");
