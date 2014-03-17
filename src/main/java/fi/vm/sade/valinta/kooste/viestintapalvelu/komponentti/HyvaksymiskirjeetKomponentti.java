@@ -48,6 +48,9 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
  * 
  *         OLETTAA ETTA KAIKILLE VALINTATAPAJONOILLE TEHDAAN HYVAKSYMISKIRJE JOS
  *         HAKEMUS ON HYVAKSYTTY YHDESSAKIN!
+ * 
+ *         Nykyisellaan hakemukset haetaan tassa komponentissa. Taytyisi
+ *         refaktoroida niin etta hakemukset tuodaan komponentille.
  */
 @Component
 public class HyvaksymiskirjeetKomponentti {
@@ -84,6 +87,7 @@ public class HyvaksymiskirjeetKomponentti {
 				.toString();
 	}
 
+	// TODO: Hakemukset taytyy tuoda komponentille
 	private Hakemus hakemusWithRetryTwice(String hakemusOid) {
 		Hakemus h = null;
 		try {

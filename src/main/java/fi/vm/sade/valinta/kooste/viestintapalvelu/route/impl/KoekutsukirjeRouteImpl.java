@@ -48,6 +48,9 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
 public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(KoekutsukirjeRouteImpl.class);
+	private final static int UUDELLEEN_YRITYSTEN_MAARA = 3;
+	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 1500L;
+
 	private final ViestintapalveluResource viestintapalveluResource;
 	private final KoekutsukirjeetKomponentti koekutsukirjeetKomponentti;
 	private final ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti;
@@ -129,6 +132,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 		//
 				.log(LoggingLevel.ERROR,
 						"Koekutsukirjeiden luonti epaonnistui: ${property.CamelExceptionCaught}");
+		//
 		// ;
 	}
 
@@ -268,9 +272,9 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 						deadLetterChannel(kirjeidenLuontiEpaonnistui())
 								//
-								.maximumRedeliveries(2)
+								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
-								.redeliveryDelay(1500L)
+								.redeliveryDelay(UUDELLEEN_YRITYSTEN_ODOTUSAIKA)
 								//
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true).logStackTrace(true)

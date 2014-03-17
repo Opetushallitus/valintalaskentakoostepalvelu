@@ -46,31 +46,31 @@ public class HaeOsoiteKomponentti {
 		this.koodiService = koodiService;
 	}
 
-	public Osoite haeOsoite(String hakemusOid) {
-		try {
-			/**
-			 * Osoitteen formatointi kirjeeseen. Esimerkiksi ulkomaille
-			 * lahtevaan kirjeeseen haetaan englanninkielinen maan nimi.
-			 */
-			LOG.info("Haetaan hakemus {}/applications/{}", new Object[] {
-					applicationResourceUrl, hakemusOid });
-			Hakemus hakemus = applicationResource
-					.getApplicationByOid(hakemusOid);
-			if (hakemus == null) {
-				notFound(hakemusOid);
-				LOG.error("Hakemus {}/applications/{} null-arvo!",
-						new Object[] { applicationResourceUrl, hakemusOid, });
-			}
-			return haeOsoite(hakemus);
-		} catch (Exception e) {
-			e.printStackTrace();
-			LOG.error(
-					"Hakemus {}/applications/{} sisälsi virheellistä tietoa!",
-					new Object[] { applicationResourceUrl, hakemusOid, });
-			notFound(hakemusOid);
-		}
-		return OsoiteHakemukseltaUtil.osoiteHakemuksesta(null, null, null);
-	}
+	// public Osoite haeOsoite(String hakemusOid) {
+	// try {
+	// /**
+	// * Osoitteen formatointi kirjeeseen. Esimerkiksi ulkomaille
+	// * lahtevaan kirjeeseen haetaan englanninkielinen maan nimi.
+	// */
+	// LOG.info("Haetaan hakemus {}/applications/{}", new Object[] {
+	// applicationResourceUrl, hakemusOid });
+	// Hakemus hakemus = applicationResource
+	// .getApplicationByOid(hakemusOid);
+	// if (hakemus == null) {
+	// notFound(hakemusOid);
+	// LOG.error("Hakemus {}/applications/{} null-arvo!",
+	// new Object[] { applicationResourceUrl, hakemusOid, });
+	// }
+	// return haeOsoite(hakemus);
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// LOG.error(
+	// "Hakemus {}/applications/{} sisälsi virheellistä tietoa!",
+	// new Object[] { applicationResourceUrl, hakemusOid, });
+	// notFound(hakemusOid);
+	// }
+	// return OsoiteHakemukseltaUtil.osoiteHakemuksesta(null, null, null);
+	// }
 
 	public Osoite haeOsoite(Hakemus hakemus) {
 		String hakemusOid = hakemus.getOid();
