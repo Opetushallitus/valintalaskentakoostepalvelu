@@ -52,7 +52,9 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaMuistissaRouteImpl.class);
-	private final int UUDELLEEN_YRITYSTEN_MAARA = 12;
+	private final static int UUDELLEEN_YRITYSTEN_MAARA = 8;
+	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 1000L;
+
 	private final String fail;
 	private final String start;
 	private final String finish;
@@ -157,7 +159,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 								//
 								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
-								.redeliveryDelay(300L)
+								.redeliveryDelay(UUDELLEEN_YRITYSTEN_ODOTUSAIKA)
 								// log exhausted stacktrace
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true)
@@ -254,7 +256,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 								//
 								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
-								.redeliveryDelay(300L)
+								.redeliveryDelay(UUDELLEEN_YRITYSTEN_ODOTUSAIKA)
 								// log exhausted stacktrace
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true)
@@ -299,7 +301,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 								//
 								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
-								.redeliveryDelay(300L)
+								.redeliveryDelay(UUDELLEEN_YRITYSTEN_ODOTUSAIKA)
 								// log exhausted stacktrace
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true)
@@ -367,7 +369,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 								//
 								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
-								.redeliveryDelay(300L)
+								.redeliveryDelay(UUDELLEEN_YRITYSTEN_ODOTUSAIKA)
 								// log exhausted stacktrace
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true)

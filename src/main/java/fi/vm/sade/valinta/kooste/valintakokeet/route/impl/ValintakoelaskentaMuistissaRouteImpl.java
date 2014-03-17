@@ -40,6 +40,9 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
 @Component
 public class ValintakoelaskentaMuistissaRouteImpl extends
 		AbstractDokumenttiRouteBuilder {
+	private final static int UUDELLEEN_YRITYSTEN_MAARA = 8;
+	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 1000L;
+
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintakoelaskentaMuistissaRouteImpl.class);
 	private final String valintakoelaskenta;
@@ -148,9 +151,9 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 						deadLetterChannel(
 								"direct:valintakoelaskentamuistissa_hakemusTyojono_deadletterchannel")
 								//
-								.maximumRedeliveries(2)
+								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
-								.redeliveryDelay(1500L)
+								.redeliveryDelay(UUDELLEEN_YRITYSTEN_ODOTUSAIKA)
 								//
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true).logStackTrace(true)
@@ -218,9 +221,9 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 						deadLetterChannel(
 								"direct:valintakoelaskentamuistissa_valintaperusteetTyojono_deadletterchannel")
 								//
-								.maximumRedeliveries(2)
+								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
-								.redeliveryDelay(1500L)
+								.redeliveryDelay(UUDELLEEN_YRITYSTEN_ODOTUSAIKA)
 								//
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true).logStackTrace(true)
@@ -284,9 +287,9 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 						deadLetterChannel(
 								"direct:valintakoelaskentamuistissa_valintakoeTyojono_deadletterchannel")
 								//
-								.maximumRedeliveries(2)
+								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
-								.redeliveryDelay(1500L)
+								.redeliveryDelay(UUDELLEEN_YRITYSTEN_ODOTUSAIKA)
 								//
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true).logStackTrace(true)
@@ -334,9 +337,9 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 						deadLetterChannel(
 								"direct:valintakoelaskentamuistissa_hakemusTyojono_deadletterchannel")
 								//
-								.maximumRedeliveries(2)
+								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
-								.redeliveryDelay(1500L)
+								.redeliveryDelay(UUDELLEEN_YRITYSTEN_ODOTUSAIKA)
 								//
 								.logExhaustedMessageHistory(true)
 								.logExhausted(true).logStackTrace(true)
