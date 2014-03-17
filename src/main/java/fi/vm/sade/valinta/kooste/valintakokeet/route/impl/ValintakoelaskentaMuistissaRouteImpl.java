@@ -40,8 +40,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
 @Component
 public class ValintakoelaskentaMuistissaRouteImpl extends
 		AbstractDokumenttiRouteBuilder {
-	private final static int UUDELLEEN_YRITYSTEN_MAARA = 15;
-	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 2500L;
+	private final static int UUDELLEEN_YRITYSTEN_MAARA = 60;
+	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 5000L;
 
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintakoelaskentaMuistissaRouteImpl.class);
