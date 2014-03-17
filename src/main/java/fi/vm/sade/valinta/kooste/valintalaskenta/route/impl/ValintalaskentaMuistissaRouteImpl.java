@@ -52,8 +52,8 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaMuistissaRouteImpl.class);
-	private final static int UUDELLEEN_YRITYSTEN_MAARA = 8;
-	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 1000L;
+	private final static int UUDELLEEN_YRITYSTEN_MAARA = 15;
+	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 2500L;
 
 	private final String fail;
 	private final String start;
