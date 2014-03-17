@@ -52,6 +52,7 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaMuistissaRouteImpl.class);
+	private final int UUDELLEEN_YRITYSTEN_MAARA = 12;
 	private final String fail;
 	private final String start;
 	private final String finish;
@@ -154,7 +155,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 						deadLetterChannel(
 								deadLetterChannelHaeHakukohteenHakemukset)
 								//
-								.maximumRedeliveries(4)
+								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
 								.redeliveryDelay(300L)
 								// log exhausted stacktrace
@@ -251,7 +252,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				.errorHandler(
 						deadLetterChannel(deadLetterChannelHaeHakemus)
 								//
-								.maximumRedeliveries(4)
+								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
 								.redeliveryDelay(300L)
 								// log exhausted stacktrace
@@ -296,7 +297,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				.errorHandler(
 						deadLetterChannel(deadLetterChannelHaeValintaperusteet)
 								//
-								.maximumRedeliveries(4)
+								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
 								.redeliveryDelay(300L)
 								// log exhausted stacktrace
@@ -364,7 +365,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 				.errorHandler(
 						deadLetterChannel(deadLetterChannelTeeValintalaskenta)
 								//
-								.maximumRedeliveries(4)
+								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
 								//
 								.redeliveryDelay(300L)
 								// log exhausted stacktrace
