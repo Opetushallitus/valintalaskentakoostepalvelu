@@ -454,12 +454,12 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					//
-					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintalaskenta.threadpoolsize:1}") String valintalaskentaTyojono,
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintalaskenta.threadpoolsize:2}") String valintalaskentaTyojono,
 			@Value("seda:haeHakemus?" +
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					//
-					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakemus.threadpoolsize:4}") String hakemusTyojono,
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakemus.threadpoolsize:2}") String hakemusTyojono,
 			@Value("seda:haeValintaperuste?" +
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&"
@@ -469,7 +469,7 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					//
-					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakukohteidenhakemukset.threadpoolsize:4}") String hakukohteidenHakemuksetTyojono,
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakukohteidenhakemukset.threadpoolsize:3}") String hakukohteidenHakemuksetTyojono,
 			@Value("valintalaskentaCache") String valintalaskentaCache,
 			@Value("direct:valintalaskenta_muistissa_aloita_laskenta") String direct_aloita_laskenta,
 			@Value("direct:valintalaskenta_muistissa_hae_valintaperusteet_yksittainen") String direct_hae_valintaperusteet_yksittainen,
