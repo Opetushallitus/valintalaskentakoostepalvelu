@@ -128,46 +128,63 @@ public class ValintalaskentaMuistissaResource {
 			Collection<String> blacklistOids) throws Exception {
 		ValintalaskentaMuistissaProsessi prosessi = new ValintalaskentaMuistissaProsessi(
 				hakuOid);
-		ValintalaskentaMuistissaProsessi vanhaProsessi = valintalaskentaTila
-				.getKaynnissaOlevaValintalaskenta().get();
-		/**
-		 * Vanha prosessi ylikirjoitetaan surutta jos siinä oli poikkeuksia
-		 */
-		if (vanhaProsessi != null && vanhaProsessi.hasPoikkeuksia()) {
-			valintalaskentaTila.getKaynnissaOlevaValintalaskenta().set(null);
+		if (hakukohdeOid != null) {
+			// jos tehdään yksittäiselle haulle niin ei blokata yhtäaikaisia
+			// ajoja.
+			kaynnistaLaskenta(hakuOid, hakukohdeOid, valinnanvaihe,
+					blacklistOids, prosessi);
+			return Vastaus.uudelleenOhjaus(prosessi.getId());
+		} else {
+			ValintalaskentaMuistissaProsessi vanhaProsessi = valintalaskentaTila
+					.getKaynnissaOlevaValintalaskenta().get();
+
+			/**
+			 * Vanha prosessi ylikirjoitetaan surutta jos siinä oli poikkeuksia
+			 */
+			if (vanhaProsessi != null && vanhaProsessi.hasPoikkeuksia()) {
+				valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
+						.set(null);
+			}
+			if (valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
+					.compareAndSet(null, prosessi)) {
+				kaynnistaLaskenta(hakuOid, hakukohdeOid, valinnanvaihe,
+						blacklistOids, prosessi);
+			} else {
+
+				throw new RuntimeException("Valintalaskenta on jo käynnissä");
+			}
+			LOG.info("Valintalaskenta käynnissä");
+			return Vastaus.uudelleenOhjaus(prosessi.getId());
 		}
-		if (valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
-				.compareAndSet(null, prosessi)) {
-			Collection<String> kasiteltavatHakukohteet;
-			try {
-				if (blacklistOids == null || blacklistOids.isEmpty()) {
-					if (hakukohdeOid != null) {
-						// Vain yhdelle hakukohteelle
-						kasiteltavatHakukohteet = Arrays.asList(hakukohdeOid);
-					} else {
-						kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
-					}
+	}
+
+	private void kaynnistaLaskenta(String hakuOid, String hakukohdeOid,
+			Integer valinnanvaihe, Collection<String> blacklistOids,
+			ValintalaskentaMuistissaProsessi prosessi) throws Exception {
+		Collection<String> kasiteltavatHakukohteet;
+		try {
+			if (blacklistOids == null || blacklistOids.isEmpty()) {
+				if (hakukohdeOid != null) {
+					// Vain yhdelle hakukohteelle
+					kasiteltavatHakukohteet = Arrays.asList(hakukohdeOid);
 				} else {
 					kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
-					kasiteltavatHakukohteet.removeAll(blacklistOids);
 				}
-			} catch (Exception e) {
-				prosessi.addException("Tarjonnalta ei saatu haulle hakukohteita! "
-						+ e.getMessage());
-				throw e;
+			} else {
+				kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
+				kasiteltavatHakukohteet.removeAll(blacklistOids);
 			}
-			LOG.info("Käynnistetään valintalaskenta prosessille {}",
-					prosessi.getId());
-			valintalaskentaMuistissa.aktivoiValintalaskenta(prosessi,
-					new ValintalaskentaCache(kasiteltavatHakukohteet), hakuOid,
-					valinnanvaihe, SecurityContextHolder.getContext()
-							.getAuthentication());
-		} else {
-
-			throw new RuntimeException("Valintalaskenta on jo käynnissä");
+		} catch (Exception e) {
+			prosessi.addException("Tarjonnalta ei saatu haulle hakukohteita! "
+					+ e.getMessage());
+			throw e;
 		}
-		LOG.info("Valintalaskenta käynnissä");
-		return Vastaus.uudelleenOhjaus(prosessi.getId());
+		LOG.info("Käynnistetään valintalaskenta prosessille {}",
+				prosessi.getId());
+		valintalaskentaMuistissa.aktivoiValintalaskenta(prosessi,
+				new ValintalaskentaCache(kasiteltavatHakukohteet), hakuOid,
+				valinnanvaihe, SecurityContextHolder.getContext()
+						.getAuthentication());
 	}
 
 	private Collection<String> getHakukohdeOids(
