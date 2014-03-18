@@ -261,6 +261,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 									"Hakukohteelle {} ei saatu valintaperusteita!",
 									valintaperusteetTyo.getOid());
 							valintaperusteetTyo.setEsitietoOhitettu();
+							exchange.getOut().setBody(Collections.emptyList());
 						} else {
 							Collection<ValintakoeTyo> v = valintaperusteetTyo
 									.setEsitieto(t);
