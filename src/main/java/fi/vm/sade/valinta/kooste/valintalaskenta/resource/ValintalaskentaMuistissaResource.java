@@ -27,6 +27,7 @@ import org.springframework.stereotype.Controller;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -189,8 +190,8 @@ public class ValintalaskentaMuistissaResource {
 
 	private Collection<String> getHakukohdeOids(
 			@Property(OPH.HAKUOID) String hakuOid) throws Exception {
-		return Collections2.transform(Collections2.filter(tarjontaService
-				.haeTarjonta(hakuOid).getHakukohde(),
+		return Lists.newArrayList(Collections2.transform(Collections2.filter(
+				tarjontaService.haeTarjonta(hakuOid).getHakukohde(),
 				new Predicate<HakukohdeTyyppi>() {
 					public boolean apply(HakukohdeTyyppi hakukohde) {
 						return JULKAISTU == hakukohde.getHakukohteenTila();
@@ -199,7 +200,7 @@ public class ValintalaskentaMuistissaResource {
 			public String apply(HakukohdeTyyppi input) {
 				return input.getOid();
 			}
-		});
+		}));
 
 	}
 }
