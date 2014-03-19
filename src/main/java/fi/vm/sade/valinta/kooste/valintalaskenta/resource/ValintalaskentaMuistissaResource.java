@@ -26,7 +26,7 @@ import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -197,27 +197,30 @@ public class ValintalaskentaMuistissaResource {
 			@Property(OPH.HAKUOID) String hakuOid) throws Exception {
 		ResultV1RDTO<HakutuloksetV1RDTO<HakukohdeHakutulosV1RDTO>> r = hakukohdeResource
 				.search(hakuOid, Arrays.asList("JULKAISTU"));
-		Collection<String> julkaistut = Collections2
-				.transform(
-						Lists.newArrayList(Iterables.concat(Collections2
-								.transform(
-										r.getResult().getTulokset(),
-										new Function<TarjoajaHakutulosV1RDTO<HakukohdeHakutulosV1RDTO>, List<HakukohdeHakutulosV1RDTO>>() {
-											@Override
-											public List<HakukohdeHakutulosV1RDTO> apply(
-													TarjoajaHakutulosV1RDTO<HakukohdeHakutulosV1RDTO> input) {
 
-												return input.getTulokset();
-											}
+		return Lists
+				.newArrayList(FluentIterable
+				//
+						.from(r.getResult().getTulokset())
+						//
+						.transformAndConcat(
+								new Function<TarjoajaHakutulosV1RDTO<HakukohdeHakutulosV1RDTO>, List<HakukohdeHakutulosV1RDTO>>() {
+									@Override
+									public List<HakukohdeHakutulosV1RDTO> apply(
+											TarjoajaHakutulosV1RDTO<HakukohdeHakutulosV1RDTO> input) {
 
-										}))),
-						new Function<HakukohdeHakutulosV1RDTO, String>() {
-							@Override
-							public String apply(HakukohdeHakutulosV1RDTO i) {
-								return i.getOid();
-							}
-						});
-		return Lists.newArrayList(julkaistut);
+										return input.getTulokset();
+									}
 
+								})
+						//
+						.transform(
+								new Function<HakukohdeHakutulosV1RDTO, String>() {
+									@Override
+									public String apply(
+											HakukohdeHakutulosV1RDTO i) {
+										return i.getOid();
+									}
+								}));
 	}
 }
