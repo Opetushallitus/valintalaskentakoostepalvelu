@@ -240,7 +240,16 @@
         </jaxrs:providers>
     </jaxrs:client>
 
-
+	<jaxrs:client id="HakukohdeV1ResourceClient"
+                  address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
+                  serviceClass="fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper"
+                  inheritHeaders="true">
+        <jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+        </jaxrs:providers>
+    </jaxrs:client>
+    
     <jaxws:client id="ValintalaskentaServiceClient"
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
                   address="${valintalaskentakoostepalvelu.valintalaskentaService.url}">

@@ -2,9 +2,12 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.camel.CamelContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +40,8 @@ import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
  */
 @Configuration
 public class ValintalaskentaMuistissaConfig {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ValintalaskentaMuistissaConfig.class);
 
 	@Bean(name = "valintalaskentaMuistissaValvomo")
 	public ValvomoService<ValintalaskentaMuistissaProsessi> getValvomoServiceImpl() {
@@ -97,7 +102,10 @@ public class ValintalaskentaMuistissaConfig {
 				HakemusList hakemusList = applicationResource.findApplications(
 						null, ACTIVE_AND_INCOMPLETE, null, null, hakuOid,
 						hakukohdeOid, 0, Integer.MAX_VALUE);
-
+				if (hakemusList == null || hakemusList.getResults() == null) {
+					LOG.error("Ei hakemuksia hakukohteelle {}", hakukohdeOid);
+					return Collections.emptyList();
+				}
 				return Collections2.transform(hakemusList.getResults(),
 						new Function<SuppeaHakemus, String>() {
 							@Override
