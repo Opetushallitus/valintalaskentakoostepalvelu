@@ -10,7 +10,7 @@ import java.util.List;
 import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
-import org.apache.camel.spring.SpringRouteBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,9 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaMuistissaRoute;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 
 /**
  * 
@@ -49,7 +51,8 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
  * 
  */
 @Component
-public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
+public class ValintalaskentaMuistissaRouteImpl extends
+		AbstractDokumenttiRouteBuilder {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaMuistissaRouteImpl.class);
 	private final static int UUDELLEEN_YRITYSTEN_MAARA = 60;
@@ -401,16 +404,48 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 		//
 				.log(ERROR, "Hakukohteen hakemusten oideja ei voitu hakea")
 				//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						dokumenttiprosessi(exchange).getPoikkeukset().add(
+								new Poikkeus(Poikkeus.HAKU,
+										"Hakuun liittyvien hakemusten haku",
+										Poikkeus.hakukohdeOid(exchange.getIn()
+												.getBody(String.class))));
+					}
+				})
+				//
 				.to(fail);
 		from(deadLetterChannelHaeHakemus)
 		//
 				.log(ERROR, "Hakukohteen hakemusta ei saatu haettua")
+				//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						dokumenttiprosessi(exchange)
+								.getPoikkeukset()
+								.add(new Poikkeus(
+										Poikkeus.HAKU,
+										"Hakemuksen haku",
+										Poikkeus.hakemusOid(oid(hakemus(exchange)))));
+					}
+				})
 				//
 				.to(fail);
 		from(deadLetterChannelHaeValintaperusteet)
 		//
 				.log(ERROR,
 						"Hakukohteen valintaperusteita ei onnistuttu haettua")
+				//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						dokumenttiprosessi(exchange)
+								.getPoikkeukset()
+								.add(new Poikkeus(
+										Poikkeus.VALINTAPERUSTEET,
+										"Valintaperusteiden haku",
+										Poikkeus.hakukohdeOid(oid(valintaperusteet(exchange)))));
+					}
+				})
 				//
 				.to(fail);
 		from(deadLetterChannelTeeValintalaskenta)
@@ -508,11 +543,14 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 		this.hakemusTyojono = hakemusTyojono;
 	}
 
+	private HakemusTyo<?> hakemus(Exchange exchange) {
+		return exchange.getIn().getBody(HakemusTyo.class);
+	}
+
 	private Processor hakemusHakuApplta() {
 		return new Processor() {
 			public void process(Exchange exchange) throws Exception {
-				HakemusTyo hakemusTyo = exchange.getIn().getBody(
-						HakemusTyo.class);
+				HakemusTyo<?> hakemusTyo = hakemus(exchange);
 				if (hakemusTyo == null) {
 					throw new RuntimeException(
 							"Yritetään tehdä null hakemusTyolla hakua haku-app:sta!");
@@ -541,6 +579,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 									hakemusTyyppi));
 				} catch (Exception e) {
 					kesto = System.currentTimeMillis() - kesto;
+					LOG.error(
+							"Hakemuksen({}) haussa tuli virhe! Yritetään uudelleen! {} {}",
+							hakemusTyo.getOid(), e.getMessage(), e.getCause());
 					prosessi(exchange).getHakemukset().tyoEpaonnistui(kesto, e);
 					throw new RuntimeException(e);
 				}
@@ -548,11 +589,28 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 		};
 	}
 
+	private ValintaperusteetTyo<?> valintaperusteet(Exchange exchange) {
+		return exchange.getIn().getBody(ValintaperusteetTyo.class);
+	}
+
+	private String oid(HakemusTyo<?> v) {
+		if (v == null) {
+			return StringUtils.EMPTY;
+		}
+		return v.getOid();
+	}
+
+	private String oid(ValintaperusteetTyo<?> v) {
+		if (v == null) {
+			return StringUtils.EMPTY;
+		}
+		return v.getOid();
+	}
+
 	private Processor valintaperusteet() {
 		return new Processor() {
 			public void process(Exchange exchange) throws Exception {
-				ValintaperusteetTyo valintaperusteetTyo = exchange.getIn()
-						.getBody(ValintaperusteetTyo.class);
+				ValintaperusteetTyo<?> valintaperusteetTyo = valintaperusteet(exchange);
 				if (valintaperusteetTyo == null) {
 					throw new RuntimeException(
 							"ValintaperusteetTyo reitillä on null");
@@ -582,6 +640,10 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 					}
 				} catch (Exception e) {
 					kesto = System.currentTimeMillis() - kesto;
+					LOG.error(
+							"Valintaperusteiden({}) haussa tuli virhe! Yritetään uudelleen! {} {}",
+							valintaperusteetTyo.getOid(), e.getMessage(),
+							e.getCause());
 					prosessi(exchange).getValintaperusteet().tyoEpaonnistui(
 							kesto, e);
 					throw new RuntimeException(e);
@@ -618,6 +680,9 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 
 				} catch (Exception e) {
 					kesto = System.currentTimeMillis() - kesto;
+					LOG.error(
+							"Hakemusten haussa haulle({}) tuli virhe! Yritetään uudelleen! {} {}",
+							hakuOid, e.getMessage(), e.getCause());
 					prosessi(exchange).getHakukohteilleHakemukset()
 							.tyoEpaonnistui(kesto, e);
 					throw new RuntimeException(e);
@@ -627,13 +692,15 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 
 	}
 
+	private ValintalaskentaTyo valintalaskenta(Exchange exchange) {
+		return exchange.getIn().getBody(ValintalaskentaTyo.class);
+	}
+
 	private Predicate valintalaskenta() {
 		return new Predicate() {
 			@Override
 			public boolean matches(Exchange exchange) {
-
-				ValintalaskentaTyo valintalaskentaTyo = exchange.getIn()
-						.getBody(ValintalaskentaTyo.class);
+				ValintalaskentaTyo valintalaskentaTyo = valintalaskenta(exchange);
 				if (valintalaskentaTyo.isOhitettu()) {
 					prosessi(exchange)
 							.getVaroitukset()
@@ -653,6 +720,10 @@ public class ValintalaskentaMuistissaRouteImpl extends SpringRouteBuilder {
 					return prosessi(exchange).getValintalaskenta().isValmis();
 				} catch (Exception e) {
 					kesto = System.currentTimeMillis() - kesto;
+					LOG.error(
+							"Valintalaskennassa tuli virhe hakukohteelle({})! Yritetään uudelleen! {} {}",
+							valintalaskentaTyo.getHakukohdeOid(),
+							e.getMessage(), e.getCause());
 					prosessi(exchange).getValintalaskenta().tyoEpaonnistui(
 							kesto, e);
 					e.printStackTrace();

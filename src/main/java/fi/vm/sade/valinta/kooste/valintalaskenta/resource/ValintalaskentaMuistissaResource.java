@@ -1,10 +1,10 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
-import static fi.vm.sade.tarjonta.service.types.TarjontaTila.JULKAISTU;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.ws.rs.Consumes;
@@ -25,14 +25,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
-import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
+import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeHakutulosV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakutuloksetV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.TarjoajaHakutulosV1RDTO;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaCache;
@@ -61,6 +65,9 @@ public class ValintalaskentaMuistissaResource {
 	private ValintalaskentaMuistissaRoute valintalaskentaMuistissa;
 	@Autowired
 	private TarjontaPublicService tarjontaService;
+
+	@Autowired
+	private HakukohdeV1ResourceWrapper hakukohdeResource;
 
 	@GET
 	@Path("/status")
@@ -138,7 +145,6 @@ public class ValintalaskentaMuistissaResource {
 		} else {
 			ValintalaskentaMuistissaProsessi vanhaProsessi = valintalaskentaTila
 					.getKaynnissaOlevaValintalaskenta().get();
-
 			/**
 			 * Vanha prosessi ylikirjoitetaan surutta jos siinä oli poikkeuksia
 			 */
@@ -151,7 +157,6 @@ public class ValintalaskentaMuistissaResource {
 				kaynnistaLaskenta(hakuOid, hakukohdeOid, valinnanvaihe,
 						blacklistOids, prosessi);
 			} else {
-
 				throw new RuntimeException("Valintalaskenta on jo käynnissä");
 			}
 			LOG.info("Valintalaskenta käynnissä");
@@ -190,17 +195,29 @@ public class ValintalaskentaMuistissaResource {
 
 	private Collection<String> getHakukohdeOids(
 			@Property(OPH.HAKUOID) String hakuOid) throws Exception {
-		return Lists.newArrayList(Collections2.transform(Collections2.filter(
-				tarjontaService.haeTarjonta(hakuOid).getHakukohde(),
-				new Predicate<HakukohdeTyyppi>() {
-					public boolean apply(HakukohdeTyyppi hakukohde) {
-						return JULKAISTU == hakukohde.getHakukohteenTila();
-					}
-				}), new Function<HakukohdeTyyppi, String>() {
-			public String apply(HakukohdeTyyppi input) {
-				return input.getOid();
-			}
-		}));
+		ResultV1RDTO<HakutuloksetV1RDTO<HakukohdeHakutulosV1RDTO>> r = hakukohdeResource
+				.search(hakuOid, Arrays.asList("JULKAISTU"));
+		Collection<String> julkaistut = Collections2
+				.transform(
+						Lists.newArrayList(Iterables.concat(Collections2
+								.transform(
+										r.getResult().getTulokset(),
+										new Function<TarjoajaHakutulosV1RDTO<HakukohdeHakutulosV1RDTO>, List<HakukohdeHakutulosV1RDTO>>() {
+											@Override
+											public List<HakukohdeHakutulosV1RDTO> apply(
+													TarjoajaHakutulosV1RDTO<HakukohdeHakutulosV1RDTO> input) {
+
+												return input.getTulokset();
+											}
+
+										}))),
+						new Function<HakukohdeHakutulosV1RDTO, String>() {
+							@Override
+							public String apply(HakukohdeHakutulosV1RDTO i) {
+								return i.getOid();
+							}
+						});
+		return Lists.newArrayList(julkaistut);
 
 	}
 }

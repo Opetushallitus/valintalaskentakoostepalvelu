@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import fi.vm.sade.valinta.kooste.valvomo.dto.OsaTyo;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Tyo;
 
 /**
  * 
@@ -42,7 +43,7 @@ public class DokumenttiProsessi extends Prosessi {
 		return poikkeukset;
 	}
 
-	public OsaTyo getKokonaistyo() {
+	public Tyo getKokonaistyo() {
 		return kokonaistyo;
 	}
 

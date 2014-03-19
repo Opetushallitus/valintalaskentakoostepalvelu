@@ -11,15 +11,15 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.kooste.valvomo.dto.KokonaisTyo;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.valvomo.dto.OsaTyo;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
-public class ValintalaskentaMuistissaProsessi extends Prosessi {
+public class ValintalaskentaMuistissaProsessi extends DokumenttiProsessi {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaMuistissaProsessi.class);
 	private final OsaTyo hakukohteilleHakemukset;
@@ -44,10 +44,10 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 	}
 
 	public ValintalaskentaMuistissaProsessi(String hakuOid,
-			final OsaTyo valintalaskenta,
-			final OsaTyo hakukohteilleHakemukset, final OsaTyo hakemukset,
-			final OsaTyo valintaperusteet) {
-		super("Valintalaskentamuistissa", "Haulle", hakuOid);
+			final OsaTyo valintalaskenta, final OsaTyo hakukohteilleHakemukset,
+			final OsaTyo hakemukset, final OsaTyo valintaperusteet) {
+		super("Valintalaskentamuistissa", "Haulle", hakuOid, Arrays
+				.asList("valintalaskenta"));
 		this.varoitukset = Collections.synchronizedList(Lists
 				.<Varoitus> newArrayList());
 		this.peruutaProsessiPoikkeuksesta = true;
@@ -76,6 +76,7 @@ public class ValintalaskentaMuistissaProsessi extends Prosessi {
 		return hakemukset;
 	}
 
+	@Override
 	public KokonaisTyo getKokonaistyo() {
 		return kokonaistyo;
 	}
