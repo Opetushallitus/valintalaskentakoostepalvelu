@@ -145,12 +145,17 @@ public class ValintalaskentaMuistissaResource {
 		} else {
 			ValintalaskentaMuistissaProsessi vanhaProsessi = valintalaskentaTila
 					.getKaynnissaOlevaValintalaskenta().get();
+
 			/**
 			 * Vanha prosessi ylikirjoitetaan surutta jos siinä oli poikkeuksia
 			 */
-			if (vanhaProsessi != null && vanhaProsessi.hasPoikkeuksia()) {
-				valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
-						.set(null);
+			if (vanhaProsessi != null) {
+				if (vanhaProsessi.hasPoikkeuksia()
+						|| vanhaProsessi.getValintalaskenta().isValmis()) {
+					// saa ylittaa
+					valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
+							.compareAndSet(vanhaProsessi, null);
+				}
 			}
 			if (valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
 					.compareAndSet(null, prosessi)) {

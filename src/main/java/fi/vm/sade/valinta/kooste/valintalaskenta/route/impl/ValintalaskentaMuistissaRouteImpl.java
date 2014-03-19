@@ -386,13 +386,6 @@ public class ValintalaskentaMuistissaRouteImpl extends
 				//
 				.when(valintalaskenta())
 				//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
-								.set(null);
-					}
-				})
-				//
 				.to(finish)
 				//
 				.end();
