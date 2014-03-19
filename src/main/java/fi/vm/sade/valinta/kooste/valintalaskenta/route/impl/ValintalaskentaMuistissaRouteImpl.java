@@ -55,8 +55,8 @@ public class ValintalaskentaMuistissaRouteImpl extends
 		AbstractDokumenttiRouteBuilder {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaMuistissaRouteImpl.class);
-	private final static int UUDELLEEN_YRITYSTEN_MAARA = 60;
-	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 5000L;
+	private final static int UUDELLEEN_YRITYSTEN_MAARA = 6;
+	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 2500L;
 
 	private final String fail;
 	private final String start;
@@ -452,6 +452,17 @@ public class ValintalaskentaMuistissaRouteImpl extends
 		//
 				.log(ERROR, "Valintalaskentaa ei voitu tehdä")
 				//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						dokumenttiprosessi(exchange)
+								.getPoikkeukset()
+								.add(new Poikkeus(
+										Poikkeus.VALINTALASKENTA,
+										"Valintalaskenta epäonnistui",
+										Poikkeus.hakukohdeOid(oid(valintalaskenta(exchange)))));
+					}
+				})
+				//
 				.to(fail);
 	}
 
@@ -591,6 +602,13 @@ public class ValintalaskentaMuistissaRouteImpl extends
 
 	private ValintaperusteetTyo<?> valintaperusteet(Exchange exchange) {
 		return exchange.getIn().getBody(ValintaperusteetTyo.class);
+	}
+
+	private String oid(ValintalaskentaTyo v) {
+		if (v == null) {
+			return StringUtils.EMPTY;
+		}
+		return v.getHakukohdeOid();
 	}
 
 	private String oid(HakemusTyo<?> v) {
