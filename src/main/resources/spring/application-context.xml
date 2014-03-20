@@ -77,33 +77,33 @@
                   serviceClass="fi.vm.sade.service.valintaperusteet.ValintaperusteService"
                   address="${valintalaskentakoostepalvelu.valintaperusteService.url}">
 		<jaxws:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"/></jaxws:properties>
-        <jaxws:outInterceptors>
-            <bean class="fi.vm.sade.valinta.kooste.CasApplicationAsAUserInterceptor">
-                <property name="webCasUrl" value="${web.url.cas}"/>
-                <property name="targetService"
-                          value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername"
-                          value="${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}"/>
-                <property name="appClientPassword"
-                          value="${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}"/>
-            </bean>
-        </jaxws:outInterceptors>
+        <!--<jaxws:outInterceptors>-->
+            <!--<bean class="fi.vm.sade.valinta.kooste.CasApplicationAsAUserInterceptor">-->
+                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
+                <!--<property name="targetService"-->
+                          <!--value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check"/>-->
+                <!--<property name="appClientUsername"-->
+                          <!--value="${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}"/>-->
+                <!--<property name="appClientPassword"-->
+                          <!--value="${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}"/>-->
+            <!--</bean>-->
+        <!--</jaxws:outInterceptors>-->
     </jaxws:client>
 	<jaxrs:client id="ValintakoeClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValintakoeResource"
                   address="${valintalaskentakoostepalvelu.valintaperusteService.url}">
 		<jaxrs:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"/></jaxrs:properties>
-        <jaxrs:outInterceptors>
-            <bean class="fi.vm.sade.valinta.kooste.CasApplicationAsAUserInterceptor">
-                <property name="webCasUrl" value="${web.url.cas}"/>
-                <property name="targetService"
-                          value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername"
-                          value="${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}"/>
-                <property name="appClientPassword"
-                          value="${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}"/>
-            </bean>
-        </jaxrs:outInterceptors>
+        <!--<jaxrs:outInterceptors>-->
+            <!--<bean class="fi.vm.sade.valinta.kooste.CasApplicationAsAUserInterceptor">-->
+                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
+                <!--<property name="targetService"-->
+                          <!--value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check"/>-->
+                <!--<property name="appClientUsername"-->
+                          <!--value="${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}"/>-->
+                <!--<property name="appClientPassword"-->
+                          <!--value="${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}"/>-->
+            <!--</bean>-->
+        <!--</jaxrs:outInterceptors>-->
     </jaxrs:client>
     <jaxrs:client id="HakemusServiceRestClientAsAdmin"
                   address="${valintalaskentakoostepalvelu.hakemus.rest.url}"
@@ -254,9 +254,9 @@
                   serviceClass="fi.vm.sade.service.valintalaskenta.ValintalaskentaService"
                   address="${valintalaskentakoostepalvelu.valintalaskentaService.url}">
         <jaxws:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"></entry></jaxws:properties>
-        <jaxws:outInterceptors>
-            <ref bean="ticketInterceptor"/>
-        </jaxws:outInterceptors>
+        <!--<jaxws:outInterceptors>-->
+            <!--<ref bean="ticketInterceptor"/>-->
+        <!--</jaxws:outInterceptors>-->
     </jaxws:client>
 
     <jaxws:client id="tarjontaServiceClient"
