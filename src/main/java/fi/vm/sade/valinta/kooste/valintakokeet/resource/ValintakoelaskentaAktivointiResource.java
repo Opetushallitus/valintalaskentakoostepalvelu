@@ -56,10 +56,9 @@ public class ValintakoelaskentaAktivointiResource {
 			throw new RuntimeException("HakuOid-parametri on pakollinen");
 		} else {
 			LOG.info("Valintakoelaskenta for haku {}", hakuOid);
-			ValintakoeProsessi prosessi;
+			ValintakoeProsessi prosessi = new ValintakoeProsessi(hakuOid);
 			valintakoelaskentaRoute.aktivoiValintakoelaskenta(
-					new ValintakoeCache(), prosessi = new ValintakoeProsessi(
-							hakuOid), hakuOid, hakukohdeOid,
+					new ValintakoeCache(), prosessi, hakuOid, hakukohdeOid,
 					SecurityContextHolder.getContext().getAuthentication());
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 			return prosessi.toProsessiId(); // "in progress";

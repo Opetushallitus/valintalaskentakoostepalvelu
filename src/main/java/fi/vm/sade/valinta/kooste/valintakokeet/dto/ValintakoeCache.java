@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintakokeet.dto;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.base.Function;
@@ -38,6 +39,12 @@ public class ValintakoeCache {
 						return hakukohdetyyppi.getHakukohdeOid();
 					}
 				});
+		//
+		// Ei hakutoiveita joten hakemusta ei kasitella
+		//
+		if (hakukohdeOids.isEmpty()) {
+			return Collections.emptyList();
+		}
 		final Collection<AbstraktiTyo> tyot = Lists.newArrayList();
 		ValintakoeTyo valintakoetyo = new ValintakoeTyo(hakemusTyyppi);
 		Collection<ValintaperusteetTyo<ValintakoeTyo>> kaikkiValintaperusteetTyyppiEsitiedot = Lists

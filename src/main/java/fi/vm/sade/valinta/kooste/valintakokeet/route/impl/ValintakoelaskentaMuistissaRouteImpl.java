@@ -26,10 +26,13 @@ import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHaunHakemuksetKomponentt
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HakemusOidSplitter;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeCache;
+import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeProsessi;
 import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeTyo;
 import fi.vm.sade.valinta.kooste.valintakokeet.route.ValintakoelaskentaMuistissaRoute;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.AbstraktiTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
+import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 
 /**
@@ -40,7 +43,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
 @Component
 public class ValintakoelaskentaMuistissaRouteImpl extends
 		AbstractDokumenttiRouteBuilder {
-	private final static int UUDELLEEN_YRITYSTEN_MAARA = 60;
+	private final static int UUDELLEEN_YRITYSTEN_MAARA = 10;
 	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 5000L;
 
 	private final static Logger LOG = LoggerFactory
@@ -62,19 +65,19 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					// Hakemustyojonon kasittelijoiden maara. Oletuksena 1
-					"concurrentConsumers=${valintalaskentakoostepalvelu.valintakoelaskenta.hakemus.threadpoolsize:2}") String hakemusTyojono,
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintakoelaskenta.hakemus.threadpoolsize:4}") String hakemusTyojono,
 			@Value("seda:valintakoelaskenta_valintaperusteetTyojono?" +
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					// Valintaperusteettyojonon kasittelijoiden maara.
 					// Oletuksena 1
-					"concurrentConsumers=${valintalaskentakoostepalvelu.valintakoelaskenta.valintaperusteet.threadpoolsize:1}") String valintaperusteetTyojono,
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintakoelaskenta.valintaperusteet.threadpoolsize:4}") String valintaperusteetTyojono,
 			@Value("seda:valintakoelaskenta_valintakoelaskentaTyojono?" +
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					// Valintakoelaskentatyojonon kasittelijoiden maara.
 					// Oletuksena 1
-					"concurrentConsumers=${valintalaskentakoostepalvelu.valintakoelaskenta.threadpoolsize:1}") String valintakoelaskentaTyojono,
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintakoelaskenta.threadpoolsize:5}") String valintakoelaskentaTyojono,
 			@Value(ValintakoelaskentaMuistissaRoute.SEDA_VALINTAKOELASKENTA_MUISTISSA) String valintakoelaskenta,
 			HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti,
 			ValintaperusteService valintaperusteService,
@@ -92,6 +95,12 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 		this.haeHaunHakemuksetKomponentti = haeHaunHakemuksetKomponentti;
 	}
 
+	protected ValintakoeProsessi prosessi(Exchange exchange) {
+		return exchange.getProperty(
+				ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI,
+				ValintakoeProsessi.class);
+	}
+
 	@Override
 	public void configure() throws Exception {
 		//
@@ -104,6 +113,9 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				.doTry()
 				//
 				// Collection<String> hakemusOids
+				//
+				.log(LoggingLevel.INFO,
+						"Haetaan valintakoelaskentaa varten hakemukset")
 				//
 				.to("direct:valintakoelaskentamuistissa_haun_hakemukset")
 				//
@@ -134,9 +146,10 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				.process(new Processor() {
 					@Override
 					public void process(Exchange exchange) throws Exception {
-						dokumenttiprosessi(exchange).setKokonaistyo(
-								exchange.getIn().getBody(Collection.class)
-										.size() * 2);
+						Collection<?> hakemukset = exchange.getIn().getBody(
+								Collection.class);
+						prosessi(exchange).getHakemukset().setKokonaismaara(
+								hakemukset.size());
 					}
 				})
 				//
@@ -145,8 +158,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				.to(hakemusTyojono);
 
 		from(hakemusTyojono)
-		//
-		// when keskeytetty ohita
+				//
+				// when keskeytetty ohita
 				.errorHandler(
 						deadLetterChannel(
 								"direct:valintakoelaskentamuistissa_hakemusTyojono_deadletterchannel")
@@ -181,16 +194,18 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 												.getApplicationByOid(exchange
 														.getIn().getBody(
 																String.class)));
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+						prosessi(exchange).getHakemukset().tyoValmistui(0L);
 						// Tallenna haettu hakemustyyppi osaksi
 						// valintakoelaskentatyota prosessiin
-						exchange.getOut()
-								.setBody(
-										cache(exchange)
-												.hakukohteenEsitiedotOnSelvitettyJaSeuraavaksiEsitiedotTyojonoihin(
-														hakemusTyyppi));
-						dokumenttiprosessi(exchange).inkrementoiKokonaistyota(
-								hakemusTyyppi.getHakutoive().size());
+						Collection<? extends AbstraktiTyo> tyot = cache(
+								exchange)
+								.hakukohteenEsitiedotOnSelvitettyJaSeuraavaksiEsitiedotTyojonoihin(
+										hakemusTyyppi);
+						exchange.getOut().setBody(tyot);
+						if (tyot.isEmpty()) {
+							LOG.error("Hakemuksella({}) ei ole hakutoiveita!",
+									hakemusTyyppi.getHakemusOid());
+						}
 					}
 				})
 				//
@@ -200,10 +215,23 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.when(body().isInstanceOf(ValintaperusteetTyo.class))
 				//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						prosessi(exchange).getValintaperusteet()
+								.inkrementoiKokonaismaaraa();
+					}
+				})
+				//
 				.to(valintaperusteetTyojono)
 				//
 				.when(body().isInstanceOf(ValintakoeTyo.class))
 				//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						prosessi(exchange).getValintakoelaskenta()
+								.inkrementoiKokonaismaaraa();
+					}
+				})
 				.to(valintakoelaskentaTyojono)
 				//
 				.otherwise()
@@ -253,9 +281,11 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 															 * hakukohteen
 															 * valintaperusteet
 															 */null);
+
 						List<ValintaperusteetTyyppi> t = valintaperusteService
 								.haeValintaperusteet(Arrays.asList(params));
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+						prosessi(exchange).getValintaperusteet().tyoValmistui(
+								0L);
 						if (t == null || t.isEmpty()) {
 							LOG.error(
 									"Hakukohteelle {} ei saatu valintaperusteita!",
@@ -265,7 +295,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 						} else {
 							Collection<ValintakoeTyo> v = valintaperusteetTyo
 									.setEsitieto(t);
-
+							prosessi(exchange).getValintakoelaskenta()
+									.inkrementoiKokonaismaaraa(v.size());
 							if (v != null) {
 								exchange.getOut().setBody(v);
 							} else {
@@ -322,7 +353,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 									"Hakemuksen {} yhdellekään hakutoiveelle ei ollut valintaperusteita.",
 									valintakoeTyo.getHakemus().getHakemusOid());
 						}
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+						prosessi(exchange).getValintakoelaskenta()
+								.tyoValmistui(0L);
 
 					}
 				})
