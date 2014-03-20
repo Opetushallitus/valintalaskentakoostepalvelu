@@ -202,10 +202,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 								.hakukohteenEsitiedotOnSelvitettyJaSeuraavaksiEsitiedotTyojonoihin(
 										hakemusTyyppi);
 						exchange.getOut().setBody(tyot);
-						if (tyot.isEmpty()) {
-							LOG.error("Hakemuksella({}) ei ole hakutoiveita!",
-									hakemusTyyppi.getHakemusOid());
-						}
+
 					}
 				})
 				//
