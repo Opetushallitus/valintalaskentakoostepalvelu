@@ -20,6 +20,7 @@ public class Poikkeus {
 
 	public static final String SIJOITTELU = "Sijoittelupalvelu";
 	public static final String VALINTATIETO = "Valintatietopalvelu";
+	public static final String VALINTAKOELASKENTA = "Valintakoelaskenta";
 	public static final String VALINTAPERUSTEET = "Valintaperustepalvelu";
 	public static final String VIESTINTAPALVELU = "Viestintäpalvelu";
 	public static final String DOKUMENTTIPALVELU = "Dokumenttipalvelu";
