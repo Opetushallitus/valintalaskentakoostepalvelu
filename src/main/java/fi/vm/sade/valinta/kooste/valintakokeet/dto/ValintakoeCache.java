@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -22,7 +25,8 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
  *         kaikki valintakoelaskennassa tarvittavat tiedot.
  */
 public class ValintakoeCache {
-
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ValintakoeCache.class);
 	private final ConcurrentHashMap<String, ValintaperusteetTyo<ValintakoeTyo>> valintaperusteetEsitiedot;
 
 	public ValintakoeCache() {
@@ -43,6 +47,8 @@ public class ValintakoeCache {
 		// Ei hakutoiveita joten hakemusta ei kasitella
 		//
 		if (hakukohdeOids.isEmpty()) {
+			LOG.error("Hakemuksella({}) ei ole hakutoiveita!",
+					hakemusTyyppi.getHakemusOid());
 			return Collections.emptyList();
 		}
 		final Collection<AbstraktiTyo> tyot = Lists.newArrayList();
