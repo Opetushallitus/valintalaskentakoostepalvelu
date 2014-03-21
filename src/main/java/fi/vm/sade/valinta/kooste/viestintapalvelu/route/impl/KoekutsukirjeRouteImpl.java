@@ -360,6 +360,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 									"koekutsukirje.pdf",
 									defaultExpirationDate().getTime(),
 									prosessi.getTags(), "application/pdf", pdf);
+
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 							prosessi.setDokumenttiId(id);
