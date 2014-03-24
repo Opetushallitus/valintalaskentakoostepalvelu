@@ -20,6 +20,7 @@ import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.util.Formatter;
 
 /**
  * 
@@ -61,8 +62,8 @@ public class SijoittelunTulosExcelKomponentti {
 		List<Object[]> rivit = new ArrayList<Object[]>();
 		for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
 			rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
-			rivit.add(new Object[] { "Jonosija", "Tasasijan jonosija",
-					"Hakija", "Hakemus", "Hakutoive", "Sijoittelun tila",
+			rivit.add(new Object[] { "Jonosija", "Hakemus", "Hakija",
+					"Hakutoive", "Pisteet", "Sijoittelun tila",
 					"Vastaanottotieto" });
 			for (HakemusDTO hakemus : jono.getHakemukset()) {
 				// Jonosija Tasasijan jonosija Hakija Hakemus Hakutoive
@@ -108,9 +109,9 @@ public class SijoittelunTulosExcelKomponentti {
 				}
 				nimi.append(hakemus.getSukunimi()).append(", ")
 						.append(hakemus.getEtunimi());
-				rivit.add(new Object[] { hakemus.getJonosija(),
-						hakemus.getTasasijaJonosija(), nimi.toString(),
-						hakemusOid, hakemus.getPrioriteetti(),
+				rivit.add(new Object[] { hakemus.getJonosija(), hakemusOid,
+						nimi.toString(), hakemus.getPrioriteetti(),
+						Formatter.suomennaNumero(hakemus.getPisteet()),
 						hakemus.getTila(), valintaTieto });
 			}
 			rivit.add(new Object[] {});
