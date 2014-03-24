@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.camel.Header;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +47,10 @@ public class ValintalaskennanTulosExcelKomponentti {
 	@Value("${valintalaskentakoostepalvelu.valintaperusteet.rest.url}")
 	private String valintaperusteetUrl;
 
-	public InputStream luoXls(@Property(OPH.HAKUKOHDEOID) String hakukohdeOid)
-			throws Exception {
+	public InputStream luoXls(@Header("haunNimi") String haunNimi,
+			@Header("hakukohteenNimi") String hakukohteenNimi,
+			@Property(OPH.HAKUOID) String hakuOid,
+			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid) throws Exception {
 		LOG.debug("Yhteys {} HakukohdeResource.hakukohde({})", new Object[] {
 				valintalaskentaResourceUrl, hakukohdeOid });
 
@@ -60,7 +63,7 @@ public class ValintalaskennanTulosExcelKomponentti {
 					LOG.error("Sijoittelulta palautuu null valinnanvaiheita!");
 					return 0;
 				}
-				return o1.getCreatedAt().compareTo(o2.getCreatedAt());
+				return -1 * o1.getCreatedAt().compareTo(o2.getCreatedAt());
 			}
 		});
 
@@ -72,6 +75,9 @@ public class ValintalaskennanTulosExcelKomponentti {
 		// -tuloksen tila
 		List<Object[]> rivit = new ArrayList<Object[]>();
 
+		rivit.add(new Object[] { haunNimi });
+		rivit.add(new Object[] { hakukohteenNimi });
+		rivit.add(new Object[] {});
 		// Valinnanvaihe OID: 13770670692632664634655521339392
 		// Päivämäärä: 08.09.2013 15:23:40
 		// Valintatapajono: Varsinaisen valinnanvaiheen valintatapajono (v.)
@@ -89,44 +95,47 @@ public class ValintalaskennanTulosExcelKomponentti {
 					vaihe.getValinnanvaiheoid() });
 			rivit.add(new Object[] { "Päivämäärä:",
 					ExcelExportUtil.DATE_FORMAT.format(vaihe.getCreatedAt()) });
-			rivit.add(new Object[] { "Valintatapajono:",
-					vaihe.getJarjestysnumero() });
-			rivit.add(new Object[] {});
-			rivit.add(new Object[] { "Jonosija", "Hakija", "Yhteispisteet",
-					"Hakutoive", "Valintatieto", "Valintatapajono" });
-			for (ValintatapajonoDTO jono : vaihe.getValintatapajono()) {
-				// fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO
-				// vjdto;
-				// try {
-				// vjdto = valintatapajonoResource.readByOid(jono.getOid());
-				// } catch (Exception e) {
-				// LOG.error("Yhteys epäonnistui: {}/valintatapajono/{}",
-				// valintaperusteetUrl, jono.getOid());
-				// throw e;
-				// }
-				for (JonosijaDTO sija : jono.getJonosijat()) {
-					StringBuilder hakija = new StringBuilder();
-					hakija.append(sija.getSukunimi()).append(", ")
-							.append(sija.getEtunimi());
-					String yhteispisteet = "--";
-					try {
-						yhteispisteet = sija.getJarjestyskriteerit().first()
-								.getArvo().toString();
-						// sija.getJarjestyskriteerit().
-						// yhteispisteet =
-						// sija.getJarjestyskriteerit().firstEntry().getValue().getArvo().toString();
-					} catch (Exception e) {
-						LOG.error(
-								"Hakemukselle {}, nimi {} ei löytynyt yhteispisteitä!",
-								new Object[] { sija.getHakemusOid(),
-										hakija.toString() });
+			if (!vaihe.getValintatapajono().isEmpty()) {
+				rivit.add(new Object[] { vaihe.getValintatapajono().get(0)
+						.getNimi() });
+				rivit.add(new Object[] { "Valintatapajonon numero",
+						vaihe.getJarjestysnumero() });
+				rivit.add(new Object[] { "Jonosija", "Hakija", "Yhteispisteet",
+						"Hakutoive", "Valintatieto" });
+				for (ValintatapajonoDTO jono : vaihe.getValintatapajono()) {
+					// fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO
+					// vjdto;
+					// try {
+					// vjdto = valintatapajonoResource.readByOid(jono.getOid());
+					// } catch (Exception e) {
+					// LOG.error("Yhteys epäonnistui: {}/valintatapajono/{}",
+					// valintaperusteetUrl, jono.getOid());
+					// throw e;
+					// }
+					for (JonosijaDTO sija : jono.getJonosijat()) {
+						StringBuilder hakija = new StringBuilder();
+						hakija.append(sija.getSukunimi()).append(", ")
+								.append(sija.getEtunimi());
+						String yhteispisteet = "--";
+						try {
+							yhteispisteet = sija.getJarjestyskriteerit()
+									.first().getArvo().toString();
+							// sija.getJarjestyskriteerit().
+							// yhteispisteet =
+							// sija.getJarjestyskriteerit().firstEntry().getValue().getArvo().toString();
+						} catch (Exception e) {
+							LOG.error(
+									"Hakemukselle {}, nimi {} ei löytynyt yhteispisteitä!",
+									new Object[] { sija.getHakemusOid(),
+											hakija.toString() });
+						}
+						rivit.add(new Object[] { sija.getJonosija(),
+								hakija.toString(), yhteispisteet,
+								sija.getPrioriteetti(),
+								suomennaTila(sija.getTuloksenTila()) });
 					}
-					rivit.add(new Object[] { sija.getJonosija(),
-							hakija.toString(), yhteispisteet,
-							sija.getPrioriteetti(),
-							suomennaTila(sija.getTuloksenTila()),
-							jono.getNimi() });
 				}
+				rivit.add(new Object[] {});
 			}
 		}
 		return ExcelExportUtil
