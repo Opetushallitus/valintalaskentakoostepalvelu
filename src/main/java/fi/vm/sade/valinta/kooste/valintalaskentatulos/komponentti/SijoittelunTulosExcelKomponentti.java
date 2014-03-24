@@ -3,11 +3,13 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.language.Simple;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +17,13 @@ import org.springframework.stereotype.Component;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.TilaHistoriaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.util.Formatter;
 
 /**
  * 
@@ -59,11 +63,24 @@ public class SijoittelunTulosExcelKomponentti {
 		}
 
 		List<Object[]> rivit = new ArrayList<Object[]>();
+		Collections.sort(hakukohde.getValintatapajonot(),
+				new Comparator<ValintatapajonoDTO>() {
+					@Override
+					public int compare(ValintatapajonoDTO o1,
+							ValintatapajonoDTO o2) {
+						if (o1.getPrioriteetti() == null
+								|| o2.getPrioriteetti() == 0) {
+							return 0;
+						}
+						return o1.getPrioriteetti().compareTo(
+								o2.getPrioriteetti());
+					}
+				});
 		for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
 			rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
-			rivit.add(new Object[] { "Jonosija", "Tasasijan jonosija",
-					"Hakija", "Hakemus", "Hakutoive", "Sijoittelun tila",
-					"Vastaanottotieto" });
+			rivit.add(new Object[] { "Jonosija", "Hakemus", "Hakija",
+					"Hakutoive", "Pisteet", "Sijoittelun tila",
+					"Vastaanottotieto", "Muokattu" });
 			for (HakemusDTO hakemus : jono.getHakemukset()) {
 				// Jonosija Tasasijan jonosija Hakija Hakemus Hakutoive
 				// Sijoittelun tila Vastaanottotieto
@@ -108,14 +125,34 @@ public class SijoittelunTulosExcelKomponentti {
 				}
 				nimi.append(hakemus.getSukunimi()).append(", ")
 						.append(hakemus.getEtunimi());
-				rivit.add(new Object[] { hakemus.getJonosija(),
-						hakemus.getTasasijaJonosija(), nimi.toString(),
-						hakemusOid, hakemus.getPrioriteetti(),
-						hakemus.getTila(), valintaTieto });
+				rivit.add(new Object[] { hakemus.getJonosija(), hakemusOid,
+						nimi.toString(), hakemus.getPrioriteetti(),
+						Formatter.suomennaNumero(hakemus.getPisteet()),
+						hakemus.getTila(), valintaTieto,
+						muokattu(hakemus.getTilaHistoria()) });
 			}
 			rivit.add(new Object[] {});
 		}
 		return ExcelExportUtil
 				.exportGridAsXls(rivit.toArray(new Object[][] {}));
+	}
+
+	private String muokattu(List<TilaHistoriaDTO> h) {
+		if (h == null || h.isEmpty()) {
+			return StringUtils.EMPTY;
+		} else {
+			Collections.sort(h, new Comparator<TilaHistoriaDTO>() {
+				@Override
+				public int compare(TilaHistoriaDTO o1, TilaHistoriaDTO o2) {
+					if (o1 == null || o2 == null || o1.getLuotu() == null
+							|| o2.getLuotu() == null) {
+						return 0;
+					}
+					return -1 * o1.getLuotu().compareTo(o2.getLuotu());
+
+				}
+			});
+			return Formatter.paivamaara(h.get(0).getLuotu());
+		}
 	}
 }

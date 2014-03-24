@@ -35,6 +35,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 
 /**
  * @author Jussi Jartamo
@@ -185,11 +186,13 @@ public class JalkiohjauskirjeetKomponentti {
 					// selitteita jarkevasti
 					if (VARALLA.equals(valintatapajono.getTila())
 							&& valintatapajono.getVarasijanNumero() != null) {
-						tulokset.put("selite", "Varasijan numero on "
+						tulokset.put("varasija", "Varasijan numero on "
 								+ valintatapajono.getVarasijanNumero());
-					} else {
-						tulokset.put("selite", StringUtils.EMPTY);
 					}
+					tulokset.put("selite",
+							new Teksti(valintatapajono.getTilanKuvaukset())
+									.getTeksti(preferoituKielikoodi,
+											StringUtils.EMPTY));
 					tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(
 							valintatapajono.getTila(),
 							valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));

@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import fi.vm.sade.service.valintatiedot.ValintatietoService;
@@ -28,6 +29,7 @@ import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.dto.ValintakoeNimi;
 
 /**
  * KOEKUTSUEXCEL
@@ -56,7 +58,8 @@ public class ValintalaskentaTulosExcelKomponentti {
 		}
 		List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService
 				.haeValintatiedotHakukohteelle(valintakoeOids, hakukohdeOid);
-		List<String> tunnisteet = getTunnisteet(tiedotHakukohteelle);
+
+		List<ValintakoeNimi> tunnisteet = getTunnisteet(tiedotHakukohteelle);
 		if (tunnisteet.isEmpty()) {
 			return ExcelExportUtil
 					.exportGridAsXls(new Object[][] {
@@ -69,7 +72,9 @@ public class ValintalaskentaTulosExcelKomponentti {
 			LOG.debug("Creating rows for Excel file!");
 			ArrayList<String> otsikot = new ArrayList<String>();
 			otsikot.addAll(Arrays.asList("Nimi", "Hakemus", "Laskettu pvm"));
-			otsikot.addAll(tunnisteet);
+			for (ValintakoeNimi n : tunnisteet) {
+				otsikot.add(n.getNimi());
+			}
 			rows.add(otsikot.toArray());
 			for (HakemusOsallistuminenTyyppi o : tiedotHakukohteelle) {
 				if (useWhitelist) {
@@ -90,10 +95,10 @@ public class ValintalaskentaTulosExcelKomponentti {
 				b.append(o.getSukunimi()).append(", ").append(o.getEtunimi());
 				rivi.addAll(Arrays.asList(b.toString(), o.getHakemusOid(),
 						ExcelExportUtil.DATE_FORMAT.format(date)));
-				for (String tunniste : tunnisteet) {
-					if (osallistumiset.containsKey(tunniste)) {
-						rivi.add(suomenna(osallistumiset.get(tunniste)
-								.getOsallistuminen()));
+				for (ValintakoeNimi tunniste : tunnisteet) {
+					if (osallistumiset.containsKey(tunniste.getTunniste())) {
+						rivi.add(suomenna(osallistumiset.get(
+								tunniste.getTunniste()).getOsallistuminen()));
 					} else {
 						rivi.add("----");
 					}
@@ -119,17 +124,24 @@ public class ValintalaskentaTulosExcelKomponentti {
 		return StringUtils.EMPTY;
 	}
 
-	private List<String> getTunnisteet(
+	private List<ValintakoeNimi> getTunnisteet(
 			List<HakemusOsallistuminenTyyppi> osallistujat) {
-		Set<String> tunnisteet = new HashSet<String>();
+		Map<String, ValintakoeNimi> tunnisteet = Maps.newHashMap();
 		for (HakemusOsallistuminenTyyppi osallistuja : osallistujat) {
 			for (ValintakoeOsallistuminenTyyppi valintakoe : osallistuja
 					.getOsallistumiset()) {
-				if (!tunnisteet.contains(valintakoe.getValintakoeTunniste())) {
-					tunnisteet.add(valintakoe.getValintakoeTunniste());
+				if (!tunnisteet.containsKey(valintakoe.getValintakoeTunniste())) {
+					String nimi = valintakoe.getNimi();
+					if (nimi == null) {
+						nimi = valintakoe.getValintakoeTunniste();
+					}
+					tunnisteet.put(
+							valintakoe.getValintakoeTunniste(),
+							new ValintakoeNimi(nimi, valintakoe
+									.getValintakoeTunniste()));
 				}
 			}
 		}
-		return new ArrayList<String>(tunnisteet);
+		return Lists.newArrayList(tunnisteet.values());
 	}
 }

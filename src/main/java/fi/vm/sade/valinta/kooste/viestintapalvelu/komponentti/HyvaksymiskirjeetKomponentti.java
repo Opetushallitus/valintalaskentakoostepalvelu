@@ -221,14 +221,13 @@ public class HyvaksymiskirjeetKomponentti {
 					// selitteita jarkevasti
 					if (VARALLA.equals(valintatapajono.getTila())
 							&& valintatapajono.getVarasijanNumero() != null) {
-						tulokset.put("selite", "Varasijan numero on "
+						tulokset.put("varasija", "Varasijan numero on "
 								+ valintatapajono.getVarasijanNumero());
-					} else {
-						tulokset.put("selite",
-								new Teksti(valintatapajono.getTilanKuvaukset())
-										.getTeksti(preferoituKielikoodi,
-												StringUtils.EMPTY));
 					}
+					tulokset.put("selite",
+							new Teksti(valintatapajono.getTilanKuvaukset())
+									.getTeksti(preferoituKielikoodi,
+											StringUtils.EMPTY));
 					tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(
 							valintatapajono.getTila(),
 							valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
