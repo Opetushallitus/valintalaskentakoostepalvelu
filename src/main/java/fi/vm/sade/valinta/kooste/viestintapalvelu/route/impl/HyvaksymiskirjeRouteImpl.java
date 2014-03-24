@@ -45,6 +45,7 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 	private final DokumenttiResource dokumenttiResource;
 	private final SecurityPreprocessor security = new SecurityPreprocessor();
+	private final String dokumenttipalveluUrl;
 
 	@Autowired
 	public HyvaksymiskirjeRouteImpl(
@@ -52,8 +53,10 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 			ViestintapalveluResource viestintapalveluResource,
 			HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
+			@Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}") String dokumenttipalveluUrl,
 			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource) {
 		super();
+		this.dokumenttipalveluUrl = dokumenttipalveluUrl;
 		this.dokumenttiResource = dokumenttiResource;
 		this.sijoitteluProxy = sijoitteluProxy;
 		this.hyvaksymiskirjeet = hyvaksymiskirjeet;
@@ -150,7 +153,15 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						DokumenttiProsessi prosessi = dokumenttiprosessi(exchange);
 						Kirjeet<Kirje> kirjeet = exchange.getIn().getBody(
 								Kirjeet.class);
-
+						if (kirjeet == null || kirjeet.getLetters() == null
+								|| kirjeet.getLetters().isEmpty()) {
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(Poikkeus.VALINTATIETO,
+											"Hyväksymiskirjeitä ei voida muodostaa tyhjälle tulosjoukolle."));
+							throw new RuntimeException(
+									"Hyväksymiskirjeitä ei voida muodostaa tyhjälle tulosjoukolle.");
+						}
 						InputStream pdf;
 						try {
 
@@ -208,12 +219,12 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 							LOG.error(
 									"Dokumenttipalvelulle tiedonsiirrossa tapahtui virhe: {}",
 									e.getMessage());
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(
-											Poikkeus.DOKUMENTTIPALVELU,
-											"Osoitteet pdf:n tallennus dokumenttipalvelulle",
-											e.getMessage()));
+							dokumenttiprosessi(exchange).getPoikkeukset().add(
+									new Poikkeus(Poikkeus.DOKUMENTTIPALVELU,
+											"Hyväksymiskirjeet pdf:n tallennus dokumenttipalvelulle. "
+													+ dokumenttipalveluUrl, e
+													.getMessage()));
+
 							throw e;
 						}
 					}
