@@ -224,7 +224,10 @@ public class HyvaksymiskirjeetKomponentti {
 						tulokset.put("selite", "Varasijan numero on "
 								+ valintatapajono.getVarasijanNumero());
 					} else {
-						tulokset.put("selite", StringUtils.EMPTY);
+						tulokset.put("selite",
+								new Teksti(valintatapajono.getTilanKuvaukset())
+										.getTeksti(preferoituKielikoodi,
+												StringUtils.EMPTY));
 					}
 					tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(
 							valintatapajono.getTila(),
