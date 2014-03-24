@@ -1,108 +1,144 @@
 package fi.vm.sade.valinta.kooste.external.resource.laskenta.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.wordnik.swagger.annotations.ApiModelProperty;
+
 public class JonosijaDTO {
 
-    private int jonosija;
-    private String hakemusOid;
-    private String hakijaOid;
-    private SortedSet<JarjestyskriteeritulosDTO> jarjestyskriteerit = new TreeSet<JarjestyskriteeritulosDTO>();
-    private int prioriteetti;
-    private String sukunimi;
-    private String etunimi;
-    private boolean harkinnanvarainen = false;
-    private JarjestyskriteerituloksenTila tuloksenTila;
-    private List<String> historiat;
-    private boolean muokattu = false;
+	@ApiModelProperty(value = "Jonosijanumero", required = true)
+	private int jonosija;
 
-    public List<String> getHistoriat() {
-        return historiat;
-    }
+	@ApiModelProperty(value = "Hakemus OID", required = true)
+	private String hakemusOid;
 
-    public void setHistoriat(List<String> historiat) {
-        this.historiat = historiat;
-    }
+	@ApiModelProperty(value = "Hakija OID")
+	private String hakijaOid;
 
-    public SortedSet<JarjestyskriteeritulosDTO> getJarjestyskriteerit() {
-        return jarjestyskriteerit;
-    }
+	@ApiModelProperty(value = "Järjestyskriteerit", required = true)
+	private SortedSet<JarjestyskriteeritulosDTO> jarjestyskriteerit = new TreeSet<JarjestyskriteeritulosDTO>();
 
-    public void setJarjestyskriteerit(SortedSet<JarjestyskriteeritulosDTO> jarjestyskriteerit) {
-        this.jarjestyskriteerit = jarjestyskriteerit;
-    }
+	@ApiModelProperty(value = "Prioriteetti", required = true)
+	private int prioriteetti;
 
-    public String getHakijaOid() {
-        return hakijaOid;
-    }
+	@ApiModelProperty(value = "Sukunimi")
+	private String sukunimi;
 
-    public void setHakijaOid(String hakijaOid) {
-        this.hakijaOid = hakijaOid;
-    }
+	@ApiModelProperty(value = "Etunimi")
+	private String etunimi;
 
-    public String getHakemusOid() {
-        return hakemusOid;
-    }
+	@ApiModelProperty(value = "Onko hakija hakenut harkinnanvaraisesti")
+	private boolean harkinnanvarainen = false;
 
-    public void setHakemusOid(String hakemusOid) {
-        this.hakemusOid = hakemusOid;
-    }
+	@ApiModelProperty(value = "Jonosijan tila", required = true)
+	private JarjestyskriteerituloksenTila tuloksenTila;
 
-    public int getJonosija() {
-        return jonosija;
-    }
+	@ApiModelProperty(value = "Jonosijan historiat")
+	private List<String> historiat;
 
-    public void setJonosija(int jonosija) {
-        this.jonosija = jonosija;
-    }
+	@ApiModelProperty(value = "Jonosijan syötetyt arvot")
+	private List<SyotettyArvoDTO> syotetytArvot = new ArrayList<SyotettyArvoDTO>();
 
-    public void setEtunimi(String etunimi) {
-        this.etunimi = etunimi;
-    }
+	@ApiModelProperty(value = "Onko jonosijaa muokattu manuaalisesti")
+	private boolean muokattu = false;
 
-    public void setSukunimi(String sukunimi) {
-        this.sukunimi = sukunimi;
-    }
+	public List<String> getHistoriat() {
+		return historiat;
+	}
 
-    public void setPrioriteetti(int prioriteetti) {
-        this.prioriteetti = prioriteetti;
-    }
+	public void setHistoriat(List<String> historiat) {
+		this.historiat = historiat;
+	}
 
-    public int getPrioriteetti() {
-        return prioriteetti;
-    }
+	public SortedSet<JarjestyskriteeritulosDTO> getJarjestyskriteerit() {
+		return jarjestyskriteerit;
+	}
 
-    public String getSukunimi() {
-        return sukunimi;
-    }
+	public void setJarjestyskriteerit(
+			SortedSet<JarjestyskriteeritulosDTO> jarjestyskriteerit) {
+		this.jarjestyskriteerit = jarjestyskriteerit;
+	}
 
-    public String getEtunimi() {
-        return etunimi;
-    }
+	public String getHakijaOid() {
+		return hakijaOid;
+	}
 
-    public JarjestyskriteerituloksenTila getTuloksenTila() {
-        return tuloksenTila;
-    }
+	public void setHakijaOid(String hakijaOid) {
+		this.hakijaOid = hakijaOid;
+	}
 
-    public void setTuloksenTila(JarjestyskriteerituloksenTila tuloksenTila) {
-        this.tuloksenTila = tuloksenTila;
-    }
+	public String getHakemusOid() {
+		return hakemusOid;
+	}
 
-    public boolean isHarkinnanvarainen() {
-        return harkinnanvarainen;
-    }
+	public void setHakemusOid(String hakemusOid) {
+		this.hakemusOid = hakemusOid;
+	}
 
-    public void setHarkinnanvarainen(boolean harkinnanvarainen) {
-        this.harkinnanvarainen = harkinnanvarainen;
-    }
+	public int getJonosija() {
+		return jonosija;
+	}
 
-    public boolean isMuokattu() {
-        return muokattu;
-    }
+	public void setJonosija(int jonosija) {
+		this.jonosija = jonosija;
+	}
 
-    public void setMuokattu(boolean muokattu) {
-        this.muokattu = muokattu;
-    }
+	public void setEtunimi(String etunimi) {
+		this.etunimi = etunimi;
+	}
+
+	public void setSukunimi(String sukunimi) {
+		this.sukunimi = sukunimi;
+	}
+
+	public void setPrioriteetti(int prioriteetti) {
+		this.prioriteetti = prioriteetti;
+	}
+
+	public int getPrioriteetti() {
+		return prioriteetti;
+	}
+
+	public String getSukunimi() {
+		return sukunimi;
+	}
+
+	public String getEtunimi() {
+		return etunimi;
+	}
+
+	public JarjestyskriteerituloksenTila getTuloksenTila() {
+		return tuloksenTila;
+	}
+
+	public void setTuloksenTila(JarjestyskriteerituloksenTila tuloksenTila) {
+		this.tuloksenTila = tuloksenTila;
+	}
+
+	public boolean isHarkinnanvarainen() {
+		return harkinnanvarainen;
+	}
+
+	public void setHarkinnanvarainen(boolean harkinnanvarainen) {
+		this.harkinnanvarainen = harkinnanvarainen;
+	}
+
+	public boolean isMuokattu() {
+		return muokattu;
+	}
+
+	public void setMuokattu(boolean muokattu) {
+		this.muokattu = muokattu;
+	}
+
+	public List<SyotettyArvoDTO> getSyotetytArvot() {
+		return syotetytArvot;
+	}
+
+	public void setSyotetytArvot(List<SyotettyArvoDTO> syotetytArvot) {
+		this.syotetytArvot = syotetytArvot;
+	}
 }

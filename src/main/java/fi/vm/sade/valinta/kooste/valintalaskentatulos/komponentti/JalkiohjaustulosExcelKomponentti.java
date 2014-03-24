@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.camel.Body;
+import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +16,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
+import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluIlmankoulutuspaikkaaKomponentti;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 
@@ -34,7 +35,7 @@ public class JalkiohjaustulosExcelKomponentti {
 	@Autowired
 	private SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy;
 
-	public InputStream luoXls(@Body String hakuOid) {
+	public InputStream luoXls(@Property(OPH.HAKUOID) String hakuOid) {
 
 		final Collection<HakijaDTO> hyvaksymattomatHakijat = sijoitteluProxy
 				.ilmankoulutuspaikkaa(hakuOid, SijoitteluResource.LATEST);

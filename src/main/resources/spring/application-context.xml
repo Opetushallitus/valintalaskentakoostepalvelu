@@ -89,6 +89,29 @@
             <!--</bean>-->
         <!--</jaxws:outInterceptors>-->
     </jaxws:client>
+    
+    <jaxrs:client id="ValintatapajonoClient"
+                  serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValintatapajonoResource"
+                  address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}/">
+    	<jaxrs:outInterceptors>
+            <ref bean="ticketInterceptorRest"/>
+        </jaxrs:outInterceptors>
+		<jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+        </jaxrs:providers>
+    </jaxrs:client>
+    <jaxrs:client id="ValinnanVaiheClient"
+                  serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValinnanVaiheResource"
+                  address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}/">
+    	<jaxrs:outInterceptors>
+            <ref bean="ticketInterceptorRest"/>
+        </jaxrs:outInterceptors>
+		<jaxrs:providers>
+            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+        </jaxrs:providers>
+    </jaxrs:client>
 	<jaxrs:client id="ValintakoeClient"
                   serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValintakoeResource"
                   address="${valintalaskentakoostepalvelu.valintaperusteService.url}">
@@ -210,7 +233,6 @@
                   address="${valintalaskentakoostepalvelu.valintalaskenta.rest.url}"
                   serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource"
                   inheritHeaders="true">
-        <jaxrs:properties value-type="boolean"><entry key="org.apache.cxf.message.Message.MAINTAIN_SESSION" value="true"/></jaxrs:properties>
         <jaxrs:outInterceptors>
             <ref bean="ticketInterceptorRest"/>
         </jaxrs:outInterceptors>

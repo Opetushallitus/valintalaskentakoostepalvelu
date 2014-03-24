@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
+import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.JalkiohjaustulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.ValintalaskennanTulosExcelKomponentti;
@@ -30,11 +32,13 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
 @Component
 public class ValintalaskentaTulosRouteImpl extends
 		AbstractDokumenttiRouteBuilder {
-
+	private final static String VAKIO_HAKUKOHTEEN_NIMI = "Hakukohteelle ei saatu haettua nimeä";
+	private final static String VAKIO_HAUN_NIMI = "Haulle ei saatu haettua nimeä";
 	private JalkiohjaustulosExcelKomponentti jalkiohjaustulosExcelKomponentti;
 	private SijoittelunTulosExcelKomponentti sijoittelunTulosExcelKomponentti;
 	private ValintalaskennanTulosExcelKomponentti valintalaskennanTulosExcelKomponentti;
 	private ValintalaskentaTulosExcelKomponentti valintalaskentaTulosExcelKomponentti;
+	private final HaeHakukohdeNimiTarjonnaltaKomponentti haeHakukohdeNimiTarjonnaltaKomponentti;
 	private final SecurityPreprocessor security = new SecurityPreprocessor();
 	private final DokumenttiResource dokumenttiResource;
 	private final String valintakoekutsutXls;
@@ -45,12 +49,14 @@ public class ValintalaskentaTulosRouteImpl extends
 			SijoittelunTulosExcelKomponentti sijoittelunTulosExcelKomponentti,
 			ValintalaskennanTulosExcelKomponentti valintalaskennanTulosExcelKomponentti,
 			ValintalaskentaTulosExcelKomponentti valintalaskentaTulosExcelKomponentti,
+			HaeHakukohdeNimiTarjonnaltaKomponentti haeHakukohdeNimiTarjonnaltaKomponentti,
 			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource,
 			@Value(ValintakoekutsutExcelRoute.SEDA_VALINTAKOE_EXCEL) String valintakoekutsutXls) {
 		this.jalkiohjaustulosExcelKomponentti = jalkiohjaustulosExcelKomponentti;
 		this.sijoittelunTulosExcelKomponentti = sijoittelunTulosExcelKomponentti;
 		this.valintalaskennanTulosExcelKomponentti = valintalaskennanTulosExcelKomponentti;
 		this.valintalaskentaTulosExcelKomponentti = valintalaskentaTulosExcelKomponentti;
+		this.haeHakukohdeNimiTarjonnaltaKomponentti = haeHakukohdeNimiTarjonnaltaKomponentti;
 		this.dokumenttiResource = dokumenttiResource;
 		this.valintakoekutsutXls = valintakoekutsutXls;
 	}
@@ -62,8 +68,29 @@ public class ValintalaskentaTulosRouteImpl extends
 		from(SijoittelunTulosExcelRoute.DIRECT_SIJOITTELU_EXCEL).bean(
 				sijoittelunTulosExcelKomponentti);
 
-		from(ValintalaskentaTulosExcelRoute.DIRECT_VALINTALASKENTA_EXCEL).bean(
-				valintalaskennanTulosExcelKomponentti);
+		from(ValintalaskentaTulosExcelRoute.DIRECT_VALINTALASKENTA_EXCEL)
+		//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						String hakukohteenNimi = VAKIO_HAKUKOHTEEN_NIMI;
+						String haunNimi = VAKIO_HAUN_NIMI;
+						try {
+							HakukohdeNimiRDTO dto = haeHakukohdeNimiTarjonnaltaKomponentti
+									.haeHakukohdeNimi(hakukohdeOid(exchange));
+							hakukohteenNimi = new fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti(
+									dto.getHakukohdeNimi()).getTeksti();
+							haunNimi = new fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti(
+									dto.getTarjoajaNimi()).getTeksti();
+						} catch (Exception e) {
+
+						}
+						exchange.getOut().setHeader("hakukohteenNimi",
+								hakukohteenNimi);
+						exchange.getOut().setHeader("haunNimi", haunNimi);
+					}
+				})
+				//
+				.bean(valintalaskennanTulosExcelKomponentti);
 
 		//
 		//
