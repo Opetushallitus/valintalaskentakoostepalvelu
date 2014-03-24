@@ -4,27 +4,62 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.wordnik.swagger.annotations.ApiModelProperty;
+
 public class ValinnanvaiheDTO {
 
-    private int jarjestysnumero;
-    private String valinnanvaiheoid;
-    private Date createdAt;
-    private List<ValintatapajonoDTO> valintatapajono = new ArrayList<ValintatapajonoDTO>();
+	@ApiModelProperty(value = "Järjestysnumero", required = true)
+	private int jarjestysnumero;
 
-    public List<ValintatapajonoDTO> getValintatapajono() {
-        return valintatapajono;
-    }
+	@ApiModelProperty(value = "Valinnan vaiheen OID", required = true)
+	private String valinnanvaiheoid;
 
-    public String getValinnanvaiheoid() {
-        return valinnanvaiheoid;
-    }
+	@ApiModelProperty(value = "Valinnan vaiheen nimi")
+	private String nimi;
 
-    public int getJarjestysnumero() {
-        return jarjestysnumero;
-    }
+	@ApiModelProperty(value = "Luomisajankohta", required = true)
+	private Date createdAt;
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
+	@ApiModelProperty(value = "Valintatapajonot", required = true)
+	private List<ValintatapajonoDTO> valintatapajono = new ArrayList<ValintatapajonoDTO>();
 
+	public List<ValintatapajonoDTO> getValintatapajono() {
+		return valintatapajono;
+	}
+
+	public String getValinnanvaiheoid() {
+		return valinnanvaiheoid;
+	}
+
+	public void setValinnanvaiheoid(String valinnanvaiheoid) {
+		this.valinnanvaiheoid = valinnanvaiheoid;
+	}
+
+	public void setValintatapajono(List<ValintatapajonoDTO> valintatapajono) {
+		this.valintatapajono = valintatapajono;
+	}
+
+	public int getJarjestysnumero() {
+		return jarjestysnumero;
+	}
+
+	public void setJarjestysnumero(int jarjestysnumero) {
+		this.jarjestysnumero = jarjestysnumero;
+	}
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public String getNimi() {
+		return nimi;
+	}
+
+	public void setNimi(String nimi) {
+		this.nimi = nimi;
+	}
 }

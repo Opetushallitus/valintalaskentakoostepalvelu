@@ -1,50 +1,71 @@
 package fi.vm.sade.valinta.kooste.external.resource.laskenta.dto;
 
 import java.math.BigDecimal;
+import java.util.Map;
+
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 //@Converters(BigDecimalConverter.class)
-public class JarjestyskriteeritulosDTO implements Comparable<JarjestyskriteeritulosDTO> {
+public class JarjestyskriteeritulosDTO implements
+		Comparable<JarjestyskriteeritulosDTO> {
 
-    private BigDecimal arvo;
-    private JarjestyskriteerituloksenTila tila;
-    private String kuvaus;
-    private int prioriteetti;
+	@ApiModelProperty(value = "Järjestyskriteerin lukuarvo", required = true)
+	private BigDecimal arvo;
 
-    @Override
-    public int compareTo(JarjestyskriteeritulosDTO o) {
-        return Integer.valueOf(prioriteetti).compareTo(o.getPrioriteetti());
-    }
+	@ApiModelProperty(value = "Järjestyskriteerin tila", required = true)
+	private JarjestyskriteerituloksenTila tila;
 
-    public BigDecimal getArvo() {
-        return arvo;
-    }
+	@ApiModelProperty(value = "Monikielinen kuvaus (esim. hylkäyksen syy)")
+	private Map<String, String> kuvaus;
 
-    public void setArvo(BigDecimal arvo) {
-        this.arvo = arvo;
-    }
+	@ApiModelProperty(value = "Järjestyskriteerin prioriteetti", required = true)
+	private int prioriteetti;
 
-    public JarjestyskriteerituloksenTila getTila() {
-        return tila;
-    }
+	@ApiModelProperty(value = "Järjestyskriteerin nimi")
+	private String nimi;
 
-    public void setTila(JarjestyskriteerituloksenTila tila) {
-        this.tila = tila;
-    }
+	@Override
+	public int compareTo(JarjestyskriteeritulosDTO o) {
+		return Integer.valueOf(prioriteetti).compareTo(o.getPrioriteetti());
+	}
 
-    public String getKuvaus() {
-        return kuvaus;
-    }
+	public BigDecimal getArvo() {
+		return arvo;
+	}
 
-    public void setKuvaus(String kuvaus) {
-        this.kuvaus = kuvaus;
-    }
+	public void setArvo(BigDecimal arvo) {
+		this.arvo = arvo;
+	}
 
-    public int getPrioriteetti() {
-        return prioriteetti;
-    }
+	public JarjestyskriteerituloksenTila getTila() {
+		return tila;
+	}
 
-    public void setPrioriteetti(int prioriteetti) {
-        this.prioriteetti = prioriteetti;
-    }
+	public void setTila(JarjestyskriteerituloksenTila tila) {
+		this.tila = tila;
+	}
 
+	public int getPrioriteetti() {
+		return prioriteetti;
+	}
+
+	public void setPrioriteetti(int prioriteetti) {
+		this.prioriteetti = prioriteetti;
+	}
+
+	public String getNimi() {
+		return nimi;
+	}
+
+	public void setNimi(String nimi) {
+		this.nimi = nimi;
+	}
+
+	public Map<String, String> getKuvaus() {
+		return kuvaus;
+	}
+
+	public void setKuvaus(Map<String, String> kuvaus) {
+		this.kuvaus = kuvaus;
+	}
 }
