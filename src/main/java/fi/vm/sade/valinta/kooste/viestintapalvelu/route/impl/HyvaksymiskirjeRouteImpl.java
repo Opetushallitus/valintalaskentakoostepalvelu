@@ -53,7 +53,7 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 			ViestintapalveluResource viestintapalveluResource,
 			HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
-			@Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}") String dokumenttipalveluUrl,
+			@Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url:''}") String dokumenttipalveluUrl,
 			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource) {
 		super();
 		this.dokumenttipalveluUrl = dokumenttipalveluUrl;
