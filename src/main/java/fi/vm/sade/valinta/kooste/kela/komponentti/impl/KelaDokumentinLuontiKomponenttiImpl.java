@@ -32,34 +32,47 @@ import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
 @Component
 public class KelaDokumentinLuontiKomponenttiImpl {
 
-    public InputStream luo(@Body Collection<TKUVAYHVA> rivit,
-    //
-            @Property(PROPERTY_AINEISTONNIMI) String aineistonNimi,
-            //
-            @Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi) {
-        int count = rivit.size();
+	public InputStream luo(@Body Collection<TKUVAYHVA> rivit,
+	//
+			@Property(PROPERTY_AINEISTONNIMI) String aineistonNimi,
+			//
+			@Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi) {
+		int count = rivit.size();
 
-        Deque<InputStream> streams = new ArrayDeque<InputStream>();
-        ByteBuffer buffer = ByteBuffer.allocate(150 + KelaUtil.RIVINVAIHTO.length);
-        for (TKUVAYHVA t : rivit) {
-            streams.add(new ByteArrayInputStream(addLineEnding(t.toByteArray(), buffer)));
-        }
-        streams.addFirst(new ByteArrayInputStream(addLineEnding(new TKUVAALKU.Builder().setAjopaivamaara(new Date())
-                .setAineistonnimi(aineistonNimi).setOrganisaationimi(organisaationNimi).build().toByteArray(), buffer)));
-        streams.addLast(new ByteArrayInputStream(addLineEnding(new TKUVALOPPU.Builder().setAjopaivamaara(new Date())
-                .setTietuelukumaara(count).build().toByteArray(), buffer)));
+		Deque<InputStream> streams = new ArrayDeque<InputStream>();
 
-        InputStream input = new SequenceInputStream(Collections.enumeration(streams));
-        return input;
-    }
+		for (TKUVAYHVA t : rivit) {
+			streams.add(new ByteArrayInputStream(addLineEnding(t.toByteArray(),
+					createBuffer())));
+		}
 
-    //
-    // Add line ending '\n' between every stream
-    //
-    private byte[] addLineEnding(byte[] tietue, ByteBuffer buffer) {
-        buffer.clear();
-        buffer.put(tietue);
-        buffer.put(KelaUtil.RIVINVAIHTO);
-        return buffer.array();
-    }
+		Date ajopvm = new Date();
+		streams.addFirst(new ByteArrayInputStream(addLineEnding(
+				new TKUVAALKU.Builder().setAjopaivamaara(ajopvm)
+						.setAineistonnimi(aineistonNimi)
+						.setOrganisaationimi(organisaationNimi).build()
+						.toByteArray(), createBuffer())));
+		streams.addLast(new ByteArrayInputStream(addLineEnding(
+				new TKUVALOPPU.Builder().setAjopaivamaara(ajopvm)
+						.setTietuelukumaara(count).build().toByteArray(),
+				createBuffer())));
+
+		InputStream input = new SequenceInputStream(
+				Collections.enumeration(streams));
+		return input;
+	}
+
+	private ByteBuffer createBuffer() {
+		return ByteBuffer.allocate(150 + KelaUtil.RIVINVAIHTO.length);
+	}
+
+	//
+	// Add line ending '\n' between every stream
+	//
+	private byte[] addLineEnding(byte[] tietue, ByteBuffer buffer) {
+		buffer.clear();
+		buffer.put(tietue);
+		buffer.put(KelaUtil.RIVINVAIHTO);
+		return buffer.array();
+	}
 }

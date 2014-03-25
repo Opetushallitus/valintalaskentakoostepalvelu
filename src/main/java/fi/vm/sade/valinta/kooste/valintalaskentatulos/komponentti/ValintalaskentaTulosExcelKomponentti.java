@@ -50,7 +50,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 	public InputStream luoTuloksetXlsMuodossa(
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
 			@Property("valintakoeOid") List<String> valintakoeOids,
-			@Property("hakemusOids") List<String> hakemusOids) {
+			@Property("hakemusOids") List<String> hakemusOids) throws Exception {
 		boolean useWhitelist = hakemusOids != null && !hakemusOids.isEmpty();
 		Set<String> whiteList = Collections.emptySet();
 		if (useWhitelist) {

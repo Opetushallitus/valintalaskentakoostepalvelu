@@ -177,9 +177,13 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 							@Override
 							public void process(Exchange exchange)
 									throws Exception {
-								exchange.getOut().setBody(
-										Iterables.concat((List<?>) exchange
+								// LOG.error("{}", new Gson().toJson(exchange
+								// .getIn().getBody()));
+								List<?> l = Lists.newArrayList(Iterables
+										.concat((Collection<? extends Collection<?>>) exchange
 												.getIn().getBody()));
+								// LOG.error("{}", new Gson().toJson(l));
+								exchange.getOut().setBody(l);
 							}
 						})
 				// Collection<TKUVAYHVA> ->
@@ -196,7 +200,8 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 							dokumenttiResource.tallenna(id, KelaUtil
 									.createTiedostoNimiYhva14(new Date()),
 									DateTime.now().plusDays(1).getMillis(),
-									Arrays.asList("kela"), "kela", filedata);
+									Arrays.asList("kela"),
+									"application/octet-stream", filedata);
 							dokumenttiprosessi(exchange).setDokumenttiId(id);
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
