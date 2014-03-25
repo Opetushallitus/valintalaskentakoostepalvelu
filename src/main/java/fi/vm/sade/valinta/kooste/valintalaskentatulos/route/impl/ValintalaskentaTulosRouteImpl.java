@@ -1,9 +1,13 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.route.impl;
 
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +36,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
 @Component
 public class ValintalaskentaTulosRouteImpl extends
 		AbstractDokumenttiRouteBuilder {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(ValintalaskentaTulosRouteImpl.class);
 	private final static String VAKIO_HAKUKOHTEEN_NIMI = "Hakukohteelle ei saatu haettua nimeä";
 	private final static String VAKIO_HAUN_NIMI = "Haulle ei saatu haettua nimeä";
 	private JalkiohjaustulosExcelKomponentti jalkiohjaustulosExcelKomponentti;
@@ -110,18 +116,57 @@ public class ValintalaskentaTulosRouteImpl extends
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						dokumenttiprosessi(exchange).setKokonaistyo(1);
-						InputStream i = pipeInputStreams(valintalaskentaTulosExcelKomponentti
-								.luoTuloksetXlsMuodossa(hakukohdeOid(exchange),
-										valintakoeOids(exchange),
-										hakemusOids(exchange)));
-						String id = generateId();
-						dokumenttiResource.tallenna(id, "valintakoekutsut.xls",
-								defaultExpirationDate().getTime(),
-								dokumenttiprosessi(exchange).getTags(),
-								"application/vnd.ms-excel", i);
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-						dokumenttiprosessi(exchange).setDokumenttiId(id);
+						try {
+							String hakukohdeOid = hakukohdeOid(exchange);
+							List<String> valintakoeOids = valintakoeOids(exchange);
+							List<String> hakemusOids = hakemusOids(exchange);
+							dokumenttiprosessi(exchange).setKokonaistyo(1);
+							InputStream xls;
+							try {
+								LOG.error("Haetaan tulokset {} {} {}",
+										hakukohdeOid, valintakoeOids,
+										hakemusOids);
+								xls = valintalaskentaTulosExcelKomponentti
+										.luoTuloksetXlsMuodossa(hakukohdeOid,
+												valintakoeOids, hakemusOids);
+								LOG.error("Tulokset haettu");
+							} catch (Exception e) {
+								LOG.error("Valintalaskentapalvelupyynto poikkeus!");
+								LOG.error("{}", e.getMessage());
+								dokumenttiprosessi(exchange).getPoikkeukset()
+										.add(new Poikkeus(
+												Poikkeus.VALINTALASKENTA,
+												"Valintatiedotpalvelukutsu", e
+														.getMessage()));
+								throw e;
+							}
+							String id = generateId();
+							try {
+								LOG.error("Tallennetaan");
+								dokumenttiResource.tallenna(id,
+										"valintakoekutsut.xls",
+										defaultExpirationDate().getTime(),
+										dokumenttiprosessi(exchange).getTags(),
+										"application/vnd.ms-excel", xls);
+							} catch (Exception e) {
+								LOG.error("{} {}", e.getMessage(),
+										Arrays.toString(e.getStackTrace()));
+								dokumenttiprosessi(exchange)
+										.getPoikkeukset()
+										.add(new Poikkeus(
+												Poikkeus.DOKUMENTTIPALVELU,
+												"Dokumenttipalvelulle tallennus",
+												e.getMessage()));
+								throw e;
+							}
+							dokumenttiprosessi(exchange)
+									.inkrementoiTehtyjaToita();
+							dokumenttiprosessi(exchange).setDokumenttiId(id);
+						} catch (Exception e) {
+							LOG.error("{} {}", e.getMessage(),
+									Arrays.toString(e.getStackTrace()));
+							throw e;
+						}
 					}
 				})
 				//
