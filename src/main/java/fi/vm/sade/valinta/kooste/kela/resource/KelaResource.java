@@ -36,6 +36,7 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaHakuFiltteri;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
+import fi.vm.sade.valinta.kooste.kela.route.KelaFtpRoute;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaHakuRoute;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
@@ -61,6 +62,9 @@ public class KelaResource {
 
 	@Autowired
 	private KelaRoute kelaRoute;
+
+	@Autowired
+	private KelaFtpRoute kelaFtpRoute;
 
 	@Resource(name = "kelaValvomo")
 	private ValvomoService<KelaProsessi> kelaValvomo;
@@ -131,7 +135,7 @@ public class KelaResource {
 	@PUT
 	@Path("/laheta/{documentId}")
 	@ApiOperation(value = "FTP-siirto", response = Response.class)
-	public Response laheta(@PathParam("documentId") String input) {
+	public Response laheta(@PathParam("documentId") String documentId) {
 		// KelaCacheDocument document = kelaCache.getDocument(input);
 		// if (document == null) {
 		// return Response.status(Status.BAD_REQUEST).build();
@@ -146,6 +150,8 @@ public class KelaResource {
 		// kelaCache.addDocument(KelaCacheDocument.createInfoMessage("Dokumentti "
 		// + document.getHeader()
 		// + " lähetetty Kelan FTP-palvelimelle"));
+		LOG.warn("Kela-ftp siirto aloitettu {}", documentId);
+		kelaFtpRoute.aloitaKelaSiirto(documentId);
 		return Response.ok().build();
 	}
 
