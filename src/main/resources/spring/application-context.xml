@@ -41,10 +41,10 @@
     <!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
     <!--<import resource="classpath:authentication-client.xml"/>-->
     <bean 	id="ticketInterceptor" 
-    		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptor"
+    		class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptor"
     		/>
     <bean 	id="ticketInterceptorRest"
-    		class="fi.vm.sade.generic.ui.portlet.security.SecurityTicketOutInterceptorRest"
+    		class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptorRest"
     		/>
     
     <authorizationPolicy id="admin" access="isAuthenticated()"
