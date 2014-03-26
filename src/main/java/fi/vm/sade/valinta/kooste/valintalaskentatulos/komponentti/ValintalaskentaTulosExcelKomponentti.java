@@ -13,6 +13,7 @@ import java.util.Set;
 import javax.annotation.Resource;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.apache.camel.Header;
 import org.apache.camel.Property;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -48,6 +49,8 @@ public class ValintalaskentaTulosExcelKomponentti {
 	private ValintatietoService valintatietoService;
 
 	public InputStream luoTuloksetXlsMuodossa(
+			@Header("haunNimi") String haunNimi,
+			@Header("hakukohteenNimi") String hakukohteenNimi,
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
 			@Property("valintakoeOid") List<String> valintakoeOids,
 			@Property("hakemusOids") List<String> hakemusOids) throws Exception {
@@ -69,6 +72,10 @@ public class ValintalaskentaTulosExcelKomponentti {
 									Arrays.toString(valintakoeOids.toArray()) } });
 		} else {
 			List<Object[]> rows = new ArrayList<Object[]>();
+			rows.add(new Object[] { haunNimi });
+			rows.add(new Object[] { hakukohteenNimi });
+			rows.add(new Object[] {});
+
 			LOG.debug("Creating rows for Excel file!");
 			ArrayList<String> otsikot = new ArrayList<String>();
 			otsikot.addAll(Arrays.asList("Nimi", "Hakemus", "Laskettu pvm"));

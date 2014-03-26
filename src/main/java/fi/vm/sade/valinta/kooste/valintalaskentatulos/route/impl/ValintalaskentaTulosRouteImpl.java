@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.route.impl;
 
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -67,6 +66,27 @@ public class ValintalaskentaTulosRouteImpl extends
 		this.valintakoekutsutXls = valintakoekutsutXls;
 	}
 
+	private Processor haunJaHakukohteenNimet() {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				String hakukohteenNimi = VAKIO_HAKUKOHTEEN_NIMI;
+				String haunNimi = VAKIO_HAUN_NIMI;
+				try {
+					HakukohdeNimiRDTO dto = haeHakukohdeNimiTarjonnaltaKomponentti
+							.haeHakukohdeNimi(hakukohdeOid(exchange));
+					hakukohteenNimi = new fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti(
+							dto.getHakukohdeNimi()).getTeksti();
+					haunNimi = new fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti(
+							dto.getTarjoajaNimi()).getTeksti();
+				} catch (Exception e) {
+
+				}
+				exchange.getOut().setHeader("hakukohteenNimi", hakukohteenNimi);
+				exchange.getOut().setHeader("haunNimi", haunNimi);
+			}
+		};
+	}
+
 	@Override
 	public void configure() throws Exception {
 		from(JalkiohjaustulosExcelRoute.DIRECT_JALKIOHJAUS_EXCEL).bean(
@@ -76,25 +96,7 @@ public class ValintalaskentaTulosRouteImpl extends
 
 		from(ValintalaskentaTulosExcelRoute.DIRECT_VALINTALASKENTA_EXCEL)
 		//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						String hakukohteenNimi = VAKIO_HAKUKOHTEEN_NIMI;
-						String haunNimi = VAKIO_HAUN_NIMI;
-						try {
-							HakukohdeNimiRDTO dto = haeHakukohdeNimiTarjonnaltaKomponentti
-									.haeHakukohdeNimi(hakukohdeOid(exchange));
-							hakukohteenNimi = new fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti(
-									dto.getHakukohdeNimi()).getTeksti();
-							haunNimi = new fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti(
-									dto.getTarjoajaNimi()).getTeksti();
-						} catch (Exception e) {
-
-						}
-						exchange.getOut().setHeader("hakukohteenNimi",
-								hakukohteenNimi);
-						exchange.getOut().setHeader("haunNimi", haunNimi);
-					}
-				})
+				.process(haunJaHakukohteenNimet())
 				//
 				.bean(valintalaskennanTulosExcelKomponentti);
 
@@ -114,32 +116,19 @@ public class ValintalaskentaTulosRouteImpl extends
 				//
 				.process(security)
 				//
+				.process(haunJaHakukohteenNimet())
+				//
+				.bean(valintalaskentaTulosExcelKomponentti)
+				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						try {
-							String hakukohdeOid = hakukohdeOid(exchange);
-							List<String> valintakoeOids = valintakoeOids(exchange);
-							List<String> hakemusOids = hakemusOids(exchange);
 							dokumenttiprosessi(exchange).setKokonaistyo(1);
-							InputStream xls;
-							try {
-								LOG.error("Haetaan tulokset {} {} {}",
-										hakukohdeOid, valintakoeOids,
-										hakemusOids);
-								xls = valintalaskentaTulosExcelKomponentti
-										.luoTuloksetXlsMuodossa(hakukohdeOid,
-												valintakoeOids, hakemusOids);
-								LOG.error("Tulokset haettu");
-							} catch (Exception e) {
-								LOG.error("Valintalaskentapalvelupyynto poikkeus!");
-								LOG.error("{}", e.getMessage());
-								dokumenttiprosessi(exchange).getPoikkeukset()
-										.add(new Poikkeus(
-												Poikkeus.VALINTALASKENTA,
-												"Valintatiedotpalvelukutsu", e
-														.getMessage()));
-								throw e;
-							}
+							InputStream xls = exchange.getIn().getBody(
+									InputStream.class);
+							// xls = valintalaskentaTulosExcelKomponentti
+							// .luoTuloksetXlsMuodossa(hakukohdeOid,
+							// valintakoeOids, hakemusOids);
 							String id = generateId();
 							try {
 								LOG.error("Tallennetaan");
@@ -185,5 +174,4 @@ public class ValintalaskentaTulosRouteImpl extends
 					}
 				});
 	}
-
 }
