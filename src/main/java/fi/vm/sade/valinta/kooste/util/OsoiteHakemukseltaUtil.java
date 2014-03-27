@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.util;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ public class OsoiteHakemukseltaUtil {
 	private final static String ULKOMAA_POSTINUMERO = "postinumeroUlkomaa";
 	private final static String ULKOMAA_POSTITOIMIPAIKKA = "kaupunkiUlkomaa";
 	private final static String ETUNIMET = "Etunimet";
+	private final static String KUTSUMANIMI = "Kutsumanimi";
 	private final static String SUKUNIMI = "Sukunimi";
 
 	public static Osoite osoiteHakemuksesta(Hakemus hakemus, String maa,
@@ -49,6 +51,7 @@ public class OsoiteHakemukseltaUtil {
 		String maakunta = "";
 
 		String etunimet = "";
+		String kutsumanimi = "";
 		String sukunimi = "";
 		boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = false;
 		if (hakemus != null) {
@@ -78,6 +81,7 @@ public class OsoiteHakemukseltaUtil {
 
 				maakoodi = henkilotiedot.get(ASUINMAA);
 				etunimet = henkilotiedot.get(ETUNIMET);
+				kutsumanimi = henkilotiedot.get(KUTSUMANIMI);
 				sukunimi = henkilotiedot.get(SUKUNIMI);
 
 				if (SUOMI.equalsIgnoreCase(maakoodi)) { // PITAISI OLLA
@@ -104,8 +108,15 @@ public class OsoiteHakemukseltaUtil {
 		if (maa == null) {
 			maa = "";
 		}
-		return new Osoite(etunimet, sukunimi, lahiosoite, null, null,
-				postinumero, postitoimipaikka, maakunta, maa, maakoodi,
+		// VT-836
+		String nimi;
+		if (StringUtils.isBlank(kutsumanimi)) {
+			nimi = etunimet;
+		} else {
+			nimi = kutsumanimi;
+		}
+		return new Osoite(nimi, sukunimi, lahiosoite, null, null, postinumero,
+				postitoimipaikka, maakunta, maa, maakoodi,
 				ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt);
 	}
 }
