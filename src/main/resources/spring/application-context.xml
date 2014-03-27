@@ -167,9 +167,6 @@
                   address="${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}"
                   serviceClass="fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource"
                   inheritHeaders="true">
-        <jaxrs:outInterceptors>
-            <ref bean="ticketInterceptorRest"/>
-        </jaxrs:outInterceptors>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
