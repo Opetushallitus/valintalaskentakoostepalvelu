@@ -18,6 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.google.gson.GsonBuilder;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -28,7 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class AbstractSecurityTicketOutInterceptor<T extends Message> extends
 		AbstractPhaseInterceptor<T> {
 
-	private final static Logger log = LoggerFactory
+	private final static Logger LOG = LoggerFactory
 			.getLogger(AbstractSecurityTicketOutInterceptor.class);
 
 	@Value("${auth.mode:cas}")
@@ -74,7 +76,7 @@ public class AbstractSecurityTicketOutInterceptor<T extends Message> extends
 			} else {
 				callback.setRequestHeader("CasSecurityTicket", proxyTicket);
 				PERA.setProxyKayttajaHeaders(callback, authentication.getName());
-				log.debug("attached proxyticket to request! user: "
+				LOG.debug("attached proxyticket to request! user: "
 						+ authentication.getName() + ", ticket: " + proxyTicket);
 			}
 		}
@@ -115,7 +117,7 @@ public class AbstractSecurityTicketOutInterceptor<T extends Message> extends
 					user);
 			callback.setRequestHeader(
 					"oldDeprecatedSecurity_REMOVE_authorities", authorities);
-			log.debug("DEV Proxy ticket! user: " + user + ", authorities: "
+			LOG.debug("DEV Proxy ticket! user: " + user + ", authorities: "
 					+ authorities);
 		}
 
@@ -180,7 +182,7 @@ public class AbstractSecurityTicketOutInterceptor<T extends Message> extends
 				new ProxyAuthenticator.Callback() {
 					@Override
 					public void setRequestHeader(String key, String value) {
-						log.info("setRequestHeader: " + key + "=" + value
+						LOG.info("setRequestHeader: " + key + "=" + value
 								+ " (targetService: " + casTargetService + ")");
 						((HttpURLConnection) message.get("http.connection"))
 								.setRequestProperty(key, value);
@@ -189,7 +191,7 @@ public class AbstractSecurityTicketOutInterceptor<T extends Message> extends
 					@Override
 					public void gotNewTicket(Authentication authentication,
 							String proxyTicket) {
-						log.info("gotNewTicket, auth: "
+						LOG.info("gotNewTicket, auth: "
 								+ authentication.getName() + ", proxyTicket: "
 								+ proxyTicket + ", (targetService: "
 								+ casTargetService + ")");
@@ -207,11 +209,18 @@ public class AbstractSecurityTicketOutInterceptor<T extends Message> extends
 			String msgProxyTicket = ((HttpURLConnection) message
 					.get("http.connection"))
 					.getRequestProperty("CasSecurityTicket");
-			log.error("FAULT in request, targetService: " + casTargetService
+			LOG.error("FAULT in request, targetService: " + casTargetService
 					+ ", authentication: " + authentication.getName()
 					+ ", msgProxyTicket: " + msgProxyTicket);
 		}
-		log.error("FAULT in request, message: " + message);
+
+		LOG.error("FAULT in request, message: " + message);
+		try {
+			LOG.error("\r\n{}", new GsonBuilder().setPrettyPrinting().create()
+					.toJson(message));
+		} catch (Exception e) {
+			LOG.error("Prettyprinting error message failed! {}", e.getMessage());
+		}
 	}
 
 	/**

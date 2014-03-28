@@ -272,9 +272,7 @@
     <jaxws:client id="valintatietoService"
                   serviceClass="fi.vm.sade.service.valintatiedot.ValintatietoService"
                   address="${valintalaskentakoostepalvelu.valintaTulosService.url}">
-        <jaxws:outInterceptors>
-            <ref bean="ticketInterceptor"/>
-        </jaxws:outInterceptors>
+
     </jaxws:client>
 
     <jaxws:client id="sijoitteluService"
