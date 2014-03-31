@@ -122,17 +122,15 @@ public class ValintalaskennanTulosExcelKomponentti {
 											|| o1sukunimi == null) {
 										return 0;
 									}
-									int c = -1
-											* o1sukunimi.compareTo(o2
-													.getSukunimi());
+									int c = o1sukunimi.compareTo(o2
+											.getSukunimi());
 									if (c == 0) {
 										String o1etunimi = o1.getEtunimi();
 										if (o1etunimi == null) {
 											return 0;
 										}
-										return -1
-												* o1etunimi.compareTo(o2
-														.getEtunimi());
+										return o1etunimi.compareTo(o2
+												.getEtunimi());
 									} else {
 										return c;
 									}
