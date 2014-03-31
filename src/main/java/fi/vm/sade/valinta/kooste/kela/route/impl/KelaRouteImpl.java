@@ -38,7 +38,6 @@ import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaDokumentinLuontiKomponenttiImpl;
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaHakijaRiviKomponenttiImpl;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
-import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.PrepareKelaProcessDescription;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKaikkiPaikanVastaanottaneet;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -59,7 +58,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti;
 	private final SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet;
 	private final DokumenttiResource dokumenttiResource;
-	private final PrepareKelaProcessDescription luoUusiProsessi;
 	private final String kelaLuonti;
 	private final SecurityPreprocessor security = new SecurityPreprocessor();
 
@@ -71,7 +69,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 			KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti,
 			SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet) {
 		this.kelaLuonti = kelaLuonti;
-		this.luoUusiProsessi = new PrepareKelaProcessDescription();
 		this.dokumenttiResource = dokumenttiResource;
 		this.kelaHakijaKomponentti = kelaHakijaKomponentti;
 		this.sijoitteluVastaanottaneet = sijoitteluVastaanottaneet;

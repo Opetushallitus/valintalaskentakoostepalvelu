@@ -38,7 +38,7 @@ public abstract class KelaRouteConfig {
 
 	@Bean
 	public KelaFtpRoute getKelaFtpRoute(
-			@Value(KelaRoute.SEDA_KELA_SIIRTO) String kelasiirto,
+			@Value(KelaRoute.KELA_SIIRTO) String kelasiirto,
 			@Qualifier("javaDslCamelContext") CamelContext context)
 			throws Exception {
 		return ProxyWithAnnotationHelper.createProxy(
