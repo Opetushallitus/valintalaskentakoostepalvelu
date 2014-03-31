@@ -136,20 +136,6 @@ public class KelaResource {
 	@Path("/laheta/{documentId}")
 	@ApiOperation(value = "FTP-siirto", response = Response.class)
 	public Response laheta(@PathParam("documentId") String documentId) {
-		// KelaCacheDocument document = kelaCache.getDocument(input);
-		// if (document == null) {
-		// return Response.status(Status.BAD_REQUEST).build();
-		// }
-		// try {
-		// kelaFtpProxy.lahetaTiedosto(document.getHeader(), new
-		// ByteArrayInputStream(document.getData()));
-		// } catch (Exception e) {
-		// kelaCache.addDocument(KelaCacheDocument.createErrorMessage("FTP-lähetys epäonnistui!"));
-		// return Response.serverError().build();
-		// }
-		// kelaCache.addDocument(KelaCacheDocument.createInfoMessage("Dokumentti "
-		// + document.getHeader()
-		// + " lähetetty Kelan FTP-palvelimelle"));
 		LOG.warn("Kela-ftp siirto aloitettu {}", documentId);
 		kelaFtpRoute.aloitaKelaSiirto(documentId);
 		return Response.ok().build();

@@ -112,6 +112,30 @@ public class ValintalaskennanTulosExcelKomponentti {
 					// valintaperusteetUrl, jono.getOid());
 					// throw e;
 					// }
+					Collections.sort(jono.getJonosijat(),
+							new Comparator<JonosijaDTO>() {
+								@Override
+								public int compare(JonosijaDTO o1,
+										JonosijaDTO o2) {
+									String o1sukunimi = o1.getSukunimi();
+									if (o1 == null || o2 == null
+											|| o1sukunimi == null) {
+										return 0;
+									}
+									int c = o1sukunimi.compareTo(o2
+											.getSukunimi());
+									if (c == 0) {
+										String o1etunimi = o1.getEtunimi();
+										if (o1etunimi == null) {
+											return 0;
+										}
+										return o1etunimi.compareTo(o2
+												.getEtunimi());
+									} else {
+										return c;
+									}
+								}
+							});
 					for (JonosijaDTO sija : jono.getJonosijat()) {
 						StringBuilder hakija = new StringBuilder();
 						hakija.append(sija.getSukunimi()).append(", ")

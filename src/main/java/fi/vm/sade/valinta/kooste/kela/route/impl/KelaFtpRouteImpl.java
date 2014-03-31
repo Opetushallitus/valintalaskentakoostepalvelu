@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.kela.route.impl;
 
-import static fi.vm.sade.valinta.kooste.dokumenttipalvelu.SendMessageToDocumentService.MESSAGE;
 import static fi.vm.sade.valinta.kooste.kela.route.KelaRoute.PROPERTY_DOKUMENTTI_ID;
 import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.finish;
 import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.kuvaus;
@@ -9,6 +8,8 @@ import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.start;
 
 import java.io.InputStream;
 
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.Property;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
 	 */
 	@Autowired
 	public KelaFtpRouteImpl(
-			@Value(KelaRoute.SEDA_KELA_SIIRTO) String kelaSiirto,
+			@Value(KelaRoute.KELA_SIIRTO) String kelaSiirto,
 			@Value("${kela.ftp.protocol}://${kela.ftp.username}@${kela.ftp.host}:${kela.ftp.port}${kela.ftp.path}") final String host,
 			@Value("password=${kela.ftp.password}&ftpClient.dataTimeout=30000&passiveMode=true") final String params,
 			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource) {
@@ -70,6 +71,10 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
 		}
 	}
 
+	private String dokumenttiId(Exchange exchange) {
+		return exchange.getProperty(PROPERTY_DOKUMENTTI_ID, String.class);
+	}
+
 	@Override
 	public void configure() throws Exception {
 		/**
@@ -81,12 +86,15 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
 				.setProperty(prosessi(), method(luoUusiProsessi))
 				// Start prosessi valvomoon dokumentin luonnin aloittamisesta
 				.to(start())
-				// Kayttajalle ilmoitus
-				.setHeader(MESSAGE,
-						constant("Kela-dokumentin siirto aloitettu."))
-				.bean(messageService)
 				// Hae dokumentti
-				.bean(new DownloadDocumentWithDocumentId())
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						exchange.getOut().setBody(
+								dokumenttiResource
+										.lataa(dokumenttiId(exchange))
+										.getEntity());
+					}
+				})
 				// FTP-SIIRTO
 				.to(ftpKelaSiirto())
 				// Done valvomoon
