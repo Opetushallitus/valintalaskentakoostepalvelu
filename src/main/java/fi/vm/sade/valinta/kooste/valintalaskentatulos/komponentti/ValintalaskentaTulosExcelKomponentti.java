@@ -127,15 +127,23 @@ public class ValintalaskentaTulosExcelKomponentti {
 				b.append(o.getSukunimi()).append(", ").append(o.getEtunimi());
 				rivi.addAll(Arrays.asList(b.toString(), o.getHakemusOid(),
 						ExcelExportUtil.DATE_FORMAT.format(date)));
+				boolean osallistuuEdesYhteen = false;
 				for (ValintakoeNimi tunniste : tunnisteet) {
 					if (osallistumiset.containsKey(tunniste.getTunniste())) {
+						Osallistuminen osallistuminen = osallistumiset.get(
+								tunniste.getTunniste()).getOsallistuminen();
+						if (Osallistuminen.OSALLISTUU.equals(osallistuminen)) {
+							osallistuuEdesYhteen = true;
+						}
 						rivi.add(suomenna(osallistumiset.get(
 								tunniste.getTunniste()).getOsallistuminen()));
 					} else {
 						rivi.add("----");
 					}
 				}
-				rows.add(rivi.toArray());
+				if (osallistuuEdesYhteen) {
+					rows.add(rivi.toArray());
+				}
 			}
 
 			return ExcelExportUtil.exportGridAsXls(rows
