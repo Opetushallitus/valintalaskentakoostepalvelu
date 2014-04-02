@@ -13,9 +13,14 @@ public class DokumentinLisatiedot {
 	private String tag;
 	private String letterBodyText;
 	private List<String> hakemusOids;
+	private List<String> valintakoeOids;
 
 	public String getTag() {
 		return tag;
+	}
+
+	public List<String> getValintakoeOids() {
+		return valintakoeOids;
 	}
 
 	public void setTag(String tag) {
