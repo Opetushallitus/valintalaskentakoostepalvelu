@@ -55,14 +55,18 @@ public class ValintalaskentaTulosExcelKomponentti {
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
 			@Property("valintakoeOid") List<String> valintakoeOids,
 			@Property("hakemusOids") List<String> hakemusOids) throws Exception {
+		if (valintakoeOids == null || valintakoeOids.isEmpty()) {
+			throw new RuntimeException(
+					"Ei voida luoda valintakokeista exceliä ilman että syötetään vähintään yksi valintakoeOid!");
+		}
 		boolean useWhitelist = hakemusOids != null && !hakemusOids.isEmpty();
 		Set<String> whiteList = Collections.emptySet();
 		if (useWhitelist) {
 			whiteList = Sets.newHashSet(hakemusOids);
 		}
+
 		List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService
 				.haeValintatiedotHakukohteelle(valintakoeOids, hakukohdeOid);
-
 		List<ValintakoeNimi> tunnisteet = getTunnisteet(tiedotHakukohteelle);
 		if (tunnisteet.isEmpty()) {
 			return ExcelExportUtil
@@ -165,7 +169,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 	}
 
 	private List<ValintakoeNimi> getTunnisteet(
-			List<HakemusOsallistuminenTyyppi> osallistujat) {
+			Iterable<HakemusOsallistuminenTyyppi> osallistujat) {
 		Map<String, ValintakoeNimi> tunnisteet = Maps.newHashMap();
 		for (HakemusOsallistuminenTyyppi osallistuja : osallistujat) {
 			for (ValintakoeOsallistuminenTyyppi valintakoe : osallistuja

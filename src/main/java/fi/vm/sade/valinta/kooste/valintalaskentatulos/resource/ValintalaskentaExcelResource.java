@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.resource;
 
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -96,20 +95,19 @@ public class ValintalaskentaExcelResource {
 	@Produces("application/json")
 	@ApiOperation(value = "Hakukohteen hyväksytyt Excel-raporttina", response = Response.class)
 	public ProsessiId haeTuloksetExcelMuodossa(
-	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
-			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("valintakoeOids") List<String> valintakoeOids) {
-		if (hakemuksillaRajaus == null) {
-			hakemuksillaRajaus = new DokumentinLisatiedot();
+	/* OPTIONAL */DokumentinLisatiedot lisatiedot,
+			@QueryParam("hakukohdeOid") String hakukohdeOid) {
+		if (lisatiedot == null) {
+			throw new RuntimeException("ValintakoeOid on pakollinen!");
 		}
 		try {
 			DokumenttiProsessi p = new DokumenttiProsessi(
 					"Valintalaskentaexcel",
 					"Valintakoekutsut taulukkolaskenta tiedosto", "",
 					Arrays.asList("valintakoekutsut", "taulukkolaskenta"));
-			valintalaskentaTulos.luoXls(p, hakukohdeOid, valintakoeOids,
-					hakemuksillaRajaus.getHakemusOids(), SecurityContextHolder
-							.getContext().getAuthentication());
+			valintalaskentaTulos.luoXls(p, hakukohdeOid, lisatiedot
+					.getValintakoeOids(), lisatiedot.getHakemusOids(),
+					SecurityContextHolder.getContext().getAuthentication());
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(p);
 			return p.toProsessiId();
 			/*
@@ -123,9 +121,10 @@ public class ValintalaskentaExcelResource {
 			// Ylläpitäjä voi lukea logeista todellisen syyn!
 			LOG.error(
 					"Valintakoekutsut excelin luonti epäonnistui hakukohteelle {}, valintakoeoideille {}: {}",
-					new Object[] { hakukohdeOid,
-							Arrays.toString(valintakoeOids.toArray()),
-							e.getMessage() });
+					new Object[] {
+							hakukohdeOid,
+							Arrays.toString(lisatiedot.getValintakoeOids()
+									.toArray()), e.getMessage() });
 			throw new RuntimeException(
 					"Valintakoekutsut excelin luonti epäonnistui!", e);
 			// return Response
