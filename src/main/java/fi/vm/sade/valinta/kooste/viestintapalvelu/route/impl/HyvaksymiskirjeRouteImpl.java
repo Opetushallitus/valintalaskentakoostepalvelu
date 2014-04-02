@@ -20,8 +20,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
@@ -159,52 +157,6 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 													return false;
 												}
 											});
-							Collection<HakijaDTO> descending = Collections2
-									.filter(hakukohteenHakijat,
-											new Predicate<HakijaDTO>() {
-												public boolean apply(
-														HakijaDTO input) {
-													if (input.getHakutoiveet() == null) {
-														LOG.error(
-																"Sijoittelulta hakemus({}) jolla ei ole hakutoiveita!",
-																input.getHakemusOid());
-													} else {
-														for (HakutoiveDTO h : input
-																.getHakutoiveet()) {
-
-															if (hakukohdeOid.equals(h
-																	.getHakukohdeOid())) {
-																final boolean checkFirstValintatapajonoOnly = true;
-																// sort by
-																// priority
-																Collections.sort(
-																		h.getHakutoiveenValintatapajonot(),
-																		HakutoiveenValintatapajonoComparator.DESCENDING);
-
-																for (HakutoiveenValintatapajonoDTO vjono : h
-																		.getHakutoiveenValintatapajonot()) {
-																	if (HakemuksenTila.HYVAKSYTTY
-																			.equals(vjono
-																					.getTila())) {
-																		return true;
-																	}
-																	if (checkFirstValintatapajonoOnly) {
-																		return false;
-																	}
-																}
-															}
-
-														}
-													}
-													return false;
-												}
-											});
-							Gson g = new GsonBuilder().setPrettyPrinting()
-									.create();
-							LOG.error("ASCENDING\r\n{}\r\n\r\n",
-									g.toJson(ascending));
-							LOG.error("DESCENDING\r\n{}\r\n\r\n",
-									g.toJson(descending));
 							hakukohteenHakijat = ascending;
 							// LOG.error("HYVÄKSYTTYJÄ JÄLKEEN FILTTERÖINNIN {}",
 							// hakukohteenHakijat.size());
