@@ -20,8 +20,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
@@ -31,6 +36,7 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HakutoiveenValintatapajonoComparator;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
@@ -87,6 +93,15 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 		// TODO: Cache ulkopuolisiin palvelukutsuihin
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
+						final String hakukohdeOid = hakukohdeOid(exchange);
+						if (hakukohdeOid == null) {
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(Poikkeus.KOOSTEPALVELU,
+											"Hyväksymiskirjeitä yritettiin luoda ilman hakukohdetta!"));
+							throw new RuntimeException(
+									"Hyväksymiskirjeitä yritettiin luoda ilman hakukohdetta!");
+						}
 						List<String> hakemusOids = hakemusOids(exchange);
 						if (hakemusOids == null) {
 							hakemusOids = Collections.<String> emptyList();
@@ -98,8 +113,101 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						try {
 							hakukohteenHakijat = sijoitteluProxy
 									.koulutuspaikalliset(hakuOid(exchange),
-											hakukohdeOid(exchange),
+											hakukohdeOid,
 											SijoitteluResource.LATEST);
+							// sijoittelu returns all hakemukset. include
+							// // HYVAKSYTYT only
+							// LOG.error("HYVÄKSYTTYJÄ ENNEN FILTTERÖINTIÄ! {}",
+							// hakukohteenHakijat.size());
+							Collection<HakijaDTO> ascending = Collections2
+									.filter(hakukohteenHakijat,
+											new Predicate<HakijaDTO>() {
+												public boolean apply(
+														HakijaDTO input) {
+													if (input.getHakutoiveet() == null) {
+														LOG.error(
+																"Sijoittelulta hakemus({}) jolla ei ole hakutoiveita!",
+																input.getHakemusOid());
+													} else {
+														for (HakutoiveDTO h : input
+																.getHakutoiveet()) {
+
+															if (hakukohdeOid.equals(h
+																	.getHakukohdeOid())) {
+																final boolean checkFirstValintatapajonoOnly = true;
+																// sort by
+																// priority
+																Collections.sort(
+																		h.getHakutoiveenValintatapajonot(),
+																		HakutoiveenValintatapajonoComparator.ASCENDING);
+
+																for (HakutoiveenValintatapajonoDTO vjono : h
+																		.getHakutoiveenValintatapajonot()) {
+																	if (HakemuksenTila.HYVAKSYTTY
+																			.equals(vjono
+																					.getTila())) {
+																		return true;
+																	}
+																	if (checkFirstValintatapajonoOnly) {
+																		return false;
+																	}
+																}
+															}
+
+														}
+													}
+													return false;
+												}
+											});
+							Collection<HakijaDTO> descending = Collections2
+									.filter(hakukohteenHakijat,
+											new Predicate<HakijaDTO>() {
+												public boolean apply(
+														HakijaDTO input) {
+													if (input.getHakutoiveet() == null) {
+														LOG.error(
+																"Sijoittelulta hakemus({}) jolla ei ole hakutoiveita!",
+																input.getHakemusOid());
+													} else {
+														for (HakutoiveDTO h : input
+																.getHakutoiveet()) {
+
+															if (hakukohdeOid.equals(h
+																	.getHakukohdeOid())) {
+																final boolean checkFirstValintatapajonoOnly = true;
+																// sort by
+																// priority
+																Collections.sort(
+																		h.getHakutoiveenValintatapajonot(),
+																		HakutoiveenValintatapajonoComparator.DESCENDING);
+
+																for (HakutoiveenValintatapajonoDTO vjono : h
+																		.getHakutoiveenValintatapajonot()) {
+																	if (HakemuksenTila.HYVAKSYTTY
+																			.equals(vjono
+																					.getTila())) {
+																		return true;
+																	}
+																	if (checkFirstValintatapajonoOnly) {
+																		return false;
+																	}
+																}
+															}
+
+														}
+													}
+													return false;
+												}
+											});
+							Gson g = new GsonBuilder().setPrettyPrinting()
+									.create();
+							LOG.error("ASCENDING\r\n{}\r\n\r\n",
+									g.toJson(ascending));
+							LOG.error("DESCENDING\r\n{}\r\n\r\n",
+									g.toJson(descending));
+							hakukohteenHakijat = ascending;
+							// LOG.error("HYVÄKSYTTYJÄ JÄLKEEN FILTTERÖINNIN {}",
+							// hakukohteenHakijat.size());
 							final Set<String> whitelist = Sets
 									.newHashSet(hakemusOids);
 							if (!whitelist.isEmpty()) {

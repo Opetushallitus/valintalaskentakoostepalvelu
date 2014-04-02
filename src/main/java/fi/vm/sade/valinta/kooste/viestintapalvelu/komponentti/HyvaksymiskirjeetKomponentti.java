@@ -178,6 +178,10 @@ public class HyvaksymiskirjeetKomponentti {
 
 				StringBuilder omatPisteet = new StringBuilder();
 				StringBuilder hyvaksytyt = new StringBuilder();
+				boolean firstOnly = true;
+				// ei sortata! pitaisi olla jo oikeassa jarjestyksessa
+				// Collections.sort(hakutoive.getHakutoiveenValintatapajonot(),
+				// HakutoiveenValintatapajonoComparator.DEFAULT);
 				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
 						.getHakutoiveenValintatapajonot()) {
 					// Hyvaksytty valintatapajonossa -- oletataan etta
@@ -190,8 +194,8 @@ public class HyvaksymiskirjeetKomponentti {
 					// OVT-6334 : Logiikka ei kuulu koostepalveluun!
 					//
 					if (osoite
-							.isUlkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt()) { // ei
-																									// pisteita
+							.isUlkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt()) {
+						// ei pisteita
 						omatPisteet
 								.append(ARVO_VAKIO)
 								.append(ARVO_EROTIN)
@@ -219,18 +223,22 @@ public class HyvaksymiskirjeetKomponentti {
 					// on useampi
 					// Nykyinen PDF formaatti ei kykene esittamaan usean jonon
 					// selitteita jarkevasti
-					if (VARALLA.equals(valintatapajono.getTila())
-							&& valintatapajono.getVarasijanNumero() != null) {
-						tulokset.put("varasija", "Varasijan numero on "
-								+ valintatapajono.getVarasijanNumero());
+					if (firstOnly) {
+						if (VARALLA.equals(valintatapajono.getTila())
+								&& valintatapajono.getVarasijanNumero() != null) {
+							tulokset.put("varasija", "Varasijan numero on "
+									+ valintatapajono.getVarasijanNumero());
+						}
+						tulokset.put("selite",
+								new Teksti(valintatapajono.getTilanKuvaukset())
+										.getTeksti(preferoituKielikoodi,
+												StringUtils.EMPTY));
+						tulokset.put("valinnanTulos",
+								HakemusUtil.tilaConverter(valintatapajono
+										.getTila(), valintatapajono
+										.isHyvaksyttyHarkinnanvaraisesti()));
+						firstOnly = false;
 					}
-					tulokset.put("selite",
-							new Teksti(valintatapajono.getTilanKuvaukset())
-									.getTeksti(preferoituKielikoodi,
-											StringUtils.EMPTY));
-					tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(
-							valintatapajono.getTila(),
-							valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
 					if (valintatapajono.getHyvaksytty() == null) {
 						throw new SijoittelupalveluException(
 								"Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
