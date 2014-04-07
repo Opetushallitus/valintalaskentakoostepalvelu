@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.camel.Exchange;
@@ -37,6 +36,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.OsoiteComparator;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
@@ -88,16 +88,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 				throw new ViestintapalveluException(
 						"Yritetään luoda nolla kappaletta osoitetarroja!");
 			}
-			Collections.sort(osoitteet, new Comparator<Osoite>() {
-				@Override
-				public int compare(Osoite o1, Osoite o2) {
-					try {
-						return o1.getLastName().compareTo(o2.getLastName());
-					} catch (Exception e) {
-						return 0;
-					}
-				}
-			});
+			Collections.sort(osoitteet, OsoiteComparator.ASCENDING);
 			return new Osoitteet(osoitteet);
 		}
 	}
