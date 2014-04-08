@@ -565,9 +565,9 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private Predicate isLisahakuTyyppi() {
 		return new Predicate() {
 			public boolean matches(Exchange exchange) {
+				HakuDTO haku = exchange.getIn().getBody(HakuDTO.class);
 				String hakutyypinArvo = cache(exchange).getHakutyyppi(
-						exchange.getIn().getBody(HakuDTO.class)
-								.getHakutyyppiUri());
+						haku.getHakutyyppiUri());
 				// Koodistosta saa hakutyypille arvon ja nimen. Oletetaan etta
 				// nimi voi vaihtua mutta koodi pysyy vakiona.
 				return "03".equals(hakutyypinArvo);
