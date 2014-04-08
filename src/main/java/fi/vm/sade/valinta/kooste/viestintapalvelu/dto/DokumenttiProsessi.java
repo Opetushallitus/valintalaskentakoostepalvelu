@@ -25,6 +25,7 @@ public class DokumenttiProsessi extends Prosessi {
 	private AtomicReference<String> dokumenttiId;
 	private final List<String> tags;
 	private final Collection<Poikkeus> poikkeukset = new CopyOnWriteArrayList<Poikkeus>();
+	private final transient Collection<Poikkeus> poikkeuksetUudelleenYrityksessa = new CopyOnWriteArrayList<Poikkeus>();
 
 	public DokumenttiProsessi(String resurssi, String toiminto, String hakuOid,
 			List<String> tags) {
@@ -37,6 +38,14 @@ public class DokumenttiProsessi extends Prosessi {
 		} else {
 			this.tags = Collections.unmodifiableList(tags);
 		}
+	}
+
+	public void luovutaUudelleenYritystenKanssa() {
+		poikkeukset.addAll(poikkeuksetUudelleenYrityksessa);
+	}
+
+	public Collection<Poikkeus> getPoikkeuksetUudelleenYrityksessa() {
+		return poikkeuksetUudelleenYrityksessa;
 	}
 
 	public Collection<Poikkeus> getPoikkeukset() {

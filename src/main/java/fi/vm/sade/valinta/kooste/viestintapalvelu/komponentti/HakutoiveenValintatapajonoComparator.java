@@ -17,7 +17,7 @@ public class HakutoiveenValintatapajonoComparator implements
 			-1);
 	public static final HakutoiveenValintatapajonoComparator ASCENDING = new HakutoiveenValintatapajonoComparator(
 			1);
-	public static final HakutoiveenValintatapajonoComparator DEFAULT = DESCENDING;
+	public static final HakutoiveenValintatapajonoComparator DEFAULT = ASCENDING;
 
 	private final int multiplier;
 

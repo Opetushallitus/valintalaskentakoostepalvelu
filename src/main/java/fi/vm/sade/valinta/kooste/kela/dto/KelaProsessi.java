@@ -1,26 +1,19 @@
 package fi.vm.sade.valinta.kooste.kela.dto;
 
-import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
+import java.util.Arrays;
+import java.util.Collection;
+
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
-public class KelaProsessi extends Prosessi {
+public class KelaProsessi extends DokumenttiProsessi {
 
-    /**
-     * Optional
-     */
-    private String dokumenttiId;
-
-    public KelaProsessi(String toiminto, String hakuOid, String dokumenttiId) {
-        super("Kela", toiminto, hakuOid);
-        this.dokumenttiId = dokumenttiId;
-    }
-
-    public String getDokumenttiId() {
-        return dokumenttiId;
-    }
+	public KelaProsessi(String toiminto, Collection<String> hakuOids) {
+		super("Kela", toiminto, "", Arrays.asList("kela"));
+	}
 
 }

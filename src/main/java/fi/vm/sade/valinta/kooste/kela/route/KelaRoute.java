@@ -1,14 +1,14 @@
 package fi.vm.sade.valinta.kooste.kela.route;
 
-import java.util.Date;
+import java.util.Collection;
 
+import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.springframework.security.core.Authentication;
 
-import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 
 /**
  * @author Jussi Jartamo
@@ -19,13 +19,13 @@ public interface KelaRoute {
 	 * Aloittaa Kela-siirtodokumentin luonnin.
 	 */
 	void aloitaKelaLuonti(
-			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
+			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) KelaProsessi prosessi,
 			//
-			@Property(OPH.HAKUOID) String hakuOid,
+			@Body Collection<String> hakuOids,
 			//
-			@Property(PROPERTY_LUKUVUOSI) Date lukuvuosi,
+			// @Property(PROPERTY_LUKUVUOSI) Date lukuvuosi,
 			//
-			@Property(PROPERTY_POIMINTAPAIVAMAARA) Date poimintapaivamaara,
+			// @Property(PROPERTY_POIMINTAPAIVAMAARA) Date poimintapaivamaara,
 			//
 			@Property(PROPERTY_AINEISTONNIMI) String aineistonNimi,
 			//

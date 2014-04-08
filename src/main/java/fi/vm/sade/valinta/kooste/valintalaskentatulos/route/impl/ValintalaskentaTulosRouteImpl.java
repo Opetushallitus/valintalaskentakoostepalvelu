@@ -8,7 +8,6 @@ import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -55,7 +54,7 @@ public class ValintalaskentaTulosRouteImpl extends
 			ValintalaskennanTulosExcelKomponentti valintalaskennanTulosExcelKomponentti,
 			ValintalaskentaTulosExcelKomponentti valintalaskentaTulosExcelKomponentti,
 			HaeHakukohdeNimiTarjonnaltaKomponentti haeHakukohdeNimiTarjonnaltaKomponentti,
-			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource,
+			DokumenttiResource dokumenttiResource,
 			@Value(ValintakoekutsutExcelRoute.SEDA_VALINTAKOE_EXCEL) String valintakoekutsutXls) {
 		this.jalkiohjaustulosExcelKomponentti = jalkiohjaustulosExcelKomponentti;
 		this.sijoittelunTulosExcelKomponentti = sijoittelunTulosExcelKomponentti;

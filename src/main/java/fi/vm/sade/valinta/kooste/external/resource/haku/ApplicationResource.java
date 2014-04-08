@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.haku;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.DefaultValue;
@@ -20,30 +22,38 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
  */
 @Path("/applications")
 public interface ApplicationResource {
-    public static final String CHARSET_UTF_8 = ";charset=UTF-8";
-    public static final String OID = "oid";
-    public static final String HENKILOTUNNUS = "Henkilotunnus";
-    public static final String SYNTYMAAIKA = "syntymaaika";
+	public static final String CHARSET_UTF_8 = ";charset=UTF-8";
+	public static final String OID = "oid";
+	public static final String HENKILOTUNNUS = "Henkilotunnus";
+	public static final String SYNTYMAAIKA = "syntymaaika";
+	public static final String ACTIVE = "ACTIVE";
+	public static final String INCOMPLETE = "INCOMPLETE";
+	public static final List<String> ACTIVE_AND_INCOMPLETE = Collections
+			.unmodifiableList(Arrays.asList(ACTIVE, INCOMPLETE));
 
-    @GET
-    @Path("{oid}")
-    @Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
-    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD')")
-    public Hakemus getApplicationByOid(@PathParam(OID) String oid);
+	@GET
+	@Path("{oid}")
+	@Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD')")
+	public Hakemus getApplicationByOid(@PathParam(OID) String oid);
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
-    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD')")
-    public HakemusList findApplications(@DefaultValue(value = "") @QueryParam("q") String query,
-            @QueryParam("appState") List<String> state, @QueryParam("aoid") String aoid,
-            @QueryParam("lopoid") String lopoid, @QueryParam("asId") String asId, @QueryParam("aoOid") String aoOid,
-            @DefaultValue(value = "0") @QueryParam("start") int start,
-            @DefaultValue(value = "100") @QueryParam("rows") int rows);
+	@GET
+	@Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD')")
+	public HakemusList findApplications(
+			@DefaultValue(value = "") @QueryParam("q") String query,
+			@QueryParam("appState") List<String> state,
+			@QueryParam("aoid") String aoid,
+			@QueryParam("lopoid") String lopoid,
+			@QueryParam("asId") String asId, @QueryParam("aoOid") String aoOid,
+			@DefaultValue(value = "0") @QueryParam("start") int start,
+			@DefaultValue(value = "100") @QueryParam("rows") int rows);
 
-    @GET
-    @Path("list")
-    @Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
-    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-    public List<Hakemus> getApplicationsByOids(@QueryParam("oid") List<String> oids);
+	@GET
+	@Path("list")
+	@Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+	public List<Hakemus> getApplicationsByOids(
+			@QueryParam("oid") List<String> oids);
 
 }

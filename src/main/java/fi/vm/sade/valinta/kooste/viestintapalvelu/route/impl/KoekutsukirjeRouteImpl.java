@@ -16,7 +16,6 @@ import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -70,7 +69,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 			@Value(KoekutsukirjeRoute.SEDA_KOEKUTSUKIRJEET) String koekutsukirjeet,
 			@Value("direct:koekutsukirjeet_hakemuksilleKoekutsukirjeet") String hakemuksilleKoekutsukirjeet,
 			@Value("hakemusOids") String hakemusOids,
-			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource,
+			DokumenttiResource dokumenttiResource,
 			// ValintakoeResource valintakoeResource,
 			ViestintapalveluResource viestintapalveluResource,
 			KoekutsukirjeetKomponentti koekutsukirjeetKomponentti,
