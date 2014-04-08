@@ -3,12 +3,8 @@ package fi.vm.sade.valinta.kooste.kela;
 import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
-import java.util.Collection;
 
-import javax.annotation.Resource;
 import javax.ws.rs.core.Response;
-
-import junit.framework.Assert;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -24,18 +20,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
-import fi.vm.sade.valinta.kooste.dokumenttipalvelu.SendMessageToDocumentService;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.route.KelaFtpRoute;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaFtpRouteImpl;
-import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
-import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 
 /**
@@ -81,12 +71,6 @@ public class KelaFtpRouteTest {
 	}
 
 	@Bean
-	public SendMessageToDocumentService getSendMessageToDocumentService(
-			DokumenttiResource dokumenttiResource) {
-		return new SendMessageToDocumentService(dokumenttiResource);
-	}
-
-	@Bean
 	public DokumenttiResource mockDokumenttiResource() {
 		return mock(DokumenttiResource.class);
 	}
@@ -97,8 +81,6 @@ public class KelaFtpRouteTest {
 	private DokumenttiResource dokumenttiResource;
 	@Autowired
 	private CamelContext context;
-	@Resource(name = "kelaValvomo")
-	private ValvomoService<KelaProsessi> kelaValvomo;
 	@Autowired
 	private KelaFtpRouteImpl ftpRouteImpl;
 
@@ -112,15 +94,6 @@ public class KelaFtpRouteTest {
 								.getBytes())).build());
 
 		kelaFtpRoute.aloitaKelaSiirto(dokumenttiId);
-
-		Collection<ProsessiJaStatus<KelaProsessi>> prosessit = kelaValvomo
-				.getUusimmatProsessitJaStatukset();
-		// START JA FAILURE Prosessit
-		Assert.assertTrue(prosessit.size() == 2);
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		for (ProsessiJaStatus<KelaProsessi> p : prosessit) {
-			LOG.info("{}", gson.toJson(p));
-		}
 
 		MockEndpoint resultEndpoint = context.getEndpoint(
 				ftpRouteImpl.getFtpKelaSiirto(), MockEndpoint.class);

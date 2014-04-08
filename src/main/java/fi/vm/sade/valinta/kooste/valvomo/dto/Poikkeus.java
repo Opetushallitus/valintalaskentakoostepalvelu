@@ -14,6 +14,7 @@ public class Poikkeus {
 
 	// tyyppi
 	public static final String HAKUOID = "Haku";
+	public static final String KOODISTOURI = "Koodisto URI";
 	public static final String HAKEMUSOID = "Hakemus";
 	public static final String HAKUKOHDEOID = "Hakukohde";
 	public static final String VALINTAKOEOID = "Valintakoe";

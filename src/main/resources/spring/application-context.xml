@@ -140,15 +140,6 @@
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
         </jaxrs:providers>
     </jaxrs:client>
-	<jaxrs:client id="dokumenttipalveluRestClient"
-                  address="${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}"
-                  serviceClass="fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource"
-                  inheritHeaders="true">
-        <jaxrs:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs:providers>
-    </jaxrs:client>
     <jaxrs:client id="TarjontaServiceRestClient"
                   address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
                   serviceClass="fi.vm.sade.tarjonta.service.resources.HakukohdeResource"

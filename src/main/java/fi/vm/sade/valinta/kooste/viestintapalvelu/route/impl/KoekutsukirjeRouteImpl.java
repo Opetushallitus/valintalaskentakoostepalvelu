@@ -5,6 +5,8 @@ import static org.apache.camel.builder.PredicateBuilder.not;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.camel.Exchange;
@@ -14,7 +16,6 @@ import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Koekutsukirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.OsoiteComparator;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
 
@@ -67,7 +69,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 			@Value(KoekutsukirjeRoute.SEDA_KOEKUTSUKIRJEET) String koekutsukirjeet,
 			@Value("direct:koekutsukirjeet_hakemuksilleKoekutsukirjeet") String hakemuksilleKoekutsukirjeet,
 			@Value("hakemusOids") String hakemusOids,
-			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource,
+			DokumenttiResource dokumenttiResource,
 			// ValintakoeResource valintakoeResource,
 			ViestintapalveluResource viestintapalveluResource,
 			KoekutsukirjeetKomponentti koekutsukirjeetKomponentti,
@@ -331,13 +333,31 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						DokumenttiProsessi prosessi = dokumenttiprosessi(exchange);
 						InputStream pdf;
 						try {
+							Kirjeet<Koekutsukirje> k = koekutsukirjeet(exchange);
+							Collections.sort(k.getLetters(),
+									new Comparator<Koekutsukirje>() {
+										@Override
+										public int compare(Koekutsukirje o1,
+												Koekutsukirje o2) {
+											try {
+												return OsoiteComparator.ASCENDING.compare(
+														o1.getAddressLabel(),
+														o2.getAddressLabel());
+											} catch (Exception e) {
+												LOG.error(
+														"Koekutsukirjeellä ei ole osoitetta! {} {}",
+														o1, o2);
+												return 0;
+											}
+										}
+									});
 							// LOG.error(
 							// "\r\n{}",
 							// new GsonBuilder().setPrettyPrinting()
 							// .create()
 							// .toJson(koekutsukirjeet(exchange)));
 							pdf = pipeInputStreams(viestintapalveluResource
-									.haeKoekutsukirjeet(koekutsukirjeet(exchange)));
+									.haeKoekutsukirjeet(k));
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 

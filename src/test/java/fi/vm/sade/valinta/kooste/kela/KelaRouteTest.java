@@ -1,17 +1,12 @@
 package fi.vm.sade.valinta.kooste.kela;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Date;
+import java.util.Collection;
 
-import javax.annotation.Resource;
-
-import org.joda.time.DateTime;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -24,26 +19,26 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
+import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.tarjonta.service.resources.HakuResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.HaunTyyppiKomponentti;
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaDokumentinLuontiKomponenttiImpl;
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaHakijaRiviKomponenttiImpl;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.LinjakoodiKomponentti;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.OppilaitosKomponentti;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteImpl;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKaikkiPaikanVastaanottaneet;
 import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.LinjakoodiKomponentti;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.OrganisaatioKomponentti;
-import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 
 @Configuration
 @Import(KelaRouteImpl.class)
@@ -64,19 +59,12 @@ public class KelaRouteTest {
 	@Bean
 	public KelaHakijaRiviKomponenttiImpl mockKelaHakijaKomponentti()
 			throws Exception {
-		//
-		// TKUVAYHVA t = new
-		// TKUVAYHVA.Builder().setAjankohtaSyksy(true).setEtunimet("J").setSukunimi("J")
-		// .setHenkilotunnus("021293-915F").setLinjakoodi("0000").setOppilaitos("0000")
-		// .setPoimintapaivamaara(new Date()).setLukuvuosi(new
-		// Date()).setValintapaivamaara(new Date()).build();
-		//
-		// KelaHakijaRiviKomponenttiImpl hakija =
-		// mock(KelaHakijaRiviKomponenttiImpl.class);
-		// when(hakija.luo(Mockito.notNull(HakijaDTO.class),
-		// Mockito.notNull(Date.class), Mockito.notNull(Date.class)))
-		// .thenReturn(Arrays.asList(new TKUVAYHVA()));
 		return mock(KelaHakijaRiviKomponenttiImpl.class);
+	}
+
+	@Bean
+	public KoodiService getKoodiService() {
+		return mock(KoodiService.class);
 	}
 
 	@Bean
@@ -89,7 +77,7 @@ public class KelaRouteTest {
 		return mock(HaeHakuTarjonnaltaKomponentti.class);
 	}
 
-	@Bean(name = "dokumenttipalveluRestClient")
+	@Bean
 	public DokumenttiResource mockDokumenttiResource() {
 		return mock(DokumenttiResource.class);
 	}
@@ -115,13 +103,18 @@ public class KelaRouteTest {
 	}
 
 	@Bean
-	public OrganisaatioKomponentti getOrganisaatioKomponentti() {
-		return mock(OrganisaatioKomponentti.class);
+	public OppilaitosKomponentti getOppilaitosKomponentti() {
+		return mock(OppilaitosKomponentti.class);
 	}
 
 	@Bean
 	public HakukohdeResource getHakukohdeResource() {
 		return mock(HakukohdeResource.class);
+	}
+
+	@Bean
+	public HaunTyyppiKomponentti getHaunTyyppiKomponentti() {
+		return mock(HaunTyyppiKomponentti.class);
 	}
 
 	@Autowired
@@ -133,82 +126,41 @@ public class KelaRouteTest {
 	@Autowired
 	private KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti;
 
-	@Resource(name = "kelaValvomo")
-	private ValvomoService<KelaProsessi> kelaValvomo;
-
 	@Autowired
 	private KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti;
 
+	@Autowired
+	private HakuResource hakuResource;
+
 	// VAKIO TESTI MUUTTUJIA
-	private final HakijaDTO virheellinen = new HakijaDTO();
 	private final HakijaDTO ok = new HakijaDTO();
-	private final Date lukuvuosi = new DateTime(2013, 11, 1, 1, 1).toDate();
-	private final Date poimintapaivamaara = new Date();
-	private final String hakuOid = "hakuOid";
 	private final String organisaationNimi = "organisaationNimi";
-
-	@Before
-	public void setupMocks() throws Exception {
-
-		when(
-				kelaHakijaKomponentti.luo(Mockito.eq(virheellinen),
-						any(Date.class), any(Date.class))).thenThrow(
-				new RuntimeException("Should fails once!"));
-
-		when(
-				kelaHakijaKomponentti.luo(Mockito.eq(ok), any(Date.class),
-						any(Date.class))).thenReturn(
-				Arrays.asList(new TKUVAYHVA(), new TKUVAYHVA()));
-	}
-
-	final String okAineistonNimi = "testaaEttaOikeinSuoritetustaReitistaSeuraaDokumentti";
+	private final String aineistonNimi = "testaaEttaOikeinSuoritetustaReitistaSeuraaDokumentti";
 
 	@Test
 	public void testaaEttaOikeinSuoritetustaReitistaSeuraaDokumentti()
 			throws Exception {
-		// yksiloidaan kutsu aineistonnimella etta yksikkotestit voidaan
-		// suorittaa moniajoisesti ilman etta mockit hajoo
 
-		/**
-		 * pelkkia ok hakijoita
-		 */
+		String haku1 = "hakuoid1";
+		String haku2 = "hakuoid2";
+
 		when(sijoitteluVastaanottaneet.vastaanottaneet(anyString()))
 				.thenReturn(
 						Arrays.asList(ok, ok, ok, ok, ok, ok, ok, ok, ok, ok,
 								ok, ok, ok, ok, ok));
-		DokumenttiProsessi p = new DokumenttiProsessi("", "", hakuOid,
-				Arrays.asList("kela"));
-		kelaSiirtoDokumentinLuonti.aloitaKelaLuonti(p, hakuOid, lukuvuosi,
-				poimintapaivamaara, okAineistonNimi, organisaationNimi, null);
 
-		// Mockito.verify(kelaDokumentinLuontiKomponentti,
-		// Mockito.only()).luo(Mockito.anyCollectionOf(TKUVAYHVA.class),
-		// // Mockito.eq(okAineistonNimi)
-		// anyString(), anyString());
-	}
+		HakuDTO dto1 = new HakuDTO();
+		HakuDTO dto2 = new HakuDTO();
 
-	final String virheAineistonNimi = "testaaEtteiVirheellisestaReitityksestaSeuraaVirheellistaDokumenttia";
+		when(hakuResource.getByOID(Mockito.eq(haku1))).thenReturn(dto1);
+		when(hakuResource.getByOID(Mockito.eq(haku2))).thenReturn(dto2);
 
-	@Test
-	public void testaaEtteiVirheellisestaReitityksestaSeuraaVirheellistaDokumenttia()
-			throws Exception {
-		// yksiloidaan kutsu aineistonnimella etta yksikkotestit voidaan
-		// suorittaa moniajoisesti ilman etta mockit hajoo
+		Collection<String> hakuOids = Arrays.asList(haku1, haku2);
+		KelaProsessi prosessi;
+		kelaSiirtoDokumentinLuonti.aloitaKelaLuonti(
+				prosessi = new KelaProsessi("", hakuOids), hakuOids,
+				aineistonNimi, organisaationNimi, null);
 
-		/**
-		 * virheellisia ja ok hakijoita sekaisin
-		 */
-		when(sijoitteluVastaanottaneet.vastaanottaneet(anyString()))
-				.thenReturn(Arrays.asList(ok, ok, ok, virheellinen, ok, ok, ok));
-		DokumenttiProsessi p = new DokumenttiProsessi("", "", hakuOid,
-				Arrays.asList("kela"));
-		kelaSiirtoDokumentinLuonti
-				.aloitaKelaLuonti(p, hakuOid, lukuvuosi, poimintapaivamaara,
-						virheAineistonNimi, organisaationNimi, null);
-
-		Mockito.verify(kelaDokumentinLuontiKomponentti, Mockito.never()).luo(
-				Mockito.anyCollectionOf(TKUVAYHVA.class),
-				Mockito.eq(virheAineistonNimi), anyString());
 	}
 
 }

@@ -12,7 +12,6 @@ import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +57,7 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 			HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
 			@Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url:''}") String dokumenttipalveluUrl,
-			@Qualifier("dokumenttipalveluRestClient") DokumenttiResource dokumenttiResource) {
+			DokumenttiResource dokumenttiResource) {
 		super();
 		this.dokumenttipalveluUrl = dokumenttipalveluUrl;
 		this.dokumenttiResource = dokumenttiResource;
@@ -137,7 +136,7 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 																// priority
 																Collections.sort(
 																		h.getHakutoiveenValintatapajonot(),
-																		HakutoiveenValintatapajonoComparator.ASCENDING);
+																		HakutoiveenValintatapajonoComparator.DEFAULT);
 
 																for (HakutoiveenValintatapajonoDTO vjono : h
 																		.getHakutoiveenValintatapajonot()) {
