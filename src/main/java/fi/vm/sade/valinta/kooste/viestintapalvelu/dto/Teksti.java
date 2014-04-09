@@ -80,7 +80,7 @@ public class Teksti {
 	 *            ("FI","SE","EN")
 	 * @return
 	 */
-	private String getTeksti(String normalisoituKielikoodi) {
+	public String getTeksti(String normalisoituKielikoodi) {
 		return getTeksti(normalisoituKielikoodi, EI_ARVOA);
 	}
 
@@ -90,6 +90,8 @@ public class Teksti {
 	public String getTeksti() {
 		if (normalisoituKieliJaKoodi.containsKey(SUOMI)) {
 			return normalisoituKieliJaKoodi.get(SUOMI);
+		} else if (normalisoituKieliJaKoodi.containsKey(RUOTSI)) {
+			return normalisoituKieliJaKoodi.get(RUOTSI);
 		} else {
 			return normalisoituKieliJaKoodi.firstEntry().getValue();
 		}
