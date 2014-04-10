@@ -45,6 +45,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaMuistissaR
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaTila;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 
 /**
  * @author Jussi Jartamo
@@ -65,43 +66,10 @@ public class ValintalaskentaMuistissaResource {
 	private ValintalaskentaMuistissaRoute valintalaskentaMuistissa;
 	@Autowired
 	private TarjontaPublicService tarjontaService;
-
 	@Autowired
 	private HakukohdeV1ResourceWrapper hakukohdeResource;
-
-	@GET
-	@Path("/status")
-	@Produces(APPLICATION_JSON)
-	@ApiOperation(value = "Muistinvaraisen valintalaskennan tila", response = Collection.class)
-	public Collection<ProsessiJaStatus<ValintalaskentaMuistissaProsessi>> status() {
-		return valintalaskentaMuistissaValvomo
-				.getUusimmatProsessitJaStatukset();
-	}
-
-	@GET
-	@Path("/status/{uuid}")
-	@Produces(APPLICATION_JSON)
-	@ApiOperation(value = "Muistinvaraisen valintalaskennan tila", response = Collection.class)
-	public ProsessiJaStatus<ValintalaskentaMuistissaProsessi> status(
-			@PathParam("uuid") String uuid) {
-		return valintalaskentaMuistissaValvomo.getProsessiJaStatus(uuid);
-	}
-
-	@GET
-	@Path("/exceptions")
-	@Produces(APPLICATION_JSON)
-	@ApiOperation(value = "Muistinvaraisen valintalaskennan poikkeukset", response = Collection.class)
-	public Collection<Collection<Exception>> poikkeukset() {
-		return Collections2
-				.transform(
-						valintalaskentaMuistissaValvomo.getUusimmatProsessit(),
-						new Function<ValintalaskentaMuistissaProsessi, Collection<Exception>>() {
-							public Collection<Exception> apply(
-									ValintalaskentaMuistissaProsessi input) {
-								return input.getKokonaistyo().getPoikkeukset();
-							}
-						});
-	}
+	@Autowired
+	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 
 	@GET
 	@Path("/aktiivinenValintalaskenta")
@@ -118,9 +86,13 @@ public class ValintalaskentaMuistissaResource {
 	@Consumes(APPLICATION_JSON)
 	@Produces(APPLICATION_JSON)
 	@ApiOperation(value = "Keskeyttää suorituksessa olevan valintalaskentaprosessin", response = Vastaus.class)
-	public Response keskeytaValintalaskentaProsessi() {
-		valintalaskentaTila.getKaynnissaOlevaValintalaskenta().getAndSet(null)
-				.peruuta();
+	public Response keskeytaValintalaskentaProsessi(
+			@QueryParam("uuid") String uuid) {
+		ValintalaskentaMuistissaProsessi v = (ValintalaskentaMuistissaProsessi) dokumenttiProsessiKomponentti
+				.haeProsessi(uuid);// (prosessi);
+		v.peruuta();
+		// valintalaskentaTila.getKaynnissaOlevaValintalaskenta().getAndSet(null)
+		// .peruuta();
 		return Response.ok().build();
 	}
 
@@ -196,6 +168,7 @@ public class ValintalaskentaMuistissaResource {
 				new ValintalaskentaCache(kasiteltavatHakukohteet), hakuOid,
 				valinnanvaihe, SecurityContextHolder.getContext()
 						.getAuthentication());
+		dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 	}
 
 	private Collection<String> getHakukohdeOids(
@@ -227,5 +200,66 @@ public class ValintalaskentaMuistissaResource {
 										return i.getOid();
 									}
 								}));
+	}
+
+	/**
+	 * @Deprecated Valvomossa ajatuksena oli saada statusta uusimmista käynnissä
+	 *             olevista prosesseista. Koska käyttäjän on hyvä pystyä
+	 *             välittämään komentoja käynnissä oleville töille niin
+	 *             tarvitaan parempi tapa säilöä käynnissä olevat työt.
+	 * 
+	 * @return
+	 */
+	@Deprecated
+	@GET
+	@Path("/status")
+	@Produces(APPLICATION_JSON)
+	@ApiOperation(value = "Muistinvaraisen valintalaskennan tila", response = Collection.class)
+	public Collection<ProsessiJaStatus<ValintalaskentaMuistissaProsessi>> status() {
+		return valintalaskentaMuistissaValvomo
+				.getUusimmatProsessitJaStatukset();
+	}
+
+	/**
+	 * @Deprecated Valvomossa ajatuksena oli saada statusta uusimmista käynnissä
+	 *             olevista prosesseista. Koska käyttäjän on hyvä pystyä
+	 *             välittämään komentoja käynnissä oleville töille niin
+	 *             tarvitaan parempi tapa säilöä käynnissä olevat työt.
+	 * 
+	 * @return
+	 */
+	@Deprecated
+	@GET
+	@Path("/status/{uuid}")
+	@Produces(APPLICATION_JSON)
+	@ApiOperation(value = "Muistinvaraisen valintalaskennan tila", response = Collection.class)
+	public ProsessiJaStatus<ValintalaskentaMuistissaProsessi> status(
+			@PathParam("uuid") String uuid) {
+		return valintalaskentaMuistissaValvomo.getProsessiJaStatus(uuid);
+	}
+
+	/**
+	 * @Deprecated Valvomossa ajatuksena oli saada statusta uusimmista käynnissä
+	 *             olevista prosesseista. Koska käyttäjän on hyvä pystyä
+	 *             välittämään komentoja käynnissä oleville töille niin
+	 *             tarvitaan parempi tapa säilöä käynnissä olevat työt.
+	 * 
+	 * @return
+	 */
+	@Deprecated
+	@GET
+	@Path("/exceptions")
+	@Produces(APPLICATION_JSON)
+	@ApiOperation(value = "Muistinvaraisen valintalaskennan poikkeukset", response = Collection.class)
+	public Collection<Collection<Exception>> poikkeukset() {
+		return Collections2
+				.transform(
+						valintalaskentaMuistissaValvomo.getUusimmatProsessit(),
+						new Function<ValintalaskentaMuistissaProsessi, Collection<Exception>>() {
+							public Collection<Exception> apply(
+									ValintalaskentaMuistissaProsessi input) {
+								return input.getKokonaistyo().getPoikkeukset();
+							}
+						});
 	}
 }

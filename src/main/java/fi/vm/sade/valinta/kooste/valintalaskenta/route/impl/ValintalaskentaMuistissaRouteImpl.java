@@ -83,8 +83,6 @@ public class ValintalaskentaMuistissaRouteImpl extends
 	private final Valintaperusteet valintaperusteet;
 	private final Valintalaskenta valintalaskenta;
 
-	private ValintalaskentaTila valintalaskentaTila;
-
 	// private final ExecutorService hakuAppExecutorService;
 	// private final ExecutorService valintaperusteetExecutorService;
 
@@ -481,7 +479,6 @@ public class ValintalaskentaMuistissaRouteImpl extends
 
 	@Autowired
 	public ValintalaskentaMuistissaRouteImpl(
-			ValintalaskentaTila valintalaskentaTila,
 			Valintaperusteet valintaperusteet,
 			HakuAppHakemus hakuAppHakemus,
 			HakuAppHakemusOids hakuAppHakemusOids,
@@ -491,20 +488,28 @@ public class ValintalaskentaMuistissaRouteImpl extends
 			@Value("bean:valintalaskentaMuistissaValvomo?method=fail") String fail,
 			@Value("seda:valintalaskentaTyojono?" +
 			//
+			// "queueFactory=#defaultQueueFactory&" +
+			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					//
 					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintalaskenta.threadpoolsize:2}") String valintalaskentaTyojono,
 			@Value("seda:haeHakemus?" +
+			//
+			// "queueFactory=#defaultQueueFactory&" +
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					//
 					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakemus.threadpoolsize:2}") String hakemusTyojono,
 			@Value("seda:haeValintaperuste?" +
 			//
+			// "queueFactory=#defaultQueueFactory&" +
+			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&"
 					//
 					+ "concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintaperusteet.threadpoolsize:1}") String valintaperusteetTyojono,
 			@Value("seda:haeHakukohteidenHakemukset?" +
+			//
+			// "queueFactory=#defaultQueueFactory&" +
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					//
@@ -522,7 +527,6 @@ public class ValintalaskentaMuistissaRouteImpl extends
 		this.deadLetterChannelHaeHakemus = deadLetterChannelHaeHakemus;
 		this.deadLetterChannelHaeValintaperusteet = deadLetterChannelHaeValintaperusteet;
 		this.deadLetterChannelTeeValintalaskenta = deadLetterChannelTeeValintalaskenta;
-		this.valintalaskentaTila = valintalaskentaTila;
 		this.finish = finish;
 		this.start = start;
 		this.fail = fail;
