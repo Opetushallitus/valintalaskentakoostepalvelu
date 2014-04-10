@@ -16,12 +16,10 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
-import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.util.Kieli;
 import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
@@ -41,18 +39,12 @@ public class KoekutsukirjeetKomponentti {
 			.getLogger(KoekutsukirjeetKomponentti.class);
 
 	private final HaeOsoiteKomponentti osoiteKomponentti;
-	private final HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
 	private final HakukohdeResource tarjontaResource;
-	private final KoodiService koodiService;
 
 	@Autowired
-	public KoekutsukirjeetKomponentti(KoodiService koodiService,
-			HaeOsoiteKomponentti osoiteKomponentti,
-			HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy,
+	public KoekutsukirjeetKomponentti(HaeOsoiteKomponentti osoiteKomponentti,
 			HakukohdeResource tarjontaResource) {
-		this.koodiService = koodiService;
 		this.osoiteKomponentti = osoiteKomponentti;
-		this.tarjontaProxy = tarjontaProxy;
 		this.tarjontaResource = tarjontaResource;
 	}
 
