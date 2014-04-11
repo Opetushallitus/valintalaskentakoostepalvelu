@@ -527,11 +527,12 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 							cache(exchange).addKelaHaku(kelahaku);
 						} catch (Exception e) {
 							dokumenttiprosessi(exchange)
-									.getPoikkeuksetUudelleenYrityksessa()
-									.add(new Poikkeus(
-											Poikkeus.SIJOITTELU,
-											"Vastaanottaneiden haku sijoittelusta epäonnistui haulle",
-											new Oid(hakuOid, Poikkeus.HAKUOID)));
+									.getPoikkeuksetUudelleenYrityksessa().add(
+											new Poikkeus(Poikkeus.SIJOITTELU,
+													"Vastaanottaneiden haku sijoittelusta epäonnistui haulle, koska: "
+															+ e.getMessage(),
+													new Oid(hakuOid,
+															Poikkeus.HAKUOID)));
 							throw e;
 						}
 					}

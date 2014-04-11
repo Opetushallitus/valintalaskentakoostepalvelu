@@ -7,11 +7,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
@@ -48,6 +50,22 @@ public class KelaHaku extends KelaAbstraktiHaku {
 					Collections.sort(
 							hakutoive.getHakutoiveenValintatapajonot(),
 							HakutoiveenValintatapajonoComparator.DEFAULT);
+					Set<Integer> prioriteetit = Sets.newHashSet();
+					for (HakutoiveenValintatapajonoDTO jono : hakutoive
+							.getHakutoiveenValintatapajonot()) {
+						if (jono.getValintatapajonoPrioriteetti() == null) {
+							throw new RuntimeException(
+									"Valintatapajonolla ei ollut prioriteettiä!");
+						}
+						if (prioriteetit.contains(jono
+								.getValintatapajonoPrioriteetti())) {
+							throw new RuntimeException(
+									"Useammalla valintatapajonolla on sama prioriteetti hakukohteessa("
+											+ hakutoive.getHakukohdeOid()
+											+ ")!");
+						}
+						prioriteetit.add(jono.getValintatapajonoPrioriteetti());
+					}
 					for (HakutoiveenValintatapajonoDTO jono : hakutoive
 							.getHakutoiveenValintatapajonot()) {
 						if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila())) {

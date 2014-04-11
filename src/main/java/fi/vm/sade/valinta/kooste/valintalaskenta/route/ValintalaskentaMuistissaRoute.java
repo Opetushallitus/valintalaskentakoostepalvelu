@@ -11,7 +11,12 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 
 public interface ValintalaskentaMuistissaRoute {
 
-	final String SEDA_VALINTALASKENTA_MUISTISSA = "seda:valintalaskenta_muistissa?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.threadpoolsize:1}";
+	final String SEDA_VALINTALASKENTA_MUISTISSA = "seda:valintalaskenta_muistissa"
+			+
+			//
+			"?purgeWhenStopping=true&waitForTaskToComplete=Never" +
+			//
+			"&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.threadpoolsize:2}";
 
 	// yksikko testausta varten
 	void aktivoiValintalaskenta(
