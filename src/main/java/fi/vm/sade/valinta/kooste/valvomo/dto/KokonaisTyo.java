@@ -29,36 +29,6 @@ public class KokonaisTyo extends Tyo {
 		return k;
 	}
 
-	@Override
-	public long getArvioituJaljellaOlevaKokonaiskesto() {
-		int k = 0;
-		for (Tyo t : tyot) {
-			k += t.getArvioituJaljellaOlevaKokonaiskesto();
-		}
-		return k;
-	}
-
-	@Override
-	public long getKesto() {
-		int k = 0;
-		for (Tyo t : tyot) {
-			k += t.getKesto();
-		}
-		return k;
-	}
-
-	/**
-	 * Palauttaa töiden mediaanikestojen keskiarvon
-	 */
-	@Override
-	public long getYksittaisenTyonArvioituKesto() {
-		int k = 0;
-		for (Tyo t : tyot) {
-			k += t.getYksittaisenTyonArvioituKesto();
-		}
-		return k / tyot.size();
-	}
-
 	public String getNimi() {
 		return "kokonaistyo";
 	}

@@ -17,22 +17,7 @@ public abstract class Tyo {
 		return ((double) getTehty()) / ((double) kokonaismaara);
 	}
 
-	/**
-	 * 
-	 * @return Suoritettujen töiden kokonaiskesto millisekunteina
-	 */
-	abstract public long getKesto();
-
 	abstract public Collection<Exception> getPoikkeukset();
-
-	//
-	abstract public long getArvioituJaljellaOlevaKokonaiskesto();
-
-	/**
-	 * 
-	 * @return yksittaisen tyon arvioitu kesto, eli mediaani kestoista.
-	 */
-	abstract public long getYksittaisenTyonArvioituKesto();
 
 	abstract public int getTehty();
 
