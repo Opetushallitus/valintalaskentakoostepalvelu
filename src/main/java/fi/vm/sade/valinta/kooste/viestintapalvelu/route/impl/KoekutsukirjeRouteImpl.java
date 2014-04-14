@@ -19,18 +19,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
-import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
-import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
-import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
-import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
+import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.function.ValintakoeOsallistuminenDTOFunction;
+import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -40,6 +38,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKom
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.OsoiteComparator;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource;
 
 /**
  * 
@@ -55,7 +55,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	private final ViestintapalveluResource viestintapalveluResource;
 	private final KoekutsukirjeetKomponentti koekutsukirjeetKomponentti;
-	private final ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti;
+	private final ValintakoeResource valintakoeResource;
 	private final ApplicationResource applicationResource;
 	private final DokumenttiResource dokumenttiResource;
 	private final SecurityPreprocessor security = new SecurityPreprocessor();
@@ -73,7 +73,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 			// ValintakoeResource valintakoeResource,
 			ViestintapalveluResource viestintapalveluResource,
 			KoekutsukirjeetKomponentti koekutsukirjeetKomponentti,
-			ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti,
+			ValintakoeResource valintakoeResource,
 			ApplicationResource applicationResource) {
 		super();
 		this.hakemusOids = hakemusOids;
@@ -82,7 +82,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 		// this.valintakoeResource = valintakoeResource;
 		this.viestintapalveluResource = viestintapalveluResource;
 		this.koekutsukirjeetKomponentti = koekutsukirjeetKomponentti;
-		this.valintatietoHakukohteelleKomponentti = valintatietoHakukohteelleKomponentti;
+		this.valintakoeResource = valintakoeResource;
 		this.applicationResource = applicationResource;
 		this.dokumenttiResource = dokumenttiResource;
 	}
@@ -155,11 +155,11 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						try {
-							exchange.getOut().setBody(
-									valintatietoHakukohteelleKomponentti
-											.valintatiedotHakukohteelle(
-													valintakoeOids(exchange),
-													hakukohdeOid(exchange)));
+
+							exchange.getOut()
+									.setBody(
+											valintakoeResource
+													.hakuByHakutoive(hakukohdeOid(exchange)));
 						} catch (Exception e) {
 							e.printStackTrace();
 							LOG.error(
@@ -184,37 +184,24 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.process(new Processor() {
 					@Override
 					public void process(Exchange exchange) throws Exception {
+						final String hakukohdeOid = hakukohdeOid(exchange);
 						@SuppressWarnings("unchecked")
-						List<HakemusOsallistuminenTyyppi> unfiltered = (List<HakemusOsallistuminenTyyppi>) exchange
+						List<ValintakoeOsallistuminenDTO> unfiltered = (List<ValintakoeOsallistuminenDTO>) exchange
 								.getIn().getBody();
-						Collection<HakemusOsallistuminenTyyppi> filtered = Collections2
-								.filter(unfiltered,
-										new com.google.common.base.Predicate<HakemusOsallistuminenTyyppi>() {
-											public boolean apply(
-													HakemusOsallistuminenTyyppi o) {
-												for (ValintakoeOsallistuminenTyyppi o1 : o
-														.getOsallistumiset()) {
-													if (Osallistuminen.OSALLISTUU.equals(o1
-															.getOsallistuminen())) {
-														return true;
-													}
-												}
-												return false;
-											}
-										});
+
+						Collection<ValintakoeOsallistuminenDTO> filtered = Collections2
+								.filter(unfiltered, OsallistujatPredicate
+										.vainOsallistujat(
+												hakukohdeOid(exchange),
+												valintakoeOids(exchange)));
+
 						exchange.setProperty(
 								hakemusOids,
-								Collections2
+								Sets.newHashSet(Collections2
 										.transform(
 												filtered,
-												new Function<HakemusOsallistuminenTyyppi, String>() {
-													@Override
-													public String apply(
-															HakemusOsallistuminenTyyppi input) {
-														return input
-																.getHakemusOid();
-													}
-												}));
+												ValintakoeOsallistuminenDTOFunction.TO_HAKEMUS_OIDS)));
+
 						LOG.info("Osallistumattomien pois filtterointi: {}/{}",
 								filtered.size(), unfiltered.size());
 
