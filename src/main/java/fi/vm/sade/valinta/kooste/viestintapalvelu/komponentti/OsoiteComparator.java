@@ -20,9 +20,11 @@ public class OsoiteComparator implements Comparator<Osoite> {
 	@Override
 	public int compare(Osoite o1, Osoite o2) {
 		try {
-			int l = o1.getLastName().compareTo(o2.getLastName());
+			int l = o1.getLastName().toUpperCase()
+					.compareTo(o2.getLastName().toUpperCase());
 			if (l == 0) {
-				return o1.getFirstName().compareTo(o2.getFirstName());
+				return o1.getFirstName().toUpperCase()
+						.compareTo(o2.getFirstName().toUpperCase());
 			}
 			return l;
 		} catch (Exception e) {
