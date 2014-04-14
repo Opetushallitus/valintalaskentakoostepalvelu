@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import static fi.vm.sade.valinta.kooste.valintalaskenta.tulos.function.ValintakoeOsallistuminenDTOFunction.TO_HAKEMUS_OIDS;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,11 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
-import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
-import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
-import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
@@ -28,7 +29,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
-import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
+import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -39,6 +40,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.OsoiteComparator;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource;
 
 /**
  * 
@@ -54,7 +57,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 1500L;
 
 	private final ViestintapalveluResource viestintapalveluResource;
-	private final ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti;
+	private final ValintakoeResource valintakoeResource;
 	private final HaeOsoiteKomponentti osoiteKomponentti;
 	private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 	private final SecurityPreprocessor security = new SecurityPreprocessor();
@@ -66,7 +69,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 	public OsoitetarratRouteImpl(
 			@Value(OsoitetarratRoute.SEDA_OSOITETARRAT) String osoitetarrat,
 			ViestintapalveluResource viestintapalveluResource,
-			ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti,
+			ValintakoeResource valintakoeResource,
 			HaeOsoiteKomponentti osoiteKomponentti,
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
 			ApplicationResource applicationResource,
@@ -76,7 +79,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 		this.osoitetarrat = osoitetarrat;
 		this.dokumenttiResource = dokumenttiResource;
 		this.viestintapalveluResource = viestintapalveluResource;
-		this.valintatietoHakukohteelleKomponentti = valintatietoHakukohteelleKomponentti;
+		this.valintakoeResource = valintakoeResource;
 		this.osoiteKomponentti = osoiteKomponentti;
 		this.sijoitteluProxy = sijoitteluProxy;
 	}
@@ -276,23 +279,23 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						try {
-							List<HakemusOsallistuminenTyyppi> h = valintatietoHakukohteelleKomponentti
-									.valintatiedotHakukohteelle(
-											valintakoeOids(exchange),
-											hakukohdeOid(exchange));
+							final String hakukohdeOid = hakukohdeOid(exchange);
+							List<ValintakoeOsallistuminenDTO> hakukohteenOsallistumistiedot = valintakoeResource
+									.hakuByHakutoive(hakukohdeOid);
 
-							List<String> hakemusOids = Lists.newArrayList();
-							for (HakemusOsallistuminenTyyppi h0 : h) {
-								for (ValintakoeOsallistuminenTyyppi o0 : h0
-										.getOsallistumiset()) {
-									if (Osallistuminen.OSALLISTUU.equals(o0
-											.getOsallistuminen())) {
-										// add
-										hakemusOids.add(h0.getHakemusOid());
-									}
-								}
-							}
-							exchange.getOut().setBody(hakemusOids);
+							Collection<ValintakoeOsallistuminenDTO> vainOsallistujat = Collections2
+									.filter(hakukohteenOsallistumistiedot,
+											OsallistujatPredicate
+													.vainOsallistujat(
+															hakukohdeOid,
+															valintakoeOids(exchange)));
+
+							exchange.getOut()
+									.setBody(
+											Sets.newHashSet(Collections2
+													.transform(
+															vainOsallistujat,
+															TO_HAKEMUS_OIDS)));
 
 						} catch (Exception e) {
 							e.printStackTrace();

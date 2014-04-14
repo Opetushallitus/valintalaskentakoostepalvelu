@@ -12,15 +12,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
-import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
-import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
@@ -29,6 +26,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.OsoitetarratRouteImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.ViestintapalveluConfig;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource;
 
 /**
  * 
@@ -43,7 +42,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.ViestintapalveluCon
 public class OsoitetarratTest {
 
 	@Autowired
-	private ValintatietoHakukohteelleKomponentti valintatietoHakukohteelleKomponentti;
+	private ValintakoeResource valintakoeResource;
 
 	@Autowired
 	private OsoitetarratRoute osoitetarratRoute;
@@ -53,17 +52,13 @@ public class OsoitetarratTest {
 
 	@Test
 	public void testaaOsoitetarratReittiPaastaPaahan() {
-		HakemusOsallistuminenTyyppi h0 = createValintatieto("1",
+		ValintakoeOsallistuminenDTO h0 = createValintatieto("1",
 				Osallistuminen.EI_OSALLISTU);
-		HakemusOsallistuminenTyyppi h1 = createValintatieto("2",
+		ValintakoeOsallistuminenDTO h1 = createValintatieto("2",
 				Osallistuminen.OSALLISTUU);
 
-		Mockito.when(
-				valintatietoHakukohteelleKomponentti
-						.valintatiedotHakukohteelle(
-								Mockito.anyListOf(String.class),
-								Mockito.anyString())).thenReturn(
-				Arrays.asList(h0, h1));
+		Mockito.when(valintakoeResource.hakuByHakutoive(Mockito.anyString()))
+				.thenReturn(Arrays.asList(h0, h1));
 
 		Osoite o = Mockito.mock(Osoite.class);
 
@@ -77,13 +72,11 @@ public class OsoitetarratTest {
 
 	}
 
-	private HakemusOsallistuminenTyyppi createValintatieto(String oid,
+	private ValintakoeOsallistuminenDTO createValintatieto(String oid,
 			Osallistuminen o) {
-		HakemusOsallistuminenTyyppi h = new HakemusOsallistuminenTyyppi();
+		ValintakoeOsallistuminenDTO h = new ValintakoeOsallistuminenDTO();
 		h.setHakemusOid(oid);
-		ValintakoeOsallistuminenTyyppi o0 = new ValintakoeOsallistuminenTyyppi();
-		o0.setOsallistuminen(o);
-		h.getOsallistumiset().add(o0);
+
 		return h;
 	}
 
@@ -108,8 +101,8 @@ public class OsoitetarratTest {
 	}
 
 	@Bean
-	public ValintatietoHakukohteelleKomponentti getValintatietoHakukohteelleKomponentti() {
-		return Mockito.mock(ValintatietoHakukohteelleKomponentti.class);
+	public ValintakoeResource getValintakoeResource() {
+		return Mockito.mock(ValintakoeResource.class);
 	}
 
 	@Bean

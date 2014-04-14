@@ -13,13 +13,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import fi.vm.sade.koodisto.service.KoodiService;
-import fi.vm.sade.service.valintatiedot.ValintatietoService;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
-import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoHakukohteelleKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
@@ -28,6 +26,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResou
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KoekutsukirjeRouteImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.ViestintapalveluConfig;
+import fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource;
 
 /**
  * 
@@ -35,9 +34,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.ViestintapalveluCon
  * 
  */
 @Configuration
-@Import({ KoekutsukirjeetKomponentti.class,
-		ValintatietoHakukohteelleKomponentti.class,
-		KoekutsukirjeRouteImpl.class })
+@Import({ KoekutsukirjeetKomponentti.class, KoekutsukirjeRouteImpl.class })
 @ContextConfiguration(classes = { KoekutsukirjeetTest.class,
 		KoostepalveluContext.CamelConfig.class, ViestintapalveluConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -69,9 +66,9 @@ public class KoekutsukirjeetTest {
 		return Mockito.mock(ViestintapalveluResource.class);
 	}
 
-	@Bean(name = "valintatietoServiceAsAdmin")
-	public ValintatietoService getValintatietoService() {
-		return Mockito.mock(ValintatietoService.class);
+	@Bean
+	public ValintakoeResource getValintakoeResource() {
+		return Mockito.mock(ValintakoeResource.class);
 	}
 
 	@Bean
