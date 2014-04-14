@@ -2,10 +2,14 @@ package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import fi.vm.sade.service.valintatiedot.ValintatietoService;
+import fi.vm.sade.service.valintatiedot.schema.HakuTyyppi;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluIlmankoulutuspaikkaaKomponentti;
@@ -13,7 +17,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikka
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluSuoritaKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SuoritaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
-import fi.vm.sade.valinta.kooste.valintatieto.komponentti.ValintatietoKomponentti;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 
 /**
@@ -24,7 +28,9 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
 @Component
 public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 
-	private ValintatietoKomponentti valintatietoKomponentti;
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SijoitteluRouteImpl.class);
+	private ValintatietoService valintatietoService;
 	private JatkuvaSijoittelu jatkuvaSijoittelu;
 	private SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluIlmankoulutuspaikkaaKomponentti;
 	private SijoitteluKoulutuspaikkallisetKomponentti sijoitteluKoulutuspaikkallisetKomponentti;
@@ -43,7 +49,7 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluKoulutuspaikkallisetKomponentti,
 			SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluIlmankoulutuspaikkaaKomponentti,
 			JatkuvaSijoittelu jatkuvaSijoittelu,
-			ValintatietoKomponentti valintatietoKomponentti) {
+			ValintatietoService valintatietoService) {
 		super();
 		this.sijoitteluAktivoi = sijoitteluAktivoi;
 		this.quartzInput = quartzInput;
@@ -52,7 +58,7 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 		this.sijoitteluKoulutuspaikkallisetKomponentti = sijoitteluKoulutuspaikkallisetKomponentti;
 		this.sijoitteluIlmankoulutuspaikkaaKomponentti = sijoitteluIlmankoulutuspaikkaaKomponentti;
 		this.jatkuvaSijoittelu = jatkuvaSijoittelu;
-		this.valintatietoKomponentti = valintatietoKomponentti;
+		this.valintatietoService = valintatietoService;
 	}
 
 	@Override
@@ -116,11 +122,68 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.process(asetaKokonaistyo(2))
 				//
-				.bean(valintatietoKomponentti)
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						try {
+							exchange.getOut()
+									.setBody(
+											valintatietoService
+													.haeValintatiedot(hakuOid(exchange)));
+						} catch (Exception e) {
+							e.printStackTrace();
+							LOG.error(
+									"Valintatietojen haku haulle({}) epäonnistui.",
+									hakuOid(exchange), e.getMessage());
+
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.VALINTATIETO,
+											"Valintatietojen haku haulle epäonnistui.",
+											e.getMessage(), Poikkeus
+													.hakuOid(hakuOid(exchange))));
+							throw e;
+						}
+					}
+				})
 				//
 				.process(merkkaaTyoTehdyksi())
 				//
-				.bean(suoritaSijoittelu)
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						HakuTyyppi hakutyyppi = hakutyyppi(exchange);
+						if (hakutyyppi == null) {
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.VALINTATIETO,
+											"Valintatiedoilta palautui null hakutyyppi",
+											Poikkeus.hakuOid(hakuOid(exchange))));
+							throw new RuntimeException(
+									"Valintatiedoilta palautui null hakutyyppi!");
+						}
+						try {
+							suoritaSijoittelu.haeLahtotiedot(hakutyyppi,
+									hakuOid(exchange));
+						} catch (Exception e) {
+							e.printStackTrace();
+							LOG.error(
+									"Sijoittelun suorittaminen epäonnistui haulle({})",
+									hakuOid(exchange), e.getMessage());
+
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.SIJOITTELU,
+											"Sijoittelun suorittaminen epäonnistui.",
+											e.getMessage(), Poikkeus
+													.hakuOid(hakuOid(exchange))));
+							throw e;
+						}
+					}
+				})
 				//
 				.process(merkkaaTyoTehdyksi())
 				//
@@ -133,5 +196,9 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 					}
 				});
 
+	}
+
+	private HakuTyyppi hakutyyppi(Exchange exchange) {
+		return exchange.getIn().getBody(HakuTyyppi.class);
 	}
 }
