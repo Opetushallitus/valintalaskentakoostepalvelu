@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -61,11 +62,18 @@ public class JalkiohjaustulosExcelKomponentti {
 					for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
 						pisteet.append(pistetieto.getArvo()).append(" ");
 					}
-					rivit.add(new Object[] { "Hakukohde",
-							hakutoive.getHakukohdeOid(), "Valintatapajono",
-							jono.getValintatapajonoOid(), "Pisteet",
-							pisteet.toString().trim(), "Valinnan tulos",
-							jono.getTila() });
+					rivit.add(new Object[] {
+							"Hakukohde",
+							hakutoive.getHakukohdeOid(),
+							"Valintatapajono",
+							jono.getValintatapajonoOid(),
+							"Pisteet",
+							pisteet.toString().trim(),
+							"Valinnan tulos",
+							jono.getTila(),
+							"Selite",
+							Arrays.toString(jono.getTilanKuvaukset().values()
+									.toArray()) });
 				}
 			}
 		}
