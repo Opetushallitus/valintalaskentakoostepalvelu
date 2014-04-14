@@ -1,13 +1,14 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -23,6 +24,9 @@ import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 
 /**
  *
@@ -43,25 +47,30 @@ public class SijoitteluAktivointiResource {
 	@Autowired
 	private ParametriService parametriService;
 
-	@GET
+	@Autowired
+	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+
+	@POST
 	@Path("/aktivoi")
 	@ApiOperation(value = "Sijoittelun aktivointi", response = String.class)
-	public Response aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
+	public ProsessiId aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
 		if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
 			LOG.error(
 					"Sijoittelua yritettiin käynnistää haulle({}) ilman käyttöoikeuksia!",
 					hakuOid);
-			return Response.serverError().entity("Ei käyttöoikeuksia!").build();
+			throw new RuntimeException("Ei käyttöoikeuksia!");
 		}
 
 		if (StringUtils.isBlank(hakuOid)) {
 			LOG.error("Sijoittelua yritettiin käynnistää ilman hakuOidia!");
-			return Response.serverError()
-					.entity("Parametri hakuOid on pakollinen!").build();
+			throw new RuntimeException("Parametri hakuOid on pakollinen!");
 		} else {
+			DokumenttiProsessi prosessi = new DokumenttiProsessi("Sijoittelu",
+					"aktivointi", hakuOid, Arrays.asList("sijoittelu"));
 			LOG.info("aktivoiSijoittelu haulle {}", hakuOid);
-			sijoitteluAktivointiProxy.aktivoiSijoittelu(hakuOid);
-			return Response.ok().build();
+			sijoitteluAktivointiProxy.aktivoiSijoittelu(prosessi, hakuOid);
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+			return prosessi.toProsessiId();
 		}
 	}
 
