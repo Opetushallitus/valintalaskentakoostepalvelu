@@ -4,9 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.TreeMultiset;
 
 /**
  * 
@@ -18,18 +16,16 @@ public class OsaTyo extends Tyo {
 	private final AtomicInteger kokonaismaara;
 	private final AtomicInteger ohitettu;
 	private final String nimi;
-	private final Collection<Long> kestot;
-	private final Collection<Long> epaonnistuneet;
+	private final AtomicInteger tehty;
+	private final AtomicInteger epaonnistunut;
 	private final Collection<Exception> poikkeukset;
 
 	// Collections.synchronizedList(Lists.<Long> newArrayList());
 	public OsaTyo(String nimi, int kokonaismaara) {
 		this.kokonaismaara = new AtomicInteger(kokonaismaara);
 		this.ohitettu = new AtomicInteger(0);
-		this.kestot = Collections.synchronizedCollection(TreeMultiset
-				.<Long> create());
-		this.epaonnistuneet = Collections.synchronizedCollection(TreeMultiset
-				.<Long> create());
+		this.tehty = new AtomicInteger(0);
+		this.epaonnistunut = new AtomicInteger(0);
 		this.poikkeukset = Collections.synchronizedCollection(Lists
 				.<Exception> newArrayList());
 		this.nimi = nimi;
@@ -39,42 +35,15 @@ public class OsaTyo extends Tyo {
 		this(nimi, -1);
 	}
 
-	@Override
-	public long getYksittaisenTyonArvioituKesto() {
-		if (kestot.isEmpty()) {
-			return 0L;
-		}
-		synchronized (kestot) {
-			return Iterables.get(kestot, (kestot.size() - 1) / 2);
-		}
-	}
-
 	public int getOhitettu() {
 		return ohitettu.get();
-	}
-
-	@Override
-	public long getArvioituJaljellaOlevaKokonaiskesto() {
-		return getJaljellaOlevienToidenMaara()
-				* getYksittaisenTyonArvioituKesto();
 	}
 
 	public int getJaljellaOlevienToidenMaara() {
 		if (kokonaismaara.get() == -1) { // kokonaismaaraa ei tiedeta
 			return -1;
 		}
-		return kokonaismaara.get() - kestot.size();
-	}
-
-	@Override
-	public long getKesto() {
-		long kokonaiskesto = 0L;
-		synchronized (kestot) {
-			for (Long kesto : kestot) {
-				kokonaiskesto += kesto;
-			}
-			return kokonaiskesto;
-		}
+		return kokonaismaara.get() - tehty.get();
 	}
 
 	public void setKokonaismaara(int kokonaismaara) {
@@ -106,15 +75,15 @@ public class OsaTyo extends Tyo {
 	}
 
 	public int getTehty() {
-		return kestot.size();
+		return tehty.get();
 	}
 
 	public void tyoValmistui(long kesto) {
-		kestot.add(kesto);
+		tehty.incrementAndGet();
 	}
 
 	public void tyoOhitettu() {
-		kestot.add(0L);
+		tehty.incrementAndGet();
 		ohitettu.incrementAndGet();
 	}
 
@@ -122,7 +91,7 @@ public class OsaTyo extends Tyo {
 		if (kokonaismaara.get() == -1) {
 			return false;
 		}
-		return kokonaismaara.get() <= kestot.size();
+		return kokonaismaara.get() <= tehty.get();
 	}
 
 	@com.fasterxml.jackson.annotation.JsonIgnore
@@ -131,7 +100,7 @@ public class OsaTyo extends Tyo {
 	}
 
 	public void tyoEpaonnistui(long kesto, Exception e) {
-		epaonnistuneet.add(kesto);
+		epaonnistunut.incrementAndGet();
 		poikkeukset.add(e);
 	}
 }
