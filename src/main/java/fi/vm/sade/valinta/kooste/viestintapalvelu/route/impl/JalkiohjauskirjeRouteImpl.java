@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
@@ -79,7 +80,35 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	@Override
 	public void configure() throws Exception {
+		Endpoint luontiEpaonnistui = endpoint("direct:jalkiohjauskirjeet_deadletterchannel");
+		from(luontiEpaonnistui)
+		//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						String syy;
+						if (exchange.getException() == null) {
+							syy = "Jälkiohjauskirjeiden luonti epäonnistui tuntemattomasta syystä. Ota yheys ylläpitoon.";
+						} else {
+							syy = exchange.getException().getMessage();
+						}
+						dokumenttiprosessi(exchange).getPoikkeukset().add(
+								new Poikkeus(Poikkeus.KOOSTEPALVELU,
+										"Jälkiohjauskirjeiden luonti", syy));
+					}
+				})
+				//
+				.stop();
 		from(jalkiohjauskirjeet)
+				//
+				.errorHandler(
+				//
+						deadLetterChannel(luontiEpaonnistui)
+								//
+								.maximumRedeliveries(0)
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
 				//
 				.bean(new SecurityPreprocessor())
 				//
@@ -90,6 +119,8 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.log(LoggingLevel.WARN,
 						"Ohitetaan prosessi ${property.property_valvomo_prosessi} koska se on merkitty keskeytetyksi!")
 				//
+				.stop()
+				//
 				.otherwise()
 				//
 				.to("direct:jalkiohjauskirjeet_jatketaan")
@@ -98,8 +129,18 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 		from("direct:jalkiohjauskirjeet_jatketaan")
 		//
-		// Kaikille sijoittelun antamille valitsemattomille
-		// jalkiohjauskirje
+				.errorHandler(
+				//
+						deadLetterChannel(luontiEpaonnistui)
+								//
+								.maximumRedeliveries(0)
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
+				//
+				// Kaikille sijoittelun antamille valitsemattomille
+				// jalkiohjauskirje
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluProxy
@@ -164,7 +205,7 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						}
 
 						dokumenttiprosessi(exchange).setKokonaistyo(
-								hyvaksymattomatHakijat.size() + 4); // hakemukset
+								hyvaksymattomatHakijat.size() + 3); // hakemukset
 																	// +
 																	// tarjonnasta
 																	// haku +
@@ -177,14 +218,23 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						for (HakijaDTO hakija : hyvaksymattomatHakijat) {
 							for (HakutoiveDTO hakutoive : hakija
 									.getHakutoiveet()) {
+								if (dokumenttiprosessi(exchange)
+										.isKeskeytetty()) {
+									throw new RuntimeException(
+											"Jälkiohjauskirjeen muodostus on keskeytetty!");
+								}
 								String hakukohdeOid = hakutoive
 										.getHakukohdeOid();
 								if (!metaKohteet.containsKey(hakukohdeOid)) { // lisataan
 																				// puuttuva
 																				// hakukohde
 									try {
+										dokumenttiprosessi(exchange)
+												.inkrementoiKokonaistyota();
 										HakukohdeNimiRDTO nimi = tarjontaProxy
 												.haeHakukohdeNimi(hakukohdeOid);
+										dokumenttiprosessi(exchange)
+												.inkrementoiTehtyjaToita();
 										Teksti hakukohdeNimi = new Teksti(nimi
 												.getHakukohdeNimi());// extractHakukohdeNimi(nimi,
 																		// kielikoodi);
@@ -218,11 +268,14 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 								}
 							}
 						}
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
 
 						Collection<Hakemus> hakemukset = Lists.newArrayList();
 						for (HakijaDTO h : hyvaksymattomatHakijat) {
 							String hakemusOid = h.getHakemusOid();
+							if (dokumenttiprosessi(exchange).isKeskeytetty()) {
+								throw new RuntimeException(
+										"Jälkiohjauskirjeen muodostus on keskeytetty!");
+							}
 							try {
 								hakemukset.add(applicationResource
 										.getApplicationByOid(hakemusOid));
