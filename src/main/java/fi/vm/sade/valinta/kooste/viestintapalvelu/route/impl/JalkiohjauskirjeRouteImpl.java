@@ -177,6 +177,11 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						for (HakijaDTO hakija : hyvaksymattomatHakijat) {
 							for (HakutoiveDTO hakutoive : hakija
 									.getHakutoiveet()) {
+								if (dokumenttiprosessi(exchange)
+										.isKeskeytetty()) {
+									throw new RuntimeException(
+											"Jälkiohjauskirjeen muodostus on keskeytetty!");
+								}
 								String hakukohdeOid = hakutoive
 										.getHakukohdeOid();
 								if (!metaKohteet.containsKey(hakukohdeOid)) { // lisataan
@@ -223,6 +228,10 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						Collection<Hakemus> hakemukset = Lists.newArrayList();
 						for (HakijaDTO h : hyvaksymattomatHakijat) {
 							String hakemusOid = h.getHakemusOid();
+							if (dokumenttiprosessi(exchange).isKeskeytetty()) {
+								throw new RuntimeException(
+										"Jälkiohjauskirjeen muodostus on keskeytetty!");
+							}
 							try {
 								hakemukset.add(applicationResource
 										.getApplicationByOid(hakemusOid));
