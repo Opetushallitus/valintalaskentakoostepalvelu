@@ -74,14 +74,19 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 						simple("[${property.authentication.name}] Valintaperusteiden vienti epäonnistui hakukohteelle ${body}"))
 				.to(fail())
 				//
-				.process(logFailedHakuImport());
+				.process(logFailedHakuImport())
+				//
+				.stop();
+		//
 		from("direct:hakuimport_epaonnistui")
 				.setHeader(
 						"message",
 						simple("[${property.authentication.name}] Tarjonnasta ei saatu hakua(${property.hakuOid}) tai haun hakukohteiden prosessointi ei mennyt oikein"))
 				.to(fail())
 				//
-				.process(logFailedHakuImport());
+				.process(logFailedHakuImport())
+				//
+				.stop();
 		/**
 		 * Erillinen reitti viennille(tuonnille). Reitilla oma errorhandler.
 		 */
@@ -216,8 +221,12 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 				HakuImportProsessi prosessi = exchange.getProperty(
 						PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
 				prosessi.lisaaVirhe();
-				LOG.error("Virhe (numero {}) hakukohteiden importoinnissa! {}",
-						exchange.getException().getMessage());
+				if (exchange.getException() != null) {
+					LOG.error("Virhe hakukohteiden importoinnissa! {}",
+							exchange.getException().getMessage());
+				} else {
+					LOG.error("Tuntematon virhe hakukohteiden importoinnissa!");
+				}
 			}
 		};
 	}
