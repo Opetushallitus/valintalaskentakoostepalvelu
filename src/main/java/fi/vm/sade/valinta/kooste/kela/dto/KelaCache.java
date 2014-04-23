@@ -16,6 +16,7 @@ import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakemusSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
@@ -43,7 +44,7 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
 	}
 
 	@Override
-	public Date lukuvuosi(HakuDTO hakuDTO) {
+	public Date lukuvuosi(HakuV1RDTO hakuDTO) {
 		String uri = hakuDTO.getKoulutuksenAlkamiskausiUri();
 		if (!lukuvuosi.contains(uri)) {
 			int vuosi = hakuDTO.getKoulutuksenAlkamisVuosi();
@@ -78,12 +79,12 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
 	}
 
 	@Override
-	public Date poimintapaivamaara(HakuDTO haku) {
+	public Date poimintapaivamaara(HakuV1RDTO haku) {
 		return now;
 	}
 
 	@Override
-	public Date valintapaivamaara(HakuDTO haku) {
+	public Date valintapaivamaara(HakuV1RDTO haku) {
 		return now;
 	}
 

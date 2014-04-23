@@ -1,0 +1,263 @@
+package fi.vm.sade.valinta.kooste.excel;
+
+import java.awt.Color;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFCreationHelper;
+import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ *         new Esittely(haku, hakukohde, ...)
+ * 
+ */
+public class Excel {
+
+	private static final Logger LOG = LoggerFactory.getLogger(Excel.class);
+	public static final int VAKIO_LEVEYS = 8500;
+	private final Collection<Rivi> rivit;
+	private final String nimi;
+	private final Collection<Sarake> sarakkeet;
+
+	public Excel(String nimi, Collection<Rivi> rivit) {
+		this.rivit = rivit;
+		this.nimi = nimi;
+		this.sarakkeet = Collections.emptyList();
+	}
+
+	public Excel(String nimi, Collection<Rivi> rivit,
+			Collection<Sarake> sarakkeet) {
+		this.rivit = rivit;
+		this.nimi = nimi;
+		this.sarakkeet = sarakkeet;
+	}
+
+	public Collection<Rivi> getRivit() {
+		return rivit;
+	}
+
+	public String getNimi() {
+		return nimi;
+	}
+
+	public void tuoXlsx(InputStream input) throws IOException,
+			ExcelValidointiPoikkeus {
+		XSSFWorkbook workbook = new XSSFWorkbook(input);
+		XSSFSheet sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
+		int lastRowIndex = sheet.getLastRowNum();
+		Iterator<Rivi> riviIterator = rivit.iterator();
+		if (riviIterator.hasNext()) {
+			Rivi riviImportteri = riviIterator.next();
+			for (int i = 0; i <= lastRowIndex; ++i) {
+				XSSFRow row = sheet.getRow(i);
+				// LOG.error("rivi [{}]", i);
+				Rivi rivi;
+				if (row == null) {
+					rivi = Rivi.tyhjaRivi();
+				} else {
+					rivi = XSSFRivi.asRivi(row);
+				}
+				// LOG.error("{}", rivi);
+				// ottaako importteri viela vastaan dataa?
+				if (riviImportteri.validoi(rivi)) {
+					continue;
+				} else {
+					if (!riviIterator.hasNext()) { // onko seuraavaa
+						// importteria?
+						return; // ei ole joten importointi on valmis
+					} else {
+						riviImportteri = riviIterator.next(); // Hidden
+																// seuraava
+																// importteri
+					}
+				}
+
+			}
+		}
+	}
+
+	public InputStream vieXlsx() {
+		XSSFWorkbook workbook = new XSSFWorkbook();
+		XSSFCreationHelper factory = workbook.getCreationHelper();
+		XSSFSheet sheet = workbook.createSheet(nimi);
+		XSSFDrawing drawing = sheet.createDrawingPatriarch();
+		XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(sheet);
+		XSSFCellStyle alignRightStyle = workbook.createCellStyle();
+		// alignRightStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+		XSSFCellStyle lockedStyle = workbook.createCellStyle();
+		lockedStyle.setFillForegroundColor(new XSSFColor(Color.GRAY));
+		lockedStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+
+		XSSFCellStyle editableStyle = workbook.createCellStyle();
+		editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204,
+				153)));
+		editableStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		editableStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+		editableStyle.setLocked(false);
+		// lockedStyle.setFillBackgroundColor(new XSSFColor(Color.GREEN));
+		sheet.enableLocking();
+		List<Integer> leveysPreferenssit = Lists.newArrayList();
+		int rowIndex = 0;
+		int maxCellNum = 0;
+		Map<Collection<String>, MonivalintaJoukko> constraintSets = Maps
+				.newHashMap();
+		Map<Collection<Number>, ArvovaliJoukko> numberConstraintSets = Maps
+				.newHashMap();
+		for (Rivi toisteinenrivi : rivit) {
+			for (Rivi rivi : toisteinenrivi.getToisteisetRivit()) {
+				XSSFRow row = sheet.createRow(rowIndex);
+				int cellNum = 0;
+				for (Solu solu : rivi.getSolut()) {
+					XSSFCell cell = null;
+					if (solu.isTeksti()) {
+						cell = row.createCell(cellNum, Cell.CELL_TYPE_STRING);
+						cell.setCellValue(solu.toTeksti().getTeksti());
+
+					} else if (solu.isNumero()) {
+						cell = row.createCell(cellNum, Cell.CELL_TYPE_NUMERIC);
+						Numero numero = solu.toNumero();
+						if (numero.hasArvovali()) {
+							ArvovaliJoukko joukko;
+							Collection<Number> numberSet = numero.asArvovali();
+							if (!numberConstraintSets.containsKey(numberSet)) {
+								numberConstraintSets.put(
+										numberSet,
+										joukko = new ArvovaliJoukko(numero
+												.getMin(), numero.getMax(),
+												sheet, dvHelper));
+							} else {
+								joukko = numberConstraintSets.get(numberSet);
+
+							}
+							joukko.addAddress(rowIndex, cellNum);
+						}
+						if (numero.isTyhja()) {
+							// cell.setCellValue(StringUtils.EMPTY);
+						} else {
+
+							cell.setCellValue(numero.getNumero().doubleValue());
+						}
+
+					} else if (solu.isMonivalinta()) {
+						cell = row.createCell(cellNum, Cell.CELL_TYPE_STRING);
+						cell.setCellValue(solu.toTeksti().getTeksti());
+
+						Monivalinta monivalinta = solu.toMonivalinta();
+						MonivalintaJoukko joukko;
+						if (!constraintSets.containsKey(monivalinta
+								.getVaihtoehdot())) {
+							constraintSets
+									.put(monivalinta.getVaihtoehdot(),
+											joukko = new MonivalintaJoukko(
+													monivalinta
+															.getVaihtoehdot(),
+													sheet, dvHelper));
+						} else {
+							joukko = constraintSets.get(monivalinta
+									.getVaihtoehdot());
+
+						}
+						joukko.addAddress(rowIndex, cellNum);
+					}
+					if (cell != null && solu.isTasausOikealle()) {
+						cell.setCellStyle(alignRightStyle);
+					}
+					if (cell != null && solu.isLukittu()) {
+						cell.setCellStyle(lockedStyle); // lockedStyle
+					} else if (cell != null && solu.isMuokattava()) {
+
+						cell.setCellStyle(editableStyle); // lockedStyle
+
+					}
+					asetaPreferenssi(cellNum, solu.preferoituLeveys(),
+							leveysPreferenssit);
+					if (solu.ulottuvuus() != 1) {
+						sheet.addMergedRegion(new CellRangeAddress(rowIndex, // first
+								// row
+								// (0-based)
+								rowIndex, // last row (0-based)
+								cellNum, // first column (0-based)
+								cellNum + solu.ulottuvuus() - 1 // last column
+																// (0-based)
+						));
+						cellNum += solu.ulottuvuus();
+					} else {
+						++cellNum;
+					}
+				}
+				maxCellNum = Math.max(maxCellNum, cellNum);
+				++rowIndex;
+			}
+		}
+		int columnIndex = 0;
+		for (Sarake sarake : sarakkeet) {
+			if (!sarake.isNaytetaanko()) {
+				sheet.setColumnHidden(columnIndex, true);
+			}
+			++columnIndex;
+		}
+		for (int i = 0; i < leveysPreferenssit.size(); ++i) {
+			int preferenssi = leveysPreferenssit.get(i);
+			if (preferenssi == 0) {
+				preferenssi = Excel.VAKIO_LEVEYS;
+			}
+			sheet.autoSizeColumn(i);
+			if (sheet.getColumnWidth(i) < preferenssi) {
+				sheet.setColumnWidth(i, preferenssi);
+			}
+		}
+		sheet.lockDeleteColumns();
+		sheet.lockDeleteRows();
+		sheet.lockFormatCells();
+		sheet.lockFormatColumns();
+
+		sheet.lockFormatRows();
+		sheet.lockInsertColumns();
+		sheet.lockInsertHyperlinks();
+		sheet.lockInsertRows();
+		ByteArrayOutputStream b;
+		try {
+			workbook.write(b = new ByteArrayOutputStream());
+			return new ByteArrayInputStream(b.toByteArray());
+		} catch (Exception e) {
+			// tämä ei koskaan tapahdu I/O virheestä johtuen mutta Apache
+			// Poi:ssa voi olla bugeja joten hyvä heittää eteenpäin ettei jää
+			// huomaamatta
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void asetaPreferenssi(int column, int preferenssi,
+			List<Integer> leveysPreferenssit) {
+
+		while (leveysPreferenssit.size() <= column) {
+			leveysPreferenssit.add(0);
+		}
+		leveysPreferenssit.set(column, preferenssi);
+	}
+}

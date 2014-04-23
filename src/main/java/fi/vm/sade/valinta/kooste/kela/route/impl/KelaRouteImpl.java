@@ -29,10 +29,10 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.tarjonta.service.resources.HakuResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -74,10 +74,10 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final DokumenttiResource dokumenttiResource;
 	private final String kelaLuonti;
 	private final SecurityPreprocessor security = new SecurityPreprocessor();
-	private final HakuResource hakuResource;
 	private final HaunTyyppiKomponentti haunTyyppiKomponentti;
 	private final ApplicationResource applicationResource;
 	private final OppilaitosKomponentti oppilaitosKomponentti;
+	private final fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource hakuResource;
 	private final LinjakoodiKomponentti linjakoodiKomponentti;
 	private final HakukohdeResource hakukohdeResource;
 	private final KoodiService koodiService;
@@ -89,7 +89,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 			KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti,
 			KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti,
 			SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet,
-			HakuResource hakuResource,
+			fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource hakuResource,
 			HaunTyyppiKomponentti haunTyyppiKomponentti,
 			ApplicationResource applicationResource,
 			OppilaitosKomponentti oppilaitosKomponentti,
@@ -366,9 +366,9 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 					@Override
 					public void process(Exchange exchange) throws Exception {
 						String hakuOid = exchange.getIn().getBody(String.class);
-						HakuDTO haku;
+						HakuV1RDTO haku;
 						try {
-							haku = hakuResource.getByOID(hakuOid);
+							haku = hakuResource.findByOid(hakuOid).getResult();
 							exchange.getOut().setBody(haku);
 
 							// cache(exchange).put(haku);
@@ -466,7 +466,8 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						HakuDTO haku = exchange.getIn().getBody(HakuDTO.class);
+						HakuV1RDTO haku = exchange.getIn().getBody(
+								HakuV1RDTO.class);
 						if (haku == null) {
 							throw new RuntimeException(
 									"Reitillä oli null hakuDTO!");
@@ -513,7 +514,8 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						HakuDTO haku = exchange.getIn().getBody(HakuDTO.class);
+						HakuV1RDTO haku = exchange.getIn().getBody(
+								HakuV1RDTO.class);
 						if (haku == null) {
 							throw new RuntimeException(
 									"Reitillä oli null hakuDTO!");

@@ -21,9 +21,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.tarjonta.service.resources.HakuResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.HakuV1Resource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
@@ -57,6 +57,11 @@ public class KelaRouteTest {
 	}
 
 	@Bean
+	public HakuV1Resource getHakuV1Resource() {
+		return Mockito.mock(HakuV1Resource.class);
+	}
+
+	@Bean
 	public KelaHakijaRiviKomponenttiImpl mockKelaHakijaKomponentti()
 			throws Exception {
 		return mock(KelaHakijaRiviKomponenttiImpl.class);
@@ -68,8 +73,8 @@ public class KelaRouteTest {
 	}
 
 	@Bean
-	public HakuResource getHakuResource() {
-		return mock(HakuResource.class);
+	public fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource getHakuResource() {
+		return mock(fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource.class);
 	}
 
 	@Bean
@@ -130,7 +135,7 @@ public class KelaRouteTest {
 	private KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti;
 
 	@Autowired
-	private HakuResource hakuResource;
+	private HakuV1Resource hakuResource;
 
 	// VAKIO TESTI MUUTTUJIA
 	private final HakijaDTO ok = new HakijaDTO();
@@ -152,8 +157,8 @@ public class KelaRouteTest {
 		HakuDTO dto1 = new HakuDTO();
 		HakuDTO dto2 = new HakuDTO();
 
-		when(hakuResource.getByOID(Mockito.eq(haku1))).thenReturn(dto1);
-		when(hakuResource.getByOID(Mockito.eq(haku2))).thenReturn(dto2);
+		// when(hakuResource.findByOid(Mockito.eq(haku1))).thenReturn(dto1);
+		// when(hakuResource.findByOid(Mockito.eq(haku2))).thenReturn(dto2);
 
 		Collection<String> hakuOids = Arrays.asList(haku1, haku2);
 		KelaProsessi prosessi;
