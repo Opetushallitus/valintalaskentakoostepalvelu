@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
+import fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoTuontiRoute;
 import fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoVientiRoute;
 
 /**
@@ -24,5 +25,15 @@ public class PistesyottoConfig {
 		return ProxyWithAnnotationHelper.createProxy(
 				context.getEndpoint(pistesyottoVienti),
 				PistesyottoVientiRoute.class);
+	}
+
+	@Bean
+	public PistesyottoTuontiRoute getPistesyottoTuontiRoute(
+			@Value(PistesyottoTuontiRoute.SEDA_PISTESYOTTO_TUONTI) String pistesyottoTuonti,
+			@Qualifier("javaDslCamelContext") CamelContext context)
+			throws Exception {
+		return ProxyWithAnnotationHelper.createProxy(
+				context.getEndpoint(pistesyottoTuonti),
+				PistesyottoTuontiRoute.class);
 	}
 }

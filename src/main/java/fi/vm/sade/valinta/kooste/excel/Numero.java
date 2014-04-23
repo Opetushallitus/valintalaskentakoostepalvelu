@@ -14,12 +14,14 @@ public class Numero extends Solu {
 	private final Number min;
 	private final Number max;
 	private final boolean muokattava;
+	private final int preferoituleveys;
 
 	public Numero() {
 		this.min = null;
 		this.max = null;
 		this.numero = null;
 		this.muokattava = false;
+		this.preferoituleveys = 0;
 	}
 
 	public Number getMax() {
@@ -55,6 +57,7 @@ public class Numero extends Solu {
 		this.muokattava = false;
 		this.min = null;
 		this.max = null;
+		this.preferoituleveys = 0;
 	}
 
 	public Numero(Number numero, boolean muokattava) {
@@ -63,6 +66,7 @@ public class Numero extends Solu {
 		this.muokattava = muokattava;
 		this.min = null;
 		this.max = null;
+		this.preferoituleveys = 0;
 	}
 
 	public Numero(Number numero, Number min, Number max, boolean muokattava) {
@@ -71,6 +75,22 @@ public class Numero extends Solu {
 		this.muokattava = muokattava;
 		this.min = min;
 		this.max = max;
+		this.preferoituleveys = 0;
+	}
+
+	public Numero(Number numero, Number min, Number max, boolean muokattava,
+			int preferoituleveys) {
+		super(null);
+		this.numero = numero;
+		this.muokattava = muokattava;
+		this.min = min;
+		this.max = max;
+		this.preferoituleveys = preferoituleveys;
+	}
+
+	@Override
+	public int preferoituLeveys() {
+		return preferoituleveys;
 	}
 
 	public boolean isMuokattava() {

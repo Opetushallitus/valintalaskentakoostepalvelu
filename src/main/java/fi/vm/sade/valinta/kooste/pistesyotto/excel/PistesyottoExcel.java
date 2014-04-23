@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -131,6 +132,13 @@ public class PistesyottoExcel {
 			List<ValintaperusteDTO> valintaperusteet,
 			List<ApplicationAdditionalDataDTO> pistetiedot,
 			Collection<PistesyottoDataRiviKuuntelija> kuuntelijat) {
+		Collections.sort(valintaperusteet, new Comparator<ValintaperusteDTO>() {
+			@Override
+			public int compare(ValintaperusteDTO o1, ValintaperusteDTO o2) {
+				return o1.getKuvaus().toUpperCase().compareTo(o2.getKuvaus());
+			}
+		});
+
 		Map<String, Map<String, ValintakoeDTO>> tunnisteValintakoe = valintakoeOidit(
 				hakukohdeOid, Sets.newHashSet(valintakoeTunnisteet),
 				osallistumistiedot);
@@ -158,11 +166,16 @@ public class PistesyottoExcel {
 				}).toList();
 
 		Collection<Rivi> rivit = Lists.newArrayList();
-		rivit.add(new RiviBuilder().addOid(hakuOid).addTeksti(hakuNimi).build());
-		rivit.add(new RiviBuilder().addOid(hakukohdeOid)
-				.addTeksti(hakukohdeNimi).build());
-		rivit.add(new RiviBuilder().addOid(tarjoajaOid).addTeksti(tarjoajaNimi)
+		rivit.add(new RiviBuilder().addOid(hakuOid).addTeksti(hakuNimi, 4)
 				.build());
+		rivit.add(new RiviBuilder().addOid(hakukohdeOid)
+				.addTeksti(hakukohdeNimi, 4).build());
+		if (StringUtils.isBlank(tarjoajaOid)) {
+			rivit.add(Rivi.tyhjaRivi());
+		} else {
+			rivit.add(new RiviBuilder().addOid(tarjoajaOid)
+					.addTeksti(tarjoajaNimi, 4).build());
+		}
 		rivit.add(Rivi.tyhjaRivi());
 		rivit.add(new RiviBuilder().addTyhja().addTyhja()
 				.addRivi(new OidRivi(tunnisteet, 2)).build());
@@ -209,16 +222,22 @@ public class PistesyottoExcel {
 				Double min = asNumber(valintaperuste.getMin());
 				if (min != null && max != null) {
 					dataArvot.add(new NumeroDataArvo(min, max,
-							VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO));
+							VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, valintaperuste
+									.getTunniste(), valintaperuste
+									.getOsallistuminenTunniste()));
 				} else {
-					dataArvot.add(new DataArvo());
+					dataArvot.add(new DataArvo(valintaperuste.getTunniste(),
+							valintaperuste.getOsallistuminenTunniste()));
 				}
 			} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(valintaperuste
 					.getFunktiotyyppi())) {
 				dataArvot.add(new BooleanDataArvo(TOTUUSARVO_KONVERSIO,
-						VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO));
+						VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, valintaperuste
+								.getTunniste(), valintaperuste
+								.getOsallistuminenTunniste()));
 			} else {
-				dataArvot.add(new DataArvo());
+				dataArvot.add(new DataArvo(valintaperuste.getTunniste(),
+						valintaperuste.getOsallistuminenTunniste()));
 			}
 		}
 
@@ -233,8 +252,8 @@ public class PistesyottoExcel {
 					.append(", ").append(data.getFirstNames()).toString()));
 			if (!osallistuja) {
 				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
-					s.add(TekstiArvo.tyhja());
-					s.add(TekstiArvo.tyhja());
+					s.add(TekstiArvo.tyhja(false));
+					s.add(TekstiArvo.tyhja(false));
 				}
 			} else {
 				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
@@ -265,7 +284,7 @@ public class PistesyottoExcel {
 									EPATOSI, TYHJA));
 						} else {
 							s.add(new TekstiArvo(data.getAdditionalData().get(
-									valintaperuste.getTunniste())));
+									valintaperuste.getTunniste()), false));
 						}
 
 						s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO
@@ -275,8 +294,8 @@ public class PistesyottoExcel {
 								VAIHTOEHDOT));
 
 					} else {
-						s.add(TekstiArvo.tyhja());
-						s.add(TekstiArvo.tyhja());
+						s.add(TekstiArvo.tyhja(false));
+						s.add(TekstiArvo.tyhja(false));
 					}
 				}
 			}

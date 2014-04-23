@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.excel.arvo;
 import org.apache.commons.lang.StringUtils;
 
 import fi.vm.sade.valinta.kooste.excel.ArvoTyyppi;
+import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.excel.Numero;
 
 public class NumeroArvo extends Arvo {
@@ -26,7 +27,7 @@ public class NumeroArvo extends Arvo {
 	}
 
 	public Numero asNumero() {
-		return new Numero(numero, min, max, true);
+		return new Numero(numero, min, max, true, Excel.VAKIO_LEVEYS / 2);
 	}
 
 	@Override

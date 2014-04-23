@@ -42,6 +42,11 @@ public class RiviBuilder {
 		return this;
 	}
 
+	public RiviBuilder addTeksti(String teksti, int ulottuvuus) {
+		rivit.add(new Rivi(new Teksti(teksti, ulottuvuus)));
+		return this;
+	}
+
 	public Rivi build() {
 		return new Kooste(rivit);
 	}

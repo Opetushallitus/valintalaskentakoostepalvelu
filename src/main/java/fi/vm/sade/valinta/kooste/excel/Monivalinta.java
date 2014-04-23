@@ -12,6 +12,7 @@ public class Monivalinta extends Solu {
 	private final Collection<String> vaihtoehdot;
 	private final String teksti;
 	private final boolean muokattava;
+	private final int preferoituleveys;
 
 	public Monivalinta(String teksti, Collection<String> vaihtoehdot,
 			boolean muokattava) {
@@ -19,6 +20,22 @@ public class Monivalinta extends Solu {
 		this.vaihtoehdot = vaihtoehdot;
 		this.teksti = teksti;
 		this.muokattava = muokattava;
+		this.preferoituleveys = 0;
+	}
+
+	public Monivalinta(String teksti, Collection<String> vaihtoehdot,
+			boolean muokattava, int preferoituleveys) {
+		super(null);
+		this.vaihtoehdot = vaihtoehdot;
+		this.teksti = teksti;
+		this.muokattava = muokattava;
+		this.preferoituleveys = preferoituleveys;
+	}
+
+	@Override
+	public int preferoituLeveys() {
+		// TODO Auto-generated method stub
+		return preferoituleveys;
 	}
 
 	public boolean isMuokattava() {
@@ -61,7 +78,7 @@ public class Monivalinta extends Solu {
 	}
 
 	public Teksti toTeksti() {
-		return new Teksti(teksti, true, false);
+		return new Teksti(teksti, true, false, preferoituleveys);
 	}
 
 }

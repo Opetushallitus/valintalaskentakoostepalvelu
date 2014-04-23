@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 
+import java.io.InputStream;
 import java.util.Arrays;
 
 import javax.ws.rs.Consumes;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
+import fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoTuontiRoute;
 import fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoVientiRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
@@ -37,6 +39,8 @@ public class PistesyottoResource {
 	private DokumenttiProsessiKomponentti dokumenttiKomponentti;
 	@Autowired
 	private PistesyottoVientiRoute vientiRoute;
+	@Autowired
+	private PistesyottoTuontiRoute tuontiRoute;
 
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
 	@POST
@@ -57,15 +61,17 @@ public class PistesyottoResource {
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
 	@POST
 	@Path("/tuonti")
-	@Consumes("application/json")
+	@Consumes("application/octet-stream")
 	@ApiOperation(consumes = "application/json", value = "Pistesyötön tuonti taulukkolaskentaan", response = ProsessiId.class)
 	public ProsessiId tuonti(@QueryParam("hakuOid") String hakuOid,
-			@QueryParam("hakukohdeOid") String hakukohdeOid) {
+			@QueryParam("hakukohdeOid") String hakukohdeOid, InputStream file) {
 		DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö",
 				"tuonti", hakuOid, Arrays.asList(hakukohdeOid));
 		//
 		// TODO:
 		//
+		tuontiRoute.tuo(file, prosessi, hakukohdeOid, hakuOid,
+				SecurityContextHolder.getContext().getAuthentication());
 		return prosessi.toProsessiId();
 	}
 }

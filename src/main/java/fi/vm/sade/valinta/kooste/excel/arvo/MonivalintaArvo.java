@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.excel.arvo;
 import java.util.Collection;
 
 import fi.vm.sade.valinta.kooste.excel.ArvoTyyppi;
+import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.excel.Monivalinta;
 
 public class MonivalintaArvo extends Arvo {
@@ -17,7 +18,7 @@ public class MonivalintaArvo extends Arvo {
 	}
 
 	public Monivalinta asMonivalinta() {
-		return new Monivalinta(arvo, vaihtoehdot, true);
+		return new Monivalinta(arvo, vaihtoehdot, true, Excel.VAKIO_LEVEYS / 2);
 	}
 
 	public String getArvo() {

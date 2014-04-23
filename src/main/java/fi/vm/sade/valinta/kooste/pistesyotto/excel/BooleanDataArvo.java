@@ -12,11 +12,16 @@ import org.apache.commons.lang.StringUtils;
 public class BooleanDataArvo extends TilaDataArvo {
 
 	private final Map<String, String> konvertteri;
+	private final String tunniste;
+	private final String osallistuminenTunniste;
 
 	public BooleanDataArvo(Map<String, String> konvertteri,
-			Map<String, String> tilaKonvertteri) {
+			Map<String, String> tilaKonvertteri, String tunniste,
+			String osallistuminenTunniste) {
 		super(tilaKonvertteri);
 		this.konvertteri = konvertteri;
+		this.tunniste = tunniste;
+		this.osallistuminenTunniste = osallistuminenTunniste;
 	}
 
 	protected boolean isValidi(String arvo) {
@@ -33,6 +38,7 @@ public class BooleanDataArvo extends TilaDataArvo {
 
 	public PistesyottoArvo asPistesyottoArvo(String arvo, String tila) {
 		return new PistesyottoArvo(konvertoi(arvo), konvertoiTila(tila),
-				isValidi(arvo) && isValidiTila(tila));
+				isValidi(arvo) && isValidiTila(tila), tunniste,
+				osallistuminenTunniste);
 	}
 }
