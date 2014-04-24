@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
-import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakemusSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
@@ -23,15 +23,15 @@ public abstract class KelaAbstraktiHaku {
 	public static final String SUKUNIMI = "sukunimi";
 	public static final String ETUNIMET = "Etunimet";
 
-	private final HakuDTO haku;
+	private final HakuV1RDTO haku;
 	private final PaivamaaraSource paivamaaraSource;
 
-	public KelaAbstraktiHaku(HakuDTO haku, PaivamaaraSource paivamaaraSource) {
+	public KelaAbstraktiHaku(HakuV1RDTO haku, PaivamaaraSource paivamaaraSource) {
 		this.haku = haku;
 		this.paivamaaraSource = paivamaaraSource;
 	}
 
-	public HakuDTO getHaku() {
+	public HakuV1RDTO getHaku() {
 		return haku;
 	}
 

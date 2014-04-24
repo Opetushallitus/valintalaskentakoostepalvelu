@@ -1,0 +1,75 @@
+package fi.vm.sade.valinta.kooste.pistesyotto.resource;
+
+import java.io.InputStream;
+import java.util.Arrays;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+
+import fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoTuontiRoute;
+import fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoVientiRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+
+@Controller
+@Path("pistesyotto")
+@PreAuthorize("isAuthenticated()")
+@Api(value = "/pistesyotto", description = "Pistesyötön tuonti ja vienti taulukkolaskentaan")
+public class PistesyottoResource {
+
+	private static final Logger LOG = LoggerFactory
+			.getLogger(PistesyottoResource.class);
+
+	// @Autowired
+	// private ValintakoeResource valintakoeResource;
+	@Autowired
+	private DokumenttiProsessiKomponentti dokumenttiKomponentti;
+	@Autowired
+	private PistesyottoVientiRoute vientiRoute;
+	@Autowired
+	private PistesyottoTuontiRoute tuontiRoute;
+
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+	@POST
+	@Path("/vienti")
+	@Consumes("application/json")
+	@ApiOperation(consumes = "application/json", value = "Pistesyötön vienti taulukkolaskentaan", response = ProsessiId.class)
+	public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid,
+			@QueryParam("hakukohdeOid") String hakukohdeOid) {
+		// PistesyotonLuontiTietue pistesyotonLuontiTietue
+		DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö",
+				"vienti", hakuOid, Arrays.asList(hakukohdeOid));
+		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
+		vientiRoute.vie(prosessi, hakukohdeOid, hakuOid, SecurityContextHolder
+				.getContext().getAuthentication());
+		return prosessi.toProsessiId();
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+	@POST
+	@Path("/tuonti")
+	@Consumes("application/octet-stream")
+	@ApiOperation(consumes = "application/json", value = "Pistesyötön tuonti taulukkolaskentaan", response = ProsessiId.class)
+	public ProsessiId tuonti(@QueryParam("hakuOid") String hakuOid,
+			@QueryParam("hakukohdeOid") String hakukohdeOid, InputStream file) {
+		DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö",
+				"tuonti", hakuOid, Arrays.asList(hakukohdeOid));
+		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
+		tuontiRoute.tuo(file, prosessi, hakukohdeOid, hakuOid,
+				SecurityContextHolder.getContext().getAuthentication());
+		return prosessi.toProsessiId();
+	}
+}

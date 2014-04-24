@@ -21,16 +21,26 @@ public class OsallistujatPredicate implements
 
 	private final String hakukohdeOid;
 	private final Set<String> valintakoeOids;
+	private final Set<String> tunnisteet;
 
 	private OsallistujatPredicate() {
 		this.hakukohdeOid = null;
 		this.valintakoeOids = null;
+		this.tunnisteet = null;
 	}
 
 	private OsallistujatPredicate(String hakukohdeOid,
 			Collection<String> valintakoeOids) {
 		this.hakukohdeOid = hakukohdeOid;
 		this.valintakoeOids = Sets.newHashSet(valintakoeOids);
+		this.tunnisteet = null;
+	}
+
+	private OsallistujatPredicate(Collection<String> tunnisteet,
+			String hakukohdeOid) {
+		this.hakukohdeOid = hakukohdeOid;
+		this.tunnisteet = Sets.newHashSet(tunnisteet);
+		this.valintakoeOids = null;
 	}
 
 	public boolean apply(ValintakoeOsallistuminenDTO valintakoeOsallistuminen) {
@@ -44,11 +54,23 @@ public class OsallistujatPredicate implements
 					.getValinnanVaiheet()) {
 				for (ValintakoeDTO valintakoe : valinnanvaihe
 						.getValintakokeet()) {
-					if (!valintakoeOids.contains(valintakoe.getValintakoeOid())) {
-						// vain tarkasteltavista
-						// valintakokeista ollaan
-						// kiinnostuneita
-						continue;
+					if (tunnisteet == null) {
+						if (!valintakoeOids.contains(valintakoe
+								.getValintakoeOid())) {
+							// vain tarkasteltavista
+							// valintakokeista ollaan
+							// kiinnostuneita
+							continue;
+						}
+					} else {
+						if (!tunnisteet.contains(valintakoe
+								.getValintakoeTunniste())) {
+
+							// vain tarkasteltavista
+							// valintakokeista ollaan
+							// kiinnostuneita
+							continue;
+						}
 					}
 					if (fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen.OSALLISTUU
 							.equals(valintakoe.getOsallistuminenTulos()
@@ -64,5 +86,10 @@ public class OsallistujatPredicate implements
 	public static OsallistujatPredicate vainOsallistujat(String hakukohdeOid,
 			Collection<String> valintakoeOids) {
 		return new OsallistujatPredicate(hakukohdeOid, valintakoeOids);
+	}
+
+	public static OsallistujatPredicate vainOsallistujatTunnisteella(
+			String hakukohdeOid, Collection<String> tunnisteet) {
+		return new OsallistujatPredicate(tunnisteet, hakukohdeOid);
 	}
 }

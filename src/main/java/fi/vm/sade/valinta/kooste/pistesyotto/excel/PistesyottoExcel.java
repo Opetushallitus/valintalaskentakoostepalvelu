@@ -1,0 +1,329 @@
+package fi.vm.sade.valinta.kooste.pistesyotto.excel;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
+import fi.vm.sade.valinta.kooste.excel.Excel;
+import fi.vm.sade.valinta.kooste.excel.OidRivi;
+import fi.vm.sade.valinta.kooste.excel.Rivi;
+import fi.vm.sade.valinta.kooste.excel.RiviBuilder;
+import fi.vm.sade.valinta.kooste.excel.Teksti;
+import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
+import fi.vm.sade.valinta.kooste.excel.arvo.BooleanArvo;
+import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
+import fi.vm.sade.valinta.kooste.excel.arvo.NumeroArvo;
+import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.util.ApplicationAdditionalDataComparator;
+import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
+import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.function.ValintakoeOsallistuminenDTOFunction;
+import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+
+public class PistesyottoExcel {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(PistesyottoExcel.class);
+	private final static String MERKITSEMATTA = "Merkitsemättä";
+	private final static String OSALLISTUI = "Osallistui";
+	private final static String EI_OSALLISTUNUT = "Ei osallistunut";
+	private final static Collection<String> VAIHTOEHDOT = Arrays.asList(
+			MERKITSEMATTA, OSALLISTUI, EI_OSALLISTUNUT);
+	private final static Map<String, String> VAIHTOEHDOT_KONVERSIO = new KonversioBuilder()
+	//
+			.addKonversio("MERKITSEMATTA", MERKITSEMATTA)
+			//
+			.addKonversio("OSALLISTUI", OSALLISTUI)
+			//
+			.addKonversio("EI_OSALLISTUNUT", EI_OSALLISTUNUT).build();
+	private final static Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO = new KonversioBuilder()
+	//
+			.addKonversio(MERKITSEMATTA, "MERKITSEMATTA")
+			//
+			.addKonversio(OSALLISTUI, "OSALLISTUI")
+			//
+			.addKonversio(EI_OSALLISTUNUT, "EI_OSALLISTUNUT").build();
+	private final static String TOSI = "Hyväksytty";
+	private final static String EPATOSI = "Hylätty";
+	private final static String TYHJA = "Tyhjä";
+	private final static Collection<String> TOTUUSARVO = Arrays.asList(TYHJA,
+			TOSI, EPATOSI);
+	private final static Map<String, String> TOTUUSARVO_KONVERSIO = new KonversioBuilder()
+	//
+			.addKonversio(TOSI, Boolean.TRUE.toString())
+			//
+			.addKonversio(EPATOSI, Boolean.FALSE.toString())
+			//
+			.addKonversio(TYHJA, null).build();
+	private final Excel excel;
+
+	/**
+	 * @return < HakemusOid , < Tunniste , ValintakoeDTO > >
+	 */
+	private Map<String, Map<String, ValintakoeDTO>> valintakoeOidit(
+			String hakukohdeOid, Set<String> valintakoeTunnisteet,
+			List<ValintakoeOsallistuminenDTO> osallistumistiedot) {
+		Map<String, Map<String, ValintakoeDTO>> tunnisteOid = Maps.newHashMap();
+		for (ValintakoeOsallistuminenDTO o : osallistumistiedot) {
+			for (HakutoiveDTO h : o.getHakutoiveet()) {
+				if (!hakukohdeOid.equals(h.getHakukohdeOid())) {
+					continue;
+				}
+				Map<String, ValintakoeDTO> k = Maps.newHashMap();
+				for (ValintakoeValinnanvaiheDTO v : h.getValinnanVaiheet()) {
+					for (ValintakoeDTO valintakoe : v.getValintakokeet()) {
+						k.put(valintakoe.getValintakoeTunniste(), valintakoe);
+					}
+				}
+				tunnisteOid.put(o.getHakemusOid(), k);
+			}
+		}
+		return tunnisteOid;
+	}
+
+	public PistesyottoExcel(String hakuOid, String hakukohdeOid,
+			String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
+			String tarjoajaNimi, Collection<String> valintakoeTunnisteet,
+			List<ValintakoeOsallistuminenDTO> osallistumistiedot,
+			List<ValintaperusteDTO> valintaperusteet,
+			List<ApplicationAdditionalDataDTO> pistetiedot) {
+		this(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi,
+				tarjoajaNimi, valintakoeTunnisteet, osallistumistiedot,
+				valintaperusteet, pistetiedot, Collections
+						.<PistesyottoDataRiviKuuntelija> emptyList());
+	}
+
+	public PistesyottoExcel(String hakuOid, String hakukohdeOid,
+			String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
+			String tarjoajaNimi, Collection<String> valintakoeTunnisteet,
+			List<ValintakoeOsallistuminenDTO> osallistumistiedot,
+			List<ValintaperusteDTO> valintaperusteet,
+			List<ApplicationAdditionalDataDTO> pistetiedot,
+			PistesyottoDataRiviKuuntelija kuuntelija) {
+		this(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi,
+				tarjoajaNimi, valintakoeTunnisteet, osallistumistiedot,
+				valintaperusteet, pistetiedot, Arrays.asList(kuuntelija));
+	}
+
+	public PistesyottoExcel(String hakuOid, String hakukohdeOid,
+			String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
+			String tarjoajaNimi, Collection<String> valintakoeTunnisteet,
+			List<ValintakoeOsallistuminenDTO> osallistumistiedot,
+			List<ValintaperusteDTO> valintaperusteet,
+			List<ApplicationAdditionalDataDTO> pistetiedot,
+			Collection<PistesyottoDataRiviKuuntelija> kuuntelijat) {
+		Collections.sort(valintaperusteet, new Comparator<ValintaperusteDTO>() {
+			@Override
+			public int compare(ValintaperusteDTO o1, ValintaperusteDTO o2) {
+				return o1.getKuvaus().toUpperCase().compareTo(o2.getKuvaus());
+			}
+		});
+
+		Map<String, Map<String, ValintakoeDTO>> tunnisteValintakoe = valintakoeOidit(
+				hakukohdeOid, Sets.newHashSet(valintakoeTunnisteet),
+				osallistumistiedot);
+
+		Set<String> osallistujat =
+		//
+		FluentIterable.from(osallistumistiedot)
+				//
+				.filter(OsallistujatPredicate.vainOsallistujatTunnisteella(
+						hakukohdeOid, valintakoeTunnisteet))
+				//
+				.transform(ValintakoeOsallistuminenDTOFunction.TO_HAKEMUS_OIDS)
+				//
+				.toSet();
+		// LOG.error("{}", Arrays.toString(osallistujat.toArray()));
+		Collection<String> tunnisteet =
+		//
+		FluentIterable.from(valintaperusteet)
+		//
+				.transform(new Function<ValintaperusteDTO, String>() {
+					@Override
+					public String apply(ValintaperusteDTO valintaperuste) {
+						return valintaperuste.getTunniste();
+					}
+				}).toList();
+
+		Collection<Rivi> rivit = Lists.newArrayList();
+		rivit.add(new RiviBuilder().addOid(hakuOid).addTeksti(hakuNimi, 4)
+				.build());
+		rivit.add(new RiviBuilder().addOid(hakukohdeOid)
+				.addTeksti(hakukohdeNimi, 4).build());
+		if (StringUtils.isBlank(tarjoajaOid)) {
+			rivit.add(Rivi.tyhjaRivi());
+		} else {
+			rivit.add(new RiviBuilder().addOid(tarjoajaOid)
+					.addTeksti(tarjoajaNimi, 4).build());
+		}
+		rivit.add(Rivi.tyhjaRivi());
+		rivit.add(new RiviBuilder().addTyhja().addTyhja()
+				.addRivi(new OidRivi(tunnisteet, 2)).build());
+		RiviBuilder riviBuilder = new RiviBuilder();
+		riviBuilder.addTeksti("Hakemus oid").addTeksti("Tiedot");
+		for (String valintakoe : FluentIterable.from(valintaperusteet)
+		//
+				.transform(new Function<ValintaperusteDTO, String>() {
+					@Override
+					public String apply(ValintaperusteDTO valintaperuste) {
+						if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
+								.getFunktiotyyppi())
+								&& !StringUtils.isBlank(valintaperuste.getMin())
+								&& !StringUtils.isBlank(valintaperuste.getMax())) {
+							// create value constraint
+							return new StringBuilder()
+									.append(valintaperuste.getKuvaus())
+									.append(" (")
+									.append(valintaperuste.getMin())
+									.append(" - ")
+									.append(valintaperuste.getMax())
+									.append(")").toString();
+						} else {
+							return valintaperuste.getKuvaus();
+						}
+
+					}
+				}).toList()) {
+			riviBuilder.addSolu(new Teksti(valintakoe, 2));
+		}
+		rivit.add(riviBuilder.build());
+
+		Collection<Collection<Arvo>> sx = Lists.newArrayList();
+
+		Collections.sort(pistetiedot,
+				ApplicationAdditionalDataComparator.ASCENDING);
+
+		// Asennetaan konvertterit
+		Collection<PistesyottoDataArvo> dataArvot = Lists.newArrayList();
+		for (ValintaperusteDTO valintaperuste : valintaperusteet) {
+			if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
+					.getFunktiotyyppi())) {
+				Double max = asNumber(valintaperuste.getMax());
+				Double min = asNumber(valintaperuste.getMin());
+				if (min != null && max != null) {
+					dataArvot.add(new NumeroDataArvo(min, max,
+							VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, valintaperuste
+									.getTunniste(), valintaperuste
+									.getOsallistuminenTunniste()));
+				} else {
+					dataArvot.add(new DataArvo(valintaperuste.getTunniste(),
+							valintaperuste.getOsallistuminenTunniste()));
+				}
+			} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(valintaperuste
+					.getFunktiotyyppi())) {
+				dataArvot.add(new BooleanDataArvo(TOTUUSARVO_KONVERSIO,
+						VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, valintaperuste
+								.getTunniste(), valintaperuste
+								.getOsallistuminenTunniste()));
+			} else {
+				dataArvot.add(new DataArvo(valintaperuste.getTunniste(),
+						valintaperuste.getOsallistuminenTunniste()));
+			}
+		}
+
+		for (ApplicationAdditionalDataDTO data : pistetiedot) {
+			boolean osallistuja = osallistujat.contains(data.getOid());
+			// Hakemuksen <tunniste, valintakoeDTO> tiedot
+			Map<String, ValintakoeDTO> tunnisteDTO = tunnisteValintakoe
+					.get(data.getOid());
+			Collection<Arvo> s = Lists.newArrayList();
+			s.add(new TekstiArvo(data.getOid()));
+			s.add(new TekstiArvo(new StringBuilder().append(data.getLastName())
+					.append(", ").append(data.getFirstNames()).toString()));
+			if (!osallistuja) {
+				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
+					s.add(TekstiArvo.tyhja(false));
+					s.add(TekstiArvo.tyhja(false));
+				}
+			} else {
+				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
+					ValintakoeDTO valintakoe = tunnisteDTO.get(valintaperuste
+							.getTunniste());
+					// if ("1_2_246_562_5_85532589612_urheilija_lisapiste"
+					// .equals(valintakoe.getValintakoeTunniste())) {
+					// LOG.error("{}", "");
+					// }
+
+					if (Osallistuminen.OSALLISTUU.equals(valintakoe
+							.getOsallistuminenTulos().getOsallistuminen())) {
+
+						if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
+								.getFunktiotyyppi())) {
+							Number value = asNumber(data.getAdditionalData()
+									.get(valintaperuste.getTunniste()));
+							Number max = asNumber(valintaperuste.getMax());
+							Number min = asNumber(valintaperuste.getMin());
+
+							s.add(new NumeroArvo(value, min, max));
+
+						} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO
+								.equals(valintaperuste.getFunktiotyyppi())) {
+							String value = data.getAdditionalData().get(
+									valintaperuste.getTunniste());
+							s.add(new BooleanArvo(value, TOTUUSARVO, TOSI,
+									EPATOSI, TYHJA));
+						} else {
+							s.add(new TekstiArvo(data.getAdditionalData().get(
+									valintaperuste.getTunniste()), false));
+						}
+
+						s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO
+								.get(data.getAdditionalData().get(
+										valintaperuste
+												.getOsallistuminenTunniste())),
+								VAIHTOEHDOT));
+
+					} else {
+						s.add(TekstiArvo.tyhja(false));
+						s.add(TekstiArvo.tyhja(false));
+					}
+				}
+			}
+			sx.add(s);
+		}
+
+		if (sx.isEmpty()) {
+			throw new RuntimeException(
+					"Hakukohteessa ei ole pistesyötettäviä hakijoita.");
+		}
+		rivit.add(new PistesyottoDataRivi(sx, kuuntelijat, dataArvot));
+
+		this.excel = new Excel("Pistesyöttö", rivit);
+	}
+
+	private Double asNumber(String value) {
+		if (StringUtils.isBlank(value)) {
+			return null;
+		} else {
+			try {
+				return Double.parseDouble(value);
+			} catch (Exception e) {
+				return null;
+			}
+		}
+	}
+
+	public Excel getExcel() {
+		return excel;
+	}
+}

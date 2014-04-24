@@ -19,8 +19,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakemusSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
@@ -38,7 +38,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
 
 	private final Collection<HakijaDTO> hakijat;
 
-	public KelaHaku(Collection<HakijaDTO> hakijat, HakuDTO haku,
+	public KelaHaku(Collection<HakijaDTO> hakijat, HakuV1RDTO haku,
 			PaivamaaraSource paivamaaraSource) {
 		super(haku, paivamaaraSource);
 		//

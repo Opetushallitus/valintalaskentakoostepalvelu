@@ -9,8 +9,8 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 
-import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakemusSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
@@ -23,7 +23,7 @@ public class KelaLisahaku extends KelaAbstraktiHaku {
 	private static final String LISAHAKU_HYVAKSYTTY = "lisahaku-hyvaksytty";
 	private final Collection<String> hakemusOids;
 
-	public KelaLisahaku(Collection<String> hakemusOids, HakuDTO haku,
+	public KelaLisahaku(Collection<String> hakemusOids, HakuV1RDTO haku,
 			PaivamaaraSource paivamaaraSource) {
 		super(haku, paivamaaraSource);
 		this.hakemusOids = hakemusOids;
