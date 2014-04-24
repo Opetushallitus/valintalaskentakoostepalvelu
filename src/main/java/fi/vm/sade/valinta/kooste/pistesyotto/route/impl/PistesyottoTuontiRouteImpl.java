@@ -70,7 +70,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		Endpoint pistesyottoTuonti = endpoint(PistesyottoTuontiRoute.SEDA_PISTESYOTTO_TUONTI);
-		Endpoint luontiEpaonnistui = endpoint("direct:pistesyotto_vienti_deadletterchannel");
+		Endpoint luontiEpaonnistui = endpoint("direct:pistesyotto_tuonti_deadletterchannel");
 		from(pistesyottoTuonti)
 		//
 				.errorHandler(
