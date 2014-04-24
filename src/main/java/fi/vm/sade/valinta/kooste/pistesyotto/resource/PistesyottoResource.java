@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.resource;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
@@ -8,6 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,12 +68,17 @@ public class PistesyottoResource {
 	@Consumes("application/octet-stream")
 	@ApiOperation(consumes = "application/json", value = "Pistesyötön tuonti taulukkolaskentaan", response = ProsessiId.class)
 	public ProsessiId tuonti(@QueryParam("hakuOid") String hakuOid,
-			@QueryParam("hakukohdeOid") String hakukohdeOid, InputStream file) {
+			@QueryParam("hakukohdeOid") String hakukohdeOid, InputStream file)
+			throws IOException {
+		ByteArrayOutputStream b;
+		IOUtils.copy(file, b = new ByteArrayOutputStream());
+		IOUtils.closeQuietly(file);
 		DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö",
 				"tuonti", hakuOid, Arrays.asList(hakukohdeOid));
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-		tuontiRoute.tuo(file, prosessi, hakukohdeOid, hakuOid,
-				SecurityContextHolder.getContext().getAuthentication());
+		tuontiRoute.tuo(new ByteArrayInputStream(b.toByteArray()), prosessi,
+				hakukohdeOid, hakuOid, SecurityContextHolder.getContext()
+						.getAuthentication());
 		return prosessi.toProsessiId();
 	}
 }

@@ -2,14 +2,18 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
@@ -27,26 +31,30 @@ public class PistesyotonTuontiTest {
 
 	private final int DEFAULT_WIDTH = 8500;
 
+	private InputStream pistesyottoResurssi(String resurssi) throws IOException {
+		return new ClassPathResource("pistesyotto/" + resurssi)
+				.getInputStream();
+	}
+
 	@Test
-	public void testaaOutput() throws FileNotFoundException, IOException {
+	public void testaaOutput() throws FileNotFoundException, IOException,
+			JsonIOException, JsonSyntaxException {
 		List<ValintakoeOsallistuminenDTO> osallistumistiedot = new Gson()
 				.fromJson(
 						new InputStreamReader(
-								PistesyotonTuontiTest.class
-										.getResourceAsStream("List_ValintakoeOsallistuminenDTO.json")),
+								pistesyottoResurssi("List_ValintakoeOsallistuminenDTO.json")),
 						new TypeToken<ArrayList<ValintakoeOsallistuminenDTO>>() {
 						}.getType());
 
 		List<ValintaperusteDTO> valintaperusteet = new Gson().fromJson(
-				new InputStreamReader(PistesyotonTuontiTest.class
-						.getResourceAsStream("List_ValintaperusteDTO.json")),
+				new InputStreamReader(
+						pistesyottoResurssi("List_ValintaperusteDTO.json")),
 				new TypeToken<ArrayList<ValintaperusteDTO>>() {
 				}.getType());
 		List<ApplicationAdditionalDataDTO> pistetiedot = new Gson()
 				.fromJson(
 						new InputStreamReader(
-								PistesyotonTuontiTest.class
-										.getResourceAsStream("List_ApplicationAdditionalDataDTO.json")),
+								pistesyottoResurssi("List_ApplicationAdditionalDataDTO.json")),
 						new TypeToken<ArrayList<ApplicationAdditionalDataDTO>>() {
 						}.getType());
 
@@ -75,7 +83,7 @@ public class PistesyotonTuontiTest {
 				pistetiedot, kuuntelija);
 		Excel excel = pistesyottoExcel.getExcel();
 		// new FileInputStream("02.xlsx"));//
-		excel.tuoXlsx(this.getClass().getResourceAsStream("pistesyotto.xlsx"));
+		excel.tuoXlsx(pistesyottoResurssi("pistesyotto.xlsx"));
 
 		// Arrays.asList(Sarake.PIILOTETTU));
 
