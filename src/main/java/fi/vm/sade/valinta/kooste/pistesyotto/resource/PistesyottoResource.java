@@ -67,9 +67,7 @@ public class PistesyottoResource {
 			@QueryParam("hakukohdeOid") String hakukohdeOid, InputStream file) {
 		DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö",
 				"tuonti", hakuOid, Arrays.asList(hakukohdeOid));
-		//
-		// TODO:
-		//
+		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 		tuontiRoute.tuo(file, prosessi, hakukohdeOid, hakuOid,
 				SecurityContextHolder.getContext().getAuthentication());
 		return prosessi.toProsessiId();

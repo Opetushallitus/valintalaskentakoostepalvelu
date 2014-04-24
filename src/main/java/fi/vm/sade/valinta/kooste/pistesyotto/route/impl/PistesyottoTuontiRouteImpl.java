@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -35,6 +36,12 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
+@Component
 public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(PistesyottoTuontiRouteImpl.class);
@@ -160,6 +167,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						}
 						applicationResource.putApplicationAdditionalData(
 								hakuOid, hakukohdeOid, uudetPistetiedot);
+						dokumenttiprosessi(exchange).setDokumenttiId("valmis");
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
 						// LOG.error("Done");
 					}
