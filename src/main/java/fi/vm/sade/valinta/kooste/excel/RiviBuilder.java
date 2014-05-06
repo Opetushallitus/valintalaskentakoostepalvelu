@@ -42,6 +42,11 @@ public class RiviBuilder {
 		return this;
 	}
 
+	public RiviBuilder addKeskitettyTeksti(String teksti) {
+		rivit.add(new Rivi(new Teksti(teksti, true, true, false, 0, 1)));
+		return this;
+	}
+
 	public RiviBuilder addTeksti(String teksti, int ulottuvuus) {
 		rivit.add(new Rivi(new Teksti(teksti, ulottuvuus)));
 		return this;

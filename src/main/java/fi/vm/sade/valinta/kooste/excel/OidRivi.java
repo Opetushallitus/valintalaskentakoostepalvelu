@@ -26,6 +26,7 @@ public class OidRivi extends Rivi {
 	private final Set<String> oidit;
 	private final Collection<OidKuuntelija> kuuntelijat;
 	private final int vali;
+	private final boolean keskitetty;
 
 	public OidRivi(String oid) {
 		super(new Teksti(oid));
@@ -36,21 +37,26 @@ public class OidRivi extends Rivi {
 		this.oidit = Sets.newHashSet(oid);
 		this.kuuntelijat = Collections.emptyList();
 		this.vali = 0;
+		this.keskitetty = false;
 	}
 
 	public OidRivi(Collection<String> oidit) {
-		this(oidit, Collections.<OidKuuntelija> emptyList(), 0);
+		this(oidit, Collections.<OidKuuntelija> emptyList(), 0, false);
 	}
 
 	public OidRivi(Collection<String> oidit, int vali) {
-		this(oidit, Collections.<OidKuuntelija> emptyList(), vali);
+		this(oidit, Collections.<OidKuuntelija> emptyList(), vali, false);
+	}
+
+	public OidRivi(Collection<String> oidit, int vali, boolean keskitetty) {
+		this(oidit, Collections.<OidKuuntelija> emptyList(), vali, keskitetty);
 	}
 
 	public static Collection<Solu> tekstiSolut(Collection<String> tekstit,
-			int vali) {
+			int vali, boolean keskitetty) {
 		Collection<Solu> solut = Lists.newArrayList();
 		for (String teksti : tekstit) {
-			solut.add(new Teksti(teksti, vali));
+			solut.add(new Teksti(teksti, keskitetty, keskitetty, false, 0, vali));
 			// for (int i = 0; i < vali; ++i) {
 			// solut.add(Teksti.tyhja());
 			// }
@@ -59,8 +65,8 @@ public class OidRivi extends Rivi {
 	}
 
 	public OidRivi(Collection<String> oidit,
-			Collection<OidKuuntelija> kuuntelijat, int vali) {
-		super(tekstiSolut(oidit, vali));
+			Collection<OidKuuntelija> kuuntelijat, int vali, boolean keskitetty) {
+		super(tekstiSolut(oidit, vali, keskitetty));
 		if (oidit == null || oidit.isEmpty()) {
 			throw new RuntimeException(
 					"Exceliin yritettiin oid tarkistusta null oidille. Tarkista datan eheys.");
@@ -71,6 +77,7 @@ public class OidRivi extends Rivi {
 		}
 		this.kuuntelijat = kuuntelijat;
 		this.vali = vali;
+		this.keskitetty = keskitetty;
 	}
 
 	public Collection<String> getOidit() {

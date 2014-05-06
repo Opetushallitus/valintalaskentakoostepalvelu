@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -91,8 +93,10 @@ public class PistesyotonTuontiTest {
 		// TEE RIVEJÄ/ KOOSTERIVEJÄ / DECORABLE RIVEJÄ
 		// TOISTEISIA RIVEJÄ
 		// excel.tuoXlsx(xlsx);
-
-		// InputStream xlsx = excel.vieXlsx();
-		// IOUtils.copy(excel.vieXlsx(), new FileOutputStream("02.xlsx"));
+		if (false) {
+			InputStream xlsx = excel.vieXlsx();
+			IOUtils.copy(excel.vieXlsx(), new FileOutputStream(
+					"pistesyotto.xlsx"));
+		}
 	}
 }

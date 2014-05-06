@@ -178,9 +178,12 @@ public class PistesyottoExcel {
 		}
 		rivit.add(Rivi.tyhjaRivi());
 		rivit.add(new RiviBuilder().addTyhja().addTyhja()
-				.addRivi(new OidRivi(tunnisteet, 2)).build());
-		RiviBuilder riviBuilder = new RiviBuilder();
-		riviBuilder.addTeksti("Hakemus oid").addTeksti("Tiedot");
+				.addRivi(new OidRivi(tunnisteet, 2, true)).build());
+		final RiviBuilder valintakoeOtsikkoRiviBuilder = new RiviBuilder();
+		final RiviBuilder otsikkoRiviBuilder = new RiviBuilder()
+				.addKeskitettyTeksti("Hakemus OID").addKeskitettyTeksti(
+						"Tiedot");
+		valintakoeOtsikkoRiviBuilder.addTyhja().addTyhja();
 		for (String valintakoe : FluentIterable.from(valintaperusteet)
 		//
 				.transform(new Function<ValintaperusteDTO, String>() {
@@ -204,9 +207,12 @@ public class PistesyottoExcel {
 
 					}
 				}).toList()) {
-			riviBuilder.addSolu(new Teksti(valintakoe, 2));
+			otsikkoRiviBuilder.addTyhja().addKeskitettyTeksti("Osallistuminen");
+			valintakoeOtsikkoRiviBuilder.addSolu(new Teksti(valintakoe, true,
+					true, false, 0, 2));
 		}
-		rivit.add(riviBuilder.build());
+		rivit.add(valintakoeOtsikkoRiviBuilder.build());
+		rivit.add(otsikkoRiviBuilder.build());
 
 		Collection<Collection<Arvo>> sx = Lists.newArrayList();
 
