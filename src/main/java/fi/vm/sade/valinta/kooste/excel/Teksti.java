@@ -12,6 +12,7 @@ public class Teksti extends Solu {
 	private final String teksti;
 	private final int ulottuvuus;
 	private final boolean tasausOikealle;
+	private final boolean tasausVasemmalle;
 	private final boolean lukittu;
 	private final int preferoituleveys;
 
@@ -19,6 +20,7 @@ public class Teksti extends Solu {
 		this.teksti = null;
 		this.ulottuvuus = 1;
 		this.tasausOikealle = false;
+		this.tasausVasemmalle = true;
 		this.lukittu = false;
 		this.preferoituleveys = 0;
 	}
@@ -27,6 +29,7 @@ public class Teksti extends Solu {
 		this.teksti = teksti;
 		this.ulottuvuus = 1;
 		this.tasausOikealle = false;
+		this.tasausVasemmalle = true;
 		this.lukittu = false;
 		this.preferoituleveys = 0;
 	}
@@ -35,6 +38,7 @@ public class Teksti extends Solu {
 		this.teksti = teksti;
 		this.ulottuvuus = 1;
 		this.tasausOikealle = tasausOikealle;
+		this.tasausVasemmalle = !tasausOikealle;
 		this.lukittu = lukittu;
 		this.preferoituleveys = 0;
 	}
@@ -44,6 +48,18 @@ public class Teksti extends Solu {
 		this.teksti = teksti;
 		this.ulottuvuus = 1;
 		this.tasausOikealle = tasausOikealle;
+		this.tasausVasemmalle = !tasausOikealle;
+		this.lukittu = lukittu;
+		this.preferoituleveys = preferoituleveys;
+	}
+
+	public Teksti(String teksti, boolean tasausOikealle,
+			boolean tasausVasemmalle, boolean lukittu, int preferoituleveys,
+			int ulottuvuus) {
+		this.teksti = teksti;
+		this.ulottuvuus = ulottuvuus;
+		this.tasausOikealle = tasausOikealle;
+		this.tasausVasemmalle = tasausVasemmalle;
 		this.lukittu = lukittu;
 		this.preferoituleveys = preferoituleveys;
 	}
@@ -57,6 +73,7 @@ public class Teksti extends Solu {
 		this.teksti = teksti;
 		this.ulottuvuus = ulottuvuus;
 		this.tasausOikealle = false;
+		this.tasausVasemmalle = true;
 		this.lukittu = false;
 		this.preferoituleveys = 0;
 	}
@@ -110,6 +127,15 @@ public class Teksti extends Solu {
 
 	public static Teksti tyhja() {
 		return TYHJA;
+	}
+
+	@Override
+	public boolean isKeskitettyTasaus() {
+		return tasausVasemmalle && tasausOikealle;
+	}
+
+	public boolean isTasausVasemmalle() {
+		return tasausVasemmalle;
 	}
 
 	public boolean isTasausOikealle() {

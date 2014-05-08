@@ -108,7 +108,9 @@ public class Excel {
 		XSSFDrawing drawing = sheet.createDrawingPatriarch();
 		XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(sheet);
 		XSSFCellStyle alignRightStyle = workbook.createCellStyle();
-		// alignRightStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+		XSSFCellStyle alignCenterStyle = workbook.createCellStyle();
+		//
+		alignCenterStyle.setAlignment(CellStyle.ALIGN_CENTER);
 		XSSFCellStyle lockedStyle = workbook.createCellStyle();
 		lockedStyle.setFillForegroundColor(new XSSFColor(Color.GRAY));
 		lockedStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
@@ -184,8 +186,12 @@ public class Excel {
 						}
 						joukko.addAddress(rowIndex, cellNum);
 					}
-					if (cell != null && solu.isTasausOikealle()) {
-						cell.setCellStyle(alignRightStyle);
+					if (cell != null) {
+						if (solu.isKeskitettyTasaus()) {
+							cell.setCellStyle(alignCenterStyle);
+						} else if (solu.isTasausOikealle()) {
+							cell.setCellStyle(alignRightStyle);
+						}
 					}
 					if (cell != null && solu.isLukittu()) {
 						cell.setCellStyle(lockedStyle); // lockedStyle

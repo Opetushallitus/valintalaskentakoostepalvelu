@@ -87,6 +87,10 @@ public abstract class Solu {
 		return false;
 	}
 
+	public boolean isKeskitettyTasaus() {
+		return false;
+	}
+
 	public boolean isLukittu() {
 		return false;
 	}
