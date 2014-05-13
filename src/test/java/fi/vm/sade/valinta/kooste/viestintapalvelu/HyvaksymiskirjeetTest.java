@@ -45,8 +45,8 @@ public class HyvaksymiskirjeetTest {
 	@Test
 	public void testaaHyvaksymiskirjeetReitti() {
 		DokumenttiProsessi p = new DokumenttiProsessi("", "", "", null);
-		hyvaksymiskirjeRoute.hyvaksymiskirjeetAktivointi(p, "1",
-				Arrays.asList("j"), "2", 3L, null);
+		hyvaksymiskirjeRoute.hyvaksymiskirjeetAktivointi(p, "1", "t", "f", "",
+				"", Arrays.asList("j"), "2", 3L, null);
 	}
 
 	@Bean
