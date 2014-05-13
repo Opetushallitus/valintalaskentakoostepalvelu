@@ -27,6 +27,10 @@ public interface HyvaksymiskirjeRoute {
 
 	void hyvaksymiskirjeetAktivointi(
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
+			@Property(OPH.TARJOAJAOID) String tarjoajaOid,
+			@Property("sisalto") String sisalto,
+			@Property("templateName") String templateName,
+			@Property("tag") String tag,
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
 			@Property("hakemusOids") List<String> hakemusOids,
 			@Property(OPH.HAKUOID) String hakuOid,

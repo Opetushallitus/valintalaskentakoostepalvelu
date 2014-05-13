@@ -18,4 +18,5 @@ public interface HakuV1Resource {
 	// @ApiOperation(value = "Palauttaa haun annetulla oid:lla", notes =
 	// "Palauttaa haun annetulla oid:lla", response = HakuV1RDTO.class)
 	public ResultV1RDTO<HakuV1RDTO> findByOid(@PathParam("oid") String oid);
+
 }
