@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +30,7 @@ import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.util.HakemusOsallistuminenComparator;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.dto.ValintakoeNimi;
 
 /**
@@ -89,29 +89,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 			}
 			rows.add(otsikot.toArray());
 			Collections.sort(tiedotHakukohteelle,
-					new Comparator<HakemusOsallistuminenTyyppi>() {
-						@Override
-						public int compare(HakemusOsallistuminenTyyppi o1,
-								HakemusOsallistuminenTyyppi o2) {
-							String o1sukunimi = o1.getSukunimi();
-							if (o1 == null || o2 == null || o1sukunimi == null) {
-								return 0;
-							} else {
-								int c = o1sukunimi.compareTo(o2.getSukunimi());
-								if (c == 0) {
-									String o1etunimi = o1.getEtunimi();
-									if (o1etunimi == null) {
-										return 0;
-									} else {
-										return o1etunimi.compareTo(o2
-												.getEtunimi());
-									}
-								} else {
-									return c;
-								}
-							}
-						}
-					});
+					HakemusOsallistuminenComparator.DEFAULT);
 			for (HakemusOsallistuminenTyyppi o : tiedotHakukohteelle) {
 				if (useWhitelist) {
 					// If whitelist in use then skip every hakemus that is not
