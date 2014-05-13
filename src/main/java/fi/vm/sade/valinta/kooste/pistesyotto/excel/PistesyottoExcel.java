@@ -51,6 +51,8 @@ public class PistesyottoExcel {
 			MERKITSEMATTA, OSALLISTUI, EI_OSALLISTUNUT);
 	private final static Map<String, String> VAIHTOEHDOT_KONVERSIO = new KonversioBuilder()
 	//
+			.addKonversio("", MERKITSEMATTA)
+			//
 			.addKonversio("MERKITSEMATTA", MERKITSEMATTA)
 			//
 			.addKonversio("OSALLISTUI", OSALLISTUI)
@@ -58,6 +60,8 @@ public class PistesyottoExcel {
 			.addKonversio("EI_OSALLISTUNUT", EI_OSALLISTUNUT).build();
 	private final static Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO = new KonversioBuilder()
 	//
+			.addKonversio("", "MERKITSEMATTA")
+			//
 			.addKonversio(MERKITSEMATTA, "MERKITSEMATTA")
 			//
 			.addKonversio(OSALLISTUI, "OSALLISTUI")
@@ -228,22 +232,28 @@ public class PistesyottoExcel {
 				Double min = asNumber(valintaperuste.getMin());
 				if (min != null && max != null) {
 					dataArvot.add(new NumeroDataArvo(min, max,
-							VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, valintaperuste
-									.getTunniste(), valintaperuste
-									.getOsallistuminenTunniste()));
+							VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, StringUtils
+									.trimToEmpty(valintaperuste.getTunniste()),
+							StringUtils.trimToEmpty(valintaperuste
+									.getOsallistuminenTunniste())));
 				} else {
-					dataArvot.add(new DataArvo(valintaperuste.getTunniste(),
-							valintaperuste.getOsallistuminenTunniste()));
+					dataArvot.add(new DataArvo(StringUtils
+							.trimToEmpty(valintaperuste.getTunniste()),
+							StringUtils.trimToEmpty(valintaperuste
+									.getOsallistuminenTunniste())));
 				}
 			} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(valintaperuste
 					.getFunktiotyyppi())) {
 				dataArvot.add(new BooleanDataArvo(TOTUUSARVO_KONVERSIO,
-						VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, valintaperuste
-								.getTunniste(), valintaperuste
-								.getOsallistuminenTunniste()));
+						VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, StringUtils
+								.trimToEmpty(valintaperuste.getTunniste()),
+						StringUtils.trimToEmpty(valintaperuste
+								.getOsallistuminenTunniste())));
 			} else {
-				dataArvot.add(new DataArvo(valintaperuste.getTunniste(),
-						valintaperuste.getOsallistuminenTunniste()));
+				dataArvot.add(new DataArvo(StringUtils
+						.trimToEmpty(valintaperuste.getTunniste()),
+						StringUtils.trimToEmpty(valintaperuste
+								.getOsallistuminenTunniste())));
 			}
 		}
 
@@ -284,19 +294,23 @@ public class PistesyottoExcel {
 
 						} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO
 								.equals(valintaperuste.getFunktiotyyppi())) {
-							String value = data.getAdditionalData().get(
-									valintaperuste.getTunniste());
+							String value = StringUtils.trimToEmpty(data
+									.getAdditionalData().get(
+											valintaperuste.getTunniste()));
 							s.add(new BooleanArvo(value, TOTUUSARVO, TOSI,
 									EPATOSI, TYHJA));
 						} else {
 							s.add(new TekstiArvo(data.getAdditionalData().get(
-									valintaperuste.getTunniste()), false));
+									StringUtils.trimToEmpty(valintaperuste
+											.getTunniste())), false));
 						}
 
-						s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO
-								.get(data.getAdditionalData().get(
-										valintaperuste
-												.getOsallistuminenTunniste())),
+						s.add(new MonivalintaArvo(
+								VAIHTOEHDOT_KONVERSIO
+										.get(StringUtils.trimToEmpty(data
+												.getAdditionalData()
+												.get(valintaperuste
+														.getOsallistuminenTunniste()))),
 								VAIHTOEHDOT));
 
 					} else {
