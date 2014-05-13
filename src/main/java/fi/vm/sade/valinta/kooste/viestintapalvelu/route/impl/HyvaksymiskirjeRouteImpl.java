@@ -19,6 +19,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
@@ -31,8 +33,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikka
 import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HakutoiveenValintatapajonoComparator;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
@@ -210,8 +211,8 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						DokumenttiProsessi prosessi = dokumenttiprosessi(exchange);
-						Kirjeet<Kirje> kirjeet = exchange.getIn().getBody(
-								Kirjeet.class);
+						LetterBatch kirjeet = exchange.getIn().getBody(
+								LetterBatch.class);
 						if (kirjeet == null || kirjeet.getLetters() == null
 								|| kirjeet.getLetters().isEmpty()) {
 							dokumenttiprosessi(exchange)
@@ -227,8 +228,12 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 							// LOG.error("\r\n{}",
 							// new GsonBuilder().setPrettyPrinting()
 							// .create().toJson(osoitteet));
+							Gson gson = new GsonBuilder().setPrettyPrinting()
+									.create();
+							String json = gson.toJson(kirjeet);
+							LOG.error("\r\n{}\r\n", json);
 							pdf = pipeInputStreams(viestintapalveluResource
-									.haeHyvaksymiskirjeetSync(kirjeet));
+									.haeKirjeSync(json));
 
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();

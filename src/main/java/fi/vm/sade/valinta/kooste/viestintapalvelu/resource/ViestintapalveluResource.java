@@ -7,15 +7,18 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import java.io.InputStream;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Koekutsukirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 
 @Path("/api/v1")
 public interface ViestintapalveluResource {
@@ -68,4 +71,19 @@ public interface ViestintapalveluResource {
 	@Consumes(APPLICATION_JSON)
 	@Path("/addresslabel/sync/pdf")
 	InputStream haeOsoitetarratSync(Osoitteet osoitteet);
+
+	@POST
+	@Produces(APPLICATION_OCTET_STREAM)
+	@Consumes(APPLICATION_JSON)
+	@Path("/letter/sync/pdf")
+	InputStream haeKirjeSync(String letterBatch);
+
+	@GET
+	@Produces(APPLICATION_JSON)
+	@Path("/getByNameOrgTag")
+	LetterBatch haeKirjepohja(@QueryParam("oid") String oid,
+			@QueryParam("name") String name,
+			@QueryParam("language") String language,
+			@QueryParam("tag") String tag);
+
 }

@@ -218,6 +218,10 @@ public class ViestintapalveluAktivointiResource {
 	public ProsessiId aktivoiHyvaksymiskirjeidenLuonti(
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
+			@QueryParam("tarjoajaOid") String tarjoajaOid,
+			@QueryParam("sisalto") String sisalto,
+			@QueryParam("templateName") String templateName,
+			@QueryParam("tag") String tag,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
 		try {
@@ -230,9 +234,13 @@ public class ViestintapalveluAktivointiResource {
 			dokumenttiProsessiKomponentti
 					.tuoUusiProsessi(hyvaksymiskirjeetProsessi);
 			hyvaksymiskirjeetRoute.hyvaksymiskirjeetAktivointi(
-					hyvaksymiskirjeetProsessi, hakukohdeOid, hakemuksillaRajaus
-							.getHakemusOids(), hakuOid, sijoitteluajoId,
-					SecurityContextHolder.getContext().getAuthentication());
+					hyvaksymiskirjeetProsessi,
+					//
+					tarjoajaOid, sisalto, templateName, tag,
+					//
+					hakukohdeOid, hakemuksillaRajaus.getHakemusOids(), hakuOid,
+					sijoitteluajoId, SecurityContextHolder.getContext()
+							.getAuthentication());
 			return new ProsessiId(hyvaksymiskirjeetProsessi.getId());
 		} catch (Exception e) {
 			LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
