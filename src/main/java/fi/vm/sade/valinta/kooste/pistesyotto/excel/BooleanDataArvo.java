@@ -37,7 +37,7 @@ public class BooleanDataArvo extends TilaDataArvo {
 	}
 
 	private boolean isAsetettu(String arvo) {
-		return konvertteri.containsKey(arvo);
+		return StringUtils.isNotBlank(arvo) && konvertteri.containsKey(arvo);
 	}
 
 	public PistesyottoArvo asPistesyottoArvo(String arvo, String tila) {
