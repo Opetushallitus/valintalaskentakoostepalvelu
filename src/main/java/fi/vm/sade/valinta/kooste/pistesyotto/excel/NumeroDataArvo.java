@@ -16,8 +16,8 @@ public class NumeroDataArvo extends TilaDataArvo {
 
 	public NumeroDataArvo(double min, double max,
 			Map<String, String> tilaKonvertteri, String tunniste,
-			String osallistuminenTunniste) {
-		super(tilaKonvertteri);
+			String asetettuTila, String osallistuminenTunniste) {
+		super(tilaKonvertteri, asetettuTila);
 		this.min = min;
 		this.max = max;
 		this.tunniste = tunniste;
@@ -38,9 +38,19 @@ public class NumeroDataArvo extends TilaDataArvo {
 		return false;
 	}
 
+	private boolean isAsetettu(String arvo) {
+		return tarkistaRajat(arvo);
+	}
+
 	public PistesyottoArvo asPistesyottoArvo(String arvo, String tila) {
 		// LOG.error("{}", arvo);
-		return new PistesyottoArvo(arvo, konvertoiTila(tila), isValidi(arvo)
+		String lopullinenTila;
+		if (isAsetettu(arvo)) {
+			lopullinenTila = getAsetettuTila();
+		} else {
+			lopullinenTila = konvertoiTila(tila);
+		}
+		return new PistesyottoArvo(arvo, lopullinenTila, isValidi(arvo)
 				&& isValidiTila(tila), tunniste, osallistuminenTunniste);
 	}
 

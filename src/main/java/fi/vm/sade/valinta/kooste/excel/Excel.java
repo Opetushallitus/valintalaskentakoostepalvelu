@@ -18,6 +18,7 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFCreationHelper;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -107,6 +108,9 @@ public class Excel {
 		XSSFSheet sheet = workbook.createSheet(nimi);
 		XSSFDrawing drawing = sheet.createDrawingPatriarch();
 		XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(sheet);
+		XSSFDataFormat format = workbook.createDataFormat();
+		XSSFCellStyle numberStyle = workbook.createCellStyle();
+		numberStyle.setDataFormat(format.getFormat("0,0"));
 		XSSFCellStyle alignRightStyle = workbook.createCellStyle();
 		XSSFCellStyle alignCenterStyle = workbook.createCellStyle();
 		//
@@ -161,7 +165,7 @@ public class Excel {
 						if (numero.isTyhja()) {
 							// cell.setCellValue(StringUtils.EMPTY);
 						} else {
-
+							cell.setCellStyle(alignRightStyle);
 							cell.setCellValue(numero.getNumero().doubleValue());
 						}
 

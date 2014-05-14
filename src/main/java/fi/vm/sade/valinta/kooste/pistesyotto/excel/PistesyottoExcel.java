@@ -47,26 +47,31 @@ public class PistesyottoExcel {
 	private final static String MERKITSEMATTA = "Merkitsemättä";
 	private final static String OSALLISTUI = "Osallistui";
 	private final static String EI_OSALLISTUNUT = "Ei osallistunut";
+
+	private final static String VAKIO_MERKITSEMATTA = "MERKITSEMATTA";
+	private final static String VAKIO_OSALLISTUI = "OSALLISTUI";
+	private final static String VAKIO_EI_OSALLISTUNUT = "EI_OSALLISTUNUT";
+
 	private final static Collection<String> VAIHTOEHDOT = Arrays.asList(
 			MERKITSEMATTA, OSALLISTUI, EI_OSALLISTUNUT);
 	private final static Map<String, String> VAIHTOEHDOT_KONVERSIO = new KonversioBuilder()
 	//
-			.addKonversio("", MERKITSEMATTA)
+			.addKonversio(StringUtils.EMPTY, MERKITSEMATTA)
 			//
-			.addKonversio("MERKITSEMATTA", MERKITSEMATTA)
+			.addKonversio(VAKIO_MERKITSEMATTA, MERKITSEMATTA)
 			//
-			.addKonversio("OSALLISTUI", OSALLISTUI)
+			.addKonversio(VAKIO_OSALLISTUI, OSALLISTUI)
 			//
-			.addKonversio("EI_OSALLISTUNUT", EI_OSALLISTUNUT).build();
+			.addKonversio(VAKIO_EI_OSALLISTUNUT, EI_OSALLISTUNUT).build();
 	private final static Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO = new KonversioBuilder()
 	//
-			.addKonversio("", "MERKITSEMATTA")
+			.addKonversio(StringUtils.EMPTY, VAKIO_MERKITSEMATTA)
 			//
-			.addKonversio(MERKITSEMATTA, "MERKITSEMATTA")
+			.addKonversio(MERKITSEMATTA, VAKIO_MERKITSEMATTA)
 			//
-			.addKonversio(OSALLISTUI, "OSALLISTUI")
+			.addKonversio(OSALLISTUI, VAKIO_OSALLISTUI)
 			//
-			.addKonversio(EI_OSALLISTUNUT, "EI_OSALLISTUNUT").build();
+			.addKonversio(EI_OSALLISTUNUT, VAKIO_EI_OSALLISTUNUT).build();
 	private final static String TOSI = "Hyväksytty";
 	private final static String EPATOSI = "Hylätty";
 	private final static String TYHJA = "Tyhjä";
@@ -233,7 +238,8 @@ public class PistesyottoExcel {
 				if (min != null && max != null) {
 					dataArvot.add(new NumeroDataArvo(min, max,
 							VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, StringUtils
-									.trimToEmpty(valintaperuste.getTunniste()),
+									.trimToEmpty(valintaperuste.getTunniste())
+									.replace(".", ","), VAKIO_OSALLISTUI,
 							StringUtils.trimToEmpty(valintaperuste
 									.getOsallistuminenTunniste())));
 				} else {
@@ -247,8 +253,9 @@ public class PistesyottoExcel {
 				dataArvot.add(new BooleanDataArvo(TOTUUSARVO_KONVERSIO,
 						VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, StringUtils
 								.trimToEmpty(valintaperuste.getTunniste()),
-						StringUtils.trimToEmpty(valintaperuste
-								.getOsallistuminenTunniste())));
+						VAKIO_OSALLISTUI, StringUtils
+								.trimToEmpty(valintaperuste
+										.getOsallistuminenTunniste())));
 			} else {
 				dataArvot.add(new DataArvo(StringUtils
 						.trimToEmpty(valintaperuste.getTunniste()),
@@ -335,6 +342,7 @@ public class PistesyottoExcel {
 		if (StringUtils.isBlank(value)) {
 			return null;
 		} else {
+			value = StringUtils.trimToEmpty(value).replace(",", ".");
 			try {
 				return Double.parseDouble(value);
 			} catch (Exception e) {

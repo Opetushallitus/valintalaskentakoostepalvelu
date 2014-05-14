@@ -17,8 +17,8 @@ public class BooleanDataArvo extends TilaDataArvo {
 
 	public BooleanDataArvo(Map<String, String> konvertteri,
 			Map<String, String> tilaKonvertteri, String tunniste,
-			String osallistuminenTunniste) {
-		super(tilaKonvertteri);
+			String asetettuTila, String osallistuminenTunniste) {
+		super(tilaKonvertteri, asetettuTila);
 		this.konvertteri = konvertteri;
 		this.tunniste = tunniste;
 		this.osallistuminenTunniste = osallistuminenTunniste;
@@ -36,8 +36,18 @@ public class BooleanDataArvo extends TilaDataArvo {
 		}
 	}
 
+	private boolean isAsetettu(String arvo) {
+		return konvertteri.containsKey(arvo);
+	}
+
 	public PistesyottoArvo asPistesyottoArvo(String arvo, String tila) {
-		return new PistesyottoArvo(konvertoi(arvo), konvertoiTila(tila),
+		String lopullinenTila;
+		if (isAsetettu(arvo)) {
+			lopullinenTila = getAsetettuTila();
+		} else {
+			lopullinenTila = konvertoiTila(tila);
+		}
+		return new PistesyottoArvo(konvertoi(arvo), lopullinenTila,
 				isValidi(arvo) && isValidiTila(tila), tunniste,
 				osallistuminenTunniste);
 	}
