@@ -37,7 +37,8 @@ public class BooleanDataArvo extends TilaDataArvo {
 	}
 
 	private boolean isAsetettu(String arvo) {
-		return StringUtils.isNotBlank(arvo) && konvertteri.containsKey(arvo);
+		return StringUtils.isNotBlank(arvo) && konvertteri.containsKey(arvo)
+				&& !PistesyottoExcel.TYHJA.equals(arvo);
 	}
 
 	public PistesyottoArvo asPistesyottoArvo(String arvo, String tila) {
@@ -46,6 +47,9 @@ public class BooleanDataArvo extends TilaDataArvo {
 			lopullinenTila = getAsetettuTila();
 		} else {
 			lopullinenTila = konvertoiTila(tila);
+			if (getAsetettuTila().equals(lopullinenTila)) {
+				lopullinenTila = PistesyottoExcel.VAKIO_MERKITSEMATTA;
+			}
 		}
 		return new PistesyottoArvo(konvertoi(arvo), lopullinenTila,
 				isValidi(arvo) && isValidiTila(tila), tunniste,

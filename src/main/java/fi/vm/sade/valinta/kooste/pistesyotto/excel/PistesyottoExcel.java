@@ -48,9 +48,9 @@ public class PistesyottoExcel {
 	private final static String OSALLISTUI = "Osallistui";
 	private final static String EI_OSALLISTUNUT = "Ei osallistunut";
 
-	private final static String VAKIO_MERKITSEMATTA = "MERKITSEMATTA";
-	private final static String VAKIO_OSALLISTUI = "OSALLISTUI";
-	private final static String VAKIO_EI_OSALLISTUNUT = "EI_OSALLISTUNUT";
+	public final static String VAKIO_MERKITSEMATTA = "MERKITSEMATTA";
+	public final static String VAKIO_OSALLISTUI = "OSALLISTUI";
+	public final static String VAKIO_EI_OSALLISTUNUT = "EI_OSALLISTUNUT";
 
 	private final static Collection<String> VAIHTOEHDOT = Arrays.asList(
 			MERKITSEMATTA, OSALLISTUI, EI_OSALLISTUNUT);
@@ -72,9 +72,9 @@ public class PistesyottoExcel {
 			.addKonversio(OSALLISTUI, VAKIO_OSALLISTUI)
 			//
 			.addKonversio(EI_OSALLISTUNUT, VAKIO_EI_OSALLISTUNUT).build();
-	private final static String TOSI = "Hyväksytty";
-	private final static String EPATOSI = "Hylätty";
-	private final static String TYHJA = "Tyhjä";
+	public final static String TOSI = "Hyväksytty";
+	public final static String EPATOSI = "Hylätty";
+	public final static String TYHJA = "Tyhjä";
 	private final static Collection<String> TOTUUSARVO = Arrays.asList(TYHJA,
 			TOSI, EPATOSI);
 	private final static Map<String, String> TOTUUSARVO_KONVERSIO = new KonversioBuilder()
