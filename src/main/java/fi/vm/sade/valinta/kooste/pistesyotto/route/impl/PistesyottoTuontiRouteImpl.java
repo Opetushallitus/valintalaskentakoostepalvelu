@@ -24,6 +24,7 @@ import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
+import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoArvo;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoRivi;
@@ -196,6 +197,33 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 									uudetPistetiedot.add(additionalData);
 								} else {
 									LOG.error("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
+
+									for (PistesyottoArvo arvo : rivi.getArvot()) {
+										if (!arvo.isValidi()) {
+											String virheIlmoitus = new StringBuffer()
+													.append("Henkilöllä ")
+													.append(rivi.getNimi())
+													//
+													.append(" (")
+													.append(rivi.getOid())
+													.append(")")
+													//
+													.append(" oli virheellinen arvo '")
+													.append(arvo.getArvo())
+													.append("'")
+													.append(" kohdassa ")
+													.append(arvo.getTunniste())
+													.toString();
+											dokumenttiprosessi(exchange)
+													.getPoikkeukset()
+													.add(new Poikkeus(
+															"Pistesyötön tuonti",
+															"", virheIlmoitus));
+											throw new RuntimeException(
+													virheIlmoitus);
+										}
+									}
+
 								}
 
 							}
@@ -216,15 +244,18 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 		//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						String syy;
-						if (exchange.getException() == null) {
-							syy = "Pistesyötön tuonti taulukkolaskennalla epäonnistui. Ota yheys ylläpitoon.";
-						} else {
-							syy = exchange.getException().getMessage();
+						if (dokumenttiprosessi(exchange).getPoikkeukset()
+								.isEmpty()) {
+							String syy;
+							if (exchange.getException() == null) {
+								syy = "Pistesyötön tuonti taulukkolaskennalla epäonnistui. Ota yhteys ylläpitoon.";
+							} else {
+								syy = exchange.getException().getMessage();
+							}
+							dokumenttiprosessi(exchange).getPoikkeukset().add(
+									new Poikkeus(Poikkeus.KOOSTEPALVELU,
+											"Pistesyötön tuonti:", syy));
 						}
-						dokumenttiprosessi(exchange).getPoikkeukset().add(
-								new Poikkeus(Poikkeus.KOOSTEPALVELU,
-										"Pistesyötön tuonti:", syy));
 					}
 				})
 				//

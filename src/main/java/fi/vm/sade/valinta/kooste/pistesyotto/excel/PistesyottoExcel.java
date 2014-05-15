@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,6 +33,7 @@ import fi.vm.sade.valinta.kooste.excel.arvo.NumeroArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.util.ApplicationAdditionalDataComparator;
+import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.function.ValintakoeOsallistuminenDTOFunction;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
@@ -203,12 +205,17 @@ public class PistesyottoExcel {
 								&& !StringUtils.isBlank(valintaperuste.getMin())
 								&& !StringUtils.isBlank(valintaperuste.getMax())) {
 							// create value constraint
+
 							return new StringBuilder()
 									.append(valintaperuste.getKuvaus())
 									.append(" (")
-									.append(valintaperuste.getMin())
+									.append(Formatter
+											.suomennaNumero(new BigDecimal(
+													valintaperuste.getMin())))
 									.append(" - ")
-									.append(valintaperuste.getMax())
+									.append(Formatter
+											.suomennaNumero(new BigDecimal(
+													valintaperuste.getMax())))
 									.append(")").toString();
 						} else {
 							return valintaperuste.getKuvaus();

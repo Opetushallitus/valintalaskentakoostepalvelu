@@ -11,6 +11,8 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.gson.Gson;
@@ -31,6 +33,8 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminen
  */
 public class PistesyotonTuontiTest {
 
+	private static final Logger LOG = LoggerFactory
+			.getLogger(PistesyotonTuontiTest.class);
 	private final int DEFAULT_WIDTH = 8500;
 
 	private InputStream pistesyottoResurssi(String resurssi) throws IOException {
@@ -64,6 +68,26 @@ public class PistesyotonTuontiTest {
 			@Override
 			public void pistesyottoDataRiviTapahtuma(
 					PistesyottoRivi pistesyottoRivi) {
+				if (!pistesyottoRivi.isValidi()) {
+					for (PistesyottoArvo arvo : pistesyottoRivi.getArvot()) {
+						if (!arvo.isValidi()) {
+							String virheIlmoitus = new StringBuffer()
+									.append("Henkilöllä ")
+									.append(pistesyottoRivi.getNimi())
+									//
+									.append(" (")
+									.append(pistesyottoRivi.getOid())
+									.append(")")
+									//
+									.append(" oli virheellinen arvo '")
+									.append(arvo.getArvo()).append("'")
+									.append(" kohdassa ")
+									.append(arvo.getTunniste()).toString();
+
+							LOG.error("{}", virheIlmoitus);
+						}
+					}
+				}
 				// LOG.error("{}", new
 				// GsonBuilder().setPrettyPrinting().create()
 				// .toJson(pistesyottoRivi));
