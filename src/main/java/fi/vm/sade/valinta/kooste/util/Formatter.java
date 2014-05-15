@@ -21,6 +21,15 @@ public class Formatter {
 		return suomennaNumero(arvo, StringUtils.EMPTY);
 	}
 
+	public static String suomennaNumero(Number arvo) {
+		if (arvo == null) {
+			return StringUtils.EMPTY;
+		} else {
+			return NUMERO_FORMAATTI.format(arvo);
+		}
+
+	}
+
 	public static String paivamaara(Date paivamaara) {
 		if (paivamaara == null) {
 			return StringUtils.EMPTY;

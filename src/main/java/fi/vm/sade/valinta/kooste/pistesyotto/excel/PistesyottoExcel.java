@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,6 +33,7 @@ import fi.vm.sade.valinta.kooste.excel.arvo.NumeroArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.util.ApplicationAdditionalDataComparator;
+import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.function.ValintakoeOsallistuminenDTOFunction;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
@@ -48,9 +50,9 @@ public class PistesyottoExcel {
 	private final static String OSALLISTUI = "Osallistui";
 	private final static String EI_OSALLISTUNUT = "Ei osallistunut";
 
-	private final static String VAKIO_MERKITSEMATTA = "MERKITSEMATTA";
-	private final static String VAKIO_OSALLISTUI = "OSALLISTUI";
-	private final static String VAKIO_EI_OSALLISTUNUT = "EI_OSALLISTUNUT";
+	public final static String VAKIO_MERKITSEMATTA = "MERKITSEMATTA";
+	public final static String VAKIO_OSALLISTUI = "OSALLISTUI";
+	public final static String VAKIO_EI_OSALLISTUNUT = "EI_OSALLISTUNUT";
 
 	private final static Collection<String> VAIHTOEHDOT = Arrays.asList(
 			MERKITSEMATTA, OSALLISTUI, EI_OSALLISTUNUT);
@@ -72,9 +74,9 @@ public class PistesyottoExcel {
 			.addKonversio(OSALLISTUI, VAKIO_OSALLISTUI)
 			//
 			.addKonversio(EI_OSALLISTUNUT, VAKIO_EI_OSALLISTUNUT).build();
-	private final static String TOSI = "Hyväksytty";
-	private final static String EPATOSI = "Hylätty";
-	private final static String TYHJA = "Tyhjä";
+	public final static String TOSI = "Hyväksytty";
+	public final static String EPATOSI = "Hylätty";
+	public final static String TYHJA = "Tyhjä";
 	private final static Collection<String> TOTUUSARVO = Arrays.asList(TYHJA,
 			TOSI, EPATOSI);
 	private final static Map<String, String> TOTUUSARVO_KONVERSIO = new KonversioBuilder()
@@ -203,12 +205,17 @@ public class PistesyottoExcel {
 								&& !StringUtils.isBlank(valintaperuste.getMin())
 								&& !StringUtils.isBlank(valintaperuste.getMax())) {
 							// create value constraint
+
 							return new StringBuilder()
 									.append(valintaperuste.getKuvaus())
 									.append(" (")
-									.append(valintaperuste.getMin())
+									.append(Formatter
+											.suomennaNumero(new BigDecimal(
+													valintaperuste.getMin())))
 									.append(" - ")
-									.append(valintaperuste.getMax())
+									.append(Formatter
+											.suomennaNumero(new BigDecimal(
+													valintaperuste.getMax())))
 									.append(")").toString();
 						} else {
 							return valintaperuste.getKuvaus();

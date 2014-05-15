@@ -49,6 +49,9 @@ public class NumeroDataArvo extends TilaDataArvo {
 			lopullinenTila = getAsetettuTila();
 		} else {
 			lopullinenTila = konvertoiTila(tila);
+			if (getAsetettuTila().equals(lopullinenTila)) {
+				lopullinenTila = PistesyottoExcel.VAKIO_MERKITSEMATTA;
+			}
 		}
 		return new PistesyottoArvo(arvo, lopullinenTila, isValidi(arvo)
 				&& isValidiTila(tila), tunniste, osallistuminenTunniste);
