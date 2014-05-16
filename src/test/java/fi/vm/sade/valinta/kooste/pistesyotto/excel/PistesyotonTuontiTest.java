@@ -109,7 +109,8 @@ public class PistesyotonTuontiTest {
 				pistetiedot, kuuntelija);
 		Excel excel = pistesyottoExcel.getExcel();
 		// new FileInputStream("02.xlsx"));//
-		excel.tuoXlsx(pistesyottoResurssi("pistesyotto.xlsx"));
+
+		excel.tuoXlsx(excel.vieXlsx());
 
 		// Arrays.asList(Sarake.PIILOTETTU));
 

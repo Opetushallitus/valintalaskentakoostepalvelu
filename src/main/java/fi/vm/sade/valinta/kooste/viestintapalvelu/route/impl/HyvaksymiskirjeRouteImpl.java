@@ -231,7 +231,7 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 							Gson gson = new GsonBuilder().setPrettyPrinting()
 									.create();
 							String json = gson.toJson(kirjeet);
-							LOG.error("\r\n{}\r\n", json);
+							// LOG.error("\r\n{}\r\n", json);
 							pdf = pipeInputStreams(viestintapalveluResource
 									.haeKirjeSync(json));
 
