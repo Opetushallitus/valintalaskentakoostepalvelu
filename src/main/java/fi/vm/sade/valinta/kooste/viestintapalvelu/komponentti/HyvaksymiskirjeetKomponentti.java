@@ -235,9 +235,14 @@ public class HyvaksymiskirjeetKomponentti {
 							tulokset.put("varasija", "Varasijan numero on "
 									+ valintatapajono.getVarasijanNumero());
 						}
-						tulokset.put("hylkaysperuste", new Teksti(
+						String hylkaysperuste = new Teksti(
 								valintatapajono.getTilanKuvaukset()).getTeksti(
-								preferoituKielikoodi, StringUtils.EMPTY));
+								preferoituKielikoodi, StringUtils.EMPTY);
+						// if (StringUtils.isNotBlank(hylkaysperuste)) {
+						// LOG.error("\r\nEpätyhjä hylkäysperuste,\r\n{}\r\n",
+						// hylkaysperuste);
+						// }
+						tulokset.put("hylkaysperuste", hylkaysperuste);
 						tulokset.put("valinnanTulos",
 								HakemusUtil.tilaConverter(valintatapajono
 										.getTila(), valintatapajono
