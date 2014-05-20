@@ -17,6 +17,8 @@ import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeResource;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -69,6 +71,16 @@ public class KoekutsukirjeetTest {
 	@Bean
 	public ValintakoeResource getValintakoeResource() {
 		return Mockito.mock(ValintakoeResource.class);
+	}
+
+	@Bean
+	public HaeHakukohteenHakemuksetKomponentti getHaeHakukohteenHakemuksetKomponentti() {
+		return Mockito.mock(HaeHakukohteenHakemuksetKomponentti.class);
+	}
+
+	@Bean
+	public ValintaperusteetValintakoeResource getValintaperusteetValintakoeResource() {
+		return Mockito.mock(ValintaperusteetValintakoeResource.class);
 	}
 
 	@Bean
