@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
@@ -20,12 +21,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.GsonBuilder;
 
+import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeResource;
+import fi.vm.sade.valinta.kooste.function.SuppeaHakemusFunction;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.function.ValintakoeOsallistuminenDTOFunction;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
@@ -56,27 +64,30 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final ViestintapalveluResource viestintapalveluResource;
 	private final KoekutsukirjeetKomponentti koekutsukirjeetKomponentti;
 	private final ValintakoeResource valintakoeResource;
+	private final ValintaperusteetValintakoeResource valintaperusteetValintakoeResource;
+	private final HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
 	private final ApplicationResource applicationResource;
 	private final DokumenttiResource dokumenttiResource;
 	private final SecurityPreprocessor security = new SecurityPreprocessor();
 	// private final ValintakoeResource valintakoeResource;
 	private final String koekutsukirjeet;
 	private final String hakemuksilleKoekutsukirjeet;
-	private final String hakemusOids;
 
 	@Autowired
 	public KoekutsukirjeRouteImpl(
 			@Value(KoekutsukirjeRoute.SEDA_KOEKUTSUKIRJEET) String koekutsukirjeet,
 			@Value("direct:koekutsukirjeet_hakemuksilleKoekutsukirjeet") String hakemuksilleKoekutsukirjeet,
-			@Value("hakemusOids") String hakemusOids,
 			DokumenttiResource dokumenttiResource,
 			// ValintakoeResource valintakoeResource,
 			ViestintapalveluResource viestintapalveluResource,
 			KoekutsukirjeetKomponentti koekutsukirjeetKomponentti,
 			ValintakoeResource valintakoeResource,
-			ApplicationResource applicationResource) {
+			ApplicationResource applicationResource,
+			ValintaperusteetValintakoeResource valintaperusteetValintakoeResource,
+			HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti) {
 		super();
-		this.hakemusOids = hakemusOids;
+		this.haeHakukohteenHakemuksetKomponentti = haeHakukohteenHakemuksetKomponentti;
+		this.valintaperusteetValintakoeResource = valintaperusteetValintakoeResource;
 		this.koekutsukirjeet = koekutsukirjeet;
 		this.hakemuksilleKoekutsukirjeet = hakemuksilleKoekutsukirjeet;
 		// this.valintakoeResource = valintakoeResource;
@@ -118,7 +129,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.choice()
 				// Jos luodaan vain yksittaiselle hakemukselle...
-				.when(property(hakemusOids).isNull())
+				.when(property(OPH.HAKEMUSOIDS).isNull())
 				//
 				.to("direct:koekutsukirjeet_hae_valintatiedot_hakemuksille")
 				//
@@ -133,7 +144,24 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 		from(kirjeidenLuontiEpaonnistui())
 		//
 				.log(LoggingLevel.ERROR,
-						"Koekutsukirjeiden luonti epaonnistui: ${property.CamelExceptionCaught}");
+						"Koekutsukirjeiden luonti epaonnistui: ${property.CamelExceptionCaught}")
+				//
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						if (dokumenttiprosessi(exchange).getPoikkeukset()
+								.isEmpty()) {
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(Poikkeus.KOOSTEPALVELU,
+											"Koekutsukirjeitä ei voitu muodostaa. Ota yhteys ylläpitoon."));
+						}
+
+					}
+				})
+				//
+				.stop();
+
 		//
 		// ;
 	}
@@ -141,7 +169,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private void congifureProsessointi() {
 		//
 		from("direct:koekutsukirjeet_hae_valintatiedot_hakemuksille")
-		//
+				//
 				.errorHandler(
 				//
 						deadLetterChannel(kirjeidenLuontiEpaonnistui())
@@ -152,61 +180,147 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
+				.log(LoggingLevel.INFO, "Haetaan koekutsukirjeitä varten oidit")
+				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
+						// VT-838
+						Collection<String> valintalaskennastaHaettavatValintakokeet = Lists
+								.newArrayList();
+						boolean haetaanKaikkiHakukohteenHakijatValintakokeeseen = false;
+						//
+						// Haetaan valintaperusteista valintakokeet VT-838
+						//
+						LOG.error("eka");
 						try {
+							for (String oid : valintakoeOids(exchange)) {
 
-							exchange.getOut()
-									.setBody(
-											valintakoeResource
-													.hakuByHakutoive(hakukohdeOid(exchange)));
+								LOG.error("toka {}", oid);
+								ValintakoeDTO valintakoeDTO = valintaperusteetValintakoeResource
+										.readByOid(oid);
+								if (valintakoeDTO == null) {
+									LOG.error(
+											"Null valintakoe osoitteesta /valintaperusteet-service/resources/valintakoe/{}",
+											oid);
+									throw new RuntimeException(
+											"Valintaperusteet palautti null valintakokeen!");
+								}
+								String dto = new GsonBuilder()
+										.setPrettyPrinting().create()
+										.toJson(valintakoeDTO);
+								LOG.error("toka 2:\r\n{}\r\n", dto);
+								if (Boolean.TRUE.equals(valintakoeDTO
+										.getKutsutaankoKaikki())) {
+
+									haetaanKaikkiHakukohteenHakijatValintakokeeseen = true;
+								} else {
+									valintalaskennastaHaettavatValintakokeet
+											.add(oid);
+								}
+
+							}
 						} catch (Exception e) {
-							e.printStackTrace();
 							LOG.error(
-									"Valintatietojen haku hakukohteelle({}) epäonnistui:{}",
+									"Valintakokeen tietojen haku hakukohteelle({}) epäonnistui:{}",
 									hakukohdeOid(exchange), e.getMessage());
-							Collection<Oid> oidit = Lists.newArrayList(Poikkeus
-									.valintakoeOids(valintakoeOids(exchange)));
+							Collection<Oid> oidit = Lists.newArrayList();
 							oidit.add(Poikkeus
 									.hakukohdeOid(hakukohdeOid(exchange)));
 
-							dokumenttiprosessi(exchange).getPoikkeukset().add(
-									new Poikkeus(Poikkeus.VALINTATIETO,
-											"Valintatiedot hakukohteelle", e
-													.getMessage(), oidit));
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.VALINTAPERUSTEET,
+											"Valintakokeen tietoja ei saatu haettua valintaperusteet palvelulta",
+											e.getMessage(), oidit));
 							throw e;
 						}
-					}
-				})
-				//
-				// .bean(valintatietoHakukohteelleKomponentti)
-				//
-				.process(new Processor() {
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						final String hakukohdeOid = hakukohdeOid(exchange);
-						@SuppressWarnings("unchecked")
-						List<ValintakoeOsallistuminenDTO> unfiltered = (List<ValintakoeOsallistuminenDTO>) exchange
-								.getIn().getBody();
+						// järkevyystarkistus
+						LOG.error("kolmas");
+						Set<String> hakemusOids = Sets.newHashSet();
+						try {
+							if (haetaanKaikkiHakukohteenHakijatValintakokeeseen) {
+								LOG.error("neljas");
+								hakemusOids
+										.addAll(FluentIterable
+												.from(haeHakukohteenHakemuksetKomponentti
+														.haeHakukohteenHakemukset(hakukohdeOid(exchange)))
+												.transform(
+														SuppeaHakemusFunction.TO_HAKEMUS_OIDS)
+												.toSet());
+							}
+						} catch (Exception e) {
+							LOG.error(
+									"Hakukohteelle({}) hakijoiden haku epäonnistui: {}",
+									hakukohdeOid(exchange), e.getMessage());
 
-						Collection<ValintakoeOsallistuminenDTO> filtered = Collections2
-								.filter(unfiltered, OsallistujatPredicate
-										.vainOsallistujat(
-												hakukohdeOid(exchange),
-												valintakoeOids(exchange)));
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.HAKU,
+											"Valintakokeen tietoja ei saatu haettua valintaperusteet palvelulta",
+											e.getMessage(),
+											Poikkeus.hakukohdeOid(hakukohdeOid(exchange))));
+							throw e;
+						}
+						LOG.error("viides");
+						if (!valintalaskennastaHaettavatValintakokeet.isEmpty()) {
+							try {
+								LOG.error("kuudes");
+								List<ValintakoeOsallistuminenDTO> unfiltered = valintakoeResource
+										.hakuByHakutoive(hakukohdeOid(exchange));
 
-						exchange.setProperty(
-								hakemusOids,
-								Sets.newHashSet(Collections2
+								Collection<ValintakoeOsallistuminenDTO> filtered = Collections2
+										.filter(unfiltered,
+												OsallistujatPredicate
+														.vainOsallistujat(
+																hakukohdeOid(exchange),
+																valintalaskennastaHaettavatValintakokeet));
+								hakemusOids.addAll(Collections2
 										.transform(
 												filtered,
-												ValintakoeOsallistuminenDTOFunction.TO_HAKEMUS_OIDS)));
+												ValintakoeOsallistuminenDTOFunction.TO_HAKEMUS_OIDS));
 
-						LOG.info("Osallistumattomien pois filtterointi: {}/{}",
-								filtered.size(), unfiltered.size());
+								LOG.info(
+										"Osallistumattomien pois filtterointi: {}/{}",
+										filtered.size(), unfiltered.size());
+							} catch (Exception e) {
+								e.printStackTrace();
+								LOG.error(
+										"Valintatietojen haku hakukohteelle({}) epäonnistui:{}",
+										hakukohdeOid(exchange), e.getMessage());
+								Collection<Oid> oidit = Lists.newArrayList(Poikkeus
+										.valintakoeOids(valintakoeOids(exchange)));
+								oidit.add(Poikkeus
+										.hakukohdeOid(hakukohdeOid(exchange)));
 
+								dokumenttiprosessi(exchange).getPoikkeukset()
+										.add(new Poikkeus(
+												Poikkeus.VALINTATIETO,
+												"Valintatiedot hakukohteelle",
+												e.getMessage(), oidit));
+								throw e;
+							}
+						}
+						LOG.error("seitsemas");
+						if (hakemusOids.isEmpty()) {
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus("Ei koekutsuttavia",
+											"Koekutsuja ei voida muodostaa ilman osallistujia"));
+							throw new RuntimeException(
+									"Koekutsuja ei voida muodostaa ilman valintakoetta johon osallistuu edes joku.");
+						}
+						exchange.setProperty(OPH.HAKEMUSOIDS, hakemusOids);
+						LOG.error("kahdeksas");
 					}
 				})
+				//
+				.log(LoggingLevel.ERROR,
+						"Oidit haettu ${property.hakemusOids.size()}")
+
+				// .bean(valintatietoHakukohteelleKomponentti)
+				//
 				//
 				.end();
 
@@ -227,7 +341,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 					public void process(Exchange exchange) throws Exception {
 						// paivitetaan kokonaistoiden maara
 						dokumenttiprosessi(exchange).setKokonaistyo(
-								exchange.getProperty(hakemusOids,
+								exchange.getProperty(OPH.HAKEMUSOIDS,
 										Collection.class).size() + 2); // +
 																		// viestintapalvelu
 																		// +
@@ -236,7 +350,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 					}
 				})
 				//
-				.split(property(hakemusOids),
+				.split(property(OPH.HAKEMUSOIDS),
 						new FlexibleAggregationStrategy<Hakemus>()
 								.storeInBody().accumulateInCollection(
 										ArrayList.class))
@@ -279,6 +393,18 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.process(new Processor() {
 					@Override
 					public void process(Exchange exchange) throws Exception {
+						if (exchange.getIn().getBody() == null) {
+							LOG.error("Hakemusta yritettiin hakea null oidilla.");
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.HAKU,
+											"Yritettiin hakea hakemus oidilla (get application by oid)",
+											"", Poikkeus.hakemusOid(null)));
+							throw new RuntimeException(
+									"Hakemusta yritettiin hakea null oidilla");
+						}
+
 						String oid = exchange.getIn().getBody(String.class);
 						try {
 

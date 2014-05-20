@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,34 +34,40 @@ public class PistesyotonTuontiTest {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(PistesyotonTuontiTest.class);
-	private final int DEFAULT_WIDTH = 8500;
 
-	private InputStream pistesyottoResurssi(String resurssi) throws IOException {
-		return new ClassPathResource("pistesyotto/" + resurssi)
-				.getInputStream();
+	private String pistesyottoResurssi(String resurssi) throws IOException {
+		InputStream i;
+		String s = IOUtils.toString(i = new ClassPathResource("pistesyotto/"
+				+ resurssi).getInputStream(), "UTF-8");
+		IOUtils.closeQuietly(i);
+		return s;
 	}
 
 	@Test
 	public void testaaOutput() throws FileNotFoundException, IOException,
-			JsonIOException, JsonSyntaxException {
-		List<ValintakoeOsallistuminenDTO> osallistumistiedot = new Gson()
-				.fromJson(
-						new InputStreamReader(
-								pistesyottoResurssi("List_ValintakoeOsallistuminenDTO.json")),
-						new TypeToken<ArrayList<ValintakoeOsallistuminenDTO>>() {
-						}.getType());
+			JsonIOException, JsonSyntaxException, Exception {
+		List<ValintakoeOsallistuminenDTO> osallistumistiedot;
+		String s = null;
+		try {
+			s = pistesyottoResurssi("List_ValintakoeOsallistuminenDTO.json");
+			osallistumistiedot = new Gson().fromJson(
 
+			s, new TypeToken<ArrayList<ValintakoeOsallistuminenDTO>>() {
+			}.getType());
+		} catch (Exception e) {
+			LOG.error("\r\n{}\r\n", s);
+			throw e;
+		}
 		List<ValintaperusteDTO> valintaperusteet = new Gson().fromJson(
-				new InputStreamReader(
-						pistesyottoResurssi("List_ValintaperusteDTO.json")),
+
+		pistesyottoResurssi("List_ValintaperusteDTO.json"),
 				new TypeToken<ArrayList<ValintaperusteDTO>>() {
 				}.getType());
-		List<ApplicationAdditionalDataDTO> pistetiedot = new Gson()
-				.fromJson(
-						new InputStreamReader(
-								pistesyottoResurssi("List_ApplicationAdditionalDataDTO.json")),
-						new TypeToken<ArrayList<ApplicationAdditionalDataDTO>>() {
-						}.getType());
+		List<ApplicationAdditionalDataDTO> pistetiedot = new Gson().fromJson(
+
+		pistesyottoResurssi("List_ApplicationAdditionalDataDTO.json"),
+				new TypeToken<ArrayList<ApplicationAdditionalDataDTO>>() {
+				}.getType());
 
 		PistesyottoDataRiviKuuntelija kuuntelija = new PistesyottoDataRiviKuuntelija() {
 			@Override
