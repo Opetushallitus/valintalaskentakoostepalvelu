@@ -24,7 +24,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
@@ -191,11 +190,8 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						//
 						// Haetaan valintaperusteista valintakokeet VT-838
 						//
-						LOG.error("eka");
 						try {
 							for (String oid : valintakoeOids(exchange)) {
-
-								LOG.error("toka {}", oid);
 								ValintakoeDTO valintakoeDTO = valintaperusteetValintakoeResource
 										.readByOid(oid);
 								if (valintakoeDTO == null) {
@@ -205,10 +201,6 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 									throw new RuntimeException(
 											"Valintaperusteet palautti null valintakokeen!");
 								}
-								String dto = new GsonBuilder()
-										.setPrettyPrinting().create()
-										.toJson(valintakoeDTO);
-								LOG.error("toka 2:\r\n{}\r\n", dto);
 								if (Boolean.TRUE.equals(valintakoeDTO
 										.getKutsutaankoKaikki())) {
 
@@ -236,11 +228,9 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 							throw e;
 						}
 						// järkevyystarkistus
-						LOG.error("kolmas");
 						Set<String> hakemusOids = Sets.newHashSet();
 						try {
 							if (haetaanKaikkiHakukohteenHakijatValintakokeeseen) {
-								LOG.error("neljas");
 								hakemusOids
 										.addAll(FluentIterable
 												.from(haeHakukohteenHakemuksetKomponentti
@@ -263,10 +253,8 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 											Poikkeus.hakukohdeOid(hakukohdeOid(exchange))));
 							throw e;
 						}
-						LOG.error("viides");
 						if (!valintalaskennastaHaettavatValintakokeet.isEmpty()) {
 							try {
-								LOG.error("kuudes");
 								List<ValintakoeOsallistuminenDTO> unfiltered = valintakoeResource
 										.hakuByHakutoive(hakukohdeOid(exchange));
 
@@ -302,7 +290,6 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 								throw e;
 							}
 						}
-						LOG.error("seitsemas");
 						if (hakemusOids.isEmpty()) {
 							dokumenttiprosessi(exchange)
 									.getPoikkeukset()
@@ -312,7 +299,6 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 									"Koekutsuja ei voida muodostaa ilman valintakoetta johon osallistuu edes joku.");
 						}
 						exchange.setProperty(OPH.HAKEMUSOIDS, hakemusOids);
-						LOG.error("kahdeksas");
 					}
 				})
 				//
