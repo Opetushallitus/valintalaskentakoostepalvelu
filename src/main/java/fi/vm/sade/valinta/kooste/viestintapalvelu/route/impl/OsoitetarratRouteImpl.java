@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -27,6 +28,9 @@ import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeResource;
+import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
@@ -64,6 +68,8 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final String osoitetarrat;
 	private final DokumenttiResource dokumenttiResource;
 	private final ApplicationResource applicationResource;
+	private final ValintaperusteetValintakoeResource valintaperusteetValintakoeResource;
+	private final HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
 
 	@Autowired
 	public OsoitetarratRouteImpl(
@@ -73,8 +79,12 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 			HaeOsoiteKomponentti osoiteKomponentti,
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
 			ApplicationResource applicationResource,
-			DokumenttiResource dokumenttiResource) {
+			DokumenttiResource dokumenttiResource,
+			ValintaperusteetValintakoeResource valintaperusteetValintakoeResource,
+			HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti) {
 		super();
+		this.valintaperusteetValintakoeResource = valintaperusteetValintakoeResource;
+		this.haeHakukohteenHakemuksetKomponentti = haeHakukohteenHakemuksetKomponentti;
 		this.applicationResource = applicationResource;
 		this.osoitetarrat = osoitetarrat;
 		this.dokumenttiResource = dokumenttiResource;
@@ -280,6 +290,22 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 					public void process(Exchange exchange) throws Exception {
 						try {
 							final String hakukohdeOid = hakukohdeOid(exchange);
+							Set<String> nivelvaiheenHakemusOidit = Sets
+									.newHashSet();
+							for (String oid : valintakoeOids(exchange)) {
+								if (Boolean.TRUE
+										.equals(valintaperusteetValintakoeResource
+												.readByOid(oid)
+												.getKutsutaankoKaikki())) {
+
+									for (SuppeaHakemus hakemus : haeHakukohteenHakemuksetKomponentti
+											.haeHakukohteenHakemukset(hakukohdeOid)) {
+										nivelvaiheenHakemusOidit.add(hakemus
+												.getOid());
+									}
+								}
+							}
+
 							List<ValintakoeOsallistuminenDTO> hakukohteenOsallistumistiedot = valintakoeResource
 									.hakuByHakutoive(hakukohdeOid);
 
@@ -289,13 +315,12 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 													.vainOsallistujat(
 															hakukohdeOid,
 															valintakoeOids(exchange)));
-
-							exchange.getOut()
-									.setBody(
-											Sets.newHashSet(Collections2
-													.transform(
-															vainOsallistujat,
-															TO_HAKEMUS_OIDS)));
+							Set<String> osallistujienHakemusOidit = Sets
+									.newHashSet(Collections2.transform(
+											vainOsallistujat, TO_HAKEMUS_OIDS));
+							nivelvaiheenHakemusOidit
+									.addAll(osallistujienHakemusOidit);
+							exchange.getOut().setBody(nivelvaiheenHakemusOidit);
 
 						} catch (Exception e) {
 							e.printStackTrace();
