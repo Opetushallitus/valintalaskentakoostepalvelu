@@ -95,14 +95,14 @@ public class ValintalaskennanTulosExcelKomponentti {
 					vaihe.getValinnanvaiheoid() });
 			rivit.add(new Object[] { "Päivämäärä:",
 					ExcelExportUtil.DATE_FORMAT.format(vaihe.getCreatedAt()) });
-			if (!vaihe.getValintatapajono().isEmpty()) {
-				rivit.add(new Object[] { vaihe.getValintatapajono().get(0)
+			if (!vaihe.getValintatapajonot().isEmpty()) {
+				rivit.add(new Object[] { vaihe.getValintatapajonot().get(0)
 						.getNimi() });
 				rivit.add(new Object[] { "Valintatapajonon numero",
 						vaihe.getJarjestysnumero() });
 				rivit.add(new Object[] { "Jonosija", "Hakija", "Yhteispisteet",
 						"Hakutoive", "Valintatieto" });
-				for (ValintatapajonoDTO jono : vaihe.getValintatapajono()) {
+				for (ValintatapajonoDTO jono : vaihe.getValintatapajonot()) {
 					// fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO
 					// vjdto;
 					// try {
