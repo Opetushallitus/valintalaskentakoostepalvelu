@@ -62,6 +62,7 @@ public class ViestintapalveluAktivointiResource {
 	@POST
 	@Path("/osoitetarrat/aktivoi")
 	@Consumes("application/json")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin hakukohteelle", response = Response.class)
 	public ProsessiId aktivoiOsoitetarrojenLuonti(
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
@@ -105,6 +106,7 @@ public class ViestintapalveluAktivointiResource {
 	@POST
 	@Path("/osoitetarrat/sijoittelussahyvaksytyille/aktivoi")
 	@Consumes("application/json")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi hyväksyttyjen osoitteiden luonnin hakukohteelle haussa", response = Response.class)
 	public ProsessiId aktivoiHyvaksyttyjenOsoitetarrojenLuonti(
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
@@ -147,6 +149,7 @@ public class ViestintapalveluAktivointiResource {
 	@POST
 	@Path("/osoitetarrat/hakemuksille/aktivoi")
 	@Consumes("application/json")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
 	public ProsessiId aktivoiOsoitetarrojenLuontiHakemuksille(
 			DokumentinLisatiedot hakemuksillaRajaus) {
@@ -183,6 +186,7 @@ public class ViestintapalveluAktivointiResource {
 	@POST
 	@Path("/jalkiohjauskirjeet/aktivoi")
 	@Consumes("application/json")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi jälkiohjauskirjeiden luonnin valitsemattomille", response = Response.class)
 	public ProsessiId aktivoiJalkiohjauskirjeidenLuonti(
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
@@ -214,6 +218,7 @@ public class ViestintapalveluAktivointiResource {
 	@POST
 	@Path("/hyvaksymiskirjeet/aktivoi")
 	@Consumes("application/json")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi hyväksymiskirjeiden luonnin hakukohteelle haussa", response = Response.class)
 	public ProsessiId aktivoiHyvaksymiskirjeidenLuonti(
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
@@ -261,6 +266,7 @@ public class ViestintapalveluAktivointiResource {
 	@POST
 	@Path("/koekutsukirjeet/aktivoi")
 	@Produces("application/json")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa", response = Response.class)
 	public ProsessiId aktivoiKoekutsukirjeidenLuonti(
 			@QueryParam("hakukohdeOid") String hakukohdeOid,

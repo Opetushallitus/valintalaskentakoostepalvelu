@@ -49,6 +49,7 @@ public class KelaResource {
 	@POST
 	@Path("/aktivoi")
 	@Consumes("application/json")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Kela-reitin aktivointi", response = ProsessiId.class)
 	public ProsessiId aktivoiKelaTiedostonluonti(KelaHakuFiltteri hakuTietue) {
 		// tietoe ei ole viela saatavilla
@@ -70,6 +71,7 @@ public class KelaResource {
 
 	@PUT
 	@Path("/laheta/{documentId}")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "FTP-siirto", response = Response.class)
 	public Response laheta(@PathParam("documentId") String documentId) {
 		LOG.warn("Kela-ftp siirto aloitettu {}", documentId);

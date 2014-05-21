@@ -63,6 +63,7 @@ public class ValintalaskentaExcelResource {
 	@GET
 	@Path("/jalkiohjaustulos/aktivoi")
 	@Produces("application/vnd.ms-excel")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Haun jälkiohjattavat Excel-raporttina", response = Response.class)
 	public Response haeJalkiohjausTuloksetExcelMuodossa(
 			@QueryParam("hakuOid") String hakuOid) {
@@ -93,6 +94,7 @@ public class ValintalaskentaExcelResource {
 	@Path("/valintakoekutsut/aktivoi")
 	@Consumes("application/json")
 	@Produces("application/json")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Hakukohteen hyväksytyt Excel-raporttina", response = Response.class)
 	public ProsessiId haeTuloksetExcelMuodossa(
 	/* OPTIONAL */DokumentinLisatiedot lisatiedot,
@@ -141,6 +143,7 @@ public class ValintalaskentaExcelResource {
 	@GET
 	@Path("/sijoitteluntulos/aktivoi")
 	@Produces("application/vnd.ms-excel")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Sijoittelun tulokset Excel-raporttina", response = Response.class)
 	public Response haeSijoittelunTuloksetExcelMuodossa(
 			@QueryParam("sijoitteluajoId") Long sijoitteluajoId,
@@ -175,6 +178,7 @@ public class ValintalaskentaExcelResource {
 	@GET
 	@Path("/valintalaskennantulos/aktivoi")
 	@Produces("application/vnd.ms-excel")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
 	public Response haeValintalaskentaTuloksetExcelMuodossa(
 			@QueryParam("hakukohdeOid") String hakukohdeOid) {
