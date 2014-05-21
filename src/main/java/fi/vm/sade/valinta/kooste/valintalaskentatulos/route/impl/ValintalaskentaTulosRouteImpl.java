@@ -130,7 +130,6 @@ public class ValintalaskentaTulosRouteImpl extends
 							// valintakoeOids, hakemusOids);
 							String id = generateId();
 							try {
-								LOG.error("Tallennetaan");
 								dokumenttiResource.tallenna(id,
 										"valintakoekutsut.xls",
 										defaultExpirationDate().getTime(),
