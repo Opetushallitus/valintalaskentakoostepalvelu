@@ -4,15 +4,9 @@ import java.util.Collection;
 
 public class BooleanArvo extends MonivalintaArvo {
 
-	private final String tosi;
-	private final String epatosi;
-
 	public BooleanArvo(String arvo, Collection<String> valinnat, String tosi,
 			String epatosi, String tyhja) {
-		super(asString(asBoolean(arvo, tosi, epatosi), tosi, epatosi, tyhja),
-				valinnat);
-		this.tosi = tosi;
-		this.epatosi = epatosi;
+		super(asString(asBoolean(arvo), tosi, epatosi, tyhja), valinnat);
 	}
 
 	public static String asString(Boolean arvo, String tosi, String epatosi,
@@ -26,17 +20,11 @@ public class BooleanArvo extends MonivalintaArvo {
 		}
 	}
 
-	public static Boolean asBoolean(String arvo, String tosi, String epatosi) {
-		if (tosi.equals(arvo)) {
-			return Boolean.TRUE;
-		} else if (epatosi.equals(arvo)) {
-			return Boolean.FALSE;
-		} else {
-			return null;
-		}
+	public static Boolean asBoolean(String arvo) {
+		return Boolean.valueOf(arvo);
 	}
 
 	public Boolean asBoolean() {
-		return asBoolean(getArvo(), this.tosi, this.epatosi);
+		return asBoolean(getArvo());
 	}
 }
