@@ -21,10 +21,10 @@ public class ValinnanvaiheDTO {
 	private Date createdAt;
 
 	@ApiModelProperty(value = "Valintatapajonot", required = true)
-	private List<ValintatapajonoDTO> valintatapajono = new ArrayList<ValintatapajonoDTO>();
+	private List<ValintatapajonoDTO> valintatapajonot = new ArrayList<ValintatapajonoDTO>();
 
-	public List<ValintatapajonoDTO> getValintatapajono() {
-		return valintatapajono;
+	public List<ValintatapajonoDTO> getValintatapajonot() {
+		return valintatapajonot;
 	}
 
 	public String getValinnanvaiheoid() {
@@ -35,8 +35,8 @@ public class ValinnanvaiheDTO {
 		this.valinnanvaiheoid = valinnanvaiheoid;
 	}
 
-	public void setValintatapajono(List<ValintatapajonoDTO> valintatapajono) {
-		this.valintatapajono = valintatapajono;
+	public void setValintatapajonot(List<ValintatapajonoDTO> valintatapajonot) {
+		this.valintatapajonot = valintatapajonot;
 	}
 
 	public int getJarjestysnumero() {
