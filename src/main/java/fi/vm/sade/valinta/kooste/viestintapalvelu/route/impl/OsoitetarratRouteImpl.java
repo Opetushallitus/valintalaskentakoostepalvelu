@@ -18,11 +18,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
@@ -40,6 +46,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HakutoiveenValintatapajonoComparator;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.OsoiteComparator;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
@@ -134,7 +141,9 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 										Poikkeus.hakemusOid(oid.toString())));
 					}
 
-				});
+				})
+				//
+				.stop();
 
 		from("direct:osoitetarrat_haeHakemuksetJaOsoitteet")
 		//
@@ -158,6 +167,18 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 		from(osoitetarrat)
 		//
+				.errorHandler(
+				//
+						deadLetterChannel(
+								"direct:osoitetarrat_hakemustenhaku_epaonnistui_deadletterchannel")
+								//
+								.maximumRedeliveries(0)
+								//
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
+				//
 				.process(security)
 				//
 				.choice()
@@ -350,16 +371,64 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void process(Exchange exchange) throws Exception {
-						List<String> l = Lists.newArrayList();
+						final String hakukohdeOid = hakukohdeOid(exchange);
+						Collection<String> o;
 						try {
-
+							List<HakijaDTO> l = Lists.newArrayList();
 							for (HakijaDTO hakija : sijoitteluProxy
 									.koulutuspaikalliset(hakuOid(exchange),
-											hakukohdeOid(exchange),
+											hakukohdeOid,
 											SijoitteluResource.LATEST)) {
-								l.add(hakija.getHakemusOid());
+								l.add(hakija);
 							}
-							exchange.getOut().setBody(l);
+							o = FluentIterable
+									.from(l)
+									.filter(new Predicate<HakijaDTO>() {
+										public boolean apply(HakijaDTO input) {
+											if (input.getHakutoiveet() == null) {
+												LOG.error(
+														"Sijoittelulta hakemus({}) jolla ei ole hakutoiveita!",
+														input.getHakemusOid());
+											} else {
+												for (HakutoiveDTO h : input
+														.getHakutoiveet()) {
+
+													if (hakukohdeOid.equals(h
+															.getHakukohdeOid())) {
+														final boolean checkFirstValintatapajonoOnly = true;
+														// sort by
+														// priority
+														Collections.sort(
+																h.getHakutoiveenValintatapajonot(),
+																HakutoiveenValintatapajonoComparator.DEFAULT);
+
+														for (HakutoiveenValintatapajonoDTO vjono : h
+																.getHakutoiveenValintatapajonot()) {
+															if (HakemuksenTila.HYVAKSYTTY
+																	.equals(vjono
+																			.getTila())) {
+																return true;
+															}
+															if (checkFirstValintatapajonoOnly) {
+																return false;
+															}
+														}
+													}
+
+												}
+											}
+											return false;
+										}
+									})
+									.transform(
+											new Function<HakijaDTO, String>() {
+												@Override
+												public String apply(
+														HakijaDTO input) {
+													return input
+															.getHakemusOid();
+												}
+											}).toSet();
 
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -379,7 +448,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 											e.getMessage(), oidit));
 							throw e;
 						}
-						if (l.isEmpty()) {
+						if (o.isEmpty()) {
 							Collection<Oid> oidit = Lists.newArrayList(Poikkeus
 									.hakuOid(hakuOid(exchange)), Poikkeus
 									.hakukohdeOid(hakukohdeOid(exchange)));
@@ -392,6 +461,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 							throw new RuntimeException(
 									"Tässä sijoittelussa yksikään hakemus ei ollut hyväksyttynä");
 						}
+						exchange.getOut().setBody(o);
 					}
 				})
 				//
