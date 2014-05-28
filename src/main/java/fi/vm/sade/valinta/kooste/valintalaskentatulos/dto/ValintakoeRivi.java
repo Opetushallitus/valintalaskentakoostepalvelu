@@ -75,8 +75,14 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 		ArrayList<String> rivi = new ArrayList<String>();
 		StringBuilder b = new StringBuilder();
 		b.append(sukunimi).append(", ").append(etunimet);
-		rivi.addAll(Arrays.asList(b.toString(), hakemusOid,
-				ExcelExportUtil.DATE_FORMAT.format(paivamaara)));
+		String pvm;
+		if (paivamaara != null) {
+			pvm = ExcelExportUtil.DATE_FORMAT.format(paivamaara);
+		} else {
+			pvm = StringUtils.EMPTY;
+		}
+
+		rivi.addAll(Arrays.asList(b.toString(), hakemusOid, pvm));
 		// boolean osallistuuEdesYhteen = false;
 		for (String valintakoeOid : valintakoeOids) {
 			String o = osallistumistiedot.get(valintakoeOid);

@@ -142,8 +142,8 @@ public class ValintalaskentaTulosExcelKomponentti {
 						}
 						ValintakoeRivi v = new ValintakoeRivi(
 								hakemus.getLastName(), hakemus.getFirstNames(),
-								hakemus.getOid(), new Date(),
-								nivelvaiheenKoekutsut, true);
+								hakemus.getOid(), null, nivelvaiheenKoekutsut,
+								true);
 
 						ValintakoeRivi v2 = hakemusJaRivi.get(hakemus.getOid());
 						if (v2 == null) {
