@@ -190,7 +190,9 @@ public class ViestintapalveluAktivointiResource {
 	@ApiOperation(value = "Aktivoi jälkiohjauskirjeiden luonnin valitsemattomille", response = Response.class)
 	public ProsessiId aktivoiJalkiohjauskirjeidenLuonti(
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
-			@QueryParam("hakuOid") String hakuOid) {
+			@QueryParam("hakuOid") String hakuOid,
+			@QueryParam("tarjoajaOid") String tarjoajaOid,
+			@QueryParam("sisalto") String sisalto, @QueryParam("tag") String tag) {
 		try {
 			if (hakemuksillaRajaus == null) {
 				hakemuksillaRajaus = new DokumentinLisatiedot();
@@ -201,7 +203,7 @@ public class ViestintapalveluAktivointiResource {
 			dokumenttiProsessiKomponentti
 					.tuoUusiProsessi(jalkiohjauskirjeetProsessi);
 			jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(
-					jalkiohjauskirjeetProsessi,
+					jalkiohjauskirjeetProsessi, tarjoajaOid, sisalto, tag,
 					hakemuksillaRajaus.getHakemusOids(), hakuOid,
 					//
 					SecurityContextHolder.getContext().getAuthentication());

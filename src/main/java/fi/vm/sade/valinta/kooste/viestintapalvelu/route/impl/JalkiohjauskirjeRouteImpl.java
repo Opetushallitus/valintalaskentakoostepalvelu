@@ -21,6 +21,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
@@ -35,10 +37,9 @@ import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluIlmankoulutusp
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.JalkiohjauskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
@@ -52,7 +53,6 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti;
 	private final SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy;
 	private final DokumenttiResource dokumenttiResource;
-	private final SijoitteluResource sijoitteluResource;
 	private final String jalkiohjauskirjeet;
 	private final ApplicationResource applicationResource;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
@@ -65,8 +65,7 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 			ViestintapalveluResource viestintapalveluResource,
 			JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti,
 			DokumenttiResource dokumenttiResource,
-			SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy,
-			SijoitteluResource sijoitteluResource) {
+			SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy) {
 		super();
 		this.tarjontaProxy = tarjontaProxy;
 		this.applicationResource = applicationResource;
@@ -74,7 +73,6 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 		this.viestintapalveluResource = viestintapalveluResource;
 		this.jalkiohjauskirjeetKomponentti = jalkiohjauskirjeetKomponentti;
 		this.sijoitteluProxy = sijoitteluProxy;
-		this.sijoitteluResource = sijoitteluResource;
 		this.jalkiohjauskirjeet = jalkiohjauskirjeet;
 	}
 
@@ -301,7 +299,13 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 									jalkiohjauskirjeetKomponentti
 											.teeJalkiohjauskirjeet(
 													hyvaksymattomatHakijat,
-													hakemukset, metaKohteet));
+													hakemukset, metaKohteet,
+													hakuOid(exchange),
+													exchange.getProperty(
+															"sisalto",
+															String.class),
+													exchange.getProperty("tag",
+															String.class)));
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 						} catch (Exception e) {
@@ -322,16 +326,34 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						DokumenttiProsessi prosessi = dokumenttiprosessi(exchange);
+						LetterBatch kirjeet = jalkiohjauskirjeet(exchange);
+						if (kirjeet == null || kirjeet.getLetters() == null
+								|| kirjeet.getLetters().isEmpty()) {
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(Poikkeus.VALINTATIETO,
+											"Jälkiohjauskirjeitä ei voida muodostaa tyhjälle tulosjoukolle."));
+							throw new RuntimeException(
+									"Jälkiohjauskirjeitä ei voida muodostaa tyhjälle tulosjoukolle.");
+						}
 						InputStream pdf;
 						try {
 
+							// LOG.error("\r\n{}",
+							// new GsonBuilder().setPrettyPrinting()
+							// .create().toJson(osoitteet));
+							Gson gson = new GsonBuilder().setPrettyPrinting()
+									.create();
+							String json = gson.toJson(kirjeet);
+							// LOG.error("\r\n{}\r\n", json);
+							pdf = pipeInputStreams(viestintapalveluResource
+									.haeKirjeSync(json));
 							// LOG.error(
 							// "\r\n{}",
 							// new GsonBuilder().setPrettyPrinting()
 							// .create()
 							// .toJson(koekutsukirjeet(exchange)));
-							pdf = pipeInputStreams(viestintapalveluResource
-									.haeJalkiohjauskirjeetSync(jalkiohjauskirjeet(exchange)));
+
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 
@@ -373,7 +395,7 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Kirjeet<Kirje> jalkiohjauskirjeet(Exchange exchange) {
-		return exchange.getIn().getBody(Kirjeet.class);
+	private LetterBatch jalkiohjauskirjeet(Exchange exchange) {
+		return exchange.getIn().getBody(LetterBatch.class);
 	}
 }

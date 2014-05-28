@@ -26,6 +26,9 @@ public interface JalkiohjauskirjeRoute {
 
 	void jalkiohjauskirjeetAktivoi(
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
+			@Property(OPH.TARJOAJAOID) String tarjoajaOid,
+			@Property("sisalto") String sisalto,
+			@Property("tag") String tag,
 			@Property("hakemusOids") List<String> hakemusOidit,
 			@Property(OPH.HAKUOID) String hakuOid,
 			@Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
