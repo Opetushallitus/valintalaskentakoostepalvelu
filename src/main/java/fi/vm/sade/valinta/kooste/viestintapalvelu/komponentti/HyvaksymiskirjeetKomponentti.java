@@ -168,17 +168,19 @@ public class HyvaksymiskirjeetKomponentti {
 
 				StringBuilder pisteet = new StringBuilder();
 				for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
-					if (pistetieto.getArvo() != null) {
-						try {
-							BigDecimal ehkaNumeroEhkaTotuusarvo = new BigDecimal(
-									pistetieto.getArvo());
-							pisteet.append(
-									suomennaNumero(ehkaNumeroEhkaTotuusarvo))
-									.append(ARVO_VALI);
-						} catch (NumberFormatException notNumber) {
-							// OVT-6340 filtteroidaan totuusarvot pois
-						}
+					try {
+						// OVT-7877 Koepisteiden formaattiin ei pysty luottamaan
+						// koostepalvelussa
+						String arvo = StringUtils.trimToEmpty(
+								pistetieto.getArvo()).replace(",", ".");
+						BigDecimal ehkaNumeroEhkaTotuusarvo = new BigDecimal(
+								arvo);
+						pisteet.append(suomennaNumero(ehkaNumeroEhkaTotuusarvo))
+								.append(ARVO_VALI);
+					} catch (NumberFormatException notNumber) {
+						// OVT-6340 filtteroidaan totuusarvot pois
 					}
+
 				}
 				tulokset.put("paasyJaSoveltuvuuskoe", pisteet.toString().trim());
 
