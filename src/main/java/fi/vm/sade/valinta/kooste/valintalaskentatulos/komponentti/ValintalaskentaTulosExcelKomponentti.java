@@ -32,12 +32,17 @@ import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeResource;
+import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.dto.ValintakoeNimi;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.dto.ValintakoeRivi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 
 /**
  * KOEKUTSUEXCEL
@@ -59,6 +64,8 @@ public class ValintalaskentaTulosExcelKomponentti {
 	private ValintaperusteetValintakoeResource valintaperusteetValintakoeResource;
 	@Autowired
 	private HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
+	@Autowired
+	private ApplicationResource applicationResource;
 
 	public InputStream luoTuloksetXlsMuodossa(
 			@Header("haunNimi") String haunNimi,
@@ -140,10 +147,16 @@ public class ValintalaskentaTulosExcelKomponentti {
 								continue;
 							}
 						}
+						Hakemus h = applicationResource
+								.getApplicationByOid(hakemus.getOid());
+						Osoite osoite = OsoiteHakemukseltaUtil
+								.osoiteHakemuksesta(h, null, null);
+
 						ValintakoeRivi v = new ValintakoeRivi(
 								hakemus.getLastName(), hakemus.getFirstNames(),
 								hakemus.getOid(), null, nivelvaiheenKoekutsut,
-								true);
+								osoite,
+								Yhteystiedot.yhteystiedotHakemukselta(h), true);
 
 						ValintakoeRivi v2 = hakemusJaRivi.get(hakemus.getOid());
 						if (v2 == null) {
@@ -166,7 +179,8 @@ public class ValintalaskentaTulosExcelKomponentti {
 
 			LOG.debug("Creating rows for Excel file!");
 			ArrayList<String> otsikot = new ArrayList<String>();
-			otsikot.addAll(Arrays.asList("Nimi", "Hakemus", "Laskettu pvm"));
+			otsikot.addAll(Arrays.asList("Nimi", "Osoite", "Yhteystiedot",
+					"Hakemus", "Laskettu pvm"));
 			List<String> oids = Lists.newArrayList();
 			for (ValintakoeNimi n : tunnisteet) {
 				otsikot.add(n.getNimi());
@@ -234,10 +248,11 @@ public class ValintalaskentaTulosExcelKomponentti {
 				osallistumistiedot.put(tunniste.getOid(), "----");
 			}
 		}
-
+		Hakemus h = applicationResource.getApplicationByOid(o.getHakemusOid());
+		Osoite osoite = OsoiteHakemukseltaUtil
+				.osoiteHakemuksesta(h, null, null);
 		return new ValintakoeRivi(o.getSukunimi(), o.getEtunimi(),
-				o.getHakemusOid(), date, osallistumistiedot,
-				osallistuuEdesYhteen);
+				o.getHakemusOid(), date, osallistumistiedot, osoite,
+				Yhteystiedot.yhteystiedotHakemukselta(h), osallistuuEdesYhteen);
 	}
-
 }

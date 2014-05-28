@@ -11,7 +11,9 @@ import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Maps;
 
+import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 
 /**
  * 
@@ -23,17 +25,22 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 	private final String sukunimi;
 	private final String etunimet;
 	private final String hakemusOid;
+	private final Osoite osoite;
+	private final Yhteystiedot yhteystiedot;
 	private final Date paivamaara;
 	private final Map<String, String> osallistumistiedot;
 	private final boolean osallistuuEdesYhteen;
 
 	public ValintakoeRivi(String sukunimi, String etunimet, String hakemusOid,
 			Date paivamaara, Map<String, String> osallistumistiedot,
+			Osoite osoite, Yhteystiedot yhteystiedot,
 			boolean osallistuuEdesYhteen) {
 		this.sukunimi = StringUtils.trimToEmpty(sukunimi);
 		this.etunimet = StringUtils.trimToEmpty(etunimet);
 		this.hakemusOid = hakemusOid;
 		this.paivamaara = paivamaara;
+		this.yhteystiedot = yhteystiedot;
+		this.osoite = osoite;
 		this.osallistumistiedot = osallistumistiedot;
 		this.osallistuuEdesYhteen = osallistuuEdesYhteen;
 	}
@@ -81,8 +88,8 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 		} else {
 			pvm = StringUtils.EMPTY;
 		}
-
-		rivi.addAll(Arrays.asList(b.toString(), hakemusOid, pvm));
+		rivi.addAll(Arrays.asList(b.toString(), osoite.toString(),
+				yhteystiedot.toString(), hakemusOid, pvm));
 		// boolean osallistuuEdesYhteen = false;
 		for (String valintakoeOid : valintakoeOids) {
 			String o = osallistumistiedot.get(valintakoeOid);
@@ -101,7 +108,8 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 			m.put(e.getKey(), e.getValue());
 		}
 		return new ValintakoeRivi(sukunimi, etunimet, hakemusOid, v.paivamaara,
-				m, osallistuuEdesYhteen || v.osallistuuEdesYhteen);
+				m, osoite, yhteystiedot, osallistuuEdesYhteen
+						|| v.osallistuuEdesYhteen);
 	}
 
 }
