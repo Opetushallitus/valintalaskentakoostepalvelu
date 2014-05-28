@@ -46,7 +46,8 @@ public class JalkiohjauskirjeetTest {
 	@Test(expected = SijoittelupalveluException.class)
 	public void testaaJalkiohjauskirjeReitti() {
 		DokumenttiProsessi p = new DokumenttiProsessi("", "", "", null);
-		jalkiohjauskirjeRoute.jalkiohjauskirjeetAktivoi(p, null, "1", null);
+		jalkiohjauskirjeRoute.jalkiohjauskirjeetAktivoi(p, null, null, null,
+				null, "1", null);
 	}
 
 	@Bean

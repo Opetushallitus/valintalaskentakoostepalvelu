@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.Body;
+import org.apache.camel.Property;
+import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +33,11 @@ import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemusUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 
 /**
  * @author Jussi Jartamo
@@ -74,13 +76,17 @@ public class JalkiohjauskirjeetKomponentti {
 		return m;
 	}
 
-	public Kirjeet<Kirje> teeJalkiohjauskirjeet(
+	public LetterBatch teeJalkiohjauskirjeet(
 			@Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
 			final Collection<Hakemus> hakemukset,
-			final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet) {// @Property(OPH.HAKUOID)
-																						// String
-																						// hakuOid)
-																						// {
+			final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
+			@Simple("${property.hakuOid}") String hakuOid,
+			@Property("sisalto") String sisalto, @Property("tag") String tag
+
+	) {// @Property(OPH.HAKUOID)
+		// String
+		// hakuOid)
+		// {
 		final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
 		if (kaikkiHyvaksymattomat == 0) {
 			LOG.error("Jälkiohjauskirjeitä yritetään luoda haulle jolla kaikki hakijat on hyväksytty koulutukseen!");
@@ -92,14 +98,14 @@ public class JalkiohjauskirjeetKomponentti {
 		// jalkiohjauskirjeessaKaytetytHakukohteet =
 		// haeKiinnostavatHakukohteet(hyvaksymattomatHakijat);
 		final Map<String, Hakemus> hakemusOidHakemukset = hakemuksistaOidMap(hakemukset);
-		final List<Kirje> kirjeet = new ArrayList<Kirje>();
+		final List<Letter> kirjeet = new ArrayList<Letter>();
+		String preferoituKielikoodi;
 		for (HakijaDTO hakija : hyvaksymattomatHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
 			final Hakemus hakemus = hakemusOidHakemukset.get(hakemusOid); // hakemusProxy.haeHakemus(hakemusOid);
 			final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
 			final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
 
-			String preferoituKielikoodi;
 			try {
 				preferoituKielikoodi = KieliUtil.normalisoiKielikoodi(hakemus
 						.getAnswers().getLisatiedot().get(ASIOINTIKIELI));
@@ -213,13 +219,24 @@ public class JalkiohjauskirjeetKomponentti {
 				tulokset.put("kaikkiHakeneet", StringUtils.EMPTY);
 				tulosList.add(tulokset);
 			}
-			kirjeet.add(new Kirje(osoite, preferoituKielikoodi, tulosList));
+			Map<String, Object> replacements = Maps.newHashMap();
+			kirjeet.add(new Letter(osoite, "jalkiohjauskirje",
+					preferoituKielikoodi, replacements));
 		}
 
 		LOG.info(
 				"Yritetään luoda viestintapalvelulta jälkiohjauskirjeitä {} kappaletta!",
 				kirjeet.size());
-		Kirjeet<Kirje> viesti = new Kirjeet<Kirje>(kirjeet);
+		LetterBatch viesti = new LetterBatch(kirjeet);
+		viesti.setApplicationPeriod(hakuOid);
+		viesti.setFetchTarget(null);
+		viesti.setLanguageCode(preferoituKielikoodi);
+		viesti.setOrganizationOid(null);
+		viesti.setTag(tag);
+		viesti.setTemplateName("hyvaksymiskirje");
+		Map<String, Object> templateReplacements = Maps.newHashMap();
+		templateReplacements.put("sisalto", sisalto);
+		viesti.setTemplateReplacements(templateReplacements);
 		LOG.debug("\r\n{}", new ViestiWrapper(viesti));
 		// Response response =
 		// viestintapalveluProxy.haeJalkiohjauskirjeet(viesti);
