@@ -17,11 +17,10 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.service.valintaperusteet.resource.ValintatapajonoResource;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.JarjestyskriteerituloksenTila;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.JonosijaDTO;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValinnanvaiheDTO;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila;
 
 /**
  * 
@@ -102,7 +101,9 @@ public class ValintalaskennanTulosExcelKomponentti {
 						vaihe.getJarjestysnumero() });
 				rivit.add(new Object[] { "Jonosija", "Hakija", "Yhteispisteet",
 						"Hakutoive", "Valintatieto" });
-				for (ValintatapajonoDTO jono : vaihe.getValintatapajonot()) {
+
+				for (fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO jono : vaihe
+						.getValintatapajonot()) {
 					// fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO
 					// vjdto;
 					// try {

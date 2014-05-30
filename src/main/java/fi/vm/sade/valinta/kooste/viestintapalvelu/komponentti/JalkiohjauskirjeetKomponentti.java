@@ -220,6 +220,7 @@ public class JalkiohjauskirjeetKomponentti {
 				tulosList.add(tulokset);
 			}
 			Map<String, Object> replacements = Maps.newHashMap();
+			replacements.put("tulokset", tulosList);
 			kirjeet.add(new Letter(osoite, "jalkiohjauskirje",
 					preferoituKielikoodi, replacements));
 		}
