@@ -233,7 +233,7 @@ public class JalkiohjauskirjeetKomponentti {
 		viesti.setLanguageCode(preferoituKielikoodi);
 		viesti.setOrganizationOid(null);
 		viesti.setTag(tag);
-		viesti.setTemplateName("hyvaksymiskirje");
+		viesti.setTemplateName("jalkiohjauskirje");
 		Map<String, Object> templateReplacements = Maps.newHashMap();
 		templateReplacements.put("sisalto", sisalto);
 		viesti.setTemplateReplacements(templateReplacements);
