@@ -179,8 +179,8 @@ public class ValintalaskentaTulosExcelKomponentti {
 
 			LOG.debug("Creating rows for Excel file!");
 			ArrayList<String> otsikot = new ArrayList<String>();
-			otsikot.addAll(Arrays.asList("Nimi", "Osoite", "Yhteystiedot",
-					"Hakemus", "Laskettu pvm"));
+			otsikot.addAll(Arrays.asList("Nimi", "Osoite", "Sähköpostiosoite",
+					"Puhelinnumero", "Hakemus", "Laskettu pvm"));
 			List<String> oids = Lists.newArrayList();
 			for (ValintakoeNimi n : tunnisteet) {
 				otsikot.add(n.getNimi());

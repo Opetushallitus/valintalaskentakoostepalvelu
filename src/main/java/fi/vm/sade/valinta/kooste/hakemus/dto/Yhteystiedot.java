@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -34,8 +36,16 @@ public class Yhteystiedot {
 		return puhelinnumerot;
 	}
 
+	public String getPuhelinnumerotAsString() {
+		StringBuilder b = new StringBuilder();
+		for (String puhelinnumero : puhelinnumerot) {
+			b.append(puhelinnumero).append(" ");
+		}
+		return b.toString().trim();
+	}
+
 	public String getSahkoposti() {
-		return sahkoposti;
+		return StringUtils.trimToEmpty(sahkoposti);
 	}
 
 	public static Yhteystiedot yhteystiedotHakemukselta(Hakemus hakemus) {
