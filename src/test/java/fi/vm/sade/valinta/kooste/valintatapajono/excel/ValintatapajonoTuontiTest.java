@@ -50,6 +50,7 @@ public class ValintatapajonoTuontiTest {
 		ValintatapajonoExcel excel = new ValintatapajonoExcel("hakuOid",
 				"hakukohdeOid", "1400827524125-5286600445600454965",
 				"Haun Nimi", "Hakukohteen Nimi", v);
+
 	}
 
 	private static String resurssi(String resurssi) throws IOException {
