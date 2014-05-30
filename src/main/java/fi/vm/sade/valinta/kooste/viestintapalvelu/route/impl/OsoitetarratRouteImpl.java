@@ -12,6 +12,7 @@ import java.util.Set;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,17 +129,22 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 						if (oid == null) {
 							oid = "null";
 						}
+						String message;
+						if (exchange.getException() != null) {
+							message = exchange.getException().getMessage();
+						} else {
+							message = StringUtils.EMPTY;
+						}
 						LOG.error(
 								"Hakemuksen hakeminen haku-app:lta epäonnistui: {}. applicationResource.getApplicationByOid({})",
-								exchange.getException().getMessage(),
-								oid.toString());
+								message, oid.toString());
 						dokumenttiprosessi(exchange)
 								.getPoikkeukset()
 								.add(new Poikkeus(
 										Poikkeus.HAKU,
 										"Yritettiin hakea hakemus oidilla (get application by oid)",
-										exchange.getException().getMessage(),
-										Poikkeus.hakemusOid(oid.toString())));
+										message, Poikkeus.hakemusOid(oid
+												.toString())));
 					}
 
 				})
