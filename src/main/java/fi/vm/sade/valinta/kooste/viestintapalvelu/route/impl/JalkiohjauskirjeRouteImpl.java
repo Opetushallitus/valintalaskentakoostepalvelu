@@ -141,11 +141,22 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				// jalkiohjauskirje
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluProxy
-								.ilmankoulutuspaikkaa(exchange.getProperty(
-										OPH.HAKUOID, String.class),
-										SijoitteluResource.LATEST);
-						exchange.getOut().setBody(hyvaksymattomatHakijat);
+						try {
+							final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluProxy
+									.ilmankoulutuspaikkaa(exchange.getProperty(
+											OPH.HAKUOID, String.class),
+											SijoitteluResource.LATEST);
+							exchange.getOut().setBody(hyvaksymattomatHakijat);
+						} catch (Exception e) {
+							LOG.error("Ei saatu sijoittelulta hyväksymättömiä hakijoita!");
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.SIJOITTELU,
+											"Ei saatu sijoittelulta hyväksymättömiä hakijoita!",
+											""));
+							throw e;
+						}
 					}
 
 				})
@@ -218,6 +229,12 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 									.getHakutoiveet()) {
 								if (dokumenttiprosessi(exchange)
 										.isKeskeytetty()) {
+									dokumenttiprosessi(exchange)
+											.getPoikkeukset()
+											.add(new Poikkeus(
+													Poikkeus.KOOSTEPALVELU,
+													"Jälkiohjauskirjeen muodostus on keskeytetty!",
+													""));
 									throw new RuntimeException(
 											"Jälkiohjauskirjeen muodostus on keskeytetty!");
 								}
@@ -271,6 +288,12 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						for (HakijaDTO h : hyvaksymattomatHakijat) {
 							String hakemusOid = h.getHakemusOid();
 							if (dokumenttiprosessi(exchange).isKeskeytetty()) {
+								dokumenttiprosessi(exchange)
+										.getPoikkeukset()
+										.add(new Poikkeus(
+												Poikkeus.KOOSTEPALVELU,
+												"Jälkiohjauskirjeen muodostus on keskeytetty!",
+												""));
 								throw new RuntimeException(
 										"Jälkiohjauskirjeen muodostus on keskeytetty!");
 							}
@@ -347,7 +370,7 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 							String json = gson.toJson(kirjeet);
 							// LOG.error("\r\n{}\r\n", json);
 							pdf = pipeInputStreams(viestintapalveluResource
-									.haeKirjeSync(json));
+									.haeKirjeSyncZip(json));
 							// LOG.error(
 							// "\r\n{}",
 							// new GsonBuilder().setPrettyPrinting()

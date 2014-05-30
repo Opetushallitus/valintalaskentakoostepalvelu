@@ -78,6 +78,12 @@ public interface ViestintapalveluResource {
 	@Path("/letter/sync/pdf")
 	InputStream haeKirjeSync(String letterBatch);
 
+	@POST
+	@Consumes("application/json")
+	@Produces("application/octet-stream")
+	@Path("/letter/sync/zip")
+	InputStream haeKirjeSyncZip(String letterBatch);
+
 	@GET
 	@Produces(APPLICATION_JSON)
 	@Path("/getByNameOrgTag")
