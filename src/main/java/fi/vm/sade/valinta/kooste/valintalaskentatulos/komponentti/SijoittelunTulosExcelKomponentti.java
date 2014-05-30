@@ -15,15 +15,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Maps;
+
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.TilaHistoriaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.Formatter;
+import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 
 /**
  * 
@@ -43,11 +49,15 @@ public class SijoittelunTulosExcelKomponentti {
 	@Autowired
 	private TilaResource tilaResource;
 
+	@Autowired
+	private ApplicationResource applicationResource;
+
 	public InputStream luoXls(
 			@Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
 			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
 			@Simple("${property.hakuOid}") String hakuOid) {
 		Map<String, List<Valintatulos>> valintatulosCache = new HashMap<String, List<Valintatulos>>();
+		Map<String, Hakemus> hakemukset = Maps.newHashMap();
 		HakukohdeDTO hakukohde;
 		try {
 			hakukohde = sijoitteluajoResource
@@ -79,6 +89,9 @@ public class SijoittelunTulosExcelKomponentti {
 		for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
 			rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
 			rivit.add(new Object[] { "Jonosija", "Hakemus", "Hakija",
+					//
+					"Osoite", "Sähköposti", "Puhelinnumero",
+					//
 					"Hakutoive", "Pisteet", "Sijoittelun tila",
 					"Vastaanottotieto", "Muokattu" });
 			for (HakemusDTO hakemus : jono.getHakemukset()) {
@@ -125,8 +138,20 @@ public class SijoittelunTulosExcelKomponentti {
 				}
 				nimi.append(hakemus.getSukunimi()).append(", ")
 						.append(hakemus.getEtunimi());
-				rivit.add(new Object[] { hakemus.getJonosija(), hakemusOid,
-						nimi.toString(), hakemus.getPrioriteetti(),
+				Hakemus application = haeHakemus(hakemusOid, hakemukset);
+				Yhteystiedot yhteystiedot = Yhteystiedot
+						.yhteystiedotHakemukselta(application);
+				rivit.add(new Object[] {
+						hakemus.getJonosija(),
+						hakemusOid,
+						nimi.toString(),
+						//
+						OsoiteHakemukseltaUtil.osoiteHakemuksesta(application,
+								null, null),
+						yhteystiedot.getSahkoposti(),
+						yhteystiedot.getPuhelinnumerotAsString(),
+						//
+						hakemus.getPrioriteetti(),
 						Formatter.suomennaNumero(hakemus.getPisteet()),
 						hakemus.getTila(), valintaTieto,
 						muokattu(hakemus.getTilaHistoria()) });
@@ -135,6 +160,17 @@ public class SijoittelunTulosExcelKomponentti {
 		}
 		return ExcelExportUtil
 				.exportGridAsXls(rivit.toArray(new Object[][] {}));
+	}
+
+	private Hakemus haeHakemus(String hakemusOid,
+			Map<String, Hakemus> hakemukset) {
+		if (hakemukset.containsKey(hakemusOid)) {
+			return hakemukset.get(hakemusOid);
+		} else {
+			Hakemus h = applicationResource.getApplicationByOid(hakemusOid);
+			hakemukset.put(hakemusOid, h);
+			return h;
+		}
 	}
 
 	private String muokattu(List<TilaHistoriaDTO> h) {
