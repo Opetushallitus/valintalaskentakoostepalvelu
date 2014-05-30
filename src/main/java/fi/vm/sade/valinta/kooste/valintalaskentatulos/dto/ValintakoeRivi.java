@@ -89,7 +89,8 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 			pvm = StringUtils.EMPTY;
 		}
 		rivi.addAll(Arrays.asList(b.toString(), osoite.toString(),
-				yhteystiedot.toString(), hakemusOid, pvm));
+				yhteystiedot.getSahkoposti(),
+				yhteystiedot.getPuhelinnumerotAsString(), hakemusOid, pvm));
 		// boolean osallistuuEdesYhteen = false;
 		for (String valintakoeOid : valintakoeOids) {
 			String o = osallistumistiedot.get(valintakoeOid);

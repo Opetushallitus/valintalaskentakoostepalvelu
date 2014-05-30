@@ -99,7 +99,7 @@ public class JalkiohjauskirjeetKomponentti {
 		// haeKiinnostavatHakukohteet(hyvaksymattomatHakijat);
 		final Map<String, Hakemus> hakemusOidHakemukset = hakemuksistaOidMap(hakemukset);
 		final List<Letter> kirjeet = new ArrayList<Letter>();
-		String preferoituKielikoodi;
+		String preferoituKielikoodi = KieliUtil.SUOMI;
 		for (HakijaDTO hakija : hyvaksymattomatHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
 			final Hakemus hakemus = hakemusOidHakemukset.get(hakemusOid); // hakemusProxy.haeHakemus(hakemusOid);
