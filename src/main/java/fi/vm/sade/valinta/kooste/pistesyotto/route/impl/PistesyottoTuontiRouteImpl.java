@@ -184,11 +184,11 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 							Map<String, String> newPistetiedot = rivi
 									.asAdditionalData();
 							if (originalPistetiedot.equals(newPistetiedot)) {
-								LOG.error("Ei muutoksia riville({},{})",
+								LOG.debug("Ei muutoksia riville({},{})",
 										rivi.getOid(), rivi.getNimi());
 							} else {
 								if (rivi.isValidi()) {
-									LOG.error("Rivi on muuttunut ja eheä. Tehdään päivitys hakupalveluun");
+									LOG.debug("Rivi on muuttunut ja eheä. Tehdään päivitys hakupalveluun");
 									Map<String, String> uudetTiedot = Maps
 											.newHashMap(originalPistetiedot);
 									uudetTiedot.putAll(newPistetiedot);
@@ -196,7 +196,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 											.setAdditionalData(uudetTiedot);
 									uudetPistetiedot.add(additionalData);
 								} else {
-									LOG.error("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
+									LOG.warn("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
 
 									for (PistesyottoArvo arvo : rivi.getArvot()) {
 										if (!arvo.isValidi()) {
