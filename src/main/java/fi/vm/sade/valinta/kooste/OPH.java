@@ -8,6 +8,7 @@ package fi.vm.sade.valinta.kooste;
  */
 public interface OPH {
 
+	public final String VALINTAPAJONOOID = "valintatapajonoOid";
 	public final String VALINNANVAIHE = "valinnanvaihe";
 	public final String TARJOAJAOID = "tarjoajaOid";
 	public final String HAKUOID = "hakuOid";

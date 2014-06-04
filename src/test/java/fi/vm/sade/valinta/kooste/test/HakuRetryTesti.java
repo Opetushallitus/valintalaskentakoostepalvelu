@@ -42,6 +42,12 @@ public class HakuRetryTesti {
 					true };
 			volatile int counter = 0;
 
+			@Override
+			public List<Hakemus> getApplicationsByOid(String aoOid,
+					List<String> appStates, int rows) {
+				return null;
+			}
+
 			public void failRandomly() {
 				++counter;
 				if (fail[counter % fail.length])

@@ -15,6 +15,7 @@ public class Teksti extends Solu {
 	private final boolean tasausVasemmalle;
 	private final boolean lukittu;
 	private final int preferoituleveys;
+	private final boolean editoitava;
 
 	public Teksti() {
 		this.teksti = null;
@@ -23,6 +24,7 @@ public class Teksti extends Solu {
 		this.tasausVasemmalle = true;
 		this.lukittu = false;
 		this.preferoituleveys = 0;
+		this.editoitava = false;
 	}
 
 	public Teksti(String teksti) {
@@ -32,6 +34,7 @@ public class Teksti extends Solu {
 		this.tasausVasemmalle = true;
 		this.lukittu = false;
 		this.preferoituleveys = 0;
+		this.editoitava = false;
 	}
 
 	public Teksti(String teksti, boolean tasausOikealle, boolean lukittu) {
@@ -41,6 +44,7 @@ public class Teksti extends Solu {
 		this.tasausVasemmalle = !tasausOikealle;
 		this.lukittu = lukittu;
 		this.preferoituleveys = 0;
+		this.editoitava = false;
 	}
 
 	public Teksti(String teksti, boolean tasausOikealle, boolean lukittu,
@@ -51,17 +55,19 @@ public class Teksti extends Solu {
 		this.tasausVasemmalle = !tasausOikealle;
 		this.lukittu = lukittu;
 		this.preferoituleveys = preferoituleveys;
+		this.editoitava = false;
 	}
 
 	public Teksti(String teksti, boolean tasausOikealle,
 			boolean tasausVasemmalle, boolean lukittu, int preferoituleveys,
-			int ulottuvuus) {
+			int ulottuvuus, boolean editoitava) {
 		this.teksti = teksti;
 		this.ulottuvuus = ulottuvuus;
 		this.tasausOikealle = tasausOikealle;
 		this.tasausVasemmalle = tasausVasemmalle;
 		this.lukittu = lukittu;
 		this.preferoituleveys = preferoituleveys;
+		this.editoitava = editoitava;
 	}
 
 	@Override
@@ -76,6 +82,12 @@ public class Teksti extends Solu {
 		this.tasausVasemmalle = true;
 		this.lukittu = false;
 		this.preferoituleveys = 0;
+		this.editoitava = false;
+	}
+
+	@Override
+	public boolean isMuokattava() {
+		return editoitava;
 	}
 
 	@Override

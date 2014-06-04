@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.hakemus.komponentti;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.camel.Property;
@@ -21,30 +20,36 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
  */
 @Component("haeHakukohteenHakemuksetKomponentti")
 public class HaeHakukohteenHakemuksetKomponentti {
-    private static final Logger LOG = LoggerFactory.getLogger(HaeHakukohteenHakemuksetKomponentti.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HaeHakukohteenHakemuksetKomponentti.class);
 
-    public static final List<String> ACTIVE_AND_INCOMPLETE = Arrays.asList("ACTIVE", "INCOMPLETE");
+	private ApplicationResource applicationResource;
+	private String applicationResourceUrl;
 
-    private ApplicationResource applicationResource;
-    private String applicationResourceUrl;
+	@Autowired
+	public HaeHakukohteenHakemuksetKomponentti(
+			ApplicationResource applicationResource,
+			@Value("${valintalaskentakoostepalvelu.hakemus.rest.url:''}") String applicationResourceUrl) {
+		this.applicationResourceUrl = applicationResourceUrl;
+		this.applicationResource = applicationResource;
+	}
 
-    @Autowired
-    public HaeHakukohteenHakemuksetKomponentti(ApplicationResource applicationResource,
-            @Value("${valintalaskentakoostepalvelu.hakemus.rest.url:''}") String applicationResourceUrl) {
-        this.applicationResourceUrl = applicationResourceUrl;
-        this.applicationResource = applicationResource;
-    }
-
-    public List<SuppeaHakemus> haeHakukohteenHakemukset(@Property(OPH.HAKUKOHDEOID) String hakukohdeOid) {
-        LOG.info("Haetaan HakemusList osoitteesta {}/applications?aoOid={}&start=0&rows={}", new Object[] {
-                applicationResourceUrl, hakukohdeOid, Integer.MAX_VALUE });
-        HakemusList hakemusList = applicationResource.findApplications(null, ACTIVE_AND_INCOMPLETE, null, null, null,
-                hakukohdeOid, 0, Integer.MAX_VALUE);
-        if (hakemusList == null || hakemusList.getResults() == null) { // ||
-                                                                       // hakemusList.getResults().isEmpty()
-            throw new HakemuspalveluException("Hakemuspalvelu ei palauttanut hakemuksia hakukohteelle " + hakukohdeOid);
-        }
-        LOG.info("Haettiin {} kpl hakemuksia", hakemusList.getResults().size());
-        return hakemusList.getResults();
-    }
+	public List<SuppeaHakemus> haeHakukohteenHakemukset(
+			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid) {
+		LOG.info(
+				"Haetaan HakemusList osoitteesta {}/applications?aoOid={}&start=0&rows={}",
+				new Object[] { applicationResourceUrl, hakukohdeOid,
+						Integer.MAX_VALUE });
+		HakemusList hakemusList = applicationResource.findApplications(null,
+				ApplicationResource.ACTIVE_AND_INCOMPLETE, null, null, null,
+				hakukohdeOid, 0, Integer.MAX_VALUE);
+		if (hakemusList == null || hakemusList.getResults() == null) { // ||
+																		// hakemusList.getResults().isEmpty()
+			throw new HakemuspalveluException(
+					"Hakemuspalvelu ei palauttanut hakemuksia hakukohteelle "
+							+ hakukohdeOid);
+		}
+		LOG.info("Haettiin {} kpl hakemuksia", hakemusList.getResults().size());
+		return hakemusList.getResults();
+	}
 }

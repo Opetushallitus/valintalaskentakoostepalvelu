@@ -403,6 +403,11 @@
         <property name="hakuLoppupvm" value="${haku.loppupvm}" />
     </bean>
     <!--
+		Valintatapajono
+	 -->
+	<bean class="fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResource"/>
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatapajono.route.impl"/>
+    <!--
 		Pistesyotto
 	 -->
 	<bean class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource"/>
