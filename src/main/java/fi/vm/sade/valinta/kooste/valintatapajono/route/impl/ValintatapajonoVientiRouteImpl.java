@@ -112,7 +112,6 @@ public class ValintatapajonoVientiRouteImpl extends
 						String valintatapajonoOid = valintatapajonoOid(exchange);
 
 						final List<Hakemus> hakemukset;
-						final List<ValinnanvaiheDTO> valinnanvaiheet;
 
 						try {
 							hakemukset = applicationResource
@@ -137,15 +136,27 @@ public class ValintatapajonoVientiRouteImpl extends
 											""));
 							throw e;
 						}
+						if (hakemukset.isEmpty()) {
+							LOG.error("Nolla hakemusta!");
+
+							dokumenttiprosessi(exchange).getPoikkeukset().add(
+									new Poikkeus(Poikkeus.HAKU,
+											"Hakukohteella ei ole hakemuksia!",
+											""));
+							throw new RuntimeException(
+									"Hakukohteelle saatiin tyhjä hakemusjoukko!");
+						}
+						final List<ValinnanvaiheDTO> valinnanvaiheet;
 						try {
 							valinnanvaiheet = hakukohdeResource
 									.hakukohde(hakukohde);
 							LOG.debug("Saatiin valinnanvaiheet {}",
 									hakemukset.size());
+
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 						} catch (Exception e) {
-							LOG.error("Hakemuspalvelun virhe: {}\r\n{}",
+							LOG.error("Valinnanvaiheiden haku virhe: {}\r\n{}",
 									e.getMessage(),
 									Arrays.toString(e.getStackTrace()));
 
@@ -156,6 +167,18 @@ public class ValintatapajonoVientiRouteImpl extends
 											"Valintalaskennalta ei saatu valinnanvaiheita",
 											""));
 							throw e;
+						}
+						if (valinnanvaiheet.isEmpty()) {
+							LOG.error("Nolla valinnanvaihetta!");
+
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.VALINTALASKENTA,
+											"Hakukohteelle ei löytynyt valinnanvaiheita!",
+											""));
+							throw new RuntimeException(
+									"Hakukohteelle ei löytynyt valinnanvaiheita!");
 						}
 						InputStream xlsx;
 						try {
