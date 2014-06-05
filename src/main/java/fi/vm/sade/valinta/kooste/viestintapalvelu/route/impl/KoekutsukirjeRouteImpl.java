@@ -67,7 +67,6 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
 	private final ApplicationResource applicationResource;
 	private final DokumenttiResource dokumenttiResource;
-	private final SecurityPreprocessor security = new SecurityPreprocessor();
 	// private final ValintakoeResource valintakoeResource;
 	private final String koekutsukirjeet;
 	private final String hakemuksilleKoekutsukirjeet;
@@ -115,7 +114,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.choice()
 				//
@@ -311,7 +310,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.end();
 
 		from(hakemuksilleKoekutsukirjeet)
-		//
+				//
 				.errorHandler(
 				//
 						deadLetterChannel(kirjeidenLuontiEpaonnistui())
@@ -321,7 +320,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -347,7 +346,8 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.stopOnException()
 				//
-				.process(security).to(hakemusOiditHakemuksiksi())
+				.process(SecurityPreprocessor.SECURITY)
+				.to(hakemusOiditHakemuksiksi())
 				//
 				.end()
 				//
@@ -370,7 +370,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.choice()
 				//
@@ -423,7 +423,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 		from(koekutsukirjeetHakemuksista())
 		//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.bean(koekutsukirjeetKomponentti)
 				//

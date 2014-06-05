@@ -57,7 +57,6 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 	private final ApplicationResource applicationResource;
 	private final ValintaperusteService valintaperusteService;
 	private final ValintalaskentaService valintalaskentaService;
-	private final SecurityPreprocessor security = new SecurityPreprocessor();
 
 	@Autowired
 	public ValintakoelaskentaMuistissaRouteImpl(
@@ -108,7 +107,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 		//
 		from(valintakoelaskenta)
 		//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.doTry()
 				//
@@ -181,7 +180,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.otherwise()
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -264,7 +263,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.otherwise()
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -333,7 +332,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.otherwise()
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -376,7 +375,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.choice()
 				//

@@ -77,7 +77,6 @@ public class ValintalaskentaMuistissaRouteImpl extends
 	private final String haeHakemusYksittainen;
 	private final String valintaperusteetTyojono;
 	private final String haeValintaperusteetYksittainen;
-	private final SecurityPreprocessor security;
 	private final HakuAppHakemus hakuAppHakemus;
 	private final HakuAppHakemusOids hakuAppHakemusOids;
 	private final Valintaperusteet valintaperusteet;
@@ -93,7 +92,7 @@ public class ValintalaskentaMuistissaRouteImpl extends
 		 */
 		from(valintalaskentaMuistissa)
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.setProperty(valvomoKuvaus,
 						constant("Muistinvarainen valintalaskenta haulle"))
@@ -168,7 +167,7 @@ public class ValintalaskentaMuistissaRouteImpl extends
 								.logStackTrace(false).logRetryStackTrace(false)
 								.logHandled(false))
 				// applications
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.choice()
 				//
@@ -265,7 +264,7 @@ public class ValintalaskentaMuistissaRouteImpl extends
 								.logStackTrace(false).logRetryStackTrace(false)
 								.logHandled(false))
 				// // /applications
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				// => hakemusOid
 				.process(hakemusHakuApplta())
@@ -310,7 +309,7 @@ public class ValintalaskentaMuistissaRouteImpl extends
 								.logStackTrace(false).logRetryStackTrace(false)
 								.logHandled(false))
 				// // /applications
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(valintaperusteet())
 				//
@@ -378,7 +377,7 @@ public class ValintalaskentaMuistissaRouteImpl extends
 								.logStackTrace(false).logRetryStackTrace(false)
 								.logHandled(false))
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.choice()
 				//
@@ -536,7 +535,6 @@ public class ValintalaskentaMuistissaRouteImpl extends
 		this.hakuAppHakemusOids = hakuAppHakemusOids;
 		this.valintalaskentaCache = valintalaskentaCache;
 		this.hakuAppHakemus = hakuAppHakemus;
-		this.security = new SecurityPreprocessor();
 		this.valvomoKuvaus = ValvomoAdminService.PROPERTY_VALVOMO_PROSESSIKUVAUS;
 		this.valvomoProsessi = ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI;
 		this.aloitaLaskenta = direct_aloita_laskenta;

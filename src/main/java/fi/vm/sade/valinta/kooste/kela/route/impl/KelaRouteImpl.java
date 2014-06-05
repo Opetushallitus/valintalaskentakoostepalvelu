@@ -73,7 +73,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet;
 	private final DokumenttiResource dokumenttiResource;
 	private final String kelaLuonti;
-	private final SecurityPreprocessor security = new SecurityPreprocessor();
 	private final HaunTyyppiKomponentti haunTyyppiKomponentti;
 	private final ApplicationResource applicationResource;
 	private final OppilaitosKomponentti oppilaitosKomponentti;
@@ -135,7 +134,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.setProperty("cache", constant(new KelaCache(koodiService)))
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				// haetaan kaikkia hakuOideja vastaavat haut tarjonnasta
 				.split(body())
 				//
@@ -319,7 +318,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.routeId("Hakemusten haku reitti")
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(new Processor() {
 
@@ -360,7 +359,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.routeId("Haun haku reitti")
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(new Processor() {
 					@Override
@@ -415,7 +414,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.routeId("Haun esitiedot keräävä reitti")
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(new Processor() {
 					@Override
@@ -462,7 +461,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.routeId("Lisähaun luova reitti")
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {

@@ -19,6 +19,12 @@ public class SecurityPreprocessor implements Processor {
 
 	public static final String SECURITY_CONTEXT_HEADER = "authentication";
 
+	public static final SecurityPreprocessor SECURITY = new SecurityPreprocessor();
+
+	private SecurityPreprocessor() {
+		// TODO Auto-generated constructor stub
+	}
+
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SecurityPreprocessor.class);
 

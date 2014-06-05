@@ -43,7 +43,6 @@ public class ValintalaskentaTulosRouteImpl extends
 	private ValintalaskennanTulosExcelKomponentti valintalaskennanTulosExcelKomponentti;
 	private ValintalaskentaTulosExcelKomponentti valintalaskentaTulosExcelKomponentti;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti haeHakukohdeNimiTarjonnaltaKomponentti;
-	private final SecurityPreprocessor security = new SecurityPreprocessor();
 	private final DokumenttiResource dokumenttiResource;
 	private final String valintakoekutsutXls;
 
@@ -101,7 +100,9 @@ public class ValintalaskentaTulosRouteImpl extends
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.process(security)
+				.routeId("Sijoitteluntulosten taulukkolaskentatyöjono")
+				//
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(asetaKokonaistyo(1))
 				//
@@ -159,7 +160,7 @@ public class ValintalaskentaTulosRouteImpl extends
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(haunJaHakukohteenNimet())
 				//
