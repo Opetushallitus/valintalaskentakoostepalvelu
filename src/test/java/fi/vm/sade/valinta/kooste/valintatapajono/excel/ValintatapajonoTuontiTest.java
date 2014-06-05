@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -29,6 +30,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
  * @author Jussi Jartamo
  * 
  */
+@Ignore
 public class ValintatapajonoTuontiTest {
 
 	@Test

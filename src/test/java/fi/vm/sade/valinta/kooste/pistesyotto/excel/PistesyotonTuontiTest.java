@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminen
  * 
  *         Pistesyoton tuonti XLSX-tiedostolla
  */
+@Ignore
 public class PistesyotonTuontiTest {
 
 	private static final Logger LOG = LoggerFactory
