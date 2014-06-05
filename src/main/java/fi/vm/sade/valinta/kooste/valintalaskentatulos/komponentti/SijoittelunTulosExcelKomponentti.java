@@ -53,7 +53,7 @@ public class SijoittelunTulosExcelKomponentti {
 	private ApplicationResource applicationResource;
 
 	public InputStream luoXls(
-			@Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
+			@Simple("${property.sijoitteluajoId}") String sijoitteluajoId,
 			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
 			@Simple("${property.hakuOid}") String hakuOid) {
 		Map<String, List<Valintatulos>> valintatulosCache = new HashMap<String, List<Valintatulos>>();
@@ -62,7 +62,7 @@ public class SijoittelunTulosExcelKomponentti {
 		try {
 			hakukohde = sijoitteluajoResource
 					.getHakukohdeBySijoitteluajoPlainDTO(hakuOid,
-							sijoitteluajoId.toString(), hakukohdeOid);
+							sijoitteluajoId, hakukohdeOid);
 		} catch (Exception e) {
 			e.printStackTrace();
 			LOG.error(

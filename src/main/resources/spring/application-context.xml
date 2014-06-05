@@ -199,7 +199,13 @@
                   serviceClass="fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource"
                   inheritHeaders="true">
         <jaxrs:outInterceptors>
-            <ref bean="ticketInterceptorRest"/>
+            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+                <property name="webCasUrl" value="${web.url.cas}"/>
+                <property name="targetService"
+                          value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>
+                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>
+                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>
+            </bean>
         </jaxrs:outInterceptors>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>

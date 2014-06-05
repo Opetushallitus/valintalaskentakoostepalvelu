@@ -35,7 +35,7 @@ public class ValintalaskentaTulosConfig {
 			throws Exception {
 		return ProxyWithAnnotationHelper
 				.createProxy(
-						context.getEndpoint(SijoittelunTulosExcelRoute.DIRECT_SIJOITTELU_EXCEL),
+						context.getEndpoint(SijoittelunTulosExcelRoute.SEDA_SIJOITTELU_EXCEL),
 						SijoittelunTulosExcelRoute.class);
 	}
 

@@ -90,8 +90,54 @@ public class ValintalaskentaTulosRouteImpl extends
 	public void configure() throws Exception {
 		from(JalkiohjaustulosExcelRoute.DIRECT_JALKIOHJAUS_EXCEL).bean(
 				jalkiohjaustulosExcelKomponentti);
-		from(SijoittelunTulosExcelRoute.DIRECT_SIJOITTELU_EXCEL).bean(
-				sijoittelunTulosExcelKomponentti);
+		from(SijoittelunTulosExcelRoute.SEDA_SIJOITTELU_EXCEL)
+		//
+				.errorHandler(
+				//
+						deadLetterChannel(
+								"direct:sijoitteluntulokset_xls_deadletterchannel")
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
+				//
+				.process(security)
+				//
+				.process(asetaKokonaistyo(1))
+				//
+				//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						String hakukohdeOid = hakukohdeOid(exchange);
+						String hakuOid = hakuOid(exchange);
+						String sijoitteluajoId = sijoitteluajoId(exchange);
+						try {
+							InputStream xls = sijoittelunTulosExcelKomponentti
+									.luoXls(sijoitteluajoId, hakukohdeOid,
+											hakuOid);
+							String id = generateId();
+							dokumenttiResource.tallenna(id, "sijoitteluntulos_"
+									+ hakukohdeOid + ".xls",
+									defaultExpirationDate().getTime(),
+									dokumenttiprosessi(exchange).getTags(),
+									"application/vnd.ms-excel", xls);
+
+							dokumenttiprosessi(exchange).setDokumenttiId(id);
+							dokumenttiprosessi(exchange)
+									.inkrementoiTehtyjaToita();
+						} catch (Exception e) {
+							LOG.error("{} {}", e.getMessage(),
+									Arrays.toString(e.getStackTrace()));
+							dokumenttiprosessi(exchange).getPoikkeukset().add(
+									new Poikkeus(Poikkeus.DOKUMENTTIPALVELU,
+											"Dokumenttipalvelulle tallennus", e
+													.getMessage()));
+							throw e;
+						}
+					}
+				})
+				//
+				.stop();
 
 		from(ValintalaskentaTulosExcelRoute.DIRECT_VALINTALASKENTA_EXCEL)
 		//
@@ -169,6 +215,22 @@ public class ValintalaskentaTulosRouteImpl extends
 						dokumenttiprosessi(exchange).getPoikkeukset().add(
 								new Poikkeus(Poikkeus.VALINTALASKENTA,
 										"Valintatiedotpalvelukutsu", message));
+					}
+				});
+		from("direct:sijoitteluntulokset_xls_deadletterchannel")
+		//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						String message = null;
+						if (null != exchange.getException()) {
+							message = exchange.getException().getMessage();
+						}
+						dokumenttiprosessi(exchange)
+								.getPoikkeukset()
+								.add(new Poikkeus(
+										Poikkeus.VALINTALASKENTA,
+										"Sijoittelun tulosten muodostaminen epäonnistui!",
+										message));
 					}
 				});
 	}
