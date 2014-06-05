@@ -100,11 +100,11 @@ public class ValintatapajonoVientiRouteImpl extends
 						HakukohdeNimiRDTO hnimi = hakukohdeTarjonnalta
 								.haeHakukohdeNimi(hakukohdeOid);
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-						String tarjoajaOid = hnimi.getTarjoajaOid();
+						// String tarjoajaOid = hnimi.getTarjoajaOid();
 						String hakukohdeNimi = new Teksti(hnimi
 								.getHakukohdeNimi()).getTeksti();
-						String tarjoajaNimi = new Teksti(hnimi
-								.getTarjoajaNimi()).getTeksti();
+						// String tarjoajaNimi = new
+						// Teksti(hnimi.getTarjoajaNimi()).getTeksti();
 						//
 						//
 						//

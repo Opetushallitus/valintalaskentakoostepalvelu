@@ -200,7 +200,7 @@ public class JalkiohjauskirjeetKomponentti {
 									.getTeksti(preferoituKielikoodi,
 											StringUtils.EMPTY));
 					tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(
-							valintatapajono.getTila(),
+							valintatapajono.getTila(), preferoituKielikoodi,
 							valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
 					if (valintatapajono.getHyvaksytty() == null) {
 						viestintapalveluLogi("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");

@@ -245,10 +245,13 @@ public class HyvaksymiskirjeetKomponentti {
 						// hylkaysperuste);
 						// }
 						tulokset.put("hylkaysperuste", hylkaysperuste);
-						tulokset.put("valinnanTulos",
-								HakemusUtil.tilaConverter(valintatapajono
-										.getTila(), valintatapajono
-										.isHyvaksyttyHarkinnanvaraisesti()));
+						tulokset.put(
+								"valinnanTulos",
+								HakemusUtil.tilaConverter(
+										valintatapajono.getTila(),
+										preferoituKielikoodi,
+										valintatapajono
+												.isHyvaksyttyHarkinnanvaraisesti()));
 						firstOnly = false;
 					}
 					if (valintatapajono.getHyvaksytty() == null) {
