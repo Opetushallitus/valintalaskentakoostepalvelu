@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.excel;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -19,6 +20,8 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
+import fi.vm.sade.valinta.kooste.excel.Excel;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 
 /**
@@ -32,7 +35,7 @@ public class ValintatapajonoTuontiTest {
 	public void testaaValintatapajonoTuonti() throws JsonSyntaxException,
 			IOException {
 		// fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValinnanvaiheDTO;
-		List<ValinnanvaiheDTO> v = new GsonBuilder()
+		List<ValinnanvaiheDTO> valinnanvaihe = new GsonBuilder()
 				.registerTypeAdapter(Date.class, new JsonDeserializer() {
 					@Override
 					public Object deserialize(JsonElement json, Type typeOfT,
@@ -47,9 +50,48 @@ public class ValintatapajonoTuontiTest {
 				.fromJson(resurssi("valinnanvaihe.json"),
 						new TypeToken<ArrayList<ValinnanvaiheDTO>>() {
 						}.getType());
-		ValintatapajonoExcel excel = new ValintatapajonoExcel("hakuOid",
-				"hakukohdeOid", "1400827524125-5286600445600454965",
-				"Haun Nimi", "Hakukohteen Nimi", v);
+
+		// List<ValinnanVaiheJonoillaDTO> valinnanvaiheJonoillaDto = new
+		// GsonBuilder()
+		// .registerTypeAdapter(Date.class, new JsonDeserializer() {
+		// @Override
+		// public Object deserialize(JsonElement json, Type typeOfT,
+		// JsonDeserializationContext context)
+		// throws JsonParseException {
+		// // TODO Auto-generated method stub
+		// return new Date(json.getAsJsonPrimitive().getAsLong());
+		// }
+		//
+		// })
+		// .create()
+		// .fromJson(resurssi("ilmanlaskentaa.json"),
+		// new TypeToken<ArrayList<ValinnanVaiheJonoillaDTO>>() {
+		// }.getType());
+
+		List<Hakemus> hakemukset = new GsonBuilder()
+				.registerTypeAdapter(Date.class, new JsonDeserializer() {
+					@Override
+					public Object deserialize(JsonElement json, Type typeOfT,
+							JsonDeserializationContext context)
+							throws JsonParseException {
+						// TODO Auto-generated method stub
+						return new Date(json.getAsJsonPrimitive().getAsLong());
+					}
+
+				})
+				.create()
+				.fromJson(resurssi("listfull.json"),
+						new TypeToken<ArrayList<Hakemus>>() {
+						}.getType());
+
+		ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(
+				"hakuOid", "hakukohdeOid", "14017934785463582418268204255542",
+				"Haun Nimi", "Hakukohteen Nimi", valinnanvaihe, hakemukset);
+		Excel excel = valintatapajonoExcel.getExcel();
+		if (false) {
+			IOUtils.copy(excel.vieXlsx(), new FileOutputStream(
+					"valintatapajono.xlsx"));
+		}
 
 	}
 

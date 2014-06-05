@@ -69,7 +69,7 @@ public class KoostepalveluContext {
 					HakemusTyyppi.class, Hakemus.class,
 					new HakemusToHakemusTyyppiConverter());
 
-			camelContext.disableJMX();
+			// camelContext.disableJMX();
 			camelContext.setAutoStartup(true);
 			for (RoutesBuilder route : routes) {
 				camelContext.addRoutes(route);

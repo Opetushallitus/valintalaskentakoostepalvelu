@@ -8,17 +8,27 @@ public class TekstiArvo extends Arvo {
 
 	private final String teksti;
 	private final boolean nimike;
+	private final boolean editoitava;
 
 	public TekstiArvo(String teksti) {
 		super(ArvoTyyppi.NIMIKE);
 		this.teksti = teksti;
 		this.nimike = true;
+		this.editoitava = false;
 	}
 
 	public TekstiArvo(String teksti, boolean nimike) {
 		super(ArvoTyyppi.NIMIKE);
 		this.teksti = teksti;
 		this.nimike = nimike;
+		this.editoitava = false;
+	}
+
+	public TekstiArvo(String teksti, boolean nimike, boolean editoitava) {
+		super(ArvoTyyppi.NIMIKE);
+		this.teksti = teksti;
+		this.nimike = nimike;
+		this.editoitava = editoitava;
 	}
 
 	@Override
@@ -31,8 +41,9 @@ public class TekstiArvo extends Arvo {
 		if (!nimike) {
 			preferoituleveys = Excel.VAKIO_LEVEYS / 2;
 		}
-		return new Teksti(teksti, true, teksti == null, preferoituleveys);// ,
-																			// Excel.VAKIO_LEVEYS
+		return new Teksti(teksti, true, false, teksti == null,
+				preferoituleveys, 1, editoitava);// ,
+		// Excel.VAKIO_LEVEYS
 		// / 2);
 	}
 

@@ -37,8 +37,8 @@ import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemusUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -245,10 +245,13 @@ public class HyvaksymiskirjeetKomponentti {
 						// hylkaysperuste);
 						// }
 						tulokset.put("hylkaysperuste", hylkaysperuste);
-						tulokset.put("valinnanTulos",
-								HakemusUtil.tilaConverter(valintatapajono
-										.getTila(), valintatapajono
-										.isHyvaksyttyHarkinnanvaraisesti()));
+						tulokset.put(
+								"valinnanTulos",
+								HakemusUtil.tilaConverter(
+										valintatapajono.getTila(),
+										preferoituKielikoodi,
+										valintatapajono
+												.isHyvaksyttyHarkinnanvaraisesti()));
 						firstOnly = false;
 					}
 					if (valintatapajono.getHyvaksytty() == null) {

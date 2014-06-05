@@ -56,7 +56,8 @@ public class OidRivi extends Rivi {
 			int vali, boolean keskitetty) {
 		Collection<Solu> solut = Lists.newArrayList();
 		for (String teksti : tekstit) {
-			solut.add(new Teksti(teksti, keskitetty, keskitetty, false, 0, vali));
+			solut.add(new Teksti(teksti, keskitetty, keskitetty, false, 0,
+					vali, false));
 			// for (int i = 0; i < vali; ++i) {
 			// solut.add(Teksti.tyhja());
 			// }

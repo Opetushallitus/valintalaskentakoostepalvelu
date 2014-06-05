@@ -225,7 +225,7 @@ public class PistesyottoExcel {
 				}).toList()) {
 			otsikkoRiviBuilder.addTyhja().addKeskitettyTeksti("Osallistuminen");
 			valintakoeOtsikkoRiviBuilder.addSolu(new Teksti(valintakoe, true,
-					true, false, 0, 2));
+					true, false, 0, 2, false));
 		}
 		rivit.add(valintakoeOtsikkoRiviBuilder.build());
 		rivit.add(otsikkoRiviBuilder.build());

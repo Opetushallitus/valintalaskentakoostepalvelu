@@ -43,7 +43,7 @@ public class RiviBuilder {
 	}
 
 	public RiviBuilder addKeskitettyTeksti(String teksti) {
-		rivit.add(new Rivi(new Teksti(teksti, true, true, false, 0, 1)));
+		rivit.add(new Rivi(new Teksti(teksti, true, true, false, 0, 1, false)));
 		return this;
 	}
 

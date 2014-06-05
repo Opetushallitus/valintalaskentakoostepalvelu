@@ -5,7 +5,7 @@ import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_EROTIN;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
 import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
-import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemusUtil.ASIOINTIKIELI;
+import static fi.vm.sade.valinta.kooste.util.HakemusUtil.ASIOINTIKIELI;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -31,8 +31,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HakemusUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -200,7 +200,7 @@ public class JalkiohjauskirjeetKomponentti {
 									.getTeksti(preferoituKielikoodi,
 											StringUtils.EMPTY));
 					tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(
-							valintatapajono.getTila(),
+							valintatapajono.getTila(), preferoituKielikoodi,
 							valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
 					if (valintatapajono.getHyvaksytty() == null) {
 						viestintapalveluLogi("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
