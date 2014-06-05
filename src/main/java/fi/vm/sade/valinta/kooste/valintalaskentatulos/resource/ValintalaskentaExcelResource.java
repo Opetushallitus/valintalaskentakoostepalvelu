@@ -140,22 +140,26 @@ public class ValintalaskentaExcelResource {
 		}
 	}
 
-	@GET
+	@POST
 	@Path("/sijoitteluntulos/aktivoi")
-	@Produces("application/vnd.ms-excel")
+	@Consumes("application/json")
+	@Produces("application/json")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Sijoittelun tulokset Excel-raporttina", response = Response.class)
-	public Response haeSijoittelunTuloksetExcelMuodossa(
-			@QueryParam("sijoitteluajoId") Long sijoitteluajoId,
+	public ProsessiId haeSijoittelunTuloksetExcelMuodossa(
+			@QueryParam("sijoitteluajoId") String sijoitteluajoId,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("hakuOid") String hakuOid) {
+			@QueryParam("hakuOid") String hakuOid) throws Exception {
 		try {
-			InputStream input = sijoittelunTulosExcelProxy.luoXls(hakukohdeOid,
-					sijoitteluajoId, hakuOid);
-			return Response
-					.ok(input, APPLICATION_VND_MS_EXCEL)
-					.header("content-disposition",
-							"inline; filename=sijoitteluntulos.xls").build();
+			DokumenttiProsessi p = new DokumenttiProsessi(
+					"Sijoitteluntulosexcel",
+					"Sijoitteluntulokset taulukkolaskenta tiedosto", "",
+					Arrays.asList("sijoitteluntulos", "taulukkolaskenta"));
+			sijoittelunTulosExcelProxy.luoXls(p, hakukohdeOid, sijoitteluajoId,
+					hakuOid, SecurityContextHolder.getContext()
+							.getAuthentication());
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(p);
+			return p.toProsessiId();
 		} catch (Exception e) {
 			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
 			// todennäköisin syy on sijoittelupalvelun tai hakemuspalvelun
@@ -165,13 +169,7 @@ public class ValintalaskentaExcelResource {
 					"Sijoitteluntulos excelin luonti epäonnistui hakukohteelle {} ja sijoitteluajolle {}: {}",
 					new Object[] { hakukohdeOid, sijoitteluajoId,
 							e.getMessage() });
-			return Response
-					.ok(ExcelExportUtil.exportGridAsXls(new Object[][] { new Object[] {
-							"Tarvittavien tietojen hakeminen epäonnistui!",
-							"Hakemuspalvelu saattaa olla ylikuormittunut!",
-							"Yritä uudelleen!" } }), APPLICATION_VND_MS_EXCEL)
-					.header("content-disposition",
-							"inline; filename=yritauudelleen.xls").build();
+			throw e;
 		}
 	}
 
