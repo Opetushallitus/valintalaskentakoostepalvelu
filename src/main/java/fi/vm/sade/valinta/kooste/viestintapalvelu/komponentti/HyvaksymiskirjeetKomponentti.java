@@ -234,8 +234,11 @@ public class HyvaksymiskirjeetKomponentti {
 					if (firstOnly) {
 						if (VARALLA.equals(valintatapajono.getTila())
 								&& valintatapajono.getVarasijanNumero() != null) {
-							tulokset.put("varasija", "Varasijan numero on "
-									+ valintatapajono.getVarasijanNumero());
+
+							tulokset.put("varasija", HakemusUtil
+									.varasijanNumeroConverter(valintatapajono
+											.getVarasijanNumero(),
+											preferoituKielikoodi));
 						}
 						String hylkaysperuste = new Teksti(
 								valintatapajono.getTilanKuvaukset()).getTeksti(
