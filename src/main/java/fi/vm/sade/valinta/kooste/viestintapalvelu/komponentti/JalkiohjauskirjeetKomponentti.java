@@ -192,8 +192,10 @@ public class JalkiohjauskirjeetKomponentti {
 					// selitteita jarkevasti
 					if (VARALLA.equals(valintatapajono.getTila())
 							&& valintatapajono.getVarasijanNumero() != null) {
-						tulokset.put("varasija", "Varasijan numero on "
-								+ valintatapajono.getVarasijanNumero());
+						tulokset.put("varasija", HakemusUtil
+								.varasijanNumeroConverter(
+										valintatapajono.getVarasijanNumero(),
+										preferoituKielikoodi));
 					}
 					tulokset.put("selite",
 							new Teksti(valintatapajono.getTilanKuvaukset())
