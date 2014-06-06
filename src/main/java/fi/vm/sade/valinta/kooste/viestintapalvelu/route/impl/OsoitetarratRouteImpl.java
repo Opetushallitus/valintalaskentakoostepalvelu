@@ -72,7 +72,6 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final ValintakoeResource valintakoeResource;
 	private final HaeOsoiteKomponentti osoiteKomponentti;
 	private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
-	private final SecurityPreprocessor security = new SecurityPreprocessor();
 	private final String osoitetarrat;
 	private final DokumenttiResource dokumenttiResource;
 	private final ApplicationResource applicationResource;
@@ -167,7 +166,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(haeHakemuksetJaOsoitteet());
 
@@ -185,7 +184,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.choice()
 				// Jos luodaan vain yksittaiselle hakemukselle...
@@ -227,7 +226,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 				// enrich to Osoitteet
 				.bean(new LuoOsoitteet())
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -306,7 +305,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 		// "DokumenttiTyyppi"
 		from("direct:osoitetarrat_resolve_hakemukset")
 				//
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.choice()
 				//

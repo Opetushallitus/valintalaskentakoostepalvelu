@@ -100,7 +100,7 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 		from("direct:sijoitteluSuoritaReitti")
 		//
-				.process(new SecurityPreprocessor())
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.bean(sijoitteluSuoritaKomponentti);
 
@@ -119,7 +119,7 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 		// Object[] { hakuOid });
 		from(sijoitteluAktivoi)
 		//
-				.process(new SecurityPreprocessor())
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(asetaKokonaistyo(2))
 				//

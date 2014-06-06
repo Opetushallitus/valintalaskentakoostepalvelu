@@ -48,7 +48,6 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final String hyvaksymiskirjeet;
 	private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 	private final DokumenttiResource dokumenttiResource;
-	private final SecurityPreprocessor security = new SecurityPreprocessor();
 	private final String dokumenttipalveluUrl;
 
 	@Autowired
@@ -71,8 +70,10 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		from(hyvaksymiskirjeet)
+				//
+				.routeId("Hyväksymiskirjeet työjono")
 				// TODO: Hae osoitteet erikseen
-				.process(security)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.choice()
 				//

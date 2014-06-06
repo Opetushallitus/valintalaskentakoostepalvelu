@@ -108,7 +108,7 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.bean(new SecurityPreprocessor())
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.choice()
 				//

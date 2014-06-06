@@ -36,7 +36,6 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
 	private final SuoritaHakuImportKomponentti suoritaHakuImportKomponentti;
 	private final SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti;
-	private final SecurityPreprocessor securityProcessor;
 	private final ValintaperusteService valintaperusteService;
 	private final ExecutorService hakuImportThreadPool;
 
@@ -49,7 +48,6 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 		this.suoritaHakuImportKomponentti = suoritaHakuImportKomponentti;
 		this.tarjontaJaKoodistoHakukohteenHakuKomponentti = tarjontaJaKoodistoHakukohteenHakuKomponentti;
 		this.valintaperusteService = valintaperusteService;
-		this.securityProcessor = new SecurityPreprocessor();
 		this.hakuImportThreadPool = Executors
 				.newFixedThreadPool(hakuImportThreadpoolSize);
 	}
@@ -117,7 +115,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 								.logStackTrace(false).logExhausted(true)
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.bean(securityProcessor)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.bean(tarjontaJaKoodistoHakukohteenHakuKomponentti)
 				//
@@ -129,7 +127,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 				.errorHandler(
 						deadLetterChannel("direct:hakuimport_epaonnistui"))
 				// .policy(admin)
-				.bean(securityProcessor)
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.setProperty(kuvaus(), constant("Haun importointi"))
 				.setProperty(prosessi(),

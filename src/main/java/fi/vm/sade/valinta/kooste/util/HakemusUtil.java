@@ -14,6 +14,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Maps;
+
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 
 public class HakemusUtil {
@@ -21,7 +23,16 @@ public class HakemusUtil {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HakemusUtil.class);
 	private final static Map<String, Map<HakemuksenTila, String>> TILAT = valmistaTilat();
+	private final static Map<String, String> VARASIJAT = varasijaTekstinTilat();
 	public static final String ASIOINTIKIELI = "asiointikieli";
+
+	private static Map<String, String> varasijaTekstinTilat() {
+		Map<String, String> varasijaTekstinTilat = Maps.newHashMap();
+		varasijaTekstinTilat.put(KieliUtil.SUOMI, "Varasijan numero on ");
+		varasijaTekstinTilat.put(KieliUtil.RUOTSI, "Reservplatsens nummer är ");
+		varasijaTekstinTilat.put(KieliUtil.ENGLANTI, "Waiting list number is ");
+		return varasijaTekstinTilat;
+	}
 
 	private static Map<String, Map<HakemuksenTila, String>> valmistaTilat() {
 
@@ -53,6 +64,12 @@ public class HakemusUtil {
 		kielet.put(KieliUtil.RUOTSI, Collections.unmodifiableMap(sv));
 		kielet.put(KieliUtil.ENGLANTI, Collections.unmodifiableMap(en));
 		return Collections.unmodifiableMap(kielet);
+	}
+
+	public static String varasijanNumeroConverter(Integer numero,
+			String preferoitukielikoodi) {
+		return new StringBuilder().append(VARASIJAT.get(preferoitukielikoodi))
+				.append(numero).toString();
 	}
 
 	public static String tilaConverter(HakemuksenTila tila,

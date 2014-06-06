@@ -17,7 +17,6 @@ import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.valinta.kooste.converter.HakemusToHakemusTyyppiConverter;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig;
-import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 
 /**
  * @author Jussi Jartamo.
@@ -82,10 +81,6 @@ public class KoostepalveluContext {
 			return new PropertySourcesPlaceholderConfigurer();
 		}
 
-		@Bean
-		public static SecurityPreprocessor getSecurityPreprocessor() {
-			return new SecurityPreprocessor();
-		}
 	}
 
 }
