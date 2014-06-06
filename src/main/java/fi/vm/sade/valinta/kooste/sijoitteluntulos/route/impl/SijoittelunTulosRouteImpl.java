@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.io.IOUtils;
@@ -47,8 +46,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta;
 	private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
 	private final DokumenttiResource dokumenttiResource;
-	private final Endpoint hakukohteidenHaku;
-	private final Endpoint luontiEpaonnistui;
+	private final String hakukohteidenHaku;
+	private final String luontiEpaonnistui;
 	private final String taulukkolaskenta;
 	private final String hyvaksymiskirjeet;
 
@@ -59,8 +58,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 			HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta,
 			SijoittelunTulosExcelKomponentti sijoittelunTulosExcel,
 			DokumenttiResource dokumenttiResource) {
-		this.hakukohteidenHaku = endpoint("direct:sijoitteluntulos_hakukohteiden_haku");
-		this.luontiEpaonnistui = endpoint("direct:sijoitteluntulos_koko_haulle_deadletterchannel");
+		this.hakukohteidenHaku = "direct:sijoitteluntulos_hakukohteiden_haku";
+		this.luontiEpaonnistui = "direct:sijoitteluntulos_koko_haulle_deadletterchannel";
 		this.hakukohteetTarjonnalta = hakukohteetTarjonnalta;
 		this.sijoittelunTulosExcel = sijoittelunTulosExcel;
 		this.dokumenttiResource = dokumenttiResource;
@@ -77,14 +76,14 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 	}
 
 	private void configureTaulukkolaskenta() {
-		Endpoint yksittainenTaulukkoTyo = endpoint("seda:sijoitteluntulos_taulukkolaskenta_haulle_yksittainentulos?"
+		String yksittainenTaulukkoTyo = "seda:sijoitteluntulos_taulukkolaskenta_haulle_yksittainentulos?"
 				+
 				// jos palvelin sammuu niin ei suorita loppuun tyojonoa
 				"purgeWhenStopping=true" +
 				// reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
 				"&waitForTaskToComplete=Never" +
 				// tyojonossa on yksi tyostaja
-				"&concurrentConsumers=10");
+				"&concurrentConsumers=10";
 		from(taulukkolaskenta)
 				//
 				.errorHandler(
@@ -107,6 +106,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.split(body())
 				//
 				.stopOnException()
+				//
+				.shareUnitOfWork()
 				//
 				.to(yksittainenTaulukkoTyo)
 				//
@@ -248,14 +249,14 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 	}
 
 	private void configureHyvaksymiskirjeet() {
-		Endpoint yksittainenHyvaksymiskirjeTyo = endpoint("seda:sijoitteluntulos_hyvaksymiskirjeet_haulle_yksittainentulos?"
+		String yksittainenHyvaksymiskirjeTyo = "seda:sijoitteluntulos_hyvaksymiskirjeet_haulle_yksittainentulos?"
 				+
 				// jos palvelin sammuu niin ei suorita loppuun tyojonoa
 				"purgeWhenStopping=true" +
 				// reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
 				"&waitForTaskToComplete=Never" +
 				// tyojonossa on yksi tyostaja
-				"&concurrentConsumers=10");
+				"&concurrentConsumers=10";
 		from(yksittainenHyvaksymiskirjeTyo)
 		//
 				.routeId(
@@ -288,6 +289,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.split(body())
 				//
 				.stopOnException()
+				//
+				.shareUnitOfWork()
 				//
 				.to(yksittainenHyvaksymiskirjeTyo)
 				//
