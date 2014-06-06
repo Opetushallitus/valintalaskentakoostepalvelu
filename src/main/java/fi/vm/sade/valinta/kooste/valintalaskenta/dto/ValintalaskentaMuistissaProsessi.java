@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,7 +27,6 @@ public class ValintalaskentaMuistissaProsessi extends DokumenttiProsessi {
 	private final OsaTyo valintalaskenta;
 	private final KokonaisTyo kokonaistyo;
 	private final boolean peruutaProsessiPoikkeuksesta;
-	private final Collection<Varoitus> varoitukset;
 
 	private List<String> kasitellytHakukohteet = Collections
 			.synchronizedList(Lists.<String> newArrayList());
@@ -48,8 +46,6 @@ public class ValintalaskentaMuistissaProsessi extends DokumenttiProsessi {
 			final OsaTyo hakemukset, final OsaTyo valintaperusteet) {
 		super("Valintalaskentamuistissa", "Haulle", hakuOid, Arrays
 				.asList("valintalaskenta"));
-		this.varoitukset = Collections.synchronizedList(Lists
-				.<Varoitus> newArrayList());
 		this.peruutaProsessiPoikkeuksesta = true;
 		this.valintalaskenta = valintalaskenta;
 		this.hakukohteilleHakemukset = hakukohteilleHakemukset;
@@ -58,10 +54,6 @@ public class ValintalaskentaMuistissaProsessi extends DokumenttiProsessi {
 		this.kokonaistyo = new KokonaisTyo(Arrays.asList(valintalaskenta,
 				valintaperusteet, hakukohteilleHakemukset, hakemukset));
 
-	}
-
-	public Collection<Varoitus> getVaroitukset() {
-		return varoitukset;
 	}
 
 	public OsaTyo getValintaperusteet() {

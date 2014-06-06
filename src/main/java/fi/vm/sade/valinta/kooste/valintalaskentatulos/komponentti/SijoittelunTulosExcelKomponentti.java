@@ -57,7 +57,6 @@ public class SijoittelunTulosExcelKomponentti {
 			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
 			@Simple("${property.hakuOid}") String hakuOid) {
 		Map<String, List<Valintatulos>> valintatulosCache = new HashMap<String, List<Valintatulos>>();
-		Map<String, Hakemus> hakemukset = Maps.newHashMap();
 		HakukohdeDTO hakukohde;
 		try {
 			hakukohde = sijoitteluajoResource
@@ -86,6 +85,7 @@ public class SijoittelunTulosExcelKomponentti {
 								o2.getPrioriteetti());
 					}
 				});
+		Map<String, Hakemus> hakemukset = haeHakemukset(hakukohdeOid);
 		for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
 			rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
 			rivit.add(new Object[] { "Jonosija", "Hakemus", "Hakija",
@@ -138,7 +138,7 @@ public class SijoittelunTulosExcelKomponentti {
 				}
 				nimi.append(hakemus.getSukunimi()).append(", ")
 						.append(hakemus.getEtunimi());
-				Hakemus application = haeHakemus(hakemusOid, hakemukset);
+				Hakemus application = hakemukset.get(hakemusOid);
 				Yhteystiedot yhteystiedot = Yhteystiedot
 						.yhteystiedotHakemukselta(application);
 				rivit.add(new Object[] {
@@ -162,15 +162,13 @@ public class SijoittelunTulosExcelKomponentti {
 				.exportGridAsXls(rivit.toArray(new Object[][] {}));
 	}
 
-	private Hakemus haeHakemus(String hakemusOid,
-			Map<String, Hakemus> hakemukset) {
-		if (hakemukset.containsKey(hakemusOid)) {
-			return hakemukset.get(hakemusOid);
-		} else {
-			Hakemus h = applicationResource.getApplicationByOid(hakemusOid);
-			hakemukset.put(hakemusOid, h);
-			return h;
+	private Map<String, Hakemus> haeHakemukset(String hakukohdeOid) {
+		Map<String, Hakemus> tmp = Maps.newHashMap();
+		for (Hakemus h : applicationResource.getApplicationsByOid(hakukohdeOid,
+				ApplicationResource.ACTIVE_AND_INCOMPLETE, Integer.MAX_VALUE)) {
+			tmp.put(h.getOid(), h);
 		}
+		return tmp;
 	}
 
 	private String muokattu(List<TilaHistoriaDTO> h) {
