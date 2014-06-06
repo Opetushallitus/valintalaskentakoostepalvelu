@@ -78,8 +78,8 @@ public class OsaTyo extends Tyo {
 		return tehty.get();
 	}
 
-	public void tyoValmistui(long kesto) {
-		tehty.incrementAndGet();
+	public int tyoValmistui(long kesto) {
+		return tehty.incrementAndGet();
 	}
 
 	public void tyoOhitettu() {

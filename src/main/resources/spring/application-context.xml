@@ -415,6 +415,11 @@
         <property name="hakuLoppupvm" value="${haku.loppupvm}" />
     </bean>
     <!--
+		Sijoitteluntulokset haulle
+	 -->
+	<bean class="fi.vm.sade.valinta.kooste.sijoitteluntulos.resource.SijoittelunTulosHaulleResource"/>
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoitteluntulos.route.impl"/>
+    <!--
 		Valintatapajono
 	 -->
 	<bean class="fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResource"/>

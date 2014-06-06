@@ -13,6 +13,7 @@ import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.ValueBuilder;
 import org.apache.camel.spring.SpringRouteBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
 import org.jgroups.util.UUID;
 import org.joda.time.DateTime;
@@ -20,6 +21,7 @@ import org.joda.time.DateTime;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -33,20 +35,18 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
  */
 public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder {
 
-	private final Processor inkrementoiKokonaistyota;
-	private final Processor inkrementoiTehtyjaToita;
+	private final Processor inkrementoiKokonaistyota = new Processor() {
+		public void process(Exchange exchange) throws Exception {
+			dokumenttiprosessi(exchange).inkrementoiKokonaistyota();
+		}
+	};
+	private final Processor inkrementoiTehtyjaToita = new Processor() {
+		public void process(Exchange exchange) throws Exception {
+			dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+		}
+	};
 
 	public AbstractDokumenttiRouteBuilder() {
-		this.inkrementoiKokonaistyota = new Processor() {
-			public void process(Exchange exchange) throws Exception {
-				dokumenttiprosessi(exchange).inkrementoiKokonaistyota();
-			}
-		};
-		this.inkrementoiTehtyjaToita = new Processor() {
-			public void process(Exchange exchange) throws Exception {
-				dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-			}
-		};
 	}
 
 	protected Processor merkkaaTyoTehdyksi() {
@@ -109,6 +109,15 @@ public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder 
 
 	protected String generateId() {
 		return UUID.randomUUID().toString();
+	}
+
+	protected Exception kasittelePoikkeus(String palvelu, Exchange exchange,
+			Exception exception, Oid... oids) {
+		exchange.setException(exception);
+		dokumenttiprosessi(exchange).getPoikkeukset().add(
+				new Poikkeus(palvelu, StringUtils.EMPTY,
+						exception.getMessage(), oids));
+		return exception;
 	}
 
 	protected Processor kirjaaPoikkeus(final Poikkeus... poikkeus) {

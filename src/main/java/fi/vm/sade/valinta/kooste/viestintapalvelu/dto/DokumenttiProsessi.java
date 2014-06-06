@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.OsaTyo;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
@@ -25,6 +26,7 @@ public class DokumenttiProsessi extends Prosessi {
 	private AtomicReference<String> dokumenttiId;
 	private final List<String> tags;
 	private final Collection<Poikkeus> poikkeukset = new CopyOnWriteArrayList<Poikkeus>();
+	private final Collection<Varoitus> varoitukset = new CopyOnWriteArrayList<Varoitus>();
 	private final transient Collection<Poikkeus> poikkeuksetUudelleenYrityksessa = new CopyOnWriteArrayList<Poikkeus>();
 
 	public DokumenttiProsessi(String resurssi, String toiminto, String hakuOid,
@@ -88,8 +90,12 @@ public class DokumenttiProsessi extends Prosessi {
 		this.kokonaistyo.inkrementoiKokonaismaaraa(delta);
 	}
 
-	public void inkrementoiTehtyjaToita() {
-		this.kokonaistyo.tyoValmistui(0L);
+	public int inkrementoiTehtyjaToita() {
+		return this.kokonaistyo.tyoValmistui(0L);
+	}
+
+	public void inkrementoiOhitettujaToita() {
+		this.kokonaistyo.tyoOhitettu();
 	}
 
 	public void setKokonaistyo(int arvo) {
@@ -99,4 +105,9 @@ public class DokumenttiProsessi extends Prosessi {
 	public ProsessiId toProsessiId() {
 		return new ProsessiId(getId());
 	}
+
+	public Collection<Varoitus> getVaroitukset() {
+		return varoitukset;
+	}
+
 }
