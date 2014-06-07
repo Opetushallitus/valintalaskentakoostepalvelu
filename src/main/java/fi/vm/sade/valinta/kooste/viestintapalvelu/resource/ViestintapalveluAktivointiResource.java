@@ -192,7 +192,7 @@ public class ViestintapalveluAktivointiResource {
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
-			@QueryParam("sisalto") String sisalto, @QueryParam("tag") String tag) {
+			@QueryParam("tag") String tag) {
 		try {
 			if (hakemuksillaRajaus == null) {
 				hakemuksillaRajaus = new DokumentinLisatiedot();
@@ -203,7 +203,8 @@ public class ViestintapalveluAktivointiResource {
 			dokumenttiProsessiKomponentti
 					.tuoUusiProsessi(jalkiohjauskirjeetProsessi);
 			jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(
-					jalkiohjauskirjeetProsessi, tarjoajaOid, sisalto, tag,
+					jalkiohjauskirjeetProsessi, tarjoajaOid,
+					hakemuksillaRajaus.getLetterBodyText(), tag,
 					hakemuksillaRajaus.getHakemusOids(), hakuOid,
 					//
 					SecurityContextHolder.getContext().getAuthentication());
@@ -226,7 +227,6 @@ public class ViestintapalveluAktivointiResource {
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
-			@QueryParam("sisalto") String sisalto,
 			@QueryParam("templateName") String templateName,
 			@QueryParam("tag") String tag,
 			@QueryParam("hakuOid") String hakuOid,
@@ -243,7 +243,8 @@ public class ViestintapalveluAktivointiResource {
 			hyvaksymiskirjeetRoute.hyvaksymiskirjeetAktivointi(
 					hyvaksymiskirjeetProsessi,
 					//
-					tarjoajaOid, sisalto, templateName, tag,
+					tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
+					templateName, tag,
 					//
 					hakukohdeOid, hakemuksillaRajaus.getHakemusOids(), hakuOid,
 					sijoitteluajoId, SecurityContextHolder.getContext()
