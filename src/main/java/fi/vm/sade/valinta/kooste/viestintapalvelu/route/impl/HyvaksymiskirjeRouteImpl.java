@@ -22,10 +22,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
@@ -34,8 +31,8 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HakutoiveenValintatapajonoComparator;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakijaPredicate;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 
@@ -120,44 +117,8 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 							// hakukohteenHakijat.size());
 							Collection<HakijaDTO> ascending = Collections2
 									.filter(hakukohteenHakijat,
-											new Predicate<HakijaDTO>() {
-												public boolean apply(
-														HakijaDTO input) {
-													if (input.getHakutoiveet() == null) {
-														LOG.error(
-																"Sijoittelulta hakemus({}) jolla ei ole hakutoiveita!",
-																input.getHakemusOid());
-													} else {
-														for (HakutoiveDTO h : input
-																.getHakutoiveet()) {
-
-															if (hakukohdeOid.equals(h
-																	.getHakukohdeOid())) {
-																final boolean checkFirstValintatapajonoOnly = true;
-																// sort by
-																// priority
-																Collections.sort(
-																		h.getHakutoiveenValintatapajonot(),
-																		HakutoiveenValintatapajonoComparator.DEFAULT);
-
-																for (HakutoiveenValintatapajonoDTO vjono : h
-																		.getHakutoiveenValintatapajonot()) {
-																	if (HakemuksenTila.HYVAKSYTTY
-																			.equals(vjono
-																					.getTila())) {
-																		return true;
-																	}
-																	if (checkFirstValintatapajonoOnly) {
-																		return false;
-																	}
-																}
-															}
-
-														}
-													}
-													return false;
-												}
-											});
+											new SijoittelussaHyvaksyttyHakijaPredicate(
+													hakukohdeOid));
 							hakukohteenHakijat = ascending;
 							// LOG.error("HYVÄKSYTTYJÄ JÄLKEEN FILTTERÖINNIN {}",
 							// hakukohteenHakijat.size());

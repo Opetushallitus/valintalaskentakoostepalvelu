@@ -20,16 +20,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
@@ -47,8 +43,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HakutoiveenValintatapajonoComparator;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.OsoiteComparator;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakijaPredicate;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
@@ -388,43 +384,8 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 							}
 							o = FluentIterable
 									.from(l)
-									.filter(new Predicate<HakijaDTO>() {
-										public boolean apply(HakijaDTO input) {
-											if (input.getHakutoiveet() == null) {
-												LOG.error(
-														"Sijoittelulta hakemus({}) jolla ei ole hakutoiveita!",
-														input.getHakemusOid());
-											} else {
-												for (HakutoiveDTO h : input
-														.getHakutoiveet()) {
-
-													if (hakukohdeOid.equals(h
-															.getHakukohdeOid())) {
-														final boolean checkFirstValintatapajonoOnly = true;
-														// sort by
-														// priority
-														Collections.sort(
-																h.getHakutoiveenValintatapajonot(),
-																HakutoiveenValintatapajonoComparator.DEFAULT);
-
-														for (HakutoiveenValintatapajonoDTO vjono : h
-																.getHakutoiveenValintatapajonot()) {
-															if (HakemuksenTila.HYVAKSYTTY
-																	.equals(vjono
-																			.getTila())) {
-																return true;
-															}
-															if (checkFirstValintatapajonoOnly) {
-																return false;
-															}
-														}
-													}
-
-												}
-											}
-											return false;
-										}
-									})
+									.filter(new SijoittelussaHyvaksyttyHakijaPredicate(
+											hakukohdeOid))
 									.transform(
 											new Function<HakijaDTO, String>() {
 												@Override
