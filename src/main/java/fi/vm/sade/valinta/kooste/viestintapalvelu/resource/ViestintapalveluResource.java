@@ -5,6 +5,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
 import java.io.InputStream;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -18,7 +19,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Koekutsukirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 
 @Path("/api/v1")
 public interface ViestintapalveluResource {
@@ -86,10 +87,10 @@ public interface ViestintapalveluResource {
 
 	@GET
 	@Produces(APPLICATION_JSON)
-	@Path("/getByNameOrgTag")
-	LetterBatch haeKirjepohja(@QueryParam("oid") String oid,
-			@QueryParam("name") String name,
-			@QueryParam("language") String language,
+	@Path("/template/getHistory")
+	List<TemplateHistory> haeKirjepohja(@QueryParam("oid") String oid,
+			@QueryParam("templateName") String templateName,
+			@QueryParam("languageCode") String languageCode,
 			@QueryParam("tag") String tag);
 
 }

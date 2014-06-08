@@ -109,18 +109,14 @@ public class HyvaksymiskirjeetKomponentti {
 			@Body Collection<HakijaDTO> hakukohteenHakijat,
 			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
 			@Simple("${property.hakuOid}") String hakuOid,
-			@Simple("${property.sijoitteluajoId}") Long sijoitteluajoId,
 			@Property("tarjoajaOid") String tarjoajaOid,
-			@Property("sisalto") String sisalto,
-			@Property("templateName") String templateName,
-			@Property("tag") String tag) {
+			@Property("sisalto") String sisalto, @Property("tag") String tag) {
 
 		LOG.debug(
 				"Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'",
-				new Object[] { hakukohdeOid, hakuOid, sijoitteluajoId });
+				new Object[] { hakukohdeOid, hakuOid, });
 		assert (hakukohdeOid != null);
 		assert (hakuOid != null);
-		assert (sijoitteluajoId != null);
 
 		final int kaikkiHakukohteenHyvaksytyt = hakukohteenHakijat.size();
 		if (kaikkiHakukohteenHyvaksytyt == 0) {
