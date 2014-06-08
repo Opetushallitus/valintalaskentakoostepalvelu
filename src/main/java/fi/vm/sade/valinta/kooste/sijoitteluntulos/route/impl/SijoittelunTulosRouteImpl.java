@@ -358,76 +358,32 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 					@Override
 					public void process(Exchange exchange) throws Exception {
 						SijoittelunTulosProsessi prosessi = prosessi(exchange);
-						try {
-							HakukohdeTyyppi hakukohde = exchange.getIn()
-									.getBody(HakukohdeTyyppi.class);
-							String hakukohdeOid = hakukohde.getOid();
-							String tarjoajaOid = StringUtils.EMPTY;
 
-							InputStream input = exchange.getIn().getBody(
-									InputStream.class);
-							if (input == null) {
+						if (prosessi.inkrementoi() == 0) {
 
-							} else {
+							try {
+								InputStream tar = generoiYhteenvetoTar(prosessi
+										.getValmiit());
 
-								try {
+								String id = generateId();
+								dokumenttiResource.tallenna(id,
+										"sijoitteluntulosexcel.tar",
+										defaultExpirationDate().getTime(),
+										dokumenttiprosessi(exchange).getTags(),
+										"application/x-tar", tar);
 
-									String id = generateId();
-									dokumenttiResource.tallenna(id,
-											"sijoitteluntulos_" + hakukohdeOid
-													+ ".xls",
-											defaultExpirationDate().getTime(),
-											dokumenttiprosessi(exchange)
-													.getTags(),
-											"application/vnd.ms-excel", input);
-									prosessi.getValmiit().add(
-											new Valmis(hakukohdeOid,
-													tarjoajaOid, id));
-								} catch (Exception e) {
-									LOG.error(
-											"Dokumentin tallennus epäonnistui hakukohteelle {}: {}",
-											hakukohdeOid, e.getMessage());
-									prosessi.getVaroitukset()
-											.add(new Varoitus(
-													hakukohdeOid,
-													"Ei saatu tallennettua dokumenttikantaan! "
-															+ e.getMessage()
-															+ "\r\n"
-															+ Arrays.toString(e
-																	.getStackTrace())));
-									prosessi.getValmiit().add(
-											new Valmis(hakukohdeOid,
-													tarjoajaOid, null));
-									return;
-								}
-							}
-						} finally {
-							if (prosessi.inkrementoi() == 0) {
+								prosessi.setDokumenttiId(id);
+							} catch (Exception e) {
+								LOG.error("Tulostietojen tallennus dokumenttipalveluun epäonnistui!");
+								prosessi.getPoikkeukset()
+										.add(new Poikkeus(
+												Poikkeus.DOKUMENTTIPALVELU,
+												"Tulostietojen tallennus epäonnistui!"));
 
-								try {
-									InputStream tar = generoiYhteenvetoTar(prosessi
-											.getValmiit());
-
-									String id = generateId();
-									dokumenttiResource.tallenna(id,
-											"sijoitteluntulosexcel.tar",
-											defaultExpirationDate().getTime(),
-											dokumenttiprosessi(exchange)
-													.getTags(),
-											"application/x-tar", tar);
-
-									prosessi.setDokumenttiId(id);
-								} catch (Exception e) {
-									LOG.error("Tulostietojen tallennus dokumenttipalveluun epäonnistui!");
-									prosessi.getPoikkeukset()
-											.add(new Poikkeus(
-													Poikkeus.DOKUMENTTIPALVELU,
-													"Tulostietojen tallennus epäonnistui!"));
-
-								}
 							}
 						}
 					}
+
 				});
 	}
 
