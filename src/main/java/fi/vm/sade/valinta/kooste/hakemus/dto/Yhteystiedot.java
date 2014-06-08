@@ -37,11 +37,19 @@ public class Yhteystiedot {
 	}
 
 	public String getPuhelinnumerotAsString() {
-		StringBuilder b = new StringBuilder();
-		for (String puhelinnumero : puhelinnumerot) {
-			b.append(puhelinnumero).append(" ");
+		if (puhelinnumerot == null || puhelinnumerot.isEmpty()) {
+			return StringUtils.EMPTY;
+		} else {
+			StringBuilder b = new StringBuilder();
+			for (String puhelinnumero : puhelinnumerot) {
+				if (puhelinnumero == null || StringUtils.isEmpty(puhelinnumero)) {
+
+				} else {
+					b.append(puhelinnumero).append(" ");
+				}
+			}
+			return b.toString().trim();
 		}
-		return b.toString().trim();
 	}
 
 	public String getSahkoposti() {
