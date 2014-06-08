@@ -55,8 +55,8 @@ public class ValintalaskentaMuistissaRouteImpl extends
 		AbstractDokumenttiRouteBuilder {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaMuistissaRouteImpl.class);
-	private final static int UUDELLEEN_YRITYSTEN_MAARA = 10;
-	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 10000L;
+	private final static int UUDELLEEN_YRITYSTEN_MAARA = 50;
+	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 100000L;
 
 	private final String fail;
 	private final String start;
