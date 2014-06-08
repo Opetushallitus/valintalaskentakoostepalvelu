@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikka
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluSuoritaKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SuoritaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 
@@ -126,11 +127,21 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.process(new Processor() {
 					@Override
 					public void process(Exchange exchange) throws Exception {
+						String hakuOid = hakuOid(exchange);
 						try {
-							exchange.getOut()
-									.setBody(
-											valintatietoService
-													.haeValintatiedot(hakuOid(exchange)));
+							LOG.error("Valintalaskennan tuloksia lähdettiin hakemaan. Operaatio saattaa kestää pitkään!");
+							dokumenttiprosessi(exchange)
+									.getVaroitukset()
+									.add(new Varoitus(hakuOid,
+											"Haetaan valintatietoja haulle. Operaatio saattaa kestää pitkään!"));
+							exchange.getOut().setBody(
+									valintatietoService
+											.haeValintatiedot(hakuOid));
+							dokumenttiprosessi(exchange)
+									.getVaroitukset()
+									.add(new Varoitus(hakuOid,
+											"Valintatiedot saatiin haettua haulle!"));
+							LOG.error("Valintalaskennan tulokset saatiin haettua!");
 						} catch (Exception e) {
 							e.printStackTrace();
 							LOG.error(
@@ -155,7 +166,9 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 					@Override
 					public void process(Exchange exchange) throws Exception {
 						HakuTyyppi hakutyyppi = hakutyyppi(exchange);
+						String hakuOid = hakuOid(exchange);
 						if (hakutyyppi == null) {
+
 							dokumenttiprosessi(exchange)
 									.getPoikkeukset()
 									.add(new Poikkeus(
@@ -166,8 +179,22 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 									"Valintatiedoilta palautui null hakutyyppi!");
 						}
 						try {
+							LOG.error(
+									"Siirretään sijoitteluun valintatiedot haulle({}). Operaatio saattaa kestää pitkään!",
+									hakuOid);
+							dokumenttiprosessi(exchange)
+									.getVaroitukset()
+									.add(new Varoitus(hakuOid,
+											"Siirretään sijoitteluun valintatiedot. Operaatio saattaa kestää pitkään!"));
 							suoritaSijoittelu.haeLahtotiedot(hakutyyppi,
-									hakuOid(exchange));
+									hakuOid);
+							dokumenttiprosessi(exchange)
+									.getVaroitukset()
+									.add(new Varoitus(hakuOid,
+											"Tiedot on siirretty sijoitteluun!"));
+							LOG.error(
+									"Tiedot on siirretty sijoitteluun haulle({})!",
+									hakuOid);
 						} catch (Exception e) {
 							e.printStackTrace();
 							LOG.error(
