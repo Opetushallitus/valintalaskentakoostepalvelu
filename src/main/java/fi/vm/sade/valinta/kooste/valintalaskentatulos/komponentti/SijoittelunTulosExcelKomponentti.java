@@ -26,6 +26,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
+import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.Formatter;
@@ -63,14 +64,17 @@ public class SijoittelunTulosExcelKomponentti {
 					.getHakukohdeBySijoitteluajoPlainDTO(hakuOid,
 							sijoitteluajoId, hakukohdeOid);
 		} catch (Exception e) {
-			e.printStackTrace();
 			LOG.error(
 					"Sijoittelulta ei saa tuloksia. Tarkista että sijoittelu on ajettu. {} {}",
 					e.getMessage(), e.getCause());
 			throw new RuntimeException(
 					"Sijoittelulta ei saa tuloksia. Tarkista että sijoittelu on ajettu.");
 		}
-
+		if (hakukohde == null) {
+			LOG.error("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
+			throw new SijoittelultaEiSisaltoaPoikkeus(
+					"Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
+		}
 		List<Object[]> rivit = new ArrayList<Object[]>();
 		Collections.sort(hakukohde.getValintatapajonot(),
 				new Comparator<ValintatapajonoDTO>() {
