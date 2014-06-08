@@ -24,11 +24,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Valmis;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosHyvaksymiskirjeetRoute;
@@ -39,6 +45,13 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateDetail;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakijaPredicate;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 
 /**
@@ -51,15 +64,19 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SijoittelunTulosRouteImpl.class);
 
+	private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
+	private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta;
 	private final HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta;
 	private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
 	private final DokumenttiResource dokumenttiResource;
+	private final ViestintapalveluResource viestintapalveluResource;
 	private final String hakukohteidenHaku;
 	private final String luontiEpaonnistui;
 	private final String taulukkolaskenta;
 	private final String hyvaksymiskirjeet;
 	private final String dokumenttipalveluUrl;
+	private final String muodostaDokumentit;
 
 	@Autowired
 	public SijoittelunTulosRouteImpl(
@@ -69,9 +86,16 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 			HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta,
 			SijoittelunTulosExcelKomponentti sijoittelunTulosExcel,
 			HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta,
+			HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
+			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
+			ViestintapalveluResource viestintapalveluResource,
 			DokumenttiResource dokumenttiResource) {
+		this.viestintapalveluResource = viestintapalveluResource;
+		this.sijoitteluProxy = sijoitteluProxy;
+		this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
 		this.nimiTarjonnalta = nimiTarjonnalta;
 		this.dokumenttipalveluUrl = dokumenttipalveluUrl;
+		this.muodostaDokumentit = "direct:sijoitteluntulos_muodosta_dokumentit";
 		this.hakukohteidenHaku = "direct:sijoitteluntulos_hakukohteiden_haku";
 		this.luontiEpaonnistui = "direct:sijoitteluntulos_koko_haulle_deadletterchannel";
 		this.hakukohteetTarjonnalta = hakukohteetTarjonnalta;
@@ -83,6 +107,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 	}
 
 	public void configure() throws Exception {
+		configureMuodostaDokumentit();
 		configureDeadLetterChannel();
 		configureHakukohteidenHaku();
 		configureTaulukkolaskenta();
@@ -137,214 +162,44 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 					@Override
 					public void process(Exchange exchange) throws Exception {
 						SijoittelunTulosProsessi prosessi = prosessi(exchange);
+						HakukohdeTyyppi hakukohde = exchange.getIn().getBody(
+								HakukohdeTyyppi.class);
+						String hakukohdeOid = hakukohde.getOid();
+						String hakuOid = hakuOid(exchange);
+						String sijoitteluajoId = sijoitteluajoId(exchange);
+						String tarjoajaOid = StringUtils.EMPTY;
 						try {
-							HakukohdeTyyppi hakukohde = exchange.getIn()
-									.getBody(HakukohdeTyyppi.class);
-							String hakukohdeOid = hakukohde.getOid();
-							String hakuOid = hakuOid(exchange);
-							String sijoitteluajoId = sijoitteluajoId(exchange);
-							String tarjoajaOid = StringUtils.EMPTY;
-							try {
-								tarjoajaOid = nimiTarjonnalta.haeHakukohdeNimi(
-										hakukohdeOid).getTarjoajaOid();
-							} catch (Exception e) {
-								prosessi.getVaroitukset()
-										.add(new Varoitus(hakukohdeOid,
-												"Hakukohteelle ei saatu tarjoajaOidia!"));
-							}
-
-							if (hakukohdeOid == null || hakuOid == null
-									|| sijoitteluajoId == null
-									|| prosessi == null) {
-								LOG.error("Arvot ei välity oikein sijoitteluntulostyöjonoon. Tarkista hakukohdeOid,hakuOid,sijoitteluajoId ja prosessi!");
-								prosessi.getVaroitukset()
-										.add(new Varoitus(hakukohdeOid,
-												"Arvot ei välity työjonoon oikein!"));
-								prosessi.getValmiit().add(
-										new Valmis(hakukohdeOid, tarjoajaOid,
-												null));
-								return;
-							}
-							InputStream xls;
-							try {
-								xls = sijoittelunTulosExcel.luoXls(
-										sijoitteluajoId, hakukohdeOid, hakuOid);
-							} catch (Exception e) {
-								LOG.error(
-										"Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle {}: {}",
-										hakukohdeOid, e.getMessage());
-								prosessi.getVaroitukset()
-										.add(new Varoitus(
-												hakukohdeOid,
-												"Ei saatu sijoittelun tuloksia tai hakukohteita! "
-														+ e.getMessage()
-														+ "\r\n"
-														+ Arrays.toString(e
-																.getStackTrace())));
-								prosessi.getValmiit().add(
-										new Valmis(hakukohdeOid, tarjoajaOid,
-												null));
-								return;
-							}
-
-							try {
-
-								String id = generateId();
-								dokumenttiResource.tallenna(id,
-										"sijoitteluntulos_" + hakukohdeOid
-												+ ".xls",
-										defaultExpirationDate().getTime(),
-										dokumenttiprosessi(exchange).getTags(),
-										"application/vnd.ms-excel", xls);
-								prosessi.getValmiit().add(
-										new Valmis(hakukohdeOid, tarjoajaOid,
-												id));
-							} catch (Exception e) {
-								LOG.error(
-										"Dokumentin tallennus epäonnistui hakukohteelle {}: {}",
-										hakukohdeOid, e.getMessage());
-								prosessi.getVaroitukset()
-										.add(new Varoitus(
-												hakukohdeOid,
-												"Ei saatu tallennettua dokumenttikantaan! "
-														+ e.getMessage()
-														+ "\r\n"
-														+ Arrays.toString(e
-																.getStackTrace())));
-								prosessi.getValmiit().add(
-										new Valmis(hakukohdeOid, tarjoajaOid,
-												null));
-								return;
-							}
-						} finally {
-							if (prosessi.inkrementoi() == 0) {
-								int yhteensa = prosessi.getValmiit().size();
-								LOG.error(
-										"Sijoitteluntulosexcel valmistui! {} työtä!",
-										yhteensa);
-								try {
-									Map<String, Collection<Valmis>> onnistuneetPerTarjoaja = Maps
-											.newHashMap();
-									Collection<Valmis> epaonnistuneet = Lists
-											.newArrayList();
-									int onnistuneita = 0;
-									synchronized (prosessi.getValmiit()) {
-										for (Valmis v : prosessi.getValmiit()) {
-											if (v.isOnnistunut()) {
-												++onnistuneita;
-											} else {
-												epaonnistuneet.add(v);
-											}
-											if (onnistuneetPerTarjoaja
-													.containsKey(v
-															.getTarjoajaOid())) {
-												onnistuneetPerTarjoaja.get(
-														v.getTarjoajaOid())
-														.add(v);
-											} else {
-												onnistuneetPerTarjoaja.put(
-														v.getTarjoajaOid(),
-														Lists.newArrayList(v));
-											}
-										}
-									}
-
-									ByteArrayOutputStream tarFileBytes = new ByteArrayOutputStream();
-									TarArchiveOutputStream tarOutputStream = new TarArchiveOutputStream(
-											tarFileBytes);
-									{
-										Collection<String> rivit = Lists
-												.newArrayList();
-										rivit.add(new StringBuilder()
-												.append("Yhteensä ")
-												.append(yhteensa)
-												.append(", joista onnistuneita ")
-												.append(onnistuneita)
-												.append(" ja epäonnistuneita ")
-												.append(yhteensa - onnistuneita)
-												.toString());
-
-										for (Valmis epa : epaonnistuneet) {
-											rivit.add(new StringBuilder()
-													.append("Hakukohde ")
-													.append(epa
-															.getHakukohdeOid())
-													.toString());
-											rivit.add(new StringBuilder()
-													.append("-- Tarjoaja ")
-													.append(epa
-															.getTarjoajaOid())
-													.toString());
-										}
-										writeLinesToTarFile("yhteenveto.txt",
-												rivit, tarOutputStream);
-									}
-									for (Entry<String, Collection<Valmis>> perTarjoaja : onnistuneetPerTarjoaja
-											.entrySet()) {
-										String subFileName = new StringBuilder()
-												.append("tarjoajaOid_")
-												.append(perTarjoaja.getKey()
-														.replace(" ", "_"))
-												.append(".tar").toString();
-
-										ByteArrayOutputStream subTarFileBytes = new ByteArrayOutputStream();
-										TarArchiveOutputStream subTarOutputStream = new TarArchiveOutputStream(
-												subTarFileBytes);
-
-										for (Valmis v : perTarjoaja.getValue()) {
-											if (v.isOnnistunut()) {
-												String hakukohdeFileName = new StringBuilder()
-														.append("hakukohdeOid_")
-														.append(v
-																.getHakukohdeOid())
-														.append(".txt")
-														.toString();
-												String kokoUrl = new StringBuilder()
-														.append(dokumenttipalveluUrl)
-														.append(v.getTulosId())
-														.toString();
-												writeLinesToTarFile(
-														hakukohdeFileName,
-														Arrays.asList(
-																v.getTulosId(),
-																kokoUrl),
-														subTarOutputStream);
-											}
-										}
-										subTarOutputStream.close();
-										writeLinesToTarFile(subFileName,
-												subTarFileBytes.toByteArray(),
-												tarOutputStream);
-									}
-
-									tarFileBytes.close();
-									String id = generateId();
-									dokumenttiResource
-											.tallenna(
-													id,
-													"sijoitteluntulosexcel.tar",
-													defaultExpirationDate()
-															.getTime(),
-													dokumenttiprosessi(exchange)
-															.getTags(),
-													"application/x-tar",
-													new ByteArrayInputStream(
-															tarFileBytes
-																	.toByteArray()));
-
-									prosessi.setDokumenttiId(id);
-								} catch (Exception e) {
-									LOG.error("Tulostietojen tallennus dokumenttipalveluun epäonnistui!");
-									prosessi.getPoikkeukset()
-											.add(new Poikkeus(
-													Poikkeus.DOKUMENTTIPALVELU,
-													"Tulostietojen tallennus epäonnistui!"));
-
-								}
-							}
+							tarjoajaOid = nimiTarjonnalta.haeHakukohdeNimi(
+									hakukohdeOid).getTarjoajaOid();
+						} catch (Exception e) {
+							prosessi.getVaroitukset()
+									.add(new Varoitus(hakukohdeOid,
+											"Hakukohteelle ei saatu tarjoajaOidia!"));
 						}
+						InputStream input = null;
+						try {
+							input = sijoittelunTulosExcel.luoXls(
+									sijoitteluajoId, hakukohdeOid, hakuOid);
+						} catch (Exception e) {
+							LOG.error(
+									"Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle {}: {}",
+									hakukohdeOid, e.getMessage());
+							prosessi.getVaroitukset().add(
+									new Varoitus(hakukohdeOid,
+											"Ei saatu sijoittelun tuloksia tai hakukohteita! "
+													+ e.getMessage()
+													+ "\r\n"
+													+ Arrays.toString(e
+															.getStackTrace())));
+							prosessi.getValmiit()
+									.add(new Valmis(hakukohdeOid, tarjoajaOid,
+											null));
+						}
+						exchange.getOut().setBody(input);
 					}
-				});
+				})
+				//
+				.to(muodostaDokumentit);
 
 	}
 
@@ -357,19 +212,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 				"&waitForTaskToComplete=Never" +
 				// tyojonossa on yksi tyostaja
 				"&concurrentConsumers=10";
-		from(yksittainenHyvaksymiskirjeTyo)
-		//
-				.routeId(
-						"Sijoitteluntulokset koko haulle hyväksymiskirjeettyöjono")
-				//
-				.process(SECURITY)
-				//
-				.process(new Processor() {
-					@Override
-					public void process(Exchange exchange) throws Exception {
-
-					}
-				});
 		from(hyvaksymiskirjeet)
 		//
 				.errorHandler(
@@ -395,6 +237,94 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.to(yksittainenHyvaksymiskirjeTyo)
 				//
 				.end();
+		from(yksittainenHyvaksymiskirjeTyo)
+		//
+				.routeId(
+						"Sijoitteluntulokset koko haulle hyväksymiskirjeettyöjono")
+				//
+				.process(SECURITY)
+				//
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						SijoittelunTulosProsessi prosessi = prosessi(exchange);
+						HakukohdeTyyppi hakukohde = exchange.getIn().getBody(
+								HakukohdeTyyppi.class);
+						String hakukohdeOid = hakukohde.getOid();
+						String hakuOid = hakuOid(exchange);
+						String tarjoajaOid = StringUtils.EMPTY;
+						String tag = StringUtils.EMPTY;
+						try {
+							HakukohdeNimiRDTO nimi = nimiTarjonnalta
+									.haeHakukohdeNimi(hakukohdeOid);
+							tarjoajaOid = nimi.getTarjoajaOid();
+							tag = nimi.getHakukohdeNameUri().split("#")[0];
+						} catch (Exception e) {
+							prosessi.getVaroitukset()
+									.add(new Varoitus(hakukohdeOid,
+											"Hakukohteelle ei saatu tarjoajaOidia!"));
+						}
+						InputStream input = null;
+						try {
+							Collection<HakijaDTO> hakukohteenHakijat;
+
+							hakukohteenHakijat = sijoitteluProxy
+									.koulutuspaikalliset(hakuOid(exchange),
+											hakukohdeOid,
+											SijoitteluResource.LATEST);
+							Collections2.filter(hakukohteenHakijat,
+									new SijoittelussaHyvaksyttyHakijaPredicate(
+											hakukohdeOid));
+							Teksti hakukohdeNimi = new Teksti(hakukohde
+									.getHakukohdeNimi());
+							for (TemplateHistory history : viestintapalveluResource
+									.haeKirjepohja(tarjoajaOid,
+											"hyvaksymiskirje",
+											hakukohdeNimi.getKieli(), tag)) {
+								if ("default".equals(history.getName())) {
+									for (TemplateDetail e : history
+											.getTemplateReplacements()) {
+										if ("sisalto".equals(e.getName())) {
+
+											LetterBatch l = hyvaksymiskirjeetKomponentti
+													.teeHyvaksymiskirjeet(
+															hakukohteenHakijat,
+															hakukohdeOid,
+															hakuOid,
+															tarjoajaOid,
+															//
+															e.getDefaultValue(),
+															tag);
+											input = pipeInputStreams(viestintapalveluResource
+													.haeKirjeSync(new Gson()
+															.toJson(l)));
+											exchange.getOut().setBody(input);
+											return;
+										}
+									}
+								}
+							}
+							exchange.getOut().setBody(input);
+						} catch (Exception e) {
+							LOG.error(
+									"Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle {}: {}",
+									hakukohdeOid, e.getMessage());
+							prosessi.getVaroitukset().add(
+									new Varoitus(hakukohdeOid,
+											"Ei saatu sijoittelun tuloksia tai hakukohteita! "
+													+ e.getMessage()
+													+ "\r\n"
+													+ Arrays.toString(e
+															.getStackTrace())));
+							prosessi.getValmiit()
+									.add(new Valmis(hakukohdeOid, tarjoajaOid,
+											null));
+						}
+
+					}
+				})
+				//
+				.to(muodostaDokumentit);
 
 	}
 
@@ -419,6 +349,86 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 				})
 				//
 				.stop();
+	}
+
+	private void configureMuodostaDokumentit() {
+		from(muodostaDokumentit)
+		//
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						SijoittelunTulosProsessi prosessi = prosessi(exchange);
+						try {
+							HakukohdeTyyppi hakukohde = exchange.getIn()
+									.getBody(HakukohdeTyyppi.class);
+							String hakukohdeOid = hakukohde.getOid();
+							String tarjoajaOid = StringUtils.EMPTY;
+
+							InputStream input = exchange.getIn().getBody(
+									InputStream.class);
+							if (input == null) {
+
+							} else {
+
+								try {
+
+									String id = generateId();
+									dokumenttiResource.tallenna(id,
+											"sijoitteluntulos_" + hakukohdeOid
+													+ ".xls",
+											defaultExpirationDate().getTime(),
+											dokumenttiprosessi(exchange)
+													.getTags(),
+											"application/vnd.ms-excel", input);
+									prosessi.getValmiit().add(
+											new Valmis(hakukohdeOid,
+													tarjoajaOid, id));
+								} catch (Exception e) {
+									LOG.error(
+											"Dokumentin tallennus epäonnistui hakukohteelle {}: {}",
+											hakukohdeOid, e.getMessage());
+									prosessi.getVaroitukset()
+											.add(new Varoitus(
+													hakukohdeOid,
+													"Ei saatu tallennettua dokumenttikantaan! "
+															+ e.getMessage()
+															+ "\r\n"
+															+ Arrays.toString(e
+																	.getStackTrace())));
+									prosessi.getValmiit().add(
+											new Valmis(hakukohdeOid,
+													tarjoajaOid, null));
+									return;
+								}
+							}
+						} finally {
+							if (prosessi.inkrementoi() == 0) {
+
+								try {
+									InputStream tar = generoiYhteenvetoTar(prosessi
+											.getValmiit());
+
+									String id = generateId();
+									dokumenttiResource.tallenna(id,
+											"sijoitteluntulosexcel.tar",
+											defaultExpirationDate().getTime(),
+											dokumenttiprosessi(exchange)
+													.getTags(),
+											"application/x-tar", tar);
+
+									prosessi.setDokumenttiId(id);
+								} catch (Exception e) {
+									LOG.error("Tulostietojen tallennus dokumenttipalveluun epäonnistui!");
+									prosessi.getPoikkeukset()
+											.add(new Poikkeus(
+													Poikkeus.DOKUMENTTIPALVELU,
+													"Tulostietojen tallennus epäonnistui!"));
+
+								}
+							}
+						}
+					}
+				});
 	}
 
 	private void configureHakukohteidenHaku() {
@@ -494,5 +504,82 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 		tarOutputStream.putArchiveEntry(archiveEntry);
 		tarOutputStream.write(data);
 		tarOutputStream.closeArchiveEntry();
+	}
+
+	private InputStream generoiYhteenvetoTar(final Collection<Valmis> valmiit)
+			throws IOException {
+		int yhteensa = valmiit.size();
+
+		Map<String, Collection<Valmis>> onnistuneetPerTarjoaja = Maps
+				.newHashMap();
+		Collection<Valmis> epaonnistuneet = Lists.newArrayList();
+		int onnistuneita = 0;
+		synchronized (valmiit) {
+			for (Valmis v : valmiit) {
+				if (v.isOnnistunut()) {
+					++onnistuneita;
+				} else {
+					epaonnistuneet.add(v);
+				}
+				if (onnistuneetPerTarjoaja.containsKey(v.getTarjoajaOid())) {
+					onnistuneetPerTarjoaja.get(v.getTarjoajaOid()).add(v);
+				} else {
+					onnistuneetPerTarjoaja.put(v.getTarjoajaOid(),
+							Lists.newArrayList(v));
+				}
+			}
+		}
+		LOG.error(
+				"Sijoitteluntulosexcel valmistui! {} työtä! Joista onnistuneita {} ja epäonnistuneita {}",
+				yhteensa, onnistuneita, yhteensa - onnistuneita);
+		ByteArrayOutputStream tarFileBytes = new ByteArrayOutputStream();
+		TarArchiveOutputStream tarOutputStream = new TarArchiveOutputStream(
+				tarFileBytes);
+		{
+			Collection<String> rivit = Lists.newArrayList();
+			rivit.add(new StringBuilder().append("Yhteensä ").append(yhteensa)
+					.append(", joista onnistuneita ").append(onnistuneita)
+					.append(" ja epäonnistuneita ")
+					.append(yhteensa - onnistuneita).toString());
+
+			for (Valmis epa : epaonnistuneet) {
+				rivit.add(new StringBuilder().append("Hakukohde ")
+						.append(epa.getHakukohdeOid()).toString());
+				rivit.add(new StringBuilder().append("-- Tarjoaja ")
+						.append(epa.getTarjoajaOid()).toString());
+			}
+			writeLinesToTarFile("yhteenveto.txt", rivit, tarOutputStream);
+		}
+		for (Entry<String, Collection<Valmis>> perTarjoaja : onnistuneetPerTarjoaja
+				.entrySet()) {
+			String subFileName = new StringBuilder().append("tarjoajaOid_")
+					.append(perTarjoaja.getKey().replace(" ", "_"))
+					.append(".tar").toString();
+
+			ByteArrayOutputStream subTarFileBytes = new ByteArrayOutputStream();
+			TarArchiveOutputStream subTarOutputStream = new TarArchiveOutputStream(
+					subTarFileBytes);
+
+			for (Valmis v : perTarjoaja.getValue()) {
+				if (v.isOnnistunut()) {
+					String hakukohdeFileName = new StringBuilder()
+							.append("hakukohdeOid_")
+							.append(v.getHakukohdeOid()).append(".txt")
+							.toString();
+					String kokoUrl = new StringBuilder()
+							.append(dokumenttipalveluUrl)
+							.append(v.getTulosId()).toString();
+					writeLinesToTarFile(hakukohdeFileName,
+							Arrays.asList(v.getTulosId(), kokoUrl),
+							subTarOutputStream);
+				}
+			}
+			subTarOutputStream.close();
+			writeLinesToTarFile(subFileName, subTarFileBytes.toByteArray(),
+					tarOutputStream);
+		}
+
+		tarOutputStream.close();
+		return new ByteArrayInputStream(tarFileBytes.toByteArray());
 	}
 }
