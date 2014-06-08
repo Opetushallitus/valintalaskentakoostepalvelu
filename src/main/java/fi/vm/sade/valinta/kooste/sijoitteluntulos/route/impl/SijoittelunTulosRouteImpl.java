@@ -176,10 +176,39 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 									.add(new Varoitus(hakukohdeOid,
 											"Hakukohteelle ei saatu tarjoajaOidia!"));
 						}
-						InputStream input = null;
 						try {
-							input = sijoittelunTulosExcel.luoXls(
+
+							InputStream input = sijoittelunTulosExcel.luoXls(
 									sijoitteluajoId, hakukohdeOid, hakuOid);
+							try {
+
+								String id = generateId();
+								dokumenttiResource.tallenna(id,
+										"sijoitteluntulos_" + hakukohdeOid
+												+ ".xls",
+										defaultExpirationDate().getTime(),
+										dokumenttiprosessi(exchange).getTags(),
+										"application/vnd.ms-excel", input);
+								prosessi.getValmiit().add(
+										new Valmis(hakukohdeOid, tarjoajaOid,
+												id));
+							} catch (Exception e) {
+								LOG.error(
+										"Dokumentin tallennus epäonnistui hakukohteelle {}: {}",
+										hakukohdeOid, e.getMessage());
+								prosessi.getVaroitukset()
+										.add(new Varoitus(
+												hakukohdeOid,
+												"Ei saatu tallennettua dokumenttikantaan! "
+														+ e.getMessage()
+														+ "\r\n"
+														+ Arrays.toString(e
+																.getStackTrace())));
+								prosessi.getValmiit().add(
+										new Valmis(hakukohdeOid, tarjoajaOid,
+												null));
+								return;
+							}
 						} catch (Exception e) {
 							LOG.error(
 									"Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle {}: {}",
@@ -195,7 +224,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 									.add(new Valmis(hakukohdeOid, tarjoajaOid,
 											null));
 						}
-						exchange.getOut().setBody(input);
 					}
 				})
 				//
@@ -298,7 +326,45 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 											input = pipeInputStreams(viestintapalveluResource
 													.haeKirjeSync(new Gson()
 															.toJson(l)));
-											exchange.getOut().setBody(input);
+											try {
+
+												String id = generateId();
+												dokumenttiResource.tallenna(
+														id,
+														"hyvaksymiskirje_"
+																+ hakukohdeOid
+																+ ".pdf",
+														defaultExpirationDate()
+																.getTime(),
+														dokumenttiprosessi(
+																exchange)
+																.getTags(),
+														"application/pdf",
+														input);
+												prosessi.getValmiit()
+														.add(new Valmis(
+																hakukohdeOid,
+																tarjoajaOid, id));
+											} catch (Exception ex) {
+												LOG.error(
+														"Dokumentin tallennus epäonnistui hakukohteelle {}: {}",
+														hakukohdeOid,
+														ex.getMessage());
+												prosessi.getVaroitukset()
+														.add(new Varoitus(
+																hakukohdeOid,
+																"Ei saatu tallennettua dokumenttikantaan! "
+																		+ ex.getMessage()
+																		+ "\r\n"
+																		+ Arrays.toString(ex
+																				.getStackTrace())));
+												prosessi.getValmiit().add(
+														new Valmis(
+																hakukohdeOid,
+																tarjoajaOid,
+																null));
+												return;
+											}
 											return;
 										}
 									}
