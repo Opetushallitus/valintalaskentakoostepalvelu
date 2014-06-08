@@ -34,6 +34,7 @@ import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Valmis;
@@ -209,6 +210,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 												null));
 								return;
 							}
+						} catch (SijoittelultaEiSisaltoaPoikkeus e) {
+							prosessi.getValmiit().add(
+									new Valmis(hakukohdeOid, tarjoajaOid, null,
+											true));
 						} catch (Exception e) {
 							LOG.error(
 									"Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle {}: {}",
@@ -565,7 +570,13 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 					.append(yhteensa - onnistuneita).toString());
 
 			for (Valmis epa : epaonnistuneet) {
-				rivit.add(new StringBuilder().append("Hakukohde ")
+				String otsikko;
+				if (epa.isEiTuloksia()) {
+					otsikko = "Tulokseton hakukohde ";
+				} else {
+					otsikko = "Epäonnistunut hakukohde ";
+				}
+				rivit.add(new StringBuilder().append(otsikko)
 						.append(epa.getHakukohdeOid()).toString());
 				rivit.add(new StringBuilder().append("-- Tarjoaja ")
 						.append(epa.getTarjoajaOid()).toString());
