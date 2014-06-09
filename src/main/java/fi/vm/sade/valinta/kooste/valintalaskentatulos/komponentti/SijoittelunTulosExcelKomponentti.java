@@ -149,7 +149,7 @@ public class SijoittelunTulosExcelKomponentti {
 							case PERUUTETTU:
 								return 5;
 							default:
-								return 0;
+								return 7;
 							}
 						}
 
