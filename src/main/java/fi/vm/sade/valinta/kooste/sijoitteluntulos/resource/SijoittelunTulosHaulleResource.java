@@ -21,6 +21,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosHyvaksymiskirjeetRoute;
+import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukkolaskentaRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
@@ -44,6 +45,34 @@ public class SijoittelunTulosHaulleResource {
 	private SijoittelunTulosTaulukkolaskentaRoute sijoittelunTulosTaulukkolaskentaRoute;
 	@Autowired
 	private SijoittelunTulosHyvaksymiskirjeetRoute sijoittelunTulosHyvaksymiskirjeetRoute;
+	@Autowired
+	private SijoittelunTulosOsoitetarratRoute sijoittelunTulosOsoitetarratRoute;
+
+	@POST
+	@Path("/osoitetarrat")
+	@Consumes("application/json")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
+	public ProsessiId osoitetarratKokoHaulle(
+			@QueryParam("hakuOid") String hakuOid) {
+		try {
+			SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(
+					"osoitetarrat", "Luo osoitetarrat haulle", null,
+					Arrays.asList("osoitetarrat", "haulle"));
+			sijoittelunTulosOsoitetarratRoute.osoitetarratHaulle(prosessi,
+					hakuOid, SijoitteluResource.LATEST, SecurityContextHolder
+							.getContext().getAuthentication());
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+			return prosessi.toProsessiId();
+		} catch (Exception e) {
+			LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
+			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+			// todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+			// Ylläpitäjä voi lukea logeista todellisen syyn!
+			throw new RuntimeException("Osoitetarrojen luonnissa virhe!", e);
+
+		}
+	}
 
 	@POST
 	@Path("/hyvaksymiskirjeet")
