@@ -163,7 +163,7 @@ public class HakemusUtil {
 		sv.put(PERUUNTUNUT, "Annullerad");
 		sv.put(HYVAKSYTTY, "Godkänd");
 		sv.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Godkänd enligt prövning");
-		fi.put(HakemuksenTila.PERUUTETTU, "Annullerad");
+		sv.put(HakemuksenTila.PERUUTETTU, "Annullerad");
 		sv.put(PERUNUT, "Annullerad");
 		Map<HakemuksenTila, String> en = new HashMap<HakemuksenTila, String>();
 		en.put(HYLATTY, "Rejected");
@@ -171,7 +171,7 @@ public class HakemusUtil {
 		en.put(PERUUNTUNUT, "Cancelled");
 		en.put(HYVAKSYTTY, "Accepted");
 		en.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Accepted");
-		fi.put(HakemuksenTila.PERUUTETTU, "Canceled");
+		en.put(HakemuksenTila.PERUUTETTU, "Canceled");
 		en.put(PERUNUT, "Canceled");
 
 		kielet.put(KieliUtil.SUOMI, Collections.unmodifiableMap(fi));
