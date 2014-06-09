@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosHyvaksymiskirjeetRoute;
+import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukkolaskentaRoute;
 
 /**
@@ -17,6 +18,16 @@ import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukko
  */
 @Configuration
 public class SijoittelunTulosConfig {
+	@Bean
+	public SijoittelunTulosOsoitetarratRoute getSijoittelunTulosOsoitetarratRoute(
+			@Value(SijoittelunTulosOsoitetarratRoute.SEDA_SIJOITTELUNTULOS_OSOITETARRAT_HAULLE) String osoitetarrat,
+			@Qualifier("javaDslCamelContext") CamelContext context)
+			throws Exception {
+		return ProxyWithAnnotationHelper.createProxy(
+				context.getEndpoint(osoitetarrat),
+				SijoittelunTulosOsoitetarratRoute.class);
+	}
+
 	@Bean
 	public SijoittelunTulosHyvaksymiskirjeetRoute getSijoittelunTulosHyvaksymiskirjeetRoute(
 			@Value(SijoittelunTulosHyvaksymiskirjeetRoute.SEDA_SIJOITTELUNTULOS_HYVAKSYMISKIRJEET_HAULLE) String hyvaksymiskirjeet,

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -18,13 +19,16 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -34,11 +38,14 @@ import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Valmis;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosHyvaksymiskirjeetRoute;
+import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukkolaskentaRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
@@ -46,10 +53,13 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateDetail;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakijaPredicate;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
@@ -64,7 +74,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
 public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SijoittelunTulosRouteImpl.class);
-
+	private final long DEFAULT_SAILYTYSAIKA = DateTime.now().plusHours(20)
+			.toDate().getTime();
 	private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
 	private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta;
@@ -72,10 +83,13 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
 	private final DokumenttiResource dokumenttiResource;
 	private final ViestintapalveluResource viestintapalveluResource;
+	private final HaeOsoiteKomponentti osoiteKomponentti;
+	private final ApplicationResource applicationResource;
 	private final String hakukohteidenHaku;
 	private final String luontiEpaonnistui;
 	private final String taulukkolaskenta;
 	private final String hyvaksymiskirjeet;
+	private final String osoitetarrat;
 	private final String dokumenttipalveluUrl;
 	private final String muodostaDokumentit;
 
@@ -84,13 +98,19 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 			@Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}/dokumentit/lataa/") String dokumenttipalveluUrl,
 			@Value(SijoittelunTulosTaulukkolaskentaRoute.SEDA_SIJOITTELUNTULOS_TAULUKKOLASKENTA_HAULLE) String taulukkolaskenta,
 			@Value(SijoittelunTulosHyvaksymiskirjeetRoute.SEDA_SIJOITTELUNTULOS_HYVAKSYMISKIRJEET_HAULLE) String hyvaksymiskirjeet,
+			@Value(SijoittelunTulosOsoitetarratRoute.SEDA_SIJOITTELUNTULOS_OSOITETARRAT_HAULLE) String osoitetarrat,
 			HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta,
 			SijoittelunTulosExcelKomponentti sijoittelunTulosExcel,
 			HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta,
 			HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
 			ViestintapalveluResource viestintapalveluResource,
+			HaeOsoiteKomponentti osoiteKomponentti,
+			ApplicationResource applicationResource,
 			DokumenttiResource dokumenttiResource) {
+		this.applicationResource = applicationResource;
+		this.osoiteKomponentti = osoiteKomponentti;
+		this.osoitetarrat = osoitetarrat;
 		this.viestintapalveluResource = viestintapalveluResource;
 		this.sijoitteluProxy = sijoitteluProxy;
 		this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
@@ -113,6 +133,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 		configureHakukohteidenHaku();
 		configureTaulukkolaskenta();
 		configureHyvaksymiskirjeet();
+		configureOsoitetarrat();
 	}
 
 	private void configureTaulukkolaskenta() {
@@ -123,7 +144,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 				// reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
 				"&waitForTaskToComplete=Never" +
 				// tyojonossa on yksi tyostaja
-				"&concurrentConsumers=10";
+				"&concurrentConsumers=6";
 		from(taulukkolaskenta)
 				//
 				.errorHandler(
@@ -236,6 +257,122 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	}
 
+	private void configureOsoitetarrat() {
+		String yksittainenOsoitetarraTyo = "seda:sijoitteluntulos_osoitetarrat_haulle_yksittainentulos?"
+				+
+				// jos palvelin sammuu niin ei suorita loppuun tyojonoa
+				"purgeWhenStopping=true" +
+				// reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
+				"&waitForTaskToComplete=Never" +
+				// tyojonossa on yksi tyostaja
+				"&concurrentConsumers=6";
+		from(osoitetarrat)
+				//
+				.errorHandler(
+				//
+						deadLetterChannel(luontiEpaonnistui)
+								//
+								.maximumRedeliveries(0)
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
+				//
+				.log(ERROR,
+						"Aloitetaan taulukkolaskentojen muodostus koko haulle!")
+
+				.process(SECURITY)
+				//
+				.to(hakukohteidenHaku)
+				//
+				.split(body())
+				//
+				.stopOnException()
+				//
+				.shareUnitOfWork()
+				//
+				.to(yksittainenOsoitetarraTyo)
+				//
+				.end();
+		from(yksittainenOsoitetarraTyo)
+		//
+				.routeId("Sijoitteluntulokset koko haulle osoitetarrattyöjono")
+				//
+				.process(SECURITY)
+				//
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						SijoittelunTulosProsessi prosessi = prosessi(exchange);
+						HakukohdeTyyppi hakukohde = exchange.getIn().getBody(
+								HakukohdeTyyppi.class);
+						String hakukohdeOid = hakukohde.getOid();
+						String tarjoajaOid = StringUtils.EMPTY;
+						List<String> o;
+						try {
+							List<HakijaDTO> l = Lists.newArrayList();
+							for (HakijaDTO hakija : sijoitteluProxy
+									.koulutuspaikalliset(hakuOid(exchange),
+											hakukohdeOid,
+											SijoitteluResource.LATEST)) {
+								l.add(hakija);
+							}
+							o = FluentIterable
+									.from(l)
+									.filter(new SijoittelussaHyvaksyttyHakijaPredicate(
+											hakukohdeOid))
+									.transform(
+											new Function<HakijaDTO, String>() {
+												@Override
+												public String apply(
+														HakijaDTO input) {
+													return input
+															.getHakemusOid();
+												}
+											}).toList();
+							List<Hakemus> hakemukset = applicationResource
+									.getApplicationsByOids(o);
+							List<Osoite> addressLabels = Lists.newArrayList();
+
+							for (Hakemus h : hakemukset) {
+								addressLabels.add(osoiteKomponentti
+										.haeOsoite(h));
+							}
+							Osoitteet osoitteet = new Osoitteet(addressLabels);
+
+							InputStream input = pipeInputStreams(viestintapalveluResource
+									.haeOsoitetarratSync(osoitteet));
+
+							String id = generateId();
+							dokumenttiResource.tallenna(id, "osoitetarrat_"
+									+ hakukohdeOid + ".pdf",
+									defaultExpirationDate().getTime(),
+									dokumenttiprosessi(exchange).getTags(),
+									"application/pdf", input);
+							prosessi.getValmiit().add(
+									new Valmis(hakukohdeOid, tarjoajaOid, id));
+						} catch (Exception e) {
+							LOG.error(
+									"Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle {}: {}",
+									hakukohdeOid, e.getMessage());
+							prosessi.getVaroitukset().add(
+									new Varoitus(hakukohdeOid,
+											"Ei saatu sijoittelun tuloksia tai hakukohteita! "
+													+ e.getMessage()
+													+ "\r\n"
+													+ Arrays.toString(e
+															.getStackTrace())));
+							prosessi.getValmiit()
+									.add(new Valmis(hakukohdeOid, tarjoajaOid,
+											null));
+						}
+
+					}
+				})
+				//
+				.to(muodostaDokumentit);
+	}
+
 	private void configureHyvaksymiskirjeet() {
 		String yksittainenHyvaksymiskirjeTyo = "seda:sijoitteluntulos_hyvaksymiskirjeet_haulle_yksittainentulos?"
 				+
@@ -244,7 +381,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 				// reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
 				"&waitForTaskToComplete=Never" +
 				// tyojonossa on yksi tyostaja
-				"&concurrentConsumers=10";
+				"&concurrentConsumers=6";
 		from(hyvaksymiskirjeet)
 		//
 				.errorHandler(
@@ -297,7 +434,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 									.add(new Varoitus(hakukohdeOid,
 											"Hakukohteelle ei saatu tarjoajaOidia!"));
 						}
-						InputStream input = null;
 						try {
 							Collection<HakijaDTO> hakukohteenHakijat;
 
@@ -328,7 +464,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 															//
 															e.getDefaultValue(),
 															tag);
-											input = pipeInputStreams(viestintapalveluResource
+
+											InputStream input = pipeInputStreams(viestintapalveluResource
 													.haeKirjeSync(new Gson()
 															.toJson(l)));
 											try {
@@ -375,7 +512,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 									}
 								}
 							}
-							exchange.getOut().setBody(input);
 						} catch (Exception e) {
 							LOG.error(
 									"Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle {}: {}",
