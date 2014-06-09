@@ -103,6 +103,10 @@ public class SijoittelunTulosExcelKomponentti {
 		rivit.add(new Object[] { hakukohdeNimi });
 		rivit.add(new Object[] {});
 		for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
+			if (jono == null || jono.getHakemukset() == null
+					|| jono.getHakemukset().isEmpty()) {
+				continue;
+			}
 			Map<String, IlmoittautumisTila> hakemusTilat = Collections
 					.emptyMap();
 			if (valintatapajononTilat.containsKey(jono.getOid())) {
