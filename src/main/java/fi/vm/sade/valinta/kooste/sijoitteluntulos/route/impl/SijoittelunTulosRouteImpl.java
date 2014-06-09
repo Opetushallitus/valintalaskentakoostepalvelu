@@ -207,8 +207,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 								String id = generateId();
 								dokumenttiResource.tallenna(id,
 										"sijoitteluntulos_" + hakukohdeOid
-												+ ".xls",
-										defaultExpirationDate().getTime(),
+												+ ".xls", DEFAULT_SAILYTYSAIKA,
 										dokumenttiprosessi(exchange).getTags(),
 										"application/vnd.ms-excel", input);
 								prosessi.getValmiit().add(
@@ -346,7 +345,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 							String id = generateId();
 							dokumenttiResource.tallenna(id, "osoitetarrat_"
 									+ hakukohdeOid + ".pdf",
-									defaultExpirationDate().getTime(),
+									DEFAULT_SAILYTYSAIKA,
 									dokumenttiprosessi(exchange).getTags(),
 									"application/pdf", input);
 							prosessi.getValmiit().add(
@@ -476,8 +475,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 														"hyvaksymiskirje_"
 																+ hakukohdeOid
 																+ ".pdf",
-														defaultExpirationDate()
-																.getTime(),
+														DEFAULT_SAILYTYSAIKA,
 														dokumenttiprosessi(
 																exchange)
 																.getTags(),
