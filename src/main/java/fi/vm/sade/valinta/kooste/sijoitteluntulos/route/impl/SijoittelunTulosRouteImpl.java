@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,8 +41,10 @@ import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
+import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Tiedosto;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Valmis;
@@ -50,6 +53,7 @@ import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoiteta
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukkolaskentaRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -86,6 +90,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta;
 	private final HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta;
 	private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
+	private final TilaResource tilaResource;
 	private final DokumenttiResource dokumenttiResource;
 	private final ViestintapalveluResource viestintapalveluResource;
 	private final HaeOsoiteKomponentti osoiteKomponentti;
@@ -112,8 +117,9 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
 			ViestintapalveluResource viestintapalveluResource,
 			HaeOsoiteKomponentti osoiteKomponentti,
-			ApplicationResource applicationResource,
+			ApplicationResource applicationResource, TilaResource tilaResource,
 			DokumenttiResource dokumenttiResource) {
+		this.tilaResource = tilaResource;
 		this.pakkaaTiedostotTarriin = pakkaaTiedostotTarriin;
 		this.applicationResource = applicationResource;
 		this.osoiteKomponentti = osoiteKomponentti;
@@ -197,13 +203,36 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 						String hakuOid = hakuOid(exchange);
 						String sijoitteluajoId = sijoitteluajoId(exchange);
 						String tarjoajaOid = StringUtils.EMPTY;
+						String hakukohdeNimi;
+						String tarjoajaNimi;
+						String preferoitukielikoodi = KieliUtil.SUOMI;
 						try {
-							tarjoajaOid = nimiTarjonnalta.haeHakukohdeNimi(
-									hakukohdeOid).getTarjoajaOid();
+							HakukohdeNimiRDTO nimi = nimiTarjonnalta
+									.haeHakukohdeNimi(hakukohdeOid);
+							Teksti hakukohdeTeksti = new Teksti(nimi
+									.getHakukohdeNimi());
+							preferoitukielikoodi = hakukohdeTeksti.getKieli();
+							hakukohdeNimi = hakukohdeTeksti.getTeksti();
+							tarjoajaOid = nimi.getTarjoajaOid();
+							tarjoajaNimi = new Teksti(nimi.getTarjoajaNimi())
+									.getTeksti();
+
 						} catch (Exception e) {
+							hakukohdeNimi = new StringBuilder()
+									.append("Nimetön hakukohde ")
+									.append(hakukohdeOid).toString();
+							tarjoajaNimi = new StringBuilder()
+									.append("Nimetön tarjoaja ")
+									.append(tarjoajaOid).toString();
 							prosessi.getVaroitukset()
 									.add(new Varoitus(hakukohdeOid,
 											"Hakukohteelle ei saatu tarjoajaOidia!"));
+						}
+						List<Valintatulos> tilat = Collections.emptyList();
+						try {
+							tilat = tilaResource.hakukohteelle(hakukohdeOid);
+						} catch (Exception e) {
+
 						}
 						try {
 							if (pakkaaTiedostotTarriin) {
@@ -211,7 +240,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 										"sijoitteluntulos_" + hakukohdeOid
 												+ ".xls",
 										IOUtils.toByteArray(sijoittelunTulosExcel
-												.luoXls(sijoitteluajoId,
+												.luoXls(tilat, sijoitteluajoId,
+														preferoitukielikoodi,
+														hakukohdeNimi,
+														tarjoajaNimi,
 														hakukohdeOid, hakuOid)));
 								prosessi.getValmiit().add(
 										new Valmis(tiedosto, hakukohdeOid,
@@ -219,8 +251,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 								return;
 							} else {
 								InputStream input = sijoittelunTulosExcel
-										.luoXls(sijoitteluajoId, hakukohdeOid,
-												hakuOid);
+										.luoXls(tilat, sijoitteluajoId,
+												preferoitukielikoodi,
+												hakukohdeNimi, tarjoajaNimi,
+												hakukohdeOid, hakuOid);
 								try {
 
 									String id = generateId();

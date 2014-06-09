@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoi
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.Formatter;
+import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 
 /**
@@ -53,8 +55,11 @@ public class SijoittelunTulosExcelKomponentti {
 	@Autowired
 	private ApplicationResource applicationResource;
 
-	public InputStream luoXls(
+	public InputStream luoXls(List<Valintatulos> tilat,
 			@Simple("${property.sijoitteluajoId}") String sijoitteluajoId,
+			@Property("preferoitukielikoodi") String preferoitukielikoodi,
+			@Property("hakukohdeNimi") String hakukohdeNimi,
+			@Property("tarjoajaNimi") String tarjoajaNimi,
 			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
 			@Simple("${property.hakuOid}") String hakuOid) {
 		Map<String, List<Valintatulos>> valintatulosCache = new HashMap<String, List<Valintatulos>>();
@@ -89,15 +94,60 @@ public class SijoittelunTulosExcelKomponentti {
 								o2.getPrioriteetti());
 					}
 				});
+
 		Map<String, Hakemus> hakemukset = haeHakemukset(hakukohdeOid);
+		rivit.add(new Object[] { hakukohdeNimi });
+		rivit.add(new Object[] { tarjoajaNimi });
+		rivit.add(new Object[] {});
 		for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
-			rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
+			// rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
 			rivit.add(new Object[] { "Jonosija", "Hakemus", "Hakija",
 					//
 					"Osoite", "Sähköposti", "Puhelinnumero",
 					//
 					"Hakutoive", "Pisteet", "Sijoittelun tila",
-					"Vastaanottotieto", "Muokattu" });
+					"Vastaanottotieto", "Ilmoittautumistieto", "Muokattu" });
+			// ComparatorChain jonosijaAndHakijaNameComparator = new
+			// ComparatorChain(
+			// compare by jonosija
+
+			// jonosijaAndHakijaNameComparator
+			// .addComparator(HakemusComparator.DEFAULT);
+			Collections.sort(jono.getHakemukset(),
+					new Comparator<HakemusDTO>() {
+						private int ordinal(HakemusDTO h) {
+							// harkinnanvaraisesti hyväksytyt, hyväksytyt,
+							// varalla, peruuntuneet, hylätyt
+							switch (h.getTila()) {
+							case HYLATTY:
+								return 6;
+							case VARALLA:
+								return 2;
+							case PERUUNTUNUT:
+								return 3;
+							case HYVAKSYTTY:
+								if (h.isHyvaksyttyHarkinnanvaraisesti()) {
+									return 0;
+								} else {
+									return 1;
+								}
+							case HARKINNANVARAISESTI_HYVAKSYTTY:
+								return 0;
+							case PERUNUT:
+								return 4;
+							case PERUUTETTU:
+								return 5;
+							default:
+								return 0;
+							}
+						}
+
+						@Override
+						public int compare(HakemusDTO o1, HakemusDTO o2) {
+							return new Integer(ordinal(o1))
+									.compareTo(ordinal(o2));
+						}
+					});
 			for (HakemusDTO hakemus : jono.getHakemukset()) {
 				// Jonosija Tasasijan jonosija Hakija Hakemus Hakutoive
 				// Sijoittelun tila Vastaanottotieto
@@ -145,6 +195,7 @@ public class SijoittelunTulosExcelKomponentti {
 				Hakemus application = hakemukset.get(hakemusOid);
 				Yhteystiedot yhteystiedot = Yhteystiedot
 						.yhteystiedotHakemukselta(application);
+				String ilmoittautumistieto = null;
 				rivit.add(new Object[] {
 						hakemus.getJonosija(),
 						hakemusOid,
@@ -157,7 +208,10 @@ public class SijoittelunTulosExcelKomponentti {
 						//
 						hakemus.getPrioriteetti(),
 						Formatter.suomennaNumero(hakemus.getPisteet()),
-						hakemus.getTila(), valintaTieto,
+						HakemusUtil.tilaConverter(hakemus.getTila(),
+								preferoitukielikoodi,
+								hakemus.isHyvaksyttyHarkinnanvaraisesti()),
+						valintaTieto, ilmoittautumistieto,
 						muokattu(hakemus.getTilaHistoria()) });
 			}
 			rivit.add(new Object[] {});

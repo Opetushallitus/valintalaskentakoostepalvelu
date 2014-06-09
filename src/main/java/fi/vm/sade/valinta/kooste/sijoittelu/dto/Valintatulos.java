@@ -1,71 +1,77 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.dto;
 
+import fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
 
 public class Valintatulos {
 
-    private String valintatapajonoOid;
-    private String hakemusOid;
-    private String hakukohdeOid;
-    private String hakijaOid;
-    private String hakuOid;
-    private int hakutoive;
-    private ValintatuloksenTila tila;
+	private String valintatapajonoOid;
+	private String hakemusOid;
+	private String hakukohdeOid;
+	private String hakijaOid;
+	private String hakuOid;
+	private int hakutoive;
+	private ValintatuloksenTila tila;
+	private IlmoittautumisTila ilmoittautumisTila;
 
-    public int getHakutoive() {
-        return hakutoive;
-    }
+	public IlmoittautumisTila getIlmoittautumisTila() {
+		return ilmoittautumisTila;
+	}
 
-    public void setHakutoive(int hakutoive) {
-        this.hakutoive = hakutoive;
-    }
+	public int getHakutoive() {
+		return hakutoive;
+	}
 
-    public String getHakukohdeOid() {
-        return hakukohdeOid;
-    }
+	public void setHakutoive(int hakutoive) {
+		this.hakutoive = hakutoive;
+	}
 
-    public void setHakukohdeOid(String hakukohdeOid) {
-        this.hakukohdeOid = hakukohdeOid;
-    }
+	public String getHakukohdeOid() {
+		return hakukohdeOid;
+	}
 
-    public String getHakemusOid() {
-        return hakemusOid;
-    }
+	public void setHakukohdeOid(String hakukohdeOid) {
+		this.hakukohdeOid = hakukohdeOid;
+	}
 
-    public void setHakemusOid(String hakemusOid) {
-        this.hakemusOid = hakemusOid;
-    }
+	public String getHakemusOid() {
+		return hakemusOid;
+	}
 
-    public String getHakijaOid() {
-        return hakijaOid;
-    }
+	public void setHakemusOid(String hakemusOid) {
+		this.hakemusOid = hakemusOid;
+	}
 
-    public void setHakijaOid(String hakijaOid) {
-        this.hakijaOid = hakijaOid;
-    }
+	public String getHakijaOid() {
+		return hakijaOid;
+	}
 
-    public ValintatuloksenTila getTila() {
-        return tila;
-    }
+	public void setHakijaOid(String hakijaOid) {
+		this.hakijaOid = hakijaOid;
+	}
 
-    public void setTila(ValintatuloksenTila tila) {
-        this.tila = tila;
-    }
+	public ValintatuloksenTila getTila() {
+		return tila;
+	}
 
-    public String getValintatapajonoOid() {
-        return valintatapajonoOid;
-    }
+	public void setTila(ValintatuloksenTila tila) {
+		this.tila = tila;
+	}
 
-    public void setValintatapajonoOid(String valintatapajonoOid) {
-        this.valintatapajonoOid = valintatapajonoOid;
-    }
+	public String getValintatapajonoOid() {
+		return valintatapajonoOid;
+	}
 
-    public String getHakuOid() {
-        return hakuOid;
-    }
+	public void setValintatapajonoOid(String valintatapajonoOid) {
+		this.valintatapajonoOid = valintatapajonoOid;
+	}
 
-    public void setHakuOid(String hakuOid) {
-        this.hakuOid = hakuOid;
-    }
+	public String getHakuOid() {
+		return hakuOid;
+	}
+
+	public void setHakuOid(String hakuOid) {
+		this.hakuOid = hakuOid;
+	}
 
 }
