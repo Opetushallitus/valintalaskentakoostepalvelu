@@ -266,7 +266,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 				// tyojonossa on yksi tyostaja
 				"&concurrentConsumers=6";
 		from(osoitetarrat)
-				//
+		//
 				.errorHandler(
 				//
 						deadLetterChannel(luontiEpaonnistui)
@@ -277,8 +277,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.log(ERROR,
-						"Aloitetaan taulukkolaskentojen muodostus koko haulle!")
+				.log(ERROR, "Aloitetaan osoitetarrojen muodostus koko haulle!")
 
 				.process(SECURITY)
 				//
@@ -329,6 +328,12 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 															.getHakemusOid();
 												}
 											}).toList();
+							if (o.isEmpty()) {
+								prosessi.getValmiit().add(
+										new Valmis(hakukohdeOid, tarjoajaOid,
+												null, true));
+								return;
+							}
 							List<Hakemus> hakemukset = applicationResource
 									.getApplicationsByOids(o);
 							List<Osoite> addressLabels = Lists.newArrayList();
@@ -440,9 +445,16 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 									.koulutuspaikalliset(hakuOid(exchange),
 											hakukohdeOid,
 											SijoitteluResource.LATEST);
-							Collections2.filter(hakukohteenHakijat,
+							hakukohteenHakijat = Collections2.filter(
+									hakukohteenHakijat,
 									new SijoittelussaHyvaksyttyHakijaPredicate(
 											hakukohdeOid));
+							if (hakukohteenHakijat.isEmpty()) {
+								prosessi.getValmiit().add(
+										new Valmis(hakukohdeOid, tarjoajaOid,
+												null, true));
+								return;
+							}
 							Teksti hakukohdeNimi = new Teksti(hakukohde
 									.getHakukohdeNimi());
 							for (TemplateHistory history : viestintapalveluResource
