@@ -155,6 +155,7 @@ public class HakemusUtil {
 		fi.put(PERUUNTUNUT, "Peruuntunut");
 		fi.put(HYVAKSYTTY, "Hyväksytty");
 		fi.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Harkinnanvaraisesti hyväksytty");
+		fi.put(HakemuksenTila.PERUUTETTU, "Peruutettu");
 		fi.put(PERUNUT, "Perunut");
 		Map<HakemuksenTila, String> sv = new HashMap<HakemuksenTila, String>();
 		sv.put(HYLATTY, "Underkänd");
@@ -162,6 +163,7 @@ public class HakemusUtil {
 		sv.put(PERUUNTUNUT, "Annullerad");
 		sv.put(HYVAKSYTTY, "Godkänd");
 		sv.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Godkänd enligt prövning");
+		fi.put(HakemuksenTila.PERUUTETTU, "Annullerad");
 		sv.put(PERUNUT, "Annullerad");
 		Map<HakemuksenTila, String> en = new HashMap<HakemuksenTila, String>();
 		en.put(HYLATTY, "Rejected");
@@ -169,6 +171,7 @@ public class HakemusUtil {
 		en.put(PERUUNTUNUT, "Cancelled");
 		en.put(HYVAKSYTTY, "Accepted");
 		en.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Accepted");
+		fi.put(HakemuksenTila.PERUUTETTU, "Canceled");
 		en.put(PERUNUT, "Canceled");
 
 		kielet.put(KieliUtil.SUOMI, Collections.unmodifiableMap(fi));
