@@ -99,8 +99,8 @@ public class SijoittelunTulosExcelKomponentti {
 
 		Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat = valintatapajononTilat(tilat);
 		Map<String, Hakemus> hakemukset = haeHakemukset(hakukohdeOid);
-		rivit.add(new Object[] { hakukohdeNimi });
 		rivit.add(new Object[] { tarjoajaNimi });
+		rivit.add(new Object[] { hakukohdeNimi });
 		rivit.add(new Object[] {});
 		for (ValintatapajonoDTO jono : hakukohde.getValintatapajonot()) {
 			Map<String, IlmoittautumisTila> hakemusTilat = Collections
@@ -196,7 +196,8 @@ public class SijoittelunTulosExcelKomponentti {
 				for (Valintatulos valinta : valintaTulos) {
 					if (jono.getOid().equals(valinta.getValintatapajonoOid())) {
 						if (valinta.getTila() != null) {
-							valintaTieto = valinta.getTila().toString();
+							valintaTieto = HakemusUtil.tilaConverter(
+									valinta.getTila(), preferoitukielikoodi);
 						}
 						break;
 					}
