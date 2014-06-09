@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,15 +41,19 @@ import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
+import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
+import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Tiedosto;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Valmis;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosHyvaksymiskirjeetRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukkolaskentaRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -74,13 +79,18 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
 public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SijoittelunTulosRouteImpl.class);
-	private final long DEFAULT_SAILYTYSAIKA = DateTime.now().plusHours(20)
-			.toDate().getTime();
+
+	private final long getTimeToLive() {
+		return DateTime.now().plusDays(7).toDate().getTime();
+	}
+
+	private final boolean pakkaaTiedostotTarriin;
 	private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
 	private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta;
 	private final HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta;
 	private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
+	private final TilaResource tilaResource;
 	private final DokumenttiResource dokumenttiResource;
 	private final ViestintapalveluResource viestintapalveluResource;
 	private final HaeOsoiteKomponentti osoiteKomponentti;
@@ -95,6 +105,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	@Autowired
 	public SijoittelunTulosRouteImpl(
+			@Value("${valintalaskentakoostepalvelu.sijoittelunTulosRouteImpl.pakkaaTiedostotTarriin:true}") boolean pakkaaTiedostotTarriin,
 			@Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}/dokumentit/lataa/") String dokumenttipalveluUrl,
 			@Value(SijoittelunTulosTaulukkolaskentaRoute.SEDA_SIJOITTELUNTULOS_TAULUKKOLASKENTA_HAULLE) String taulukkolaskenta,
 			@Value(SijoittelunTulosHyvaksymiskirjeetRoute.SEDA_SIJOITTELUNTULOS_HYVAKSYMISKIRJEET_HAULLE) String hyvaksymiskirjeet,
@@ -106,8 +117,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
 			ViestintapalveluResource viestintapalveluResource,
 			HaeOsoiteKomponentti osoiteKomponentti,
-			ApplicationResource applicationResource,
+			ApplicationResource applicationResource, TilaResource tilaResource,
 			DokumenttiResource dokumenttiResource) {
+		this.tilaResource = tilaResource;
+		this.pakkaaTiedostotTarriin = pakkaaTiedostotTarriin;
 		this.applicationResource = applicationResource;
 		this.osoiteKomponentti = osoiteKomponentti;
 		this.osoitetarrat = osoitetarrat;
@@ -190,45 +203,87 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 						String hakuOid = hakuOid(exchange);
 						String sijoitteluajoId = sijoitteluajoId(exchange);
 						String tarjoajaOid = StringUtils.EMPTY;
+						String hakukohdeNimi;
+						String tarjoajaNimi;
+						String preferoitukielikoodi = KieliUtil.SUOMI;
 						try {
-							tarjoajaOid = nimiTarjonnalta.haeHakukohdeNimi(
-									hakukohdeOid).getTarjoajaOid();
+							HakukohdeNimiRDTO nimi = nimiTarjonnalta
+									.haeHakukohdeNimi(hakukohdeOid);
+							Teksti hakukohdeTeksti = new Teksti(nimi
+									.getHakukohdeNimi());
+							preferoitukielikoodi = hakukohdeTeksti.getKieli();
+							hakukohdeNimi = hakukohdeTeksti.getTeksti();
+							tarjoajaOid = nimi.getTarjoajaOid();
+							tarjoajaNimi = new Teksti(nimi.getTarjoajaNimi())
+									.getTeksti();
+
 						} catch (Exception e) {
+							hakukohdeNimi = new StringBuilder()
+									.append("Nimetön hakukohde ")
+									.append(hakukohdeOid).toString();
+							tarjoajaNimi = new StringBuilder()
+									.append("Nimetön tarjoaja ")
+									.append(tarjoajaOid).toString();
 							prosessi.getVaroitukset()
 									.add(new Varoitus(hakukohdeOid,
 											"Hakukohteelle ei saatu tarjoajaOidia!"));
 						}
+						List<Valintatulos> tilat = Collections.emptyList();
 						try {
+							tilat = tilaResource.hakukohteelle(hakukohdeOid);
+						} catch (Exception e) {
 
-							InputStream input = sijoittelunTulosExcel.luoXls(
-									sijoitteluajoId, hakukohdeOid, hakuOid);
-							try {
-
-								String id = generateId();
-								dokumenttiResource.tallenna(id,
+						}
+						try {
+							if (pakkaaTiedostotTarriin) {
+								Tiedosto tiedosto = new Tiedosto(
 										"sijoitteluntulos_" + hakukohdeOid
-												+ ".xls", DEFAULT_SAILYTYSAIKA,
-										dokumenttiprosessi(exchange).getTags(),
-										"application/vnd.ms-excel", input);
+												+ ".xls",
+										IOUtils.toByteArray(sijoittelunTulosExcel
+												.luoXls(tilat, sijoitteluajoId,
+														preferoitukielikoodi,
+														hakukohdeNimi,
+														tarjoajaNimi,
+														hakukohdeOid, hakuOid)));
 								prosessi.getValmiit().add(
-										new Valmis(hakukohdeOid, tarjoajaOid,
-												id));
-							} catch (Exception e) {
-								LOG.error(
-										"Dokumentin tallennus epäonnistui hakukohteelle {}: {}",
-										hakukohdeOid, e.getMessage());
-								prosessi.getVaroitukset()
-										.add(new Varoitus(
-												hakukohdeOid,
-												"Ei saatu tallennettua dokumenttikantaan! "
-														+ e.getMessage()
-														+ "\r\n"
-														+ Arrays.toString(e
-																.getStackTrace())));
-								prosessi.getValmiit().add(
-										new Valmis(hakukohdeOid, tarjoajaOid,
-												null));
+										new Valmis(tiedosto, hakukohdeOid,
+												tarjoajaOid));
 								return;
+							} else {
+								InputStream input = sijoittelunTulosExcel
+										.luoXls(tilat, sijoitteluajoId,
+												preferoitukielikoodi,
+												hakukohdeNimi, tarjoajaNimi,
+												hakukohdeOid, hakuOid);
+								try {
+
+									String id = generateId();
+									dokumenttiResource.tallenna(id,
+											"sijoitteluntulos_" + hakukohdeOid
+													+ ".xls", getTimeToLive(),
+											dokumenttiprosessi(exchange)
+													.getTags(),
+											"application/vnd.ms-excel", input);
+									prosessi.getValmiit().add(
+											new Valmis(hakukohdeOid,
+													tarjoajaOid, id));
+								} catch (Exception e) {
+									LOG.error(
+											"Dokumentin tallennus epäonnistui hakukohteelle {}: {}",
+											hakukohdeOid, e.getMessage());
+									prosessi.getVaroitukset()
+											.add(new Varoitus(
+													hakukohdeOid,
+													"Ei saatu tallennettua dokumenttikantaan! "
+															+ e.getMessage()
+															+ "\r\n"
+															+ Arrays.toString(e
+																	.getStackTrace())));
+									prosessi.getValmiit().add(
+											new Valmis(hakukohdeOid,
+													tarjoajaOid, null));
+									return;
+								}
 							}
 						} catch (SijoittelultaEiSisaltoaPoikkeus e) {
 							prosessi.getValmiit().add(
@@ -343,18 +398,29 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 										.haeOsoite(h));
 							}
 							Osoitteet osoitteet = new Osoitteet(addressLabels);
+							if (pakkaaTiedostotTarriin) {
+								Tiedosto tiedosto = new Tiedosto(
+										"osoitetarrat_" + hakukohdeOid + ".pdf",
+										IOUtils.toByteArray(viestintapalveluResource
+												.haeOsoitetarratSync(osoitteet)));
+								prosessi.getValmiit().add(
+										new Valmis(tiedosto, hakukohdeOid,
+												tarjoajaOid));
+								return;
+							} else {
+								InputStream input = pipeInputStreams(viestintapalveluResource
+										.haeOsoitetarratSync(osoitteet));
 
-							InputStream input = pipeInputStreams(viestintapalveluResource
-									.haeOsoitetarratSync(osoitteet));
-
-							String id = generateId();
-							dokumenttiResource.tallenna(id, "osoitetarrat_"
-									+ hakukohdeOid + ".pdf",
-									DEFAULT_SAILYTYSAIKA,
-									dokumenttiprosessi(exchange).getTags(),
-									"application/pdf", input);
-							prosessi.getValmiit().add(
-									new Valmis(hakukohdeOid, tarjoajaOid, id));
+								String id = generateId();
+								dokumenttiResource.tallenna(id, "osoitetarrat_"
+										+ hakukohdeOid + ".pdf",
+										getTimeToLive(),
+										dokumenttiprosessi(exchange).getTags(),
+										"application/pdf", input);
+								prosessi.getValmiit().add(
+										new Valmis(hakukohdeOid, tarjoajaOid,
+												id));
+							}
 						} catch (Exception e) {
 							LOG.error(
 									"Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle {}: {}",
@@ -475,47 +541,63 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 															//
 															e.getDefaultValue(),
 															tag);
-
-											InputStream input = pipeInputStreams(viestintapalveluResource
-													.haeKirjeSync(new Gson()
-															.toJson(l)));
-											try {
-
-												String id = generateId();
-												dokumenttiResource.tallenna(
-														id,
+											if (pakkaaTiedostotTarriin) {
+												Tiedosto tiedosto = new Tiedosto(
 														"hyvaksymiskirje_"
 																+ hakukohdeOid
 																+ ".pdf",
-														DEFAULT_SAILYTYSAIKA,
-														dokumenttiprosessi(
-																exchange)
-																.getTags(),
-														"application/pdf",
-														input);
-												prosessi.getValmiit()
-														.add(new Valmis(
-																hakukohdeOid,
-																tarjoajaOid, id));
-											} catch (Exception ex) {
-												LOG.error(
-														"Dokumentin tallennus epäonnistui hakukohteelle {}: {}",
-														hakukohdeOid,
-														ex.getMessage());
-												prosessi.getVaroitukset()
-														.add(new Varoitus(
-																hakukohdeOid,
-																"Ei saatu tallennettua dokumenttikantaan! "
-																		+ ex.getMessage()
-																		+ "\r\n"
-																		+ Arrays.toString(ex
-																				.getStackTrace())));
+														IOUtils.toByteArray(viestintapalveluResource
+																.haeKirjeSync(new Gson()
+																		.toJson(l))));
 												prosessi.getValmiit().add(
-														new Valmis(
+														new Valmis(tiedosto,
 																hakukohdeOid,
-																tarjoajaOid,
-																null));
+																tarjoajaOid));
 												return;
+											} else {
+												InputStream input = pipeInputStreams(viestintapalveluResource
+														.haeKirjeSync(new Gson()
+																.toJson(l)));
+												try {
+
+													String id = generateId();
+													dokumenttiResource
+															.tallenna(
+																	id,
+																	"hyvaksymiskirje_"
+																			+ hakukohdeOid
+																			+ ".pdf",
+																	getTimeToLive(),
+																	dokumenttiprosessi(
+																			exchange)
+																			.getTags(),
+																	"application/pdf",
+																	input);
+													prosessi.getValmiit()
+															.add(new Valmis(
+																	hakukohdeOid,
+																	tarjoajaOid,
+																	id));
+												} catch (Exception ex) {
+													LOG.error(
+															"Dokumentin tallennus epäonnistui hakukohteelle {}: {}",
+															hakukohdeOid,
+															ex.getMessage());
+													prosessi.getVaroitukset()
+															.add(new Varoitus(
+																	hakukohdeOid,
+																	"Ei saatu tallennettua dokumenttikantaan! "
+																			+ ex.getMessage()
+																			+ "\r\n"
+																			+ Arrays.toString(ex
+																					.getStackTrace())));
+													prosessi.getValmiit()
+															.add(new Valmis(
+																	hakukohdeOid,
+																	tarjoajaOid,
+																	null));
+													return;
+												}
 											}
 											return;
 										}
@@ -740,7 +822,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 					subTarFileBytes);
 
 			for (Valmis v : perTarjoaja.getValue()) {
-				if (v.isOnnistunut()) {
+				if (v.containsTiedosto()) {
+					writeLinesToTarFile(v.getTiedosto().getTiedostonNimi(), v
+							.getTiedosto().getData(), subTarOutputStream);
+				} else if (v.isOnnistunut()) {
 					String hakukohdeFileName = new StringBuilder()
 							.append("hakukohdeOid_")
 							.append(v.getHakukohdeOid()).append(".txt")
@@ -752,6 +837,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 							Arrays.asList(v.getTulosId(), kokoUrl),
 							subTarOutputStream);
 				}
+
 			}
 			subTarOutputStream.close();
 			writeLinesToTarFile(subFileName, subTarFileBytes.toByteArray(),
