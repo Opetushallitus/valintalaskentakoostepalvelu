@@ -209,11 +209,11 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 						try {
 							HakukohdeNimiRDTO nimi = nimiTarjonnalta
 									.haeHakukohdeNimi(hakukohdeOid);
+							tarjoajaOid = nimi.getTarjoajaOid();
 							Teksti hakukohdeTeksti = new Teksti(nimi
 									.getHakukohdeNimi());
 							preferoitukielikoodi = hakukohdeTeksti.getKieli();
 							hakukohdeNimi = hakukohdeTeksti.getTeksti();
-							tarjoajaOid = nimi.getTarjoajaOid();
 							tarjoajaNimi = new Teksti(nimi.getTarjoajaNimi())
 									.getTeksti();
 
@@ -361,6 +361,15 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 								HakukohdeTyyppi.class);
 						String hakukohdeOid = hakukohde.getOid();
 						String tarjoajaOid = StringUtils.EMPTY;
+						try {
+							HakukohdeNimiRDTO nimi = nimiTarjonnalta
+									.haeHakukohdeNimi(hakukohdeOid);
+							tarjoajaOid = nimi.getTarjoajaOid();
+						} catch (Exception e) {
+							prosessi.getVaroitukset()
+									.add(new Varoitus(hakukohdeOid,
+											"Hakukohteelle ei saatu tarjoajaOidia!"));
+						}
 						List<String> o;
 						try {
 							List<HakijaDTO> l = Lists.newArrayList();
@@ -666,7 +675,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 								String id = generateId();
 								dokumenttiResource.tallenna(id,
-										"sijoitteluntulosexcel.tar",
+										"sijoitteluntuloksethaulle.tar",
 										defaultExpirationDate().getTime(),
 										dokumenttiprosessi(exchange).getTags(),
 										"application/x-tar", tar);
