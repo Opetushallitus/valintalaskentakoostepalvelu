@@ -682,7 +682,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 								prosessi.setDokumenttiId(id);
 							} catch (Exception e) {
-								LOG.error("Tulostietojen tallennus dokumenttipalveluun epäonnistui!");
+								LOG.error(
+										"Tulostietojen tallennus dokumenttipalveluun epäonnistui! {}:\r\n{}",
+										e.getMessage(),
+										Arrays.asList(e.getStackTrace()));
 								prosessi.getPoikkeukset()
 										.add(new Poikkeus(
 												Poikkeus.DOKUMENTTIPALVELU,
