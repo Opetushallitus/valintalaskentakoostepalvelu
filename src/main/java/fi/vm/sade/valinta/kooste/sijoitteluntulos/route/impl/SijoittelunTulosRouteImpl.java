@@ -540,10 +540,31 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 							}
 							Teksti hakukohdeNimi = new Teksti(hakukohde
 									.getHakukohdeNimi());
-							for (TemplateHistory history : viestintapalveluResource
-									.haeKirjepohja(tarjoajaOid,
-											"hyvaksymiskirje",
-											hakukohdeNimi.getKieli(), tag)) {
+							List<TemplateHistory> histories;
+							try {
+								histories = viestintapalveluResource
+										.haeKirjepohja(tarjoajaOid,
+												"hyvaksymiskirje",
+												hakukohdeNimi.getKieli(), tag);
+							} catch (Exception e) {
+								prosessi.getVaroitukset()
+										.add(new Varoitus(hakukohdeOid,
+												"Ei saatu kirjepohjia tarjoajalle("
+														+ tarjoajaOid
+														+ ") kielellä "
+														+ hakukohdeNimi
+																.getKieli()
+														+ " ja tagilla " + tag));
+								prosessi.getValmiit().add(
+										new Valmis(hakukohdeOid, tarjoajaOid,
+												null, true));
+								LOG.error(
+										"Viestintäpalvelun getHistory kutsu epäonnistui {}:\r\n{}",
+										e.getMessage(),
+										Arrays.toString(e.getStackTrace()));
+								return;
+							}
+							for (TemplateHistory history : histories) {
 								if ("default".equals(history.getName())) {
 									for (TemplateDetail e : history
 											.getTemplateReplacements()) {
