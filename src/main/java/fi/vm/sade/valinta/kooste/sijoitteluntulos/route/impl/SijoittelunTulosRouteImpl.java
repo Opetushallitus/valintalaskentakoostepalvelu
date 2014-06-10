@@ -36,6 +36,8 @@ import com.google.gson.Gson;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
@@ -88,6 +90,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
 	private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta;
+	private final HakukohdeResource tarjontaResource;
 	private final HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta;
 	private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
 	private final TilaResource tilaResource;
@@ -118,7 +121,9 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 			ViestintapalveluResource viestintapalveluResource,
 			HaeOsoiteKomponentti osoiteKomponentti,
 			ApplicationResource applicationResource, TilaResource tilaResource,
-			DokumenttiResource dokumenttiResource) {
+			DokumenttiResource dokumenttiResource,
+			HakukohdeResource tarjontaResource) {
+		this.tarjontaResource = tarjontaResource;
 		this.tilaResource = tilaResource;
 		this.pakkaaTiedostotTarriin = pakkaaTiedostotTarriin;
 		this.applicationResource = applicationResource;
@@ -499,15 +504,18 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 						SijoittelunTulosProsessi prosessi = prosessi(exchange);
 						HakukohdeTyyppi hakukohde = exchange.getIn().getBody(
 								HakukohdeTyyppi.class);
+
 						String hakukohdeOid = hakukohde.getOid();
 						String hakuOid = hakuOid(exchange);
 						String tarjoajaOid = StringUtils.EMPTY;
 						String tag = StringUtils.EMPTY;
+
 						try {
-							HakukohdeNimiRDTO nimi = nimiTarjonnalta
-									.haeHakukohdeNimi(hakukohdeOid);
-							tarjoajaOid = nimi.getTarjoajaOid();
-							tag = nimi.getHakukohdeNameUri().split("#")[0];
+							HakukohdeDTO h = tarjontaResource
+									.getByOID(hakukohdeOid);
+							tarjoajaOid = h.getTarjoajaOid();
+							tag = h.getHakukohdeNimiUri().split("#")[0];
+
 						} catch (Exception e) {
 							prosessi.getVaroitukset()
 									.add(new Varoitus(hakukohdeOid,
