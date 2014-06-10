@@ -42,7 +42,7 @@ public class Valmis {
 	}
 
 	public boolean isOnnistunut() {
-		return tulosId != null;
+		return tulosId != null || tiedosto != null;
 	}
 
 	public String getHakukohdeOid() {
