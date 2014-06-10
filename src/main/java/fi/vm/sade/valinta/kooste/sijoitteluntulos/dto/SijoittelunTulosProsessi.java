@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -12,7 +14,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 public class SijoittelunTulosProsessi extends DokumenttiProsessi {
 
 	private final AtomicInteger valmis = new AtomicInteger(-1);
-	private final transient Collection<Valmis> valmiit;
+	private final Collection<Valmis> valmiit;
 
 	public SijoittelunTulosProsessi(String resurssi, String toiminto,
 			String hakuOid, List<String> tags) {
@@ -33,6 +35,8 @@ public class SijoittelunTulosProsessi extends DokumenttiProsessi {
 		super.setKokonaistyo(arvo);
 	}
 
+	@com.fasterxml.jackson.annotation.JsonIgnore
+	@JsonIgnore
 	public Collection<Valmis> getValmiit() {
 		return valmiit;
 	}
