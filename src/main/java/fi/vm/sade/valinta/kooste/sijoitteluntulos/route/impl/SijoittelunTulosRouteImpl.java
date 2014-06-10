@@ -825,14 +825,22 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 		}
 		for (Entry<String, Collection<Valmis>> perTarjoaja : onnistuneetPerTarjoaja
 				.entrySet()) {
+			if (perTarjoaja == null) {
+				LOG.error("perTarjoaja null! Miten mahdollista!");
+				continue;
+			}
+			String tarjoajaOid = StringUtils.trimToEmpty(perTarjoaja.getKey());
 			String subFileName = new StringBuilder().append("tarjoajaOid_")
-					.append(perTarjoaja.getKey().replace(" ", "_"))
-					.append(".tar").toString();
+					.append(tarjoajaOid.replace(" ", "_")).append(".tar")
+					.toString();
 
 			ByteArrayOutputStream subTarFileBytes = new ByteArrayOutputStream();
 			TarArchiveOutputStream subTarOutputStream = new TarArchiveOutputStream(
 					subTarFileBytes);
-
+			if (perTarjoaja.getValue() == null) {
+				LOG.error("perTarjoaja value null! Miten mahdollista!");
+				continue;
+			}
 			for (Valmis v : perTarjoaja.getValue()) {
 				if (v.containsTiedosto()) {
 					writeLinesToTarFile(v.getTiedosto().getTiedostonNimi(), v
