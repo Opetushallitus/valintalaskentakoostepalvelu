@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.sijoittelu.komponentti;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.camel.Property;
@@ -41,6 +42,9 @@ public class SijoitteluKoulutuspaikkallisetKomponentti {
 		final HakijaPaginationObject result = sijoitteluResource.hakemukset(
 				hakuOid, SijoitteluResource.LATEST, true, null, null,
 				hakukohteet, null, null);
+		if (result == null) {
+			return Collections.emptyList();
+		}
 		return result.getResults();
 	}
 
