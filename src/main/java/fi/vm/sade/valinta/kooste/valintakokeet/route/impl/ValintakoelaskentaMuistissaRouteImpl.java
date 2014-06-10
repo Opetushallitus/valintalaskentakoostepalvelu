@@ -184,23 +184,30 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						HakemusTyyppi hakemusTyyppi = exchange
-								.getContext()
-								.getTypeConverter()
-								.tryConvertTo(
-										HakemusTyyppi.class,
-										applicationResource
-												.getApplicationByOid(exchange
-														.getIn().getBody(
-																String.class)));
-						prosessi(exchange).getHakemukset().tyoValmistui(0L);
-						// Tallenna haettu hakemustyyppi osaksi
-						// valintakoelaskentatyota prosessiin
-						Collection<? extends AbstraktiTyo> tyot = cache(
-								exchange)
-								.hakukohteenEsitiedotOnSelvitettyJaSeuraavaksiEsitiedotTyojonoihin(
-										hakemusTyyppi);
-						exchange.getOut().setBody(tyot);
+						String hakemusOid = exchange.getIn().getBody(
+								String.class);
+						try {
+							HakemusTyyppi hakemusTyyppi = exchange
+									.getContext()
+									.getTypeConverter()
+									.tryConvertTo(
+											HakemusTyyppi.class,
+											applicationResource
+													.getApplicationByOid(hakemusOid));
+							prosessi(exchange).getHakemukset().tyoValmistui(0L);
+							// Tallenna haettu hakemustyyppi osaksi
+							// valintakoelaskentatyota prosessiin
+							Collection<? extends AbstraktiTyo> tyot = cache(
+									exchange)
+									.hakukohteenEsitiedotOnSelvitettyJaSeuraavaksiEsitiedotTyojonoihin(
+											hakemusTyyppi);
+							exchange.getOut().setBody(tyot);
+						} catch (Exception e) {
+							LOG.error("Ei saatu hakemusta({}) {}:\r\n{}",
+									hakemusOid, e.getMessage(),
+									Arrays.toString(e.getStackTrace()));
+							throw e;
+						}
 
 					}
 				})
@@ -267,38 +274,49 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						ValintaperusteetTyo<ValintakoeTyo> valintaperusteetTyo = exchange
-								.getIn().getBody(ValintaperusteetTyo.class);
+						try {
+							ValintaperusteetTyo<ValintakoeTyo> valintaperusteetTyo = exchange
+									.getIn().getBody(ValintaperusteetTyo.class);
 
-						HakuparametritTyyppi params = new HakuparametritTyyppi();
-						params.setHakukohdeOid(valintaperusteetTyo.getOid());
-						params.setValinnanVaiheJarjestysluku(/*
-															 * Haetaan kaikki
-															 * hakukohteen
-															 * valintaperusteet
-															 */null);
+							HakuparametritTyyppi params = new HakuparametritTyyppi();
+							params.setHakukohdeOid(valintaperusteetTyo.getOid());
+							params.setValinnanVaiheJarjestysluku(/*
+																 * Haetaan
+																 * kaikki
+																 * hakukohteen
+																 * valintaperusteet
+																 */null);
 
-						List<ValintaperusteetTyyppi> t = valintaperusteService
-								.haeValintaperusteet(Arrays.asList(params));
-						prosessi(exchange).getValintaperusteet().tyoValmistui(
-								0L);
-						if (t == null || t.isEmpty()) {
-							LOG.error(
-									"Hakukohteelle {} ei saatu valintaperusteita!",
-									valintaperusteetTyo.getOid());
-							valintaperusteetTyo.setEsitietoOhitettu();
-							exchange.getOut().setBody(Collections.emptyList());
-						} else {
-							Collection<ValintakoeTyo> v = valintaperusteetTyo
-									.setEsitieto(t);
-							prosessi(exchange).getValintakoelaskenta()
-									.inkrementoiKokonaismaaraa(v.size());
-							if (v != null) {
-								exchange.getOut().setBody(v);
-							} else {
+							List<ValintaperusteetTyyppi> t = valintaperusteService
+									.haeValintaperusteet(Arrays.asList(params));
+							prosessi(exchange).getValintaperusteet()
+									.tyoValmistui(0L);
+							if (t == null || t.isEmpty()) {
+								LOG.error(
+										"Hakukohteelle {} ei saatu valintaperusteita!",
+										valintaperusteetTyo.getOid());
+								valintaperusteetTyo.setEsitietoOhitettu();
 								exchange.getOut().setBody(
 										Collections.emptyList());
+							} else {
+								Collection<ValintakoeTyo> v = valintaperusteetTyo
+										.setEsitieto(t);
+								if (v != null) {
+									prosessi(exchange)
+											.getValintakoelaskenta()
+											.inkrementoiKokonaismaaraa(v.size());
+									exchange.getOut().setBody(v);
+								} else {
+									exchange.getOut().setBody(
+											Collections.emptyList());
+								}
 							}
+						} catch (Exception e) {
+							LOG.error(
+									"Virhe valintaperusteiden haussa {}:\r\n{}",
+									e.getMessage(),
+									Arrays.toString(e.getStackTrace()));
+							throw e;
 						}
 					}
 				})
@@ -338,20 +356,29 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 					public void process(Exchange exchange) throws Exception {
 						ValintakoeTyo valintakoeTyo = exchange.getIn().getBody(
 								ValintakoeTyo.class);
-						List<ValintaperusteetTyyppi> v = valintakoeTyo
-								.getValintaperusteet();
-						if (!v.isEmpty()) {
-							valintalaskentaService.valintakokeet(
-									valintakoeTyo.getHakemus(),
-									valintakoeTyo.getValintaperusteet());
-						} else {
+						try {
+							List<ValintaperusteetTyyppi> v = valintakoeTyo
+									.getValintaperusteet();
+							if (!v.isEmpty()) {
+								valintalaskentaService.valintakokeet(
+										valintakoeTyo.getHakemus(),
+										valintakoeTyo.getValintaperusteet());
+							} else {
+								LOG.error(
+										"Hakemuksen {} yhdellekään hakutoiveelle ei ollut valintaperusteita.",
+										valintakoeTyo.getHakemus()
+												.getHakemusOid());
+							}
+							prosessi(exchange).getValintakoelaskenta()
+									.tyoValmistui(0L);
+						} catch (Exception e) {
 							LOG.error(
-									"Hakemuksen {} yhdellekään hakutoiveelle ei ollut valintaperusteita.",
-									valintakoeTyo.getHakemus().getHakemusOid());
+									"Valintakoelaskenta epäonnistui hakemukselle({}) {}:\r\n",
+									valintakoeTyo.getHakemus().getHakemusOid(),
+									e.getMessage(),
+									Arrays.toString(e.getStackTrace()));
+							throw e;
 						}
-						prosessi(exchange).getValintakoelaskenta()
-								.tyoValmistui(0L);
-
 					}
 				})
 				//
