@@ -34,6 +34,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 
 /**
@@ -118,7 +119,7 @@ public class SijoittelunTulosExcelKomponentti {
 			// rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
 			rivit.add(new Object[] { "Jonosija", "Hakemus", "Hakija",
 					//
-					"Osoite", "Sähköposti", "Puhelinnumero",
+					"Osoite", "Sähköposti", "Puhelinnumero", "Lupa julkaisuun",
 					//
 					"Hakutoive", "Pisteet", "Sijoittelun tila",
 					"Vastaanottotieto", "Ilmoittautumistieto", "Muokattu" });
@@ -209,6 +210,8 @@ public class SijoittelunTulosExcelKomponentti {
 				nimi.append(hakemus.getSukunimi()).append(", ")
 						.append(hakemus.getEtunimi());
 				Hakemus application = hakemukset.get(hakemusOid);
+				HakemusWrapper wrapper = new HakemusWrapper(application);
+				boolean lupaJulkaisuun = wrapper.getLupaJulkaisuun();
 				Yhteystiedot yhteystiedot = Yhteystiedot
 						.yhteystiedotHakemukselta(application);
 				String ilmoittautumistieto = StringUtils.EMPTY;
@@ -227,6 +230,8 @@ public class SijoittelunTulosExcelKomponentti {
 								null, null),
 						yhteystiedot.getSahkoposti(),
 						yhteystiedot.getPuhelinnumerotAsString(),
+						//
+						HakemusUtil.lupaJulkaisuun(lupaJulkaisuun),
 						//
 						hakemus.getPrioriteetti(),
 						Formatter.suomennaNumero(hakemus.getPisteet()),
