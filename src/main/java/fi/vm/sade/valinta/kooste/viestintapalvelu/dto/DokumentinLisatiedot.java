@@ -2,6 +2,10 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -12,11 +16,19 @@ public class DokumentinLisatiedot {
 
 	private String tag;
 	private String letterBodyText;
+	private String languageCode;
 	private List<String> hakemusOids;
 	private List<String> valintakoeOids;
 
 	public String getTag() {
 		return tag;
+	}
+
+	public String getLanguageCode() {
+		if (languageCode == null) {
+			return StringUtils.EMPTY;
+		}
+		return KieliUtil.normalisoiKielikoodi(languageCode);
 	}
 
 	public List<String> getValintakoeOids() {

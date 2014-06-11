@@ -207,6 +207,13 @@ public class HakemusUtil {
 		}
 	}
 
+	public static String lupaJulkaisuun(boolean lupa) {
+		if (true) {
+			return "Lupa julkaisuun";
+		}
+		return StringUtils.EMPTY;
+	}
+
 	public static String tilaConverter(ValintatuloksenTila tila,
 			String preferoitukielikoodi) {
 		if (tila == null) {

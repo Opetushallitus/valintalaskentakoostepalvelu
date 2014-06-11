@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 
@@ -26,6 +27,7 @@ public interface JalkiohjauskirjeRoute {
 
 	void jalkiohjauskirjeetAktivoi(
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
+			@Property(KieliUtil.PREFEROITUKIELIKOODI) String preferoitukielikoodi,
 			@Property(OPH.TARJOAJAOID) String tarjoajaOid,
 			@Property("sisalto") String sisalto,
 			@Property("tag") String tag,
