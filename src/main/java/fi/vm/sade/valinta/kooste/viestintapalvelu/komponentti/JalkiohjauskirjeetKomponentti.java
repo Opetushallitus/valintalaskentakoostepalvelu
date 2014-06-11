@@ -77,6 +77,7 @@ public class JalkiohjauskirjeetKomponentti {
 	}
 
 	public LetterBatch teeJalkiohjauskirjeet(
+			String ylikirjoitettuPreferoitukielikoodi,
 			@Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
 			final Collection<Hakemus> hakemukset,
 			final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
@@ -102,6 +103,9 @@ public class JalkiohjauskirjeetKomponentti {
 		String preferoituKielikoodi = KieliUtil.SUOMI;
 		for (HakijaDTO hakija : hyvaksymattomatHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
+			if (!hakemusOidHakemukset.containsKey(hakemusOid)) {
+				continue;
+			}
 			final Hakemus hakemus = hakemusOidHakemukset.get(hakemusOid); // hakemusProxy.haeHakemus(hakemusOid);
 			final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
 			final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
@@ -233,7 +237,11 @@ public class JalkiohjauskirjeetKomponentti {
 		LetterBatch viesti = new LetterBatch(kirjeet);
 		viesti.setApplicationPeriod(hakuOid);
 		viesti.setFetchTarget(null);
-		viesti.setLanguageCode(preferoituKielikoodi);
+		if (StringUtils.isNotEmpty(ylikirjoitettuPreferoitukielikoodi)) {
+			viesti.setLanguageCode(ylikirjoitettuPreferoitukielikoodi);
+		} else {
+			viesti.setLanguageCode(preferoituKielikoodi);
+		}
 		viesti.setOrganizationOid(null);
 		viesti.setTag(tag);
 		viesti.setTemplateName("jalkiohjauskirje");

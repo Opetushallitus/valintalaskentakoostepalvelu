@@ -11,6 +11,7 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,8 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluIlmankoulutuspaikkaaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
@@ -164,7 +167,9 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				// TODO: Cache ulkopuolisiin palvelukutsuihin
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-
+						final String preferoitukielikoodi = exchange
+								.getProperty(KieliUtil.PREFEROITUKIELIKOODI,
+										String.class);
 						@SuppressWarnings("unchecked")
 						Collection<HakijaDTO> hyvaksymattomatHakijat = exchange
 								.getIn().getBody(List.class);
@@ -298,8 +303,30 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 										"Jälkiohjauskirjeen muodostus on keskeytetty!");
 							}
 							try {
-								hakemukset.add(applicationResource
-										.getApplicationByOid(hakemusOid));
+								//
+								Hakemus hakemus = applicationResource
+										.getApplicationByOid(hakemusOid);
+								if (StringUtils.isEmpty(preferoitukielikoodi)) {
+									hakemukset.add(hakemus);
+								} else {
+									if (KieliUtil.RUOTSI
+											.equals(preferoitukielikoodi)) {
+
+										if (KieliUtil.RUOTSI
+												.equals(new HakemusWrapper(
+														hakemus)
+														.getAsiointikieli())) {
+											hakemukset.add(hakemus);
+										}
+									} else {
+										if (!KieliUtil.RUOTSI
+												.equals(new HakemusWrapper(
+														hakemus)
+														.getAsiointikieli())) {
+											hakemukset.add(hakemus);
+										}
+									}
+								}
 								dokumenttiprosessi(exchange)
 										.inkrementoiTehtyjaToita();
 							} catch (Exception e) {
@@ -321,6 +348,7 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 							exchange.getOut().setBody(
 									jalkiohjauskirjeetKomponentti
 											.teeJalkiohjauskirjeet(
+													preferoitukielikoodi,
 													hyvaksymattomatHakijat,
 													hakemukset, metaKohteet,
 													hakuOid(exchange),
