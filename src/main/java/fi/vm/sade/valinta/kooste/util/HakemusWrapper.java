@@ -17,10 +17,12 @@ public class HakemusWrapper {
 
 	private final Hakemus hakemus;
 	private Map<String, String> henkilotiedot = null;
+	private Map<String, String> lisatiedot = null;
 	private final static String ETUNIMET = "Etunimet";
 	private final static String KUTSUMANIMI = "Kutsumanimi";
 	private final static String SUKUNIMI = "Sukunimi";
 	private final static String ASIOINTIKIELI = "asiointikieli";
+	private final static String LUPAJULKAISUUN = "lupaJulkaisu";
 
 	public HakemusWrapper(Hakemus hakemus) {
 		this.hakemus = hakemus;
@@ -46,6 +48,18 @@ public class HakemusWrapper {
 		}
 	}
 
+	public boolean getLupaJulkaisuun() {
+		getLisatiedot(); // lazy load henkilotiedot
+		if (lisatiedot.containsKey(LUPAJULKAISUUN)) {
+			String l = lisatiedot.get(LUPAJULKAISUUN);
+			try {
+				return Boolean.TRUE.equals(Boolean.valueOf(l));
+			} catch (Exception e) {
+			}
+		}
+		return false;
+	}
+
 	public String getAsiointikieli() {
 		getHenkilotiedot(); // lazy load henkilotiedot
 		if (henkilotiedot.containsKey(ASIOINTIKIELI)) {
@@ -54,6 +68,19 @@ public class HakemusWrapper {
 		} else {
 			return KieliUtil.SUOMI;
 		}
+	}
+
+	public Map<String, String> getLisatiedot() {
+		if (lisatiedot == null) {
+			lisatiedot = // hakemus.getAnswers().getHenkilotiedot();
+			new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+			try {
+				lisatiedot.putAll(hakemus.getAnswers().getLisatiedot());
+			} catch (Exception e) {
+
+			}
+		}
+		return lisatiedot;
 	}
 
 	public Map<String, String> getHenkilotiedot() {
