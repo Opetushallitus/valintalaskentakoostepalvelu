@@ -212,6 +212,23 @@
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
         </jaxrs:providers>
     </jaxrs:client>
+
+    <jaxrs:client id="sijoitteluRestClient"
+                  address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
+                  serviceClass="fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource"
+                  inheritHeaders="true">
+        <jaxrs:outInterceptors>
+            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+                <property name="webCasUrl" value="${web.url.cas}"/>
+                <property name="targetService"
+                          value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>
+                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>
+                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>
+            </bean>
+        </jaxrs:outInterceptors>
+    </jaxrs:client>
+
+
     <jaxrs:client id="SijoitteluServiceRestClient"
                   address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
                   serviceClass="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource"

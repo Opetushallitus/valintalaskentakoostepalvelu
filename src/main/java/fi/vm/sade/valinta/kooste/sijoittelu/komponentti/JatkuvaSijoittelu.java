@@ -5,8 +5,10 @@ import fi.vm.sade.service.sijoittelu.SijoitteluService;
 import fi.vm.sade.service.valintatiedot.ValintatietoService;
 import fi.vm.sade.service.valintatiedot.schema.HakuTyyppi;
 import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -23,11 +25,14 @@ public class JatkuvaSijoittelu {
 
     private static final Logger LOG = LoggerFactory.getLogger(JatkuvaSijoittelu.class);
 
-    @Resource(name="valintatietoServiceAsAdmin")
-    private ValintatietoService valintatietoService;
+//    @Resource(name="valintatietoServiceAsAdmin")
+//    private ValintatietoService valintatietoService;
+//
+//    @Resource(name="sijoitteluServiceAsAdmin")
+//    private SijoitteluService sijoitteluService;
 
-    @Resource(name="sijoitteluServiceAsAdmin")
-    private SijoitteluService sijoitteluService;
+    @Autowired
+    private SijoitteluResource sijoitteluResource;
 
     public void suorita() {
         LOG.debug("JATKUVA SIJOITTELU KÄYNNISTETTY");
@@ -35,9 +40,10 @@ public class JatkuvaSijoittelu {
             if(sijoittelu.isAjossa()) {
                 LOG.debug("JATKUVA SIJOITTELU: {}", sijoittelu.getHakuOid());
                 try {
-                    HakuTyyppi ht = valintatietoService.haeValintatiedot(sijoittelu.getHakuOid());
-                    LOG.info("Haettu valinnan tulokset");
-                    sijoitteluService.sijoittele(ht);
+//                    HakuTyyppi ht = valintatietoService.haeValintatiedot(sijoittelu.getHakuOid());
+//                    LOG.info("Haettu valinnan tulokset");
+//                    sijoitteluService.sijoittele(ht);
+                    sijoitteluResource.sijoittele(sijoittelu.getHakuOid());
                     LOG.info("Viety sijoittelulle valinnan tulokset");
                 } catch(Exception e) {
                     LOG.error("JATKUVA SIJOITTELU", e);
