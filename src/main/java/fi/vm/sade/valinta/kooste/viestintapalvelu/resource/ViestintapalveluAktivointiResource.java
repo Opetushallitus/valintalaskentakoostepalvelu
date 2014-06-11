@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
@@ -202,8 +203,13 @@ public class ViestintapalveluAktivointiResource {
 					tags("jalkiohjauskirjeet", hakemuksillaRajaus.getTag()));
 			dokumenttiProsessiKomponentti
 					.tuoUusiProsessi(jalkiohjauskirjeetProsessi);
+			LOG.warn("Luodaan jälkiohjauskirjeet kielellä {}. Onko {} == {}",
+					hakemuksillaRajaus.getLanguageCode(), KieliUtil.RUOTSI,
+					KieliUtil.RUOTSI.equals(hakemuksillaRajaus
+							.getLanguageCode()));
 			jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(
-					jalkiohjauskirjeetProsessi, tarjoajaOid,
+					jalkiohjauskirjeetProsessi,
+					hakemuksillaRajaus.getLanguageCode(), tarjoajaOid,
 					hakemuksillaRajaus.getLetterBodyText(), tag,
 					hakemuksillaRajaus.getHakemusOids(), hakuOid,
 					//

@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
  */
 public class KieliUtil {
 
+	public static final String PREFEROITUKIELIKOODI = "preferoitukielikoodi";
 	private static final String SUOMI_KIELI = "SUOMI";
 	private static final String RUOTSI_KIELI = "RUOTSI";
 	private static final String ENGLANTI_KIELI = "ENGLANTI";
@@ -22,8 +23,8 @@ public class KieliUtil {
 	private static final String ENGLANTI_KOODI = "KIELI_EN";
 
 	public static final String SUOMI = "FI";
-	public static final String RUOTSI = "SE";
-	public static final String RUOTSI_2 = "SV";
+	public static final String RUOTSI = "SV";
+	public static final String RUOTSI_2 = "SE";
 	public static final String ENGLANTI = "EN";
 
 	/**

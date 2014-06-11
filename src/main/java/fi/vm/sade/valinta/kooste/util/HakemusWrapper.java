@@ -20,6 +20,7 @@ public class HakemusWrapper {
 	private final static String ETUNIMET = "Etunimet";
 	private final static String KUTSUMANIMI = "Kutsumanimi";
 	private final static String SUKUNIMI = "Sukunimi";
+	private final static String ASIOINTIKIELI = "asiointikieli";
 
 	public HakemusWrapper(Hakemus hakemus) {
 		this.hakemus = hakemus;
@@ -45,11 +46,25 @@ public class HakemusWrapper {
 		}
 	}
 
+	public String getAsiointikieli() {
+		getHenkilotiedot(); // lazy load henkilotiedot
+		if (henkilotiedot.containsKey(ASIOINTIKIELI)) {
+			return KieliUtil.normalisoiKielikoodi(henkilotiedot
+					.get(ASIOINTIKIELI));
+		} else {
+			return KieliUtil.SUOMI;
+		}
+	}
+
 	public Map<String, String> getHenkilotiedot() {
 		if (henkilotiedot == null) {
 			henkilotiedot = // hakemus.getAnswers().getHenkilotiedot();
 			new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-			henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
+			try {
+				henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
+			} catch (Exception e) {
+
+			}
 		}
 		return henkilotiedot;
 	}
