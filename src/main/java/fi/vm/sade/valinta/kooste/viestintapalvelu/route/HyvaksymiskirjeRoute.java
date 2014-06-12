@@ -16,6 +16,9 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
  * 
  */
 public interface HyvaksymiskirjeRoute {
+
+	// seda:hyvaksymiskirjeet?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1
+
 	// final String SEDA_HYVAKSYMISKIRJEET = "direct:hyvaksymiskirjeet";
 	final String SEDA_HYVAKSYMISKIRJEET = "seda:hyvaksymiskirjeet?" +
 	// jos palvelin sammuu niin ei suorita loppuun tyojonoa
@@ -23,7 +26,7 @@ public interface HyvaksymiskirjeRoute {
 			// reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
 			"&waitForTaskToComplete=Never" +
 			// tyojonossa on yksi tyostaja
-			"&concurrentConsumers=1";
+			"&concurrentConsumers=5";
 
 	void hyvaksymiskirjeetAktivointi(
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
