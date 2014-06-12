@@ -26,7 +26,7 @@ public interface HyvaksymiskirjeRoute {
 			// reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
 			"&waitForTaskToComplete=Never" +
 			// tyojonossa on yksi tyostaja
-			"&concurrentConsumers=5";
+			"&concurrentConsumers=6";
 
 	void hyvaksymiskirjeetAktivointi(
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,

@@ -18,7 +18,7 @@ public interface SijoittelunTulosExcelRoute {
 			// reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
 			"&waitForTaskToComplete=Never" +
 			// tyojonossa on yksi tyostaja
-			"&concurrentConsumers=5";
+			"&concurrentConsumers=6";
 
 	public InputStream luoXls(
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,

@@ -208,7 +208,7 @@ public class HakemusUtil {
 	}
 
 	public static String lupaJulkaisuun(boolean lupa) {
-		if (true) {
+		if (lupa) {
 			return "Lupa julkaisuun";
 		}
 		return StringUtils.EMPTY;
