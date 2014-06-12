@@ -31,12 +31,10 @@ import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.exception.HakemuspalveluException;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
@@ -44,6 +42,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
 
 /**
  * 
@@ -64,17 +63,17 @@ public class HyvaksymiskirjeetKomponentti {
 	private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
 	private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
-	private HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
+	private KirjeetHakukohdeCache kirjeetHakukohdeCache;
 	private HaeOsoiteKomponentti osoiteKomponentti;
 	private ApplicationResource applicationResource;
 
 	@Autowired
 	public HyvaksymiskirjeetKomponentti(
-			HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy,
+			KirjeetHakukohdeCache kirjeetHakukohdeCache,
 			HaeOsoiteKomponentti osoiteKomponentti,
 			ApplicationResource applicationResource) {
 		this.osoiteKomponentti = osoiteKomponentti;
-		this.tarjontaProxy = tarjontaProxy;
+		this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
 		this.applicationResource = applicationResource;
 	}
 
@@ -90,23 +89,9 @@ public class HyvaksymiskirjeetKomponentti {
 				.toString();
 	}
 
-	// TODO: Hakemukset taytyy tuoda komponentille
-	private Hakemus hakemusWithRetryTwice(String hakemusOid) {
-		Hakemus h = null;
-		try {
-			h = applicationResource.getApplicationByOid(hakemusOid);
-			return h;
-		} catch (Exception e) {
-			try {
-				Thread.sleep(1500L);
-			} catch (InterruptedException e1) {
-			}
-		}
-		return applicationResource.getApplicationByOid(hakemusOid);
-	}
-
 	public LetterBatch teeHyvaksymiskirjeet(
 			@Body Collection<HakijaDTO> hakukohteenHakijat,
+			@Property("hakemukset") List<Hakemus> hakemukset,
 			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
 			@Simple("${property.hakuOid}") String hakuOid,
 			@Property("tarjoajaOid") String tarjoajaOid,
@@ -117,7 +102,10 @@ public class HyvaksymiskirjeetKomponentti {
 				new Object[] { hakukohdeOid, hakuOid, });
 		assert (hakukohdeOid != null);
 		assert (hakuOid != null);
-
+		Map<String, Hakemus> hakukohteenHakemukset = Maps.newHashMap();
+		for (Hakemus h : hakemukset) {
+			hakukohteenHakemukset.put(h.getOid(), h);
+		}
 		final int kaikkiHakukohteenHyvaksytyt = hakukohteenHakijat.size();
 		if (kaikkiHakukohteenHyvaksytyt == 0) {
 			LOG.error(
@@ -139,8 +127,8 @@ public class HyvaksymiskirjeetKomponentti {
 		String preferoituKielikoodi = KieliUtil.SUOMI;
 		for (HakijaDTO hakija : hakukohteenHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
-			final Hakemus hakemus;
-			hakemus = hakemusWithRetryTwice(hakemusOid);
+			final Hakemus hakemus = hakukohteenHakemukset.get(hakemusOid);
+			// hakemus = hakemusWithRetryTwice(hakemusOid);
 
 			final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
 			final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
@@ -331,19 +319,10 @@ public class HyvaksymiskirjeetKomponentti {
 		for (HakijaDTO hakija : hakukohteenHakijat) {
 			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
 				String hakukohdeOid = hakutoive.getHakukohdeOid();
-				if (!metaKohteet.containsKey(hakukohdeOid)) { // lisataan
-																// puuttuva
-																// hakukohde
+				if (!metaKohteet.containsKey(hakukohdeOid)) {
 					try {
-						HakukohdeNimiRDTO nimi = tarjontaProxy
-								.haeHakukohdeNimi(hakukohdeOid);
-						Teksti hakukohdeNimi = new Teksti(
-								nimi.getHakukohdeNimi());// extractHakukohdeNimi(nimi,
-															// kielikoodi);
-						Teksti tarjoajaNimi = new Teksti(nimi.getTarjoajaNimi());
-						// extractTarjoajaNimi(nimi, kielikoodi);
-						metaKohteet.put(hakukohdeOid, new MetaHakukohde(
-								hakukohdeNimi, tarjoajaNimi));
+						metaKohteet.put(hakukohdeOid, kirjeetHakukohdeCache
+								.haeHakukohde(hakukohdeOid));
 					} catch (Exception e) {
 						e.printStackTrace();
 						LOG.error("Tarjonnasta ei saatu hakukohdetta {}: {}",

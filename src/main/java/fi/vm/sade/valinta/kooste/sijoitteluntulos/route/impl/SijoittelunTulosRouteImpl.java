@@ -569,10 +569,22 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 									for (TemplateDetail e : history
 											.getTemplateReplacements()) {
 										if ("sisalto".equals(e.getName())) {
-
+											List<Hakemus> hakemukset = applicationResource
+													.getApplicationsByOids(FluentIterable
+															.from(hakukohteenHakijat)
+															.transform(
+																	new Function<HakijaDTO, String>() {
+																		@Override
+																		public String apply(
+																				HakijaDTO input) {
+																			return input
+																					.getHakemusOid();
+																		}
+																	}).toList());
 											LetterBatch l = hyvaksymiskirjeetKomponentti
 													.teeHyvaksymiskirjeet(
 															hakukohteenHakijat,
+															hakemukset,
 															hakukohdeOid,
 															hakuOid,
 															tarjoajaOid,
