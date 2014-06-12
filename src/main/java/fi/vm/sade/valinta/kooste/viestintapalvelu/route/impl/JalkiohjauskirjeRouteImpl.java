@@ -218,11 +218,10 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 									"Jälkiohjauskirjeitä ei voida luoda kun ei ole hakijoita!");
 						}
 
-						dokumenttiprosessi(exchange).setKokonaistyo(
-								hyvaksymattomatHakijat.size() + 3); // hakemukset
-																	// +
-																	// tarjonnasta
-																	// haku +
+						dokumenttiprosessi(exchange).setKokonaistyo(3); // hakemukset
+						// +
+						// tarjonnasta
+						// haku +
 						// osoitteiden haku +
 						// dokumentin
 						// luonti +
