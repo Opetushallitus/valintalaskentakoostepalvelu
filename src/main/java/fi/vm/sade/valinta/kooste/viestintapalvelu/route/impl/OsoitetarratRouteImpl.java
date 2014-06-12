@@ -238,9 +238,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						dokumenttiprosessi(exchange).setKokonaistyo(
-								exchange.getIn().getBody(Collection.class)
-										.size() + 2);
+						dokumenttiprosessi(exchange).setKokonaistyo(2);
 					}
 				})
 				//
