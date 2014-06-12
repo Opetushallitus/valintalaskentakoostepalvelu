@@ -25,7 +25,7 @@ public class DokumentinLisatiedot {
 	}
 
 	public String getLanguageCode() {
-		if (languageCode == null) {
+		if (StringUtils.isBlank(languageCode)) {
 			return StringUtils.EMPTY;
 		}
 		return KieliUtil.normalisoiKielikoodi(languageCode);
