@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -28,14 +30,12 @@ import com.google.gson.GsonBuilder;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluIlmankoulutuspaikkaaKomponentti;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -53,24 +53,24 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 			.getLogger(JalkiohjauskirjeRouteImpl.class);
 	private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
 	private final ViestintapalveluResource viestintapalveluResource;
+	private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
 	private final JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti;
 	private final SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy;
 	private final DokumenttiResource dokumenttiResource;
 	private final String jalkiohjauskirjeet;
 	private final ApplicationResource applicationResource;
-	private final HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
 
 	@Autowired
 	public JalkiohjauskirjeRouteImpl(
-			HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy,
 			ApplicationResource applicationResource,
 			@Value(JalkiohjauskirjeRoute.SEDA_JALKIOHJAUSKIRJEET) String jalkiohjauskirjeet,
 			ViestintapalveluResource viestintapalveluResource,
 			JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti,
+			KirjeetHakukohdeCache kirjeetHakukohdeCache,
 			DokumenttiResource dokumenttiResource,
 			SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy) {
 		super();
-		this.tarjontaProxy = tarjontaProxy;
+		this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
 		this.applicationResource = applicationResource;
 		this.dokumenttiResource = dokumenttiResource;
 		this.viestintapalveluResource = viestintapalveluResource;
@@ -228,8 +228,77 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						// luonti +
 						// dokumentin
 						// vienti
+
+						Collection<Hakemus> hakemukset;
+						try {
+
+							hakemukset = applicationResource
+									.getApplicationsByOids(FluentIterable
+											.from(hyvaksymattomatHakijat)
+											.transform(
+													new Function<HakijaDTO, String>() {
+														public String apply(
+																HakijaDTO input) {
+															return input
+																	.getHakemusOid();
+														}
+													}).toList());
+						} catch (Exception e) {
+							e.printStackTrace();
+							LOG.error(
+									"Jälkiohjauskirjeitä varten ei saatu hakemuksia: {}",
+
+									Arrays.toString(e.getStackTrace()));
+							dokumenttiprosessi(exchange).getPoikkeukset().add(
+									new Poikkeus(Poikkeus.HAKU,
+											"Hakemusten haku",
+											"hakemusten haku epäonnistui!"));
+							throw e;
+						}
+						if (StringUtils.isEmpty(preferoitukielikoodi)) {
+							// OK
+						} else {
+							// VAIN RUOTSINKIELISET HALUTAAN
+							if (KieliUtil.RUOTSI.equals(preferoitukielikoodi)) {
+
+								hakemukset = FluentIterable.from(hakemukset)
+										.filter(new Predicate<Hakemus>() {
+											@Override
+											public boolean apply(Hakemus input) {
+												return KieliUtil.RUOTSI
+														.equals(new HakemusWrapper(
+																input)
+																.getAsiointikieli());
+											}
+										}).toList();
+
+							} else {
+								// VAIN SUOMENKIELISET HALUTAAN
+								hakemukset = FluentIterable.from(hakemukset)
+										.filter(new Predicate<Hakemus>() {
+											@Override
+											public boolean apply(Hakemus input) {
+												return !KieliUtil.RUOTSI
+														.equals(new HakemusWrapper(
+																input)
+																.getAsiointikieli());
+											}
+										}).toList();
+							}
+						}
+						final Set<String> oidSet = FluentIterable
+								.from(hakemukset)
+								.transform(new Function<Hakemus, String>() {
+									@Override
+									public String apply(Hakemus input) {
+										return input.getOid();
+									}
+								}).toSet();
 						final Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
 						for (HakijaDTO hakija : hyvaksymattomatHakijat) {
+							if (!oidSet.contains(hakija.getHakemusOid())) {
+								continue;
+							}
 							for (HakutoiveDTO hakutoive : hakija
 									.getHakutoiveet()) {
 								if (dokumenttiprosessi(exchange)
@@ -249,22 +318,11 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 																				// puuttuva
 																				// hakukohde
 									try {
-										dokumenttiprosessi(exchange)
-												.inkrementoiKokonaistyota();
-										HakukohdeNimiRDTO nimi = tarjontaProxy
-												.haeHakukohdeNimi(hakukohdeOid);
-										dokumenttiprosessi(exchange)
-												.inkrementoiTehtyjaToita();
-										Teksti hakukohdeNimi = new Teksti(nimi
-												.getHakukohdeNimi());// extractHakukohdeNimi(nimi,
-																		// kielikoodi);
-										Teksti tarjoajaNimi = new Teksti(nimi
-												.getTarjoajaNimi());// extractTarjoajaNimi(nimi,
-																	// kielikoodi);
-										metaKohteet.put(hakukohdeOid,
-												new MetaHakukohde(
-														hakukohdeNimi,
-														tarjoajaNimi));
+
+										metaKohteet
+												.put(hakukohdeOid,
+														kirjeetHakukohdeCache
+																.haeHakukohde(hakukohdeOid));
 
 									} catch (Exception e) {
 										e.printStackTrace();
@@ -286,62 +344,6 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 									}
 
 								}
-							}
-						}
-
-						Collection<Hakemus> hakemukset = Lists.newArrayList();
-						for (HakijaDTO h : hyvaksymattomatHakijat) {
-							String hakemusOid = h.getHakemusOid();
-							if (dokumenttiprosessi(exchange).isKeskeytetty()) {
-								dokumenttiprosessi(exchange)
-										.getPoikkeukset()
-										.add(new Poikkeus(
-												Poikkeus.KOOSTEPALVELU,
-												"Jälkiohjauskirjeen muodostus on keskeytetty!",
-												""));
-								throw new RuntimeException(
-										"Jälkiohjauskirjeen muodostus on keskeytetty!");
-							}
-							try {
-								//
-								Hakemus hakemus = applicationResource
-										.getApplicationByOid(hakemusOid);
-								if (StringUtils.isEmpty(preferoitukielikoodi)) {
-									hakemukset.add(hakemus);
-								} else {
-									if (KieliUtil.RUOTSI
-											.equals(preferoitukielikoodi)) {
-
-										if (KieliUtil.RUOTSI
-												.equals(new HakemusWrapper(
-														hakemus)
-														.getAsiointikieli())) {
-											hakemukset.add(hakemus);
-										}
-									} else {
-										if (!KieliUtil.RUOTSI
-												.equals(new HakemusWrapper(
-														hakemus)
-														.getAsiointikieli())) {
-											hakemukset.add(hakemus);
-										}
-									}
-								}
-								dokumenttiprosessi(exchange)
-										.inkrementoiTehtyjaToita();
-							} catch (Exception e) {
-								e.printStackTrace();
-								LOG.error(
-										"Jälkiohjauskirjeitä varten ei saatu hakemusta({}): {}\r\n{}",
-										hakemusOid, e.getMessage(),
-										e.getCause());
-								dokumenttiprosessi(exchange)
-										.getPoikkeukset()
-										.add(new Poikkeus(Poikkeus.HAKU,
-												"Hakemusten haku",
-												"hakemusten haku epäonnistui!",
-												Poikkeus.hakemusOid(hakemusOid)));
-								throw e;
 							}
 						}
 						try {
