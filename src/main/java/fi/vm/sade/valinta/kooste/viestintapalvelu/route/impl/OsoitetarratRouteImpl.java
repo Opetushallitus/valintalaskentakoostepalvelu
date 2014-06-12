@@ -4,6 +4,7 @@ import static fi.vm.sade.valinta.kooste.valintalaskenta.tulos.function.Valintako
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -146,6 +147,47 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.stop();
 
+		from("direct:osoitetarrat_haeHakemuksetJaOsoitteet_kerralla")
+		//
+				.errorHandler(
+				//
+						deadLetterChannel(
+								"direct:osoitetarrat_hakemustenhaku_epaonnistui_deadletterchannel")
+								//
+								.maximumRedeliveries(UUDELLEEN_YRITYSTEN_MAARA)
+								//
+								.redeliveryDelay(UUDELLEEN_YRITYSTEN_ODOTUSAIKA)
+								//
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
+				//
+				.process(SecurityPreprocessor.SECURITY)
+				//
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						try {
+							Collection<String> hakemusOids = exchange.getIn()
+									.getBody(Collection.class);
+							List<String> oids = Lists.newArrayList(hakemusOids);
+							List<Hakemus> hakemukset = applicationResource
+									.getApplicationsByOids(oids);
+							List<Osoite> osoitteet = Lists.newArrayList();
+							for (Hakemus hakemus : hakemukset) {
+								osoitteet.add(osoiteKomponentti
+										.haeOsoite(hakemus));
+							}
+							exchange.getOut().setBody(osoitteet);
+						} catch (Exception e) {
+							LOG.error("Hakemuksia ei saatu hakupalvelulta! {}",
+									Arrays.toString(e.getStackTrace()));
+							throw e;
+						}
+					}
+				});
+
 		from("direct:osoitetarrat_haeHakemuksetJaOsoitteet")
 		//
 				.errorHandler(
@@ -202,27 +244,20 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 					}
 				})
 				//
-				.split(body(), osoiteAggregation())
+				// .split(body(), osoiteAggregation())
+				// //
+				// .shareUnitOfWork()
+				// //
+				// .stopOnException()
+				// //
+				// .to("direct:osoitetarrat_haeHakemuksetJaOsoitteet")
+				.to("direct:osoitetarrat_haeHakemuksetJaOsoitteet_kerralla")
 				//
-				.shareUnitOfWork()
-				//
-				// .process(haeHakemuksetJaOsoitteet()) //
-				// haeOsoitteetValittamattaSaadaankoHakemusta())
-
-				//
-				// .parallelProcessing()
-				//
-				.stopOnException()
-				//
-				.to("direct:osoitetarrat_haeHakemuksetJaOsoitteet")
-				//
-				.end()
+				// .end()
 				//
 
 				// enrich to Osoitteet
 				.bean(new LuoOsoitteet())
-				//
-				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {

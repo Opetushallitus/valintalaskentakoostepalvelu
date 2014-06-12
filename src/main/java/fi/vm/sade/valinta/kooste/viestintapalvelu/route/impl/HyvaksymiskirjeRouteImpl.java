@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -15,8 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -25,6 +28,9 @@ import com.google.gson.GsonBuilder;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
@@ -46,6 +52,7 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 	private final DokumenttiResource dokumenttiResource;
 	private final String dokumenttipalveluUrl;
+	private final ApplicationResource applicationResource;
 
 	@Autowired
 	public HyvaksymiskirjeRouteImpl(
@@ -54,8 +61,10 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 			HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
 			@Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url:''}") String dokumenttipalveluUrl,
-			DokumenttiResource dokumenttiResource) {
+			DokumenttiResource dokumenttiResource,
+			ApplicationResource applicationResource) {
 		super();
+		this.applicationResource = applicationResource;
 		this.dokumenttipalveluUrl = dokumenttipalveluUrl;
 		this.dokumenttiResource = dokumenttiResource;
 		this.sijoitteluProxy = sijoitteluProxy;
@@ -66,7 +75,20 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	@Override
 	public void configure() throws Exception {
+		configureDeadLetterChannels();
 		from(hyvaksymiskirjeet)
+				//
+
+				//
+				.errorHandler(
+				//
+						deadLetterChannel(kirjeidenLuontiEpaonnistui())
+								//
+								.maximumRedeliveries(0)
+								.logExhaustedMessageHistory(true)
+								.logExhausted(true).logStackTrace(true)
+								// hide retry/handled stacktrace
+								.logRetryStackTrace(false).logHandled(false))
 				//
 				.routeId("Hyväksymiskirjeet työjono")
 				// TODO: Hae osoitteet erikseen
@@ -133,8 +155,10 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 														.getHakemusOid());
 											}
 										});
+
 							}
-							exchange.getOut().setBody(hakukohteenHakijat);
+
+							// exchange.getOut().setBody(hakukohteenHakijat);
 							dokumenttiprosessi(exchange).setKokonaistyo(2);
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -164,11 +188,53 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 							throw new RuntimeException(
 									"Sijoittelussa ei ollut yhtään hyväksyttyä hakijaa!");
 						}
+
+						try {
+
+							List<Hakemus> hakemukset = applicationResource
+									.getApplicationsByOids(FluentIterable
+											.from(hakukohteenHakijat)
+											.transform(
+													new Function<HakijaDTO, String>() {
+														@Override
+														public String apply(
+																HakijaDTO input) {
+															return input
+																	.getHakemusOid();
+														}
+													}).toList());
+
+							exchange.getOut().setBody(
+									hyvaksymiskirjeetKomponentti
+											.teeHyvaksymiskirjeet(
+													hakukohteenHakijat,
+													hakemukset, hakukohdeOid,
+													hakuOid(exchange),
+													exchange.getProperty(
+															OPH.TARJOAJAOID,
+															String.class),
+													exchange.getProperty(
+															"sisalto",
+															String.class),
+													exchange.getProperty("tag",
+															String.class)));
+						} catch (Exception e) {
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(Poikkeus.HAKU,
+											"Hakupalvelulta ei saatu hakemuksia!"));
+							throw new RuntimeException(
+									"Hakupalvelulta ei saatu hakemuksia! "
+											+ e.getMessage()
+											+ " "
+											+ Arrays.toString(e.getStackTrace()));
+						}
+
 					}
 
 				})
 				//
-				.bean(hyvaksymiskirjeetKomponentti)
+				// .bean()
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -258,4 +324,33 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 		// .bean(viestintapalveluResource, "haeHyvaksymiskirjeet");
 	}
 
+	private void configureDeadLetterChannels() {
+		from(kirjeidenLuontiEpaonnistui())
+		//
+				.log(LoggingLevel.ERROR,
+						"Hyväksymiskirjeiden luonti epaonnistui: ${property.CamelExceptionCaught}")
+				//
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						if (dokumenttiprosessi(exchange).getPoikkeukset()
+								.isEmpty()) {
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(Poikkeus.KOOSTEPALVELU,
+											"Hyväksymiskirjeitä ei voitu muodostaa. Ota yhteys ylläpitoon."));
+						}
+
+					}
+				})
+				//
+				.stop();
+
+		//
+		// ;
+	}
+
+	private String kirjeidenLuontiEpaonnistui() {
+		return "direct:hyvaksymiskirjeet_epaonnistui";
+	}
 }
