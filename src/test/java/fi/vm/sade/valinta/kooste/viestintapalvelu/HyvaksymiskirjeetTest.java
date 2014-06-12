@@ -24,6 +24,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetK
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeRouteImpl;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.ViestintapalveluConfig;
 
 /**
@@ -47,6 +48,11 @@ public class HyvaksymiskirjeetTest {
 		DokumenttiProsessi p = new DokumenttiProsessi("", "", "", null);
 		hyvaksymiskirjeRoute.hyvaksymiskirjeetAktivointi(p, "1", "t", "f", "",
 				"", Arrays.asList("j"), "2", 3L, null);
+	}
+
+	@Bean
+	public KirjeetHakukohdeCache getKirjeetHakukohdeCache() {
+		return new KirjeetHakukohdeCache();
 	}
 
 	@Bean

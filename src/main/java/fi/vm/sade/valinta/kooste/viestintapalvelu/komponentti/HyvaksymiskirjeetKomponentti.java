@@ -179,8 +179,7 @@ public class HyvaksymiskirjeetKomponentti {
 					// Hyvaksytty valintatapajonossa -- oletataan etta
 					// hyvaksytty hakukohteeseen
 					if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
-						preferoituKielikoodi = metakohde.getHakukohdeNimi()
-								.getKieli();
+						preferoituKielikoodi = metakohde.getHakukohteenKieli();
 					}
 					//
 					// OVT-6334 : Logiikka ei kuulu koostepalveluun!
