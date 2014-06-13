@@ -172,8 +172,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 							Collection<String> hakemusOids = exchange.getIn()
 									.getBody(Collection.class);
 							List<String> oids = Lists.newArrayList(hakemusOids);
-							List<Hakemus> hakemukset = applicationResource
-									.getApplicationsByOids(oids);
+							List<Hakemus> hakemukset = kutsuKahdesti(oids);
 							List<Osoite> osoitteet = Lists.newArrayList();
 							for (Hakemus hakemus : hakemukset) {
 								osoitteet.add(osoiteKomponentti
@@ -520,4 +519,17 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 		};
 	}
 
+	private List<Hakemus> kutsuKahdesti(List<String> oids) throws Exception {
+		Exception e = null;
+		for (int i = 0; i < 2; ++i) {
+			try {
+				return applicationResource.getApplicationsByOids(oids);
+			} catch (Exception ex) {
+				e = ex;
+				Thread.sleep(1500);
+			}
+
+		}
+		throw e;
+	}
 }

@@ -191,18 +191,17 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 						try {
 
-							List<Hakemus> hakemukset = applicationResource
-									.getApplicationsByOids(FluentIterable
-											.from(hakukohteenHakijat)
-											.transform(
-													new Function<HakijaDTO, String>() {
-														@Override
-														public String apply(
-																HakijaDTO input) {
-															return input
-																	.getHakemusOid();
-														}
-													}).toList());
+							List<Hakemus> hakemukset = kutsuKahdesti(FluentIterable
+									.from(hakukohteenHakijat)
+									.transform(
+											new Function<HakijaDTO, String>() {
+												@Override
+												public String apply(
+														HakijaDTO input) {
+													return input
+															.getHakemusOid();
+												}
+											}).toList());
 
 							exchange.getOut().setBody(
 									hyvaksymiskirjeetKomponentti
@@ -348,6 +347,19 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 		//
 		// ;
+	}
+
+	private List<Hakemus> kutsuKahdesti(List<String> oids) throws Exception {
+		Exception e = null;
+		for (int i = 0; i < 2; ++i) {
+			try {
+				return applicationResource.getApplicationsByOids(oids);
+			} catch (Exception ex) {
+				e = ex;
+				Thread.sleep(1500);
+			}
+		}
+		throw e;
 	}
 
 	private String kirjeidenLuontiEpaonnistui() {
