@@ -122,96 +122,97 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 		//
 				.process(SecurityPreprocessor.SECURITY)
 				//
-				.process(asetaKokonaistyo(2))
+				.process(asetaKokonaistyo(1))
+				//
+//              Uus sijoittelu saa valintatulokset suoraan kannasta
+//				.process(new Processor() {
+//					@Override
+//					public void process(Exchange exchange) throws Exception {
+//						String hakuOid = hakuOid(exchange);
+//						try {
+//							LOG.error("Valintalaskennan tuloksia lähdettiin hakemaan. Operaatio saattaa kestää pitkään!");
+//							dokumenttiprosessi(exchange)
+//									.getVaroitukset()
+//									.add(new Varoitus(hakuOid,
+//											"Haetaan valintatietoja haulle. Operaatio saattaa kestää pitkään!"));
+//							exchange.getOut().setBody(
+//									valintatietoService
+//											.haeValintatiedot(hakuOid));
+//							dokumenttiprosessi(exchange)
+//									.getVaroitukset()
+//									.add(new Varoitus(hakuOid,
+//											"Valintatiedot saatiin haettua haulle!"));
+//							LOG.error("Valintalaskennan tulokset saatiin haettua!");
+//						} catch (Exception e) {
+//							e.printStackTrace();
+//							LOG.error(
+//									"Valintatietojen haku haulle({}) epäonnistui.",
+//									hakuOid(exchange), e.getMessage());
+//
+//							dokumenttiprosessi(exchange)
+//									.getPoikkeukset()
+//									.add(new Poikkeus(
+//											Poikkeus.VALINTATIETO,
+//											"Valintatietojen haku haulle epäonnistui.",
+//											e.getMessage(), Poikkeus
+//													.hakuOid(hakuOid(exchange))));
+//							throw e;
+//						}
+//					}
+//				})
+//				//
+//				.process(merkkaaTyoTehdyksi())
 				//
 				.process(new Processor() {
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						String hakuOid = hakuOid(exchange);
-						try {
-							LOG.error("Valintalaskennan tuloksia lähdettiin hakemaan. Operaatio saattaa kestää pitkään!");
-							dokumenttiprosessi(exchange)
-									.getVaroitukset()
-									.add(new Varoitus(hakuOid,
-											"Haetaan valintatietoja haulle. Operaatio saattaa kestää pitkään!"));
-							exchange.getOut().setBody(
-									valintatietoService
-											.haeValintatiedot(hakuOid));
-							dokumenttiprosessi(exchange)
-									.getVaroitukset()
-									.add(new Varoitus(hakuOid,
-											"Valintatiedot saatiin haettua haulle!"));
-							LOG.error("Valintalaskennan tulokset saatiin haettua!");
-						} catch (Exception e) {
-							e.printStackTrace();
-							LOG.error(
-									"Valintatietojen haku haulle({}) epäonnistui.",
-									hakuOid(exchange), e.getMessage());
+                    @Override
+                    public void process(Exchange exchange) throws Exception {
+//                        HakuTyyppi hakutyyppi = hakutyyppi(exchange);
+                        String hakuOid = hakuOid(exchange);
+//                        if (hakutyyppi == null) {
+//
+//                            dokumenttiprosessi(exchange)
+//                                    .getPoikkeukset()
+//                                    .add(new Poikkeus(
+//                                            Poikkeus.VALINTATIETO,
+//                                            "Valintatiedoilta palautui null hakutyyppi",
+//                                            Poikkeus.hakuOid(hakuOid(exchange))));
+//                            throw new RuntimeException(
+//                                    "Valintatiedoilta palautui null hakutyyppi!");
+//                        }
+                        try {
+                            LOG.error(
+                                    "Siirretään sijoitteluun valintatiedot haulle({}). Operaatio saattaa kestää pitkään!",
+                                    hakuOid);
+                            dokumenttiprosessi(exchange)
+                                    .getVaroitukset()
+                                    .add(new Varoitus(hakuOid,
+                                            "Siirretään sijoitteluun valintatiedot. Operaatio saattaa kestää pitkään!"));
+                            suoritaSijoittelu.sijoittele(
+                                    hakuOid);
+                            dokumenttiprosessi(exchange)
+                                    .getVaroitukset()
+                                    .add(new Varoitus(hakuOid,
+                                            "Tiedot on siirretty sijoitteluun!"));
+                            LOG.error(
+                                    "Tiedot on siirretty sijoitteluun haulle({})!",
+                                    hakuOid);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            LOG.error(
+                                    "Sijoittelun suorittaminen epäonnistui haulle({})",
+                                    hakuOid(exchange), e.getMessage());
 
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(
-											Poikkeus.VALINTATIETO,
-											"Valintatietojen haku haulle epäonnistui.",
-											e.getMessage(), Poikkeus
-													.hakuOid(hakuOid(exchange))));
-							throw e;
-						}
-					}
-				})
-				//
-				.process(merkkaaTyoTehdyksi())
-				//
-				.process(new Processor() {
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						HakuTyyppi hakutyyppi = hakutyyppi(exchange);
-						String hakuOid = hakuOid(exchange);
-						if (hakutyyppi == null) {
-
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(
-											Poikkeus.VALINTATIETO,
-											"Valintatiedoilta palautui null hakutyyppi",
-											Poikkeus.hakuOid(hakuOid(exchange))));
-							throw new RuntimeException(
-									"Valintatiedoilta palautui null hakutyyppi!");
-						}
-						try {
-							LOG.error(
-									"Siirretään sijoitteluun valintatiedot haulle({}). Operaatio saattaa kestää pitkään!",
-									hakuOid);
-							dokumenttiprosessi(exchange)
-									.getVaroitukset()
-									.add(new Varoitus(hakuOid,
-											"Siirretään sijoitteluun valintatiedot. Operaatio saattaa kestää pitkään!"));
-							suoritaSijoittelu.haeLahtotiedot(hakutyyppi,
-									hakuOid);
-							dokumenttiprosessi(exchange)
-									.getVaroitukset()
-									.add(new Varoitus(hakuOid,
-											"Tiedot on siirretty sijoitteluun!"));
-							LOG.error(
-									"Tiedot on siirretty sijoitteluun haulle({})!",
-									hakuOid);
-						} catch (Exception e) {
-							e.printStackTrace();
-							LOG.error(
-									"Sijoittelun suorittaminen epäonnistui haulle({})",
-									hakuOid(exchange), e.getMessage());
-
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(
-											Poikkeus.SIJOITTELU,
-											"Sijoittelun suorittaminen epäonnistui.",
-											e.getMessage(), Poikkeus
-													.hakuOid(hakuOid(exchange))));
-							throw e;
-						}
-					}
-				})
+                            dokumenttiprosessi(exchange)
+                                    .getPoikkeukset()
+                                    .add(new Poikkeus(
+                                            Poikkeus.SIJOITTELU,
+                                            "Sijoittelun suorittaminen epäonnistui.",
+                                            e.getMessage(), Poikkeus
+                                            .hakuOid(hakuOid(exchange))));
+                            throw e;
+                        }
+                    }
+                })
 				//
 				.process(merkkaaTyoTehdyksi())
 				//
