@@ -396,6 +396,10 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 							Gson gson = new GsonBuilder().setPrettyPrinting()
 									.create();
 							String json = gson.toJson(kirjeet);
+							LOG.error(
+									"Siirretään jälkiohjauskirjeisiin tiedostoa koolta {}",
+									humanReadableByteCount(json.length(), true));
+
 							// LOG.error("\r\n{}\r\n", json);
 							pdf = pipeInputStreams(viestintapalveluResource
 									.haeKirjeSyncZip(json));
@@ -466,5 +470,15 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	@SuppressWarnings("unchecked")
 	private LetterBatch jalkiohjauskirjeet(Exchange exchange) {
 		return exchange.getIn().getBody(LetterBatch.class);
+	}
+
+	public static String humanReadableByteCount(long bytes, boolean si) {
+		int unit = si ? 1000 : 1024;
+		if (bytes < unit)
+			return bytes + " B";
+		int exp = (int) (Math.log(bytes) / Math.log(unit));
+		String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1)
+				+ (si ? "" : "i");
+		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 	}
 }
