@@ -20,7 +20,7 @@ public interface SijoitteluResource {
 	@GET
 	@Path("{hakuOid}")
 	@ApiOperation(value = "Hakemuksen valintatulosten haku")
-	public HakuTyyppi sijoittele(@PathParam("hakuOid") String hakuOid);
+	public String sijoittele(@PathParam("hakuOid") String hakuOid);
 
 
 }
