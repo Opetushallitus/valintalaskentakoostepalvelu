@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
@@ -48,6 +49,11 @@ public class HyvaksymiskirjeetTest {
 		DokumenttiProsessi p = new DokumenttiProsessi("", "", "", null);
 		hyvaksymiskirjeRoute.hyvaksymiskirjeetAktivointi(p, "1", "t", "f", "",
 				"", Arrays.asList("j"), "2", 3L, null);
+	}
+
+	@Bean
+	public HakukohdeResource getHakukohdeResource() {
+		return Mockito.mock(HakukohdeResource.class);
 	}
 
 	@Bean
