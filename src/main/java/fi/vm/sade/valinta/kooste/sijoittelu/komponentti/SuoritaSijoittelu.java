@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.komponentti;
 
+import fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -25,6 +26,14 @@ public class SuoritaSijoittelu {
 
         LOG.info("Haettu valinnan tulokset");
         sijoitteluProxy.suorita(hakuTyyppi);
+        LOG.info("Viety sijoittelulle valinnan tulokset");
+
+    }
+
+    public void sijoittele(@Property(OPH.HAKUOID) String hakuOid) {
+
+        LOG.info("Haettu valinnan tulokset");
+        sijoitteluProxy.sijottele(hakuOid);
         LOG.info("Viety sijoittelulle valinnan tulokset");
 
     }
