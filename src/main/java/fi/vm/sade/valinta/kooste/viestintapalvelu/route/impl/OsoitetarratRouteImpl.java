@@ -308,7 +308,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 						}
 						try {
 
-							dokumenttiResource.tallenna(id, "osoitetarrat.pdf",
+							dokumenttiResource.tallenna(id, "osoitetarrat_" + hakukohdeOid(exchange)+".pdf",
 									expirationTime, tags, "application/pdf",
 									pdf);
 							dokumenttiprosessi(exchange)
