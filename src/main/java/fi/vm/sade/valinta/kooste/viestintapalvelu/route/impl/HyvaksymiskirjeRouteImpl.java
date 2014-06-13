@@ -300,7 +300,7 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						try {
 
 							dokumenttiResource.tallenna(id,
-									"hyvaksymiskirjeet.pdf", expirationTime,
+									"hyvaksymiskirjeet_"+hakukohdeOid(exchange)+".pdf", expirationTime,
 									tags, "application/pdf", pdf);
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
