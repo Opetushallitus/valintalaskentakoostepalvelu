@@ -393,11 +393,11 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 							// LOG.error("\r\n{}",
 							// new GsonBuilder().setPrettyPrinting()
 							// .create().toJson(osoitteet));
-							Gson gson = new GsonBuilder().setPrettyPrinting()
-									.create();
+							Gson gson = new GsonBuilder().create();
 							String json = gson.toJson(kirjeet);
 							LOG.error(
-									"Siirretään jälkiohjauskirjeisiin tiedostoa koolta {}",
+									"Siirretään jälkiohjauskirjeisiin {} kirjettä koolta {}",
+									kirjeet.getLetters().size(),
 									humanReadableByteCount(json.length(), true));
 
 							// LOG.error("\r\n{}\r\n", json);

@@ -255,7 +255,7 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 							// LOG.error("\r\n{}",
 							// new GsonBuilder().setPrettyPrinting()
 							// .create().toJson(osoitteet));
-							Gson gson = new GsonBuilder().setPrettyPrinting()
+							Gson gson = new GsonBuilder()// .setPrettyPrinting()
 									.create();
 							String json = gson.toJson(kirjeet);
 							// LOG.error("\r\n{}\r\n", json);
@@ -365,4 +365,5 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private String kirjeidenLuontiEpaonnistui() {
 		return "direct:hyvaksymiskirjeet_epaonnistui";
 	}
+
 }
