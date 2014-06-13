@@ -24,8 +24,7 @@ public class KirjeetHakukohdeCache {
 	private final Logger LOG = LoggerFactory
 			.getLogger(KirjeetHakukohdeCache.class);
 	private final Cache<String, MetaHakukohde> metaHakukohdeCache = CacheBuilder
-			.newBuilder().softValues().expireAfterWrite(12, TimeUnit.HOURS)
-			.build();
+			.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).build();
 
 	// private HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
 	@Autowired
