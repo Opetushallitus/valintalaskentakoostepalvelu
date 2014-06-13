@@ -231,22 +231,21 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						Collection<Hakemus> hakemukset;
 						try {
 
-							hakemukset = applicationResource
-									.getApplicationsByOids(FluentIterable
-											.from(hyvaksymattomatHakijat)
-											.transform(
-													new Function<HakijaDTO, String>() {
-														public String apply(
-																HakijaDTO input) {
-															return input
-																	.getHakemusOid();
-														}
-													}).toList());
+							hakemukset = kutsuKahdesti(FluentIterable
+									.from(hyvaksymattomatHakijat)
+									.transform(
+											new Function<HakijaDTO, String>() {
+												public String apply(
+														HakijaDTO input) {
+													return input
+															.getHakemusOid();
+												}
+											}).toList());
 						} catch (Exception e) {
-							e.printStackTrace();
-							LOG.error(
-									"Jälkiohjauskirjeitä varten ei saatu hakemuksia: {}",
 
+							LOG.error(
+									"Jälkiohjauskirjeitä varten ei saatu hakemuksia {}:\r\n{}",
+									e.getMessage(),
 									Arrays.toString(e.getStackTrace()));
 							dokumenttiprosessi(exchange).getPoikkeukset().add(
 									new Poikkeus(Poikkeus.HAKU,
@@ -363,7 +362,7 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						} catch (Exception e) {
 							LOG.error(
 									"Jälkiohjauskirjeitä ei saatu muodostettua: {}\r\n{}",
-									e.getMessage(), e.getCause());
+									e.getMessage(), e.getStackTrace());
 							e.printStackTrace();
 							dokumenttiprosessi(exchange).getPoikkeukset().add(
 									new Poikkeus(Poikkeus.HAKU,
@@ -412,8 +411,9 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						} catch (Exception e) {
 							e.printStackTrace();
 							LOG.error(
-									"Viestintäpalvelulta pdf:n haussa tapahtui virhe: {}",
-									e.getMessage());
+									"Viestintäpalvelulta pdf:n haussa tapahtui virhe {}:\r\n{}",
+									e.getMessage(),
+									Arrays.toString(e.getStackTrace()));
 							dokumenttiprosessi(exchange)
 									.getPoikkeukset()
 									.add(new Poikkeus(
@@ -434,8 +434,9 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						} catch (Exception e) {
 							e.printStackTrace();
 							LOG.error(
-									"Dokumenttipalvelulle tiedonsiirrossa tapahtui virhe: {}",
-									e.getMessage());
+									"Dokumenttipalvelulle tiedonsiirrossa tapahtui virhe {}:\r\n{}",
+									e.getMessage(),
+									Arrays.toString(e.getStackTrace()));
 							dokumenttiprosessi(exchange).getPoikkeukset().add(
 									new Poikkeus(Poikkeus.DOKUMENTTIPALVELU,
 											"Dokumentin tallennus", e
@@ -444,6 +445,21 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						}
 					}
 				});
+	}
+
+	/**
+	 * 
+	 */
+	private List<Hakemus> kutsuKahdesti(List<String> oids) throws Exception {
+		Exception e = null;
+		for (int i = 0; i < 2; ++i) {
+			try {
+				return applicationResource.getApplicationsByOids(oids);
+			} catch (Exception ex) {
+				e = ex;
+			}
+		}
+		throw e;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -43,6 +43,12 @@ public class HakuRetryTesti {
 			volatile int counter = 0;
 
 			@Override
+			public List<Hakemus> getApplicationsByOidsGet(List<String> oids) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
 			public List<Hakemus> getApplicationsByOid(String aoOid,
 					List<String> appStates, int rows) {
 				return null;

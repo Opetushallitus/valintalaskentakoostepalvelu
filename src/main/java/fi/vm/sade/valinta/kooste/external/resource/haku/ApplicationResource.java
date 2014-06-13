@@ -7,6 +7,7 @@ import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -61,11 +62,18 @@ public interface ApplicationResource {
 			@QueryParam("appState") List<String> appStates,
 			@QueryParam("rows") int rows);
 
+	@POST
+	@Path("list")
+	@Consumes(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
+	@Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
+	// @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+	public List<Hakemus> getApplicationsByOids(List<String> oids);
+
 	@GET
 	@Path("list")
 	@Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
 	// @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	public List<Hakemus> getApplicationsByOids(
+	public List<Hakemus> getApplicationsByOidsGet(
 			@QueryParam("oid") List<String> oids);
 
 	@GET
