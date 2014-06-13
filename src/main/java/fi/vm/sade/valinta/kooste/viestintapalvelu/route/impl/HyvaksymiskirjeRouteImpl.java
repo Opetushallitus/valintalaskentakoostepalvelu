@@ -356,6 +356,7 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				return applicationResource.getApplicationsByOids(oids);
 			} catch (Exception ex) {
 				e = ex;
+				Thread.sleep(1500);
 			}
 		}
 		throw e;
