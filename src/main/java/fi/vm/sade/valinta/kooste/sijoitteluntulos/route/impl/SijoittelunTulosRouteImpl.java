@@ -83,7 +83,11 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 			.getLogger(SijoittelunTulosRouteImpl.class);
 
 	private final long getTimeToLive() {
-		return DateTime.now().plusDays(7).toDate().getTime();
+		return DateTime.now().plusHours(21).toDate().getTime(); // almost a day
+																// so expires
+																// just before
+																// new batch
+																// generates
 	}
 
 	private final boolean pakkaaTiedostotTarriin;
