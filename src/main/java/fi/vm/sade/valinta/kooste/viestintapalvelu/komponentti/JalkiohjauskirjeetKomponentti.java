@@ -201,10 +201,11 @@ public class JalkiohjauskirjeetKomponentti {
 										valintatapajono.getVarasijanNumero(),
 										preferoituKielikoodi));
 					}
-					tulokset.put("selite",
+					tulokset.put("hylkaysperuste",
 							new Teksti(valintatapajono.getTilanKuvaukset())
 									.getTeksti(preferoituKielikoodi,
 											StringUtils.EMPTY));
+
 					tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(
 							valintatapajono.getTila(), preferoituKielikoodi,
 							valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
