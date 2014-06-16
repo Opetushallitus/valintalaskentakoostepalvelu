@@ -61,9 +61,9 @@ public class HakemusWrapper {
 	}
 
 	public String getAsiointikieli() {
-		getHenkilotiedot(); // lazy load henkilotiedot
-		if (henkilotiedot.containsKey(ASIOINTIKIELI)) {
-			return KieliUtil.normalisoiKielikoodi(henkilotiedot
+        getLisatiedot(); // lazy load henkilotiedot
+		if (lisatiedot.containsKey(ASIOINTIKIELI)) {
+			return KieliUtil.normalisoiKielikoodi(lisatiedot
 					.get(ASIOINTIKIELI));
 		} else {
 			return KieliUtil.SUOMI;
