@@ -83,7 +83,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 			.getLogger(SijoittelunTulosRouteImpl.class);
 
 	private final long getTimeToLive() {
-		return DateTime.now().plusHours(21).toDate().getTime(); // almost a day
+		return DateTime.now().plusHours(720).toDate().getTime(); // almost a day
 																// so expires
 																// just before
 																// new batch
@@ -112,7 +112,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	@Autowired
 	public SijoittelunTulosRouteImpl(
-			@Value("${valintalaskentakoostepalvelu.sijoittelunTulosRouteImpl.pakkaaTiedostotTarriin:true}") boolean pakkaaTiedostotTarriin,
+			@Value("${valintalaskentakoostepalvelu.sijoittelunTulosRouteImpl.pakkaaTiedostotTarriin:false}") boolean pakkaaTiedostotTarriin,
 			@Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}/dokumentit/lataa/") String dokumenttipalveluUrl,
 			@Value(SijoittelunTulosTaulukkolaskentaRoute.SEDA_SIJOITTELUNTULOS_TAULUKKOLASKENTA_HAULLE) String taulukkolaskenta,
 			@Value(SijoittelunTulosHyvaksymiskirjeetRoute.SEDA_SIJOITTELUNTULOS_HYVAKSYMISKIRJEET_HAULLE) String hyvaksymiskirjeet,
