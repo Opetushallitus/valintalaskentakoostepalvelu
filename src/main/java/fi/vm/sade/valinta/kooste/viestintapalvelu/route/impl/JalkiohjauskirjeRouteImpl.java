@@ -169,7 +169,7 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 					public void process(Exchange exchange) throws Exception {
 						final String preferoitukielikoodi = exchange
 								.getProperty(KieliUtil.PREFEROITUKIELIKOODI,
-										String.class);
+										StringUtils.EMPTY, String.class);
 						@SuppressWarnings("unchecked")
 						Collection<HakijaDTO> hyvaksymattomatHakijat = exchange
 								.getIn().getBody(List.class);

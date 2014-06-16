@@ -5,7 +5,6 @@ import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_EROTIN;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
 import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
-import static fi.vm.sade.valinta.kooste.util.HakemusUtil.ASIOINTIKIELI;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -32,6 +31,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -100,7 +100,14 @@ public class JalkiohjauskirjeetKomponentti {
 		// haeKiinnostavatHakukohteet(hyvaksymattomatHakijat);
 		final Map<String, Hakemus> hakemusOidHakemukset = hakemuksistaOidMap(hakemukset);
 		final List<Letter> kirjeet = new ArrayList<Letter>();
-		String preferoituKielikoodi = KieliUtil.SUOMI;
+		String preferoituKielikoodi;
+		final boolean kaytetaanYlikirjoitettuKielikoodia = StringUtils
+				.isNotBlank(ylikirjoitettuPreferoitukielikoodi);
+		if (kaytetaanYlikirjoitettuKielikoodia) {
+			preferoituKielikoodi = ylikirjoitettuPreferoitukielikoodi;
+		} else {
+			preferoituKielikoodi = KieliUtil.SUOMI;
+		}
 		for (HakijaDTO hakija : hyvaksymattomatHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
 			if (!hakemusOidHakemukset.containsKey(hakemusOid)) {
@@ -109,14 +116,9 @@ public class JalkiohjauskirjeetKomponentti {
 			final Hakemus hakemus = hakemusOidHakemukset.get(hakemusOid); // hakemusProxy.haeHakemus(hakemusOid);
 			final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
 			final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
-
-			try {
-				preferoituKielikoodi = KieliUtil.normalisoiKielikoodi(hakemus
-						.getAnswers().getLisatiedot().get(ASIOINTIKIELI));
-			} catch (Exception e) {
-				LOG.error("Hakemuksella {} ei ollut asiointikielta!",
-						hakemusOid);
-				preferoituKielikoodi = KieliUtil.SUOMI;
+			if (!kaytetaanYlikirjoitettuKielikoodia) {
+				preferoituKielikoodi = new HakemusWrapper(hakemus)
+						.getAsiointikieli();
 			}
 
 			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
@@ -238,11 +240,7 @@ public class JalkiohjauskirjeetKomponentti {
 		LetterBatch viesti = new LetterBatch(kirjeet);
 		viesti.setApplicationPeriod(hakuOid);
 		viesti.setFetchTarget(null);
-		if (StringUtils.isNotEmpty(ylikirjoitettuPreferoitukielikoodi)) {
-			viesti.setLanguageCode(ylikirjoitettuPreferoitukielikoodi);
-		} else {
-			viesti.setLanguageCode(preferoituKielikoodi);
-		}
+		viesti.setLanguageCode(preferoituKielikoodi);
 		viesti.setOrganizationOid(null);
 		viesti.setTag(tag);
 		viesti.setTemplateName("jalkiohjauskirje");
