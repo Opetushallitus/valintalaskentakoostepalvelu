@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.wordnik.swagger.annotations.Api;
@@ -68,7 +69,8 @@ public class SijoitteluAktivointiResource {
 			DokumenttiProsessi prosessi = new DokumenttiProsessi("Sijoittelu",
 					"aktivointi", hakuOid, Arrays.asList("sijoittelu"));
 			LOG.info("aktivoiSijoittelu haulle {}", hakuOid);
-			sijoitteluAktivointiProxy.aktivoiSijoittelu(prosessi, hakuOid);
+			sijoitteluAktivointiProxy.aktivoiSijoittelu(prosessi, hakuOid,
+					SecurityContextHolder.getContext().getAuthentication());
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 			return prosessi.toProsessiId();
 		}
