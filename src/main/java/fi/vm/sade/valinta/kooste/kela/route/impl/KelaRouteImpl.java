@@ -30,7 +30,6 @@ import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
-import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
@@ -419,7 +418,8 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.process(new Processor() {
 					@Override
 					public void process(Exchange exchange) throws Exception {
-						HakuDTO haku = exchange.getIn().getBody(HakuDTO.class);
+						HakuV1RDTO haku = exchange.getIn().getBody(
+								HakuV1RDTO.class);
 						String hakutyyppiUri = haku.getHakutyyppiUri();
 						try {
 							if (cache(exchange).getHakutyyppi(hakutyyppiUri) == null) {
@@ -567,7 +567,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private Predicate isLisahakuTyyppi() {
 		return new Predicate() {
 			public boolean matches(Exchange exchange) {
-				HakuDTO haku = exchange.getIn().getBody(HakuDTO.class);
+				HakuV1RDTO haku = exchange.getIn().getBody(HakuV1RDTO.class);
 				String hakutyypinArvo = cache(exchange).getHakutyyppi(
 						haku.getHakutyyppiUri());
 				// Koodistosta saa hakutyypille arvon ja nimen. Oletetaan etta

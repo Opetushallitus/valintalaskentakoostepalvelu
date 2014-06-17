@@ -342,7 +342,11 @@ public class PistesyottoExcel {
 		}
 		rivit.add(new PistesyottoDataRivi(sx, kuuntelijat, dataArvot));
 
-		this.excel = new Excel("Pistesyöttö", rivit);
+		this.excel = new Excel("Pistesyöttö", rivit, new int[] { 0 } // piilottaa
+				// ensimmaisen
+				// pysty
+				// sarakkeen
+				, new int[] { 4 });
 	}
 
 	private Double asNumber(String value) {
