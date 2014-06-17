@@ -419,7 +419,8 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.process(new Processor() {
 					@Override
 					public void process(Exchange exchange) throws Exception {
-						HakuDTO haku = exchange.getIn().getBody(HakuDTO.class);
+						HakuV1RDTO haku = exchange.getIn().getBody(
+								HakuV1RDTO.class);
 						String hakutyyppiUri = haku.getHakutyyppiUri();
 						try {
 							if (cache(exchange).getHakutyyppi(hakutyyppiUri) == null) {
