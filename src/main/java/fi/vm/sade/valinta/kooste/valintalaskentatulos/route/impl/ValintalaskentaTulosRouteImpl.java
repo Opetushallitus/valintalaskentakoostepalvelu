@@ -134,7 +134,10 @@ public class ValintalaskentaTulosRouteImpl extends
 						try {
 							tilat = tilaResource.hakukohteelle(hakukohdeOid);
 						} catch (Exception e) {
-
+							LOG.error(
+									"Tilojen hakemisessa tapahtui virhe {}\r\n{}",
+									e.getMessage(),
+									Arrays.toString(e.getStackTrace()));
 						}
 						try {
 

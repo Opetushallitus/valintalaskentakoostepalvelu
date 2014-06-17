@@ -99,6 +99,7 @@ public class SijoittelunTulosExcelKomponentti {
 				});
 
 		Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat = valintatapajononTilat(tilat);
+
 		Map<String, Hakemus> hakemukset = haeHakemukset(hakukohdeOid);
 		rivit.add(new Object[] { tarjoajaNimi });
 		rivit.add(new Object[] { hakukohdeNimi });
@@ -219,7 +220,6 @@ public class SijoittelunTulosExcelKomponentti {
 					ilmoittautumistieto = HakemusUtil.tilaConverter(
 							hakemusTilat.get(hakemusOid), preferoitukielikoodi);
 				} catch (Exception e) {
-
 				}
 				rivit.add(new Object[] {
 						hakemus.getJonosija(),
