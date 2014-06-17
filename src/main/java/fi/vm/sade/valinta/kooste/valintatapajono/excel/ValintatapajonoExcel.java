@@ -170,7 +170,11 @@ public class ValintatapajonoExcel {
 		}
 
 		rivit.add(new ValintatapajonoDataRivi(sx));
-		this.excel = new Excel("Valintatapajono", rivit);
+		this.excel = new Excel("Valintatapajono", rivit, new int[] { 0 } // piilottaa
+																			// ensimmaisen
+																			// pysty
+																			// sarakkeen
+				, new int[] {});
 	}
 
 	public Excel getExcel() {

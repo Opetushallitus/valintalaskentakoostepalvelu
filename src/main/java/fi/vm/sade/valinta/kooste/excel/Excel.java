@@ -6,7 +6,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,19 +42,22 @@ public class Excel {
 	public static final int VAKIO_LEVEYS = 8500;
 	private final Collection<Rivi> rivit;
 	private final String nimi;
-	private final Collection<Sarake> sarakkeet;
+	private final int[] sarakkeetPysty;
+	private final int[] sarakkeetVaaka;
 
 	public Excel(String nimi, Collection<Rivi> rivit) {
 		this.rivit = rivit;
 		this.nimi = nimi;
-		this.sarakkeet = Collections.emptyList();
+		this.sarakkeetPysty = new int[] {};
+		this.sarakkeetVaaka = new int[] {};
 	}
 
-	public Excel(String nimi, Collection<Rivi> rivit,
-			Collection<Sarake> sarakkeet) {
+	public Excel(String nimi, Collection<Rivi> rivit, int[] sarakkeetPysty,
+			int[] sarakkeetVaaka) {
 		this.rivit = rivit;
 		this.nimi = nimi;
-		this.sarakkeet = sarakkeet;
+		this.sarakkeetPysty = sarakkeetPysty;
+		this.sarakkeetVaaka = sarakkeetVaaka;
 	}
 
 	public Collection<Rivi> getRivit() {
@@ -109,6 +111,9 @@ public class Excel {
 		XSSFDrawing drawing = sheet.createDrawingPatriarch();
 		XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(sheet);
 		XSSFDataFormat format = workbook.createDataFormat();
+		XSSFCellStyle hiddenStyle = workbook.createCellStyle();
+		hiddenStyle.setHidden(true);
+
 		XSSFCellStyle numberStyle = workbook.createCellStyle();
 		numberStyle.setDataFormat(format.getFormat("0,0"));
 		XSSFCellStyle alignRightStyle = workbook.createCellStyle();
@@ -224,12 +229,24 @@ public class Excel {
 				++rowIndex;
 			}
 		}
-		int columnIndex = 0;
-		for (Sarake sarake : sarakkeet) {
-			if (!sarake.isNaytetaanko()) {
-				sheet.setColumnHidden(columnIndex, true);
+
+		for (int sarake : sarakkeetPysty) {
+			try {
+				sheet.setColumnHidden(sarake, true);
+			} catch (Exception e) {
+
 			}
-			++columnIndex;
+		}
+		for (int sarake : sarakkeetVaaka) {
+			try {
+				XSSFRow r = sheet.getRow(sarake);
+				if (r != null) {
+					r.setZeroHeight(true);
+					r.setRowStyle(hiddenStyle);
+				}
+			} catch (Exception e) {
+				LOG.error("{}", e.getMessage());
+			}
 		}
 		for (int i = 0; i < leveysPreferenssit.size(); ++i) {
 			int preferenssi = leveysPreferenssit.get(i);

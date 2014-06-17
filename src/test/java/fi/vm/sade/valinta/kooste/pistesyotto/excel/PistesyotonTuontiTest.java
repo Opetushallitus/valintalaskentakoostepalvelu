@@ -126,7 +126,6 @@ public class PistesyotonTuontiTest {
 		// TOISTEISIA RIVEJÄ
 		// excel.tuoXlsx(xlsx);
 		if (false) {
-			InputStream xlsx = excel.vieXlsx();
 			IOUtils.copy(excel.vieXlsx(), new FileOutputStream(
 					"pistesyotto.xlsx"));
 		}
