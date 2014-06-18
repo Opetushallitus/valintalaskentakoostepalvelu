@@ -5,6 +5,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.ws.rs.Consumes;
@@ -27,7 +28,7 @@ import org.springframework.stereotype.Controller;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -41,6 +42,7 @@ import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaCache;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaMuistissaProsessi;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaMuistissaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaTila;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
@@ -96,15 +98,27 @@ public class ValintalaskentaMuistissaResource {
 		return Response.ok().build();
 	}
 
+	/**
+	 * 
+	 * @param hakuOid
+	 * @param hakukohdeOid
+	 * @param valinnanvaihe
+	 * @param onkoWhitelist
+	 *            blacklist jos false
+	 * @param blacklistOids
+	 * @return
+	 * @throws Exception
+	 */
 	@POST
 	@Path("/aktivoi")
 	@Consumes(APPLICATION_JSON)
 	@Produces(APPLICATION_JSON)
-	@ApiOperation(value = "Valintalaskennan aktivointi haulle ilman annettuja hakukohteita", response = Vastaus.class)
+	@ApiOperation(value = "Valintalaskennan aktivointi haulle ilman annettuja hakukohteita. Valinnaisen muuttujan onkoWhitelist ollessa true annettu oid-blacklist tulkitaan whitelistiksi.", response = Vastaus.class)
 	public Vastaus aktivoiHaunValintalaskentaIlmanAnnettujaHakukohteita(
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valinnanvaihe") Integer valinnanvaihe,
+			@QueryParam("onkoWhitelist") Boolean onkoWhitelist,
 			Collection<String> blacklistOids) throws Exception {
 		ValintalaskentaMuistissaProsessi prosessi = new ValintalaskentaMuistissaProsessi(
 				hakuOid);
@@ -112,7 +126,7 @@ public class ValintalaskentaMuistissaResource {
 			// jos tehdään yksittäiselle haulle niin ei blokata yhtäaikaisia
 			// ajoja.
 			kaynnistaLaskenta(hakuOid, hakukohdeOid, valinnanvaihe,
-					blacklistOids, prosessi);
+					blacklistOids, false, prosessi);
 			return Vastaus.uudelleenOhjaus(prosessi.getId());
 		} else {
 			ValintalaskentaMuistissaProsessi vanhaProsessi = valintalaskentaTila
@@ -132,7 +146,8 @@ public class ValintalaskentaMuistissaResource {
 			if (valintalaskentaTila.getKaynnissaOlevaValintalaskenta()
 					.compareAndSet(null, prosessi)) {
 				kaynnistaLaskenta(hakuOid, hakukohdeOid, valinnanvaihe,
-						blacklistOids, prosessi);
+						blacklistOids, Boolean.TRUE.equals(onkoWhitelist),
+						prosessi);
 			} else {
 				throw new RuntimeException("Valintalaskenta on jo käynnissä");
 			}
@@ -143,19 +158,42 @@ public class ValintalaskentaMuistissaResource {
 
 	private void kaynnistaLaskenta(String hakuOid, String hakukohdeOid,
 			Integer valinnanvaihe, Collection<String> blacklistOids,
-			ValintalaskentaMuistissaProsessi prosessi) throws Exception {
-		Collection<String> kasiteltavatHakukohteet;
+			boolean onkoWhitelist, ValintalaskentaMuistissaProsessi prosessi)
+			throws Exception {
+		Set<String> kasiteltavatHakukohteet;
+		if (onkoWhitelist && (blacklistOids == null || blacklistOids.isEmpty())) {
+			prosessi.addException("Laskenta tyhjällä whitelistillä on päättynyt!");
+			throw new RuntimeException(
+					"Yritettiin käynnistää laskenta ilman hakukohteita laskennalle!");
+		}
 		try {
 			if (blacklistOids == null || blacklistOids.isEmpty()) {
+
 				if (hakukohdeOid != null) {
 					// Vain yhdelle hakukohteelle
-					kasiteltavatHakukohteet = Arrays.asList(hakukohdeOid);
+					kasiteltavatHakukohteet = Sets.newHashSet(hakukohdeOid);
 				} else {
 					kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
 				}
 			} else {
 				kasiteltavatHakukohteet = getHakukohdeOids(hakuOid);
-				kasiteltavatHakukohteet.removeAll(blacklistOids);
+				if (onkoWhitelist) {
+
+					kasiteltavatHakukohteet.retainAll(blacklistOids);
+					// whitelistissa enemman kuin haussa
+					if (kasiteltavatHakukohteet.size() != blacklistOids.size()) {
+						Set<String> ylimaaraiset = Sets
+								.newHashSet(kasiteltavatHakukohteet);
+						ylimaaraiset.removeAll(blacklistOids);
+						for (String tuntematonOid : ylimaaraiset) {
+							prosessi.getVaroitukset()
+									.add(new Varoitus(tuntematonOid,
+											"Whitelistissä oli oideja joita ei löydy hausta!"));
+						}
+					}
+				} else {
+					kasiteltavatHakukohteet.removeAll(blacklistOids);
+				}
 			}
 		} catch (Exception e) {
 			prosessi.addException("Tarjonnalta ei saatu haulle hakukohteita! "
@@ -171,13 +209,13 @@ public class ValintalaskentaMuistissaResource {
 		dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 	}
 
-	private Collection<String> getHakukohdeOids(
-			@Property(OPH.HAKUOID) String hakuOid) throws Exception {
+	private Set<String> getHakukohdeOids(@Property(OPH.HAKUOID) String hakuOid)
+			throws Exception {
 		ResultV1RDTO<HakutuloksetV1RDTO<HakukohdeHakutulosV1RDTO>> r = hakukohdeResource
 				.search(hakuOid, Arrays.asList("JULKAISTU"));
 
-		return Lists
-				.newArrayList(FluentIterable
+		return Sets
+				.newHashSet(FluentIterable
 				//
 						.from(r.getResult().getTulokset())
 						//

@@ -150,9 +150,6 @@ public class ValintatapajonoVientiRouteImpl extends
 						try {
 							valinnanvaiheet = hakukohdeResource
 									.hakukohde(hakukohde);
-							LOG.debug("Saatiin valinnanvaiheet {}",
-									hakemukset.size());
-
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 						} catch (Exception e) {
@@ -168,18 +165,18 @@ public class ValintatapajonoVientiRouteImpl extends
 											""));
 							throw e;
 						}
-						if (valinnanvaiheet.isEmpty()) {
-							LOG.error("Nolla valinnanvaihetta!");
-
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(
-											Poikkeus.VALINTALASKENTA,
-											"Hakukohteelle ei löytynyt valinnanvaiheita!",
-											""));
-							throw new RuntimeException(
-									"Hakukohteelle ei löytynyt valinnanvaiheita!");
-						}
+						// if (valinnanvaiheet.isEmpty()) {
+						// LOG.error("Nolla valinnanvaihetta!");
+						//
+						// dokumenttiprosessi(exchange)
+						// .getPoikkeukset()
+						// .add(new Poikkeus(
+						// Poikkeus.VALINTALASKENTA,
+						// "Hakukohteelle ei löytynyt valinnanvaiheita!",
+						// ""));
+						// throw new RuntimeException(
+						// "Hakukohteelle ei löytynyt valinnanvaiheita!");
+						// }
 						InputStream xlsx;
 						try {
 							ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(

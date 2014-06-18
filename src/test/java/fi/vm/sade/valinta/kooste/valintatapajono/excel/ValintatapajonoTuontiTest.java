@@ -8,7 +8,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import junit.framework.Assert;
+
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.builder.EqualsBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -30,9 +33,36 @@ import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
  * @author Jussi Jartamo
  * 
  */
-@Ignore
 public class ValintatapajonoTuontiTest {
 
+	@Ignore
+	@Test
+	public void testaaTallennuksenYhtenevyysKayttoliittymanTuottamanJsoninKanssa()
+			throws JsonSyntaxException, IOException {
+		ValinnanvaiheDTO valinnanvaiheKali = new GsonBuilder()
+				.registerTypeAdapter(Date.class, new JsonDeserializer() {
+					@Override
+					public Object deserialize(JsonElement json, Type typeOfT,
+							JsonDeserializationContext context)
+							throws JsonParseException {
+						// TODO Auto-generated method stub
+						return new Date(json.getAsJsonPrimitive().getAsLong());
+					}
+
+				})
+				.create()
+				.fromJson(resurssi("valinnanvaihe2.json"),
+						new TypeToken<ArrayList<ValinnanvaiheDTO>>() {
+						}.getType());
+		ValinnanvaiheDTO valinnanvaiheExcel = null;
+
+		Assert.assertTrue(
+				"Excelista saatu valinnanvaihe ei tasmaa kayttoliittyman tallennuksessa tuottamaa valinnanvaihetta.",
+				EqualsBuilder.reflectionEquals(valinnanvaiheKali,
+						valinnanvaiheExcel));
+	}
+
+	@Ignore
 	@Test
 	public void testaaValintatapajonoTuonti() throws JsonSyntaxException,
 			IOException {
