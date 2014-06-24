@@ -32,6 +32,7 @@ public interface ApplicationResource {
 	public static final String SYNTYMAAIKA = "syntymaaika";
 	public static final String ACTIVE = "ACTIVE";
 	public static final String INCOMPLETE = "INCOMPLETE";
+	public static final int MAX = 999999;
 	public static final List<String> ACTIVE_AND_INCOMPLETE = Collections
 			.unmodifiableList(Arrays.asList(ACTIVE, INCOMPLETE));
 

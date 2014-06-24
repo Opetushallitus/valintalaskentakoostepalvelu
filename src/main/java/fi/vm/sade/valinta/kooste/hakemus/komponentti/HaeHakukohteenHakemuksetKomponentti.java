@@ -42,7 +42,7 @@ public class HaeHakukohteenHakemuksetKomponentti {
 						Integer.MAX_VALUE });
 		HakemusList hakemusList = applicationResource.findApplications(null,
 				ApplicationResource.ACTIVE_AND_INCOMPLETE, null, null, null,
-				hakukohdeOid, 0, Integer.MAX_VALUE);
+				hakukohdeOid, 0, ApplicationResource.MAX);
 		if (hakemusList == null || hakemusList.getResults() == null) { // ||
 																		// hakemusList.getResults().isEmpty()
 			throw new HakemuspalveluException(
