@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.util;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +19,7 @@ public class HakemusWrapper {
 	private final Hakemus hakemus;
 	private Map<String, String> henkilotiedot = null;
 	private Map<String, String> lisatiedot = null;
+	private Map<String, String> hakutoiveet = null;
 	private final static String ETUNIMET = "Etunimet";
 	private final static String KUTSUMANIMI = "Kutsumanimi";
 	private final static String SUKUNIMI = "Sukunimi";
@@ -26,6 +28,25 @@ public class HakemusWrapper {
 
 	public HakemusWrapper(Hakemus hakemus) {
 		this.hakemus = hakemus;
+	}
+
+	public Integer getHakutoiveenPrioriteetti(String hakukohdeOid) {
+		getHakutoiveet();
+
+		if (hakutoiveet.containsValue(hakukohdeOid)) {
+			for (Entry<String, String> s : hakutoiveet.entrySet()) {
+				if (hakukohdeOid.equals(s.getValue())) {
+					try {
+						String value = s.getKey().split("preference")[1]
+								.split("-")[0];
+						return Integer.parseInt(value);
+					} catch (Exception e) {
+
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	public String getEtunimi() {
@@ -61,10 +82,10 @@ public class HakemusWrapper {
 	}
 
 	public String getAsiointikieli() {
-        getLisatiedot(); // lazy load henkilotiedot
+		getLisatiedot(); // lazy load henkilotiedot
 		if (lisatiedot.containsKey(ASIOINTIKIELI)) {
-			return KieliUtil.normalisoiKielikoodi(lisatiedot
-					.get(ASIOINTIKIELI));
+			return KieliUtil
+					.normalisoiKielikoodi(lisatiedot.get(ASIOINTIKIELI));
 		} else {
 			return KieliUtil.SUOMI;
 		}
@@ -94,5 +115,18 @@ public class HakemusWrapper {
 			}
 		}
 		return henkilotiedot;
+	}
+
+	public Map<String, String> getHakutoiveet() {
+		if (hakutoiveet == null) {
+			hakutoiveet = // hakemus.getAnswers().getHenkilotiedot();
+			new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+			try {
+				hakutoiveet.putAll(hakemus.getAnswers().getHakutoiveet());
+			} catch (Exception e) {
+
+			}
+		}
+		return hakutoiveet;
 	}
 }

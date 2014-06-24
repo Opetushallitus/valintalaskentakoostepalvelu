@@ -7,12 +7,16 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.collect.Maps;
 
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila;
 
 public class ValintatapajonoRivi {
 	private final String oid;
 	private final String nimi;
+	private final String tila;
 	private final boolean validi;
+	private final JarjestyskriteerituloksenTila kriteeriTila;
 	private final Map<String, String> kuvaus;
+	private final int jonosija;
 
 	public ValintatapajonoRivi(String oid, String jonosija, String nimi,
 	//
@@ -29,8 +33,42 @@ public class ValintatapajonoRivi {
 		if (!StringUtils.isBlank(en)) {
 			kuvaus.put(KieliUtil.ENGLANTI, en);
 		}
+		this.tila = tila;
+		boolean errors = false;
+		JarjestyskriteerituloksenTila defaultTila = JarjestyskriteerituloksenTila.MAARITTELEMATON;
+		if (ValintatapajonoExcel.HYLATTY.equals(tila)) {
+			defaultTila = JarjestyskriteerituloksenTila.HYLATTY;
+		} else if (ValintatapajonoExcel.HYVAKSYTTAVISSA.equals(tila)) {
+			defaultTila = JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
+		} else if (ValintatapajonoExcel.MAARITTELEMATON.equals(tila)) {
+			defaultTila = JarjestyskriteerituloksenTila.MAARITTELEMATON;
+		} else {
+			errors = true;
+		}
+		this.kriteeriTila = defaultTila;
 
-		this.validi = true;
+		int defaultJonosija = 0;
+		try {
+			defaultJonosija = Integer.parseInt(jonosija);
+
+		} catch (Exception e) {
+			errors = true;
+
+		}
+		this.jonosija = defaultJonosija;
+		this.validi = errors;
+	}
+
+	public JarjestyskriteerituloksenTila asTila() {
+		return kriteeriTila;
+	}
+
+	public String getTila() {
+		return tila;
+	}
+
+	public int getJonosija() {
+		return jonosija;
 	}
 
 	public boolean isValidi() {

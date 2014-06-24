@@ -9,10 +9,10 @@ import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 
 public class ValintatapajonoDataRivi extends DataRivi {
 
-	final Collection<ValintatapajonoDataRiviKuuntelija> kuuntelijat;
+	final Collection<? extends ValintatapajonoDataRiviKuuntelija> kuuntelijat;
 
 	public ValintatapajonoDataRivi(Collection<Collection<Arvo>> arvot,
-			Collection<ValintatapajonoDataRiviKuuntelija> kuuntelijat) {
+			Collection<? extends ValintatapajonoDataRiviKuuntelija> kuuntelijat) {
 		super(arvot);
 		this.kuuntelijat = kuuntelijat;
 	}

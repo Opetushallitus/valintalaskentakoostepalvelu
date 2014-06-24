@@ -5,6 +5,8 @@ import static fi.vm.sade.valinta.kooste.OPH.HAKUOID;
 import static fi.vm.sade.valinta.kooste.OPH.VALINTAPAJONOOID;
 import static fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI;
 
+import java.io.InputStream;
+
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 
@@ -19,10 +21,10 @@ public interface ValintatapajonoTuontiRoute {
 			// tyojonossa on yksi tyostaja
 			"&concurrentConsumers=5";
 
-	void tuo(@Property(PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
+	void tuo(@Body InputStream file,
+			@Property(PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
 			@Property(HAKUOID) String hakuOid,
 			@Property(HAKUKOHDEOID) String hakukohdeOid,
-			@Property(VALINTAPAJONOOID) String valintatapajonoOid,
-			@Body byte[] xlsx);
+			@Property(VALINTAPAJONOOID) String valintatapajonoOid);
 
 }

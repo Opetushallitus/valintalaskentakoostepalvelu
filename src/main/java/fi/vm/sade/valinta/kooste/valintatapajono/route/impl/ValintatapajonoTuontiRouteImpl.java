@@ -2,7 +2,10 @@ package fi.vm.sade.valinta.kooste.valintatapajono.route.impl;
 
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -10,7 +13,12 @@ import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -18,15 +26,26 @@ import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
-import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviKuuntelija;
+import fi.vm.sade.valinta.kooste.util.EnumConverter;
+import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
+import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRiviAsJonosijaConverter;
 import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoTuontiRoute;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
+import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
+@Component
 public class ValintatapajonoTuontiRouteImpl extends
 		AbstractDokumenttiRouteBuilder {
 	private static final Logger LOG = LoggerFactory
@@ -166,24 +185,20 @@ public class ValintatapajonoTuontiRouteImpl extends
 											""));
 							throw e;
 						}
+						ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
 						try {
-							ValintatapajonoDataRiviKuuntelija k = new ValintatapajonoDataRiviKuuntelija() {
-								@Override
-								public void valintatapajonoDataRiviTapahtuma(
-										ValintatapajonoRivi valintatapajonoRivi) {
 
-								}
-							};
 							ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(
 									hakuOid, hakukohdeOid, valintatapajonoOid,
 									hakuNimi, hakukohdeNimi,
 									//
 									valinnanvaiheet, hakemukset, Arrays
-											.asList(k));
+											.asList(listaus));
 							valintatapajonoExcel.getExcel()
 									.tuoXlsx(
 											exchange.getIn().getBody(
 													InputStream.class));
+
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 						} catch (Exception e) {
@@ -200,31 +215,162 @@ public class ValintatapajonoTuontiRouteImpl extends
 											""));
 							throw e;
 						}
-						try {
 
-							dokumenttiprosessi(exchange).setDokumenttiId(
-									"valmis");
-							dokumenttiprosessi(exchange)
-									.inkrementoiTehtyjaToita();
+						try {
+							ValinnanvaiheDTO vaihe = haeValinnanVaihe(
+									valintatapajonoOid, valinnanvaiheet);
+							if (vaihe == null) {
+								vaihe = luoValinnanVaihe(hakukohdeOid, hakuOid,
+										valintatapajonoOid);
+
+							}
+							ValintatapajonoDTO jono = haeValintatapajono(
+									valintatapajonoOid, vaihe);
+							List<JonosijaDTO> jonosijat = Lists.newArrayList();
+							Map<String, Hakemus> hakemusmappaus = mapHakemukset(hakemukset);
+							for (ValintatapajonoRivi rivi : listaus.getRivit()) {
+								jonosijat
+										.add(ValintatapajonoRiviAsJonosijaConverter
+												.convert(hakukohdeOid, rivi,
+														hakemusmappaus.get(rivi
+																.getOid())));
+							}
+							jono.setJonosijat(jonosijat);
+							hakukohdeResource.tuoValinnanvaiheet(hakukohdeOid,
+									vaihe);
 						} catch (Exception e) {
 							LOG.error(
-									"Dokumenttipalveluun vienti virhe: {}\r\n{}",
+									"Valintatapajono excelin luonti virhe: {}\r\n{}",
 									e.getMessage(),
 									Arrays.toString(e.getStackTrace()));
 
 							dokumenttiprosessi(exchange)
 									.getPoikkeukset()
 									.add(new Poikkeus(
-											Poikkeus.DOKUMENTTIPALVELU,
-											"Dokumenttipalveluun ei saatu vietyä taulukkolaskentatiedostoa!",
+											Poikkeus.VALINTALASKENTA,
+											"Valinnanvaihetta ei saatu tallennettua!",
 											""));
 							throw e;
 						}
+						dokumenttiprosessi(exchange).setDokumenttiId("valmis");
+						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
 					}
 
 				})
 				//
 				.stop();
-
+		/**
+		 * DEAD LETTER CHANNEL
+		 */
+		from(luontiEpaonnistui)
+		//
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						String syy;
+						if (exchange.getException() == null) {
+							syy = "Valintatapajonon taulukkolaskentaan tuonti epäonnistui. Ota yheys ylläpitoon.";
+						} else {
+							syy = exchange.getException().getMessage();
+						}
+						dokumenttiprosessi(exchange).getPoikkeukset().add(
+								new Poikkeus(Poikkeus.KOOSTEPALVELU,
+										"Valintatapajonon tuonti", syy));
+					}
+				})
+				//
+				.stop();
 	}
+
+	private ValinnanVaiheJonoillaDTO haeVaihe(String oid,
+			List<ValinnanVaiheJonoillaDTO> jonot) {
+		for (ValinnanVaiheJonoillaDTO jonoilla : jonot) {
+			for (fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO v : jonoilla
+					.getJonot()) {
+				if (oid.equals(v.getOid())) {
+					return jonoilla;
+				}
+			}
+		}
+		return null;
+	}
+
+	private fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO haeJono(
+			String oid, ValinnanVaiheJonoillaDTO vaihe) {
+
+		for (fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO v : vaihe
+				.getJonot()) {
+			if (oid.equals(v.getOid())) {
+				return v;
+			}
+		}
+
+		return null;
+	}
+
+	private ValinnanvaiheDTO luoValinnanVaihe(String hakukohdeOid,
+			String hakuOid, String valintatapajonoOid) {
+		ValinnanVaiheJonoillaDTO vaihe = haeVaihe(valintatapajonoOid,
+				valintaperusteetResource.ilmanLaskentaa(hakukohdeOid));
+		if (vaihe == null) {
+			throw new RuntimeException(
+					"Tälle valintatapajonolle ei löydy valintaperusteista valinnanvaihetta!");
+		}
+		fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO jono = haeJono(
+				valintatapajonoOid, vaihe);
+
+		// luodaan uusi
+		LOG.warn(
+				"Valinnanvaihetta ei löytynyt valintatapajonolle({}) joten luodaan uusi!",
+				valintatapajonoOid);
+		ValinnanvaiheDTO v0 = new ValinnanvaiheDTO();
+		v0.setCreatedAt(new Date());
+		v0.setHakuOid(hakuOid);
+		v0.setJarjestysnumero(0);
+		v0.setNimi(vaihe.getNimi());
+		v0.setValinnanvaiheoid(vaihe.getOid());
+		ValintatapajonoDTO vx = new ValintatapajonoDTO();
+		vx.setAloituspaikat(jono.getAloituspaikat());
+		vx.setEiVarasijatayttoa(jono.getEiVarasijatayttoa());
+		vx.setKaikkiEhdonTayttavatHyvaksytaan(jono
+				.getKaikkiEhdonTayttavatHyvaksytaan());
+		vx.setNimi(jono.getNimi());
+		vx.setOid(valintatapajonoOid);
+		vx.setPoissaOlevaTaytto(jono.getPoissaOlevaTaytto());
+		vx.setPrioriteetti(0);
+		vx.setSiirretaanSijoitteluun(jono.getSiirretaanSijoitteluun());
+		vx.setTasasijasaanto(EnumConverter.convert(Tasasijasaanto.class,
+				jono.getTasapistesaanto()));
+		vx.setValintatapajonooid(valintatapajonoOid);
+		v0.getValintatapajonot().add(vx);
+		return v0;
+	}
+
+	private ValinnanvaiheDTO haeValinnanVaihe(String valintatapajonoOid,
+			Collection<ValinnanvaiheDTO> v) {
+		for (ValinnanvaiheDTO v0 : v) {
+			if (haeValintatapajono(valintatapajonoOid, v0) != null) {
+				return v0;
+			}
+		}
+		return null;
+	}
+
+	private ValintatapajonoDTO haeValintatapajono(String valintatapajonoOid,
+			ValinnanvaiheDTO v) {
+		for (ValintatapajonoDTO vx : v.getValintatapajonot()) {
+			if (valintatapajonoOid.equals(vx.getValintatapajonooid())) {
+				return vx;
+			}
+		}
+		return null;
+	}
+
+	private Map<String, Hakemus> mapHakemukset(Collection<Hakemus> hakemukset) {
+		Map<String, Hakemus> tmp = Maps.newHashMap();
+		for (Hakemus h : hakemukset) {
+			tmp.put(h.getOid(), h);
+		}
+		return tmp;
+	}
+
 }
