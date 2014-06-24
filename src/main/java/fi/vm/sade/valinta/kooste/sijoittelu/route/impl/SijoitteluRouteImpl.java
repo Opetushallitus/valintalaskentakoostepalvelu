@@ -5,18 +5,15 @@ import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.valintatiedot.ValintatietoService;
-import fi.vm.sade.service.valintatiedot.schema.HakuTyyppi;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluIlmankoulutuspaikkaaKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluSuoritaKomponentti;
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SuoritaSijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -32,12 +29,12 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SijoitteluRouteImpl.class);
-	private ValintatietoService valintatietoService;
 	private JatkuvaSijoittelu jatkuvaSijoittelu;
 	private SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluIlmankoulutuspaikkaaKomponentti;
 	private SijoitteluKoulutuspaikkallisetKomponentti sijoitteluKoulutuspaikkallisetKomponentti;
 	private SijoitteluSuoritaKomponentti sijoitteluSuoritaKomponentti;
-	private SuoritaSijoittelu suoritaSijoittelu;
+
+	private SijoitteluResource sijoitteluService;
 	private final String quartzInput;
 	private final String sijoitteluAktivoi;
 
@@ -46,58 +43,30 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 			// Quartz timer endpoint configuration
 			@Value("quartz://timerName?cron=${valintalaskentakoostepalvelu.jatkuvasijoittelu.cron}") String quartzInput,
 			@Value(SijoitteluAktivointiRoute.SEDA_SIJOITTELU_AKTIVOI) String sijoitteluAktivoi,
-			SuoritaSijoittelu suoritaSijoittelu,
+			SijoitteluResource sijoitteluService,
 			SijoitteluSuoritaKomponentti sijoitteluSuoritaKomponentti,
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluKoulutuspaikkallisetKomponentti,
 			SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluIlmankoulutuspaikkaaKomponentti,
-			JatkuvaSijoittelu jatkuvaSijoittelu,
-			@Qualifier("valintatietoServiceAsAdmin") ValintatietoService valintatietoService) {
+			JatkuvaSijoittelu jatkuvaSijoittelu) {
 		super();
 		this.sijoitteluAktivoi = sijoitteluAktivoi;
 		this.quartzInput = quartzInput;
-		this.suoritaSijoittelu = suoritaSijoittelu;
+		this.sijoitteluService = sijoitteluService;
 		this.sijoitteluSuoritaKomponentti = sijoitteluSuoritaKomponentti;
 		this.sijoitteluKoulutuspaikkallisetKomponentti = sijoitteluKoulutuspaikkallisetKomponentti;
 		this.sijoitteluIlmankoulutuspaikkaaKomponentti = sijoitteluIlmankoulutuspaikkaaKomponentti;
 		this.jatkuvaSijoittelu = jatkuvaSijoittelu;
-		this.valintatietoService = valintatietoService;
 	}
 
 	@Override
 	public void configure() throws Exception {
 		from(quartzInput).bean(jatkuvaSijoittelu);
-		// <route errorHandlerRef="sijoitteluRetryHandler">
-		// <from uri="direct:sijoitteluKoulutuspaikallisetReitti"/>
-		// <setProperty
-		// propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
-		// <setProperty
-		// propertyName="hakukohdeOid"><simple>${body.args[1]}</simple></setProperty>
-		// <setProperty
-		// propertyName="sijoitteluajoId"><simple>${body.args[2]}</simple></setProperty>
-		// <to uri="bean:sijoitteluKoulutuspaikkallisetKomponentti"/>
-		// </route>
 
 		from("direct:sijoitteluKoulutuspaikallisetReitti").bean(
 				sijoitteluKoulutuspaikkallisetKomponentti);
 
-		// <route errorHandlerRef="sijoitteluRetryHandler">
-		// <from uri="direct:sijoitteluIlmankoulutuspaikkaaReitti"/>
-		// <setProperty
-		// propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
-		// <setProperty
-		// propertyName="sijoitteluajoId"><simple>${body.args[1]}</simple></setProperty>
-		// <to uri="bean:sijoitteluIlmankoulutuspaikkaaKomponentti"/>
-		// </route>
-
 		from("direct:sijoitteluIlmankoulutuspaikkaaReitti").bean(
 				sijoitteluIlmankoulutuspaikkaaKomponentti);
-
-		// <route errorHandlerRef="sijoitteluRetryHandler">
-		// <from uri="direct:sijoitteluSuoritaReitti"/>
-		// <setProperty
-		// propertyName="hakutyyppi"><simple>${body}</simple></setProperty>
-		// <to uri="bean:sijoitteluSuoritaKomponentti"/>
-		// </route>
 
 		from("direct:sijoitteluSuoritaReitti")
 		//
@@ -105,114 +74,50 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.bean(sijoitteluSuoritaKomponentti);
 
-		// <route>
-		// <from uri="direct:kaynnistaSijoitteluReitti"/>
-		// <setProperty propertyName="hakuOid">
-		// <simple>${body.args[0]}</simple>
-		// </setProperty>
-		// <policy ref="admin">
-		// <process ref="securityPreprocessor"/>
-		// <to uri="bean:suoritaSijoittelu"/>
-		// </policy>
-		// </route>
-
-		// LOG.info("KOOSTEPALVELU: Haetaan valintatiedot haulle {}", new
-		// Object[] { hakuOid });
+		//
 		from(sijoitteluAktivoi)
 		//
 				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(asetaKokonaistyo(1))
 				//
-//              Uus sijoittelu saa valintatulokset suoraan kannasta
-//				.process(new Processor() {
-//					@Override
-//					public void process(Exchange exchange) throws Exception {
-//						String hakuOid = hakuOid(exchange);
-//						try {
-//							LOG.error("Valintalaskennan tuloksia lähdettiin hakemaan. Operaatio saattaa kestää pitkään!");
-//							dokumenttiprosessi(exchange)
-//									.getVaroitukset()
-//									.add(new Varoitus(hakuOid,
-//											"Haetaan valintatietoja haulle. Operaatio saattaa kestää pitkään!"));
-//							exchange.getOut().setBody(
-//									valintatietoService
-//											.haeValintatiedot(hakuOid));
-//							dokumenttiprosessi(exchange)
-//									.getVaroitukset()
-//									.add(new Varoitus(hakuOid,
-//											"Valintatiedot saatiin haettua haulle!"));
-//							LOG.error("Valintalaskennan tulokset saatiin haettua!");
-//						} catch (Exception e) {
-//							e.printStackTrace();
-//							LOG.error(
-//									"Valintatietojen haku haulle({}) epäonnistui.",
-//									hakuOid(exchange), e.getMessage());
-//
-//							dokumenttiprosessi(exchange)
-//									.getPoikkeukset()
-//									.add(new Poikkeus(
-//											Poikkeus.VALINTATIETO,
-//											"Valintatietojen haku haulle epäonnistui.",
-//											e.getMessage(), Poikkeus
-//													.hakuOid(hakuOid(exchange))));
-//							throw e;
-//						}
-//					}
-//				})
-//				//
-//				.process(merkkaaTyoTehdyksi())
-				//
 				.process(new Processor() {
-                    @Override
-                    public void process(Exchange exchange) throws Exception {
-//                        HakuTyyppi hakutyyppi = hakutyyppi(exchange);
-                        String hakuOid = hakuOid(exchange);
-//                        if (hakutyyppi == null) {
-//
-//                            dokumenttiprosessi(exchange)
-//                                    .getPoikkeukset()
-//                                    .add(new Poikkeus(
-//                                            Poikkeus.VALINTATIETO,
-//                                            "Valintatiedoilta palautui null hakutyyppi",
-//                                            Poikkeus.hakuOid(hakuOid(exchange))));
-//                            throw new RuntimeException(
-//                                    "Valintatiedoilta palautui null hakutyyppi!");
-//                        }
-                        try {
-                            LOG.error(
-                                    "Siirretään sijoitteluun valintatiedot haulle({}). Operaatio saattaa kestää pitkään!",
-                                    hakuOid);
-                            dokumenttiprosessi(exchange)
-                                    .getVaroitukset()
-                                    .add(new Varoitus(hakuOid,
-                                            "Siirretään sijoitteluun valintatiedot. Operaatio saattaa kestää pitkään!"));
-                            suoritaSijoittelu.sijoittele(
-                                    hakuOid);
-                            dokumenttiprosessi(exchange)
-                                    .getVaroitukset()
-                                    .add(new Varoitus(hakuOid,
-                                            "Tiedot on siirretty sijoitteluun!"));
-                            LOG.error(
-                                    "Tiedot on siirretty sijoitteluun haulle({})!",
-                                    hakuOid);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            LOG.error(
-                                    "Sijoittelun suorittaminen epäonnistui haulle({})",
-                                    hakuOid(exchange), e.getMessage());
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						String hakuOid = hakuOid(exchange);
+						try {
+							LOG.error(
+									"Siirretään sijoitteluun valintatiedot haulle({}). Operaatio saattaa kestää pitkään!",
+									hakuOid);
+							dokumenttiprosessi(exchange)
+									.getVaroitukset()
+									.add(new Varoitus(hakuOid,
+											"Siirretään sijoitteluun valintatiedot. Operaatio saattaa kestää pitkään!"));
+							sijoitteluService.sijoittele(hakuOid);
+							dokumenttiprosessi(exchange)
+									.getVaroitukset()
+									.add(new Varoitus(hakuOid,
+											"Tiedot on siirretty sijoitteluun!"));
+							LOG.error(
+									"Tiedot on siirretty sijoitteluun haulle({})!",
+									hakuOid);
+						} catch (Exception e) {
+							e.printStackTrace();
+							LOG.error(
+									"Sijoittelun suorittaminen epäonnistui haulle({})",
+									hakuOid(exchange), e.getMessage());
 
-                            dokumenttiprosessi(exchange)
-                                    .getPoikkeukset()
-                                    .add(new Poikkeus(
-                                            Poikkeus.SIJOITTELU,
-                                            "Sijoittelun suorittaminen epäonnistui.",
-                                            e.getMessage(), Poikkeus
-                                            .hakuOid(hakuOid(exchange))));
-                            throw e;
-                        }
-                    }
-                })
+							dokumenttiprosessi(exchange)
+									.getPoikkeukset()
+									.add(new Poikkeus(
+											Poikkeus.SIJOITTELU,
+											"Sijoittelun suorittaminen epäonnistui.",
+											e.getMessage(), Poikkeus
+													.hakuOid(hakuOid(exchange))));
+							throw e;
+						}
+					}
+				})
 				//
 				.process(merkkaaTyoTehdyksi())
 				//
@@ -227,7 +132,4 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	}
 
-	private HakuTyyppi hakutyyppi(Exchange exchange) {
-		return exchange.getIn().getBody(HakuTyyppi.class);
-	}
 }
