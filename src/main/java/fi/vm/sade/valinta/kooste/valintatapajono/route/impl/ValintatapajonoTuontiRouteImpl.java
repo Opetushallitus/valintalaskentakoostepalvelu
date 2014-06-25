@@ -250,8 +250,16 @@ public class ValintatapajonoTuontiRouteImpl extends
 							jono.setJonosijat(jonosijat);
 							// LOG.error("\r\n{}", new GsonBuilder()
 							// .setPrettyPrinting().create().toJson(vaihe));
+							vaihe.setHakuOid(hakuOid);// jos valintalaskenta
+														// osaa palauttaa
+														// hakuOidittoman
+														// vastauksen mutta ei
+														// ottaa vastaan
+														// sellaista
+							vaihe.setCreatedAt(null); // ei konvertteria
+														// paivamaaralle
 							Response response = hakukohdeResource
-									.tuoValinnanvaiheet(hakukohdeOid, vaihe);
+									.lisaaTuloksia(hakukohdeOid, vaihe);
 							if (!Response.Status.ACCEPTED.equals(response
 									.getStatus())) {
 								throw new RuntimeException(

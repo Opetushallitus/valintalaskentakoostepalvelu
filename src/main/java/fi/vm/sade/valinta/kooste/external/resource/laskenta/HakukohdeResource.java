@@ -24,7 +24,8 @@ public interface HakukohdeResource {
 
 	@POST
 	@Path("{hakukohdeoid}/valinnanvaihe")
+	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	Response tuoValinnanvaiheet(@PathParam("hakukohdeoid") String hakukohdeoid,
+	Response lisaaTuloksia(@PathParam("hakukohdeoid") String hakukohdeoid,
 			ValinnanvaiheDTO vaihe);
 }
