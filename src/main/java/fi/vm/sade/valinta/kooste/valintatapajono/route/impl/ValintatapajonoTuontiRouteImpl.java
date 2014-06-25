@@ -196,11 +196,15 @@ public class ValintatapajonoTuontiRouteImpl extends
 									//
 									valinnanvaiheet, hakemukset, Arrays
 											.asList(listaus));
-							valintatapajonoExcel.getExcel()
-									.tuoXlsx(
-											exchange.getIn().getBody(
-													InputStream.class));
-
+							try {
+								valintatapajonoExcel.getExcel().tuoXlsx(
+										exchange.getIn().getBody(
+												InputStream.class));
+							} catch (Exception e) {
+								valintatapajonoExcel.getExcel().tuoXlsx(
+										exchange.getIn().getBody(
+												InputStream.class));
+							}
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 						} catch (Exception e) {
@@ -260,8 +264,8 @@ public class ValintatapajonoTuontiRouteImpl extends
 														// paivamaaralle
 							Response response = hakukohdeResource
 									.lisaaTuloksia(hakukohdeOid, vaihe);
-							if (!Response.Status.ACCEPTED.equals(response
-									.getStatus())) {
+							if (Response.Status.ACCEPTED.getStatusCode() != response
+									.getStatus()) {
 								throw new RuntimeException(
 										"Valintalaskenta ei hyväksynyt syötettyjä tietoja! Koodi "
 												+ response.getStatus());
