@@ -62,7 +62,9 @@ public class ValintatapajonoRivi {
 			} else {
 				defaultJonosija = new BigDecimal(jonosija).toBigInteger()
 						.intValue();
-				defaultTila = JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
+				if (!JarjestyskriteerituloksenTila.HYLATTY.equals(defaultTila)) {
+					defaultTila = JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
+				}
 			}
 		} catch (Exception e) {
 			// e.printStackTrace();
