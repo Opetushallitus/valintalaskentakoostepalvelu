@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -248,8 +250,14 @@ public class ValintatapajonoTuontiRouteImpl extends
 							jono.setJonosijat(jonosijat);
 							// LOG.error("\r\n{}", new GsonBuilder()
 							// .setPrettyPrinting().create().toJson(vaihe));
-							hakukohdeResource.tuoValinnanvaiheet(hakukohdeOid,
-									vaihe);
+							Response response = hakukohdeResource
+									.tuoValinnanvaiheet(hakukohdeOid, vaihe);
+							if (!Response.Status.ACCEPTED.equals(response
+									.getStatus())) {
+								throw new RuntimeException(
+										"Valintalaskenta ei hyväksynyt syötettyjä tietoja! Koodi "
+												+ response.getStatus());
+							}
 						} catch (Exception e) {
 							LOG.error(
 									"Valintatapajono excelin luonti virhe: {}\r\n{}",

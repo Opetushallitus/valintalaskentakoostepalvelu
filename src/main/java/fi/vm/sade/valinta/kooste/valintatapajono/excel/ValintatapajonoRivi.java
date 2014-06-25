@@ -18,10 +18,12 @@ public class ValintatapajonoRivi {
 	private final JarjestyskriteerituloksenTila kriteeriTila;
 	private final Map<String, String> kuvaus;
 	private final int jonosija;
+	private final String virhe;
 
 	public ValintatapajonoRivi(String oid, String jonosija, String nimi,
 	//
 			String tila, String fi, String sv, String en) {
+		StringBuilder defaultVirhe = new StringBuilder();
 		this.oid = oid;
 		this.nimi = nimi;
 		this.kuvaus = Maps.newHashMap();
@@ -44,28 +46,35 @@ public class ValintatapajonoRivi {
 		} else if (ValintatapajonoExcel.MAARITTELEMATON.equals(tila)) {
 			defaultTila = JarjestyskriteerituloksenTila.MAARITTELEMATON;
 		} else {
+			defaultVirhe.append("Tuntematon tila ").append(tila).append(".");
 			errors = true;
 		}
-		this.kriteeriTila = defaultTila;
 
 		int defaultJonosija = 0;
-		// jos tilassa ettei jonosijalla valia
-		if (JarjestyskriteerituloksenTila.HYLATTY.equals(defaultTila)
-				|| (JarjestyskriteerituloksenTila.MAARITTELEMATON
-						.equals(defaultTila) && !errors)) {
-
-		} else {
-			try {
+		try {
+			if (StringUtils.isBlank(jonosija)) {
+				if (JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA
+						.equals(defaultTila)) {
+					errors = true;
+					defaultVirhe
+							.append(" Tyhjä jonosija vaikka hakija on hyväksyttävissä.");
+				}
+			} else {
 				defaultJonosija = new BigDecimal(jonosija).toBigInteger()
 						.intValue();
-			} catch (Exception e) {
-				// e.printStackTrace();
-				errors = true;
-
+				defaultTila = JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
 			}
+		} catch (Exception e) {
+			// e.printStackTrace();
+			errors = true;
+			defaultVirhe.append(" Jonosijaa ").append(jonosija)
+					.append(" ei voi muuttaa numeroksi.");
+
 		}
+		this.kriteeriTila = defaultTila;
 		this.jonosija = defaultJonosija;
-		this.validi = errors;
+		this.validi = !errors;
+		this.virhe = defaultVirhe.toString().trim();
 	}
 
 	public JarjestyskriteerituloksenTila asTila() {
@@ -78,6 +87,10 @@ public class ValintatapajonoRivi {
 
 	public int getJonosija() {
 		return jonosija;
+	}
+
+	public String getVirhe() {
+		return virhe;
 	}
 
 	public boolean isValidi() {

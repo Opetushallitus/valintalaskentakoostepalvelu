@@ -129,7 +129,8 @@ public class ValintatapajonoTuontiTest {
 				new ClassPathResource("valintatapajono/valintatapajono.xlsx")
 						.getInputStream());
 		for (ValintatapajonoRivi r : listaus.getRivit()) {
-			LOG.error("{} {}", r.getJonosija(), r.getNimi());
+			LOG.error("{} {} {} {}", r.getJonosija(), r.getNimi(),
+					r.isValidi(), r.getVirhe());
 
 		}
 		// Excel excel = valintatapajonoExcel.getExcel();
