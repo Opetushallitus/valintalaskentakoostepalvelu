@@ -21,6 +21,7 @@ public class ValintatapajonoDataRivi extends DataRivi {
 		SoluLukija lukija = new SoluLukija(false, rivi.getSolut());
 		String oid = lukija.getArvoAt(0);
 		String jonosija = lukija.getArvoAt(1);
+		// System.err.println(jonosija);
 		String nimi = lukija.getArvoAt(2);
 		String tila = lukija.getArvoAt(3);
 		String fi = lukija.getArvoAt(4);

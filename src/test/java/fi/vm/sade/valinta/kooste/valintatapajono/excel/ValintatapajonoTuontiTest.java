@@ -1,10 +1,10 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.excel;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +14,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.gson.GsonBuilder;
@@ -24,7 +26,6 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
-import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 
@@ -34,6 +35,8 @@ import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
  * 
  */
 public class ValintatapajonoTuontiTest {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ValintatapajonoTuontiTest.class);
 
 	@Ignore
 	@Test
@@ -62,7 +65,7 @@ public class ValintatapajonoTuontiTest {
 						valinnanvaiheExcel));
 	}
 
-	@Ignore
+	// @Ignore
 	@Test
 	public void testaaValintatapajonoTuonti() throws JsonSyntaxException,
 			IOException {
@@ -115,15 +118,25 @@ public class ValintatapajonoTuontiTest {
 				.fromJson(resurssi("listfull.json"),
 						new TypeToken<ArrayList<Hakemus>>() {
 						}.getType());
-
+		ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
 		ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(
-				"hakuOid", "hakukohdeOid", "14017934785463582418268204255542",
-				"Haun Nimi", "Hakukohteen Nimi", valinnanvaihe, hakemukset);
-		Excel excel = valintatapajonoExcel.getExcel();
-		if (false) {
-			IOUtils.copy(excel.vieXlsx(), new FileOutputStream(
-					"valintatapajono.xlsx"));
+				"1.2.246.562.5.2013080813081926341927",
+				"1.2.246.562.14.2013082110450143806511",
+				"14017934785463582418268204255542", "Haun Nimi",
+				"Hakukohteen Nimi", valinnanvaihe, hakemukset,
+				Arrays.asList(listaus));
+		valintatapajonoExcel.getExcel().tuoXlsx(
+				new ClassPathResource("valintatapajono/valintatapajono.xlsx")
+						.getInputStream());
+		for (ValintatapajonoRivi r : listaus.getRivit()) {
+			LOG.error("{} {}", r.getJonosija(), r.getNimi());
+
 		}
+		// Excel excel = valintatapajonoExcel.getExcel();
+		// if (false) {
+		// IOUtils.copy(excel.vieXlsx(), new FileOutputStream(
+		// "valintatapajono.xlsx"));
+		// }
 
 	}
 

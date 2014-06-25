@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.excel;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -48,12 +49,20 @@ public class ValintatapajonoRivi {
 		this.kriteeriTila = defaultTila;
 
 		int defaultJonosija = 0;
-		try {
-			defaultJonosija = Integer.parseInt(jonosija);
+		// jos tilassa ettei jonosijalla valia
+		if (JarjestyskriteerituloksenTila.HYLATTY.equals(defaultTila)
+				|| (JarjestyskriteerituloksenTila.MAARITTELEMATON
+						.equals(defaultTila) && !errors)) {
 
-		} catch (Exception e) {
-			errors = true;
+		} else {
+			try {
+				defaultJonosija = new BigDecimal(jonosija).toBigInteger()
+						.intValue();
+			} catch (Exception e) {
+				// e.printStackTrace();
+				errors = true;
 
+			}
 		}
 		this.jonosija = defaultJonosija;
 		this.validi = errors;

@@ -229,13 +229,25 @@ public class ValintatapajonoTuontiRouteImpl extends
 							List<JonosijaDTO> jonosijat = Lists.newArrayList();
 							Map<String, Hakemus> hakemusmappaus = mapHakemukset(hakemukset);
 							for (ValintatapajonoRivi rivi : listaus.getRivit()) {
-								jonosijat
-										.add(ValintatapajonoRiviAsJonosijaConverter
-												.convert(hakukohdeOid, rivi,
-														hakemusmappaus.get(rivi
-																.getOid())));
+
+								if (rivi.isValidi()) {
+									jonosijat
+											.add(ValintatapajonoRiviAsJonosijaConverter
+													.convert(
+															hakukohdeOid,
+															rivi,
+															hakemusmappaus.get(rivi
+																	.getOid())));
+								} else {
+									LOG.warn("Rivi ei ole validi {} {} {}",
+											rivi.getOid(), rivi.getJonosija(),
+											rivi.getNimi());
+
+								}
 							}
 							jono.setJonosijat(jonosijat);
+							// LOG.error("\r\n{}", new GsonBuilder()
+							// .setPrettyPrinting().create().toJson(vaihe));
 							hakukohdeResource.tuoValinnanvaiheet(hakukohdeOid,
 									vaihe);
 						} catch (Exception e) {
