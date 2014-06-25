@@ -75,7 +75,9 @@ public class ValintatapajonoRivi {
 		}
 		this.kriteeriTila = defaultTila;
 		this.jonosija = defaultJonosija;
-		this.validi = !errors;
+		this.validi = !errors
+				|| defaultTila
+						.equals(JarjestyskriteerituloksenTila.MAARITTELEMATON);
 		this.virhe = defaultVirhe.toString().trim();
 	}
 
