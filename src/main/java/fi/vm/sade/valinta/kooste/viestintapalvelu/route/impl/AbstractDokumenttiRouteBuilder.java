@@ -162,4 +162,8 @@ public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder 
 			}
 		};
 	}
+
+	protected String valintatapajonoOid(Exchange exchange) {
+		return exchange.getProperty(OPH.VALINTAPAJONOOID, String.class);
+	}
 }

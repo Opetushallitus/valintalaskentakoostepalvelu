@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.resource;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
 import org.apache.poi.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -20,6 +23,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoTuontiRoute;
 import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
@@ -35,6 +39,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
 @Api(value = "/valintatapajonolaskenta", description = "Valintatapajonon tuonti ja vienti taulukkolaskentaan")
 public class ValintatapajonoResource {
 
+	private final Logger LOG = LoggerFactory
+			.getLogger(ValintatapajonoResource.class);
 	@Autowired
 	private ValintatapajonoVientiRoute valintatapajonoVienti;
 	@Autowired
@@ -67,14 +73,27 @@ public class ValintatapajonoResource {
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
 			InputStream file) throws IOException {
-		ByteArrayOutputStream b;
-		IOUtils.copy(file, b = new ByteArrayOutputStream());
-		IOUtils.closeQuietly(file);
 		DokumenttiProsessi prosessi = new DokumenttiProsessi("Valintatapajono",
 				"tuonti", hakuOid, Arrays.asList(hakukohdeOid));
-		valintatapajonoTuonti.tuo(prosessi, hakuOid, hakukohdeOid,
-				valintatapajonoOid, b.toByteArray());
-		dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-		return prosessi.toProsessiId();
+		try {
+			ByteArrayOutputStream b;
+			IOUtils.copy(file, b = new ByteArrayOutputStream());
+			IOUtils.closeQuietly(file);
+			LOG.info(
+					"Käynnistetään tuonti! Hakukohde({}), haku({}), valintatapajono({})",
+					hakukohdeOid, hakuOid, valintatapajonoOid);
+			valintatapajonoTuonti.tuo(
+					new ByteArrayInputStream(b.toByteArray()), prosessi,
+					hakuOid, hakukohdeOid, valintatapajonoOid);
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+			return prosessi.toProsessiId();
+		} catch (Exception e) {
+			LOG.error("Tuonnin käynnistys epäonnistui {}\r\n{}",
+					e.getMessage(), Arrays.toString(e.getStackTrace()));
+			prosessi.getPoikkeukset().add(
+					new Poikkeus(Poikkeus.KOOSTEPALVELU, "Tuntematon virhe "
+							+ e.getMessage()));
+			return prosessi.toProsessiId();
+		}
 	}
 }
