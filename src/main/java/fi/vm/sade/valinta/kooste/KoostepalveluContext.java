@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste;
 
+import fi.vm.sade.valinta.kooste.converter.HakemusToHakemusDTOConverter;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.ThreadPoolRejectedPolicy;
 import org.apache.camel.spi.ThreadPoolProfile;
@@ -67,6 +69,10 @@ public class KoostepalveluContext {
 			camelContext.getTypeConverterRegistry().addTypeConverter(
 					HakemusTyyppi.class, Hakemus.class,
 					new HakemusToHakemusTyyppiConverter());
+
+            camelContext.getTypeConverterRegistry().addTypeConverter(
+                    HakemusDTO.class, Hakemus.class,
+                    new HakemusToHakemusDTOConverter());
 
 			// camelContext.disableJMX();
 			camelContext.setAutoStartup(true);

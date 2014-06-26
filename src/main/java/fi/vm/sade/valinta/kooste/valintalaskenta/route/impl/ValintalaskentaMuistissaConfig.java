@@ -5,6 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import fi.vm.sade.service.valintaperusteet.dto.HakuparametritDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import org.apache.camel.CamelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,19 +71,29 @@ public class ValintalaskentaMuistissaConfig {
 
 	@Bean
 	public Valintalaskenta getValintalaskenta(
-			final ValintalaskentaService valintalaskentaService) {
+			final ValintalaskentaService valintalaskentaService, final ValintalaskentaResource valintalaskentaResource) {
 		return new Valintalaskenta() {
 			@Override
 			public void teeValintalaskenta(List<HakemusTyyppi> hakemukset,
 					List<ValintaperusteetTyyppi> valintaperusteet) {
 				valintalaskentaService.laske(hakemukset, valintaperusteet);
 			}
-		};
+
+            @Override
+            public void teeValintalaskentaRest(List<HakemusDTO> hakemukset, List<ValintaperusteetDTO> valintaperusteet) {
+
+                LaskeDTO laskeDTO =new LaskeDTO();
+                laskeDTO.setHakemus(hakemukset);
+                laskeDTO.setValintaperuste(valintaperusteet);
+
+                valintalaskentaResource.laske(laskeDTO);
+            }
+        };
 	}
 
 	@Bean
 	public Valintaperusteet getValintaperusteet(
-			final ValintaperusteService valintaperusteService) {
+			final ValintaperusteService valintaperusteService, final ValintaperusteetRestResource valintaperusteetRestResource) {
 		return new Valintaperusteet() {
 			@Override
 			public List<ValintaperusteetTyyppi> getValintaperusteet(
@@ -88,7 +104,15 @@ public class ValintalaskentaMuistissaConfig {
 				return valintaperusteService.haeValintaperusteet(Arrays
 						.asList(params));
 			}
-		};
+
+            @Override
+            public List<ValintaperusteetDTO> getValintaperusteetRest(String hakukohdeOid, Integer valinnanvaihe) {
+                HakuparametritDTO params = new HakuparametritDTO();
+                params.setHakukohdeOid(hakukohdeOid);
+                params.setValinnanVaiheJarjestysluku(valinnanvaihe);
+                return valintaperusteetRestResource.haeValintaperusteet(hakukohdeOid, valinnanvaihe);
+            }
+        };
 	}
 
 	@Bean

@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.slf4j.Logger;
@@ -35,9 +37,10 @@ public class ValinnanVaiheenValintaperusteetProxyCachingImpl implements Valinnan
             .getLogger(ValinnanVaiheenValintaperusteetProxyCachingImpl.class);
 
     @Autowired
-    private ValintaperusteService valintaperusteProxy;
+    private ValintaperusteetRestResource valintaperusteProxy;
 
-    private LoadingCache<ValintaperusteetCacheKey, List<ValintaperusteetTyyppi>> valintaperusteetCache;
+    //private LoadingCache<ValintaperusteetCacheKey, List<ValintaperusteetTyyppi>> valintaperusteetCache;
+    private LoadingCache<ValintaperusteetCacheKey, List<ValintaperusteetDTO>> valintaperusteetCache;
 
     @Value("${valintakoostepalvelu.cache.valinnanvaiheenvalintaperusteet.size:5000}")
     private int cacheSize;
@@ -45,21 +48,21 @@ public class ValinnanVaiheenValintaperusteetProxyCachingImpl implements Valinnan
     @PostConstruct
     public void init() {
         valintaperusteetCache = CacheBuilder.newBuilder().recordStats().maximumSize(cacheSize)
-                .build(new CacheLoader<ValintaperusteetCacheKey, List<ValintaperusteetTyyppi>>() {
+                .build(new CacheLoader<ValintaperusteetCacheKey, List<ValintaperusteetDTO>>() {
                     @Override
-                    public List<ValintaperusteetTyyppi> load(ValintaperusteetCacheKey key) throws Exception {
+                    public List<ValintaperusteetDTO> load(ValintaperusteetCacheKey key) throws Exception {
                         HakuparametritTyyppi params = new HakuparametritTyyppi();
                         params.setHakukohdeOid(key.getHakukohdeOid());
                         params.setValinnanVaiheJarjestysluku(key.getValinnanVaihejarjestysluku());
 
                         return ValinnanVaiheenValintaperusteetProxyCachingImpl.this.valintaperusteProxy
-                                .haeValintaperusteet(Arrays.asList(params));
+                                .haeValintaperusteet(key.getHakukohdeOid(), key.getValinnanVaihejarjestysluku());
                     }
                 });
     }
 
     @Override
-    public List<ValintaperusteetTyyppi> haeValintaperusteet(String hakukohdeOid, int valinnanVaiheJarjestysluku) {
+    public List<ValintaperusteetDTO> haeValintaperusteet(String hakukohdeOid, int valinnanVaiheJarjestysluku) {
 
         try {
             if(LOG.isDebugEnabled()) {
