@@ -112,7 +112,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	 */
 	public final void configure() {
 		Endpoint haeHaku = endpoint("direct:kelaluonti_hae_haku");
-		Endpoint haeHakemus = endpoint("direct:kelaluonti_hae_hakemus");
 		Endpoint valmistaHaku = endpoint("direct:kelaluonti_valmista_haku");
 		Endpoint luoLisahaku = endpoint("direct:kelaluonti_luo_lisahaku");
 		Endpoint luoHaku = endpoint("direct:kelaluonti_luo_haku");
@@ -155,21 +154,21 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 								.getKelaHaut()) {
 							hakemusOidit.addAll(kelahaku.getHakemusOids());
 						}
-						exchange.getOut().setBody(hakemusOidit);
+						try {
+							exchange.getOut()
+									.setBody(
+											applicationResource
+													.getApplicationsByOids(Lists
+															.newArrayList(hakemusOidit)));
+						} catch (Exception e) {
+							String virhe = "Ei saatu hakemuksia hakupalvelulta!";
+							dokumenttiprosessi(exchange)
+									.getPoikkeuksetUudelleenYrityksessa().add(
+											new Poikkeus(Poikkeus.HAKU, virhe));
+							throw new RuntimeException(virhe);
+						}
 					}
 				})
-				// Collection<String>
-				.split(body(), createAccumulatingAggregation())
-				//
-				.shareUnitOfWork()
-				//
-				.parallelProcessing()
-				//
-				.stopOnException()
-				//
-				.to(haeHakemus)
-				//
-				.end()
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -297,48 +296,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 					}
 				});
 
-		// takes body hakemusoid
-		from(haeHakemus)
-		//
-				.errorHandler(
-						deadLetterChannel(kelaFailed())
-								// .useOriginalMessage()
-								//
-								// (kelaFailed())
-								//
-								.maximumRedeliveries(3)
-								.redeliveryDelay(1500L)
-								// log exhausted stacktrace
-								.logExhaustedMessageHistory(true)
-								.logExhausted(true)
-								// hide retry/handled stacktrace
-								.logStackTrace(false).logRetryStackTrace(false)
-								.logHandled(false))
-				//
-				.routeId("Hakemusten haku reitti")
-				//
-				.process(SecurityPreprocessor.SECURITY)
-				//
-				.process(new Processor() {
-
-					public void process(Exchange exchange) throws Exception {
-						String hakemusOid = exchange.getIn().getBody(
-								String.class);
-						try {
-							exchange.getOut().setBody(
-									applicationResource
-											.getApplicationByOid(hakemusOid));
-						} catch (Exception e) {
-							dokumenttiprosessi(exchange)
-									.getPoikkeuksetUudelleenYrityksessa()
-									.add(new Poikkeus(Poikkeus.HAKU,
-											"Hakemuksen haku oid:lla.",
-											new Oid(hakemusOid,
-													Poikkeus.HAKEMUSOID)));
-							throw e;
-						}
-					}
-				});
 		from(haeHaku)
 		//
 				.errorHandler(
