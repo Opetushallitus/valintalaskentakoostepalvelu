@@ -4,39 +4,41 @@
        xmlns:beans="http://www.springframework.org/schema/beans"
        xmlns:camel="http://camel.apache.org/schema/spring" 
        xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:jaxrs-client="http://cxf.apache.org/jaxrs-client"
        xmlns:jaxrs="http://cxf.apache.org/jaxrs"
        xmlns:p="http://www.springframework.org/schema/p"
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:http="http://cxf.apache.org/transports/http/configuration"
-       xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
-           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 		   http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
            http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
            http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+           http://cxf.apache.org/jaxrs-client http://cxf.apache.org/schemas/jaxrs-client.xsd
            http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd">
 
     <ctx:annotation-config/>
 
-    <ctx:property-placeholder/>
+    <!--<ctx:property-placeholder/>-->
 	
-	<jaxrs:client id="TarjontaServiceRestClient"
+	<jaxrs-client:client id="TarjontaServiceRestClient"
                   address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
                   serviceClass="fi.vm.sade.tarjonta.service.resources.HakukohdeResource"
                   inheritHeaders="true">
-        <jaxrs:providers>
+        <jaxrs-client:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs:providers>
-    </jaxrs:client>
-    <jaxrs:client id="TarjontaHakuResourceRestClient"
+        </jaxrs-client:providers>
+    </jaxrs-client:client>
+    <jaxrs-client:client id="TarjontaHakuResourceRestClient"
                   address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
                   serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource"
                   inheritHeaders="true">
-        <jaxrs:providers>
+        <jaxrs-client:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs:providers>
-    </jaxrs:client>
+        </jaxrs-client:providers>
+    </jaxrs-client:client>
 </beans>
