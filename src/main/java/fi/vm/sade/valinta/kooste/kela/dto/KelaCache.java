@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.google.common.collect.Collections2;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -114,6 +115,14 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
 	}
 
 	public void addKelaHaku(KelaAbstraktiHaku kelaHaku) {
+        String tunniste = kelaHaku.getHaku().getHaunTunniste();
+        if(tunniste != null) {
+            for (KelaAbstraktiHaku haku : kelaHaut) {
+                if(tunniste.equals(haku.getHaku().getHaunTunniste())) {
+                    kelaHaut.remove(haku);
+                }
+            }
+        }
 		kelaHaut.add(kelaHaku);
 	}
 
