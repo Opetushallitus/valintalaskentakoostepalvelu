@@ -73,7 +73,6 @@ public class KelaHaku extends KelaAbstraktiHaku {
                                 (jono.getVastaanottotieto() != null && jono.getVastaanottotieto().equals(ValintatuloksenTila.VASTAANOTTANUT))) {
 							return true;
 						}
-						return false;
 					}
 				}
 				return false;
@@ -92,7 +91,8 @@ public class KelaHaku extends KelaAbstraktiHaku {
 						HakutoiveenValintatapajonoComparator.DEFAULT);
 				for (HakutoiveenValintatapajonoDTO jono : hakutoive
 						.getHakutoiveenValintatapajonot()) {
-					if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila())) {
+					if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila()) &&
+                            (jono.getVastaanottotieto() != null && jono.getVastaanottotieto().equals(ValintatuloksenTila.VASTAANOTTANUT))) {
 						Hakemus hakemus = hakemusSource.getHakemusByOid(hakija
 								.getHakemusOid());
 						Map<String, String> henkilotiedot = henkilotiedot(hakemus);
