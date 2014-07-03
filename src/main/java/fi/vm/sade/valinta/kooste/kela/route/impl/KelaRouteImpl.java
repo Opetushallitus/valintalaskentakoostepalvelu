@@ -156,10 +156,9 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 						}
 						try {
 							exchange.getOut()
-									.setBody(
-											applicationResource
-													.getApplicationsByOids(Lists
-															.newArrayList(hakemusOidit)));
+									.setBody(kutsuKahdesti(Lists
+                                            .newArrayList(hakemusOidit)));
+
 						} catch (Exception e) {
 							String virhe = "Ei saatu hakemuksia hakupalvelulta!";
 							dokumenttiprosessi(exchange)
@@ -540,5 +539,18 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private String kelaFailed() {
 		return KelaRoute.DIRECT_KELA_FAILED;
 	}
+
+    private List<Hakemus> kutsuKahdesti(List<String> oids) throws Exception {
+        Exception e = null;
+        for (int i = 0; i < 2; ++i) {
+            try {
+                return applicationResource.getApplicationsByOids(oids);
+            } catch (Exception ex) {
+                e = ex;
+                Thread.sleep(1500);
+            }
+        }
+        throw e;
+    }
 
 }
