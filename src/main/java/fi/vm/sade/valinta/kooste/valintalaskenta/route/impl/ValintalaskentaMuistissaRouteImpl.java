@@ -493,28 +493,28 @@ public class ValintalaskentaMuistissaRouteImpl extends
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					//
-					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintalaskenta.threadpoolsize:2}") String valintalaskentaTyojono,
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintalaskenta.threadpoolsize:5}") String valintalaskentaTyojono,
 			@Value("seda:haeHakemus?" +
 			//
 			// "queueFactory=#defaultQueueFactory&" +
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					//
-					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakemus.threadpoolsize:2}") String hakemusTyojono,
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakemus.threadpoolsize:5}") String hakemusTyojono,
 			@Value("seda:haeValintaperuste?" +
 			//
 			// "queueFactory=#defaultQueueFactory&" +
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&"
 					//
-					+ "concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintaperusteet.threadpoolsize:1}") String valintaperusteetTyojono,
+					+ "concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.valintaperusteet.threadpoolsize:5}") String valintaperusteetTyojono,
 			@Value("seda:haeHakukohteidenHakemukset?" +
 			//
 			// "queueFactory=#defaultQueueFactory&" +
 			//
 					"purgeWhenStopping=true&waitForTaskToComplete=Never&" +
 					//
-					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakukohteidenhakemukset.threadpoolsize:3}") String hakukohteidenHakemuksetTyojono,
+					"concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentamuistissa.hakukohteidenhakemukset.threadpoolsize:5}") String hakukohteidenHakemuksetTyojono,
 			@Value("valintalaskentaCache") String valintalaskentaCache,
 			@Value("direct:valintalaskenta_muistissa_aloita_laskenta") String direct_aloita_laskenta,
 			@Value("direct:valintalaskenta_muistissa_hae_valintaperusteet_yksittainen") String direct_hae_valintaperusteet_yksittainen,

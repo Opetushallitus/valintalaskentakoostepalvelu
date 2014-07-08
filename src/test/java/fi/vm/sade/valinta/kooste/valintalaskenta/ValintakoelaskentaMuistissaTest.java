@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.valintalaskenta;
 
 import java.util.concurrent.TimeUnit;
 
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
 import org.apache.camel.CamelContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +43,10 @@ public class ValintakoelaskentaMuistissaTest {
 	private ValintaperusteService valintaperusteet;
 	@Autowired
 	private ValintalaskentaService valintalaskenta;
+    @Autowired
+    private ValintaperusteetRestResource valintaperusteetRestResource;
+    @Autowired
+    private ValintalaskentaResource valintalaskentaResource;
 
 	@Test
 	public void testaaMaskaus() throws Exception {
@@ -71,5 +77,15 @@ public class ValintakoelaskentaMuistissaTest {
 	public ValintalaskentaService getValintalaskentaService() {
 		return Mockito.mock(ValintalaskentaService.class);
 	}
+
+    @Bean
+    public ValintaperusteetRestResource getValintaperusteetRestResource() {
+        return Mockito.mock(ValintaperusteetRestResource.class);
+    }
+
+    @Bean
+    public ValintalaskentaResource getValintalaskentaResource() {
+        return Mockito.mock(ValintalaskentaResource.class);
+    }
 
 }

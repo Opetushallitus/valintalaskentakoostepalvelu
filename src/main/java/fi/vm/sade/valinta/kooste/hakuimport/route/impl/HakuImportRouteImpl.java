@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.Property;
@@ -36,18 +37,18 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
 	private final SuoritaHakuImportKomponentti suoritaHakuImportKomponentti;
 	private final SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti;
-	private final ValintaperusteService valintaperusteService;
+	private final ValintaperusteetRestResource valintaperusteetRestResource;
 	private final ExecutorService hakuImportThreadPool;
 
 	@Autowired
 	public HakuImportRouteImpl(
 			@Value("${valintalaskentakoostepalvelu.hakuimport.threadpoolsize:10}") Integer hakuImportThreadpoolSize,
 			SuoritaHakuImportKomponentti suoritaHakuImportKomponentti,
-			ValintaperusteService valintaperusteService,
+            ValintaperusteetRestResource valintaperusteetRestResource,
 			SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti) {
 		this.suoritaHakuImportKomponentti = suoritaHakuImportKomponentti;
 		this.tarjontaJaKoodistoHakukohteenHakuKomponentti = tarjontaJaKoodistoHakukohteenHakuKomponentti;
-		this.valintaperusteService = valintaperusteService;
+		this.valintaperusteetRestResource = valintaperusteetRestResource;
 		this.hakuImportThreadPool = Executors
 				.newFixedThreadPool(hakuImportThreadpoolSize);
 	}
@@ -100,7 +101,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 								.logStackTrace(false).logExhausted(true)
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.bean(valintaperusteService, "tuoHakukohde")
+				.bean(valintaperusteetRestResource, "tuoHakukohde")
 				//
 				.process(logSuccessfulHakuImport());
 

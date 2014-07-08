@@ -217,15 +217,15 @@
                   address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
                   serviceClass="fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource"
                   inheritHeaders="true">
-        <jaxrs-client:outInterceptors>
-            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-                <property name="webCasUrl" value="${web.url.cas}"/>
-                <property name="targetService"
-                          value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>
-                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>
-            </bean>
-        </jaxrs-client:outInterceptors>
+        <!--<jaxrs-client:outInterceptors>-->
+            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
+                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
+                <!--<property name="targetService"-->
+                          <!--value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>-->
+                <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>-->
+                <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>-->
+            <!--</bean>-->
+        <!--</jaxrs-client:outInterceptors>-->
     </jaxrs-client:client>
 
 
@@ -233,15 +233,15 @@
                   address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
                   serviceClass="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource"
                   inheritHeaders="true">
-        <jaxrs-client:outInterceptors>
-            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-                <property name="webCasUrl" value="${web.url.cas}"/>
-                <property name="targetService"
-                          value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>
-                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>
-            </bean>
-        </jaxrs-client:outInterceptors>
+        <!--<jaxrs-client:outInterceptors>-->
+            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
+                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
+                <!--<property name="targetService"-->
+                          <!--value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>-->
+                <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>-->
+                <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>-->
+            <!--</bean>-->
+        <!--</jaxrs-client:outInterceptors>-->
         <jaxrs-client:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
             <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
@@ -368,17 +368,17 @@
     <jaxws:client id="sijoitteluService"
                   serviceClass="fi.vm.sade.service.sijoittelu.SijoitteluService"
                   address="${valintalaskentakoostepalvelu.sijoitteluService.url}">
-        <jaxws:outInterceptors>
-            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-                <property name="webCasUrl" value="${web.url.cas}"/>
-                <property name="targetService"
-                          value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername"
-                          value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>
-                <property name="appClientPassword"
-                          value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>
-            </bean>
-        </jaxws:outInterceptors>
+        <!--<jaxws:outInterceptors>-->
+            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
+                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
+                <!--<property name="targetService"-->
+                          <!--value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>-->
+                <!--<property name="appClientUsername"-->
+                          <!--value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>-->
+                <!--<property name="appClientPassword"-->
+                          <!--value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>-->
+            <!--</bean>-->
+        <!--</jaxws:outInterceptors>-->
     </jaxws:client>
 
     <jaxws:client id="valintatietoServiceAsAdmin"
@@ -402,15 +402,15 @@
     <jaxws:client id="sijoitteluServiceAsAdmin"
                   serviceClass="fi.vm.sade.service.sijoittelu.SijoitteluService"
                   address="${valintalaskentakoostepalvelu.sijoitteluService.url}">
-        <jaxws:outInterceptors>
-            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-                <property name="webCasUrl" value="${web.url.cas}"/>
-                <property name="targetService"
-                          value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>
-                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>
-            </bean>
-        </jaxws:outInterceptors>
+        <!--<jaxws:outInterceptors>-->
+            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
+                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
+                <!--<property name="targetService"-->
+                          <!--value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>-->
+                <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>-->
+                <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>-->
+            <!--</bean>-->
+        <!--</jaxws:outInterceptors>-->
     </jaxws:client>
 	
     <jaxws:client id="koodiService"

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -73,7 +74,7 @@ public class ValintatapajonoExcel {
 			//
 			String hakuNimi, String hakukohdeNimi,
 			//
-			List<ValinnanvaiheDTO> valinnanvaihe,
+			List<ValintatietoValinnanvaiheDTO> valinnanvaihe,
 			// List<ValinnanVaiheJonoillaDTO> valinnanvaiheet,
 			List<Hakemus> hakemukset) {
 		// Jonosija (13) Hakija Valintatieto Kuvaus (FI) Kuvaus (SV) Kuvaus (EN)
@@ -99,7 +100,7 @@ public class ValintatapajonoExcel {
 		final Map<String, Integer> jonosijat = Maps.newHashMap();
 		final Map<String, String> valintatiedot = Maps.newHashMap();
 		final Map<String, Map<String, String>> avaimet = Maps.newHashMap();
-		for (ValinnanvaiheDTO vaihe : valinnanvaihe) {
+		for (ValintatietoValinnanvaiheDTO vaihe : valinnanvaihe) {
 			for (ValintatapajonoDTO jono : vaihe.getValintatapajonot()) {
 				if (valintatapajonoOid.equals(jono.getOid())) {
 					for (JonosijaDTO jonosija : jono.getJonosijat()) {

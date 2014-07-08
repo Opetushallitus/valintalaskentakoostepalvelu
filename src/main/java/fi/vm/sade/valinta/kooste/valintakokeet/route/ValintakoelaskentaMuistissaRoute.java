@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintakokeet.route;
 
+import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeCacheRest;
 import org.apache.camel.Property;
 import org.springframework.security.core.Authentication;
 
@@ -29,7 +30,7 @@ public interface ValintakoelaskentaMuistissaRoute {
 	 *        valintakoelaskenta tehdään
 	 */
 	void aktivoiValintakoelaskenta(
-			@Property("valintakoeCache") ValintakoeCache valintakoeCache,
+			@Property("valintakoeCache") ValintakoeCacheRest valintakoeCache,
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
 			@Property(OPH.HAKUOID) String hakuOid,
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,

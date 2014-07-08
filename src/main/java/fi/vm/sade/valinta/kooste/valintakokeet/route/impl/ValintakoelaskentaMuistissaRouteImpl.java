@@ -5,6 +5,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import fi.vm.sade.service.valintaperusteet.dto.HakuparametritDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
+import fi.vm.sade.valinta.kooste.valintakokeet.dto.*;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyoRest;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
@@ -25,9 +33,6 @@ import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKom
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHaunHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HakemusOidSplitter;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
-import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeCache;
-import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeProsessi;
-import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeTyo;
 import fi.vm.sade.valinta.kooste.valintakokeet.route.ValintakoelaskentaMuistissaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.AbstraktiTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
@@ -55,8 +60,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 	private final HaeHaunHakemuksetKomponentti haeHaunHakemuksetKomponentti;
 	private final HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
 	private final ApplicationResource applicationResource;
-	private final ValintaperusteService valintaperusteService;
-	private final ValintalaskentaService valintalaskentaService;
+	private final ValintaperusteetRestResource valintaperusteService;
+	private final ValintalaskentaResource valintalaskentaService;
 
 	@Autowired
 	public ValintakoelaskentaMuistissaRouteImpl(
@@ -79,8 +84,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 					"concurrentConsumers=${valintalaskentakoostepalvelu.valintakoelaskenta.threadpoolsize:5}") String valintakoelaskentaTyojono,
 			@Value(ValintakoelaskentaMuistissaRoute.SEDA_VALINTAKOELASKENTA_MUISTISSA) String valintakoelaskenta,
 			HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti,
-			ValintaperusteService valintaperusteService,
-			ValintalaskentaService valintalaskentaService,
+            ValintaperusteetRestResource valintaperusteService,
+            ValintalaskentaResource valintalaskentaService,
 			ApplicationResource applicationResource,
 			HaeHaunHakemuksetKomponentti haeHaunHakemuksetKomponentti) {
 		this.haeHakukohteenHakemuksetKomponentti = haeHakukohteenHakemuksetKomponentti;
@@ -187,11 +192,11 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 						String hakemusOid = exchange.getIn().getBody(
 								String.class);
 						try {
-							HakemusTyyppi hakemusTyyppi = exchange
+							HakemusDTO hakemusTyyppi = exchange
 									.getContext()
 									.getTypeConverter()
 									.tryConvertTo(
-											HakemusTyyppi.class,
+											HakemusDTO.class,
 											applicationResource
 													.getApplicationByOid(hakemusOid));
 							prosessi(exchange).getHakemukset().tyoValmistui(0L);
@@ -216,7 +221,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.choice()
 				//
-				.when(body().isInstanceOf(ValintaperusteetTyo.class))
+				.when(body().isInstanceOf(ValintaperusteetTyoRest.class))
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -227,7 +232,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.to(valintaperusteetTyojono)
 				//
-				.when(body().isInstanceOf(ValintakoeTyo.class))
+				.when(body().isInstanceOf(ValintakoeTyoRest.class))
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -275,20 +280,12 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						try {
-							ValintaperusteetTyo<ValintakoeTyo> valintaperusteetTyo = exchange
-									.getIn().getBody(ValintaperusteetTyo.class);
+							ValintaperusteetTyoRest<ValintakoeTyoRest> valintaperusteetTyo = exchange
+									.getIn().getBody(ValintaperusteetTyoRest.class);
 
-							HakuparametritTyyppi params = new HakuparametritTyyppi();
-							params.setHakukohdeOid(valintaperusteetTyo.getOid());
-							params.setValinnanVaiheJarjestysluku(/*
-																 * Haetaan
-																 * kaikki
-																 * hakukohteen
-																 * valintaperusteet
-																 */null);
 
-							List<ValintaperusteetTyyppi> t = valintaperusteService
-									.haeValintaperusteet(Arrays.asList(params));
+							List<ValintaperusteetDTO> t = valintaperusteService
+									.haeValintaperusteet(valintaperusteetTyo.getOid(), null);
 							prosessi(exchange).getValintaperusteet()
 									.tyoValmistui(0L);
 							if (t == null || t.isEmpty()) {
@@ -299,7 +296,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 								exchange.getOut().setBody(
 										Collections.emptyList());
 							} else {
-								Collection<ValintakoeTyo> v = valintaperusteetTyo
+								Collection<ValintakoeTyoRest> v = valintaperusteetTyo
 										.setEsitieto(t);
 								if (v != null) {
 									prosessi(exchange)
@@ -354,27 +351,28 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						ValintakoeTyo valintakoeTyo = exchange.getIn().getBody(
-								ValintakoeTyo.class);
+						ValintakoeTyoRest valintakoeTyo = exchange.getIn().getBody(
+								ValintakoeTyoRest.class);
 						try {
-							List<ValintaperusteetTyyppi> v = valintakoeTyo
+							List<ValintaperusteetDTO> v = valintakoeTyo
 									.getValintaperusteet();
 							if (!v.isEmpty()) {
-								valintalaskentaService.valintakokeet(
-										valintakoeTyo.getHakemus(),
-										valintakoeTyo.getValintaperusteet());
+                                LaskeDTO dto = new LaskeDTO();
+                                dto.setHakemus(Arrays.asList(valintakoeTyo.getHakemus()));
+                                dto.setValintaperuste(valintakoeTyo.getValintaperusteet());
+								valintalaskentaService.valintakokeet(dto);
 							} else {
 								LOG.error(
 										"Hakemuksen {} yhdellekään hakutoiveelle ei ollut valintaperusteita.",
 										valintakoeTyo.getHakemus()
-												.getHakemusOid());
+												.getHakemusoid());
 							}
 							prosessi(exchange).getValintakoelaskenta()
 									.tyoValmistui(0L);
 						} catch (Exception e) {
 							LOG.error(
 									"Valintakoelaskenta epäonnistui hakemukselle({}) {}:\r\n",
-									valintakoeTyo.getHakemus().getHakemusOid(),
+									valintakoeTyo.getHakemus().getHakemusoid(),
 									e.getMessage(),
 									Arrays.toString(e.getStackTrace()));
 							throw e;
@@ -445,8 +443,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 
 	}
 
-	private ValintakoeCache cache(Exchange exchange) {
-		return exchange.getProperty("valintakoeCache", ValintakoeCache.class);
+	private ValintakoeCacheRest cache(Exchange exchange) {
+		return exchange.getProperty("valintakoeCache", ValintakoeCacheRest.class);
 	}
 
 }

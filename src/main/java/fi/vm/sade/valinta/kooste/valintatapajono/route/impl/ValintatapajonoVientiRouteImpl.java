@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -146,7 +147,7 @@ public class ValintatapajonoVientiRouteImpl extends
 							throw new RuntimeException(
 									"Hakukohteelle saatiin tyhjä hakemusjoukko!");
 						}
-						final List<ValinnanvaiheDTO> valinnanvaiheet;
+						final List<ValintatietoValinnanvaiheDTO> valinnanvaiheet;
 						try {
 							valinnanvaiheet = hakukohdeResource
 									.hakukohde(hakukohde);

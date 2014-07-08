@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import junit.framework.Assert;
 
 import org.apache.commons.io.IOUtils;
@@ -67,7 +68,7 @@ public class ValintatapajonoTuontiTest {
 	public void testaaValintatapajonoTuonti() throws JsonSyntaxException,
 			IOException {
 		// fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValinnanvaiheDTO;
-		List<ValinnanvaiheDTO> valinnanvaihe = new GsonBuilder()
+		List<ValintatietoValinnanvaiheDTO> valinnanvaihe = new GsonBuilder()
 				.registerTypeAdapter(Date.class, new JsonDeserializer() {
 					@Override
 					public Object deserialize(JsonElement json, Type typeOfT,

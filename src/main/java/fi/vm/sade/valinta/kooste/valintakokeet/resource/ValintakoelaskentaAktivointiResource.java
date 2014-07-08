@@ -4,6 +4,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeCacheRest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,7 @@ public class ValintakoelaskentaAktivointiResource {
 			LOG.info("Valintakoelaskenta for haku {}", hakuOid);
 			ValintakoeProsessi prosessi = new ValintakoeProsessi(hakuOid);
 			valintakoelaskentaRoute.aktivoiValintakoelaskenta(
-					new ValintakoeCache(), prosessi, hakuOid, hakukohdeOid,
+					new ValintakoeCacheRest(), prosessi, hakuOid, hakukohdeOid,
 					SecurityContextHolder.getContext().getAuthentication());
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 			return prosessi.toProsessiId(); // "in progress";

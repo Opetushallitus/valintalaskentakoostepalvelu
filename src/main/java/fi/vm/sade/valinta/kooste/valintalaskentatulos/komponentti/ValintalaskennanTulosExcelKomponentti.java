@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.camel.Header;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
@@ -53,7 +54,7 @@ public class ValintalaskennanTulosExcelKomponentti {
 		LOG.debug("Yhteys {} HakukohdeResource.hakukohde({})", new Object[] {
 				valintalaskentaResourceUrl, hakukohdeOid });
 
-		List<ValinnanvaiheDTO> valinnanVaiheet = hakukohdeResource
+		List<ValintatietoValinnanvaiheDTO> valinnanVaiheet = hakukohdeResource
 				.hakukohde(hakukohdeOid);
 		Collections.sort(valinnanVaiheet, new Comparator<ValinnanvaiheDTO>() {
 			@Override
