@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
-import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
@@ -61,6 +60,7 @@ public class ValintatapajonoVientiRouteImpl extends
 		this.hakukohdeTarjonnalta = hakukohdeTarjonnalta;
 		this.hakuTarjonnalta = hakuTarjonnalta;
 		this.hakukohdeResource = hakukohdeResource;
+
 	}
 
 	@Override
@@ -109,17 +109,27 @@ public class ValintatapajonoVientiRouteImpl extends
 						//
 						//
 						//
-						String hakukohde = hakukohdeOid(exchange);
 						String valintatapajonoOid = valintatapajonoOid(exchange);
+						if (hakukohdeOid == null || hakuOid == null
+								|| valintatapajonoOid == null) {
+							LOG.error(
+									"Pakolliset tiedot reitille puuttuu hakuOid = {}, hakukohdeOid = {}, valintatapajonoOid = {}",
+									hakuOid, hakukohdeOid, valintatapajonoOid);
 
+							dokumenttiprosessi(exchange).getPoikkeukset().add(
+									new Poikkeus(Poikkeus.KOOSTEPALVELU,
+											"Puutteelliset lähtötiedot"));
+							throw new RuntimeException(
+									"Pakolliset tiedot reitille puuttuu hakuOid, hakukohdeOid, valintatapajonoOid");
+						}
 						final List<Hakemus> hakemukset;
 
 						try {
 							hakemukset = applicationResource
 									.getApplicationsByOid(
-											hakukohde,
+											hakukohdeOid,
 											ApplicationResource.ACTIVE_AND_INCOMPLETE,
-											Integer.MAX_VALUE);
+											ApplicationResource.MAX);
 							LOG.debug("Saatiin hakemukset {}",
 									hakemukset.size());
 							dokumenttiprosessi(exchange)
@@ -150,7 +160,7 @@ public class ValintatapajonoVientiRouteImpl extends
 						final List<ValintatietoValinnanvaiheDTO> valinnanvaiheet;
 						try {
 							valinnanvaiheet = hakukohdeResource
-									.hakukohde(hakukohde);
+									.hakukohde(hakukohdeOid);
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 						} catch (Exception e) {
@@ -257,7 +267,4 @@ public class ValintatapajonoVientiRouteImpl extends
 				.stop();
 	}
 
-	protected String valintatapajonoOid(Exchange exchange) {
-		return exchange.getProperty(OPH.VALINTAPAJONOOID, String.class);
-	}
 }

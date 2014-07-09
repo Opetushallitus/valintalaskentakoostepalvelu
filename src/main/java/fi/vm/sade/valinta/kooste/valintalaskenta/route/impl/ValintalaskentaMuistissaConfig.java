@@ -104,7 +104,7 @@ public class ValintalaskentaMuistissaConfig {
 					String hakukohdeOid) throws Exception {
 				HakemusList hakemusList = applicationResource.findApplications(
 						null, ACTIVE_AND_INCOMPLETE, null, null, hakuOid,
-						hakukohdeOid, 0, Integer.MAX_VALUE);
+						hakukohdeOid, 0, ApplicationResource.MAX);
 				if (hakemusList == null || hakemusList.getResults() == null) {
 					LOG.error("Ei hakemuksia hakukohteelle {}", hakukohdeOid);
 					return Collections.emptyList();

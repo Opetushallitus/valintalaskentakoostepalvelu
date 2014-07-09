@@ -251,7 +251,8 @@ public class SijoittelunTulosExcelKomponentti {
 	private Map<String, Hakemus> haeHakemukset(String hakukohdeOid) {
 		Map<String, Hakemus> tmp = Maps.newHashMap();
 		for (Hakemus h : applicationResource.getApplicationsByOid(hakukohdeOid,
-				ApplicationResource.ACTIVE_AND_INCOMPLETE, Integer.MAX_VALUE)) {
+				ApplicationResource.ACTIVE_AND_INCOMPLETE,
+				ApplicationResource.MAX)) {
 			tmp.put(h.getOid(), h);
 		}
 		return tmp;

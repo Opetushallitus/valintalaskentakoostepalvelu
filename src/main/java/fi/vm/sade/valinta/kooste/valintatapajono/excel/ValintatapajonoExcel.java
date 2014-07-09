@@ -30,16 +30,15 @@ import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
 
 public class ValintatapajonoExcel {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintatapajonoExcel.class);
 
-	private final static String MAARITTELEMATON = "Määrittelemätön";
-	private final static String HYVAKSYTTAVISSA = "Hyväksyttävissä";
-	private final static String HYLATTY = "Hylätty";
+	public final static String MAARITTELEMATON = "Määrittelemätön";
+	public final static String HYVAKSYTTAVISSA = "Hyväksyttävissä";
+	public final static String HYLATTY = "Hylätty";
 
 	public final static String VAKIO_MAARITTELEMATON = "MAARITTELEMATON";
 	public final static String VAKIO_HYVAKSYTTAVISSA = "HYVAKSYTTAVISSA";
@@ -68,6 +67,19 @@ public class ValintatapajonoExcel {
 
 	private final Excel excel;
 
+	public ValintatapajonoExcel(String hakuOid, String hakukohdeOid,
+			String valintatapajonoOid,
+			//
+			String hakuNimi, String hakukohdeNimi,
+			//
+			List<ValintatietoValinnanvaiheDTO> valinnanvaihe,
+			//
+			List<Hakemus> hakemukset) {
+		this(hakuOid, hakukohdeOid, valintatapajonoOid, hakuNimi,
+				hakukohdeNimi, valinnanvaihe, hakemukset, Collections
+						.<ValintatapajonoDataRiviKuuntelija> emptyList());
+	}
+
 	@SuppressWarnings("unchecked")
 	public ValintatapajonoExcel(String hakuOid, String hakukohdeOid,
 			String valintatapajonoOid,
@@ -76,7 +88,9 @@ public class ValintatapajonoExcel {
 			//
 			List<ValintatietoValinnanvaiheDTO> valinnanvaihe,
 			// List<ValinnanVaiheJonoillaDTO> valinnanvaiheet,
-			List<Hakemus> hakemukset) {
+			List<Hakemus> hakemukset,
+			//
+			Collection<? extends ValintatapajonoDataRiviKuuntelija> kuuntelijat) {
 		// Jonosija (13) Hakija Valintatieto Kuvaus (FI) Kuvaus (SV) Kuvaus (EN)
 		Collection<Rivi> rivit = Lists.newArrayList();
 		rivit.add(new RiviBuilder().addOid(hakuOid).addTeksti(hakuNimi, 4)
@@ -171,7 +185,7 @@ public class ValintatapajonoExcel {
 			sx.add(s);
 		}
 
-		rivit.add(new ValintatapajonoDataRivi(sx));
+		rivit.add(new ValintatapajonoDataRivi(sx, kuuntelijat));
 		this.excel = new Excel("Valintatapajono", rivit, new int[] { 0 } // piilottaa
 																			// ensimmaisen
 																			// pysty

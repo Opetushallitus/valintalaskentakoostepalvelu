@@ -6,13 +6,6 @@ import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUNUT;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUNTUNUT;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
-import static fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila.EI_ILMOITTAUTUNUT;
-import static fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila.EI_TEHTY;
-import static fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila.LASNA;
-import static fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila.LASNA_KOKO_LUKUVUOSI;
-import static fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila.LASNA_SYKSY;
-import static fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila.POISSA;
-import static fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila.POISSA_KOKO_LUKUVUOSI;
 import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.EHDOLLISESTI_VASTAANOTTANUT;
 import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA;
 import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.ILMOITETTU;
@@ -113,35 +106,57 @@ public class HakemusUtil {
 
 		Map<String, Map<IlmoittautumisTila, String>> kielet = new HashMap<String, Map<IlmoittautumisTila, String>>();
 
-		Map<IlmoittautumisTila, String> fi = new HashMap<IlmoittautumisTila, String>();
-		fi.put(EI_TEHTY, "Ei tehty");
-		fi.put(LASNA_KOKO_LUKUVUOSI, "Läsnä koko lukuvuosi");
-		fi.put(POISSA_KOKO_LUKUVUOSI, "Poissa koko lukuvuosi");
-		fi.put(EI_ILMOITTAUTUNUT, "Ei ilmoittautunut");
-		fi.put(LASNA_SYKSY, "Läsnä syksy");
-		fi.put(LASNA, "Läsnä");
-		fi.put(POISSA, "Poissa");
+		{// SUOMI
+			Map<IlmoittautumisTila, String> tmp = new HashMap<IlmoittautumisTila, String>();
+			tmp.put(IlmoittautumisTila.EI_TEHTY, "Ei tehty");
+			tmp.put(IlmoittautumisTila.LASNA_KOKO_LUKUVUOSI,
+					"Läsnä (koko lukuvuosi)");
+			tmp.put(IlmoittautumisTila.POISSA_KOKO_LUKUVUOSI,
+					"Poissa koko lukuvuosi");
+			tmp.put(IlmoittautumisTila.EI_ILMOITTAUTUNUT, "Ei ilmoittautunut");
+			tmp.put(IlmoittautumisTila.LASNA_SYKSY, "Läsnä syksy, poissa kevät");
+			tmp.put(IlmoittautumisTila.POISSA_SYKSY,
+					"Poissa syksy, läsnä kevät");
+			tmp.put(IlmoittautumisTila.LASNA, "Läsnä keväällä alkava koulutus");
+			tmp.put(IlmoittautumisTila.POISSA,
+					"Poissa keväällä alkava koulutus");
+			kielet.put(KieliUtil.SUOMI, Collections.unmodifiableMap(tmp));
+		}
 
-		Map<IlmoittautumisTila, String> sv = new HashMap<IlmoittautumisTila, String>();
-		sv.put(EI_TEHTY, "Ei tehty");
-		sv.put(LASNA_KOKO_LUKUVUOSI, "Läsnä koko lukuvuosi");
-		sv.put(POISSA_KOKO_LUKUVUOSI, "Poissa koko lukuvuosi");
-		sv.put(EI_ILMOITTAUTUNUT, "Ei ilmoittautunut");
-		sv.put(LASNA_SYKSY, "Läsnä syksy");
-		sv.put(LASNA, "Läsnä");
-		sv.put(POISSA, "Poissa");
-		Map<IlmoittautumisTila, String> en = new HashMap<IlmoittautumisTila, String>();
-		en.put(EI_TEHTY, "Ei tehty");
-		en.put(LASNA_KOKO_LUKUVUOSI, "Läsnä koko lukuvuosi");
-		en.put(POISSA_KOKO_LUKUVUOSI, "Poissa koko lukuvuosi");
-		en.put(EI_ILMOITTAUTUNUT, "Ei ilmoittautunut");
-		en.put(LASNA_SYKSY, "Läsnä syksy");
-		en.put(LASNA, "Läsnä");
-		en.put(POISSA, "Poissa");
+		{// RUOTSI
+			Map<IlmoittautumisTila, String> tmp = new HashMap<IlmoittautumisTila, String>();
+			tmp.put(IlmoittautumisTila.EI_TEHTY, "Ei tehty");
+			tmp.put(IlmoittautumisTila.LASNA_KOKO_LUKUVUOSI,
+					"Läsnä (koko lukuvuosi)");
+			tmp.put(IlmoittautumisTila.POISSA_KOKO_LUKUVUOSI,
+					"Poissa koko lukuvuosi");
+			tmp.put(IlmoittautumisTila.EI_ILMOITTAUTUNUT, "Ei ilmoittautunut");
+			tmp.put(IlmoittautumisTila.LASNA_SYKSY, "Läsnä syksy, poissa kevät");
+			tmp.put(IlmoittautumisTila.POISSA_SYKSY,
+					"Poissa syksy, läsnä kevät");
+			tmp.put(IlmoittautumisTila.LASNA, "Läsnä keväällä alkava koulutus");
+			tmp.put(IlmoittautumisTila.POISSA,
+					"Poissa keväällä alkava koulutus");
+			kielet.put(KieliUtil.RUOTSI, Collections.unmodifiableMap(tmp));
+		}
 
-		kielet.put(KieliUtil.SUOMI, Collections.unmodifiableMap(fi));
-		kielet.put(KieliUtil.RUOTSI, Collections.unmodifiableMap(sv));
-		kielet.put(KieliUtil.ENGLANTI, Collections.unmodifiableMap(en));
+		{// ENGLANTI
+			Map<IlmoittautumisTila, String> tmp = new HashMap<IlmoittautumisTila, String>();
+			tmp.put(IlmoittautumisTila.EI_TEHTY, "Ei tehty");
+			tmp.put(IlmoittautumisTila.LASNA_KOKO_LUKUVUOSI,
+					"Läsnä (koko lukuvuosi)");
+			tmp.put(IlmoittautumisTila.POISSA_KOKO_LUKUVUOSI,
+					"Poissa koko lukuvuosi");
+			tmp.put(IlmoittautumisTila.EI_ILMOITTAUTUNUT, "Ei ilmoittautunut");
+			tmp.put(IlmoittautumisTila.LASNA_SYKSY, "Läsnä syksy, poissa kevät");
+			tmp.put(IlmoittautumisTila.POISSA_SYKSY,
+					"Poissa syksy, läsnä kevät");
+			tmp.put(IlmoittautumisTila.LASNA, "Läsnä keväällä alkava koulutus");
+			tmp.put(IlmoittautumisTila.POISSA,
+					"Poissa keväällä alkava koulutus");
+			kielet.put(KieliUtil.ENGLANTI, Collections.unmodifiableMap(tmp));
+		}
+
 		return Collections.unmodifiableMap(kielet);
 	}
 

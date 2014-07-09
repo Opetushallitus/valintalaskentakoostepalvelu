@@ -16,6 +16,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
+import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
@@ -42,7 +43,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
 			PaivamaaraSource paivamaaraSource) {
 		super(haku, paivamaaraSource);
 		//
-		// Varmistetaan etta ainoastaan hyvaksyttyja
+		// Varmistetaan etta ainoastaan hyvaksyttyja ja vastaanottaneita
 		//
 		this.hakijat = Collections2.filter(hakijat, new Predicate<HakijaDTO>() {
 			public boolean apply(HakijaDTO hakija) {
@@ -68,10 +69,10 @@ public class KelaHaku extends KelaAbstraktiHaku {
 					}
 					for (HakutoiveenValintatapajonoDTO jono : hakutoive
 							.getHakutoiveenValintatapajonot()) {
-						if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila())) {
+						if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila()) &&
+                                (jono.getVastaanottotieto() != null && jono.getVastaanottotieto().equals(ValintatuloksenTila.VASTAANOTTANUT))) {
 							return true;
 						}
-						return false;
 					}
 				}
 				return false;
@@ -90,7 +91,8 @@ public class KelaHaku extends KelaAbstraktiHaku {
 						HakutoiveenValintatapajonoComparator.DEFAULT);
 				for (HakutoiveenValintatapajonoDTO jono : hakutoive
 						.getHakutoiveenValintatapajonot()) {
-					if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila())) {
+					if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila()) &&
+                            (jono.getVastaanottotieto() != null && jono.getVastaanottotieto().equals(ValintatuloksenTila.VASTAANOTTANUT))) {
 						Hakemus hakemus = hakemusSource.getHakemusByOid(hakija
 								.getHakemusOid());
 						Map<String, String> henkilotiedot = henkilotiedot(hakemus);

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.*;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;
@@ -21,10 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
@@ -67,6 +64,9 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(KelaRouteImpl.class);
+
+    private final int MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA = 10000;
+
 	private final KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti;
 	private final KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti;
 	private final SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet;
@@ -112,7 +112,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	 */
 	public final void configure() {
 		Endpoint haeHaku = endpoint("direct:kelaluonti_hae_haku");
-		Endpoint haeHakemus = endpoint("direct:kelaluonti_hae_hakemus");
 		Endpoint valmistaHaku = endpoint("direct:kelaluonti_valmista_haku");
 		Endpoint luoLisahaku = endpoint("direct:kelaluonti_luo_lisahaku");
 		Endpoint luoHaku = endpoint("direct:kelaluonti_luo_haku");
@@ -149,27 +148,64 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						// valmistetaan hakemusoidit silmukkaa varten
-						Set<String> hakemusOidit = Sets.newHashSet();
-						for (KelaAbstraktiHaku kelahaku : cache(exchange)
-								.getKelaHaut()) {
-							hakemusOidit.addAll(kelahaku.getHakemusOids());
+                        // valmistetaan hakemusoidit silmukkaa varten
+                        Collection<String> hakemusOidit = Sets.newHashSet();
+                        for (KelaAbstraktiHaku kelahaku : cache(exchange)
+                                .getKelaHaut()) {
+                            hakemusOidit.addAll(kelahaku.getHakemusOids());
+                        }
+                        hakemusOidit = Lists.newArrayList(hakemusOidit); // muutetaan
+                        try {
+                            int n = 0;
+                            Collection<List<String>> oiditSivutettuna = Lists
+                                    .newArrayList();
+                            do {
+                                List<String> osajoukkoOideista = FluentIterable
+                                        .from(hakemusOidit)
+                                                //
+                                        .skip(n)
+                                        .limit(MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA)
+                                                //
+                                        .toList();
+                                oiditSivutettuna.add(osajoukkoOideista);
+                                n += MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA;
+                            } while (n < hakemusOidit.size());
+                            List<Hakemus> hakemukset = Lists.newArrayList();
+                            LOG.warn("Haetaan {} hakemusta, {} erässä",
+                                    hakemusOidit.size(),
+                                    oiditSivutettuna.size());
+                            for (List<String> oidit : oiditSivutettuna) {
+                                try {
+                                    List<Hakemus> h = applicationResource
+                                            .getApplicationsByOids(oidit);
+                                    hakemukset.addAll(h);
+                                    LOG.warn(
+                                            "Saatiin erä hakemuksia {}. {}/{}",
+                                            h.size(), hakemukset.size(),
+                                            hakemusOidit.size());
+                                } catch (Exception e) {
+                                    LOG.error(
+                                            "Hakemuspalvelu ei jaksa tarjoilla hakemuksia {}. Yritetään vielä uudestaan.",
+                                            e.getMessage());
+                                    // annetaan hakuapp:lle vahan aikaa toipua
+                                    // ja yritetaan uudestaan
+                                    Thread.sleep(250L);
+                                    hakemukset.addAll(applicationResource
+                                            .getApplicationsByOids(oidit));
+
+                                }
+                            }
+                            exchange.getOut().setBody(hakemukset);
+
+                        } catch (Exception e) {
+							String virhe = "Ei saatu hakemuksia hakupalvelulta!";
+							dokumenttiprosessi(exchange)
+									.getPoikkeuksetUudelleenYrityksessa().add(
+											new Poikkeus(Poikkeus.HAKU, virhe));
+							throw new RuntimeException(virhe);
 						}
-						exchange.getOut().setBody(hakemusOidit);
 					}
 				})
-				// Collection<String>
-				.split(body(), createAccumulatingAggregation())
-				//
-				.shareUnitOfWork()
-				//
-				.parallelProcessing()
-				//
-				.stopOnException()
-				//
-				.to(haeHakemus)
-				//
-				.end()
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -297,48 +333,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 					}
 				});
 
-		// takes body hakemusoid
-		from(haeHakemus)
-		//
-				.errorHandler(
-						deadLetterChannel(kelaFailed())
-								// .useOriginalMessage()
-								//
-								// (kelaFailed())
-								//
-								.maximumRedeliveries(3)
-								.redeliveryDelay(1500L)
-								// log exhausted stacktrace
-								.logExhaustedMessageHistory(true)
-								.logExhausted(true)
-								// hide retry/handled stacktrace
-								.logStackTrace(false).logRetryStackTrace(false)
-								.logHandled(false))
-				//
-				.routeId("Hakemusten haku reitti")
-				//
-				.process(SecurityPreprocessor.SECURITY)
-				//
-				.process(new Processor() {
-
-					public void process(Exchange exchange) throws Exception {
-						String hakemusOid = exchange.getIn().getBody(
-								String.class);
-						try {
-							exchange.getOut().setBody(
-									applicationResource
-											.getApplicationByOid(hakemusOid));
-						} catch (Exception e) {
-							dokumenttiprosessi(exchange)
-									.getPoikkeuksetUudelleenYrityksessa()
-									.add(new Poikkeus(Poikkeus.HAKU,
-											"Hakemuksen haku oid:lla.",
-											new Oid(hakemusOid,
-													Poikkeus.HAKEMUSOID)));
-							throw e;
-						}
-					}
-				});
 		from(haeHaku)
 		//
 				.errorHandler(
@@ -480,7 +474,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 											null,
 											ApplicationResource.ACTIVE_AND_INCOMPLETE,
 											null, null, haku.getOid(), null, 0,
-											Integer.MAX_VALUE);
+											ApplicationResource.MAX);
 							KelaLisahaku kelalisahaku = new KelaLisahaku(
 									Collections2.transform(
 											hakemusList.getResults(),

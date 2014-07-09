@@ -66,38 +66,12 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 	@Override
 	public void configure() throws Exception {
 		from(quartzInput).bean(jatkuvaSijoittelu);
-		// <route errorHandlerRef="sijoitteluRetryHandler">
-		// <from uri="direct:sijoitteluKoulutuspaikallisetReitti"/>
-		// <setProperty
-		// propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
-		// <setProperty
-		// propertyName="hakukohdeOid"><simple>${body.args[1]}</simple></setProperty>
-		// <setProperty
-		// propertyName="sijoitteluajoId"><simple>${body.args[2]}</simple></setProperty>
-		// <to uri="bean:sijoitteluKoulutuspaikkallisetKomponentti"/>
-		// </route>
 
 		from("direct:sijoitteluKoulutuspaikallisetReitti").bean(
 				sijoitteluKoulutuspaikkallisetKomponentti);
 
-		// <route errorHandlerRef="sijoitteluRetryHandler">
-		// <from uri="direct:sijoitteluIlmankoulutuspaikkaaReitti"/>
-		// <setProperty
-		// propertyName="hakuOid"><simple>${body.args[0]}</simple></setProperty>
-		// <setProperty
-		// propertyName="sijoitteluajoId"><simple>${body.args[1]}</simple></setProperty>
-		// <to uri="bean:sijoitteluIlmankoulutuspaikkaaKomponentti"/>
-		// </route>
-
 		from("direct:sijoitteluIlmankoulutuspaikkaaReitti").bean(
 				sijoitteluIlmankoulutuspaikkaaKomponentti);
-
-		// <route errorHandlerRef="sijoitteluRetryHandler">
-		// <from uri="direct:sijoitteluSuoritaReitti"/>
-		// <setProperty
-		// propertyName="hakutyyppi"><simple>${body}</simple></setProperty>
-		// <to uri="bean:sijoitteluSuoritaKomponentti"/>
-		// </route>
 
 		from("direct:sijoitteluSuoritaReitti")
 		//
@@ -105,16 +79,6 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.bean(sijoitteluSuoritaKomponentti);
 
-		// <route>
-		// <from uri="direct:kaynnistaSijoitteluReitti"/>
-		// <setProperty propertyName="hakuOid">
-		// <simple>${body.args[0]}</simple>
-		// </setProperty>
-		// <policy ref="admin">
-		// <process ref="securityPreprocessor"/>
-		// <to uri="bean:suoritaSijoittelu"/>
-		// </policy>
-		// </route>
 
 		// LOG.info("KOOSTEPALVELU: Haetaan valintatiedot haulle {}", new
 		// Object[] { hakuOid });
@@ -124,61 +88,13 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.process(asetaKokonaistyo(1))
 				//
-//              Uus sijoittelu saa valintatulokset suoraan kannasta
-//				.process(new Processor() {
-//					@Override
-//					public void process(Exchange exchange) throws Exception {
-//						String hakuOid = hakuOid(exchange);
-//						try {
-//							LOG.error("Valintalaskennan tuloksia lähdettiin hakemaan. Operaatio saattaa kestää pitkään!");
-//							dokumenttiprosessi(exchange)
-//									.getVaroitukset()
-//									.add(new Varoitus(hakuOid,
-//											"Haetaan valintatietoja haulle. Operaatio saattaa kestää pitkään!"));
-//							exchange.getOut().setBody(
-//									valintatietoService
-//											.haeValintatiedot(hakuOid));
-//							dokumenttiprosessi(exchange)
-//									.getVaroitukset()
-//									.add(new Varoitus(hakuOid,
-//											"Valintatiedot saatiin haettua haulle!"));
-//							LOG.error("Valintalaskennan tulokset saatiin haettua!");
-//						} catch (Exception e) {
-//							e.printStackTrace();
-//							LOG.error(
-//									"Valintatietojen haku haulle({}) epäonnistui.",
-//									hakuOid(exchange), e.getMessage());
-//
-//							dokumenttiprosessi(exchange)
-//									.getPoikkeukset()
-//									.add(new Poikkeus(
-//											Poikkeus.VALINTATIETO,
-//											"Valintatietojen haku haulle epäonnistui.",
-//											e.getMessage(), Poikkeus
-//													.hakuOid(hakuOid(exchange))));
-//							throw e;
-//						}
-//					}
-//				})
-//				//
-//				.process(merkkaaTyoTehdyksi())
-				//
+
 				.process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
 //                        HakuTyyppi hakutyyppi = hakutyyppi(exchange);
                         String hakuOid = hakuOid(exchange);
-//                        if (hakutyyppi == null) {
-//
-//                            dokumenttiprosessi(exchange)
-//                                    .getPoikkeukset()
-//                                    .add(new Poikkeus(
-//                                            Poikkeus.VALINTATIETO,
-//                                            "Valintatiedoilta palautui null hakutyyppi",
-//                                            Poikkeus.hakuOid(hakuOid(exchange))));
-//                            throw new RuntimeException(
-//                                    "Valintatiedoilta palautui null hakutyyppi!");
-//                        }
+
                         try {
                             LOG.error(
                                     "Siirretään sijoitteluun valintatiedot haulle({}). Operaatio saattaa kestää pitkään!",
