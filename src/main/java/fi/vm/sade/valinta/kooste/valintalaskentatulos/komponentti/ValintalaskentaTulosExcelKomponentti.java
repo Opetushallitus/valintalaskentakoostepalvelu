@@ -57,9 +57,8 @@ public class ValintalaskentaTulosExcelKomponentti {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaTulosExcelKomponentti.class);
 
-	@Resource(name = "valintatietoService")
+    @Autowired
 	private ValintatietoResource valintatietoService;
-
 	@Autowired
 	private ValintaperusteetValintakoeResource valintaperusteetValintakoeResource;
 	@Autowired
