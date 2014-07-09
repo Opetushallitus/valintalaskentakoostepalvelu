@@ -22,11 +22,6 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -51,7 +46,7 @@ public class ValintalaskentaMuistissaConfig {
 
 	@Bean(name = "valintalaskentaMuistissaValvomo")
 	public ValvomoService<ValintalaskentaMuistissaProsessi> getValvomoServiceImpl() {
-		return new ValvomoServiceImpl<ValintalaskentaMuistissaProsessi>();
+		return new ValvomoServiceImpl<>();
 	}
 
 	@Bean
@@ -70,14 +65,8 @@ public class ValintalaskentaMuistissaConfig {
 	}
 
 	@Bean
-	public Valintalaskenta getValintalaskenta(
-			final ValintalaskentaService valintalaskentaService, final ValintalaskentaResource valintalaskentaResource) {
+	public Valintalaskenta getValintalaskenta(final ValintalaskentaResource valintalaskentaResource) {
 		return new Valintalaskenta() {
-			@Override
-			public void teeValintalaskenta(List<HakemusTyyppi> hakemukset,
-					List<ValintaperusteetTyyppi> valintaperusteet) {
-				valintalaskentaService.laske(hakemukset, valintaperusteet);
-			}
 
             @Override
             public void teeValintalaskentaRest(List<HakemusDTO> hakemukset, List<ValintaperusteetDTO> valintaperusteet) {
@@ -92,18 +81,8 @@ public class ValintalaskentaMuistissaConfig {
 	}
 
 	@Bean
-	public Valintaperusteet getValintaperusteet(
-			final ValintaperusteService valintaperusteService, final ValintaperusteetRestResource valintaperusteetRestResource) {
+	public Valintaperusteet getValintaperusteet(final ValintaperusteetRestResource valintaperusteetRestResource) {
 		return new Valintaperusteet() {
-			@Override
-			public List<ValintaperusteetTyyppi> getValintaperusteet(
-					String hakukohdeOid, Integer valinnanvaihe) {
-				HakuparametritTyyppi params = new HakuparametritTyyppi();
-				params.setHakukohdeOid(hakukohdeOid);
-				params.setValinnanVaiheJarjestysluku(valinnanvaihe);
-				return valintaperusteService.haeValintaperusteet(Arrays
-						.asList(params));
-			}
 
             @Override
             public List<ValintaperusteetDTO> getValintaperusteetRest(String hakukohdeOid, Integer valinnanvaihe) {

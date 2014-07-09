@@ -1,12 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintakokeet.dto;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.AbstraktiTyo;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyoRest;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;

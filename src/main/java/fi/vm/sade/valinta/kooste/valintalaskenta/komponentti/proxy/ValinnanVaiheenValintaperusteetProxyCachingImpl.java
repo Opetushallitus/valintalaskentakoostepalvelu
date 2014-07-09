@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -19,10 +17,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 
 /**
  * User: wuoti Date: 5.8.2013 Time: 9.28
@@ -51,9 +45,6 @@ public class ValinnanVaiheenValintaperusteetProxyCachingImpl implements Valinnan
                 .build(new CacheLoader<ValintaperusteetCacheKey, List<ValintaperusteetDTO>>() {
                     @Override
                     public List<ValintaperusteetDTO> load(ValintaperusteetCacheKey key) throws Exception {
-                        HakuparametritTyyppi params = new HakuparametritTyyppi();
-                        params.setHakukohdeOid(key.getHakukohdeOid());
-                        params.setValinnanVaiheJarjestysluku(key.getValinnanVaihejarjestysluku());
 
                         return ValinnanVaiheenValintaperusteetProxyCachingImpl.this.valintaperusteProxy
                                 .haeValintaperusteet(key.getHakukohdeOid(), key.getValinnanVaihejarjestysluku());

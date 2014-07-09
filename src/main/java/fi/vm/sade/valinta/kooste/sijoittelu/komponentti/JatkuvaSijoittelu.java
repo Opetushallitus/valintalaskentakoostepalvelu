@@ -1,9 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.komponentti;
 
 
-import fi.vm.sade.service.sijoittelu.SijoitteluService;
-import fi.vm.sade.service.valintatiedot.ValintatietoService;
-import fi.vm.sade.service.valintatiedot.schema.HakuTyyppi;
 import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource;
 import org.slf4j.Logger;
@@ -11,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,12 +20,6 @@ public class JatkuvaSijoittelu {
     public static Map<String, Sijoittelu> SIJOITTELU_HAUT = new HashMap<String, Sijoittelu>();
 
     private static final Logger LOG = LoggerFactory.getLogger(JatkuvaSijoittelu.class);
-
-//    @Resource(name="valintatietoServiceAsAdmin")
-//    private ValintatietoService valintatietoService;
-//
-//    @Resource(name="sijoitteluServiceAsAdmin")
-//    private SijoitteluService sijoitteluService;
 
     @Autowired
     private SijoitteluResource sijoitteluResource;

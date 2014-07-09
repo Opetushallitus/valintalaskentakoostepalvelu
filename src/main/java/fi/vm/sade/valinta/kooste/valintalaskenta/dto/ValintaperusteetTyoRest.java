@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 
 import java.util.List;
 

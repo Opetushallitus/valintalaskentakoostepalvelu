@@ -16,7 +16,7 @@ public class ValintalaskentaTila {
 	private final AtomicReference<ValintalaskentaMuistissaProsessi> kaynnissaOlevaValintalaskenta;
 
 	public ValintalaskentaTila() {
-		this.kaynnissaOlevaValintalaskenta = new AtomicReference<ValintalaskentaMuistissaProsessi>(
+		this.kaynnissaOlevaValintalaskenta = new AtomicReference<>(
 				null);
 	}
 

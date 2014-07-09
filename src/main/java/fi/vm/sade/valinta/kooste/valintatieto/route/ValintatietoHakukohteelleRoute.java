@@ -2,12 +2,11 @@ package fi.vm.sade.valinta.kooste.valintatieto.route;
 
 import java.util.List;
 
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 import org.apache.camel.Property;
-
-import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
 
 public interface ValintatietoHakukohteelleRoute {
 
-    List<HakemusOsallistuminenTyyppi> haeValintatiedotHakukohteelle(
+    List<HakemusOsallistuminenDTO> haeValintatiedotHakukohteelle(
             @Property("valintakoeOid") List<String> valintakoeOids, @Property("hakukohdeOid") String hakukohdeOid);
 }

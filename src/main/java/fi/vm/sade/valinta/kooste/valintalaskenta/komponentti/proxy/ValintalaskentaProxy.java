@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy;
 
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
 import java.util.List;
 
@@ -13,5 +13,5 @@ import java.util.List;
  */
 public interface ValintalaskentaProxy {
 
-    void laske(List<HakemusTyyppi> hakemustyypit, List<ValintaperusteetTyyppi> valintaperusteet);
+    void laske(List<HakemusDTO> hakemustyypit, List<ValintaperusteetDTO> valintaperusteet);
 }

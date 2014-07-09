@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti;

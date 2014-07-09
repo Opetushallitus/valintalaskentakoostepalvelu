@@ -19,8 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;

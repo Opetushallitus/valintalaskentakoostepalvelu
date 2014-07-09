@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
 import fi.vm.sade.service.valintaperusteet.dto.*;
-import fi.vm.sade.service.valintaperusteet.schema.*;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeValintaperusteetDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.ValintakoeRDTO;
@@ -16,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * User: wuoti Date: 20.5.2013 Time: 10.46

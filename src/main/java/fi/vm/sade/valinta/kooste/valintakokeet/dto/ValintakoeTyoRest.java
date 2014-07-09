@@ -2,12 +2,9 @@ package fi.vm.sade.valinta.kooste.valintakokeet.dto;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.AbstraktiTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.EsitiedonKuuntelija;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyoRest;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 

@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
 import java.util.Arrays;
 
+import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -12,7 +13,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
@@ -55,9 +55,9 @@ public class OsoitetarratTest {
 	@Test
 	public void testaaOsoitetarratReittiPaastaPaahan() {
 		ValintakoeOsallistuminenDTO h0 = createValintatieto("1",
-				Osallistuminen.EI_OSALLISTU);
+				OsallistuminenDTO.EI_OSALLISTU);
 		ValintakoeOsallistuminenDTO h1 = createValintatieto("2",
-				Osallistuminen.OSALLISTUU);
+                OsallistuminenDTO.OSALLISTUU);
 
 		Mockito.when(valintakoeResource.hakuByHakutoive(Mockito.anyString()))
 				.thenReturn(Arrays.asList(h0, h1));
@@ -75,7 +75,7 @@ public class OsoitetarratTest {
 	}
 
 	private ValintakoeOsallistuminenDTO createValintatieto(String oid,
-			Osallistuminen o) {
+			OsallistuminenDTO o) {
 		ValintakoeOsallistuminenDTO h = new ValintakoeOsallistuminenDTO();
 		h.setHakemusOid(oid);
 

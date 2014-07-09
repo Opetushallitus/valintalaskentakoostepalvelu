@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintatietoResource;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakuDTO;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
@@ -9,8 +11,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.valintatiedot.ValintatietoService;
-import fi.vm.sade.service.valintatiedot.schema.HakuTyyppi;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluIlmankoulutuspaikkaaKomponentti;
@@ -32,7 +32,7 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SijoitteluRouteImpl.class);
-	private ValintatietoService valintatietoService;
+	private ValintatietoResource valintatietoService;
 	private JatkuvaSijoittelu jatkuvaSijoittelu;
 	private SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluIlmankoulutuspaikkaaKomponentti;
 	private SijoitteluKoulutuspaikkallisetKomponentti sijoitteluKoulutuspaikkallisetKomponentti;
@@ -51,7 +51,7 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluKoulutuspaikkallisetKomponentti,
 			SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluIlmankoulutuspaikkaaKomponentti,
 			JatkuvaSijoittelu jatkuvaSijoittelu,
-			@Qualifier("valintatietoServiceAsAdmin") ValintatietoService valintatietoService) {
+			@Qualifier("ValintatietoRestClient") ValintatietoResource valintatietoService) {
 		super();
 		this.sijoitteluAktivoi = sijoitteluAktivoi;
 		this.quartzInput = quartzInput;
@@ -227,7 +227,7 @@ public class SijoitteluRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	}
 
-	private HakuTyyppi hakutyyppi(Exchange exchange) {
-		return exchange.getIn().getBody(HakuTyyppi.class);
+	private HakuDTO hakutyyppi(Exchange exchange) {
+		return exchange.getIn().getBody(HakuDTO.class);
 	}
 }

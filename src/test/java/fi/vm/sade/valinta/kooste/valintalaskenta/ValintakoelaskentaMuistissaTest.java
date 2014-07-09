@@ -15,8 +15,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -39,10 +37,7 @@ public class ValintakoelaskentaMuistissaTest {
 	private CamelContext camelContext;
 	@Autowired
 	private ApplicationResource hakuAppHakemus;
-	@Autowired
-	private ValintaperusteService valintaperusteet;
-	@Autowired
-	private ValintalaskentaService valintalaskenta;
+
     @Autowired
     private ValintaperusteetRestResource valintaperusteetRestResource;
     @Autowired
@@ -66,16 +61,6 @@ public class ValintakoelaskentaMuistissaTest {
 	@Bean
 	public ApplicationResource getApplicationResource() {
 		return Mockito.mock(ApplicationResource.class);
-	}
-
-	@Bean
-	public ValintaperusteService getValintaperusteService() {
-		return Mockito.mock(ValintaperusteService.class);
-	}
-
-	@Bean
-	public ValintalaskentaService getValintalaskentaService() {
-		return Mockito.mock(ValintalaskentaService.class);
 	}
 
     @Bean

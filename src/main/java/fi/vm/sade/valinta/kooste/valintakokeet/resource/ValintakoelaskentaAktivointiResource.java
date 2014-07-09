@@ -15,7 +15,6 @@ import org.springframework.stereotype.Controller;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeCache;
 import fi.vm.sade.valinta.kooste.valintakokeet.dto.ValintakoeProsessi;
 import fi.vm.sade.valinta.kooste.valintakokeet.route.ValintakoelaskentaMuistissaRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;

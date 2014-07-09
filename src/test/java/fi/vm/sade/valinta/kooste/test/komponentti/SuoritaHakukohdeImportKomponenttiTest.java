@@ -20,7 +20,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
@@ -40,7 +39,6 @@ public class SuoritaHakukohdeImportKomponenttiTest {
 
     private SuoritaHakukohdeImportKomponentti suoritaHakukohdeImportKomponentti;
 
-    private ValintaperusteService valintaperusteServiceMock;
     private HakukohdeResource hakukohdeResourceMock;
     private KoodistoJsonRESTResource koodistoJsonRESTResourceMock;
 
@@ -49,7 +47,6 @@ public class SuoritaHakukohdeImportKomponenttiTest {
         suoritaHakukohdeImportKomponentti = new SuoritaHakukohdeImportKomponentti();
 
         hakukohdeResourceMock = mock(HakukohdeResource.class);
-        valintaperusteServiceMock = mock(ValintaperusteService.class);
         koodistoJsonRESTResourceMock = mock(KoodistoJsonRESTResource.class);
 
         // ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti,

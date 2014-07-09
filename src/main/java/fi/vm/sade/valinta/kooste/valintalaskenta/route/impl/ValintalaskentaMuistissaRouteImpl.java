@@ -19,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
@@ -768,17 +766,11 @@ public class ValintalaskentaMuistissaRouteImpl extends
 
 	public static interface Valintaperusteet {
 
-		List<ValintaperusteetTyyppi> getValintaperusteet(String hakukohdeOid,
-				Integer valinnanvaihe);
-
         List<ValintaperusteetDTO> getValintaperusteetRest(String hakukohdeOid,
                                                          Integer valinnanvaihe);
 	}
 
 	public static interface Valintalaskenta {
-
-		void teeValintalaskenta(List<HakemusTyyppi> hakemukset,
-				List<ValintaperusteetTyyppi> valintaperusteet);
 
         void teeValintalaskentaRest(List<HakemusDTO> hakemukset,
                                 List<ValintaperusteetDTO> valintaperusteet);

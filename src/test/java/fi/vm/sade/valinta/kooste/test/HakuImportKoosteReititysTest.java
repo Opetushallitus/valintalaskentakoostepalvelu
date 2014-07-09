@@ -5,11 +5,11 @@ import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.SearchKoodisByKoodistoCriteriaType;
 import fi.vm.sade.koodisto.service.types.SearchKoodisCriteriaType;
 import fi.vm.sade.koodisto.service.types.common.*;
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.service.valintaperusteet.schema.HakukohdeImportTyyppi;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.tarjonta.service.types.TarjontaTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
 import fi.vm.sade.valinta.kooste.hakuimport.resource.HakuImportResource;
 
 import org.junit.Ignore;
@@ -55,8 +55,8 @@ public class HakuImportKoosteReititysTest {
     private HakuImportResource hakuImportAktivointiResource;
 
     @Bean
-    public ValintaperusteService getValintaperusteServiceMock() {
-        return mock(ValintaperusteService.class);
+    public ValintaperusteetRestResource getValintaperusteServiceMock() {
+        return mock(ValintaperusteetRestResource.class);
     }
 
     @Bean
@@ -139,7 +139,7 @@ public class HakuImportKoosteReititysTest {
     }
 
     @Autowired
-    private ValintaperusteService valintaperusteService;
+    private ValintaperusteetRestResource valintaperusteService;
 
     @Autowired
     private KoodiService koodiService;
@@ -148,13 +148,13 @@ public class HakuImportKoosteReititysTest {
     @Ignore
     public void testImportHaku() {
         hakuImportAktivointiResource.aktivoiHakuImport(HAKU_OID);
-        ArgumentCaptor<HakukohdeImportTyyppi> argCaptor = ArgumentCaptor.forClass(HakukohdeImportTyyppi.class);
+        ArgumentCaptor<HakukohdeImportDTO> argCaptor = ArgumentCaptor.forClass(HakukohdeImportDTO.class);
         verify(valintaperusteService, times(HAKUKOHDE_URIS_AND_OIDS.length)).tuoHakukohde(argCaptor.capture());
 
         // Tsekataan, että valintaperusteserviceä kutsuttiin kaikille hakukohde oideille
         outer:
         for (String[] uriAndOid : HAKUKOHDE_URIS_AND_OIDS) {
-            for (HakukohdeImportTyyppi t : argCaptor.getAllValues()) {
+            for (HakukohdeImportDTO t : argCaptor.getAllValues()) {
                 if (uriAndOid[1].equals(t.getHakukohdeOid())) {
                     assertEquals(HAKU_OID, t.getHakuOid());
                     assertEquals(uriAndOid[0], t.getHakukohdekoodi().getKoodiUri());
