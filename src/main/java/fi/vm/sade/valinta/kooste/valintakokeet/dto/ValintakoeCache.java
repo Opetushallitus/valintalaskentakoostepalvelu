@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.valintakokeet.dto;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.AbstraktiTyo;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyoRest;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
 import org.slf4j.Logger;
@@ -21,13 +21,13 @@ import java.util.stream.Collectors;
  *         Reitin exchange on elinkaari. Muuttujaan tallennetaan tilapaisesti
  *         kaikki valintakoelaskennassa tarvittavat tiedot.
  */
-public class ValintakoeCacheRest {
+public class ValintakoeCache {
 	private static final Logger LOG = LoggerFactory
-			.getLogger(ValintakoeCacheRest.class);
-	private final ConcurrentHashMap<String, ValintaperusteetTyoRest<ValintakoeTyoRest>> valintaperusteetEsitiedot;
+			.getLogger(ValintakoeCache.class);
+	private final ConcurrentHashMap<String, ValintaperusteetTyo<ValintakoeTyo>> valintaperusteetEsitiedot;
 
-	public ValintakoeCacheRest() {
-		this.valintaperusteetEsitiedot = new ConcurrentHashMap<String, ValintaperusteetTyoRest<ValintakoeTyoRest>>();
+	public ValintakoeCache() {
+		this.valintaperusteetEsitiedot = new ConcurrentHashMap<String, ValintaperusteetTyo<ValintakoeTyo>>();
 	}
 
 	public Collection<? extends AbstraktiTyo> hakukohteenEsitiedotOnSelvitettyJaSeuraavaksiEsitiedotTyojonoihin(
@@ -42,14 +42,14 @@ public class ValintakoeCacheRest {
 			return Collections.emptyList();
 		}
 		final Collection<AbstraktiTyo> tyot = Lists.newArrayList();
-		ValintakoeTyoRest valintakoetyo = new ValintakoeTyoRest(hakemusTyyppi);
-		Collection<ValintaperusteetTyoRest<ValintakoeTyoRest>> kaikkiValintaperusteetTyyppiEsitiedot = Lists
+		ValintakoeTyo valintakoetyo = new ValintakoeTyo(hakemusTyyppi);
+		Collection<ValintaperusteetTyo<ValintakoeTyo>> kaikkiValintaperusteetTyyppiEsitiedot = Lists
 				.newArrayList();
 		for (String hakukohdeOid : hakukohdeOids) {
-			ValintaperusteetTyoRest<ValintakoeTyoRest> uusiEsitieto = new ValintaperusteetTyoRest<ValintakoeTyoRest>(
+			ValintaperusteetTyo<ValintakoeTyo> uusiEsitieto = new ValintaperusteetTyo<ValintakoeTyo>(
 					hakukohdeOid);
 			@SuppressWarnings("unchecked")
-			ValintaperusteetTyoRest<ValintakoeTyoRest> aiempiTyosto = valintaperusteetEsitiedot
+            ValintaperusteetTyo<ValintakoeTyo> aiempiTyosto = valintaperusteetEsitiedot
 					.putIfAbsent(hakukohdeOid, uusiEsitieto);
 			if (aiempiTyosto != null) {
 				// Jokin säie on jo hakemassa tätä hakemusta. Joten ei laiteta

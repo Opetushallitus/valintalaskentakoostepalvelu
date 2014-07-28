@@ -4,10 +4,10 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 
 import java.util.List;
 
-public class ValintaperusteetTyoRest<A> extends
+public class ValintaperusteetTyo<A> extends
 		Esitieto<A, List<ValintaperusteetDTO>> {
 
-	public ValintaperusteetTyoRest(String oid) {
+	public ValintaperusteetTyo(String oid) {
 		super(oid);
 	}
 

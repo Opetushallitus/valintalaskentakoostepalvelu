@@ -14,7 +14,7 @@ public class ValintaperusteKomponentti {
     @Autowired
     private ValintaperusteetRestResource valintaperusteetResource;
 
-    public List<ValintaperusteetDTO> haeValintaperusteetRest(
+    public List<ValintaperusteetDTO> haeValintaperusteet(
             @Property("hakukohdeOid") String hakukohdeOid, @Property("vaihe") Integer vaihe) {
         return valintaperusteetResource.haeValintaperusteet(hakukohdeOid, vaihe);
     }

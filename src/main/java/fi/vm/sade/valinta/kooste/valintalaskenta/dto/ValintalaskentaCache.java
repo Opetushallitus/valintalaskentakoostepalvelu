@@ -24,38 +24,38 @@ public class ValintalaskentaCache {
 	// HakuOidilla voi tarkistaa ettei cachea käytetä useassa eri haussa
 	// yhtäaikaa
 	private final Collection<String> hakukohteet;
-    private final ConcurrentHashMap<String, ValintaperusteetTyoRest<ValintalaskentaTyoRest>> valintaperusteetEsitiedotRest;
-    private final ConcurrentHashMap<String, HakemusTyoRest<ValintalaskentaTyoRest>> hakemusTyyppiEsitiedotRest;
+    private final ConcurrentHashMap<String, ValintaperusteetTyo<ValintalaskentaTyo>> valintaperusteetEsitiedot;
+    private final ConcurrentHashMap<String, HakemusTyo<ValintalaskentaTyo>> hakemusTyyppiEsitiedot;
 
 	// private final ConcurrentHashMap<String, Esitieto<?>>
 	// valintalaskennanEsitiedot;
 
 	public ValintalaskentaCache(Collection<String> hakukohteet) {
-        this.valintaperusteetEsitiedotRest = new ConcurrentHashMap<>();
-        this.hakemusTyyppiEsitiedotRest = new ConcurrentHashMap<>();
+        this.valintaperusteetEsitiedot = new ConcurrentHashMap<>();
+        this.hakemusTyyppiEsitiedot = new ConcurrentHashMap<>();
 		this.hakukohteet = Collections.unmodifiableCollection(hakukohteet);
 	}
 
-    public Collection<? extends AbstraktiTyo> hakukohteenEsitiedotOnSelvitettyJaSeuraavaksiEsitiedotTyojonoihinRest(
+    public Collection<? extends AbstraktiTyo> hakukohteenEsitiedotOnSelvitettyJaSeuraavaksiEsitiedotTyojonoihin(
             String hakukohdeOid, Collection<String> hakemusOids) {
         final Collection<AbstraktiTyo> tyot = Lists.newArrayList();
-        final ValintalaskentaTyoRest hakukohdeTyo = new ValintalaskentaTyoRest(
+        final ValintalaskentaTyo hakukohdeTyo = new ValintalaskentaTyo(
                 hakukohdeOid);
-        ValintaperusteetTyoRest<ValintalaskentaTyoRest> valintaperusteetEsitieto = new ValintaperusteetTyoRest<ValintalaskentaTyoRest>(
+        ValintaperusteetTyo<ValintalaskentaTyo> valintaperusteetEsitieto = new ValintaperusteetTyo<ValintalaskentaTyo>(
                 hakukohdeOid);
-        if (valintaperusteetEsitiedotRest.putIfAbsent(hakukohdeOid,
+        if (valintaperusteetEsitiedot.putIfAbsent(hakukohdeOid,
                 valintaperusteetEsitieto) != null) {
             throw new RuntimeException(
                     "Samalle hakukohteelle yritettiin työstää toistumiseen esitietoja!");
         }
         tyot.add(valintaperusteetEsitieto);
-        Collection<HakemusTyoRest<ValintalaskentaTyoRest>> kaikkiHakemusTyyppiEsitiedot = Lists
+        Collection<HakemusTyo<ValintalaskentaTyo>> kaikkiHakemusTyyppiEsitiedot = Lists
                 .newArrayList();
         for (String hakemusOid : hakemusOids) {
-            HakemusTyoRest<ValintalaskentaTyoRest> uusiEsitieto = new HakemusTyoRest<ValintalaskentaTyoRest>(
+            HakemusTyo<ValintalaskentaTyo> uusiEsitieto = new HakemusTyo<ValintalaskentaTyo>(
                     hakemusOid);
             @SuppressWarnings("unchecked")
-            HakemusTyoRest<ValintalaskentaTyoRest> aiempiTyosto = hakemusTyyppiEsitiedotRest
+            HakemusTyo<ValintalaskentaTyo> aiempiTyosto = hakemusTyyppiEsitiedot
                     .putIfAbsent(hakemusOid, uusiEsitieto);
             if (aiempiTyosto != null) {
                 // Jokin säie on jo hakemassa tätä hakemusta. Joten ei laiteta
@@ -69,7 +69,7 @@ public class ValintalaskentaCache {
                 tyot.add(uusiEsitieto);
             }
         }
-        ValintalaskentaTyoRest valmisValintalaskentaTyo = hakukohdeTyo
+        ValintalaskentaTyo valmisValintalaskentaTyo = hakukohdeTyo
                 .rekisteroiKuuntelijat(valintaperusteetEsitieto,
                         kaikkiHakemusTyyppiEsitiedot);
 
@@ -85,18 +85,18 @@ public class ValintalaskentaCache {
         }
     }
 
-    public Collection<ValintalaskentaTyoRest> esitietoHaettuRest(String oid,
+    public Collection<ValintalaskentaTyo> esitietoHaettu(String oid,
                                                          List<ValintaperusteetDTO> e) {
-        return valintaperusteetEsitiedotRest.get(oid).setEsitieto(e);
+        return valintaperusteetEsitiedot.get(oid).setEsitieto(e);
     }
 
-    public Collection<ValintalaskentaTyoRest> esitietoOhitettuRest(String oid) {
-        return valintaperusteetEsitiedotRest.get(oid).setEsitieto(null);
+    public Collection<ValintalaskentaTyo> esitietoOhitettu(String oid) {
+        return valintaperusteetEsitiedot.get(oid).setEsitieto(null);
     }
 
-    public Collection<ValintalaskentaTyoRest> esitietoHaettuRest(String oid,
+    public Collection<ValintalaskentaTyo> esitietoHaettu(String oid,
                                                          HakemusDTO e) {
-        return hakemusTyyppiEsitiedotRest.get(oid).setEsitieto(e);
+        return hakemusTyyppiEsitiedot.get(oid).setEsitieto(e);
     }
 
 	/**

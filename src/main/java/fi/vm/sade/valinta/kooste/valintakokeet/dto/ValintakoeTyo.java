@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.AbstraktiTyo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.EsitiedonKuuntelija;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyoRest;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
 import java.util.Collection;
@@ -23,14 +23,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  *         saatavista hakutoiveista saadaan lopulliset esitiedot ja tyon
  *         prosessointi voidaan aloittaa.
  */
-public class ValintakoeTyoRest extends AbstraktiTyo {
+public class ValintakoeTyo extends AbstraktiTyo {
 
 	private final HakemusDTO esitiedoiksiHaettuHakemus;
 	private final List<List<ValintaperusteetDTO>> valintaperusteet;
 	private final AtomicInteger laskuri;
 	private final AtomicBoolean ohitettu;
 
-	public ValintakoeTyoRest(HakemusDTO hakemus) {
+	public ValintakoeTyo(HakemusDTO hakemus) {
 		super();
 		this.esitiedoiksiHaettuHakemus = hakemus;
 		this.valintaperusteet = Collections.synchronizedList(Lists
@@ -39,24 +39,24 @@ public class ValintakoeTyoRest extends AbstraktiTyo {
 		this.ohitettu = new AtomicBoolean(false);
 	}
 
-	public ValintakoeTyoRest rekisteroiKuuntelijat(
-			Collection<ValintaperusteetTyoRest<ValintakoeTyoRest>> valintaperusteetEsitiedot) {
+	public ValintakoeTyo rekisteroiKuuntelijat(
+			Collection<ValintaperusteetTyo<ValintakoeTyo>> valintaperusteetEsitiedot) {
 		laskuri.set(valintaperusteetEsitiedot.size());
-		for (ValintaperusteetTyoRest<ValintakoeTyoRest> valintaperusteetTyo : valintaperusteetEsitiedot) {
+		for (ValintaperusteetTyo<ValintakoeTyo> valintaperusteetTyo : valintaperusteetEsitiedot) {
 			// Jos palauttaa not null:n niin tyo on valmistunut
 			if (null != valintaperusteetTyo
-					.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintakoeTyoRest, List<ValintaperusteetDTO>>() {
+					.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintakoeTyo, List<ValintaperusteetDTO>>() {
 
 						@Override
-						public ValintakoeTyoRest esitietoSaatavilla(
+						public ValintakoeTyo esitietoSaatavilla(
 								List<ValintaperusteetDTO> esitieto) {
-							ValintakoeTyoRest.this.valintaperusteet.add(esitieto);
+							ValintakoeTyo.this.valintaperusteet.add(esitieto);
 							return dekrementoiJaTarkista();
 						}
 
 						@Override
-						public ValintakoeTyoRest esitietoOhitettu() {
-							ValintakoeTyoRest.this.ohitettu.set(true);
+						public ValintakoeTyo esitietoOhitettu() {
+							ValintakoeTyo.this.ohitettu.set(true);
 							return dekrementoiJaTarkista();
 						}
 					})) {
@@ -79,10 +79,10 @@ public class ValintakoeTyoRest extends AbstraktiTyo {
 		}
 	}
 
-	private ValintakoeTyoRest dekrementoiJaTarkista() {
+	private ValintakoeTyo dekrementoiJaTarkista() {
 		int tyotaJaljella = this.laskuri.decrementAndGet();
 		if (tyotaJaljella == 0) {
-			return ValintakoeTyoRest.this;
+			return ValintakoeTyo.this;
 		} else if (tyotaJaljella < 0) {
 			throw new RuntimeException(
 					"Hakukohdetyölle on valmistunut enemmän töitä kuin odotettiin valmistuvaksi!");

@@ -69,7 +69,7 @@ public class ValintalaskentaMuistissaConfig {
 		return new Valintalaskenta() {
 
             @Override
-            public void teeValintalaskentaRest(List<HakemusDTO> hakemukset, List<ValintaperusteetDTO> valintaperusteet) {
+            public void teeValintalaskenta(List<HakemusDTO> hakemukset, List<ValintaperusteetDTO> valintaperusteet) {
 
                 LaskeDTO laskeDTO =new LaskeDTO();
                 laskeDTO.setHakemus(hakemukset);
@@ -85,7 +85,7 @@ public class ValintalaskentaMuistissaConfig {
 		return new Valintaperusteet() {
 
             @Override
-            public List<ValintaperusteetDTO> getValintaperusteetRest(String hakukohdeOid, Integer valinnanvaihe) {
+            public List<ValintaperusteetDTO> getValintaperusteet(String hakukohdeOid, Integer valinnanvaihe) {
                 HakuparametritDTO params = new HakuparametritDTO();
                 params.setHakukohdeOid(hakukohdeOid);
                 params.setValinnanVaiheJarjestysluku(valinnanvaihe);

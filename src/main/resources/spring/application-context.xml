@@ -40,11 +40,8 @@
 
     <!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
     <!--<import resource="classpath:authentication-client.xml"/>-->
-    <bean 	id="ticketInterceptor" 
+    <bean 	id="ticketInterceptor"
     		class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptor"
-    		/>
-    <bean 	id="ticketInterceptorRest"
-    		class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptorRest"
     		/>
     
     <authorizationPolicy id="admin" access="isAuthenticated()"
@@ -85,7 +82,7 @@
                   serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValintatapajonoResource"
                   address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}/">
     	<!--<jaxrs-client:outInterceptors>-->
-            <!--<ref bean="ticketInterceptorRest"/>-->
+            <!--<ref bean="ticketInterceptor"/>-->
         <!--</jaxrs-client:outInterceptors>-->
 		<jaxrs-client:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
@@ -96,7 +93,7 @@
                   serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValinnanVaiheResource"
                   address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}/">
     	<!--<jaxrs-client:outInterceptors>-->
-            <!--<ref bean="ticketInterceptorRest"/>-->
+            <!--<ref bean="ticketInterceptor"/>-->
         <!--</jaxrs-client:outInterceptors>-->
 		<jaxrs-client:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
@@ -344,7 +341,7 @@
                   serviceClass="fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource"
                   inheritHeaders="true">
         <jaxrs-client:outInterceptors>
-            <ref bean="ticketInterceptorRest"/>
+            <ref bean="ticketInterceptor"/>
         </jaxrs-client:outInterceptors>
         <jaxrs-client:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>

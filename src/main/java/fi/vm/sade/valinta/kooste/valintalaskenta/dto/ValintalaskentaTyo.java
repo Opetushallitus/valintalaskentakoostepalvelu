@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *         kuitenkaan koskaan tapahdu sillä vähintäänkin valintaperusteet on
  *         haettava.
  */
-public class ValintalaskentaTyoRest extends AbstraktiTyo {
+public class ValintalaskentaTyo extends AbstraktiTyo {
 
 	private final AtomicReference<List<ValintaperusteetDTO>> valintaperusteet;
 	private final List<HakemusDTO> hakemustyypit;
@@ -28,7 +28,7 @@ public class ValintalaskentaTyoRest extends AbstraktiTyo {
 	private final AtomicInteger laskuri;
 	private final String hakukohdeOid;
 
-	public ValintalaskentaTyoRest(String hakukohdeOid) {
+	public ValintalaskentaTyo(String hakukohdeOid) {
 		this.ohitettu = new AtomicBoolean(false);
 		this.laskuri = new AtomicInteger(-1);
 		this.hakemustyypit = Collections.synchronizedList(Lists
@@ -70,27 +70,27 @@ public class ValintalaskentaTyoRest extends AbstraktiTyo {
 	 * 
 	 * @return this jos tyo on valmis. null jos tyo ei ole viela valmis
 	 */
-	public ValintalaskentaTyoRest rekisteroiKuuntelijat(
-			ValintaperusteetTyoRest<ValintalaskentaTyoRest> valintaperusteetEsitieto,
-			Collection<HakemusTyoRest<ValintalaskentaTyoRest>> hakemustyyppiEsitiedot) {
+	public ValintalaskentaTyo rekisteroiKuuntelijat(
+			ValintaperusteetTyo<ValintalaskentaTyo> valintaperusteetEsitieto,
+			Collection<HakemusTyo<ValintalaskentaTyo>> hakemustyyppiEsitiedot) {
 		if (hakemustyyppiEsitiedot == null || hakemustyyppiEsitiedot.isEmpty()) {
 			throw new RuntimeException(
 					"Hakukohdetyotä ei tarvitse luoda jos hakukohteella ei ole hakemuksia!");
 		}
 		this.laskuri.set(1 + hakemustyyppiEsitiedot.size());
 		if (null != valintaperusteetEsitieto
-				.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintalaskentaTyoRest, List<ValintaperusteetDTO>>() {
-					public ValintalaskentaTyoRest esitietoOhitettu() {
+				.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintalaskentaTyo, List<ValintaperusteetDTO>>() {
+					public ValintalaskentaTyo esitietoOhitettu() {
 						ohitettu.set(true); // Voi olla ohitettu kahdenkin eri
 											// esitiedon puuttumisen vuoksi
 						return dekrementoiJaTarkista();
 					}
 
-					public ValintalaskentaTyoRest esitietoSaatavilla(
+					public ValintalaskentaTyo esitietoSaatavilla(
 							List<ValintaperusteetDTO> v) {
 						// Tuskin tarpeen mutta varmistaa että reitityksessä ei
 						// ole tehty kirjoitusvirheitä
-						if (!ValintalaskentaTyoRest.this.valintaperusteet
+						if (!ValintalaskentaTyo.this.valintaperusteet
 								.compareAndSet(null, v)) {
 							throw new RuntimeException(
 									"Valintaperusteet merkittiin kahdesti valmistuneeksi esitiedoksi valintalaskentatyölle!");
@@ -100,19 +100,19 @@ public class ValintalaskentaTyoRest extends AbstraktiTyo {
 				})) {
 			return this;
 		}
-		for (HakemusTyoRest<ValintalaskentaTyoRest> h : hakemustyyppiEsitiedot) {
+		for (HakemusTyo<ValintalaskentaTyo> h : hakemustyyppiEsitiedot) {
 			if (null != h
-					.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintalaskentaTyoRest, HakemusDTO>() {
-						public ValintalaskentaTyoRest esitietoOhitettu() {
+					.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintalaskentaTyo, HakemusDTO>() {
+						public ValintalaskentaTyo esitietoOhitettu() {
 							ohitettu.set(true); // Voi olla ohitettu kahdenkin
 												// eri esitiedon puuttumisen
 												// vuoksi
 							return dekrementoiJaTarkista();
 						}
 
-						public ValintalaskentaTyoRest esitietoSaatavilla(
+						public ValintalaskentaTyo esitietoSaatavilla(
 								HakemusDTO h) {
-							ValintalaskentaTyoRest.this.hakemustyypit.add(h);
+							ValintalaskentaTyo.this.hakemustyypit.add(h);
 							return dekrementoiJaTarkista();
 						}
 					})) {
@@ -122,10 +122,10 @@ public class ValintalaskentaTyoRest extends AbstraktiTyo {
 		return null;
 	}
 
-	private ValintalaskentaTyoRest dekrementoiJaTarkista() {
+	private ValintalaskentaTyo dekrementoiJaTarkista() {
 		int tyotaJaljella = this.laskuri.decrementAndGet();
 		if (tyotaJaljella == 0) {
-			return ValintalaskentaTyoRest.this;
+			return ValintalaskentaTyo.this;
 		} else if (tyotaJaljella < 0) {
 			throw new RuntimeException(
 					"Hakukohdetyölle on valmistunut enemmän töitä kuin odotettiin valmistuvaksi!");

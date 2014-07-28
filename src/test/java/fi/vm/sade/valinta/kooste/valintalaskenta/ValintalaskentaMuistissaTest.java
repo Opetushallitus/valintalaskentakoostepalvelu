@@ -79,11 +79,11 @@ public class ValintalaskentaMuistissaTest {
 
 		Mockito.when(hakuAppHakemus.getHakemus("hak1")).thenReturn(hak1);
 		Mockito.when(hakuAppHakemus.getHakemus("hak2")).thenReturn(hak2);
-		Mockito.when(valintaperusteet.getValintaperusteetRest("h1", null))
+		Mockito.when(valintaperusteet.getValintaperusteet("h1", null))
 				.thenReturn(Arrays.asList(new ValintaperusteetDTO()));
-		Mockito.when(valintaperusteet.getValintaperusteetRest("h2", null))
+		Mockito.when(valintaperusteet.getValintaperusteet("h2", null))
 				.thenReturn(Collections.<ValintaperusteetDTO> emptyList());
-		Mockito.when(valintaperusteet.getValintaperusteetRest("h3", null))
+		Mockito.when(valintaperusteet.getValintaperusteet("h3", null))
 				.thenReturn(Arrays.asList(new ValintaperusteetDTO()));
 
 		ValintalaskentaMuistissaRoute l = ProxyWithAnnotationHelper
@@ -171,7 +171,7 @@ public class ValintalaskentaMuistissaTest {
 		Mockito.verify(
 				valintalaskenta,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
-						.times(3)).teeValintalaskentaRest(
+						.times(3)).teeValintalaskenta(
                 Mockito.anyListOf(HakemusDTO.class),
                 Mockito.anyListOf(ValintaperusteetDTO.class));
 

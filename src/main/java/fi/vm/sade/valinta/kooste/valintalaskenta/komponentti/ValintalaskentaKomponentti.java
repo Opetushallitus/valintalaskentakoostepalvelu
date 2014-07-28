@@ -21,7 +21,7 @@ public class ValintalaskentaKomponentti {
     @Autowired
     private ValintalaskentaResource valintalaskentaResource;
 
-    public void laskeRest(@Property("hakemustyypit") List<HakemusDTO> hakemustyypit,
+    public void laske(@Property("hakemustyypit") List<HakemusDTO> hakemustyypit,
                       @Property("valintaperusteet") List<ValintaperusteetDTO> valintaperusteet) {
 
         LaskeDTO laskeDTO =new LaskeDTO();

@@ -9,7 +9,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
 import fi.vm.sade.valinta.kooste.valintakokeet.dto.*;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyoRest;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import org.apache.camel.Exchange;
@@ -215,7 +215,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.choice()
 				//
-				.when(body().isInstanceOf(ValintaperusteetTyoRest.class))
+				.when(body().isInstanceOf(ValintaperusteetTyo.class))
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -226,7 +226,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.to(valintaperusteetTyojono)
 				//
-				.when(body().isInstanceOf(ValintakoeTyoRest.class))
+				.when(body().isInstanceOf(ValintakoeTyo.class))
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -274,8 +274,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						try {
-							ValintaperusteetTyoRest<ValintakoeTyoRest> valintaperusteetTyo = exchange
-									.getIn().getBody(ValintaperusteetTyoRest.class);
+							ValintaperusteetTyo<ValintakoeTyo> valintaperusteetTyo = exchange
+									.getIn().getBody(ValintaperusteetTyo.class);
 
 
 							List<ValintaperusteetDTO> t = valintaperusteService
@@ -290,7 +290,7 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 								exchange.getOut().setBody(
 										Collections.emptyList());
 							} else {
-								Collection<ValintakoeTyoRest> v = valintaperusteetTyo
+								Collection<ValintakoeTyo> v = valintaperusteetTyo
 										.setEsitieto(t);
 								if (v != null) {
 									prosessi(exchange)
@@ -345,8 +345,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						ValintakoeTyoRest valintakoeTyo = exchange.getIn().getBody(
-								ValintakoeTyoRest.class);
+						ValintakoeTyo valintakoeTyo = exchange.getIn().getBody(
+								ValintakoeTyo.class);
 						try {
 							List<ValintaperusteetDTO> v = valintakoeTyo
 									.getValintaperusteet();
@@ -437,8 +437,8 @@ public class ValintakoelaskentaMuistissaRouteImpl extends
 
 	}
 
-	private ValintakoeCacheRest cache(Exchange exchange) {
-		return exchange.getProperty("valintakoeCache", ValintakoeCacheRest.class);
+	private ValintakoeCache cache(Exchange exchange) {
+		return exchange.getProperty("valintakoeCache", ValintakoeCache.class);
 	}
 
 }
