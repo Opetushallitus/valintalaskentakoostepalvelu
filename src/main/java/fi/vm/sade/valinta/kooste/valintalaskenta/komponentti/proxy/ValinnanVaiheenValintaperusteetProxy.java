@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy;
 
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 
 import java.util.List;
 
@@ -10,6 +10,6 @@ import java.util.List;
  * Time: 12.20
  */
 public interface ValinnanVaiheenValintaperusteetProxy {
-    List<ValintaperusteetTyyppi> haeValintaperusteet(String hakukohdeOid,
+    List<ValintaperusteetDTO> haeValintaperusteet(String hakukohdeOid,
                                                      int valinnanVaiheJarjestysluku);
 }

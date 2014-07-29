@@ -12,8 +12,12 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
-import javax.xml.datatype.XMLGregorianCalendar;
 
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintatietoResource;
+import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 import org.apache.camel.Header;
 import org.apache.camel.Property;
 import org.apache.commons.lang.StringUtils;
@@ -27,10 +31,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.service.valintatiedot.ValintatietoService;
-import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
-import fi.vm.sade.service.valintatiedot.schema.Osallistuminen;
-import fi.vm.sade.service.valintatiedot.schema.ValintakoeOsallistuminenTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -46,7 +46,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 
 /**
  * KOEKUTSUEXCEL
- * 
+ *
  * @author Jussi Jartamo
  *         <p/>
  *         Komponentti tulosten kasaamiseen Excel-muodossa
@@ -57,9 +57,8 @@ public class ValintalaskentaTulosExcelKomponentti {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaTulosExcelKomponentti.class);
 
-	@Resource(name = "valintatietoService")
-	private ValintatietoService valintatietoService;
-
+    @Autowired
+	private ValintatietoResource valintatietoService;
 	@Autowired
 	private ValintaperusteetValintakoeResource valintaperusteetValintakoeResource;
 	@Autowired
@@ -117,10 +116,9 @@ public class ValintalaskentaTulosExcelKomponentti {
 			}
 			Map<String, ValintakoeRivi> hakemusJaRivi = Maps.newHashMap();
 			{
-				List<HakemusOsallistuminenTyyppi> tiedotHakukohteelle = valintatietoService
-						.haeValintatiedotHakukohteelle(valintakoeOids,
-								hakukohdeOid);
-				for (HakemusOsallistuminenTyyppi tieto : tiedotHakukohteelle) {
+				List<HakemusOsallistuminenDTO> tiedotHakukohteelle = valintatietoService
+						.haeValintatiedotHakukohteelle(hakukohdeOid,valintakoeOids);
+				for (HakemusOsallistuminenDTO tieto : tiedotHakukohteelle) {
 					if (useWhitelist) {
 						// If whitelist in use then skip every hakemus that is
 						// not
@@ -204,7 +202,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 		}
 	}
 
-	private String suomenna(Osallistuminen osallistuminen) {
+	private String suomenna(OsallistuminenDTO osallistuminen) {
 		if (osallistuminen != null) {
 			if (Osallistuminen.EI_OSALLISTU.equals(osallistuminen)) {
 				return "Ei kutsuta";
@@ -218,15 +216,14 @@ public class ValintalaskentaTulosExcelKomponentti {
 	}
 
 	private ValintakoeRivi muodostaValintakoeRivi(
-			HakemusOsallistuminenTyyppi o, List<ValintakoeNimi> tunnisteet) {
+			HakemusOsallistuminenDTO o, List<ValintakoeNimi> tunnisteet) {
 
-		XMLGregorianCalendar calendar = o.getLuontiPvm();
-		Date date = calendar.toGregorianCalendar().getTime();
-		Map<String, ValintakoeOsallistuminenTyyppi> osallistumiset = new HashMap<String, ValintakoeOsallistuminenTyyppi>();
-		for (ValintakoeOsallistuminenTyyppi v : o.getOsallistumiset()) {
+		Date date = o.getLuontiPvm();
+		Map<String, ValintakoeOsallistuminenDTO> osallistumiset = new HashMap<>();
+		for (ValintakoeOsallistuminenDTO v : o.getOsallistumiset()) {
 			osallistumiset.put(v.getValintakoeOid(), v);
 		}
-		ArrayList<String> rivi = new ArrayList<String>();
+		ArrayList<String> rivi = new ArrayList<>();
 		StringBuilder b = new StringBuilder();
 		b.append(o.getSukunimi()).append(", ").append(o.getEtunimi());
 		rivi.addAll(Arrays.asList(b.toString(), o.getHakemusOid(),
@@ -235,9 +232,9 @@ public class ValintalaskentaTulosExcelKomponentti {
 		Map<String, String> osallistumistiedot = Maps.newHashMap();
 		for (ValintakoeNimi tunniste : tunnisteet) {
 			if (osallistumiset.containsKey(tunniste.getOid())) {
-				Osallistuminen osallistuminen = osallistumiset.get(
+                OsallistuminenDTO osallistuminen = osallistumiset.get(
 						tunniste.getOid()).getOsallistuminen();
-				if (Osallistuminen.OSALLISTUU.equals(osallistuminen)) {
+				if (OsallistuminenDTO.OSALLISTUU.equals(osallistuminen)) {
 					osallistuuEdesYhteen = true;
 				}
 				osallistumistiedot.put(tunniste.getOid(),

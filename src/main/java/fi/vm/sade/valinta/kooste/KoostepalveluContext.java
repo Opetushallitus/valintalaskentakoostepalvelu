@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste;
 
+import fi.vm.sade.valinta.kooste.converter.HakemusToHakemusDTOConverter;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.ThreadPoolRejectedPolicy;
 import org.apache.camel.spi.ThreadPoolProfile;
@@ -13,8 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.valinta.kooste.converter.HakemusToHakemusTyyppiConverter;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig;
 
@@ -63,10 +63,11 @@ public class KoostepalveluContext {
 			// poolSize="10" maxPoolSize="20" maxQueueSize="1000"
 			// rejectedPolicy="CallerRuns"/>
 			//
-			// Hakemus -> HakemusTyyppi Converter
-			camelContext.getTypeConverterRegistry().addTypeConverter(
-					HakemusTyyppi.class, Hakemus.class,
-					new HakemusToHakemusTyyppiConverter());
+			// Hakemus -> HakemusDTO Converter
+
+            camelContext.getTypeConverterRegistry().addTypeConverter(
+                    HakemusDTO.class, Hakemus.class,
+                    new HakemusToHakemusDTOConverter());
 
 			// camelContext.disableJMX();
 			camelContext.setAutoStartup(true);

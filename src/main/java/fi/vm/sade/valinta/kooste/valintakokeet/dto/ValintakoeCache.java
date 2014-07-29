@@ -1,21 +1,18 @@
 package fi.vm.sade.valinta.kooste.valintakokeet.dto;
 
+import com.google.common.collect.Lists;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.AbstraktiTyo;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
-
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.AbstraktiTyo;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -34,21 +31,14 @@ public class ValintakoeCache {
 	}
 
 	public Collection<? extends AbstraktiTyo> hakukohteenEsitiedotOnSelvitettyJaSeuraavaksiEsitiedotTyojonoihin(
-			HakemusTyyppi hakemusTyyppi) {
-		Collection<String> hakukohdeOids = Collections2.transform(
-				hakemusTyyppi.getHakutoive(),
-				new Function<HakukohdeTyyppi, String>() {
-					@Override
-					public String apply(HakukohdeTyyppi hakukohdetyyppi) {
-						return hakukohdetyyppi.getHakukohdeOid();
-					}
-				});
+			HakemusDTO hakemusTyyppi) {
+		Collection<String> hakukohdeOids = hakemusTyyppi.getHakukohteet().parallelStream().map(HakukohdeDTO::getOid).collect(Collectors.toSet());
 		//
 		// Ei hakutoiveita joten hakemusta ei kasitella
 		//
 		if (hakukohdeOids.isEmpty()) {
 			LOG.error("Hakemuksella({}) ei ole hakutoiveita!",
-					hakemusTyyppi.getHakemusOid());
+					hakemusTyyppi.getHakemusoid());
 			return Collections.emptyList();
 		}
 		final Collection<AbstraktiTyo> tyot = Lists.newArrayList();
@@ -59,7 +49,7 @@ public class ValintakoeCache {
 			ValintaperusteetTyo<ValintakoeTyo> uusiEsitieto = new ValintaperusteetTyo<ValintakoeTyo>(
 					hakukohdeOid);
 			@SuppressWarnings("unchecked")
-			ValintaperusteetTyo<ValintakoeTyo> aiempiTyosto = valintaperusteetEsitiedot
+            ValintaperusteetTyo<ValintakoeTyo> aiempiTyosto = valintaperusteetEsitiedot
 					.putIfAbsent(hakukohdeOid, uusiEsitieto);
 			if (aiempiTyosto != null) {
 				// Jokin säie on jo hakemassa tätä hakemusta. Joten ei laiteta

@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import org.apache.camel.CamelContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,8 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -80,11 +80,11 @@ public class ValintalaskentaMuistissaTest {
 		Mockito.when(hakuAppHakemus.getHakemus("hak1")).thenReturn(hak1);
 		Mockito.when(hakuAppHakemus.getHakemus("hak2")).thenReturn(hak2);
 		Mockito.when(valintaperusteet.getValintaperusteet("h1", null))
-				.thenReturn(Arrays.asList(new ValintaperusteetTyyppi()));
+				.thenReturn(Arrays.asList(new ValintaperusteetDTO()));
 		Mockito.when(valintaperusteet.getValintaperusteet("h2", null))
-				.thenReturn(Collections.<ValintaperusteetTyyppi> emptyList());
+				.thenReturn(Collections.<ValintaperusteetDTO> emptyList());
 		Mockito.when(valintaperusteet.getValintaperusteet("h3", null))
-				.thenReturn(Arrays.asList(new ValintaperusteetTyyppi()));
+				.thenReturn(Arrays.asList(new ValintaperusteetDTO()));
 
 		ValintalaskentaMuistissaRoute l = ProxyWithAnnotationHelper
 				.createProxy(camelContext.getEndpoint(routeId),
@@ -172,8 +172,8 @@ public class ValintalaskentaMuistissaTest {
 				valintalaskenta,
 				Mockito.timeout(VALINTALASKENTA_TAKES_TO_COMPLETE_AT_MOST)
 						.times(3)).teeValintalaskenta(
-				Mockito.anyListOf(HakemusTyyppi.class),
-				Mockito.anyListOf(ValintaperusteetTyyppi.class));
+                Mockito.anyListOf(HakemusDTO.class),
+                Mockito.anyListOf(ValintaperusteetDTO.class));
 
 	}
 

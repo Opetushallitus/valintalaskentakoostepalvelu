@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -38,7 +40,6 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
 
@@ -168,7 +169,7 @@ public class ValintatapajonoTuontiRouteImpl extends
 							throw new RuntimeException(
 									"Hakukohteelle saatiin tyhjä hakemusjoukko!");
 						}
-						final List<ValinnanvaiheDTO> valinnanvaiheet;
+						final List<ValintatietoValinnanvaiheDTO> valinnanvaiheet;
 						try {
 							valinnanvaiheet = hakukohdeResource
 									.hakukohde(hakukohdeOid);
@@ -223,7 +224,7 @@ public class ValintatapajonoTuontiRouteImpl extends
 						}
 
 						try {
-							ValinnanvaiheDTO vaihe = haeValinnanVaihe(
+							ValintatietoValinnanvaiheDTO vaihe = haeValinnanVaihe(
 									valintatapajonoOid, valinnanvaiheet);
 							if (vaihe == null) {
 								vaihe = luoValinnanVaihe(hakukohdeOid, hakuOid,
@@ -339,7 +340,7 @@ public class ValintatapajonoTuontiRouteImpl extends
 		return null;
 	}
 
-	private ValinnanvaiheDTO luoValinnanVaihe(String hakukohdeOid,
+	private ValintatietoValinnanvaiheDTO luoValinnanVaihe(String hakukohdeOid,
 			String hakuOid, String valintatapajonoOid) {
 		ValinnanVaiheJonoillaDTO vaihe = haeVaihe(valintatapajonoOid,
 				valintaperusteetResource.ilmanLaskentaa(hakukohdeOid));
@@ -354,13 +355,13 @@ public class ValintatapajonoTuontiRouteImpl extends
 		LOG.warn(
 				"Valinnanvaihetta ei löytynyt valintatapajonolle({}) joten luodaan uusi!",
 				valintatapajonoOid);
-		ValinnanvaiheDTO v0 = new ValinnanvaiheDTO();
+		ValintatietoValinnanvaiheDTO v0 = new ValintatietoValinnanvaiheDTO();
 		v0.setCreatedAt(new Date());
 		v0.setHakuOid(hakuOid);
 		v0.setJarjestysnumero(0);
 		v0.setNimi(vaihe.getNimi());
 		v0.setValinnanvaiheoid(vaihe.getOid());
-		ValintatapajonoDTO vx = new ValintatapajonoDTO();
+		ValintatietoValintatapajonoDTO vx = new ValintatietoValintatapajonoDTO();
 		vx.setAloituspaikat(jono.getAloituspaikat());
 		vx.setEiVarasijatayttoa(jono.getEiVarasijatayttoa());
 		vx.setKaikkiEhdonTayttavatHyvaksytaan(jono
@@ -377,9 +378,9 @@ public class ValintatapajonoTuontiRouteImpl extends
 		return v0;
 	}
 
-	private ValinnanvaiheDTO haeValinnanVaihe(String valintatapajonoOid,
-			Collection<ValinnanvaiheDTO> v) {
-		for (ValinnanvaiheDTO v0 : v) {
+	private ValintatietoValinnanvaiheDTO haeValinnanVaihe(String valintatapajonoOid,
+			Collection<ValintatietoValinnanvaiheDTO> v) {
+		for (ValintatietoValinnanvaiheDTO v0 : v) {
 			if (haeValintatapajono(valintatapajonoOid, v0) != null) {
 				return v0;
 			}
@@ -388,7 +389,7 @@ public class ValintatapajonoTuontiRouteImpl extends
 	}
 
 	private ValintatapajonoDTO haeValintatapajono(String valintatapajonoOid,
-			ValinnanvaiheDTO v) {
+			ValintatietoValinnanvaiheDTO v) {
 		for (ValintatapajonoDTO vx : v.getValintatapajonot()) {
 			if (valintatapajonoOid.equals(vx.getValintatapajonooid())) {
 				return vx;

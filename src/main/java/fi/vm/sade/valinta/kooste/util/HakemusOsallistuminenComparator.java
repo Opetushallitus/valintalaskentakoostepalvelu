@@ -1,15 +1,15 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
+
 import java.util.Comparator;
 
-import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
-
 public class HakemusOsallistuminenComparator implements
-		Comparator<HakemusOsallistuminenTyyppi> {
+		Comparator<HakemusOsallistuminenDTO> {
 
 	@Override
-	public int compare(HakemusOsallistuminenTyyppi o1,
-			HakemusOsallistuminenTyyppi o2) {
+	public int compare(HakemusOsallistuminenDTO o1,
+			HakemusOsallistuminenDTO o2) {
 		String o1sukunimi = o1.getSukunimi().toUpperCase();
 		if (o1 == null || o2 == null || o1sukunimi == null
 				|| o2.getSukunimi() == null) {

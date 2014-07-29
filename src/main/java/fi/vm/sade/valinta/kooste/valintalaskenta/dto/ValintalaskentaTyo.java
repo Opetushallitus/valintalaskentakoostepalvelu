@@ -1,16 +1,15 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 
+import com.google.common.collect.Lists;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
-import com.google.common.collect.Lists;
-
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 
 /**
  * 
@@ -23,8 +22,8 @@ import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
  */
 public class ValintalaskentaTyo extends AbstraktiTyo {
 
-	private final AtomicReference<List<ValintaperusteetTyyppi>> valintaperusteet;
-	private final List<HakemusTyyppi> hakemustyypit;
+	private final AtomicReference<List<ValintaperusteetDTO>> valintaperusteet;
+	private final List<HakemusDTO> hakemustyypit;
 	private final AtomicBoolean ohitettu;
 	private final AtomicInteger laskuri;
 	private final String hakukohdeOid;
@@ -33,8 +32,8 @@ public class ValintalaskentaTyo extends AbstraktiTyo {
 		this.ohitettu = new AtomicBoolean(false);
 		this.laskuri = new AtomicInteger(-1);
 		this.hakemustyypit = Collections.synchronizedList(Lists
-				.<HakemusTyyppi> newArrayList());
-		this.valintaperusteet = new AtomicReference<List<ValintaperusteetTyyppi>>(
+				.<HakemusDTO> newArrayList());
+		this.valintaperusteet = new AtomicReference<List<ValintaperusteetDTO>>(
 				null);
 		this.hakukohdeOid = hakukohdeOid;
 	}
@@ -51,7 +50,7 @@ public class ValintalaskentaTyo extends AbstraktiTyo {
 		return this.ohitettu.get();
 	}
 
-	public List<ValintaperusteetTyyppi> getValintaperusteet() {
+	public List<ValintaperusteetDTO> getValintaperusteet() {
 		if (this.ohitettu.get()) {
 			throw new RuntimeException(
 					"Yritetään hakea ohitetulle valintalaskentatyölle valintaperusteita. Tarkista ettei työtä ole ohitettu ennen valintaperusteiden hakua!");
@@ -59,7 +58,7 @@ public class ValintalaskentaTyo extends AbstraktiTyo {
 		return valintaperusteet.get();
 	}
 
-	public List<HakemusTyyppi> getHakemustyypit() {
+	public List<HakemusDTO> getHakemustyypit() {
 		if (this.ohitettu.get()) {
 			throw new RuntimeException(
 					"Yritetään hakea ohitetulle valintalaskentatyölle hakemustyyppejä. Tarkista ettei työtä ole ohitettu ennen hakemustyyppien pyyntöä!");
@@ -80,7 +79,7 @@ public class ValintalaskentaTyo extends AbstraktiTyo {
 		}
 		this.laskuri.set(1 + hakemustyyppiEsitiedot.size());
 		if (null != valintaperusteetEsitieto
-				.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintalaskentaTyo, List<ValintaperusteetTyyppi>>() {
+				.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintalaskentaTyo, List<ValintaperusteetDTO>>() {
 					public ValintalaskentaTyo esitietoOhitettu() {
 						ohitettu.set(true); // Voi olla ohitettu kahdenkin eri
 											// esitiedon puuttumisen vuoksi
@@ -88,7 +87,7 @@ public class ValintalaskentaTyo extends AbstraktiTyo {
 					}
 
 					public ValintalaskentaTyo esitietoSaatavilla(
-							List<ValintaperusteetTyyppi> v) {
+							List<ValintaperusteetDTO> v) {
 						// Tuskin tarpeen mutta varmistaa että reitityksessä ei
 						// ole tehty kirjoitusvirheitä
 						if (!ValintalaskentaTyo.this.valintaperusteet
@@ -103,7 +102,7 @@ public class ValintalaskentaTyo extends AbstraktiTyo {
 		}
 		for (HakemusTyo<ValintalaskentaTyo> h : hakemustyyppiEsitiedot) {
 			if (null != h
-					.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintalaskentaTyo, HakemusTyyppi>() {
+					.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintalaskentaTyo, HakemusDTO>() {
 						public ValintalaskentaTyo esitietoOhitettu() {
 							ohitettu.set(true); // Voi olla ohitettu kahdenkin
 												// eri esitiedon puuttumisen
@@ -112,7 +111,7 @@ public class ValintalaskentaTyo extends AbstraktiTyo {
 						}
 
 						public ValintalaskentaTyo esitietoSaatavilla(
-								HakemusTyyppi h) {
+								HakemusDTO h) {
 							ValintalaskentaTyo.this.hakemustyypit.add(h);
 							return dekrementoiJaTarkista();
 						}

@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.valintatieto.komponentti;
 import java.util.Arrays;
 import java.util.List;
 
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintatietoResource;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,28 +12,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.service.valintatiedot.ValintatietoService;
-import fi.vm.sade.service.valintatiedot.schema.HakemusOsallistuminenTyyppi;
-
 @Component("valintatietoHakukohteelleKomponentti")
 public class ValintatietoHakukohteelleKomponentti {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintatietoHakukohteelleKomponentti.class);
-	private ValintatietoService valintatietoService;
+	private ValintatietoResource valintatietoService;
 
 	@Autowired
 	public ValintatietoHakukohteelleKomponentti(
-			@Qualifier("valintatietoServiceAsAdmin") ValintatietoService valintatietoService) {
+			@Qualifier("ValintatietoRestClient") ValintatietoResource valintatietoService) {
 		this.valintatietoService = valintatietoService;
 	}
 
-	public List<HakemusOsallistuminenTyyppi> valintatiedotHakukohteelle(
+	public List<HakemusOsallistuminenDTO> valintatiedotHakukohteelle(
 			@Property("valintakoeOid") List<String> valintakoeOids,
 			@Property("hakukohdeOid") String hakukohdeOid) {
 
-		List<HakemusOsallistuminenTyyppi> osallistujat = valintatietoService
-				.haeValintatiedotHakukohteelle(valintakoeOids, hakukohdeOid);
+		List<HakemusOsallistuminenDTO> osallistujat = valintatietoService
+				.haeValintatiedotHakukohteelle(hakukohdeOid, valintakoeOids);
 		if (osallistujat == null || osallistujat.isEmpty()) {
 			String oids = null;
 			if (osallistujat != null) {

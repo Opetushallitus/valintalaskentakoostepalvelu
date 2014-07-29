@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.valintalaskenta;
 
 import java.util.concurrent.TimeUnit;
 
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
 import org.apache.camel.CamelContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,8 +15,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -37,10 +37,11 @@ public class ValintakoelaskentaMuistissaTest {
 	private CamelContext camelContext;
 	@Autowired
 	private ApplicationResource hakuAppHakemus;
-	@Autowired
-	private ValintaperusteService valintaperusteet;
-	@Autowired
-	private ValintalaskentaService valintalaskenta;
+
+    @Autowired
+    private ValintaperusteetRestResource valintaperusteetRestResource;
+    @Autowired
+    private ValintalaskentaResource valintalaskentaResource;
 
 	@Test
 	public void testaaMaskaus() throws Exception {
@@ -62,14 +63,14 @@ public class ValintakoelaskentaMuistissaTest {
 		return Mockito.mock(ApplicationResource.class);
 	}
 
-	@Bean
-	public ValintaperusteService getValintaperusteService() {
-		return Mockito.mock(ValintaperusteService.class);
-	}
+    @Bean
+    public ValintaperusteetRestResource getValintaperusteetRestResource() {
+        return Mockito.mock(ValintaperusteetRestResource.class);
+    }
 
-	@Bean
-	public ValintalaskentaService getValintalaskentaService() {
-		return Mockito.mock(ValintalaskentaService.class);
-	}
+    @Bean
+    public ValintalaskentaResource getValintalaskentaResource() {
+        return Mockito.mock(ValintalaskentaResource.class);
+    }
 
 }

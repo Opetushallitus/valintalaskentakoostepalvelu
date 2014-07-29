@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 
 @Path("/valintalaskenta-laskenta-service/resources/hakukohde")
 public interface HakukohdeResource {
@@ -19,7 +20,7 @@ public interface HakukohdeResource {
 	@GET
 	@Path("{hakukohdeoid}/valinnanvaihe")
 	@Produces(MediaType.APPLICATION_JSON)
-	List<ValinnanvaiheDTO> hakukohde(
+	List<ValintatietoValinnanvaiheDTO> hakukohde(
 			@PathParam("hakukohdeoid") String hakukohdeoid);
 
 	@POST

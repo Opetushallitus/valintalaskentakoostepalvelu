@@ -1,19 +1,18 @@
 package fi.vm.sade.valinta.kooste.valintakokeet.dto;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.AbstraktiTyo;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.EsitiedonKuuntelija;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.AbstraktiTyo;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.EsitiedonKuuntelija;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
 
 /**
  * 
@@ -26,16 +25,16 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintaperusteetTyo;
  */
 public class ValintakoeTyo extends AbstraktiTyo {
 
-	private final HakemusTyyppi esitiedoiksiHaettuHakemus;
-	private final List<List<ValintaperusteetTyyppi>> valintaperusteet;
+	private final HakemusDTO esitiedoiksiHaettuHakemus;
+	private final List<List<ValintaperusteetDTO>> valintaperusteet;
 	private final AtomicInteger laskuri;
 	private final AtomicBoolean ohitettu;
 
-	public ValintakoeTyo(HakemusTyyppi hakemus) {
+	public ValintakoeTyo(HakemusDTO hakemus) {
 		super();
 		this.esitiedoiksiHaettuHakemus = hakemus;
 		this.valintaperusteet = Collections.synchronizedList(Lists
-				.<List<ValintaperusteetTyyppi>> newArrayList());
+				.<List<ValintaperusteetDTO>> newArrayList());
 		this.laskuri = new AtomicInteger(-1);
 		this.ohitettu = new AtomicBoolean(false);
 	}
@@ -46,11 +45,11 @@ public class ValintakoeTyo extends AbstraktiTyo {
 		for (ValintaperusteetTyo<ValintakoeTyo> valintaperusteetTyo : valintaperusteetEsitiedot) {
 			// Jos palauttaa not null:n niin tyo on valmistunut
 			if (null != valintaperusteetTyo
-					.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintakoeTyo, List<ValintaperusteetTyyppi>>() {
+					.rekisteroiKuuntelija(new EsitiedonKuuntelija<ValintakoeTyo, List<ValintaperusteetDTO>>() {
 
 						@Override
 						public ValintakoeTyo esitietoSaatavilla(
-								List<ValintaperusteetTyyppi> esitieto) {
+								List<ValintaperusteetDTO> esitieto) {
 							ValintakoeTyo.this.valintaperusteet.add(esitieto);
 							return dekrementoiJaTarkista();
 						}
@@ -68,11 +67,11 @@ public class ValintakoeTyo extends AbstraktiTyo {
 		return null;
 	}
 
-	public HakemusTyyppi getHakemus() {
+	public HakemusDTO getHakemus() {
 		return esitiedoiksiHaettuHakemus;
 	}
 
-	public List<ValintaperusteetTyyppi> getValintaperusteet() {
+	public List<ValintaperusteetDTO> getValintaperusteet() {
 		// synchronized listia iteroidessa taytyy synkronoida tai tietojoukon
 		// lukeminen ei valttamatta onnistu oikein
 		synchronized (valintaperusteet) {

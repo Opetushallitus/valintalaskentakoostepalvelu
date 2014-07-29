@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -28,7 +30,6 @@ import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
 
 public class ValintatapajonoExcel {
@@ -71,7 +72,7 @@ public class ValintatapajonoExcel {
 			//
 			String hakuNimi, String hakukohdeNimi,
 			//
-			List<ValinnanvaiheDTO> valinnanvaihe,
+			List<ValintatietoValinnanvaiheDTO> valinnanvaihe,
 			//
 			List<Hakemus> hakemukset) {
 		this(hakuOid, hakukohdeOid, valintatapajonoOid, hakuNimi,
@@ -85,7 +86,7 @@ public class ValintatapajonoExcel {
 			//
 			String hakuNimi, String hakukohdeNimi,
 			//
-			List<ValinnanvaiheDTO> valinnanvaihe,
+			List<ValintatietoValinnanvaiheDTO> valinnanvaihe,
 			// List<ValinnanVaiheJonoillaDTO> valinnanvaiheet,
 			List<Hakemus> hakemukset,
 			//
@@ -113,7 +114,7 @@ public class ValintatapajonoExcel {
 		final Map<String, Integer> jonosijat = Maps.newHashMap();
 		final Map<String, String> valintatiedot = Maps.newHashMap();
 		final Map<String, Map<String, String>> avaimet = Maps.newHashMap();
-		for (ValinnanvaiheDTO vaihe : valinnanvaihe) {
+		for (ValintatietoValinnanvaiheDTO vaihe : valinnanvaihe) {
 			for (ValintatapajonoDTO jono : vaihe.getValintatapajonot()) {
 				if (valintatapajonoOid.equals(jono.getOid())) {
 					for (JonosijaDTO jonosija : jono.getJonosijat()) {

@@ -1,9 +1,9 @@
 package fi.vm.sade.valinta.kooste.util;
 
-import fi.vm.sade.service.hakemus.schema.AvainArvoTyyppi;
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.hakemus.schema.HakukohdeTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,34 +57,34 @@ public class Converter {
         return arvo;
     }
 
-    public static HakemusTyyppi hakemusToHakemusTyyppi(Hakemus hakemus) {
-        HakemusTyyppi hakemusTyyppi = new HakemusTyyppi();
-        hakemusTyyppi.setHakemusOid(hakemus.getOid());
+    public static HakemusDTO hakemusToHakemusDTO(Hakemus hakemus) {
+        HakemusDTO hakemusTyyppi = new HakemusDTO();
+        hakemusTyyppi.setHakemusoid(hakemus.getOid());
         hakemusTyyppi.setHakijaOid(hakemus.getPersonOid());
 
         if (hakemus.getAnswers() != null) {
 
             if (hakemus.getAnswers().getHenkilotiedot() != null) {
-                hakemusTyyppi.setHakijanEtunimi(hakemus.getAnswers().getHenkilotiedot().get(ETUNIMET));
-                hakemusTyyppi.setHakijanSukunimi(hakemus.getAnswers().getHenkilotiedot().get(SUKUNIMI));
+                hakemusTyyppi.setEtunimi(hakemus.getAnswers().getHenkilotiedot().get(ETUNIMET));
+                hakemusTyyppi.setSukunimi(hakemus.getAnswers().getHenkilotiedot().get(SUKUNIMI));
 
                 for (Map.Entry<String, String> e : hakemus.getAnswers().getHenkilotiedot().entrySet()) {
-                    AvainArvoTyyppi aa = new AvainArvoTyyppi();
+                    AvainArvoDTO aa = new AvainArvoDTO();
                     aa.setAvain(e.getKey());
                     aa.setArvo(sanitizeArvo(e.getValue()));
 
-                    hakemusTyyppi.getAvainArvo().add(aa);
+                    hakemusTyyppi.getAvaimet().add(aa);
                 }
             }
 
             Map<Integer, Hakutoive> hakutoiveet = new HashMap<Integer, Hakutoive>();
             if (hakemus.getAnswers().getHakutoiveet() != null) {
                 for (Map.Entry<String, String> e : hakemus.getAnswers().getHakutoiveet().entrySet()) {
-                    AvainArvoTyyppi aa = new AvainArvoTyyppi();
+                    AvainArvoDTO aa = new AvainArvoDTO();
                     aa.setAvain(e.getKey());
                     aa.setArvo(sanitizeArvo(e.getValue()));
 
-                    hakemusTyyppi.getAvainArvo().add(aa);
+                    hakemusTyyppi.getAvaimet().add(aa);
 
                     if (e.getKey().startsWith(PREFERENCE)) {
                         Integer prioriteetti = Integer.valueOf(e.getKey().replaceAll("\\D+", ""));
@@ -112,11 +112,11 @@ public class Converter {
                     Hakutoive hakutoive = e.getValue();
                     if (hakutoive != null) {
                         if (hakutoive.getHakukohdeOid() != null && !hakutoive.getHakukohdeOid().trim().isEmpty()) {
-                            HakukohdeTyyppi hk = new HakukohdeTyyppi();
-                            hk.setHakukohdeOid(hakutoive.getHakukohdeOid());
+                            HakukohdeDTO hk = new HakukohdeDTO();
+                            hk.setOid(hakutoive.getHakukohdeOid());
                             hk.setHarkinnanvaraisuus(Boolean.TRUE.equals(hakutoive.getHarkinnanvaraisuus()));
                             hk.setPrioriteetti(e.getKey());
-                            hakemusTyyppi.getHakutoive().add(hk);
+                            hakemusTyyppi.getHakukohteet().add(hk);
                         }
                     }
                 }
@@ -124,42 +124,42 @@ public class Converter {
 
             if (hakemus.getAnswers().getKoulutustausta() != null) {
                 for (Map.Entry<String, String> e : hakemus.getAnswers().getKoulutustausta().entrySet()) {
-                    AvainArvoTyyppi aa = new AvainArvoTyyppi();
+                    AvainArvoDTO aa = new AvainArvoDTO();
                     aa.setAvain(e.getKey());
                     aa.setArvo(sanitizeArvo(e.getValue()));
 
-                    hakemusTyyppi.getAvainArvo().add(aa);
+                    hakemusTyyppi.getAvaimet().add(aa);
                 }
             }
 
             if (hakemus.getAnswers().getLisatiedot() != null) {
                 for (Map.Entry<String, String> e : hakemus.getAnswers().getLisatiedot().entrySet()) {
-                    AvainArvoTyyppi aa = new AvainArvoTyyppi();
+                    AvainArvoDTO aa = new AvainArvoDTO();
                     aa.setAvain(e.getKey());
                     aa.setArvo(sanitizeArvo(e.getValue()));
 
-                    hakemusTyyppi.getAvainArvo().add(aa);
+                    hakemusTyyppi.getAvaimet().add(aa);
                 }
             }
 
             if (hakemus.getAnswers().getOsaaminen() != null) {
                 for (Map.Entry<String, String> e : hakemus.getAnswers().getOsaaminen().entrySet()) {
-                    AvainArvoTyyppi aa = new AvainArvoTyyppi();
+                    AvainArvoDTO aa = new AvainArvoDTO();
                     aa.setAvain(e.getKey());
                     aa.setArvo(sanitizeArvo(e.getValue()));
 
-                    hakemusTyyppi.getAvainArvo().add(aa);
+                    hakemusTyyppi.getAvaimet().add(aa);
                 }
             }
         }
 
         if (hakemus.getAdditionalInfo() != null) {
             for (Map.Entry<String, String> e : hakemus.getAdditionalInfo().entrySet()) {
-                AvainArvoTyyppi aa = new AvainArvoTyyppi();
+                AvainArvoDTO aa = new AvainArvoDTO();
                 aa.setAvain(e.getKey());
                 aa.setArvo(e.getValue());
 
-                hakemusTyyppi.getAvainArvo().add(aa);
+                hakemusTyyppi.getAvaimet().add(aa);
             }
         }
 

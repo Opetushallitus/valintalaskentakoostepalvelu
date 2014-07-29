@@ -5,6 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import fi.vm.sade.service.valintaperusteet.dto.HakuparametritDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import org.apache.camel.CamelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,11 +22,6 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 
-import fi.vm.sade.service.hakemus.schema.HakemusTyyppi;
-import fi.vm.sade.service.valintalaskenta.ValintalaskentaService;
-import fi.vm.sade.service.valintaperusteet.ValintaperusteService;
-import fi.vm.sade.service.valintaperusteet.messages.HakuparametritTyyppi;
-import fi.vm.sade.service.valintaperusteet.schema.ValintaperusteetTyyppi;
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -45,7 +46,7 @@ public class ValintalaskentaMuistissaConfig {
 
 	@Bean(name = "valintalaskentaMuistissaValvomo")
 	public ValvomoService<ValintalaskentaMuistissaProsessi> getValvomoServiceImpl() {
-		return new ValvomoServiceImpl<ValintalaskentaMuistissaProsessi>();
+		return new ValvomoServiceImpl<>();
 	}
 
 	@Bean
@@ -64,31 +65,33 @@ public class ValintalaskentaMuistissaConfig {
 	}
 
 	@Bean
-	public Valintalaskenta getValintalaskenta(
-			final ValintalaskentaService valintalaskentaService) {
+	public Valintalaskenta getValintalaskenta(final ValintalaskentaResource valintalaskentaResource) {
 		return new Valintalaskenta() {
-			@Override
-			public void teeValintalaskenta(List<HakemusTyyppi> hakemukset,
-					List<ValintaperusteetTyyppi> valintaperusteet) {
-				valintalaskentaService.laske(hakemukset, valintaperusteet);
-			}
-		};
+
+            @Override
+            public void teeValintalaskenta(List<HakemusDTO> hakemukset, List<ValintaperusteetDTO> valintaperusteet) {
+
+                LaskeDTO laskeDTO =new LaskeDTO();
+                laskeDTO.setHakemus(hakemukset);
+                laskeDTO.setValintaperuste(valintaperusteet);
+
+                valintalaskentaResource.laske(laskeDTO);
+            }
+        };
 	}
 
 	@Bean
-	public Valintaperusteet getValintaperusteet(
-			final ValintaperusteService valintaperusteService) {
+	public Valintaperusteet getValintaperusteet(final ValintaperusteetRestResource valintaperusteetRestResource) {
 		return new Valintaperusteet() {
-			@Override
-			public List<ValintaperusteetTyyppi> getValintaperusteet(
-					String hakukohdeOid, Integer valinnanvaihe) {
-				HakuparametritTyyppi params = new HakuparametritTyyppi();
-				params.setHakukohdeOid(hakukohdeOid);
-				params.setValinnanVaiheJarjestysluku(valinnanvaihe);
-				return valintaperusteService.haeValintaperusteet(Arrays
-						.asList(params));
-			}
-		};
+
+            @Override
+            public List<ValintaperusteetDTO> getValintaperusteet(String hakukohdeOid, Integer valinnanvaihe) {
+                HakuparametritDTO params = new HakuparametritDTO();
+                params.setHakukohdeOid(hakukohdeOid);
+                params.setValinnanVaiheJarjestysluku(valinnanvaihe);
+                return valintaperusteetRestResource.haeValintaperusteet(hakukohdeOid, valinnanvaihe);
+            }
+        };
 	}
 
 	@Bean

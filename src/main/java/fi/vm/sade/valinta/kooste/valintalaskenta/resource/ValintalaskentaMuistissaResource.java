@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
@@ -113,6 +114,9 @@ public class ValintalaskentaMuistissaResource {
 			@QueryParam("valinnanvaihe") Integer valinnanvaihe,
 			@QueryParam("onkoWhitelist") Boolean onkoWhitelist,
 			Collection<String> blacklistOids) throws Exception {
+		try {
+			LOG.info("Valintalaskenta käynnistetty! HakuOid({}), HakukohdeOid({}), Valinnanvaihe({}) Whitelist({})",
+					hakuOid,hakukohdeOid,valinnanvaihe, onkoWhitelist);
 		ValintalaskentaMuistissaProsessi prosessi = new ValintalaskentaMuistissaProsessi(
 				hakuOid);
 		if (hakukohdeOid != null) {
@@ -146,6 +150,10 @@ public class ValintalaskentaMuistissaResource {
 			}
 			LOG.info("Valintalaskenta käynnissä");
 			return Vastaus.uudelleenOhjaus(prosessi.getId());
+		}
+		} catch(Exception e) {
+			LOG.error("Virhe laskentaa käynnistettäessä: {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+			throw e;
 		}
 	}
 

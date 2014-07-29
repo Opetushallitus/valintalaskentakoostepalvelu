@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import junit.framework.Assert;
 
 import org.apache.commons.io.IOUtils;
@@ -27,7 +28,6 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 
 /**
  * 
@@ -42,7 +42,7 @@ public class ValintatapajonoTuontiTest {
 	@Test
 	public void testaaTallennuksenYhtenevyysKayttoliittymanTuottamanJsoninKanssa()
 			throws JsonSyntaxException, IOException {
-		ValinnanvaiheDTO valinnanvaiheKali = new GsonBuilder()
+		ValintatietoValinnanvaiheDTO valinnanvaiheKali = new GsonBuilder()
 				.registerTypeAdapter(Date.class, new JsonDeserializer() {
 					@Override
 					public Object deserialize(JsonElement json, Type typeOfT,
@@ -55,9 +55,9 @@ public class ValintatapajonoTuontiTest {
 				})
 				.create()
 				.fromJson(resurssi("valinnanvaihe2.json"),
-						new TypeToken<ArrayList<ValinnanvaiheDTO>>() {
+						new TypeToken<ArrayList<ValintatietoValinnanvaiheDTO>>() {
 						}.getType());
-		ValinnanvaiheDTO valinnanvaiheExcel = null;
+		ValintatietoValinnanvaiheDTO valinnanvaiheExcel = null;
 
 		Assert.assertTrue(
 				"Excelista saatu valinnanvaihe ei tasmaa kayttoliittyman tallennuksessa tuottamaa valinnanvaihetta.",
@@ -69,8 +69,8 @@ public class ValintatapajonoTuontiTest {
 	@Test
 	public void testaaValintatapajonoTuonti() throws JsonSyntaxException,
 			IOException {
-		// fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValinnanvaiheDTO;
-		List<ValinnanvaiheDTO> valinnanvaihe = new GsonBuilder()
+		// fi.vm.sade.valinta.kooste.external.resource.laskenta.dto.ValintatietoValinnanvaiheDTO;
+		List<ValintatietoValinnanvaiheDTO> valinnanvaihe = new GsonBuilder()
 				.registerTypeAdapter(Date.class, new JsonDeserializer() {
 					@Override
 					public Object deserialize(JsonElement json, Type typeOfT,
@@ -83,7 +83,7 @@ public class ValintatapajonoTuontiTest {
 				})
 				.create()
 				.fromJson(resurssi("valinnanvaihe.json"),
-						new TypeToken<ArrayList<ValinnanvaiheDTO>>() {
+						new TypeToken<ArrayList<ValintatietoValinnanvaiheDTO>>() {
 						}.getType());
 
 		// List<ValinnanVaiheJonoillaDTO> valinnanvaiheJonoillaDto = new
