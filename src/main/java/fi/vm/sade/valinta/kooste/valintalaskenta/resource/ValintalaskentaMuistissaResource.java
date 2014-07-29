@@ -151,9 +151,9 @@ public class ValintalaskentaMuistissaResource {
 			LOG.info("Valintalaskenta käynnissä");
 			return Vastaus.uudelleenOhjaus(prosessi.getId());
 		}
-		} catch(Exception e ) {
+		} catch(Exception e) {
 			LOG.error("Virhe laskentaa käynnistettäessä: {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
-			return Vastaus.virhe(e.getMessage());
+			throw e;
 		}
 	}
 
