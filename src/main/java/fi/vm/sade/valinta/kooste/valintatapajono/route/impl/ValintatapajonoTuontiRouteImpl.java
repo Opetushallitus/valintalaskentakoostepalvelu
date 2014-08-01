@@ -366,6 +366,7 @@ public class ValintatapajonoTuontiRouteImpl extends
 		vx.setEiVarasijatayttoa(jono.getEiVarasijatayttoa());
 		vx.setKaikkiEhdonTayttavatHyvaksytaan(jono
 				.getKaikkiEhdonTayttavatHyvaksytaan());
+        vx.setKaytetaanValintalaskentaa(jono.getKaytetaanValintalaskentaa());
 		vx.setNimi(jono.getNimi());
 		vx.setOid(valintatapajonoOid);
 		vx.setPoissaOlevaTaytto(jono.getPoissaOlevaTaytto());
