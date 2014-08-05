@@ -11,7 +11,9 @@ import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResou
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+
 import org.apache.camel.CamelContext;
+import org.apache.camel.component.bean.ProxyHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,6 +30,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaMuistissaProsessi;
+import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaMuistissaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.HakuAppHakemus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaMuistissaRouteImpl.HakuAppHakemusOids;
@@ -63,7 +66,13 @@ public class ValintalaskentaMuistissaConfig {
 				context.getEndpoint(routeId),
 				ValintalaskentaMuistissaRoute.class);
 	}
-
+	@Bean
+	public ValintalaskentaKerrallaRoute getValintalaskentaKaikilleRoute(
+			@Value(ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA) String routeId,
+			@Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
+		return ProxyHelper.createProxy(context.getEndpoint(routeId), ValintalaskentaKerrallaRoute.class);
+	}
+	
 	@Bean
 	public Valintalaskenta getValintalaskenta(final ValintalaskentaResource valintalaskentaResource) {
 		return new Valintalaskenta() {

@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.builder.ProxyBuilder;
+import org.apache.camel.component.bean.ProxyHelper;
 import org.apache.camel.component.seda.BlockingQueueFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +13,7 @@ import fi.vm.sade.valinta.kooste.util.BlockingLifoQueueFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaProsessi;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.HakukohteenValintalaskentaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.HaunValintalaskentaRoute;
+import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 
@@ -25,6 +28,9 @@ public class ValintalaskentaConfig {
 		return new ValvomoServiceImpl<ValintalaskentaProsessi>();
 	}
 
+	
+			
+	
 	@Bean
 	public HaunValintalaskentaRoute getValintalaskentaHaulleRoute(
 			@Qualifier("javaDslCamelContext") CamelContext context)
