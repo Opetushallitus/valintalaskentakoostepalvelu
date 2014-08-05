@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -27,11 +26,9 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHakukohde;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaMaski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaValintaperusteetJaHakemukset;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
@@ -52,7 +49,6 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder 
 	private static final String DEADLETTERCHANNEL = "direct:valintalaskenta_kerralla_deadletterchannel";
 	private static final String ROUTE_ID = "valintalaskenta_kerralla";
 	private final SeurantaResource seurantaResource;
-	private final ValintaperusteetResource valintaperusteetResource;
 	private final ValintaperusteetRestResource valintaperusteetRestResource;
 	private final ValintalaskentaResource valintalaskentaResource;
 	private final ApplicationResource applicationResource;
@@ -68,7 +64,6 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder 
 			@Value(ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA_HAKEMUKSET) String valintalaskentaKerrallaHakemukset,
 			@Value(ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA_LASKENTA) String valintalaskentaKerrallaLaskenta,
 			SeurantaResource seurantaResource,
-			ValintaperusteetResource valintaperusteetResource,
 			ValintaperusteetRestResource valintaperusteetRestResource,
 			ValintalaskentaResource valintalaskentaResource,
 			ApplicationResource applicationResource) {
@@ -78,32 +73,32 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder 
 		this.valintalaskentaKerrallaHakemukset = valintalaskentaKerrallaHakemukset;
 		this.valintalaskentaKerralla = valintalaskentaKerralla;
 		this.valintalaskentaKerrallaLaskenta = valintalaskentaKerrallaLaskenta;
-		this.valintaperusteetResource = valintaperusteetResource;
 		this.valintaperusteetRestResource = valintaperusteetRestResource;
 		this.valintalaskentaResource = valintalaskentaResource;
 	}
 
 	@Override
 	public void configure() throws Exception {
-		interceptFrom(valintalaskentaKerralla)
-		//
-				.setProperty(LOPETUSEHTO, constant(new AtomicBoolean(false)));
+		// interceptFrom(valintalaskentaKerralla)
+		// //
+		// .setProperty(LOPETUSEHTO, constant(new AtomicBoolean(false)));
 		intercept().when(simple("${property.lopetusehto?.get()}")).stop();
 
 		from(DEADLETTERCHANNEL)
-
-		.process(new Processor() {
-			@Override
-			public void process(Exchange exchange) throws Exception {
-				LOG.error(
-						"Valintalaskenta paattyi virheeseen\r\n{}",
-						simple("${exception.message}").evaluate(exchange,
-								String.class));
-				exchange.getProperty(LOPETUSEHTO, AtomicBoolean.class)
-						.set(true);
-			}
-		})
 		//
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						LOG.error(
+								"Valintalaskenta paattyi virheeseen\r\n{}",
+								simple("${exception.message}").evaluate(
+										exchange, String.class));
+						exchange.getProperty(
+								ValintalaskentaKerrallaRoute.LOPETUSEHTO,
+								AtomicBoolean.class).set(true);
+					}
+				})
+				//
 				.stop();
 
 		/**
@@ -119,55 +114,20 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder 
 				//
 				// Odotetaan laskenta luokkaa
 				//
-				.convertBodyTo(LaskentaJaMaski.class)
+				.convertBodyTo(LaskentaJaHaku.class)
 				//
 				// Haetaan hakukohteet prosessointiin
 				//
-				.split(Reititys.<LaskentaJaMaski, List<LaskentaJaHakukohde>> lauseke(
-						laskentaJaMaski -> {
-							Laskenta laskenta = laskentaJaMaski.getLaskenta();
-							Maski maski = laskentaJaMaski.getMaski();
-							Collection<String> oidit = maski.maskaa(valintaperusteetResource
-									.haunHakukohteet(laskenta.getHakuOid())
-									.stream()
-									//
-									.filter((h -> {
-										boolean julkaistu = "JULKAISTU"
-												.equals(h.getTila());
-										if (!julkaistu) {
-											LOG.warn(
-													"Ohitetaan hakukohde {} koska sen tila on {}.",
-													h.getOid(), h.getTila());
-										}
-										return julkaistu;
-									})).map(u -> u.getOid())
-									//
-									.collect(Collectors.toSet()));
-							if (oidit.size() == 0) {
-								throw new RuntimeException(
-										"Laskentaan tarvitaan vahintaan yksi hakukohde");
-							}
-							laskenta.setLaskettavienHakukohteidenMaara(oidit
-									.size());
-							return oidit
+				.split(Reititys
+						.<LaskentaJaHaku, List<LaskentaJaHakukohde>> lauseke(laskentaJaHaku -> {
+							return laskentaJaHaku
+									.getHakukohdeOids()
 									// after mask
 									.stream()
 									.map(oid -> new LaskentaJaHakukohde(
-											laskenta, oid))
+											laskentaJaHaku.getLaskenta(), oid))
 									.collect(Collectors.toList());
-						},
-						//
-						// Poikkeus hakukohteiden haussa
-						//
-						((i, e) -> LOG
-								.error("Hakukohteita ei saatu haettua haulle({}). {}\r\n{}",
-										i.getLaskenta().getHakuOid(),
-										e.getMessage(),
-										Arrays.toString(e.getStackTrace())))))
-				//
-				// .shareUnitOfWork()
-				//
-				// Suorita tyo
+						}))
 				//
 				.to(valintalaskentaKerrallaValintaperusteet,
 						valintalaskentaKerrallaHakemukset);

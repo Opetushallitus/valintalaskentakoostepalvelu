@@ -15,8 +15,6 @@ import org.apache.camel.spring.SpringRouteBuilder;
  */
 public abstract class KoostepalveluRouteBuilder extends SpringRouteBuilder {
 
-	protected static final String LOPETUSEHTO = "lopetusehto";
-
 	/**
 	 * 
 	 * @return default deadletterchannel endpoint
