@@ -347,7 +347,27 @@
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
-
+	<jaxrs-client:client id="SijoittelunSeurantaRestClient"
+		address="${valintalaskentakoostepalvelu.seuranta.rest.url}"
+		serviceClass="fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.seuranta-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
 	<jaxrs-client:client id="ValintatietoRestClient"
 		address="${valintalaskentakoostepalvelu.valintalaskenta.rest.url}"
 		serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintatietoResource"

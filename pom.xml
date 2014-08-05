@@ -90,6 +90,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>fi.vm.sade.valintaperusteet</groupId>
+            <artifactId>seuranta-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>fi.vm.sade.organisaatio</groupId>
             <artifactId>organisaatio-api</artifactId>
             <version>${organisaatio.api.version}</version>
