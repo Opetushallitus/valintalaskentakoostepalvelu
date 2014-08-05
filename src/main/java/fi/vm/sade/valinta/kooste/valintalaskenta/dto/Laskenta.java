@@ -21,12 +21,24 @@ public class Laskenta {
 	private final static String NIMI_FORMAT = "Laskenta hakuOid(%s) uuid(%s) hakukohteita(%s/%s)";
 	private final String uuid;
 	private final String hakuOid;
+	private final boolean kaytaSeurantaa;
 	private final AtomicInteger hakukohteita = new AtomicInteger(0);
 	private final AtomicInteger tehty = new AtomicInteger(0);
 
 	public Laskenta(String uuid, String hakuOid) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
+		this.kaytaSeurantaa = true;
+	}
+
+	public Laskenta(String uuid, String hakuOid, boolean kaytaSeurantaa) {
+		this.uuid = uuid;
+		this.hakuOid = hakuOid;
+		this.kaytaSeurantaa = kaytaSeurantaa;
+	}
+
+	public boolean isKaytaSeurantaa() {
+		return kaytaSeurantaa;
 	}
 
 	public void setLaskettavienHakukohteidenMaara(int maara) {

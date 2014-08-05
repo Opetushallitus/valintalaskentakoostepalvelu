@@ -288,7 +288,7 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder 
 				.completionSize(2)
 				// Purkaa valmistumattomat viimeistaan muutamien minuuttien
 				// jalkeen
-				.completionTimeout(TimeUnit.MINUTES.toMillis(5L))
+				.completionTimeout(TimeUnit.MINUTES.toMillis(10L))
 				//
 				.process(
 						Reititys.<LaskentaJaValintaperusteetJaHakemukset> kuluttaja(
