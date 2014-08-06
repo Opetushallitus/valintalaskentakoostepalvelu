@@ -27,6 +27,7 @@ import org.springframework.stereotype.Controller;
 import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.Api;
 
+import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
@@ -68,8 +69,8 @@ public class ValintalaskentaKerrallaResource {
 	@POST
 	@Path("/haku/{hakuOid}/whitelist/{whitelist}")
 	@Consumes(APPLICATION_JSON)
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid,
+	@Produces(APPLICATION_JSON)
+	public Vastaus valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid,
 			@PathParam("whitelist") boolean whitelist, List<String> maski) {
 		return kaynnistaLaskenta(hakuOid, new Maski(whitelist, maski));
 	}
@@ -104,15 +105,14 @@ public class ValintalaskentaKerrallaResource {
 	@POST
 	@Path("/haku/{hakuOid}")
 	@Consumes(APPLICATION_JSON)
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid) {
+	@Produces(APPLICATION_JSON)
+	public Vastaus valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid) {
 		return kaynnistaLaskenta(hakuOid, new Maski());
 	}
 
-	private Response kaynnistaLaskenta(String hakuOid, Maski maski) {
+	private Vastaus kaynnistaLaskenta(String hakuOid, Maski maski) {
 		if (hakuOid == null) {
-			return Response.serverError().entity("HakuOid on pakollinen")
-					.build();
+			throw new RuntimeException("HakuOid on pakollinen");
 		}
 		// Kaynnissa oleva laskenta koko haulle
 		Optional<Laskenta> ajossaOlevaLaskentaHaulle = valintalaskentaValvomo
@@ -130,7 +130,7 @@ public class ValintalaskentaKerrallaResource {
 			LOG.warn(
 					"Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun",
 					hakuOid, uuid);
-			return Response.ok().entity(uuid).build();
+			return Vastaus.uudelleenOhjaus(uuid);
 		} else {
 			LOG.info("Aloitetaan uusi laskenta haulle {}", hakuOid);
 			List<String> haunHakukohteetOids = haunHakukohteet(hakuOid);
@@ -147,7 +147,7 @@ public class ValintalaskentaKerrallaResource {
 							haunHakukohteetOids.size(), lopetusehto, maski
 									.isMask()), haunHakukohteetOids),
 					lopetusehto);
-			return Response.ok().entity(uuid).build();
+			return Vastaus.uudelleenOhjaus(uuid);
 		}
 	}
 
@@ -160,12 +160,11 @@ public class ValintalaskentaKerrallaResource {
 	 */
 	@POST
 	@Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid,
+	@Produces(APPLICATION_JSON)
+	public Vastaus valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid,
 			@PathParam("hakukohdeOid") String hakukohdeOid) {
 		if (hakuOid == null || hakukohdeOid == null) {
-			return Response.serverError()
-					.entity("HakuOid ja hakukohdeOid on pakollinen").build();
+			throw new RuntimeException("HakuOid ja hakukohdeOid on pakollinen");
 		}
 		LOG.info("Pyynto suorittaa valintalaskenta haun {} hakukohteelle {}",
 				hakuOid, hakukohdeOid);
@@ -175,7 +174,7 @@ public class ValintalaskentaKerrallaResource {
 		valintalaskentaRoute.suoritaValintalaskentaKerralla(
 				new LaskentaJaHaku(new Laskenta(uuid, hakuOid, 1, lopetusehto,
 						true), hakukohteet), lopetusehto);
-		return Response.ok().entity(uuid).build();
+		return Vastaus.uudelleenOhjaus(uuid);
 	}
 
 	private List<String> haunHakukohteet(String hakuOid) {
