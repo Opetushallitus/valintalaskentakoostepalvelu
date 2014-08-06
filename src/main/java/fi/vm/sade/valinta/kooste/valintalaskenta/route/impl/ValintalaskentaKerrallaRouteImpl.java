@@ -340,7 +340,7 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 											valintalaskentaResource
 													.laskeKaikki(new LaskeDTO(
 															tyo.getHakemukset()
-																	.stream()
+																	.parallelStream()
 																	.map(h -> getContext()
 																			.getTypeConverter()
 																			.tryConvertTo(
