@@ -73,6 +73,7 @@ public class ValintalaskentaKerrallaResource {
 	 */
 	@POST
 	@Path("/haku/{hakuOid}")
+	@Consumes(APPLICATION_JSON)
 	public Response valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid) {
 		return kaynnistaLaskenta(hakuOid, new Maski());
 	}
@@ -115,6 +116,7 @@ public class ValintalaskentaKerrallaResource {
 	 */
 	@POST
 	@Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
+	@Consumes(APPLICATION_JSON)
 	public Response valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid,
 			@PathParam("hakukohdeOid") String hakukohdeOid) {
 		if (hakuOid == null || hakukohdeOid == null) {
