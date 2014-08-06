@@ -4,6 +4,9 @@ import fi.vm.sade.service.valintaperusteet.dto.*;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeValintaperusteetDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.ValintakoeRDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1Resource;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.kooste.exception.KoodistoException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.KoodistoJsonRESTResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.KoodistoUrheilija;
@@ -26,7 +29,7 @@ public class SuoritaHakukohdeImportKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(SuoritaHakukohdeImportKomponentti.class);
 
     @Autowired
-    private HakukohdeResource hakukohdeResource;
+    private HakukohdeV1Resource hakukohdeResource;
 
     @Autowired
     private KoodistoJsonRESTResource koodistoJsonRESTResource;
@@ -37,7 +40,11 @@ public class SuoritaHakukohdeImportKomponentti {
 
     public HakukohdeImportDTO suoritaHakukohdeImport(@Body //@Property(OPH.HAKUKOHDEOID)
                                                                 String hakukohdeOid) {
-        HakukohdeValintaperusteetDTO data = hakukohdeResource.getHakukohdeValintaperusteet(hakukohdeOid);
+
+
+        ResultV1RDTO<HakukohdeValintaperusteetV1RDTO> result = hakukohdeResource.findValintaperusteetByOid(hakukohdeOid);
+
+        HakukohdeValintaperusteetV1RDTO data = result.getResult();
         HakukohdeImportDTO importTyyppi = new HakukohdeImportDTO();
 
         importTyyppi.setTarjoajaOid(data.getTarjoajaOid());
