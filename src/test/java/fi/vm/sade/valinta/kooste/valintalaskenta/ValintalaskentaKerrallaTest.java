@@ -71,13 +71,12 @@ public class ValintalaskentaKerrallaTest {
 	@Test
 	public void testaaValintalaskentaKerralla() throws InterruptedException {
 		AtomicBoolean lopetusehto = new AtomicBoolean(false);
-		Laskenta laskenta = new Laskenta(UUID, HAKUOID, HAKUKOHTEITA,
-				lopetusehto);
 		List<String> hakukohdeOids = valintaperusteetResource
 				.haunHakukohteet(HAKUOID).stream().map(h -> h.getOid())
 				.collect(Collectors.toList());
 		valintalaskentaKaikilleRoute.suoritaValintalaskentaKerralla(
-				new LaskentaJaHaku(laskenta, hakukohdeOids), lopetusehto);
+				new LaskentaJaHaku(new Laskenta(UUID, HAKUOID, HAKUKOHTEITA,
+						lopetusehto), hakukohdeOids), lopetusehto);
 		Mockito.verify(seurantaResource, Mockito.timeout(15000).times(1))
 				.merkkaaLaskennanTila(Mockito.eq(UUID),
 						Mockito.eq(LaskentaTila.VALMIS));
