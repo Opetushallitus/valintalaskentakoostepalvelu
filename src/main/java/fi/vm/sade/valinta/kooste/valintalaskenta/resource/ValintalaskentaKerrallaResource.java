@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -15,6 +17,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,8 +96,9 @@ public class ValintalaskentaKerrallaResource {
 				haunHakukohteetOids = Lists.newArrayList(maski
 						.maskaa(haunHakukohteetOids));
 			}
-			String uuid = (String) seurantaResource.luoLaskenta(hakuOid,
-					haunHakukohteetOids).getEntity();
+			String uuid = seurantaResource.luoLaskenta(hakuOid,
+					haunHakukohteetOids);
+
 			AtomicBoolean lopetusehto = new AtomicBoolean(false);
 			valintalaskentaRoute.suoritaValintalaskentaKerralla(
 					new LaskentaJaHaku(new Laskenta(uuid, hakuOid,

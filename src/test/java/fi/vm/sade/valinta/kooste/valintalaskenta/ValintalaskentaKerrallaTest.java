@@ -78,7 +78,7 @@ public class ValintalaskentaKerrallaTest {
 				.collect(Collectors.toList());
 		valintalaskentaKaikilleRoute.suoritaValintalaskentaKerralla(
 				new LaskentaJaHaku(laskenta, hakukohdeOids), lopetusehto);
-		Mockito.verify(seurantaResource, Mockito.timeout(5000).times(1))
+		Mockito.verify(seurantaResource, Mockito.timeout(15000).times(1))
 				.merkkaaLaskennanTila(Mockito.eq(UUID),
 						Mockito.eq(LaskentaTila.VALMIS));
 	}
