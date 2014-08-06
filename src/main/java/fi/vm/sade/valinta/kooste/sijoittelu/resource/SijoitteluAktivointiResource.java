@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.ws.rs.GET;
@@ -10,6 +11,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
+import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +26,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
@@ -50,6 +52,9 @@ public class SijoitteluAktivointiResource {
 
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+
+    @Autowired
+    private SijoittelunSeurantaResource sijoittelunSeurantaResource;
 
 	@POST
 	@Path("/aktivoi")
@@ -90,16 +95,7 @@ public class SijoitteluAktivointiResource {
 			return "get parameter 'hakuOid' required";
 		} else {
 			LOG.info("jatkuva sijoittelu aktivoitu haulle {}", hakuOid);
-			// TODO: käyttöoikeus hakuun ja tarkastus samalla onko hakukohdetta,
-			// jos vaihdetaan pois OPH_CRUDISTA
-			Sijoittelu sijoittelu = JatkuvaSijoittelu.SIJOITTELU_HAUT
-					.get(hakuOid);
-			if (sijoittelu == null) {
-				sijoittelu = new Sijoittelu();
-			}
-			sijoittelu.setHakuOid(hakuOid);
-			sijoittelu.setAjossa(true);
-			JatkuvaSijoittelu.SIJOITTELU_HAUT.put(hakuOid, sijoittelu);
+            sijoittelunSeurantaResource.merkkaaSijoittelunAjossaTila(hakuOid, true);
 			return "aktivoitu";
 		}
 	}
@@ -118,14 +114,7 @@ public class SijoitteluAktivointiResource {
 			return "get parameter 'hakuOid' required";
 		} else {
 			LOG.info("jatkuva sijoittelu poistettu haulta {}", hakuOid);
-			Sijoittelu sijoittelu = JatkuvaSijoittelu.SIJOITTELU_HAUT
-					.get(hakuOid);
-			if (sijoittelu == null) {
-				sijoittelu = new Sijoittelu();
-			}
-			sijoittelu.setHakuOid(hakuOid);
-			sijoittelu.setAjossa(false);
-			JatkuvaSijoittelu.SIJOITTELU_HAUT.put(hakuOid, sijoittelu);
+            sijoittelunSeurantaResource.poistaSijoittelu(hakuOid);
 			return "poistettu";
 		}
 	}
@@ -135,8 +124,8 @@ public class SijoitteluAktivointiResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@PreAuthorize(OPH_CRUD)
 	@ApiOperation(value = "Kaikki aktiiviset sijoittelut", response = Map.class)
-	public Map<String, Sijoittelu> aktiivisetSijoittelut() {
-		return JatkuvaSijoittelu.SIJOITTELU_HAUT;
+	public Collection<SijoitteluDto> aktiivisetSijoittelut() {
+		return sijoittelunSeurantaResource.hae();
 	}
 
 	@GET
@@ -144,11 +133,11 @@ public class SijoitteluAktivointiResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@PreAuthorize(OPH_CRUD)
 	@ApiOperation(value = "Haun aktiiviset sijoittelut", response = Sijoittelu.class)
-	public Sijoittelu jatkuvaTila(@QueryParam("hakuOid") String hakuOid) {
+	public SijoitteluDto jatkuvaTila(@QueryParam("hakuOid") String hakuOid) {
 		if (StringUtils.isBlank(hakuOid)) {
 			return null;
 		} else {
-			return JatkuvaSijoittelu.SIJOITTELU_HAUT.get(hakuOid);
+			return sijoittelunSeurantaResource.hae(hakuOid);
 		}
 	}
 }
