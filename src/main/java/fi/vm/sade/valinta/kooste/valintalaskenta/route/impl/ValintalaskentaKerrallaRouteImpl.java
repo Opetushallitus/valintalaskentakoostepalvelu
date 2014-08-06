@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -18,18 +19,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.KoostepalveluRouteBuilder;
 import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHakukohde;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaValintaperusteetJaHakemukset;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
+import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.resource.SeurantaResource;
@@ -42,7 +49,8 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
  * 
  */
 @Component
-public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder {
+public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
+		implements ValintalaskentaKerrallaRouteValvomo {
 
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaKerrallaRouteImpl.class);
@@ -56,6 +64,15 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder 
 	private final String valintalaskentaKerrallaValintaperusteet;
 	private final String valintalaskentaKerrallaHakemukset;
 	private final String valintalaskentaKerrallaLaskenta;
+	private final Cache<String, Laskenta> laskentaCache = CacheBuilder
+			.newBuilder().weakValues().expireAfterWrite(3, TimeUnit.HOURS)
+			.removalListener(new RemovalListener<String, Laskenta>() {
+				public void onRemoval(
+						RemovalNotification<String, Laskenta> notification) {
+					LOG.info("{} siivottu pois muistista",
+							notification.getValue());
+				}
+			}).build();
 
 	@Autowired
 	public ValintalaskentaKerrallaRouteImpl(
@@ -78,10 +95,28 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder 
 	}
 
 	@Override
+	public List<Laskenta> ajossaOlevatLaskennat() {
+		return laskentaCache.asMap().values().stream()
+				.filter(l -> l.isValmis()).collect(Collectors.toList());
+	}
+
+	@Override
+	public Laskenta haeLaskenta(String uuid) {
+		Laskenta l = laskentaCache.getIfPresent(uuid);
+		if (l != null && l.isValmis()) { // ei palauteta valmistuneita
+			return null;
+		}
+		return l;
+	}
+
+	@Override
 	public void configure() throws Exception {
-		// interceptFrom(valintalaskentaKerralla)
-		// //
-		// .setProperty(LOPETUSEHTO, constant(new AtomicBoolean(false)));
+		interceptFrom(valintalaskentaKerralla).process(
+				Reititys.<LaskentaJaHaku> kuluttaja(l -> {
+					laskentaCache.put(l.getLaskenta().getUuid(),
+							l.getLaskenta());
+				}));
+		//
 		intercept().when(simple("${property.lopetusehto?.get()}")).stop();
 
 		from(DEADLETTERCHANNEL)
@@ -315,6 +350,8 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder 
 															Collectors.toList());
 
 											laskeDTO.setHakemus(hakemukset);
+											laskeDTO.setValintaperuste(tyo
+													.getValintaperusteet());
 											Collections
 													.sort(tyo
 															.getValintaperusteet(),
@@ -332,8 +369,7 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder 
 															});
 											for (ValintaperusteetDTO vp : tyo
 													.getValintaperusteet()) {
-												laskeDTO.setValintaperuste(Arrays
-														.asList(vp));
+
 												if (isValintakoelaskenta(vp)) {
 													valintalaskentaResource
 															.valintakokeet(laskeDTO);

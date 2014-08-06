@@ -3,16 +3,22 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
 public class Laskenta {
+	private final static Logger LOG = LoggerFactory.getLogger(Laskenta.class);
 	private final static String NIMI_FORMAT = "Laskenta hakuOid(%s) uuid(%s) hakukohteita(%s/%s)";
 	private final String uuid;
 	private final String hakuOid;
-	private final boolean kaytaSeurantaa;
+	private final boolean osittainenLaskenta; // eli ei koko haku, eli esim
+												// yksittainen hakukohde tai
+												// osajoukko haun hakukohteista
 	private final int hakukohteita;
 	private final AtomicBoolean lopetusehto;
 	private final AtomicInteger tehty = new AtomicInteger(0);
@@ -21,33 +27,45 @@ public class Laskenta {
 			AtomicBoolean lopetusehto) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
-		this.kaytaSeurantaa = true;
 		this.hakukohteita = hakukohteita;
 		this.lopetusehto = lopetusehto;
+		this.osittainenLaskenta = false;
 	}
 
 	public Laskenta(String uuid, String hakuOid, int hakukohteita,
-			boolean kaytaSeurantaa, AtomicBoolean lopetusehto) {
+			AtomicBoolean lopetusehto, boolean osittainenLaskenta) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
-		this.kaytaSeurantaa = kaytaSeurantaa;
 		this.hakukohteita = hakukohteita;
 		this.lopetusehto = lopetusehto;
+		this.osittainenLaskenta = osittainenLaskenta;
+	}
+
+	public boolean isOsittainenLaskenta() {
+		return osittainenLaskenta;
 	}
 
 	public AtomicBoolean getLopetusehto() {
 		return lopetusehto;
 	}
 
-	public boolean isKaytaSeurantaa() {
-		return kaytaSeurantaa;
-	}
-
 	/**
 	 * @return true jos laskenta valmis
 	 */
 	public boolean merkkaaHakukohdeTehdyksi() {
-		return tehty.incrementAndGet() == hakukohteita;
+		int nyt = tehty.incrementAndGet();
+		if (nyt > hakukohteita) {
+			LOG.error("Tehdyt tyot ylittaa maariteltyjen toiden maaran laskenta reitilla!");
+		}
+		return nyt >= hakukohteita;
+	}
+
+	public boolean isValmis() {
+		return tehty.get() >= hakukohteita;
+	}
+
+	public int getHakukohteita() {
+		return hakukohteita;
 	}
 
 	public String getHakuOid() {
