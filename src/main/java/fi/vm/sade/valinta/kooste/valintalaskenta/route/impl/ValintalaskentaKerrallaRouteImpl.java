@@ -337,58 +337,25 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 													"Laskenta hakukohteelle {}. Valmis laskettavaksi == {}",
 													tyo.getHakukohdeOid(),
 													tyo.isValmisLaskettavaksi());
-											LaskeDTO laskeDTO = new LaskeDTO();
-											List<HakemusDTO> hakemukset = tyo
-													.getHakemukset()
-													.stream()
-													.map(h -> getContext()
-															.getTypeConverter()
-															.tryConvertTo(
-																	HakemusDTO.class,
-																	h))
-													.collect(
-															Collectors.toList());
-
-											laskeDTO.setHakemus(hakemukset);
-											laskeDTO.setValintaperuste(tyo
-													.getValintaperusteet());
-											Collections
-													.sort(tyo
-															.getValintaperusteet(),
-															new Comparator<ValintaperusteetDTO>() {
-																public int compare(
-																		ValintaperusteetDTO o1,
-																		ValintaperusteetDTO o2) {
-																	return new Integer(
-																			o1.getValinnanVaihe()
-																					.getValinnanVaiheJarjestysluku())
-																			.compareTo(o2
-																					.getValinnanVaihe()
-																					.getValinnanVaiheJarjestysluku());
-																}
-															});
-											for (ValintaperusteetDTO vp : tyo
-													.getValintaperusteet()) {
-
-												if (isValintakoelaskenta(vp)) {
-													valintalaskentaResource
-															.valintakokeet(laskeDTO);
-													LOG.debug(
-															"Valintakoelaskenta hakukohteelle {} suoritettu valinnanvaiheelle {}",
+											valintalaskentaResource
+													.laskeKaikki(new LaskeDTO(
+															tyo.getHakemukset()
+																	.stream()
+																	.map(h -> getContext()
+																			.getTypeConverter()
+																			.tryConvertTo(
+																					HakemusDTO.class,
+																					h))
+																	.collect(
+																			Collectors
+																					.toList()),
+															tyo.getValintaperusteet()));
+											seurantaResource
+													.merkkaaHakukohteenTila(
+															tyo.getLaskenta()
+																	.getUuid(),
 															tyo.getHakukohdeOid(),
-															vp.getValinnanVaihe()
-																	.getValinnanVaiheJarjestysluku());
-												} else {
-													valintalaskentaResource
-															.laske(laskeDTO);
-													LOG.debug(
-															"Valintalaskenta hakukohteelle {} suoritettu valinnanvaiheelle {}",
-															tyo.getHakukohdeOid(),
-															vp.getValinnanVaihe()
-																	.getValinnanVaiheJarjestysluku());
-												}
-											}
-
+															HakukohdeTila.VALMIS);
 										}
 									} finally {
 										LOG.info(
@@ -423,11 +390,6 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 								})))
 				//
 				.stop();
-	}
-
-	private boolean isValintakoelaskenta(ValintaperusteetDTO vp) {
-		return vp.getValinnanVaihe().getValintakoe() != null
-				&& !vp.getValinnanVaihe().getValintakoe().isEmpty();
 	}
 
 	@Override
