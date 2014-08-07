@@ -192,6 +192,7 @@ public class ViestintapalveluAktivointiResource {
 	public ProsessiId aktivoiJalkiohjauskirjeidenLuonti(
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
 			@QueryParam("hakuOid") String hakuOid,
+			@QueryParam("templateName") String templateName,
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("tag") String tag) {
 		try {
@@ -210,7 +211,7 @@ public class ViestintapalveluAktivointiResource {
 			jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(
 					jalkiohjauskirjeetProsessi,
 					hakemuksillaRajaus.getLanguageCode(), tarjoajaOid,
-					hakemuksillaRajaus.getLetterBodyText(), tag,
+					templateName, hakemuksillaRajaus.getLetterBodyText(), tag,
 					hakemuksillaRajaus.getHakemusOids(), hakuOid,
 					//
 					SecurityContextHolder.getContext().getAuthentication());

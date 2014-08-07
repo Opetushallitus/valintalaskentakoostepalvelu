@@ -29,6 +29,7 @@ public interface JalkiohjauskirjeRoute {
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
 			@Property(KieliUtil.PREFEROITUKIELIKOODI) String preferoitukielikoodi,
 			@Property(OPH.TARJOAJAOID) String tarjoajaOid,
+			@Property("templateName") String templateName,
 			@Property("sisalto") String sisalto,
 			@Property("tag") String tag,
 			@Property("hakemusOids") List<String> hakemusOidit,
