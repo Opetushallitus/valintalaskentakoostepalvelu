@@ -97,7 +97,7 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 	@Override
 	public List<Laskenta> ajossaOlevatLaskennat() {
 		return laskentaCache.asMap().values().stream()
-				.filter(l -> l.isValmis()).collect(Collectors.toList());
+				.filter(l -> !l.isValmis()).collect(Collectors.toList());
 	}
 
 	@Override
