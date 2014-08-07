@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 /**
  * User: wuoti Date: 20.5.2013 Time: 10.46
  */
-//@Component("suoritaHakukohdeImportKomponentti")
+
 @PreAuthorize("isAuthenticated()")
 public class SuoritaHakukohdeImportKomponentti {
 
