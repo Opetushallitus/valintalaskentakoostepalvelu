@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 
-import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1Resource;
 import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
@@ -25,10 +24,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
-import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
 
 /**
@@ -44,15 +41,15 @@ public class SuoritaHakukohdeImportKomponenttiTest {
 
 	private SuoritaHakukohdeImportKomponentti suoritaHakukohdeImportKomponentti;
 
-	private HakukohdeV1ResourceWrapper hakukohdeResourceMock;
-	private KoodistoJsonRESTResource koodistoJsonRESTResourceMock;
+    private HakukohdeV1ResourceWrapper hakukohdeResourceMock;
+    private KoodistoJsonRESTResource koodistoJsonRESTResourceMock;
 
 	@Before
 	public void setUp() {
 		suoritaHakukohdeImportKomponentti = new SuoritaHakukohdeImportKomponentti();
 
-		hakukohdeResourceMock = mock(HakukohdeV1ResourceWrapper.class);
-		koodistoJsonRESTResourceMock = mock(KoodistoJsonRESTResource.class);
+        hakukohdeResourceMock = mock(HakukohdeV1ResourceWrapper.class);
+        koodistoJsonRESTResourceMock = mock(KoodistoJsonRESTResource.class);
 
 		// ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti,
 		// "valintaperusteService",
