@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
@@ -34,6 +35,8 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.resource.SeurantaResource;
 
@@ -72,7 +75,9 @@ public class ValintalaskentaKerrallaResource {
 	@Produces(APPLICATION_JSON)
 	public Vastaus valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid,
 			@PathParam("whitelist") boolean whitelist, List<String> maski) {
-		return kaynnistaLaskenta(hakuOid, new Maski(whitelist, maski));
+		return kaynnistaLaskenta(hakuOid, new Maski(whitelist, maski), ((hoid,
+				haunHakukohteetOids) -> seurantaResource.luoLaskenta(hoid,
+				haunHakukohteetOids)));
 	}
 
 	/**
@@ -107,48 +112,68 @@ public class ValintalaskentaKerrallaResource {
 	@Consumes(APPLICATION_JSON)
 	@Produces(APPLICATION_JSON)
 	public Vastaus valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid) {
-		return kaynnistaLaskenta(hakuOid, new Maski());
+		return kaynnistaLaskenta(hakuOid, new Maski(), ((hoid,
+				haunHakukohteetOids) -> seurantaResource.luoLaskenta(hoid,
+				haunHakukohteetOids)));
 	}
 
-	private Vastaus kaynnistaLaskenta(String hakuOid, Maski maski) {
+	/**
+	 * Uudelleen aja vanha haku
+	 * 
+	 * @param hakuOid
+	 * @return
+	 */
+	@POST
+	@Path("/uudelleenyrita/{uuid}")
+	@Consumes(APPLICATION_JSON)
+	@Produces(APPLICATION_JSON)
+	public Vastaus uudelleenajoLaskennalle(@PathParam("uuid") String uuid) {
+		final LaskentaDto laskenta = seurantaResource.laskenta(uuid);
+		// valmistumattomien hakukohteiden maski
+		List<String> maski = laskenta.getHakukohteet().stream()
+				.filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
+				.map(h -> h.getHakukohdeOid()).collect(Collectors.toList());
+		return kaynnistaLaskenta(uuid, new Maski(true, maski), ((hoid,
+				haunHakukohteetOids) -> laskenta.getUuid()));
+	}
+
+	private Vastaus kaynnistaLaskenta(String hakuOid, Maski maski,
+			BiFunction<String, List<String>, String> seurantaTunnus) {
 		if (hakuOid == null) {
 			throw new RuntimeException("HakuOid on pakollinen");
 		}
-		// Kaynnissa oleva laskenta koko haulle
-		Optional<Laskenta> ajossaOlevaLaskentaHaulle = valintalaskentaValvomo
-				.ajossaOlevatLaskennat().stream()
-				// Tama haku ...
-				.filter(l -> hakuOid.equals(l.getHakuOid())
-				// .. ja koko haun laskennasta on kyse
-						&& !l.isOsittainenLaskenta()).findFirst();
-		if (ajossaOlevaLaskentaHaulle.isPresent() &&
 		// maskilla kaynnistettaessa luodaan aina uusi laskenta
-				!maski.isMask()) {
-			// palautetaan seurattavaksi ajossa olevan hakukohteen
-			// seurantatunnus
-			String uuid = ajossaOlevaLaskentaHaulle.get().getUuid();
-			LOG.warn(
-					"Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun",
-					hakuOid, uuid);
-			return Vastaus.uudelleenOhjaus(uuid);
-		} else {
-			LOG.info("Aloitetaan uusi laskenta haulle {}", hakuOid);
-			List<String> haunHakukohteetOids = haunHakukohteet(hakuOid);
-			if (maski.isMask()) {
-				haunHakukohteetOids = Lists.newArrayList(maski
-						.maskaa(haunHakukohteetOids));
+		if (!maski.isMask()) { // muuten tarkistetaan onko laskenta jo olemassa
+			// Kaynnissa oleva laskenta koko haulle
+			Optional<Laskenta> ajossaOlevaLaskentaHaulle = valintalaskentaValvomo
+					.ajossaOlevatLaskennat().stream()
+					// Tama haku ...
+					.filter(l -> hakuOid.equals(l.getHakuOid())
+					// .. ja koko haun laskennasta on kyse
+							&& !l.isOsittainenLaskenta()).findFirst();
+			if (ajossaOlevaLaskentaHaulle.isPresent()) {
+				// palautetaan seurattavaksi ajossa olevan hakukohteen
+				// seurantatunnus
+				String uuid = ajossaOlevaLaskentaHaulle.get().getUuid();
+				LOG.warn(
+						"Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun",
+						hakuOid, uuid);
+				return Vastaus.uudelleenOhjaus(uuid);
 			}
-			String uuid = seurantaResource.luoLaskenta(hakuOid,
-					haunHakukohteetOids);
-
-			AtomicBoolean lopetusehto = new AtomicBoolean(false);
-			valintalaskentaRoute.suoritaValintalaskentaKerralla(
-					new LaskentaJaHaku(new Laskenta(uuid, hakuOid,
-							haunHakukohteetOids.size(), lopetusehto, maski
-									.isMask()), haunHakukohteetOids),
-					lopetusehto);
-			return Vastaus.uudelleenOhjaus(uuid);
 		}
+		LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
+		List<String> haunHakukohteetOids = haunHakukohteet(hakuOid);
+		if (maski.isMask()) {
+			haunHakukohteetOids = Lists.newArrayList(maski
+					.maskaa(haunHakukohteetOids));
+		}
+		String uuid = seurantaTunnus.apply(hakuOid, haunHakukohteetOids);
+		AtomicBoolean lopetusehto = new AtomicBoolean(false);
+		valintalaskentaRoute.suoritaValintalaskentaKerralla(new LaskentaJaHaku(
+				new Laskenta(uuid, hakuOid, haunHakukohteetOids.size(),
+						lopetusehto, maski.isMask()), haunHakukohteetOids),
+				lopetusehto);
+		return Vastaus.uudelleenOhjaus(uuid);
 	}
 
 	/**
