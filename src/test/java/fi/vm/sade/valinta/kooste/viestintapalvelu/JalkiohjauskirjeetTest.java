@@ -47,7 +47,7 @@ public class JalkiohjauskirjeetTest {
 	public void testaaJalkiohjauskirjeReitti() {
 		DokumenttiProsessi p = new DokumenttiProsessi("", "", "", null);
 		jalkiohjauskirjeRoute.jalkiohjauskirjeetAktivoi(p, null, null, null,
-				null, null, "1", null);
+				null, null, null, "1", null);
 	}
 
 	@Bean
