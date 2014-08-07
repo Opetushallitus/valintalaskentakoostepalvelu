@@ -61,7 +61,7 @@ public class Laskenta {
 	}
 
 	public boolean isValmis() {
-		return tehty.get() >= hakukohteita;
+		return tehty.get() >= hakukohteita || lopetusehto.get();
 	}
 
 	public int getHakukohteita() {
