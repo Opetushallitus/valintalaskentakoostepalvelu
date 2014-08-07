@@ -113,6 +113,16 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 	public void configure() throws Exception {
 		interceptFrom(valintalaskentaKerralla).process(
 				Reititys.<LaskentaJaHaku> kuluttaja(l -> {
+					Laskenta vanhaLaskenta = laskentaCache.getIfPresent(l
+							.getLaskenta().getUuid());
+					if (vanhaLaskenta != null) {
+						// varmistetaan etta uudelleen ajon reunatapauksessa
+						// mahdollisesti viela suorituksessa oleva vanha
+						// laskenta
+						// lakkaa kayttamasta resursseja ja siivoutuu ajallaan
+						// pois
+						vanhaLaskenta.getLopetusehto().set(true);
+					}
 					laskentaCache.put(l.getLaskenta().getUuid(),
 							l.getLaskenta());
 				}));
@@ -283,7 +293,7 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 				.completionSize(2)
 				// Purkaa valmistumattomat viimeistaan muutamien minuuttien
 				// jalkeen
-				.completionTimeout(TimeUnit.MINUTES.toMillis(10L))
+				.completionTimeout(TimeUnit.HOURS.toHours(2L))
 				//
 				.process(
 						Reititys.<LaskentaJaValintaperusteetJaHakemukset> kuluttaja(
