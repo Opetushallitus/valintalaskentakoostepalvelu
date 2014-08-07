@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste;
 
 import fi.vm.sade.valinta.kooste.converter.HakemusToHakemusDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.ThreadPoolRejectedPolicy;
 import org.apache.camel.spi.ThreadPoolProfile;
@@ -24,7 +25,9 @@ import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig;
 @Configuration
 @Import({ KelaRouteConfig.class, KoostepalveluContext.CamelConfig.class })
 public class KoostepalveluContext {
-
+	
+	static final String TYHJA_ARVO_POIKKEUS = "Reititysta ei voida jatkaa tyhjalle arvolle!";
+	
 	private static final Logger LOG = LoggerFactory
 			.getLogger(KoostepalveluContext.class);
 

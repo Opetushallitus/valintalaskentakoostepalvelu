@@ -95,7 +95,8 @@ public class HyvaksymiskirjeetKomponentti {
 			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
 			@Simple("${property.hakuOid}") String hakuOid,
 			@Property("tarjoajaOid") String tarjoajaOid,
-			@Property("sisalto") String sisalto, @Property("tag") String tag) {
+			@Property("sisalto") String sisalto, @Property("tag") String tag,
+			@Property("templateName") String templateName) {
 
 		LOG.debug(
 				"Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'",
@@ -271,8 +272,8 @@ public class HyvaksymiskirjeetKomponentti {
 					vakioTarjoajanNimi(hakukohdeOid)));
 			replacements.put("koulutus", koulutus.getTeksti(
 					preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
-			kirjeet.add(new Letter(osoite, "hyvaksymiskirje",
-					preferoituKielikoodi, replacements));
+			kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi,
+					replacements));
 		}
 
 		LOG.info(
@@ -295,7 +296,7 @@ public class HyvaksymiskirjeetKomponentti {
 		viesti.setLanguageCode(preferoituKielikoodi);
 		viesti.setOrganizationOid(tarjoajaOid);
 		viesti.setTag(tag);
-		viesti.setTemplateName("hyvaksymiskirje");
+		viesti.setTemplateName(templateName);
 		Map<String, Object> templateReplacements = Maps.newHashMap();
 		templateReplacements.put("sisalto", sisalto);
 		templateReplacements.put("hakukohde", koulutus.getTeksti(

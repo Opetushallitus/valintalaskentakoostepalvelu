@@ -216,6 +216,10 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 															"sisalto",
 															String.class),
 													exchange.getProperty("tag",
+															String.class),
+													exchange.getProperty(
+															"templateName",
+															"hyvaksymiskirje",
 															String.class)));
 						} catch (Exception e) {
 							dokumenttiprosessi(exchange)
@@ -300,8 +304,10 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						try {
 
 							dokumenttiResource.tallenna(id,
-									"hyvaksymiskirjeet_"+hakukohdeOid(exchange)+".pdf", expirationTime,
-									tags, "application/pdf", pdf);
+									"hyvaksymiskirjeet_"
+											+ hakukohdeOid(exchange) + ".pdf",
+									expirationTime, tags, "application/pdf",
+									pdf);
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 							prosessi.setDokumenttiId(id);

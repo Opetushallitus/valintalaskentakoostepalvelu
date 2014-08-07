@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
-       xmlns:beans="http://www.springframework.org/schema/beans"
-       xmlns:jaxws="http://cxf.apache.org/jaxws"
-       xmlns:jaxrs-client="http://cxf.apache.org/jaxrs-client"
-       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
-       xmlns:p="http://www.springframework.org/schema/p"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:http="http://cxf.apache.org/transports/http/configuration"
-       xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:jaxrs-client="http://cxf.apache.org/jaxrs-client" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:http="http://cxf.apache.org/transports/http/configuration"
+	xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
            http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
@@ -17,485 +14,580 @@
            http://cxf.apache.org/jaxrs-client http://cxf.apache.org/schemas/jaxrs-client.xsd
            http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd">
 
-    <ctx:annotation-config/>
+	<ctx:annotation-config />
 
-    <ctx:property-placeholder
-            location="classpath:META-INF/kela.properties, classpath:META-INF/valintalaskentakoostepalvelu.properties, classpath:META-INF/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valinta.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/override.properties"
-            ignore-resource-not-found="true" properties-ref="defaultProps"/>
-	
-	
+	<ctx:property-placeholder
+		location="classpath:META-INF/kela.properties, classpath:META-INF/valintalaskentakoostepalvelu.properties, classpath:META-INF/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valinta.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/override.properties"
+		ignore-resource-not-found="true" properties-ref="defaultProps" />
 
-    <bean id="defaultProps" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-        <property name="properties">
-            <util:properties local-override="true">
-                <prop key="cas_mode">front</prop>
-                <prop key="cas_key">valintalaskentakoostepalvelu</prop>
-                <prop key="cas_service">${cas.service.valintalaskentakoostepalvelu}</prop>
-                <prop key="cas_callback_url">${cas.callback.valintalaskentakoostepalvelu}</prop>
-                <prop key="spring_security_default_access">isAuthenticated()</prop>
-            </util:properties>
-        </property>
-    </bean>
-    <import resource="file:///${user.home:''}/oph-configuration/security-context-backend.xml"/>
 
-    <!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
-    <!--<import resource="classpath:authentication-client.xml"/>-->
-    <bean 	id="ticketInterceptor"
-    		class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptor"
-    		/>
-    
-    <authorizationPolicy id="admin" access="isAuthenticated()"
-                         authenticationManager="authenticationManager"
-                         accessDecisionManager="accessDecisionManager"
-                         xmlns="http://camel.apache.org/schema/spring-security"/>
 
-    
-    <!--fetching valintatieto takes ages, consider removing this once valinnan tulokset service has been optimized-->
-    <http:conduit name="*.http-conduit">
-        <!-- AllowChunking="false" Nginx fails without this -->
-        <http:client Connection="Keep-Alive" ConnectionTimeout="0" ReceiveTimeout="0" AllowChunking="false"/>
-    </http:conduit>
+	<bean id="defaultProps"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="properties">
+			<util:properties local-override="true">
+				<prop key="cas_mode">front</prop>
+				<prop key="cas_key">valintalaskentakoostepalvelu</prop>
+				<prop key="cas_service">${cas.service.valintalaskentakoostepalvelu}</prop>
+				<prop key="cas_callback_url">${cas.callback.valintalaskentakoostepalvelu}</prop>
+				<prop key="spring_security_default_access">isAuthenticated()</prop>
+			</util:properties>
+		</property>
+	</bean>
+	<import
+		resource="file:///${user.home:''}/oph-configuration/security-context-backend.xml" />
 
-    <bean id="jacksonMapper" class="org.codehaus.jackson.map.ObjectMapper"/>
-    
-    <jaxrs-client:client id="viestintapalveluClient"
-    			  name="ViestintapalveluRestClient"
-                  serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource"
-                  address="${valintalaskentakoostepalvelu.viestintapalvelu.url}"
-                  inheritHeaders="true">
-    	<jaxrs-client:outInterceptors>
-            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-                <property name="webCasUrl" value="${web.url.cas}"/>
-                <property name="targetService"
-                          value="${cas.service.viestintapalvelu}/j_spring_cas_security_check"/>
-                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}"/>
-                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}"/>
-            </bean>
-        </jaxrs-client:outInterceptors>
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
-    
-    <jaxrs-client:client id="ValintatapajonoClient"
-                  serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValintatapajonoResource"
-                  address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}/">
-    	<!--<jaxrs-client:outInterceptors>-->
-            <!--<ref bean="ticketInterceptor"/>-->
-        <!--</jaxrs-client:outInterceptors>-->
+	<!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
+	<!--<import resource="classpath:authentication-client.xml"/> -->
+	<bean id="ticketInterceptor" class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptor" />
+
+	<authorizationPolicy id="admin" access="isAuthenticated()"
+		authenticationManager="authenticationManager" accessDecisionManager="accessDecisionManager"
+		xmlns="http://camel.apache.org/schema/spring-security" />
+
+
+	<!--fetching valintatieto takes ages, consider removing this once valinnan 
+		tulokset service has been optimized -->
+	<http:conduit name="*.http-conduit">
+		<!-- AllowChunking="false" Nginx fails without this -->
+		<http:client Connection="Keep-Alive" ConnectionTimeout="0"
+			ReceiveTimeout="0" AllowChunking="false" />
+	</http:conduit>
+
+	<bean id="jacksonMapper" class="org.codehaus.jackson.map.ObjectMapper" />
+
+	<jaxrs-client:client id="viestintapalveluClient"
+		name="ViestintapalveluRestClient"
+		serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource"
+		address="${valintalaskentakoostepalvelu.viestintapalvelu.url}"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.viestintapalvelu}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
-    <jaxrs-client:client id="ValinnanVaiheClient"
-                  serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValinnanVaiheResource"
-                  address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}/">
-    	<!--<jaxrs-client:outInterceptors>-->
-            <!--<ref bean="ticketInterceptor"/>-->
-        <!--</jaxrs-client:outInterceptors>-->
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+
+	<jaxrs-client:client id="ValintatapajonoClient"
+		serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValintatapajonoResource"
+		address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}/">
+		<jaxrs-client:outInterceptors>
+			<ref bean="ticketInterceptor"/>
+		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
-    
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+	<jaxrs-client:client id="ValinnanVaiheClient"
+		serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValinnanVaiheResource"
+		address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}/">
+		<jaxrs-client:outInterceptors>
+			<ref bean="ticketInterceptor"/>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+
 	<jaxrs-client:client id="ValintaperusteetValintakoeRestClient"
-                  serviceClass="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeResource"
-                  address="https://${host.virkailija}"
-                  inheritHeaders="true">
-		<!--<jaxrs-client:outInterceptors>-->
-            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
-                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
-                <!--<property name="targetService"-->
-                          <!--value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check"/>-->
-                <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}"/>-->
-                <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}"/>-->
-            <!--</bean>-->
-        <!--</jaxrs-client:outInterceptors>-->
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
-    <jaxrs-client:client id="ValintakoeRestClient"
-                  serviceClass="fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource"
-                  address="${valintalaskentakoostepalvelu.valintalaskenta.rest.url}">
-		<!--<jaxrs-client:outInterceptors>-->
-            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
-                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
-                <!--<property name="targetService"-->
-                          <!--value="${cas.service.valintalaskenta-service}/j_spring_cas_security_check"/>-->
-                <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}"/>-->
-                <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}"/>-->
-            <!--</bean>-->
-        <!--</jaxrs-client:outInterceptors>-->
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
-    <jaxrs-client:client id="HakemusServiceRestClientAsAdmin"
-                  address="${valintalaskentakoostepalvelu.hakemus.rest.url}"
-                  serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource"
-                  inheritHeaders="true">
-        <!--<jaxrs-client:outInterceptors>-->
-            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
-                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
-                <!--<property name="targetService"-->
-                          <!--value="${cas.service.haku-service}/j_spring_cas_security_check"/>-->
-                <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.haku}"/>-->
-                <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.haku}"/>-->
-            <!--</bean>-->
-        <!--</jaxrs-client:outInterceptors>-->
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
-    <jaxrs-client:client id="adminDokumenttipalveluRestClient"
-                  address="${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}"
-                  serviceClass="fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource"
-                  inheritHeaders="true">
-        <jaxrs-client:outInterceptors>
-            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-                <property name="webCasUrl" value="${web.url.cas}"/>
-                <property name="targetService"
-                          value="${cas.service.dokumenttipalvelu}/j_spring_cas_security_check"/>
-                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}"/>
-                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}"/>
-            </bean>
-        </jaxrs-client:outInterceptors>
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
-    
-    <import resource="classpath:spring/application-rs-tarjonta.xml"/>
-    
-	
-    <jaxrs-client:client id="KoodistoServiceRestClient"
-                  address="${valintalaskentakoostepalvelu.koodisto.rest.url}"
-                  serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.KoodistoJsonRESTResource"
-                  inheritHeaders="true">
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
-    <jaxrs-client:client id="sijoitteluTilaServiceRestClient"
-                  address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
-                  serviceClass="fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource"
-                  inheritHeaders="true">
-        <jaxrs-client:outInterceptors>
-            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-                <property name="webCasUrl" value="${web.url.cas}"/>
-                <property name="targetService"
-                          value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>
-                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>
-            </bean>
-        </jaxrs-client:outInterceptors>
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
+		serviceClass="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeResource"
+		address="https://${host.virkailija}" inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+	<jaxrs-client:client id="ValintakoeRestClient"
+		serviceClass="fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource"
+		address="${valintalaskentakoostepalvelu.valintalaskenta.rest.url}">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.valintalaskenta-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+	<jaxrs-client:client id="HakemusServiceRestClientAsAdmin"
+		address="${valintalaskentakoostepalvelu.hakemus.rest.url}"
+		serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.haku-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.haku}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.haku}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+	<jaxrs-client:client id="adminDokumenttipalveluRestClient"
+		address="${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}"
+		serviceClass="fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.dokumenttipalvelu}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
 
-    <jaxrs-client:client id="sijoitteluRestClient"
-                  address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
-                  serviceClass="fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource"
-                  inheritHeaders="true">
-        <!--<jaxrs-client:outInterceptors>-->
-            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
-                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
-                <!--<property name="targetService"-->
-                          <!--value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>-->
-                <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>-->
-                <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>-->
-            <!--</bean>-->
-        <!--</jaxrs-client:outInterceptors>-->
-    </jaxrs-client:client>
+	<import resource="classpath:spring/application-rs-tarjonta.xml" />
 
 
-    <jaxrs-client:client id="SijoitteluServiceRestClient"
-                  address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
-                  serviceClass="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource"
-                  inheritHeaders="true">
-        <!--<jaxrs-client:outInterceptors>-->
-            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
-                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
-                <!--<property name="targetService"-->
-                          <!--value="${cas.service.sijoittelu-service}/j_spring_cas_security_check"/>-->
-                <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}"/>-->
-                <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}"/>-->
-            <!--</bean>-->
-        <!--</jaxrs-client:outInterceptors>-->
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
-    <jaxrs-client:client id="ValintaperusteetHakukohdeRestClient"
-                  address="https://${host.virkailija}"
-                  serviceClass="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource"
-                  inheritHeaders="true">
-        <!--<jaxrs-client:outInterceptors>-->
-            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
-                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
-                <!--<property name="targetService"-->
-                          <!--value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check"/>-->
-                <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}"/>-->
-                <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}"/>-->
-            <!--</bean>-->
-        <!--</jaxrs-client:outInterceptors>-->
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
+	<jaxrs-client:client id="KoodistoServiceRestClient"
+		address="${valintalaskentakoostepalvelu.koodisto.rest.url}"
+		serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.KoodistoJsonRESTResource"
+		inheritHeaders="true">
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+	<jaxrs-client:client id="sijoitteluTilaServiceRestClient"
+		address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
+		serviceClass="fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.sijoittelu-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
 
-    <jaxrs-client:client id="ValintaperusteetLaskentaRestClient"
-                  address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}"
-                  serviceClass="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource"
-                  inheritHeaders="true">
-        <!--<jaxrs-client:outInterceptors>-->
-            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
-                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
-                <!--<property name="targetService"-->
-                          <!--value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check"/>-->
-                <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}"/>-->
-                <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}"/>-->
-            <!--</bean>-->
-        <!--</jaxrs-client:outInterceptors>-->
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
+	<jaxrs-client:client id="sijoitteluRestClient"
+		address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
+		serviceClass="fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.sijoittelu-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+	</jaxrs-client:client>
 
 
-    <jaxrs-client:client id="ValintalaskentaHakukohdeRestClient"
-                  address="https://${host.virkailija}"
-                  serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource"
-                  inheritHeaders="true">
-        <!--<jaxrs-client:outInterceptors>-->
-            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
-                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
-                <!--<property name="targetService"-->
-                          <!--value="${cas.service.valintalaskenta-service}/j_spring_cas_security_check"/>-->
-                <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}"/>-->
-                <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}"/>-->
-            <!--</bean>-->
-        <!--</jaxrs-client:outInterceptors>-->
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
+	<jaxrs-client:client id="SijoitteluServiceRestClient"
+		address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
+		serviceClass="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.sijoittelu-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.sijoittelu}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.sijoittelu}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+	<jaxrs-client:client id="ValintaperusteetHakukohdeRestClient"
+		address="https://${host.virkailija}"
+		serviceClass="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
 
-    <jaxrs-client:client id="ValintalaskentaLaskentaRestClient"
-                  address="${valintalaskentakoostepalvelu.valintalaskenta.rest.url}"
-                  serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource"
-                  inheritHeaders="true">
-        <!--<jaxrs-client:outInterceptors>-->
-            <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
-                <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
-                <!--<property name="targetService"-->
-                          <!--value="${cas.service.valintalaskenta-service}/j_spring_cas_security_check"/>-->
-                <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}"/>-->
-                <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}"/>-->
-            <!--</bean>-->
-        <!--</jaxrs-client:outInterceptors>-->
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
-
-    <jaxrs-client:client id="ValintatietoRestClient"
-                         address="${valintalaskentakoostepalvelu.valintalaskenta.rest.url}"
-                         serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintatietoResource"
-                         inheritHeaders="true">
-        <!--<jaxrs-client:outInterceptors>-->
-        <!--<bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">-->
-        <!--<property name="webCasUrl" value="${web.url.cas}"/>-->
-        <!--<property name="targetService"-->
-        <!--value="${cas.service.valintalaskenta-service}/j_spring_cas_security_check"/>-->
-        <!--<property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}"/>-->
-        <!--<property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}"/>-->
-        <!--</bean>-->
-        <!--</jaxrs-client:outInterceptors>-->
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
+	<jaxrs-client:client id="ValintaperusteetLaskentaRestClient"
+		address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}"
+		serviceClass="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
 
 
+	<jaxrs-client:client id="ValintalaskentaHakukohdeRestClient"
+		address="https://${host.virkailija}"
+		serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.valintalaskenta-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
 
-    <jaxrs-client:client id="OrganisaatioResourceClient"
-                  address="${valintalaskentakoostepalvelu.organisaatioService.rest.url}"
-                  serviceClass="fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource"
-                  inheritHeaders="true">
-        <jaxrs-client:outInterceptors>
-            <ref bean="ticketInterceptor"/>
-        </jaxrs-client:outInterceptors>
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
+	<jaxrs-client:client id="ValintalaskentaLaskentaRestClient"
+		address="${valintalaskentakoostepalvelu.valintalaskenta.rest.url}"
+		serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.valintalaskenta-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+	<jaxrs-client:client id="SeurantaRestClient"
+		address="${valintalaskentakoostepalvelu.seuranta.rest.url}"
+		serviceClass="fi.vm.sade.valinta.seuranta.resource.SeurantaResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.seuranta}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+	<jaxrs-client:client id="SijoittelunSeurantaRestClient"
+		address="${valintalaskentakoostepalvelu.seuranta.rest.url}"
+		serviceClass="fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.seuranta}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+	<jaxrs-client:client id="ValintatietoRestClient"
+		address="${valintalaskentakoostepalvelu.valintalaskenta.rest.url}"
+		serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintatietoResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.valintalaskenta-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}" />
+			</bean>
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+
+
+
+	<jaxrs-client:client id="OrganisaatioResourceClient"
+		address="${valintalaskentakoostepalvelu.organisaatioService.rest.url}"
+		serviceClass="fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource"
+		inheritHeaders="true">
+		<jaxrs-client:outInterceptors>
+			<ref bean="ticketInterceptor" />
+		</jaxrs-client:outInterceptors>
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
 
 	<jaxrs-client:client id="HakukohdeV1ResourceClient"
-                  address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
-                  serviceClass="fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper"
-                  inheritHeaders="true">
-        <jaxrs-client:providers>
-            <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-        </jaxrs-client:providers>
-    </jaxrs-client:client>
+		address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
+		serviceClass="fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper"
+		inheritHeaders="true">
+		<jaxrs-client:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
 
-    <jaxws:client id="tarjontaServiceClient"
-                  serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
-                  address="${valintalaskentakoostepalvelu.tarjontaService.url}">
-    </jaxws:client>
-	
-    <jaxws:client id="koodiService"
-                  serviceClass="fi.vm.sade.koodisto.service.KoodiService"
-                  
-                  address="${valintalaskentakoostepalvelu.koodiService.url}">
-        <jaxws:outInterceptors>
-            <bean class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-                <property name="webCasUrl" value="${web.url.cas}"/>
-                <property name="targetService"
-                          value="${cas.service.koodisto-service}/j_spring_cas_security_check"/>
-                <property name="appClientUsername" value="${valintalaskentakoostepalvelu.app.username.to.koodisto}"/>
-                <property name="appClientPassword" value="${valintalaskentakoostepalvelu.app.password.to.koodisto}"/>
-            </bean>
-        </jaxws:outInterceptors>
-    </jaxws:client>
-	
+	<jaxws:client id="tarjontaServiceClient"
+		serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
+		address="${valintalaskentakoostepalvelu.tarjontaService.url}">
+	</jaxws:client>
+
+	<jaxws:client id="koodiService"
+		serviceClass="fi.vm.sade.koodisto.service.KoodiService" address="${valintalaskentakoostepalvelu.koodiService.url}">
+		<jaxws:outInterceptors>
+			<bean
+				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
+				<property name="webCasUrl" value="${web.url.cas}" />
+				<property name="targetService"
+					value="${cas.service.koodisto-service}/j_spring_cas_security_check" />
+				<property name="appClientUsername"
+					value="${valintalaskentakoostepalvelu.app.username.to.koodisto}" />
+				<property name="appClientPassword"
+					value="${valintalaskentakoostepalvelu.app.password.to.koodisto}" />
+			</bean>
+		</jaxws:outInterceptors>
+	</jaxws:client>
+
 	<bean id="redeliveryPolicy" class="org.apache.camel.processor.RedeliveryPolicy">
 		<property name="maximumRedeliveries" value="5" />
 		<property name="redeliveryDelay" value="25" />
 		<property name="retryAttemptedLogLevel" value="ERROR" />
 	</bean>
-	
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.external.resource.haku.proxy"/>
 
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy"/>
-    
-    <!--  Sijoittelu -->
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.komponentti"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.route.impl"/>
-    <bean class="fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluAktivointiResource"/>
-    
-    <!-- Valintalaskennan tulokset (Excel) -->
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.impl"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.resource"/>
-    
-    <!-- Tarjonta reitit -->
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.route.impl"/>
-    
-    <!-- Valintatieto -->
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatieto.komponentti"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatieto.route.impl"/>
-    
-    <!-- Parametrit -->
-    <bean class="fi.vm.sade.valinta.kooste.parametrit.resource.ParametritResource" />
-    <bean class="fi.vm.sade.valinta.kooste.parametrit.service.impl.ParametriServiceImpl" />
-    <bean id="parametrit" class="fi.vm.sade.valinta.kooste.parametrit.Parametrit">
-        <!--<property name="valintakoekutsutAlkupvm" value="${valintakoekutsut.alkupvm}"/>
-        <property name="valintakoekutsutLoppupvm" value="${valintakoekutsut.loppupvm}"/>
-        <property name="valintakoekutsutkouluillePvm" value="${valintakoekutsutkouluille.pvm}"/>
-        <property name="valintakoeAlkupvm" value="${valintakoe.alkupvm}"/>
-        <property name="valintakoeLoppupvm" value="${valintakoe.loppupvm}"/>-->
-        <property name="koetuloksetAlkupvm" value="${koetulokset.alkupvm}"/>
-        <property name="koetuloksetLoppupvm" value="${koetulokset.loppupvm}"/>
-        <!--<property name="valintajasijoitteluAlkupvm" value="${valintajasijoittelu.alkupvm}"/>
-        <property name="valintajasijoitteluLoppupvm" value="${valintajasijoittelu.loppupvm}"/>-->
-        <property name="valintaesitysPvm" value="${valintaesitys.pvm}"/>
-        <property name="hakuAlkupvm" value="${haku.alkupvm}" />
-        <property name="hakuLoppupvm" value="${haku.loppupvm}" />
-    </bean>
-    <!--
-		Sijoitteluntulokset haulle
-	 -->
-	<bean class="fi.vm.sade.valinta.kooste.sijoitteluntulos.resource.SijoittelunTulosHaulleResource"/>
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoitteluntulos.route.impl"/>
-    <!--
-		Valintatapajono
-	 -->
-	<bean class="fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResource"/>
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatapajono.route.impl"/>
-    <!--
-		Pistesyotto
-	 -->
-	<bean class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource"/>
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.pistesyotto.route.impl"/>
-	<!--
-		Valintalaskenta
-	 -->
-	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaMuistissaResource"/>
-	<bean name="valintalaskentaKomponentti" class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.ValintalaskentaKomponentti"/>
-	<bean name="valintaperusteKomponentti" class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.ValintaperusteKomponentti"/>
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.route.impl"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti"/>
-    
-	<!--
-		Viestintapalvelu 
-	 -->
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
-    <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl"/>
-	<bean class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluAktivointiResource"/>
-	<bean class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.DokumenttiProsessiResource"/>
-	<!--
-		Valintakoelaskenta 
-	 -->
-	<bean class="fi.vm.sade.valinta.kooste.valintakokeet.resource.ValintakoelaskentaAktivointiResource"/>
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintakokeet.route.impl"/>
-	
-	<!--
-		Kela Export
-	 -->
-	<bean class="fi.vm.sade.valinta.kooste.KoostepalveluContext"/>
-	<bean class="fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig"/>
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.resource"/>
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.route.impl"/>
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.komponentti.impl"/>
-	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.dokumenttipalvelu"/>
-	
-	<!--
-		Haku Import 
-	 -->
-	<bean class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti"/>
-	<bean class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti"/>
-	<bean class="fi.vm.sade.valinta.kooste.hakuimport.resource.HakuImportResource"/>
-	<bean class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteConfig"/>
-	<bean class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteImpl"/>
-	
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti" />
+	<ctx:component-scan
+		base-package="fi.vm.sade.valinta.kooste.external.resource.haku.proxy" />
+
+	<ctx:component-scan
+		base-package="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy" />
+
+	<!-- Sijoittelu -->
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.komponentti" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.route.impl" />
+	<bean
+		class="fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluAktivointiResource" />
+
+	<!-- Valintalaskennan tulokset (Excel) -->
+	<ctx:component-scan
+		base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti" />
+	<ctx:component-scan
+		base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.impl" />
+	<ctx:component-scan
+		base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.resource" />
+
+	<!-- Tarjonta reitit -->
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.route.impl" />
+
+	<!-- Valintatieto -->
+	<ctx:component-scan
+		base-package="fi.vm.sade.valinta.kooste.valintatieto.komponentti" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatieto.route.impl" />
+
+	<!-- Parametrit -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.parametrit.resource.ParametritResource" />
+	<bean
+		class="fi.vm.sade.valinta.kooste.parametrit.service.impl.ParametriServiceImpl" />
+	<bean id="parametrit" class="fi.vm.sade.valinta.kooste.parametrit.Parametrit">
+		<property name="koetuloksetAlkupvm" value="${koetulokset.alkupvm}" />
+		<property name="koetuloksetLoppupvm" value="${koetulokset.loppupvm}" />
+		<property name="valintaesitysPvm" value="${valintaesitys.pvm}" />
+		<property name="hakuAlkupvm" value="${haku.alkupvm}" />
+		<property name="hakuLoppupvm" value="${haku.loppupvm}" />
+	</bean>
+	<!-- Sijoitteluntulokset haulle -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.sijoitteluntulos.resource.SijoittelunTulosHaulleResource" />
+	<ctx:component-scan
+		base-package="fi.vm.sade.valinta.kooste.sijoitteluntulos.route.impl" />
+	<!-- Valintatapajono -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResource" />
+	<ctx:component-scan
+		base-package="fi.vm.sade.valinta.kooste.valintatapajono.route.impl" />
+	<!-- Pistesyotto -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.pistesyotto.route.impl" />
+	<!-- Valintalaskenta -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaMuistissaResource" />
+	<bean
+		class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource" />
+	<bean name="valintalaskentaKomponentti"
+		class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.ValintalaskentaKomponentti" />
+	<bean name="valintaperusteKomponentti"
+		class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.ValintaperusteKomponentti" />
+	<ctx:component-scan
+		base-package="fi.vm.sade.valinta.kooste.valintalaskenta.route.impl" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
+
+	<!-- Viestintapalvelu -->
+	<ctx:component-scan
+		base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti" />
+	<ctx:component-scan
+		base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl" />
+	<bean
+		class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluAktivointiResource" />
+	<bean
+		class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.DokumenttiProsessiResource" />
+	<!-- Valintakoelaskenta -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.valintakokeet.resource.ValintakoelaskentaAktivointiResource" />
+	<ctx:component-scan
+		base-package="fi.vm.sade.valinta.kooste.valintakokeet.route.impl" />
+
+	<!-- Kela Export -->
+	<bean class="fi.vm.sade.valinta.kooste.KoostepalveluContext" />
+	<bean class="fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.resource" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.route.impl" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.kela.komponentti.impl" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.dokumenttipalvelu" />
+
+	<!-- Haku Import -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti" />
+	<bean
+		class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti" />
+	<bean
+		class="fi.vm.sade.valinta.kooste.hakuimport.resource.HakuImportResource" />
+	<bean
+		class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteConfig" />
+	<bean
+		class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteImpl" />
+
 	<!-- Swagger -->
 	<!-- Swagger API listing resource -->
-    <bean id="swaggerResourceJSON" class="com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON"/>
+	<bean id="swaggerResourceJSON"
+		class="com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON" />
 
-    <!-- Swagger writers -->
-    <bean id="resourceWriter" class="com.wordnik.swagger.jaxrs.listing.ResourceListingProvider" scope="singleton"/>
-    <bean id="apiWriter" class="com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider" scope="singleton"/>
+	<!-- Swagger writers -->
+	<bean id="resourceWriter"
+		class="com.wordnik.swagger.jaxrs.listing.ResourceListingProvider"
+		scope="singleton" />
+	<bean id="apiWriter"
+		class="com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider"
+		scope="singleton" />
 
-    <!-- Swagger configuration -->
-    <bean id="swaggerConfig" class="com.wordnik.swagger.jaxrs.config.BeanConfig">
-        <property name="resourcePackage" value="fi.vm.sade.valinta.kooste"/>
-        <property name="version" value="1.0"/>
-        <property name="basePath" value="${valintalaskentakoostepalvelu.swagger.basepath}"/>
+	<!-- Swagger configuration -->
+	<bean id="swaggerConfig" class="com.wordnik.swagger.jaxrs.config.BeanConfig">
+		<property name="resourcePackage" value="fi.vm.sade.valinta.kooste" />
+		<property name="version" value="1.0" />
+		<property name="basePath"
+			value="${valintalaskentakoostepalvelu.swagger.basepath}" />
 
-        <property name="title" value="Swagger API documentation"/>
-        <property name="scan" value="true"/>
-    </bean>
+		<property name="title" value="Swagger API documentation" />
+		<property name="scan" value="true" />
+	</bean>
 </beans>
