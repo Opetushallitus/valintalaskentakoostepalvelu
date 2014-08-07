@@ -128,7 +128,8 @@ public class ValintalaskentaKerrallaResource {
 	@Consumes(APPLICATION_JSON)
 	@Produces(APPLICATION_JSON)
 	public Vastaus uudelleenajoLaskennalle(@PathParam("uuid") String uuid) {
-		final LaskentaDto laskenta = seurantaResource.laskenta(uuid);
+		final LaskentaDto laskenta = // seurantaResource.laskenta(uuid);
+		seurantaResource.resetoiTilat(uuid);
 		// valmistumattomien hakukohteiden maski
 		List<String> maski = laskenta.getHakukohteet().stream()
 				.filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
