@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.apache.camel.Exchange;
+import static org.apache.camel.ExchangePattern.InOnly;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
@@ -55,6 +56,7 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaKerrallaRouteImpl.class);
 	private static final String DEADLETTERCHANNEL = "direct:valintalaskenta_kerralla_deadletterchannel";
+	private static final String AGGREGATOR = "direct:valintalaskenta_kerralla_aggregator";
 	private static final String ROUTE_ID = "valintalaskenta_kerralla";
 	private final SeurantaResource seurantaResource;
 	private final ValintaperusteetRestResource valintaperusteetRestResource;
@@ -174,7 +176,7 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 									.collect(Collectors.toList());
 						}))
 				//
-				.to(valintalaskentaKerrallaValintaperusteet,
+				.to(InOnly, valintalaskentaKerrallaValintaperusteet,
 						valintalaskentaKerrallaHakemukset);
 		/**
 		 * Hakee hakemukset
@@ -213,7 +215,7 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 										tyo.getLaskenta(), tyo
 												.getHakukohdeOid(), null, null))))
 				//
-				.to(valintalaskentaKerrallaLaskenta);
+				.to(InOnly, AGGREGATOR);// valintalaskentaKerrallaLaskenta);
 
 		/**
 		 * Hakee valintaperusteet
@@ -250,9 +252,11 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 										tyo.getLaskenta(), tyo
 												.getHakukohdeOid(), null, null))))
 				//
-				.to(valintalaskentaKerrallaLaskenta);
-
-		from(valintalaskentaKerrallaLaskenta)
+				.to(InOnly, AGGREGATOR); // valintalaskentaKerrallaLaskenta);
+		/**
+		 * Aggregoi
+		 */
+		from(AGGREGATOR)
 				.errorHandler(deadLetterChannel())
 				/**
 				 * AGGREGOI HAKEMUKSET JA VALINTAPERUSTEET YHDEKSI
@@ -294,6 +298,14 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 				// Purkaa valmistumattomat viimeistaan muutamien minuuttien
 				// jalkeen
 				.completionTimeout(TimeUnit.HOURS.toHours(2L))
+				//
+				.to(InOnly, valintalaskentaKerrallaLaskenta);
+		/**
+		 * Vie laskentoihin
+		 */
+		from(valintalaskentaKerrallaLaskenta)
+		//
+				.errorHandler(deadLetterChannel())
 				//
 				.process(
 						Reititys.<LaskentaJaValintaperusteetJaHakemukset> kuluttaja(
