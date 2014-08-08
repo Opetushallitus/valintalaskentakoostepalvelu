@@ -17,6 +17,7 @@ public class LaskentaJaValintaperusteetJaHakemukset {
 	private final List<ValintaperusteetDTO> valintaperusteet;
 	private final List<Hakemus> hakemukset;
 	private final String hakukohdeOid;
+	private final boolean yhdistetty;
 
 	public LaskentaJaValintaperusteetJaHakemukset(Laskenta laskenta,
 			String hakukohdeOid, List<ValintaperusteetDTO> valintaperusteet,
@@ -25,6 +26,17 @@ public class LaskentaJaValintaperusteetJaHakemukset {
 		this.hakukohdeOid = hakukohdeOid;
 		this.valintaperusteet = valintaperusteet;
 		this.hakemukset = hakemukset;
+		this.yhdistetty = false;
+	}
+
+	private LaskentaJaValintaperusteetJaHakemukset(Laskenta laskenta,
+			String hakukohdeOid, List<ValintaperusteetDTO> valintaperusteet,
+			List<Hakemus> hakemukset, boolean yhdistetty) {
+		this.laskenta = laskenta;
+		this.hakukohdeOid = hakukohdeOid;
+		this.valintaperusteet = valintaperusteet;
+		this.hakemukset = hakemukset;
+		this.yhdistetty = yhdistetty;
 	}
 
 	public LaskentaJaValintaperusteetJaHakemukset yhdista(
@@ -46,7 +58,11 @@ public class LaskentaJaValintaperusteetJaHakemukset {
 		// RuntimeException("Laskentaa ei voida suorittaa koska palvelimelta on saatu puutteellisia tietoja!");
 		// }
 		return new LaskentaJaValintaperusteetJaHakemukset(laskenta,
-				hakukohdeOid, v, h);
+				hakukohdeOid, v, h, true);
+	}
+
+	public boolean isYhdistetty() {
+		return yhdistetty;
 	}
 
 	public boolean isValmisLaskettavaksi() {

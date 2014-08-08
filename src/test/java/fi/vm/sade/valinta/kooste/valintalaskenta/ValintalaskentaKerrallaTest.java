@@ -7,9 +7,15 @@ import java.util.stream.Collectors;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.bean.ProxyHelper;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +41,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaKerrallaRouteImpl;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.resource.SeurantaResource;
+import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
 @Configuration
 // @Import({ })
@@ -67,6 +74,8 @@ public class ValintalaskentaKerrallaTest {
 	private SeurantaResource seurantaResource;
 	@Autowired
 	private ValintaperusteetResource valintaperusteetResource;
+	@Autowired
+	private ValintalaskentaResource valintalaskentaResource;
 
 	@Test
 	public void testaaValintalaskentaKerralla() throws InterruptedException {
@@ -80,6 +89,28 @@ public class ValintalaskentaKerrallaTest {
 		Mockito.verify(seurantaResource, Mockito.timeout(15000).times(1))
 				.merkkaaLaskennanTila(Mockito.eq(UUID),
 						Mockito.eq(LaskentaTila.VALMIS));
+		Matcher<LaskeDTO> l = new BaseMatcher<LaskeDTO>() {
+			public boolean matches(Object o) {
+				if (o instanceof LaskeDTO) {
+					LaskeDTO l0 = (LaskeDTO) o;
+					if (l0.getHakemus() == null || l0.getHakemus().isEmpty()
+							|| l0.getValintaperuste() == null
+							|| l0.getValintaperuste().isEmpty()) {
+						return false;
+					}
+					return true;
+				} else {
+					return false;
+				}
+			}
+
+			public void describeTo(Description desc) {
+
+			}
+		};
+		Mockito.verify(valintalaskentaResource, Mockito.timeout(15000).times(3))
+				.laskeKaikki(Mockito.argThat(l));
+
 	}
 
 	@Bean
@@ -124,6 +155,10 @@ public class ValintalaskentaKerrallaTest {
 				a.getApplicationsByOid(Mockito.eq("h3"),
 						Mockito.anyListOf(String.class), Mockito.anyInt()))
 				.thenReturn(Collections.emptyList());
+		Mockito.when(
+				a.getApplicationsByOid(Mockito.eq("h3"),
+						Mockito.anyListOf(String.class), Mockito.anyInt()))
+				.thenThrow(new RuntimeException("unauthorized"));// thenReturn(Collections.emptyList());
 		return a;
 	}
 
@@ -136,7 +171,7 @@ public class ValintalaskentaKerrallaTest {
 	public ValintaperusteetRestResource getValintaperusteetRestResource() {
 		ValintaperusteetRestResource v = Mockito
 				.mock(ValintaperusteetRestResource.class);
-		List<ValintaperusteetDTO> vp = Lists.newArrayList();
+		final List<ValintaperusteetDTO> vp = Lists.newArrayList();
 		ValintaperusteetDTO v0 = new ValintaperusteetDTO();
 		ValintaperusteetValinnanVaiheDTO vv0 = new ValintaperusteetValinnanVaiheDTO();
 		vv0.setValinnanVaiheJarjestysluku(0);
@@ -151,7 +186,14 @@ public class ValintalaskentaKerrallaTest {
 
 		Mockito.when(
 				v.haeValintaperusteet(Mockito.anyString(), Mockito.eq(null)))
-				.thenReturn(vp);
+				.thenAnswer(new Answer<List<ValintaperusteetDTO>>() {
+					@Override
+					public List<ValintaperusteetDTO> answer(
+							InvocationOnMock invocation) throws Throwable {
+						Thread.sleep(0);
+						return vp;
+					}
+				});
 		Mockito.when(v.haeValintaperusteet(Mockito.eq("h1"), Mockito.eq(null)))
 				.thenReturn(Collections.emptyList());
 		return v;
