@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.route;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.camel.Body;
+import org.apache.camel.InOnly;
 import org.apache.camel.Property;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
@@ -35,6 +36,7 @@ public interface ValintalaskentaKerrallaRoute {
 			//
 			"&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentakerralla.threadpoolsize:10}";
 
+	@InOnly
 	void suoritaValintalaskentaKerralla(@Body LaskentaJaHaku laskentaJaHaku,
 			@Property(LOPETUSEHTO) AtomicBoolean lopetusehto);
 }
