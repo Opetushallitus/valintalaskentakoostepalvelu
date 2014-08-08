@@ -84,10 +84,12 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 	private final long getTimeToLive() {
 		return DateTime.now().plusHours(720).toDate().getTime(); // almost a day
-																// so expires
-																// just before
-																// new batch
-																// generates
+																	// so
+																	// expires
+																	// just
+																	// before
+																	// new batch
+																	// generates
 	}
 
 	private final boolean pakkaaTiedostotTarriin;
@@ -594,7 +596,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 															tarjoajaOid,
 															//
 															e.getDefaultValue(),
-															tag);
+															tag,
+															"hyvaksmiskirje");
 											if (pakkaaTiedostotTarriin) {
 												Tiedosto tiedosto = new Tiedosto(
 														"hyvaksymiskirje_"

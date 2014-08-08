@@ -353,6 +353,10 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 													hakemukset, metaKohteet,
 													hakuOid(exchange),
 													exchange.getProperty(
+															"templateName",
+															"jalkiohjauskirje",
+															String.class),
+													exchange.getProperty(
 															"sisalto",
 															String.class),
 													exchange.getProperty("tag",

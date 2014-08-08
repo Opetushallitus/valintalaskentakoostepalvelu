@@ -82,6 +82,7 @@ public class JalkiohjauskirjeetKomponentti {
 			final Collection<Hakemus> hakemukset,
 			final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
 			@Simple("${property.hakuOid}") String hakuOid,
+			@Property("templateName") String templateName,
 			@Property("sisalto") String sisalto, @Property("tag") String tag
 
 	) {// @Property(OPH.HAKUOID)
@@ -230,8 +231,8 @@ public class JalkiohjauskirjeetKomponentti {
 			}
 			Map<String, Object> replacements = Maps.newHashMap();
 			replacements.put("tulokset", tulosList);
-			kirjeet.add(new Letter(osoite, "jalkiohjauskirje",
-					preferoituKielikoodi, replacements));
+			kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi,
+					replacements));
 		}
 
 		LOG.info(
@@ -243,7 +244,7 @@ public class JalkiohjauskirjeetKomponentti {
 		viesti.setLanguageCode(preferoituKielikoodi);
 		viesti.setOrganizationOid(null);
 		viesti.setTag(tag);
-		viesti.setTemplateName("jalkiohjauskirje");
+		viesti.setTemplateName(templateName);
 		Map<String, Object> templateReplacements = Maps.newHashMap();
 		templateReplacements.put("sisalto", sisalto);
 		viesti.setTemplateReplacements(templateReplacements);
