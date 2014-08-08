@@ -26,6 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.collect.Lists;
+import com.google.gson.GsonBuilder;
 import com.wordnik.swagger.annotations.Api;
 
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
@@ -147,7 +148,8 @@ public class ValintalaskentaKerrallaResource {
 	public Vastaus uudelleenajoLaskennalle(@PathParam("uuid") String uuid) {
 		final LaskentaDto laskenta;
 		try {
-			laskenta = seurantaResource.resetoiTilat(uuid);
+			laskenta = new GsonBuilder().create().fromJson(
+					seurantaResource.resetoiTilat(uuid), LaskentaDto.class);
 		} catch (Exception e) {
 			LOG.error("Laskennan {} resetointi epaonnistui! {}\r\n{}", uuid,
 					e.getMessage(), Arrays.toString(e.getStackTrace()));

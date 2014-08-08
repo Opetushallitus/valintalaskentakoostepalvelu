@@ -321,8 +321,11 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 									try {
 										if (!tyo.isValmisLaskettavaksi()) {
 											LOG.error(
-													"Laskentaa ei voida tehda hakukohteelle {}",
-													tyo.getHakukohdeOid());
+													"Laskentaa ei voida tehda hakukohteelle {}. Hakemukset null=={} ja valintaperusteet null=={}",
+													tyo.getHakukohdeOid(),
+													null == tyo.getHakemukset(),
+													null == tyo
+															.getValintaperusteet());
 											try {
 												seurantaResource
 														.merkkaaHakukohteenTila(

@@ -28,6 +28,7 @@ public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
 				.configure(
 						DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES,
 						false);
+
 	}
 
 	@Override
