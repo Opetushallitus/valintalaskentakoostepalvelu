@@ -76,8 +76,16 @@ public class ValintalaskentaKerrallaResource {
 	public Vastaus valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid,
 			@PathParam("whitelist") boolean whitelist, List<String> maski) {
 		return kaynnistaLaskenta(hakuOid, new Maski(whitelist, maski), ((hoid,
-				haunHakukohteetOids) -> seurantaResource.luoLaskenta(hoid,
-				haunHakukohteetOids)));
+				haunHakukohteetOids) -> {
+			try {
+				return seurantaResource.luoLaskenta(hoid, haunHakukohteetOids);
+			} catch (Exception e) {
+				LOG.error("Laskennan luonti haulle {} epaonnistui! {}\r\n{}",
+						hoid, e.getMessage(),
+						Arrays.toString(e.getStackTrace()));
+				throw e;
+			}
+		}));
 	}
 
 	/**
@@ -95,8 +103,17 @@ public class ValintalaskentaKerrallaResource {
 		Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
 		if (l != null) {
 			l.getLopetusehto().set(true); // aktivoidaan lopetuskasky
-			seurantaResource
-					.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
+			try {
+				seurantaResource.merkkaaLaskennanTila(uuid,
+						LaskentaTila.PERUUTETTU);
+			} catch (Exception e) {
+				LOG.error("Laskennan {} peruutus epaonnistui! {}\r\n{}", uuid,
+						e.getMessage(), Arrays.toString(e.getStackTrace()));
+				return Response
+						.serverError()
+						.entity("Laskennan peruutus epaonnistui! "
+								+ e.getMessage()).build();
+			}
 		}
 		return Response.ok().build();
 	}
@@ -128,8 +145,14 @@ public class ValintalaskentaKerrallaResource {
 	@Consumes(APPLICATION_JSON)
 	@Produces(APPLICATION_JSON)
 	public Vastaus uudelleenajoLaskennalle(@PathParam("uuid") String uuid) {
-		final LaskentaDto laskenta = // seurantaResource.laskenta(uuid);
-		seurantaResource.resetoiTilat(uuid);
+		final LaskentaDto laskenta;
+		try {
+			laskenta = seurantaResource.resetoiTilat(uuid);
+		} catch (Exception e) {
+			LOG.error("Laskennan {} resetointi epaonnistui! {}\r\n{}", uuid,
+					e.getMessage(), Arrays.toString(e.getStackTrace()));
+			throw e;
+		}
 		// valmistumattomien hakukohteiden maski
 		List<String> maski = laskenta.getHakukohteet().stream()
 				.filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
@@ -195,7 +218,16 @@ public class ValintalaskentaKerrallaResource {
 		LOG.info("Pyynto suorittaa valintalaskenta haun {} hakukohteelle {}",
 				hakuOid, hakukohdeOid);
 		List<String> hakukohteet = Arrays.asList(hakukohdeOid);
-		String uuid = seurantaResource.luoLaskenta(hakuOid, hakukohteet);
+		final String uuid;
+		try {
+			uuid = seurantaResource.luoLaskenta(hakuOid, hakukohteet);
+		} catch (Exception e) {
+			LOG.error(
+					"Laskennan luonti epaonnistui haulle {} ja hakukohteelle {}! {}\r\n{}",
+					hakuOid, hakukohdeOid, e.getMessage(),
+					Arrays.toString(e.getStackTrace()));
+			throw e;
+		}
 		AtomicBoolean lopetusehto = new AtomicBoolean(false);
 		valintalaskentaRoute.suoritaValintalaskentaKerralla(
 				new LaskentaJaHaku(new Laskenta(uuid, hakuOid, 1, lopetusehto,
