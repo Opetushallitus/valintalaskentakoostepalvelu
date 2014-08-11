@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,10 +11,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.apache.camel.Exchange;
+
 import static org.apache.camel.ExchangePattern.InOnly;
+
 import org.apache.camel.LoggingLevel;
+import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
+import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
+import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
+import org.apache.camel.util.toolbox.FlexibleAggregationStrategy.CompletionAwareMixin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -261,43 +268,40 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 				/**
 				 * AGGREGOI HAKEMUKSET JA VALINTAPERUSTEET YHDEKSI
 				 * LASKENTATYOKSI AVAIMELLA (hakukohdeOid,uuid(laskennantyoID))
-				 * PURKAA PITKAAN TEKEMATTOMAT TYOT POIS 10MIN TIMEOUTILLA
+				 * PURKAA PITKAAN TEKEMATTOMAT TYOT ENNEN PITKAA POIS
 				 */
 				.aggregate(
-						Reititys.<LaskentaJaValintaperusteetJaHakemukset, String> lauseke(tyo -> new StringBuilder()
-								.append(tyo.getHakukohdeOid())
-								.append(tyo.getLaskenta().getUuid()).toString()),
-						new AggregationStrategy() {
+						Reititys.<LaskentaJaValintaperusteetJaHakemukset, String> lauseke(tyo -> {
+							String aggKey = new StringBuilder()
+									.append(tyo.getHakukohdeOid())
+									.append(tyo.getLaskenta().getUuid())
+									.toString();
+							LOG.debug("Correlation key {}", aggKey);
+							return aggKey;
+						}), new AggregationStrategy() {
 							public Exchange aggregate(Exchange oldExchange,
 									Exchange newExchange) {
-								LaskentaJaValintaperusteetJaHakemukset o1 = null;
-								LaskentaJaValintaperusteetJaHakemukset o2 = null;
-								if (oldExchange != null) {
-									o1 = oldExchange
+								if (oldExchange == null) {
+									return newExchange;
+								} else {
+									LaskentaJaValintaperusteetJaHakemukset tyo1 = oldExchange
 											.getIn()
 											.getBody(
 													LaskentaJaValintaperusteetJaHakemukset.class);
-								}
-								if (newExchange != null) {
-									o2 = newExchange
+									LaskentaJaValintaperusteetJaHakemukset tyo2 = newExchange
 											.getIn()
 											.getBody(
 													LaskentaJaValintaperusteetJaHakemukset.class);
+									oldExchange.getOut().setBody(
+											tyo1.yhdista(tyo2));
+									return oldExchange;
 								}
-								if (o1 != null && o2 != null) {
-									newExchange.getOut()
-											.setBody(o1.yhdista(o2));
-								}
-								// LOG.error("o1 ({}) and o2 ({})", o1, o2);
-								return newExchange;
 							}
 						})
-				// Molemmat osatyot valmiina, eli hakemukset haettu ja
-				// valintaperusteet
+
+				//
+				.completionTimeout(TimeUnit.HOURS.toMillis(2L))
 				.completionSize(2)
-				// Purkaa valmistumattomat viimeistaan muutamien minuuttien
-				// jalkeen
-				.completionTimeout(TimeUnit.HOURS.toHours(2L))
 				//
 				.to(InOnly, valintalaskentaKerrallaLaskenta);
 		/**
@@ -310,17 +314,32 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 				.process(
 						Reititys.<LaskentaJaValintaperusteetJaHakemukset> kuluttaja(
 								tyo -> {
+									if (!tyo.isYhdistetty()) {
+										LOG.error("Aggregaattorissa oli tyo pitkaan jumissa.");
+										return;
+									}
 									try {
 										if (!tyo.isValmisLaskettavaksi()) {
 											LOG.error(
-													"Laskentaa ei voida tehda hakukohteelle {}",
-													tyo.getHakukohdeOid());
-											seurantaResource
-													.merkkaaHakukohteenTila(
-															tyo.getLaskenta()
-																	.getUuid(),
-															tyo.getHakukohdeOid(),
-															HakukohdeTila.KESKEYTETTY);
+													"Laskentaa ei voida tehda hakukohteelle {}. Hakemukset null=={} ja valintaperusteet null=={}",
+													tyo.getHakukohdeOid(),
+													null == tyo.getHakemukset(),
+													null == tyo
+															.getValintaperusteet());
+											try {
+												seurantaResource
+														.merkkaaHakukohteenTila(
+																tyo.getLaskenta()
+																		.getUuid(),
+																tyo.getHakukohdeOid(),
+																HakukohdeTila.KESKEYTETTY);
+											} catch (Exception e) {
+												LOG.error(
+														"Seurantapalvelu on alhaalla! {}\r\n{}",
+														e.getMessage(),
+														Arrays.toString(e
+																.getStackTrace()));
+											}
 											return;
 										} else {
 											if (tyo.getHakemukset().isEmpty()) {
@@ -334,12 +353,20 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 															"Laskentaa ei tehda hakukohteelle {} koska ei ole hakemuksia",
 															tyo.getHakukohdeOid());
 												}
-												seurantaResource
-														.merkkaaHakukohteenTila(
-																tyo.getLaskenta()
-																		.getUuid(),
-																tyo.getHakukohdeOid(),
-																HakukohdeTila.VALMIS);
+												try {
+													seurantaResource
+															.merkkaaHakukohteenTila(
+																	tyo.getLaskenta()
+																			.getUuid(),
+																	tyo.getHakukohdeOid(),
+																	HakukohdeTila.VALMIS);
+												} catch (Exception e) {
+													LOG.error(
+															"Seurantapalvelu on alhaalla! {}\r\n{}",
+															e.getMessage(),
+															Arrays.toString(e
+																	.getStackTrace()));
+												}
 												return;
 											} else if (tyo
 													.getValintaperusteet()
@@ -347,12 +374,20 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 												LOG.warn(
 														"Laskentaa ei tehda hakukohteelle {} koska ei ole valintaperusteita",
 														tyo.getHakukohdeOid());
-												seurantaResource
-														.merkkaaHakukohteenTila(
-																tyo.getLaskenta()
-																		.getUuid(),
-																tyo.getHakukohdeOid(),
-																HakukohdeTila.VALMIS);
+												try {
+													seurantaResource
+															.merkkaaHakukohteenTila(
+																	tyo.getLaskenta()
+																			.getUuid(),
+																	tyo.getHakukohdeOid(),
+																	HakukohdeTila.VALMIS);
+												} catch (Exception e) {
+													LOG.error(
+															"Seurantapalvelu on alhaalla! {}\r\n{}",
+															e.getMessage(),
+															Arrays.toString(e
+																	.getStackTrace()));
+												}
 												return;
 											}
 											LOG.debug(
@@ -372,12 +407,20 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 																			Collectors
 																					.toList()),
 															tyo.getValintaperusteet()));
-											seurantaResource
-													.merkkaaHakukohteenTila(
-															tyo.getLaskenta()
-																	.getUuid(),
-															tyo.getHakukohdeOid(),
-															HakukohdeTila.VALMIS);
+											try {
+												seurantaResource
+														.merkkaaHakukohteenTila(
+																tyo.getLaskenta()
+																		.getUuid(),
+																tyo.getHakukohdeOid(),
+																HakukohdeTila.VALMIS);
+											} catch (Exception e) {
+												LOG.error(
+														"Seurantapalvelu on alhaalla! {}\r\n{}",
+														e.getMessage(),
+														Arrays.toString(e
+																.getStackTrace()));
+											}
 										}
 									} finally {
 										LOG.info(
@@ -391,11 +434,19 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 															.getHakuOid(), tyo
 															.getLaskenta()
 															.getUuid());
-											seurantaResource
-													.merkkaaLaskennanTila(tyo
-															.getLaskenta()
-															.getUuid(),
-															LaskentaTila.VALMIS);
+											try {
+												seurantaResource
+														.merkkaaLaskennanTila(
+																tyo.getLaskenta()
+																		.getUuid(),
+																LaskentaTila.VALMIS);
+											} catch (Exception e) {
+												LOG.error(
+														"Seurantapalvelu on alhaalla! {}\r\n{}",
+														e.getMessage(),
+														Arrays.toString(e
+																.getStackTrace()));
+											}
 										}
 									}
 								},
@@ -404,14 +455,36 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 											"Laskentaa suoritettaessa hakukohteelle {} tapahtui poikkeus {}",
 											tyo.getHakukohdeOid(),
 											poikkeus.getMessage());
-									seurantaResource.merkkaaHakukohteenTila(tyo
-											.getLaskenta().getUuid(), tyo
-											.getHakukohdeOid(),
-											HakukohdeTila.KESKEYTETTY);
+									try {
+										seurantaResource.merkkaaHakukohteenTila(
+												tyo.getLaskenta().getUuid(),
+												tyo.getHakukohdeOid(),
+												HakukohdeTila.KESKEYTETTY);
+									} catch (Exception e) {
+										LOG.error(
+												"Seurantapalvelu on alhaalla! {}\r\n{}",
+												e.getMessage(),
+												Arrays.toString(e
+														.getStackTrace()));
+									}
 									return true;
 								})))
 				//
 				.stop();
+	}
+
+	private LaskentaJaValintaperusteetJaHakemukset tyotAsTyo(
+			List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
+		LaskentaJaValintaperusteetJaHakemukset tyo;
+		if (tyot.size() == 2) {
+			tyo = tyot.get(0).yhdista(tyot.get(1));
+		} else if (tyot.size() == 1) {
+			tyo = tyot.get(0);
+		} else {
+			tyo = null;
+			LOG.error("Miten on mahdollista!");
+		}
+		return tyo;
 	}
 
 	@Override

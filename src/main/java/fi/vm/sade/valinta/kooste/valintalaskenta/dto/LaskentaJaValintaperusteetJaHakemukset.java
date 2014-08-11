@@ -9,7 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
  * 
  * @author Jussi Jartamo
  * 
- * Tyovaihe laskenta reitilla
+ *         Tyovaihe laskenta reitilla
  */
 public class LaskentaJaValintaperusteetJaHakemukset {
 
@@ -17,47 +17,70 @@ public class LaskentaJaValintaperusteetJaHakemukset {
 	private final List<ValintaperusteetDTO> valintaperusteet;
 	private final List<Hakemus> hakemukset;
 	private final String hakukohdeOid;
-	
-	public LaskentaJaValintaperusteetJaHakemukset(
-			Laskenta laskenta, 
-			String hakukohdeOid, 
-			List<ValintaperusteetDTO> valintaperusteet, 
+	private final boolean yhdistetty;
+
+	public LaskentaJaValintaperusteetJaHakemukset(Laskenta laskenta,
+			String hakukohdeOid, List<ValintaperusteetDTO> valintaperusteet,
 			List<Hakemus> hakemukset) {
 		this.laskenta = laskenta;
 		this.hakukohdeOid = hakukohdeOid;
 		this.valintaperusteet = valintaperusteet;
 		this.hakemukset = hakemukset;
+		this.yhdistetty = false;
 	}
-	
-	public LaskentaJaValintaperusteetJaHakemukset yhdista(LaskentaJaValintaperusteetJaHakemukset t) {
-		if(!hakukohdeOid.equals(t.getHakukohdeOid())) {
-			throw new RuntimeException("Ei voida yhdistaa kahden eri hakukohteen valintaperusteita ja hakemuksia keskenaan!");
+
+	private LaskentaJaValintaperusteetJaHakemukset(Laskenta laskenta,
+			String hakukohdeOid, List<ValintaperusteetDTO> valintaperusteet,
+			List<Hakemus> hakemukset, boolean yhdistetty) {
+		this.laskenta = laskenta;
+		this.hakukohdeOid = hakukohdeOid;
+		this.valintaperusteet = valintaperusteet;
+		this.hakemukset = hakemukset;
+		this.yhdistetty = yhdistetty;
+	}
+
+	public LaskentaJaValintaperusteetJaHakemukset yhdista(
+			LaskentaJaValintaperusteetJaHakemukset t) {
+		if (!hakukohdeOid.equals(t.getHakukohdeOid())) {
+			throw new RuntimeException(
+					"Ei voida yhdistaa kahden eri hakukohteen valintaperusteita ja hakemuksia keskenaan!");
 		}
 		List<ValintaperusteetDTO> v = valintaperusteet;
 		List<Hakemus> h = hakemukset;
-		if(t.getValintaperusteet() != null) {
+		if (t.getValintaperusteet() != null) {
 			v = t.getValintaperusteet();
 		}
-		if(t.getHakemukset() != null) {
+		if (t.getHakemukset() != null) {
 			h = t.getHakemukset();
 		}
-//		if(v == null || h == null) {
-//			throw new RuntimeException("Laskentaa ei voida suorittaa koska palvelimelta on saatu puutteellisia tietoja!");
-//		}
-		return new LaskentaJaValintaperusteetJaHakemukset(laskenta,hakukohdeOid,v,h);
+		// if(v == null || h == null) {
+		// throw new
+		// RuntimeException("Laskentaa ei voida suorittaa koska palvelimelta on saatu puutteellisia tietoja!");
+		// }
+		return new LaskentaJaValintaperusteetJaHakemukset(laskenta,
+				hakukohdeOid, v, h, true);
 	}
+
+	public boolean isYhdistetty() {
+		return yhdistetty;
+	}
+
 	public boolean isValmisLaskettavaksi() {
 		return valintaperusteet != null && hakemukset != null;
 	}
+
 	public List<Hakemus> getHakemukset() {
 		return hakemukset;
 	}
+
 	public String getHakukohdeOid() {
 		return hakukohdeOid;
 	}
+
 	public Laskenta getLaskenta() {
 		return laskenta;
 	}
+
 	public List<ValintaperusteetDTO> getValintaperusteet() {
 		return valintaperusteet;
 	}

@@ -137,7 +137,8 @@ public class SijoitteluAktivointiResource {
 		if (StringUtils.isBlank(hakuOid)) {
 			return null;
 		} else {
-			return sijoittelunSeurantaResource.hae(hakuOid);
+            SijoitteluDto sijoitteluDto = sijoittelunSeurantaResource.hae(hakuOid);
+			return sijoitteluDto;
 		}
 	}
 }
