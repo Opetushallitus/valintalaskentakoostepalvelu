@@ -169,8 +169,6 @@ public class SuoritaHakukohdeImportKomponentti {
 		avainArvo.setArvo(data.getPainotettuKeskiarvoHylkaysMax().toString());
 		importTyyppi.getValintaperuste().add(avainArvo);
 
-		String nimiUri = data.getHakukohdeNimiUri().split("#")[0];
-
 		avainArvo = new AvainArvoDTO();
 		avainArvo.setAvain("paasykoe_tunniste");
 		avainArvo.setArvo(data.getPaasykoeTunniste() != null ? data
