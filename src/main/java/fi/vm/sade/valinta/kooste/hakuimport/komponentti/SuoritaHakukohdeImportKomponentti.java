@@ -82,7 +82,11 @@ public class SuoritaHakukohdeImportKomponentti {
             importTyyppi.setHakuVuosi(new Integer(data.getHakuVuosi()).toString());
 
             HakukohdekoodiDTO hkt = new HakukohdekoodiDTO();
-            hkt.setKoodiUri(data.getHakukohdeNimiUri());
+            if(data.getHakukohdeNimiUri() != null) {
+                hkt.setKoodiUri(data.getHakukohdeNimiUri());
+            } else {
+                hkt.setKoodiUri("hakukohteet_"+data.getOid().replace(".",""));
+            }
             importTyyppi.setHakukohdekoodi(hkt);
 
             importTyyppi.setHakukohdeOid(data.getOid());
