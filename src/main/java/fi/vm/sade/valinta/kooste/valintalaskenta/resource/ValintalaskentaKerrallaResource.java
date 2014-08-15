@@ -3,22 +3,20 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.wordnik.swagger.annotations.ApiOperation;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaMuistissaProsessi;
+import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +86,14 @@ public class ValintalaskentaKerrallaResource {
 			}
 		}));
 	}
+
+    @GET
+    @Path("/status/{uuid}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
+    public Laskenta status(@PathParam("uuid") String uuid) {
+        return valintalaskentaValvomo.haeLaskenta(uuid);
+    }
 
 	/**
 	 * Sammutta laskennan uuid:lla jos laskenta on kaynnissa
