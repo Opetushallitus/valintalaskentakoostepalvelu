@@ -35,6 +35,8 @@ public class HaunTyyppiKomponentti {
 	}
 
 	public String haunTyyppi(String haunTyyppiUri) {
+		LOG.error("Tehdään koodistokutsu tuntemattomalle haunTyyppiUri:lle {}",
+				haunTyyppiUri);
 		String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(haunTyyppiUri);
 		Integer koodiVersio = TarjontaUriToKoodistoUtil
 				.stripVersion(haunTyyppiUri);
@@ -50,8 +52,8 @@ public class HaunTyyppiKomponentti {
 		for (KoodiType koodi : koodiTypes) {
 			String arvo = koodi.getKoodiArvo();
 			if (arvo != null) {
+				LOG.error("HaunTyyppiUri {} == {}", haunTyyppiUri, arvo);
 				return arvo;
-
 			} else {
 				LOG.error(
 						"Koodistosta palautui null arvo uri:lle {}, versio {}",

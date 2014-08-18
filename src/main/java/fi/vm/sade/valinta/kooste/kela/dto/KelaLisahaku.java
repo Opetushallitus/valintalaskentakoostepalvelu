@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
@@ -42,7 +44,9 @@ public class KelaLisahaku extends KelaAbstraktiHaku {
 		for (String hakemusOid : hakemusOids) {
 			Hakemus hakemus = hakemusSource.getHakemusByOid(hakemusOid);
 			Map<String, String> additionalInfo = additionalInfo(hakemus);
-			if (additionalInfo.containsKey(LISAHAKU_HYVAKSYTTY)) {
+			if (additionalInfo.containsKey(LISAHAKU_HYVAKSYTTY)
+					&& !StringUtils.isBlank(additionalInfo
+							.get(LISAHAKU_HYVAKSYTTY))) {
 				String hakukohdeOid = additionalInfo.get(LISAHAKU_HYVAKSYTTY);
 				Map<String, String> henkilotiedot = henkilotiedot(hakemus);
 				HakukohdeDTO hakukohde = hakukohdeSource
