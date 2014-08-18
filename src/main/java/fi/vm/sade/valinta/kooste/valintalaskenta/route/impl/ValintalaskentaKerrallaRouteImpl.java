@@ -473,20 +473,6 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 				.stop();
 	}
 
-	private LaskentaJaValintaperusteetJaHakemukset tyotAsTyo(
-			List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
-		LaskentaJaValintaperusteetJaHakemukset tyo;
-		if (tyot.size() == 2) {
-			tyo = tyot.get(0).yhdista(tyot.get(1));
-		} else if (tyot.size() == 1) {
-			tyo = tyot.get(0);
-		} else {
-			tyo = null;
-			LOG.error("Miten on mahdollista!");
-		}
-		return tyo;
-	}
-
 	@Override
 	protected String deadLetterChannelEndpoint() {
 		return DEADLETTERCHANNEL;
