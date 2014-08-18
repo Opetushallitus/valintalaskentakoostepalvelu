@@ -40,6 +40,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import fi.vm.sade.valinta.seuranta.resource.SeurantaResource;
 
 /**
@@ -72,15 +73,17 @@ public class ValintalaskentaKerrallaResource {
 	 * @return
 	 */
 	@POST
-	@Path("/haku/{hakuOid}/whitelist/{whitelist}")
+	@Path("/haku/{hakuOid}/tyyppi/{tyyppi}/whitelist/{whitelist}")
 	@Consumes(APPLICATION_JSON)
 	@Produces(APPLICATION_JSON)
 	public Vastaus valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid,
+			@PathParam("tyyppi") LaskentaTyyppi tyyppi,
 			@PathParam("whitelist") boolean whitelist, List<String> maski) {
 		return kaynnistaLaskenta(hakuOid, new Maski(whitelist, maski), ((hoid,
 				haunHakukohteetOids) -> {
 			try {
-				return seurantaResource.luoLaskenta(hoid, haunHakukohteetOids);
+				return seurantaResource.luoLaskenta(hoid, tyyppi,
+						haunHakukohteetOids);
 			} catch (Exception e) {
 				LOG.error("Laskennan luonti haulle {} epaonnistui! {}\r\n{}",
 						hoid, e.getMessage(),
@@ -126,22 +129,6 @@ public class ValintalaskentaKerrallaResource {
 			}
 		}
 		return Response.ok().build();
-	}
-
-	/**
-	 * Koko haun laskenta
-	 * 
-	 * @param hakuOid
-	 * @return
-	 */
-	@POST
-	@Path("/haku/{hakuOid}")
-	@Consumes(APPLICATION_JSON)
-	@Produces(APPLICATION_JSON)
-	public Vastaus valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid) {
-		return kaynnistaLaskenta(hakuOid, new Maski(), ((hoid,
-				haunHakukohteetOids) -> seurantaResource.luoLaskenta(hoid,
-				haunHakukohteetOids)));
 	}
 
 	/**
@@ -236,7 +223,8 @@ public class ValintalaskentaKerrallaResource {
 		List<String> hakukohteet = Arrays.asList(hakukohdeOid);
 		final String uuid;
 		try {
-			uuid = seurantaResource.luoLaskenta(hakuOid, hakukohteet);
+			uuid = seurantaResource.luoLaskenta(hakuOid,
+					LaskentaTyyppi.HAKUKOHDE, hakukohteet);
 		} catch (Exception e) {
 			LOG.error(
 					"Laskennan luonti epaonnistui haulle {} ja hakukohteelle {}! {}\r\n{}",
