@@ -15,8 +15,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.wordnik.swagger.annotations.ApiOperation;
+
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaMuistissaProsessi;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,13 +90,13 @@ public class ValintalaskentaKerrallaResource {
 		}));
 	}
 
-    @GET
-    @Path("/status/{uuid}")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
-    public Laskenta status(@PathParam("uuid") String uuid) {
-        return valintalaskentaValvomo.haeLaskenta(uuid);
-    }
+	@GET
+	@Path("/status/{uuid}")
+	@Produces(APPLICATION_JSON)
+	@ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
+	public Laskenta status(@PathParam("uuid") String uuid) {
+		return valintalaskentaValvomo.haeLaskenta(uuid);
+	}
 
 	/**
 	 * Sammutta laskennan uuid:lla jos laskenta on kaynnissa
@@ -165,13 +168,14 @@ public class ValintalaskentaKerrallaResource {
 		List<String> maski = laskenta.getHakukohteet().stream()
 				.filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
 				.map(h -> h.getHakukohdeOid()).collect(Collectors.toList());
-		return kaynnistaLaskenta(uuid, new Maski(true, maski), ((hoid,
-				haunHakukohteetOids) -> laskenta.getUuid()));
+		return kaynnistaLaskenta(laskenta.getHakuOid(), new Maski(true, maski),
+				((hoid, haunHakukohteetOids) -> laskenta.getUuid()));
 	}
 
 	private Vastaus kaynnistaLaskenta(String hakuOid, Maski maski,
 			BiFunction<String, List<String>, String> seurantaTunnus) {
-		if (hakuOid == null) {
+		if (StringUtils.isBlank(hakuOid)) {
+			LOG.error("HakuOid on pakollinen");
 			throw new RuntimeException("HakuOid on pakollinen");
 		}
 		// maskilla kaynnistettaessa luodaan aina uusi laskenta
@@ -198,6 +202,10 @@ public class ValintalaskentaKerrallaResource {
 		if (maski.isMask()) {
 			haunHakukohteetOids = Lists.newArrayList(maski
 					.maskaa(haunHakukohteetOids));
+			if (haunHakukohteetOids.isEmpty()) {
+				throw new RuntimeException(
+						"Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa hakukohteettomasti.");
+			}
 		}
 		String uuid = seurantaTunnus.apply(hakuOid, haunHakukohteetOids);
 		AtomicBoolean lopetusehto = new AtomicBoolean(false);
@@ -244,8 +252,13 @@ public class ValintalaskentaKerrallaResource {
 	}
 
 	private List<String> haunHakukohteet(String hakuOid) {
-		return valintaperusteetResource
-				.haunHakukohteet(hakuOid)
+		if (StringUtils.isBlank(hakuOid)) {
+			LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
+			throw new RuntimeException(
+					"Yritettiin hakea hakukohteita ilman hakuOidia!");
+		}
+		List<String> haunHakukohdeOidit = valintaperusteetResource
+				.haunHakukohteet(hakuOid.trim())
 				.stream()
 				.filter((h -> {
 					boolean julkaistu = "JULKAISTU".equals(h.getTila());
@@ -256,5 +269,15 @@ public class ValintalaskentaKerrallaResource {
 					}
 					return julkaistu;
 				})).map(u -> u.getOid()).collect(Collectors.toList());
+		if (haunHakukohdeOidit.isEmpty()) {
+			LOG.error(
+					"Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?",
+					hakuOid);
+			throw new RuntimeException(
+					"Haulla "
+							+ hakuOid
+							+ " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?");
+		}
+		return haunHakukohdeOidit;
 	}
 }

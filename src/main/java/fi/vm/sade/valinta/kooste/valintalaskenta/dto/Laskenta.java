@@ -76,11 +76,11 @@ public class Laskenta {
 		return uuid;
 	}
 
-    public AtomicInteger getTehty() {
-        return tehty;
-    }
+	public AtomicInteger getTehty() {
+		return tehty;
+	}
 
-    public String toString() {
+	public String toString() {
 		return String.format(NIMI_FORMAT, hakuOid, uuid, tehty.get(),
 				hakukohteita);
 	}
