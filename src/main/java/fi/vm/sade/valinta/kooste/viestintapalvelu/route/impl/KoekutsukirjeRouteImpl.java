@@ -425,7 +425,29 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 		//
 				.process(SecurityPreprocessor.SECURITY)
 				//
-				.bean(koekutsukirjeetKomponentti)
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						List<Hakemus> hakemukset = exchange.getIn().getBody(
+								List.class);
+						String hakuOid = exchange.getProperty(OPH.HAKUOID,
+								String.class);
+						String hakukohdeOid = exchange.getProperty(
+								OPH.HAKUKOHDEOID, String.class);
+						String letterBodyText = exchange.getProperty(
+								OPH.LETTER_BODY_TEXT, String.class);
+						String tarjoajaOid = exchange.getProperty(
+								OPH.TARJOAJAOID, String.class);
+						String templateName = exchange.getProperty(
+								"templateName", String.class);
+						String tag = exchange.getProperty("tag", String.class);
+						exchange.getOut().setBody(
+								koekutsukirjeetKomponentti
+										.valmistaKoekutsukirjeet(hakemukset,
+												hakuOid, hakukohdeOid,
+												letterBodyText, tarjoajaOid,
+												tag, templateName));
+					}
+				})
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {

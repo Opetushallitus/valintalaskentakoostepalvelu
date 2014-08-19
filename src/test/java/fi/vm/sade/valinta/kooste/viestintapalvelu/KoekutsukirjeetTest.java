@@ -48,12 +48,18 @@ public class KoekutsukirjeetTest {
 	@Test
 	public void testaaKoekutsukirjeetReitti() throws InterruptedException {
 		String hakukohdeOid = "";
+		String hakuOid = "";
+		String tarjoajaOid = "";
+		String templateName = "";
+		String tag = "";
+
 		String letterBodyText = "";
 		DokumenttiProsessi prosessi = new DokumenttiProsessi("", "", "",
 				Collections.<String> emptyList());
 		prosessi.getPoikkeukset().add(new Poikkeus("", "", ""));
 		koekutsukirjeRoute.koekutsukirjeetAktivointi(prosessi,
-				Collections.<String> emptyList(), hakukohdeOid,
+				Collections.<String> emptyList(), hakuOid, hakukohdeOid,
+				tarjoajaOid, tag, templateName,
 				Collections.<String> emptyList(), letterBodyText, null);
 
 	}

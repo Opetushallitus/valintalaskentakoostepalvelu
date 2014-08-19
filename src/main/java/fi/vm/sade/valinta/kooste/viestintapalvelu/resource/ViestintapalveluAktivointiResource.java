@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
+import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -279,7 +280,10 @@ public class ViestintapalveluAktivointiResource {
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa", response = Response.class)
 	public ProsessiId aktivoiKoekutsukirjeidenLuonti(
-			@QueryParam("hakukohdeOid") String hakukohdeOid,
+			@QueryParam(OPH.HAKUOID) String hakuOid,
+			@QueryParam(OPH.HAKUKOHDEOID) String hakukohdeOid,
+			@QueryParam(OPH.TARJOAJAOID) String tarjoajaOid,
+			@QueryParam("templateName") String templateName,
 			@QueryParam("valintakoeOids") List<String> valintakoeOids,
 			DokumentinLisatiedot hakemuksillaRajaus) {
 		DokumenttiProsessi kirjeProsessi = null;
@@ -295,10 +299,15 @@ public class ViestintapalveluAktivointiResource {
 						"Valintakoe ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
 			}
 		}
+		String tag = null;
 		try {
+			if (templateName == null) {
+				templateName = "koekutsukirje";
+			}
 			if (hakemuksillaRajaus == null) {
 				hakemuksillaRajaus = new DokumentinLisatiedot();
 			}
+			tag = hakemuksillaRajaus.getTag();
 			if (hakemuksillaRajaus.getHakemusOids() != null) {
 				LOG.info(
 						"Koekutsukirjeiden luonti aloitettu yksittaiselle hakemukselle {}",
@@ -316,8 +325,9 @@ public class ViestintapalveluAktivointiResource {
 			}
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(kirjeProsessi); //
 			koekutsukirjeRoute.koekutsukirjeetAktivointi(kirjeProsessi,
-					hakemuksillaRajaus.getHakemusOids(), hakukohdeOid,
-					valintakoeOids, hakemuksillaRajaus.getLetterBodyText(),
+					hakemuksillaRajaus.getHakemusOids(), hakuOid, hakukohdeOid,
+					tarjoajaOid, tag, templateName, valintakoeOids,
+					hakemuksillaRajaus.getLetterBodyText(),
 					SecurityContextHolder.getContext().getAuthentication());
 		} catch (Exception e) {
 			LOG.error("Koekutsukirjeiden luonti epäonnistui! {}",
