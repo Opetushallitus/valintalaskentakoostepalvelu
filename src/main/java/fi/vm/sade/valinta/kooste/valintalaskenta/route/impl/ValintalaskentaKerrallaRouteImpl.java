@@ -57,8 +57,9 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
  * 
  */
 @Component
-public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
-		implements ValintalaskentaKerrallaRouteValvomo {
+public class ValintalaskentaKerrallaRouteImpl extends
+		KoostepalveluRouteBuilder<Laskenta> implements
+		ValintalaskentaKerrallaRouteValvomo {
 
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaKerrallaRouteImpl.class);
@@ -73,15 +74,6 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 	private final String valintalaskentaKerrallaValintaperusteet;
 	private final String valintalaskentaKerrallaHakemukset;
 	private final String valintalaskentaKerrallaLaskenta;
-	private final Cache<String, Laskenta> laskentaCache = CacheBuilder
-			.newBuilder().weakValues().expireAfterWrite(3, TimeUnit.HOURS)
-			.removalListener(new RemovalListener<String, Laskenta>() {
-				public void onRemoval(
-						RemovalNotification<String, Laskenta> notification) {
-					LOG.info("{} siivottu pois muistista",
-							notification.getValue());
-				}
-			}).build();
 
 	@Autowired
 	public ValintalaskentaKerrallaRouteImpl(
@@ -105,13 +97,13 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 
 	@Override
 	public List<Laskenta> ajossaOlevatLaskennat() {
-		return laskentaCache.asMap().values().stream()
+		return getKoostepalveluCache().asMap().values().stream()
 				.filter(l -> !l.isValmis()).collect(Collectors.toList());
 	}
 
 	@Override
 	public Laskenta haeLaskenta(String uuid) {
-		Laskenta l = laskentaCache.getIfPresent(uuid);
+		Laskenta l = getKoostepalveluCache().getIfPresent(uuid);
 		if (l != null && l.isValmis()) { // ei palauteta valmistuneita
 			return null;
 		}
@@ -122,8 +114,8 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 	public void configure() throws Exception {
 		interceptFrom(valintalaskentaKerralla).process(
 				Reititys.<LaskentaJaHaku> kuluttaja(l -> {
-					Laskenta vanhaLaskenta = laskentaCache.getIfPresent(l
-							.getLaskenta().getUuid());
+					Laskenta vanhaLaskenta = getKoostepalveluCache()
+							.getIfPresent(l.getLaskenta().getUuid());
 					if (vanhaLaskenta != null) {
 						// varmistetaan etta uudelleen ajon reunatapauksessa
 						// mahdollisesti viela suorituksessa oleva vanha
@@ -132,7 +124,7 @@ public class ValintalaskentaKerrallaRouteImpl extends KoostepalveluRouteBuilder
 						// pois
 						vanhaLaskenta.getLopetusehto().set(true);
 					}
-					laskentaCache.put(l.getLaskenta().getUuid(),
+					getKoostepalveluCache().put(l.getLaskenta().getUuid(),
 							l.getLaskenta());
 				}));
 		//

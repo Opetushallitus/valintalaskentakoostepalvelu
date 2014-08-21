@@ -20,7 +20,11 @@ public interface KoekutsukirjeRoute {
 	void koekutsukirjeetAktivointi(
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
 			@Property("hakemusOids") List<String> hakemusOids,
+			@Property(OPH.HAKUOID) String hakuOid,
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
+			@Property(OPH.TARJOAJAOID) String tarjoajaOid,
+			@Property("tag") String tag,
+			@Property("templateName") String templateName,
 			@Property("valintakoeOid") List<String> valintakoeOid,
 			@Property(OPH.LETTER_BODY_TEXT) String letterBodyText,
 			@Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
