@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.*;
+
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;
@@ -545,6 +546,19 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 		//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
+						String virhe = null;
+						String stacktrace = null;
+						try {
+							virhe = simple("${exception.message}").evaluate(
+									exchange, String.class);
+							stacktrace = simple("${exception.stacktrace}")
+									.evaluate(exchange, String.class);
+						} catch (Exception e) {
+						}
+						LOG.error(
+								"Keladokumentin luonti paattyi virheeseen! {}\r\n{}",
+								virhe, stacktrace);
+
 						dokumenttiprosessi(exchange)
 								.luovutaUudelleenYritystenKanssa();
 
