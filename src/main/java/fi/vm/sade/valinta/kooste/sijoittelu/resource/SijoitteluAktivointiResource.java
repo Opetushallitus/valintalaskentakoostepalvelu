@@ -7,29 +7,31 @@ import java.util.Map;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
-import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
+import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
-import fi.vm.sade.valinta.kooste.sijoittelu.Sijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
+import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoittelunValvonta;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
+import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
 
 /**
  *
@@ -53,13 +55,24 @@ public class SijoitteluAktivointiResource {
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 
-    @Autowired
-    private SijoittelunSeurantaResource sijoittelunSeurantaResource;
+	@Autowired
+	private SijoittelunSeurantaResource sijoittelunSeurantaResource;
+
+	@Autowired
+	private SijoittelunValvonta sijoittelunValvonta;
+
+	@GET
+	@Path("/status/{hakuoid}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@ApiOperation(value = "Sijoittelun status", response = String.class)
+	public Sijoittelu status(@PathParam("hakuoid") String hakuOid) {
+		return sijoittelunValvonta.haeAktiivinenSijoitteluHaulle(hakuOid);
+	}
 
 	@POST
 	@Path("/aktivoi")
 	@ApiOperation(value = "Sijoittelun aktivointi", response = String.class)
-	public ProsessiId aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
+	public void aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
 		if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
 			LOG.error(
 					"Sijoittelua yritettiin käynnistää haulle({}) ilman käyttöoikeuksia!",
@@ -71,13 +84,8 @@ public class SijoitteluAktivointiResource {
 			LOG.error("Sijoittelua yritettiin käynnistää ilman hakuOidia!");
 			throw new RuntimeException("Parametri hakuOid on pakollinen!");
 		} else {
-			DokumenttiProsessi prosessi = new DokumenttiProsessi("Sijoittelu",
-					"aktivointi", hakuOid, Arrays.asList("sijoittelu"));
-			LOG.info("aktivoiSijoittelu haulle {}", hakuOid);
-			sijoitteluAktivointiProxy.aktivoiSijoittelu(prosessi, hakuOid,
-					SecurityContextHolder.getContext().getAuthentication());
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-			return prosessi.toProsessiId();
+			sijoitteluAktivointiProxy
+					.aktivoiSijoittelu(new Sijoittelu(hakuOid));
 		}
 	}
 
@@ -95,7 +103,8 @@ public class SijoitteluAktivointiResource {
 			return "get parameter 'hakuOid' required";
 		} else {
 			LOG.info("jatkuva sijoittelu aktivoitu haulle {}", hakuOid);
-            sijoittelunSeurantaResource.merkkaaSijoittelunAjossaTila(hakuOid, true);
+			sijoittelunSeurantaResource.merkkaaSijoittelunAjossaTila(hakuOid,
+					true);
 			return "aktivoitu";
 		}
 	}
@@ -114,7 +123,7 @@ public class SijoitteluAktivointiResource {
 			return "get parameter 'hakuOid' required";
 		} else {
 			LOG.info("jatkuva sijoittelu poistettu haulta {}", hakuOid);
-            sijoittelunSeurantaResource.poistaSijoittelu(hakuOid);
+			sijoittelunSeurantaResource.poistaSijoittelu(hakuOid);
 			return "poistettu";
 		}
 	}
@@ -132,12 +141,13 @@ public class SijoitteluAktivointiResource {
 	@Path("/jatkuva")
 	@Produces(MediaType.APPLICATION_JSON)
 	@PreAuthorize(OPH_CRUD)
-	@ApiOperation(value = "Haun aktiiviset sijoittelut", response = Sijoittelu.class)
+	@ApiOperation(value = "Haun aktiiviset sijoittelut", response = SijoitteluDto.class)
 	public SijoitteluDto jatkuvaTila(@QueryParam("hakuOid") String hakuOid) {
 		if (StringUtils.isBlank(hakuOid)) {
 			return null;
 		} else {
-            SijoitteluDto sijoitteluDto = sijoittelunSeurantaResource.hae(hakuOid);
+			SijoitteluDto sijoitteluDto = sijoittelunSeurantaResource
+					.hae(hakuOid);
 			return sijoitteluDto;
 		}
 	}
