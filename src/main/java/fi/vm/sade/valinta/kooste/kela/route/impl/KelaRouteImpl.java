@@ -558,7 +558,10 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 						LOG.error(
 								"Keladokumentin luonti paattyi virheeseen! {}\r\n{}",
 								virhe, stacktrace);
-
+						dokumenttiprosessi(exchange).getPoikkeukset().add(
+								new Poikkeus(Poikkeus.KOOSTEPALVELU,
+										"Kela-dokumentin luonti", virhe));
+						dokumenttiprosessi(exchange).addException(virhe);
 						dokumenttiprosessi(exchange)
 								.luovutaUudelleenYritystenKanssa();
 
