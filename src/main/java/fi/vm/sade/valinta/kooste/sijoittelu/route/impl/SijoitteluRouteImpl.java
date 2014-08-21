@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.camel.AsyncCallback;
@@ -13,6 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 
 import fi.vm.sade.valinta.kooste.KoostepalveluRouteBuilder;
 import fi.vm.sade.valinta.kooste.Reititys;
@@ -47,6 +53,18 @@ public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu>
 	@Autowired
 	public SijoitteluRouteImpl(SijoitteluResource sijoitteluResource) {
 		this.sijoitteluResource = sijoitteluResource;
+	}
+
+	@Override
+	protected Cache<String, Sijoittelu> configureCache() {
+		return CacheBuilder.newBuilder().expireAfterWrite(60, TimeUnit.MINUTES)
+				.removalListener(new RemovalListener<String, Sijoittelu>() {
+					public void onRemoval(
+							RemovalNotification<String, Sijoittelu> notification) {
+						LOG.info("{} siivottu pois muistista",
+								notification.getValue());
+					}
+				}).build();
 	}
 
 	@Override

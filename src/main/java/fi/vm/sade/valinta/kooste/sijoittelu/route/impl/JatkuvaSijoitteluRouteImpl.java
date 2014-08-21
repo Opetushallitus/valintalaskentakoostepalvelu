@@ -26,7 +26,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder {
 
 	@Autowired
 	public JatkuvaSijoitteluRouteImpl(
-			@Value("quartz://jakuvasijoittelu_ajastin?cron=${valintalaskentakoostepalvelu.jatkuvasijoittelu.cron}") String quartzInput,
+			@Value("quartz://jatkuvanSijoittelunAjastin?cron=${valintalaskentakoostepalvelu.jatkuvasijoittelu.cron}") String quartzInput,
 			JatkuvaSijoittelu jatkuvaSijoittelu) {
 		this.quartzInput = quartzInput;
 		this.jatkuvaSijoittelu = jatkuvaSijoittelu;

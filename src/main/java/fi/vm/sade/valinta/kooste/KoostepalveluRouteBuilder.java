@@ -36,15 +36,19 @@ public abstract class KoostepalveluRouteBuilder<T> extends SpringRouteBuilder {
 	 */
 	protected abstract String deadLetterChannelEndpoint();
 
-	private final Cache<String, T> koostepalveluCache = CacheBuilder
-			.newBuilder().weakValues().expireAfterWrite(3, TimeUnit.HOURS)
-			.removalListener(new RemovalListener<String, T>() {
-				public void onRemoval(
-						RemovalNotification<String, T> notification) {
-					LOG.info("{} siivottu pois muistista",
-							notification.getValue());
-				}
-			}).build();
+	private final Cache<String, T> koostepalveluCache = configureCache();
+
+	protected Cache<String, T> configureCache() {
+		return CacheBuilder.newBuilder().weakValues()
+				.expireAfterWrite(3, TimeUnit.HOURS)
+				.removalListener(new RemovalListener<String, T>() {
+					public void onRemoval(
+							RemovalNotification<String, T> notification) {
+						LOG.info("{} siivottu pois muistista",
+								notification.getValue());
+					}
+				}).build();
+	}
 
 	protected Cache<String, T> getKoostepalveluCache() {
 		return koostepalveluCache;
