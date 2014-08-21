@@ -69,11 +69,7 @@ public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu>
 
 	@Override
 	public Sijoittelu haeAktiivinenSijoitteluHaulle(String hakuOid) {
-		Sijoittelu l = getKoostepalveluCache().getIfPresent(hakuOid);
-		if (l != null && l.isValmis()) { // ei palauteta valmistuneita
-			return null;
-		}
-		return l;
+		return getKoostepalveluCache().getIfPresent(hakuOid);
 	}
 
 	@Override
