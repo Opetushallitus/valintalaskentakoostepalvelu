@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.excel;
 
-import scala.collection.mutable.StringBuilder;
-
 /**
  * 
  * @author Jussi Jartamo
