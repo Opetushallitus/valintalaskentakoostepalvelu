@@ -25,8 +25,7 @@ public class ExcelExportUtil {
 	public static final FastDateFormat DATE_FORMAT = FastDateFormat
 			.getInstance("dd.MM.yyyy hh.mm");
 
-	public static InputStream exportGridAsXls(Object[][] grid) {
-
+	public static byte[] exportGridAsXlsBytes(Object[][] grid) {
 		assert (grid != null);
 		Workbook wb = new HSSFWorkbook();
 		Sheet sheet = wb.createSheet(DATE_FORMAT.format(new Date()));
@@ -68,11 +67,10 @@ public class ExcelExportUtil {
 			e.printStackTrace(); // <- not going to happen since not using real
 									// I/O
 		}
-
-		return new ByteArrayInputStream(bytesOut.toByteArray());// bytesOut.newInputStream();
+		return bytesOut.toByteArray();
 	}
 
-	private static boolean isInteger(String str) {
-		return str.matches("^-?[0-9]+(\\.[0-9]+)?$");
+	public static InputStream exportGridAsXls(Object[][] grid) {
+		return new ByteArrayInputStream(exportGridAsXlsBytes(grid));// bytesOut.newInputStream();
 	}
 }

@@ -1,38 +1,23 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 
-import java.util.ArrayList;
+import static org.apache.camel.ExchangePattern.InOnly;
+
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.apache.camel.Exchange;
-
-import static org.apache.camel.ExchangePattern.InOnly;
-
 import org.apache.camel.LoggingLevel;
-import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
-import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
-import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
-import org.apache.camel.util.toolbox.FlexibleAggregationStrategy.CompletionAwareMixin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
-
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.KoostepalveluRouteBuilder;
 import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;

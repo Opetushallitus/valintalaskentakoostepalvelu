@@ -20,21 +20,21 @@ public interface ValintalaskentaKerrallaRoute {
 			//
 			"?purgeWhenStopping=true&waitForTaskToComplete=Never" +
 			//
-			"&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentakerralla.threadpoolsize:10}";
+			"&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentakerralla.threadpoolsize:5}";
 
 	static final String SEDA_VALINTALASKENTA_KERRALLA_VALINTAPERUSTEET = "seda:valintalaskentakerralla_valintaperusteet"
 			+
 			//
 			"?purgeWhenStopping=true&waitForTaskToComplete=Never" +
 			//
-			"&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentakerralla.threadpoolsize:10}";
+			"&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentakerralla.threadpoolsize:5}";
 
 	static final String SEDA_VALINTALASKENTA_KERRALLA_LASKENTA = "seda:valintalaskentakerralla_laskenta"
 			+
 			//
 			"?purgeWhenStopping=true&waitForTaskToComplete=Never" +
 			//
-			"&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentakerralla.threadpoolsize:10}";
+			"&concurrentConsumers=${valintalaskentakoostepalvelu.valintalaskentakerralla.threadpoolsize:5}";
 
 	@InOnly
 	void suoritaValintalaskentaKerralla(@Body LaskentaJaHaku laskentaJaHaku,
