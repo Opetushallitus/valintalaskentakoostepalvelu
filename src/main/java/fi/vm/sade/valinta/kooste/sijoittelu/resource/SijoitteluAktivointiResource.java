@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
+import com.google.gson.Gson;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -142,13 +143,13 @@ public class SijoitteluAktivointiResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@PreAuthorize(OPH_CRUD)
 	@ApiOperation(value = "Haun aktiiviset sijoittelut", response = SijoitteluDto.class)
-	public SijoitteluDto jatkuvaTila(@QueryParam("hakuOid") String hakuOid) {
+	public String jatkuvaTila(@QueryParam("hakuOid") String hakuOid) {
 		if (StringUtils.isBlank(hakuOid)) {
 			return null;
 		} else {
 			SijoitteluDto sijoitteluDto = sijoittelunSeurantaResource
 					.hae(hakuOid);
-			return sijoitteluDto;
+			return new Gson().toJson(sijoitteluDto);
 		}
 	}
 }

@@ -2,23 +2,36 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.CompletionCallback;
+import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import com.wordnik.swagger.annotations.ApiOperation;
 
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaMuistissaProsessi;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +50,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
@@ -56,7 +70,8 @@ public class ValintalaskentaKerrallaResource {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaKerrallaResource.class);
-
+	public final static MediaType APPLICATION_VND_MS_EXCEL = new MediaType(
+			"application", "vnd.ms-excel");
 	@Autowired
 	private SeurantaResource seurantaResource;
 	@Autowired
@@ -99,6 +114,36 @@ public class ValintalaskentaKerrallaResource {
 	@ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
 	public Laskenta status(@PathParam("uuid") String uuid) {
 		return valintalaskentaValvomo.haeLaskenta(uuid);
+	}
+
+	@GET
+	@Path("/status/{uuid}/xls")
+	@Produces("application/vnd.ms-excel")
+	@ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
+	public Response statusXls(final @PathParam("uuid") String uuid) {
+		LOG.error("XLS SAIE");
+		byte[] bytes = null;
+		try {
+			LaskentaDto laskenta = seurantaResource.laskenta(uuid);
+			LOG.error("XLS SAATIIN LASKENTA");
+			List<Object[]> grid = Lists.newArrayList();
+			for (HakukohdeDto hakukohde : laskenta.getHakukohteet()) {
+				grid.add(new Object[] { hakukohde.getHakukohdeOid() });
+			}
+			bytes = ExcelExportUtil.exportGridAsXlsBytes(grid
+					.toArray(new Object[][] {}));
+		} catch (Exception e) {
+
+		}
+		return Response.ok()
+				.entity(bytes)
+				//
+				.header("Content-Length", bytes.length)
+				//
+				.header("Content-Type", "application/vnd.ms-excel")
+				//
+				.header("Content-Disposition",
+						"attachment; filename=\"yhteenveto.xls\"").build();
 	}
 
 	/**
