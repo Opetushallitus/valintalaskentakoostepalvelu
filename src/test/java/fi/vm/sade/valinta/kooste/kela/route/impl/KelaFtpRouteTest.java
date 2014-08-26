@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.kela;
+package fi.vm.sade.valinta.kooste.kela.route.impl;
 
 import static org.mockito.Mockito.mock;
 

@@ -55,7 +55,7 @@ import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
-import fi.vm.sade.valinta.seuranta.resource.SeurantaResource;
+import fi.vm.sade.valinta.seuranta.resource.LaskentaSeurantaResource;
 
 /**
  * 
@@ -73,7 +73,7 @@ public class ValintalaskentaKerrallaResource {
 	public final static MediaType APPLICATION_VND_MS_EXCEL = new MediaType(
 			"application", "vnd.ms-excel");
 	@Autowired
-	private SeurantaResource seurantaResource;
+	private LaskentaSeurantaResource seurantaResource;
 	@Autowired
 	private ValintalaskentaKerrallaRoute valintalaskentaRoute;
 	@Autowired

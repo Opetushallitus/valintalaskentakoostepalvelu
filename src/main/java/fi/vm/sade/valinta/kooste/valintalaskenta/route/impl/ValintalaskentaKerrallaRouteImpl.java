@@ -32,7 +32,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
-import fi.vm.sade.valinta.seuranta.resource.SeurantaResource;
+import fi.vm.sade.valinta.seuranta.resource.LaskentaSeurantaResource;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
@@ -51,7 +51,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 	private static final String DEADLETTERCHANNEL = "direct:valintalaskenta_kerralla_deadletterchannel";
 	private static final String AGGREGATOR = "direct:valintalaskenta_kerralla_aggregator";
 	private static final String ROUTE_ID = "valintalaskenta_kerralla";
-	private final SeurantaResource seurantaResource;
+	private final LaskentaSeurantaResource seurantaResource;
 	private final ValintaperusteetRestResource valintaperusteetRestResource;
 	private final ValintalaskentaResource valintalaskentaResource;
 	private final ApplicationResource applicationResource;
@@ -66,7 +66,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 			@Value(ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA_VALINTAPERUSTEET) String valintalaskentaKerrallaValintaperusteet,
 			@Value(ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA_HAKEMUKSET) String valintalaskentaKerrallaHakemukset,
 			@Value(ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA_LASKENTA) String valintalaskentaKerrallaLaskenta,
-			SeurantaResource seurantaResource,
+			LaskentaSeurantaResource seurantaResource,
 			ValintaperusteetRestResource valintaperusteetRestResource,
 			ValintalaskentaResource valintalaskentaResource,
 			ApplicationResource applicationResource) {

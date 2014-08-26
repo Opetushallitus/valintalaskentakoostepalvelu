@@ -40,7 +40,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaKerrallaRouteImpl;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
-import fi.vm.sade.valinta.seuranta.resource.SeurantaResource;
+import fi.vm.sade.valinta.seuranta.resource.LaskentaSeurantaResource;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
 @Configuration
@@ -71,7 +71,7 @@ public class ValintalaskentaKerrallaTest {
 	@Autowired
 	private ValintalaskentaKerrallaRoute valintalaskentaKaikilleRoute;
 	@Autowired
-	private SeurantaResource seurantaResource;
+	private LaskentaSeurantaResource seurantaResource;
 	@Autowired
 	private ValintaperusteetResource valintaperusteetResource;
 	@Autowired
@@ -115,7 +115,7 @@ public class ValintalaskentaKerrallaTest {
 
 	@Bean
 	public ValintalaskentaKerrallaRouteImpl getValintalaskentaKerrallaRouteImpl(
-			SeurantaResource s, ValintaperusteetRestResource vr,
+			LaskentaSeurantaResource s, ValintaperusteetRestResource vr,
 			ValintalaskentaResource vl, ApplicationResource app) {
 		return new ValintalaskentaKerrallaRouteImpl(ENDPOINT,
 				ENDPOINT_VALINTAPERUSTEET, ENDPOINT_HAKEMUKSET,
@@ -163,8 +163,8 @@ public class ValintalaskentaKerrallaTest {
 	}
 
 	@Bean
-	public SeurantaResource getSeurantaResource() {
-		return Mockito.mock(SeurantaResource.class);
+	public LaskentaSeurantaResource getSeurantaResource() {
+		return Mockito.mock(LaskentaSeurantaResource.class);
 	}
 
 	@Bean
