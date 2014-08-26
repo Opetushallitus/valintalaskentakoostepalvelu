@@ -168,6 +168,9 @@ public class ValintalaskentaKerrallaRouteImpl extends
 		from(valintalaskentaKerrallaHakemukset)
 				.errorHandler(deadLetterChannel())
 				//
+				.throttle(1)
+				.timePeriodMillis(200)
+				//
 				.process(
 						Reititys.<LaskentaJaHakukohde, LaskentaJaValintaperusteetJaHakemukset> funktio(
 								tyo -> {
@@ -206,6 +209,9 @@ public class ValintalaskentaKerrallaRouteImpl extends
 		 */
 		from(valintalaskentaKerrallaValintaperusteet)
 				.errorHandler(deadLetterChannel())
+				//
+				.throttle(1)
+				.timePeriodMillis(200)
 				//
 				.process(
 						Reititys.<LaskentaJaHakukohde, LaskentaJaValintaperusteetJaHakemukset> funktio(
