@@ -106,8 +106,9 @@ public class ValintalaskentaKerrallaTest {
 
 			}
 		};
-		Mockito.verify(valintalaskentaResource, Mockito.timeout(15000).times(3))
-				.laskeKaikki(Mockito.argThat(l));
+		Mockito.verify(valintalaskentaResource,
+				Mockito.timeout(15000).atLeast(2)).laskeKaikki(
+				Mockito.argThat(l));
 
 	}
 
@@ -150,7 +151,7 @@ public class ValintalaskentaKerrallaTest {
 						Mockito.anyListOf(String.class), Mockito.anyInt()))
 				.thenReturn(Collections.emptyList());
 		Mockito.when(
-				a.getApplicationsByOid(Mockito.eq("h3"),
+				a.getApplicationsByOid(Mockito.eq("h2"),
 						Mockito.anyListOf(String.class), Mockito.anyInt()))
 				.thenReturn(Collections.emptyList());
 		Mockito.when(

@@ -168,8 +168,30 @@ public class ValintalaskentaKerrallaRouteImpl extends
 		from(valintalaskentaKerrallaHakemukset)
 				.errorHandler(deadLetterChannel())
 				//
+				.choice()
+				//
+				.when(Reititys.<LaskentaJaHakukohde> ehto(tyo -> {
+					return tyo.isLuovutettu();
+				}))
+				//
+				.process(
+						Reititys.<LaskentaJaHakukohde, LaskentaJaValintaperusteetJaHakemukset> funktio(
+						//
+						(tyo -> {
+							LOG.error(
+									"Koska valintaperusteita ei saatu niin ei haeta hakemuksiakaan suotta hakukohteelle {}",
+									tyo.getHakukohdeOid());
+							return new LaskentaJaValintaperusteetJaHakemukset(
+									tyo.getLaskenta(), tyo.getHakukohdeOid(),
+									null, null);
+						})))
+				//
+				.to(InOnly, AGGREGATOR)
+				//
+				.otherwise()
+				//
 				.throttle(1)
-				.timePeriodMillis(200)
+				.timePeriodMillis(50)
 				//
 				.process(
 						Reititys.<LaskentaJaHakukohde, LaskentaJaValintaperusteetJaHakemukset> funktio(
@@ -188,6 +210,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 
 								},
 								((tyo, poikkeus) -> {
+									tyo.luovuta();
 									LOG.error(
 											"Hakemuksia ei saatu hakukohteelle({}) haussa({}). {}\r\n{}",
 											tyo.getHakukohdeOid(),
@@ -210,8 +233,30 @@ public class ValintalaskentaKerrallaRouteImpl extends
 		from(valintalaskentaKerrallaValintaperusteet)
 				.errorHandler(deadLetterChannel())
 				//
+				.choice()
+				//
+				.when(Reititys.<LaskentaJaHakukohde> ehto(tyo -> {
+					return tyo.isLuovutettu();
+				}))
+				//
+				.process(
+						Reititys.<LaskentaJaHakukohde, LaskentaJaValintaperusteetJaHakemukset> funktio(
+						//
+						(tyo -> {
+							LOG.error(
+									"Koska hakemuksia ei saatu niin ei haeta valintaperusteitakaan suotta hakukohteelle {}",
+									tyo.getHakukohdeOid());
+							return new LaskentaJaValintaperusteetJaHakemukset(
+									tyo.getLaskenta(), tyo.getHakukohdeOid(),
+									null, null);
+						})))
+				//
+				.to(InOnly, AGGREGATOR)
+				//
+				.otherwise()
+				//
 				.throttle(1)
-				.timePeriodMillis(200)
+				.timePeriodMillis(50)
 				//
 				.process(
 						Reititys.<LaskentaJaHakukohde, LaskentaJaValintaperusteetJaHakemukset> funktio(
@@ -229,6 +274,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 											null);
 								},
 								((tyo, poikkeus) -> {
+									tyo.luovuta();
 									LOG.error(
 											"Valintaperusteita ei saatu hakukohteelle({}) haussa({}). {}\r\n{}",
 											tyo.getHakukohdeOid(),
