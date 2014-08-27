@@ -4,6 +4,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
@@ -27,6 +28,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -116,17 +119,42 @@ public class ValintalaskentaKerrallaResource {
 	@Produces("application/vnd.ms-excel")
 	@ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
 	public Response statusXls(final @PathParam("uuid") String uuid) {
-		LOG.error("XLS SAIE");
 		byte[] bytes = null;
 		try {
-			LaskentaDto laskenta = seurantaResource.laskenta(uuid);
-			LOG.error("XLS SAATIIN LASKENTA");
-			List<Object[]> grid = Lists.newArrayList();
-			for (HakukohdeDto hakukohde : laskenta.getHakukohteet()) {
-				grid.add(new Object[] { hakukohde.getHakukohdeOid() });
+			LaskentaDto laskenta = new Gson().fromJson(
+					seurantaResource.laskenta(uuid), LaskentaDto.class);
+			Map<String, Object[][]> sheetAndGrid = Maps.newHashMap();
+			{
+				List<Object[]> grid = Lists.newArrayList();
+				grid.add(new Object[] { "Suorittamattomat hakukohteet" });
+				for (HakukohdeDto hakukohde : laskenta.getHakukohteet()
+						.stream()
+						.filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
+						.collect(Collectors.toList())) {
+					List<String> rivi = Lists.newArrayList();
+					rivi.add(hakukohde.getHakukohdeOid());
+					rivi.addAll(hakukohde.getIlmoitukset().stream()
+							.map(i -> i.getOtsikko())
+							.collect(Collectors.toList()));
+					grid.add(rivi.toArray());
+					sheetAndGrid.put("Kesken", grid.toArray(new Object[][] {}));
+				}
+
 			}
-			bytes = ExcelExportUtil.exportGridAsXlsBytes(grid
-					.toArray(new Object[][] {}));
+			{
+				List<Object[]> grid = Lists.newArrayList();
+				grid.add(new Object[] { "Valmistuneet hakukohteet" });
+				for (HakukohdeDto hakukohde : laskenta.getHakukohteet()
+						.stream()
+						.filter(h -> HakukohdeTila.VALMIS.equals(h.getTila()))
+						.collect(Collectors.toList())) {
+					grid.add(new Object[] { hakukohde.getHakukohdeOid() });
+					sheetAndGrid
+							.put("Valmiit", grid.toArray(new Object[][] {}));
+				}
+			}
+			bytes = ExcelExportUtil.exportGridSheetsAsXlsBytes(sheetAndGrid);// GridAsXlsBytes(grid
+			// .toArray(new Object[][] {}));
 		} catch (Exception e) {
 			LOG.error(
 					"Excelin muodostus laskennan yhteenvedolle epaonnistui! {}\r\n{}",
