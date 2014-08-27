@@ -12,20 +12,20 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
  * @author Jussi Jartamo
  * 
  */
-public class KelaLuonti {
+public class Luonti {
 	private final String uuid;
 	private final Collection<String> hakuOids;
 	private final String aineistonNimi;
 	private final String organisaationNimi;
 
-	public KelaLuonti() {
+	public Luonti() {
 		this.hakuOids = null;
 		this.aineistonNimi = null;
 		this.organisaationNimi = null;
 		this.uuid = null;
 	}
 
-	public KelaLuonti(String uuid, Collection<String> hakuOids,
+	public Luonti(String uuid, Collection<String> hakuOids,
 			String aineistonNimi, String organisaationNimi) {
 		this.uuid = uuid;
 		this.hakuOids = hakuOids;
