@@ -51,6 +51,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 	private static final String DEADLETTERCHANNEL = "direct:valintalaskenta_kerralla_deadletterchannel";
 	private static final String AGGREGATOR = "direct:valintalaskenta_kerralla_aggregator";
 	private static final String ROUTE_ID = "valintalaskenta_kerralla";
+	private static final Integer HAE_KAIKKI_VALINNANVAIHEET = new Integer(-1);
 	private final LaskentaSeurantaResource seurantaResource;
 	private final ValintaperusteetRestResource valintaperusteetRestResource;
 	private final ValintalaskentaResource valintalaskentaResource;
@@ -264,13 +265,19 @@ public class ValintalaskentaKerrallaRouteImpl extends
 									LOG.debug(
 											"Valintaperusteet hakukohteelle {}",
 											tyo.getHakukohdeOid());
+									Integer valinnanvaihe = tyo.getLaskenta()
+											.getValinnanvaihe();
+									if (HAE_KAIKKI_VALINNANVAIHEET
+											.equals(valinnanvaihe)) {
+										valinnanvaihe = null;
+									}
 									return new LaskentaJaValintaperusteetJaHakemukset(
-											tyo.getLaskenta(),
-											tyo.getHakukohdeOid(),
-											valintaperusteetRestResource.haeValintaperusteet(
-													tyo.getHakukohdeOid(), tyo
-															.getLaskenta()
-															.getValinnanvaihe()),
+											tyo.getLaskenta(), tyo
+													.getHakukohdeOid(),
+											valintaperusteetRestResource
+													.haeValintaperusteet(tyo
+															.getHakukohdeOid(),
+															valinnanvaihe),
 											null);
 								},
 								((tyo, poikkeus) -> {
@@ -433,7 +440,17 @@ public class ValintalaskentaKerrallaRouteImpl extends
 												valintalaskentaResource
 														.valintakokeet(new LaskeDTO(
 																tyo.getHakemukset()
-																		.parallelStream()
+																		// kaikki
+																		// saikeet
+																		// on
+																		// varmasti
+																		// jo
+																		// tyollistettyja
+																		// parellelstream
+																		// tod.nak
+																		// hidastaa
+																		// .parallelStream()
+																		.stream()
 																		.map(h -> getContext()
 																				.getTypeConverter()
 																				.tryConvertTo(
@@ -452,7 +469,17 @@ public class ValintalaskentaKerrallaRouteImpl extends
 													valintalaskentaResource
 															.laskeKaikki(new LaskeDTO(
 																	tyo.getHakemukset()
-																			.parallelStream()
+																			// kaikki
+																			// saikeet
+																			// on
+																			// varmasti
+																			// jo
+																			// tyollistettyja
+																			// parellelstream
+																			// tod.nak
+																			// hidastaa
+																			// .parallelStream()
+																			.stream()
 																			.map(h -> getContext()
 																					.getTypeConverter()
 																					.tryConvertTo(
@@ -470,7 +497,8 @@ public class ValintalaskentaKerrallaRouteImpl extends
 													valintalaskentaResource
 															.laske(new LaskeDTO(
 																	tyo.getHakemukset()
-																			.parallelStream()
+																			.stream()
+																			// .parallelStream()
 																			.map(h -> getContext()
 																					.getTypeConverter()
 																					.tryConvertTo(
