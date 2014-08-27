@@ -6,13 +6,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.component.bean.ProxyHelper;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -85,7 +83,7 @@ public class ValintalaskentaKerrallaTest {
 				.collect(Collectors.toList());
 		valintalaskentaKaikilleRoute.suoritaValintalaskentaKerralla(
 				new LaskentaJaHaku(new Laskenta(UUID, HAKUOID, HAKUKOHTEITA,
-						lopetusehto), hakukohdeOids), lopetusehto);
+						lopetusehto, null, null), hakukohdeOids), lopetusehto);
 		Mockito.verify(seurantaResource, Mockito.timeout(15000).times(1))
 				.merkkaaLaskennanTila(Mockito.eq(UUID),
 						Mockito.eq(LaskentaTila.VALMIS));

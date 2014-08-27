@@ -22,23 +22,39 @@ public class Laskenta {
 	private final int hakukohteita;
 	private final AtomicBoolean lopetusehto;
 	private final AtomicInteger tehty = new AtomicInteger(0);
+	private final Integer valinnanvaihe;
+	private final Boolean valintakoelaskenta;
 
 	public Laskenta(String uuid, String hakuOid, int hakukohteita,
-			AtomicBoolean lopetusehto) {
+			AtomicBoolean lopetusehto, Integer valinnanvaihe,
+			Boolean valintakoelaskenta) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
 		this.hakukohteita = hakukohteita;
 		this.lopetusehto = lopetusehto;
 		this.osittainenLaskenta = false;
+		this.valinnanvaihe = valinnanvaihe;
+		this.valintakoelaskenta = valintakoelaskenta;
 	}
 
 	public Laskenta(String uuid, String hakuOid, int hakukohteita,
-			AtomicBoolean lopetusehto, boolean osittainenLaskenta) {
+			AtomicBoolean lopetusehto, boolean osittainenLaskenta,
+			Integer valinnanvaihe, Boolean valintakoelaskenta) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
 		this.hakukohteita = hakukohteita;
 		this.lopetusehto = lopetusehto;
 		this.osittainenLaskenta = osittainenLaskenta;
+		this.valinnanvaihe = valinnanvaihe;
+		this.valintakoelaskenta = valintakoelaskenta;
+	}
+
+	public Integer getValinnanvaihe() {
+		return valinnanvaihe;
+	}
+
+	public Boolean getValintakoelaskenta() {
+		return valintakoelaskenta;
 	}
 
 	public boolean isOsittainenLaskenta() {

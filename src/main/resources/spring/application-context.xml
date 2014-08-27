@@ -529,14 +529,7 @@
 		class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.pistesyotto.route.impl" />
 	<!-- Valintalaskenta -->
-	<bean
-		class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaMuistissaResource" />
-	<bean
-		class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource" />
-	<bean name="valintalaskentaKomponentti"
-		class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.ValintalaskentaKomponentti" />
-	<bean name="valintaperusteKomponentti"
-		class="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.ValintaperusteKomponentti" />
+	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource"/>
 	<ctx:component-scan
 		base-package="fi.vm.sade.valinta.kooste.valintalaskenta.route.impl" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
@@ -550,11 +543,6 @@
 		class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluAktivointiResource" />
 	<bean
 		class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.DokumenttiProsessiResource" />
-	<!-- Valintakoelaskenta -->
-	<bean
-		class="fi.vm.sade.valinta.kooste.valintakokeet.resource.ValintakoelaskentaAktivointiResource" />
-	<ctx:component-scan
-		base-package="fi.vm.sade.valinta.kooste.valintakokeet.route.impl" />
 
 	<!-- Kela Export -->
 	<bean class="fi.vm.sade.valinta.kooste.KoostepalveluContext" />
