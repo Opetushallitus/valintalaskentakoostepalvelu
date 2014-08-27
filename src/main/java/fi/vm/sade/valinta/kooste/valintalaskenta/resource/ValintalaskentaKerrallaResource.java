@@ -230,13 +230,20 @@ public class ValintalaskentaKerrallaResource {
 			}
 		}
 		LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
-		List<String> haunHakukohteetOids = haunHakukohteet(hakuOid);
-		if (maski.isMask()) {
+		List<String> haunHakukohteetOids = null;
+		if (maski.isWhitelist()) { // whitelistilla ohitetaan haun hakukohteiden
+									// resolvaus
 			haunHakukohteetOids = Lists.newArrayList(maski
-					.maskaa(haunHakukohteetOids));
-			if (haunHakukohteetOids.isEmpty()) {
-				throw new RuntimeException(
-						"Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa hakukohteettomasti.");
+					.getHakukohdeOidsMask());
+		} else {
+			haunHakukohteetOids = haunHakukohteet(hakuOid);
+			if (maski.isMask()) {
+				haunHakukohteetOids = Lists.newArrayList(maski
+						.maskaa(haunHakukohteetOids));
+				if (haunHakukohteetOids.isEmpty()) {
+					throw new RuntimeException(
+							"Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa hakukohteettomasti.");
+				}
 			}
 		}
 		String uuid = seurantaTunnus.apply(hakuOid, haunHakukohteetOids);
@@ -245,45 +252,6 @@ public class ValintalaskentaKerrallaResource {
 				new Laskenta(uuid, hakuOid, haunHakukohteetOids.size(),
 						lopetusehto, maski.isMask(), valinnanvaihe,
 						valintakoelaskenta), haunHakukohteetOids), lopetusehto);
-		return Vastaus.uudelleenOhjaus(uuid);
-	}
-
-	/**
-	 * Yksittaisen hakukohteen laskenta. Ei merkata seurantaan.
-	 * 
-	 * @param hakuOid
-	 * @param hakukohdeOid
-	 * @return laskennan uuid
-	 */
-	@POST
-	@Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
-	@Produces(APPLICATION_JSON)
-	public Vastaus valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid,
-			@QueryParam("valinnanvaihe") Integer valinnanvaihe,
-			@QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
-			@PathParam("hakukohdeOid") String hakukohdeOid) {
-		if (hakuOid == null || hakukohdeOid == null) {
-			throw new RuntimeException("HakuOid ja hakukohdeOid on pakollinen");
-		}
-		LOG.info("Pyynto suorittaa valintalaskenta haun {} hakukohteelle {}",
-				hakuOid, hakukohdeOid);
-		List<String> hakukohteet = Arrays.asList(hakukohdeOid);
-		final String uuid;
-		try {
-			uuid = seurantaResource.luoLaskenta(hakuOid,
-					LaskentaTyyppi.HAKUKOHDE, hakukohteet);
-		} catch (Exception e) {
-			LOG.error(
-					"Laskennan luonti epaonnistui haulle {} ja hakukohteelle {}! {}\r\n{}",
-					hakuOid, hakukohdeOid, e.getMessage(),
-					Arrays.toString(e.getStackTrace()));
-			throw e;
-		}
-		AtomicBoolean lopetusehto = new AtomicBoolean(false);
-		valintalaskentaRoute.suoritaValintalaskentaKerralla(new LaskentaJaHaku(
-				new Laskenta(uuid, hakuOid, 1, lopetusehto, true,
-						valinnanvaihe, valintakoelaskenta), hakukohteet),
-				lopetusehto);
 		return Vastaus.uudelleenOhjaus(uuid);
 	}
 
