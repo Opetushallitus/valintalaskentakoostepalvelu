@@ -70,8 +70,6 @@ public class ValintalaskentaKerrallaResource {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaKerrallaResource.class);
-	public final static MediaType APPLICATION_VND_MS_EXCEL = new MediaType(
-			"application", "vnd.ms-excel");
 	@Autowired
 	private LaskentaSeurantaResource seurantaResource;
 	@Autowired
@@ -133,7 +131,10 @@ public class ValintalaskentaKerrallaResource {
 			bytes = ExcelExportUtil.exportGridAsXlsBytes(grid
 					.toArray(new Object[][] {}));
 		} catch (Exception e) {
-
+			LOG.error(
+					"Excelin muodostus laskennan yhteenvedolle epaonnistui! {}\r\n{}",
+					e.getMessage(), Arrays.toString(e.getStackTrace()));
+			bytes = new byte[] {};
 		}
 		return Response.ok()
 				.entity(bytes)
