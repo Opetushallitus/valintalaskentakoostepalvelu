@@ -349,7 +349,7 @@
 	</jaxrs-client:client>
 	<jaxrs-client:client id="SeurantaRestClient"
 		address="${valintalaskentakoostepalvelu.seuranta.rest.url}"
-		serviceClass="fi.vm.sade.valinta.seuranta.resource.SeurantaResource"
+		serviceClass="fi.vm.sade.valinta.seuranta.resource.LaskentaSeurantaResource"
 		inheritHeaders="true">
 		<jaxrs-client:outInterceptors>
 			<bean
