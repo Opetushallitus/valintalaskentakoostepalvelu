@@ -104,7 +104,7 @@ public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder 
 	}
 
 	protected Date defaultExpirationDate() {
-		return DateTime.now().plusHours(720).toDate(); // almost a day
+		return DateTime.now().plusHours(168).toDate(); // almost a day
 	}
 
 	protected String generateId() {
