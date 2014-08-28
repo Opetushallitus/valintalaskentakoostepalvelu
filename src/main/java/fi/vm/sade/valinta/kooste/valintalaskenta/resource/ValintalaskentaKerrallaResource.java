@@ -40,6 +40,7 @@ import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
+import fi.vm.sade.valinta.kooste.valintalaskenta.excel.LaskentaDtoAsExcel;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
@@ -123,38 +124,7 @@ public class ValintalaskentaKerrallaResource {
 		try {
 			LaskentaDto laskenta = new Gson().fromJson(
 					seurantaResource.laskenta(uuid), LaskentaDto.class);
-			Map<String, Object[][]> sheetAndGrid = Maps.newHashMap();
-			{
-				List<Object[]> grid = Lists.newArrayList();
-				grid.add(new Object[] { "Suorittamattomat hakukohteet" });
-				for (HakukohdeDto hakukohde : laskenta.getHakukohteet()
-						.stream()
-						.filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
-						.collect(Collectors.toList())) {
-					List<String> rivi = Lists.newArrayList();
-					rivi.add(hakukohde.getHakukohdeOid());
-					rivi.addAll(hakukohde.getIlmoitukset().stream()
-							.map(i -> i.getOtsikko())
-							.collect(Collectors.toList()));
-					grid.add(rivi.toArray());
-					sheetAndGrid.put("Kesken", grid.toArray(new Object[][] {}));
-				}
-
-			}
-			{
-				List<Object[]> grid = Lists.newArrayList();
-				grid.add(new Object[] { "Valmistuneet hakukohteet" });
-				for (HakukohdeDto hakukohde : laskenta.getHakukohteet()
-						.stream()
-						.filter(h -> HakukohdeTila.VALMIS.equals(h.getTila()))
-						.collect(Collectors.toList())) {
-					grid.add(new Object[] { hakukohde.getHakukohdeOid() });
-					sheetAndGrid
-							.put("Valmiit", grid.toArray(new Object[][] {}));
-				}
-			}
-			bytes = ExcelExportUtil.exportGridSheetsAsXlsBytes(sheetAndGrid);// GridAsXlsBytes(grid
-			// .toArray(new Object[][] {}));
+			bytes = LaskentaDtoAsExcel.laskentaDtoAsExcel(laskenta);
 		} catch (Exception e) {
 			LOG.error(
 					"Excelin muodostus laskennan yhteenvedolle epaonnistui! {}\r\n{}",
