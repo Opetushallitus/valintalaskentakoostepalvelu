@@ -23,10 +23,6 @@ public interface KelaRoute {
 			//
 			@Body Collection<String> hakuOids,
 			//
-			// @Property(PROPERTY_LUKUVUOSI) Date lukuvuosi,
-			//
-			// @Property(PROPERTY_POIMINTAPAIVAMAARA) Date poimintapaivamaara,
-			//
 			@Property(PROPERTY_AINEISTONNIMI) String aineistonNimi,
 			//
 			@Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi,

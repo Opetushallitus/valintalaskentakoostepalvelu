@@ -38,6 +38,10 @@ public class Maski {
 		return hakukohdeOidsMask != null && !hakukohdeOidsMask.isEmpty();
 	}
 
+	public Set<String> getHakukohdeOidsMask() {
+		return hakukohdeOidsMask;
+	}
+
 	public boolean isBlacklist() {
 		return !whiteList && isMask();
 	}

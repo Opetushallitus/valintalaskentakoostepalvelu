@@ -11,10 +11,19 @@ public class LaskentaJaHakukohde {
 	private final static String NIMI_FORMAT = "hakukohdeOid(%s) %s";
 	private final Laskenta laskenta;
 	private final String hakukohdeOid;
+	private volatile boolean luovutus = false;
 
 	public LaskentaJaHakukohde(Laskenta laskenta, String hakukohdeOid) {
 		this.laskenta = laskenta;
 		this.hakukohdeOid = hakukohdeOid;
+	}
+
+	public void luovuta() {
+		luovutus = true;
+	}
+
+	public boolean isLuovutettu() {
+		return luovutus;
 	}
 
 	public String getHakukohdeOid() {

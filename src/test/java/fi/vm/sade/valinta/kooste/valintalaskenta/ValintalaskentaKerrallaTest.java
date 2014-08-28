@@ -6,13 +6,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.component.bean.ProxyHelper;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -40,7 +38,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaKerrallaRouteImpl;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
-import fi.vm.sade.valinta.seuranta.resource.SeurantaResource;
+import fi.vm.sade.valinta.seuranta.resource.LaskentaSeurantaResource;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
 @Configuration
@@ -71,7 +69,7 @@ public class ValintalaskentaKerrallaTest {
 	@Autowired
 	private ValintalaskentaKerrallaRoute valintalaskentaKaikilleRoute;
 	@Autowired
-	private SeurantaResource seurantaResource;
+	private LaskentaSeurantaResource seurantaResource;
 	@Autowired
 	private ValintaperusteetResource valintaperusteetResource;
 	@Autowired
@@ -85,7 +83,7 @@ public class ValintalaskentaKerrallaTest {
 				.collect(Collectors.toList());
 		valintalaskentaKaikilleRoute.suoritaValintalaskentaKerralla(
 				new LaskentaJaHaku(new Laskenta(UUID, HAKUOID, HAKUKOHTEITA,
-						lopetusehto), hakukohdeOids), lopetusehto);
+						lopetusehto, null, null), hakukohdeOids), lopetusehto);
 		Mockito.verify(seurantaResource, Mockito.timeout(15000).times(1))
 				.merkkaaLaskennanTila(Mockito.eq(UUID),
 						Mockito.eq(LaskentaTila.VALMIS));
@@ -108,14 +106,15 @@ public class ValintalaskentaKerrallaTest {
 
 			}
 		};
-		Mockito.verify(valintalaskentaResource, Mockito.timeout(15000).times(3))
-				.laskeKaikki(Mockito.argThat(l));
+		Mockito.verify(valintalaskentaResource,
+				Mockito.timeout(15000).atLeast(2)).laskeKaikki(
+				Mockito.argThat(l));
 
 	}
 
 	@Bean
 	public ValintalaskentaKerrallaRouteImpl getValintalaskentaKerrallaRouteImpl(
-			SeurantaResource s, ValintaperusteetRestResource vr,
+			LaskentaSeurantaResource s, ValintaperusteetRestResource vr,
 			ValintalaskentaResource vl, ApplicationResource app) {
 		return new ValintalaskentaKerrallaRouteImpl(ENDPOINT,
 				ENDPOINT_VALINTAPERUSTEET, ENDPOINT_HAKEMUKSET,
@@ -152,7 +151,7 @@ public class ValintalaskentaKerrallaTest {
 						Mockito.anyListOf(String.class), Mockito.anyInt()))
 				.thenReturn(Collections.emptyList());
 		Mockito.when(
-				a.getApplicationsByOid(Mockito.eq("h3"),
+				a.getApplicationsByOid(Mockito.eq("h2"),
 						Mockito.anyListOf(String.class), Mockito.anyInt()))
 				.thenReturn(Collections.emptyList());
 		Mockito.when(
@@ -163,8 +162,8 @@ public class ValintalaskentaKerrallaTest {
 	}
 
 	@Bean
-	public SeurantaResource getSeurantaResource() {
-		return Mockito.mock(SeurantaResource.class);
+	public LaskentaSeurantaResource getSeurantaResource() {
+		return Mockito.mock(LaskentaSeurantaResource.class);
 	}
 
 	@Bean

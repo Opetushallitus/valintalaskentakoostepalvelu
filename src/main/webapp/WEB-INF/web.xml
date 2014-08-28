@@ -38,7 +38,6 @@
             <param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
             <param-value>true</param-value>
         </init-param>
-
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
@@ -49,14 +48,5 @@
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
-	<!-- Health Check -->
-	<servlet>
-		<servlet-name>healthcheck</servlet-name>
-		<servlet-class>fi.vm.sade.generic.healthcheck.SpringAwareHealthCheckServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>healthcheck</servlet-name>
-		<url-pattern>/healthcheck</url-pattern>
-	</servlet-mapping>
 
 </web-app>

@@ -2,36 +2,24 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.*;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.CompletionCallback;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 
-import com.wordnik.swagger.annotations.ApiOperation;
-
-import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.ValintalaskentaMuistissaProsessi;
-import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,11 +28,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
@@ -55,7 +47,7 @@ import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
-import fi.vm.sade.valinta.seuranta.resource.SeurantaResource;
+import fi.vm.sade.valinta.seuranta.resource.LaskentaSeurantaResource;
 
 /**
  * 
@@ -70,10 +62,8 @@ public class ValintalaskentaKerrallaResource {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaKerrallaResource.class);
-	public final static MediaType APPLICATION_VND_MS_EXCEL = new MediaType(
-			"application", "vnd.ms-excel");
 	@Autowired
-	private SeurantaResource seurantaResource;
+	private LaskentaSeurantaResource seurantaResource;
 	@Autowired
 	private ValintalaskentaKerrallaRoute valintalaskentaRoute;
 	@Autowired
@@ -92,20 +82,28 @@ public class ValintalaskentaKerrallaResource {
 	@Consumes(APPLICATION_JSON)
 	@Produces(APPLICATION_JSON)
 	public Vastaus valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid,
+			@QueryParam("valinnanvaihe") Integer valinnanvaihe,
+			@QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
 			@PathParam("tyyppi") LaskentaTyyppi tyyppi,
 			@PathParam("whitelist") boolean whitelist, List<String> maski) {
 		return kaynnistaLaskenta(hakuOid, new Maski(whitelist, maski), ((hoid,
 				haunHakukohteetOids) -> {
 			try {
-				return seurantaResource.luoLaskenta(hoid, tyyppi,
-						haunHakukohteetOids);
+				if (valinnanvaihe != null && valintakoelaskenta != null) {
+					return seurantaResource.luoLaskenta(hoid, tyyppi,
+							valinnanvaihe, valintakoelaskenta,
+							haunHakukohteetOids);
+				} else {
+					return seurantaResource.luoLaskenta(hoid, tyyppi,
+							haunHakukohteetOids);
+				}
 			} catch (Exception e) {
 				LOG.error("Laskennan luonti haulle {} epaonnistui! {}\r\n{}",
 						hoid, e.getMessage(),
 						Arrays.toString(e.getStackTrace()));
 				throw e;
 			}
-		}));
+		}), valinnanvaihe, valintakoelaskenta);
 	}
 
 	@GET
@@ -121,19 +119,47 @@ public class ValintalaskentaKerrallaResource {
 	@Produces("application/vnd.ms-excel")
 	@ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
 	public Response statusXls(final @PathParam("uuid") String uuid) {
-		LOG.error("XLS SAIE");
 		byte[] bytes = null;
 		try {
-			LaskentaDto laskenta = seurantaResource.laskenta(uuid);
-			LOG.error("XLS SAATIIN LASKENTA");
-			List<Object[]> grid = Lists.newArrayList();
-			for (HakukohdeDto hakukohde : laskenta.getHakukohteet()) {
-				grid.add(new Object[] { hakukohde.getHakukohdeOid() });
-			}
-			bytes = ExcelExportUtil.exportGridAsXlsBytes(grid
-					.toArray(new Object[][] {}));
-		} catch (Exception e) {
+			LaskentaDto laskenta = new Gson().fromJson(
+					seurantaResource.laskenta(uuid), LaskentaDto.class);
+			Map<String, Object[][]> sheetAndGrid = Maps.newHashMap();
+			{
+				List<Object[]> grid = Lists.newArrayList();
+				grid.add(new Object[] { "Suorittamattomat hakukohteet" });
+				for (HakukohdeDto hakukohde : laskenta.getHakukohteet()
+						.stream()
+						.filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
+						.collect(Collectors.toList())) {
+					List<String> rivi = Lists.newArrayList();
+					rivi.add(hakukohde.getHakukohdeOid());
+					rivi.addAll(hakukohde.getIlmoitukset().stream()
+							.map(i -> i.getOtsikko())
+							.collect(Collectors.toList()));
+					grid.add(rivi.toArray());
+					sheetAndGrid.put("Kesken", grid.toArray(new Object[][] {}));
+				}
 
+			}
+			{
+				List<Object[]> grid = Lists.newArrayList();
+				grid.add(new Object[] { "Valmistuneet hakukohteet" });
+				for (HakukohdeDto hakukohde : laskenta.getHakukohteet()
+						.stream()
+						.filter(h -> HakukohdeTila.VALMIS.equals(h.getTila()))
+						.collect(Collectors.toList())) {
+					grid.add(new Object[] { hakukohde.getHakukohdeOid() });
+					sheetAndGrid
+							.put("Valmiit", grid.toArray(new Object[][] {}));
+				}
+			}
+			bytes = ExcelExportUtil.exportGridSheetsAsXlsBytes(sheetAndGrid);// GridAsXlsBytes(grid
+			// .toArray(new Object[][] {}));
+		} catch (Exception e) {
+			LOG.error(
+					"Excelin muodostus laskennan yhteenvedolle epaonnistui! {}\r\n{}",
+					e.getMessage(), Arrays.toString(e.getStackTrace()));
+			bytes = new byte[] {};
 		}
 		return Response.ok()
 				.entity(bytes)
@@ -201,11 +227,13 @@ public class ValintalaskentaKerrallaResource {
 				.filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
 				.map(h -> h.getHakukohdeOid()).collect(Collectors.toList());
 		return kaynnistaLaskenta(laskenta.getHakuOid(), new Maski(true, maski),
-				((hoid, haunHakukohteetOids) -> laskenta.getUuid()));
+				((hoid, haunHakukohteetOids) -> laskenta.getUuid()),
+				laskenta.getValinnanvaihe(), laskenta.getValintakoelaskenta());
 	}
 
 	private Vastaus kaynnistaLaskenta(String hakuOid, Maski maski,
-			BiFunction<String, List<String>, String> seurantaTunnus) {
+			BiFunction<String, List<String>, String> seurantaTunnus,
+			Integer valinnanvaihe, Boolean valintakoelaskenta) {
 		if (StringUtils.isBlank(hakuOid)) {
 			LOG.error("HakuOid on pakollinen");
 			throw new RuntimeException("HakuOid on pakollinen");
@@ -230,57 +258,28 @@ public class ValintalaskentaKerrallaResource {
 			}
 		}
 		LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
-		List<String> haunHakukohteetOids = haunHakukohteet(hakuOid);
-		if (maski.isMask()) {
+		List<String> haunHakukohteetOids = null;
+		if (maski.isWhitelist()) { // whitelistilla ohitetaan haun hakukohteiden
+									// resolvaus
 			haunHakukohteetOids = Lists.newArrayList(maski
-					.maskaa(haunHakukohteetOids));
-			if (haunHakukohteetOids.isEmpty()) {
-				throw new RuntimeException(
-						"Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa hakukohteettomasti.");
+					.getHakukohdeOidsMask());
+		} else {
+			haunHakukohteetOids = haunHakukohteet(hakuOid);
+			if (maski.isMask()) {
+				haunHakukohteetOids = Lists.newArrayList(maski
+						.maskaa(haunHakukohteetOids));
+				if (haunHakukohteetOids.isEmpty()) {
+					throw new RuntimeException(
+							"Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa hakukohteettomasti.");
+				}
 			}
 		}
 		String uuid = seurantaTunnus.apply(hakuOid, haunHakukohteetOids);
 		AtomicBoolean lopetusehto = new AtomicBoolean(false);
 		valintalaskentaRoute.suoritaValintalaskentaKerralla(new LaskentaJaHaku(
 				new Laskenta(uuid, hakuOid, haunHakukohteetOids.size(),
-						lopetusehto, maski.isMask()), haunHakukohteetOids),
-				lopetusehto);
-		return Vastaus.uudelleenOhjaus(uuid);
-	}
-
-	/**
-	 * Yksittaisen hakukohteen laskenta. Ei merkata seurantaan.
-	 * 
-	 * @param hakuOid
-	 * @param hakukohdeOid
-	 * @return laskennan uuid
-	 */
-	@POST
-	@Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
-	@Produces(APPLICATION_JSON)
-	public Vastaus valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid,
-			@PathParam("hakukohdeOid") String hakukohdeOid) {
-		if (hakuOid == null || hakukohdeOid == null) {
-			throw new RuntimeException("HakuOid ja hakukohdeOid on pakollinen");
-		}
-		LOG.info("Pyynto suorittaa valintalaskenta haun {} hakukohteelle {}",
-				hakuOid, hakukohdeOid);
-		List<String> hakukohteet = Arrays.asList(hakukohdeOid);
-		final String uuid;
-		try {
-			uuid = seurantaResource.luoLaskenta(hakuOid,
-					LaskentaTyyppi.HAKUKOHDE, hakukohteet);
-		} catch (Exception e) {
-			LOG.error(
-					"Laskennan luonti epaonnistui haulle {} ja hakukohteelle {}! {}\r\n{}",
-					hakuOid, hakukohdeOid, e.getMessage(),
-					Arrays.toString(e.getStackTrace()));
-			throw e;
-		}
-		AtomicBoolean lopetusehto = new AtomicBoolean(false);
-		valintalaskentaRoute.suoritaValintalaskentaKerralla(
-				new LaskentaJaHaku(new Laskenta(uuid, hakuOid, 1, lopetusehto,
-						true), hakukohteet), lopetusehto);
+						lopetusehto, maski.isMask(), valinnanvaihe,
+						valintakoelaskenta), haunHakukohteetOids), lopetusehto);
 		return Vastaus.uudelleenOhjaus(uuid);
 	}
 

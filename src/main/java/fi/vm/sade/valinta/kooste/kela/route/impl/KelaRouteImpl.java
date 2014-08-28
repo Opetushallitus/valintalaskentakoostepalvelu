@@ -193,7 +193,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 									Thread.sleep(250L);
 									hakemukset.addAll(applicationResource
 											.getApplicationsByOids(oidit));
-
 								}
 							}
 							exchange.getOut().setBody(hakemukset);

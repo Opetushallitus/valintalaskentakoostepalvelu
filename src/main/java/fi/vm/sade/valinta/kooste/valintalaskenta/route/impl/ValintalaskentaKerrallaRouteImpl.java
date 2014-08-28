@@ -32,7 +32,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
-import fi.vm.sade.valinta.seuranta.resource.SeurantaResource;
+import fi.vm.sade.valinta.seuranta.resource.LaskentaSeurantaResource;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
@@ -45,13 +45,14 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 public class ValintalaskentaKerrallaRouteImpl extends
 		KoostepalveluRouteBuilder<Laskenta> implements
 		ValintalaskentaKerrallaRouteValvomo {
-
+	//
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaKerrallaRouteImpl.class);
 	private static final String DEADLETTERCHANNEL = "direct:valintalaskenta_kerralla_deadletterchannel";
 	private static final String AGGREGATOR = "direct:valintalaskenta_kerralla_aggregator";
 	private static final String ROUTE_ID = "valintalaskenta_kerralla";
-	private final SeurantaResource seurantaResource;
+	private static final Integer HAE_KAIKKI_VALINNANVAIHEET = new Integer(-1);
+	private final LaskentaSeurantaResource seurantaResource;
 	private final ValintaperusteetRestResource valintaperusteetRestResource;
 	private final ValintalaskentaResource valintalaskentaResource;
 	private final ApplicationResource applicationResource;
@@ -66,7 +67,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 			@Value(ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA_VALINTAPERUSTEET) String valintalaskentaKerrallaValintaperusteet,
 			@Value(ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA_HAKEMUKSET) String valintalaskentaKerrallaHakemukset,
 			@Value(ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA_LASKENTA) String valintalaskentaKerrallaLaskenta,
-			SeurantaResource seurantaResource,
+			LaskentaSeurantaResource seurantaResource,
 			ValintaperusteetRestResource valintaperusteetRestResource,
 			ValintalaskentaResource valintalaskentaResource,
 			ApplicationResource applicationResource) {
@@ -168,6 +169,31 @@ public class ValintalaskentaKerrallaRouteImpl extends
 		from(valintalaskentaKerrallaHakemukset)
 				.errorHandler(deadLetterChannel())
 				//
+				.choice()
+				//
+				.when(Reititys.<LaskentaJaHakukohde> ehto(tyo -> {
+					return tyo.isLuovutettu();
+				}))
+				//
+				.process(
+						Reititys.<LaskentaJaHakukohde, LaskentaJaValintaperusteetJaHakemukset> funktio(
+						//
+						(tyo -> {
+							LOG.error(
+									"Koska valintaperusteita ei saatu niin ei haeta hakemuksiakaan suotta hakukohteelle {}",
+									tyo.getHakukohdeOid());
+							return new LaskentaJaValintaperusteetJaHakemukset(
+									tyo.getLaskenta(), tyo.getHakukohdeOid(),
+									null, null);
+						})))
+				//
+				.to(InOnly, AGGREGATOR)
+				//
+				.otherwise()
+				//
+				.throttle(1)
+				.timePeriodMillis(50)
+				//
 				.process(
 						Reititys.<LaskentaJaHakukohde, LaskentaJaValintaperusteetJaHakemukset> funktio(
 								tyo -> {
@@ -185,6 +211,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 
 								},
 								((tyo, poikkeus) -> {
+									tyo.luovuta();
 									LOG.error(
 											"Hakemuksia ei saatu hakukohteelle({}) haussa({}). {}\r\n{}",
 											tyo.getHakukohdeOid(),
@@ -207,21 +234,54 @@ public class ValintalaskentaKerrallaRouteImpl extends
 		from(valintalaskentaKerrallaValintaperusteet)
 				.errorHandler(deadLetterChannel())
 				//
+				.choice()
+				//
+				.when(Reititys.<LaskentaJaHakukohde> ehto(tyo -> {
+					return tyo.isLuovutettu();
+				}))
+				//
+				.process(
+						Reititys.<LaskentaJaHakukohde, LaskentaJaValintaperusteetJaHakemukset> funktio(
+						//
+						(tyo -> {
+							LOG.error(
+									"Koska hakemuksia ei saatu niin ei haeta valintaperusteitakaan suotta hakukohteelle {}",
+									tyo.getHakukohdeOid());
+							return new LaskentaJaValintaperusteetJaHakemukset(
+									tyo.getLaskenta(), tyo.getHakukohdeOid(),
+									null, null);
+						})))
+				//
+				.to(InOnly, AGGREGATOR)
+				//
+				.otherwise()
+				//
+				.throttle(1)
+				.timePeriodMillis(50)
+				//
 				.process(
 						Reititys.<LaskentaJaHakukohde, LaskentaJaValintaperusteetJaHakemukset> funktio(
 								tyo -> {
 									LOG.debug(
 											"Valintaperusteet hakukohteelle {}",
 											tyo.getHakukohdeOid());
+									Integer valinnanvaihe = tyo.getLaskenta()
+											.getValinnanvaihe();
+									if (HAE_KAIKKI_VALINNANVAIHEET
+											.equals(valinnanvaihe)) {
+										valinnanvaihe = null;
+									}
 									return new LaskentaJaValintaperusteetJaHakemukset(
 											tyo.getLaskenta(), tyo
 													.getHakukohdeOid(),
 											valintaperusteetRestResource
 													.haeValintaperusteet(tyo
 															.getHakukohdeOid(),
-															null), null);
+															valinnanvaihe),
+											null);
 								},
 								((tyo, poikkeus) -> {
+									tyo.luovuta();
 									LOG.error(
 											"Valintaperusteita ei saatu hakukohteelle({}) haussa({}). {}\r\n{}",
 											tyo.getHakukohdeOid(),
@@ -371,19 +431,85 @@ public class ValintalaskentaKerrallaRouteImpl extends
 													"Laskenta hakukohteelle {}. Valmis laskettavaksi == {}",
 													tyo.getHakukohdeOid(),
 													tyo.isValmisLaskettavaksi());
-											valintalaskentaResource
-													.laskeKaikki(new LaskeDTO(
-															tyo.getHakemukset()
-																	.parallelStream()
-																	.map(h -> getContext()
-																			.getTypeConverter()
-																			.tryConvertTo(
-																					HakemusDTO.class,
-																					h))
-																	.collect(
-																			Collectors
-																					.toList()),
-															tyo.getValintaperusteet()));
+											//
+											// VALINTAKOELASKENTA
+											//
+											if (Boolean.TRUE.equals(tyo
+													.getLaskenta()
+													.getValintakoelaskenta())) {
+												valintalaskentaResource
+														.valintakokeet(new LaskeDTO(
+																tyo.getHakemukset()
+																		// kaikki
+																		// saikeet
+																		// on
+																		// varmasti
+																		// jo
+																		// tyollistettyja
+																		// parellelstream
+																		// tod.nak
+																		// hidastaa
+																		// .parallelStream()
+																		.stream()
+																		.map(h -> getContext()
+																				.getTypeConverter()
+																				.tryConvertTo(
+																						HakemusDTO.class,
+																						h))
+																		.collect(
+																				Collectors
+																						.toList()),
+																tyo.getValintaperusteet()));
+											} else {
+												//
+												// VALINTALASKENTA KAIKELLA
+												//
+												if (null == tyo.getLaskenta()
+														.getValinnanvaihe()) {
+													valintalaskentaResource
+															.laskeKaikki(new LaskeDTO(
+																	tyo.getHakemukset()
+																			// kaikki
+																			// saikeet
+																			// on
+																			// varmasti
+																			// jo
+																			// tyollistettyja
+																			// parellelstream
+																			// tod.nak
+																			// hidastaa
+																			// .parallelStream()
+																			.stream()
+																			.map(h -> getContext()
+																					.getTypeConverter()
+																					.tryConvertTo(
+																							HakemusDTO.class,
+																							h))
+																			.collect(
+																					Collectors
+																							.toList()),
+																	tyo.getValintaperusteet()));
+												} else {
+													//
+													// VALINTALASKENTA TIETYLLE
+													// VALINNANVAIHEELLE
+													//
+													valintalaskentaResource
+															.laske(new LaskeDTO(
+																	tyo.getHakemukset()
+																			.stream()
+																			// .parallelStream()
+																			.map(h -> getContext()
+																					.getTypeConverter()
+																					.tryConvertTo(
+																							HakemusDTO.class,
+																							h))
+																			.collect(
+																					Collectors
+																							.toList()),
+																	tyo.getValintaperusteet()));
+												}
+											}
 											try {
 												seurantaResource
 														.merkkaaHakukohteenTila(
