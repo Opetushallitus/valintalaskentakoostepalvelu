@@ -28,9 +28,11 @@ public class LaskentaDtoAsExcel {
 						.collect(Collectors.toList())) {
 					List<String> rivi = Lists.newArrayList();
 					rivi.add(hakukohde.getHakukohdeOid());
-					rivi.addAll(hakukohde.getIlmoitukset().stream()
-							.map(i -> i.getOtsikko())
-							.collect(Collectors.toList()));
+					if (hakukohde.getIlmoitukset() != null) {
+						rivi.addAll(hakukohde.getIlmoitukset().stream()
+								.map(i -> i.getOtsikko())
+								.collect(Collectors.toList()));
+					}
 					grid.add(rivi.toArray());
 
 				}

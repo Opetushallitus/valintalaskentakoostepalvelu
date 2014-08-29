@@ -122,9 +122,12 @@ public class ValintalaskentaKerrallaResource {
 	public Response statusXls(final @PathParam("uuid") String uuid) {
 		byte[] bytes = null;
 		try {
+			LOG.error("Haetaan DTO");
 			LaskentaDto laskenta = new Gson().fromJson(
 					seurantaResource.laskenta(uuid), LaskentaDto.class);
+			LOG.error("Muodostetaan Excel");
 			bytes = LaskentaDtoAsExcel.laskentaDtoAsExcel(laskenta);
+			LOG.error("Saatiin tavut excelia varten onnistuneesti");
 		} catch (Exception e) {
 			LOG.error(
 					"Excelin muodostus laskennan yhteenvedolle epaonnistui! {}\r\n{}",
