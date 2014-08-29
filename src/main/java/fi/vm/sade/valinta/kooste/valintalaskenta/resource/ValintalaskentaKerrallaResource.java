@@ -186,6 +186,13 @@ public class ValintalaskentaKerrallaResource {
 	@Consumes(APPLICATION_JSON)
 	@Produces(APPLICATION_JSON)
 	public Vastaus uudelleenajoLaskennalle(@PathParam("uuid") String uuid) {
+		Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
+		if (l != null && !l.isValmis()) {
+			LOG.error(
+					"Laskenta {} on viela ajossa, joten palautetaan linkki siihen.",
+					uuid);
+			return Vastaus.uudelleenOhjaus(uuid);
+		}
 		final LaskentaDto laskenta;
 		try {
 			laskenta = new GsonBuilder().create().fromJson(
