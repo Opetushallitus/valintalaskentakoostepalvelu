@@ -25,22 +25,35 @@ public class JatkuvaSijoittelu {
 	private fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource sijoitteluResource;
 
 	public void suorita() {
-		LOG.debug("JATKUVA SIJOITTELU KÄYNNISTETTY");
+		LOG.warn("Jatkuvasijoittelu kaynnistetty!");
 		for (SijoitteluDto sijoittelu : sijoittelunSeurantaResource.hae()) {
-			if (sijoittelu.isAjossa()) {
-				LOG.debug("JATKUVA SIJOITTELU: {}", sijoittelu.getHakuOid());
-				try {
+			try {
+				if (sijoittelu == null) {
+					LOG.warn("Jatkuvassa sijoittelussa saatiin null olio seurantapalvelulta!");
+					continue;
+				}
+				if (sijoittelu.isAjossa()) {
+					LOG.warn(
+							"Aloitetaan jatkuvasijoittelu ajossa olevalle haulle {}",
+							sijoittelu.getHakuOid());
+
 					sijoitteluResource.sijoittele(sijoittelu.getHakuOid());
+					LOG.warn("Jatkuva sijoittelu saatiin tehtya haulle {}",
+							sijoittelu.getHakuOid());
 					sijoittelunSeurantaResource.merkkaaSijoittelunAjossaTila(
 							sijoittelu.getHakuOid(), true);
-					LOG.info("Viety sijoittelulle valinnan tulokset");
-				} catch (Exception e) {
-					LOG.error("JATKUVA SIJOITTELU", e);
+					LOG.info("Sijoittelu haulle {} merkattu ajetuksi!",
+							sijoittelu.getHakuOid());
+				}
+			} catch (Exception e) {
+				LOG.error("Virhe jatkuvan sijoittelun aktivoinnissa {}",
+						e.getMessage());
+				try {
 					sijoittelunSeurantaResource.merkkaaSijoittelunAjossaVirhe(
 							sijoittelu.getHakuOid(), e.getMessage());
+				} catch (Exception ee) {
 				}
 			}
 		}
-		LOG.debug("JATKUVA SIJOITTELU LOPETETTU");
 	}
 }
