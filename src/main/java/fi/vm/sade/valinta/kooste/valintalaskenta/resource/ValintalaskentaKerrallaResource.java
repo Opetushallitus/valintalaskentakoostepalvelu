@@ -122,9 +122,12 @@ public class ValintalaskentaKerrallaResource {
 	public Response statusXls(final @PathParam("uuid") String uuid) {
 		byte[] bytes = null;
 		try {
+			LOG.error("Haetaan DTO");
 			LaskentaDto laskenta = new Gson().fromJson(
 					seurantaResource.laskenta(uuid), LaskentaDto.class);
+			LOG.error("Muodostetaan Excel");
 			bytes = LaskentaDtoAsExcel.laskentaDtoAsExcel(laskenta);
+			LOG.error("Saatiin tavut excelia varten onnistuneesti");
 		} catch (Exception e) {
 			LOG.error(
 					"Excelin muodostus laskennan yhteenvedolle epaonnistui! {}\r\n{}",
@@ -183,6 +186,13 @@ public class ValintalaskentaKerrallaResource {
 	@Consumes(APPLICATION_JSON)
 	@Produces(APPLICATION_JSON)
 	public Vastaus uudelleenajoLaskennalle(@PathParam("uuid") String uuid) {
+		Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
+		if (l != null && !l.isValmis()) {
+			LOG.error(
+					"Laskenta {} on viela ajossa, joten palautetaan linkki siihen.",
+					uuid);
+			return Vastaus.uudelleenOhjaus(uuid);
+		}
 		final LaskentaDto laskenta;
 		try {
 			laskenta = new GsonBuilder().create().fromJson(
