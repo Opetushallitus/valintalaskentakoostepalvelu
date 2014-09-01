@@ -29,6 +29,8 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetValinnanVaiheDTO;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
@@ -140,12 +142,23 @@ public class ValintalaskentaKerrallaTest {
 		ApplicationResource a = Mockito.mock(ApplicationResource.class);
 		List<Hakemus> l = Lists.newArrayList();
 		Hakemus h0 = new Hakemus();
+		h0.setOid("hakemus1oid");
+		h0.setAnswers(new Answers());
 		l.add(h0);
+
+		ApplicationAdditionalDataDTO addData = new ApplicationAdditionalDataDTO();
+		addData.setOid(h0.getOid());
+
+		Mockito.when(
+				a.getApplicationAdditionalData(Mockito.anyString(),
+						Mockito.anyString())).thenReturn(
+				Lists.newArrayList(addData));
 
 		Mockito.when(
 				a.getApplicationsByOid(Mockito.anyString(),
 						Mockito.anyListOf(String.class), Mockito.anyInt()))
 				.thenReturn(l);
+
 		Mockito.when(
 				a.getApplicationsByOid(Mockito.eq("h1"),
 						Mockito.anyListOf(String.class), Mockito.anyInt()))

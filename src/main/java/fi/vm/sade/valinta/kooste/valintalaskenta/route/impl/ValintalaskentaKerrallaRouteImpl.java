@@ -233,8 +233,16 @@ public class ValintalaskentaKerrallaRouteImpl extends
 															"Lisatietoja ei saatu hakemukselle "
 																	+ h.getOid());
 												}
-												h.getAnswers().setLisatiedot(
-														addData);
+												if (h.getAnswers() != null) {
+													h.getAnswers()
+															.setLisatiedot(
+																	addData);
+												} else {
+													throw new RuntimeException(
+															"Hakemuksella ("
+																	+ h.getOid()
+																	+ ") ei ollut vastaus (answers) tietuetta!");
+												}
 												return h;
 											}).collect(Collectors.toList());
 									return new LaskentaJaValintaperusteetJaHakemukset(
