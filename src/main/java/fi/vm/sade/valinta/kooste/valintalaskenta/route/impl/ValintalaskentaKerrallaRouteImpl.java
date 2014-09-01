@@ -4,6 +4,7 @@ import static org.apache.camel.ExchangePattern.InOnly;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -21,9 +22,12 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.valinta.kooste.KoostepalveluRouteBuilder;
 import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
+import fi.vm.sade.valinta.kooste.util.HakemusUtil;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHakukohde;
@@ -31,6 +35,8 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaValintaperusteetJ
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
+import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
+import fi.vm.sade.valinta.seuranta.dto.IlmoitusTyyppi;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.resource.LaskentaSeurantaResource;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -204,6 +210,33 @@ public class ValintalaskentaKerrallaRouteImpl extends
 													tyo.getHakukohdeOid(),
 													ApplicationResource.ACTIVE_AND_INCOMPLETE,
 													ApplicationResource.MAX);
+
+									final Map<String, ApplicationAdditionalDataDTO> appData = applicationResource
+											.getApplicationAdditionalData(
+													tyo.getLaskenta()
+															.getHakuOid(),
+													tyo.getHakukohdeOid())
+											.parallelStream()
+											.collect(
+											//
+													Collectors
+															.toMap(ApplicationAdditionalDataDTO::getOid,
+																	i -> i));
+									hakemukset = hakemukset
+											.parallelStream()
+											.map(h -> {
+												Map<String, String> addData = appData
+														.get(h.getOid())
+														.getAdditionalData();
+												if (addData == null) {
+													throw new RuntimeException(
+															"Lisatietoja ei saatu hakemukselle "
+																	+ h.getOid());
+												}
+												h.getAnswers().setLisatiedot(
+														addData);
+												return h;
+											}).collect(Collectors.toList());
 									return new LaskentaJaValintaperusteetJaHakemukset(
 											tyo.getLaskenta(), tyo
 													.getHakukohdeOid(), null,
@@ -216,9 +249,16 @@ public class ValintalaskentaKerrallaRouteImpl extends
 											"Hakemuksia ei saatu hakukohteelle({}) haussa({}). {}\r\n{}",
 											tyo.getHakukohdeOid(),
 											tyo.getLaskenta().getHakuOid(),
+
 											poikkeus.getMessage(), Arrays
 													.toString(poikkeus
 															.getStackTrace()));
+									seurantaResource.lisaaIlmoitusHakukohteelle(
+											tyo.getLaskenta().getHakuOid(), tyo
+													.getHakukohdeOid(),
+											new IlmoitusDto(
+													IlmoitusTyyppi.VIRHE,
+													poikkeus.getMessage()));
 									return true; // poikkeus on kasitelty.
 													// jatketaan prosessointia
 								}),
@@ -289,6 +329,12 @@ public class ValintalaskentaKerrallaRouteImpl extends
 											poikkeus.getMessage(), Arrays
 													.toString(poikkeus
 															.getStackTrace()));
+									seurantaResource.lisaaIlmoitusHakukohteelle(
+											tyo.getLaskenta().getHakuOid(), tyo
+													.getHakukohdeOid(),
+											new IlmoitusDto(
+													IlmoitusTyyppi.VIRHE,
+													poikkeus.getMessage()));
 									return true; // poikkeus on kasitelty.
 													// jatketaan prosessointia
 								}),
@@ -385,10 +431,50 @@ public class ValintalaskentaKerrallaRouteImpl extends
 													LOG.warn(
 															"Laskentaa ei tehda hakukohteelle {} koska ei ole hakemuksia eika valintaperusteita",
 															tyo.getHakukohdeOid());
+													try {
+														seurantaResource
+																.lisaaIlmoitusHakukohteelle(
+																		tyo.getLaskenta()
+																				.getHakuOid(),
+																		tyo.getHakukohdeOid(),
+																		new IlmoitusDto(
+																				IlmoitusTyyppi.ILMOITUS,
+																				"Laskentaa ei tehda hakukohteelle koska ei ole hakemuksia eika valintaperusteita"));
+													} catch (Exception e) {// nice
+																			// to
+																			// have
+																			// loggausta.
+																			// jos
+																			// ei
+																			// toimi
+																			// niin
+																			// ei
+																			// haittaa
+													}
 												} else {
 													LOG.warn(
 															"Laskentaa ei tehda hakukohteelle {} koska ei ole hakemuksia",
 															tyo.getHakukohdeOid());
+													try {
+														seurantaResource
+																.lisaaIlmoitusHakukohteelle(
+																		tyo.getLaskenta()
+																				.getHakuOid(),
+																		tyo.getHakukohdeOid(),
+																		new IlmoitusDto(
+																				IlmoitusTyyppi.ILMOITUS,
+																				"Laskentaa ei tehda hakukohteelle koska ei ole hakemuksia"));
+													} catch (Exception e) {// nice
+																			// to
+																			// have
+																			// loggausta.
+																			// jos
+																			// ei
+																			// toimi
+																			// niin
+																			// ei
+																			// haittaa
+													}
 												}
 												try {
 													seurantaResource
@@ -411,6 +497,26 @@ public class ValintalaskentaKerrallaRouteImpl extends
 												LOG.warn(
 														"Laskentaa ei tehda hakukohteelle {} koska ei ole valintaperusteita",
 														tyo.getHakukohdeOid());
+												try {
+													seurantaResource
+															.lisaaIlmoitusHakukohteelle(
+																	tyo.getLaskenta()
+																			.getHakuOid(),
+																	tyo.getHakukohdeOid(),
+																	new IlmoitusDto(
+																			IlmoitusTyyppi.ILMOITUS,
+																			"Laskentaa ei tehda hakukohteelle koska ei ole valintaperusteita"));
+												} catch (Exception e) {// nice
+																		// to
+																		// have
+																		// loggausta.
+																		// jos
+																		// ei
+																		// toimi
+																		// niin
+																		// ei
+																		// haittaa
+												}
 												try {
 													seurantaResource
 															.merkkaaHakukohteenTila(
@@ -450,7 +556,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 																		// tod.nak
 																		// hidastaa
 																		// .parallelStream()
-																		.stream()
+																		.parallelStream()
 																		.map(h -> getContext()
 																				.getTypeConverter()
 																				.tryConvertTo(
@@ -479,7 +585,8 @@ public class ValintalaskentaKerrallaRouteImpl extends
 																			// tod.nak
 																			// hidastaa
 																			// .parallelStream()
-																			.stream()
+																			.parallelStream()
+
 																			.map(h -> getContext()
 																					.getTypeConverter()
 																					.tryConvertTo(
@@ -497,7 +604,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 													valintalaskentaResource
 															.laske(new LaskeDTO(
 																	tyo.getHakemukset()
-																			.stream()
+																			.parallelStream()
 																			// .parallelStream()
 																			.map(h -> getContext()
 																					.getTypeConverter()
