@@ -12,14 +12,26 @@ public class LaskentaJaHakukohde {
 	private final Laskenta laskenta;
 	private final String hakukohdeOid;
 	private volatile boolean luovutus = false;
+	private volatile boolean valmistui = false; // jos tyo esim valmistuu koska
+												// hakemuksia oli nolla niin
+												// valintaperusteita ei haeta
+												// suotta
 
 	public LaskentaJaHakukohde(Laskenta laskenta, String hakukohdeOid) {
 		this.laskenta = laskenta;
 		this.hakukohdeOid = hakukohdeOid;
 	}
 
+	public void valmistui() {
+		valmistui = true;
+	}
+
 	public void luovuta() {
 		luovutus = true;
+	}
+
+	public boolean isValmistui() {
+		return valmistui;
 	}
 
 	public boolean isLuovutettu() {

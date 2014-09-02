@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.route.impl;
 import static org.apache.camel.ExchangePattern.InOnly;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.KoostepalveluRouteBuilder;
 import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
@@ -178,19 +179,32 @@ public class ValintalaskentaKerrallaRouteImpl extends
 				.choice()
 				//
 				.when(Reititys.<LaskentaJaHakukohde> ehto(tyo -> {
-					return tyo.isLuovutettu();
+					return tyo.isLuovutettu() || tyo.isValmistui();
 				}))
 				//
 				.process(
 						Reititys.<LaskentaJaHakukohde, LaskentaJaValintaperusteetJaHakemukset> funktio(
 						//
 						(tyo -> {
-							LOG.error(
-									"Koska valintaperusteita ei saatu niin ei haeta hakemuksiakaan suotta hakukohteelle {}",
-									tyo.getHakukohdeOid());
-							return new LaskentaJaValintaperusteetJaHakemukset(
-									tyo.getLaskenta(), tyo.getHakukohdeOid(),
-									null, null);
+							if (tyo.isValmistui()) { // kaikki OK. ohitetaan
+														// hakemusten haku koska
+														// hakukohteelle ei
+														// ollut
+														// valintaperusteita
+								return new LaskentaJaValintaperusteetJaHakemukset(
+										tyo.getLaskenta(), tyo
+												.getHakukohdeOid(), null,
+										Collections.emptyList() // tyhjat
+																// hakemukset
+								);
+							} else {
+								LOG.error(
+										"Koska valintaperusteita ei saatu niin ei haeta hakemuksiakaan suotta hakukohteelle {}",
+										tyo.getHakukohdeOid());
+								return new LaskentaJaValintaperusteetJaHakemukset(
+										tyo.getLaskenta(), tyo
+												.getHakukohdeOid(), null, null);
+							}
 						})))
 				//
 				.to(InOnly, AGGREGATOR)
@@ -210,7 +224,24 @@ public class ValintalaskentaKerrallaRouteImpl extends
 													tyo.getHakukohdeOid(),
 													ApplicationResource.ACTIVE_AND_INCOMPLETE,
 													ApplicationResource.MAX);
-
+									// case 0 hakemusta
+									if (hakemukset.isEmpty()
+											// skipataan lisatietojen haku jos
+											// edellisen I/O:n aikana huomattiin
+											// etta tyo kokonaisuudessaan on
+											// tarpeeton jatkettavaksi, eli esim
+											// valintaperusteita on
+											// hakukohteella nolla tai
+											// valintaperusteiden haku
+											// epaonnistui
+											|| tyo.isValmistui()
+											|| tyo.isLuovutettu()) {
+										tyo.valmistui();
+										return new LaskentaJaValintaperusteetJaHakemukset(
+												tyo.getLaskenta(), tyo
+														.getHakukohdeOid(),
+												null, hakemukset);
+									}
 									final Map<String, ApplicationAdditionalDataDTO> appData = applicationResource
 											.getApplicationAdditionalData(
 													tyo.getLaskenta()
@@ -285,19 +316,30 @@ public class ValintalaskentaKerrallaRouteImpl extends
 				.choice()
 				//
 				.when(Reititys.<LaskentaJaHakukohde> ehto(tyo -> {
-					return tyo.isLuovutettu();
+					return tyo.isLuovutettu() || tyo.isValmistui();
 				}))
 				//
 				.process(
 						Reititys.<LaskentaJaHakukohde, LaskentaJaValintaperusteetJaHakemukset> funktio(
 						//
 						(tyo -> {
-							LOG.error(
-									"Koska hakemuksia ei saatu niin ei haeta valintaperusteitakaan suotta hakukohteelle {}",
-									tyo.getHakukohdeOid());
-							return new LaskentaJaValintaperusteetJaHakemukset(
-									tyo.getLaskenta(), tyo.getHakukohdeOid(),
-									null, null);
+							if (tyo.isValmistui()) {
+								// kaikki OK ohitetaan tyo koska hakemuksia oli
+								// nolla
+								return new LaskentaJaValintaperusteetJaHakemukset(
+										tyo.getLaskenta(), tyo
+												.getHakukohdeOid(), Collections
+												.emptyList() // tyhjat
+																// valintaperusteet
+										, null);
+							} else { // ohitettiin koska hakemusten haku hajosi
+								LOG.error(
+										"Koska hakemuksia ei saatu niin ei haeta valintaperusteitakaan suotta hakukohteelle {}",
+										tyo.getHakukohdeOid());
+								return new LaskentaJaValintaperusteetJaHakemukset(
+										tyo.getLaskenta(), tyo
+												.getHakukohdeOid(), null, null);
+							}
 						})))
 				//
 				.to(InOnly, AGGREGATOR)
@@ -319,14 +361,22 @@ public class ValintalaskentaKerrallaRouteImpl extends
 											.equals(valinnanvaihe)) {
 										valinnanvaihe = null;
 									}
+									List<ValintaperusteetDTO> valintaperusteet = valintaperusteetRestResource
+											.haeValintaperusteet(
+													tyo.getHakukohdeOid(),
+													valinnanvaihe);
+									if (valintaperusteet.isEmpty()) {
+										tyo.valmistui(); // vihjataan
+															// hakemustyojonoon
+															// etta hakemuksia
+															// ei tarvitse hakea
+															// jos ne on viela
+															// hakematta
+									}
 									return new LaskentaJaValintaperusteetJaHakemukset(
 											tyo.getLaskenta(), tyo
 													.getHakukohdeOid(),
-											valintaperusteetRestResource
-													.haeValintaperusteet(tyo
-															.getHakukohdeOid(),
-															valinnanvaihe),
-											null);
+											valintaperusteet, null);
 								},
 								((tyo, poikkeus) -> {
 									tyo.luovuta();
