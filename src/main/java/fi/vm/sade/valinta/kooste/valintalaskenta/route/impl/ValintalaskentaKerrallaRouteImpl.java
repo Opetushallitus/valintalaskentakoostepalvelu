@@ -57,7 +57,11 @@ public class ValintalaskentaKerrallaRouteImpl extends
 			.getLogger(ValintalaskentaKerrallaRouteImpl.class);
 	private static final String DEADLETTERCHANNEL = "direct:valintalaskenta_kerralla_deadletterchannel";
 	private static final String AGGREGATOR = "direct:valintalaskenta_kerralla_aggregator";
-	private static final String ROUTE_ID = "valintalaskenta_kerralla";
+	private static final String ROUTE_ID = "VALINTALASKENTA";
+	private static final String ROUTE_ID_AGGREGOINTI = "VALINTALASKENTA_AGGREGOINTI";
+	private static final String ROUTE_ID_HAKEMUKSET = "VALINTALASKENTA_HAKEMUKSET";
+	private static final String ROUTE_ID_VALINTAPERUSTEET = "VALINTALASKENTA_VALINTAPERUSTEET";
+	private static final String ROUTE_ID_LASKENTA = "VALINTALASKENTA_LASKENTA";
 	private static final Integer HAE_KAIKKI_VALINNANVAIHEET = new Integer(-1);
 	private final LaskentaSeurantaResource seurantaResource;
 	private final ValintaperusteetRestResource valintaperusteetRestResource;
@@ -175,6 +179,8 @@ public class ValintalaskentaKerrallaRouteImpl extends
 		 */
 		from(valintalaskentaKerrallaHakemukset)
 				.errorHandler(deadLetterChannel())
+				//
+				.routeId(ROUTE_ID_HAKEMUKSET)
 				//
 				.choice()
 				//
@@ -313,6 +319,8 @@ public class ValintalaskentaKerrallaRouteImpl extends
 		from(valintalaskentaKerrallaValintaperusteet)
 				.errorHandler(deadLetterChannel())
 				//
+				.routeId(ROUTE_ID_VALINTAPERUSTEET)
+				//
 				.choice()
 				//
 				.when(Reititys.<LaskentaJaHakukohde> ehto(tyo -> {
@@ -406,6 +414,8 @@ public class ValintalaskentaKerrallaRouteImpl extends
 		 */
 		from(AGGREGATOR)
 				.errorHandler(deadLetterChannel())
+				//
+				.routeId(ROUTE_ID_AGGREGOINTI)
 				/**
 				 * AGGREGOI HAKEMUKSET JA VALINTAPERUSTEET YHDEKSI
 				 * LASKENTATYOKSI AVAIMELLA (hakukohdeOid,uuid(laskennantyoID))
@@ -451,6 +461,8 @@ public class ValintalaskentaKerrallaRouteImpl extends
 		from(valintalaskentaKerrallaLaskenta)
 		//
 				.errorHandler(deadLetterChannel())
+				//
+				.routeId(ROUTE_ID_LASKENTA)
 				//
 				.process(
 						Reititys.<LaskentaJaValintaperusteetJaHakemukset> kuluttaja(
