@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
 import java.io.Serializable;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 

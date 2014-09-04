@@ -9,8 +9,9 @@ package fi.vm.sade.valinta.kooste;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 
@@ -24,10 +25,9 @@ public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
 
 	public ObjectMapperProvider() {
 		objectMapper = new ObjectMapper();
-		objectMapper
-				.configure(
-						DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES,
-						false);
+
+		objectMapper.configure(
+				DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 	}
 

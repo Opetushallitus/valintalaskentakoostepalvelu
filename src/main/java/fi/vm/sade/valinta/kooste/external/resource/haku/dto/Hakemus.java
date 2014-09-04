@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource.haku.dto;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * User: wuoti Date: 3.9.2013 Time: 14.42

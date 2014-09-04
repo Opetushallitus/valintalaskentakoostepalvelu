@@ -54,7 +54,7 @@
 			ReceiveTimeout="0" AllowChunking="false" />
 	</http:conduit>
 
-	<bean id="jacksonMapper" class="org.codehaus.jackson.map.ObjectMapper" />
+	<bean id="jacksonMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
 
 	<jaxrs-client:client id="viestintapalveluClient"
 		name="ViestintapalveluRestClient"
@@ -74,7 +74,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -86,7 +86,7 @@
 			<ref bean="ticketInterceptor"/>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -97,7 +97,7 @@
 			<ref bean="ticketInterceptor"/>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -118,7 +118,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -138,7 +138,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -159,7 +159,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -180,7 +180,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -193,7 +193,7 @@
 		serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.KoodistoJsonRESTResource"
 		inheritHeaders="true">
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -214,7 +214,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -255,7 +255,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -276,7 +276,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -298,7 +298,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -321,7 +321,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -343,7 +343,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -364,7 +364,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -385,7 +385,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -406,7 +406,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -430,7 +430,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -440,7 +440,7 @@
 		serviceClass="fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper"
 		inheritHeaders="true">
 		<jaxrs-client:providers>
-			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
@@ -473,11 +473,7 @@
 	</bean>
 
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti" />
-	<ctx:component-scan
-		base-package="fi.vm.sade.valinta.kooste.external.resource.haku.proxy" />
 
-	<ctx:component-scan
-		base-package="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy" />
 
 	<!-- Sijoittelu -->
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.komponentti" />
