@@ -473,8 +473,6 @@
 	</bean>
 
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti" />
-	<ctx:component-scan
-		base-package="fi.vm.sade.valinta.kooste.external.resource.haku.proxy" />
 
 	<ctx:component-scan
 		base-package="fi.vm.sade.valinta.kooste.valintalaskenta.komponentti.proxy" />
