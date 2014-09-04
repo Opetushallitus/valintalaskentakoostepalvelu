@@ -5,8 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -36,7 +35,6 @@ public class SijoittelunTulosProsessi extends DokumenttiProsessi {
 	}
 
 	@com.fasterxml.jackson.annotation.JsonIgnore
-	@JsonIgnore
 	public Collection<Valmis> getValmiit() {
 		return valmiit;
 	}

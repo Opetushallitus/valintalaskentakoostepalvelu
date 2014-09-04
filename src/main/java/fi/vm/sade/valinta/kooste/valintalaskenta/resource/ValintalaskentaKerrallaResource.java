@@ -87,24 +87,31 @@ public class ValintalaskentaKerrallaResource {
 			@QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
 			@PathParam("tyyppi") LaskentaTyyppi tyyppi,
 			@PathParam("whitelist") boolean whitelist, List<String> maski) {
-		return kaynnistaLaskenta(hakuOid, new Maski(whitelist, maski), ((hoid,
-				haunHakukohteetOids) -> {
-			try {
-				if (valinnanvaihe != null && valintakoelaskenta != null) {
-					return seurantaResource.luoLaskenta(hoid, tyyppi,
-							valinnanvaihe, valintakoelaskenta,
-							haunHakukohteetOids);
-				} else {
-					return seurantaResource.luoLaskenta(hoid, tyyppi,
-							haunHakukohteetOids);
+		try {
+			return kaynnistaLaskenta(hakuOid, new Maski(whitelist, maski), ((
+					hoid, haunHakukohteetOids) -> {
+				try {
+					if (valinnanvaihe != null && valintakoelaskenta != null) {
+						return seurantaResource.luoLaskenta(hoid, tyyppi,
+								valinnanvaihe, valintakoelaskenta,
+								haunHakukohteetOids);
+					} else {
+						return seurantaResource.luoLaskenta(hoid, tyyppi,
+								haunHakukohteetOids);
+					}
+				} catch (Exception e) {
+					LOG.error(
+							"Laskennan luonti haulle {} epaonnistui! {}\r\n{}",
+							hoid, e.getMessage(),
+							Arrays.toString(e.getStackTrace()));
+					throw e;
 				}
-			} catch (Exception e) {
-				LOG.error("Laskennan luonti haulle {} epaonnistui! {}\r\n{}",
-						hoid, e.getMessage(),
-						Arrays.toString(e.getStackTrace()));
-				throw e;
-			}
-		}), valinnanvaihe, valintakoelaskenta);
+			}), valinnanvaihe, valintakoelaskenta);
+		} catch (Exception e) {
+			LOG.error("Laskennan kaynnistys heitti poikkeuksen {}:\r\n{}",
+					e.getMessage(), Arrays.toString(e.getStackTrace()));
+			return null;
+		}
 	}
 
 	@GET
@@ -112,7 +119,13 @@ public class ValintalaskentaKerrallaResource {
 	@Produces(APPLICATION_JSON)
 	@ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
 	public Laskenta status(@PathParam("uuid") String uuid) {
-		return valintalaskentaValvomo.haeLaskenta(uuid);
+		try {
+			return valintalaskentaValvomo.haeLaskenta(uuid);
+		} catch (Exception e) {
+			LOG.error("Valintalaskennan statuksen luku heitti poikkeuksen! {}",
+					e.getMessage());
+			return null;
+		}
 	}
 
 	@GET
@@ -186,29 +199,38 @@ public class ValintalaskentaKerrallaResource {
 	@Consumes(APPLICATION_JSON)
 	@Produces(APPLICATION_JSON)
 	public Vastaus uudelleenajoLaskennalle(@PathParam("uuid") String uuid) {
-		Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
-		if (l != null && !l.isValmis()) {
-			LOG.error(
-					"Laskenta {} on viela ajossa, joten palautetaan linkki siihen.",
-					uuid);
-			return Vastaus.uudelleenOhjaus(uuid);
-		}
-		final LaskentaDto laskenta;
 		try {
-			laskenta = new GsonBuilder().create().fromJson(
-					seurantaResource.resetoiTilat(uuid), LaskentaDto.class);
+			Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
+			if (l != null && !l.isValmis()) {
+				LOG.error(
+						"Laskenta {} on viela ajossa, joten palautetaan linkki siihen.",
+						uuid);
+				return Vastaus.uudelleenOhjaus(uuid);
+			}
+			final LaskentaDto laskenta;
+			try {
+				laskenta = new GsonBuilder().create().fromJson(
+						seurantaResource.resetoiTilat(uuid), LaskentaDto.class);
+			} catch (Exception e) {
+				LOG.error("Laskennan {} resetointi epaonnistui! {}\r\n{}",
+						uuid, e.getMessage(),
+						Arrays.toString(e.getStackTrace()));
+				throw e;
+			}
+			// valmistumattomien hakukohteiden maski
+			List<String> maski = laskenta.getHakukohteet().stream()
+					.filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
+					.map(h -> h.getHakukohdeOid()).collect(Collectors.toList());
+			return kaynnistaLaskenta(laskenta.getHakuOid(), new Maski(true,
+					maski),
+					((hoid, haunHakukohteetOids) -> laskenta.getUuid()),
+					laskenta.getValinnanvaihe(),
+					laskenta.getValintakoelaskenta());
 		} catch (Exception e) {
-			LOG.error("Laskennan {} resetointi epaonnistui! {}\r\n{}", uuid,
+			LOG.error("Uudelleen ajo laskennalle heitti poikkeuksen {}:\r\n{}",
 					e.getMessage(), Arrays.toString(e.getStackTrace()));
-			throw e;
+			return null;
 		}
-		// valmistumattomien hakukohteiden maski
-		List<String> maski = laskenta.getHakukohteet().stream()
-				.filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
-				.map(h -> h.getHakukohdeOid()).collect(Collectors.toList());
-		return kaynnistaLaskenta(laskenta.getHakuOid(), new Maski(true, maski),
-				((hoid, haunHakukohteetOids) -> laskenta.getUuid()),
-				laskenta.getValinnanvaihe(), laskenta.getValintakoelaskenta());
 	}
 
 	private Vastaus kaynnistaLaskenta(String hakuOid, Maski maski,

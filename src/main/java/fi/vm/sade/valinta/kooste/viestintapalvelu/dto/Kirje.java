@@ -1,11 +1,9 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * 
@@ -15,63 +13,64 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class Kirje {
 
-    /**
-     * JALKIOHJAUSKIRJERAKENTAJA
-     * 
-     * @param addressLabel
-     * @param languageCode
-     * @param tulokset
-     */
-    public Kirje(Osoite addressLabel, String languageCode, List<Map<String, String>> tulokset) {
-        this.addressLabel = addressLabel;
-        this.languageCode = languageCode;
-        this.tulokset = tulokset;
-        this.koulu = null;
-        this.koulutus = null;
-    }
+	/**
+	 * JALKIOHJAUSKIRJERAKENTAJA
+	 * 
+	 * @param addressLabel
+	 * @param languageCode
+	 * @param tulokset
+	 */
+	public Kirje(Osoite addressLabel, String languageCode,
+			List<Map<String, String>> tulokset) {
+		this.addressLabel = addressLabel;
+		this.languageCode = languageCode;
+		this.tulokset = tulokset;
+		this.koulu = null;
+		this.koulutus = null;
+	}
 
-    /**
-     * HYVAKSYMISKIRJERAKENTAJA
-     * 
-     * @param addressLabel
-     * @param languageCode
-     * @param koulu
-     * @param koulutus
-     * @param tulokset
-     */
-    public Kirje(Osoite addressLabel, String languageCode, String koulu, String koulutus,
-            List<Map<String, String>> tulokset) {
-        this.addressLabel = addressLabel;
-        this.languageCode = languageCode;
-        this.tulokset = tulokset;
-        this.koulu = koulu;
-        this.koulutus = koulutus;
-    }
+	/**
+	 * HYVAKSYMISKIRJERAKENTAJA
+	 * 
+	 * @param addressLabel
+	 * @param languageCode
+	 * @param koulu
+	 * @param koulutus
+	 * @param tulokset
+	 */
+	public Kirje(Osoite addressLabel, String languageCode, String koulu,
+			String koulutus, List<Map<String, String>> tulokset) {
+		this.addressLabel = addressLabel;
+		this.languageCode = languageCode;
+		this.tulokset = tulokset;
+		this.koulu = koulu;
+		this.koulutus = koulutus;
+	}
 
-    private Osoite addressLabel;
-    private String languageCode;
-    private String koulu;
-    private String koulutus;
-    private List<Map<String, String>> tulokset;
+	private Osoite addressLabel;
+	private String languageCode;
+	private String koulu;
+	private String koulutus;
+	private List<Map<String, String>> tulokset;
 
-    public Osoite getAddressLabel() {
-        return addressLabel;
-    }
+	public Osoite getAddressLabel() {
+		return addressLabel;
+	}
 
-    public String getKoulu() {
-        return koulu;
-    }
+	public String getKoulu() {
+		return koulu;
+	}
 
-    public String getKoulutus() {
-        return koulutus;
-    }
+	public String getKoulutus() {
+		return koulutus;
+	}
 
-    public String getLanguageCode() {
-        return languageCode;
-    }
+	public String getLanguageCode() {
+		return languageCode;
+	}
 
-    public List<Map<String, String>> getTulokset() {
-        return tulokset;
-    }
+	public List<Map<String, String>> getTulokset() {
+		return tulokset;
+	}
 
 }

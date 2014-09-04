@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * 
@@ -14,17 +14,17 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class Kirjeet<T> {
 
-    private List<T> letters;
+	private List<T> letters;
 
-    public Kirjeet() {
-        this.letters = new ArrayList<T>();
-    }
+	public Kirjeet() {
+		this.letters = new ArrayList<T>();
+	}
 
-    public Kirjeet(List<T> kirjeet) {
-        this.letters = kirjeet;
-    }
+	public Kirjeet(List<T> kirjeet) {
+		this.letters = kirjeet;
+	}
 
-    public List<T> getLetters() {
-        return letters;
-    }
+	public List<T> getLetters() {
+		return letters;
+	}
 }
