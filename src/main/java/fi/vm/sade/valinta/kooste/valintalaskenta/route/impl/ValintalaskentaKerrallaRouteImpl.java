@@ -266,9 +266,11 @@ public class ValintalaskentaKerrallaRouteImpl extends
 														.get(h.getOid())
 														.getAdditionalData();
 												if (addData == null) {
-													throw new RuntimeException(
-															"Lisatietoja ei saatu hakemukselle "
-																	+ h.getOid());
+													LOG.warn(
+															"Lisatietoja ei saatu hakemukselle {}",
+															h.getOid());
+													addData = Collections
+															.emptyMap();
 												}
 												if (h.getAnswers() != null) {
 													h.getAnswers()
