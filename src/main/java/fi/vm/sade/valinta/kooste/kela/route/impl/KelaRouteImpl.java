@@ -250,6 +250,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 						};
 						OppilaitosSource oppilaitosSource = new OppilaitosSource() {
 							Map<String, String> c = Maps.newHashMap();
+							Map<String, String> d = Maps.newHashMap();
 
 							public String getOppilaitosKoodi(String tarjoajaOid) {
 								if (!c.containsKey(tarjoajaOid)) {
@@ -258,6 +259,13 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 								}
 								return c.get(tarjoajaOid);
 							}
+                            public String getOppilaitosnumero(String tarjoajaOid) {
+                                if (!d.containsKey(tarjoajaOid)) {
+                                    d.put(tarjoajaOid, oppilaitosKomponentti
+                                            .haeOppilaitosnumero(tarjoajaOid));
+                                }
+                                return d.get(tarjoajaOid);
+                            }
 						};
 						for (KelaAbstraktiHaku kelahaku : cache.getKelaHaut()) {
 							rivit.addAll(kelahaku.createHakijaRivit(cache,

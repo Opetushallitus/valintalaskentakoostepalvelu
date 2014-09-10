@@ -36,14 +36,14 @@ public class KelaDokumentinLuontiKomponenttiImpl {
 	//
 			@Property(PROPERTY_AINEISTONNIMI) String aineistonNimi,
 			//
-			@Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi) {
+			@Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi) throws Exception {
 		int count = rivit.size();
 
 		Deque<InputStream> streams = new ArrayDeque<InputStream>();
 
 		for (TKUVAYHVA t : rivit) {
 			streams.add(new ByteArrayInputStream(addLineEnding(t.toByteArray(),
-					createBuffer())));
+					createBuffer(200))));
 		}
 
 		Date ajopvm = new Date();
@@ -51,19 +51,19 @@ public class KelaDokumentinLuontiKomponenttiImpl {
 				new TKUVAALKU.Builder().setAjopaivamaara(ajopvm)
 						.setAineistonnimi(aineistonNimi)
 						.setOrganisaationimi(organisaationNimi).build()
-						.toByteArray(), createBuffer())));
+						.toByteArray(), createBuffer(150))));
 		streams.addLast(new ByteArrayInputStream(addLineEnding(
 				new TKUVALOPPU.Builder().setAjopaivamaara(ajopvm)
 						.setTietuelukumaara(count).build().toByteArray(),
-				createBuffer())));
+				createBuffer(150))));
 
 		InputStream input = new SequenceInputStream(
 				Collections.enumeration(streams));
 		return input;
 	}
 
-	private ByteBuffer createBuffer() {
-		return ByteBuffer.allocate(150 + KelaUtil.RIVINVAIHTO.length);
+	private ByteBuffer createBuffer(int i) {
+		return ByteBuffer.allocate(i + KelaUtil.RIVINVAIHTO.length);
 	}
 
 	//

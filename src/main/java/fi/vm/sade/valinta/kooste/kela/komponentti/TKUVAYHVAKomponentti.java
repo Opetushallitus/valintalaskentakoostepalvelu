@@ -66,14 +66,8 @@ public class TKUVAYHVAKomponentti {
 						TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
 						String hakukohdeOid = hakutoive.getHakukohdeOid();
 						String tarjoajaOid = hakutoive.getTarjoajaOid();
-						// LINJAKOODI
-						builder.setLinjakoodi(haeLinjakoodi(hakukohdeOid,
-								linjakoodiCache, linjakoodiErrorSet));
 						// KOULUTUKSEN ALKAMISVUOSI
 						builder.setLukuvuosi(lukuvuosi);
-						// YHTEISHAUNKOULUKOODI
-						builder.setOppilaitos(haeOppilaitos(tarjoajaOid,
-								oppilaitosCache, oppilaitosErrorSet));
 
 						builder.setValintapaivamaara(new Date()); // TODO:
 																	// Sijoittelun
@@ -98,14 +92,15 @@ public class TKUVAYHVAKomponentti {
 										.get(HENKILOTUNNUS);
 								// KELA ei halua vuosisata merkkia
 								// henkilotunnukseen!
-								StringBuilder kelanVaatimaHenkilotunnus = new StringBuilder();
+								/*StringBuilder kelanVaatimaHenkilotunnus = new StringBuilder();
 								kelanVaatimaHenkilotunnus.append(
 										standardinMukainenHenkilotunnus
 												.substring(0, 6)).append(
 										standardinMukainenHenkilotunnus
 												.substring(7, 11));
 								builder.setHenkilotunnus(kelanVaatimaHenkilotunnus
-										.toString());
+										.toString());*/
+								builder.setHenkilotunnus(standardinMukainenHenkilotunnus);
 							} else { // Ulkomaalaisille syntyma-aika hetun
 										// sijaan
 								String syntymaAika = henkilotiedot
