@@ -172,6 +172,8 @@ public class ValintalaskentaKerrallaRouteImpl extends
 				//
 				.routeId(ROUTE_ID)
 				//
+				.threads(1)
+				//
 				.log(LoggingLevel.WARN, "Valintalaskenta tyo kaynnistetty")
 				//
 				// Odotetaan laskenta luokkaa

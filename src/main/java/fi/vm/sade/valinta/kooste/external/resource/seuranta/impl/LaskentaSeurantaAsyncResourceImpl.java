@@ -54,6 +54,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 	private final WebClient webClient;
 	private final Gson gson = new Gson();
 	private final ResponseCallback responseCallback = new ResponseCallback();
+	private final String address;
 
 	@Autowired
 	public LaskentaSeurantaAsyncResourceImpl(
@@ -68,6 +69,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 			@Value("${valintalaskentakoostepalvelu.seuranta.rest.url}") String address
 	//
 	) {
+		this.address = address;
 		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
 		bean.setAddress(address);
 		bean.setThreadSafe(true);
@@ -91,16 +93,25 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 
 	public void haeAsync(String hakuOid,
 			Consumer<Collection<YhteenvetoDto>> callback) {
-		WebClient.fromClient(webClient).path("/seuranta/hae/" + hakuOid)
-				.async().get(new Callback<Collection<YhteenvetoDto>>(callback));
+		String url = "/seuranta/hae/" + hakuOid;
+		WebClient
+				.fromClient(webClient)
+				.path(url)
+				.async()
+				.get(new Callback<Collection<YhteenvetoDto>>(address, url,
+						callback));
 	}
 
 	public void laskenta(String uuid, Consumer<LaskentaDto> callback,
 			Consumer<Throwable> failureCallback) {
 		String url = new StringBuilder().append("/seuranta/laskenta/")
 				.append(uuid).toString();
-		WebClient.fromClient(webClient).path(url).async()
-				.get(new Callback<LaskentaDto>(callback, failureCallback));
+		WebClient
+				.fromClient(webClient)
+				.path(url)
+				.async()
+				.get(new Callback<LaskentaDto>(address, url, callback,
+						failureCallback));
 	}
 
 	public void resetoiTilat(String uuid, Consumer<LaskentaDto> callback,
@@ -112,7 +123,8 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 				.path(url)
 				.async()
 				.put(Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE),
-						new Callback<LaskentaDto>(callback, failureCallback));
+						new Callback<LaskentaDto>(address, url, callback,
+								failureCallback));
 	}
 
 	public void luoLaskenta(String hakuOid, LaskentaTyyppi tyyppi,
@@ -131,7 +143,8 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 					.async()
 					.post(Entity.entity(gson.toJson(hakukohdeOids),
 							MediaType.APPLICATION_JSON_TYPE),
-							new Callback<String>(callback, failureCallback));
+							new Callback<String>(address, url, callback,
+									failureCallback));
 		} else {
 			String url = new StringBuilder().append("/seuranta/laskenta/")
 					.append(hakuOid).append("/tyyppi/").append(tyyppi)
@@ -142,7 +155,8 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 					.async()
 					.post(Entity.entity(gson.toJson(hakukohdeOids),
 							MediaType.APPLICATION_JSON_TYPE),
-							new Callback<String>(callback, failureCallback));
+							new Callback<String>(address, url, callback,
+									failureCallback));
 		}
 	}
 

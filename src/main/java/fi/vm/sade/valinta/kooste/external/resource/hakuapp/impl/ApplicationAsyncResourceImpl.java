@@ -34,6 +34,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 @Service
 public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 	private final WebClient webClient;
+	private final String address;
 
 	@Autowired
 	public ApplicationAsyncResourceImpl(
@@ -48,6 +49,7 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 			@Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String address
 	//
 	) {
+		this.address = address;
 		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
 		bean.setAddress(address);
 		bean.setThreadSafe(true);
@@ -83,8 +85,12 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		String url = new StringBuilder()
 				.append("/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=")
 				.append(hakukohdeOid).toString();
-		WebClient.fromClient(webClient).path(url).async()
-				.get(new Callback<List<Hakemus>>(callback, failureCallback));
+		WebClient
+				.fromClient(webClient)
+				.path(url)
+				.async()
+				.get(new Callback<List<Hakemus>>(address, url, callback,
+						failureCallback));
 	}
 
 	public void getApplicationAdditionalData(String hakuOid,
@@ -100,7 +106,7 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 				.fromClient(webClient)
 				.path(url)
 				.async()
-				.get(new Callback<List<ApplicationAdditionalDataDTO>>(callback,
-						failureCallback));
+				.get(new Callback<List<ApplicationAdditionalDataDTO>>(address,
+						url, callback, failureCallback));
 	}
 }

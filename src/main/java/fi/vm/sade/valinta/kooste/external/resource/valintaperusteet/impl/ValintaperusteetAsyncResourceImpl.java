@@ -37,6 +37,7 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 public class ValintaperusteetAsyncResourceImpl implements
 		ValintaperusteetAsyncResource {
 	private final WebClient webClient;
+	private final String address;
 
 	@Autowired
 	public ValintaperusteetAsyncResourceImpl(
@@ -51,6 +52,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 			@Value("https://${host.virkailija}") String address
 	//
 	) {
+		this.address = address;
 		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
 		bean.setAddress(address);
 		bean.setThreadSafe(true);
@@ -82,15 +84,16 @@ public class ValintaperusteetAsyncResourceImpl implements
 		StringBuilder urlBuilder = new StringBuilder().append(
 				"/valintaperusteet-service/resources/valintaperusteet/")
 				.append(hakukohdeOid);
-		// if (valinnanVaiheJarjestysluku != null) {
-		urlBuilder.append("?vaihe=").append(valinnanVaiheJarjestysluku);
-		// }
+		if (valinnanVaiheJarjestysluku != null) {
+			urlBuilder.append("?vaihe=").append(valinnanVaiheJarjestysluku);
+		}
+		String url = urlBuilder.toString();
 		WebClient
 				.fromClient(webClient)
-				.path(urlBuilder.toString())
+				.path(url)
 				.async()
-				.get(new Callback<List<ValintaperusteetDTO>>(callback,
-						failureCallback));
+				.get(new Callback<List<ValintaperusteetDTO>>(address, url,
+						callback, failureCallback));
 	}
 
 	public void haunHakukohteet(String hakuOid,
@@ -103,7 +106,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 				.fromClient(webClient)
 				.path(url)
 				.async()
-				.get(new Callback<List<HakukohdeViiteDTO>>(callback,
-						failureCallback));
+				.get(new Callback<List<HakukohdeViiteDTO>>(address, url,
+						callback, failureCallback));
 	}
 }

@@ -31,6 +31,7 @@ public class ValintalaskentaAsyncResourceImpl implements
 		ValintalaskentaAsyncResource {
 	private final WebClient webClient;
 	private final Gson gson = new Gson();
+	private final String address;
 
 	@Autowired
 	public ValintalaskentaAsyncResourceImpl(
@@ -45,6 +46,7 @@ public class ValintalaskentaAsyncResourceImpl implements
 			@Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}") String address
 	//
 	) {
+		this.address = address;
 		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
 		bean.setAddress(address);
 		bean.setThreadSafe(true);
@@ -84,7 +86,8 @@ public class ValintalaskentaAsyncResourceImpl implements
 				.async()
 				.post(Entity.entity(gson.toJson(laskeDTO),
 						MediaType.APPLICATION_JSON_TYPE),
-						new Callback<String>(callback, failureCallback));
+						new Callback<String>(address, url, callback,
+								failureCallback));
 	}
 
 	@Override
@@ -102,7 +105,8 @@ public class ValintalaskentaAsyncResourceImpl implements
 				.async()
 				.post(Entity.entity(gson.toJson(laskeDTO),
 						MediaType.APPLICATION_JSON_TYPE),
-						new Callback<String>(callback, failureCallback));
+						new Callback<String>(address, url, callback,
+								failureCallback));
 	}
 
 	@Override
@@ -121,7 +125,8 @@ public class ValintalaskentaAsyncResourceImpl implements
 				.async()
 				.post(Entity.entity(gson.toJson(laskeDTO),
 						MediaType.APPLICATION_JSON_TYPE),
-						new Callback<String>(callback, failureCallback));
+						new Callback<String>(address, url, callback,
+								failureCallback));
 	}
 
 }

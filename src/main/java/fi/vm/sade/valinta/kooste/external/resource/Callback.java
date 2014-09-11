@@ -29,15 +29,20 @@ public class Callback<T> implements InvocationCallback<Response> {
 	private final Gson gson = new Gson();
 	private final Consumer<T> callback;
 	private final Consumer<Throwable> failureCallback;
+	private final String palvelukutsu;
+	private final String url;
 
-	public Callback(Consumer<T> callback) {
-		this(callback, (t -> LOG.error(
+	public Callback(String url, String palvelukutsu, Consumer<T> callback) {
+		this(url, palvelukutsu, callback, (t -> LOG.error(
 				"Asynkroninen palvelukutsu epaonnistui: {}", t.getMessage())));
 	}
 
-	public Callback(Consumer<T> callback, Consumer<Throwable> failureCallback) {
+	public Callback(String url, String palvelukutsu, Consumer<T> callback,
+			Consumer<Throwable> failureCallback) {
 		this.callback = callback;
 		this.failureCallback = failureCallback;
+		this.palvelukutsu = palvelukutsu;
+		this.url = url;
 	}
 
 	@Override
@@ -52,13 +57,13 @@ public class Callback<T> implements InvocationCallback<Response> {
 				callback.accept(t);
 			} catch (Exception e) {
 				LOG.error(
-						"Asynkronisen kutsun paluuarvonkasittelija heitti poikkeuksen: {}",
-						e.getMessage());
+						"Asynkronisen kutsun ({}{}) paluuarvonkasittelija heitti poikkeuksen: {}",
+						url, palvelukutsu, e.getMessage());
 			}
 		} catch (Exception e) {
 			LOG.error(
-					"Gson deserialisointi epaonnistui onnistuneelle asynkroniselle palvelin kutsulle: '{}' <-paluuviesti",
-					json);
+					"Gson deserialisointi epaonnistui onnistuneelle asynkroniselle palvelin kutsulle ({}{}): '{}' <-paluuviesti",
+					url, palvelukutsu, json);
 			try {
 				failureCallback.accept(e);
 			} catch (Exception ex) {
@@ -75,8 +80,8 @@ public class Callback<T> implements InvocationCallback<Response> {
 			failureCallback.accept(throwable);
 		} catch (Exception ex) {
 			LOG.error(
-					"Epaonnistuneen asynkronisen kutsun virheenkasittelija heitti poikkeuksen: {}",
-					ex.getMessage());
+					"Epaonnistuneen asynkronisen kutsun ({}{}) virheenkasittelija heitti poikkeuksen: {}",
+					url, palvelukutsu, ex.getMessage());
 		}
 	}
 }
