@@ -568,6 +568,9 @@
  
  	<!-- HakuApp Async -->
 	<bean class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl"/>
+	
+ 	<!-- Valintalaskenta Async -->
+	<bean class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl"/>
  
   
 	<!-- Swagger -->
