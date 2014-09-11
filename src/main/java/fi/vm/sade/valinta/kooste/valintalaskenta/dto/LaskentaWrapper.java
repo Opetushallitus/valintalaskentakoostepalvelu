@@ -74,7 +74,8 @@ public class LaskentaWrapper {
 		return onkoToitaOikeaMaara;
 	}
 
-	public List<HakemusDTO> convertHakemuksetToHakemuksetDTO(TypeConverter converter) {
+	public List<HakemusDTO> convertHakemuksetToHakemuksetDTO(
+			TypeConverter converter) {
 		List<HakemusDTO> hx = getHakemuksetLisatiedoilla().parallelStream()
 				.map(h -> converter.tryConvertTo(HakemusDTO.class, h))
 				.collect(Collectors.toList());
@@ -152,12 +153,7 @@ public class LaskentaWrapper {
 								h.getOid());
 						addData = Collections.emptyMap();
 					}
-					if (h.getAnswers() == null) {
-						h.setAnswers(new Answers());
-						LOG.warn("Hakemuksen {} anwsers tietue oli tyhja!",
-								h.getOid());
-					}
-					h.getAnswers().setLisatiedot(addData);
+					h.setAdditionalInfo(addData);
 					return h;
 				}).collect(Collectors.toList());
 	}
