@@ -1,8 +1,11 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.camel.CamelContext;
@@ -16,6 +19,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -32,17 +36,27 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintalaskentaResource;
+import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
+import static fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute.*;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.impl.ValintalaskentaKerrallaRouteImpl;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.resource.LaskentaSeurantaResource;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 @Configuration
 // @Import({ })
 @ContextConfiguration(classes = { ValintalaskentaKerrallaTest.class,
@@ -50,42 +64,26 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ValintalaskentaKerrallaTest {
 
-	private static final int HAKUKOHTEITA = 5;
 	private static final String UUID = "uuid";
 	private static final String HAKUOID = "hakuOid";
-
-	private static final String ENDPOINT = "direct:testValintalaskentaKerralla";
-	private static final String ENDPOINT_VALINTAPERUSTEET = "seda:testValintalaskentaKerralla_valintaperusteet"
-			+ "?purgeWhenStopping=true&waitForTaskToComplete=Never" +
-			//
-			"&concurrentConsumers=1";
-	private static final String ENDPOINT_HAKEMUKSET = "seda:testValintalaskentaKerralla_hakemukset"
-			+ "?purgeWhenStopping=true&waitForTaskToComplete=Never" +
-			//
-			"&concurrentConsumers=1";
-	private static final String ENDPOINT_LASKENTA = "seda:testValintalaskentaKerralla_laskenta"
-			+ "?purgeWhenStopping=true&waitForTaskToComplete=Never" +
-			//
-			"&concurrentConsumers=1";
 
 	@Autowired
 	private ValintalaskentaKerrallaRoute valintalaskentaKaikilleRoute;
 	@Autowired
-	private LaskentaSeurantaResource seurantaResource;
+	private LaskentaSeurantaAsyncResource seurantaResource;
+
 	@Autowired
-	private ValintaperusteetResource valintaperusteetResource;
-	@Autowired
-	private ValintalaskentaResource valintalaskentaResource;
+	private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 
 	@Test
 	public void testaaValintalaskentaKerralla() throws InterruptedException {
 		AtomicBoolean lopetusehto = new AtomicBoolean(false);
-		List<String> hakukohdeOids = valintaperusteetResource
-				.haunHakukohteet(HAKUOID).stream().map(h -> h.getOid())
-				.collect(Collectors.toList());
+		List<String> hakukohdeOids = Arrays
+				.asList("h1", "h2", "h3", "h4", "h5");
 		valintalaskentaKaikilleRoute.suoritaValintalaskentaKerralla(
-				new LaskentaJaHaku(new Laskenta(UUID, HAKUOID, HAKUKOHTEITA,
-						lopetusehto, null, null), hakukohdeOids), lopetusehto);
+				new LaskentaJaHaku(new Laskenta(UUID, HAKUOID, hakukohdeOids
+						.size(), lopetusehto, null, null), hakukohdeOids),
+				lopetusehto);
 		Mockito.verify(seurantaResource, Mockito.timeout(15000).times(1))
 				.merkkaaLaskennanTila(Mockito.eq(UUID),
 						Mockito.eq(LaskentaTila.VALMIS));
@@ -108,24 +106,44 @@ public class ValintalaskentaKerrallaTest {
 
 			}
 		};
-		Mockito.verify(valintalaskentaResource,
+
+		Mockito.verify(valintalaskentaAsyncResource,
 				Mockito.timeout(15000).atLeast(2)).laskeKaikki(
-				Mockito.argThat(l));
+				Mockito.argThat(l), Mockito.any(), Mockito.any());
 
 	}
 
 	@Bean
 	public ValintalaskentaKerrallaRouteImpl getValintalaskentaKerrallaRouteImpl(
-			LaskentaSeurantaResource s, ValintaperusteetRestResource vr,
-			ValintalaskentaResource vl, ApplicationResource app) {
-		return new ValintalaskentaKerrallaRouteImpl(ENDPOINT,
-				ENDPOINT_VALINTAPERUSTEET, ENDPOINT_HAKEMUKSET,
-				ENDPOINT_LASKENTA, s, vr, vl, app);
+			LaskentaSeurantaAsyncResource s, ValintaperusteetAsyncResource vr,
+			ValintalaskentaAsyncResource vl, ApplicationAsyncResource app) {
+		return new ValintalaskentaKerrallaRouteImpl(s, vr, vl, app);
 	}
 
 	@Bean
-	public ValintalaskentaResource getValintalaskentaResource() {
-		return Mockito.mock(ValintalaskentaResource.class);
+	public ValintalaskentaAsyncResource getValintalaskentaAsyncResource() {
+		ValintalaskentaAsyncResource v = new ValintalaskentaAsyncResource() {
+			@Override
+			public void laske(LaskeDTO laskeDTO, Consumer<String> callback,
+					Consumer<Throwable> failureCallback) {
+				callback.accept("ok");
+			}
+
+			@Override
+			public void laskeKaikki(LaskeDTO laskeDTO,
+					Consumer<String> callback,
+					Consumer<Throwable> failureCallback) {
+				callback.accept("ok");
+			}
+
+			@Override
+			public void valintakokeet(LaskeDTO laskeDTO,
+					Consumer<String> callback,
+					Consumer<Throwable> failureCallback) {
+				callback.accept("ok");
+			}
+		};
+		return Mockito.spy(v);
 	}
 
 	@Bean
@@ -133,56 +151,58 @@ public class ValintalaskentaKerrallaTest {
 			@Qualifier("javaDslCamelContext") CamelContext context)
 			throws Exception {
 		return ProxyWithAnnotationHelper.createProxy(
-				context.getEndpoint(ENDPOINT),
+				context.getEndpoint(SEDA_VALINTALASKENTA_KERRALLA),
 				ValintalaskentaKerrallaRoute.class);
 	}
 
 	@Bean
-	public ApplicationResource getApplicationResource() {
-		ApplicationResource a = Mockito.mock(ApplicationResource.class);
-		List<Hakemus> l = Lists.newArrayList();
+	public ApplicationAsyncResource getApplicationAsyncResource() {
+
+		final List<Hakemus> l = Lists.newArrayList();
 		Hakemus h0 = new Hakemus();
 		h0.setOid("hakemus1oid");
 		h0.setAnswers(new Answers());
 		l.add(h0);
 
-		ApplicationAdditionalDataDTO addData = new ApplicationAdditionalDataDTO();
+		final ApplicationAdditionalDataDTO addData = new ApplicationAdditionalDataDTO();
 		addData.setOid(h0.getOid());
 
-		Mockito.when(
-				a.getApplicationAdditionalData(Mockito.anyString(),
-						Mockito.anyString())).thenReturn(
-				Lists.newArrayList(addData));
+		ApplicationAsyncResource a = new ApplicationAsyncResource() {
+			@Override
+			public void getApplicationAdditionalData(String hakuOid,
+					String hakukohdeOid,
+					Consumer<List<ApplicationAdditionalDataDTO>> callback,
+					Consumer<Throwable> failureCallback) {
+				callback.accept(Lists.newArrayList(addData));
+			}
 
-		Mockito.when(
-				a.getApplicationsByOid(Mockito.anyString(),
-						Mockito.anyListOf(String.class), Mockito.anyInt()))
-				.thenReturn(l);
-
-		Mockito.when(
-				a.getApplicationsByOid(Mockito.eq("h1"),
-						Mockito.anyListOf(String.class), Mockito.anyInt()))
-				.thenReturn(Collections.emptyList());
-		Mockito.when(
-				a.getApplicationsByOid(Mockito.eq("h2"),
-						Mockito.anyListOf(String.class), Mockito.anyInt()))
-				.thenReturn(Collections.emptyList());
-		Mockito.when(
-				a.getApplicationsByOid(Mockito.eq("h3"),
-						Mockito.anyListOf(String.class), Mockito.anyInt()))
-				.thenThrow(new RuntimeException("unauthorized"));// thenReturn(Collections.emptyList());
+			@Override
+			public void getApplicationsByOid(String hakukohdeOid,
+					Consumer<List<Hakemus>> callback,
+					Consumer<Throwable> failureCallback) {
+				if ("h1".equals(hakukohdeOid)) {
+					callback.accept(Collections.emptyList());
+				} else if ("h2".equals(hakukohdeOid)) {
+					callback.accept(Collections.emptyList());
+				} else if ("h3".equals(hakukohdeOid)) {
+					failureCallback
+							.accept(new RuntimeException("unauthorized"));
+				} else {
+					callback.accept(l);
+				}
+			}
+		};
 		return a;
 	}
 
 	@Bean
-	public LaskentaSeurantaResource getSeurantaResource() {
-		return Mockito.mock(LaskentaSeurantaResource.class);
+	public LaskentaSeurantaAsyncResource getLaskentaSeurantaAsyncResource() {
+		return Mockito.mock(LaskentaSeurantaAsyncResource.class);
 	}
 
 	@Bean
-	public ValintaperusteetRestResource getValintaperusteetRestResource() {
-		ValintaperusteetRestResource v = Mockito
-				.mock(ValintaperusteetRestResource.class);
+	public ValintaperusteetAsyncResource getValintaperusteetAsyncResource() {
+
 		final List<ValintaperusteetDTO> vp = Lists.newArrayList();
 		ValintaperusteetDTO v0 = new ValintaperusteetDTO();
 		ValintaperusteetValinnanVaiheDTO vv0 = new ValintaperusteetValinnanVaiheDTO();
@@ -195,35 +215,28 @@ public class ValintalaskentaKerrallaTest {
 		vv1.setValinnanVaiheJarjestysluku(1);
 		v1.setValinnanVaihe(vv1);
 		vp.add(v1);
+		ValintaperusteetAsyncResource v = new ValintaperusteetAsyncResource() {
+			@Override
+			public void haeValintaperusteet(String hakukohdeOid,
+					Integer valinnanVaiheJarjestysluku,
+					Consumer<List<ValintaperusteetDTO>> callback,
+					Consumer<Throwable> failureCallback) {
+				if ("h1".equals(hakukohdeOid)) {
+					callback.accept(Collections.emptyList());
+				} else {
+					// Thread.sleep(0);
+					callback.accept(vp);
+				}
+			}
 
-		Mockito.when(
-				v.haeValintaperusteet(Mockito.anyString(), Mockito.eq(null)))
-				.thenAnswer(new Answer<List<ValintaperusteetDTO>>() {
-					@Override
-					public List<ValintaperusteetDTO> answer(
-							InvocationOnMock invocation) throws Throwable {
-						Thread.sleep(0);
-						return vp;
-					}
-				});
-		Mockito.when(v.haeValintaperusteet(Mockito.eq("h1"), Mockito.eq(null)))
-				.thenReturn(Collections.emptyList());
+			@Override
+			public void haunHakukohteet(String hakuOid,
+					Consumer<List<HakukohdeViiteDTO>> callback,
+					Consumer<Throwable> failureCallback) {
+
+			}
+		};
 		return v;
 	}
 
-	@Bean
-	public ValintaperusteetResource getValintaperusteetResource() {
-		ValintaperusteetResource v = Mockito
-				.mock(ValintaperusteetResource.class);
-		List<HakukohdeViiteDTO> l = Lists.newArrayList();
-		for (int i = 0; i < HAKUKOHTEITA; ++i) {
-			HakukohdeViiteDTO h1 = new HakukohdeViiteDTO();
-			h1.setTila("JULKAISTU");
-			h1.setOid("h" + i);
-			l.add(h1);
-		}
-
-		Mockito.when(v.haunHakukohteet(Mockito.anyString())).thenReturn(l);
-		return v;
-	}
 }

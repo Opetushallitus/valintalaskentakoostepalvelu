@@ -1,0 +1,127 @@
+package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
+
+import java.util.List;
+import java.util.function.Consumer;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+
+import org.apache.cxf.interceptor.Interceptor;
+import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
+import org.apache.cxf.jaxrs.client.WebClient;
+import org.apache.cxf.message.Message;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+
+import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
+import fi.vm.sade.valinta.kooste.external.resource.Callback;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
+public class ValintalaskentaAsyncResourceImpl implements
+		ValintalaskentaAsyncResource {
+	private final WebClient webClient;
+	private final Gson gson = new Gson();
+
+	@Autowired
+	public ValintalaskentaAsyncResourceImpl(
+			//
+			@Value("${web.url.cas}") String webCasUrl,
+			//
+			@Value("${cas.service.valintalaskenta-service}/j_spring_cas_security_check") String targetService,
+			//
+			@Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
+			//
+			@Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
+			@Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}") String address
+	//
+	) {
+		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
+		bean.setAddress(address);
+		bean.setThreadSafe(true);
+		List<Object> providers = Lists.newArrayList();
+		providers
+				.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
+		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
+		bean.setProviders(providers);
+		List<Interceptor<? extends Message>> interceptors = Lists
+				.newArrayList();
+
+		CasApplicationAsAUserInterceptor cas = new CasApplicationAsAUserInterceptor();
+		cas.setWebCasUrl(webCasUrl);
+		cas.setTargetService(targetService);
+		cas.setAppClientUsername(appClientUsername);
+		cas.setAppClientPassword(appClientPassword);
+		interceptors.add(cas);
+		bean.setOutInterceptors(interceptors);
+		this.webClient = bean.createWebClient();
+	}
+
+	@Override
+	public void laske(LaskeDTO laskeDTO, Consumer<String> callback,
+			Consumer<Throwable> failureCallback) {
+		// @Path("valintalaskenta")
+		// public interface ValintalaskentaResource {
+		// @PreAuthorize(CRUD)
+		// @POST
+		// @Path("laske")
+		// @Consumes("application/json")
+		// @Produces("text/plain")
+		String url = new StringBuilder().append("/valintalaskenta/laske")
+				.toString();
+		WebClient
+				.fromClient(webClient)
+				.path(url)
+				.async()
+				.post(Entity.entity(gson.toJson(laskeDTO),
+						MediaType.APPLICATION_JSON_TYPE),
+						new Callback<String>(callback, failureCallback));
+	}
+
+	@Override
+	public void laskeKaikki(LaskeDTO laskeDTO, Consumer<String> callback,
+			Consumer<Throwable> failureCallback) {
+		// @POST
+		// @Path("laskekaikki")
+		// @Consumes("application/json")
+		// @Produces("text/plain")
+		String url = new StringBuilder().append("/valintalaskenta/laskekaikki")
+				.toString();
+		WebClient
+				.fromClient(webClient)
+				.path(url)
+				.async()
+				.post(Entity.entity(gson.toJson(laskeDTO),
+						MediaType.APPLICATION_JSON_TYPE),
+						new Callback<String>(callback, failureCallback));
+	}
+
+	@Override
+	public void valintakokeet(LaskeDTO laskeDTO, Consumer<String> callback,
+			Consumer<Throwable> failureCallback) {
+		// @PreAuthorize(CRUD)
+		// @POST
+		// @Path("valintakokeet")
+		// @Consumes("application/json")
+		// @Produces("text/plain")
+		String url = new StringBuilder().append(
+				"/valintalaskenta/valintakokeet").toString();
+		WebClient
+				.fromClient(webClient)
+				.path(url)
+				.async()
+				.post(Entity.entity(gson.toJson(laskeDTO),
+						MediaType.APPLICATION_JSON_TYPE),
+						new Callback<String>(callback, failureCallback));
+	}
+
+}

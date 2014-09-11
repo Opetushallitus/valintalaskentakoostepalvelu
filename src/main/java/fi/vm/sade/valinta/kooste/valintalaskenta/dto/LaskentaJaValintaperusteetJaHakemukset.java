@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 import java.util.List;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 
 /**
@@ -16,57 +17,50 @@ public class LaskentaJaValintaperusteetJaHakemukset {
 	private final Laskenta laskenta;
 	private final List<ValintaperusteetDTO> valintaperusteet;
 	private final List<Hakemus> hakemukset;
+	private final List<ApplicationAdditionalDataDTO> lisatiedot;
 	private final String hakukohdeOid;
-	private final boolean yhdistetty;
 
 	public LaskentaJaValintaperusteetJaHakemukset(Laskenta laskenta,
 			String hakukohdeOid, List<ValintaperusteetDTO> valintaperusteet,
-			List<Hakemus> hakemukset) {
+			List<Hakemus> hakemukset,
+			List<ApplicationAdditionalDataDTO> lisatiedot) {
 		this.laskenta = laskenta;
 		this.hakukohdeOid = hakukohdeOid;
 		this.valintaperusteet = valintaperusteet;
 		this.hakemukset = hakemukset;
-		this.yhdistetty = false;
+		this.lisatiedot = lisatiedot;
 	}
 
-	private LaskentaJaValintaperusteetJaHakemukset(Laskenta laskenta,
-			String hakukohdeOid, List<ValintaperusteetDTO> valintaperusteet,
-			List<Hakemus> hakemukset, boolean yhdistetty) {
-		this.laskenta = laskenta;
-		this.hakukohdeOid = hakukohdeOid;
-		this.valintaperusteet = valintaperusteet;
-		this.hakemukset = hakemukset;
-		this.yhdistetty = yhdistetty;
-	}
-
-	public LaskentaJaValintaperusteetJaHakemukset yhdista(
-			LaskentaJaValintaperusteetJaHakemukset t) {
-		if (!hakukohdeOid.equals(t.getHakukohdeOid())) {
-			throw new RuntimeException(
-					"Ei voida yhdistaa kahden eri hakukohteen valintaperusteita ja hakemuksia keskenaan!");
-		}
-		List<ValintaperusteetDTO> v = valintaperusteet;
-		List<Hakemus> h = hakemukset;
-		if (t.getValintaperusteet() != null) {
-			v = t.getValintaperusteet();
-		}
-		if (t.getHakemukset() != null) {
-			h = t.getHakemukset();
-		}
-		// if(v == null || h == null) {
-		// throw new
-		// RuntimeException("Laskentaa ei voida suorittaa koska palvelimelta on saatu puutteellisia tietoja!");
-		// }
-		return new LaskentaJaValintaperusteetJaHakemukset(laskenta,
-				hakukohdeOid, v, h, true);
-	}
-
-	public boolean isYhdistetty() {
-		return yhdistetty;
-	}
+	//
+	// public LaskentaJaValintaperusteetJaHakemukset yhdista(
+	// LaskentaJaValintaperusteetJaHakemukset t) {
+	// if (!hakukohdeOid.equals(t.getHakukohdeOid())) {
+	// throw new RuntimeException(
+	// "Ei voida yhdistaa kahden eri hakukohteen valintaperusteita ja hakemuksia keskenaan!");
+	// }
+	// List<ValintaperusteetDTO> v = valintaperusteet;
+	// List<Hakemus> h = hakemukset;
+	// if (t.getValintaperusteet() != null) {
+	// v = t.getValintaperusteet();
+	// }
+	// if (t.getHakemukset() != null) {
+	// h = t.getHakemukset();
+	// }
+	// // if(v == null || h == null) {
+	// // throw new
+	// //
+	// RuntimeException("Laskentaa ei voida suorittaa koska palvelimelta on saatu puutteellisia tietoja!");
+	// // }
+	// return new LaskentaJaValintaperusteetJaHakemukset(laskenta,
+	// hakukohdeOid, v, h, null, true);
+	// }
 
 	public boolean isValmisLaskettavaksi() {
 		return valintaperusteet != null && hakemukset != null;
+	}
+
+	public List<ApplicationAdditionalDataDTO> getLisatiedot() {
+		return lisatiedot;
 	}
 
 	public List<Hakemus> getHakemukset() {
