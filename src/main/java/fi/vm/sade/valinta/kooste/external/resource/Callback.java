@@ -57,19 +57,23 @@ public class Callback<T> implements InvocationCallback<Response> {
 				callback.accept(t);
 			} catch (Exception e) {
 				LOG.error(
-						"Asynkronisen kutsun ({}{}) paluuarvonkasittelija heitti poikkeuksen: {}",
-						url, palvelukutsu, e.getMessage());
+						"Asynkronisen kutsun ({}{}) paluuarvonkasittelija heitti poikkeuksen {}:\r\npaluuarvo->\r\n{}",
+						url, palvelukutsu, e.getMessage(),
+						StringUtils.substring(json, 0, 250));
+				failureCallback.accept(e);
 			}
 		} catch (Exception e) {
 			LOG.error(
-					"Gson deserialisointi epaonnistui onnistuneelle asynkroniselle palvelin kutsulle ({}{}): '{}' <-paluuviesti",
-					url, palvelukutsu, json);
+					"Gson deserialisointi epaonnistui onnistuneelle asynkroniselle palvelin kutsulle ({}{}), {}:\r\npaluuarvo->\r\n{}",
+					url, palvelukutsu, e.getMessage(),
+					StringUtils.substring(json, 0, 250));
 			try {
 				failureCallback.accept(e);
 			} catch (Exception ex) {
 				LOG.error(
-						"Epaonnistuneen asynkronisen kutsun virheenkasittelija heitti poikkeuksen: {}",
-						ex.getMessage());
+						"Asynkronisen kutsun ({}{}) epaonnistuneesta sarjallistuksesta seuranneelle virheenkasittelijakutsusta lensi poikkeus: {}",
+						url, palvelukutsu, ex.getMessage(),
+						StringUtils.substring(json, 0, 250));
 			}
 		}
 	}
