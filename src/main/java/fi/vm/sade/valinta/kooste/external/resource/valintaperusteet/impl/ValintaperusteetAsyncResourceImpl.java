@@ -78,35 +78,40 @@ public class ValintaperusteetAsyncResourceImpl implements
 			Integer valinnanVaiheJarjestysluku,
 			Consumer<List<ValintaperusteetDTO>> callback,
 			Consumer<Throwable> failureCallback) {
-		// @GET
-		// @Path("{hakukohdeOid}")
-		// @Produces(MediaType.APPLICATION_JSON)
-		StringBuilder urlBuilder = new StringBuilder().append(
-				"/valintaperusteet-service/resources/valintaperusteet/")
-				.append(hakukohdeOid);
-		if (valinnanVaiheJarjestysluku != null) {
-			urlBuilder.append("?vaihe=").append(valinnanVaiheJarjestysluku);
+		try {
+			StringBuilder urlBuilder = new StringBuilder().append(
+					"/valintaperusteet-service/resources/valintaperusteet/")
+					.append(hakukohdeOid);
+			if (valinnanVaiheJarjestysluku != null) {
+				urlBuilder.append("?vaihe=").append(valinnanVaiheJarjestysluku);
+			}
+			String url = urlBuilder.toString();
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.get(new Callback<List<ValintaperusteetDTO>>(address, url,
+							callback, failureCallback));
+		} catch (Exception e) {
+			failureCallback.accept(e);
 		}
-		String url = urlBuilder.toString();
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.get(new Callback<List<ValintaperusteetDTO>>(address, url,
-						callback, failureCallback));
 	}
 
 	public void haunHakukohteet(String hakuOid,
 			Consumer<List<HakukohdeViiteDTO>> callback,
 			Consumer<Throwable> failureCallback) {
-		String url = new StringBuilder()
-				.append("/valintaperusteet-service/resources/hakukohde/haku/")
-				.append(hakuOid).toString();
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.get(new Callback<List<HakukohdeViiteDTO>>(address, url,
-						callback, failureCallback));
+		try {
+			String url = new StringBuilder()
+					.append("/valintaperusteet-service/resources/hakukohde/haku/")
+					.append(hakuOid).toString();
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.get(new Callback<List<HakukohdeViiteDTO>>(address, url,
+							callback, failureCallback));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+		}
 	}
 }

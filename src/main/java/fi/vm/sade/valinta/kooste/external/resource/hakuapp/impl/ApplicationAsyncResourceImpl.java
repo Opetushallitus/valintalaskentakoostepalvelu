@@ -85,28 +85,34 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		String url = new StringBuilder()
 				.append("/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=")
 				.append(hakukohdeOid).toString();
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.get(new Callback<List<Hakemus>>(address, url, callback,
-						failureCallback));
+		try {
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.get(new Callback<List<Hakemus>>(address, url, callback,
+							failureCallback));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+		}
 	}
 
 	public void getApplicationAdditionalData(String hakuOid,
 			String hakukohdeOid,
 			Consumer<List<ApplicationAdditionalDataDTO>> callback,
 			Consumer<Throwable> failureCallback) {
-		// @GET
-		// @Path("additionalData/{asId}/{aoId}")
 		String url = new StringBuilder()
 				.append("/applications/additionalData/").append(hakuOid)
 				.append("/").append(hakukohdeOid).toString();
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.get(new Callback<List<ApplicationAdditionalDataDTO>>(address,
-						url, callback, failureCallback));
+		try {
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.get(new Callback<List<ApplicationAdditionalDataDTO>>(
+							address, url, callback, failureCallback));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+		}
 	}
 }

@@ -24,6 +24,8 @@ import org.apache.cxf.message.Message;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -50,7 +52,8 @@ import fi.vm.sade.valinta.seuranta.dto.YhteenvetoDto;
 @Service
 public class LaskentaSeurantaAsyncResourceImpl implements
 		LaskentaSeurantaAsyncResource {
-
+	private static final Logger LOG = LoggerFactory
+			.getLogger(LaskentaSeurantaAsyncResourceImpl.class);
 	private final WebClient webClient;
 	private final Gson gson = new Gson();
 	private final ResponseCallback responseCallback = new ResponseCallback();
@@ -94,81 +97,103 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 	public void haeAsync(String hakuOid,
 			Consumer<Collection<YhteenvetoDto>> callback) {
 		String url = "/seuranta/hae/" + hakuOid;
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.get(new Callback<Collection<YhteenvetoDto>>(address, url,
-						callback));
+		try {
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.get(new Callback<Collection<YhteenvetoDto>>(address, url,
+							callback));
+		} catch (Exception e) {
+			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
+					e.getMessage());
+		}
 	}
 
 	public void laskenta(String uuid, Consumer<LaskentaDto> callback,
 			Consumer<Throwable> failureCallback) {
-		String url = new StringBuilder().append("/seuranta/laskenta/")
-				.append(uuid).toString();
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.get(new Callback<LaskentaDto>(address, url, callback,
-						failureCallback));
+		try {
+			String url = new StringBuilder().append("/seuranta/laskenta/")
+					.append(uuid).toString();
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.get(new Callback<LaskentaDto>(address, url, callback,
+							failureCallback));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+		}
 	}
 
 	public void resetoiTilat(String uuid, Consumer<LaskentaDto> callback,
 			Consumer<Throwable> failureCallback) {
-		String url = new StringBuilder().append("/seuranta/laskenta/")
-				.append(uuid).toString();
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.put(Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE),
-						new Callback<LaskentaDto>(address, url, callback,
-								failureCallback));
+		try {
+			String url = new StringBuilder().append("/seuranta/laskenta/")
+					.append(uuid).toString();
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.put(Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE),
+							new Callback<LaskentaDto>(address, url, callback,
+									failureCallback));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+		}
 	}
 
 	public void luoLaskenta(String hakuOid, LaskentaTyyppi tyyppi,
 			Integer valinnanvaihe, Boolean valintakoelaskenta,
 			List<String> hakukohdeOids, Consumer<String> callback,
 			Consumer<Throwable> failureCallback) {
-		if (valintakoelaskenta != null && valinnanvaihe != null) {
-			String url = new StringBuilder().append("/seuranta/laskenta/")
-					.append(hakuOid).append("/tyyppi/").append(tyyppi)
-					.append("/valinnanvaihe/").append(valinnanvaihe)
-					.append("/valintakoelaskenta/").append(valintakoelaskenta)
-					.toString();
-			WebClient
-					.fromClient(webClient)
-					.path(url)
-					.async()
-					.post(Entity.entity(gson.toJson(hakukohdeOids),
-							MediaType.APPLICATION_JSON_TYPE),
-							new Callback<String>(address, url, callback,
-									failureCallback));
-		} else {
-			String url = new StringBuilder().append("/seuranta/laskenta/")
-					.append(hakuOid).append("/tyyppi/").append(tyyppi)
-					.toString();
-			WebClient
-					.fromClient(webClient)
-					.path(url)
-					.async()
-					.post(Entity.entity(gson.toJson(hakukohdeOids),
-							MediaType.APPLICATION_JSON_TYPE),
-							new Callback<String>(address, url, callback,
-									failureCallback));
+		try {
+			if (valintakoelaskenta != null && valinnanvaihe != null) {
+				String url = new StringBuilder().append("/seuranta/laskenta/")
+						.append(hakuOid).append("/tyyppi/").append(tyyppi)
+						.append("/valinnanvaihe/").append(valinnanvaihe)
+						.append("/valintakoelaskenta/")
+						.append(valintakoelaskenta).toString();
+				WebClient
+						.fromClient(webClient)
+						.path(url)
+						.async()
+						.post(Entity.entity(gson.toJson(hakukohdeOids),
+								MediaType.APPLICATION_JSON_TYPE),
+								new Callback<String>(address, url, callback,
+										failureCallback));
+			} else {
+				String url = new StringBuilder().append("/seuranta/laskenta/")
+						.append(hakuOid).append("/tyyppi/").append(tyyppi)
+						.toString();
+				WebClient
+						.fromClient(webClient)
+						.path(url)
+						.async()
+						.post(Entity.entity(gson.toJson(hakukohdeOids),
+								MediaType.APPLICATION_JSON_TYPE),
+								new Callback<String>(address, url, callback,
+										failureCallback));
+			}
+		} catch (Exception e) {
+			failureCallback.accept(e);
 		}
 	}
 
 	public void merkkaaLaskennanTila(String uuid, LaskentaTila tila) {
 		String url = new StringBuilder().append("/seuranta/laskenta/")
 				.append(uuid).append("/tila/").append(tila).toString();
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE),
-						responseCallback);
+		try {
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE),
+							responseCallback);
+		} catch (Exception e) {
+			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
+					e.getMessage());
+		}
 	}
 
 	@Override
@@ -177,12 +202,17 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 		String url = new StringBuilder().append("/seuranta/laskenta/")
 				.append(uuid).append("/hakukohde/").append(hakukohdeOid)
 				.append("/tila/").append(tila).toString();
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE),
-						responseCallback);
+		try {
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE),
+							responseCallback);
+		} catch (Exception e) {
+			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
+					e.getMessage());
+		}
 	}
 
 	public void lisaaIlmoitusHakukohteelle(String uuid, String hakukohdeOid,
@@ -190,12 +220,17 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 		String url = new StringBuilder().append("/seuranta/laskenta/")
 				.append(uuid).append("/hakukohde/").append(hakukohdeOid)
 				.toString();
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.post(Entity.entity(gson.toJson(ilmoitus),
-						MediaType.APPLICATION_JSON_TYPE), responseCallback);
+		try {
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.post(Entity.entity(gson.toJson(ilmoitus),
+							MediaType.APPLICATION_JSON_TYPE), responseCallback);
+		} catch (Exception e) {
+			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
+					e.getMessage());
+		}
 	}
 
 }

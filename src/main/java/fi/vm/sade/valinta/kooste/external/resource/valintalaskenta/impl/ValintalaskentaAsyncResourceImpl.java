@@ -71,62 +71,58 @@ public class ValintalaskentaAsyncResourceImpl implements
 	@Override
 	public void laske(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback) {
-		// @Path("valintalaskenta")
-		// public interface ValintalaskentaResource {
-		// @PreAuthorize(CRUD)
-		// @POST
-		// @Path("laske")
-		// @Consumes("application/json")
-		// @Produces("text/plain")
-		String url = new StringBuilder().append("/valintalaskenta/laske")
-				.toString();
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.post(Entity.entity(gson.toJson(laskeDTO),
-						MediaType.APPLICATION_JSON_TYPE),
-						new Callback<String>(address, url, callback,
-								failureCallback));
+		try {
+			String url = new StringBuilder().append("/valintalaskenta/laske")
+					.toString();
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.post(Entity.entity(gson.toJson(laskeDTO),
+							MediaType.APPLICATION_JSON_TYPE),
+							new Callback<String>(address, url, callback,
+									failureCallback));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+		}
 	}
 
 	@Override
 	public void laskeKaikki(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback) {
-		// @POST
-		// @Path("laskekaikki")
-		// @Consumes("application/json")
-		// @Produces("text/plain")
-		String url = new StringBuilder().append("/valintalaskenta/laskekaikki")
-				.toString();
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.post(Entity.entity(gson.toJson(laskeDTO),
-						MediaType.APPLICATION_JSON_TYPE),
-						new Callback<String>(address, url, callback,
-								failureCallback));
+		try {
+			String url = new StringBuilder().append(
+					"/valintalaskenta/laskekaikki").toString();
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.post(Entity.entity(gson.toJson(laskeDTO),
+							MediaType.APPLICATION_JSON_TYPE),
+							new Callback<String>(address, url, callback,
+									failureCallback));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+		}
 	}
 
 	@Override
 	public void valintakokeet(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback) {
-		// @PreAuthorize(CRUD)
-		// @POST
-		// @Path("valintakokeet")
-		// @Consumes("application/json")
-		// @Produces("text/plain")
-		String url = new StringBuilder().append(
-				"/valintalaskenta/valintakokeet").toString();
-		WebClient
-				.fromClient(webClient)
-				.path(url)
-				.async()
-				.post(Entity.entity(gson.toJson(laskeDTO),
-						MediaType.APPLICATION_JSON_TYPE),
-						new Callback<String>(address, url, callback,
-								failureCallback));
+		try {
+			String url = new StringBuilder().append(
+					"/valintalaskenta/valintakokeet").toString();
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.post(Entity.entity(gson.toJson(laskeDTO),
+							MediaType.APPLICATION_JSON_TYPE),
+							new Callback<String>(address, url, callback,
+									failureCallback));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+		}
 	}
 
 }
