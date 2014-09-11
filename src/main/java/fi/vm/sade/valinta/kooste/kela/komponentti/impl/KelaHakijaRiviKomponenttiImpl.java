@@ -17,21 +17,15 @@ public class KelaHakijaRiviKomponenttiImpl {
 	// @Property("poimintapaivamaara") Date poimintapaivamaara)
 			throws Exception {
 		TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
-		builder.setLinjakoodi(hakija.getLinjakoodi());
+		builder.setOppilaitosnumero(hakija.getOppilaitosnumero());
+		builder.setOrganisaatio(hakija.getOrganisaatio());
+		builder.setHakukohde(hakija.getHakukohde());
 		builder.setLukuvuosi(hakija.getLukuvuosi());
-		builder.setOppilaitos(hakija.getOppilaitos());
 		builder.setValintapaivamaara(hakija.getValintapaivamaara());
 		builder.setSukunimi(hakija.getSukunimi());
 		builder.setEtunimet(hakija.getEtunimi());
 		if (hakija.hasHenkilotunnus()) {
-			String standardinMukainenHenkilotunnus = hakija.getHenkilotunnus();
-			// KELA ei halua vuosisata merkkia
-			// henkilotunnukseen!
-			StringBuilder kelanVaatimaHenkilotunnus = new StringBuilder();
-			kelanVaatimaHenkilotunnus.append(
-					standardinMukainenHenkilotunnus.substring(0, 6)).append(
-					standardinMukainenHenkilotunnus.substring(7, 11));
-			builder.setHenkilotunnus(kelanVaatimaHenkilotunnus.toString());
+			builder.setHenkilotunnus(hakija.getHenkilotunnus());
 		} else { // Ulkomaalaisille syntyma-aika hetun
 					// sijaan
 			String syntymaAika = hakija.getSyntymaaika(); // henkilotiedot.get(SYNTYMAAIKA);

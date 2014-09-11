@@ -51,6 +51,7 @@ public class KelaLisahaku extends KelaAbstraktiHaku {
 				Map<String, String> henkilotiedot = henkilotiedot(hakemus);
 				HakukohdeDTO hakukohde = hakukohdeSource
 						.getHakukohdeByOid(hakukohdeOid);
+				String organisaatioOid = hakukohde.getTarjoajaOid();
 				final String etunimi = henkilotiedot.get(ETUNIMET);
 				final String sukunimi = henkilotiedot.get(SUKUNIMI);
 				final String henkilotunnus = henkilotiedot.get(HENKILOTUNNUS);
@@ -62,14 +63,20 @@ public class KelaLisahaku extends KelaAbstraktiHaku {
 						.poimintapaivamaara(getHaku());
 				final Date valintapaivamaara = getPaivamaaraSource()
 						.valintapaivamaara(getHaku());
-				final String linjakoodi = linjakoodiSource
-						.getLinjakoodi(hakukohde.getHakukohdeNimiUri());
-				final String oppilaitos = oppilaitosSource
-						.getOppilaitosKoodi(hakukohde.getTarjoajaOid());
+				/*final String linjakoodi = linjakoodiSource
+						.getLinjakoodi(hakukohde.getHakukohdeNimiUri());*/
+				/*final String oppilaitos = oppilaitosSource
+						.getOppilaitosKoodi(hakukohde.getTarjoajaOid());*/
 
-				valitut.add(new KelaHakijaRivi(etunimi, sukunimi,
+				final String oppilaitosnumero = oppilaitosSource.getOppilaitosnumero(organisaatioOid);
+				
+				valitut.add(new KelaHakijaRivi(etunimi, sukunimi, henkilotunnus, 
+						lukuvuosi, poimintapaivamaara, valintapaivamaara, 
+						oppilaitosnumero, organisaatioOid, hakukohdeOid, syntymaaika));
+
+/*				valitut.add(new KelaHakijaRivi(etunimi, sukunimi,
 						henkilotunnus, lukuvuosi, poimintapaivamaara,
-						valintapaivamaara, linjakoodi, oppilaitos, syntymaaika));
+						valintapaivamaara, linjakoodi, oppilaitos, syntymaaika));*/
 			} else {
 				continue;
 			}

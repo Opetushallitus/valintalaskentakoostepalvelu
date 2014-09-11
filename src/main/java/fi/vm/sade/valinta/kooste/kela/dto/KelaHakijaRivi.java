@@ -15,22 +15,27 @@ public class KelaHakijaRivi {
 	private final Date lukuvuosi;
 	private final Date poimintapaivamaara;
 	private final Date valintapaivamaara;
-	private final String linjakoodi;
-	private final String oppilaitos;
+	private final String oppilaitosnumero;
+	private final String organisaatio;
+	private final String hakukohde;
+	//private final String linjakoodi;
+	//private final String oppilaitos;
 	private final String syntymaaika; // 04.05.1965
 
 	public KelaHakijaRivi(String etunimi, String sukunimi,
 			String henkilotunnus, Date lukuvuosi, Date poimintapaivamaara,
-			Date valintapaivamaara, String linjakoodi, String oppilaitos,
+			Date valintapaivamaara, String oppilaitosnumero, String organisaatio, String  hakukohde,
 			String syntymaaika) {
+		
 		this.etunimi = etunimi;
 		this.sukunimi = sukunimi;
 		this.henkilotunnus = henkilotunnus;
 		this.lukuvuosi = lukuvuosi;
 		this.poimintapaivamaara = poimintapaivamaara;
 		this.valintapaivamaara = valintapaivamaara;
-		this.linjakoodi = linjakoodi;
-		this.oppilaitos = oppilaitos;
+		this.oppilaitosnumero = oppilaitosnumero;
+		this.organisaatio = organisaatio;
+		this.hakukohde = hakukohde;
 		this.syntymaaika = syntymaaika;
 	}
 
@@ -66,11 +71,16 @@ public class KelaHakijaRivi {
 		return lukuvuosi;
 	}
 
-	public String getLinjakoodi() {
-		return linjakoodi;
+	public String getOppilaitosnumero() {
+		return oppilaitosnumero;
 	}
 
-	public String getOppilaitos() {
-		return oppilaitos;
+	public String getOrganisaatio() {
+		return organisaatio;
 	}
+
+	public String getHakukohde() {
+		return hakukohde;
+	}
+
 }

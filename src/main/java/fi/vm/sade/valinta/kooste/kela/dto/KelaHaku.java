@@ -56,7 +56,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
 							.getHakutoiveenValintatapajonot()) {
 						if (jono.getValintatapajonoPrioriteetti() == null) {
 							throw new RuntimeException(
-									"Valintatapajonolla ei ollut prioriteettiä!");
+									"Valintatapajonolla ei ollut prioriteettiÃ¤!");
 						}
 						if (prioriteetit.contains(jono
 								.getValintatapajonoPrioriteetti())) {
@@ -98,8 +98,8 @@ public class KelaHaku extends KelaAbstraktiHaku {
 						Map<String, String> henkilotiedot = henkilotiedot(hakemus);
 						String hakukohdeOid = hakutoive.getHakukohdeOid();
 
-						HakukohdeDTO hakukohde = hakukohdeSource
-								.getHakukohdeByOid(hakukohdeOid);
+						/*HakukohdeDTO hakukohde = hakukohdeSource
+								.getHakukohdeByOid(hakukohdeOid);*/
 						final String etunimi = henkilotiedot.get(ETUNIMET);
 						final String sukunimi = henkilotiedot.get(SUKUNIMI);
 						final String henkilotunnus = henkilotiedot
@@ -112,15 +112,21 @@ public class KelaHaku extends KelaAbstraktiHaku {
 								.poimintapaivamaara(getHaku());
 						final Date valintapaivamaara = getPaivamaaraSource()
 								.valintapaivamaara(getHaku());
-						final String linjakoodi = linjakoodiSource
-								.getLinjakoodi(hakukohde.getHakukohdeNimiUri());
-						final String oppilaitos = oppilaitosSource
-								.getOppilaitosKoodi(hakutoive.getTarjoajaOid());
+						/*final String linjakoodi = linjakoodiSource
+								.getLinjakoodi(hakukohde.getHakukohdeNimiUri());*/
+						/*final String oppilaitos = oppilaitosSource
+								.getOppilaitosKoodi(hakutoive.getTarjoajaOid());*/
+						final String oppilaitosnumero = oppilaitosSource
+								.getOppilaitosnumero(hakutoive.getTarjoajaOid());
+						final String organisaatioOid = hakutoive.getTarjoajaOid();
 
-						valitut.add(new KelaHakijaRivi(etunimi, sukunimi,
+						valitut.add(new KelaHakijaRivi(etunimi, sukunimi, henkilotunnus, 
+								lukuvuosi, poimintapaivamaara, valintapaivamaara, 
+								oppilaitosnumero, organisaatioOid, hakukohdeOid, syntymaaika));
+						/*valitut.add(new KelaHakijaRivi(etunimi, sukunimi,
 								henkilotunnus, lukuvuosi, poimintapaivamaara,
 								valintapaivamaara, linjakoodi, oppilaitos,
-								syntymaaika));
+								syntymaaika));*/
 					} else {
 						break;
 					}
