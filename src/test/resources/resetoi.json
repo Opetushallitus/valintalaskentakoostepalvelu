@@ -1,0 +1,20 @@
+{
+    "uuid": "5412846be4b0bfb1202cfe4b",
+    "hakuOid": "1.2.246.562.5.2013080813081926341927",
+    "luotu": 1410499691183,
+    "tila": "MENEILLAAN",
+    "hakukohteet": [
+        {
+            "hakukohdeOid": "1.2.246.562.5.79851048458",
+            "tila": "TEKEMATTA"
+        },
+        {
+            "hakukohdeOid": "1.2.246.562.5.74387765972",
+            "tila": "TEKEMATTA"
+        },
+        {
+            "hakukohdeOid": "1.2.246.562.5.99848212041",
+            "tila": "TEKEMATTA"
+        }
+    ]
+}

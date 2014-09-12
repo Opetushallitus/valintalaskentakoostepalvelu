@@ -50,7 +50,7 @@
 		tulokset service has been optimized -->
 	<http:conduit name="*.http-conduit">
 		<!-- AllowChunking="false" Nginx fails without this -->
-		<http:client Connection="Keep-Alive" ConnectionTimeout="0"
+		<http:client Connection="Keep-Alive" ConnectionTimeout="0" 
 			ReceiveTimeout="0" AllowChunking="false" />
 	</http:conduit>
 
@@ -560,6 +560,19 @@
 	<bean
 		class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteImpl" />
 
+	<!-- Seuranta Async -->
+	<bean class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.LaskentaSeurantaAsyncResourceImpl"/>
+
+ 	<!-- Valintaperusteet Async -->
+	<bean class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl"/>
+ 
+ 	<!-- HakuApp Async -->
+	<bean class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl"/>
+	
+ 	<!-- Valintalaskenta Async -->
+	<bean class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaAsyncResourceImpl"/>
+ 
+  
 	<!-- Swagger -->
 	<!-- Swagger API listing resource -->
 	<bean id="swaggerResourceJSON"

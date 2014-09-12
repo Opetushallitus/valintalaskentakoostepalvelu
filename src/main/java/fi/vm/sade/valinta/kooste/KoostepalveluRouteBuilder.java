@@ -30,6 +30,10 @@ public abstract class KoostepalveluRouteBuilder<T> extends SpringRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(KoostepalveluRouteBuilder.class);
 
+	public KoostepalveluRouteBuilder() {
+		super();
+	}
+
 	/**
 	 * 
 	 * @return default deadletterchannel endpoint
