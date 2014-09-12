@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -27,6 +28,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.*;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
@@ -55,7 +57,7 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final ViestintapalveluResource viestintapalveluResource;
 	private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
 	private final JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti;
-	private final SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy;
+	private final SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluIlmankoulutuspaikkaaKomponentti;
 	private final DokumenttiResource dokumenttiResource;
 	private final String jalkiohjauskirjeet;
 	private final ApplicationResource applicationResource;
@@ -75,7 +77,7 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 		this.dokumenttiResource = dokumenttiResource;
 		this.viestintapalveluResource = viestintapalveluResource;
 		this.jalkiohjauskirjeetKomponentti = jalkiohjauskirjeetKomponentti;
-		this.sijoitteluProxy = sijoitteluProxy;
+		this.sijoitteluIlmankoulutuspaikkaaKomponentti = sijoitteluProxy;
 		this.jalkiohjauskirjeet = jalkiohjauskirjeet;
 	}
 
@@ -145,7 +147,7 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						try {
-							final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluProxy
+							final List<HakijaDTO> hyvaksymattomatHakijat = sijoitteluIlmankoulutuspaikkaaKomponentti
 									.ilmankoulutuspaikkaa(exchange.getProperty(
 											OPH.HAKUOID, String.class),
 											SijoitteluResource.LATEST);
@@ -174,37 +176,49 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						Collection<HakijaDTO> hyvaksymattomatHakijat = exchange
 								.getIn().getBody(List.class);
 
-						Predicate<HakijaDTO> puutteellisetTiedot = new Predicate<HakijaDTO>() {
-							public boolean apply(HakijaDTO input) {
-								if (input == null
-										|| input.getHakutoiveet() == null
-										|| input.getHakutoiveet().isEmpty()) {
-									LOG.error("Hakija ilman hakutoiveita!");
-									return false;
-								}
-								return true;
-							}
-						};
-						//
-						// Filtteröidään puutteellisilla tiedoilla olevat
-						// hakijat pois
-						//
-						hyvaksymattomatHakijat = Collections2.filter(
-								hyvaksymattomatHakijat, puutteellisetTiedot);
+						hyvaksymattomatHakijat = hyvaksymattomatHakijat
+								.stream()
+								//
+								// Filtteröidään puutteellisilla tiedoilla
+								// olevat
+								// hakijat pois
+								//
+								.filter(hakija -> {
+									if (hakija == null
+											|| hakija.getHakutoiveet() == null
+											|| hakija.getHakutoiveet()
+													.isEmpty()) {
+										LOG.error("Hakija ilman hakutoiveita!");
+										return false;
+									}
+									return true;
+								})
+								//
+								// OVT-8553 Itse itsensa peruuttaneet pois
+								//
+								.filter(hakija -> hakija
+										.getHakutoiveet()
+										.stream()
+										.anyMatch(
+												hakutoive -> hakutoive
+														.getHakutoiveenValintatapajonot()
+														.stream()
+														.noneMatch(
+																valintatapajono -> valintatapajono
+																		.getVastaanottotieto() == PERUNUT)))
+								//
+								.collect(Collectors.toList());
 
 						final Set<String> filterOids = Sets
 								.<String> newHashSet(hakemusOids(exchange));
 						if (!filterOids.isEmpty()) {
-							Predicate<HakijaDTO> hakemusOidsWhitelist = new Predicate<HakijaDTO>() {
-								public boolean apply(HakijaDTO input) {
-
-									return filterOids.contains(input
-											.getHakemusOid());
-								}
-							};
-							hyvaksymattomatHakijat = Collections2.filter(
-									hyvaksymattomatHakijat,
-									hakemusOidsWhitelist);
+							hyvaksymattomatHakijat = hyvaksymattomatHakijat
+									.stream()
+									//
+									.filter(hakija -> filterOids
+											.contains(hakija.getHakemusOid()))
+									//
+									.collect(Collectors.toList());
 						}
 
 						if (hyvaksymattomatHakijat.isEmpty()) {
