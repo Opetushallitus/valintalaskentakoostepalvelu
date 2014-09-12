@@ -24,25 +24,35 @@ import com.google.gson.reflect.TypeToken;
  */
 public class Callback<T> implements InvocationCallback<Response> {
 	private final static Logger LOG = LoggerFactory.getLogger(Callback.class);
-	private final Type type = new TypeToken<T>() {
-	}.getType();
 	private final Gson gson = new Gson();
 	private final Consumer<T> callback;
 	private final Consumer<Throwable> failureCallback;
 	private final String palvelukutsu;
 	private final String url;
+	// private final Class<T> clazz;
+	private final Type type;
 
-	public Callback(String url, String palvelukutsu, Consumer<T> callback) {
+	// public Callback(String url, String palvelukutsu, Consumer<T> callback,
+	// Class<T> clazz) {
+	// this(url, palvelukutsu, callback, (t -> LOG.error(
+	// "Asynkroninen palvelukutsu epaonnistui: {}", t.getMessage())),
+	// clazz,null);
+	// }
+	public Callback(String url, String palvelukutsu, Consumer<T> callback,
+			Type type) {
 		this(url, palvelukutsu, callback, (t -> LOG.error(
-				"Asynkroninen palvelukutsu epaonnistui: {}", t.getMessage())));
+				"Asynkroninen palvelukutsu epaonnistui: {}", t.getMessage())),
+				type);
 	}
 
 	public Callback(String url, String palvelukutsu, Consumer<T> callback,
-			Consumer<Throwable> failureCallback) {
+			Consumer<Throwable> failureCallback, Type type) {
 		this.callback = callback;
 		this.failureCallback = failureCallback;
 		this.palvelukutsu = palvelukutsu;
 		this.url = url;
+		// this.clazz = clazz;
+		this.type = type;
 	}
 
 	@Override

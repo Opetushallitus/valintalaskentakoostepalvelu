@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
@@ -91,7 +92,9 @@ public class ValintaperusteetAsyncResourceImpl implements
 					.path(url)
 					.async()
 					.get(new Callback<List<ValintaperusteetDTO>>(address, url,
-							callback, failureCallback));
+							callback, failureCallback,
+							new TypeToken<List<ValintaperusteetDTO>>() {
+							}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
@@ -109,7 +112,9 @@ public class ValintaperusteetAsyncResourceImpl implements
 					.path(url)
 					.async()
 					.get(new Callback<List<HakukohdeViiteDTO>>(address, url,
-							callback, failureCallback));
+							callback, failureCallback,
+							new TypeToken<List<HakukohdeViiteDTO>>() {
+							}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
@@ -74,24 +75,31 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 	public void getApplicationsByOid(String hakukohdeOid,
 			Consumer<List<Hakemus>> callback,
 			Consumer<Throwable> failureCallback) {
-		// @GET
-		// @Path("listfull")
-		// @Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
-		// @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-		// public List<Hakemus> getApplicationsByOid(
-		// @QueryParam("aoOid") String aoOid,
-		// @QueryParam("appState") List<String> appStates,
-		// @QueryParam("rows") int rows);
-		String url = new StringBuilder()
-				.append("/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=")
+		String url = new StringBuilder().append("/applications/listfull/")
 				.append(hakukohdeOid).toString();
 		try {
 			WebClient
 					.fromClient(webClient)
 					.path(url)
+					//
+					.query("appStates", "ACTIVE")
+					//
+					.query("appStates", "INCOMPLETE")
+					//
+					.query("rows", 100000)
+					//
+					.query("aoOid", hakukohdeOid)
+					//
 					.async()
-					.get(new Callback<List<Hakemus>>(address, url, callback,
-							failureCallback));
+					//
+					.get(new Callback<List<Hakemus>>(
+							address,
+							new StringBuilder()
+									.append(url)
+									.append("?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=")
+									.append(hakukohdeOid).toString(), callback,
+							failureCallback, new TypeToken<List<Hakemus>>() {
+							}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
@@ -110,7 +118,12 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 					.path(url)
 					.async()
 					.get(new Callback<List<ApplicationAdditionalDataDTO>>(
-							address, url, callback, failureCallback));
+							address,
+							url,
+							callback,
+							failureCallback,
+							new TypeToken<List<ApplicationAdditionalDataDTO>>() {
+							}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}

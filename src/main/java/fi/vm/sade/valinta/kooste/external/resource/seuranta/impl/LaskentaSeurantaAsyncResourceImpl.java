@@ -31,11 +31,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.ResponseCallback;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
@@ -103,7 +105,9 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 					.path(url)
 					.async()
 					.get(new Callback<Collection<YhteenvetoDto>>(address, url,
-							callback));
+							callback,
+							new TypeToken<Collection<YhteenvetoDto>>() {
+							}.getType()));
 		} catch (Exception e) {
 			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
 					e.getMessage());
@@ -120,7 +124,8 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 					.path(url)
 					.async()
 					.get(new Callback<LaskentaDto>(address, url, callback,
-							failureCallback));
+							failureCallback, new TypeToken<LaskentaDto>() {
+							}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
@@ -130,14 +135,16 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 			Consumer<Throwable> failureCallback) {
 		try {
 			String url = new StringBuilder().append("/seuranta/laskenta/")
-					.append(uuid).toString();
+					.append(uuid).append("/resetoi").toString();
 			WebClient
 					.fromClient(webClient)
 					.path(url)
 					.async()
 					.put(Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE),
 							new Callback<LaskentaDto>(address, url, callback,
-									failureCallback));
+									failureCallback,
+									new TypeToken<LaskentaDto>() {
+									}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
@@ -161,7 +168,9 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 						.post(Entity.entity(gson.toJson(hakukohdeOids),
 								MediaType.APPLICATION_JSON_TYPE),
 								new Callback<String>(address, url, callback,
-										failureCallback));
+										failureCallback,
+										new TypeToken<String>() {
+										}.getType()));
 			} else {
 				String url = new StringBuilder().append("/seuranta/laskenta/")
 						.append(hakuOid).append("/tyyppi/").append(tyyppi)
@@ -173,7 +182,9 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 						.post(Entity.entity(gson.toJson(hakukohdeOids),
 								MediaType.APPLICATION_JSON_TYPE),
 								new Callback<String>(address, url, callback,
-										failureCallback));
+										failureCallback,
+										new TypeToken<String>() {
+										}.getType()));
 			}
 		} catch (Exception e) {
 			failureCallback.accept(e);

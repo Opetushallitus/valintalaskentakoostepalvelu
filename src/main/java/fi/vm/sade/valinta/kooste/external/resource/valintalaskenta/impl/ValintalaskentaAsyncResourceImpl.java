@@ -14,12 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
 /**
@@ -81,7 +83,8 @@ public class ValintalaskentaAsyncResourceImpl implements
 					.post(Entity.entity(gson.toJson(laskeDTO),
 							MediaType.APPLICATION_JSON_TYPE),
 							new Callback<String>(address, url, callback,
-									failureCallback));
+									failureCallback, new TypeToken<String>() {
+									}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
@@ -100,7 +103,8 @@ public class ValintalaskentaAsyncResourceImpl implements
 					.post(Entity.entity(gson.toJson(laskeDTO),
 							MediaType.APPLICATION_JSON_TYPE),
 							new Callback<String>(address, url, callback,
-									failureCallback));
+									failureCallback, new TypeToken<String>() {
+									}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
@@ -119,7 +123,8 @@ public class ValintalaskentaAsyncResourceImpl implements
 					.post(Entity.entity(gson.toJson(laskeDTO),
 							MediaType.APPLICATION_JSON_TYPE),
 							new Callback<String>(address, url, callback,
-									failureCallback));
+									failureCallback, new TypeToken<String>() {
+									}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
