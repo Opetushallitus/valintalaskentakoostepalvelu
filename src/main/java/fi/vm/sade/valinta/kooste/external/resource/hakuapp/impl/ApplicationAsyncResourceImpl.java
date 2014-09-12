@@ -75,8 +75,8 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 	public void getApplicationsByOid(String hakukohdeOid,
 			Consumer<List<Hakemus>> callback,
 			Consumer<Throwable> failureCallback) {
-		String url = new StringBuilder().append("/applications/listfull/")
-				.append(hakukohdeOid).toString();
+		String url = new StringBuilder().append("/applications/listfull")
+				.toString();
 		try {
 			WebClient
 					.fromClient(webClient)
