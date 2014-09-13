@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
@@ -82,7 +83,7 @@ public class ValintalaskentaTulosRouteImpl extends
 				String haunNimi = VAKIO_HAUN_NIMI;
 				String preferoitukielikoodi = KieliUtil.SUOMI;
 				try {
-					HakukohdeNimiRDTO dto = haeHakukohdeNimiTarjonnaltaKomponentti
+					HakukohdeDTO dto = haeHakukohdeNimiTarjonnaltaKomponentti
 							.haeHakukohdeNimi(hakukohdeOid(exchange));
 					fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti hakukohdeTeksti = new fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti(
 							dto.getHakukohdeNimi());

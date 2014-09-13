@@ -218,7 +218,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 						String tarjoajaNimi;
 						String preferoitukielikoodi = KieliUtil.SUOMI;
 						try {
-							HakukohdeNimiRDTO nimi = nimiTarjonnalta
+							HakukohdeDTO nimi = nimiTarjonnalta
 									.haeHakukohdeNimi(hakukohdeOid);
 							tarjoajaOid = nimi.getTarjoajaOid();
 							Teksti hakukohdeTeksti = new Teksti(nimi
@@ -373,7 +373,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 						String hakukohdeOid = hakukohde.getOid();
 						String tarjoajaOid = StringUtils.EMPTY;
 						try {
-							HakukohdeNimiRDTO nimi = nimiTarjonnalta
+							HakukohdeDTO nimi = nimiTarjonnalta
 									.haeHakukohdeNimi(hakukohdeOid);
 							tarjoajaOid = nimi.getTarjoajaOid();
 						} catch (Exception e) {

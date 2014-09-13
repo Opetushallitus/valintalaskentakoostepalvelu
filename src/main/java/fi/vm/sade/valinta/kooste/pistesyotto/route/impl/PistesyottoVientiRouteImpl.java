@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -98,7 +99,7 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						String hakuNimi = new Teksti(hakuTarjonnalta.getHaku(
 								hakuOid).getNimi()).getTeksti();
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-						HakukohdeNimiRDTO hnimi = hakukohdeTarjonnalta
+						HakukohdeDTO hnimi = hakukohdeTarjonnalta
 								.haeHakukohdeNimi(hakukohdeOid);
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
 						String tarjoajaOid = hnimi.getTarjoajaOid();

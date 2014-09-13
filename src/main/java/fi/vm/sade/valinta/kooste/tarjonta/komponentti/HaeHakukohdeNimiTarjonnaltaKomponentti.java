@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class HaeHakukohdeNimiTarjonnaltaKomponentti {
         this.tarjontaResourceUrl = tarjontaResourceUrl;
     }
 
-    public HakukohdeNimiRDTO haeHakukohdeNimi(@Property("hakukohdeOid") String hakukohdeOid) {
+    public HakukohdeDTO haeHakukohdeNimi(@Property("hakukohdeOid") String hakukohdeOid) {
         if (hakukohdeOid == null) {
             throw new SijoittelupalveluException(
                     "Sijoittelu palautti puutteellisesti luodun hakutoiveen! Hakukohteen tunniste puuttuu!");
@@ -42,7 +43,9 @@ public class HaeHakukohdeNimiTarjonnaltaKomponentti {
             LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[] { tarjontaResourceUrl,
                     hakukohdeOid });
             try {
-                HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
+                // Palauttaa jotain täysin mystistä
+                //HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
+                HakukohdeDTO nimi = tarjontaResource.getByOID(hakukohdeOid);
                 return nimi;
             } catch (Exception e) {
                 throw new TarjontaException("Tarjonnasta ei löydy hakukohdetta " + hakukohdeOid);

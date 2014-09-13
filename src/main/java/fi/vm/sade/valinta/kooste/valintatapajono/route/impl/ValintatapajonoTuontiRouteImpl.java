@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 import org.apache.camel.Endpoint;
@@ -110,7 +111,7 @@ public class ValintatapajonoTuontiRouteImpl extends
 						String hakuNimi = new Teksti(hakuTarjonnalta.getHaku(
 								hakuOid).getNimi()).getTeksti();
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-						HakukohdeNimiRDTO hnimi = hakukohdeTarjonnalta
+						HakukohdeDTO hnimi = hakukohdeTarjonnalta
 								.haeHakukohdeNimi(hakukohdeOid);
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
 						// String tarjoajaOid = hnimi.getTarjoajaOid();
