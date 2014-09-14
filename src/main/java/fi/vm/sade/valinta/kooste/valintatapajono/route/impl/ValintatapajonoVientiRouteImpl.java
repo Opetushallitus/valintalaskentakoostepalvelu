@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -98,7 +99,7 @@ public class ValintatapajonoVientiRouteImpl extends
 						String hakuNimi = new Teksti(hakuTarjonnalta.getHaku(
 								hakuOid).getNimi()).getTeksti();
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-						HakukohdeNimiRDTO hnimi = hakukohdeTarjonnalta
+						HakukohdeDTO hnimi = hakukohdeTarjonnalta
 								.haeHakukohdeNimi(hakukohdeOid);
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
 						// String tarjoajaOid = hnimi.getTarjoajaOid();

@@ -49,13 +49,15 @@ public class PistesyottoExcel {
 	private final static String MERKITSEMATTA = "Merkitsemättä";
 	private final static String OSALLISTUI = "Osallistui";
 	private final static String EI_OSALLISTUNUT = "Ei osallistunut";
+    private final static String EI_VAADITA = "Ei vaadita";
 
 	public final static String VAKIO_MERKITSEMATTA = "MERKITSEMATTA";
 	public final static String VAKIO_OSALLISTUI = "OSALLISTUI";
 	public final static String VAKIO_EI_OSALLISTUNUT = "EI_OSALLISTUNUT";
+    public final static String VAKIO_EI_VAADITA = "EI_VAADITA";
 
 	private final static Collection<String> VAIHTOEHDOT = Arrays.asList(
-			MERKITSEMATTA, OSALLISTUI, EI_OSALLISTUNUT);
+			MERKITSEMATTA, OSALLISTUI, EI_OSALLISTUNUT, EI_VAADITA);
 	private final static Map<String, String> VAIHTOEHDOT_KONVERSIO = new KonversioBuilder()
 	//
 			.addKonversio(StringUtils.EMPTY, MERKITSEMATTA)
@@ -64,6 +66,8 @@ public class PistesyottoExcel {
 			//
 			.addKonversio(VAKIO_OSALLISTUI, OSALLISTUI)
 			//
+            .addKonversio(VAKIO_EI_VAADITA, EI_VAADITA)
+                    //
 			.addKonversio(VAKIO_EI_OSALLISTUNUT, EI_OSALLISTUNUT).build();
 	private final static Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO = new KonversioBuilder()
 	//
@@ -73,6 +77,8 @@ public class PistesyottoExcel {
 			//
 			.addKonversio(OSALLISTUI, VAKIO_OSALLISTUI)
 			//
+            .addKonversio(EI_VAADITA, VAKIO_EI_VAADITA)
+                    //
 			.addKonversio(EI_OSALLISTUNUT, VAKIO_EI_OSALLISTUNUT).build();
 	public final static String TOSI = "Hyväksytty";
 	public final static String EPATOSI = "Hylätty";
