@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -35,40 +36,42 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/hakuimport", description = "Haun tuontiin tarjonnalta")
 public class HakuImportResource {
-    private static final Logger LOG = LoggerFactory.getLogger(HakuImportResource.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(HakuImportResource.class);
 
-    @Autowired
-    private HakuImportRoute hakuImportAktivointiRoute;
+	@Autowired
+	private HakuImportRoute hakuImportAktivointiRoute;
 
-    @Autowired
-    private ParametriService parametriService;
+	@Autowired
+	private ParametriService parametriService;
 
-    @Resource(name = "hakuImportValvomo")
-    private ValvomoService<HakuImportProsessi> hakuImportValvomo;
+	@Autowired(required = true)
+	@Qualifier("hakuImportValvomo")
+	private ValvomoService<HakuImportProsessi> hakuImportValvomo;
 
-    @GET
-    @Path("/status")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Hauntuontireitin tila", response = Collection.class)
-    public Collection<ProsessiJaStatus<HakuImportProsessi>> status() {
-        return hakuImportValvomo.getUusimmatProsessitJaStatukset();
-    }
+	@GET
+	@Path("/status")
+	@Produces(APPLICATION_JSON)
+	@ApiOperation(value = "Hauntuontireitin tila", response = Collection.class)
+	public Collection<ProsessiJaStatus<HakuImportProsessi>> status() {
+		return hakuImportValvomo.getUusimmatProsessitJaStatukset();
+	}
 
-    @GET
-    @Path("/aktivoi")
-    @ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
-    public String aktivoiHakuImport(@QueryParam("hakuOid") String hakuOid) {
-        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
-            return "no privileges.";
-        }
+	@GET
+	@Path("/aktivoi")
+	@ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
+	public String aktivoiHakuImport(@QueryParam("hakuOid") String hakuOid) {
+		if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+			return "no privileges.";
+		}
 
-        if (StringUtils.isBlank(hakuOid)) {
-            return "get parameter 'hakuOid' required";
-        } else {
-            LOG.info("Haku import haulle {}", hakuOid);
-            hakuImportAktivointiRoute.asyncAktivoiHakuImport(hakuOid, SecurityContextHolder.getContext()
-                    .getAuthentication());
-            return "in progress";
-        }
-    }
+		if (StringUtils.isBlank(hakuOid)) {
+			return "get parameter 'hakuOid' required";
+		} else {
+			LOG.info("Haku import haulle {}", hakuOid);
+			hakuImportAktivointiRoute.asyncAktivoiHakuImport(hakuOid,
+					SecurityContextHolder.getContext().getAuthentication());
+			return "in progress";
+		}
+	}
 }
