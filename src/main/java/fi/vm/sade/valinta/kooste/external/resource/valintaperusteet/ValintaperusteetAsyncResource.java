@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 
 /**
@@ -20,6 +21,11 @@ import fi.vm.sade.valinta.kooste.external.resource.Callback;
  * 
  */
 public interface ValintaperusteetAsyncResource {
+
+	void haeHakijaryhmat(String hakukohdeOid,
+			Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback,
+			Consumer<Throwable> failureCallback);
+
 	// @GET
 	// @Path("haku/{hakuOid}")
 	// @Produces(MediaType.APPLICATION_JSON)
@@ -36,4 +42,5 @@ public interface ValintaperusteetAsyncResource {
 			Integer valinnanVaiheJarjestysluku,
 			Consumer<List<ValintaperusteetDTO>> callback,
 			Consumer<Throwable> failureCallback);
+
 }

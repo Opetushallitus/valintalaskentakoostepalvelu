@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -29,11 +30,12 @@ public class LaskentaWrapper {
 	private final List<ValintaperusteetDTO> valintaperusteet;
 	private final List<Hakemus> hakemukset;
 	private final List<ApplicationAdditionalDataDTO> lisatiedot;
+	private final List<ValintaperusteetHakijaryhmaDTO> hakijaryhmat;
 	private final String hakukohdeOid;
 	private final Laskenta laskenta;
 
 	public LaskentaWrapper(List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
-		if (tyot == null || tyot.size() != 3) {
+		if (tyot == null || tyot.size() != 4) {
 			this.onkoToitaOikeaMaara = false;
 			this.valintaperusteet = null;
 			this.hakemukset = null;
@@ -42,16 +44,26 @@ public class LaskentaWrapper {
 			this.onkoOhitettavaEliValintaperusteetTaiHakemuksetTaiLisatiedotPuuttui = false;
 			this.hakukohdeOid = null;
 			this.laskenta = null;
+			this.hakijaryhmat = null;
 		} else {
 			this.onkoToitaOikeaMaara = true;
 			this.valintaperusteet = extractValintaperusteet(tyot);
 			this.hakemukset = extractHakemukset(tyot);
 			this.lisatiedot = extractLisatiedot(tyot);
-			this.onkoLaskemattakinTehtyEliHakukohteelleEiOllutHakemuksiaTaiValintaperusteita = isOnkoJokuDataJoukkoTyhja();
-			this.onkoOhitettavaEliValintaperusteetTaiHakemuksetTaiLisatiedotPuuttui = isOnkoJokuDataJoukkoNullReferenssi();
 			this.hakukohdeOid = extractHakukohdeOid(tyot);
 			this.laskenta = extractLaskenta(tyot);
+			this.hakijaryhmat = extractHakijaryhmat(tyot);
+			this.onkoLaskemattakinTehtyEliHakukohteelleEiOllutHakemuksiaTaiValintaperusteita = isOnkoJokuDataJoukkoTyhja();
+			this.onkoOhitettavaEliValintaperusteetTaiHakemuksetTaiLisatiedotPuuttui = isOnkoJokuDataJoukkoNullReferenssi();
 		}
+	}
+
+	public List<Hakemus> getHakemukset() {
+		return hakemukset;
+	}
+
+	public List<ValintaperusteetHakijaryhmaDTO> getHakijaryhmat() {
+		return hakijaryhmat;
 	}
 
 	public Laskenta getLaskenta() {
@@ -68,6 +80,10 @@ public class LaskentaWrapper {
 
 	public boolean isOnkoOhitettavaEliValintaperusteetTaiHakemuksetTaiLisatiedotPuuttui() {
 		return onkoOhitettavaEliValintaperusteetTaiHakemuksetTaiLisatiedotPuuttui;
+	}
+
+	public List<ApplicationAdditionalDataDTO> getLisatiedot() {
+		return lisatiedot;
 	}
 
 	public boolean isOnkoToitaOikeaMaara() {
@@ -93,7 +109,7 @@ public class LaskentaWrapper {
 
 	private boolean isOnkoJokuDataJoukkoNullReferenssi() {
 		return valintaperusteet == null || hakemukset == null
-				|| lisatiedot == null;
+				|| lisatiedot == null || hakijaryhmat == null;
 	}
 
 	private String extractHakukohdeOid(
@@ -121,6 +137,16 @@ public class LaskentaWrapper {
 		for (LaskentaJaValintaperusteetJaHakemukset v : tyot) {
 			if (v.getHakemukset() != null) {
 				return v.getHakemukset();
+			}
+		}
+		return null;
+	}
+
+	private List<ValintaperusteetHakijaryhmaDTO> extractHakijaryhmat(
+			List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
+		for (LaskentaJaValintaperusteetJaHakemukset v : tyot) {
+			if (v.getHakijaryhmat() != null) {
+				return v.getHakijaryhmat();
 			}
 		}
 		return null;
