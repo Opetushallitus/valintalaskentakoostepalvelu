@@ -291,8 +291,7 @@ public class PistesyottoExcel {
                     if(!valintaperuste.getVaatiiOsallistumisen()) {
                         if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
                                 .getFunktiotyyppi())) {
-                            Number value = asNumber(data.getAdditionalData()
-                                    .get(valintaperuste.getTunniste()));
+                            Number value = asNumber("0.0");
                             Number max = asNumber(valintaperuste.getMax());
                             Number min = asNumber(valintaperuste.getMin());
 
@@ -313,10 +312,7 @@ public class PistesyottoExcel {
 
                         s.add(new MonivalintaArvo(
                                 VAIHTOEHDOT_KONVERSIO
-                                        .get(StringUtils.trimToEmpty(data
-                                                .getAdditionalData()
-                                                .get(valintaperuste
-                                                        .getOsallistuminenTunniste()))),
+                                        .get(VAKIO_EI_VAADITA),
                                 VAIHTOEHDOT));
 
                     } else {
