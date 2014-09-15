@@ -288,8 +288,37 @@ public class PistesyottoExcel {
 					.append(", ").append(data.getFirstNames()).toString()));
 			if (!osallistuja) {
 				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
-					s.add(TekstiArvo.tyhja(false));
-					s.add(TekstiArvo.tyhja(false));
+                    if(!valintaperuste.getVaatiiOsallistumisen()) {
+                        if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
+                                .getFunktiotyyppi())) {
+                            Number value = asNumber("0.0");
+                            Number max = asNumber(valintaperuste.getMax());
+                            Number min = asNumber(valintaperuste.getMin());
+
+                            s.add(new NumeroArvo(value, min, max));
+
+                        } else if (Funktiotyyppi.TOTUUSARVOFUNKTIO
+                                .equals(valintaperuste.getFunktiotyyppi())) {
+                            String value = StringUtils.trimToEmpty(data
+                                    .getAdditionalData().get(
+                                            valintaperuste.getTunniste()));
+                            s.add(new BooleanArvo(value, TOTUUSARVO, TOSI,
+                                    EPATOSI, TYHJA));
+                        } else {
+                            s.add(new TekstiArvo(data.getAdditionalData().get(
+                                    StringUtils.trimToEmpty(valintaperuste
+                                            .getTunniste())), false));
+                        }
+
+                        s.add(new MonivalintaArvo(
+                                VAIHTOEHDOT_KONVERSIO
+                                        .get(VAKIO_EI_VAADITA),
+                                VAIHTOEHDOT));
+
+                    } else {
+                        s.add(TekstiArvo.tyhja(false));
+                        s.add(TekstiArvo.tyhja(false));
+                    }
 				}
 			} else {
 				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
@@ -301,7 +330,7 @@ public class PistesyottoExcel {
 					// }
 
 					if (Osallistuminen.OSALLISTUU.equals(valintakoe
-							.getOsallistuminenTulos().getOsallistuminen())) {
+							.getOsallistuminenTulos().getOsallistuminen()) || !valintaperuste.getVaatiiOsallistumisen()) {
 
 						if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
 								.getFunktiotyyppi())) {
