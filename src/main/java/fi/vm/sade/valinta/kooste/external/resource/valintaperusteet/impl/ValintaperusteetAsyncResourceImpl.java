@@ -25,6 +25,7 @@ import com.google.common.reflect.TypeToken;
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
@@ -73,6 +74,31 @@ public class ValintaperusteetAsyncResourceImpl implements
 		interceptors.add(cas);
 		bean.setOutInterceptors(interceptors);
 		this.webClient = bean.createWebClient();
+	}
+
+	// /valintaperusteet/hakijaryhmä/{hakukohdeoid}
+	public void haeHakijaryhmat(String hakukohdeOid,
+			Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback,
+			Consumer<Throwable> failureCallback) {
+		try {
+			StringBuilder urlBuilder = new StringBuilder()
+					.append("/valintaperusteet-service/resources/valintaperusteet/hakijaryhma/")
+					.append(hakukohdeOid);
+			String url = urlBuilder.toString();
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.get(new Callback<List<ValintaperusteetHakijaryhmaDTO>>(
+							address,
+							url,
+							callback,
+							failureCallback,
+							new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {
+							}.getType()));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+		}
 	}
 
 	public void haeValintaperusteet(String hakukohdeOid,

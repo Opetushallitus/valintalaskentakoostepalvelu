@@ -15,6 +15,8 @@ public interface ValintalaskentaKerrallaRoute {
 	static final String LOPETUSEHTO = "lopetusehto";
 	static final String SEDA_VALINTALASKENTA_KERRALLA = "direct:valintalaskentakerralla";
 
+	static final String SEDA_VALINTALASKENTA_KERRALLA_VALINTARYHMAT = "direct:valintalaskentakerralla_valintaryhmat";
+
 	static final String SEDA_VALINTALASKENTA_KERRALLA_HAKEMUKSET = "direct:valintalaskentakerralla_hakemukset";
 	// +
 	// //
