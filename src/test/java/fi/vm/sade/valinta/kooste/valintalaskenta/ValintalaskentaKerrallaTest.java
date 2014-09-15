@@ -17,6 +17,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +31,7 @@ import com.google.common.collect.Lists;
 
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetValinnanVaiheDTO;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
@@ -63,7 +66,8 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 		KoostepalveluContext.CamelConfig.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ValintalaskentaKerrallaTest {
-
+	private static final Logger LOG = LoggerFactory
+			.getLogger(ValintalaskentaKerrallaTest.class);
 	private static final String UUID = "uuid";
 	private static final String HAKUOID = "hakuOid";
 
@@ -126,6 +130,7 @@ public class ValintalaskentaKerrallaTest {
 			@Override
 			public void laske(LaskeDTO laskeDTO, Consumer<String> callback,
 					Consumer<Throwable> failureCallback) {
+				LOG.error("\r\n############\r\n############ Pelkka laskenta \r\n############");
 				callback.accept("ok");
 			}
 
@@ -133,6 +138,7 @@ public class ValintalaskentaKerrallaTest {
 			public void laskeKaikki(LaskeDTO laskeDTO,
 					Consumer<String> callback,
 					Consumer<Throwable> failureCallback) {
+				LOG.error("\r\n############\r\n############ Laskenta kaikille vaiheille \r\n############");
 				callback.accept("ok");
 			}
 
@@ -140,6 +146,7 @@ public class ValintalaskentaKerrallaTest {
 			public void valintakokeet(LaskeDTO laskeDTO,
 					Consumer<String> callback,
 					Consumer<Throwable> failureCallback) {
+				LOG.error("\r\n############\r\n############ Laskenta valintakoevaiheelle \r\n############");
 				callback.accept("ok");
 			}
 		};
@@ -216,6 +223,13 @@ public class ValintalaskentaKerrallaTest {
 		v1.setValinnanVaihe(vv1);
 		vp.add(v1);
 		ValintaperusteetAsyncResource v = new ValintaperusteetAsyncResource() {
+			@Override
+			public void haeHakijaryhmat(String hakukohdeOid,
+					Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback,
+					Consumer<Throwable> failureCallback) {
+				callback.accept(Collections.emptyList());
+			}
+
 			@Override
 			public void haeValintaperusteet(String hakukohdeOid,
 					Integer valinnanVaiheJarjestysluku,

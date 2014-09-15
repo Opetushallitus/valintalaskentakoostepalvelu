@@ -82,6 +82,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 	private static final String ROUTE_ID_LISATIEDOT = "VALINTALASKENTA_LISATIEDOT";
 	private static final String ROUTE_ID_VALINTAPERUSTEET = "VALINTALASKENTA_VALINTAPERUSTEET";
 	private static final String ROUTE_ID_LASKENTA = "VALINTALASKENTA_LASKENTA";
+	private static final String ROUTE_ID_VALINTARYHMAT = "VALINTALASKENTA_VALINTARYHMAT";
 	private static final Integer HAE_KAIKKI_VALINNANVAIHEET = new Integer(-1);
 
 	private final LaskentaSeurantaAsyncResource seurantaAsyncResource;
@@ -94,6 +95,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 	private final String valintalaskentaKerrallaHakemukset = ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA_HAKEMUKSET;
 	private final String valintalaskentaKerrallaLisatiedot = ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA_LISATIEDOT;
 	private final String valintalaskentaKerrallaLaskenta = ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA_LASKENTA;
+	private final String valintalaskentaKerrallaHakijaryhmat = ValintalaskentaKerrallaRoute.SEDA_VALINTALASKENTA_KERRALLA_VALINTARYHMAT;
 	private ProducerTemplate producerTemplate;
 
 	@Autowired
@@ -227,6 +229,18 @@ public class ValintalaskentaKerrallaRouteImpl extends
 																	laskentaJaHaku
 																			.getLaskenta()
 																			.getLopetusehto());
+													producerTemplate
+
+															.sendBodyAndProperty(
+																	valintalaskentaKerrallaHakijaryhmat,
+																	//
+																	ExchangePattern.InOnly,
+																	tyo,
+																	//
+																	LOPETUSEHTO,
+																	laskentaJaHaku
+																			.getLaskenta()
+																			.getLopetusehto());
 												} catch (Exception e) {
 													LOG.error(
 															"{} {}",
@@ -266,7 +280,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 														tyo.getLaskenta(),
 														tyo.getHakukohdeOid(),
 														null, null,
-														additionalData));
+														additionalData, null));
 									},
 									poikkeus -> {
 										LOG.error(
@@ -283,6 +297,78 @@ public class ValintalaskentaKerrallaRouteImpl extends
 														IlmoitusTyyppi.VIRHE,
 														poikkeus.getMessage()));
 									});
+						}));
+
+		/**
+		 * Hakijaryhmat
+		 */
+		from(valintalaskentaKerrallaHakijaryhmat)
+				.errorHandler(deadLetterChannel())
+				//
+				.routeId(ROUTE_ID_VALINTARYHMAT)
+				//
+				.throttle(3L)
+				//
+				.asyncDelayed()
+				.timePeriodMillis(150)
+				//
+				.filter(filtteroiValmistuneetTaiOhitetutTyotPoisValintaryhmienHausta())
+				//
+				.process(
+						Reititys.<LaskentaJaHakukohde> kuluttaja(tyo -> {
+							// ei haeta hakijaryhmia valintakoelaskennalle
+							if (Boolean.TRUE.equals(tyo.getLaskenta()
+									.getValintakoelaskenta())) {
+								lahetaLaskentaan(
+										tyo,
+										new LaskentaJaValintaperusteetJaHakemukset(
+												tyo.getLaskenta(), tyo
+														.getHakukohdeOid(),
+												null, null, null, Collections
+														.emptyList()));
+							} else {
+
+								valintaperusteetAsyncResource.haeHakijaryhmat(
+										tyo.getHakukohdeOid(),
+										hakijaryhmat -> {
+											if (hakijaryhmat == null) { // voiko
+																		// tulla
+																		// nullina.
+																		// jos
+																		// tulee
+																		// niin
+																		// laitetaan
+																		// tyhjaksi
+												hakijaryhmat = Collections
+														.emptyList();
+											}
+											lahetaLaskentaan(
+													tyo,
+													new LaskentaJaValintaperusteetJaHakemukset(
+															tyo.getLaskenta(),
+															tyo.getHakukohdeOid(),
+															null, null, null,
+															hakijaryhmat));
+										},
+										poikkeus -> {
+											LOG.error(
+													"Valintaryhmien haussa tapahtui virhe: {}",
+													poikkeus.getMessage());
+											lahetaLaskentaanLuovutus(
+													tyo,
+													"koska poikkeus "
+															+ poikkeus
+																	.getMessage());
+											seurantaAsyncResource
+													.lisaaIlmoitusHakukohteelle(
+															tyo.getLaskenta()
+																	.getHakuOid(),
+															tyo.getHakukohdeOid(),
+															new IlmoitusDto(
+																	IlmoitusTyyppi.VIRHE,
+																	poikkeus.getMessage()));
+										});
+							}
 						}));
 
 		/**
@@ -318,7 +404,8 @@ public class ValintalaskentaKerrallaRouteImpl extends
 												new LaskentaJaValintaperusteetJaHakemukset(
 														tyo.getLaskenta(),
 														tyo.getHakukohdeOid(),
-														null, hakemukset, null));
+														null, hakemukset, null,
+														null));
 									},
 									poikkeus -> {
 										LOG.error(
@@ -388,7 +475,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 														tyo.getLaskenta(),
 														tyo.getHakukohdeOid(),
 														valintaperusteet, null,
-														null));
+														null, null));
 									},
 									poikkeus -> {
 										LOG.error(
@@ -444,7 +531,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 
 				//
 				.completionTimeout(TimeUnit.HOURS.toMillis(2L))
-				.completionSize(3)
+				.completionSize(4)
 				//
 				.to(InOnly, valintalaskentaKerrallaLaskenta);
 
@@ -500,8 +587,18 @@ public class ValintalaskentaKerrallaRouteImpl extends
 
 							} else if (laskenta
 									.isOnkoOhitettavaEliValintaperusteetTaiHakemuksetTaiLisatiedotPuuttui()) {
-								LOG.info("Tyo ohitetaan hakukohteelle({})",
-										laskenta.getHakukohdeOid());
+								LOG.info(
+										"Tyo ohitetaan hakukohteelle({}) koska puuttui {} {} {} {}",
+										laskenta.getHakukohdeOid(),
+										laskenta.getValintaperusteet() == null ? "--\t\t"
+												: "valintaperusteet",
+										laskenta.getHakemukset() == null ? "--\t\t"
+												: "hakemukset",
+										laskenta.getLisatiedot() == null ? "--\t\t"
+												: "lisatiedot",
+										laskenta.getHakijaryhmat() == null ? "--\t\t"
+												: "hakijaryhmat");
+
 								laskennanViimeistelyEliTarkistusLoppuikoKokoLaskenta
 										.accept(null);
 								seurantaAsyncResource.merkkaaHakukohteenTila(
@@ -558,7 +655,8 @@ public class ValintalaskentaKerrallaRouteImpl extends
 											new LaskeDTO(
 													laskenta.convertHakemuksetToHakemuksetDTO(getContext()
 															.getTypeConverter()),
-													laskenta.getValintaperusteet()),
+													laskenta.getValintaperusteet(),
+													laskenta.getHakijaryhmat()),
 											takaisinkutusLaskentapalvelunPaluuarvolleOK,
 											takaisinkutsuLaskentapalvelunEpaonnistumiselle);
 								} else {
@@ -574,7 +672,8 @@ public class ValintalaskentaKerrallaRouteImpl extends
 												new LaskeDTO(
 														laskenta.convertHakemuksetToHakemuksetDTO(getContext()
 																.getTypeConverter()),
-														laskenta.getValintaperusteet()),
+														laskenta.getValintaperusteet(),
+														laskenta.getHakijaryhmat()),
 												takaisinkutusLaskentapalvelunPaluuarvolleOK,
 												takaisinkutsuLaskentapalvelunEpaonnistumiselle);
 									} else {
@@ -589,7 +688,8 @@ public class ValintalaskentaKerrallaRouteImpl extends
 												new LaskeDTO(
 														laskenta.convertHakemuksetToHakemuksetDTO(getContext()
 																.getTypeConverter()),
-														laskenta.getValintaperusteet()),
+														laskenta.getValintaperusteet(),
+														laskenta.getHakijaryhmat()),
 												takaisinkutusLaskentapalvelunPaluuarvolleOK,
 												takaisinkutsuLaskentapalvelunEpaonnistumiselle);
 									}
@@ -613,7 +713,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 				//
 				eiValmistunut(tyo -> new LaskentaJaValintaperusteetJaHakemukset(
 						tyo.getLaskenta(), tyo.getHakukohdeOid(), Collections
-								.emptyList(), null, null)));
+								.emptyList(), null, null, null)));
 	}
 
 	private Predicate filtteroiValmistuneetTaiOhitetutTyotPoisHakemustenHausta() {
@@ -623,7 +723,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 				//
 				eiValmistunut(tyo -> new LaskentaJaValintaperusteetJaHakemukset(
 						tyo.getLaskenta(), tyo.getHakukohdeOid(), null,
-						Collections.emptyList(), null)));
+						Collections.emptyList(), null, null)));
 	}
 
 	private Predicate or(Predicate left, Predicate right) {
@@ -646,7 +746,17 @@ public class ValintalaskentaKerrallaRouteImpl extends
 				//
 				eiValmistunut(tyo -> new LaskentaJaValintaperusteetJaHakemukset(
 						tyo.getLaskenta(), tyo.getHakukohdeOid(), null, null,
-						Collections.emptyList())));
+						Collections.emptyList(), null)));
+	}
+
+	private Predicate filtteroiValmistuneetTaiOhitetutTyotPoisValintaryhmienHausta() {
+		return or(
+		//
+				eiLuovutettu(),
+				//
+				eiValmistunut(tyo -> new LaskentaJaValintaperusteetJaHakemukset(
+						tyo.getLaskenta(), tyo.getHakukohdeOid(), null, null,
+						null, Collections.emptyList())));
 	}
 
 	private Predicate eiLuovutettu() {
@@ -678,14 +788,18 @@ public class ValintalaskentaKerrallaRouteImpl extends
 		tyo.luovuta();
 		lahetaLaskentaan(tyo,
 				new LaskentaJaValintaperusteetJaHakemukset(tyo.getLaskenta(),
-						tyo.getHakukohdeOid(), null, null, null));
+						tyo.getHakukohdeOid(), null, null, null, null));
 	}
 
 	private void lahetaLaskentaan(LaskentaJaHakukohde tyo,
 			LaskentaJaValintaperusteetJaHakemukset data) {
-		LOG.info("Lahetetaan laskentaan hakukohde {}: {} {} {}",
-				tyo.getHakukohdeOid(), data.getValintaperusteet() == null,
-				data.getHakemukset() == null, data.getLisatiedot() == null);
+		LOG.info("Lahetetaan laskentaan hakukohde {}: {} {} {} {}", tyo
+				.getHakukohdeOid(),
+				data.getValintaperusteet() == null ? "--\t\t"
+						: "valintaperusteet",
+				data.getHakemukset() == null ? "--\t\t" : "hakemukset", data
+						.getLisatiedot() == null ? "--\t\t" : "lisatiedot",
+				data.getHakijaryhmat() == null ? "--\t\t" : "hakijaryhmat");
 		producerTemplate.sendBodyAndProperty(AGGREGATOR,
 		//
 				ExchangePattern.InOnly,

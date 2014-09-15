@@ -291,7 +291,8 @@ public class PistesyottoExcel {
                     if(!valintaperuste.getVaatiiOsallistumisen()) {
                         if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
                                 .getFunktiotyyppi())) {
-                            Number value = asNumber("0.0");
+                            Number value = asNumber(data.getAdditionalData()
+                                    .get(valintaperuste.getTunniste()));
                             Number max = asNumber(valintaperuste.getMax());
                             Number min = asNumber(valintaperuste.getMin());
 
