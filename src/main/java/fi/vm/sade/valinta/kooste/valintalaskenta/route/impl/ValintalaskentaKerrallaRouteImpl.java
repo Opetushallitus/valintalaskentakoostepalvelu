@@ -581,7 +581,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 								}
 								LOG.info(
 										"Tyo hakukohteelle({}) on laskemattakin tehty. {}",
-										laskenta.getHakukohdeOid());
+										laskenta.getHakukohdeOid(), selite);
 								laskennanViimeistelyEliTarkistusLoppuikoKokoLaskenta
 										.accept(null);
 								seurantaAsyncResource.merkkaaHakukohteenTila(
