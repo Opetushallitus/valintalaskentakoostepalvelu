@@ -567,8 +567,20 @@ public class ValintalaskentaKerrallaRouteImpl extends
 								LOG.error("Aggregaattorissa oli tyo pitkaan jumissa.");
 							} else if (laskenta
 									.isOnkoLaskemattakinTehtyEliHakukohteelleEiOllutHakemuksiaTaiValintaperusteita()) {
+								String selite = null;
+								try {
+									if (laskenta.getHakemukset().isEmpty()) {
+										selite = "Hakukohteelle ei ollut hakemuksia joten laskentaa ei ole tarvetta suorittaa.";
+									}
+									if (laskenta.getValintaperusteet()
+											.isEmpty()) {
+										selite = "Hakukohteelle ei ollut valintaperusteita joten laskentaa ei ole tarvetta suorittaa.";
+									}
+								} catch (Exception e) {
+									selite = e.getMessage();
+								}
 								LOG.info(
-										"Tyo hakukohteelle({}) on laskemattakin tehty.",
+										"Tyo hakukohteelle({}) on laskemattakin tehty. {}",
 										laskenta.getHakukohdeOid());
 								laskennanViimeistelyEliTarkistusLoppuikoKokoLaskenta
 										.accept(null);
