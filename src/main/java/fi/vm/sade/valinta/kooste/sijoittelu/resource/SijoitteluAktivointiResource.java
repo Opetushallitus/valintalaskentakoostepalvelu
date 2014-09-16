@@ -152,4 +152,22 @@ public class SijoitteluAktivointiResource {
 			return new Gson().toJson(sijoitteluDto);
 		}
 	}
+
+    @GET
+    @Path("/jatkuva/paivita")
+    @PreAuthorize(OPH_CRUD)
+    @ApiOperation(value = "Ajastetun sijoittelun aloituksen päivitys", response = String.class)
+    public String paivitaJatkuvanSijoittelunAloitus(
+            @QueryParam("hakuOid") String hakuOid) {
+        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+            return "no privileges.";
+        }
+
+        if (StringUtils.isBlank(hakuOid)) {
+            return "get parameter 'hakuOid' required";
+        } else {
+         //   sijoittelunSeurantaResource.paivitaSijoittelunAloitusAjankohta(hakuOid);
+            return "paivitetty";
+        }
+    }
 }
