@@ -653,6 +653,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 											laskenta.getHakukohdeOid());
 									valintalaskentaAsyncResource.valintakokeet(
 											new LaskeDTO(
+													laskenta.getHakukohdeOid(),
 													laskenta.convertHakemuksetToHakemuksetDTO(getContext()
 															.getTypeConverter()),
 													laskenta.getValintaperusteet(),
@@ -670,6 +671,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 												laskenta.getHakukohdeOid());
 										valintalaskentaAsyncResource.laskeKaikki(
 												new LaskeDTO(
+														laskenta.getHakukohdeOid(),
 														laskenta.convertHakemuksetToHakemuksetDTO(getContext()
 																.getTypeConverter()),
 														laskenta.getValintaperusteet(),
@@ -686,6 +688,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 										//
 										valintalaskentaAsyncResource.laske(
 												new LaskeDTO(
+														laskenta.getHakukohdeOid(),
 														laskenta.convertHakemuksetToHakemuksetDTO(getContext()
 																.getTypeConverter()),
 														laskenta.getValintaperusteet(),
