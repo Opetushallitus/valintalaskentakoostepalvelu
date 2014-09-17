@@ -567,9 +567,21 @@ public class ValintalaskentaKerrallaRouteImpl extends
 								LOG.error("Aggregaattorissa oli tyo pitkaan jumissa.");
 							} else if (laskenta
 									.isOnkoLaskemattakinTehtyEliHakukohteelleEiOllutHakemuksiaTaiValintaperusteita()) {
+								String selite = null;
+								try {
+									if (laskenta.getHakemukset().isEmpty()) {
+										selite = "Hakukohteelle ei ollut hakemuksia joten laskentaa ei ole tarvetta suorittaa.";
+									}
+									if (laskenta.getValintaperusteet()
+											.isEmpty()) {
+										selite = "Hakukohteelle ei ollut valintaperusteita joten laskentaa ei ole tarvetta suorittaa.";
+									}
+								} catch (Exception e) {
+									selite = e.getMessage();
+								}
 								LOG.info(
-										"Tyo hakukohteelle({}) on laskemattakin tehty.",
-										laskenta.getHakukohdeOid());
+										"Tyo hakukohteelle({}) on laskemattakin tehty. {}",
+										laskenta.getHakukohdeOid(), selite);
 								laskennanViimeistelyEliTarkistusLoppuikoKokoLaskenta
 										.accept(null);
 								seurantaAsyncResource.merkkaaHakukohteenTila(
@@ -653,6 +665,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 											laskenta.getHakukohdeOid());
 									valintalaskentaAsyncResource.valintakokeet(
 											new LaskeDTO(
+													laskenta.getHakukohdeOid(),
 													laskenta.convertHakemuksetToHakemuksetDTO(getContext()
 															.getTypeConverter()),
 													laskenta.getValintaperusteet(),
@@ -670,6 +683,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 												laskenta.getHakukohdeOid());
 										valintalaskentaAsyncResource.laskeKaikki(
 												new LaskeDTO(
+														laskenta.getHakukohdeOid(),
 														laskenta.convertHakemuksetToHakemuksetDTO(getContext()
 																.getTypeConverter()),
 														laskenta.getValintaperusteet(),
@@ -686,6 +700,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 										//
 										valintalaskentaAsyncResource.laske(
 												new LaskeDTO(
+														laskenta.getHakukohdeOid(),
 														laskenta.convertHakemuksetToHakemuksetDTO(getContext()
 																.getTypeConverter()),
 														laskenta.getValintaperusteet(),

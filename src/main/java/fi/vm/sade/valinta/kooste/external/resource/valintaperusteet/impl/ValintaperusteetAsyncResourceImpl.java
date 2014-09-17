@@ -106,19 +106,18 @@ public class ValintaperusteetAsyncResourceImpl implements
 			Consumer<List<ValintaperusteetDTO>> callback,
 			Consumer<Throwable> failureCallback) {
 		try {
-			StringBuilder urlBuilder = new StringBuilder().append(
-					"/valintaperusteet-service/resources/valintaperusteet/")
-					.append(hakukohdeOid);
+			String url = new StringBuilder()
+					.append("/valintaperusteet-service/resources/valintaperusteet/")
+					.append(hakukohdeOid).toString();
+
+			WebClient wc = WebClient.fromClient(webClient).path(url);
 			if (valinnanVaiheJarjestysluku != null) {
-				urlBuilder.append("?vaihe=").append(valinnanVaiheJarjestysluku);
+				wc.query("vaihe", valinnanVaiheJarjestysluku);
 			}
-			String url = urlBuilder.toString();
-			WebClient
-					.fromClient(webClient)
-					.path(url)
-					.async()
-					.get(new Callback<List<ValintaperusteetDTO>>(address, url,
-							callback, failureCallback,
+			wc.async().get(
+					new Callback<List<ValintaperusteetDTO>>(address, url
+							+ "?vaihe=" + valinnanVaiheJarjestysluku, callback,
+							failureCallback,
 							new TypeToken<List<ValintaperusteetDTO>>() {
 							}.getType()));
 		} catch (Exception e) {
