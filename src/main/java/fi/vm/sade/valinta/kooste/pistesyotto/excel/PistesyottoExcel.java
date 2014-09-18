@@ -49,12 +49,12 @@ public class PistesyottoExcel {
 	private final static String MERKITSEMATTA = "Merkitsemättä";
 	private final static String OSALLISTUI = "Osallistui";
 	private final static String EI_OSALLISTUNUT = "Ei osallistunut";
-    private final static String EI_VAADITA = "Ei vaadita";
+	private final static String EI_VAADITA = "Ei vaadita";
 
 	public final static String VAKIO_MERKITSEMATTA = "MERKITSEMATTA";
 	public final static String VAKIO_OSALLISTUI = "OSALLISTUI";
 	public final static String VAKIO_EI_OSALLISTUNUT = "EI_OSALLISTUNUT";
-    public final static String VAKIO_EI_VAADITA = "EI_VAADITA";
+	public final static String VAKIO_EI_VAADITA = "EI_VAADITA";
 
 	private final static Collection<String> VAIHTOEHDOT = Arrays.asList(
 			MERKITSEMATTA, OSALLISTUI, EI_OSALLISTUNUT, EI_VAADITA);
@@ -66,8 +66,8 @@ public class PistesyottoExcel {
 			//
 			.addKonversio(VAKIO_OSALLISTUI, OSALLISTUI)
 			//
-            .addKonversio(VAKIO_EI_VAADITA, EI_VAADITA)
-                    //
+			.addKonversio(VAKIO_EI_VAADITA, EI_VAADITA)
+			//
 			.addKonversio(VAKIO_EI_OSALLISTUNUT, EI_OSALLISTUNUT).build();
 	private final static Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO = new KonversioBuilder()
 	//
@@ -77,8 +77,8 @@ public class PistesyottoExcel {
 			//
 			.addKonversio(OSALLISTUI, VAKIO_OSALLISTUI)
 			//
-            .addKonversio(EI_VAADITA, VAKIO_EI_VAADITA)
-                    //
+			.addKonversio(EI_VAADITA, VAKIO_EI_VAADITA)
+			//
 			.addKonversio(EI_OSALLISTUNUT, VAKIO_EI_OSALLISTUNUT).build();
 	public final static String TOSI = "Hyväksytty";
 	public final static String EPATOSI = "Hylätty";
@@ -149,6 +149,9 @@ public class PistesyottoExcel {
 			List<ValintaperusteDTO> valintaperusteet,
 			List<ApplicationAdditionalDataDTO> pistetiedot,
 			Collection<PistesyottoDataRiviKuuntelija> kuuntelijat) {
+		if (pistetiedot == null) {
+			pistetiedot = Collections.emptyList();
+		}
 		Collections.sort(valintaperusteet, new Comparator<ValintaperusteDTO>() {
 			@Override
 			public int compare(ValintaperusteDTO o1, ValintaperusteDTO o2) {
@@ -288,38 +291,41 @@ public class PistesyottoExcel {
 					.append(", ").append(data.getFirstNames()).toString()));
 			if (!osallistuja) {
 				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
-                    if(!valintaperuste.getVaatiiOsallistumisen()) {
-                        if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
-                                .getFunktiotyyppi())) {
-                            Number value = asNumber(data.getAdditionalData()
-                                    .get(valintaperuste.getTunniste()));
-                            Number max = asNumber(valintaperuste.getMax());
-                            Number min = asNumber(valintaperuste.getMin());
+					if (!valintaperuste.getVaatiiOsallistumisen()) {
+						if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
+								.getFunktiotyyppi())) {
+							Number value;
+							if (data.getAdditionalData() == null) {
+								value = asNumber(null);
+							} else {
+								value = asNumber(data.getAdditionalData().get(
+										valintaperuste.getTunniste()));
+							}
+							Number max = asNumber(valintaperuste.getMax());
+							Number min = asNumber(valintaperuste.getMin());
 
-                            s.add(new NumeroArvo(value, min, max));
+							s.add(new NumeroArvo(value, min, max));
 
-                        } else if (Funktiotyyppi.TOTUUSARVOFUNKTIO
-                                .equals(valintaperuste.getFunktiotyyppi())) {
-                            String value = StringUtils.trimToEmpty(data
-                                    .getAdditionalData().get(
-                                            valintaperuste.getTunniste()));
-                            s.add(new BooleanArvo(value, TOTUUSARVO, TOSI,
-                                    EPATOSI, TYHJA));
-                        } else {
-                            s.add(new TekstiArvo(data.getAdditionalData().get(
-                                    StringUtils.trimToEmpty(valintaperuste
-                                            .getTunniste())), false));
-                        }
+						} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO
+								.equals(valintaperuste.getFunktiotyyppi())) {
+							String value = StringUtils.trimToEmpty(data
+									.getAdditionalData().get(
+											valintaperuste.getTunniste()));
+							s.add(new BooleanArvo(value, TOTUUSARVO, TOSI,
+									EPATOSI, TYHJA));
+						} else {
+							s.add(new TekstiArvo(data.getAdditionalData().get(
+									StringUtils.trimToEmpty(valintaperuste
+											.getTunniste())), false));
+						}
 
-                        s.add(new MonivalintaArvo(
-                                VAIHTOEHDOT_KONVERSIO
-                                        .get(VAKIO_EI_VAADITA),
-                                VAIHTOEHDOT));
+						s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO
+								.get(VAKIO_EI_VAADITA), VAIHTOEHDOT));
 
-                    } else {
-                        s.add(TekstiArvo.tyhja(false));
-                        s.add(TekstiArvo.tyhja(false));
-                    }
+					} else {
+						s.add(TekstiArvo.tyhja(false));
+						s.add(TekstiArvo.tyhja(false));
+					}
 				}
 			} else {
 				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
@@ -331,7 +337,8 @@ public class PistesyottoExcel {
 					// }
 
 					if (Osallistuminen.OSALLISTUU.equals(valintakoe
-							.getOsallistuminenTulos().getOsallistuminen()) || !valintaperuste.getVaatiiOsallistumisen()) {
+							.getOsallistuminenTulos().getOsallistuminen())
+							|| !valintaperuste.getVaatiiOsallistumisen()) {
 
 						if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
 								.getFunktiotyyppi())) {

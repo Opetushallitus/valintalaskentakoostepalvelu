@@ -24,6 +24,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
@@ -34,6 +35,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.function.SuppeaHakemusFunction;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
+import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.function.ValintakoeOsallistuminenDTOFunction;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
@@ -41,6 +43,8 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Koekutsukirje;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.OsoiteComparator;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
@@ -59,7 +63,12 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 			.getLogger(KoekutsukirjeRouteImpl.class);
 	private final static int UUDELLEEN_YRITYSTEN_MAARA = 3;
 	private final static long UUDELLEEN_YRITYSTEN_ODOTUSAIKA = 1500L;
-
+	private final static String ROUTE_ID_KOEKUTSUKIRJEET = "KOEKUTSUKIRJEET";
+	private final static String ROUTE_ID_KOEKUTSUKIRJEET_DEADLETTERCHANNEL = "KOEKUTSUKIRJEET_DEADLETTERCHANNEL";
+	private final static String ROUTE_ID_KOEKUTSUKIRJEET_HAKEMUKSILLE = "KOEKUTSUKIRJEET_HAKEMUKSILLE";
+	private final static String ROUTE_ID_KOEKUTSUKIRJEET_VALINTATIEDOT_HAKEMUKSILLE = "KOEKUTSUKIRJEET_VALINTATIEDOT_HAKEMUKSILLE";
+	private final static String ROUTE_ID_KOEKUTSUKIRJEET_HAKEMUSOIDIT_HAKEMUKSIKSI = "KOEKUTSUKIRJEET_HAKEMUSOIDIT_HAKEMUKSIKSI";
+	private final static String ROUTE_ID_KOEKUTSUKIRJEET_LUONTI = "KOEKUTSUKIRJEET_LUONTI";
 	private final ViestintapalveluResource viestintapalveluResource;
 	private final KoekutsukirjeetKomponentti koekutsukirjeetKomponentti;
 	private final ValintakoeResource valintakoeResource;
@@ -114,6 +123,8 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
+				.routeId(ROUTE_ID_KOEKUTSUKIRJEET)
+				//
 				.process(SecurityPreprocessor.SECURITY)
 				//
 				.choice()
@@ -143,6 +154,8 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 		//
 				.log(LoggingLevel.ERROR,
 						"Koekutsukirjeiden luonti epaonnistui: ${property.CamelExceptionCaught}")
+				//
+				.routeId(ROUTE_ID_KOEKUTSUKIRJEET_DEADLETTERCHANNEL)
 				//
 				.process(new Processor() {
 					@Override
@@ -177,6 +190,8 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 								.logExhausted(true).logStackTrace(true)
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
+				//
+				.routeId(ROUTE_ID_KOEKUTSUKIRJEET_VALINTATIEDOT_HAKEMUKSILLE)
 				//
 				.log(LoggingLevel.INFO, "Haetaan koekutsukirjeitä varten oidit")
 				//
@@ -320,6 +335,8 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
 				//
+				.routeId(ROUTE_ID_KOEKUTSUKIRJEET_HAKEMUKSILLE)
+				//
 				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(new Processor() {
@@ -351,7 +368,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.end()
 				//
-				.to(koekutsukirjeetHakemuksista());
+				.to(koekutsukirjeetLuonti());
 		//
 		// Haku-app kutsu täällä
 		//
@@ -369,6 +386,8 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 								.logExhausted(true).logStackTrace(true)
 								// hide retry/handled stacktrace
 								.logRetryStackTrace(false).logHandled(false))
+				//
+				.routeId(ROUTE_ID_KOEKUTSUKIRJEET_HAKEMUSOIDIT_HAKEMUKSIKSI)
 				//
 				.process(SecurityPreprocessor.SECURITY)
 				//
@@ -421,8 +440,10 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.end();
 
-		from(koekutsukirjeetHakemuksista())
+		from(koekutsukirjeetLuonti())
 		//
+				.routeId(ROUTE_ID_KOEKUTSUKIRJEET_LUONTI)
+				//
 				.process(SecurityPreprocessor.SECURITY)
 				//
 				.process(new Processor() {
@@ -454,12 +475,11 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						DokumenttiProsessi prosessi = dokumenttiprosessi(exchange);
 						InputStream pdf;
 						try {
-							Kirjeet<Koekutsukirje> k = koekutsukirjeet(exchange);
+							LetterBatch k = koekutsukirjeet(exchange);
 							Collections.sort(k.getLetters(),
-									new Comparator<Koekutsukirje>() {
+									new Comparator<Letter>() {
 										@Override
-										public int compare(Koekutsukirje o1,
-												Koekutsukirje o2) {
+										public int compare(Letter o1, Letter o2) {
 											try {
 												return OsoiteComparator.ASCENDING.compare(
 														o1.getAddressLabel(),
@@ -472,13 +492,14 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 											}
 										}
 									});
-							// LOG.error(
-							// "\r\n{}",
-							// new GsonBuilder().setPrettyPrinting()
-							// .create()
-							// .toJson(koekutsukirjeet(exchange)));
+							String letterBatch = new Gson().toJson(k);
+							LOG.warn(
+									"Lahetetaan koekutsukirje viestintapalveluun. Lahetettavan koekutsukirjeen koko on {}.",
+									Formatter
+											.humanReadableByteCount(letterBatch
+													.length()));
 							pdf = pipeInputStreams(viestintapalveluResource
-									.haeKoekutsukirjeet(k));
+									.haeKirjeSync(letterBatch));// haeKoekutsukirjeet(k));
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 
@@ -518,12 +539,10 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 						}
 					}
 				});
-		//
-
 	}
 
-	private String koekutsukirjeetHakemuksista() {
-		return "direct:koekutsukirjeet_hakemuksista";
+	private String koekutsukirjeetLuonti() {
+		return "direct:koekutsukirjeet_luonti";
 	}
 
 	private String hakemusOiditHakemuksiksi() {
@@ -535,8 +554,8 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Kirjeet<Koekutsukirje> koekutsukirjeet(Exchange exchange) {
-		return exchange.getIn().getBody(Kirjeet.class);
+	private LetterBatch koekutsukirjeet(Exchange exchange) {
+		return exchange.getIn().getBody(LetterBatch.class);
 	}
 
 }

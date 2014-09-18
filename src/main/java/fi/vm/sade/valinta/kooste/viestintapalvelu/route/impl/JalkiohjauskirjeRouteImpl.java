@@ -38,6 +38,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluIlmankoulutuspaikkaaKomponentti;
+import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -415,8 +416,9 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 							String json = gson.toJson(kirjeet);
 							LOG.error(
 									"Siirretään jälkiohjauskirjeisiin {} kirjettä koolta {}",
-									kirjeet.getLetters().size(),
-									humanReadableByteCount(json.length(), true));
+									kirjeet.getLetters().size(), Formatter
+											.humanReadableByteCount(json
+													.length()));
 
 							// LOG.error("\r\n{}\r\n", json);
 							pdf = pipeInputStreams(viestintapalveluResource
@@ -490,13 +492,4 @@ public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 		return exchange.getIn().getBody(LetterBatch.class);
 	}
 
-	public static String humanReadableByteCount(long bytes, boolean si) {
-		int unit = si ? 1000 : 1024;
-		if (bytes < unit)
-			return bytes + " B";
-		int exp = (int) (Math.log(bytes) / Math.log(unit));
-		String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1)
-				+ (si ? "" : "i");
-		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
-	}
 }
