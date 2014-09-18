@@ -67,6 +67,9 @@ public class ApplicationAdditionalDataDTO implements Serializable {
 	}
 
 	public Map<String, String> getAdditionalData() {
+        if(additionalData == null) {
+            return new HashMap<>();
+        }
 		return additionalData;
 	}
 
