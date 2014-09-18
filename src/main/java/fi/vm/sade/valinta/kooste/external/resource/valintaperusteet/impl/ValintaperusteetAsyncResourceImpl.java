@@ -72,7 +72,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 		cas.setAppClientUsername(appClientUsername);
 		cas.setAppClientPassword(appClientPassword);
 		interceptors.add(cas);
-		bean.setOutInterceptors(interceptors);
+//		bean.setOutInterceptors(interceptors);
 		this.webClient = bean.createWebClient();
 	}
 
