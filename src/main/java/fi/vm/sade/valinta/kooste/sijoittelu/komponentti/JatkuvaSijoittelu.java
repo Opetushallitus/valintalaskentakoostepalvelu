@@ -34,13 +34,17 @@ public class JatkuvaSijoittelu {
 					continue;
 				}
                 Instant now = Instant.now();
-                Instant viimeksiAjettu = sijoittelu.getViimeksiAjettu().toInstant();
+                long minutesBetween = 0;
+                if (sijoittelu.getViimeksiAjettu() != null) {
+                    Instant viimeksiAjettu = sijoittelu.getViimeksiAjettu().toInstant();
 
-                long minutesBetween = ChronoUnit.MINUTES.between(viimeksiAjettu, now);
+                    minutesBetween = ChronoUnit.MINUTES.between(viimeksiAjettu, now);
+                }
 				if (sijoittelu.isAjossa() &&
                         sijoittelu.getAjotiheys() != null && sijoittelu.getAloitusajankohta() != null &&
                         minutesBetween >= sijoittelu.getAjotiheys() &&
-                        now.isAfter(sijoittelu.getAloitusajankohta().toInstant())) {
+                        now.isAfter(sijoittelu.getAloitusajankohta().toInstant()) || sijoittelu.isAjossa() &&
+                        sijoittelu.getAjotiheys() == null && sijoittelu.getAloitusajankohta() == null) {
 					LOG.warn(
 							"Aloitetaan jatkuvasijoittelu ajossa olevalle haulle {}",
 							sijoittelu.getHakuOid());
