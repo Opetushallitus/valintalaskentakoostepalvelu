@@ -69,7 +69,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
 					}
 					for (HakutoiveenValintatapajonoDTO jono : hakutoive
 							.getHakutoiveenValintatapajonot()) {
-						if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila()) &&
+						if ((HakemuksenTila.HYVAKSYTTY.equals(jono.getTila()) || HakemuksenTila.VARASIJALTA_HYVAKSYTTY.equals(jono.getTila())) &&
                                 (jono.getVastaanottotieto() != null && jono.getVastaanottotieto().equals(ValintatuloksenTila.VASTAANOTTANUT))) {
 							return true;
 						}
@@ -91,7 +91,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
 						HakutoiveenValintatapajonoComparator.DEFAULT);
 				for (HakutoiveenValintatapajonoDTO jono : hakutoive
 						.getHakutoiveenValintatapajonot()) {
-					if (HakemuksenTila.HYVAKSYTTY.equals(jono.getTila()) &&
+					if ((HakemuksenTila.HYVAKSYTTY.equals(jono.getTila()) || HakemuksenTila.VARASIJALTA_HYVAKSYTTY.equals(jono.getTila())) &&
                             (jono.getVastaanottotieto() != null && jono.getVastaanottotieto().equals(ValintatuloksenTila.VASTAANOTTANUT))) {
 						Hakemus hakemus = hakemusSource.getHakemusByOid(hakija
 								.getHakemusOid());

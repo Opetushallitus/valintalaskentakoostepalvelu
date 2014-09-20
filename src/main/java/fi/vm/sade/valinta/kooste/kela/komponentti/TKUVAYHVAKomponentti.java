@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.kela.komponentti;
 
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARASIJALTA_HYVAKSYTTY;
 import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.HENKILOTUNNUS;
 import static fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource.SYNTYMAAIKA;
 
@@ -62,7 +63,7 @@ public class TKUVAYHVAKomponentti {
 			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
 				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
 						.getHakutoiveenValintatapajonot()) {
-					if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
+					if (HYVAKSYTTY.equals(valintatapajono.getTila()) || VARASIJALTA_HYVAKSYTTY.equals(valintatapajono.getTila())) {
 						TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
 						String hakukohdeOid = hakutoive.getHakukohdeOid();
 						String tarjoajaOid = hakutoive.getTarjoajaOid();
