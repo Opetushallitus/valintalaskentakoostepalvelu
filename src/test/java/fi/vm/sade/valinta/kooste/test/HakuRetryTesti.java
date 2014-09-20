@@ -49,8 +49,8 @@ public class HakuRetryTesti {
 			}
 
 			@Override
-			public List<Hakemus> getApplicationsByOid(String aoOid,
-					List<String> appStates, int rows) {
+			public List<Hakemus> getApplicationsByOid(String asId,
+					String aoOid, List<String> appStates, int rows) {
 				return null;
 			}
 
