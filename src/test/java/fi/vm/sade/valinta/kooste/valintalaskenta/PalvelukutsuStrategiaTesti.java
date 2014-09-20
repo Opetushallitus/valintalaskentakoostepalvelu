@@ -65,8 +65,11 @@ public class PalvelukutsuStrategiaTesti {
 		palvelukutsuStrategia.aloitaUusiPalvelukutsu();
 		palvelukutsuStrategia.laitaPalvelukutsuJonoon(pk, takaisinkutsu);
 		try {
-			palvelukutsuStrategia.aloitaUusiPalvelukutsu();
-			Assert.fail("Sama palvelukutsu uudestaan tyojonossa mutta palvelukutsun aloitus onnistui!");
+			palvelukutsuStrategia.aloitaUusiPalvelukutsu();// <- Palvelukutsu
+			// ei enaa heita
+			// poikkeusta
+			// ulospain
+			// Assert.fail("Sama palvelukutsu uudestaan tyojonossa mutta palvelukutsun aloitus onnistui!");
 		} catch (PalvelukutsunUudelleenAktivointiPoikkeus e) {
 
 		}
@@ -132,8 +135,11 @@ public class PalvelukutsuStrategiaTesti {
 		palvelukutsuStrategia.laitaPalvelukutsuJonoon(pk, takaisinkutsu);
 		pk.peruuta();
 		try {
-			palvelukutsuStrategia.aloitaUusiPalvelukutsu();
-			Assert.fail("Sama palvelukutsu uudestaan tyojonossa mutta palvelukutsun aloitus onnistui!");
+			palvelukutsuStrategia.aloitaUusiPalvelukutsu(); // <- Palvelukutsu
+															// ei enaa heita
+															// poikkeusta
+															// ulospain
+			// Assert.fail("Sama palvelukutsu uudestaan tyojonossa mutta palvelukutsun aloitus onnistui!");
 		} catch (PalvelukutsunUudelleenAktivointiPoikkeus e) {
 
 		}

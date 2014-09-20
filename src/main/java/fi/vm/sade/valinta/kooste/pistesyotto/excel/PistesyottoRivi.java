@@ -14,12 +14,14 @@ public class PistesyottoRivi {
 
 	private final String oid;
 	private final String nimi;
+	private final String hetu;
 	private final Collection<PistesyottoArvo> arvot;
 
-	public PistesyottoRivi(String oid, String nimi,
+	public PistesyottoRivi(String oid, String nimi, String hetu,
 			Collection<PistesyottoArvo> arvot) {
 		this.oid = oid;
 		this.nimi = nimi;
+		this.hetu = hetu;
 		this.arvot = arvot;
 	}
 

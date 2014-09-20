@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.util;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
@@ -25,9 +26,16 @@ public class HakemusWrapper {
 	private final static String SUKUNIMI = "Sukunimi";
 	private final static String ASIOINTIKIELI = "asiointikieli";
 	private final static String LUPAJULKAISUUN = "lupaJulkaisu";
+	private final static String HETU = "Henkilotunnus";
 
 	public HakemusWrapper(Hakemus hakemus) {
 		this.hakemus = hakemus;
+	}
+
+	public String getHenkilotunnus() {
+		getHenkilotiedot();
+		return Optional.ofNullable(henkilotiedot.get(HETU)).orElse(
+				StringUtils.EMPTY);
 	}
 
 	public Integer getHakutoiveenPrioriteetti(String hakukohdeOid) {

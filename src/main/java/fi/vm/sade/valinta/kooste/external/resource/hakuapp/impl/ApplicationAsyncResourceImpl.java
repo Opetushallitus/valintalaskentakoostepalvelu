@@ -1,13 +1,16 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
@@ -74,6 +77,29 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		interceptors.add(cas);
 		bean.setOutInterceptors(interceptors);
 		this.webClient = bean.createWebClient();
+	}
+
+	@Override
+	public Future<List<Hakemus>> getApplicationsByOid(String hakuOid,
+			String hakukohdeOid) {
+		String url = new StringBuilder().append("/applications/listfull")
+				.toString();
+		return WebClient.fromClient(webClient).path(url)
+		//
+				.query("appStates", "ACTIVE")
+				//
+				.query("appStates", "INCOMPLETE")
+				//
+				.query("rows", 100000)
+				//
+				.query("asId", hakuOid)
+				//
+				.query("aoOid", hakukohdeOid)
+				//
+				.async()
+				//
+				.get(new GenericType<List<Hakemus>>() {
+				});
 	}
 
 	public Peruutettava getApplicationsByOid(String hakuOid,

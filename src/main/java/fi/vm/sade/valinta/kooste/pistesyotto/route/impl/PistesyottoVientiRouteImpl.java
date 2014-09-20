@@ -2,9 +2,11 @@ package fi.vm.sade.valinta.kooste.pistesyotto.route.impl;
 
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -134,9 +136,10 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						// LOG.error("Excelin luonti");
 						PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
 								hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi,
-								hakukohdeNimi, tarjoajaNimi,
-								valintakoeTunnisteet, osallistumistiedot,
-								valintaperusteet, pistetiedot);
+								hakukohdeNimi, tarjoajaNimi, Collections
+										.emptyList(), valintakoeTunnisteet,
+								osallistumistiedot, valintaperusteet,
+								pistetiedot);
 						InputStream xlsx = pistesyottoExcel.getExcel()
 								.vieXlsx();
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
@@ -178,5 +181,4 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.stop();
 	}
-
 }

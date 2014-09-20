@@ -41,9 +41,10 @@ public class PistesyottoDataRivi extends DataRivi {
 		SoluLukija lukija = new SoluLukija(false, rivi.getSolut());
 		String oid = lukija.getArvoAt(0);
 		String nimi = lukija.getArvoAt(1);
+		String hetu = lukija.getArvoAt(2);
 		Collection<PistesyottoArvo> arvot = Lists.newArrayList();
 		{
-			int i = 2;
+			int i = 3;
 			for (PistesyottoDataArvo dataArvo : dataArvot) {
 				arvot.add(dataArvo.asPistesyottoArvo(lukija.getArvoAt(i),
 						lukija.getArvoAt(i + 1)));
@@ -51,7 +52,8 @@ public class PistesyottoDataRivi extends DataRivi {
 				i += 2;
 			}
 		}
-		PistesyottoRivi pistesyottorivi = new PistesyottoRivi(oid, nimi, arvot);
+		PistesyottoRivi pistesyottorivi = new PistesyottoRivi(oid, nimi, hetu,
+				arvot);
 		for (PistesyottoDataRiviKuuntelija kuuntelija : kuuntelijat) {
 			kuuntelija.pistesyottoDataRiviTapahtuma(pistesyottorivi);
 		}
