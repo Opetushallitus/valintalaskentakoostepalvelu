@@ -22,7 +22,6 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
-
 import org.apache.camel.processor.aggregate.AggregationStrategy;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.slf4j.Logger;
@@ -47,6 +46,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHakukohde;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaValintaperusteetJaHakemukset;
@@ -69,7 +69,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
  */
 @Component
 public class ValintalaskentaKerrallaRouteImpl extends
-		KoostepalveluRouteBuilder<Laskenta> implements
+		KoostepalveluRouteBuilder<LaskentaImpl> implements
 		ValintalaskentaKerrallaRouteValvomo {
 	//
 	private final static Logger LOG = LoggerFactory
@@ -119,8 +119,8 @@ public class ValintalaskentaKerrallaRouteImpl extends
 	}
 
 	@Override
-	public Laskenta haeLaskenta(String uuid) {
-		Laskenta l = getKoostepalveluCache().getIfPresent(uuid);
+	public LaskentaImpl haeLaskenta(String uuid) {
+		LaskentaImpl l = getKoostepalveluCache().getIfPresent(uuid);
 		if (l != null && l.isValmis()) { // ei palauteta valmistuneita
 			return null;
 		}
@@ -131,7 +131,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 	public void configure() throws Exception {
 		interceptFrom(valintalaskentaKerralla).process(
 				Reititys.<LaskentaJaHaku> kuluttaja(l -> {
-					Laskenta vanhaLaskenta = getKoostepalveluCache()
+					LaskentaImpl vanhaLaskenta = getKoostepalveluCache()
 							.getIfPresent(l.getLaskenta().getUuid());
 					if (vanhaLaskenta != null) {
 						// varmistetaan etta uudelleen ajon reunatapauksessa
@@ -291,7 +291,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 												"koska poikkeus "
 														+ poikkeus.getMessage());
 										seurantaAsyncResource.lisaaIlmoitusHakukohteelle(
-												tyo.getLaskenta().getHakuOid(),
+												tyo.getLaskenta().getUuid(),
 												tyo.getHakukohdeOid(),
 												new IlmoitusDto(
 														IlmoitusTyyppi.VIRHE,
@@ -362,7 +362,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 											seurantaAsyncResource
 													.lisaaIlmoitusHakukohteelle(
 															tyo.getLaskenta()
-																	.getHakuOid(),
+																	.getUuid(),
 															tyo.getHakukohdeOid(),
 															new IlmoitusDto(
 																	IlmoitusTyyppi.VIRHE,
@@ -391,6 +391,7 @@ public class ValintalaskentaKerrallaRouteImpl extends
 							LOG.debug("Hakemukset hakukohteelle {}",
 									tyo.getHakukohdeOid());
 							applicationAsyncResource.getApplicationsByOid(
+									tyo.getLaskenta().getHakuOid(),
 									tyo.getHakukohdeOid(),
 									hakemukset -> {
 										LOG.info(
