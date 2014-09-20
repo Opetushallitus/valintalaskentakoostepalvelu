@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -23,14 +22,10 @@ import com.google.gson.Gson;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoittelunValvonta;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
 
@@ -53,8 +48,6 @@ public class SijoitteluAktivointiResource {
 	@Autowired
 	private ParametriService parametriService;
 
-	@Autowired
-	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 
 	@Autowired
 	private SijoittelunSeurantaResource sijoittelunSeurantaResource;
@@ -152,4 +145,23 @@ public class SijoitteluAktivointiResource {
 			return new Gson().toJson(sijoitteluDto);
 		}
 	}
+
+    @GET
+    @Path("/jatkuva/paivita")
+    @PreAuthorize(OPH_CRUD)
+    @ApiOperation(value = "Ajastetun sijoittelun aloituksen päivitys", response = String.class)
+    public String paivitaJatkuvanSijoittelunAloitus(
+            @QueryParam("hakuOid") String hakuOid, @QueryParam("aloitusajankohta") Long aloitusajankohta,
+            @QueryParam("ajotiheys") Integer ajotiheys) {
+        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+            return "no privileges.";
+        }
+
+        if (StringUtils.isBlank(hakuOid)) {
+            return "get parameter 'hakuOid' required";
+        } else {
+            sijoittelunSeurantaResource.paivitaSijoittelunAloitusajankohta(hakuOid, aloitusajankohta, ajotiheys);
+            return "paivitetty";
+        }
+    }
 }

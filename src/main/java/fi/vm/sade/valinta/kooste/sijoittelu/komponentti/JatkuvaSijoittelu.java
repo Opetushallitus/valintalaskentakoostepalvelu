@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.komponentti;
 
-import javax.annotation.Resource;
-
 import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
 
@@ -9,6 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 /**
  *
@@ -32,7 +33,18 @@ public class JatkuvaSijoittelu {
 					LOG.warn("Jatkuvassa sijoittelussa saatiin null olio seurantapalvelulta!");
 					continue;
 				}
-				if (sijoittelu.isAjossa()) {
+                Instant now = Instant.now();
+                long minutesBetween = 0;
+                if (sijoittelu.getViimeksiAjettu() != null) {
+                    Instant viimeksiAjettu = sijoittelu.getViimeksiAjettu().toInstant();
+
+                    minutesBetween = ChronoUnit.MINUTES.between(viimeksiAjettu, now);
+                }
+				if (sijoittelu.isAjossa() &&
+                        sijoittelu.getAjotiheys() != null && sijoittelu.getAloitusajankohta() != null &&
+                        minutesBetween >= sijoittelu.getAjotiheys() &&
+                        now.isAfter(sijoittelu.getAloitusajankohta().toInstant()) || sijoittelu.isAjossa() &&
+                        sijoittelu.getAjotiheys() == null && sijoittelu.getAloitusajankohta() == null) {
 					LOG.warn(
 							"Aloitetaan jatkuvasijoittelu ajossa olevalle haulle {}",
 							sijoittelu.getHakuOid());

@@ -11,8 +11,8 @@ public class Valintatulos {
 	private String hakijaOid;
 	private String hakuOid;
 	private int hakutoive;
-	private ValintatuloksenTila tila;
-	private IlmoittautumisTila ilmoittautumisTila;
+	private ValintatuloksenTila tila = ValintatuloksenTila.KESKEN;
+	private IlmoittautumisTila ilmoittautumisTila = IlmoittautumisTila.EI_TEHTY;
 
 	public IlmoittautumisTila getIlmoittautumisTila() {
 		return ilmoittautumisTila;
