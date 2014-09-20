@@ -20,6 +20,9 @@ import com.google.gson.Gson;
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
@@ -71,12 +74,12 @@ public class ValintalaskentaAsyncResourceImpl implements
 	}
 
 	@Override
-	public void laske(LaskeDTO laskeDTO, Consumer<String> callback,
+	public Peruutettava laske(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback) {
 		try {
 			String url = new StringBuilder().append("/valintalaskenta/laske")
 					.toString();
-			WebClient
+			return new PeruutettavaImpl(WebClient
 					.fromClient(webClient)
 					.path(url)
 					.async()
@@ -84,19 +87,21 @@ public class ValintalaskentaAsyncResourceImpl implements
 							MediaType.APPLICATION_JSON_TYPE),
 							new Callback<String>(address, url, callback,
 									failureCallback, new TypeToken<String>() {
-									}.getType()));
+									}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
+
 	}
 
 	@Override
-	public void laskeKaikki(LaskeDTO laskeDTO, Consumer<String> callback,
-			Consumer<Throwable> failureCallback) {
+	public Peruutettava laskeKaikki(LaskeDTO laskeDTO,
+			Consumer<String> callback, Consumer<Throwable> failureCallback) {
 		try {
 			String url = new StringBuilder().append(
 					"/valintalaskenta/laskekaikki").toString();
-			WebClient
+			return new PeruutettavaImpl(WebClient
 					.fromClient(webClient)
 					.path(url)
 					.async()
@@ -104,19 +109,20 @@ public class ValintalaskentaAsyncResourceImpl implements
 							MediaType.APPLICATION_JSON_TYPE),
 							new Callback<String>(address, url, callback,
 									failureCallback, new TypeToken<String>() {
-									}.getType()));
+									}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
 
 	@Override
-	public void valintakokeet(LaskeDTO laskeDTO, Consumer<String> callback,
-			Consumer<Throwable> failureCallback) {
+	public Peruutettava valintakokeet(LaskeDTO laskeDTO,
+			Consumer<String> callback, Consumer<Throwable> failureCallback) {
 		try {
 			String url = new StringBuilder().append(
 					"/valintalaskenta/valintakokeet").toString();
-			WebClient
+			return new PeruutettavaImpl(WebClient
 					.fromClient(webClient)
 					.path(url)
 					.async()
@@ -124,9 +130,10 @@ public class ValintalaskentaAsyncResourceImpl implements
 							MediaType.APPLICATION_JSON_TYPE),
 							new Callback<String>(address, url, callback,
 									failureCallback, new TypeToken<String>() {
-									}.getType()));
+									}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
 

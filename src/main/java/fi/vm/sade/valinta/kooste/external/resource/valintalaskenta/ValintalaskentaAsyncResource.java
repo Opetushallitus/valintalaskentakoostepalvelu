@@ -8,6 +8,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
@@ -18,12 +19,12 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
  */
 public interface ValintalaskentaAsyncResource {
 
-	void laske(LaskeDTO laskeDTO, Consumer<String> callback,
+	Peruutettava laske(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback);
 
-	void valintakokeet(LaskeDTO laskeDTO, Consumer<String> callback,
+	Peruutettava valintakokeet(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback);
 
-	void laskeKaikki(LaskeDTO laskeDTO, Consumer<String> callback,
+	Peruutettava laskeKaikki(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback);
 }

@@ -23,6 +23,9 @@ import com.google.common.reflect.TypeToken;
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -31,6 +34,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
  * 
  * @author Jussi Jartamo
  * 
+ *         ApplicationResource
  */
 @Service
 public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
@@ -72,40 +76,47 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		this.webClient = bean.createWebClient();
 	}
 
-	public void getApplicationsByOid(String hakukohdeOid,
-			Consumer<List<Hakemus>> callback,
+	public Peruutettava getApplicationsByOid(String hakuOid,
+			String hakukohdeOid, Consumer<List<Hakemus>> callback,
 			Consumer<Throwable> failureCallback) {
 		String url = new StringBuilder().append("/applications/listfull")
 				.toString();
 		try {
-			WebClient
-					.fromClient(webClient)
-					.path(url)
-					//
-					.query("appStates", "ACTIVE")
-					//
-					.query("appStates", "INCOMPLETE")
-					//
-					.query("rows", 100000)
-					//
-					.query("aoOid", hakukohdeOid)
-					//
-					.async()
-					//
-					.get(new Callback<List<Hakemus>>(
-							address,
-							new StringBuilder()
-									.append(url)
-									.append("?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=")
-									.append(hakukohdeOid).toString(), callback,
-							failureCallback, new TypeToken<List<Hakemus>>() {
-							}.getType()));
+			return new PeruutettavaImpl(
+					WebClient
+							.fromClient(webClient)
+							.path(url)
+							//
+							.query("appStates", "ACTIVE")
+							//
+							.query("appStates", "INCOMPLETE")
+							//
+							.query("rows", 100000)
+							//
+							.query("asId", hakuOid)
+							//
+							.query("aoOid", hakukohdeOid)
+							//
+							.async()
+							//
+							.get(new Callback<List<Hakemus>>(
+									address,
+									new StringBuilder()
+											.append(url)
+											.append("?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=")
+											.append(hakukohdeOid)
+											.append("&asId=").append(hakuOid)
+											.toString(), callback,
+									failureCallback,
+									new TypeToken<List<Hakemus>>() {
+									}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
 
-	public void getApplicationAdditionalData(String hakuOid,
+	public Peruutettava getApplicationAdditionalData(String hakuOid,
 			String hakukohdeOid,
 			Consumer<List<ApplicationAdditionalDataDTO>> callback,
 			Consumer<Throwable> failureCallback) {
@@ -113,19 +124,21 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 				.append("/applications/additionalData/").append(hakuOid)
 				.append("/").append(hakukohdeOid).toString();
 		try {
-			WebClient
-					.fromClient(webClient)
-					.path(url)
-					.async()
-					.get(new Callback<List<ApplicationAdditionalDataDTO>>(
-							address,
-							url,
-							callback,
-							failureCallback,
-							new TypeToken<List<ApplicationAdditionalDataDTO>>() {
-							}.getType()));
+			return new PeruutettavaImpl(
+					WebClient
+							.fromClient(webClient)
+							.path(url)
+							.async()
+							.get(new Callback<List<ApplicationAdditionalDataDTO>>(
+									address,
+									url,
+									callback,
+									failureCallback,
+									new TypeToken<List<ApplicationAdditionalDataDTO>>() {
+									}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
 }

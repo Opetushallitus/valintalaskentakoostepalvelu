@@ -1,0 +1,135 @@
+package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
+
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import akka.actor.ActorSystem;
+import akka.actor.TypedActor;
+import akka.actor.TypedActorExtension;
+import akka.actor.TypedProps;
+import akka.japi.Creator;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.typesafe.config.ConfigFactory;
+
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaImpl;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
+import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
+import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
+
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
+@Service
+public class LaskentaActorSystem implements
+		ValintalaskentaKerrallaRouteValvomo, ValintalaskentaKerrallaRoute {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(LaskentaActorSystem.class);
+	private final TypedActorExtension typed;
+	private final ActorSystem actorSystem;
+	private static final Integer HAE_KAIKKI_VALINNANVAIHEET = new Integer(-1);
+
+	private final LaskentaActorFactory laskentaActorFactory;
+	private final LaskentaSupervisor laskentaSupervisor;
+
+	@Autowired
+	public LaskentaActorSystem(
+			LaskentaSeurantaAsyncResource seurantaAsyncResource,
+			ValintaperusteetAsyncResource valintaperusteetAsyncResource,
+			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
+			ApplicationAsyncResource applicationAsyncResource) {
+		this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem",
+				ConfigFactory.defaultOverrides());
+		this.typed = TypedActor.get(actorSystem);
+		this.laskentaActorFactory = new LaskentaActorFactory(
+				valintalaskentaAsyncResource, applicationAsyncResource,
+				valintaperusteetAsyncResource, seurantaAsyncResource);
+		this.laskentaSupervisor = typed
+				.typedActorOf(new TypedProps<LaskentaSupervisorActorImpl>(
+						LaskentaSupervisor.class,
+						LaskentaSupervisorActorImpl.class));
+	}
+
+	public void suoritaValintalaskentaKerralla(
+			final LaskentaJaHaku laskentaJaHaku, AtomicBoolean lopetusehto) {
+		final LaskentaTyyppi laskentaTyyppi = asLaskentaTyyppi(laskentaJaHaku
+				.getLaskenta());
+		final Integer valinnanvaiheet = asValinnanvaihe(laskentaJaHaku
+				.getLaskenta().getValinnanvaihe());
+		final String uuid = laskentaJaHaku.getLaskenta().getUuid();
+		final String hakuOid = laskentaJaHaku.getLaskenta().getHakuOid();
+
+		laskentaSupervisor.luoJaKaynnistaLaskenta(uuid, hakuOid, lsup -> {
+
+			return typed.typedActorOf(new TypedProps<LaskentaActor>(
+					LaskentaActor.class, new Creator<LaskentaActor>() {
+						private static final long serialVersionUID = 8521766139538840217L;
+
+						public LaskentaActor create() throws Exception {
+							return laskentaActorFactory
+									.createValintakoelaskentaActor(uuid,
+											hakuOid, valinnanvaiheet,
+											laskentaJaHaku.getHakukohdeOids());
+						}
+					}));
+		});
+
+	}
+
+	@Override
+	public List<Laskenta> ajossaOlevatLaskennat() {
+		return laskentaSupervisor.ajossaOlevatLaskennat();
+	}
+
+	@Override
+	public Laskenta haeLaskenta(String uuid) {
+		return laskentaSupervisor.haeLaskenta(uuid);
+	}
+
+	/**
+	 * Tilapainen workaround resurssin valinnanvaiheen normalisointiin.
+	 */
+	private Integer asValinnanvaihe(Integer valinnanvaihe) {
+		if (HAE_KAIKKI_VALINNANVAIHEET.equals(valinnanvaihe)) {
+			return null;
+		} else {
+			return valinnanvaihe;
+		}
+	}
+
+	/**
+	 * Tilapainen workaround resurssin syotteiden normalisointiin
+	 */
+	private LaskentaTyyppi asLaskentaTyyppi(LaskentaImpl l) {
+		if (Boolean.TRUE.equals(l.getValintakoelaskenta())) {
+			return LaskentaTyyppi.VALINTAKOELASKENTA;
+		} else {
+			if (l.getValinnanvaihe() == null) {
+				return LaskentaTyyppi.KAIKKI;
+			} else {
+				return LaskentaTyyppi.VALINTALASKENTA;
+			}
+		}
+	}
+
+}
