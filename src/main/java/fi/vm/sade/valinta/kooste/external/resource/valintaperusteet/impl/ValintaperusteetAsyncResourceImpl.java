@@ -3,14 +3,6 @@ package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -27,8 +19,10 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 
 /**
  * 
@@ -77,31 +71,34 @@ public class ValintaperusteetAsyncResourceImpl implements
 	}
 
 	// /valintaperusteet/hakijaryhmä/{hakukohdeoid}
-	public void haeHakijaryhmat(String hakukohdeOid,
+	public Peruutettava haeHakijaryhmat(String hakukohdeOid,
 			Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback,
 			Consumer<Throwable> failureCallback) {
 		try {
+
 			StringBuilder urlBuilder = new StringBuilder()
 					.append("/valintaperusteet-service/resources/valintaperusteet/hakijaryhma/")
 					.append(hakukohdeOid);
 			String url = urlBuilder.toString();
-			WebClient
-					.fromClient(webClient)
-					.path(url)
-					.async()
-					.get(new Callback<List<ValintaperusteetHakijaryhmaDTO>>(
-							address,
-							url,
-							callback,
-							failureCallback,
-							new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {
-							}.getType()));
+			return new PeruutettavaImpl(
+					WebClient
+							.fromClient(webClient)
+							.path(url)
+							.async()
+							.get(new Callback<List<ValintaperusteetHakijaryhmaDTO>>(
+									address,
+									url,
+									callback,
+									failureCallback,
+									new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {
+									}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
 
-	public void haeValintaperusteet(String hakukohdeOid,
+	public Peruutettava haeValintaperusteet(String hakukohdeOid,
 			Integer valinnanVaiheJarjestysluku,
 			Consumer<List<ValintaperusteetDTO>> callback,
 			Consumer<Throwable> failureCallback) {
@@ -114,34 +111,36 @@ public class ValintaperusteetAsyncResourceImpl implements
 			if (valinnanVaiheJarjestysluku != null) {
 				wc.query("vaihe", valinnanVaiheJarjestysluku);
 			}
-			wc.async().get(
+			return new PeruutettavaImpl(wc.async().get(
 					new Callback<List<ValintaperusteetDTO>>(address, url
 							+ "?vaihe=" + valinnanVaiheJarjestysluku, callback,
 							failureCallback,
 							new TypeToken<List<ValintaperusteetDTO>>() {
-							}.getType()));
+							}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
 
-	public void haunHakukohteet(String hakuOid,
+	public Peruutettava haunHakukohteet(String hakuOid,
 			Consumer<List<HakukohdeViiteDTO>> callback,
 			Consumer<Throwable> failureCallback) {
 		try {
 			String url = new StringBuilder()
 					.append("/valintaperusteet-service/resources/hakukohde/haku/")
 					.append(hakuOid).toString();
-			WebClient
+			return new PeruutettavaImpl(WebClient
 					.fromClient(webClient)
 					.path(url)
 					.async()
 					.get(new Callback<List<HakukohdeViiteDTO>>(address, url,
 							callback, failureCallback,
 							new TypeToken<List<HakukohdeViiteDTO>>() {
-							}.getType()));
+							}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
 }
