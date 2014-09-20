@@ -148,6 +148,12 @@ public class SijoittelunTulosExcelKomponentti {
 								} else {
 									return 1;
 								}
+                            case VARASIJALTA_HYVAKSYTTY:
+                                if (h.isHyvaksyttyHarkinnanvaraisesti()) {
+                                    return 0;
+                                } else {
+                                    return 1;
+                                }
 							case HARKINNANVARAISESTI_HYVAKSYTTY:
 								return 0;
 							case PERUNUT:

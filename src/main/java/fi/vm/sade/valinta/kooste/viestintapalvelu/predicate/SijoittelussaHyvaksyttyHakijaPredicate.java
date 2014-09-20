@@ -34,7 +34,7 @@ public class SijoittelussaHyvaksyttyHakijaPredicate implements
 
 					for (HakutoiveenValintatapajonoDTO vjono : h
 							.getHakutoiveenValintatapajonot()) {
-						if (HakemuksenTila.HYVAKSYTTY.equals(vjono.getTila())) {
+						if (HakemuksenTila.HYVAKSYTTY.equals(vjono.getTila()) || HakemuksenTila.VARASIJALTA_HYVAKSYTTY.equals(vjono.getTila())) {
 							return true;
 						}
 						if (checkFirstValintatapajonoOnly) {
