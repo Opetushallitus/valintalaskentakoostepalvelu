@@ -11,7 +11,10 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintakoelaskentaPalvelukutsu;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintalaskentaJaValintakoelaskentaPalvelukutsu;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintalaskentaPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakemuksetPalvelukutsu;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.LisatiedotPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.ValintaperusteetPalvelukutsu;
@@ -59,10 +62,70 @@ public class LaskentaActorFactory {
 								applicationAsyncResource),
 						new HakemuksetPalvelukutsu(hakuOid, hakukohdeOid,
 								applicationAsyncResource),
-						new ValintaperusteetPalvelukutsu(hakuOid,
+						new ValintaperusteetPalvelukutsu(hakukohdeOid,
 								valinnanvaihe, valintaperusteetAsyncResource),
 						lisatiedotStrategia, hakemuksetStrategia,
 						valintaperusteetStrategia))
+				.collect(Collectors.toList());
+		return new LaskentaActorImpl(uuid, hakuOid, palvelukutsut, strategiat,
+				laskentaStrategia, laskentaSeurantaAsyncResource);
+	}
+
+	public LaskentaActor createValintalaskentaActor(final String uuid,
+			final String hakuOid, final Integer valinnanvaihe,
+			final Collection<String> hakukohdeOids) {
+		final PalvelukutsuStrategia laskentaStrategia = createStrategia();
+		final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
+		final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
+		final PalvelukutsuStrategia hakijaryhmatStrategia = createStrategia();
+		final PalvelukutsuStrategia lisatiedotStrategia = createStrategia();
+		final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
+				laskentaStrategia, valintaperusteetStrategia,
+				hakemuksetStrategia, lisatiedotStrategia);
+		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
+				.parallelStream()
+				.map(hakukohdeOid -> new ValintalaskentaPalvelukutsu(
+						hakukohdeOid, valintalaskentaAsyncResource,
+						new LisatiedotPalvelukutsu(hakuOid, hakukohdeOid,
+								applicationAsyncResource),
+						new HakemuksetPalvelukutsu(hakuOid, hakukohdeOid,
+								applicationAsyncResource),
+						new ValintaperusteetPalvelukutsu(hakukohdeOid,
+								valinnanvaihe, valintaperusteetAsyncResource),
+						new HakijaryhmatPalvelukutsu(hakukohdeOid,
+								valintaperusteetAsyncResource),
+						lisatiedotStrategia, hakemuksetStrategia,
+						valintaperusteetStrategia, hakijaryhmatStrategia))
+				.collect(Collectors.toList());
+		return new LaskentaActorImpl(uuid, hakuOid, palvelukutsut, strategiat,
+				laskentaStrategia, laskentaSeurantaAsyncResource);
+	}
+
+	public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(
+			final String uuid, final String hakuOid,
+			final Integer valinnanvaihe, final Collection<String> hakukohdeOids) {
+		final PalvelukutsuStrategia laskentaStrategia = createStrategia();
+		final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
+		final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
+		final PalvelukutsuStrategia hakijaryhmatStrategia = createStrategia();
+		final PalvelukutsuStrategia lisatiedotStrategia = createStrategia();
+		final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
+				laskentaStrategia, valintaperusteetStrategia,
+				hakemuksetStrategia, lisatiedotStrategia);
+		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
+				.parallelStream()
+				.map(hakukohdeOid -> new ValintalaskentaJaValintakoelaskentaPalvelukutsu(
+						hakukohdeOid, valintalaskentaAsyncResource,
+						new LisatiedotPalvelukutsu(hakuOid, hakukohdeOid,
+								applicationAsyncResource),
+						new HakemuksetPalvelukutsu(hakuOid, hakukohdeOid,
+								applicationAsyncResource),
+						new ValintaperusteetPalvelukutsu(hakukohdeOid,
+								valinnanvaihe, valintaperusteetAsyncResource),
+						new HakijaryhmatPalvelukutsu(hakukohdeOid,
+								valintaperusteetAsyncResource),
+						lisatiedotStrategia, hakemuksetStrategia,
+						valintaperusteetStrategia, hakijaryhmatStrategia))
 				.collect(Collectors.toList());
 		return new LaskentaActorImpl(uuid, hakuOid, palvelukutsut, strategiat,
 				laskentaStrategia, laskentaSeurantaAsyncResource);

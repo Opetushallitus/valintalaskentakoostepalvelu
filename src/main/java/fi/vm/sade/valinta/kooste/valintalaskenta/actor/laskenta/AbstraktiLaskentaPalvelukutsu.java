@@ -2,19 +2,27 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.AbstraktiPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategia;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
 /**
  * 
@@ -41,24 +49,25 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 		this.takaisinkutsu = new AtomicReference<>();
 		final AtomicInteger counter = new AtomicInteger(palvelukutsut.size());
 		this.laskuri = pk -> {
+			if (takaisinkutsu.get() == null) {
+				return;
+			}
 			if (pk.onkoPeruutettu()) { // peruutetaan laskenta talle
 										// hakukohteelle
-				//
 				try {
-					peruuta();
 					takaisinkutsu.getAndUpdate(tk -> {
 						if (tk != null) {
 							tk.accept(AbstraktiLaskentaPalvelukutsu.this);
 						}
 						return null;
 					});
-
 				} catch (Exception e) {
 					LOG.error(
 							"Laskentapalvelukutsun takaisinkutsu epaonnistui {}",
 							e.getMessage());
 					throw e;
 				}
+				peruuta();
 			} else {
 				int i = counter.decrementAndGet();
 				LOG.error("Saatiin palvelukutsu hakukohteelle {}: {}/{}",
@@ -115,5 +124,31 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 		this.takaisinkutsu.set(takaisinkutsu);
 		palvelukutsut.forEach(tyojono -> tyojono
 				.laitaPalvelukutsuTyojonoon(laskuri));
+	}
+
+	protected List<HakemusDTO> muodostaHakemuksetDTO(List<Hakemus> hakemukset,
+			List<ApplicationAdditionalDataDTO> lisatiedot) {
+		final Map<String, ApplicationAdditionalDataDTO> appData = lisatiedot
+				.parallelStream().collect(
+						//
+						Collectors.toMap(ApplicationAdditionalDataDTO::getOid,
+								i -> i));
+		hakemukset
+				.parallelStream()
+				.map(h -> {
+					Map<String, String> addData = appData.get(h.getOid())
+							.getAdditionalData();
+					if (addData == null) {
+						LOG.warn("Lisatietoja ei saatu hakemukselle {}",
+								h.getOid());
+						addData = Collections.emptyMap();
+					}
+					h.setAdditionalInfo(addData);
+					return h;
+				}).collect(Collectors.toList());
+		List<HakemusDTO> hakemusDtot = hakemukset.parallelStream()
+				.map(h -> Converter.hakemusToHakemusDTO(h))
+				.collect(Collectors.toList());
+		return hakemusDtot;
 	}
 }

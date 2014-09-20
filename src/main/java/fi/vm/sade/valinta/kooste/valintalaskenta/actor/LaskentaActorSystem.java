@@ -86,10 +86,28 @@ public class LaskentaActorSystem implements
 						private static final long serialVersionUID = 8521766139538840217L;
 
 						public LaskentaActor create() throws Exception {
-							return laskentaActorFactory
-									.createValintakoelaskentaActor(uuid,
-											hakuOid, valinnanvaiheet,
-											laskentaJaHaku.getHakukohdeOids());
+							if (LaskentaTyyppi.VALINTAKOELASKENTA
+									.equals(laskentaTyyppi)) {
+								return laskentaActorFactory
+										.createValintakoelaskentaActor(uuid,
+												hakuOid, valinnanvaiheet,
+												laskentaJaHaku
+														.getHakukohdeOids());
+							}
+							if (LaskentaTyyppi.VALINTALASKENTA
+									.equals(laskentaTyyppi)) {
+								return laskentaActorFactory
+										.createValintalaskentaActor(uuid,
+												hakuOid, valinnanvaiheet,
+												laskentaJaHaku
+														.getHakukohdeOids());
+							} else {
+								return laskentaActorFactory
+										.createValintalaskentaJaValintakoelaskentaActor(
+												uuid, hakuOid, valinnanvaiheet,
+												laskentaJaHaku
+														.getHakukohdeOids());
+							}
 						}
 					}));
 		});
