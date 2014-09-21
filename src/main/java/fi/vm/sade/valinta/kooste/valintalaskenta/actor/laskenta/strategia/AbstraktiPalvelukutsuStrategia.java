@@ -37,7 +37,9 @@ public abstract class AbstraktiPalvelukutsuStrategia implements
 		final PalvelukutsuJaTakaisinkutsu seuraavaPalvelukutsu = palvelukutsuJono
 				.poll();
 		if (seuraavaPalvelukutsu != null) {
-			LOG.info("Aktivoidaan jonossa seuraava palvelukutsu.");
+			LOG.info("Aktivoidaan jonossa seuraava {}",
+					seuraavaPalvelukutsu.palvelukutsu.getClass()
+							.getSimpleName());
 			// seuraavaPalvelukutsu.aloita();
 			aloitetutPalvelukutsut.add(seuraavaPalvelukutsu.palvelukutsu);
 			try {
