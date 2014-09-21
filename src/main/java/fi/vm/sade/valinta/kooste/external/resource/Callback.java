@@ -76,8 +76,14 @@ public class Callback<T> implements InvocationCallback<Response> {
 		String json = StringUtils.EMPTY;
 		try {
 			InputStream stream = (InputStream) response.getEntity();
-			json = IOUtils.toString(stream);
+			json = StringUtils.trimToEmpty(IOUtils.toString(stream));
 			IOUtils.closeQuietly(stream);
+			if (json.length() == 0) {
+				LOG.error(
+						"Paluuarvona saadun viestin pituus oli nolla merkkia palvelukutsulle {}{} (Response {} {})",
+						url, palvelukutsu, response.getStatus(), response
+								.getMetadata().getFirst("Content-Type"));
+			}
 			T t = gson.fromJson(json, type);
 			try {
 				callback.accept(t);

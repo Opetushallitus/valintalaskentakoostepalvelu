@@ -5,6 +5,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -298,9 +299,37 @@ public class ValintalaskentaKerrallaResource {
 				.haunHakukohteet(
 						hakuOid,
 						hakukohdeViitteet -> {
+							LOG.error(
+									"Tarkastellaan hakukohdeviitteita haulle {}",
+									hakuOid);
+							if (hakukohdeViitteet == null
+									|| hakukohdeViitteet.isEmpty()) {
+								LOG.error(
+										"Valintaperusteet palautti tyhjat hakukohdeviitteet haulle {}!",
+										hakuOid);
+								throw new NullPointerException(
+										"Valintaperusteet palautti tyhjat hakukohdeviitteet!");
+							}
 							List<String> haunHakukohdeOidit = hakukohdeViitteet
 									.stream()
-									.filter((h -> {
+									.filter(Objects::nonNull)
+									.filter(h -> {
+										if (h == null) {
+											LOG.error("nonNull filteri ei toimi!");
+											return false;
+										}
+										if (h.getOid() == null) {
+											LOG.error(
+													"Hakukohdeviitteen oid oli null haussa {}",
+													hakuOid);
+											return false;
+										}
+										if (h.getTila() == null) {
+											LOG.error(
+													"Hakukohdeviitteen tila oli null hakukohteelle {}",
+													h.getOid());
+											return false;
+										}
 										boolean julkaistu = "JULKAISTU"
 												.equals(h.getTila());
 										if (!julkaistu) {
@@ -309,7 +338,7 @@ public class ValintalaskentaKerrallaResource {
 													h.getOid(), h.getTila());
 										}
 										return julkaistu;
-									})).map(u -> u.getOid())
+									}).map(u -> u.getOid())
 									.collect(Collectors.toList());
 							if (haunHakukohdeOidit.isEmpty()) {
 								LOG.error(

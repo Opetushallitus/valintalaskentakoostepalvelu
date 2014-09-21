@@ -7,6 +7,8 @@ import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,8 @@ public class ValintaperusteetAsyncResourceImpl implements
 		ValintaperusteetAsyncResource {
 	private final WebClient webClient;
 	private final String address;
+	private final static Logger LOG = LoggerFactory
+			.getLogger(ValintaperusteetAsyncResourceImpl.class);
 
 	@Autowired
 	public ValintaperusteetAsyncResourceImpl(
@@ -60,13 +64,15 @@ public class ValintaperusteetAsyncResourceImpl implements
 		List<Interceptor<? extends Message>> interceptors = Lists
 				.newArrayList();
 
-		CasApplicationAsAUserInterceptor cas = new CasApplicationAsAUserInterceptor();
-		cas.setWebCasUrl(webCasUrl);
-		cas.setTargetService(targetService);
-		cas.setAppClientUsername(appClientUsername);
-		cas.setAppClientPassword(appClientPassword);
-		interceptors.add(cas);
-//		bean.setOutInterceptors(interceptors);
+		// CasApplicationAsAUserInterceptor cas = new
+		// CasApplicationAsAUserInterceptor();
+		// cas.setWebCasUrl(webCasUrl);
+		// cas.setTargetService(targetService);
+		// cas.setAppClientUsername(appClientUsername);
+		// cas.setAppClientPassword(appClientPassword);
+		LOG.warn("Valintaperusteiden palvelukutsusta on disabloitu CAS-filtteri!");
+		// interceptors.add(cas);
+		// bean.setOutInterceptors(interceptors);
 		this.webClient = bean.createWebClient();
 	}
 
