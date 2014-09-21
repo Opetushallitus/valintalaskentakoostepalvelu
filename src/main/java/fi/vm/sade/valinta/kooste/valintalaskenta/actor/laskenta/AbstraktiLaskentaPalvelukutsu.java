@@ -70,8 +70,9 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 				peruuta();
 			} else {
 				int i = counter.decrementAndGet();
-				LOG.error("Saatiin palvelukutsu hakukohteelle {}: {}/{}",
-						getHakukohdeOid(), i, palvelukutsut.size());
+				LOG.error("Saatiin {} hakukohteelle {}: {}/{}", pk.getClass()
+						.getSimpleName(), getHakukohdeOid(), i, palvelukutsut
+						.size());
 				if (i == 0) {
 					tila = HakukohdeTila.VALMIS;
 					try {
