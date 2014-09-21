@@ -1,10 +1,13 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import java.util.Collection;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Queues;
 
 import akka.actor.TypedActor;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
@@ -22,23 +25,57 @@ public class LaskentaActorImpl implements LaskentaActor {
 			.getLogger(LaskentaActorImpl.class);
 	private final String uuid;
 	private final String hakuOid;
-	private final Collection<LaskentaPalvelukutsu> palvelukutsut;
 	private final Collection<PalvelukutsuStrategia> strategiat;
 	private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
-	private volatile boolean valmis = false;
 	private final PalvelukutsuStrategia laskentaStrategia;
+	private final LaskentaSupervisor laskentaSupervisor;
+	private final HakukohdeLaskuri hakukohdeLaskuri;
 
-	public LaskentaActorImpl(String uuid, String hakuOid,
+	public LaskentaActorImpl(LaskentaSupervisor laskentaSupervisor,
+			String uuid, String hakuOid,
 			Collection<LaskentaPalvelukutsu> palvelukutsut,
 			Collection<PalvelukutsuStrategia> strategiat,
 			PalvelukutsuStrategia laskentaStrategia,
 			LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource) {
+		this.hakukohdeLaskuri = new HakukohdeLaskuri(palvelukutsut.size());
+		this.laskentaSupervisor = laskentaSupervisor;
 		this.hakuOid = hakuOid;
 		this.uuid = uuid;
-		this.palvelukutsut = palvelukutsut;
 		this.strategiat = strategiat;
 		this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
 		this.laskentaStrategia = laskentaStrategia;
+		palvelukutsut.forEach(pk -> pk.laitaTyojonoon(pkk -> {
+			LOG.error("Hakukohteen {} laskenta valmistui statuksella {}",
+					pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
+			if (pkk.onkoPeruutettu()) {
+				try {
+					laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid,
+							pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
+				} catch (Exception e) {
+					LOG.error("Virhe {}", e.getMessage());
+				}
+				if (hakukohdeLaskuri.done(pkk.getHakukohdeOid())) {
+					viimeisteleLaskenta();
+					return;
+				}
+			} else {
+				laskentaStrategia.laitaPalvelukutsuJonoon(pkk, p -> {
+					try {
+						laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(
+								uuid, pkk.getHakukohdeOid(),
+								pkk.getHakukohdeTila());
+					} catch (Exception e) {
+						LOG.error("Virhe {}", e.getMessage());
+					}
+					if (hakukohdeLaskuri.done(pkk.getHakukohdeOid())) {
+						viimeisteleLaskenta();
+						return;
+					}
+					uudetPalvelukutsutKayntiin();
+				});
+			}
+			uudetPalvelukutsutKayntiin();
+		}));
 	}
 
 	public String getHakuOid() {
@@ -46,47 +83,31 @@ public class LaskentaActorImpl implements LaskentaActor {
 	}
 
 	public boolean isValmis() {
-		return valmis;
+		return hakukohdeLaskuri.isDone();
 	}
 
-	private void tarkista(AtomicInteger counter, LaskentaPalvelukutsu pkk) {
-		int now = counter.decrementAndGet();
-		LOG.error("Hakukohde {} valmistui statuksella {}. {}/{}",
-				pkk.getHakukohdeOid(), pkk.getHakukohdeTila(), now,
-				palvelukutsut.size());
-		if (now == 0) {
-			LOG.warn("Laskenta valmistui {} hakukohteelle haussa {}",
-					palvelukutsut.size());
-			valmis = true;
+	private void viimeisteleLaskenta() {
+		try {
 			laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
 					LaskentaTila.VALMIS);
-		} else if (now < 0) {
+		} catch (Exception e) {
 			LOG.error(
-					"Laskennassa syntyi enemman palvelukutsujen paluuviesteja kuin laskennassa oli hakukohteita! Hakukohteita oli {} ja ylimaaraisia paluuviesteja {}",
-					palvelukutsut.size(), -now);
-			valmis = true;
+					"\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta kayttoliittymaa ei saatu paivitettya!\r\n####",
+					hakukohdeLaskuri.getYhteensa(), hakuOid);
+		}
+		try {
+			laskentaSupervisor.valmis(uuid);
+			LOG.error(
+					"\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} uuid:lle {}!\r\n####",
+					hakukohdeLaskuri.getYhteensa(), hakuOid, uuid);
+		} catch (Exception e) {
+			LOG.error(
+					"\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta Actoria ei saatu pysaytettya {}!\r\n####",
+					hakukohdeLaskuri.getYhteensa(), hakuOid, uuid);
 		}
 	}
 
 	public void aloita() {
-		final AtomicInteger counter = new AtomicInteger(palvelukutsut.size());
-		palvelukutsut.forEach(pk -> pk.laitaTyojonoon(pkk -> {
-			LOG.error("Hakukohteen {} laskenta valmistui! {}",
-					pkk.getHakukohdeOid(), pkk.onkoPeruutettu());
-			if (pkk.onkoPeruutettu()) {
-				tarkista(counter, pkk);
-				laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid,
-						pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
-			} else {
-				laskentaStrategia.laitaPalvelukutsuJonoon(pkk, p -> {
-					laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid,
-							pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
-					tarkista(counter, pkk);
-					uudetPalvelukutsutKayntiin();
-				});
-			}
-			uudetPalvelukutsutKayntiin();
-		}));
 		uudetPalvelukutsutKayntiin();
 	}
 
@@ -96,8 +117,30 @@ public class LaskentaActorImpl implements LaskentaActor {
 	}
 
 	public void lopeta() {
-		palvelukutsut.forEach(kutsu -> {
-			kutsu.peruuta();
-		});
+		try {
+			strategiat.forEach(s -> {
+				try {
+					s.peruutaKaikki();
+				} catch (Exception e) {
+					LOG.error(
+							"Palvelukutsu Strategian peruutus epaonnistui! {}",
+							e.getMessage());
+				}
+			});
+			laskentaStrategia.peruutaKaikki();
+		} catch (Exception e) {
+			LOG.error("Virhe {}", e.getMessage());
+		}
+		try {
+			laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
+					LaskentaTila.PERUUTETTU);
+		} catch (Exception e) {
+			LOG.error("Virhe {}", e.getMessage());
+		}
+		try {
+			laskentaSupervisor.valmis(uuid);
+		} catch (Exception e) {
+			LOG.error("Virhe {}", e.getMessage());
+		}
 	}
 }

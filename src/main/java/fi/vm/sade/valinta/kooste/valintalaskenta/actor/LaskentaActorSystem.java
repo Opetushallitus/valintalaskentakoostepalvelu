@@ -61,13 +61,14 @@ public class LaskentaActorSystem implements
 		this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem",
 				ConfigFactory.defaultOverrides());
 		this.typed = TypedActor.get(actorSystem);
-		this.laskentaActorFactory = new LaskentaActorFactory(
-				valintalaskentaAsyncResource, applicationAsyncResource,
-				valintaperusteetAsyncResource, seurantaAsyncResource);
 		this.laskentaSupervisor = typed
 				.typedActorOf(new TypedProps<LaskentaSupervisorActorImpl>(
 						LaskentaSupervisor.class,
 						LaskentaSupervisorActorImpl.class));
+		this.laskentaActorFactory = new LaskentaActorFactory(
+				valintalaskentaAsyncResource, applicationAsyncResource,
+				valintaperusteetAsyncResource, seurantaAsyncResource,
+				laskentaSupervisor);
 	}
 
 	public void suoritaValintalaskentaKerralla(

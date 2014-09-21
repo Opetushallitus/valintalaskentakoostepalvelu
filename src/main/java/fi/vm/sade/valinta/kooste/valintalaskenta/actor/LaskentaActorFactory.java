@@ -32,12 +32,15 @@ public class LaskentaActorFactory {
 	private final ApplicationAsyncResource applicationAsyncResource;
 	private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 	private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
+	private final LaskentaSupervisor laskentaSupervisor;
 
 	public LaskentaActorFactory(
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			ApplicationAsyncResource applicationAsyncResource,
 			ValintaperusteetAsyncResource valintaperusteetAsyncResource,
-			LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource) {
+			LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource,
+			LaskentaSupervisor laskentaSupervisor) {
+		this.laskentaSupervisor = laskentaSupervisor;
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
 		this.applicationAsyncResource = applicationAsyncResource;
 		this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
@@ -67,8 +70,9 @@ public class LaskentaActorFactory {
 						lisatiedotStrategia, hakemuksetStrategia,
 						valintaperusteetStrategia))
 				.collect(Collectors.toList());
-		return new LaskentaActorImpl(uuid, hakuOid, palvelukutsut, strategiat,
-				laskentaStrategia, laskentaSeurantaAsyncResource);
+		return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
+				palvelukutsut, strategiat, laskentaStrategia,
+				laskentaSeurantaAsyncResource);
 	}
 
 	public LaskentaActor createValintalaskentaActor(final String uuid,
@@ -97,8 +101,9 @@ public class LaskentaActorFactory {
 						lisatiedotStrategia, hakemuksetStrategia,
 						valintaperusteetStrategia, hakijaryhmatStrategia))
 				.collect(Collectors.toList());
-		return new LaskentaActorImpl(uuid, hakuOid, palvelukutsut, strategiat,
-				laskentaStrategia, laskentaSeurantaAsyncResource);
+		return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
+				palvelukutsut, strategiat, laskentaStrategia,
+				laskentaSeurantaAsyncResource);
 	}
 
 	public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(
@@ -127,8 +132,9 @@ public class LaskentaActorFactory {
 						lisatiedotStrategia, hakemuksetStrategia,
 						valintaperusteetStrategia, hakijaryhmatStrategia))
 				.collect(Collectors.toList());
-		return new LaskentaActorImpl(uuid, hakuOid, palvelukutsut, strategiat,
-				laskentaStrategia, laskentaSeurantaAsyncResource);
+		return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
+				palvelukutsut, strategiat, laskentaStrategia,
+				laskentaSeurantaAsyncResource);
 	}
 
 	private PalvelukutsuStrategia createStrategia() {

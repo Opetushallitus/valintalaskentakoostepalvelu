@@ -1,9 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia;
 
-import java.util.Collection;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
@@ -12,9 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
 
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.PalvelukutsunUudelleenAktivointiPoikkeus;
 
 /**
  * 
@@ -27,8 +23,7 @@ public abstract class AbstraktiPalvelukutsuStrategia implements
 			.getLogger(AbstraktiPalvelukutsuStrategia.class);
 	private final Set<Palvelukutsu> aloitetutPalvelukutsut;
 	private final Queue<PalvelukutsuJaTakaisinkutsu> palvelukutsuJono;
-
-	// private final Set<String> done = Sets.newConcurrentHashSet();
+	private volatile boolean kaikkiPeruutettu = false;
 
 	public AbstraktiPalvelukutsuStrategia() {
 		this.aloitetutPalvelukutsut = Sets.newConcurrentHashSet();
@@ -36,6 +31,9 @@ public abstract class AbstraktiPalvelukutsuStrategia implements
 	}
 
 	protected void kaynnistaJonossaSeuraavaPalvelukutsu() {
+		if (kaikkiPeruutettu) {
+			return;
+		}
 		final PalvelukutsuJaTakaisinkutsu seuraavaPalvelukutsu = palvelukutsuJono
 				.poll();
 		if (seuraavaPalvelukutsu != null) {
@@ -73,6 +71,16 @@ public abstract class AbstraktiPalvelukutsuStrategia implements
 				throw e;
 			}
 		}
+	}
+
+	public void peruutaKaikki() {
+		kaikkiPeruutettu = true;
+		aloitetutPalvelukutsut.forEach(a -> {
+			try {
+				a.peruuta();
+			} catch (Exception e) {
+			}
+		});
 	}
 
 	protected int aloitettujaPalvelukutsuja() {

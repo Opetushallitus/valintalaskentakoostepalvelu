@@ -5,6 +5,10 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.typesafe.config.ConfigFactory;
@@ -22,7 +26,8 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
  *         osittainenlaskenta?
  */
 public class LaskentaSupervisorActorImpl implements LaskentaSupervisor {
-
+	private final static Logger LOG = LoggerFactory
+			.getLogger(LaskentaSupervisorActorImpl.class);
 	private final Set<LaskentaActorWrapper> ajossaOlevatLaskennat;
 
 	public LaskentaSupervisorActorImpl() {
@@ -31,12 +36,24 @@ public class LaskentaSupervisorActorImpl implements LaskentaSupervisor {
 
 	@Override
 	public void valmis(String uuid) {
-		ajossaOlevatLaskennat.removeIf(l -> {
-			if (uuid.equals(l.getUuid())) {
-				return true;
-			}
-			return false;
-		});
+		ajossaOlevatLaskennat
+				.removeIf(l -> {
+					if (uuid.equals(l.getUuid())) {
+						try {
+							TypedActor.get(TypedActor.context().system())
+									.poisonPill(l);
+							LOG.error(
+									"PoisonPill lahetetty onnistuneesti Actorille {}",
+									uuid);
+						} catch (Exception e) {
+							LOG.error(
+									"PoisonPill lahetys epaonnistui Actorille {}: {}",
+									uuid, e.getMessage());
+						}
+						return true;
+					}
+					return false;
+				});
 	}
 
 	public void luoJaKaynnistaLaskenta(String uuid, String hakuOid,

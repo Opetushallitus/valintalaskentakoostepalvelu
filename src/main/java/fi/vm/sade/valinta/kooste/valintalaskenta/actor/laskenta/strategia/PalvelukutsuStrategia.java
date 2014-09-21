@@ -17,4 +17,5 @@ public interface PalvelukutsuStrategia {
 
 	void aloitaUusiPalvelukutsu();
 
+	void peruutaKaikki();
 }
