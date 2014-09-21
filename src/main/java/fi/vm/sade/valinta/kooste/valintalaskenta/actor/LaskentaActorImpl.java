@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,7 @@ import akka.actor.TypedActor;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 
 /**
@@ -45,8 +47,9 @@ public class LaskentaActorImpl implements LaskentaActor {
 		this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
 		this.laskentaStrategia = laskentaStrategia;
 		palvelukutsut.forEach(pk -> pk.laitaTyojonoon(pkk -> {
-			LOG.error("Hakukohteen {} laskenta valmistui statuksella {}",
-					pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
+			LOG.error("Hakukohteen {} tila muuttunut statukseen {}. {}",
+					pkk.getHakukohdeOid(), pkk.getHakukohdeTila(),
+					tulkinta(pkk.getHakukohdeTila()));
 			if (pkk.onkoPeruutettu()) {
 				try {
 					laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid,
@@ -76,6 +79,15 @@ public class LaskentaActorImpl implements LaskentaActor {
 			}
 			uudetPalvelukutsutKayntiin();
 		}));
+	}
+
+	private String tulkinta(HakukohdeTila tila) {
+		if (HakukohdeTila.VALMIS.equals(tila)) {
+			return "Seuraavaksi suoritetaan hakukohteelle laskentakutsu!";
+		} else if (HakukohdeTila.KESKEYTETTY.equals(tila)) {
+			return "Merkataan laskenta ohitetuksi seurantapalveluun! Laskentakutsua ei tehda koska tarvittavia resursseja ei saatu!";
+		}
+		return StringUtils.EMPTY;
 	}
 
 	public String getHakuOid() {

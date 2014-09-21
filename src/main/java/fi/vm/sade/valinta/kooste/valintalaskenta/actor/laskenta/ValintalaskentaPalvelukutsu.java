@@ -76,8 +76,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 			aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
 				public Peruutettava get() {
 					return valintalaskentaAsyncResource
-							.laskeKaikki(
-									muodostaLaskeDTO(),
+							.laske(muodostaLaskeDTO(),
 									laskentaCallback -> {
 										takaisinkutsu
 												.accept(ValintalaskentaPalvelukutsu.this);
