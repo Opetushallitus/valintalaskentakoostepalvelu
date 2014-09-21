@@ -83,9 +83,10 @@ public class LaskentaActorFactory {
 		final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
 		final PalvelukutsuStrategia hakijaryhmatStrategia = createStrategia();
 		final PalvelukutsuStrategia lisatiedotStrategia = createStrategia();
-		final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
-				laskentaStrategia, valintaperusteetStrategia,
-				hakemuksetStrategia, lisatiedotStrategia);
+		final Collection<PalvelukutsuStrategia> strategiat = Arrays
+				.asList(laskentaStrategia, valintaperusteetStrategia,
+						hakemuksetStrategia, lisatiedotStrategia,
+						hakijaryhmatStrategia);
 		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
 				.parallelStream()
 				.map(hakukohdeOid -> new ValintalaskentaPalvelukutsu(
@@ -114,9 +115,10 @@ public class LaskentaActorFactory {
 		final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
 		final PalvelukutsuStrategia hakijaryhmatStrategia = createStrategia();
 		final PalvelukutsuStrategia lisatiedotStrategia = createStrategia();
-		final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
-				laskentaStrategia, valintaperusteetStrategia,
-				hakemuksetStrategia, lisatiedotStrategia);
+		final Collection<PalvelukutsuStrategia> strategiat = Arrays
+				.asList(laskentaStrategia, valintaperusteetStrategia,
+						hakemuksetStrategia, lisatiedotStrategia,
+						hakijaryhmatStrategia);
 		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
 				.parallelStream()
 				.map(hakukohdeOid -> new ValintalaskentaJaValintakoelaskentaPalvelukutsu(

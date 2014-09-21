@@ -20,6 +20,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.AbstraktiPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.PalvelukutsuLaskuri;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategia;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -47,7 +48,8 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 		super(hakukohdeOid);
 		this.palvelukutsut = palvelukutsut;
 		this.takaisinkutsu = new AtomicReference<>();
-		final AtomicInteger counter = new AtomicInteger(palvelukutsut.size());
+		final PalvelukutsuLaskuri palvelukutsulaskuri = new PalvelukutsuLaskuri(
+				palvelukutsut.size());
 		this.laskuri = pk -> {
 			if (takaisinkutsu.get() == null) {
 				return;
@@ -69,11 +71,12 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 				}
 				peruuta();
 			} else {
-				int i = counter.getAndDecrement();
+				int yhteensa = palvelukutsulaskuri.getYhteensa();
+				int laskuriNyt = palvelukutsulaskuri.palvelukutsuSaapui();
 				LOG.error("Saatiin {} hakukohteelle {}: {}/{}", pk.getClass()
-						.getSimpleName(), getHakukohdeOid(), i, palvelukutsut
-						.size());
-				if (i == 0) {
+						.getSimpleName(), getHakukohdeOid(), (-laskuriNyt)
+						+ yhteensa, yhteensa);
+				if (laskuriNyt == 0) {
 					tila = HakukohdeTila.VALMIS;
 					try {
 						takaisinkutsu.getAndUpdate(tk -> {
@@ -88,7 +91,7 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 								e.getMessage());
 						throw e;
 					}
-				} else if (i < 0) {
+				} else if (laskuriNyt < 0) {
 					LOG.error("Laskenta sai enemman paluuarvoja palvelukutsuista kuin kutsuja tehtiin!");
 					throw new RuntimeException(
 							"Laskenta sai enemman paluuarvoja palvelukutsuista kuin kutsuja tehtiin!");
