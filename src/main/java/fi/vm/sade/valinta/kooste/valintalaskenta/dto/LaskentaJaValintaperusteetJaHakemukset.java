@@ -15,14 +15,14 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
  */
 public class LaskentaJaValintaperusteetJaHakemukset {
 
-	private final Laskenta laskenta;
+	private final LaskentaImpl laskenta;
 	private final List<ValintaperusteetDTO> valintaperusteet;
 	private final List<Hakemus> hakemukset;
 	private final List<ApplicationAdditionalDataDTO> lisatiedot;
 	private final List<ValintaperusteetHakijaryhmaDTO> hakijaryhmat;
 	private final String hakukohdeOid;
 
-	public LaskentaJaValintaperusteetJaHakemukset(Laskenta laskenta,
+	public LaskentaJaValintaperusteetJaHakemukset(LaskentaImpl laskenta,
 			String hakukohdeOid, List<ValintaperusteetDTO> valintaperusteet,
 			List<Hakemus> hakemukset,
 			List<ApplicationAdditionalDataDTO> lisatiedot,
@@ -55,7 +55,7 @@ public class LaskentaJaValintaperusteetJaHakemukset {
 		return hakukohdeOid;
 	}
 
-	public Laskenta getLaskenta() {
+	public LaskentaImpl getLaskenta() {
 		return laskenta;
 	}
 

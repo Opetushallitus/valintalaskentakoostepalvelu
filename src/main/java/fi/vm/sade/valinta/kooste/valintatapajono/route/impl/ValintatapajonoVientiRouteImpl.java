@@ -128,6 +128,7 @@ public class ValintatapajonoVientiRouteImpl extends
 						try {
 							hakemukset = applicationResource
 									.getApplicationsByOid(
+											hakuOid,
 											hakukohdeOid,
 											ApplicationResource.ACTIVE_AND_INCOMPLETE,
 											ApplicationResource.MAX);

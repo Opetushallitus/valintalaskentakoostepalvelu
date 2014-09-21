@@ -100,7 +100,7 @@ public class SijoittelunTulosExcelKomponentti {
 
 		Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat = valintatapajononTilat(tilat);
 
-		Map<String, Hakemus> hakemukset = haeHakemukset(hakukohdeOid);
+		Map<String, Hakemus> hakemukset = haeHakemukset(hakuOid, hakukohdeOid);
 		rivit.add(new Object[] { tarjoajaNimi });
 		rivit.add(new Object[] { hakukohdeNimi });
 		rivit.add(new Object[] {});
@@ -148,12 +148,12 @@ public class SijoittelunTulosExcelKomponentti {
 								} else {
 									return 1;
 								}
-                            case VARASIJALTA_HYVAKSYTTY:
-                                if (h.isHyvaksyttyHarkinnanvaraisesti()) {
-                                    return 0;
-                                } else {
-                                    return 1;
-                                }
+							case VARASIJALTA_HYVAKSYTTY:
+								if (h.isHyvaksyttyHarkinnanvaraisesti()) {
+									return 0;
+								} else {
+									return 1;
+								}
 							case HARKINNANVARAISESTI_HYVAKSYTTY:
 								return 0;
 							case PERUNUT:
@@ -254,10 +254,11 @@ public class SijoittelunTulosExcelKomponentti {
 				.exportGridAsXls(rivit.toArray(new Object[][] {}));
 	}
 
-	private Map<String, Hakemus> haeHakemukset(String hakukohdeOid) {
+	private Map<String, Hakemus> haeHakemukset(String hakuOid,
+			String hakukohdeOid) {
 		Map<String, Hakemus> tmp = Maps.newHashMap();
-		for (Hakemus h : applicationResource.getApplicationsByOid(hakukohdeOid,
-				ApplicationResource.ACTIVE_AND_INCOMPLETE,
+		for (Hakemus h : applicationResource.getApplicationsByOid(hakuOid,
+				hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE,
 				ApplicationResource.MAX)) {
 			tmp.put(h.getOid(), h);
 		}

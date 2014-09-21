@@ -140,6 +140,7 @@ public class ValintatapajonoTuontiRouteImpl extends
 						try {
 							hakemukset = applicationResource
 									.getApplicationsByOid(
+											hakuOid,
 											hakukohdeOid,
 											ApplicationResource.ACTIVE_AND_INCOMPLETE,
 											ApplicationResource.MAX);
@@ -367,7 +368,7 @@ public class ValintatapajonoTuontiRouteImpl extends
 		vx.setEiVarasijatayttoa(jono.getEiVarasijatayttoa());
 		vx.setKaikkiEhdonTayttavatHyvaksytaan(jono
 				.getKaikkiEhdonTayttavatHyvaksytaan());
-        vx.setKaytetaanValintalaskentaa(jono.getKaytetaanValintalaskentaa());
+		vx.setKaytetaanValintalaskentaa(jono.getKaytetaanValintalaskentaa());
 		vx.setNimi(jono.getNimi());
 		vx.setOid(valintatapajonoOid);
 		vx.setPoissaOlevaTaytto(jono.getPoissaOlevaTaytto());
@@ -380,7 +381,8 @@ public class ValintatapajonoTuontiRouteImpl extends
 		return v0;
 	}
 
-	private ValintatietoValinnanvaiheDTO haeValinnanVaihe(String valintatapajonoOid,
+	private ValintatietoValinnanvaiheDTO haeValinnanVaihe(
+			String valintatapajonoOid,
 			Collection<ValintatietoValinnanvaiheDTO> v) {
 		for (ValintatietoValinnanvaiheDTO v0 : v) {
 			if (haeValintatapajono(valintatapajonoOid, v0) != null) {

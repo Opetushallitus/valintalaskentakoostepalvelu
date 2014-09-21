@@ -42,6 +42,7 @@ import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyn
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.excel.LaskentaDtoAsExcel;
@@ -234,7 +235,7 @@ public class ValintalaskentaKerrallaResource {
 			seurantaTunnus.accept(haunHakukohteetOids, uuid -> {
 				AtomicBoolean lopetusehto = new AtomicBoolean(false);
 				valintalaskentaRoute.suoritaValintalaskentaKerralla(
-						new LaskentaJaHaku(new Laskenta(uuid, hakuOid,
+						new LaskentaJaHaku(new LaskentaImpl(uuid, hakuOid,
 								haunHakukohteetOids.size(), lopetusehto, maski
 										.isMask(), valinnanvaihe,
 								valintakoelaskenta), haunHakukohteetOids),
@@ -264,7 +265,7 @@ public class ValintalaskentaKerrallaResource {
 											valintalaskentaRoute
 													.suoritaValintalaskentaKerralla(
 															new LaskentaJaHaku(
-																	new Laskenta(
+																	new LaskentaImpl(
 																			uuid,
 																			hakuOid,
 																			hOids.size(),
@@ -343,7 +344,7 @@ public class ValintalaskentaKerrallaResource {
 	@GET
 	@Path("/status/{uuid}")
 	@Produces(APPLICATION_JSON)
-	@ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
+	@ApiOperation(value = "Valintalaskennan tila", response = LaskentaImpl.class)
 	public Laskenta status(@PathParam("uuid") String uuid) {
 		try {
 			return valintalaskentaValvomo.haeLaskenta(uuid);
@@ -371,7 +372,7 @@ public class ValintalaskentaKerrallaResource {
 	@GET
 	@Path("/status/{uuid}/xls")
 	@Produces("application/vnd.ms-excel")
-	@ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
+	@ApiOperation(value = "Valintalaskennan tila", response = LaskentaImpl.class)
 	public void statusXls(final @PathParam("uuid") String uuid,
 			@Suspended AsyncResponse asyncResponse) {
 		asyncResponse.setTimeout(2L, TimeUnit.SECONDS);
@@ -458,7 +459,8 @@ public class ValintalaskentaKerrallaResource {
 		}
 		Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
 		if (l != null) {
-			l.getLopetusehto().set(true); // aktivoidaan lopetuskasky
+			l.lopeta();// getLopetusehto().set(true); // aktivoidaan
+						// lopetuskasky
 			seurantaAsyncResource.merkkaaLaskennanTila(uuid,
 					LaskentaTila.PERUUTETTU);
 		}

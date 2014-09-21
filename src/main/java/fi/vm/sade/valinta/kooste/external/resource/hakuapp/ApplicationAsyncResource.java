@@ -1,8 +1,10 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp;
 
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 
@@ -13,11 +15,15 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
  */
 public interface ApplicationAsyncResource {
 
-	void getApplicationsByOid(String hakukohdeOid,
+	Future<List<Hakemus>> getApplicationsByOid(String hakuOid,
+			String hakukohdeOid);
+
+	Peruutettava getApplicationsByOid(String hakuOid, String hakukohdeOid,
 			Consumer<List<Hakemus>> callback,
 			Consumer<Throwable> failureCallback);
 
-	void getApplicationAdditionalData(String hakuOid, String hakukohdeOid,
+	Peruutettava getApplicationAdditionalData(String hakuOid,
+			String hakukohdeOid,
 			Consumer<List<ApplicationAdditionalDataDTO>> callback,
 			Consumer<Throwable> failureCallback);
 }

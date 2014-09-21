@@ -14,6 +14,7 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 
 /**
  * 
@@ -22,21 +23,21 @@ import fi.vm.sade.valinta.kooste.external.resource.Callback;
  */
 public interface ValintaperusteetAsyncResource {
 
-	void haeHakijaryhmat(String hakukohdeOid,
+	Peruutettava haeHakijaryhmat(String hakukohdeOid,
 			Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback,
 			Consumer<Throwable> failureCallback);
 
 	// @GET
 	// @Path("haku/{hakuOid}")
 	// @Produces(MediaType.APPLICATION_JSON)
-	void haunHakukohteet(String hakuOid,
+	Peruutettava haunHakukohteet(String hakuOid,
 			Consumer<List<HakukohdeViiteDTO>> callback,
 			Consumer<Throwable> failureCallback);
 
 	// @GET
 	// @Path("{hakukohdeOid}")
 	// @Produces(MediaType.APPLICATION_JSON)
-	void haeValintaperusteet(
+	Peruutettava haeValintaperusteet(
 			String hakukohdeOid,
 			//
 			Integer valinnanVaiheJarjestysluku,

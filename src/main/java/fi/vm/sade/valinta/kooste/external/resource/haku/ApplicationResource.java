@@ -39,12 +39,12 @@ public interface ApplicationResource {
 	@GET
 	@Path("{oid}")
 	@Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
-	//@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD')")
+	// @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD')")
 	public Hakemus getApplicationByOid(@PathParam(OID) String oid);
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
-	//@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD')")
+	// @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD')")
 	public HakemusList findApplications(
 			@DefaultValue(value = "") @QueryParam("q") String query,
 			@QueryParam("appState") List<String> state,
@@ -59,6 +59,7 @@ public interface ApplicationResource {
 	@Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
 	// @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	public List<Hakemus> getApplicationsByOid(
+			@QueryParam("asId") String hakuOid,
 			@QueryParam("aoOid") String aoOid,
 			@QueryParam("appState") List<String> appStates,
 			@QueryParam("rows") int rows);

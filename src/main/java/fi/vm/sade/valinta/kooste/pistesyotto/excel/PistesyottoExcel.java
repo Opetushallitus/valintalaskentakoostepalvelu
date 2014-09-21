@@ -7,7 +7,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -18,6 +20,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
@@ -32,8 +35,10 @@ import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.NumeroArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.ApplicationAdditionalDataComparator;
 import fi.vm.sade.valinta.kooste.util.Formatter;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.function.ValintakoeOsallistuminenDTOFunction;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
@@ -120,31 +125,35 @@ public class PistesyottoExcel {
 
 	public PistesyottoExcel(String hakuOid, String hakukohdeOid,
 			String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
-			String tarjoajaNimi, Collection<String> valintakoeTunnisteet,
+			String tarjoajaNimi, Collection<Hakemus> hakemukset,
+			Collection<String> valintakoeTunnisteet,
 			List<ValintakoeOsallistuminenDTO> osallistumistiedot,
 			List<ValintaperusteDTO> valintaperusteet,
 			List<ApplicationAdditionalDataDTO> pistetiedot) {
 		this(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi,
-				tarjoajaNimi, valintakoeTunnisteet, osallistumistiedot,
-				valintaperusteet, pistetiedot, Collections
+				tarjoajaNimi, hakemukset, valintakoeTunnisteet,
+				osallistumistiedot, valintaperusteet, pistetiedot, Collections
 						.<PistesyottoDataRiviKuuntelija> emptyList());
 	}
 
 	public PistesyottoExcel(String hakuOid, String hakukohdeOid,
 			String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
-			String tarjoajaNimi, Collection<String> valintakoeTunnisteet,
+			String tarjoajaNimi, Collection<Hakemus> hakemukset,
+			Collection<String> valintakoeTunnisteet,
 			List<ValintakoeOsallistuminenDTO> osallistumistiedot,
 			List<ValintaperusteDTO> valintaperusteet,
 			List<ApplicationAdditionalDataDTO> pistetiedot,
 			PistesyottoDataRiviKuuntelija kuuntelija) {
 		this(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi,
-				tarjoajaNimi, valintakoeTunnisteet, osallistumistiedot,
-				valintaperusteet, pistetiedot, Arrays.asList(kuuntelija));
+				tarjoajaNimi, hakemukset, valintakoeTunnisteet,
+				osallistumistiedot, valintaperusteet, pistetiedot, Arrays
+						.asList(kuuntelija));
 	}
 
 	public PistesyottoExcel(String hakuOid, String hakukohdeOid,
 			String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
-			String tarjoajaNimi, Collection<String> valintakoeTunnisteet,
+			String tarjoajaNimi, Collection<Hakemus> hakemukset,
+			Collection<String> valintakoeTunnisteet,
 			List<ValintakoeOsallistuminenDTO> osallistumistiedot,
 			List<ValintaperusteDTO> valintaperusteet,
 			List<ApplicationAdditionalDataDTO> pistetiedot,
@@ -201,9 +210,10 @@ public class PistesyottoExcel {
 				.addRivi(new OidRivi(tunnisteet, 2, true)).build());
 		final RiviBuilder valintakoeOtsikkoRiviBuilder = new RiviBuilder();
 		final RiviBuilder otsikkoRiviBuilder = new RiviBuilder()
-				.addKeskitettyTeksti("Hakemus OID").addKeskitettyTeksti(
-						"Tiedot");
-		valintakoeOtsikkoRiviBuilder.addTyhja().addTyhja();
+				.addKeskitettyTeksti("Hakemus OID")
+				.addKeskitettyTeksti("Tiedot")
+				.addKeskitettyTeksti("Henkilötunnus");
+		valintakoeOtsikkoRiviBuilder.addTyhja().addTyhja().addTyhja();
 		for (String valintakoe : FluentIterable.from(valintaperusteet)
 		//
 				.transform(new Function<ValintaperusteDTO, String>() {
@@ -279,7 +289,9 @@ public class PistesyottoExcel {
 								.getOsallistuminenTunniste())));
 			}
 		}
-
+		Map<String, String> oidToHetu = hakemukset.stream().collect(
+				Collectors.toMap(Hakemus::getOid,
+						h -> new HakemusWrapper(h).getHenkilotunnus()));
 		for (ApplicationAdditionalDataDTO data : pistetiedot) {
 			boolean osallistuja = osallistujat.contains(data.getOid());
 			// Hakemuksen <tunniste, valintakoeDTO> tiedot
@@ -289,6 +301,8 @@ public class PistesyottoExcel {
 			s.add(new TekstiArvo(data.getOid()));
 			s.add(new TekstiArvo(new StringBuilder().append(data.getLastName())
 					.append(", ").append(data.getFirstNames()).toString()));
+			s.add(new TekstiArvo(Optional.ofNullable(
+					oidToHetu.get(data.getOid())).orElse(StringUtils.EMPTY)));
 			if (!osallistuja) {
 				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
 					if (!valintaperuste.getVaatiiOsallistumisen()) {

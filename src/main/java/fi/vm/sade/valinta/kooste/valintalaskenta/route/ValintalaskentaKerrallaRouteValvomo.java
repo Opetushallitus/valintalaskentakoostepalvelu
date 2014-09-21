@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.route;
 import java.util.List;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaImpl;
 
 /**
  * @author Jussi Jartamo.

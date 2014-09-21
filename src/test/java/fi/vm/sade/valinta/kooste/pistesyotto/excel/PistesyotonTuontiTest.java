@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -31,7 +33,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminen
  * 
  *         Pistesyoton tuonti XLSX-tiedostolla
  */
-@Ignore
+// @Ignore
 public class PistesyotonTuontiTest {
 
 	private static final Logger LOG = LoggerFactory
@@ -109,6 +111,7 @@ public class PistesyotonTuontiTest {
 				"",
 				"",
 				"",
+				Collections.emptyList(),
 				Arrays.asList(
 						"1_2_246_562_5_85532589612_urheilija_lisapiste",
 						"Eläintenhoidon koulutusohjelma, pk (Maatalousalan perustutkinto), pääsy- ja soveltuvuuskoe",
