@@ -69,7 +69,7 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 				}
 				peruuta();
 			} else {
-				int i = counter.decrementAndGet();
+				int i = counter.getAndDecrement();
 				LOG.error("Saatiin {} hakukohteelle {}: {}/{}", pk.getClass()
 						.getSimpleName(), getHakukohdeOid(), i, palvelukutsut
 						.size());
