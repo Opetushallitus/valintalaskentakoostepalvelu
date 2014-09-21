@@ -41,6 +41,12 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ * 
+ */
 public class ValintalaskentaTesti {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaTesti.class);

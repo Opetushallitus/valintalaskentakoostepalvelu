@@ -29,6 +29,12 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisorActorImpl;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ * 
+ */
 public class LaskentaActorSystemTest {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(LaskentaActorSystemTest.class);

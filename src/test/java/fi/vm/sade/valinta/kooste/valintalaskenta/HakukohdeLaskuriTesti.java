@@ -24,6 +24,12 @@ import com.google.gson.JsonSyntaxException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.HakukohdeLaskuri;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ * 
+ */
 public class HakukohdeLaskuriTesti {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(HakukohdeLaskuriTesti.class);
