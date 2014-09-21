@@ -34,7 +34,7 @@ public class HakukohdeLaskuri extends Laskuri {
 		} catch (Exception e) {
 			LOG.error("Bloomfilterin kutsu epaonnistui! {}", e.getMessage());
 		}
-		int l = kasvataLaskuria();
+		int l = tiputaLaskuria();
 		if (l < 0) {
 			int yhteensa = getYhteensa();
 			LOG.error(

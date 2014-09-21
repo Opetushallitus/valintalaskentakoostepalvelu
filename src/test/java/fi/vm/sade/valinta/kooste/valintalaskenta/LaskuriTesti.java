@@ -3,9 +3,11 @@ package fi.vm.sade.valinta.kooste.valintalaskenta;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -23,6 +25,7 @@ import com.google.gson.JsonSyntaxException;
 
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.HakukohdeLaskuri;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.PalvelukutsuLaskuri;
 
 /**
  * 
@@ -30,9 +33,9 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.HakukohdeLaskuri;
  * 
  * 
  */
-public class HakukohdeLaskuriTesti {
+public class LaskuriTesti {
 	private final static Logger LOG = LoggerFactory
-			.getLogger(HakukohdeLaskuriTesti.class);
+			.getLogger(LaskuriTesti.class);
 
 	@Test
 	public void testaaHakukohdeLaskuri() throws JsonSyntaxException,
@@ -46,14 +49,42 @@ public class HakukohdeLaskuriTesti {
 				oids.size());
 
 		HakukohdeLaskuri hakukohdeLaskuri = new HakukohdeLaskuri(oids.size());
-
-		oids.forEach(o -> hakukohdeLaskuri.done(o));
-
+		final AtomicBoolean valmis = new AtomicBoolean(false);
+		oids.forEach(o -> {
+			if (hakukohdeLaskuri.done(o)) {
+				if (!valmis.compareAndSet(false, true)) {
+					Assert.fail("Laskuri vaitti tyon valmistuneen kahdesti!");
+				}
+			}
+		});
+		Assert.assertTrue("Laskurin piti valmistua!", valmis.get());
 		Assert.assertTrue("Hakukohde laskurin tulisi olla valmis!",
 				hakukohdeLaskuri.isDone());
 		Assert.assertFalse(
 				"Hakukohde laskurin ei saisi olla ylikierroksilla eli enemman merkintoja kuin tehtavia!",
 				hakukohdeLaskuri.isOverDone());
+	}
+
+	@Test
+	public void testaaPalvelukutsuLaskuri() throws JsonSyntaxException,
+			IOException {
+		Collection<Object> pks = Arrays.asList(1, 2, 3, 4, 5);
+		PalvelukutsuLaskuri pkl = new PalvelukutsuLaskuri(pks.size());
+
+		final AtomicBoolean valmis = new AtomicBoolean(false);
+		pks.forEach(o -> {
+			if (pkl.isDone(pkl.palvelukutsuSaapui())) {
+				if (!valmis.compareAndSet(false, true)) {
+					Assert.fail("Laskuri vaitti tyon valmistuneen kahdesti!");
+				}
+			}
+		});
+		Assert.assertTrue("Palvelulaskurin piti valmistua!", valmis.get());
+		Assert.assertTrue("Palvelukutsulaskurin tulisi olla valmis!",
+				pkl.isDone());
+		Assert.assertFalse(
+				"Palvelukutsulaskurin ei saisi olla ylikierroksilla eli enemman merkintoja kuin tehtavia!",
+				pkl.isOverDone());
 	}
 
 }

@@ -12,8 +12,8 @@ public class Laskuri {
 		this.laskuri = new AtomicInteger(tehtavia);
 	}
 
-	protected int kasvataLaskuria() {
-		return laskuri.getAndDecrement();
+	protected int tiputaLaskuria() {
+		return laskuri.decrementAndGet();
 	}
 
 	public boolean isDone() {

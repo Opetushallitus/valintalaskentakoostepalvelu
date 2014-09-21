@@ -13,8 +13,12 @@ public class PalvelukutsuLaskuri extends Laskuri {
 		super(palvelukutsuja);
 	}
 
+	public boolean isDone(int nyt) {
+		return nyt == 0;
+	}
+
 	public int palvelukutsuSaapui() {
-		int laskuriNyt = kasvataLaskuria();
+		int laskuriNyt = tiputaLaskuria();
 		return laskuriNyt;
 	}
 }
