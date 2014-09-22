@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -132,27 +133,80 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 
 	protected List<HakemusDTO> muodostaHakemuksetDTO(List<Hakemus> hakemukset,
 			List<ApplicationAdditionalDataDTO> lisatiedot) {
-		final Map<String, ApplicationAdditionalDataDTO> appData = lisatiedot
-				.parallelStream().collect(
+		boolean merkittyJo = false;
+		try {
+			final Map<String, ApplicationAdditionalDataDTO> appData = lisatiedot
+					.parallelStream()
+					//
+					.filter(Objects::nonNull)
+					//
+					.collect(
+					//
+							Collectors.toMap(
+									ApplicationAdditionalDataDTO::getOid,
+									i -> i));
+			try {
+				List<Hakemus> h0 = hakemukset.parallelStream()
+				//
+						.filter(Objects::nonNull)
 						//
-						Collectors.toMap(ApplicationAdditionalDataDTO::getOid,
-								i -> i));
-		hakemukset
-				.parallelStream()
-				.map(h -> {
-					Map<String, String> addData = appData.get(h.getOid())
-							.getAdditionalData();
-					if (addData == null) {
-						LOG.warn("Lisatietoja ei saatu hakemukselle {}",
-								h.getOid());
-						addData = Collections.emptyMap();
-					}
-					h.setAdditionalInfo(addData);
-					return h;
-				}).collect(Collectors.toList());
-		List<HakemusDTO> hakemusDtot = hakemukset.parallelStream()
-				.map(h -> Converter.hakemusToHakemusDTO(h))
-				.collect(Collectors.toList());
-		return hakemusDtot;
+						.map(h -> {
+							if (h == null) {
+								LOG.error("Objects:nonNull vuosi null objektin mappaukseen!");
+								return null;
+							}
+							Map<String, String> addData = Collections
+									.emptyMap();
+							try {
+								if (appData.containsKey(h.getOid())) {
+									addData = appData.get(h.getOid())
+											.getAdditionalData();
+									if (addData == null) {
+										LOG.warn(
+												"Lisatietoja ei saatu hakemukselle {}",
+												h.getOid());
+										addData = Collections.emptyMap();
+									}
+								}
+							} catch (Exception e) {
+								LOG.error(
+										"AppDatan keraaminen epaonnistui! {}",
+										e.getMessage());
+							}
+							h.setAdditionalInfo(addData);
+							return h;
+						}).collect(Collectors.toList());
+				try {
+					List<HakemusDTO> hakemusDtot = h0.parallelStream()
+							.map(h -> Converter.hakemusToHakemusDTO(h))
+							.collect(Collectors.toList());
+					return hakemusDtot;
+				} catch (Exception exx) {
+					merkittyJo = true;
+					LOG.error(
+							"Hakemusten konvertointi laskennan hakemusDTO:ksi epaonnistui {}!",
+							exx.getMessage());
+
+					throw exx;
+				}
+			} catch (Exception ex) {
+				if (!merkittyJo) {
+					merkittyJo = true;
+					LOG.error(
+							"Lisatietojen syottaminen osaksi hakemuksen dataa epaonnistui {}!",
+							ex.getMessage());
+				}
+				throw ex;
+			}
+
+		} catch (Exception e) {
+			if (!merkittyJo) {
+				LOG.error(
+						"Lisatietojen parsiminen epaonnistui {}. Luultavasti null oid lisatietojen joukossa!",
+						e.getMessage());
+			}
+			throw e;
+		}
+
 	}
 }
