@@ -44,6 +44,11 @@ public class LisatiedotPalvelukutsu extends AbstraktiPalvelukutsu implements
 								getHakukohdeOid(),
 								lisatiedot -> {
 									try {
+										if (lisatiedot == null) {
+											LOG.error("Lisatiedotpalvelu palautti null datajoukon!");
+											failureCallback(takaisinkutsu);
+											return;
+										}
 										LisatiedotPalvelukutsu.this.lisatiedot
 												.set(lisatiedot);
 										takaisinkutsu

@@ -26,7 +26,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 public class ValintalaskentaJaValintakoelaskentaPalvelukutsu extends
 		AbstraktiLaskentaPalvelukutsu implements LaskentaPalvelukutsu {
 	private static final Logger LOG = LoggerFactory
-			.getLogger(ValintakoelaskentaPalvelukutsu.class);
+			.getLogger(ValintalaskentaJaValintakoelaskentaPalvelukutsu.class);
 	private final ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu;
 	private final HakemuksetPalvelukutsu hakemuksetPalvelukutsu;
 	private final LisatiedotPalvelukutsu lisatiedotPalvelukutsu;

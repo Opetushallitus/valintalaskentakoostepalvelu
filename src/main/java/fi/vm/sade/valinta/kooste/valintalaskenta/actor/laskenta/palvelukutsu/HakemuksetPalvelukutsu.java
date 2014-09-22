@@ -39,12 +39,21 @@ public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements
 	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
 		aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
 			public Peruutettava get() {
-				return applicationAsyncResource.getApplicationsByOid(hakuOid,
-						getHakukohdeOid(), hakemukset -> {
-							HakemuksetPalvelukutsu.this.hakemukset
-									.set(hakemukset);
-							takaisinkutsu.accept(HakemuksetPalvelukutsu.this);
-						}, failureCallback(takaisinkutsu));
+				return applicationAsyncResource
+						.getApplicationsByOid(
+								hakuOid,
+								getHakukohdeOid(),
+								hakemukset -> {
+									if (hakemukset == null) {
+										LOG.error("Hakemuksetpalvelu palautti null datajoukon!");
+										failureCallback(takaisinkutsu);
+										return;
+									}
+									HakemuksetPalvelukutsu.this.hakemukset
+											.set(hakemukset);
+									takaisinkutsu
+											.accept(HakemuksetPalvelukutsu.this);
+								}, failureCallback(takaisinkutsu));
 			}
 		});
 		return this;
