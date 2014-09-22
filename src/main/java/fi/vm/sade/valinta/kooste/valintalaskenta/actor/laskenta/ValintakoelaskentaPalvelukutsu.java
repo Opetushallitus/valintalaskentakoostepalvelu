@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -65,29 +66,49 @@ public class ValintakoelaskentaPalvelukutsu extends
 	}
 
 	private LaskeDTO muodostaLaskeDTO() {
+		List<Hakemus> hakemukset = hakemuksetPalvelukutsu.getHakemukset();
+		List<ApplicationAdditionalDataDTO> lisatiedot = lisatiedotPalvelukutsu
+				.getLisatiedot();
+		List<ValintaperusteetDTO> valintaperusteet = valintaperusteetPalvelukutsu
+				.getValintaperusteet();
+		if (hakemukset == null) {
+			throw new NullPointerException("Hakemukset oli null dataa!");
+		}
+		if (lisatiedot == null) {
+			throw new NullPointerException("Lisatiedot oli null dataa!");
+		}
+		if (valintaperusteet == null) {
+			throw new NullPointerException("Valintaperusteet oli null dataa!");
+		}
 		return new LaskeDTO(getHakukohdeOid(), muodostaHakemuksetDTO(
-				hakemuksetPalvelukutsu.getHakemukset(),
-				lisatiedotPalvelukutsu.getLisatiedot()),
-				valintaperusteetPalvelukutsu.getValintaperusteet());
+				hakemukset, lisatiedot), valintaperusteet);
 	}
 
 	@Override
 	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
 		try {
-			aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
-				public Peruutettava get() {
-					return valintalaskentaAsyncResource
-							.valintakokeet(
-									muodostaLaskeDTO(),
-									laskentaCallback -> {
-										takaisinkutsu
-												.accept(ValintakoelaskentaPalvelukutsu.this);
-									}, failureCallback(takaisinkutsu));
-				}
-			});
+			final LaskeDTO laskeDTO = muodostaLaskeDTO();
+			try {
+				aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
+					public Peruutettava get() {
+						return valintalaskentaAsyncResource
+								.valintakokeet(
+										laskeDTO,
+										laskentaCallback -> {
+											takaisinkutsu
+													.accept(ValintakoelaskentaPalvelukutsu.this);
+										}, failureCallback(takaisinkutsu));
+					}
+				});
+			} catch (Exception e) {
+				LOG.error(
+						"Valintakoelaskennan palvelukutsun muodostus epaonnistui virheeseen {}",
+						e.getMessage());
+				failureCallback(takaisinkutsu).accept(e);
+			}
 		} catch (Exception e) {
 			LOG.error(
-					"Valintakoelaskennan palvelukutsun muodostus epaonnistui virheeseen {}",
+					"LaskeDTO:n muodostus epaonnistui ValintakoelaskentaPalvelukutsulle: {}",
 					e.getMessage());
 			failureCallback(takaisinkutsu).accept(e);
 		}
