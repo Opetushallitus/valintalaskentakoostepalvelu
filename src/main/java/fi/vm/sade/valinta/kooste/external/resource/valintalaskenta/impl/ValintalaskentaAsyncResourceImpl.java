@@ -63,12 +63,13 @@ public class ValintalaskentaAsyncResourceImpl implements
 		List<Interceptor<? extends Message>> interceptors = Lists
 				.newArrayList();
 
-		CasApplicationAsAUserInterceptor cas = new CasApplicationAsAUserInterceptor();
-		cas.setWebCasUrl(webCasUrl);
-		cas.setTargetService(targetService);
-		cas.setAppClientUsername(appClientUsername);
-		cas.setAppClientPassword(appClientPassword);
-		interceptors.add(cas);
+		// CasApplicationAsAUserInterceptor cas = new
+		// CasApplicationAsAUserInterceptor();
+		// cas.setWebCasUrl(webCasUrl);
+		// cas.setTargetService(targetService);
+		// cas.setAppClientUsername(appClientUsername);
+		// cas.setAppClientPassword(appClientPassword);
+		// interceptors.add(cas);
 		bean.setOutInterceptors(interceptors);
 		this.webClient = bean.createWebClient();
 	}
