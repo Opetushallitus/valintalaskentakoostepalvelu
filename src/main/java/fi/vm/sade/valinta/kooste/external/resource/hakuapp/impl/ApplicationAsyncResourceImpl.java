@@ -1,16 +1,12 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
@@ -24,11 +20,10 @@ import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -79,11 +74,13 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		this.webClient = bean.createWebClient();
 	}
 
+	// public static final String CHARSET_UTF_8 = ";charset=UTF-8";
 	@Override
 	public Future<List<Hakemus>> getApplicationsByOid(String hakuOid,
 			String hakukohdeOid) {
 		String url = new StringBuilder().append("/applications/listfull")
 				.toString();
+		// new MediaType("application", "json", Charset.forName("UTF-8"));
 		return WebClient.fromClient(webClient).path(url)
 		//
 				.query("appStates", "ACTIVE")
@@ -95,6 +92,9 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 				.query("asId", hakuOid)
 				//
 				.query("aoOid", hakukohdeOid)
+				//
+				// .accept("application/json;charset=UTF-8")
+				.accept(MediaType.APPLICATION_JSON_TYPE)
 				//
 				.async()
 				//
