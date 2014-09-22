@@ -56,7 +56,6 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final DokumenttiResource dokumenttiResource;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta;
 	private final HaeHakuTarjonnaltaKomponentti hakuTarjonnalta;
-	private final ApplicationAsyncResource applicationAsyncResource;
 
 	@Autowired
 	public PistesyottoTuontiRouteImpl(ValintakoeResource valintakoeResource,
@@ -64,9 +63,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 			DokumenttiResource dokumenttiResource,
 			ValintaperusteetResource hakukohdeResource,
 			HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta,
-			HaeHakuTarjonnaltaKomponentti hakuTarjonnalta,
-			ApplicationAsyncResource applicationAsyncResource) {
-		this.applicationAsyncResource = applicationAsyncResource;
+			HaeHakuTarjonnaltaKomponentti hakuTarjonnalta) {
 		this.valintakoeResource = valintakoeResource;
 		this.applicationResource = applicationResource;
 		this.hakukohdeResource = hakukohdeResource;
@@ -108,15 +105,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						String hakuNimi = StringUtils.EMPTY;
 						String hakukohdeNimi = StringUtils.EMPTY;
 						String tarjoajaNimi = StringUtils.EMPTY;
-						Future<List<Hakemus>> hakemuksetFuture = null;
-						try {
-							hakemuksetFuture = applicationAsyncResource
-									.getApplicationsByOid(hakuOid, hakukohdeOid);
-						} catch (Exception e) {
-							LOG.error(
-									"Hakemusten haku hetua varten epaonnistui! Jatketaan silti koska ei ole kriittista! {}",
-									e.getMessage());
-						}
+
 						// LOG.error("Osallistumistiedot");
 						List<ValintakoeOsallistuminenDTO> osallistumistiedot;
 						try {
@@ -176,16 +165,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 													.hakukohdeOid(hakukohdeOid)));
 							throw e;
 						}
-						List<Hakemus> hakemukset = null;
-						try {
-							hakemukset = hakemuksetFuture.get(1500,
-									TimeUnit.MILLISECONDS);
-						} catch (Exception e) {
-
-						}
-						if (hakemukset == null) {
-							hakemukset = Collections.emptyList();
-						}
+						List<Hakemus> hakemukset = Collections.emptyList();
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
 						// LOG.error("Excelin luonti");
 						PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();

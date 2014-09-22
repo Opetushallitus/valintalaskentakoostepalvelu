@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 
@@ -23,6 +25,8 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoVientiRoute;
@@ -50,6 +54,7 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final DokumenttiResource dokumenttiResource;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta;
 	private final HaeHakuTarjonnaltaKomponentti hakuTarjonnalta;
+	private final ApplicationAsyncResource applicationAsyncResource;
 
 	@Autowired
 	public PistesyottoVientiRouteImpl(ValintakoeResource valintakoeResource,
@@ -57,7 +62,9 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 			DokumenttiResource dokumenttiResource,
 			ValintaperusteetResource hakukohdeResource,
 			HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta,
-			HaeHakuTarjonnaltaKomponentti hakuTarjonnalta) {
+			HaeHakuTarjonnaltaKomponentti hakuTarjonnalta,
+			ApplicationAsyncResource applicationAsyncResource) {
+		this.applicationAsyncResource = applicationAsyncResource;
 		this.valintakoeResource = valintakoeResource;
 		this.applicationResource = applicationResource;
 		this.hakukohdeResource = hakukohdeResource;
@@ -100,6 +107,15 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						String hakukohdeOid = hakukohdeOid(exchange);
 						String hakuNimi = new Teksti(hakuTarjonnalta.getHaku(
 								hakuOid).getNimi()).getTeksti();
+						Future<List<Hakemus>> hakemuksetFuture = null;
+						try {
+							hakemuksetFuture = applicationAsyncResource
+									.getApplicationsByOid(hakuOid, hakukohdeOid);
+						} catch (Exception e) {
+							LOG.error(
+									"Hakemusten haku hetua varten epaonnistui! Jatketaan silti koska ei ole kriittista! {}",
+									e.getMessage());
+						}
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
 						HakukohdeDTO hnimi = hakukohdeTarjonnalta
 								.haeHakukohdeNimi(hakukohdeOid);
@@ -134,12 +150,23 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 										hakukohdeOid);
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
 						// LOG.error("Excelin luonti");
+
+						List<Hakemus> hakemukset = null;
+						try {
+							hakemukset = hakemuksetFuture.get(9000,
+									TimeUnit.MILLISECONDS);
+						} catch (Exception e) {
+							LOG.error("Hakemusten haku timeouttasi {}",
+									e.getMessage());
+						}
+						if (hakemukset == null) {
+							hakemukset = Collections.emptyList();
+						}
 						PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
 								hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi,
-								hakukohdeNimi, tarjoajaNimi, Collections
-										.emptyList(), valintakoeTunnisteet,
-								osallistumistiedot, valintaperusteet,
-								pistetiedot);
+								hakukohdeNimi, tarjoajaNimi, hakemukset,
+								valintakoeTunnisteet, osallistumistiedot,
+								valintaperusteet, pistetiedot);
 						InputStream xlsx = pistesyottoExcel.getExcel()
 								.vieXlsx();
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
