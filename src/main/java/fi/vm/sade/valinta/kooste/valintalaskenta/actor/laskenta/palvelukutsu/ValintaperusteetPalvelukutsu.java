@@ -37,14 +37,21 @@ public class ValintaperusteetPalvelukutsu extends AbstraktiPalvelukutsu
 	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
 		aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
 			public Peruutettava get() {
-				return valintaperusteetAsyncResource.haeValintaperusteet(
-						getHakukohdeOid(), valinnanVaiheJarjestysluku,
-						valintaperusteet -> {
-							ValintaperusteetPalvelukutsu.this.valintaperusteet
-									.set(valintaperusteet);
-							takaisinkutsu
-									.accept(ValintaperusteetPalvelukutsu.this);
-						}, failureCallback(takaisinkutsu));
+				return valintaperusteetAsyncResource
+						.haeValintaperusteet(
+								getHakukohdeOid(),
+								valinnanVaiheJarjestysluku,
+								valintaperusteet -> {
+									if (valintaperusteet == null) {
+										LOG.error("Valintaperusteetpalvelu palautti null datajoukon!");
+										failureCallback(takaisinkutsu);
+										return;
+									}
+									ValintaperusteetPalvelukutsu.this.valintaperusteet
+											.set(valintaperusteet);
+									takaisinkutsu
+											.accept(ValintaperusteetPalvelukutsu.this);
+								}, failureCallback(takaisinkutsu));
 			}
 		});
 		return this;

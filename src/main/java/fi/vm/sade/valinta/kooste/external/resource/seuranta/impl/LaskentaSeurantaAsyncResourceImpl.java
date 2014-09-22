@@ -141,37 +141,20 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 			List<String> hakukohdeOids, Consumer<String> callback,
 			Consumer<Throwable> failureCallback) {
 		try {
-			if (valintakoelaskenta != null && valinnanvaihe != null) {
-				String url = new StringBuilder().append("/seuranta/laskenta/")
-						.append(hakuOid).append("/tyyppi/").append(tyyppi)
-						.append("/valinnanvaihe/").append(valinnanvaihe)
-						.append("/valintakoelaskenta/")
-						.append(valintakoelaskenta).toString();
-				WebClient
-						.fromClient(webClient)
-						.path(url)
-						.async()
-						.post(Entity.entity(gson.toJson(hakukohdeOids),
-								MediaType.APPLICATION_JSON_TYPE),
-								new Callback<String>(address, url, callback,
-										failureCallback,
-										new TypeToken<String>() {
-										}.getType()));
-			} else {
-				String url = new StringBuilder().append("/seuranta/laskenta/")
-						.append(hakuOid).append("/tyyppi/").append(tyyppi)
-						.toString();
-				WebClient
-						.fromClient(webClient)
-						.path(url)
-						.async()
-						.post(Entity.entity(gson.toJson(hakukohdeOids),
-								MediaType.APPLICATION_JSON_TYPE),
-								new Callback<String>(address, url, callback,
-										failureCallback,
-										new TypeToken<String>() {
-										}.getType()));
-			}
+			String url = new StringBuilder().append("/seuranta/laskenta/")
+					.append(hakuOid).append("/tyyppi/").append(tyyppi)
+					.append("/valinnanvaihe/").append(valinnanvaihe)
+					.append("/valintakoelaskenta/").append(valintakoelaskenta)
+					.toString();
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.post(Entity.entity(gson.toJson(hakukohdeOids),
+							MediaType.APPLICATION_JSON_TYPE),
+							new Callback<String>(address, url, callback,
+									failureCallback, new TypeToken<String>() {
+									}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}

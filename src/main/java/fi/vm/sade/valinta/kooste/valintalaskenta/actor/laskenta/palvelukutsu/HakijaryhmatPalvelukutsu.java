@@ -38,6 +38,11 @@ public class HakijaryhmatPalvelukutsu extends AbstraktiPalvelukutsu implements
 						.haeHakijaryhmat(
 								getHakukohdeOid(),
 								hakijaryhmat -> {
+									if (hakijaryhmat == null) {
+										LOG.error("Hakijaryhmatpalvelu palautti null datajoukon!");
+										failureCallback(takaisinkutsu);
+										return;
+									}
 									HakijaryhmatPalvelukutsu.this.hakijaryhmat
 											.set(hakijaryhmat);
 									takaisinkutsu

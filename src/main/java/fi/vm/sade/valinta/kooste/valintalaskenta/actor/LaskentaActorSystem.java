@@ -89,6 +89,7 @@ public class LaskentaActorSystem implements
 						public LaskentaActor create() throws Exception {
 							if (LaskentaTyyppi.VALINTAKOELASKENTA
 									.equals(laskentaTyyppi)) {
+								LOG.error("Muodostetaan VALINTAKOELASKENTA");
 								return laskentaActorFactory
 										.createValintakoelaskentaActor(uuid,
 												hakuOid, valinnanvaiheet,
@@ -97,12 +98,19 @@ public class LaskentaActorSystem implements
 							}
 							if (LaskentaTyyppi.VALINTALASKENTA
 									.equals(laskentaTyyppi)) {
+								LOG.error("Muodostetaan VALINTALASKENTA");
 								return laskentaActorFactory
 										.createValintalaskentaActor(uuid,
 												hakuOid, valinnanvaiheet,
 												laskentaJaHaku
 														.getHakukohdeOids());
 							} else {
+								LOG.error(
+										"Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}",
+										laskentaJaHaku.getLaskenta()
+												.getValinnanvaihe(),
+										laskentaJaHaku.getLaskenta()
+												.getValintakoelaskenta());
 								return laskentaActorFactory
 										.createValintalaskentaJaValintakoelaskentaActor(
 												uuid, hakuOid, valinnanvaiheet,
