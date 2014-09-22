@@ -40,10 +40,10 @@ public class JatkuvaSijoittelu {
 
                     hoursBetween = ChronoUnit.HOURS.between(viimeksiAjettu, now);
                 }
-				if (!sijoittelu.isAjossa() &&
+				if (sijoittelu.isAjossa() &&
                         sijoittelu.getAjotiheys() != null && sijoittelu.getAloitusajankohta() != null &&
                         hoursBetween >= sijoittelu.getAjotiheys() &&
-                        now.isAfter(sijoittelu.getAloitusajankohta().toInstant()) || !sijoittelu.isAjossa() &&
+                        now.isAfter(sijoittelu.getAloitusajankohta().toInstant()) || sijoittelu.isAjossa() &&
                         sijoittelu.getAjotiheys() == null && sijoittelu.getAloitusajankohta() == null) {
 					LOG.warn(
 							"Aloitetaan jatkuvasijoittelu ajossa olevalle haulle {}",
