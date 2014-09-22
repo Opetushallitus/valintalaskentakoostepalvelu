@@ -143,18 +143,23 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 		try {
 			String url = new StringBuilder().append("/seuranta/laskenta/")
 					.append(hakuOid).append("/tyyppi/").append(tyyppi)
-					.append("/valinnanvaihe/").append(valinnanvaihe)
-					.append("/valintakoelaskenta/").append(valintakoelaskenta)
 					.toString();
-			WebClient
-					.fromClient(webClient)
-					.path(url)
-					.async()
-					.post(Entity.entity(gson.toJson(hakukohdeOids),
+			WebClient wc = WebClient.fromClient(webClient).path(url);
+			//
+			if (valinnanvaihe != null) {
+				wc.query("valinnanvaihe", valinnanvaihe);
+			}
+			//
+			if (valintakoelaskenta != null) {
+				wc.query("valintakoelaskenta", valintakoelaskenta);
+			}
+			//
+			wc.async().post(
+					Entity.entity(gson.toJson(hakukohdeOids),
 							MediaType.APPLICATION_JSON_TYPE),
-							new Callback<String>(address, url, callback,
-									failureCallback, new TypeToken<String>() {
-									}.getType()));
+					new Callback<String>(address, url, callback,
+							failureCallback, new TypeToken<String>() {
+							}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
