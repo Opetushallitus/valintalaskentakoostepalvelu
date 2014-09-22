@@ -34,15 +34,15 @@ public class JatkuvaSijoittelu {
 					continue;
 				}
                 Instant now = Instant.now();
-                long minutesBetween = 0;
+                long hoursBetween = 0;
                 if (sijoittelu.getViimeksiAjettu() != null) {
                     Instant viimeksiAjettu = sijoittelu.getViimeksiAjettu().toInstant();
 
-                    minutesBetween = ChronoUnit.MINUTES.between(viimeksiAjettu, now);
+                    hoursBetween = ChronoUnit.HOURS.between(viimeksiAjettu, now);
                 }
 				if (sijoittelu.isAjossa() &&
                         sijoittelu.getAjotiheys() != null && sijoittelu.getAloitusajankohta() != null &&
-                        minutesBetween >= sijoittelu.getAjotiheys() &&
+                        hoursBetween >= sijoittelu.getAjotiheys() &&
                         now.isAfter(sijoittelu.getAloitusajankohta().toInstant()) || sijoittelu.isAjossa() &&
                         sijoittelu.getAjotiheys() == null && sijoittelu.getAloitusajankohta() == null) {
 					LOG.warn(
