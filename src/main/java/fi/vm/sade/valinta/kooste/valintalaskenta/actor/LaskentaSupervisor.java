@@ -9,5 +9,6 @@ public interface LaskentaSupervisor extends ValintalaskentaKerrallaRouteValvomo 
 	void valmis(String uuid);
 
 	void luoJaKaynnistaLaskenta(String uuid, String hakuOid,
+			boolean osittainen,
 			Function<LaskentaSupervisor, LaskentaActor> laskentaProducer);
 }

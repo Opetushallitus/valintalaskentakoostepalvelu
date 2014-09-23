@@ -6,13 +6,19 @@ public class LaskentaActorWrapper implements Laskenta {
 
 	private final String uuid;
 	private final String hakuOid;
+	private final boolean osittainen;
 	private final LaskentaActor laskentaActor;
 
 	public LaskentaActorWrapper(String uuid, String hakuOid,
-			LaskentaActor laskentaActor) {
+			boolean osittainen, LaskentaActor laskentaActor) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
+		this.osittainen = osittainen;
 		this.laskentaActor = laskentaActor;
+	}
+
+	public LaskentaActor laskentaActor() {
+		return laskentaActor;
 	}
 
 	public String getHakuOid() {
@@ -24,7 +30,7 @@ public class LaskentaActorWrapper implements Laskenta {
 	}
 
 	public boolean isOsittainenLaskenta() {
-		return false;
+		return osittainen;
 	}
 
 	public boolean isValmis() {

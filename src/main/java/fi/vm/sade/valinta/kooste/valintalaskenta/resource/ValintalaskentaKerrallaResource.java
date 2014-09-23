@@ -112,28 +112,64 @@ public class ValintalaskentaKerrallaResource {
 					hakuOid,
 					new Maski(whitelist, maski),
 					(hakukohdeOids, laskennanAloitus) -> {
-						seurantaAsyncResource.luoLaskenta(
-								hakuOid,
-								tyyppi,
-								valinnanvaihe,
-								valintakoelaskenta,
-								hakukohdeOids
-										.stream()
-										.map(hk -> new HakukohdeDto(hk
-												.getHakukohdeOid(), hk
-												.getOrganisaatioOid()))
-										.collect(Collectors.toList()),
-								uuid -> {
-									laskennanAloitus.accept(uuid);
-								},
-								poikkeus -> {
-									LOG.error(
-											"Seurannasta uuden laskennan haku paatyi virheeseen: {}",
-											poikkeus.getMessage());
-									asyncResponse.resume(Response.serverError()
-											.entity(poikkeus.getMessage())
+						List<HakukohdeDto> hakukohdeDtos = hakukohdeOids
+								.stream()
+								.filter(hk -> {
+									if (hk == null) {
+										LOG.error("Null referenssi hakukohdeOidsien joukossa laskentaa luotaessa!");
+										return false;
+									}
+									if (hk.getHakukohdeOid() == null) {
+										LOG.error(
+												"HakukohdeOid oli null laskentaa luotaessa! OrganisaatioOid == {}, joten hakukohde ohitetaan!",
+												hk.getOrganisaatioOid());
+										return false;
+									}
+									if (hk.getOrganisaatioOid() == null) {
+										LOG.error(
+												"OrganisaatioOid oli null laskentaa luotaessa! HakukohdeOid == {}, joten hakukohde ohitetaan!",
+												hk.getHakukohdeOid());
+										return false;
+									}
+									return true;
+								})
+								.map(hk -> new HakukohdeDto(hk
+										.getHakukohdeOid(), hk
+										.getOrganisaatioOid()))
+								.collect(Collectors.toList());
+						if (hakukohdeDtos.isEmpty()
+								|| hakukohdeDtos.size() == 0) {
+							LOG.error("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
+							asyncResponse
+									.resume(Response
+											.serverError()
+											.entity("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!")
 											.build());
-								});
+							throw new RuntimeException(
+									"Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
+						} else {
+							LOG.error(
+									"Hakukohteita puuttuvien organisaatio-oidien vuoksi filtteroinnin jalkeen {}/{}!",
+									hakukohdeDtos.size(), hakukohdeOids.size());
+							seurantaAsyncResource.luoLaskenta(
+									hakuOid,
+									tyyppi,
+									valinnanvaihe,
+									valintakoelaskenta,
+									hakukohdeDtos,
+									uuid -> {
+										laskennanAloitus.accept(uuid);
+									},
+									poikkeus -> {
+										LOG.error(
+												"Seurannasta uuden laskennan haku paatyi virheeseen: {}",
+												poikkeus.getMessage());
+										asyncResponse.resume(Response
+												.serverError()
+												.entity(poikkeus.getMessage())
+												.build());
+									});
+						}
 					}, valinnanvaihe, valintakoelaskenta, asyncResponse);
 		} catch (Exception e) {
 			LOG.error(
@@ -261,7 +297,7 @@ public class ValintalaskentaKerrallaResource {
 					}
 					final Collection<HakukohdeJaOrganisaatio> finalOids = oids;
 					seurantaTunnus.accept(
-							haunHakukohteetOids,
+							finalOids,
 							uuid -> {
 								valintalaskentaRoute
 										.suoritaValintalaskentaKerralla(new LaskentaAloitus(
