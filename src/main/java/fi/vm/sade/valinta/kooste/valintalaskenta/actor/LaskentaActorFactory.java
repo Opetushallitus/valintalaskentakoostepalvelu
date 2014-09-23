@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintakoelaskentaPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintalaskentaJaValintakoelaskentaPalvelukutsu;
@@ -49,7 +50,7 @@ public class LaskentaActorFactory {
 
 	public LaskentaActor createValintakoelaskentaActor(final String uuid,
 			final String hakuOid, final Integer valinnanvaihe,
-			final Collection<String> hakukohdeOids) {
+			final Collection<HakukohdeJaOrganisaatio> hakukohdeOids) {
 		final PalvelukutsuStrategia laskentaStrategia = createStrategia();
 		final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
 		final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
@@ -77,7 +78,7 @@ public class LaskentaActorFactory {
 
 	public LaskentaActor createValintalaskentaActor(final String uuid,
 			final String hakuOid, final Integer valinnanvaihe,
-			final Collection<String> hakukohdeOids) {
+			final Collection<HakukohdeJaOrganisaatio> hakukohdeOids) {
 		final PalvelukutsuStrategia laskentaStrategia = createStrategia();
 		final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
 		final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
@@ -109,7 +110,8 @@ public class LaskentaActorFactory {
 
 	public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(
 			final String uuid, final String hakuOid,
-			final Integer valinnanvaihe, final Collection<String> hakukohdeOids) {
+			final Integer valinnanvaihe,
+			final Collection<HakukohdeJaOrganisaatio> hakukohdeOids) {
 		final PalvelukutsuStrategia laskentaStrategia = createStrategia();
 		final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
 		final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();

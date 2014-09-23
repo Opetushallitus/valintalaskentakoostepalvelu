@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakemuksetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.LisatiedotPalvelukutsu;
@@ -33,7 +34,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 	private final HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu;
 
-	public ValintalaskentaPalvelukutsu(String hakukohdeOid,
+	public ValintalaskentaPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			LisatiedotPalvelukutsu lisatiedotPalvelukutsu,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
@@ -44,7 +45,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 			PalvelukutsuStrategia valintaperusteetStrategia,
 			PalvelukutsuStrategia hakijaryhmatStrategia) {
 		super(
-				hakukohdeOid,
+				hakukohdeOid.getHakukohdeOid(),
 				Arrays.asList(
 						new PalvelukutsuJaPalvelukutsuStrategia(
 								lisatiedotPalvelukutsu, lisatiedotStrategia),

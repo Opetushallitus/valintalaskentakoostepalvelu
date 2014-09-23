@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditiona
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.Converter;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakemuksetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.LisatiedotPalvelukutsu;
@@ -43,7 +44,7 @@ public class ValintakoelaskentaPalvelukutsu extends
 	private final LisatiedotPalvelukutsu lisatiedotPalvelukutsu;
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 
-	public ValintakoelaskentaPalvelukutsu(String hakukohdeOid,
+	public ValintakoelaskentaPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			LisatiedotPalvelukutsu lisatiedotPalvelukutsu,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
@@ -51,7 +52,7 @@ public class ValintakoelaskentaPalvelukutsu extends
 			PalvelukutsuStrategia lisatiedotStrategia,
 			PalvelukutsuStrategia hakemuksetStrategia,
 			PalvelukutsuStrategia valintaperusteetStrategia) {
-		super(hakukohdeOid, Arrays
+		super(hakukohdeOid.getHakukohdeOid(), Arrays
 				.asList(new PalvelukutsuJaPalvelukutsuStrategia(
 						lisatiedotPalvelukutsu, lisatiedotStrategia),
 						new PalvelukutsuJaPalvelukutsuStrategia(

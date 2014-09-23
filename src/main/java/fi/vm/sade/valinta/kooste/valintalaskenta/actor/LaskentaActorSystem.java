@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -28,8 +29,9 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaImpl;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
@@ -71,15 +73,19 @@ public class LaskentaActorSystem implements
 				laskentaSupervisor);
 	}
 
+	@Override
 	public void suoritaValintalaskentaKerralla(
-			final LaskentaJaHaku laskentaJaHaku, AtomicBoolean lopetusehto) {
-		final LaskentaTyyppi laskentaTyyppi = asLaskentaTyyppi(laskentaJaHaku
-				.getLaskenta());
-		final Integer valinnanvaiheet = asValinnanvaihe(laskentaJaHaku
-				.getLaskenta().getValinnanvaihe());
-		final String uuid = laskentaJaHaku.getLaskenta().getUuid();
-		final String hakuOid = laskentaJaHaku.getLaskenta().getHakuOid();
-
+			final LaskentaAloitus laskentaAloitus) {
+		final LaskentaTyyppi laskentaTyyppi = asLaskentaTyyppi(laskentaAloitus);
+		final Integer valinnanvaiheet = asValinnanvaihe(laskentaAloitus
+				.getValinnanvaihe());
+		final String uuid = laskentaAloitus.getUuid();
+		final String hakuOid = laskentaAloitus.getHakuOid();
+		final Collection<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatio = laskentaAloitus
+				.getHakukohdeDtos()
+				.stream()
+				.map(hk -> new HakukohdeJaOrganisaatio(hk.getHakukohdeOid(), hk
+						.getOrganisaatioOid())).collect(Collectors.toList());
 		laskentaSupervisor.luoJaKaynnistaLaskenta(uuid, hakuOid, lsup -> {
 
 			return typed.typedActorOf(new TypedProps<LaskentaActor>(
@@ -93,8 +99,7 @@ public class LaskentaActorSystem implements
 								return laskentaActorFactory
 										.createValintakoelaskentaActor(uuid,
 												hakuOid, valinnanvaiheet,
-												laskentaJaHaku
-														.getHakukohdeOids());
+												hakukohdeJaOrganisaatio);
 							}
 							if (LaskentaTyyppi.VALINTALASKENTA
 									.equals(laskentaTyyppi)) {
@@ -102,20 +107,16 @@ public class LaskentaActorSystem implements
 								return laskentaActorFactory
 										.createValintalaskentaActor(uuid,
 												hakuOid, valinnanvaiheet,
-												laskentaJaHaku
-														.getHakukohdeOids());
+												hakukohdeJaOrganisaatio);
 							} else {
 								LOG.error(
 										"Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}",
-										laskentaJaHaku.getLaskenta()
-												.getValinnanvaihe(),
-										laskentaJaHaku.getLaskenta()
-												.getValintakoelaskenta());
+										laskentaAloitus.getValinnanvaihe(),
+										laskentaAloitus.getValintakoelaskenta());
 								return laskentaActorFactory
 										.createValintalaskentaJaValintakoelaskentaActor(
 												uuid, hakuOid, valinnanvaiheet,
-												laskentaJaHaku
-														.getHakukohdeOids());
+												hakukohdeJaOrganisaatio);
 							}
 						}
 					}));
@@ -147,7 +148,7 @@ public class LaskentaActorSystem implements
 	/**
 	 * Tilapainen workaround resurssin syotteiden normalisointiin
 	 */
-	private LaskentaTyyppi asLaskentaTyyppi(LaskentaImpl l) {
+	private LaskentaTyyppi asLaskentaTyyppi(LaskentaAloitus l) {
 		if (Boolean.TRUE.equals(l.getValintakoelaskenta())) {
 			return LaskentaTyyppi.VALINTAKOELASKENTA;
 		} else {

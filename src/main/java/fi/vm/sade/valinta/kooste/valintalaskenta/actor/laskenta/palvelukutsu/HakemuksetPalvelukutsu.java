@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditiona
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 
 /**
  * 
@@ -28,9 +29,10 @@ public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements
 	private final ApplicationAsyncResource applicationAsyncResource;
 	private final AtomicReference<List<Hakemus>> hakemukset;
 
-	public HakemuksetPalvelukutsu(String hakuOid, String hakukohdeOid,
+	public HakemuksetPalvelukutsu(String hakuOid,
+			HakukohdeJaOrganisaatio hakukohdeOid,
 			ApplicationAsyncResource applicationAsyncResource) {
-		super(hakukohdeOid);
+		super(hakukohdeOid.getHakukohdeOid());
 		this.hakuOid = hakuOid;
 		this.applicationAsyncResource = applicationAsyncResource;
 		this.hakemukset = new AtomicReference<>();

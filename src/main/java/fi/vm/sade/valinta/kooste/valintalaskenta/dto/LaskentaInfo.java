@@ -18,12 +18,6 @@ public interface LaskentaInfo {
 	 * 
 	 * @return
 	 */
-	boolean isValmis();
-
-	/**
-	 * 
-	 * @return
-	 */
 	boolean isOsittainenLaskenta(); // eli maskilla aloitettu osajoukko koko
 									// laskennasta
 

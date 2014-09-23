@@ -25,6 +25,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.PalvelukutsunUudelleenAktivointiPoikkeus;
@@ -42,8 +43,10 @@ public class PalvelukutsuStrategiaTesti {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(PalvelukutsuStrategiaTesti.class);
 
-	private final String HAKUKOHDE_OID1 = "hakukohde.oid1";
-	private final String HAKUKOHDE_OID2 = "hakukohde.oid2";
+	private final HakukohdeJaOrganisaatio HAKUKOHDE_OID1 = new HakukohdeJaOrganisaatio(
+			"hakukohde.oid1", "org.oid1");
+	private final HakukohdeJaOrganisaatio HAKUKOHDE_OID2 = new HakukohdeJaOrganisaatio(
+			"hakukohde.oid2", "org.oid2");
 
 	@Test
 	public void palvelukutsustrategiaKaynnistaaPalvelukutsunTesti() {

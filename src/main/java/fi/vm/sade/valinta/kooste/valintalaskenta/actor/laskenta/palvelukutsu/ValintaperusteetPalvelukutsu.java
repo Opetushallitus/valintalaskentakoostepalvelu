@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 
 /**
  * 
@@ -25,10 +26,10 @@ public class ValintaperusteetPalvelukutsu extends AbstraktiPalvelukutsu
 	private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 	private final AtomicReference<List<ValintaperusteetDTO>> valintaperusteet;
 
-	public ValintaperusteetPalvelukutsu(String hakukohdeOid,
+	public ValintaperusteetPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
 			Integer valinnanVaiheJarjestysluku,
 			ValintaperusteetAsyncResource valintaperusteetAsyncResource) {
-		super(hakukohdeOid);
+		super(hakukohdeOid.getHakukohdeOid());
 		this.valinnanVaiheJarjestysluku = valinnanVaiheJarjestysluku;
 		this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
 		this.valintaperusteet = new AtomicReference<>();

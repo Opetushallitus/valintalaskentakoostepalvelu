@@ -13,6 +13,7 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 
 /**
  * 
@@ -27,9 +28,10 @@ public class LisatiedotPalvelukutsu extends AbstraktiPalvelukutsu implements
 	private final ApplicationAsyncResource applicationAsyncResource;
 	private final AtomicReference<List<ApplicationAdditionalDataDTO>> lisatiedot;
 
-	public LisatiedotPalvelukutsu(String hakuOid, String hakukohdeOid,
+	public LisatiedotPalvelukutsu(String hakuOid,
+			HakukohdeJaOrganisaatio hakukohdeOid,
 			ApplicationAsyncResource applicationAsyncResource) {
-		super(hakukohdeOid);
+		super(hakukohdeOid.getHakukohdeOid());
 		this.hakuOid = hakuOid;
 		this.applicationAsyncResource = applicationAsyncResource;
 		this.lisatiedot = new AtomicReference<>();

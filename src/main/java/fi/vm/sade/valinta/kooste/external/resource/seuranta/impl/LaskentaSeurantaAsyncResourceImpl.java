@@ -25,6 +25,7 @@ import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.ResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
@@ -138,7 +139,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 
 	public void luoLaskenta(String hakuOid, LaskentaTyyppi tyyppi,
 			Integer valinnanvaihe, Boolean valintakoelaskenta,
-			List<String> hakukohdeOids, Consumer<String> callback,
+			List<HakukohdeDto> hakukohdeOids, Consumer<String> callback,
 			Consumer<Throwable> failureCallback) {
 		try {
 			String url = new StringBuilder().append("/seuranta/laskenta/")

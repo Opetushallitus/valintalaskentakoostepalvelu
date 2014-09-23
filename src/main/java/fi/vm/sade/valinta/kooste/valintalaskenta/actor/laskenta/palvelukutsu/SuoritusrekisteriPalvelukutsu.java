@@ -11,23 +11,17 @@ import org.slf4j.LoggerFactory;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
-public class HakijaryhmatPalvelukutsu extends AbstraktiPalvelukutsu implements
-		Palvelukutsu {
+public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu
+		implements Palvelukutsu {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(HakijaryhmatPalvelukutsu.class);
 	private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 	private final AtomicReference<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat;
 
-	public HakijaryhmatPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
+	public SuoritusrekisteriPalvelukutsu(String hakukohdeOid,
 			ValintaperusteetAsyncResource valintaperusteetAsyncResource) {
-		super(hakukohdeOid.getHakukohdeOid());
+		super(hakukohdeOid);
 		this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
 		this.hakijaryhmat = new AtomicReference<>();
 	}
@@ -39,15 +33,10 @@ public class HakijaryhmatPalvelukutsu extends AbstraktiPalvelukutsu implements
 						.haeHakijaryhmat(
 								getHakukohdeOid(),
 								hakijaryhmat -> {
-									if (hakijaryhmat == null) {
-										LOG.error("Hakijaryhmatpalvelu palautti null datajoukon!");
-										failureCallback(takaisinkutsu);
-										return;
-									}
-									HakijaryhmatPalvelukutsu.this.hakijaryhmat
+									SuoritusrekisteriPalvelukutsu.this.hakijaryhmat
 											.set(hakijaryhmat);
 									takaisinkutsu
-											.accept(HakijaryhmatPalvelukutsu.this);
+											.accept(SuoritusrekisteriPalvelukutsu.this);
 								}, failureCallback(takaisinkutsu));
 			}
 		});

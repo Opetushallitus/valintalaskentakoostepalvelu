@@ -121,9 +121,8 @@ public class KelaLuontiRouteImpl extends KoostepalveluRouteBuilder<Luonti> {
 								"Kelatiedoston luonti paattyi virheeseen\r\n{}",
 								simple("${exception.message}").evaluate(
 										exchange, String.class));
-						exchange.getProperty(
-								ValintalaskentaKerrallaRoute.LOPETUSEHTO,
-								AtomicBoolean.class).set(true);
+						exchange.getProperty("lopetusehto", AtomicBoolean.class)
+								.set(true);
 					}
 				})
 				//
