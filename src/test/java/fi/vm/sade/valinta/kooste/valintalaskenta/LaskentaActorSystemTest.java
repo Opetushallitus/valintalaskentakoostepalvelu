@@ -54,7 +54,7 @@ public class LaskentaActorSystemTest {
 		LOG.info("Ajossa olevat laskennat nyt {}",
 				laskentaSupervisor.ajossaOlevatLaskennat());
 
-		laskentaSupervisor.luoJaKaynnistaLaskenta(UUID, HAKUOID,
+		laskentaSupervisor.luoJaKaynnistaLaskenta(UUID, HAKUOID, false,
 				lsup -> create(lsup));
 
 		LOG.info("Ajossa olevat laskennat nyt {}",

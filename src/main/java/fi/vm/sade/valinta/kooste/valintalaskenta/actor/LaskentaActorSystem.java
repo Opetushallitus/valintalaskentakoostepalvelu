@@ -88,41 +88,47 @@ public class LaskentaActorSystem implements
 				.stream()
 				.map(hk -> new HakukohdeJaOrganisaatio(hk.getHakukohdeOid(), hk
 						.getOrganisaatioOid())).collect(Collectors.toList());
-		laskentaSupervisor.luoJaKaynnistaLaskenta(uuid, hakuOid, lsup -> {
+		laskentaSupervisor.luoJaKaynnistaLaskenta(uuid, hakuOid,
+				laskentaAloitus.isOsittainenLaskenta(), lsup -> {
 
-			return typed.typedActorOf(new TypedProps<LaskentaActor>(
-					LaskentaActor.class, new Creator<LaskentaActor>() {
-						private static final long serialVersionUID = 8521766139538840217L;
+					return typed.typedActorOf(new TypedProps<LaskentaActor>(
+							LaskentaActor.class, new Creator<LaskentaActor>() {
+								private static final long serialVersionUID = 8521766139538840217L;
 
-						public LaskentaActor create() throws Exception {
-							if (LaskentaTyyppi.VALINTAKOELASKENTA
-									.equals(laskentaTyyppi)) {
-								LOG.error("Muodostetaan VALINTAKOELASKENTA");
-								return laskentaActorFactory
-										.createValintakoelaskentaActor(uuid,
-												hakuOid, valinnanvaiheet,
-												hakukohdeJaOrganisaatio);
-							}
-							if (LaskentaTyyppi.VALINTALASKENTA
-									.equals(laskentaTyyppi)) {
-								LOG.error("Muodostetaan VALINTALASKENTA");
-								return laskentaActorFactory
-										.createValintalaskentaActor(uuid,
-												hakuOid, valinnanvaiheet,
-												hakukohdeJaOrganisaatio);
-							} else {
-								LOG.error(
-										"Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}",
-										laskentaAloitus.getValinnanvaihe(),
-										laskentaAloitus.getValintakoelaskenta());
-								return laskentaActorFactory
-										.createValintalaskentaJaValintakoelaskentaActor(
-												uuid, hakuOid, valinnanvaiheet,
-												hakukohdeJaOrganisaatio);
-							}
-						}
-					}));
-		});
+								public LaskentaActor create() throws Exception {
+									if (LaskentaTyyppi.VALINTAKOELASKENTA
+											.equals(laskentaTyyppi)) {
+										LOG.error("Muodostetaan VALINTAKOELASKENTA");
+										return laskentaActorFactory
+												.createValintakoelaskentaActor(
+														uuid, hakuOid,
+														valinnanvaiheet,
+														hakukohdeJaOrganisaatio);
+									}
+									if (LaskentaTyyppi.VALINTALASKENTA
+											.equals(laskentaTyyppi)) {
+										LOG.error("Muodostetaan VALINTALASKENTA");
+										return laskentaActorFactory
+												.createValintalaskentaActor(
+														uuid, hakuOid,
+														valinnanvaiheet,
+														hakukohdeJaOrganisaatio);
+									} else {
+										LOG.error(
+												"Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}",
+												laskentaAloitus
+														.getValinnanvaihe(),
+												laskentaAloitus
+														.getValintakoelaskenta());
+										return laskentaActorFactory
+												.createValintalaskentaJaValintakoelaskentaActor(
+														uuid, hakuOid,
+														valinnanvaiheet,
+														hakukohdeJaOrganisaatio);
+									}
+								}
+							}));
+				});
 
 	}
 

@@ -36,32 +36,32 @@ public class LaskentaSupervisorActorImpl implements LaskentaSupervisor {
 
 	@Override
 	public void valmis(String uuid) {
-		ajossaOlevatLaskennat
-				.removeIf(l -> {
-					if (uuid.equals(l.getUuid())) {
-						try {
-							TypedActor.get(TypedActor.context().system())
-									.poisonPill(l);
-							LOG.error(
-									"PoisonPill lahetetty onnistuneesti Actorille {}",
-									uuid);
-						} catch (Exception e) {
-							LOG.error(
-									"PoisonPill lahetys epaonnistui Actorille {}: {}",
-									uuid, e.getMessage());
-						}
-						return true;
-					}
-					return false;
-				});
+		ajossaOlevatLaskennat.removeIf(l -> {
+			if (uuid.equals(l.getUuid())) {
+				try {
+					TypedActor.get(TypedActor.context().system()).poisonPill(
+							l.laskentaActor());
+					LOG.error(
+							"PoisonPill lahetetty onnistuneesti Actorille {}",
+							uuid);
+				} catch (Exception e) {
+					LOG.error(
+							"PoisonPill lahetys epaonnistui Actorille {}: {}",
+							uuid, e.getMessage());
+				}
+				return true;
+			}
+			return false;
+		});
 	}
 
 	public void luoJaKaynnistaLaskenta(String uuid, String hakuOid,
+			boolean osittainen,
 			Function<LaskentaSupervisor, LaskentaActor> laskentaProducer) {
 		LaskentaActor laskentaActor = laskentaProducer.apply(TypedActor.self());
 		laskentaActor.aloita();
 		ajossaOlevatLaskennat.add(new LaskentaActorWrapper(uuid, hakuOid,
-				laskentaActor));
+				osittainen, laskentaActor));
 	}
 
 	public List<Laskenta> ajossaOlevatLaskennat() {

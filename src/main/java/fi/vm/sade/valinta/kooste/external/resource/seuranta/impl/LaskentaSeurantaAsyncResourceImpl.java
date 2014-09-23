@@ -155,12 +155,13 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 				wc.query("valintakoelaskenta", valintakoelaskenta);
 			}
 			//
-			wc.async().post(
-					Entity.entity(gson.toJson(hakukohdeOids),
+			wc.async()
+			//
+					.post(Entity.entity(hakukohdeOids,
 							MediaType.APPLICATION_JSON_TYPE),
-					new Callback<String>(address, url, callback,
-							failureCallback, new TypeToken<String>() {
-							}.getType()));
+							new Callback<String>(address, url, callback,
+									failureCallback, new TypeToken<String>() {
+									}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
