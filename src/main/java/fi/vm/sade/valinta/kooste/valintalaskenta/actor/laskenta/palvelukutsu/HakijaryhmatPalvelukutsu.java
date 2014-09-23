@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 
 /**
  * 
@@ -24,9 +25,9 @@ public class HakijaryhmatPalvelukutsu extends AbstraktiPalvelukutsu implements
 	private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 	private final AtomicReference<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat;
 
-	public HakijaryhmatPalvelukutsu(String hakukohdeOid,
+	public HakijaryhmatPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintaperusteetAsyncResource valintaperusteetAsyncResource) {
-		super(hakukohdeOid);
+		super(hakukohdeOid.getHakukohdeOid());
 		this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
 		this.hakijaryhmat = new AtomicReference<>();
 	}

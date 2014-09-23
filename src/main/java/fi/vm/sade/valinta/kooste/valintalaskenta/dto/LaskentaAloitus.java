@@ -1,53 +1,59 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
+
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
-public class LaskentaImpl implements Laskenta {
+public class LaskentaAloitus implements LaskentaInfo {
 	private final static Logger LOG = LoggerFactory
-			.getLogger(LaskentaImpl.class);
+			.getLogger(LaskentaAloitus.class);
 	private final static String NIMI_FORMAT = "Laskenta hakuOid(%s) uuid(%s) hakukohteita(%s/%s)";
 	private final String uuid;
 	private final String hakuOid;
 	private final boolean osittainenLaskenta; // eli ei koko haku, eli esim
 												// yksittainen hakukohde tai
 												// osajoukko haun hakukohteista
-	private final int hakukohteita;
-	private final AtomicBoolean lopetusehto;
-	private final AtomicInteger tehty = new AtomicInteger(0);
 	private final Integer valinnanvaihe;
 	private final Boolean valintakoelaskenta;
+	private final Collection<HakukohdeJaOrganisaatio> hakukohdeDtos;
 
-	public LaskentaImpl(String uuid, String hakuOid, int hakukohteita,
-			AtomicBoolean lopetusehto, Integer valinnanvaihe,
-			Boolean valintakoelaskenta) {
+	public LaskentaAloitus(String uuid, String hakuOid, Integer valinnanvaihe,
+			Boolean valintakoelaskenta,
+			Collection<HakukohdeJaOrganisaatio> hakukohdeDtos) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
-		this.hakukohteita = hakukohteita;
-		this.lopetusehto = lopetusehto;
 		this.osittainenLaskenta = false;
 		this.valinnanvaihe = valinnanvaihe;
 		this.valintakoelaskenta = valintakoelaskenta;
+		this.hakukohdeDtos = hakukohdeDtos;
 	}
 
-	public LaskentaImpl(String uuid, String hakuOid, int hakukohteita,
-			AtomicBoolean lopetusehto, boolean osittainenLaskenta,
-			Integer valinnanvaihe, Boolean valintakoelaskenta) {
+	public LaskentaAloitus(String uuid, String hakuOid,
+			boolean osittainenLaskenta, Integer valinnanvaihe,
+			Boolean valintakoelaskenta,
+			Collection<HakukohdeJaOrganisaatio> hakukohdeDtos) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
-		this.hakukohteita = hakukohteita;
-		this.lopetusehto = lopetusehto;
 		this.osittainenLaskenta = osittainenLaskenta;
 		this.valinnanvaihe = valinnanvaihe;
 		this.valintakoelaskenta = valintakoelaskenta;
+		this.hakukohdeDtos = hakukohdeDtos;
+	}
+
+	public Collection<HakukohdeJaOrganisaatio> getHakukohdeDtos() {
+		return hakukohdeDtos;
 	}
 
 	public Integer getValinnanvaihe() {
@@ -62,29 +68,6 @@ public class LaskentaImpl implements Laskenta {
 		return osittainenLaskenta;
 	}
 
-	public AtomicBoolean getLopetusehto() {
-		return lopetusehto;
-	}
-
-	/**
-	 * @return true jos laskenta valmis
-	 */
-	public boolean merkkaaHakukohdeTehdyksi() {
-		int nyt = tehty.incrementAndGet();
-		if (nyt > hakukohteita) {
-			LOG.error("Tehdyt tyot ylittaa maariteltyjen toiden maaran laskenta reitilla!");
-		}
-		return nyt >= hakukohteita;
-	}
-
-	public boolean isValmis() {
-		return tehty.get() >= hakukohteita || lopetusehto.get();
-	}
-
-	public int getHakukohteita() {
-		return hakukohteita;
-	}
-
 	public String getHakuOid() {
 		return hakuOid;
 	}
@@ -93,17 +76,8 @@ public class LaskentaImpl implements Laskenta {
 		return uuid;
 	}
 
-	@Override
-	public void lopeta() {
-		lopetusehto.set(true);
-	}
-
-	public AtomicInteger getTehty() {
-		return tehty;
-	}
-
 	public String toString() {
-		return String.format(NIMI_FORMAT, hakuOid, uuid, tehty.get(),
-				hakukohteita);
+		return String.format(NIMI_FORMAT, hakuOid, uuid);
 	}
+
 }

@@ -32,10 +32,12 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaImpl;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
@@ -53,23 +55,27 @@ public class ValintalaskentaTesti {
 
 	@Test
 	public void testaaValintalaskentaa() {
-		List<String> hakukohdeOids = Arrays.asList("h1", "h2", "h3");
+		List<HakukohdeJaOrganisaatio> hakukohdeOids = Arrays.asList(
+				new HakukohdeJaOrganisaatio("h1", "o1"),
+				new HakukohdeJaOrganisaatio("h2", "o2"),
+				new HakukohdeJaOrganisaatio("h3", "o3"));
 		String uuid = "uuid";
 		String hakuOid = "hakuOid";
 		LaskentaSeurantaAsyncResource seurantaAsyncResource = createMockLaskentaSeurantaAsyncResource();
 		ValintaperusteetAsyncResource valintaperusteetAsyncResource = createMockValintaperusteetAsyncResource();
 		ValintalaskentaAsyncResource valintalaskentaAsyncResource = createMockValintalaskentaAsyncResource();
 		ApplicationAsyncResource applicationAsyncResource = createMockApplicationAsyncResource();
+		SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = createMockSuoritusrekisteriAsyncResource();
 		LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(
 				seurantaAsyncResource, valintaperusteetAsyncResource,
-				valintalaskentaAsyncResource, applicationAsyncResource);
+				valintalaskentaAsyncResource, applicationAsyncResource,
+				suoritusrekisteriAsyncResource);
 
 		ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute = laskentaActorSystem;
-		LaskentaJaHaku laskentaJaHaku = new LaskentaJaHaku(new LaskentaImpl(
-				uuid, hakuOid, hakukohdeOids.size(), new AtomicBoolean(), null,
-				null), hakukohdeOids);
-		valintalaskentaKerrallaRoute.suoritaValintalaskentaKerralla(
-				laskentaJaHaku, null);
+		LaskentaAloitus laskentaJaHaku = new LaskentaAloitus(uuid, hakuOid,
+				null, null, hakukohdeOids);
+		valintalaskentaKerrallaRoute
+				.suoritaValintalaskentaKerralla(laskentaJaHaku);
 	}
 
 	public static LaskentaSeurantaAsyncResource createMockLaskentaSeurantaAsyncResource() {
@@ -134,6 +140,11 @@ public class ValintalaskentaTesti {
 		// }
 		// });
 		return asyncResource;
+	}
+
+	public static SuoritusrekisteriAsyncResource createMockSuoritusrekisteriAsyncResource() {
+		SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = mock(SuoritusrekisteriAsyncResource.class);
+		return suoritusrekisteriAsyncResource;
 	}
 
 	public static ApplicationAsyncResource createMockApplicationAsyncResource() {

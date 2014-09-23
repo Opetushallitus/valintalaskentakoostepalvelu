@@ -32,7 +32,7 @@ public class LaskentaWrapper {
 	private final List<ApplicationAdditionalDataDTO> lisatiedot;
 	private final List<ValintaperusteetHakijaryhmaDTO> hakijaryhmat;
 	private final String hakukohdeOid;
-	private final LaskentaImpl laskenta;
+	private final LaskentaAloitus laskenta;
 
 	public LaskentaWrapper(List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
 		if (tyot == null || tyot.size() != 4) {
@@ -66,7 +66,7 @@ public class LaskentaWrapper {
 		return hakijaryhmat;
 	}
 
-	public LaskentaImpl getLaskenta() {
+	public LaskentaAloitus getLaskenta() {
 		return laskenta;
 	}
 
@@ -117,7 +117,7 @@ public class LaskentaWrapper {
 		return tyot.iterator().next().getHakukohdeOid();
 	}
 
-	private LaskentaImpl extractLaskenta(
+	private LaskentaAloitus extractLaskenta(
 			List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
 		return tyot.iterator().next().getLaskenta();
 	}

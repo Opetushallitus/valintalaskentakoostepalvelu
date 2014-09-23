@@ -9,10 +9,12 @@ import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakemuksetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.LisatiedotPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.SuoritusrekisteriPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.ValintaperusteetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategia;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
@@ -32,19 +34,22 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 	private final LisatiedotPalvelukutsu lisatiedotPalvelukutsu;
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 	private final HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu;
+	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
 
-	public ValintalaskentaPalvelukutsu(String hakukohdeOid,
+	public ValintalaskentaPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			LisatiedotPalvelukutsu lisatiedotPalvelukutsu,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
 			ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
 			HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu,
+			SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu,
 			PalvelukutsuStrategia lisatiedotStrategia,
 			PalvelukutsuStrategia hakemuksetStrategia,
 			PalvelukutsuStrategia valintaperusteetStrategia,
-			PalvelukutsuStrategia hakijaryhmatStrategia) {
+			PalvelukutsuStrategia hakijaryhmatStrategia,
+			PalvelukutsuStrategia suoritusrekisteriStrategia) {
 		super(
-				hakukohdeOid,
+				hakukohdeOid.getHakukohdeOid(),
 				Arrays.asList(
 						new PalvelukutsuJaPalvelukutsuStrategia(
 								lisatiedotPalvelukutsu, lisatiedotStrategia),
@@ -54,12 +59,16 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 								valintaperusteetPalvelukutsu,
 								valintaperusteetStrategia),
 						new PalvelukutsuJaPalvelukutsuStrategia(
-								hakijaryhmatPalvelukutsu, hakijaryhmatStrategia)));
+								hakijaryhmatPalvelukutsu, hakijaryhmatStrategia),
+						new PalvelukutsuJaPalvelukutsuStrategia(
+								suoritusrekisteriPalvelukutsu,
+								suoritusrekisteriStrategia)));
 		this.hakijaryhmatPalvelukutsu = hakijaryhmatPalvelukutsu;
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
 		this.lisatiedotPalvelukutsu = lisatiedotPalvelukutsu;
 		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
 		this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
+		this.suoritusrekisteriPalvelukutsu = suoritusrekisteriPalvelukutsu;
 	}
 
 	private LaskeDTO muodostaLaskeDTO() {

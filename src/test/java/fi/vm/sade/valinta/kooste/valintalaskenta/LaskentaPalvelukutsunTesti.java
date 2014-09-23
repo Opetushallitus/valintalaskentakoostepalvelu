@@ -28,6 +28,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.AbstraktiLaskentaPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintakoelaskentaPalvelukutsu;
@@ -46,7 +47,8 @@ import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 public class LaskentaPalvelukutsunTesti {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(LaskentaPalvelukutsunTesti.class);
-	private static final String HAKUKOHDE_OID = "hk.oid";
+	private static final HakukohdeJaOrganisaatio HAKUKOHDE_OID = new HakukohdeJaOrganisaatio(
+			"hk.oid", "org.oid");
 
 	@Test
 	public void testaaLaskentaPalvelukutsunSuoritusta() {
@@ -77,7 +79,7 @@ public class LaskentaPalvelukutsunTesti {
 						new PalvelukutsuJaPalvelukutsuStrategia(lisatiedot, p4));
 
 		LaskentaPalvelukutsu laskentaPalvelukutsu = new AbstraktiLaskentaPalvelukutsu(
-				HAKUKOHDE_OID, palvelukutsut) {
+				HAKUKOHDE_OID.getHakukohdeOid(), palvelukutsut) {
 
 			@Override
 			public Palvelukutsu teePalvelukutsu(

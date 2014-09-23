@@ -18,7 +18,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaImpl;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
 
 /**
  * 

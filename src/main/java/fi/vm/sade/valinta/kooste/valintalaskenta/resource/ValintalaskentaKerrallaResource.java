@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,13 +43,15 @@ import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaImpl;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.excel.LaskentaDtoAsExcel;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
@@ -114,7 +117,12 @@ public class ValintalaskentaKerrallaResource {
 								tyyppi,
 								valinnanvaihe,
 								valintakoelaskenta,
-								hakukohdeOids,
+								hakukohdeOids
+										.stream()
+										.map(hk -> new HakukohdeDto(hk
+												.getHakukohdeOid(), hk
+												.getOrganisaatioOid()))
+										.collect(Collectors.toList()),
 								uuid -> {
 									laskennanAloitus.accept(uuid);
 								},
@@ -171,19 +179,27 @@ public class ValintalaskentaKerrallaResource {
 				.resetoiTilat(
 						uuid,
 						laskenta -> {
-							List<String> maski = laskenta
+
+							List<HakukohdeJaOrganisaatio> maski = laskenta
 									.getHakukohteet()
 									.stream()
 									.filter(h -> !HakukohdeTila.VALMIS.equals(h
 											.getTila()))
-									.map(h -> h.getHakukohdeOid())
+									.map(h -> new HakukohdeJaOrganisaatio(h
+											.getHakukohdeOid(), h
+											.getOrganisaatioOid()))
 									.collect(Collectors.toList());
-							kaynnistaLaskenta(laskenta.getHakuOid(), new Maski(
-									true, maski), (hakuJaHakukohteet,
-									laskennanAloitus) -> {
-								laskennanAloitus.accept(laskenta.getUuid());
-							}, laskenta.getValinnanvaihe(), laskenta
-									.getValintakoelaskenta(), asyncResponse);
+							kaynnistaLaskenta(
+									laskenta.getHakuOid(),
+									new Maski(true, maski.stream()
+											.map(hk -> hk.getHakukohdeOid())
+											.collect(Collectors.toList())),
+									(hakuJaHakukohteet, laskennanAloitus) -> {
+										laskennanAloitus.accept(laskenta
+												.getUuid());
+									}, laskenta.getValinnanvaihe(), laskenta
+											.getValintakoelaskenta(),
+									asyncResponse);
 						},
 						t -> {
 							LOG.error(
@@ -198,8 +214,10 @@ public class ValintalaskentaKerrallaResource {
 						});
 	}
 
-	private void kaynnistaLaskenta(String hakuOid, Maski maski,
-			BiConsumer<List<String>, Consumer<String>> seurantaTunnus,
+	private void kaynnistaLaskenta(
+			String hakuOid,
+			Maski maski,
+			BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
 			Integer valinnanvaihe, Boolean valintakoelaskenta,
 			AsyncResponse asyncResponse) {
 		if (StringUtils.isBlank(hakuOid)) {
@@ -228,68 +246,40 @@ public class ValintalaskentaKerrallaResource {
 			}
 		}
 		LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
-		// List<String> haunHakukohteetOids = null;
-		if (maski.isWhitelist()) { // whitelistilla ohitetaan haun hakukohteiden
-									// resolvaus
-			List<String> haunHakukohteetOids = Lists.newArrayList(maski
-					.getHakukohdeOidsMask());
-			seurantaTunnus.accept(haunHakukohteetOids, uuid -> {
-				AtomicBoolean lopetusehto = new AtomicBoolean(false);
-				valintalaskentaRoute.suoritaValintalaskentaKerralla(
-						new LaskentaJaHaku(new LaskentaImpl(uuid, hakuOid,
-								haunHakukohteetOids.size(), lopetusehto, maski
-										.isMask(), valinnanvaihe,
-								valintakoelaskenta), haunHakukohteetOids),
-						lopetusehto);
-				asyncResponse.resume(Response.ok(Vastaus.uudelleenOhjaus(uuid))
-						.build());
-			});
-
-		} else {
-			haunHakukohteet(
-					hakuOid,
-					haunHakukohteetOids -> {
-						if (maski.isMask()) {
-							haunHakukohteetOids = Lists.newArrayList(maski
-									.maskaa(haunHakukohteetOids));
-							if (haunHakukohteetOids.isEmpty()) {
-								throw new RuntimeException(
-										"Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa hakukohteettomasti.");
-							}
+		haunHakukohteet(
+				hakuOid,
+				haunHakukohteetOids -> {
+					Collection<HakukohdeJaOrganisaatio> oids;
+					if (maski.isMask()) {
+						oids = maski.maskaa(haunHakukohteetOids);
+						if (oids.isEmpty()) {
+							throw new RuntimeException(
+									"Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa hakukohteettomasti.");
 						}
-						final List<String> hOids = haunHakukohteetOids;
-						seurantaTunnus
-								.accept(haunHakukohteetOids,
-										uuid -> {
-											AtomicBoolean lopetusehto = new AtomicBoolean(
-													false);
-											valintalaskentaRoute
-													.suoritaValintalaskentaKerralla(
-															new LaskentaJaHaku(
-																	new LaskentaImpl(
-																			uuid,
-																			hakuOid,
-																			hOids.size(),
-																			lopetusehto,
-																			maski.isMask(),
-																			valinnanvaihe,
-																			valintakoelaskenta),
-																	hOids),
-															lopetusehto);
-											asyncResponse.resume(Response
-													.ok(Vastaus
-															.uudelleenOhjaus(uuid))
-													.build());
-										});
-					}, poikkeus -> {
-						asyncResponse.resume(Response.serverError()
-								.entity(poikkeus.getMessage()).build());
-					});
-		}
+					} else {
+						oids = haunHakukohteetOids;
+					}
+					final Collection<HakukohdeJaOrganisaatio> finalOids = oids;
+					seurantaTunnus.accept(
+							haunHakukohteetOids,
+							uuid -> {
+								valintalaskentaRoute
+										.suoritaValintalaskentaKerralla(new LaskentaAloitus(
+												uuid, hakuOid, maski.isMask(),
+												valinnanvaihe,
+												valintakoelaskenta, finalOids));
+								asyncResponse.resume(Response.ok(
+										Vastaus.uudelleenOhjaus(uuid)).build());
+							});
+				}, poikkeus -> {
+					asyncResponse.resume(Response.serverError()
+							.entity(poikkeus.getMessage()).build());
+				});
 	}
 
 	private void haunHakukohteet(String hakuOid,
-			Consumer<List<String>> callback, Consumer<Throwable> failureCallback) {
+			Consumer<List<HakukohdeJaOrganisaatio>> callback,
+			Consumer<Throwable> failureCallback) {
 		if (StringUtils.isBlank(hakuOid)) {
 			LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
 			throw new RuntimeException(
@@ -310,7 +300,7 @@ public class ValintalaskentaKerrallaResource {
 								throw new NullPointerException(
 										"Valintaperusteet palautti tyhjat hakukohdeviitteet!");
 							}
-							List<String> haunHakukohdeOidit = hakukohdeViitteet
+							List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet
 									.stream()
 									.filter(Objects::nonNull)
 									.filter(h -> {
@@ -338,7 +328,9 @@ public class ValintalaskentaKerrallaResource {
 													h.getOid(), h.getTila());
 										}
 										return julkaistu;
-									}).map(u -> u.getOid())
+									})
+									.map(u -> new HakukohdeJaOrganisaatio(u
+											.getOid(), u.getTarjoajaOid()))
 									.collect(Collectors.toList());
 							if (haunHakukohdeOidit.isEmpty()) {
 								LOG.error(
@@ -373,7 +365,7 @@ public class ValintalaskentaKerrallaResource {
 	@GET
 	@Path("/status/{uuid}")
 	@Produces(APPLICATION_JSON)
-	@ApiOperation(value = "Valintalaskennan tila", response = LaskentaImpl.class)
+	@ApiOperation(value = "Valintalaskennan tila", response = LaskentaAloitus.class)
 	public Laskenta status(@PathParam("uuid") String uuid) {
 		try {
 			return valintalaskentaValvomo.haeLaskenta(uuid);
@@ -401,7 +393,7 @@ public class ValintalaskentaKerrallaResource {
 	@GET
 	@Path("/status/{uuid}/xls")
 	@Produces("application/vnd.ms-excel")
-	@ApiOperation(value = "Valintalaskennan tila", response = LaskentaImpl.class)
+	@ApiOperation(value = "Valintalaskennan tila", response = LaskentaAloitus.class)
 	public void statusXls(final @PathParam("uuid") String uuid,
 			@Suspended AsyncResponse asyncResponse) {
 		asyncResponse.setTimeout(2L, TimeUnit.SECONDS);

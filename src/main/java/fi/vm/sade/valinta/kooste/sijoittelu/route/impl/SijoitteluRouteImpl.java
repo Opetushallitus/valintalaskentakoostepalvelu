@@ -29,7 +29,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SuoritaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoittelunValvonta;
 import static fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute.*;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaImpl;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;

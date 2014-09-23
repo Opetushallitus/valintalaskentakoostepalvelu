@@ -5,6 +5,11 @@ import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.Laskuri;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class PalvelukutsuLaskuri extends Laskuri {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(PalvelukutsuLaskuri.class);

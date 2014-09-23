@@ -571,7 +571,9 @@
 	
  	<!-- Valintalaskenta Async -->
 	<bean class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaAsyncResourceImpl"/>
- 
+	
+ 	<!-- Suoritusrekisteri (SURE) Async -->
+	<bean class="fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl.SuoritusrekisteriAsyncResourceImpl"/>
   
 	<!-- Swagger -->
 	<!-- Swagger API listing resource -->

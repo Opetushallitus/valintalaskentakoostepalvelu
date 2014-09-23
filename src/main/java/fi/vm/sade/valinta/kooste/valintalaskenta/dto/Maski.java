@@ -2,7 +2,10 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -11,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 
 import fi.vm.sade.valinta.kooste.Util;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 
 /**
  * 
@@ -21,25 +25,25 @@ import fi.vm.sade.valinta.kooste.Util;
 public class Maski {
 	private final static Logger LOG = LoggerFactory.getLogger(Maski.class);
 	private final static String NIMI_FORMAT = "Maski whitelist(%s) blacklist(%s) \r\nMask(%s)";
-	private final Set<String> hakukohdeOidsMask;
+	private final Collection<String> hakukohteet;
 	private final boolean whiteList;
 
 	public Maski() {
 		this.whiteList = false;
-		this.hakukohdeOidsMask = null;
+		this.hakukohteet = null;
 	}
 
-	public Maski(boolean whitelist, Collection<String> hakukohdeOidsMask) {
+	public Maski(boolean whitelist, Collection<String> hakukohteet) {
 		this.whiteList = whitelist;
-		this.hakukohdeOidsMask = Sets.newHashSet(hakukohdeOidsMask);
+		this.hakukohteet = hakukohteet;
 	}
 
 	public boolean isMask() {
-		return hakukohdeOidsMask != null && !hakukohdeOidsMask.isEmpty();
+		return hakukohteet != null && !hakukohteet.isEmpty();
 	}
 
-	public Set<String> getHakukohdeOidsMask() {
-		return hakukohdeOidsMask;
+	public Collection<String> getHakukohdeOidsMask() {
+		return hakukohteet;
 	}
 
 	public boolean isBlacklist() {
@@ -50,8 +54,12 @@ public class Maski {
 		return whiteList && isMask();
 	}
 
-	public Collection<String> maskaa(Collection<String> original) {
-		Collection<String> lopulliset = original;
+	public Collection<HakukohdeJaOrganisaatio> maskaa(
+			Collection<HakukohdeJaOrganisaatio> originalHjaO) {
+		Set<String> lopulliset = Collections.emptySet();
+		Set<String> original = originalHjaO.stream()
+				.map(hk -> hk.getHakukohdeOid()).collect(Collectors.toSet());
+		Set<String> hakukohdeOidsMask = Sets.newHashSet(hakukohteet);
 		if (isMask()) {
 			if (isWhitelist()) {
 				lopulliset = Util
@@ -71,14 +79,17 @@ public class Maski {
 												Arrays.toString(s.toArray()))));
 			}
 		}
-		return lopulliset;
+		final Set<String> lopullisetFilter = lopulliset;
+		return originalHjaO.stream()
+				.filter(hk -> lopullisetFilter.contains(hk.getHakukohdeOid()))
+				.collect(Collectors.toList());
 	}
 
 	public String toString() {
-		if (hakukohdeOidsMask == null) {
+		if (hakukohteet == null) {
 			return String.format(NIMI_FORMAT, isWhitelist(), StringUtils.EMPTY);
 		}
 		return String.format(NIMI_FORMAT, isWhitelist(), isBlacklist(),
-				Arrays.toString(hakukohdeOidsMask.toArray()));
+				Arrays.toString(hakukohteet.toArray()));
 	}
 }

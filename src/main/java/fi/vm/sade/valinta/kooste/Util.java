@@ -10,12 +10,13 @@ import com.google.common.collect.Sets;
  * 
  * @author jussija
  *
- * Ei kopioi listaa ellei ole pakko
+ *         Ei kopioi listaa ellei ole pakko
  */
 public class Util {
 
-	public static <T> Collection<T> whitelist(Collection<T> w, Collection<T> t, Consumer<Collection<T>> ylimaaraiset) {
-		if(t.containsAll(w)) {
+	public static <T> Set<T> whitelist(Set<T> w, Set<T> t,
+			Consumer<Set<T>> ylimaaraiset) {
+		if (t.containsAll(w)) {
 			return w;
 		} else {
 			Set<T> s = Sets.newHashSet(w);
@@ -26,11 +27,12 @@ public class Util {
 			return copy;
 		}
 	}
-	
-	public static <T> Collection<T> blacklist(Collection<T> b, Collection<T> t, Consumer<Collection<T>> ylimaaraiset) {
+
+	public static <T> Set<T> blacklist(Set<T> b, Set<T> t,
+			Consumer<Collection<T>> ylimaaraiset) {
 		Set<T> copy = Sets.newHashSet(t);
 		copy.removeAll(b);
-		if(t.containsAll(b)) {
+		if (t.containsAll(b)) {
 			return copy;
 		} else {
 			Set<T> s = Sets.newHashSet(b);
@@ -39,6 +41,5 @@ public class Util {
 			return copy;
 		}
 	}
-	
-	
+
 }
