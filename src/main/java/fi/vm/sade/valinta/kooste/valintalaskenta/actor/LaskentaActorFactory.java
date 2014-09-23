@@ -63,7 +63,8 @@ public class LaskentaActorFactory {
 		final PalvelukutsuStrategia suoritusrekisteriStrategia = createStrategia();
 		final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
 				laskentaStrategia, valintaperusteetStrategia,
-				hakemuksetStrategia, lisatiedotStrategia);
+				hakemuksetStrategia, lisatiedotStrategia,
+				suoritusrekisteriStrategia);
 		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
 				.parallelStream()
 				.map(hakukohdeOid -> new ValintakoelaskentaPalvelukutsu(
@@ -93,10 +94,10 @@ public class LaskentaActorFactory {
 		final PalvelukutsuStrategia hakijaryhmatStrategia = createStrategia();
 		final PalvelukutsuStrategia lisatiedotStrategia = createStrategia();
 		final PalvelukutsuStrategia suoritusrekisteriStrategia = createStrategia();
-		final Collection<PalvelukutsuStrategia> strategiat = Arrays
-				.asList(laskentaStrategia, valintaperusteetStrategia,
-						hakemuksetStrategia, lisatiedotStrategia,
-						hakijaryhmatStrategia);
+		final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
+				laskentaStrategia, valintaperusteetStrategia,
+				hakemuksetStrategia, lisatiedotStrategia,
+				hakijaryhmatStrategia, suoritusrekisteriStrategia);
 		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
 				.parallelStream()
 				.map(hakukohdeOid -> new ValintalaskentaPalvelukutsu(
@@ -130,10 +131,10 @@ public class LaskentaActorFactory {
 		final PalvelukutsuStrategia hakijaryhmatStrategia = createStrategia();
 		final PalvelukutsuStrategia lisatiedotStrategia = createStrategia();
 		final PalvelukutsuStrategia suoritusrekisteriStrategia = createStrategia();
-		final Collection<PalvelukutsuStrategia> strategiat = Arrays
-				.asList(laskentaStrategia, valintaperusteetStrategia,
-						hakemuksetStrategia, lisatiedotStrategia,
-						hakijaryhmatStrategia);
+		final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
+				laskentaStrategia, valintaperusteetStrategia,
+				hakemuksetStrategia, lisatiedotStrategia,
+				hakijaryhmatStrategia, suoritusrekisteriStrategia);
 		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
 				.parallelStream()
 				.map(hakukohdeOid -> new ValintalaskentaJaValintakoelaskentaPalvelukutsu(
