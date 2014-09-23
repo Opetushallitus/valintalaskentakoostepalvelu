@@ -32,6 +32,7 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
@@ -64,9 +65,11 @@ public class ValintalaskentaTesti {
 		ValintaperusteetAsyncResource valintaperusteetAsyncResource = createMockValintaperusteetAsyncResource();
 		ValintalaskentaAsyncResource valintalaskentaAsyncResource = createMockValintalaskentaAsyncResource();
 		ApplicationAsyncResource applicationAsyncResource = createMockApplicationAsyncResource();
+		SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = createMockSuoritusrekisteriAsyncResource();
 		LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(
 				seurantaAsyncResource, valintaperusteetAsyncResource,
-				valintalaskentaAsyncResource, applicationAsyncResource);
+				valintalaskentaAsyncResource, applicationAsyncResource,
+				suoritusrekisteriAsyncResource);
 
 		ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute = laskentaActorSystem;
 		LaskentaAloitus laskentaJaHaku = new LaskentaAloitus(uuid, hakuOid,
@@ -137,6 +140,11 @@ public class ValintalaskentaTesti {
 		// }
 		// });
 		return asyncResource;
+	}
+
+	public static SuoritusrekisteriAsyncResource createMockSuoritusrekisteriAsyncResource() {
+		SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = mock(SuoritusrekisteriAsyncResource.class);
+		return suoritusrekisteriAsyncResource;
 	}
 
 	public static ApplicationAsyncResource createMockApplicationAsyncResource() {

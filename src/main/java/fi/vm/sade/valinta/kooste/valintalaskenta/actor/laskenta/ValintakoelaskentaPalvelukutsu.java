@@ -23,6 +23,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Hak
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.LisatiedotPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.SuoritusrekisteriPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.ValintaperusteetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategia;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
@@ -42,6 +43,7 @@ public class ValintakoelaskentaPalvelukutsu extends
 	private final ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu;
 	private final HakemuksetPalvelukutsu hakemuksetPalvelukutsu;
 	private final LisatiedotPalvelukutsu lisatiedotPalvelukutsu;
+	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 
 	public ValintakoelaskentaPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
@@ -49,9 +51,11 @@ public class ValintakoelaskentaPalvelukutsu extends
 			LisatiedotPalvelukutsu lisatiedotPalvelukutsu,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
 			ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
+			SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu,
 			PalvelukutsuStrategia lisatiedotStrategia,
 			PalvelukutsuStrategia hakemuksetStrategia,
-			PalvelukutsuStrategia valintaperusteetStrategia) {
+			PalvelukutsuStrategia valintaperusteetStrategia,
+			PalvelukutsuStrategia suoritusrekisteriStrategia) {
 		super(hakukohdeOid.getHakukohdeOid(), Arrays
 				.asList(new PalvelukutsuJaPalvelukutsuStrategia(
 						lisatiedotPalvelukutsu, lisatiedotStrategia),
@@ -59,11 +63,15 @@ public class ValintakoelaskentaPalvelukutsu extends
 								hakemuksetPalvelukutsu, hakemuksetStrategia),
 						new PalvelukutsuJaPalvelukutsuStrategia(
 								valintaperusteetPalvelukutsu,
-								valintaperusteetStrategia)));
+								valintaperusteetStrategia),
+						new PalvelukutsuJaPalvelukutsuStrategia(
+								suoritusrekisteriPalvelukutsu,
+								suoritusrekisteriStrategia)));
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
 		this.lisatiedotPalvelukutsu = lisatiedotPalvelukutsu;
 		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
 		this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
+		this.suoritusrekisteriPalvelukutsu = suoritusrekisteriPalvelukutsu;
 	}
 
 	private LaskeDTO muodostaLaskeDTO() {

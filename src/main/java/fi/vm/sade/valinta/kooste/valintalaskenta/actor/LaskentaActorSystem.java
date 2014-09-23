@@ -27,6 +27,7 @@ import com.typesafe.config.ConfigFactory;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
@@ -59,7 +60,8 @@ public class LaskentaActorSystem implements
 			LaskentaSeurantaAsyncResource seurantaAsyncResource,
 			ValintaperusteetAsyncResource valintaperusteetAsyncResource,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
-			ApplicationAsyncResource applicationAsyncResource) {
+			ApplicationAsyncResource applicationAsyncResource,
+			SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
 		this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem",
 				ConfigFactory.defaultOverrides());
 		this.typed = TypedActor.get(actorSystem);
@@ -70,7 +72,7 @@ public class LaskentaActorSystem implements
 		this.laskentaActorFactory = new LaskentaActorFactory(
 				valintalaskentaAsyncResource, applicationAsyncResource,
 				valintaperusteetAsyncResource, seurantaAsyncResource,
-				laskentaSupervisor);
+				suoritusrekisteriAsyncResource, laskentaSupervisor);
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
@@ -18,6 +19,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Hak
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.LisatiedotPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.SuoritusrekisteriPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.ValintaperusteetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.YksiPalvelukutsuKerrallaPalvelukutsuStrategia;
@@ -33,6 +35,7 @@ public class LaskentaActorFactory {
 	private final ApplicationAsyncResource applicationAsyncResource;
 	private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 	private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
+	private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
 	private final LaskentaSupervisor laskentaSupervisor;
 
 	public LaskentaActorFactory(
@@ -40,12 +43,14 @@ public class LaskentaActorFactory {
 			ApplicationAsyncResource applicationAsyncResource,
 			ValintaperusteetAsyncResource valintaperusteetAsyncResource,
 			LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource,
+			SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
 			LaskentaSupervisor laskentaSupervisor) {
 		this.laskentaSupervisor = laskentaSupervisor;
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
 		this.applicationAsyncResource = applicationAsyncResource;
 		this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
 		this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
+		this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
 	}
 
 	public LaskentaActor createValintakoelaskentaActor(final String uuid,
@@ -55,6 +60,7 @@ public class LaskentaActorFactory {
 		final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
 		final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
 		final PalvelukutsuStrategia lisatiedotStrategia = createStrategia();
+		final PalvelukutsuStrategia suoritusrekisteriStrategia = createStrategia();
 		final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
 				laskentaStrategia, valintaperusteetStrategia,
 				hakemuksetStrategia, lisatiedotStrategia);
@@ -68,8 +74,10 @@ public class LaskentaActorFactory {
 								applicationAsyncResource),
 						new ValintaperusteetPalvelukutsu(hakukohdeOid,
 								valinnanvaihe, valintaperusteetAsyncResource),
+						new SuoritusrekisteriPalvelukutsu(hakukohdeOid,
+								suoritusrekisteriAsyncResource),
 						lisatiedotStrategia, hakemuksetStrategia,
-						valintaperusteetStrategia))
+						valintaperusteetStrategia, suoritusrekisteriStrategia))
 				.collect(Collectors.toList());
 		return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
 				palvelukutsut, strategiat, laskentaStrategia,
@@ -84,6 +92,7 @@ public class LaskentaActorFactory {
 		final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
 		final PalvelukutsuStrategia hakijaryhmatStrategia = createStrategia();
 		final PalvelukutsuStrategia lisatiedotStrategia = createStrategia();
+		final PalvelukutsuStrategia suoritusrekisteriStrategia = createStrategia();
 		final Collection<PalvelukutsuStrategia> strategiat = Arrays
 				.asList(laskentaStrategia, valintaperusteetStrategia,
 						hakemuksetStrategia, lisatiedotStrategia,
@@ -100,8 +109,11 @@ public class LaskentaActorFactory {
 								valinnanvaihe, valintaperusteetAsyncResource),
 						new HakijaryhmatPalvelukutsu(hakukohdeOid,
 								valintaperusteetAsyncResource),
+						new SuoritusrekisteriPalvelukutsu(hakukohdeOid,
+								suoritusrekisteriAsyncResource),
 						lisatiedotStrategia, hakemuksetStrategia,
-						valintaperusteetStrategia, hakijaryhmatStrategia))
+						valintaperusteetStrategia, hakijaryhmatStrategia,
+						suoritusrekisteriStrategia))
 				.collect(Collectors.toList());
 		return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
 				palvelukutsut, strategiat, laskentaStrategia,
@@ -117,6 +129,7 @@ public class LaskentaActorFactory {
 		final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
 		final PalvelukutsuStrategia hakijaryhmatStrategia = createStrategia();
 		final PalvelukutsuStrategia lisatiedotStrategia = createStrategia();
+		final PalvelukutsuStrategia suoritusrekisteriStrategia = createStrategia();
 		final Collection<PalvelukutsuStrategia> strategiat = Arrays
 				.asList(laskentaStrategia, valintaperusteetStrategia,
 						hakemuksetStrategia, lisatiedotStrategia,
@@ -133,8 +146,11 @@ public class LaskentaActorFactory {
 								valinnanvaihe, valintaperusteetAsyncResource),
 						new HakijaryhmatPalvelukutsu(hakukohdeOid,
 								valintaperusteetAsyncResource),
+						new SuoritusrekisteriPalvelukutsu(hakukohdeOid,
+								suoritusrekisteriAsyncResource),
 						lisatiedotStrategia, hakemuksetStrategia,
-						valintaperusteetStrategia, hakijaryhmatStrategia))
+						valintaperusteetStrategia, hakijaryhmatStrategia,
+						suoritusrekisteriStrategia))
 				.collect(Collectors.toList());
 		return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
 				palvelukutsut, strategiat, laskentaStrategia,
