@@ -84,7 +84,7 @@ public class ValintalaskentaAsyncResourceImpl implements
 					.fromClient(webClient)
 					.path(url)
 					.async()
-					.post(Entity.entity(gson.toJson(laskeDTO),
+					.post(Entity.entity(laskeDTO,
 							MediaType.APPLICATION_JSON_TYPE),
 							new Callback<String>(address, url, callback,
 									failureCallback, new TypeToken<String>() {
@@ -106,7 +106,7 @@ public class ValintalaskentaAsyncResourceImpl implements
 					.fromClient(webClient)
 					.path(url)
 					.async()
-					.post(Entity.entity(gson.toJson(laskeDTO),
+					.post(Entity.entity(laskeDTO,
 							MediaType.APPLICATION_JSON_TYPE),
 							new Callback<String>(address, url, callback,
 									failureCallback, new TypeToken<String>() {
@@ -127,7 +127,7 @@ public class ValintalaskentaAsyncResourceImpl implements
 					.fromClient(webClient)
 					.path(url)
 					.async()
-					.post(Entity.entity(gson.toJson(laskeDTO),
+					.post(Entity.entity(laskeDTO,
 							MediaType.APPLICATION_JSON_TYPE),
 							new Callback<String>(address, url, callback,
 									failureCallback, new TypeToken<String>() {
