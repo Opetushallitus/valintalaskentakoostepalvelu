@@ -96,7 +96,7 @@ public class ValintalaskentaKerrallaResource {
 			@PathParam("whitelist") boolean whitelist, List<String> maski,
 			@Suspended AsyncResponse asyncResponse) {
 		try {
-			asyncResponse.setTimeout(2L, TimeUnit.SECONDS);
+			asyncResponse.setTimeout(15L, TimeUnit.SECONDS);
 			asyncResponse.setTimeoutHandler(new TimeoutHandler() {
 				public void handleTimeout(AsyncResponse asyncResponse) {
 					LOG.error(
@@ -194,7 +194,7 @@ public class ValintalaskentaKerrallaResource {
 	@Produces(APPLICATION_JSON)
 	public void uudelleenajoLaskennalle(@PathParam("uuid") String uuid,
 			@Suspended AsyncResponse asyncResponse) {
-		asyncResponse.setTimeout(2L, TimeUnit.SECONDS);
+		asyncResponse.setTimeout(15L, TimeUnit.SECONDS);
 		asyncResponse.setTimeoutHandler(new TimeoutHandler() {
 			public void handleTimeout(AsyncResponse asyncResponse) {
 				LOG.error("Uudelleen ajo laskennalle({}) timeouttasi!", uuid);
