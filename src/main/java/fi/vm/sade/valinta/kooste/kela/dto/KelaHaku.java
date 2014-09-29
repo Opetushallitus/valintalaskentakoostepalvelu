@@ -46,53 +46,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
 	public KelaHaku(Collection<HakijaDTO> hakijat, HakuV1RDTO haku,
 			PaivamaaraSource paivamaaraSource) {
 		super(haku, paivamaaraSource);
-		//
-		// Varmistetaan etta ainoastaan hyvaksyttyja ja vastaanottaneita
-		//
-		LOG.info("Filtteroidaan haussa ylimaaraiset hakijat pois keladokumentista!");
-		this.hakijat = hakijat
-				.stream()
-				.filter(hakija -> hakija
-						.getHakutoiveet()
-						.stream()
-						.anyMatch(hakutoive -> {
-							// Tassa oli ennen tarkistus etta
-							// valintatapajonoilla on yksilollinen prioriteetti.
-							// Onko enaa tarpeellista?
-							// Collections.sort(
-							// hakutoive.getHakutoiveenValintatapajonot(),
-							// HakutoiveenValintatapajonoComparator.DEFAULT);
-							// Set<Integer> prioriteetit =
-							// Sets.newHashSet();
-							// for (HakutoiveenValintatapajonoDTO jono :
-							// hakutoive
-							// .getHakutoiveenValintatapajonot()) {
-							// if (jono.getValintatapajonoPrioriteetti() ==
-							// null) {
-							// throw new RuntimeException(
-							// "Valintatapajonolla ei ollut prioriteettiÃ¤!");
-							// }
-							// if (prioriteetit.contains(jono
-							// .getValintatapajonoPrioriteetti())) {
-							// throw new RuntimeException(
-							// "Useammalla valintatapajonolla on sama prioriteetti hakukohteessa("
-							// + hakutoive.getHakukohdeOid()
-							// + ")!");
-							// }
-							// prioriteetit.add(jono.getValintatapajonoPrioriteetti());
-							// }
-								return hakutoive
-										.getHakutoiveenValintatapajonot()
-										.stream()
-										.sorted(HakutoiveenValintatapajonoComparator.DEFAULT)
-										.anyMatch(
-												jono -> (HakemuksenTila.HYVAKSYTTY
-														.equals(jono.getTila()) || HakemuksenTila.VARASIJALTA_HYVAKSYTTY
-														.equals(jono.getTila()))
-														&& (jono.getVastaanottotieto() != null && jono
-																.getVastaanottotieto()
-																.equals(ValintatuloksenTila.VASTAANOTTANUT)));
-							})).collect(Collectors.toList());
+		this.hakijat = hakijat;
 	}
 
 	@Override
@@ -166,12 +120,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
 
 	@Override
 	public Collection<String> getHakemusOids() {
-		return Collections2.transform(hakijat,
-				new Function<HakijaDTO, String>() {
-					@Override
-					public String apply(HakijaDTO input) {
-						return input.getHakemusOid();
-					}
-				});
+		return hakijat.stream().map(h -> h.getHakemusOid())
+				.collect(Collectors.toList());
 	}
 }
