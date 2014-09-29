@@ -91,7 +91,6 @@ public class KelaRouteTest extends CamelTestSupport {
 	private HakukohdeDTO createHakukohdeDTO() {
 		HakukohdeDTO hakukohdeDTO = new HakukohdeDTO();
 		hakukohdeDTO.setOid(HAKUKOHDE1);
-
 		return hakukohdeDTO;
 	}
 
@@ -99,13 +98,6 @@ public class KelaRouteTest extends CamelTestSupport {
 	public void kelaLuonninTestaus() {
 		Mockito.when(hakukohdeResource.getByOID(Mockito.anyString()))
 				.thenReturn(createHakukohdeDTO());
-		// hakukohdeResource
-		// .getByOID(oid));
-		//
-		// HakukohdeDTO hakukohde = hakukohdeSource
-		// .getHakukohdeByOid(hakukohdeOid);
-		//
-
 		Mockito.when(hakuResource.findByOid(Mockito.anyString())).then(
 				new Answer<ResultV1RDTO<HakuV1RDTO>>() {
 					@Override

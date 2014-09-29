@@ -128,9 +128,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 		Endpoint haeHakuJaValmistaHaku = endpoint("direct:kelaluonti_hae_ja_valmista_haku");
 		Endpoint tarkistaHaunTyyppi = endpoint("direct:kelaluonti_tarkista_haun_tyyppi");
 		Endpoint keraaHakujenDatat = endpoint("direct:kelaluonti_keraa_hakujen_datat");
-		// Endpoint valmistaHaku = endpoint("direct:kelaluonti_valmista_haku");
-		// Endpoint luoLisahaku = endpoint("direct:kelaluonti_luo_lisahaku");
-		// Endpoint luoHaku = endpoint("direct:kelaluonti_luo_haku");
 		Endpoint vientiDokumenttipalveluun = endpoint("direct:kelaluonti_vienti_dokumenttipalveluun");
 
 		/**
