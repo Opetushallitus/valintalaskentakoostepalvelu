@@ -49,7 +49,7 @@ public class KelaGenerator {
 		kelaRoute.aloitaKelaLuonti(kelaProsessi,
 				new KelaLuonti(kelaProsessi.getId(), hakuTietue.getHakuOids(),
 						aineistonNimi, organisaationNimi, new KelaCache(
-								koodiService)));
+								koodiService), kelaProsessi));
 		dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
 		return kelaProsessi.toProsessiId();
 	}

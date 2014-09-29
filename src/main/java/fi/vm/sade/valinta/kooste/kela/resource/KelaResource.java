@@ -69,7 +69,7 @@ public class KelaResource {
 		kelaRoute.aloitaKelaLuonti(kelaProsessi,
 				new KelaLuonti(kelaProsessi.getId(), hakuTietue.getHakuOids(),
 						aineistonNimi, organisaationNimi, new KelaCache(
-								koodiService)));
+								koodiService), kelaProsessi));
 		// SecurityContextHolder.getContext().getAuthentication()
 		dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
 		return kelaProsessi.toProsessiId();
