@@ -34,7 +34,6 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
 	private final ConcurrentHashMap<String, HakukohdeDTO> hakukohteet = new ConcurrentHashMap<String, HakukohdeDTO>();
 	private final ConcurrentHashMap<String, Hakemus> hakemukset = new ConcurrentHashMap<String, Hakemus>();
 	private final ConcurrentHashMap<String, String> hakutyyppiArvo = new ConcurrentHashMap<String, String>();
-	private final CopyOnWriteArrayList<KelaAbstraktiHaku> kelaHaut = new CopyOnWriteArrayList<KelaAbstraktiHaku>();
 	private final ConcurrentHashMap<String, Date> lukuvuosi = new ConcurrentHashMap<String, Date>();
 	private final Date now;
 	private final KoodiService koodiService;
@@ -47,6 +46,10 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
 	@Override
 	public Date lukuvuosi(HakuV1RDTO hakuDTO) {
 		String uri = hakuDTO.getKoulutuksenAlkamiskausiUri();
+		if (uri == null) {
+			LOG.error("Koulutuksen alkamiskausi URI oli null!");
+			throw new RuntimeException("Koulutuksen alkamiskausi URI oli null!");
+		}
 		if (!lukuvuosi.contains(uri)) {
 			int vuosi = hakuDTO.getKoulutuksenAlkamisVuosi();
 			int kuukausi = 1;
@@ -112,21 +115,5 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
 
 	public String getHakutyyppi(String hakutyyppi) {
 		return hakutyyppiArvo.get(hakutyyppi);
-	}
-
-	public void addKelaHaku(KelaAbstraktiHaku kelaHaku) {
-        String tunniste = kelaHaku.getHaku().getHaunTunniste();
-        if(tunniste != null) {
-            for (KelaAbstraktiHaku haku : kelaHaut) {
-                if(tunniste.equals(haku.getHaku().getHaunTunniste())) {
-                    kelaHaut.remove(haku);
-                }
-            }
-        }
-		kelaHaut.add(kelaHaku);
-	}
-
-	public Collection<KelaAbstraktiHaku> getKelaHaut() {
-		return kelaHaut;
 	}
 }

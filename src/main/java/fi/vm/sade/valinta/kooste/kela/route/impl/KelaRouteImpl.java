@@ -1,48 +1,53 @@
 package fi.vm.sade.valinta.kooste.kela.route.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import com.google.common.collect.*;
+import java.util.stream.Collectors;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
-import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
-import org.apache.camel.builder.DeadLetterChannelBuilder;
 import org.apache.camel.builder.DefaultErrorHandlerBuilder;
-import org.apache.camel.processor.DeadLetterChannel;
-import org.apache.camel.processor.aggregate.AggregationStrategy;
-import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import fi.vm.sade.koodisto.service.KoodiService;
+import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
+import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaAbstraktiHaku;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaHakijaRivi;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaHaku;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaLisahaku;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaAbstraktitHaut;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaDokumentti;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaHaut;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaHautJaLisahaut;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaRivit;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.LinjakoodiSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.OppilaitosSource;
@@ -52,7 +57,6 @@ import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaHakijaRiviKomponentti
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.LinjakoodiKomponentti;
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.OppilaitosKomponentti;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
-import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKaikkiPaikanVastaanottaneet;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -78,7 +82,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final HaunTyyppiKomponentti haunTyyppiKomponentti;
 	private final ApplicationResource applicationResource;
 	private final OppilaitosKomponentti oppilaitosKomponentti;
-	private final fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource hakuResource;
+	private final HakuV1Resource hakuResource;
 	private final LinjakoodiKomponentti linjakoodiKomponentti;
 	private final HakukohdeResource hakukohdeResource;
 	private final KoodiService koodiService;
@@ -91,7 +95,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 			KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti,
 			KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti,
 			SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet,
-			fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource hakuResource,
+			HakuV1Resource hakuResource,
 			HaunTyyppiKomponentti haunTyyppiKomponentti,
 			ApplicationResource applicationResource,
 			OppilaitosKomponentti oppilaitosKomponentti,
@@ -121,10 +125,12 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	 * Kela Camel Configuration: Siirto and document generation.
 	 */
 	public final void configure() {
-		Endpoint haeHaku = endpoint("direct:kelaluonti_hae_haku");
-		Endpoint valmistaHaku = endpoint("direct:kelaluonti_valmista_haku");
-		Endpoint luoLisahaku = endpoint("direct:kelaluonti_luo_lisahaku");
-		Endpoint luoHaku = endpoint("direct:kelaluonti_luo_haku");
+		Endpoint haeHakuJaValmistaHaku = endpoint("direct:kelaluonti_hae_ja_valmista_haku");
+		Endpoint tarkistaHaunTyyppi = endpoint("direct:kelaluonti_tarkista_haun_tyyppi");
+		Endpoint keraaHakujenDatat = endpoint("direct:kelaluonti_keraa_hakujen_datat");
+		// Endpoint valmistaHaku = endpoint("direct:kelaluonti_valmista_haku");
+		// Endpoint luoLisahaku = endpoint("direct:kelaluonti_luo_lisahaku");
+		// Endpoint luoHaku = endpoint("direct:kelaluonti_luo_haku");
 		Endpoint vientiDokumenttipalveluun = endpoint("direct:kelaluonti_vienti_dokumenttipalveluun");
 
 		/**
@@ -160,6 +166,206 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				})
 				//
 				.stop();
+
+		from(haeHakuJaValmistaHaku)
+		//
+				.routeId("KELALUONTI_HAKU")
+				//
+				.errorHandler(deadLetterChannel())
+				//
+				// .maximumRedeliveries(1).redeliveryDelay(1500L))
+				//
+				.process(
+						Reititys.<KelaLuonti, KelaLuontiJaHaut> funktio(luonti -> {
+							List<HakuV1RDTO> haut = Lists.newArrayList();
+							for (String hakuOid : luonti.getHakuOids()) {
+								HakuV1RDTO haku;
+								try {
+									ResultV1RDTO<HakuV1RDTO> hakuResult = hakuResource
+											.findByOid(hakuOid);
+									haku = hakuResult.getResult();
+									haut.add(haku);
+									// cache(exchange).put(haku);
+								} catch (Exception e) {
+									luonti.getProsessi()
+											.getPoikkeuksetUudelleenYrityksessa()
+											.add(new Poikkeus(
+													Poikkeus.TARJONTA,
+													"Haun haku oid:lla.",
+													new Oid(hakuOid,
+															Poikkeus.HAKUOID)));
+									throw e;
+								}
+								try {
+									luonti.getCache().lukuvuosi(haku);
+								} catch (Exception e) {
+									luonti.getProsessi()
+											.getPoikkeuksetUudelleenYrityksessa()
+											.add(new Poikkeus(
+													Poikkeus.KOODISTO,
+													"Lukuvuoden haku haulle koodistosta URI:lla "
+															+ haku.getKoulutuksenAlkamiskausiUri(),
+													new Oid(hakuOid,
+															Poikkeus.HAKUOID)));
+									throw e;
+								}
+							}
+							return new KelaLuontiJaHaut(luonti, haut);
+						}))
+				//
+				.to(tarkistaHaunTyyppi);
+
+		from(tarkistaHaunTyyppi)
+		//
+				.routeId("KELALUONTI_TARKISTA_TYYPPI")
+				//
+				.errorHandler(deadLetterChannel())
+				//
+				// .maximumRedeliveries(3).redeliveryDelay(1500L))
+				//
+				.process(
+						Reititys.<KelaLuontiJaHaut, KelaLuontiJaHautJaLisahaut> funktio(luontiJaHaut -> {
+							Collection<HakuV1RDTO> lisahaut = Lists
+									.newArrayList();
+							Collection<HakuV1RDTO> haut = Lists.newArrayList();
+							for (HakuV1RDTO haku : luontiJaHaut.getHaut()) {
+								String hakutyyppiUri = haku.getHakutyyppiUri();
+								try {
+									if (luontiJaHaut.getLuonti().getCache()
+											.getHakutyyppi(hakutyyppiUri) == null) {
+										luontiJaHaut
+												.getLuonti()
+												.getCache()
+												.putHakutyyppi(
+														hakutyyppiUri,
+														haunTyyppiKomponentti
+																.haunTyyppi(hakutyyppiUri));
+									}
+								} catch (Exception e) {
+									luontiJaHaut
+											.getLuonti()
+											.getProsessi()
+											.getPoikkeuksetUudelleenYrityksessa()
+											.add(new Poikkeus(
+													Poikkeus.KOODISTO,
+													"Haun tyypille "
+															+ hakutyyppiUri
+															+ " ei saatu arvoa koodistosta",
+													new Oid(
+															hakutyyppiUri,
+															Poikkeus.KOODISTOURI)));
+									throw e;
+								}
+								String hakutyypinArvo = luontiJaHaut
+										.getLuonti().getCache()
+										.getHakutyyppi(haku.getHakutyyppiUri());
+								// Koodistosta saa hakutyypille arvon ja nimen.
+								// Oletetaan etta
+								// nimi voi vaihtua mutta koodi pysyy vakiona.
+								if ("03".equals(hakutyypinArvo)) { // onko
+																	// lisahaku
+									lisahaut.add(haku);
+								} else {
+									haut.add(haku);
+								}
+							}
+							return new KelaLuontiJaHautJaLisahaut(luontiJaHaut
+									.getLuonti(), haut, lisahaut);
+						})).to(keraaHakujenDatat);
+
+		from(keraaHakujenDatat)
+		//
+				.routeId("KELALUONTI_KERAA_HAKUJEN_DATAT")
+				//
+				.errorHandler(deadLetterChannel())
+				//
+				// .maximumRedeliveries(3).redeliveryDelay(1500L))
+				//
+				// Keraa hakujen datat palveluista
+				//
+				.process(
+						Reititys.<KelaLuontiJaHautJaLisahaut, KelaLuontiJaAbstraktitHaut> funktio(luontiJaHautJaLisahaut -> {
+							Collection<KelaAbstraktiHaku> haut = Lists
+									.newArrayList();
+							//
+							// .routeId("KELALUONTI_LISAHAKU")
+							//
+							for (HakuV1RDTO haku : luontiJaHautJaLisahaut
+									.getLisahaut()) {
+								if (haku == null) {
+									throw new RuntimeException(
+											"Reitillä oli null hakuDTO!");
+								}
+								// haetaan kaikki hakemukset lisahaulle koska ei
+								// voida
+								// tietaa tarkastelematta ketka on valittuja.
+								try {
+									HakemusList hakemusList = applicationResource
+											.findApplications(
+													null,
+													ApplicationResource.ACTIVE_AND_INCOMPLETE,
+													null, null, haku.getOid(),
+													null, 0,
+													ApplicationResource.MAX);
+									KelaLisahaku kelalisahaku = new KelaLisahaku(
+											hakemusList
+													.getResults()
+													.stream()
+													.map(suppeaHakemus -> suppeaHakemus
+															.getOid())
+													.collect(
+															Collectors.toList()),
+											haku, luontiJaHautJaLisahaut
+													.getLuonti().getCache());
+									haut.add(kelalisahaku);
+								} catch (Exception e) {
+									luontiJaHautJaLisahaut
+											.getLuonti()
+											.getProsessi()
+											.getPoikkeuksetUudelleenYrityksessa()
+											.add(new Poikkeus(
+													Poikkeus.HAKU,
+													"Hakemusten haku haulle epäonnistui",
+													new Oid(haku.getOid(),
+															Poikkeus.HAKUOID)));
+									throw e;
+								}
+							}
+							//
+							// .routeId("KELALUONTI_LUONTI")
+							//
+							for (HakuV1RDTO haku : luontiJaHautJaLisahaut
+									.getHaut()) {
+								if (haku == null) {
+									throw new RuntimeException(
+											"Reitillä oli null hakuDTO!");
+								}
+								String hakuOid = haku.getOid();
+								try {
+									Collection<HakijaDTO> hakijat = sijoitteluVastaanottaneet
+											.vastaanottaneet(hakuOid);
+									KelaHaku kelahaku = new KelaHaku(hakijat,
+											haku, luontiJaHautJaLisahaut
+													.getLuonti().getCache());
+									haut.add(kelahaku);
+								} catch (Exception e) {
+									luontiJaHautJaLisahaut
+											.getLuonti()
+											.getProsessi()
+											.getPoikkeuksetUudelleenYrityksessa()
+											.add(new Poikkeus(
+													Poikkeus.SIJOITTELU,
+													"Vastaanottaneiden haku sijoittelusta epäonnistui haulle, koska: "
+															+ e.getMessage(),
+													new Oid(hakuOid,
+															Poikkeus.HAKUOID)));
+									throw e;
+								}
+							}
+							return new KelaLuontiJaAbstraktitHaut(
+									luontiJaHautJaLisahaut.getLuonti(), haut);
+						}));
+
 		/**
 		 * Kela-dokkarin luonti reitti
 		 */
@@ -169,413 +375,232 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.routeId("KELALUONTI")
 				//
-				// haetaan kaikkia hakuOideja vastaavat haut tarjonnasta
-				.split(body())
+				.to(haeHakuJaValmistaHaku)
 				//
-				.shareUnitOfWork()
-				//
-				.parallelProcessing()
-				//
-				.stopOnException()
-				//
-				.to(haeHaku).to(valmistaHaku)
-				//
-				.end()
-				//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						// valmistetaan hakemusoidit silmukkaa varten
-						Collection<String> hakemusOidit = Sets.newHashSet();
-						for (KelaAbstraktiHaku kelahaku : cache(exchange)
-								.getKelaHaut()) {
-							hakemusOidit.addAll(kelahaku.getHakemusOids());
-						}
-						hakemusOidit = Lists.newArrayList(hakemusOidit); // muutetaan
-						try {
-							int n = 0;
-							Collection<List<String>> oiditSivutettuna = Lists
-									.newArrayList();
-							do {
-								List<String> osajoukkoOideista = FluentIterable
-										.from(hakemusOidit)
-										//
-										.skip(n)
-										.limit(MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA)
-										//
-										.toList();
-								oiditSivutettuna.add(osajoukkoOideista);
-								n += MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA;
-							} while (n < hakemusOidit.size());
-							List<Hakemus> hakemukset = Lists.newArrayList();
-							LOG.warn("Haetaan {} hakemusta, {} erässä",
-									hakemusOidit.size(),
-									oiditSivutettuna.size());
-							for (List<String> oidit : oiditSivutettuna) {
-								try {
-									List<Hakemus> h = applicationResource
-											.getApplicationsByOids(oidit);
-									hakemukset.addAll(h);
-									LOG.warn(
-											"Saatiin erä hakemuksia {}. {}/{}",
-											h.size(), hakemukset.size(),
-											hakemusOidit.size());
-								} catch (Exception e) {
-									LOG.error(
-											"Hakemuspalvelu ei jaksa tarjoilla hakemuksia {}. Yritetään vielä uudestaan.",
-											e.getMessage());
-									// annetaan hakuapp:lle vahan aikaa toipua
-									// ja yritetaan uudestaan
-									Thread.sleep(250L);
-									hakemukset.addAll(applicationResource
-											.getApplicationsByOids(oidit));
-								}
+				.process(
+						Reititys.<KelaLuontiJaAbstraktitHaut> kuluttaja(luonti -> {
+							// valmistetaan hakemusoidit silmukkaa varten
+							Collection<String> hakemusOidit = Sets.newHashSet();
+							for (KelaAbstraktiHaku kelahaku : luonti.getHaut()) {
+								hakemusOidit.addAll(kelahaku.getHakemusOids());
 							}
-							exchange.getOut().setBody(hakemukset);
-
-						} catch (Exception e) {
-							String virhe = "Ei saatu hakemuksia hakupalvelulta!";
-							dokumenttiprosessi(exchange)
-									.getPoikkeuksetUudelleenYrityksessa().add(
-											new Poikkeus(Poikkeus.HAKU, virhe));
-							throw new RuntimeException(virhe);
-						}
-					}
-				})
-				//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						@SuppressWarnings("unchecked")
-						Collection<Hakemus> hakemukset = (Collection<Hakemus>) exchange
-								.getIn().getBody();
-						KelaCache cache = cache(exchange);
-						for (Hakemus hakemus : hakemukset) {
-							cache.put(hakemus);
-						}
-						// Filtteroidaan ylimaaraiset pois ja bodyyn joukko
-						// valmistettavia kela riveja
-						List<KelaHakijaRivi> rivit = Lists.newArrayList();
-						HakukohdeSource hakukohdeSource = new HakukohdeSource() {
-							Map<String, HakukohdeDTO> c = Maps.newHashMap();
-
-							public HakukohdeDTO getHakukohdeByOid(String oid) {
-								if (!c.containsKey(oid)) {
+							hakemusOidit = Lists.newArrayList(hakemusOidit); // muutetaan
+							try {
+								int n = 0;
+								Collection<List<String>> oiditSivutettuna = Lists
+										.newArrayList();
+								do {
+									List<String> osajoukkoOideista = FluentIterable
+											.from(hakemusOidit)
+											//
+											.skip(n)
+											.limit(MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA)
+											//
+											.toList();
+									oiditSivutettuna.add(osajoukkoOideista);
+									n += MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA;
+								} while (n < hakemusOidit.size());
+								List<Hakemus> hakemukset = Lists.newArrayList();
+								LOG.warn("Haetaan {} hakemusta, {} erässä",
+										hakemusOidit.size(),
+										oiditSivutettuna.size());
+								for (List<String> oidit : oiditSivutettuna) {
 									try {
-										c.put(oid,
-												hakukohdeResource.getByOID(oid));
+										List<Hakemus> h = applicationResource
+												.getApplicationsByOids(oidit);
+										hakemukset.addAll(h);
+										LOG.warn(
+												"Saatiin erä hakemuksia {}. {}/{}",
+												h.size(), hakemukset.size(),
+												hakemusOidit.size());
 									} catch (Exception e) {
 										LOG.error(
-												"Ei saatu tarjonnalta hakukohdetta oidilla {} (/tarjonta-service/rest/hakukohde/{})\r\n{}",
-												oid, e.getMessage());
-										throw e;
+												"Hakemuspalvelu ei jaksa tarjoilla hakemuksia {}. Yritetään vielä uudestaan.",
+												e.getMessage());
+										// annetaan hakuapp:lle vahan aikaa
+										// toipua
+										// ja yritetaan uudestaan
+										Thread.sleep(50L);
+										hakemukset.addAll(applicationResource
+												.getApplicationsByOids(oidit));
 									}
 								}
-								return c.get(oid);
-							}
-						};
-						LinjakoodiSource linjakoodiSource = new LinjakoodiSource() {
-							Map<String, String> c = Maps.newHashMap();
-
-							public String getLinjakoodi(String uri) {
-								if (!c.containsKey(uri)) {
-									c.put(uri, linjakoodiKomponentti
-											.haeLinjakoodi(uri));
+								KelaCache cache = luonti.getLuonti().getCache();
+								for (Hakemus hakemus : hakemukset) {
+									cache.put(hakemus);
 								}
-								return c.get(uri);
+							} catch (Exception e) {
+								String virhe = "Ei saatu hakemuksia hakupalvelulta!";
+								luonti.getLuonti()
+										.getProsessi()
+										.getPoikkeuksetUudelleenYrityksessa()
+										.add(new Poikkeus(Poikkeus.HAKU, virhe));
+								throw new RuntimeException(virhe);
 							}
-						};
-						OppilaitosSource oppilaitosSource = new OppilaitosSource() {
-							Map<String, String> c = Maps.newHashMap();
-							Map<String, String> d = Maps.newHashMap();
+						}))
+				//
+				.process(
+						Reititys.<KelaLuontiJaAbstraktitHaut, KelaLuontiJaRivit> funktio(luontiJaRivit -> {
 
-							public String getOppilaitosKoodi(String tarjoajaOid) {
-								if (!c.containsKey(tarjoajaOid)) {
-									c.put(tarjoajaOid, oppilaitosKomponentti
-											.haeOppilaitosKoodi(tarjoajaOid));
-								}
-								return c.get(tarjoajaOid);
-							}
+							// Filtteroidaan ylimaaraiset pois ja bodyyn joukko
+							// valmistettavia kela riveja
+							List<KelaHakijaRivi> rivit = Lists.newArrayList();
+							HakukohdeSource hakukohdeSource = new HakukohdeSource() {
+								Map<String, HakukohdeDTO> c = Maps.newHashMap();
 
-							public String getOppilaitosnumero(String tarjoajaOid) {
-								if (!d.containsKey(tarjoajaOid)) {
-									d.put(tarjoajaOid, oppilaitosKomponentti
-											.haeOppilaitosnumero(tarjoajaOid));
+								public HakukohdeDTO getHakukohdeByOid(String oid) {
+									if (!c.containsKey(oid)) {
+										try {
+											c.put(oid, hakukohdeResource
+													.getByOID(oid));
+										} catch (Exception e) {
+											LOG.error(
+													"Ei saatu tarjonnalta hakukohdetta oidilla {} (/tarjonta-service/rest/hakukohde/{})\r\n{}",
+													oid, e.getMessage());
+											throw e;
+										}
+									}
+									return c.get(oid);
 								}
-								return d.get(tarjoajaOid);
+							};
+							LinjakoodiSource linjakoodiSource = new LinjakoodiSource() {
+								Map<String, String> c = Maps.newHashMap();
+
+								public String getLinjakoodi(String uri) {
+									if (!c.containsKey(uri)) {
+										c.put(uri, linjakoodiKomponentti
+												.haeLinjakoodi(uri));
+									}
+									return c.get(uri);
+								}
+							};
+							OppilaitosSource oppilaitosSource = new OppilaitosSource() {
+								Map<String, String> c = Maps.newHashMap();
+								Map<String, String> d = Maps.newHashMap();
+
+								public String getOppilaitosKoodi(
+										String tarjoajaOid) {
+									if (!c.containsKey(tarjoajaOid)) {
+										c.put(tarjoajaOid,
+												oppilaitosKomponentti
+														.haeOppilaitosKoodi(tarjoajaOid));
+									}
+									return c.get(tarjoajaOid);
+								}
+
+								public String getOppilaitosnumero(
+										String tarjoajaOid) {
+									if (!d.containsKey(tarjoajaOid)) {
+										d.put(tarjoajaOid,
+												oppilaitosKomponentti
+														.haeOppilaitosnumero(tarjoajaOid));
+									}
+									return d.get(tarjoajaOid);
+								}
+							};
+							for (KelaAbstraktiHaku kelahaku : luontiJaRivit
+									.getHaut()) {
+								rivit.addAll(kelahaku.createHakijaRivit(
+										luontiJaRivit.getLuonti().getCache(),
+										hakukohdeSource, linjakoodiSource,
+										oppilaitosSource));
 							}
-						};
-						for (KelaAbstraktiHaku kelahaku : cache.getKelaHaut()) {
-							rivit.addAll(kelahaku.createHakijaRivit(cache,
-									hakukohdeSource, linjakoodiSource,
-									oppilaitosSource));
-						}
-						if (rivit.isEmpty()) {
-							String virhe = "Kela-dokumenttia ei voi luoda hauille joissa ei ole yhtään valittua hakijaa!";
-							dokumenttiprosessi(exchange)
-									.getPoikkeuksetUudelleenYrityksessa().add(
-											new Poikkeus(
-													Poikkeus.KOOSTEPALVELU,
-													virhe));
-							throw new RuntimeException(virhe);
-						}
-						dokumenttiprosessi(exchange).setKokonaistyo(
-								rivit.size() + 1);
-						exchange.getOut().setBody(rivit);
-					}
-				})
+							if (rivit.isEmpty()) {
+								String virhe = "Kela-dokumenttia ei voi luoda hauille joissa ei ole yhtään valittua hakijaa!";
+								luontiJaRivit
+										.getLuonti()
+										.getProsessi()
+										.getPoikkeuksetUudelleenYrityksessa()
+										.add(new Poikkeus(
+												Poikkeus.KOOSTEPALVELU, virhe));
+								throw new RuntimeException(virhe);
+							}
+							luontiJaRivit.getLuonti().getProsessi()
+									.setKokonaistyo(rivit.size() + 1);
+							return new KelaLuontiJaRivit(luontiJaRivit
+									.getLuonti(), rivit);
+						}))
 				//
-				.split(body(), createAccumulatingAggregation())
-				//
-				// .to(valmistaKelaRivi)
-				//
-				.bean(kelaHakijaKomponentti)
-				//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-					}
-				})
-				//
-				.end()
-				//
-				.bean(kelaDokumentinLuontiKomponentti)
+				.process(
+						Reititys.<KelaLuontiJaRivit, KelaLuontiJaDokumentti> funktio(luontiJaRivit -> {
+							Collection<TKUVAYHVA> rivit = luontiJaRivit
+									.getRivit()
+									.stream()
+									.map(rivi -> {
+										try {
+											return kelaHakijaKomponentti
+													.luo(rivi);
+										} finally {
+											luontiJaRivit.getLuonti()
+													.getProsessi()
+													.inkrementoiTehtyjaToita();
+										}
+									}).collect(Collectors.toList());
+
+							try {
+								return new KelaLuontiJaDokumentti(
+										luontiJaRivit.getLuonti(),
+										kelaDokumentinLuontiKomponentti
+												.luo(rivit,
+														luontiJaRivit
+																.getLuonti()
+																.getAineistonNimi(),
+														luontiJaRivit
+																.getLuonti()
+																.getOrganisaationNimi()));
+							} catch (Exception e) {
+								String virhe = "Kela-dokumenttia ei saatu luotua!";
+								luontiJaRivit
+										.getLuonti()
+										.getProsessi()
+										.getPoikkeuksetUudelleenYrityksessa()
+										.add(new Poikkeus(
+												Poikkeus.KOOSTEPALVELU, virhe));
+								throw new RuntimeException(virhe);
+							}
+						}))
 				//
 				.to(vientiDokumenttipalveluun);
 
-		from(haeHaku)
-		//
-				.routeId("KELALUONTI_HAKU")
-				//
-				.errorHandler(deadLetterChannel()
-				//
-						.maximumRedeliveries(3).redeliveryDelay(1500L))
-				//
-				.process(new Processor() {
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						String hakuOid = exchange.getIn().getBody(String.class);
-						HakuV1RDTO haku;
-						try {
-							haku = hakuResource.findByOid(hakuOid).getResult();
-							exchange.getOut().setBody(haku);
-
-							// cache(exchange).put(haku);
-						} catch (Exception e) {
-							dokumenttiprosessi(exchange)
-									.getPoikkeuksetUudelleenYrityksessa().add(
-											new Poikkeus(Poikkeus.TARJONTA,
-													"Haun haku oid:lla.",
-													new Oid(hakuOid,
-															Poikkeus.HAKUOID)));
-							throw e;
-						}
-						try {
-							cache(exchange).lukuvuosi(haku);
-						} catch (Exception e) {
-							dokumenttiprosessi(exchange)
-									.getPoikkeuksetUudelleenYrityksessa()
-									.add(new Poikkeus(
-											Poikkeus.KOODISTO,
-											"Lukuvuoden haku haulle koodistosta URI:lla "
-													+ haku.getKoulutuksenAlkamiskausiUri(),
-											new Oid(hakuOid, Poikkeus.HAKUOID)));
-							throw e;
-						}
-
-					}
-				});
-
-		from(valmistaHaku)
-		//
-				.routeId("KELALUONTI_HAKU_ESITIEDOT")
-				//
-				.errorHandler(deadLetterChannel()
-				//
-						.maximumRedeliveries(3).redeliveryDelay(1500L))
-				//
-				.process(new Processor() {
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						HakuV1RDTO haku = exchange.getIn().getBody(
-								HakuV1RDTO.class);
-						String hakutyyppiUri = haku.getHakutyyppiUri();
-						try {
-							if (cache(exchange).getHakutyyppi(hakutyyppiUri) == null) {
-								cache(exchange).putHakutyyppi(
-										hakutyyppiUri,
-										haunTyyppiKomponentti
-												.haunTyyppi(hakutyyppiUri));
-							}
-						} catch (Exception e) {
-							dokumenttiprosessi(exchange)
-									.getPoikkeuksetUudelleenYrityksessa()
-									.add(new Poikkeus(
-											Poikkeus.KOODISTO,
-											"Haun tyypille "
-													+ hakutyyppiUri
-													+ " ei saatu arvoa koodistosta",
-											new Oid(hakutyyppiUri,
-													Poikkeus.KOODISTOURI)));
-							throw e;
-						}
-					}
-				})
-				//
-				.choice()
-				//
-				.when(isLisahakuTyyppi())
-				//
-				.to(luoLisahaku)
-				//
-				.otherwise()
-				//
-				.to(luoHaku)
-				//
-				.end();
-
-		from(luoLisahaku)
-		//
-				.routeId("KELALUONTI_LISAHAKU")
-				//
-				.errorHandler(deadLetterChannel())
-				//
-				.process(SecurityPreprocessor.SECURITY)
-				//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						HakuV1RDTO haku = exchange.getIn().getBody(
-								HakuV1RDTO.class);
-						if (haku == null) {
-							throw new RuntimeException(
-									"Reitillä oli null hakuDTO!");
-						}
-						String hakuOid = haku.getOid();
-						// haetaan kaikki hakemukset lisahaulle koska ei voida
-						// tietaa tarkastelematta ketka on valittuja.
-						try {
-							HakemusList hakemusList = applicationResource
-									.findApplications(
-											null,
-											ApplicationResource.ACTIVE_AND_INCOMPLETE,
-											null, null, haku.getOid(), null, 0,
-											ApplicationResource.MAX);
-							KelaLisahaku kelalisahaku = new KelaLisahaku(
-									Collections2.transform(
-											hakemusList.getResults(),
-											new Function<SuppeaHakemus, String>() {
-												@Override
-												public String apply(
-														SuppeaHakemus suppeaHakemus) {
-													return suppeaHakemus
-															.getOid();
-												}
-											}), haku, cache(exchange));
-							cache(exchange).addKelaHaku(kelalisahaku);
-						} catch (Exception e) {
-							dokumenttiprosessi(exchange)
-									.getPoikkeuksetUudelleenYrityksessa()
-									.add(new Poikkeus(
-											Poikkeus.HAKU,
-											"Hakemusten haku haulle epäonnistui",
-											new Oid(haku.getOid(),
-													Poikkeus.HAKUOID)));
-							throw e;
-						}
-					}
-				});
-		from(luoHaku)
-		//
-				.routeId("KELALUONTI_LUONTI")
-				//
-				.errorHandler(deadLetterChannel())
-				//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						HakuV1RDTO haku = exchange.getIn().getBody(
-								HakuV1RDTO.class);
-						if (haku == null) {
-							throw new RuntimeException(
-									"Reitillä oli null hakuDTO!");
-						}
-						String hakuOid = haku.getOid();
-						try {
-							Collection<HakijaDTO> hakijat = sijoitteluVastaanottaneet
-									.vastaanottaneet(hakuOid);
-							KelaHaku kelahaku = new KelaHaku(hakijat, haku,
-									cache(exchange));
-							cache(exchange).addKelaHaku(kelahaku);
-						} catch (Exception e) {
-							dokumenttiprosessi(exchange)
-									.getPoikkeuksetUudelleenYrityksessa().add(
-											new Poikkeus(Poikkeus.SIJOITTELU,
-													"Vastaanottaneiden haku sijoittelusta epäonnistui haulle, koska: "
-															+ e.getMessage(),
-													new Oid(hakuOid,
-															Poikkeus.HAKUOID)));
-							throw e;
-						}
-					}
-				});
 		from(vientiDokumenttipalveluun)
 		//
 				.routeId("KELALUONTI_DOKUMENTTIPALVELUUN")
 				//
-				.errorHandler(deadLetterChannel()
+				.errorHandler(deadLetterChannel())
 				//
-						.maximumRedeliveries(3).redeliveryDelay(1500L))
+				// .maximumRedeliveries(3).redeliveryDelay(1500L))
 				//
-				.process(new Processor() {
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						try {
-							InputStream filedata = exchange.getIn().getBody(
-									InputStream.class);
-							String id = generateId();
-							Long expirationTime = defaultExpirationDate()
-									.getTime();
-							List<String> tags = dokumenttiprosessi(exchange)
-									.getTags();
-							dokumenttiResource.tallenna(id, KelaUtil
-									.createTiedostoNimiYhva14(new Date()),
-									expirationTime, tags,
-									"application/octet-stream", filedata);
-							dokumenttiprosessi(exchange).setDokumenttiId(id);
-							dokumenttiprosessi(exchange)
-									.inkrementoiTehtyjaToita();
-						} catch (Exception e) {
-							dokumenttiprosessi(exchange)
-									.getPoikkeuksetUudelleenYrityksessa()
-									.add(new Poikkeus(
-											Poikkeus.DOKUMENTTIPALVELU,
-											"Kela-dokumentin tallennus dokumenttipalveluun epäonnistui"));
-							throw e;
-						}
-					}
-				});
+				.process(
+						Reititys.<KelaLuontiJaDokumentti> kuluttaja(luontiJaDokumentti -> {
+							LOG.info(
+									"Aloitetaan keladokumentin(uuid {}) siirtovaihe dokumenttipalveluun.",
+									luontiJaDokumentti.getLuonti().getUuid());
+							try {
+								InputStream filedata = new ByteArrayInputStream(
+										luontiJaDokumentti.getDokumentti());
+								String id = generateId();
+								Long expirationTime = defaultExpirationDate()
+										.getTime();
+								List<String> tags = luontiJaDokumentti
+										.getLuonti().getProsessi().getTags();
+								dokumenttiResource.tallenna(id, KelaUtil
+										.createTiedostoNimiYhva14(new Date()),
+										expirationTime, tags,
+										"application/octet-stream", filedata);
+								luontiJaDokumentti.getLuonti().getProsessi()
+										.setDokumenttiId(id);
+								luontiJaDokumentti.getLuonti().getProsessi()
+										.inkrementoiTehtyjaToita();
+							} catch (Exception e) {
+								luontiJaDokumentti
+										.getLuonti()
+										.getProsessi()
+										.getPoikkeuksetUudelleenYrityksessa()
+										.add(new Poikkeus(
+												Poikkeus.DOKUMENTTIPALVELU,
+												"Kela-dokumentin tallennus dokumenttipalveluun epäonnistui"));
+								throw e;
+							}
+						}));
 	}
-
-	/**
-	 * @return Arraylist aggregation strategy.
-	 */
-	private <T> AggregationStrategy createAccumulatingAggregation() {
-		return new FlexibleAggregationStrategy<T>().storeInBody()
-				.accumulateInCollection(ArrayList.class);
-	}
-
-	private KelaCache cache(Exchange exchange) {
-		return exchange.getProperty("cache", KelaCache.class);
-	}
-
-	private Predicate isLisahakuTyyppi() {
-		return new Predicate() {
-			public boolean matches(Exchange exchange) {
-				HakuV1RDTO haku = exchange.getIn().getBody(HakuV1RDTO.class);
-				String hakutyypinArvo = cache(exchange).getHakutyyppi(
-						haku.getHakutyyppiUri());
-				// Koodistosta saa hakutyypille arvon ja nimen. Oletetaan etta
-				// nimi voi vaihtua mutta koodi pysyy vakiona.
-				return "03".equals(hakutyypinArvo);
-			}
-		};
-	}
-
 }
