@@ -11,14 +11,14 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
  */
 public class KelaLuontiJaHaut {
 	private final KelaLuonti luonti;
-	private final Collection<HakuV1RDTO> haut;
+	private final Collection<Haku> haut;
 
-	public KelaLuontiJaHaut(KelaLuonti kelaLuonti, Collection<HakuV1RDTO> haut) {
+	public KelaLuontiJaHaut(KelaLuonti kelaLuonti, Collection<Haku> haut) {
 		this.luonti = kelaLuonti;
 		this.haut = haut;
 	}
 
-	public Collection<HakuV1RDTO> getHaut() {
+	public Collection<Haku> getHaut() {
 		return haut;
 	}
 
