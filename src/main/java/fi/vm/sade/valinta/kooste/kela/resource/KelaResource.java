@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.kela.resource;
 
+import java.util.UUID;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -18,7 +20,9 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.koodisto.service.KoodiService;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaHakuFiltteri;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.route.KelaFtpRoute;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
@@ -62,9 +66,11 @@ public class KelaResource {
 		String organisaationNimi = "OPH";
 		KelaProsessi kelaProsessi = new KelaProsessi("Kela-dokumentin luonti",
 				hakuTietue.getHakuOids());
-		kelaRoute.aloitaKelaLuonti(kelaProsessi, hakuTietue.getHakuOids(),
-				aineistonNimi, organisaationNimi, SecurityContextHolder
-						.getContext().getAuthentication());
+		kelaRoute.aloitaKelaLuonti(kelaProsessi,
+				new KelaLuonti(kelaProsessi.getId(), hakuTietue.getHakuOids(),
+						aineistonNimi, organisaationNimi, new KelaCache(
+								koodiService)));
+		// SecurityContextHolder.getContext().getAuthentication()
 		dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
 		return kelaProsessi.toProsessiId();
 	}

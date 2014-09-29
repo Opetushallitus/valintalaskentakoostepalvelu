@@ -6,6 +6,7 @@ import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.springframework.security.core.Authentication;
 
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
@@ -21,13 +22,7 @@ public interface KelaRoute {
 	void aloitaKelaLuonti(
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) KelaProsessi prosessi,
 			//
-			@Body Collection<String> hakuOids,
-			//
-			@Property(PROPERTY_AINEISTONNIMI) String aineistonNimi,
-			//
-			@Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi,
-			//
-			@Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
+			@Body KelaLuonti luonti);
 
 	/**
 	 * Camel route description.

@@ -14,6 +14,9 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
+import org.apache.camel.builder.DeadLetterChannelBuilder;
+import org.apache.camel.builder.DefaultErrorHandlerBuilder;
+import org.apache.camel.processor.DeadLetterChannel;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.slf4j.Logger;
@@ -72,7 +75,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti;
 	private final SijoitteluKaikkiPaikanVastaanottaneet sijoitteluVastaanottaneet;
 	private final DokumenttiResource dokumenttiResource;
-	private final String kelaLuonti;
 	private final HaunTyyppiKomponentti haunTyyppiKomponentti;
 	private final ApplicationResource applicationResource;
 	private final OppilaitosKomponentti oppilaitosKomponentti;
@@ -80,6 +82,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final LinjakoodiKomponentti linjakoodiKomponentti;
 	private final HakukohdeResource hakukohdeResource;
 	private final KoodiService koodiService;
+	private final String kelaLuonti;
 
 	@Autowired
 	public KelaRouteImpl(
@@ -108,6 +111,12 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 		this.applicationResource = applicationResource;
 	}
 
+	private DefaultErrorHandlerBuilder deadLetterChannel() {
+		return deadLetterChannel(KelaRoute.DIRECT_KELA_FAILED)
+				.logExhaustedMessageHistory(true).logExhausted(true)
+				.logStackTrace(true).logRetryStackTrace(true).logHandled(true);
+	}
+
 	/**
 	 * Kela Camel Configuration: Siirto and document generation.
 	 */
@@ -117,23 +126,49 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 		Endpoint luoLisahaku = endpoint("direct:kelaluonti_luo_lisahaku");
 		Endpoint luoHaku = endpoint("direct:kelaluonti_luo_haku");
 		Endpoint vientiDokumenttipalveluun = endpoint("direct:kelaluonti_vienti_dokumenttipalveluun");
+
+		/**
+		 * Deadletterchannel
+		 */
+		from(KelaRoute.DIRECT_KELA_FAILED)
+		//
+				.routeId("KELALUONTI_DEADLETTERCHANNEL")
+				//
+
+				.process(new Processor() {
+					public void process(Exchange exchange) throws Exception {
+						String virhe = null;
+						String stacktrace = null;
+						try {
+							virhe = simple("${exception.message}").evaluate(
+									exchange, String.class);
+							stacktrace = simple("${exception.stacktrace}")
+									.evaluate(exchange, String.class);
+						} catch (Exception e) {
+						}
+						LOG.error(
+								"Keladokumentin luonti paattyi virheeseen! {}\r\n{}",
+								virhe, stacktrace);
+						dokumenttiprosessi(exchange).getPoikkeukset().add(
+								new Poikkeus(Poikkeus.KOOSTEPALVELU,
+										"Kela-dokumentin luonti", virhe));
+						dokumenttiprosessi(exchange).addException(virhe);
+						dokumenttiprosessi(exchange)
+								.luovutaUudelleenYritystenKanssa();
+
+					}
+				})
+				//
+				.stop();
 		/**
 		 * Kela-dokkarin luonti reitti
 		 */
 		from(kelaLuonti)
 		//
-				.errorHandler(
-						deadLetterChannel(kelaFailed())
-								//
-								.logExhaustedMessageHistory(true)
-								.logExhausted(true)
-								// hide retry/handled stacktrace
-								.logStackTrace(true).logRetryStackTrace(true)
-								.logHandled(true))
+				.errorHandler(deadLetterChannel())
 				//
-				.setProperty("cache", constant(new KelaCache(koodiService)))
+				.routeId("KELALUONTI")
 				//
-				.process(SecurityPreprocessor.SECURITY)
 				// haetaan kaikkia hakuOideja vastaavat haut tarjonnasta
 				.split(body())
 				//
@@ -259,13 +294,14 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 								}
 								return c.get(tarjoajaOid);
 							}
-                            public String getOppilaitosnumero(String tarjoajaOid) {
-                                if (!d.containsKey(tarjoajaOid)) {
-                                    d.put(tarjoajaOid, oppilaitosKomponentti
-                                            .haeOppilaitosnumero(tarjoajaOid));
-                                }
-                                return d.get(tarjoajaOid);
-                            }
+
+							public String getOppilaitosnumero(String tarjoajaOid) {
+								if (!d.containsKey(tarjoajaOid)) {
+									d.put(tarjoajaOid, oppilaitosKomponentti
+											.haeOppilaitosnumero(tarjoajaOid));
+								}
+								return d.get(tarjoajaOid);
+							}
 						};
 						for (KelaAbstraktiHaku kelahaku : cache.getKelaHaut()) {
 							rivit.addAll(kelahaku.createHakijaRivit(cache,
@@ -305,70 +341,13 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.to(vientiDokumenttipalveluun);
 
-		from(vientiDokumenttipalveluun)
-		//
-
-				.errorHandler(
-						deadLetterChannel(kelaFailed())
-								//
-								.maximumRedeliveries(3)
-								.redeliveryDelay(1500L)
-								// log exhausted stacktrace
-								.logExhaustedMessageHistory(true)
-								.logExhausted(true)
-								// hide retry/handled stacktrace
-								.logStackTrace(false).logRetryStackTrace(false)
-								.logHandled(false))
-				//
-				.process(new Processor() {
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						try {
-							InputStream filedata = exchange.getIn().getBody(
-									InputStream.class);
-							String id = generateId();
-							Long expirationTime = defaultExpirationDate()
-									.getTime();
-							List<String> tags = dokumenttiprosessi(exchange)
-									.getTags();
-							dokumenttiResource.tallenna(id, KelaUtil
-									.createTiedostoNimiYhva14(new Date()),
-									expirationTime, tags,
-									"application/octet-stream", filedata);
-							dokumenttiprosessi(exchange).setDokumenttiId(id);
-							dokumenttiprosessi(exchange)
-									.inkrementoiTehtyjaToita();
-						} catch (Exception e) {
-							dokumenttiprosessi(exchange)
-									.getPoikkeuksetUudelleenYrityksessa()
-									.add(new Poikkeus(
-											Poikkeus.DOKUMENTTIPALVELU,
-											"Kela-dokumentin tallennus dokumenttipalveluun epäonnistui"));
-							throw e;
-						}
-					}
-				});
-
 		from(haeHaku)
 		//
-				.errorHandler(
-						deadLetterChannel(kelaFailed())
-								// .useOriginalMessage()
-								//
-								// (kelaFailed())
-								//
-								.maximumRedeliveries(3)
-								.redeliveryDelay(1500L)
-								// log exhausted stacktrace
-								.logExhaustedMessageHistory(true)
-								.logExhausted(true)
-								// hide retry/handled stacktrace
-								.logStackTrace(false).logRetryStackTrace(false)
-								.logHandled(false))
+				.routeId("KELALUONTI_HAKU")
 				//
-				.routeId("Haun haku reitti")
+				.errorHandler(deadLetterChannel()
 				//
-				.process(SecurityPreprocessor.SECURITY)
+						.maximumRedeliveries(3).redeliveryDelay(1500L))
 				//
 				.process(new Processor() {
 					@Override
@@ -406,24 +385,12 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				});
 
 		from(valmistaHaku)
-				.errorHandler(
-						deadLetterChannel(kelaFailed())
-								// .useOriginalMessage()
-								//
-								// (kelaFailed())
-								//
-								.maximumRedeliveries(3)
-								.redeliveryDelay(1500L)
-								// log exhausted stacktrace
-								.logExhaustedMessageHistory(true)
-								.logExhausted(true)
-								// hide retry/handled stacktrace
-								.logStackTrace(false).logRetryStackTrace(false)
-								.logHandled(false))
+		//
+				.routeId("KELALUONTI_HAKU_ESITIEDOT")
 				//
-				.routeId("Haun esitiedot keräävä reitti")
+				.errorHandler(deadLetterChannel()
 				//
-				.process(SecurityPreprocessor.SECURITY)
+						.maximumRedeliveries(3).redeliveryDelay(1500L))
 				//
 				.process(new Processor() {
 					@Override
@@ -467,9 +434,9 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 		from(luoLisahaku)
 		//
-				.errorHandler(deadLetterChannel(kelaFailed()))
+				.routeId("KELALUONTI_LISAHAKU")
 				//
-				.routeId("Lisähaun luova reitti")
+				.errorHandler(deadLetterChannel())
 				//
 				.process(SecurityPreprocessor.SECURITY)
 				//
@@ -517,9 +484,9 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				});
 		from(luoHaku)
 		//
-				.errorHandler(deadLetterChannel(kelaFailed()))
+				.routeId("KELALUONTI_LUONTI")
 				//
-				.routeId("Haun luova reitti")
+				.errorHandler(deadLetterChannel())
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
@@ -548,34 +515,42 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 						}
 					}
 				});
-
-		from(kelaFailed())
+		from(vientiDokumenttipalveluun)
 		//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						String virhe = null;
-						String stacktrace = null;
-						try {
-							virhe = simple("${exception.message}").evaluate(
-									exchange, String.class);
-							stacktrace = simple("${exception.stacktrace}")
-									.evaluate(exchange, String.class);
-						} catch (Exception e) {
-						}
-						LOG.error(
-								"Keladokumentin luonti paattyi virheeseen! {}\r\n{}",
-								virhe, stacktrace);
-						dokumenttiprosessi(exchange).getPoikkeukset().add(
-								new Poikkeus(Poikkeus.KOOSTEPALVELU,
-										"Kela-dokumentin luonti", virhe));
-						dokumenttiprosessi(exchange).addException(virhe);
-						dokumenttiprosessi(exchange)
-								.luovutaUudelleenYritystenKanssa();
-
-					}
-				})
+				.routeId("KELALUONTI_DOKUMENTTIPALVELUUN")
 				//
-				.stop();
+				.errorHandler(deadLetterChannel()
+				//
+						.maximumRedeliveries(3).redeliveryDelay(1500L))
+				//
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						try {
+							InputStream filedata = exchange.getIn().getBody(
+									InputStream.class);
+							String id = generateId();
+							Long expirationTime = defaultExpirationDate()
+									.getTime();
+							List<String> tags = dokumenttiprosessi(exchange)
+									.getTags();
+							dokumenttiResource.tallenna(id, KelaUtil
+									.createTiedostoNimiYhva14(new Date()),
+									expirationTime, tags,
+									"application/octet-stream", filedata);
+							dokumenttiprosessi(exchange).setDokumenttiId(id);
+							dokumenttiprosessi(exchange)
+									.inkrementoiTehtyjaToita();
+						} catch (Exception e) {
+							dokumenttiprosessi(exchange)
+									.getPoikkeuksetUudelleenYrityksessa()
+									.add(new Poikkeus(
+											Poikkeus.DOKUMENTTIPALVELU,
+											"Kela-dokumentin tallennus dokumenttipalveluun epäonnistui"));
+							throw e;
+						}
+					}
+				});
 	}
 
 	/**
@@ -601,13 +576,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				return "03".equals(hakutyypinArvo);
 			}
 		};
-	}
-
-	/**
-	 * @return direct:kela_siirto
-	 */
-	private String kelaFailed() {
-		return KelaRoute.DIRECT_KELA_FAILED;
 	}
 
 }
