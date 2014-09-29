@@ -83,9 +83,7 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		// new MediaType("application", "json", Charset.forName("UTF-8"));
 		return WebClient.fromClient(webClient).path(url)
 		//
-				.query("appStates", "ACTIVE")
-				//
-				.query("appStates", "INCOMPLETE")
+				.query("appState", "ACTIVE", "INCOMPLETE")
 				//
 				.query("rows", 100000)
 				//
@@ -113,9 +111,7 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 							.fromClient(webClient)
 							.path(url)
 							//
-							.query("appStates", "ACTIVE")
-							//
-							.query("appStates", "INCOMPLETE")
+							.query("appState", "ACTIVE", "INCOMPLETE")
 							//
 							.query("rows", 100000)
 							//
