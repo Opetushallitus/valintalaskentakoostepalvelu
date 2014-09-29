@@ -15,6 +15,7 @@ import java.util.Deque;
 
 import org.apache.camel.Body;
 import org.apache.camel.Property;
+import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAALKU;
@@ -32,11 +33,13 @@ import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
 @Component
 public class KelaDokumentinLuontiKomponenttiImpl {
 
-	public InputStream luo(@Body Collection<TKUVAYHVA> rivit,
+	public byte[] luo(@Body Collection<TKUVAYHVA> rivit,
 	//
 			@Property(PROPERTY_AINEISTONNIMI) String aineistonNimi,
 			//
-			@Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi) throws Exception {
+			@Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi)
+			throws Exception {
+
 		int count = rivit.size();
 
 		Deque<InputStream> streams = new ArrayDeque<InputStream>();
@@ -59,7 +62,7 @@ public class KelaDokumentinLuontiKomponenttiImpl {
 
 		InputStream input = new SequenceInputStream(
 				Collections.enumeration(streams));
-		return input;
+		return IOUtils.toByteArray(input);
 	}
 
 	private ByteBuffer createBuffer(int i) {

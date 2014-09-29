@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -21,13 +23,15 @@ import fi.vm.sade.valinta.kooste.kela.komponentti.OppilaitosSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
 
 public class KelaLisahaku extends KelaAbstraktiHaku {
-
-	private static final String LISAHAKU_HYVAKSYTTY = "lisahaku-hyvaksytty";
+	private final static Logger LOG = LoggerFactory
+			.getLogger(KelaLisahaku.class);
+	public static final String LISAHAKU_HYVAKSYTTY = "lisahaku-hyvaksytty";
 	private final Collection<String> hakemusOids;
 
 	public KelaLisahaku(Collection<String> hakemusOids, HakuV1RDTO haku,
 			PaivamaaraSource paivamaaraSource) {
 		super(haku, paivamaaraSource);
+		LOG.info("Hakemukset laitettu lisahakuun {}kpl.", hakemusOids.size());
 		this.hakemusOids = hakemusOids;
 	}
 
@@ -63,20 +67,28 @@ public class KelaLisahaku extends KelaAbstraktiHaku {
 						.poimintapaivamaara(getHaku());
 				final Date valintapaivamaara = getPaivamaaraSource()
 						.valintapaivamaara(getHaku());
-				/*final String linjakoodi = linjakoodiSource
-						.getLinjakoodi(hakukohde.getHakukohdeNimiUri());*/
-				/*final String oppilaitos = oppilaitosSource
-						.getOppilaitosKoodi(hakukohde.getTarjoajaOid());*/
+				/*
+				 * final String linjakoodi = linjakoodiSource
+				 * .getLinjakoodi(hakukohde.getHakukohdeNimiUri());
+				 */
+				/*
+				 * final String oppilaitos = oppilaitosSource
+				 * .getOppilaitosKoodi(hakukohde.getTarjoajaOid());
+				 */
 
-				final String oppilaitosnumero = oppilaitosSource.getOppilaitosnumero(organisaatioOid);
-				
-				valitut.add(new KelaHakijaRivi(etunimi, sukunimi, henkilotunnus, 
-						lukuvuosi, poimintapaivamaara, valintapaivamaara, 
-						oppilaitosnumero, organisaatioOid, hakukohdeOid, syntymaaika));
+				final String oppilaitosnumero = oppilaitosSource
+						.getOppilaitosnumero(organisaatioOid);
 
-/*				valitut.add(new KelaHakijaRivi(etunimi, sukunimi,
+				valitut.add(new KelaHakijaRivi(etunimi, sukunimi,
 						henkilotunnus, lukuvuosi, poimintapaivamaara,
-						valintapaivamaara, linjakoodi, oppilaitos, syntymaaika));*/
+						valintapaivamaara, oppilaitosnumero, organisaatioOid,
+						hakukohdeOid, syntymaaika));
+
+				/*
+				 * valitut.add(new KelaHakijaRivi(etunimi, sukunimi,
+				 * henkilotunnus, lukuvuosi, poimintapaivamaara,
+				 * valintapaivamaara, linjakoodi, oppilaitos, syntymaaika));
+				 */
 			} else {
 				continue;
 			}

@@ -15,7 +15,7 @@ public class KelaHakijaRiviKomponenttiImpl {
 	// @Body HakijaDTO hakija,
 	// @Property("lukuvuosi") Date lukuvuosi,
 	// @Property("poimintapaivamaara") Date poimintapaivamaara)
-			throws Exception {
+	{
 		TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
 		builder.setOppilaitosnumero(hakija.getOppilaitosnumero());
 		builder.setOrganisaatio(hakija.getOrganisaatio());

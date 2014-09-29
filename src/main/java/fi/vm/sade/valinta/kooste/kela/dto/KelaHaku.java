@@ -8,6 +8,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -36,7 +40,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HakutoiveenValinta
  * 
  */
 public class KelaHaku extends KelaAbstraktiHaku {
-
+	private final static Logger LOG = LoggerFactory.getLogger(KelaHaku.class);
 	private final Collection<HakijaDTO> hakijat;
 
 	public KelaHaku(Collection<HakijaDTO> hakijat, HakuV1RDTO haku,
@@ -45,39 +49,50 @@ public class KelaHaku extends KelaAbstraktiHaku {
 		//
 		// Varmistetaan etta ainoastaan hyvaksyttyja ja vastaanottaneita
 		//
-		this.hakijat = Collections2.filter(hakijat, new Predicate<HakijaDTO>() {
-			public boolean apply(HakijaDTO hakija) {
-				for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-					Collections.sort(
-							hakutoive.getHakutoiveenValintatapajonot(),
-							HakutoiveenValintatapajonoComparator.DEFAULT);
-					Set<Integer> prioriteetit = Sets.newHashSet();
-					for (HakutoiveenValintatapajonoDTO jono : hakutoive
-							.getHakutoiveenValintatapajonot()) {
-						if (jono.getValintatapajonoPrioriteetti() == null) {
-							throw new RuntimeException(
-									"Valintatapajonolla ei ollut prioriteettiÃ¤!");
-						}
-						if (prioriteetit.contains(jono
-								.getValintatapajonoPrioriteetti())) {
-							throw new RuntimeException(
-									"Useammalla valintatapajonolla on sama prioriteetti hakukohteessa("
-											+ hakutoive.getHakukohdeOid()
-											+ ")!");
-						}
-						prioriteetit.add(jono.getValintatapajonoPrioriteetti());
-					}
-					for (HakutoiveenValintatapajonoDTO jono : hakutoive
-							.getHakutoiveenValintatapajonot()) {
-						if ((HakemuksenTila.HYVAKSYTTY.equals(jono.getTila()) || HakemuksenTila.VARASIJALTA_HYVAKSYTTY.equals(jono.getTila())) &&
-                                (jono.getVastaanottotieto() != null && jono.getVastaanottotieto().equals(ValintatuloksenTila.VASTAANOTTANUT))) {
-							return true;
-						}
-					}
-				}
-				return false;
-			}
-		});
+		LOG.info("Filtteroidaan haussa ylimaaraiset hakijat pois keladokumentista!");
+		this.hakijat = hakijat
+				.stream()
+				.filter(hakija -> hakija
+						.getHakutoiveet()
+						.stream()
+						.anyMatch(hakutoive -> {
+							// Tassa oli ennen tarkistus etta
+							// valintatapajonoilla on yksilollinen prioriteetti.
+							// Onko enaa tarpeellista?
+							// Collections.sort(
+							// hakutoive.getHakutoiveenValintatapajonot(),
+							// HakutoiveenValintatapajonoComparator.DEFAULT);
+							// Set<Integer> prioriteetit =
+							// Sets.newHashSet();
+							// for (HakutoiveenValintatapajonoDTO jono :
+							// hakutoive
+							// .getHakutoiveenValintatapajonot()) {
+							// if (jono.getValintatapajonoPrioriteetti() ==
+							// null) {
+							// throw new RuntimeException(
+							// "Valintatapajonolla ei ollut prioriteettiÃ¤!");
+							// }
+							// if (prioriteetit.contains(jono
+							// .getValintatapajonoPrioriteetti())) {
+							// throw new RuntimeException(
+							// "Useammalla valintatapajonolla on sama prioriteetti hakukohteessa("
+							// + hakutoive.getHakukohdeOid()
+							// + ")!");
+							// }
+							// prioriteetit.add(jono.getValintatapajonoPrioriteetti());
+							// }
+								return hakutoive
+										.getHakutoiveenValintatapajonot()
+										.stream()
+										.sorted(HakutoiveenValintatapajonoComparator.DEFAULT)
+										.anyMatch(
+												jono -> (HakemuksenTila.HYVAKSYTTY
+														.equals(jono.getTila()) || HakemuksenTila.VARASIJALTA_HYVAKSYTTY
+														.equals(jono.getTila()))
+														&& (jono.getVastaanottotieto() != null && jono
+																.getVastaanottotieto()
+																.equals(ValintatuloksenTila.VASTAANOTTANUT)));
+							})).collect(Collectors.toList());
 	}
 
 	@Override
@@ -91,15 +106,20 @@ public class KelaHaku extends KelaAbstraktiHaku {
 						HakutoiveenValintatapajonoComparator.DEFAULT);
 				for (HakutoiveenValintatapajonoDTO jono : hakutoive
 						.getHakutoiveenValintatapajonot()) {
-					if ((HakemuksenTila.HYVAKSYTTY.equals(jono.getTila()) || HakemuksenTila.VARASIJALTA_HYVAKSYTTY.equals(jono.getTila())) &&
-                            (jono.getVastaanottotieto() != null && jono.getVastaanottotieto().equals(ValintatuloksenTila.VASTAANOTTANUT))) {
+					if ((HakemuksenTila.HYVAKSYTTY.equals(jono.getTila()) || HakemuksenTila.VARASIJALTA_HYVAKSYTTY
+							.equals(jono.getTila()))
+							&& (jono.getVastaanottotieto() != null && jono
+									.getVastaanottotieto().equals(
+											ValintatuloksenTila.VASTAANOTTANUT))) {
 						Hakemus hakemus = hakemusSource.getHakemusByOid(hakija
 								.getHakemusOid());
 						Map<String, String> henkilotiedot = henkilotiedot(hakemus);
 						String hakukohdeOid = hakutoive.getHakukohdeOid();
 
-						/*HakukohdeDTO hakukohde = hakukohdeSource
-								.getHakukohdeByOid(hakukohdeOid);*/
+						/*
+						 * HakukohdeDTO hakukohde = hakukohdeSource
+						 * .getHakukohdeByOid(hakukohdeOid);
+						 */
 						final String etunimi = henkilotiedot.get(ETUNIMET);
 						final String sukunimi = henkilotiedot.get(SUKUNIMI);
 						final String henkilotunnus = henkilotiedot
@@ -112,21 +132,29 @@ public class KelaHaku extends KelaAbstraktiHaku {
 								.poimintapaivamaara(getHaku());
 						final Date valintapaivamaara = getPaivamaaraSource()
 								.valintapaivamaara(getHaku());
-						/*final String linjakoodi = linjakoodiSource
-								.getLinjakoodi(hakukohde.getHakukohdeNimiUri());*/
-						/*final String oppilaitos = oppilaitosSource
-								.getOppilaitosKoodi(hakutoive.getTarjoajaOid());*/
+						/*
+						 * final String linjakoodi = linjakoodiSource
+						 * .getLinjakoodi(hakukohde.getHakukohdeNimiUri());
+						 */
+						/*
+						 * final String oppilaitos = oppilaitosSource
+						 * .getOppilaitosKoodi(hakutoive.getTarjoajaOid());
+						 */
 						final String oppilaitosnumero = oppilaitosSource
 								.getOppilaitosnumero(hakutoive.getTarjoajaOid());
-						final String organisaatioOid = hakutoive.getTarjoajaOid();
+						final String organisaatioOid = hakutoive
+								.getTarjoajaOid();
 
-						valitut.add(new KelaHakijaRivi(etunimi, sukunimi, henkilotunnus, 
-								lukuvuosi, poimintapaivamaara, valintapaivamaara, 
-								oppilaitosnumero, organisaatioOid, hakukohdeOid, syntymaaika));
-						/*valitut.add(new KelaHakijaRivi(etunimi, sukunimi,
+						valitut.add(new KelaHakijaRivi(etunimi, sukunimi,
 								henkilotunnus, lukuvuosi, poimintapaivamaara,
-								valintapaivamaara, linjakoodi, oppilaitos,
-								syntymaaika));*/
+								valintapaivamaara, oppilaitosnumero,
+								organisaatioOid, hakukohdeOid, syntymaaika));
+						/*
+						 * valitut.add(new KelaHakijaRivi(etunimi, sukunimi,
+						 * henkilotunnus, lukuvuosi, poimintapaivamaara,
+						 * valintapaivamaara, linjakoodi, oppilaitos,
+						 * syntymaaika));
+						 */
 					} else {
 						break;
 					}
