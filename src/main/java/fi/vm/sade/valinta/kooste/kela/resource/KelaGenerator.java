@@ -10,12 +10,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.koodisto.service.KoodiService;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaHakuFiltteri;
+import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.route.KelaFtpRoute;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+
 @Component
 @Configurable
 public class KelaGenerator {
@@ -43,13 +46,14 @@ public class KelaGenerator {
 		String organisaationNimi = "OPH";
 		KelaProsessi kelaProsessi = new KelaProsessi("Kela-dokumentin luonti",
 				hakuTietue.getHakuOids());
-		kelaRoute.aloitaKelaLuonti(kelaProsessi, hakuTietue.getHakuOids(),
-				aineistonNimi, organisaationNimi, SecurityContextHolder
-						.getContext().getAuthentication());
+		kelaRoute.aloitaKelaLuonti(kelaProsessi,
+				new KelaLuonti(kelaProsessi.getId(), hakuTietue.getHakuOids(),
+						aineistonNimi, organisaationNimi, new KelaCache(
+								koodiService), kelaProsessi));
 		dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
 		return kelaProsessi.toProsessiId();
 	}
-	
+
 	public String aktivoiKelaTiedostonluonti(String[] args) {
 		KelaHakuFiltteri kelaHakuFiltteri = new KelaHakuFiltteri();
 		kelaHakuFiltteri.setAineisto("");
@@ -58,14 +62,16 @@ public class KelaGenerator {
 		System.out.println("STARTED");
 		return "STARTED";
 	}
+
 	public static void main(String[] args) {
-				if( args.length==0) {
-					System.err.println("No hakuOids given.");
-					return;
-				}
-		        final ApplicationContext context = new ClassPathXmlApplicationContext("/spring/application-context.xml");
-		        KelaGenerator kelaGenerator = context.getBean(KelaGenerator.class);
-		        kelaGenerator.aktivoiKelaTiedostonluonti(args);
-		        return;
-    }
+		if (args.length == 0) {
+			System.err.println("No hakuOids given.");
+			return;
+		}
+		final ApplicationContext context = new ClassPathXmlApplicationContext(
+				"/spring/application-context.xml");
+		KelaGenerator kelaGenerator = context.getBean(KelaGenerator.class);
+		kelaGenerator.aktivoiKelaTiedostonluonti(args);
+		return;
+	}
 }
