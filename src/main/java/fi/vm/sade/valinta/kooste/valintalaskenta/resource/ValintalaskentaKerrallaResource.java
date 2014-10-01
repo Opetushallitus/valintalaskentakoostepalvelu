@@ -158,6 +158,11 @@ public class ValintalaskentaKerrallaResource {
 									valintakoelaskenta,
 									hakukohdeDtos,
 									uuid -> {
+										if (uuid == null) {
+											LOG.error("Laskentaa ei saatu luotua!");
+											throw new RuntimeException(
+													"Laskentaa ei saatu luotua!");
+										}
 										laskennanAloitus.accept(uuid);
 									},
 									poikkeus -> {
