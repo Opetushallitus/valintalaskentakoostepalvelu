@@ -73,11 +73,16 @@ public class ValintalaskentaJaValintakoelaskentaPalvelukutsu extends
 	}
 
 	private LaskeDTO muodostaLaskeDTO() {
-		return new LaskeDTO(getHakukohdeOid(), muodostaHakemuksetDTO(
-				hakemuksetPalvelukutsu.getHakemukset(),
-				lisatiedotPalvelukutsu.getLisatiedot()),
-				valintaperusteetPalvelukutsu.getValintaperusteet(),
-				hakijaryhmatPalvelukutsu.getHakijaryhmat());
+		try {
+			return new LaskeDTO(getHakukohdeOid(), muodostaHakemuksetDTO(
+					hakemuksetPalvelukutsu.getHakemukset(),
+					lisatiedotPalvelukutsu.getLisatiedot()),
+					valintaperusteetPalvelukutsu.getValintaperusteet(),
+					hakijaryhmatPalvelukutsu.getHakijaryhmat());
+		} catch (Exception e) {
+			LOG.error("LaskeDTO:n muodostaminen epaonnistui {}", e.getMessage());
+			throw e;
+		}
 	}
 
 	@Override

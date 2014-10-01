@@ -13,6 +13,7 @@ import org.junit.Test;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 
 public class TestLaskentaDtoAsExcel {
 
@@ -27,7 +28,8 @@ public class TestLaskentaDtoAsExcel {
 		Integer valinnanvaihe = null;
 		Boolean valintakoelaskenta = null;
 		LaskentaDto l = new LaskentaDto(uuid, hakuOid, new Date().getTime(),
-				tila, hakukohteet, valinnanvaihe, valintakoelaskenta);
+				tila, LaskentaTyyppi.HAKUKOHDE, hakukohteet, valinnanvaihe,
+				valintakoelaskenta);
 		LaskentaDtoAsExcel.laskentaDtoAsExcel(l);
 	}
 }

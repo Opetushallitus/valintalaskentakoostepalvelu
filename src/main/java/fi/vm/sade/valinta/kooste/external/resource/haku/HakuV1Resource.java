@@ -9,6 +9,11 @@ import javax.ws.rs.core.MediaType;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 @Path("/v1/haku")
 public interface HakuV1Resource {
 

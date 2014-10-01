@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.haku.dto;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -17,13 +18,17 @@ public class Hakemus {
 	private String applicationSystemId;
 	private Answers answers;
 	private Map<String, String> additionalInfo = new HashMap<String, String>();
-
+	private List<Eligibility> preferenceEligibilities;
 	private String oid;
 	private String state;
 	private String personOid;
 
 	public String getType() {
 		return type;
+	}
+
+	public List<Eligibility> getPreferenceEligibilities() {
+		return preferenceEligibilities;
 	}
 
 	public void setType(String type) {

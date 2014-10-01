@@ -1,13 +1,21 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,6 +224,59 @@ public class Converter {
 					e.getMessage());
 			throw e;
 		}
+
+		try {
+			hakemus.getAnswers()
+					.getHakutoiveet()
+					.putAll(mapEligibilityAndStatus(hakemus
+							.getPreferenceEligibilities(), hakemus.getAnswers()
+							.getHakutoiveet()));
+		} catch (Exception e) {
+			throw new RuntimeException(
+					"Eligibilities statusten mappaus preferensseihin epaonnistui! "
+							+ e.getMessage(), e);
+		}
 		return hakemusTyyppi;
+	}
+
+	public static Map<String, String> mapEligibilityAndStatus(
+			List<Eligibility> eligibilities, Map<String, String> hakutoiveet) {
+		Map<String, String> eligibilityAndStatus = Optional
+				.ofNullable(eligibilities).orElse(Collections.emptyList())
+				.stream()
+				.filter(Objects::nonNull)
+				// .map(e -> e.getAoId())
+				.collect(Collectors.toList())
+				.stream()
+				.collect(Collectors.toMap(e -> e.getAoId(), e -> e.getStatus()));
+		return Optional
+				.ofNullable(hakutoiveet)
+				.orElse(Collections.emptyMap())
+				.entrySet()
+				.stream()
+				// preference{x}-Koulutus-id eli esim preference2-Koulutus-id
+				.filter(pair -> {
+					boolean b = pair.getKey().startsWith("preference")
+							&& pair.getKey().endsWith("-Koulutus-id");
+					LOG.warn("Matsaako {} {}", pair, b);
+					return b;
+				})
+				// eligibility with aoId exists
+				.filter(pair -> {
+					boolean b = eligibilityAndStatus.containsKey(pair
+							.getValue());
+					LOG.warn("Matsaako key({}) == {}", pair.getValue(), b);
+					return b;
+				})
+				// Maps
+				// preference2-Koulutus-id = "1.2.246.562.20.645785477510"
+				// To
+				// preference2-Koulutus-id-eligibility = "UNKNOWN"
+				.collect(
+						Collectors.toMap(
+								pair -> new StringBuilder(pair.getKey())
+										.append("-eligibility").toString(),
+								pair -> eligibilityAndStatus.get(pair
+										.getValue())));
 	}
 }
