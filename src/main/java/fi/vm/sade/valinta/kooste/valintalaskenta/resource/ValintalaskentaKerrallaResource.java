@@ -175,7 +175,8 @@ public class ValintalaskentaKerrallaResource {
 												.build());
 									});
 						}
-					}, valinnanvaihe, valintakoelaskenta, asyncResponse);
+					}, LaskentaTyyppi.VALINTARYHMA.equals(tyyppi),
+					valinnanvaihe, valintakoelaskenta, asyncResponse);
 		} catch (Exception e) {
 			LOG.error(
 					"Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}",
@@ -238,7 +239,9 @@ public class ValintalaskentaKerrallaResource {
 									(hakuJaHakukohteet, laskennanAloitus) -> {
 										laskennanAloitus.accept(laskenta
 												.getUuid());
-									}, laskenta.getValinnanvaihe(), laskenta
+									}, LaskentaTyyppi.VALINTARYHMA
+											.equals(laskenta.getTyyppi()),
+									laskenta.getValinnanvaihe(), laskenta
 											.getValintakoelaskenta(),
 									asyncResponse);
 						},
@@ -259,8 +262,8 @@ public class ValintalaskentaKerrallaResource {
 			String hakuOid,
 			Maski maski,
 			BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
-			Integer valinnanvaihe, Boolean valintakoelaskenta,
-			AsyncResponse asyncResponse) {
+			boolean valintaryhmalaskenta, Integer valinnanvaihe,
+			Boolean valintakoelaskenta, AsyncResponse asyncResponse) {
 		if (StringUtils.isBlank(hakuOid)) {
 			LOG.error("HakuOid on pakollinen");
 			throw new RuntimeException("HakuOid on pakollinen");
@@ -307,6 +310,7 @@ public class ValintalaskentaKerrallaResource {
 								valintalaskentaRoute
 										.suoritaValintalaskentaKerralla(new LaskentaAloitus(
 												uuid, hakuOid, maski.isMask(),
+												valintaryhmalaskenta,
 												valinnanvaihe,
 												valintakoelaskenta, finalOids));
 								asyncResponse.resume(Response.ok(

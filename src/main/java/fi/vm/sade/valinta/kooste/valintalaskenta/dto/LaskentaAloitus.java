@@ -27,6 +27,7 @@ public class LaskentaAloitus implements LaskentaInfo {
 												// osajoukko haun hakukohteista
 	private final Integer valinnanvaihe;
 	private final Boolean valintakoelaskenta;
+	private final boolean valintaryhmalaskenta;
 	private final Collection<HakukohdeJaOrganisaatio> hakukohdeDtos;
 
 	public LaskentaAloitus(String uuid, String hakuOid, Integer valinnanvaihe,
@@ -38,15 +39,17 @@ public class LaskentaAloitus implements LaskentaInfo {
 		this.valinnanvaihe = valinnanvaihe;
 		this.valintakoelaskenta = valintakoelaskenta;
 		this.hakukohdeDtos = hakukohdeDtos;
+		this.valintaryhmalaskenta = false;
 	}
 
 	public LaskentaAloitus(String uuid, String hakuOid,
-			boolean osittainenLaskenta, Integer valinnanvaihe,
-			Boolean valintakoelaskenta,
+			boolean osittainenLaskenta, boolean valintaryhmalaskenta,
+			Integer valinnanvaihe, Boolean valintakoelaskenta,
 			Collection<HakukohdeJaOrganisaatio> hakukohdeDtos) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
 		this.osittainenLaskenta = osittainenLaskenta;
+		this.valintaryhmalaskenta = valintaryhmalaskenta;
 		this.valinnanvaihe = valinnanvaihe;
 		this.valintakoelaskenta = valintakoelaskenta;
 		this.hakukohdeDtos = hakukohdeDtos;
@@ -66,6 +69,10 @@ public class LaskentaAloitus implements LaskentaInfo {
 
 	public boolean isOsittainenLaskenta() {
 		return osittainenLaskenta;
+	}
+
+	public boolean isValintaryhmaLaskenta() {
+		return valintaryhmalaskenta;
 	}
 
 	public String getHakuOid() {
