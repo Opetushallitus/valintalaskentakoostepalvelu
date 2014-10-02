@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -18,7 +17,6 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintalaskentaP
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakemuksetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.LisatiedotPalvelukutsu;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.SuoritusrekisteriPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.ValintaperusteetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
@@ -51,6 +49,32 @@ public class LaskentaActorFactory {
 		this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
 		this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
 		this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
+	}
+
+	public LaskentaActor createValintaryhmaActor(final String uuid,
+			final String hakuOid, final Integer valinnanvaihe,
+			final Collection<HakukohdeJaOrganisaatio> hakukohdeOids) {
+		final PalvelukutsuStrategia laskentaStrategia = createStrategia();
+		final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
+		final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
+		final PalvelukutsuStrategia hakijaryhmatStrategia = createStrategia();
+		final PalvelukutsuStrategia lisatiedotStrategia = createStrategia();
+		final PalvelukutsuStrategia suoritusrekisteriStrategia = createStrategia();
+		final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
+				laskentaStrategia, valintaperusteetStrategia,
+				hakemuksetStrategia, lisatiedotStrategia,
+				hakijaryhmatStrategia, suoritusrekisteriStrategia);
+
+		// final ValintaryhmatKatenoivaValintalaskentaPalvelukutsu
+		// valintaryhmatKatenoivaValintalaskentaPalvelukutsu = new
+		// ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
+		//
+		// );
+		//
+		// return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
+		// palvelukutsut, strategiat, laskentaStrategia,
+		// laskentaSeurantaAsyncResource);
+		return null;
 	}
 
 	public LaskentaActor createValintakoelaskentaActor(final String uuid,

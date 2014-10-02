@@ -9,21 +9,24 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.valinta.kooste.OPH;
 
 /**
- *
+ * 
+ * @author Jussi Jartamo
+ * 
  */
 @Component("suoritaSijoittelu")
 public class SuoritaSijoittelu {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SuoritaSijoittelu.class);
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SuoritaSijoittelu.class);
 
-    @Autowired
-    private SijoitteluSuoritaKomponentti sijoitteluProxy;
+	@Autowired
+	private SijoitteluSuoritaKomponentti sijoitteluProxy;
 
-    public void sijoittele(@Property(OPH.HAKUOID) String hakuOid) {
+	public void sijoittele(@Property(OPH.HAKUOID) String hakuOid) {
 
-        LOG.info("Haettu valinnan tulokset");
-        sijoitteluProxy.sijottele(hakuOid);
-        LOG.info("Viety sijoittelulle valinnan tulokset");
+		LOG.info("Haettu valinnan tulokset");
+		sijoitteluProxy.sijottele(hakuOid);
+		LOG.info("Viety sijoittelulle valinnan tulokset");
 
-    }
+	}
 }

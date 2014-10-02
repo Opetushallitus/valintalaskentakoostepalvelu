@@ -2,6 +2,11 @@ package fi.vm.sade.valinta.kooste.sijoittelu.dto;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class Sijoittelu {
 
 	private String hakuOid;

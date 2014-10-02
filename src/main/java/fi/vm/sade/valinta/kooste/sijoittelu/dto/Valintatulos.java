@@ -3,6 +3,11 @@ package fi.vm.sade.valinta.kooste.sijoittelu.dto;
 import fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class Valintatulos {
 
 	private String valintatapajonoOid;
