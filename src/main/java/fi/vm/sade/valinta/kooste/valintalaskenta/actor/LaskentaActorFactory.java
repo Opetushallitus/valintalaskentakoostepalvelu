@@ -2,7 +2,10 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
@@ -14,11 +17,14 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaPalveluk
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintakoelaskentaPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintalaskentaJaValintakoelaskentaPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintalaskentaPalvelukutsu;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintaryhmaPalvelukutsuYhdiste;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintaryhmatKatenoivaValintalaskentaPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakemuksetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.LisatiedotPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.SuoritusrekisteriPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.ValintaperusteetPalvelukutsu;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategiaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.YksiPalvelukutsuKerrallaPalvelukutsuStrategia;
 
@@ -65,16 +71,73 @@ public class LaskentaActorFactory {
 				hakemuksetStrategia, lisatiedotStrategia,
 				hakijaryhmatStrategia, suoritusrekisteriStrategia);
 
-		// final ValintaryhmatKatenoivaValintalaskentaPalvelukutsu
-		// valintaryhmatKatenoivaValintalaskentaPalvelukutsu = new
-		// ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
-		//
-		// );
-		//
-		// return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
-		// palvelukutsut, strategiat, laskentaStrategia,
-		// laskentaSeurantaAsyncResource);
-		return null;
+		final List<ValintaryhmaPalvelukutsuYhdiste> valintaryhmaPalvelukutsuYhdiste = Lists
+				.newArrayList();
+		final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<LisatiedotPalvelukutsu>> lisatiedotPalvelukutsut = Lists
+				.newArrayList();
+		final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakemuksetPalvelukutsu>> hakemuksetPalvelukutsut = Lists
+				.newArrayList();
+		final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<ValintaperusteetPalvelukutsu>> valintaperusteetPalvelukutsut = Lists
+				.newArrayList();
+		final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakijaryhmatPalvelukutsu>> hakijaryhmatPalvelukutsut = Lists
+				.newArrayList();
+		final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<SuoritusrekisteriPalvelukutsu>> suoritusrekisteriPalvelukutsut = Lists
+				.newArrayList();
+		hakukohdeOids
+				.forEach(hk -> {
+					ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu = new ValintaperusteetPalvelukutsu(
+							hk, valinnanvaihe, valintaperusteetAsyncResource);
+					LisatiedotPalvelukutsu lisatiedotPalvelukutsu = new LisatiedotPalvelukutsu(
+							hakuOid, hk, applicationAsyncResource);
+					HakemuksetPalvelukutsu hakemuksetPalvelukutsu = new HakemuksetPalvelukutsu(
+							hakuOid, hk, applicationAsyncResource);
+					SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu = new SuoritusrekisteriPalvelukutsu(
+							hk, suoritusrekisteriAsyncResource);
+					HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu = new HakijaryhmatPalvelukutsu(
+							hk, valintaperusteetAsyncResource);
+
+					lisatiedotPalvelukutsut
+							.add(new PalvelukutsuJaPalvelukutsuStrategiaImpl<>(
+									lisatiedotPalvelukutsu, lisatiedotStrategia));
+
+					hakemuksetPalvelukutsut
+							.add(new PalvelukutsuJaPalvelukutsuStrategiaImpl<>(
+									hakemuksetPalvelukutsu, hakemuksetStrategia));
+
+					valintaperusteetPalvelukutsut
+							.add(new PalvelukutsuJaPalvelukutsuStrategiaImpl<>(
+									valintaperusteetPalvelukutsu,
+									valintaperusteetStrategia));
+
+					hakijaryhmatPalvelukutsut
+							.add(new PalvelukutsuJaPalvelukutsuStrategiaImpl<>(
+									hakijaryhmatPalvelukutsu,
+									hakijaryhmatStrategia));
+
+					suoritusrekisteriPalvelukutsut
+							.add(new PalvelukutsuJaPalvelukutsuStrategiaImpl<>(
+									suoritusrekisteriPalvelukutsu,
+									suoritusrekisteriStrategia));
+
+					valintaryhmaPalvelukutsuYhdiste
+							.add(new ValintaryhmaPalvelukutsuYhdiste(
+									lisatiedotPalvelukutsu,
+									hakemuksetPalvelukutsu,
+									valintaperusteetPalvelukutsu,
+									hakijaryhmatPalvelukutsu,
+									suoritusrekisteriPalvelukutsu));
+
+				});
+		ValintaryhmatKatenoivaValintalaskentaPalvelukutsu laskentaPk = new ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
+				new HakukohdeJaOrganisaatio("kaikkiHakukohteet",
+						"kaikkiOrganisaatiot"), valintalaskentaAsyncResource,
+				valintaryhmaPalvelukutsuYhdiste, lisatiedotPalvelukutsut,
+				hakemuksetPalvelukutsut, valintaperusteetPalvelukutsut,
+				hakijaryhmatPalvelukutsut, suoritusrekisteriPalvelukutsut);
+
+		return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
+				Arrays.asList(laskentaPk), strategiat, laskentaStrategia,
+				laskentaSeurantaAsyncResource);
 	}
 
 	public LaskentaActor createValintakoelaskentaActor(final String uuid,

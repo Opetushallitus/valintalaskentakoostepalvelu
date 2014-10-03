@@ -17,19 +17,19 @@ public class ValintaryhmaPalvelukutsuYhdiste {
 	private final HakemuksetPalvelukutsu hakemuksetPalvelukutsu;
 	private final ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu;
 	private final HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu;
-	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsut;
+	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
 
 	public ValintaryhmaPalvelukutsuYhdiste(
 			LisatiedotPalvelukutsu lisatiedotPalvelukutsu,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
 			ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
 			HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu,
-			SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsut) {
+			SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu) {
 		this.lisatiedotPalvelukutsu = lisatiedotPalvelukutsu;
 		this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
 		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
 		this.hakijaryhmatPalvelukutsu = hakijaryhmatPalvelukutsu;
-		this.suoritusrekisteriPalvelukutsut = suoritusrekisteriPalvelukutsut;
+		this.suoritusrekisteriPalvelukutsu = suoritusrekisteriPalvelukutsu;
 	}
 
 	public HakemuksetPalvelukutsu getHakemuksetPalvelukutsu() {
@@ -45,7 +45,7 @@ public class ValintaryhmaPalvelukutsuYhdiste {
 	}
 
 	public SuoritusrekisteriPalvelukutsu getSuoritusrekisteriPalvelukutsut() {
-		return suoritusrekisteriPalvelukutsut;
+		return suoritusrekisteriPalvelukutsu;
 	}
 
 	public ValintaperusteetPalvelukutsu getValintaperusteetPalvelukutsu() {

@@ -25,7 +25,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Lis
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.SuoritusrekisteriPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.ValintaperusteetPalvelukutsu;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategia;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategiaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -57,14 +57,14 @@ public class ValintakoelaskentaPalvelukutsu extends
 			PalvelukutsuStrategia valintaperusteetStrategia,
 			PalvelukutsuStrategia suoritusrekisteriStrategia) {
 		super(hakukohdeOid.getHakukohdeOid(), Arrays
-				.asList(new PalvelukutsuJaPalvelukutsuStrategia(
+				.asList(new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 						lisatiedotPalvelukutsu, lisatiedotStrategia),
-						new PalvelukutsuJaPalvelukutsuStrategia(
+						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								hakemuksetPalvelukutsu, hakemuksetStrategia),
-						new PalvelukutsuJaPalvelukutsuStrategia(
+						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								valintaperusteetPalvelukutsu,
 								valintaperusteetStrategia),
-						new PalvelukutsuJaPalvelukutsuStrategia(
+						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								suoritusrekisteriPalvelukutsu,
 								suoritusrekisteriStrategia)));
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;

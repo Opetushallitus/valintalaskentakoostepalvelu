@@ -2,9 +2,6 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia;
 
 import java.util.function.Consumer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 
 /**
@@ -12,34 +9,9 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Pal
  * @author Jussi Jartamo
  * 
  */
-public class PalvelukutsuJaPalvelukutsuStrategia {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(PalvelukutsuJaPalvelukutsuStrategia.class);
-	private final PalvelukutsuStrategia palvelukutsuStrategia;
-	private final Palvelukutsu palvelukutsu;
+public interface PalvelukutsuJaPalvelukutsuStrategia {
 
-	public PalvelukutsuJaPalvelukutsuStrategia(Palvelukutsu palvelukutsu,
-			PalvelukutsuStrategia palvelukutsuStrategia) {
-		this.palvelukutsuStrategia = palvelukutsuStrategia;
-		this.palvelukutsu = palvelukutsu;
-	}
+	void laitaPalvelukutsuTyojonoon(Consumer<Palvelukutsu> takaisinkutsu);
 
-	public void laitaPalvelukutsuTyojonoon(Consumer<Palvelukutsu> takaisinkutsu) {
-		palvelukutsuStrategia.laitaPalvelukutsuJonoon(palvelukutsu,
-				takaisinkutsu);
-	}
-
-	public void peruuta() {
-		if (!palvelukutsu.onkoPeruutettu()) {
-			try {
-				palvelukutsu.peruuta();
-			} catch (Exception e) {
-				LOG.error(
-						"Laskennanpalvelukutsustakasin aloitettu alipalvelukutsujen peruutu epaonnistui palvelukutsulle {} syysta {}",
-						palvelukutsu.getClass().getSimpleName(), e.getMessage());
-			}
-		}
-
-	}
-
+	void peruuta();
 }

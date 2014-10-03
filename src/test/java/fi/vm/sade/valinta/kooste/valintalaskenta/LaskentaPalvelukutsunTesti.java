@@ -35,6 +35,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.Valintakoelasken
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategia;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategiaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.YksiPalvelukutsuKerrallaPalvelukutsuStrategia;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
@@ -71,12 +72,14 @@ public class LaskentaPalvelukutsunTesti {
 				p3, p4);
 
 		Collection<PalvelukutsuJaPalvelukutsuStrategia> palvelukutsut = Arrays
-				.asList(new PalvelukutsuJaPalvelukutsuStrategia(hakijaryhmat,
-						p1),
-						new PalvelukutsuJaPalvelukutsuStrategia(
+				.asList(new PalvelukutsuJaPalvelukutsuStrategiaImpl(
+						hakijaryhmat, p1),
+						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								valintaperusteet, p2),
-						new PalvelukutsuJaPalvelukutsuStrategia(hakemukset, p3),
-						new PalvelukutsuJaPalvelukutsuStrategia(lisatiedot, p4));
+						new PalvelukutsuJaPalvelukutsuStrategiaImpl(hakemukset,
+								p3),
+						new PalvelukutsuJaPalvelukutsuStrategiaImpl(lisatiedot,
+								p4));
 
 		LaskentaPalvelukutsu laskentaPalvelukutsu = new AbstraktiLaskentaPalvelukutsu(
 				HAKUKOHDE_OID.getHakukohdeOid(), palvelukutsut) {

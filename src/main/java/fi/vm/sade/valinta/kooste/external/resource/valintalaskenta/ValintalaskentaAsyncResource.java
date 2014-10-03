@@ -27,4 +27,11 @@ public interface ValintalaskentaAsyncResource {
 
 	Peruutettava laskeKaikki(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback);
+
+	// @Path("laskejasijoittele")
+	// @Consumes("application/json")
+	// @Produces("text/plain")
+	// @POST
+	Peruutettava laskeJaSijoittele(List<LaskeDTO> lista,
+			Consumer<String> callback, Consumer<Throwable> failureCallback);
 }
