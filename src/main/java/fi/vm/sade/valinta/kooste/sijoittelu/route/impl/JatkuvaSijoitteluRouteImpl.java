@@ -61,7 +61,8 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 			// tarkistetaan viidentoista minuutin valein tilanne
 			@Value("timer://jatkuvaSijoitteluTimer?fixedRate=true&period=5minutes") String jatkuvaSijoitteluTimer,
 			SijoitteluResource sijoitteluResource,
-			SijoittelunSeurantaResource sijoittelunSeurantaResource) {
+			SijoittelunSeurantaResource sijoittelunSeurantaResource,
+			@Qualifier("jatkuvaSijoitteluDelayedQueue") DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue) {
 		this.jatkuvaSijoitteluTimer = jatkuvaSijoitteluTimer;
 		this.sijoitteluResource = sijoitteluResource;
 		this.sijoittelunSeurantaResource = sijoittelunSeurantaResource;
