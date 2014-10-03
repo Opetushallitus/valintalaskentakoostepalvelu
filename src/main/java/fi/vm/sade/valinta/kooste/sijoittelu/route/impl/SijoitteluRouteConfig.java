@@ -20,11 +20,6 @@ import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 @Configuration
 public class SijoitteluRouteConfig {
 
-	@Bean(name = "jatkuvaSijoitteluDelayedQueue")
-	public DelayQueue<DelayedSijoittelu> createDelayQueue() {
-		return new DelayQueue<DelayedSijoittelu>();
-	}
-
 	@Bean
 	public SijoitteluAktivointiRoute getSijoitteluAktivointiRoute(
 			@Qualifier("javaDslCamelContext") CamelContext context,

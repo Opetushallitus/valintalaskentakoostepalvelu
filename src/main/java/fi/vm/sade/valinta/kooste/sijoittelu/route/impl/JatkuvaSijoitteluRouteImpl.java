@@ -61,21 +61,20 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 			// tarkistetaan viidentoista minuutin valein tilanne
 			@Value("timer://jatkuvaSijoitteluTimer?fixedRate=true&amp;period=5m") String jatkuvaSijoitteluTimer,
 			SijoitteluResource sijoitteluResource,
-			SijoittelunSeurantaResource sijoittelunSeurantaResource,
-			@Qualifier("jatkuvaSijoitteluDelayedQueue") DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue) {
+			SijoittelunSeurantaResource sijoittelunSeurantaResource) {
 		this.jatkuvaSijoitteluTimer = jatkuvaSijoitteluTimer;
 		this.sijoitteluResource = sijoitteluResource;
 		this.sijoittelunSeurantaResource = sijoittelunSeurantaResource;
-		this.jatkuvaSijoitteluDelayedQueue = jatkuvaSijoitteluDelayedQueue;
+		this.jatkuvaSijoitteluDelayedQueue = new DelayQueue<DelayedSijoitteluExchange>();
 		this.ajossaHakuOids = new ConcurrentHashMap<>();
 	}
 
 	public JatkuvaSijoitteluRouteImpl(
 			// tarkistetaan viidentoista minuutin valein tilanne
-			@Value("timer://jatkuvaSijoitteluTimer?fixedRate=true&amp;period=5m") String jatkuvaSijoitteluTimer,
+			String jatkuvaSijoitteluTimer,
 			SijoitteluResource sijoitteluResource,
 			SijoittelunSeurantaResource sijoittelunSeurantaResource,
-			@Qualifier("jatkuvaSijoitteluDelayedQueue") DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue,
+			DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue,
 			ConcurrentHashMap<String, Long> ajossaHakuOids) {
 		this.jatkuvaSijoitteluTimer = jatkuvaSijoitteluTimer;
 		this.sijoitteluResource = sijoitteluResource;
