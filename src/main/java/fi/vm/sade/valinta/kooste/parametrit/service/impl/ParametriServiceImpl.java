@@ -77,6 +77,16 @@ public class ParametriServiceImpl implements ParametriService {
 		return isOPH(); // now.after(hakuAlkupvm) && isOPH();
 	}
 
+    @Override
+    public boolean hakijaryhmatEnabled(String hakuOid) {
+        if (isOPH()) {
+            return true;
+        }
+        Date now = Calendar.getInstance().getTime();
+        Date hakuAlkupvm = parseDate(parametrit.getHakuAlkupvm());
+        return now.after(hakuAlkupvm);
+    }
+
 	@Override
 	public boolean valinnanhallintaEnabled(String hakuOid) {
 		if (isOPH()) {
