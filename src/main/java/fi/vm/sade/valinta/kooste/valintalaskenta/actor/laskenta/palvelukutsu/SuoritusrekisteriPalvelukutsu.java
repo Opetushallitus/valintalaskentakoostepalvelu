@@ -27,22 +27,11 @@ public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu
 			.getLogger(HakijaryhmatPalvelukutsu.class);
 	private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
 	private final AtomicReference<List<Oppija>> oppijat;
-	private final String organisaatioOid;
 
 	public SuoritusrekisteriPalvelukutsu(
 			HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio,
 			SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
 		super(hakukohdeJaOrganisaatio.getHakukohdeOid());
-		this.organisaatioOid = hakukohdeJaOrganisaatio.getOrganisaatioOid();
-		if (organisaatioOid == null) {
-			LOG.error(
-					"Suoritusrekisteripalvelukutsua ei voi alustaa ilman organisaation tunnistetta! Hakukohteella {} ei ole organisaation tunnistetta!",
-					hakukohdeJaOrganisaatio.getHakukohdeOid());
-			throw new NullPointerException(
-					"Suoritusrekisteripalvelukutsua ei voi alustaa ilman organisaation tunnistetta! Hakukohteella "
-							+ hakukohdeJaOrganisaatio.getHakukohdeOid()
-							+ " ei ole organisaation tunnistetta!");
-		}
 		this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
 		this.oppijat = new AtomicReference<>();
 	}
@@ -51,8 +40,8 @@ public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu
 		aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
 			public Peruutettava get() {
 				return suoritusrekisteriAsyncResource
-						.getOppijatByOrganisaatio(
-								organisaatioOid,
+						.getOppijatByHakukohde(
+								getHakukohdeOid(),
 								oppijat -> {
 									SuoritusrekisteriPalvelukutsu.this.oppijat
 											.set(oppijat);
@@ -61,8 +50,9 @@ public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu
 								},
 								failu -> {
 									LOG.error(
-											"Suoritusrekisterikutsu epaonnistui hakukohteelle {} ja organisaatiolle {}!",
-											getHakukohdeOid(), organisaatioOid);
+											"Suoritusrekisterikutsu epaonnistui hakukohteelle {} ja hakukohteelle {}!",
+											getHakukohdeOid(),
+											getHakukohdeOid());
 									SuoritusrekisteriPalvelukutsu.this.oppijat
 											.set(Collections.emptyList());
 									takaisinkutsu

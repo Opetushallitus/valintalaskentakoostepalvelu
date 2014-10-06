@@ -87,7 +87,32 @@ public class SuoritusrekisteriAsyncResourceImpl implements
 					.get(new Callback<List<Oppija>>(address,
 							new StringBuilder().append(url).append("?haku=")
 									.append(hakuOid).toString(), callback,
-							failureCallback, new TypeToken<List<Hakemus>>() {
+							failureCallback, new TypeToken<List<Oppija>>() {
+							}.getType())));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
+		}
+	}
+
+	public Peruutettava getOppijatByHakukohde(String hakukohdeOid,
+			Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
+		String url = new StringBuilder().append(
+				"/suoritusrekisteri/rest/v1/oppijat").toString();
+		try {
+			return new PeruutettavaImpl(WebClient
+					.fromClient(webClient)
+					.path(url)
+					//
+					.query("hakukohde", hakukohdeOid)
+
+					.async()
+					//
+					.get(new Callback<List<Oppija>>(address,
+							new StringBuilder().append(url)
+									.append("?hakukohde=").append(hakukohdeOid)
+									.toString(), callback, failureCallback,
+							new TypeToken<List<Oppija>>() {
 							}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
@@ -113,7 +138,7 @@ public class SuoritusrekisteriAsyncResourceImpl implements
 									.append("?organisaatio=")
 									.append(organisaatioOid).toString(),
 							callback, failureCallback,
-							new TypeToken<List<Hakemus>>() {
+							new TypeToken<List<Oppija>>() {
 							}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
