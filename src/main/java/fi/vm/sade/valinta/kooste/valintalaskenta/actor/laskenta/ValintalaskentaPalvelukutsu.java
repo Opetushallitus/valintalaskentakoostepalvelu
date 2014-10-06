@@ -31,19 +31,16 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 			.getLogger(ValintakoelaskentaPalvelukutsu.class);
 	private final ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu;
 	private final HakemuksetPalvelukutsu hakemuksetPalvelukutsu;
-	private final LisatiedotPalvelukutsu lisatiedotPalvelukutsu;
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 	private final HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu;
 	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
 
 	public ValintalaskentaPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
-			LisatiedotPalvelukutsu lisatiedotPalvelukutsu,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
 			ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
 			HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu,
 			SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu,
-			PalvelukutsuStrategia lisatiedotStrategia,
 			PalvelukutsuStrategia hakemuksetStrategia,
 			PalvelukutsuStrategia valintaperusteetStrategia,
 			PalvelukutsuStrategia hakijaryhmatStrategia,
@@ -51,8 +48,6 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 		super(
 				hakukohdeOid.getHakukohdeOid(),
 				Arrays.asList(
-						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
-								lisatiedotPalvelukutsu, lisatiedotStrategia),
 						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								hakemuksetPalvelukutsu, hakemuksetStrategia),
 						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
@@ -65,16 +60,14 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 								suoritusrekisteriStrategia)));
 		this.hakijaryhmatPalvelukutsu = hakijaryhmatPalvelukutsu;
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
-		this.lisatiedotPalvelukutsu = lisatiedotPalvelukutsu;
 		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
 		this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
 		this.suoritusrekisteriPalvelukutsu = suoritusrekisteriPalvelukutsu;
 	}
 
 	private LaskeDTO muodostaLaskeDTO() {
-		return new LaskeDTO(getHakukohdeOid(), muodostaHakemuksetDTO(
-				hakemuksetPalvelukutsu.getHakemukset(),
-				lisatiedotPalvelukutsu.getLisatiedot()),
+		return new LaskeDTO(getHakukohdeOid(),
+				muodostaHakemuksetDTO(hakemuksetPalvelukutsu.getHakemukset()),
 				valintaperusteetPalvelukutsu.getValintaperusteet(),
 				hakijaryhmatPalvelukutsu.getHakijaryhmat());
 	}

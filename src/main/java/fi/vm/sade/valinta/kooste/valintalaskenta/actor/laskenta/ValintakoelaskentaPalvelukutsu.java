@@ -1,34 +1,24 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
-import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakemuksetPalvelukutsu;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.LisatiedotPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.SuoritusrekisteriPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.ValintaperusteetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategiaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
-import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
 /**
@@ -42,25 +32,20 @@ public class ValintakoelaskentaPalvelukutsu extends
 			.getLogger(ValintakoelaskentaPalvelukutsu.class);
 	private final ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu;
 	private final HakemuksetPalvelukutsu hakemuksetPalvelukutsu;
-	private final LisatiedotPalvelukutsu lisatiedotPalvelukutsu;
 	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 
 	public ValintakoelaskentaPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
-			LisatiedotPalvelukutsu lisatiedotPalvelukutsu,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
 			ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
 			SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu,
-			PalvelukutsuStrategia lisatiedotStrategia,
 			PalvelukutsuStrategia hakemuksetStrategia,
 			PalvelukutsuStrategia valintaperusteetStrategia,
 			PalvelukutsuStrategia suoritusrekisteriStrategia) {
 		super(hakukohdeOid.getHakukohdeOid(), Arrays
 				.asList(new PalvelukutsuJaPalvelukutsuStrategiaImpl(
-						lisatiedotPalvelukutsu, lisatiedotStrategia),
-						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
-								hakemuksetPalvelukutsu, hakemuksetStrategia),
+						hakemuksetPalvelukutsu, hakemuksetStrategia),
 						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								valintaperusteetPalvelukutsu,
 								valintaperusteetStrategia),
@@ -68,7 +53,6 @@ public class ValintakoelaskentaPalvelukutsu extends
 								suoritusrekisteriPalvelukutsu,
 								suoritusrekisteriStrategia)));
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
-		this.lisatiedotPalvelukutsu = lisatiedotPalvelukutsu;
 		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
 		this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
 		this.suoritusrekisteriPalvelukutsu = suoritusrekisteriPalvelukutsu;
@@ -76,21 +60,16 @@ public class ValintakoelaskentaPalvelukutsu extends
 
 	private LaskeDTO muodostaLaskeDTO() {
 		List<Hakemus> hakemukset = hakemuksetPalvelukutsu.getHakemukset();
-		List<ApplicationAdditionalDataDTO> lisatiedot = lisatiedotPalvelukutsu
-				.getLisatiedot();
 		List<ValintaperusteetDTO> valintaperusteet = valintaperusteetPalvelukutsu
 				.getValintaperusteet();
 		if (hakemukset == null) {
 			throw new NullPointerException("Hakemukset oli null dataa!");
 		}
-		if (lisatiedot == null) {
-			throw new NullPointerException("Lisatiedot oli null dataa!");
-		}
 		if (valintaperusteet == null) {
 			throw new NullPointerException("Valintaperusteet oli null dataa!");
 		}
-		return new LaskeDTO(getHakukohdeOid(), muodostaHakemuksetDTO(
-				hakemukset, lisatiedot), valintaperusteet);
+		return new LaskeDTO(getHakukohdeOid(),
+				muodostaHakemuksetDTO(hakemukset), valintaperusteet);
 	}
 
 	@Override

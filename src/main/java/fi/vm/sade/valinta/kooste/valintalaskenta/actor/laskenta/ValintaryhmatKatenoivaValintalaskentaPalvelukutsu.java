@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -17,12 +16,10 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakemuksetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.LisatiedotPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.SuoritusrekisteriPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.ValintaperusteetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategiaImpl;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
 /**
@@ -35,7 +32,6 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintakoelaskentaPalvelukutsu.class);
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
-	private final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<LisatiedotPalvelukutsu>> lisatiedotPalvelukutsut;
 	private final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakemuksetPalvelukutsu>> hakemuksetPalvelukutsut;
 	private final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<ValintaperusteetPalvelukutsu>> valintaperusteetPalvelukutsut;
 	private final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakijaryhmatPalvelukutsu>> hakijaryhmatPalvelukutsut;
@@ -47,19 +43,16 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 			HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			List<ValintaryhmaPalvelukutsuYhdiste> valintaryhmaPalvelukutsuYhdiste,
-			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<LisatiedotPalvelukutsu>> lisatiedotPalvelukutsut,
 			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakemuksetPalvelukutsu>> hakemuksetPalvelukutsut,
 			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<ValintaperusteetPalvelukutsu>> valintaperusteetPalvelukutsut,
 			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakijaryhmatPalvelukutsu>> hakijaryhmatPalvelukutsut,
 			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<SuoritusrekisteriPalvelukutsu>> suoritusrekisteriPalvelukutsut) {
 		super(hakukohdeOid.getHakukohdeOid(), Lists.newArrayList(Iterables
-				.concat(lisatiedotPalvelukutsut, hakemuksetPalvelukutsut,
-						valintaperusteetPalvelukutsut,
+				.concat(hakemuksetPalvelukutsut, valintaperusteetPalvelukutsut,
 						hakijaryhmatPalvelukutsut,
 						suoritusrekisteriPalvelukutsut)));
 		this.valintaryhmaPalvelukutsuYhdiste = valintaryhmaPalvelukutsuYhdiste;
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
-		this.lisatiedotPalvelukutsut = lisatiedotPalvelukutsut;
 		this.hakemuksetPalvelukutsut = hakemuksetPalvelukutsut;
 		this.valintaperusteetPalvelukutsut = valintaperusteetPalvelukutsut;
 		this.hakijaryhmatPalvelukutsut = hakijaryhmatPalvelukutsut;
@@ -74,9 +67,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 						return new LaskeDTO(getHakukohdeOid(),
 								muodostaHakemuksetDTO(y
 										.getHakemuksetPalvelukutsu()
-										.getHakemukset(), y
-										.getLisatiedotPalvelukutsu()
-										.getLisatiedot()), y
+										.getHakemukset()), y
 										.getValintaperusteetPalvelukutsu()
 										.getValintaperusteet(), y
 										.getHakijaryhmatPalvelukutsu()
