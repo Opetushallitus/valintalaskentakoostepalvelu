@@ -8,13 +8,18 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 @Component("sijoitteluSuoritaKomponentti")
 public class SijoitteluSuoritaKomponentti {
 
-    @Autowired
-    private SijoitteluResource sijoitteluResource;
+	@Autowired
+	private SijoitteluResource sijoitteluResource;
 
-    public void sijottele(@Property(OPH.HAKUOID) String hakuOid) {
-        sijoitteluResource.sijoittele(hakuOid);
-    }
+	public void sijottele(@Property(OPH.HAKUOID) String hakuOid) {
+		sijoitteluResource.sijoittele(hakuOid);
+	}
 }

@@ -10,27 +10,26 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 @Component("sijoitteluKaikkiKoulutuspaikkallisetKomponentti")
 public class SijoitteluKaikkiKoulutuspaikkallisetKomponentti {
 
-    @Autowired
-    private SijoitteluResource sijoitteluResource;
+	@Autowired
+	private SijoitteluResource sijoitteluResource;
 
-    @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}")
-    private String sijoitteluResourceUrl;
+	@Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}")
+	private String sijoitteluResourceUrl;
 
-    public Collection<HakijaDTO> ilmankoulutuspaikkaa(@Property("hakuOid") String hakuOid) {
-        final HakijaPaginationObject result =sijoitteluResource.hakemukset(hakuOid,
-                SijoitteluResource.LATEST,
-                true,
-                null,
-                null,
-                null,
-                null,
-                null);
-        return result.getResults();
-    }
+	public Collection<HakijaDTO> ilmankoulutuspaikkaa(
+			@Property("hakuOid") String hakuOid) {
+		final HakijaPaginationObject result = sijoitteluResource.hakemukset(
+				hakuOid, SijoitteluResource.LATEST, true, null, null, null,
+				null, null);
+		return result.getResults();
+	}
 
 }
-
-

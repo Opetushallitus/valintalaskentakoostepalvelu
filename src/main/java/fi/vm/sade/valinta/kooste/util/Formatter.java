@@ -9,8 +9,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 
 public class Formatter {
-	private static final FastDateFormat DATEFORMATTER = FastDateFormat
-			.getInstance("dd.MM.yyyy hh:mm");
+	public static final FastDateFormat PVMFORMATTER = FastDateFormat
+			.getInstance("dd.MM.yyyy HH:mm");
 	public static final NumberFormat NUMERO_FORMAATTI = NumberFormat
 			.getInstance(new Locale("FI"));
 	public static final String ARVO_EROTIN = " / ";
@@ -34,7 +34,7 @@ public class Formatter {
 		if (paivamaara == null) {
 			return StringUtils.EMPTY;
 		} else {
-			return DATEFORMATTER.format(paivamaara);
+			return PVMFORMATTER.format(paivamaara);
 		}
 	}
 

@@ -47,6 +47,7 @@ public class ParametritResource {
         params.put("valintakoekutsut", parametriService.valintakoekutsutEnabled(hakuOid));
         params.put("valintalaskenta", parametriService.valintalaskentaEnabled(hakuOid));
         params.put("valinnanhallinta", parametriService.valinnanhallintaEnabled(hakuOid));
+        params.put("hakijaryhmat", parametriService.hakijaryhmatEnabled(hakuOid));
         return Response.ok(params).build();
     }
 }

@@ -4,8 +4,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
@@ -170,6 +175,24 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 	public void merkkaaLaskennanTila(String uuid, LaskentaTila tila) {
 		String url = new StringBuilder().append("/seuranta/laskenta/")
 				.append(uuid).append("/tila/").append(tila).toString();
+		try {
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE),
+							responseCallback);
+		} catch (Exception e) {
+			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
+					e.getMessage());
+		}
+	}
+
+	public void merkkaaLaskennanTila(String uuid, LaskentaTila tila,
+			HakukohdeTila hakukohdetila) {
+		String url = new StringBuilder().append("/seuranta/laskenta/")
+				.append(uuid).append("/tila/").append(tila)
+				.append("/hakukohde/").append(hakukohdetila).toString();
 		try {
 			WebClient
 					.fromClient(webClient)

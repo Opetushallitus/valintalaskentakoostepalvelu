@@ -42,6 +42,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 
 /**
  * 
@@ -73,7 +74,7 @@ public class ValintalaskentaTesti {
 
 		ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute = laskentaActorSystem;
 		LaskentaAloitus laskentaJaHaku = new LaskentaAloitus(uuid, hakuOid,
-				null, null, hakukohdeOids);
+				null, null, hakukohdeOids, LaskentaTyyppi.HAKUKOHDE);
 		valintalaskentaKerrallaRoute
 				.suoritaValintalaskentaKerralla(laskentaJaHaku);
 	}

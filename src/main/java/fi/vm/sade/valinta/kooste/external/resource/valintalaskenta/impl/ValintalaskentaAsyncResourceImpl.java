@@ -118,6 +118,29 @@ public class ValintalaskentaAsyncResourceImpl implements
 	}
 
 	@Override
+	public Peruutettava laskeJaSijoittele(List<LaskeDTO> lista,
+			Consumer<String> callback, Consumer<Throwable> failureCallback) {
+		try {
+			String url = new StringBuilder().append(
+					"/valintalaskenta/laskejasijoittele").toString();
+			return new PeruutettavaImpl(
+					WebClient
+							.fromClient(webClient)
+							.path(url)
+							.async()
+							.post(Entity.entity(lista,
+									MediaType.APPLICATION_JSON_TYPE),
+									new Callback<String>(address, url,
+											callback, failureCallback,
+											new TypeToken<String>() {
+											}.getType())));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
+		}
+	}
+
+	@Override
 	public Peruutettava valintakokeet(LaskeDTO laskeDTO,
 			Consumer<String> callback, Consumer<Throwable> failureCallback) {
 		try {

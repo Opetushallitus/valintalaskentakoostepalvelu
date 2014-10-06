@@ -48,4 +48,11 @@ public interface ParametriService {
      * @return
      */
     boolean valinnanhallintaEnabled(String hakuOid);
+
+    /**
+     * Onko hakijaryhmien listaaminen mahdollista haulle?
+     * @param hakuOid
+     * @return
+     */
+    boolean hakijaryhmatEnabled(String hakuOid);
 }

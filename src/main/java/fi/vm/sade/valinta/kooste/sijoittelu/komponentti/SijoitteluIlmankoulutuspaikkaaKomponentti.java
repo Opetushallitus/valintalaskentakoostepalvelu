@@ -10,6 +10,11 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 @Component("sijoitteluIlmankoulutuspaikkaaKomponentti")
 public class SijoitteluIlmankoulutuspaikkaaKomponentti {
 

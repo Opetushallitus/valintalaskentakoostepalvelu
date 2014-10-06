@@ -109,6 +109,7 @@ public class ValintalaskentaKerrallaResource {
 				}
 			});
 			kaynnistaLaskenta(
+					tyyppi,
 					hakuOid,
 					new Maski(whitelist, maski),
 					(hakukohdeOids, laskennanAloitus) -> {
@@ -231,18 +232,15 @@ public class ValintalaskentaKerrallaResource {
 											.getHakukohdeOid(), h
 											.getOrganisaatioOid()))
 									.collect(Collectors.toList());
-							kaynnistaLaskenta(
-									laskenta.getHakuOid(),
-									new Maski(true, maski.stream()
-											.map(hk -> hk.getHakukohdeOid())
-											.collect(Collectors.toList())),
-									(hakuJaHakukohteet, laskennanAloitus) -> {
-										laskennanAloitus.accept(laskenta
-												.getUuid());
-									}, LaskentaTyyppi.VALINTARYHMA
-											.equals(laskenta.getTyyppi()),
-									laskenta.getValinnanvaihe(), laskenta
-											.getValintakoelaskenta(),
+							kaynnistaLaskenta(laskenta.getTyyppi(), laskenta
+									.getHakuOid(), new Maski(true, maski
+									.stream().map(hk -> hk.getHakukohdeOid())
+									.collect(Collectors.toList())), (
+									hakuJaHakukohteet, laskennanAloitus) -> {
+								laskennanAloitus.accept(laskenta.getUuid());
+							}, LaskentaTyyppi.VALINTARYHMA.equals(laskenta
+									.getTyyppi()), laskenta.getValinnanvaihe(),
+									laskenta.getValintakoelaskenta(),
 									asyncResponse);
 						},
 						t -> {
@@ -259,6 +257,7 @@ public class ValintalaskentaKerrallaResource {
 	}
 
 	private void kaynnistaLaskenta(
+			LaskentaTyyppi tyyppi,
 			String hakuOid,
 			Maski maski,
 			BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
@@ -312,7 +311,8 @@ public class ValintalaskentaKerrallaResource {
 												uuid, hakuOid, maski.isMask(),
 												valintaryhmalaskenta,
 												valinnanvaihe,
-												valintakoelaskenta, finalOids));
+												valintakoelaskenta, finalOids,
+												tyyppi));
 								asyncResponse.resume(Response.ok(
 										Vastaus.uudelleenOhjaus(uuid)).build());
 							});

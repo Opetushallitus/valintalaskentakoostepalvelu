@@ -23,7 +23,9 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
+import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
+import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoittelunValvonta;
 import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
@@ -48,12 +50,14 @@ public class SijoitteluAktivointiResource {
 	@Autowired
 	private ParametriService parametriService;
 
-
 	@Autowired
 	private SijoittelunSeurantaResource sijoittelunSeurantaResource;
 
 	@Autowired
 	private SijoittelunValvonta sijoittelunValvonta;
+
+	@Autowired
+	private JatkuvaSijoittelu jatkuvaSijoittelu;
 
 	@GET
 	@Path("/status/{hakuoid}")
@@ -61,6 +65,14 @@ public class SijoitteluAktivointiResource {
 	@ApiOperation(value = "Sijoittelun status", response = String.class)
 	public Sijoittelu status(@PathParam("hakuoid") String hakuOid) {
 		return sijoittelunValvonta.haeAktiivinenSijoitteluHaulle(hakuOid);
+	}
+
+	@GET
+	@Path("/status")
+	@Produces(MediaType.APPLICATION_JSON)
+	@ApiOperation(value = "Jatkuvan sijoittelun jonossa olevat sijoittelut", response = String.class)
+	public Collection<DelayedSijoittelu> status() {
+		return jatkuvaSijoittelu.haeJonossaOlevatSijoittelut();
 	}
 
 	@POST
@@ -146,22 +158,24 @@ public class SijoitteluAktivointiResource {
 		}
 	}
 
-    @GET
-    @Path("/jatkuva/paivita")
-    @PreAuthorize(OPH_CRUD)
-    @ApiOperation(value = "Ajastetun sijoittelun aloituksen päivitys", response = String.class)
-    public String paivitaJatkuvanSijoittelunAloitus(
-            @QueryParam("hakuOid") String hakuOid, @QueryParam("aloitusajankohta") Long aloitusajankohta,
-            @QueryParam("ajotiheys") Integer ajotiheys) {
-        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
-            return "no privileges.";
-        }
+	@GET
+	@Path("/jatkuva/paivita")
+	@PreAuthorize(OPH_CRUD)
+	@ApiOperation(value = "Ajastetun sijoittelun aloituksen päivitys", response = String.class)
+	public String paivitaJatkuvanSijoittelunAloitus(
+			@QueryParam("hakuOid") String hakuOid,
+			@QueryParam("aloitusajankohta") Long aloitusajankohta,
+			@QueryParam("ajotiheys") Integer ajotiheys) {
+		if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+			return "no privileges.";
+		}
 
-        if (StringUtils.isBlank(hakuOid)) {
-            return "get parameter 'hakuOid' required";
-        } else {
-            sijoittelunSeurantaResource.paivitaSijoittelunAloitusajankohta(hakuOid, aloitusajankohta, ajotiheys);
-            return "paivitetty";
-        }
-    }
+		if (StringUtils.isBlank(hakuOid)) {
+			return "get parameter 'hakuOid' required";
+		} else {
+			sijoittelunSeurantaResource.paivitaSijoittelunAloitusajankohta(
+					hakuOid, aloitusajankohta, ajotiheys);
+			return "paivitetty";
+		}
+	}
 }

@@ -12,11 +12,10 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakemuksetPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakijaryhmatPalvelukutsu;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.LisatiedotPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.SuoritusrekisteriPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.ValintaperusteetPalvelukutsu;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategia;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategiaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
@@ -31,19 +30,16 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 			.getLogger(ValintakoelaskentaPalvelukutsu.class);
 	private final ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu;
 	private final HakemuksetPalvelukutsu hakemuksetPalvelukutsu;
-	private final LisatiedotPalvelukutsu lisatiedotPalvelukutsu;
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 	private final HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu;
 	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
 
 	public ValintalaskentaPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
-			LisatiedotPalvelukutsu lisatiedotPalvelukutsu,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
 			ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
 			HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu,
 			SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu,
-			PalvelukutsuStrategia lisatiedotStrategia,
 			PalvelukutsuStrategia hakemuksetStrategia,
 			PalvelukutsuStrategia valintaperusteetStrategia,
 			PalvelukutsuStrategia hakijaryhmatStrategia,
@@ -51,30 +47,26 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 		super(
 				hakukohdeOid.getHakukohdeOid(),
 				Arrays.asList(
-						new PalvelukutsuJaPalvelukutsuStrategia(
-								lisatiedotPalvelukutsu, lisatiedotStrategia),
-						new PalvelukutsuJaPalvelukutsuStrategia(
+						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								hakemuksetPalvelukutsu, hakemuksetStrategia),
-						new PalvelukutsuJaPalvelukutsuStrategia(
+						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								valintaperusteetPalvelukutsu,
 								valintaperusteetStrategia),
-						new PalvelukutsuJaPalvelukutsuStrategia(
+						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								hakijaryhmatPalvelukutsu, hakijaryhmatStrategia),
-						new PalvelukutsuJaPalvelukutsuStrategia(
+						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								suoritusrekisteriPalvelukutsu,
 								suoritusrekisteriStrategia)));
 		this.hakijaryhmatPalvelukutsu = hakijaryhmatPalvelukutsu;
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
-		this.lisatiedotPalvelukutsu = lisatiedotPalvelukutsu;
 		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
 		this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
 		this.suoritusrekisteriPalvelukutsu = suoritusrekisteriPalvelukutsu;
 	}
 
 	private LaskeDTO muodostaLaskeDTO() {
-		return new LaskeDTO(getHakukohdeOid(), muodostaHakemuksetDTO(
-				hakemuksetPalvelukutsu.getHakemukset(),
-				lisatiedotPalvelukutsu.getLisatiedot()),
+		return new LaskeDTO(getHakukohdeOid(),
+				muodostaHakemuksetDTO(hakemuksetPalvelukutsu.getHakemukset()),
 				valintaperusteetPalvelukutsu.getValintaperusteet(),
 				hakijaryhmatPalvelukutsu.getHakijaryhmat());
 	}
