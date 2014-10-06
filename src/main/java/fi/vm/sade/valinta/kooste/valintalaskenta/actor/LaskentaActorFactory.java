@@ -135,8 +135,8 @@ public class LaskentaActorFactory {
 				hakemuksetPalvelukutsut, valintaperusteetPalvelukutsut,
 				hakijaryhmatPalvelukutsut, suoritusrekisteriPalvelukutsut);
 
-		return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
-				Arrays.asList(laskentaPk), strategiat, laskentaStrategia,
+		return new ValintaryhmaLaskentaActorImpl(laskentaSupervisor, uuid,
+				hakuOid, laskentaPk, strategiat, laskentaStrategia,
 				laskentaSeurantaAsyncResource);
 	}
 

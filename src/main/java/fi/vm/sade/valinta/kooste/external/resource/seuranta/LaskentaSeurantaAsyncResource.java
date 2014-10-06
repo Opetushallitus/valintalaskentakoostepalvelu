@@ -52,5 +52,8 @@ public interface LaskentaSeurantaAsyncResource {
 	void merkkaaHakukohteenTila(String uuid, String hakukohdeOid,
 			HakukohdeTila tila);
 
+	void merkkaaLaskennanTila(String uuid, LaskentaTila tila,
+			HakukohdeTila hakukohdetila);
+
 	void merkkaaLaskennanTila(String uuid, LaskentaTila tila);
 }

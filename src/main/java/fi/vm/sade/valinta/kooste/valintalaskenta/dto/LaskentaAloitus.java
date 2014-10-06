@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 
 /**
  * 
@@ -29,10 +30,12 @@ public class LaskentaAloitus implements LaskentaInfo {
 	private final Boolean valintakoelaskenta;
 	private final boolean valintaryhmalaskenta;
 	private final Collection<HakukohdeJaOrganisaatio> hakukohdeDtos;
+	private final LaskentaTyyppi tyyppi;
 
 	public LaskentaAloitus(String uuid, String hakuOid, Integer valinnanvaihe,
 			Boolean valintakoelaskenta,
-			Collection<HakukohdeJaOrganisaatio> hakukohdeDtos) {
+			Collection<HakukohdeJaOrganisaatio> hakukohdeDtos,
+			LaskentaTyyppi tyyppi) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
 		this.osittainenLaskenta = false;
@@ -40,12 +43,14 @@ public class LaskentaAloitus implements LaskentaInfo {
 		this.valintakoelaskenta = valintakoelaskenta;
 		this.hakukohdeDtos = hakukohdeDtos;
 		this.valintaryhmalaskenta = false;
+		this.tyyppi = tyyppi;
 	}
 
 	public LaskentaAloitus(String uuid, String hakuOid,
 			boolean osittainenLaskenta, boolean valintaryhmalaskenta,
 			Integer valinnanvaihe, Boolean valintakoelaskenta,
-			Collection<HakukohdeJaOrganisaatio> hakukohdeDtos) {
+			Collection<HakukohdeJaOrganisaatio> hakukohdeDtos,
+			LaskentaTyyppi tyyppi) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
 		this.osittainenLaskenta = osittainenLaskenta;
@@ -53,6 +58,11 @@ public class LaskentaAloitus implements LaskentaInfo {
 		this.valinnanvaihe = valinnanvaihe;
 		this.valintakoelaskenta = valintakoelaskenta;
 		this.hakukohdeDtos = hakukohdeDtos;
+		this.tyyppi = tyyppi;
+	}
+
+	public LaskentaTyyppi getTyyppi() {
+		return tyyppi;
 	}
 
 	public Collection<HakukohdeJaOrganisaatio> getHakukohdeDtos() {
