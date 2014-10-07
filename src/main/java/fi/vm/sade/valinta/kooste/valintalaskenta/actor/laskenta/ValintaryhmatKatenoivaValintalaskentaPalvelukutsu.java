@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -37,6 +38,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 	private final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakijaryhmatPalvelukutsu>> hakijaryhmatPalvelukutsut;
 	private final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<SuoritusrekisteriPalvelukutsu>> suoritusrekisteriPalvelukutsut;
 	private final List<ValintaryhmaPalvelukutsuYhdiste> valintaryhmaPalvelukutsuYhdiste;
+	private final AtomicReference<Runnable> callback = new AtomicReference<>();
 
 	@SuppressWarnings("unchecked")
 	public ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
@@ -57,6 +59,14 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 		this.valintaperusteetPalvelukutsut = valintaperusteetPalvelukutsut;
 		this.hakijaryhmatPalvelukutsut = hakijaryhmatPalvelukutsut;
 		this.suoritusrekisteriPalvelukutsut = suoritusrekisteriPalvelukutsut;
+	}
+
+	public void setCallback(Runnable r) {
+		callback.set(r);
+	}
+
+	protected void yksiVaiheValmistui() {
+		callback.get().run();
 	}
 
 	private List<LaskeDTO> muodostaLaskeDTOs() {
