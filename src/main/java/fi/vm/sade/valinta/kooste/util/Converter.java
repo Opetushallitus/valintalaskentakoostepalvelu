@@ -97,6 +97,17 @@ public class Converter {
 			}
 
 			try {
+				try {
+					hakemus.getAnswers()
+							.getHakutoiveet()
+							.putAll(mapEligibilityAndStatus(
+									hakemus.getPreferenceEligibilities(),
+									hakemus.getAnswers().getHakutoiveet()));
+				} catch (Exception e) {
+					throw new RuntimeException(
+							"Eligibilities statusten mappaus preferensseihin epaonnistui! "
+									+ e.getMessage(), e);
+				}
 				Map<Integer, Hakutoive> hakutoiveet = new HashMap<Integer, Hakutoive>();
 				if (hakemus.getAnswers().getHakutoiveet() != null) {
 					for (Map.Entry<String, String> e : hakemus.getAnswers()
@@ -225,17 +236,6 @@ public class Converter {
 			throw e;
 		}
 
-		try {
-			hakemus.getAnswers()
-					.getHakutoiveet()
-					.putAll(mapEligibilityAndStatus(hakemus
-							.getPreferenceEligibilities(), hakemus.getAnswers()
-							.getHakutoiveet()));
-		} catch (Exception e) {
-			throw new RuntimeException(
-					"Eligibilities statusten mappaus preferensseihin epaonnistui! "
-							+ e.getMessage(), e);
-		}
 		return hakemusTyyppi;
 	}
 
