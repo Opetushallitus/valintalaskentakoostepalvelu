@@ -55,6 +55,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 																				// delay
 																				// after
 																				// retry
+	private final int VAKIO_AJOTIHEYS = 24;// 24h
 	private final ConcurrentHashMap<String, Long> ajossaHakuOids;
 
 	@Autowired
@@ -217,8 +218,8 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 											.moduloiSeuraava(
 													aloitusajankohtaTaiNyt,
 													DateTime.now(),
-													sijoitteluDto
-															.getAjotiheys());
+													ajotiheysTaiVakio(sijoitteluDto
+															.getAjotiheys()));
 									LOG.info(
 											"Laitettiin tyojonoon jatkuvaa sijoittelua varten sijoittelutyo aktivoitumaan {} (tyo aktivoitui jatkuvaan sijoitteluun hetkella {}). Ylimaaraiset tyot tyojonossa ei haittaa. Ne siivotaan pois. Ainoastaan yksi tyo ajetaan per intervalli.",
 											Formatter
@@ -284,6 +285,10 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 											poikkeus.getMessage());
 									return false;
 								}));
+	}
+
+	public int ajotiheysTaiVakio(Integer ajotiheys) {
+		return Optional.ofNullable(ajotiheys).orElse(VAKIO_AJOTIHEYS);
 	}
 
 	public boolean laitetaankoJoTyoJonoonEliEnaaTuntiJaljellaAktivointiin(
