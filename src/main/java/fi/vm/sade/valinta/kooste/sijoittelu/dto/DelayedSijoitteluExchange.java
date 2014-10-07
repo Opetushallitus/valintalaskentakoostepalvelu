@@ -31,6 +31,10 @@ public class DelayedSijoitteluExchange implements Exchange, Delayed {
 		this.delayedSijoittelu = delayedSijoittelu;
 	}
 
+	public String getHakuOid() {
+		return delayedSijoittelu.getHakuOid();
+	}
+
 	public DelayedSijoittelu getDelayedSijoittelu() {
 		return delayedSijoittelu;
 	}

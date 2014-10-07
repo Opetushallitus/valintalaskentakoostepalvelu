@@ -49,6 +49,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 	private final SijoitteluResource sijoitteluResource;
 	private final SijoittelunSeurantaResource sijoittelunSeurantaResource;
 	private final String jatkuvaSijoitteluTimer;
+	private final String jatkuvaSijoitteluQueue;
 	private final DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue;
 	private final int DELAY_WHEN_FAILS = (int) TimeUnit.MINUTES.toMillis(45L); // 1H
 																				// delay
@@ -60,10 +61,12 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 	public JatkuvaSijoitteluRouteImpl(
 			// tarkistetaan viidentoista minuutin valein tilanne
 			@Value("timer://jatkuvaSijoitteluTimer?fixedRate=true&period=5minutes") String jatkuvaSijoitteluTimer,
+			@Value("seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue") String jatkuvaSijoitteluQueue,
 			SijoitteluResource sijoitteluResource,
 			SijoittelunSeurantaResource sijoittelunSeurantaResource,
 			@Qualifier("jatkuvaSijoitteluDelayedQueue") DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue) {
 		this.jatkuvaSijoitteluTimer = jatkuvaSijoitteluTimer;
+		this.jatkuvaSijoitteluQueue = jatkuvaSijoitteluQueue;
 		this.sijoitteluResource = sijoitteluResource;
 		this.sijoittelunSeurantaResource = sijoittelunSeurantaResource;
 		this.jatkuvaSijoitteluDelayedQueue = new DelayQueue<DelayedSijoitteluExchange>();
@@ -73,11 +76,13 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 	public JatkuvaSijoitteluRouteImpl(
 			// tarkistetaan viidentoista minuutin valein tilanne
 			String jatkuvaSijoitteluTimer,
+			String jatkuvaSijoitteluQueue,
 			SijoitteluResource sijoitteluResource,
 			SijoittelunSeurantaResource sijoittelunSeurantaResource,
 			DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue,
 			ConcurrentHashMap<String, Long> ajossaHakuOids) {
 		this.jatkuvaSijoitteluTimer = jatkuvaSijoitteluTimer;
+		this.jatkuvaSijoitteluQueue = jatkuvaSijoitteluQueue;
 		this.sijoitteluResource = sijoitteluResource;
 		this.sijoittelunSeurantaResource = sijoittelunSeurantaResource;
 		this.jatkuvaSijoitteluDelayedQueue = jatkuvaSijoitteluDelayedQueue;
@@ -141,9 +146,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 									// se on nyt niin sijoittelu on
 									// aktiivinen sen osalta
 									//
-									return aloitusajankohtaTaiNyt.isBeforeNow()
-											|| aloitusajankohtaTaiNyt
-													.isEqualNow();
+									return laitetaankoJoTyoJonoonEliEnaaTuntiJaljellaAktivointiin(aloitusajankohtaTaiNyt);
 								})
 								//
 								.collect(
@@ -223,13 +226,20 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 															.toDate()),
 											Formatter.paivamaara(ajastusHetki
 													.toDate()));
-									jatkuvaSijoitteluDelayedQueue
-											.add(new DelayedSijoitteluExchange(
-													new DelayedSijoittelu(
-															hakuOid,
-															ajastusHetki),
-													new DefaultExchange(
-															getContext())));
+									if (!ajossaHakuOids.containsKey(hakuOid)
+											&& jatkuvaSijoitteluDelayedQueue
+													.stream()
+													.filter(j -> hakuOid.equals(j
+															.getHakuOid()))
+													.distinct().count() == 0L) {
+										jatkuvaSijoitteluDelayedQueue
+												.add(new DelayedSijoitteluExchange(
+														new DelayedSijoittelu(
+																hakuOid,
+																ajastusHetki),
+														new DefaultExchange(
+																getContext())));
+									}
 								});
 					}
 				});
@@ -237,8 +247,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 		//
 		// Vie sijoittelu queuesta toita sijoitteluun sita mukaa kuin vanhenee
 		//
-		from(
-				"seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue")
+		from(jatkuvaSijoitteluQueue)
 		//
 				.errorHandler(deadLetterChannel(DEADLETTERCHANNEL))
 				//
@@ -275,6 +284,11 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 											poikkeus.getMessage());
 									return false;
 								}));
+	}
+
+	public boolean laitetaankoJoTyoJonoonEliEnaaTuntiJaljellaAktivointiin(
+			DateTime aloitusAika) {
+		return aloitusAika.isBefore(DateTime.now().plusHours(1));
 	}
 
 	private DateTime aloitusajankohtaTaiNyt(SijoitteluDto sijoitteluDto) {
