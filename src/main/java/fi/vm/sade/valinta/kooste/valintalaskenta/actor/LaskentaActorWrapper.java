@@ -2,6 +2,11 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class LaskentaActorWrapper implements Laskenta {
 
 	private final String uuid;

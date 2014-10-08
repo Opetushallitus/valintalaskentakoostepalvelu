@@ -2,6 +2,11 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class Laskuri {
 
 	private final AtomicInteger laskuri;

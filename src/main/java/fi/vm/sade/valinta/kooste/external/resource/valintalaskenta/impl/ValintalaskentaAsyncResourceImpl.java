@@ -12,6 +12,7 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
@@ -32,6 +33,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
  * @author Jussi Jartamo
  * 
  */
+@Service
 public class ValintalaskentaAsyncResourceImpl implements
 		ValintalaskentaAsyncResource {
 	private final WebClient webClient;
