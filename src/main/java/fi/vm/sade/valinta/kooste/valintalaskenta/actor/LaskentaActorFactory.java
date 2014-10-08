@@ -110,8 +110,8 @@ public class LaskentaActorFactory {
 									suoritusrekisteriStrategia));
 
 					valintaryhmaPalvelukutsuYhdiste
-							.add(new ValintaryhmaPalvelukutsuYhdiste(
-									hakemuksetPalvelukutsu,
+							.add(new ValintaryhmaPalvelukutsuYhdiste(hk
+									.getHakukohdeOid(), hakemuksetPalvelukutsu,
 									valintaperusteetPalvelukutsu,
 									hakijaryhmatPalvelukutsu,
 									suoritusrekisteriPalvelukutsu));

@@ -16,16 +16,22 @@ public class ValintaryhmaPalvelukutsuYhdiste {
 	private final ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu;
 	private final HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu;
 	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
+	private final String hakukohdeOid;
 
-	public ValintaryhmaPalvelukutsuYhdiste(
+	public ValintaryhmaPalvelukutsuYhdiste(String hakukohdeOid,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
 			ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
 			HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu,
 			SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu) {
+		this.hakukohdeOid = hakukohdeOid;
 		this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
 		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
 		this.hakijaryhmatPalvelukutsu = hakijaryhmatPalvelukutsu;
 		this.suoritusrekisteriPalvelukutsu = suoritusrekisteriPalvelukutsu;
+	}
+
+	public String getHakukohdeOid() {
+		return hakukohdeOid;
 	}
 
 	public HakemuksetPalvelukutsu getHakemuksetPalvelukutsu() {
