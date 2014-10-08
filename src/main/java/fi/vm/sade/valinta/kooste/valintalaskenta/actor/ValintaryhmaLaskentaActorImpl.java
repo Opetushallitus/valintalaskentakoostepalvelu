@@ -12,9 +12,14 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.Palvel
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 	private final static Logger LOG = LoggerFactory
-			.getLogger(LaskentaActorImpl.class);
+			.getLogger(ValintaryhmaLaskentaActorImpl.class);
 	private final String uuid;
 	private final String hakuOid;
 	private final Collection<PalvelukutsuStrategia> strategiat;
@@ -49,6 +54,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 				viimeisteleLaskenta();
 
 			} else {
+				LOG.error("Aloitetaan valintaryhman laskenta!");
 				laskentaStrategia.laitaPalvelukutsuJonoon(pkk, p -> {
 					try {
 						laskentaSeurantaAsyncResource.merkkaaLaskennanTila(
