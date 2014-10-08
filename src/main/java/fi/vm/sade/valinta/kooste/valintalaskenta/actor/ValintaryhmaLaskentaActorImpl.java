@@ -65,6 +65,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 					}
 					viimeisteleLaskenta();
 				});
+				laskentaStrategia.aloitaUusiPalvelukutsu();
 			}
 		});
 	}
