@@ -74,7 +74,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 				.stream()
 				.map(y -> {
 					try {
-						return new LaskeDTO(getHakukohdeOid(),
+						return new LaskeDTO(y.getHakukohdeOid(),
 								muodostaHakemuksetDTO(y
 										.getHakemuksetPalvelukutsu()
 										.getHakemukset()), y
