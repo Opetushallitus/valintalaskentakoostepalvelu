@@ -117,6 +117,7 @@ public class LaskentaActorFactory {
 									suoritusrekisteriPalvelukutsu));
 
 				});
+
 		ValintaryhmatKatenoivaValintalaskentaPalvelukutsu laskentaPk = new ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
 				new HakukohdeJaOrganisaatio("kaikkiHakukohteet",
 						"kaikkiOrganisaatiot"), valintalaskentaAsyncResource,
@@ -124,9 +125,11 @@ public class LaskentaActorFactory {
 				valintaperusteetPalvelukutsut, hakijaryhmatPalvelukutsut,
 				suoritusrekisteriPalvelukutsut);
 
-		return new ValintaryhmaLaskentaActorImpl(laskentaSupervisor, uuid,
-				hakuOid, laskentaPk, strategiat, laskentaStrategia,
-				laskentaSeurantaAsyncResource);
+		ValintaryhmaLaskentaActorImpl v = new ValintaryhmaLaskentaActorImpl(
+				laskentaSupervisor, uuid, hakuOid, laskentaPk, strategiat,
+				laskentaStrategia, laskentaSeurantaAsyncResource);
+		laskentaPk.setCallback(v);
+		return v;
 	}
 
 	public LaskentaActor createValintakoelaskentaActor(final String uuid,

@@ -43,6 +43,39 @@ public class OsallistujatPredicate implements
 		this.valintakoeOids = null;
 	}
 
+	public static java.util.function.Predicate<ValintakoeOsallistuminenDTO> osallistujat(
+			String hakukohdeOid, Collection<String> vkOids) {
+		final Set<String> valintakoeOids = Sets.newHashSet(vkOids);
+		return vk -> {
+			for (HakutoiveDTO hakutoive : vk.getHakutoiveet()) {
+				if (!hakukohdeOid.equals(hakutoive.getHakukohdeOid())) {
+					// vain tarkasteltavasta hakukohteesta
+					// ollaan kiinnostuneita
+					continue;
+				}
+				for (ValintakoeValinnanvaiheDTO valinnanvaihe : hakutoive
+						.getValinnanVaiheet()) {
+					for (ValintakoeDTO valintakoe : valinnanvaihe
+							.getValintakokeet()) {
+						if (!valintakoeOids.contains(valintakoe
+								.getValintakoeOid())) {
+							// vain tarkasteltavista
+							// valintakokeista ollaan
+							// kiinnostuneita
+							continue;
+						}
+						if (fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen.OSALLISTUU
+								.equals(valintakoe.getOsallistuminenTulos()
+										.getOsallistuminen())) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		};
+	}
+
 	public boolean apply(ValintakoeOsallistuminenDTO valintakoeOsallistuminen) {
 		for (HakutoiveDTO hakutoive : valintakoeOsallistuminen.getHakutoiveet()) {
 			if (!hakukohdeOid.equals(hakutoive.getHakukohdeOid())) {

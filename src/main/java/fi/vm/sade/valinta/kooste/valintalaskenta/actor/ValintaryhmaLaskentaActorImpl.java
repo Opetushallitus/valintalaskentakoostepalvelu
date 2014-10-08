@@ -12,7 +12,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.Palvel
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 
-public class ValintaryhmaLaskentaActorImpl implements LaskentaActor {
+public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(LaskentaActorImpl.class);
 	private final String uuid;
@@ -85,6 +85,10 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor {
 	}
 
 	public void aloita() {
+		uudetPalvelukutsutKayntiin();
+	}
+
+	public void run() {
 		uudetPalvelukutsutKayntiin();
 	}
 

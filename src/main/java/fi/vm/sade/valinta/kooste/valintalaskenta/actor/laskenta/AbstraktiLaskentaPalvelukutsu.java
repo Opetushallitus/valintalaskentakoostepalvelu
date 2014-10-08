@@ -48,6 +48,7 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 		final PalvelukutsuLaskuri palvelukutsulaskuri = new PalvelukutsuLaskuri(
 				palvelukutsut.size());
 		this.laskuri = pk -> {
+			yksiVaiheValmistui();
 			if (takaisinkutsu.get() == null) {
 				return;
 			}
@@ -95,6 +96,13 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 				}
 			}
 		};
+	}
+
+	/**
+	 * Ylikirjoita callbackiksi
+	 */
+	protected void yksiVaiheValmistui() {
+
 	}
 
 	/**
