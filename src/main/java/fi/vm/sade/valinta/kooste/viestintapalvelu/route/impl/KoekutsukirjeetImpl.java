@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 import static rx.Observable.from;
 import static rx.Observable.zip;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -207,6 +208,8 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 							.entrySet()
 							.stream()
 							//
+							.filter(Objects::nonNull)
+							//
 							.filter(e -> {
 								return StringUtils.trimToEmpty(e.getKey())
 										.endsWith("Opetuspiste-id");
@@ -217,45 +220,96 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 							});
 
 					LOG.error("Haetaan valintakokeet hakutoiveille!");
-					final Map<String, List<ValintakoeDTO>> valintakoeOidsHakutoiveille = valintakoeResource
-							.haeValintakokeetHakukohteille(
-									hakemukset.stream()
-											.flatMap(hakutoiveetHakemuksesta)
-											.collect(Collectors.toSet())).get();
+					final Map<String, List<ValintakoeDTO>> valintakoeOidsHakutoiveille;
+					try {
+						Set<String> hakutoiveetKaikistaHakemuksista = hakemukset
+								.stream().flatMap(hakutoiveetHakemuksesta)
+								.collect(Collectors.toSet());
+						LOG.error("Hakutoiveet hakemuksista:\r\n{}", Arrays
+								.toString(hakutoiveetKaikistaHakemuksista
+										.toArray()));
+						valintakoeOidsHakutoiveille = valintakoeResource
+								.haeValintakokeetHakukohteille(
+										hakutoiveetKaikistaHakemuksista).get();
+						LOG.error("\r\n{}",
+								new GsonBuilder().setPrettyPrinting().create()
+										.toJson(valintakoeOidsHakutoiveille));
+						if (valintakoeOidsHakutoiveille.isEmpty()) {
+							throw new RuntimeException(
+									"Yhdellekaan hakutoiveelle ei loytynyt valintakokeita!");
+						}
+					} catch (Exception e) {
+						LOG.error(
+								"Valintakokeiden haku hakutoiveille epaonnistui! {}",
+								e.getMessage());
+						throw e;
+					}
+					final Map<String, Collection<String>> hakemusOidJaHakijanMuutHakutoiveOids;
+					try {
+						LOG.error(
+								"Haetaan tunnisteet kohde valintakokeille: Onko valintakoeOid {}",
+								valintakoeOidsHakutoiveille
+										.containsKey(koekutsu.getHakukohdeOid()));
 
-					final Set<String> kohdeHakukohteenTunnisteet = valintakoeOidsHakutoiveille
-							.get(koekutsu.getHakukohdeOid())
-							.stream()
-							//
-							.filter(v -> Boolean.TRUE.equals(v.getAktiivinen()))
-							//
-							.map(v -> v.getTunniste())
-							//
-							.collect(Collectors.toSet());
-
-					Map<String, Collection<String>> hakemusOidJaHakijanMuutHakutoiveOids = hakemukset
-							.stream()
-							.collect(
-									Collectors.toMap(
-											h -> h.getOid(),
-											h -> hakutoiveetHakemuksesta
-													.apply(h)
-													//
-													// jos joku hakutoive
-													// sisaltaa valintakokeen
-													// jolla sama tunniste kuin
-													// taman hakukohteen
-													// valintakokeilla
-													//
-													.filter(hakutoive -> valintakoeOidsHakutoiveille
-															.get(hakutoive)
-															.stream()
-															.anyMatch(
-																	v -> kohdeHakukohteenTunnisteet
-																			.contains(v
-																					.getTunniste())))
-													.collect(
-															Collectors.toList())));
+						final Set<String> kohdeHakukohteenTunnisteet = valintakoeOidsHakutoiveille
+								.get(koekutsu.getHakukohdeOid()).stream()
+								//
+								.filter(Objects::nonNull)
+								//
+								.filter(v -> Boolean.TRUE.equals(v
+										.getAktiivinen()))
+								//
+								.map(v -> v.getTunniste())
+								//
+								.collect(Collectors.toSet());
+						LOG.error("Mapataan muut hakukohteet");
+						hakemusOidJaHakijanMuutHakutoiveOids = hakemukset
+								.stream()
+								//
+								.filter(Objects::nonNull)
+								//
+								.filter(h -> h.getOid() != null)
+								//
+								.collect(
+										Collectors.toMap(
+												h -> h.getOid(),
+												h -> hakutoiveetHakemuksesta
+														.apply(h)
+														//
+														.filter(Objects::nonNull)
+														//
+														// jos joku hakutoive
+														// sisaltaa
+														// valintakokeen
+														// jolla sama tunniste
+														// kuin
+														// taman hakukohteen
+														// valintakokeilla
+														//
+														.filter(hakutoive -> valintakoeOidsHakutoiveille
+																.containsKey(hakutoive))
+														//
+														.filter(hakutoive -> valintakoeOidsHakutoiveille
+																.get(hakutoive)
+																.stream()
+																.filter(Objects::nonNull)
+																//
+																.filter(v -> null != v
+																		.getTunniste())
+																//
+																.anyMatch(
+																		v -> kohdeHakukohteenTunnisteet
+																				.contains(v
+																						.getTunniste())))
+														.collect(
+																Collectors
+																		.toList())));
+					} catch (Exception e) {
+						LOG.error(
+								"Muiden hakukohteiden mappauksessa tapahtui odottamaton virhe {}",
+								e.getMessage());
+						throw e;
+					}
 					LOG.info("Luodaan kirje.");
 					LetterBatch letterBatch = koekutsukirjeetKomponentti
 							.valmistaKoekutsukirjeet(hakemukset,
