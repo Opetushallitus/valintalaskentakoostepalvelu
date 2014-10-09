@@ -83,6 +83,11 @@ public class LaskentaPalvelukutsunTesti {
 
 		LaskentaPalvelukutsu laskentaPalvelukutsu = new AbstraktiLaskentaPalvelukutsu(
 				HAKUKOHDE_OID.getHakukohdeOid(), palvelukutsut) {
+			@Override
+			public void vapautaResurssit() {
+				// TODO Auto-generated method stub
+
+			}
 
 			@Override
 			public Palvelukutsu teePalvelukutsu(
