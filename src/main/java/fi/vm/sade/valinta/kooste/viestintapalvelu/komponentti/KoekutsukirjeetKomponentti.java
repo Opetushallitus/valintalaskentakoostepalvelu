@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.camel.Body;
 import org.apache.camel.Property;
@@ -16,6 +18,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
@@ -26,6 +29,7 @@ import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirjeet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Koekutsukirje;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.NimiJaOpetuskieli;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
@@ -55,6 +59,7 @@ public class KoekutsukirjeetKomponentti {
 	public LetterBatch valmistaKoekutsukirjeet(@Body List<Hakemus> hakemukset,
 			@Property(OPH.HAKUOID) String hakuOid,
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
+			Map<String, Collection<String>> hakemusOidJaMuutHakukohdeOids,
 			@Property(OPH.LETTER_BODY_TEXT) String letterBodyText,
 			@Property(OPH.TARJOAJAOID) String tarjoajaOid,
 			@Property("tag") String tag,
@@ -68,22 +73,45 @@ public class KoekutsukirjeetKomponentti {
 					.emptyList();
 
 			// final HakukohdeNimiRDTO nimi;
-			final HakukohdeDTO nimi;
-			final String opetuskieli;
+			final Map<String, NimiJaOpetuskieli> nimet;
 			try {
+				Set<String> kaikkiMuutHakutoiveetOids = Sets
+						.newHashSet(hakemusOidJaMuutHakukohdeOids.entrySet()
+								.stream()
+								//
+								.flatMap(e -> e.getValue().stream())
+								.collect(Collectors.toSet()));
+				kaikkiMuutHakutoiveetOids.add(hakukohdeOid); // <- pitaisi olla
+																// kylla jo
+																// listassa
+																// mutta
+																// varmuuden
+																// vuoksi
 				// hakukohde =
-				nimi = tarjontaResource.getByOID(hakukohdeOid);
+				nimet = kaikkiMuutHakutoiveetOids
+						.stream()
+						.collect(
+								Collectors.toMap(
+										h -> h,
+										h -> {
+											HakukohdeDTO nimi = tarjontaResource
+													.getByOID(hakukohdeOid);
+											Collection<String> kielikoodit = Collections2.transform(
+													nimi.getOpetuskielet(),
+													new Function<String, String>() {
+														@Override
+														public String apply(
+																String tarjonnanEpastandardiKoodistoUri) {
+															return TarjontaUriToKoodistoUtil
+																	.cleanUri(tarjonnanEpastandardiKoodistoUri);
+														}
+													});
+											String opetuskieli = new Kieli(
+													kielikoodit).getKieli();
+											return new NimiJaOpetuskieli(nimi,
+													opetuskieli);
+										}));
 
-				Collection<String> kielikoodit = Collections2.transform(
-						nimi.getOpetuskielet(), new Function<String, String>() {
-							@Override
-							public String apply(
-									String tarjonnanEpastandardiKoodistoUri) {
-								return TarjontaUriToKoodistoUtil
-										.cleanUri(tarjonnanEpastandardiKoodistoUri);
-							}
-						});
-				opetuskieli = new Kieli(kielikoodit).getKieli();
 				// tarjontaProxy.haeHakukohdeNimi(hakukohdeOid);
 				// hakukohde.getHakukohdeNimi()
 			} catch (Exception e) {
@@ -91,8 +119,6 @@ public class KoekutsukirjeetKomponentti {
 						hakukohdeOid);
 				throw e;
 			}
-			final Teksti hakukohdeNimi = new Teksti(nimi.getHakukohdeNimi());
-			final Teksti tarjoajaNimi = new Teksti(nimi.getTarjoajaNimi());
 
 			// try {
 			// if (nimi.getLiitteet() != null) {
@@ -106,16 +132,30 @@ public class KoekutsukirjeetKomponentti {
 			// } catch (Exception e) {
 			// LOG.error("Ei voitu tulostaa liitteitä!");
 			// }
+			NimiJaOpetuskieli kohdeHakukohdeNimi = nimet.get(hakukohdeOid);
+			String opetuskieli = kohdeHakukohdeNimi.getOpetuskieli();
 			String hakukohdeNimiTietyllaKielella = "";
 			String tarjoajaNimiTietyllaKielella = "";
 			for (Hakemus hakemus : hakemukset) {
 				Osoite addressLabel = osoiteKomponentti.haeOsoite(hakemus);
 
-				hakukohdeNimiTietyllaKielella = hakukohdeNimi
-						.getTeksti(opetuskieli);
-				tarjoajaNimiTietyllaKielella = tarjoajaNimi
-						.getTeksti(opetuskieli);
+				hakukohdeNimiTietyllaKielella = kohdeHakukohdeNimi
+						.getHakukohdeNimi().getTeksti(opetuskieli);
+				tarjoajaNimiTietyllaKielella = kohdeHakukohdeNimi
+						.getTarjoajaNimi().getTeksti(opetuskieli);
 
+				List<String> muutHakukohteet = Collections.emptyList();
+				try {
+					muutHakukohteet = hakemusOidJaMuutHakukohdeOids
+							.get(hakemus.getOid())
+							.stream()
+							.map(h -> {
+								return nimet.get(h).getHakukohdeNimi()
+										.getTeksti(opetuskieli);
+							}).collect(Collectors.toList());
+				} catch (Exception e) {
+					LOG.error("\r\n###\r\n### {}\r\n###", e.getMessage());
+				}
 				// hakukohdeNimiTietyllaKielella,
 				// tarjoajaNimiTietyllaKielella, letterBodyText,
 				// customLetterContents
@@ -123,6 +163,7 @@ public class KoekutsukirjeetKomponentti {
 				replacements.put("koulu", hakukohdeNimiTietyllaKielella);
 				replacements.put("koulutus", tarjoajaNimiTietyllaKielella);
 				replacements.put("tulokset", customLetterContents);
+				replacements.put("muut_hakukohteet", muutHakukohteet);
 				// new Kirje(addressLabel, languageCode, koulu, koulutus,
 				// tulokset)
 				kirjeet.add(new Letter(addressLabel, templateName, opetuskieli,

@@ -465,6 +465,7 @@ public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 								koekutsukirjeetKomponentti
 										.valmistaKoekutsukirjeet(hakemukset,
 												hakuOid, hakukohdeOid,
+												Collections.emptyMap(),
 												letterBodyText, tarjoajaOid,
 												tag, templateName));
 					}

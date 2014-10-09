@@ -4,13 +4,18 @@ import static rx.Observable.from;
 import static rx.Observable.zip;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +37,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessi;
@@ -57,22 +63,18 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 	private final ValintalaskentaValintakoeAsyncResource osallistumisetResource;
 	private final int VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA = 30;
 
-	// private final DeferredManager deferredManager;
-
 	@Autowired
 	public KoekutsukirjeetImpl(
 			KoekutsukirjeetKomponentti koekutsukirjeetKomponentti,
 			ApplicationAsyncResource applicationAsyncResource,
 			ViestintapalveluAsyncResource viestintapalveluAsyncResource,
 			ValintaperusteetValintakoeAsyncResource valintaperusteetValintakoeAsyncResource,
-			ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {// ,
-		// DeferredManager deferredManager) {
+			ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
 		this.koekutsukirjeetKomponentti = koekutsukirjeetKomponentti;
 		this.applicationAsyncResource = applicationAsyncResource;
 		this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
 		this.valintakoeResource = valintaperusteetValintakoeAsyncResource;
 		this.osallistumisetResource = valintalaskentaValintakoeAsyncResource;
-		// this.deferredManager = deferredManager;
 	}
 
 	@Override
@@ -200,11 +202,66 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 				}
 				// // Puuttuvat hakemukset //
 				try {
+					Function<Hakemus, Stream<String>> hakutoiveetHakemuksesta = h -> (Stream<String>) new HakemusWrapper(
+							h).getHakutoiveet()
+							.entrySet()
+							.stream()
+							//
+							.filter(e -> {
+								return StringUtils.trimToEmpty(e.getKey())
+										.endsWith("Opetuspiste-id");
+							})
+							//
+							.map(e -> {
+								return e.getValue();
+							});
+
+					LOG.error("Haetaan valintakokeet hakutoiveille!");
+					final Map<String, List<ValintakoeDTO>> valintakoeOidsHakutoiveille = valintakoeResource
+							.haeValintakokeetHakukohteille(
+									hakemukset.stream()
+											.flatMap(hakutoiveetHakemuksesta)
+											.collect(Collectors.toSet())).get();
+
+					final Set<String> kohdeHakukohteenTunnisteet = valintakoeOidsHakutoiveille
+							.get(koekutsu.getHakukohdeOid())
+							.stream()
+							//
+							.filter(v -> Boolean.TRUE.equals(v.getAktiivinen()))
+							//
+							.map(v -> v.getTunniste())
+							//
+							.collect(Collectors.toSet());
+
+					Map<String, Collection<String>> hakemusOidJaHakijanMuutHakutoiveOids = hakemukset
+							.stream()
+							.collect(
+									Collectors.toMap(
+											h -> h.getOid(),
+											h -> hakutoiveetHakemuksesta
+													.apply(h)
+													//
+													// jos joku hakutoive
+													// sisaltaa valintakokeen
+													// jolla sama tunniste kuin
+													// taman hakukohteen
+													// valintakokeilla
+													//
+													.filter(hakutoive -> valintakoeOidsHakutoiveille
+															.get(hakutoive)
+															.stream()
+															.anyMatch(
+																	v -> kohdeHakukohteenTunnisteet
+																			.contains(v
+																					.getTunniste())))
+													.collect(
+															Collectors.toList())));
 					LOG.info("Luodaan kirje.");
 					LetterBatch letterBatch = koekutsukirjeetKomponentti
 							.valmistaKoekutsukirjeet(hakemukset,
 									koekutsu.getHakuOid(),
 									koekutsu.getHakukohdeOid(),
+									hakemusOidJaHakijanMuutHakutoiveOids,
 									koekutsu.getLetterBodyText(),
 									koekutsu.getTarjoajaOid(),
 									koekutsu.getTag(),
