@@ -24,12 +24,16 @@ import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessiImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
 
 /**
@@ -60,6 +64,8 @@ public class ViestintapalveluAktivointiResource {
 	private KoekutsukirjeRoute koekutsukirjeRoute;
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+	@Autowired
+	private KoekutsukirjeetService koekutsukirjeetService;
 
 	@POST
 	@Path("/osoitetarrat/aktivoi")
@@ -286,7 +292,6 @@ public class ViestintapalveluAktivointiResource {
 			@QueryParam("templateName") String templateName,
 			@QueryParam("valintakoeOids") List<String> valintakoeOids,
 			DokumentinLisatiedot hakemuksillaRajaus) {
-		DokumenttiProsessi kirjeProsessi = null;
 		if (hakemuksillaRajaus != null
 				&& hakemuksillaRajaus.getHakemusOids() != null
 				&& !hakemuksillaRajaus.getHakemusOids().isEmpty()) {
@@ -300,6 +305,7 @@ public class ViestintapalveluAktivointiResource {
 			}
 		}
 		String tag = null;
+		KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
 		try {
 			if (templateName == null) {
 				templateName = "koekutsukirje";
@@ -308,34 +314,31 @@ public class ViestintapalveluAktivointiResource {
 				hakemuksillaRajaus = new DokumentinLisatiedot();
 			}
 			tag = hakemuksillaRajaus.getTag();
+
 			if (hakemuksillaRajaus.getHakemusOids() != null) {
-				LOG.info(
+				LOG.error(
 						"Koekutsukirjeiden luonti aloitettu yksittaiselle hakemukselle {}",
 						hakemuksillaRajaus.getHakemusOids());
-				kirjeProsessi = new DokumenttiProsessi("Koekirjeet",
-						"Koekirjeet valituille hakemuksille", null,
-						Lists.newArrayList("koekutsukirjeet", "hakemuksille"));
+				koekutsukirjeetService.koekutsukirjeetHakemuksille(prosessi,
+						new KoekutsuDTO(hakemuksillaRajaus.getLetterBodyText(),
+								tarjoajaOid, tag, hakukohdeOid, hakuOid,
+								templateName), hakemuksillaRajaus
+								.getHakemusOids());
 			} else {
-				LOG.info("Koekutsukirjeiden luonti aloitettu");
-				kirjeProsessi = new DokumenttiProsessi(
-						"Koekirjeet",
-						"Koekirjeet valintakokeisiin osallistujille",
-						null,
-						Lists.newArrayList("koekutsukirjeet", "valintakokeelle"));
+				LOG.error("Koekutsukirjeiden luonti aloitettu");
+				koekutsukirjeetService.koekutsukirjeetOsallistujille(prosessi,
+						new KoekutsuDTO(hakemuksillaRajaus.getLetterBodyText(),
+								tarjoajaOid, tag, hakukohdeOid, hakuOid,
+								templateName), valintakoeOids);
 			}
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(kirjeProsessi); //
-			koekutsukirjeRoute.koekutsukirjeetAktivointi(kirjeProsessi,
-					hakemuksillaRajaus.getHakemusOids(), hakuOid, hakukohdeOid,
-					tarjoajaOid, tag, templateName, valintakoeOids,
-					hakemuksillaRajaus.getLetterBodyText(),
-					SecurityContextHolder.getContext().getAuthentication());
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 		} catch (Exception e) {
 			LOG.error("Koekutsukirjeiden luonti epäonnistui! {}",
 					e.getMessage());
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
-		return new ProsessiId(kirjeProsessi.getId());// Response.ok().build();
+		return new ProsessiId(prosessi.getId());// Response.ok().build();
 	}
 
 	private List<String> tags(String... tag) {

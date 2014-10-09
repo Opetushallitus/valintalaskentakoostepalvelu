@@ -3,6 +3,11 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class Koekutsukirje {
 	public Koekutsukirje() {
 	}

@@ -13,6 +13,8 @@ public class Letter {
 
 	private Osoite addressLabel;
 	private String languageCode;
+	private String henkilotunnus;
+	private Osoite hakijapalveluidenOsoite;
 	private Map<String, Object> templateReplacements;
 	private LetterContent letterContent;
 
@@ -28,6 +30,23 @@ public class Letter {
 			String languageCode, Map<String, Object> replacements) {
 		this.addressLabel = addressLabel;
 		this.templateReplacements = replacements;
+	}
+
+	public Letter(Osoite addressLabel, String templateName,
+			String languageCode, Map<String, Object> replacements,
+			String henkilotunnus, Osoite hakijapalveluidenOsoite) {
+		this.addressLabel = addressLabel;
+		this.templateReplacements = replacements;
+		this.hakijapalveluidenOsoite = hakijapalveluidenOsoite;
+		this.henkilotunnus = henkilotunnus;
+	}
+
+	public Osoite getHakijapalveluidenOsoite() {
+		return hakijapalveluidenOsoite;
+	}
+
+	public String getHenkilotunnus() {
+		return henkilotunnus;
 	}
 
 	public Osoite getAddressLabel() {

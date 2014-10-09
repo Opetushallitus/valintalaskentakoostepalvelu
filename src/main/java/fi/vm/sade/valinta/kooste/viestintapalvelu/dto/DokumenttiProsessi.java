@@ -15,8 +15,10 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Tyo;
 /**
  * 
  * @author Jussi Jartamo
- * 
+ *
+ * @Deprecated ei enaa tarpeellinen kun SSE eventit otetaan kayttoon
  */
+@Deprecated
 public class DokumenttiProsessi extends Prosessi {
 
 	public static final String DOKUMENTTI_PROSESSI = "dokumenttiProsessi";
