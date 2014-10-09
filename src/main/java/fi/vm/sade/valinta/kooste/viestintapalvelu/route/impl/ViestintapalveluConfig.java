@@ -20,6 +20,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
 @Configuration
 public class ViestintapalveluConfig {
 
+	// @Bean
+	// public DeferredManager getDeferredManager() {
+	// return new DefaultDeferredManager();
+	// }
+
 	@Bean
 	public HyvaksymiskirjeRoute getHyvaksymiskirjeRoute(
 			@Value(HyvaksymiskirjeRoute.SEDA_HYVAKSYMISKIRJEET) String hyvaksymiskirjeet,

@@ -38,6 +38,11 @@ public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements
 		this.hakemukset = new AtomicReference<>();
 	}
 
+	@Override
+	public void vapautaResurssit() {
+		hakemukset.set(null);
+	}
+
 	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
 		aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
 			public Peruutettava get() {

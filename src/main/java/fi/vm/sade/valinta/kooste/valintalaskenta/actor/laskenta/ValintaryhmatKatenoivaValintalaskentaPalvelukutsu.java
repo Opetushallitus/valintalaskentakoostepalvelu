@@ -33,10 +33,6 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintakoelaskentaPalvelukutsu.class);
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
-	private final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakemuksetPalvelukutsu>> hakemuksetPalvelukutsut;
-	private final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<ValintaperusteetPalvelukutsu>> valintaperusteetPalvelukutsut;
-	private final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakijaryhmatPalvelukutsu>> hakijaryhmatPalvelukutsut;
-	private final List<PalvelukutsuJaPalvelukutsuStrategiaImpl<SuoritusrekisteriPalvelukutsu>> suoritusrekisteriPalvelukutsut;
 	private final List<ValintaryhmaPalvelukutsuYhdiste> valintaryhmaPalvelukutsuYhdiste;
 	private final AtomicReference<Runnable> callback = new AtomicReference<>();
 
@@ -55,10 +51,11 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 						suoritusrekisteriPalvelukutsut)));
 		this.valintaryhmaPalvelukutsuYhdiste = valintaryhmaPalvelukutsuYhdiste;
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
-		this.hakemuksetPalvelukutsut = hakemuksetPalvelukutsut;
-		this.valintaperusteetPalvelukutsut = valintaperusteetPalvelukutsut;
-		this.hakijaryhmatPalvelukutsut = hakijaryhmatPalvelukutsut;
-		this.suoritusrekisteriPalvelukutsut = suoritusrekisteriPalvelukutsut;
+	}
+
+	@Override
+	public void vapautaResurssit() {
+		valintaryhmaPalvelukutsuYhdiste.forEach(v -> v.vapautaResurssit());
 	}
 
 	public void setCallback(Runnable r) {
@@ -74,7 +71,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 				.stream()
 				.map(y -> {
 					try {
-						return new LaskeDTO(y.getHakukohdeOid(),
+						LaskeDTO l = new LaskeDTO(y.getHakukohdeOid(),
 								muodostaHakemuksetDTO(y
 										.getHakemuksetPalvelukutsu()
 										.getHakemukset()), y
@@ -82,6 +79,8 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 										.getValintaperusteet(), y
 										.getHakijaryhmatPalvelukutsu()
 										.getHakijaryhmat());
+						y.vapautaResurssit();
+						return l;
 					} catch (Exception e) {
 						LOG.error("LaskeDTO:n muodostaminen epaonnistui {}",
 								e.getMessage());

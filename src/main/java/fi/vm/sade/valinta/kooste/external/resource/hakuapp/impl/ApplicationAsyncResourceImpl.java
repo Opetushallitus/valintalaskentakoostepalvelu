@@ -1,10 +1,16 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
@@ -98,6 +104,26 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 				//
 				.get(new GenericType<List<Hakemus>>() {
 				});
+	}
+
+	@Override
+	public Future<List<Hakemus>> getApplicationsByOids(
+			Collection<String> hakemusOids) {
+		String url = new StringBuilder().append("/applications/list")
+				.toString();
+		// new MediaType("application", "json", Charset.forName("UTF-8"));
+		return WebClient
+				.fromClient(webClient)
+				.path(url)
+				// .accept("application/json;charset=UTF-8")
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				//
+				.async()
+				//
+				.post(Entity.entity(Lists.newArrayList(hakemusOids),
+						MediaType.APPLICATION_JSON_TYPE),
+						new GenericType<List<Hakemus>>() {
+						});
 	}
 
 	public Peruutettava getApplicationsByOid(String hakuOid,
