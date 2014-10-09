@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 import javax.ws.rs.client.Entity;
@@ -83,6 +84,23 @@ public class ValintaperusteetValintakoeAsyncResourceImpl implements
 				.async()
 				.post(Entity.entity(oids, MediaType.APPLICATION_JSON_TYPE),
 						new GenericType<List<ValintakoeDTO>>() {
+						});
+	}
+
+	@Override
+	public Future<Map<String, List<ValintakoeDTO>>> haeValintakokeetHakukohteille(
+			Collection<String> hakukohdeOids) {
+		StringBuilder urlBuilder = new StringBuilder()
+				.append("/valintaperusteet-service/resources/hakukohde/valintakoe");
+		String url = urlBuilder.toString();
+		return WebClient
+				.fromClient(webClient)
+				.path(url)
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				.async()
+				.post(Entity.entity(hakukohdeOids,
+						MediaType.APPLICATION_JSON_TYPE),
+						new GenericType<Map<String, List<ValintakoeDTO>>>() {
 						});
 	}
 }
