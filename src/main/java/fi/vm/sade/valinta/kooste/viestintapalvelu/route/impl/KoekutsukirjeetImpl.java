@@ -229,8 +229,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 														TimeUnit.MILLISECONDS);
 										if ("ready".equals(status.getStatus())) {
 											LOG.error("Koekutsukirjeet valmistui!");
-											prosessi.valmistui("mergedLetterBatch"
-													+ batchId);
+											prosessi.valmistui(batchId);
 											stop.onNext(null);
 										}
 									} catch (Exception e) {
