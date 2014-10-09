@@ -34,6 +34,14 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 	private final HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu;
 	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
 
+	@Override
+	public void vapautaResurssit() {
+		valintaperusteetPalvelukutsu.vapautaResurssit();
+		hakemuksetPalvelukutsu.vapautaResurssit();
+		hakijaryhmatPalvelukutsu.vapautaResurssit();
+		suoritusrekisteriPalvelukutsu.vapautaResurssit();
+	}
+
 	public ValintalaskentaPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
@@ -65,10 +73,12 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 	}
 
 	private LaskeDTO muodostaLaskeDTO() {
-		return new LaskeDTO(getHakukohdeOid(),
+		LaskeDTO l = new LaskeDTO(getHakukohdeOid(),
 				muodostaHakemuksetDTO(hakemuksetPalvelukutsu.getHakemukset()),
 				valintaperusteetPalvelukutsu.getValintaperusteet(),
 				hakijaryhmatPalvelukutsu.getHakijaryhmat());
+		vapautaResurssit();
+		return l;
 	}
 
 	@Override

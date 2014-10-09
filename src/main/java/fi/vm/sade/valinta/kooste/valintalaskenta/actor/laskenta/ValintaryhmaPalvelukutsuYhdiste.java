@@ -30,6 +30,13 @@ public class ValintaryhmaPalvelukutsuYhdiste {
 		this.suoritusrekisteriPalvelukutsu = suoritusrekisteriPalvelukutsu;
 	}
 
+	public void vapautaResurssit() {
+		hakemuksetPalvelukutsu.vapautaResurssit();
+		valintaperusteetPalvelukutsu.vapautaResurssit();
+		hakijaryhmatPalvelukutsu.vapautaResurssit();
+		suoritusrekisteriPalvelukutsu.vapautaResurssit();
+	}
+
 	public String getHakukohdeOid() {
 		return hakukohdeOid;
 	}

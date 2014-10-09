@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 
 /**
  * 
@@ -36,6 +38,8 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
 	public boolean onkoPeruutettu() {
 		return TyhjaPeruutettava.tyhjaPeruutettava().equals(peruutettava.get());
 	}
+
+	public abstract void vapautaResurssit();
 
 	protected Consumer<Throwable> failureCallback(
 			final Consumer<Palvelukutsu> takaisinkutsu) {

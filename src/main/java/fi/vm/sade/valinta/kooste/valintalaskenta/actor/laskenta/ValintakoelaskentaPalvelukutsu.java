@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -56,6 +57,13 @@ public class ValintakoelaskentaPalvelukutsu extends
 		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
 		this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
 		this.suoritusrekisteriPalvelukutsu = suoritusrekisteriPalvelukutsu;
+	}
+
+	@Override
+	public void vapautaResurssit() {
+		valintaperusteetPalvelukutsu.vapautaResurssit();
+		hakemuksetPalvelukutsu.vapautaResurssit();
+		suoritusrekisteriPalvelukutsu.vapautaResurssit();
 	}
 
 	private LaskeDTO muodostaLaskeDTO() {

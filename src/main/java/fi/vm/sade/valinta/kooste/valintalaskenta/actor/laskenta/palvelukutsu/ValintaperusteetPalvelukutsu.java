@@ -35,6 +35,11 @@ public class ValintaperusteetPalvelukutsu extends AbstraktiPalvelukutsu
 		this.valintaperusteet = new AtomicReference<>();
 	}
 
+	@Override
+	public void vapautaResurssit() {
+		valintaperusteet.set(null);
+	}
+
 	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
 		aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
 			public Peruutettava get() {

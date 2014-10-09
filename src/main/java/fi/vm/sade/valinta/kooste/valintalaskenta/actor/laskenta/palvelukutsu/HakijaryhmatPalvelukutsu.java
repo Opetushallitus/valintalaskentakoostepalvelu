@@ -32,6 +32,11 @@ public class HakijaryhmatPalvelukutsu extends AbstraktiPalvelukutsu implements
 		this.hakijaryhmat = new AtomicReference<>();
 	}
 
+	@Override
+	public void vapautaResurssit() {
+		hakijaryhmat.set(null);
+	}
+
 	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
 		aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
 			public Peruutettava get() {

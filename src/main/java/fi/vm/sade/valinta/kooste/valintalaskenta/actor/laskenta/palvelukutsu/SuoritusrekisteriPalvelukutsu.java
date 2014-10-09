@@ -36,6 +36,11 @@ public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu
 		this.oppijat = new AtomicReference<>();
 	}
 
+	@Override
+	public void vapautaResurssit() {
+		oppijat.set(null);
+	}
+
 	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
 		aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
 			public Peruutettava get() {
