@@ -142,6 +142,11 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 	protected List<HakemusDTO> muodostaHakemuksetDTO(List<Hakemus> hakemukset,
 			List<Oppija> oppijat) {
 		try {
+			Map<String, String> hakemusOidToPersonOid = hakemukset.stream()
+					.collect(
+							Collectors.toMap(h -> h.getOid(),
+									h -> h.getPersonOid()));
+
 			List<HakemusDTO> hakemusDtot = hakemukset.parallelStream()
 					.map(h -> Converter.hakemusToHakemusDTO(h))
 					.collect(Collectors.toList());
@@ -153,8 +158,11 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 											o -> o));
 					hakemusDtot
 							.forEach(h -> {
-								if (oppijaNumeroJaOppija.containsKey(h
-										.getHakemusoid())) {
+								String personOid = hakemusOidToPersonOid.get(h
+										.getHakemusoid());
+								if (personOid != null
+										&& oppijaNumeroJaOppija
+												.containsKey(personOid)) {
 									Oppija oppija = oppijaNumeroJaOppija.get(h
 											.getHakemusoid());
 									h.getAvaimet().addAll(
