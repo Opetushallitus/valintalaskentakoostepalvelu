@@ -10,6 +10,16 @@ public class Arvio {
 	private String asteikko;
 	private Integer pisteet;
 
+	public Arvio() {
+
+	}
+
+	public Arvio(String arvosana, String asteikko, Integer pisteet) {
+		this.arvosana = arvosana;
+		this.asteikko = asteikko;
+		this.pisteet = pisteet;
+	}
+
 	public String getAsteikko() {
 		return asteikko;
 	}

@@ -92,7 +92,7 @@ public class OppijaToAvainArvoDTOConverter {
 				.collect(Collectors.toList());
 	}
 
-	private static Arvosana max(List<Arvosana> arvosanat) {
+	public static Arvosana max(List<Arvosana> arvosanat) {
 		return arvosanat
 				.stream()
 				.reduce((a, b) -> {
