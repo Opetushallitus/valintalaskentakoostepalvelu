@@ -8,6 +8,17 @@ package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 public class Arvio {
 	private String arvosana;
 	private String asteikko;
+	private Integer pisteet;
+
+	public Arvio() {
+
+	}
+
+	public Arvio(String arvosana, String asteikko, Integer pisteet) {
+		this.arvosana = arvosana;
+		this.asteikko = asteikko;
+		this.pisteet = pisteet;
+	}
 
 	public String getAsteikko() {
 		return asteikko;
@@ -15,5 +26,9 @@ public class Arvio {
 
 	public String getArvosana() {
 		return arvosana;
+	}
+
+	public Integer getPisteet() {
+		return pisteet;
 	}
 }

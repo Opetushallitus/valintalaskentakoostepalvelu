@@ -76,8 +76,9 @@ public class ValintakoelaskentaPalvelukutsu extends
 		if (valintaperusteet == null) {
 			throw new NullPointerException("Valintaperusteet oli null dataa!");
 		}
-		return new LaskeDTO(getHakukohdeOid(),
-				muodostaHakemuksetDTO(hakemukset), valintaperusteet);
+		return new LaskeDTO(getHakukohdeOid(), muodostaHakemuksetDTO(
+				hakemukset, suoritusrekisteriPalvelukutsu.getOppijat()),
+				valintaperusteet);
 	}
 
 	@Override

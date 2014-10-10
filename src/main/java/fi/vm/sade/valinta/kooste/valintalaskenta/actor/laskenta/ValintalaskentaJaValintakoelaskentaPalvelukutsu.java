@@ -75,9 +75,9 @@ public class ValintalaskentaJaValintakoelaskentaPalvelukutsu extends
 
 	private LaskeDTO muodostaLaskeDTO() {
 		try {
-			LaskeDTO l = new LaskeDTO(getHakukohdeOid(),
-					muodostaHakemuksetDTO(hakemuksetPalvelukutsu
-							.getHakemukset()),
+			LaskeDTO l = new LaskeDTO(getHakukohdeOid(), muodostaHakemuksetDTO(
+					hakemuksetPalvelukutsu.getHakemukset(),
+					suoritusrekisteriPalvelukutsu.getOppijat()),
 					valintaperusteetPalvelukutsu.getValintaperusteet(),
 					hakijaryhmatPalvelukutsu.getHakijaryhmat());
 			vapautaResurssit();

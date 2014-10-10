@@ -74,7 +74,9 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 						LaskeDTO l = new LaskeDTO(y.getHakukohdeOid(),
 								muodostaHakemuksetDTO(y
 										.getHakemuksetPalvelukutsu()
-										.getHakemukset()), y
+										.getHakemukset(), y
+										.getSuoritusrekisteriPalvelukutsut()
+										.getOppijat()), y
 										.getValintaperusteetPalvelukutsu()
 										.getValintaperusteet(), y
 										.getHakijaryhmatPalvelukutsu()

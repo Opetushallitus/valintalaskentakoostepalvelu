@@ -9,16 +9,29 @@ public class Arvosana {
 	private String id;
 	private String suoritus;
 	private String aine;
-	private boolean valinnainen;
+	private Boolean valinnainen;
 	private String myonnetty;
 	private String source;
 	private Arvio arvio;
 
-	public boolean isValinnainen() {
+	public Arvosana() {
+	}
+
+	public Arvosana(String id, String suoritus, String aine,
+			Boolean valinnainen, String myonnetty, String source, Arvio arvio) {
+		this.id = id;
+		this.suoritus = suoritus;
+		this.valinnainen = valinnainen;
+		this.myonnetty = myonnetty;
+		this.source = source;
+		this.arvio = arvio;
+	}
+
+	public Boolean isValinnainen() {
 		return valinnainen;
 	}
 
-	public boolean getValinnainen() {
+	public Boolean getValinnainen() {
 		return valinnainen;
 	}
 
