@@ -28,6 +28,7 @@ public class HakemusWrapper {
 	private final static String LUPAJULKAISUUN = "lupaJulkaisu";
 	private final static String HETU = "Henkilotunnus";
 	private final static String SAHKOPOSTI = "Sähköposti";
+	private final static String SYNTYMAAIKA = "syntymaaika";
 
 	public HakemusWrapper(Hakemus hakemus) {
 		this.hakemus = hakemus;
@@ -37,6 +38,13 @@ public class HakemusWrapper {
 		getHenkilotiedot();
 		return Optional.ofNullable(henkilotiedot.get(SAHKOPOSTI)).orElse(
 				StringUtils.EMPTY);
+	}
+
+	public String getHenkilotunnusTaiSyntymaaika() {
+		getHenkilotiedot();
+		return Optional.ofNullable(henkilotiedot.get(HETU)).orElse(
+				Optional.ofNullable(henkilotiedot.get(SYNTYMAAIKA)).orElse(
+						StringUtils.EMPTY));
 	}
 
 	public String getHenkilotunnus() {

@@ -170,7 +170,8 @@ public class KoekutsukirjeetKomponentti {
 				// new Kirje(addressLabel, languageCode, koulu, koulutus,
 				// tulokset)
 				kirjeet.add(new Letter(addressLabel, templateName, opetuskieli,
-						replacements, hakemusWrapper.getHenkilotunnus(), null,
+						replacements, hakemusWrapper
+								.getHenkilotunnusTaiSyntymaaika(), null,
 						hakemusWrapper.getSahkopostiOsoite()));
 			}
 			LOG.info("Luodaan koekutsukirjeet {} henkilolle", kirjeet.size());
