@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.ViestintapalveluAsyncResourceImpl;
@@ -89,13 +90,13 @@ public class ValintaperusteetValintakoeAsyncResourceImpl implements
 	}
 
 	@Override
-	public Future<Map<String, List<ValintakoeDTO>>> haeValintakokeetHakukohteille(
+	public Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
 			Collection<String> hakukohdeOids) {
 		StringBuilder urlBuilder = new StringBuilder()
 				.append("/valintaperusteet-service/resources/hakukohde/valintakoe");
 		String url = urlBuilder.toString();
-		LOG.error("POST {}\r\n{}", url,
-				Arrays.toString(hakukohdeOids.toArray()));
+		// LOG.error("POST {}\r\n{}", url,
+		// Arrays.toString(hakukohdeOids.toArray()));
 		return WebClient
 				.fromClient(webClient)
 				.path(url)
@@ -103,7 +104,7 @@ public class ValintaperusteetValintakoeAsyncResourceImpl implements
 				.async()
 				.post(Entity.entity(hakukohdeOids,
 						MediaType.APPLICATION_JSON_TYPE),
-						new GenericType<Map<String, List<ValintakoeDTO>>>() {
+						new GenericType<List<HakukohdeJaValintakoeDTO>>() {
 						});
 	}
 }

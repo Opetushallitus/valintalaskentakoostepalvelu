@@ -112,10 +112,13 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		String url = new StringBuilder().append("/applications/list")
 				.toString();
 		// new MediaType("application", "json", Charset.forName("UTF-8"));
-		return WebClient
-				.fromClient(webClient)
+		return WebClient.fromClient(webClient)
+		//
 				.path(url)
 				// .accept("application/json;charset=UTF-8")
+				//
+				.query("rows", 100000)
+				//
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				//
 				.async()
