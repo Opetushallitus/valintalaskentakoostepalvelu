@@ -358,6 +358,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 												.haeStatus(batchId).get(900L,
 														TimeUnit.MILLISECONDS);
 										if ("ready".equals(status.getStatus())) {
+											prosessi.vaiheValmistui();
 											LOG.error("Koekutsukirjeet valmistui!");
 											prosessi.valmistui(batchId);
 											stop.onNext(null);
