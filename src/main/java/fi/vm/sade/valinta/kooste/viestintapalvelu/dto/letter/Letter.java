@@ -17,6 +17,7 @@ public class Letter {
 	private Osoite hakijapalveluidenOsoite;
 	private Map<String, Object> templateReplacements;
 	private LetterContent letterContent;
+	private String emailAddress;
 
 	public Letter() {
 	}
@@ -34,11 +35,13 @@ public class Letter {
 
 	public Letter(Osoite addressLabel, String templateName,
 			String languageCode, Map<String, Object> replacements,
-			String henkilotunnus, Osoite hakijapalveluidenOsoite) {
+			String henkilotunnus, Osoite hakijapalveluidenOsoite,
+			String emailAddress) {
 		this.addressLabel = addressLabel;
 		this.templateReplacements = replacements;
 		this.hakijapalveluidenOsoite = hakijapalveluidenOsoite;
 		this.henkilotunnus = henkilotunnus;
+		this.emailAddress = emailAddress;
 	}
 
 	public Osoite getHakijapalveluidenOsoite() {
