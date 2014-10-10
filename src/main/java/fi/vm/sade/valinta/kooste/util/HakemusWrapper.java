@@ -27,9 +27,16 @@ public class HakemusWrapper {
 	private final static String ASIOINTIKIELI = "asiointikieli";
 	private final static String LUPAJULKAISUUN = "lupaJulkaisu";
 	private final static String HETU = "Henkilotunnus";
+	private final static String SAHKOPOSTI = "Sähköposti";
 
 	public HakemusWrapper(Hakemus hakemus) {
 		this.hakemus = hakemus;
+	}
+
+	public String getSahkopostiOsoite() {
+		getHenkilotiedot();
+		return Optional.ofNullable(henkilotiedot.get(SAHKOPOSTI)).orElse(
+				StringUtils.EMPTY);
 	}
 
 	public String getHenkilotunnus() {

@@ -24,6 +24,7 @@ import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.Kieli;
 import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Kirje;
@@ -137,6 +138,7 @@ public class KoekutsukirjeetKomponentti {
 			String hakukohdeNimiTietyllaKielella = "";
 			String tarjoajaNimiTietyllaKielella = "";
 			for (Hakemus hakemus : hakemukset) {
+				HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
 				Osoite addressLabel = osoiteKomponentti.haeOsoite(hakemus);
 
 				hakukohdeNimiTietyllaKielella = kohdeHakukohdeNimi
@@ -164,10 +166,12 @@ public class KoekutsukirjeetKomponentti {
 				replacements.put("koulutus", tarjoajaNimiTietyllaKielella);
 				replacements.put("tulokset", customLetterContents);
 				replacements.put("muut_hakukohteet", muutHakukohteet);
+
 				// new Kirje(addressLabel, languageCode, koulu, koulutus,
 				// tulokset)
 				kirjeet.add(new Letter(addressLabel, templateName, opetuskieli,
-						replacements));
+						replacements, hakemusWrapper.getHenkilotunnus(), null,
+						hakemusWrapper.getSahkopostiOsoite()));
 			}
 			LOG.info("Luodaan koekutsukirjeet {} henkilolle", kirjeet.size());
 			LetterBatch viesti = new LetterBatch(kirjeet);
