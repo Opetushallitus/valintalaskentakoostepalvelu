@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 
 /**
@@ -16,6 +17,6 @@ public interface ValintaperusteetValintakoeAsyncResource {
 
 	Future<List<ValintakoeDTO>> haeValintakokeet(Collection<String> oids);
 
-	Future<Map<String, List<ValintakoeDTO>>> haeValintakokeetHakukohteille(
+	Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
 			Collection<String> hakukohdeOids);
 }

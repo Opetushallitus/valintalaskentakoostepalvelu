@@ -30,8 +30,10 @@ import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
 
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -220,17 +222,30 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 							});
 
 					LOG.error("Haetaan valintakokeet hakutoiveille!");
-					final Map<String, List<ValintakoeDTO>> valintakoeOidsHakutoiveille;
+					final Map<String, HakukohdeJaValintakoeDTO> valintakoeOidsHakutoiveille;
 					try {
-						Set<String> hakutoiveetKaikistaHakemuksista = hakemukset
-								.stream().flatMap(hakutoiveetHakemuksesta)
-								.collect(Collectors.toSet());
+						Set<String> hakutoiveetKaikistaHakemuksista = Sets
+								.newHashSet(hakemukset.stream()
+										.flatMap(hakutoiveetHakemuksesta)
+										.collect(Collectors.toSet()));
+						hakutoiveetKaikistaHakemuksista.add(koekutsu
+								.getHakukohdeOid());
 						LOG.error("Hakutoiveet hakemuksista:\r\n{}", Arrays
 								.toString(hakutoiveetKaikistaHakemuksista
 										.toArray()));
 						valintakoeOidsHakutoiveille = valintakoeResource
 								.haeValintakokeetHakukohteille(
-										hakutoiveetKaikistaHakemuksista).get();
+										hakutoiveetKaikistaHakemuksista)
+								.get()
+								.stream()
+								//
+								.filter(h -> h.getValintakoeDTO() != null
+										&& h.getValintakoeDTO().isEmpty())
+								//
+								.collect(
+										Collectors.toMap(
+												h -> h.getHakukohdeOid(),
+												h -> h));
 						LOG.error("\r\n{}",
 								new GsonBuilder().setPrettyPrinting().create()
 										.toJson(valintakoeOidsHakutoiveille));
@@ -245,14 +260,16 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 						throw e;
 					}
 					final Map<String, Collection<String>> hakemusOidJaHakijanMuutHakutoiveOids;
+					final Set<String> kohdeHakukohteenTunnisteet;
 					try {
 						LOG.error(
 								"Haetaan tunnisteet kohde valintakokeille: Onko valintakoeOid {}",
 								valintakoeOidsHakutoiveille
 										.containsKey(koekutsu.getHakukohdeOid()));
 
-						final Set<String> kohdeHakukohteenTunnisteet = valintakoeOidsHakutoiveille
-								.get(koekutsu.getHakukohdeOid()).stream()
+						kohdeHakukohteenTunnisteet = valintakoeOidsHakutoiveille
+								.get(koekutsu.getHakukohdeOid())
+								.getValintakoeDTO().stream()
 								//
 								.filter(Objects::nonNull)
 								//
@@ -291,6 +308,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 														//
 														.filter(hakutoive -> valintakoeOidsHakutoiveille
 																.get(hakutoive)
+																.getValintakoeDTO()
 																.stream()
 																.filter(Objects::nonNull)
 																//
@@ -301,6 +319,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 																		v -> kohdeHakukohteenTunnisteet
 																				.contains(v
 																						.getTunniste())))
+														//
 														.collect(
 																Collectors
 																		.toList())));
