@@ -44,6 +44,10 @@ public class Letter {
 		this.emailAddress = emailAddress;
 	}
 
+	public String getEmailAddress() {
+		return emailAddress;
+	}
+
 	public Osoite getHakijapalveluidenOsoite() {
 		return hakijapalveluidenOsoite;
 	}
