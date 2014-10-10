@@ -240,7 +240,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 								.stream()
 								//
 								.filter(h -> h.getValintakoeDTO() != null
-										&& h.getValintakoeDTO().isEmpty())
+										&& !h.getValintakoeDTO().isEmpty())
 								//
 								.collect(
 										Collectors.toMap(
