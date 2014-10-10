@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
+import java.util.List;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -7,10 +9,10 @@ package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
  */
 public class SuoritusJaArvosanat {
 	private Suoritus suoritus;
-	private Arvosana arvosana;
+	private List<Arvosana> arvosanat;
 
-	public Arvosana getArvosana() {
-		return arvosana;
+	public List<Arvosana> getArvosanat() {
+		return arvosanat;
 	}
 
 	public Suoritus getSuoritus() {

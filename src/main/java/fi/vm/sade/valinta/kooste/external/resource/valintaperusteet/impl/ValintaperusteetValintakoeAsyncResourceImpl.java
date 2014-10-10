@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +94,8 @@ public class ValintaperusteetValintakoeAsyncResourceImpl implements
 		StringBuilder urlBuilder = new StringBuilder()
 				.append("/valintaperusteet-service/resources/hakukohde/valintakoe");
 		String url = urlBuilder.toString();
+		LOG.error("POST {}\r\n{}", url,
+				Arrays.toString(hakukohdeOids.toArray()));
 		return WebClient
 				.fromClient(webClient)
 				.path(url)

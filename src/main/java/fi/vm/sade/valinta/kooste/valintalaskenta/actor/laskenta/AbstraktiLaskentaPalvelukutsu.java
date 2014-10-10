@@ -12,9 +12,13 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Maps;
+
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.util.Converter;
+import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.AbstraktiPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.PalvelukutsuLaskuri;
@@ -135,11 +139,35 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 				.laitaPalvelukutsuTyojonoon(laskuri));
 	}
 
-	protected List<HakemusDTO> muodostaHakemuksetDTO(List<Hakemus> hakemukset) {
+	protected List<HakemusDTO> muodostaHakemuksetDTO(List<Hakemus> hakemukset,
+			List<Oppija> oppijat) {
 		try {
 			List<HakemusDTO> hakemusDtot = hakemukset.parallelStream()
 					.map(h -> Converter.hakemusToHakemusDTO(h))
 					.collect(Collectors.toList());
+			try {
+				if (oppijat != null) {
+					Map<String, Oppija> oppijaNumeroJaOppija = oppijat.stream()
+							.collect(
+									Collectors.toMap(o -> o.getOppijanumero(),
+											o -> o));
+					hakemusDtot
+							.forEach(h -> {
+								if (oppijaNumeroJaOppija.containsKey(h
+										.getHakemusoid())) {
+									Oppija oppija = oppijaNumeroJaOppija.get(h
+											.getHakemusoid());
+									h.getAvaimet().addAll(
+											OppijaToAvainArvoDTOConverter
+													.convert(oppija));
+								}
+							});
+				}
+			} catch (Exception e) {
+				LOG.error(
+						"\r\n###\r\n### SURE YO-arvosanojen konversiossa odottamaton virhe {}\r\n###",
+						e.getMessage());
+			}
 			return hakemusDtot;
 		} catch (Exception exx) {
 			LOG.error(
@@ -148,5 +176,6 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 
 			throw exx;
 		}
+
 	}
 }

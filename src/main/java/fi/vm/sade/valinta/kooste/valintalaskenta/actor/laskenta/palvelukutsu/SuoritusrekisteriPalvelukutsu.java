@@ -52,17 +52,7 @@ public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu
 											.set(oppijat);
 									takaisinkutsu
 											.accept(SuoritusrekisteriPalvelukutsu.this);
-								},
-								failu -> {
-									LOG.error(
-											"Suoritusrekisterikutsu epaonnistui hakukohteelle {} ja hakukohteelle {}!",
-											getHakukohdeOid(),
-											getHakukohdeOid());
-									SuoritusrekisteriPalvelukutsu.this.oppijat
-											.set(Collections.emptyList());
-									takaisinkutsu
-											.accept(SuoritusrekisteriPalvelukutsu.this);
-								});
+								}, failureCallback(takaisinkutsu));
 			}
 		});
 		return this;

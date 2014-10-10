@@ -9,16 +9,16 @@ public class Arvosana {
 	private String id;
 	private String suoritus;
 	private String aine;
-	private boolean valinnainen;
+	private Boolean valinnainen;
 	private String myonnetty;
 	private String source;
 	private Arvio arvio;
 
-	public boolean isValinnainen() {
+	public Boolean isValinnainen() {
 		return valinnainen;
 	}
 
-	public boolean getValinnainen() {
+	public Boolean getValinnainen() {
 		return valinnainen;
 	}
 
