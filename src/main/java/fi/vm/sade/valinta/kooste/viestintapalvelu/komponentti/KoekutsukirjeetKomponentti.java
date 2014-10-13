@@ -169,9 +169,11 @@ public class KoekutsukirjeetKomponentti {
 
 				// new Kirje(addressLabel, languageCode, koulu, koulutus,
 				// tulokset)
+
+				// hetua ei tarvitakaan koekutsukirjeeseen
+				// hakemusWrapper.getHenkilotunnusTaiSyntymaaika()
 				kirjeet.add(new Letter(addressLabel, templateName, opetuskieli,
-						replacements, hakemusWrapper.getHenkilotunnus(), null,
-						hakemusWrapper.getSahkopostiOsoite()));
+						replacements, hakemusWrapper.getSahkopostiOsoite()));
 			}
 			LOG.info("Luodaan koekutsukirjeet {} henkilolle", kirjeet.size());
 			LetterBatch viesti = new LetterBatch(kirjeet);

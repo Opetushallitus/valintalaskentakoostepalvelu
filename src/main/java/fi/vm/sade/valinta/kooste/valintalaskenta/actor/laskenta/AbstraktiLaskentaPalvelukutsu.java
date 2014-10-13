@@ -163,8 +163,7 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 								if (personOid != null
 										&& oppijaNumeroJaOppija
 												.containsKey(personOid)) {
-									Oppija oppija = oppijaNumeroJaOppija.get(h
-											.getHakemusoid());
+									Oppija oppija = oppijaNumeroJaOppija.get(personOid);
 									h.getAvaimet().addAll(
 											OppijaToAvainArvoDTOConverter
 													.convert(oppija));
