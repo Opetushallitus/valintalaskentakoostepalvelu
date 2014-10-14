@@ -155,7 +155,7 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 					Map<String, Oppija> oppijaNumeroJaOppija = oppijat.stream()
 							.collect(
 									Collectors.toMap(o -> o.getOppijanumero(),
-											o -> o));
+											o -> o, (o1, o2) -> o2));
 					hakemusDtot
 							.forEach(h -> {
 								String personOid = hakemusOidToPersonOid.get(h
@@ -163,7 +163,8 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 								if (personOid != null
 										&& oppijaNumeroJaOppija
 												.containsKey(personOid)) {
-									Oppija oppija = oppijaNumeroJaOppija.get(personOid);
+									Oppija oppija = oppijaNumeroJaOppija
+											.get(personOid);
 									h.getAvaimet().addAll(
 											OppijaToAvainArvoDTOConverter
 													.convert(oppija));
