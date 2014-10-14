@@ -312,6 +312,9 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 																.stream()
 																.filter(Objects::nonNull)
 																//
+																.filter(v -> Boolean.TRUE.equals(v
+																	.getAktiivinen()))
+																//
 																.filter(v -> null != v
 																		.getTunniste())
 																//
