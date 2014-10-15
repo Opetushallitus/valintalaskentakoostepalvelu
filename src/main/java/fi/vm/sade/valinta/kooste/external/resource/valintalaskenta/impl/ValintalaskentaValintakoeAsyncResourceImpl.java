@@ -77,7 +77,11 @@ public class ValintalaskentaValintakoeAsyncResourceImpl implements
 		String url = urlBuilder.toString();
 		return WebClient
 				.fromClient(webClient)
+				//
 				.path(url)
+				//
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				//
 				.async()
 				.post(Entity.entity(hakemusOids,
 						MediaType.APPLICATION_JSON_TYPE),
@@ -91,7 +95,13 @@ public class ValintalaskentaValintakoeAsyncResourceImpl implements
 		StringBuilder urlBuilder = new StringBuilder().append(
 				"/valintakoe/hakutoive/").append(hakukohdeOid);
 		String url = urlBuilder.toString();
-		return WebClient.fromClient(webClient).path(url).async()
+		return WebClient.fromClient(webClient)
+				//
+				.path(url)
+				//
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				//
+				.async()
 				.get(new GenericType<List<ValintakoeOsallistuminenDTO>>() {
 				});
 	}
