@@ -45,18 +45,10 @@ public class SuoritaHakukohdeImportKomponenttiTest {
 
 	@Before
 	public void setUp() {
-		suoritaHakukohdeImportKomponentti = new SuoritaHakukohdeImportKomponentti();
-
 		hakukohdeResourceMock = mock(HakukohdeV1ResourceWrapper.class);
-		koodistoJsonRESTResourceMock = mock(KoodistoJsonRESTResource.class);
+		suoritaHakukohdeImportKomponentti = new SuoritaHakukohdeImportKomponentti(
+				hakukohdeResourceMock);
 
-		// ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti,
-		// "valintaperusteService",
-		// valintaperusteServiceMock);
-		ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti,
-				"koodistoJsonRESTResource", koodistoJsonRESTResourceMock);
-		ReflectionTestUtils.setField(suoritaHakukohdeImportKomponentti,
-				"hakukohdeResource", hakukohdeResourceMock);
 	}
 
 	@Test
@@ -89,8 +81,6 @@ public class SuoritaHakukohdeImportKomponenttiTest {
 		// when(hakukohdeResourceMock.getByOID(hakukohdeOid)).thenReturn(hakukohde);
 		when(hakukohdeResourceMock.findValintaperusteetByOid(hakukohdeOid))
 				.thenReturn(result);
-		when(koodistoJsonRESTResourceMock.getAlakoodis(hakukohdeNimirUri, 1))
-				.thenReturn(alakoodit);
 
 		// ArgumentCaptor<HakukohdeImportTyyppi> captor =
 		// ArgumentCaptor.forClass(HakukohdeImportTyyppi.class);

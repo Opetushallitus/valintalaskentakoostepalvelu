@@ -9,7 +9,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
+
 import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.apache.camel.Property;
 import org.apache.camel.spring.SpringRouteBuilder;
@@ -43,7 +45,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 	public HakuImportRouteImpl(
 			@Value("${valintalaskentakoostepalvelu.hakuimport.threadpoolsize:10}") Integer hakuImportThreadpoolSize,
 			SuoritaHakuImportKomponentti suoritaHakuImportKomponentti,
-            ValintaperusteetRestResource valintaperusteetRestResource,
+			ValintaperusteetRestResource valintaperusteetRestResource,
 			SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti) {
 		this.suoritaHakuImportKomponentti = suoritaHakuImportKomponentti;
 		this.tarjontaJaKoodistoHakukohteenHakuKomponentti = tarjontaJaKoodistoHakukohteenHakuKomponentti;
@@ -67,6 +69,10 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 		 * Tanne tullaan jos retry:t ei riita importoinnin loppuun vientiin
 		 */
 		from("direct:tuoHakukohdeDead")
+				//
+				.log(LoggingLevel.ERROR,
+						"Verismo update check failed! Reason ${exception.message} ${exception.stacktrace}")
+				//
 				.setHeader(
 						"message",
 						simple("[${property.authentication.name}] Valintaperusteiden vienti epäonnistui hakukohteelle ${body}"))
@@ -77,6 +83,11 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 				.stop();
 		//
 		from("direct:hakuimport_epaonnistui")
+
+				//
+				.log(LoggingLevel.ERROR,
+						"Verismo update check failed! Reason ${exception.message} ${exception.stacktrace}")
+				//
 				.setHeader(
 						"message",
 						simple("[${property.authentication.name}] Tarjonnasta ei saatu hakua(${property.hakuOid}) tai haun hakukohteiden prosessointi ei mennyt oikein"))
@@ -135,7 +146,16 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 				//
 				.to(start())
 				//
-				.bean(suoritaHakuImportKomponentti)
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						exchange.getOut().setBody(
+								suoritaHakuImportKomponentti
+										.suoritaHakukohdeImport(exchange
+												.getProperty(OPH.HAKUOID,
+														String.class)));
+					}
+				})
 				//
 				.process(logSuccessfulHakuGet())
 				//

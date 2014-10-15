@@ -24,6 +24,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.route.HakuImportRoute;
+import fi.vm.sade.valinta.kooste.hakuimport.route.HakukohdeImportRoute;
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
@@ -41,7 +42,8 @@ public class HakuImportResource {
 
 	@Autowired
 	private HakuImportRoute hakuImportAktivointiRoute;
-
+	@Autowired
+	private HakukohdeImportRoute hakukohdeImportRoute;
 	@Autowired
 	private ParametriService parametriService;
 
@@ -70,6 +72,23 @@ public class HakuImportResource {
 		} else {
 			LOG.info("Haku import haulle {}", hakuOid);
 			hakuImportAktivointiRoute.asyncAktivoiHakuImport(hakuOid,
+					SecurityContextHolder.getContext().getAuthentication());
+			return "in progress";
+		}
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+	@GET
+	@Path("/hakukohde}")
+	@ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
+	public String aktivoiHakukohdeImport(
+			@QueryParam("hakukohdeOid") String hakukohdeOid) {
+
+		if (StringUtils.isBlank(hakukohdeOid)) {
+			return "get parameter 'hakuOid' required";
+		} else {
+			LOG.info("Hakukohde import hakukohteelle {}", hakukohdeOid);
+			hakukohdeImportRoute.asyncAktivoiHakukohdeImport(hakukohdeOid,
 					SecurityContextHolder.getContext().getAuthentication());
 			return "in progress";
 		}
