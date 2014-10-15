@@ -1,1 +1,545 @@
-[{"oppijanumero":"1.2.246.562.24.30480914702","opiskelu":[],"suoritukset":[{"suoritus":{"henkiloOid":"1.2.246.562.24.30480914702","source":"1.2.246.562.24.30988735768","vahvistettu":true,"komo":"1.2.246.562.5.2013061010184237348007","myontaja":"1.2.246.562.10.43628088406","tila":"VALMIS","valmistuminen":"31.05.1985","yksilollistaminen":"Ei","suoritusKieli":"FI","id":"09d8ae7e-5909-434b-b4ed-b59d0eb8b513"},"arvosanat":[{"id":"b43d1250-0239-4300-af30-61c1efd57155","suoritus":"09d8ae7e-5909-434b-b4ed-b59d0eb8b513","arvio":{"arvosana":"L","asteikko":"YO","pisteet":95},"aine":"AI","lisatieto":"FI","valinnainen":false,"myonnetty":"01.06.1985","source":"1.2.246.562.24.30988735768"},{"id":"708c3e14-d937-4e90-beb0-597829c55969","suoritus":"09d8ae7e-5909-434b-b4ed-b59d0eb8b513","arvio":{"arvosana":"L","asteikko":"YO","pisteet":99},"aine":"A","lisatieto":"EN","valinnainen":false,"myonnetty":"01.06.1985","source":"1.2.246.562.24.30988735768"}]}],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.30276853420","opiskelu":[{"id":"3cefebbd-1467-4586-bcc0-e1f320785e69","oppilaitosOid":"1.2.246.562.10.16546622305","luokkataso":"9","luokka":"9A","henkiloOid":"1.2.246.562.24.30276853420","alkuPaiva":"2010-07-31T21:00:00.000Z","loppuPaiva":"2011-05-30T21:00:00.000Z","source":"1.2.246.562.24.30988735768"}],"suoritukset":[{"suoritus":{"henkiloOid":"1.2.246.562.24.30276853420","source":"1.2.246.562.24.30988735768","vahvistettu":true,"komo":"1.2.246.562.5.2013061010184237348007","myontaja":"1.2.246.562.10.43628088406","tila":"VALMIS","valmistuminen":"31.05.2014","yksilollistaminen":"Ei","suoritusKieli":"FI","id":"2d539d43-f4c9-4629-9a72-b894b0e28d31"},"arvosanat":[]},{"suoritus":{"henkiloOid":"1.2.246.562.24.30276853420","source":"1.2.246.562.24.30988735768","vahvistettu":true,"komo":"1.2.246.562.13.62959769647","myontaja":"1.2.246.562.10.16546622305","tila":"VALMIS","valmistuminen":"31.05.2011","yksilollistaminen":"Ei","suoritusKieli":"FI","id":"317d3236-9bb2-422f-bf7b-e8a686f00c08"},"arvosanat":[{"id":"af145451-bb1c-483f-9303-60199442dae1","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"KO","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"1321290d-a215-43d4-8c00-8a6b2a6e119f","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"LI","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"a3818eac-01ab-43ff-a752-5df56bcda2b4","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"KS","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"e935f7f1-050e-4e63-bedd-04e645012012","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"KU","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"9ab9ba9d-eb6e-489d-9c13-587c7c719557","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"9","asteikko":"4-10"},"aine":"MU","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"84fc074b-fd4e-471c-ae9b-affc80c8b90e","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"7","asteikko":"4-10"},"aine":"YH","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"e966d0f0-bef4-43d0-b9ba-9f098b9e2e11","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"9","asteikko":"4-10"},"aine":"HI","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"c4e7272c-f3f0-4a0d-ad52-6f15963564b4","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"KT","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"34885677-3522-449d-9807-0be9ad3a3557","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"TE","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"b49746e1-efea-4a80-b43b-ef75f1780823","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"9","asteikko":"4-10"},"aine":"KE","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"f67c5221-aa26-44a7-992c-56ee39b5ea6f","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"10","asteikko":"4-10"},"aine":"FY","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"550fabf3-ba92-40e0-8749-6725c019bfb3","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"B1","lisatieto":"SV","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"f54ed167-e4d9-4521-9174-e2a8e1478118","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"9","asteikko":"4-10"},"aine":"MA","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"c4ae0114-fff8-4ad7-a3ff-13f87c42ddcf","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"9","asteikko":"4-10"},"aine":"BI","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"8a8e27a5-c087-4954-941d-8c3ec553b9e5","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"10","asteikko":"4-10"},"aine":"AI","lisatieto":"FI","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"24c7151c-821f-4d69-ac89-451ef8fbc3e8","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"7","asteikko":"4-10"},"aine":"GE","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"},{"id":"5510065d-2e56-4092-9720-6d8030a2aa50","suoritus":"317d3236-9bb2-422f-bf7b-e8a686f00c08","arvio":{"arvosana":"9","asteikko":"4-10"},"aine":"A1","lisatieto":"EN","valinnainen":false,"myonnetty":"01.01.2014","source":"1.2.246.562.24.30988735768"}]}],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.88681327014","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.89052412308","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.74807701774","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.48331539228","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.60669761704","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.59339299821","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.80678204245","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.26876161937","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.73013366674","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.71728119419","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.80361790396","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.75598394813","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.89082493407","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.77983393964","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.48446053592","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.96647704142","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.42664132453","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.80479622369","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.97726144525","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true},{"oppijanumero":"1.2.246.562.24.72399005919","opiskelu":[],"suoritukset":[],"opiskeluoikeudet":[],"ensikertalainen":true}]
+[
+    {
+        "oppijanumero": "1.2.246.562.24.39262195452",
+        "opiskelu": [ ],
+        "suoritukset": [
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.39262195452",
+                    "source": "1.2.246.562.10.43628088406",
+                    "vahvistettu": true,
+                    "komo": "1.2.246.562.5.2013061010184237348007",
+                    "myontaja": "1.2.246.562.10.43628088406",
+                    "tila": "VALMIS",
+                    "valmistuminen": "01.06.1996",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "394e5398-e997-4be3-98ee-91df18c8b630"
+                },
+                "arvosanat": [
+                    {
+                        "id": "60678f47-2f25-41e5-8004-f5e02d0baac3",
+                        "suoritus": "394e5398-e997-4be3-98ee-91df18c8b630",
+                        "arvio": {
+                            "arvosana": "M",
+                            "asteikko": "YO",
+                            "pisteet": 211
+                        },
+                        "aine": "B",
+                        "lisatieto": "RU",
+                        "valinnainen": false,
+                        "myonnetty": "21.12.1996",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "3bd618f5-bbb1-4803-a080-c76ccc5a2918",
+                        "suoritus": "394e5398-e997-4be3-98ee-91df18c8b630",
+                        "arvio": {
+                            "arvosana": "C",
+                            "asteikko": "YO",
+                            "pisteet": 24
+                        },
+                        "aine": "REAALI",
+                        "lisatieto": "UE",
+                        "valinnainen": false,
+                        "myonnetty": "21.12.1997",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "354891ec-75fb-43eb-a710-bd1a9ad0a5ce",
+                        "suoritus": "394e5398-e997-4be3-98ee-91df18c8b630",
+                        "arvio": {
+                            "arvosana": "B",
+                            "asteikko": "YO",
+                            "pisteet": 185
+                        },
+                        "aine": "A",
+                        "lisatieto": "EN",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.1996",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "0e18d4aa-00b1-4be7-a997-5cfaeca8e61e",
+                        "suoritus": "394e5398-e997-4be3-98ee-91df18c8b630",
+                        "arvio": {
+                            "arvosana": "B",
+                            "asteikko": "YO",
+                            "pisteet": 20
+                        },
+                        "aine": "REAALI",
+                        "lisatieto": "UE",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.1996",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "edca56dc-9b2d-405b-a40a-1eb0e83dc661",
+                        "suoritus": "394e5398-e997-4be3-98ee-91df18c8b630",
+                        "arvio": {
+                            "arvosana": "M",
+                            "asteikko": "YO",
+                            "pisteet": 83
+                        },
+                        "aine": "AI",
+                        "lisatieto": "FI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.1996",
+                        "source": "1.2.246.562.10.43628088406"
+                    }
+                ]
+            }
+        ],
+        "opiskeluoikeudet": [ ],
+        "ensikertalainen": true,
+        "id": "1.2.246.562.24.39262195452",
+        "source": "1.2.246.562.10.00000000001"
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.30480914702",
+        "opiskelu": [],
+        "suoritukset": [
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.30480914702",
+                    "source": "1.2.246.562.24.30988735768",
+                    "vahvistettu": true,
+                    "komo": "1.2.246.562.5.2013061010184237348007",
+                    "myontaja": "1.2.246.562.10.43628088406",
+                    "tila": "VALMIS",
+                    "valmistuminen": "31.05.1985",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "09d8ae7e-5909-434b-b4ed-b59d0eb8b513"
+                },
+                "arvosanat": [
+                    {
+                        "id": "b43d1250-0239-4300-af30-61c1efd57155",
+                        "suoritus": "09d8ae7e-5909-434b-b4ed-b59d0eb8b513",
+                        "arvio": {
+                            "arvosana": "L",
+                            "asteikko": "YO"
+                        },
+                        "aine": "AI",
+                        "lisatieto": "FI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.1985",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "708c3e14-d937-4e90-beb0-597829c55969",
+                        "suoritus": "09d8ae7e-5909-434b-b4ed-b59d0eb8b513",
+                        "arvio": {
+                            "arvosana": "L",
+                            "asteikko": "YO"
+                        },
+                        "aine": "A",
+                        "lisatieto": "EN",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.1985",
+                        "source": "1.2.246.562.24.30988735768"
+                    }
+                ]
+            }
+        ],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.30276853420",
+        "opiskelu": [
+            {
+                "id": "3cefebbd-1467-4586-bcc0-e1f320785e69",
+                "oppilaitosOid": "1.2.246.562.10.16546622305",
+                "luokkataso": "9",
+                "luokka": "9A",
+                "henkiloOid": "1.2.246.562.24.30276853420",
+                "alkuPaiva": "2010-07-31T21:00:00.000Z",
+                "loppuPaiva": "2011-05-30T21:00:00.000Z",
+                "source": "1.2.246.562.24.30988735768"
+            }
+        ],
+        "suoritukset": [
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.30276853420",
+                    "source": "1.2.246.562.24.30988735768",
+                    "vahvistettu": true,
+                    "komo": "1.2.246.562.5.2013061010184237348007",
+                    "myontaja": "1.2.246.562.10.43628088406",
+                    "tila": "VALMIS",
+                    "valmistuminen": "31.05.2014",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "2d539d43-f4c9-4629-9a72-b894b0e28d31"
+                },
+                "arvosanat": []
+            },
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.30276853420",
+                    "source": "1.2.246.562.24.30988735768",
+                    "vahvistettu": true,
+                    "komo": "1.2.246.562.13.62959769647",
+                    "myontaja": "1.2.246.562.10.16546622305",
+                    "tila": "VALMIS",
+                    "valmistuminen": "31.05.2011",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "317d3236-9bb2-422f-bf7b-e8a686f00c08"
+                },
+                "arvosanat": [
+                    {
+                        "id": "af145451-bb1c-483f-9303-60199442dae1",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "6",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "KO",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "1321290d-a215-43d4-8c00-8a6b2a6e119f",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "8",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "LI",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "a3818eac-01ab-43ff-a752-5df56bcda2b4",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "8",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "KS",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "e935f7f1-050e-4e63-bedd-04e645012012",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "8",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "KU",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "9ab9ba9d-eb6e-489d-9c13-587c7c719557",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "9",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "MU",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "84fc074b-fd4e-471c-ae9b-affc80c8b90e",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "7",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "YH",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "e966d0f0-bef4-43d0-b9ba-9f098b9e2e11",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "9",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "HI",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "c4e7272c-f3f0-4a0d-ad52-6f15963564b4",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "8",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "KT",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "34885677-3522-449d-9807-0be9ad3a3557",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "8",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "TE",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "b49746e1-efea-4a80-b43b-ef75f1780823",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "9",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "KE",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "f67c5221-aa26-44a7-992c-56ee39b5ea6f",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "10",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "FY",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "550fabf3-ba92-40e0-8749-6725c019bfb3",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "8",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "B1",
+                        "lisatieto": "SV",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "f54ed167-e4d9-4521-9174-e2a8e1478118",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "9",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "MA",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "c4ae0114-fff8-4ad7-a3ff-13f87c42ddcf",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "9",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "BI",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "8a8e27a5-c087-4954-941d-8c3ec553b9e5",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "10",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "AI",
+                        "lisatieto": "FI",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "24c7151c-821f-4d69-ac89-451ef8fbc3e8",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "7",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "GE",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    },
+                    {
+                        "id": "5510065d-2e56-4092-9720-6d8030a2aa50",
+                        "suoritus": "317d3236-9bb2-422f-bf7b-e8a686f00c08",
+                        "arvio": {
+                            "arvosana": "9",
+                            "asteikko": "4-10"
+                        },
+                        "aine": "A1",
+                        "lisatieto": "EN",
+                        "valinnainen": false,
+                        "myonnetty": "01.01.2014",
+                        "source": "1.2.246.562.24.30988735768"
+                    }
+                ]
+            }
+        ],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.88681327014",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.89052412308",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.74807701774",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.48331539228",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.60669761704",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.59339299821",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.80678204245",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.26876161937",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.73013366674",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.71728119419",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.80361790396",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.75598394813",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.89082493407",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.77983393964",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.48446053592",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.96647704142",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.42664132453",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.80479622369",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.97726144525",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    },
+    {
+        "oppijanumero": "1.2.246.562.24.72399005919",
+        "opiskelu": [],
+        "suoritukset": [],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true
+    }
+]
