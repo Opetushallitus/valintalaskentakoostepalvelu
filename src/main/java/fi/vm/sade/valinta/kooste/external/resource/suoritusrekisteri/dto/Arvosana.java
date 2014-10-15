@@ -13,18 +13,21 @@ public class Arvosana {
 	private String myonnetty;
 	private String source;
 	private Arvio arvio;
+    private String lisatieto;
 
 	public Arvosana() {
 	}
 
 	public Arvosana(String id, String suoritus, String aine,
-			Boolean valinnainen, String myonnetty, String source, Arvio arvio) {
+			Boolean valinnainen, String myonnetty, String source, Arvio arvio, String lisatieto) {
 		this.id = id;
 		this.suoritus = suoritus;
+        this.aine = aine;
 		this.valinnainen = valinnainen;
 		this.myonnetty = myonnetty;
 		this.source = source;
 		this.arvio = arvio;
+        this.lisatieto = lisatieto;
 	}
 
 	public Boolean isValinnainen() {
@@ -58,4 +61,8 @@ public class Arvosana {
 	public String getSuoritus() {
 		return suoritus;
 	}
+
+    public String getLisatieto() {
+        return lisatieto;
+    }
 }

@@ -54,7 +54,7 @@ public class SureKonvertointiTest {
 	public void testaaArvosanaMax() {
 		String ARVOSANA = "L";
 		Arvosana a = new Arvosana(null, null, null, null, null, null,
-				new Arvio(ARVOSANA, null, null));
+				new Arvio(ARVOSANA, null, null), null);
 		Assert.assertTrue(ARVOSANA.equals(OppijaToAvainArvoDTOConverter
 				.max(Arrays.asList(a)).getArvio().getArvosana()));
 	}
@@ -69,9 +69,9 @@ public class SureKonvertointiTest {
 		String ARVOSANA = "L";
 		String ARVOSANA2 = "B";
 		Arvosana a = new Arvosana(null, null, null, null, null, null,
-				new Arvio(ARVOSANA, null, null));
+				new Arvio(ARVOSANA, null, null), null);
 		Arvosana b = new Arvosana(null, null, null, null, null, null,
-				new Arvio(ARVOSANA2, null, null));
+				new Arvio(ARVOSANA2, null, null), null);
 		Assert.assertTrue(ARVOSANA.equals(OppijaToAvainArvoDTOConverter
 				.max(Arrays.asList(a, b)).getArvio().getArvosana()));
 	}
@@ -82,11 +82,11 @@ public class SureKonvertointiTest {
 		String ARVOSANA2 = "B";
 		String ARVOSANA3 = "C";
 		Arvosana a = new Arvosana(null, null, null, null, null, null,
-				new Arvio(ARVOSANA, null, null));
+				new Arvio(ARVOSANA, null, null), null);
 		Arvosana b = new Arvosana(null, null, null, null, null, null,
-				new Arvio(ARVOSANA2, null, null));
+				new Arvio(ARVOSANA2, null, null), null);
 		Arvosana c = new Arvosana(null, null, null, null, null, null,
-				new Arvio(ARVOSANA3, null, null));
+				new Arvio(ARVOSANA3, null, null), null);
 		Assert.assertTrue(ARVOSANA3.equals(OppijaToAvainArvoDTOConverter
 				.max(Arrays.asList(a, b, c)).getArvio().getArvosana()));
 	}
