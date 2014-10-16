@@ -72,7 +72,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 				.map(y -> {
 					try {
 						LaskeDTO l = new LaskeDTO(y.getHakukohdeOid(),
-								muodostaHakemuksetDTO(y
+								muodostaHakemuksetDTO(getHakukohdeOid(), y
 										.getHakemuksetPalvelukutsu()
 										.getHakemukset(), y
 										.getSuoritusrekisteriPalvelukutsut()
