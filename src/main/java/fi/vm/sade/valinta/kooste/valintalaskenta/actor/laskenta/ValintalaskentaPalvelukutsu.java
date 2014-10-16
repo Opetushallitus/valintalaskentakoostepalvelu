@@ -74,7 +74,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 
 	private LaskeDTO muodostaLaskeDTO() {
 		LaskeDTO l = new LaskeDTO(getHakukohdeOid(), muodostaHakemuksetDTO(
-				hakemuksetPalvelukutsu.getHakemukset(),
+				getHakukohdeOid(), hakemuksetPalvelukutsu.getHakemukset(),
 				suoritusrekisteriPalvelukutsu.getOppijat()),
 				valintaperusteetPalvelukutsu.getValintaperusteet(),
 				hakijaryhmatPalvelukutsu.getHakijaryhmat());

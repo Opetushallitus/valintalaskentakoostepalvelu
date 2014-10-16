@@ -139,8 +139,8 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 				.laitaPalvelukutsuTyojonoon(laskuri));
 	}
 
-	protected List<HakemusDTO> muodostaHakemuksetDTO(List<Hakemus> hakemukset,
-			List<Oppija> oppijat) {
+	protected List<HakemusDTO> muodostaHakemuksetDTO(String hakukohdeOid,
+			List<Hakemus> hakemukset, List<Oppija> oppijat) {
 		try {
 			Map<String, String> hakemusOidToPersonOid = hakemukset
 					.stream()
@@ -186,8 +186,8 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 			return hakemusDtot;
 		} catch (Exception exx) {
 			LOG.error(
-					"Hakemusten konvertointi laskennan hakemusDTO:ksi epaonnistui {}!",
-					exx.getMessage());
+					"Hakemusten konvertointi laskennan hakemusDTO:ksi epaonnistui hakukohteelle {}. Syy {}!",
+					hakukohdeOid, exx.getMessage());
 
 			throw exx;
 		}
