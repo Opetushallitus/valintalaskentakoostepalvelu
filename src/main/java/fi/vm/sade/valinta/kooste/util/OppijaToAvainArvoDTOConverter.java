@@ -25,7 +25,12 @@ public class OppijaToAvainArvoDTOConverter {
 		if (oppija == null || oppija.getSuoritukset() == null) {
 			return Collections.emptyList();
 		}
-		return convert(oppija.getSuoritukset());
+        List<AvainArvoDTO> avainArvot = convert(oppija.getSuoritukset());
+        AvainArvoDTO ensikertalaisuus = new AvainArvoDTO();
+        ensikertalaisuus.setAvain("ensikertalainen");
+        ensikertalaisuus.setArvo(String.valueOf(oppija.isEnsikertalainen()));
+        avainArvot.add(ensikertalaisuus);
+        return avainArvot;
 	}
 
 	public static List<AvainArvoDTO> convert(
