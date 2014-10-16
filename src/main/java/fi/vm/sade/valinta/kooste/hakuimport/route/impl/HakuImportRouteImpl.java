@@ -71,7 +71,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 		from("direct:tuoHakukohdeDead")
 				//
 				.log(LoggingLevel.ERROR,
-						"Verismo update check failed! Reason ${exception.message} ${exception.stacktrace}")
+						"Reason ${exception.message} ${exception.stacktrace}")
 				//
 				.setHeader(
 						"message",
@@ -86,7 +86,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
 				//
 				.log(LoggingLevel.ERROR,
-						"Verismo update check failed! Reason ${exception.message} ${exception.stacktrace}")
+						"Reason ${exception.message} ${exception.stacktrace}")
 				//
 				.setHeader(
 						"message",

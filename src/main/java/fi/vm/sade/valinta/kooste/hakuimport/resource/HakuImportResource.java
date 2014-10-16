@@ -79,16 +79,17 @@ public class HakuImportResource {
 
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@GET
-	@Path("/hakukohde}")
+	@Path("/hakukohde")
 	@ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
 	public String aktivoiHakukohdeImport(
 			@QueryParam("hakukohdeOid") String hakukohdeOid) {
 
 		if (StringUtils.isBlank(hakukohdeOid)) {
-			return "get parameter 'hakuOid' required";
+			return "get parameter 'hakukohde' required";
 		} else {
 			LOG.info("Hakukohde import hakukohteelle {}", hakukohdeOid);
 			hakukohdeImportRoute.asyncAktivoiHakukohdeImport(hakukohdeOid,
+					new HakuImportProsessi("Hakukohde", "Hakukhode"),
 					SecurityContextHolder.getContext().getAuthentication());
 			return "in progress";
 		}
