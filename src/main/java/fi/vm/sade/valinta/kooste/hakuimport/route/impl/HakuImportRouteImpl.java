@@ -4,10 +4,12 @@ import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.kuvaus;
 import static fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteUtils.prosessi;
 import static fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
 
 import org.apache.camel.Exchange;
@@ -81,6 +83,19 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 				.process(logFailedHakuImport())
 				//
 				.stop();
+		from("direct:convertHakukohdeDead")
+				//
+				.log(LoggingLevel.ERROR,
+						"Reason ${exception.message} ${exception.stacktrace}")
+				//
+				.setHeader(
+						"message",
+						simple("[${property.authentication.name}] Valintaperusteiden vienti epäonnistui hakukohteelle ${body}"))
+				.to(fail())
+				//
+				.process(logFailedHakuConvert())
+				//
+				.stop();
 		//
 		from("direct:hakuimport_epaonnistui")
 
@@ -93,7 +108,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 						simple("[${property.authentication.name}] Tarjonnasta ei saatu hakua(${property.hakuOid}) tai haun hakukohteiden prosessointi ei mennyt oikein"))
 				.to(fail())
 				//
-				.process(logFailedHakuImport())
+				// .process(logFailedHakuConvert())
 				//
 				.stop();
 		/**
@@ -104,29 +119,34 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 		//
 				.errorHandler(
 						deadLetterChannel("direct:tuoHakukohdeDead")
-								.maximumRedeliveries(5)
-								.redeliveryDelay(200L)
+								.maximumRedeliveries(0)
+								// .redeliveryDelay(200L)
 								//
 								.logExhaustedMessageHistory(true)
 								.logStackTrace(false).logExhausted(true)
 								.logRetryStackTrace(false).logHandled(false))
 				//
-				.bean(valintaperusteetRestResource, "tuoHakukohde")
+				.process(new Processor() {
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						HakukohdeImportDTO hki = exchange.getIn().getBody(
+								HakukohdeImportDTO.class);
+						valintaperusteetRestResource.tuoHakukohde(hki);
+					}
+				})
 				//
 				.process(logSuccessfulHakuImport());
 
 		from("direct:hakuimport_tarjonnasta_koostepalvelulle")
 		//
 				.errorHandler(
-						deadLetterChannel("direct:tuoHakukohdeDead")
-								.maximumRedeliveries(5)
+						deadLetterChannel("direct:convertHakukohdeDead")
+								.maximumRedeliveries(0)
 								.redeliveryDelay(200L)
 								//
 								.logExhaustedMessageHistory(true)
 								.logStackTrace(false).logExhausted(true)
 								.logRetryStackTrace(false).logHandled(false))
-				//
-				.process(SecurityPreprocessor.SECURITY)
 				//
 				.bean(tarjontaJaKoodistoHakukohteenHakuKomponentti)
 				//
@@ -163,11 +183,11 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 				//
 				.executorService(hakuImportThreadPool)
 				//
-				.shareUnitOfWork()
+				// .shareUnitOfWork()
 				//
 				.parallelProcessing()
 				//
-				.stopOnException()
+				// .stopOnException()
 				//
 				.to("direct:hakuimport_tarjonnasta_koostepalvelulle")
 				//
@@ -200,7 +220,14 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 						PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
 				int i = prosessi.lisaaImportoitu();
 				if (i == prosessi.getHakukohteita()) {
-					LOG.info("Kaikki hakukohteet ({}) importoitu!", i);
+					LOG.info(
+							"Importointi on valmis! Onnistuneita importointeja {}",
+							i);
+					if (prosessi.getVirhe() != 0) {
+						LOG.error(
+								"Importoinnin valimistumisen jalkeen epaonnistuneita importointeja {}",
+								i);
+					}
 				}
 			}
 		};
@@ -226,9 +253,26 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 				HakuImportProsessi prosessi = exchange.getProperty(
 						PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
 				int t = prosessi.lisaaTuonti();
-
 				LOG.info("Hakukohde on tuotu onnistuneesti ({}/{}).",
 						new Object[] { t, prosessi.getHakukohteita() });
+			}
+		};
+	}
+
+	private Processor logFailedHakuConvert() {
+		return new Processor() {
+			public void process(Exchange exchange) throws Exception {
+				HakuImportProsessi prosessi = exchange.getProperty(
+						PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+				String oid = exchange.getIn().getBody(String.class);
+				if (oid != null) {
+					prosessi.lisaaVirhe(oid + "_KONVERSIOSSA");
+				} else {
+					prosessi.lisaaVirhe("<<Tuntematon hakukohde>>_KONVERSIOSSA");
+				}
+				LOG.error(
+						"Epaonnistuneita hakukohdeOideja tahan mennessa {}",
+						Arrays.toString(prosessi.getEpaonnistuneetHakukohteet()));
 			}
 		};
 	}
@@ -238,13 +282,16 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 			public void process(Exchange exchange) throws Exception {
 				HakuImportProsessi prosessi = exchange.getProperty(
 						PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
-				prosessi.lisaaVirhe();
-				if (exchange.getException() != null) {
-					LOG.error("Virhe hakukohteiden importoinnissa! {}",
-							exchange.getException().getMessage());
+				HakukohdeImportDTO hki = exchange.getIn().getBody(
+						HakukohdeImportDTO.class);
+				if (hki != null) {
+					prosessi.lisaaVirhe(hki.getHakukohdeOid() + "_VIENNISSA");
 				} else {
-					LOG.error("Tuntematon virhe hakukohteiden importoinnissa!");
+					prosessi.lisaaVirhe("<<Tuntematon hakukohde>>_VIENNISSA");
 				}
+				LOG.error(
+						"Epaonnistuneita hakukohdeOideja tahan mennessa {}",
+						Arrays.toString(prosessi.getEpaonnistuneetHakukohteet()));
 			}
 		};
 	}

@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.haku.dto;
 
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
@@ -11,46 +12,51 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
  */
 public class HakuImportProsessi extends Prosessi {
 
-    // private List<String> importoitu = new CopyOnWriteArrayList<String>();
-    private volatile int hakukohteita = 0;
-    private AtomicInteger importoitu = new AtomicInteger();
-    private AtomicInteger virhe = new AtomicInteger();
-    private AtomicInteger tuonti = new AtomicInteger();
+	// private List<String> importoitu = new CopyOnWriteArrayList<String>();
+	private volatile int hakukohteita = 0;
+	private AtomicInteger importoitu = new AtomicInteger();
+	private AtomicInteger tuonti = new AtomicInteger();
+	private CopyOnWriteArrayList<String> epaonnistuneetHakukohteet = new CopyOnWriteArrayList<String>();
 
-    public HakuImportProsessi(String toiminto, String hakuOid) {
-        super("Haku Import", toiminto, hakuOid);
-    }
+	public HakuImportProsessi(String toiminto, String hakuOid) {
+		super("Haku Import", toiminto, hakuOid);
+	}
 
-    public int getHakukohteita() {
-        return hakukohteita;
-    }
+	public int getHakukohteita() {
+		return hakukohteita;
+	}
 
-    public int getImportoitu() {
-        return importoitu.get();
-    }
+	public int getImportoitu() {
+		return importoitu.get();
+	}
 
-    public int getTuonti() {
-        return tuonti.get();
-    }
+	public int getTuonti() {
+		return tuonti.get();
+	}
 
-    public int getVirhe() {
-        return virhe.get();
-    }
+	public int getVirhe() {
+		return epaonnistuneetHakukohteet.size();
+	}
 
-    public int lisaaImportoitu() {
-        return importoitu.incrementAndGet();
-    }
+	public String[] getEpaonnistuneetHakukohteet() {
+		return epaonnistuneetHakukohteet.toArray(new String[] {});
+	}
 
-    public int lisaaTuonti() {
-        return tuonti.incrementAndGet();
-    }
+	public int lisaaImportoitu() {
+		return importoitu.incrementAndGet();
+	}
 
-    public int lisaaVirhe() {
-        return virhe.incrementAndGet();
-    }
+	public int lisaaTuonti() {
+		return tuonti.incrementAndGet();
+	}
 
-    public void setHakukohteita(int hakukohteita) {
-        this.hakukohteita = hakukohteita;
-    }
+	public int lisaaVirhe(String hakukohdeOid) {
+		epaonnistuneetHakukohteet.add(hakukohdeOid);
+		return epaonnistuneetHakukohteet.size();
+	}
+
+	public void setHakukohteita(int hakukohteita) {
+		this.hakukohteita = hakukohteita;
+	}
 
 }

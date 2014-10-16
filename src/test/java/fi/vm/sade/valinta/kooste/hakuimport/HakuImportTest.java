@@ -1,8 +1,10 @@
 package fi.vm.sade.valinta.kooste.hakuimport;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.camel.Exchange;
@@ -21,8 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 
 import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper;
@@ -46,18 +54,31 @@ public class HakuImportTest extends CamelTestSupport {
 	@Ignore
 	@Test
 	public void testData() throws JsonSyntaxException, IOException {
-		ResultV1RDTO<HakukohdeValintaperusteetV1RDTO> obj = new Gson()
+		// ObjectMapper mapper = new ObjectMapper(); // can reuse, share
+		// globally
+		// HakukohdeValintaperusteetV1RDTO obj = mapper.readValue(new File(
+		// "user.json"), User.class);
+		HakukohdeValintaperusteetV1RDTO obj = new GsonBuilder()
+				.registerTypeAdapter(Date.class, new JsonDeserializer() {
+					@Override
+					public Object deserialize(JsonElement json, Type typeOfT,
+							JsonDeserializationContext context)
+							throws JsonParseException {
+						return new Date(json.getAsJsonPrimitive().getAsLong());
+					}
+				})
+				.create()
 				.fromJson(
 						IOUtils.toString(new ClassPathResource(
 								"hakukohdeimport/data2/1.2.246.562.20.27059719875.json")
 								.getInputStream()),
-						new TypeToken<HakukohdeValintaperusteetV1RDTO>() {
-						}.getType());
-		LOG.error("\r\n###\r\n### {}\r\n###", obj.getResult());
+						HakukohdeValintaperusteetV1RDTO.class);
+		LOG.error("\r\n###\r\n### {}\r\n###", obj);
+		LOG.error("\r\n###\r\n### {}\r\n###", new GsonBuilder()
+				.setPrettyPrinting().create().toJson(obj));
 
 	}
 
-	@Ignore
 	@Test
 	public void testRoute() {
 
@@ -77,6 +98,7 @@ public class HakuImportTest extends CamelTestSupport {
 	}
 
 	protected RouteBuilder createRouteBuilder() throws Exception {
+		final String VIALLINEN_HAKUKOHDE = "throws";
 		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) context()
 				.getRegistry();
 		JndiRegistry jndiRegistry = (JndiRegistry) registry.getRegistry();
@@ -85,7 +107,9 @@ public class HakuImportTest extends CamelTestSupport {
 		SuoritaHakuImportKomponentti suoritaHakuImportKomponentti = new SuoritaHakuImportKomponentti() {
 			@Override
 			public Collection<String> suoritaHakukohdeImport(String hakuOid) {
-				return Arrays.asList("1.2.246.562.20.27059719875");
+				return Arrays.asList(VIALLINEN_HAKUKOHDE,
+						"1.2.246.562.20.27059719875", VIALLINEN_HAKUKOHDE,
+						"1.2.246.562.20.27059719875");
 			}
 		};
 		ValintaperusteetRestResource valintaperusteetRestResource = Mockito
@@ -94,20 +118,39 @@ public class HakuImportTest extends CamelTestSupport {
 			@Override
 			public ResultV1RDTO<HakukohdeValintaperusteetV1RDTO> findValintaperusteetByOid(
 					String oid) {
+				if (VIALLINEN_HAKUKOHDE.equals(oid)) {
+					HakukohdeValintaperusteetV1RDTO obj = new HakukohdeValintaperusteetV1RDTO();
+					return new ResultV1RDTO<HakukohdeValintaperusteetV1RDTO>(
+							obj);
+				}
 				try {
-					System.err.println("JSON");
-					return new Gson()
+
+					HakukohdeValintaperusteetV1RDTO obj = new GsonBuilder()
+							.registerTypeAdapter(Date.class,
+									new JsonDeserializer() {
+										@Override
+										public Object deserialize(
+												JsonElement json,
+												Type typeOfT,
+												JsonDeserializationContext context)
+												throws JsonParseException {
+											return new Date(json
+													.getAsJsonPrimitive()
+													.getAsLong());
+										}
+									})
+							.create()
 							.fromJson(
 									IOUtils.toString(new ClassPathResource(
-											"hakukohdeimport/data2/valintaperusteet-1.2.246.562.20.27059719875.json")
+											"hakukohdeimport/data2/1.2.246.562.20.27059719875.json")
 											.getInputStream()),
-									new TypeToken<ResultV1RDTO<HakukohdeValintaperusteetV1RDTO>>() {
-									}.getType());
+									HakukohdeValintaperusteetV1RDTO.class);
+					return new ResultV1RDTO<HakukohdeValintaperusteetV1RDTO>(
+							obj);
 
 				} catch (Exception e) {
-					System.err.println(e.getMessage());
+
 				}
-				System.err.println("ERR");
 				return null;
 			}
 

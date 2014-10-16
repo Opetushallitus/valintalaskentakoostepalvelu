@@ -80,6 +80,10 @@ public class SuoritaHakukohdeImportKomponentti {
 			if (data.getHakukohdeNimiUri() != null) {
 				hkt.setKoodiUri(data.getHakukohdeNimiUri());
 			} else {
+				if (data.getOid() == null) {
+					LOG.error("Hakukohteella ei ole Oidia!");
+					throw new RuntimeException("Hakukohteella ei ole Oidia!");
+				}
 				hkt.setKoodiUri("hakukohteet_" + data.getOid().replace(".", ""));
 			}
 			importTyyppi.setHakukohdekoodi(hkt);
