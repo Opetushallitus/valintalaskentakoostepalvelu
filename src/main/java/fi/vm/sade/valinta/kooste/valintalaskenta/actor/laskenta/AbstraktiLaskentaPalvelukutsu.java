@@ -23,6 +23,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Abs
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.PalvelukutsuLaskuri;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategia;
+import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
@@ -141,56 +142,7 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 
 	protected List<HakemusDTO> muodostaHakemuksetDTO(String hakukohdeOid,
 			List<Hakemus> hakemukset, List<Oppija> oppijat) {
-		try {
-			Map<String, String> hakemusOidToPersonOid = hakemukset
-					.stream()
-					//
-					.filter(Objects::nonNull)
-					//
-					.collect(
-							Collectors.toMap(h -> h.getOid(),
-									h -> h.getPersonOid()));
-
-			List<HakemusDTO> hakemusDtot = hakemukset.parallelStream()
-					//
-					.filter(Objects::nonNull)
-					//
-					.map(h -> Converter.hakemusToHakemusDTO(h))
-					.collect(Collectors.toList());
-			try {
-				if (oppijat != null) {
-					Map<String, Oppija> oppijaNumeroJaOppija = oppijat.stream()
-							.collect(
-									Collectors.toMap(o -> o.getOppijanumero(),
-											o -> o, (o1, o2) -> o2));
-					hakemusDtot
-							.forEach(h -> {
-								String personOid = hakemusOidToPersonOid.get(h
-										.getHakemusoid());
-								if (personOid != null
-										&& oppijaNumeroJaOppija
-												.containsKey(personOid)) {
-									Oppija oppija = oppijaNumeroJaOppija
-											.get(personOid);
-									h.getAvaimet().addAll(
-											OppijaToAvainArvoDTOConverter
-													.convert(oppija));
-								}
-							});
-				}
-			} catch (Exception e) {
-				LOG.error(
-						"\r\n###\r\n### SURE YO-arvosanojen konversiossa odottamaton virhe {}\r\n###",
-						e.getMessage());
-			}
-			return hakemusDtot;
-		} catch (Exception exx) {
-			LOG.error(
-					"Hakemusten konvertointi laskennan hakemusDTO:ksi epaonnistui hakukohteelle {}. Syy {}!",
-					hakukohdeOid, exx.getMessage());
-
-			throw exx;
-		}
-
+		return HakemuksetConverterUtil.muodostaHakemuksetDTO(hakukohdeOid,
+				hakemukset, oppijat);
 	}
 }

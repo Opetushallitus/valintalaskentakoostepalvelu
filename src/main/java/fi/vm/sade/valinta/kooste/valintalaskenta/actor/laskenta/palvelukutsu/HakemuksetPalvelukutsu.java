@@ -67,7 +67,16 @@ public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements
 	}
 
 	public List<Hakemus> getHakemukset() {
-		return hakemukset.get();
+		List<Hakemus> h = hakemukset.get();
+		if (h == null) {
+			LOG.error(
+					"Hakemukset palvelu palautti null joukon hakukohteelle {}",
+					getHakukohdeOid());
+			throw new RuntimeException(
+					"Hakemukset palvelu palautti null joukon hakukohteelle "
+							+ getHakukohdeOid());
+		}
+		return h;
 	}
 
 }
