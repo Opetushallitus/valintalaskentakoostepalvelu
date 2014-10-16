@@ -126,6 +126,8 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 								.logStackTrace(false).logExhausted(true)
 								.logRetryStackTrace(false).logHandled(false))
 				//
+				.process(SecurityPreprocessor.SECURITY)
+				//
 				.process(new Processor() {
 					@Override
 					public void process(Exchange exchange) throws Exception {
@@ -147,6 +149,8 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 								.logExhaustedMessageHistory(true)
 								.logStackTrace(false).logExhausted(true)
 								.logRetryStackTrace(false).logHandled(false))
+				//
+				.process(SecurityPreprocessor.SECURITY)
 				//
 				.bean(tarjontaJaKoodistoHakukohteenHakuKomponentti)
 				//
