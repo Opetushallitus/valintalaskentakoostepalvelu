@@ -64,7 +64,8 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 	private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
 	private final ValintaperusteetValintakoeAsyncResource valintakoeResource;
 	private final ValintalaskentaValintakoeAsyncResource osallistumisetResource;
-	private final int VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA = 30;
+	private final int VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA = (int) TimeUnit.MINUTES
+			.toMillis(15L);
 
 	@Autowired
 	public KoekutsukirjeetImpl(
@@ -312,8 +313,9 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 																.stream()
 																.filter(Objects::nonNull)
 																//
-																.filter(v -> Boolean.TRUE.equals(v
-																	.getAktiivinen()))
+																.filter(v -> Boolean.TRUE
+																		.equals(v
+																				.getAktiivinen()))
 																//
 																.filter(v -> null != v
 																		.getTunniste())
@@ -360,6 +362,11 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 										LetterBatchStatusDto status = viestintapalveluAsyncResource
 												.haeStatus(batchId).get(900L,
 														TimeUnit.MILLISECONDS);
+										if ("error".equals(status.getStatus())) {
+											LOG.error("Koekutsukirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
+											prosessi.keskeyta();
+											stop.onNext(null);
+										}
 										if ("ready".equals(status.getStatus())) {
 											prosessi.vaiheValmistui();
 											LOG.error("Koekutsukirjeet valmistui!");
