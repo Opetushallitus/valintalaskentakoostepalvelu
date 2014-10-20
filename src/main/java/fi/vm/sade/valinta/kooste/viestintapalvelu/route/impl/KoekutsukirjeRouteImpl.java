@@ -57,7 +57,6 @@ import fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource;
  * @author Jussi Jartamo
  * 
  */
-@Component
 public class KoekutsukirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(KoekutsukirjeRouteImpl.class);

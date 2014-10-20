@@ -50,7 +50,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.Jalkiohjauskirjeet
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
 
-@Component
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class JalkiohjauskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(JalkiohjauskirjeRouteImpl.class);

@@ -42,7 +42,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksy
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 
-@Component
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HyvaksymiskirjeRouteImpl.class);
