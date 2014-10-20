@@ -43,7 +43,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService
  * 
  */
 @Service
-public class HyvaksymiskirjeetImpl implements HyvaksymiskirjeetService {
+public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HyvaksymiskirjeRouteImpl.class);
@@ -54,7 +54,7 @@ public class HyvaksymiskirjeetImpl implements HyvaksymiskirjeetService {
 	private final ApplicationAsyncResource applicationAsyncResource;
 
 	@Autowired
-	public HyvaksymiskirjeetImpl(
+	public HyvaksymiskirjeetServiceImpl(
 			ViestintapalveluAsyncResource viestintapalveluAsyncResource,
 			HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
 			SijoitteluAsyncResource sijoitteluAsyncResource,
@@ -70,8 +70,7 @@ public class HyvaksymiskirjeetImpl implements HyvaksymiskirjeetService {
 			final HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
 			final List<String> hakemusOids) {
 		Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource
-				.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(),
-						hyvaksymiskirjeDTO.getHakukohdeOid());
+				.getApplicationsByOids(hakemusOids);
 		Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource
 				.getKoulutuspaikkallisetHakijat(
 						hyvaksymiskirjeDTO.getHakuOid(),
@@ -139,6 +138,7 @@ public class HyvaksymiskirjeetImpl implements HyvaksymiskirjeetService {
 				from(hakemuksetFuture),
 				from(hakijatFuture),
 				(hakemukset, hakijat) -> {
+
 					LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi.");
 					final String hakukohdeOid = hyvaksymiskirjeDTO
 							.getHakukohdeOid();
