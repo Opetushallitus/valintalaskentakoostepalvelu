@@ -16,12 +16,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Sets;
-
 import rx.Observable;
 import rx.functions.Action3;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
+
+import com.google.common.collect.Sets;
+
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -80,6 +81,7 @@ public class HyvaksymiskirjeetImpl implements HyvaksymiskirjeetService {
 				from(hakemuksetFuture),
 				from(hakijatFuture),
 				(hakemukset, hakijat) -> {
+					LOG.info("Tehdaan valituille hakijoille hyvaksytyt filtterointi.");
 					final Set<String> kohdeHakijat = Sets
 							.newHashSet(hakemusOids);
 					final String hakukohdeOid = hyvaksymiskirjeDTO
@@ -113,8 +115,11 @@ public class HyvaksymiskirjeetImpl implements HyvaksymiskirjeetService {
 						letterBatch -> {
 							letterBatchToViestintapalvelu().call(letterBatch,
 									prosessi, hyvaksymiskirjeDTO);
-						}, throwable -> {
-							LOG.error("{}", throwable.getMessage());
+						},
+						throwable -> {
+							LOG.error(
+									"Sijoittelu tai hakemuspalvelukutsu epaonnistui {}",
+									throwable.getMessage());
 							prosessi.keskeyta();
 						});
 	}
@@ -134,6 +139,7 @@ public class HyvaksymiskirjeetImpl implements HyvaksymiskirjeetService {
 				from(hakemuksetFuture),
 				from(hakijatFuture),
 				(hakemukset, hakijat) -> {
+					LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi.");
 					final String hakukohdeOid = hyvaksymiskirjeDTO
 							.getHakukohdeOid();
 					BiPredicate<HakijaDTO, String> kohdeHakukohteessaHyvaksytty = new SijoittelussaHyvaksyttyHakijaBiPredicate();
@@ -160,14 +166,17 @@ public class HyvaksymiskirjeetImpl implements HyvaksymiskirjeetService {
 						letterBatch -> {
 							letterBatchToViestintapalvelu().call(letterBatch,
 									prosessi, hyvaksymiskirjeDTO);
-						}, throwable -> {
-							LOG.error("{}", throwable.getMessage());
+						},
+						throwable -> {
+							LOG.error(
+									"Sijoittelu tai hakemuspalvelukutsu epaonnistui {}",
+									throwable.getMessage());
 							prosessi.keskeyta();
 						});
 	}
 
 	public Action3<LetterBatch, KirjeProsessi, HyvaksymiskirjeDTO> letterBatchToViestintapalvelu() {
-		return (letterBatch, prosessi, koekutsu) -> {
+		return (letterBatch, prosessi, kirje) -> {
 			try {
 				LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
 				String batchId = viestintapalveluAsyncResource
@@ -213,7 +222,7 @@ public class HyvaksymiskirjeetImpl implements HyvaksymiskirjeetService {
 								});
 			} catch (Exception e) {
 				LOG.error("Virhe hakukohteelle {}: {}",
-						koekutsu.getHakukohdeOid(), e.getMessage());
+						kirje.getHakukohdeOid(), e.getMessage());
 				prosessi.keskeyta();
 			}
 		};

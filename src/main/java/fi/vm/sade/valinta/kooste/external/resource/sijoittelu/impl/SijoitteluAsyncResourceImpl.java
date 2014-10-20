@@ -7,9 +7,12 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.cxf.interceptor.Interceptor;
+import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,8 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncRes
  */
 @Service
 public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SijoitteluAsyncResourceImpl.class);
 	private final WebClient webClient;
 	private final String address;
 
@@ -77,6 +82,8 @@ public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
 				.append(hakuOid).append("/sijoitteluajo/")
 				.append(SijoitteluResource.LATEST).append("/hakemukset");
 		String url = urlBuilder.toString();
+		LOG.warn("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}",
+				address, url, hakukohdeOid);
 		return WebClient.fromClient(webClient)
 		//
 				.path(url)
