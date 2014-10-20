@@ -50,7 +50,7 @@
 		tulokset service has been optimized -->
 	<http:conduit name="*.http-conduit">
 		<!-- AllowChunking="false" Nginx fails without this -->
-		<http:client Connection="Keep-Alive" ConnectionTimeout="0" 
+		<http:client Connection="Keep-Alive" ConnectionTimeout="0"
 			ReceiveTimeout="0" AllowChunking="false" />
 	</http:conduit>
 
@@ -83,7 +83,7 @@
 		serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValintatapajonoResource"
 		address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}/">
 		<jaxrs-client:outInterceptors>
-			<ref bean="ticketInterceptor"/>
+			<ref bean="ticketInterceptor" />
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
 			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
@@ -94,7 +94,7 @@
 		serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValinnanVaiheResource"
 		address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}/">
 		<jaxrs-client:outInterceptors>
-			<ref bean="ticketInterceptor"/>
+			<ref bean="ticketInterceptor" />
 		</jaxrs-client:outInterceptors>
 		<jaxrs-client:providers>
 			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
@@ -525,9 +525,9 @@
 		class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.pistesyotto.route.impl" />
 	<!-- Valintalaskenta -->
-	<bean class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource"/>
-	<ctx:component-scan
-		base-package="fi.vm.sade.valinta.kooste.valintalaskenta.actor" />
+	<bean
+		class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.actor" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
 
 	<!-- Viestintapalvelu -->
@@ -561,25 +561,36 @@
 		class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteImpl" />
 
 	<!-- Seuranta Async -->
-	<bean class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.LaskentaSeurantaAsyncResourceImpl"/>
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.LaskentaSeurantaAsyncResourceImpl" />
 
- 	<!-- Valintaperusteet Async -->
-	<bean class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl"/>
- 
- 	<!-- HakuApp Async -->
-	<bean class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl"/>
-	
- 	<!-- Valintalaskenta Async -->
-	<bean class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaAsyncResourceImpl"/>
-	
- 	<!-- Suoritusrekisteri (SURE) Async -->
-	<bean class="fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl.SuoritusrekisteriAsyncResourceImpl"/>
-  
-  	<!-- Vipa Async -->
-	<bean class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.ViestintapalveluAsyncResourceImpl"/>
-  	<bean class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetValintakoeAsyncResourceImpl"/>
-  	<bean class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaValintakoeAsyncResourceImpl"/>
-  
+	<!-- Valintaperusteet Async -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl" />
+
+	<!-- HakuApp Async -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl" />
+
+	<!-- Valintalaskenta Async -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaAsyncResourceImpl" />
+
+	<!-- Suoritusrekisteri (SURE) Async -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl.SuoritusrekisteriAsyncResourceImpl" />
+	<!-- Sijoittelu Async -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteluAsyncResourceImpl" />
+
+	<!-- Vipa Async -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.ViestintapalveluAsyncResourceImpl" />
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetValintakoeAsyncResourceImpl" />
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaValintakoeAsyncResourceImpl" />
+
 	<!-- Swagger -->
 	<!-- Swagger API listing resource -->
 	<bean id="swaggerResourceJSON"

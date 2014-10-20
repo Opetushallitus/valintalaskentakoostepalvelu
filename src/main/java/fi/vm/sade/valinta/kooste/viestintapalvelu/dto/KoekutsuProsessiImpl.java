@@ -14,7 +14,7 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
  * 
  */
 public class KoekutsuProsessiImpl extends DokumenttiProsessi implements
-		KoekutsuProsessi {
+		KirjeProsessi {
 
 	public KoekutsuProsessiImpl(int vaiheet) {
 		super(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,

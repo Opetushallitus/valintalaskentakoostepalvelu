@@ -27,9 +27,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>io.reactivex</groupId>
-			<artifactId>rxjava</artifactId>
-			<version>1.0.0-rc.5</version>
+			<groupId>com.netflix.rxjava</groupId>
+			<artifactId>rxjava-core</artifactId>
+			<version>0.20.6</version>
 		</dependency>
 		<dependency>
 			<groupId>com.typesafe.akka</groupId>
