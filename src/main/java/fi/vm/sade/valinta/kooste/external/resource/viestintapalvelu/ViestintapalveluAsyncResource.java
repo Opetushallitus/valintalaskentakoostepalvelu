@@ -14,7 +14,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDt
 public interface ViestintapalveluAsyncResource {
 
 	int VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA = (int) TimeUnit.MINUTES
-			.toMillis(15L);
+			.toMillis(60L);
 
 	Future<String> viePdfJaOdotaReferenssi(LetterBatch letterBatch);
 

@@ -233,14 +233,18 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 							kirje.getTag());
 			try {
 				if (prosessi.isKeskeytetty()) {
-					LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta!");
+					LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta! (Timeout 30min)");
 					return;
 				}
-				LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
+				LOG.error(
+						"Aloitetaan jalkiohjauskirjeiden vienti! Kirjeita {}kpl",
+						letterBatch.getLetters().size());
 				String batchId = viestintapalveluAsyncResource
 						.viePdfJaOdotaReferenssi(letterBatch).get(30L,
 								TimeUnit.MINUTES);
-				LOG.info("Saatiin kirjeen seurantaId {}", batchId);
+				LOG.error(
+						"Saatiin jalkiohjauskirjeen seurantaId {} ja aloitetaan valmistumisen pollaus! (Timeout 60min)",
+						batchId);
 				prosessi.vaiheValmistui();
 				PublishSubject<String> stop = PublishSubject.create();
 				Observable
