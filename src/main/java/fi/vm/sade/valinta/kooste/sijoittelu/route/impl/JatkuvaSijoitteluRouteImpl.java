@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.valinta.kooste.Reititys;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoitteluExchange;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
@@ -46,7 +47,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 	private static final Logger LOG = LoggerFactory
 			.getLogger(JatkuvaSijoitteluRouteImpl.class);
 	private final String DEADLETTERCHANNEL = "direct:jatkuvan_sijoittelun_deadletterchannel";
-	private final SijoitteluResource sijoitteluResource;
+	private final SijoitteluAsyncResource sijoitteluAsyncResource;
 	private final SijoittelunSeurantaResource sijoittelunSeurantaResource;
 	private final String jatkuvaSijoitteluTimer;
 	private final String jatkuvaSijoitteluQueue;
@@ -63,12 +64,12 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 			// tarkistetaan viidentoista minuutin valein tilanne
 			@Value("timer://jatkuvaSijoitteluTimer?fixedRate=true&period=5minutes") String jatkuvaSijoitteluTimer,
 			@Value("seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue") String jatkuvaSijoitteluQueue,
-			SijoitteluResource sijoitteluResource,
+			SijoitteluAsyncResource sijoitteluAsyncResource,
 			SijoittelunSeurantaResource sijoittelunSeurantaResource,
 			@Qualifier("jatkuvaSijoitteluDelayedQueue") DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue) {
 		this.jatkuvaSijoitteluTimer = jatkuvaSijoitteluTimer;
 		this.jatkuvaSijoitteluQueue = jatkuvaSijoitteluQueue;
-		this.sijoitteluResource = sijoitteluResource;
+		this.sijoitteluAsyncResource = sijoitteluAsyncResource;
 		this.sijoittelunSeurantaResource = sijoittelunSeurantaResource;
 		this.jatkuvaSijoitteluDelayedQueue = new DelayQueue<DelayedSijoitteluExchange>();
 		this.ajossaHakuOids = new ConcurrentHashMap<>();
@@ -78,13 +79,13 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 			// tarkistetaan viidentoista minuutin valein tilanne
 			String jatkuvaSijoitteluTimer,
 			String jatkuvaSijoitteluQueue,
-			SijoitteluResource sijoitteluResource,
+			SijoitteluAsyncResource sijoitteluAsyncResource,
 			SijoittelunSeurantaResource sijoittelunSeurantaResource,
 			DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue,
 			ConcurrentHashMap<String, Long> ajossaHakuOids) {
 		this.jatkuvaSijoitteluTimer = jatkuvaSijoitteluTimer;
 		this.jatkuvaSijoitteluQueue = jatkuvaSijoitteluQueue;
-		this.sijoitteluResource = sijoitteluResource;
+		this.sijoitteluAsyncResource = sijoitteluAsyncResource;
 		this.sijoittelunSeurantaResource = sijoittelunSeurantaResource;
 		this.jatkuvaSijoitteluDelayedQueue = jatkuvaSijoitteluDelayedQueue;
 		this.ajossaHakuOids = ajossaHakuOids;
@@ -255,36 +256,42 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 				.routeId("Jatkuvan sijoittelun ajuri")
 				//
 				.process(
-						Reititys.<DelayedSijoittelu> kuluttaja(
-								sijoitteluHakuOid -> {
-									//
-									// Aloitetaan sijoittelu ainoastaan jos se
-									// ei ole jo ajossa
-									//
-									if (ajossaHakuOids.putIfAbsent(
-											sijoitteluHakuOid.getHakuOid(),
-											System.currentTimeMillis()) == null) {
-										sijoitteluResource
-												.sijoittele(sijoitteluHakuOid
-														.getHakuOid());
-										LOG.warn(
-												"Jatkuva sijoittelu saatiin tehtya haulle {}",
-												sijoitteluHakuOid.getHakuOid());
-										sijoittelunSeurantaResource
-												.merkkaaSijoittelunAjetuksi(sijoitteluHakuOid
-														.getHakuOid());
-										LOG.warn(
-												"Jatkuva sijoittelu merkattiin ajetuksi haulle {}",
-												sijoitteluHakuOid.getHakuOid());
-									}
-								},
-								(sijoitteluHakuOid, poikkeus) -> {
-									LOG.error(
-											"Jatkuvan sijoittelun suorittaminen ei onnistunut haulle {}. {}",
-											sijoitteluHakuOid.getHakuOid(),
-											poikkeus.getMessage());
-									return false;
-								}));
+						Reititys.<DelayedSijoittelu> kuluttaja(sijoitteluHakuOid -> {
+							//
+							// Aloitetaan sijoittelu ainoastaan jos se
+							// ei ole jo ajossa
+							//
+							if (ajossaHakuOids.putIfAbsent(
+									sijoitteluHakuOid.getHakuOid(),
+									System.currentTimeMillis()) == null) {
+								LOG.error(
+										"Jatkuvasijoittelu kaynnistyy nyt haulle {}",
+										sijoitteluHakuOid.getHakuOid());
+								sijoitteluAsyncResource.sijoittele(
+										sijoitteluHakuOid.getHakuOid(),
+										done -> {
+											LOG.warn(
+													"Jatkuva sijoittelu saatiin tehtya haulle {}",
+													sijoitteluHakuOid
+															.getHakuOid());
+											sijoittelunSeurantaResource
+													.merkkaaSijoittelunAjetuksi(sijoitteluHakuOid
+															.getHakuOid());
+											LOG.warn(
+													"Jatkuva sijoittelu merkattiin ajetuksi haulle {}",
+													sijoitteluHakuOid
+															.getHakuOid());
+										},
+										poikkeus -> {
+											LOG.error(
+													"Jatkuvan sijoittelun suorittaminen ei onnistunut haulle {}. {}",
+													sijoitteluHakuOid
+															.getHakuOid(),
+													poikkeus.getMessage());
+										});
+
+							}
+						}));
 	}
 
 	public int ajotiheysTaiVakio(Integer ajotiheys) {
