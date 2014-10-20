@@ -238,8 +238,8 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 				}
 				LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
 				String batchId = viestintapalveluAsyncResource
-						.viePdfJaOdotaReferenssi(letterBatch).get(35L,
-								TimeUnit.SECONDS);
+						.viePdfJaOdotaReferenssi(letterBatch).get(30L,
+								TimeUnit.MINUTES);
 				LOG.info("Saatiin kirjeen seurantaId {}", batchId);
 				prosessi.vaiheValmistui();
 				PublishSubject<String> stop = PublishSubject.create();
