@@ -24,13 +24,15 @@ import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessiImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
@@ -66,6 +68,8 @@ public class ViestintapalveluAktivointiResource {
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 	@Autowired
 	private KoekutsukirjeetService koekutsukirjeetService;
+	@Autowired
+	private HyvaksymiskirjeetService hyvaksymiskirjeetService;
 
 	@POST
 	@Path("/osoitetarrat/aktivoi")
@@ -246,24 +250,27 @@ public class ViestintapalveluAktivointiResource {
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
 		try {
+			if (templateName == null) {
+				templateName = "hyvaksymiskirje";
+			}
 			if (hakemuksillaRajaus == null) {
 				hakemuksillaRajaus = new DokumentinLisatiedot();
 			}
-			DokumenttiProsessi hyvaksymiskirjeetProsessi = new DokumenttiProsessi(
-					"Hyväksymiskirjeet", "Hyväksymiskirjeet", hakuOid, tags(
-							"hyvaksymiskirjeet", hakemuksillaRajaus.getTag()));
-			dokumenttiProsessiKomponentti
-					.tuoUusiProsessi(hyvaksymiskirjeetProsessi);
-			hyvaksymiskirjeetRoute.hyvaksymiskirjeetAktivointi(
-					hyvaksymiskirjeetProsessi,
-					//
+			tag = hakemuksillaRajaus.getTag();
+			KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+			HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
 					tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
-					templateName, tag,
-					//
-					hakukohdeOid, hakemuksillaRajaus.getHakemusOids(), hakuOid,
-					sijoitteluajoId, SecurityContextHolder.getContext()
-							.getAuthentication());
-			return new ProsessiId(hyvaksymiskirjeetProsessi.getId());
+					templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId);
+			if (hakemuksillaRajaus.getHakemusOids() == null) {
+				hyvaksymiskirjeetService.hyvaksymiskirjeetHakukohteelle(
+						prosessi, hyvaksymiskirjeDTO);
+			} else {
+				hyvaksymiskirjeetService.hyvaksymiskirjeetHakemuksille(
+						prosessi, hyvaksymiskirjeDTO,
+						hakemuksillaRajaus.getHakemusOids());
+			}
+			return prosessi.toProsessiId();
 		} catch (Exception e) {
 			LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
 

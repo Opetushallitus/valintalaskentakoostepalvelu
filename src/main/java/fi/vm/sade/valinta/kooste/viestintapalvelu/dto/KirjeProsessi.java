@@ -5,7 +5,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
  * @author Jussi Jartamo
  * 
  */
-public interface KoekutsuProsessi {
+public interface KirjeProsessi {
 
 	void vaiheValmistui();
 

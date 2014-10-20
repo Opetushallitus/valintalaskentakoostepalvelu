@@ -1,8 +1,10 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.predicate;
 
 import java.util.Collections;
+import java.util.function.BiPredicate;
 
-import com.google.common.base.Predicate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
@@ -15,20 +17,16 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HakutoiveenValinta
  * @author Jussi Jartamo
  * 
  */
-public class SijoittelussaHyvaksyttyHakijaPredicate implements
-		Predicate<HakijaDTO> {
-
-	private final String hakukohdeOid;
-
-	public SijoittelussaHyvaksyttyHakijaPredicate(String hakukohdeOid) {
-		this.hakukohdeOid = hakukohdeOid;
-	}
+public class SijoittelussaHyvaksyttyHakijaBiPredicate implements
+		BiPredicate<HakijaDTO, String> {
+	private static final Logger LOG = LoggerFactory
+			.getLogger(SijoittelussaHyvaksyttyHakijaBiPredicate.class);
 
 	@Override
-	public boolean apply(HakijaDTO input) {
-		if (input.getHakutoiveet() == null) {
+	public boolean test(HakijaDTO hakija, String hakukohdeOid) {
+		if (hakija.getHakutoiveet() == null) {
 		} else {
-			for (HakutoiveDTO h : input.getHakutoiveet()) {
+			for (HakutoiveDTO h : hakija.getHakutoiveet()) {
 
 				if (hakukohdeOid.equals(h.getHakukohdeOid())) {
 					final boolean checkFirstValintatapajonoOnly = true;
@@ -39,9 +37,14 @@ public class SijoittelussaHyvaksyttyHakijaPredicate implements
 
 					for (HakutoiveenValintatapajonoDTO vjono : h
 							.getHakutoiveenValintatapajonot()) {
-						if (HakemuksenTila.HYVAKSYTTY.equals(vjono.getTila())
-								|| HakemuksenTila.VARASIJALTA_HYVAKSYTTY
-										.equals(vjono.getTila())) {
+						if (vjono.getTila() == null) {
+							LOG.warn(
+									"Hakijalla (hakijaOid={},hakemusOid={}) ei ole hakutoiveen valintatapajonossa tilaa joten merkitaan automaattisesti ei hyvaksytyksi!",
+									hakija.getHakijaOid(),
+									hakija.getHakemusOid());
+						}
+						if (vjono.getTila() != null
+								&& vjono.getTila().isHyvaksytty()) {
 							return true;
 						}
 						if (checkFirstValintatapajonoOnly) {

@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 
 public interface KoekutsukirjeetService {
 
@@ -15,7 +15,7 @@ public interface KoekutsukirjeetService {
 	 * @param hakemusOids
 	 *            hakemukset joille
 	 */
-	void koekutsukirjeetHakemuksille(KoekutsuProsessi prosessi,
+	void koekutsukirjeetHakemuksille(KirjeProsessi prosessi,
 			KoekutsuDTO koekutsu, Collection<String> hakemusOids);
 
 	/**
@@ -23,6 +23,6 @@ public interface KoekutsukirjeetService {
 	 * @param hakukohdeOid
 	 *            hakukohde johon osallistujille kirjeet luodaan
 	 */
-	void koekutsukirjeetOsallistujille(KoekutsuProsessi prosessi,
+	void koekutsukirjeetOsallistujille(KirjeProsessi prosessi,
 			KoekutsuDTO koekutsu, List<String> valintakoeOids);
 }

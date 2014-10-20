@@ -43,7 +43,7 @@ import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.Viestintapal
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKomponentti;
@@ -64,8 +64,6 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 	private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
 	private final ValintaperusteetValintakoeAsyncResource valintakoeResource;
 	private final ValintalaskentaValintakoeAsyncResource osallistumisetResource;
-	private final int VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA = (int) TimeUnit.MINUTES
-			.toMillis(15L);
 
 	@Autowired
 	public KoekutsukirjeetImpl(
@@ -82,7 +80,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 	}
 
 	@Override
-	public void koekutsukirjeetHakemuksille(KoekutsuProsessi prosessi,
+	public void koekutsukirjeetHakemuksille(KirjeProsessi prosessi,
 			KoekutsuDTO koekutsu, Collection<String> hakemusOids) {
 		from(applicationAsyncResource.getApplicationsByOids(hakemusOids))
 		//
@@ -101,7 +99,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 	}
 
 	@Override
-	public void koekutsukirjeetOsallistujille(KoekutsuProsessi prosessi,
+	public void koekutsukirjeetOsallistujille(KirjeProsessi prosessi,
 			KoekutsuDTO koekutsu, List<String> valintakoeOids) {
 		// ehka tarvitaan
 		final Future<List<ValintakoeOsallistuminenDTO>> osallistumiset = osallistumisetResource
@@ -194,7 +192,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 	}
 
 	private Action1<List<Hakemus>> koekutsukirjeiksi(
-			final KoekutsuProsessi prosessi, final KoekutsuDTO koekutsu) {
+			final KirjeProsessi prosessi, final KoekutsuDTO koekutsu) {
 		return new Action1<List<Hakemus>>() {
 			public void call(List<Hakemus> hakemukset) {
 				if (hakemukset.isEmpty()) {
@@ -351,43 +349,44 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 					LOG.info("Saatiin kirjeen seurantaId {}", batchId);
 					prosessi.vaiheValmistui();
 					PublishSubject<String> stop = PublishSubject.create();
-					Observable.interval(1, TimeUnit.SECONDS)
-							.take(VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
-							.takeUntil(stop).subscribe(new Action1<Long>() {
-								public void call(Long t1) {
-									try {
-										LOG.warn(
-												"Tehdaan status kutsu seurantaId:lle {}",
-												batchId);
-										LetterBatchStatusDto status = viestintapalveluAsyncResource
-												.haeStatus(batchId).get(900L,
-														TimeUnit.MILLISECONDS);
-										if ("error".equals(status.getStatus())) {
-											LOG.error("Koekutsukirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
-											prosessi.keskeyta();
-											stop.onNext(null);
+					Observable
+							.interval(1, TimeUnit.SECONDS)
+							.take(ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
+							.takeUntil(stop)
+							.subscribe(
+									pulse -> {
+										try {
+											LOG.warn(
+													"Tehdaan status kutsu seurantaId:lle {}",
+													batchId);
+											LetterBatchStatusDto status = viestintapalveluAsyncResource
+													.haeStatus(batchId)
+													.get(900L,
+															TimeUnit.MILLISECONDS);
+											if ("error".equals(status
+													.getStatus())) {
+												LOG.error("Koekutsukirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
+												prosessi.keskeyta();
+												stop.onNext(null);
+											}
+											if ("ready".equals(status
+													.getStatus())) {
+												prosessi.vaiheValmistui();
+												LOG.error("Koekutsukirjeet valmistui!");
+												prosessi.valmistui(batchId);
+												stop.onNext(null);
+											}
+										} catch (Exception e) {
+											LOG.error(
+													"Statuksen haku epaonnistui {}",
+													e.getMessage());
 										}
-										if ("ready".equals(status.getStatus())) {
-											prosessi.vaiheValmistui();
-											LOG.error("Koekutsukirjeet valmistui!");
-											prosessi.valmistui(batchId);
-											stop.onNext(null);
-										}
-									} catch (Exception e) {
-										LOG.error(
-												"Statuksen haku epaonnistui {}",
-												e.getMessage());
-									}
-								}
-							}, new Action1<Throwable>() {
-								public void call(Throwable t1) {
-									prosessi.keskeyta();
-								}
-							}, new Action0() {
-								public void call() {
-									prosessi.keskeyta();
-								}
-							});
+
+									}, throwable -> {
+										prosessi.keskeyta();
+									}, () -> {
+										prosessi.keskeyta();
+									});
 				} catch (Exception e) {
 					LOG.error("Virhe hakutoiveelle {}: {}",
 							koekutsu.getHakukohdeOid(), e.getMessage());

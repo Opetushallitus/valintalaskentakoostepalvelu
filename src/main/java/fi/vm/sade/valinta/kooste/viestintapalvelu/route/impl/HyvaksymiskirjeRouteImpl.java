@@ -155,7 +155,6 @@ public class HyvaksymiskirjeRouteImpl extends AbstractDokumenttiRouteBuilder {
 														.getHakemusOid());
 											}
 										});
-
 							}
 
 							// exchange.getOut().setBody(hakukohteenHakijat);
