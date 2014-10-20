@@ -72,8 +72,8 @@ public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
 	@Override
 	public Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(
 			String hakuOid, String hakukohdeOid) {
-
-		StringBuilder urlBuilder = new StringBuilder().append("/")
+		// https://${host.virkailija}/sijoittelu-service/resources/.../sijoitteluajo/latest/hakemukset?hyvaksytyt=true&hakukohdeOid=
+		StringBuilder urlBuilder = new StringBuilder().append("/sijoittelu/")
 				.append(hakuOid).append("/sijoitteluajo/")
 				.append(SijoitteluResource.LATEST).append("/hakemukset");
 		String url = urlBuilder.toString();
