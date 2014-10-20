@@ -11,4 +11,6 @@ public interface SijoitteluAsyncResource {
 
 	Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(
 			String hakuOid, String hakukohdeOid);
+
+	Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
 }

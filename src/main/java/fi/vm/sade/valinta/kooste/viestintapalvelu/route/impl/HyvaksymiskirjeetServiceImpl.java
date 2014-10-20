@@ -178,6 +178,10 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 	public Action3<LetterBatch, KirjeProsessi, HyvaksymiskirjeDTO> letterBatchToViestintapalvelu() {
 		return (letterBatch, prosessi, kirje) -> {
 			try {
+				if (prosessi.isKeskeytetty()) {
+					LOG.error("Hyvaksymiskirjeiden luonti on keskeytetty kayttajantoimesta!");
+					return;
+				}
 				LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
 				String batchId = viestintapalveluAsyncResource
 						.viePdfJaOdotaReferenssi(letterBatch).get(35L,
@@ -198,6 +202,11 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 										LetterBatchStatusDto status = viestintapalveluAsyncResource
 												.haeStatus(batchId).get(900L,
 														TimeUnit.MILLISECONDS);
+										if (prosessi.isKeskeytetty()) {
+											LOG.error("Hyvaksymiskirjeiden luonti on keskeytetty kayttajantoimesta!");
+											stop.onNext(null);
+											return;
+										}
 										if ("error".equals(status.getStatus())) {
 											LOG.error("Hyvaksymiskirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
 											prosessi.keskeyta();

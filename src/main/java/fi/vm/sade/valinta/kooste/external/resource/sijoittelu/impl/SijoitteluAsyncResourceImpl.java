@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.camel.Property;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
@@ -72,6 +74,44 @@ public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
 		interceptors.add(cas);
 		bean.setOutInterceptors(interceptors);
 		this.webClient = bean.createWebClient();
+	}
+
+	@Override
+	public Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(
+			String hakuOid) {
+		/*
+		 * private SijoitteluResource sijoitteluResource;
+		 * 
+		 * @Autowired public SijoitteluIlmankoulutuspaikkaaKomponentti(
+		 * SijoitteluResource sijoitteluResource) { this.sijoitteluResource =
+		 * sijoitteluResource; }
+		 * 
+		 * public List<HakijaDTO> ilmankoulutuspaikkaa(
+		 * 
+		 * @Property("hakuOid") String hakuOid,
+		 * 
+		 * @Property("sijoitteluajoId") String sijoitteluajoId) {
+		 * 
+		 * final HakijaPaginationObject result = sijoitteluResource.hakemukset(
+		 * hakuOid, SijoitteluResource.LATEST, null, true, null, null, null,
+		 * null); return result.getResults(); }
+		 */
+		// https://${host.virkailija}/sijoittelu-service/resources/.../sijoitteluajo/latest/hakemukset?hyvaksytyt=true&hakukohdeOid=
+		StringBuilder urlBuilder = new StringBuilder().append("/sijoittelu/")
+				.append(hakuOid).append("/sijoitteluajo/")
+				.append(SijoitteluResource.LATEST).append("/hakemukset");
+		String url = urlBuilder.toString();
+		LOG.warn("Asynkroninen kutsu: {}{}?ilmanHyvaksyntaa=true", address, url);
+		return WebClient.fromClient(webClient)
+		//
+				.path(url)
+				//
+				.query("ilmanHyvaksyntaa", true)
+				//
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				//
+				.async().get(new GenericType<HakijaPaginationObject>() {
+				});
 	}
 
 	@Override

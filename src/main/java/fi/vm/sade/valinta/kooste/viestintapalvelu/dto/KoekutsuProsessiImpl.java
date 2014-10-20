@@ -31,6 +31,10 @@ public class KoekutsuProsessiImpl extends DokumenttiProsessi implements
 		setDokumenttiId(dokumentId);
 	}
 
+	public boolean isKeskeytetty() {
+		return !getPoikkeukset().isEmpty();
+	}
+
 	public void keskeyta() {
 		if (getDokumenttiId() == null) {
 			getPoikkeukset().add(

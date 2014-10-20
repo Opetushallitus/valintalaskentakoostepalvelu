@@ -12,4 +12,6 @@ public interface KirjeProsessi {
 	void valmistui(String dokumenttiId);
 
 	void keskeyta();
+
+	boolean isKeskeytetty();
 }
