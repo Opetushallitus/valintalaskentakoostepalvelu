@@ -1,0 +1,22 @@
+package fi.vm.sade.valinta.kooste.viestintapalvelu.route;
+
+import java.util.List;
+
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
+public interface JalkiohjauskirjeService {
+
+	void jalkiohjauskirjeetHakemuksille(KirjeProsessi prosessi,
+			JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids);
+
+	void jalkiohjauskirjeetHakukohteelle(KirjeProsessi prosessi,
+			JalkiohjauskirjeDTO jalkiohjauskirjeDTO);
+
+}

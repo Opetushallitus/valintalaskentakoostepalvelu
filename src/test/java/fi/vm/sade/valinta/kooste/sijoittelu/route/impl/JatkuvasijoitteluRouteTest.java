@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoitteluExchange;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource;
 import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
@@ -33,8 +34,8 @@ public class JatkuvasijoitteluRouteTest extends CamelTestSupport {
 	private final DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue = new DelayQueue<>();
 	private final SijoittelunSeurantaResource sijoittelunSeurantaResource = Mockito
 			.mock(SijoittelunSeurantaResource.class);
-	private final SijoitteluResource sijoitteluResource = Mockito
-			.mock(SijoitteluResource.class);
+	private final SijoitteluAsyncResource sijoitteluResource = Mockito
+			.mock(SijoitteluAsyncResource.class);
 	private final String jatkuvaSijoitteluTimer = "direct:jatkuvaSijoitteluTimer";
 	private final String jatkuvaSijoitteluQueue = "direct:jatkuvaSijoitteluQueue";
 	private final ConcurrentHashMap<String, Long> ajossaHakuOids = Mockito

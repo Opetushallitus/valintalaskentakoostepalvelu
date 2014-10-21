@@ -25,6 +25,7 @@ import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessiImpl;
@@ -34,6 +35,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeRoute;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
@@ -59,17 +61,13 @@ public class ViestintapalveluAktivointiResource {
 	@Autowired
 	private OsoitetarratRoute osoitetarratRoute;
 	@Autowired
-	private JalkiohjauskirjeRoute jalkiohjauskirjeBatchProxy;
-	@Autowired
-	private HyvaksymiskirjeRoute hyvaksymiskirjeetRoute;
-	@Autowired
-	private KoekutsukirjeRoute koekutsukirjeRoute;
-	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 	@Autowired
 	private KoekutsukirjeetService koekutsukirjeetService;
 	@Autowired
 	private HyvaksymiskirjeetService hyvaksymiskirjeetService;
+	@Autowired
+	private JalkiohjauskirjeService jalkiohjauskirjeService;
 
 	@POST
 	@Path("/osoitetarrat/aktivoi")
@@ -210,23 +208,25 @@ public class ViestintapalveluAktivointiResource {
 			if (hakemuksillaRajaus == null) {
 				hakemuksillaRajaus = new DokumentinLisatiedot();
 			}
-			DokumenttiProsessi jalkiohjauskirjeetProsessi = new DokumenttiProsessi(
-					"Jälkiohjauskirjeet", "Luo jälkiohjauskirjeet", hakuOid,
-					tags("jalkiohjauskirjeet", hakemuksillaRajaus.getTag()));
-			dokumenttiProsessiKomponentti
-					.tuoUusiProsessi(jalkiohjauskirjeetProsessi);
+			KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 			LOG.warn("Luodaan jälkiohjauskirjeet kielellä {}. Onko {} == {}",
 					hakemuksillaRajaus.getLanguageCode(), KieliUtil.RUOTSI,
 					KieliUtil.RUOTSI.equals(hakemuksillaRajaus
 							.getLanguageCode()));
-			jalkiohjauskirjeBatchProxy.jalkiohjauskirjeetAktivoi(
-					jalkiohjauskirjeetProsessi,
-					hakemuksillaRajaus.getLanguageCode(), tarjoajaOid,
-					templateName, hakemuksillaRajaus.getLetterBodyText(), tag,
-					hakemuksillaRajaus.getHakemusOids(), hakuOid,
-					//
-					SecurityContextHolder.getContext().getAuthentication());
-			return jalkiohjauskirjeetProsessi.toProsessiId();
+			JalkiohjauskirjeDTO jalkiohjauskirjeDTO = new JalkiohjauskirjeDTO(
+					tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
+					templateName, tag, hakuOid,
+					hakemuksillaRajaus.getLanguageCode());
+			if (hakemuksillaRajaus.getHakemusOids() == null) {
+				jalkiohjauskirjeService.jalkiohjauskirjeetHakukohteelle(
+						prosessi, jalkiohjauskirjeDTO);
+			} else {
+				jalkiohjauskirjeService.jalkiohjauskirjeetHakemuksille(
+						prosessi, jalkiohjauskirjeDTO,
+						hakemuksillaRajaus.getHakemusOids());
+			}
+			return prosessi.toProsessiId();
 		} catch (Exception e) {
 			LOG.error("Jälkiohjauskirjeiden luonnissa virhe! {}",
 					e.getMessage());
