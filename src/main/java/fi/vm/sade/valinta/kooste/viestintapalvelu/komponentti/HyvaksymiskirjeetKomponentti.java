@@ -38,6 +38,7 @@ import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -302,6 +303,8 @@ public class HyvaksymiskirjeetKomponentti {
 			replacements.put("tulokset", tulosList);
 			replacements.put("koulu", koulu.getTeksti(preferoituKielikoodi,
 					vakioTarjoajanNimi(hakukohdeOid)));
+			replacements.put("henkilotunnus",
+					new HakemusWrapper(hakemus).getHenkilotunnus());
 			replacements.put("koulutus", koulutus.getTeksti(
 					preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
 			kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi,

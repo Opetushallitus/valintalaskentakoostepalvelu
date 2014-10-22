@@ -262,6 +262,8 @@ public class JalkiohjauskirjeetKomponentti {
 			}
 			Map<String, Object> replacements = Maps.newHashMap();
 			replacements.put("tulokset", tulosList);
+			replacements.put("henkilotunnus",
+					new HakemusWrapper(hakemus).getHenkilotunnus());
 			kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi,
 					replacements));
 		}
