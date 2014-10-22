@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
@@ -63,7 +64,8 @@ public class HakemuksetConverterUtil {
 							+ " puuttui personOid! Jalkikasittely ehka tekematta! Tarkista hakemusten tiedot!");
 		}
 		List<HakemusDTO> hakemusDtot;
-		final AtomicReference<Hakemus> h0 = new AtomicReference<Hakemus>();
+		Map<String, Exception> epaonnistuneetKonversiot = Maps
+				.newConcurrentMap();
 		try {
 
 			hakemusDtot = hakemukset.parallelStream()
@@ -71,21 +73,33 @@ public class HakemuksetConverterUtil {
 					.filter(Objects::nonNull)
 					//
 					.map(h -> {
-						h0.set(h);
-						return Converter.hakemusToHakemusDTO(h);
+						try {
+							return Converter.hakemusToHakemusDTO(h);
+						} catch (Exception e) {
+							epaonnistuneetKonversiot.put(h.getOid(), e);
+							return null;
+						}
 					}).collect(Collectors.toList());
 		} catch (Exception e) {
-			if (h0.get() == null) {
-				LOG.error(
-						"Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle {} ja null hakemukselle. Syy {}!",
-						hakukohdeOid, e.getMessage());
-			} else {
-				LOG.error(
-						"Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle {} ja hakemukselle {}. Syy {}!",
-						hakukohdeOid, h0.get().getOid(), e.getMessage());
-			}
+			LOG.error(
+					"Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle {} ja null hakemukselle. Syy {}!",
+					hakukohdeOid, e.getMessage());
 			throw e;
 		}
+		if (!epaonnistuneetKonversiot.isEmpty()) {
+			LOG.error(
+					"Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle {} ja hakemuksille {}. Esimerkiksi {}!",
+					hakukohdeOid, Arrays.toString(epaonnistuneetKonversiot
+							.keySet().toArray()), epaonnistuneetKonversiot
+							.values().iterator().next().getMessage());
+			throw new RuntimeException(
+					"Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle "
+							+ hakukohdeOid
+							+ " ja hakemuksille "
+							+ Arrays.toString(epaonnistuneetKonversiot.keySet()
+									.toArray()) + "!");
+		}
+
 		try {
 			if (oppijat != null) {
 				Map<String, Oppija> oppijaNumeroJaOppija = oppijat.stream()

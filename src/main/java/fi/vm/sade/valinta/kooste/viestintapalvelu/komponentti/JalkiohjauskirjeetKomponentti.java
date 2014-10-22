@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.camel.Body;
 import org.apache.camel.Property;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
@@ -38,6 +40,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Pisteet;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 
 /**
  * @author Jussi Jartamo
@@ -116,7 +120,7 @@ public class JalkiohjauskirjeetKomponentti {
 			}
 			final Hakemus hakemus = hakemusOidHakemukset.get(hakemusOid); // hakemusProxy.haeHakemus(hakemusOid);
 			final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
-			final List<Map<String, String>> tulosList = new ArrayList<Map<String, String>>();
+			final List<Map<String, Object>> tulosList = new ArrayList<Map<String, Object>>();
 			if (!kaytetaanYlikirjoitettuKielikoodia) {
 				preferoituKielikoodi = new HakemusWrapper(hakemus)
 						.getAsiointikieli();
@@ -126,7 +130,7 @@ public class JalkiohjauskirjeetKomponentti {
 				String hakukohdeOid = hakutoive.getHakukohdeOid();
 				MetaHakukohde metakohde = jalkiohjauskirjeessaKaytetytHakukohteet
 						.get(hakukohdeOid);
-				Map<String, String> tulokset = new HashMap<String, String>();
+				Map<String, Object> tulokset = new HashMap<String, Object>();
 
 				tulokset.put(
 						"hakukohteenNimi",
@@ -162,8 +166,35 @@ public class JalkiohjauskirjeetKomponentti {
 								vakioTarjoajanNimi(hakukohdeOid)));
 				StringBuilder omatPisteet = new StringBuilder();
 				StringBuilder hyvaksytyt = new StringBuilder();
+
+				//
+				// VT-1036
+				//
+				List<Sijoitus> kkSijoitukset = Lists.newArrayList();
+				List<Pisteet> kkPisteet = Lists.newArrayList();
+				tulokset.put("sijoitukset", kkSijoitukset);
+				tulokset.put("pisteet", kkPisteet);
 				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
 						.getHakutoiveenValintatapajonot()) {
+					String kkNimi = valintatapajono.getValintatapajonoNimi();
+					int kkJonosija = Optional.ofNullable(
+							valintatapajono.getJonosija()).orElse(0)
+							+ Optional.ofNullable(
+									valintatapajono.getTasasijaJonosija())
+									.orElse(0) - 1;
+					int kkHyvaksytyt = Optional.ofNullable(
+							valintatapajono.getHyvaksytty()).orElse(0);
+					int kkPiste = Optional
+							.ofNullable(valintatapajono.getPisteet())
+							.orElse(BigDecimal.ZERO).intValue();
+					int kkMinimi = Optional
+							.ofNullable(
+									valintatapajono
+											.getAlinHyvaksyttyPistemaara())
+							.orElse(BigDecimal.ZERO).intValue();
+					kkSijoitukset.add(new Sijoitus(kkNimi, kkJonosija,
+							kkHyvaksytyt));
+					kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
 					//
 					// OVT-6334 : Logiikka ei kuulu koostepalveluun!
 					//
@@ -231,6 +262,8 @@ public class JalkiohjauskirjeetKomponentti {
 			}
 			Map<String, Object> replacements = Maps.newHashMap();
 			replacements.put("tulokset", tulosList);
+			replacements.put("henkilotunnus",
+					new HakemusWrapper(hakemus).getHenkilotunnus());
 			kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi,
 					replacements));
 		}
