@@ -50,7 +50,7 @@ public class JatkuvasijoitteluRouteTest extends CamelTestSupport {
 	protected ProducerTemplate queueTemplate;
 
 	@Test
-	public void testaaJatkuvaSijoitteluRouteSamanHakuaEiLaitetaJonoonMoneenOtteeseen() {
+	public void testaaJatkuvaSijoitteluRouteSamaaHakuaEiLaitetaJonoonMoneenOtteeseen() {
 		final String HK = "hk1";
 		Mockito.reset(sijoittelunSeurantaResource, sijoitteluResource);
 		SijoitteluDto s = new SijoitteluDto(HK, true, null, null, null, 1);
