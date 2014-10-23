@@ -60,6 +60,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -587,8 +588,12 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 																					.getHakemusOid();
 																		}
 																	}).toList());
+											Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti
+													.haeKiinnostavatHakukohteet(hakukohteenHakijat);
 											LetterBatch l = hyvaksymiskirjeetKomponentti
 													.teeHyvaksymiskirjeet(
+															null,
+															hyvaksymiskirjeessaKaytetytHakukohteet,
 															hakukohteenHakijat,
 															hakemukset,
 															hakukohdeOid,

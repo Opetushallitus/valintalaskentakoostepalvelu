@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -15,6 +16,7 @@ import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 
 public class HakijapalvelunOsoiteTest {
 
+	@Ignore
 	@Test
 	public void testaaHakijapalvelunOsoitteenHaku() throws JsonSyntaxException,
 			JsonIOException, IOException {
@@ -22,9 +24,5 @@ public class HakijapalvelunOsoiteTest {
 				new InputStreamReader(new ClassPathResource(
 						"organisaatio/organisaatiodto.json").getInputStream()),
 				OrganisaatioRDTO.class);
-		for (Map<String, String> yhteystiedot : organisaatio.getMetadata()
-				.getYhteystiedot()) {
-
-		}
 	}
 }
