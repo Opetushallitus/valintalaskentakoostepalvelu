@@ -59,6 +59,9 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 	private final int VAKIO_AJOTIHEYS = 24;// 24h
 	private final ConcurrentHashMap<String, Long> ajossaHakuOids;
 
+	@Value("${jatkuvasijoittelu.autostart:true}")
+	private boolean autoStartup = true;
+	
 	@Autowired
 	public JatkuvaSijoitteluRouteImpl(
 			// tarkistetaan viidentoista minuutin valein tilanne
@@ -127,6 +130,8 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 				.errorHandler(deadLetterChannel(DEADLETTERCHANNEL))
 				//
 				.routeId("Jatkuvan sijoittelun ajastin")
+				//
+				.autoStartup(autoStartup)
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
