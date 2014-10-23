@@ -1,0 +1,32 @@
+[
+{
+aoId: "1.2.246.562.20.10024964198",
+status: "ELIGIBLE",
+source: "COPY"
+},
+{
+aoId: "1.2.246.562.20.41025983325",
+status: "ELIGIBLE",
+source: "COPY"
+},
+{
+aoId: "1.2.246.562.20.90993026252",
+status: "ELIGIBLE",
+source: "COPY"
+},
+{
+aoId: "1.2.246.562.20.56474742543",
+status: "ELIGIBLE",
+source: "COPY"
+},
+{
+aoId: "1.2.246.562.20.44414467827",
+status: "ELIGIBLE",
+source: "COPY"
+},
+{
+aoId: "1.2.246.562.20.82363790419",
+status: "ELIGIBLE",
+source: "COPY"
+}
+]

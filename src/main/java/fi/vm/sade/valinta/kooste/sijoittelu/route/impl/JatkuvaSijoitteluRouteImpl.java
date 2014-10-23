@@ -74,7 +74,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 		this.jatkuvaSijoitteluQueue = jatkuvaSijoitteluQueue;
 		this.sijoitteluAsyncResource = sijoitteluAsyncResource;
 		this.sijoittelunSeurantaResource = sijoittelunSeurantaResource;
-		this.jatkuvaSijoitteluDelayedQueue = new DelayQueue<DelayedSijoitteluExchange>();
+		this.jatkuvaSijoitteluDelayedQueue = jatkuvaSijoitteluDelayedQueue;
 		this.ajossaHakuOids = new ConcurrentHashMap<>();
 	}
 
@@ -99,6 +99,110 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 		return jatkuvaSijoitteluDelayedQueue.stream()
 				.map(d -> d.getDelayedSijoittelu())
 				.collect(Collectors.toList());
+	}
+
+	public void teeJatkuvaSijoittelu() {
+		LOG.info("Jatkuvansijoittelun ajastin kaynnistyi");
+		Map<String, SijoitteluDto> aktiivisetSijoittelut = sijoittelunSeurantaResource
+				.hae().stream().filter(Objects::nonNull)// .collect(Collectors.toSet());
+
+				.filter(sijoitteluDto -> {
+					return sijoitteluDto.isAjossa();
+				})
+				//
+				// Onko aloitusajankohta jo mennyt.
+				// Null-aloitusajankohta tulkitaan etta on.
+				//
+				.filter(sijoitteluDto -> {
+					DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
+					//
+					// jos aloitusajankohta on jo mennyt tai
+					// se on nyt niin sijoittelu on
+					// aktiivinen sen osalta
+					//
+					return laitetaankoJoTyoJonoonEliEnaaTuntiJaljellaAktivointiin(aloitusajankohtaTaiNyt);
+				})
+				//
+				.collect(Collectors.toMap(s -> s.getHakuOid(), s -> s));
+		LOG.info(
+				"Jatkuvansijoittelun ajastin sai seurannalta {} aktiivista sijoittelua.",
+				aktiivisetSijoittelut.size());
+		//
+		// Poista yritetyt hakuoidit jaahylta
+		//
+		ajossaHakuOids.forEach((hakuOid, activationTime) -> {
+			DateTime activated = new DateTime(activationTime);
+			DateTime expires = new DateTime(activationTime)
+					.plusMillis(DELAY_WHEN_FAILS);
+			boolean vanheneekoNyt = expires.isBeforeNow()
+					|| expires.isEqualNow();
+			LOG.debug("Aktivoitu {} ja vanhenee {} vanheneeko nyt {}",
+					Formatter.paivamaara(activated.toDate()),
+					Formatter.paivamaara(expires.toDate()), vanheneekoNyt);
+			//
+				if (vanheneekoNyt) {
+					LOG.debug("Jaahy haulle {} vanhentui", hakuOid);
+					ajossaHakuOids.remove(hakuOid);
+				}
+			});
+		//
+		// Poistetaan sammutetut tai sijoittelut joiden
+		// ajankohta ei ole viela alkanut
+		//
+		jatkuvaSijoitteluDelayedQueue
+				.forEach(d -> {
+					//
+					// Poistetaan tyojonosta passiiviset
+					// sijoittelut
+					//
+					if (!aktiivisetSijoittelut.containsKey(d
+							.getDelayedSijoittelu().getHakuOid())) {
+						jatkuvaSijoitteluDelayedQueue.remove(d);
+						LOG.warn(
+								"Sijoittelu haulle {} poistettu ajastuksesta {}. Joko aloitusajankohtaa siirrettiin tulevaisuuteen tai jatkuvasijoittelu ei ole enaa aktiivinen haulle.",
+								d.getDelayedSijoittelu().getHakuOid(),
+								Formatter.paivamaara(new Date(d
+										.getDelayedSijoittelu().getWhen())));
+					}
+					if (ajossaHakuOids.containsKey(d.getDelayedSijoittelu()
+							.getHakuOid())) {
+						LOG.info(
+								"Sijoittelu haulle {} poistettu ajastuksesta {}. Ylimaarainen sijoitteluajo tai joko parhaillaan ajossa tai epaonnistunut.",
+								d.getDelayedSijoittelu().getHakuOid(),
+								Formatter.paivamaara(new Date(d
+										.getDelayedSijoittelu().getWhen())));
+						jatkuvaSijoitteluDelayedQueue.remove(d);
+					}
+				});
+
+		//
+		// Laita ajoon
+		//
+
+		aktiivisetSijoittelut
+				.forEach((hakuOid, sijoitteluDto) -> {
+					DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
+					DateTime ajastusHetki = ModuloiPaivamaaraJaTunnit
+							.moduloiSeuraava(aloitusajankohtaTaiNyt, DateTime
+									.now(), ajotiheysTaiVakio(sijoitteluDto
+									.getAjotiheys()));
+					LOG.info(
+							"Laitettiin tyojonoon jatkuvaa sijoittelua varten sijoittelutyo aktivoitumaan {} (tyo aktivoitui jatkuvaan sijoitteluun hetkella {}). Ylimaaraiset tyot tyojonossa ei haittaa. Ne siivotaan pois. Ainoastaan yksi tyo ajetaan per intervalli.",
+							Formatter.paivamaara(aloitusajankohtaTaiNyt
+									.toDate()), Formatter
+									.paivamaara(ajastusHetki.toDate()));
+					if (!ajossaHakuOids.containsKey(hakuOid)
+							&& jatkuvaSijoitteluDelayedQueue
+									.stream()
+									.filter(j -> hakuOid.equals(j.getHakuOid()))
+									.distinct().count() == 0L) {
+						jatkuvaSijoitteluDelayedQueue
+								.add(new DelayedSijoitteluExchange(
+										new DelayedSijoittelu(hakuOid,
+												ajastusHetki),
+										new DefaultExchange(getContext())));
+					}
+				});
 	}
 
 	@Override
@@ -135,119 +239,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
-						LOG.info("Jatkuvansijoittelun ajastin kaynnistyi");
-						Map<String, SijoitteluDto> aktiivisetSijoittelut = sijoittelunSeurantaResource
-								.hae().stream().filter(Objects::nonNull)// .collect(Collectors.toSet());
-
-								.filter(sijoitteluDto -> {
-									return sijoitteluDto.isAjossa();
-								})
-								//
-								// Onko aloitusajankohta jo mennyt.
-								// Null-aloitusajankohta tulkitaan etta on.
-								//
-								.filter(sijoitteluDto -> {
-									DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
-									//
-									// jos aloitusajankohta on jo mennyt tai
-									// se on nyt niin sijoittelu on
-									// aktiivinen sen osalta
-									//
-									return laitetaankoJoTyoJonoonEliEnaaTuntiJaljellaAktivointiin(aloitusajankohtaTaiNyt);
-								})
-								//
-								.collect(
-										Collectors.toMap(s -> s.getHakuOid(),
-												s -> s));
-						LOG.info(
-								"Jatkuvansijoittelun ajastin sai seurannalta {} aktiivista sijoittelua.",
-								aktiivisetSijoittelut.size());
-						//
-						// Poista yritetyt hakuoidit jaahylta
-						//
-						ajossaHakuOids.forEach((hakuOid, activationTime) -> {
-							DateTime activated = new DateTime(activationTime);
-							DateTime expires = new DateTime(activationTime)
-									.plusMillis(DELAY_WHEN_FAILS);
-							boolean vanheneekoNyt = expires.isBeforeNow()
-									|| expires.isEqualNow();
-							LOG.debug(
-									"Aktivoitu {} ja vanhenee {} vanheneeko nyt {}",
-									Formatter.paivamaara(activated.toDate()),
-									Formatter.paivamaara(expires.toDate()),
-									vanheneekoNyt);
-							//
-							if (vanheneekoNyt) {
-								LOG.debug("Jaahy haulle {} vanhentui", hakuOid);
-								ajossaHakuOids.remove(hakuOid);
-							}
-						});
-						//
-						// Poistetaan sammutetut tai sijoittelut joiden
-						// ajankohta ei ole viela alkanut
-						//
-						jatkuvaSijoitteluDelayedQueue.forEach(d -> {
-							//
-							// Poistetaan tyojonosta passiiviset
-							// sijoittelut
-							//
-							if (!aktiivisetSijoittelut.containsKey(d
-									.getDelayedSijoittelu().getHakuOid())) {
-								jatkuvaSijoitteluDelayedQueue.remove(d);
-								LOG.warn(
-										"Sijoittelu haulle {} poistettu ajastuksesta {}. Joko aloitusajankohtaa siirrettiin tulevaisuuteen tai jatkuvasijoittelu ei ole enaa aktiivinen haulle.",
-										d.getDelayedSijoittelu().getHakuOid(),
-										Formatter.paivamaara(new Date(d
-												.getDelayedSijoittelu()
-												.getWhen())));
-							}
-							if (ajossaHakuOids.containsKey(d
-									.getDelayedSijoittelu().getHakuOid())) {
-								LOG.info(
-										"Sijoittelu haulle {} poistettu ajastuksesta {}. Ylimaarainen sijoitteluajo tai joko parhaillaan ajossa tai epaonnistunut.",
-										d.getDelayedSijoittelu().getHakuOid(),
-										Formatter.paivamaara(new Date(d
-												.getDelayedSijoittelu()
-												.getWhen())));
-								jatkuvaSijoitteluDelayedQueue.remove(d);
-							}
-						});
-
-						//
-						// Laita ajoon
-						//
-
-						aktiivisetSijoittelut
-								.forEach((hakuOid, sijoitteluDto) -> {
-									DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
-									DateTime ajastusHetki = ModuloiPaivamaaraJaTunnit
-											.moduloiSeuraava(
-													aloitusajankohtaTaiNyt,
-													DateTime.now(),
-													ajotiheysTaiVakio(sijoitteluDto
-															.getAjotiheys()));
-									LOG.info(
-											"Laitettiin tyojonoon jatkuvaa sijoittelua varten sijoittelutyo aktivoitumaan {} (tyo aktivoitui jatkuvaan sijoitteluun hetkella {}). Ylimaaraiset tyot tyojonossa ei haittaa. Ne siivotaan pois. Ainoastaan yksi tyo ajetaan per intervalli.",
-											Formatter
-													.paivamaara(aloitusajankohtaTaiNyt
-															.toDate()),
-											Formatter.paivamaara(ajastusHetki
-													.toDate()));
-									if (!ajossaHakuOids.containsKey(hakuOid)
-											&& jatkuvaSijoitteluDelayedQueue
-													.stream()
-													.filter(j -> hakuOid.equals(j
-															.getHakuOid()))
-													.distinct().count() == 0L) {
-										jatkuvaSijoitteluDelayedQueue
-												.add(new DelayedSijoitteluExchange(
-														new DelayedSijoittelu(
-																hakuOid,
-																ajastusHetki),
-														new DefaultExchange(
-																getContext())));
-									}
-								});
+						teeJatkuvaSijoittelu();
 					}
 				});
 
@@ -295,6 +287,10 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 													poikkeus.getMessage());
 										});
 
+							} else {
+								LOG.error(
+										"Jatkuvasijoittelu ei kaynnisty haulle {} koska uudelleen kaynnistysviivetta on viela jaljella",
+										sijoitteluHakuOid.getHakuOid());
 							}
 						}));
 	}

@@ -22,6 +22,11 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosan
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class SureKonvertointiTest {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SureKonvertointiTest.class);
