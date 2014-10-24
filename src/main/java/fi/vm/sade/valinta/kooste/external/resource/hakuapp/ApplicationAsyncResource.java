@@ -16,6 +16,9 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
  */
 public interface ApplicationAsyncResource {
 
+	Future<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(
+			String hakuOid, String hakukohdeOid);
+
 	Future<List<Hakemus>> getApplicationsByOid(String hakuOid,
 			String hakukohdeOid);
 

@@ -27,6 +27,8 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoVientiRoute;
@@ -48,26 +50,24 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(PistesyottoVientiRouteImpl.class);
 
-	private final ValintakoeResource valintakoeResource;
-	private final ApplicationResource applicationResource;
-	private final ValintaperusteetResource hakukohdeResource;
+	private final ValintalaskentaValintakoeAsyncResource valintakoeResource;
+	private final ValintaperusteetAsyncResource valintaperusteetResource;
 	private final DokumenttiResource dokumenttiResource;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta;
 	private final HaeHakuTarjonnaltaKomponentti hakuTarjonnalta;
 	private final ApplicationAsyncResource applicationAsyncResource;
 
 	@Autowired
-	public PistesyottoVientiRouteImpl(ValintakoeResource valintakoeResource,
-			ApplicationResource applicationResource,
+	public PistesyottoVientiRouteImpl(
+			ValintalaskentaValintakoeAsyncResource valintakoeResource,
 			DokumenttiResource dokumenttiResource,
-			ValintaperusteetResource hakukohdeResource,
+			ValintaperusteetAsyncResource valintaperusteetResource,
 			HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta,
 			HaeHakuTarjonnaltaKomponentti hakuTarjonnalta,
 			ApplicationAsyncResource applicationAsyncResource) {
 		this.applicationAsyncResource = applicationAsyncResource;
 		this.valintakoeResource = valintakoeResource;
-		this.applicationResource = applicationResource;
-		this.hakukohdeResource = hakukohdeResource;
+		this.valintaperusteetResource = valintaperusteetResource;
 		this.dokumenttiResource = dokumenttiResource;
 		this.hakukohdeTarjonnalta = hakukohdeTarjonnalta;
 		this.hakuTarjonnalta = hakuTarjonnalta;
@@ -93,12 +93,13 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 					@Override
 					public void process(Exchange exchange) throws Exception {
+
 						dokumenttiprosessi(exchange).setKokonaistyo(
 						// haun nimi ja hakukohteen nimi
-								1 + 1 +
+								1 + 1 + 1 +
 								// osallistumistiedot + valintaperusteet +
 								// hakemuspistetiedot
-										1 + 1 + 1
+										1 + 1
 										// luonti
 										+ 1
 										// dokumenttipalveluun vienti
@@ -107,61 +108,78 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						String hakukohdeOid = hakukohdeOid(exchange);
 						String hakuNimi = new Teksti(hakuTarjonnalta.getHaku(
 								hakuOid).getNimi()).getTeksti();
-						Future<List<Hakemus>> hakemuksetFuture = null;
-						try {
-							hakemuksetFuture = applicationAsyncResource
-									.getApplicationsByOid(hakuOid, hakukohdeOid);
-						} catch (Exception e) {
-							LOG.error(
-									"Hakemusten haku hetua varten epaonnistui! Jatketaan silti koska ei ole kriittista! {}",
-									e.getMessage());
-						}
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+						Future<List<ValintakoeOsallistuminenDTO>> osallistumistiedotFuture = valintakoeResource
+								.haeHakutoiveelle(hakukohdeOid);
+						Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource
+								.getApplicationsByOid(hakuOid, hakukohdeOid);
+						Future<List<ValintaperusteDTO>> valintaperusteetFuture = valintaperusteetResource
+								.findAvaimet(hakukohdeOid);
+
+						Future<List<ApplicationAdditionalDataDTO>> pistetiedotFuture = applicationAsyncResource
+								.getApplicationAdditionalData(hakuOid,
+										hakukohdeOid);
+
 						HakukohdeDTO hnimi = hakukohdeTarjonnalta
 								.haeHakukohdeNimi(hakukohdeOid);
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita(); // TARJONTA
+																				// HAETTU
 						String tarjoajaOid = hnimi.getTarjoajaOid();
 						String hakukohdeNimi = new Teksti(hnimi
 								.getHakukohdeNimi()).getTeksti();
 						String tarjoajaNimi = new Teksti(hnimi
 								.getTarjoajaNimi()).getTeksti();
-
-						// LOG.error("Osallistumistiedot");
-						List<ValintakoeOsallistuminenDTO> osallistumistiedot = valintakoeResource
-								.hakuByHakutoive(hakukohdeOid);
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-						// LOG.error("Valintaperusteet");
-						List<ValintaperusteDTO> valintaperusteet = hakukohdeResource
-								.findAvaimet(hakukohdeOid);
-						Collection<String> valintakoeTunnisteet = FluentIterable
-								.from(valintaperusteet)
-								.transform(
-										new Function<ValintaperusteDTO, String>() {
-											@Override
-											public String apply(
-													ValintaperusteDTO input) {
-												return input.getTunniste();
-											}
-										}).toList();
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-						// LOG.error("Additional data");
-						List<ApplicationAdditionalDataDTO> pistetiedot = applicationResource
-								.getApplicationAdditionalData(hakuOid,
-										hakukohdeOid);
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
 						// LOG.error("Excelin luonti");
 
 						List<Hakemus> hakemukset = null;
 						try {
-							hakemukset = hakemuksetFuture.get(9000,
-									TimeUnit.MILLISECONDS);
+							hakemukset = hakemuksetFuture.get();
 						} catch (Exception e) {
-							LOG.error("Hakemusten haku timeouttasi {}",
+							LOG.error("Hakemusten haku epaonnistui {}",
 									e.getMessage());
+							throw e;
 						}
-						if (hakemukset == null) {
-							hakemukset = Collections.emptyList();
+						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita(); // HAKEMUKSET
+						List<ValintaperusteDTO> valintaperusteet = null;
+						Collection<String> valintakoeTunnisteet = null;
+						try {
+							valintaperusteet = valintaperusteetFuture.get();
+							valintakoeTunnisteet = FluentIterable
+									.from(valintaperusteet)
+									.transform(
+											new Function<ValintaperusteDTO, String>() {
+												@Override
+												public String apply(
+														ValintaperusteDTO input) {
+													return input.getTunniste();
+												}
+											}).toList();
+						} catch (Exception e) {
+							LOG.error(
+									"Tunnisteiden haku valintaperusteista epaonnistui {}",
+									e.getMessage());
+							throw e;
 						}
+						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita(); // VALINTAPERUSTEET
+						List<ApplicationAdditionalDataDTO> pistetiedot = null;
+						try {
+							pistetiedot = pistetiedotFuture.get();
+						} catch (Exception e) {
+							LOG.error(
+									"Pistetietojen haku hakuapp:sta epaonnistui {}",
+									e.getMessage());
+							throw e;
+						}
+						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita(); // PISTETIEDOT
+						List<ValintakoeOsallistuminenDTO> osallistumistiedot = null;
+						try {
+							osallistumistiedot = osallistumistiedotFuture.get();
+						} catch (Exception e) {
+							LOG.error(
+									"Osallistumistietojen haku valintalaskennasta epaonnistui {}",
+									e.getMessage());
+							throw e;
+						}
+						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita(); // OSALLISTUMISTIEDOT
 						PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
 								hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi,
 								hakukohdeNimi, tarjoajaNimi, hakemukset,

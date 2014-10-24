@@ -1,7 +1,10 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl;
 
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
+
+import javax.ws.rs.core.GenericType;
 
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
@@ -18,12 +21,14 @@ import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 
 /**
@@ -74,6 +79,20 @@ public class ValintaperusteetAsyncResourceImpl implements
 		// interceptors.add(cas);
 		// bean.setOutInterceptors(interceptors);
 		this.webClient = bean.createWebClient();
+	}
+
+	// @GET
+	// @Path("/avaimet/{oid}")
+	// @Produces(MediaType.APPLICATION_JSON)
+	// List<ValintaperusteDTO> findAvaimet(@PathParam("oid") String oid);
+	@Override
+	public Future<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
+		String url = new StringBuilder()
+				.append("/valintaperusteet-service/resources/hakukohde/avaimet/")
+				.append(hakukohdeOid).toString();
+		return WebClient.fromClient(webClient).path(url).async()
+				.get(new GenericType<List<ValintaperusteDTO>>() {
+				});
 	}
 
 	// /valintaperusteet/hakijaryhmä/{hakukohdeoid}
