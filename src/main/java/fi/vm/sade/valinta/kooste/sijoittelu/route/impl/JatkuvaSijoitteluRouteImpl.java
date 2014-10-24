@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.valinta.kooste.Reititys;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoitteluExchange;
@@ -47,7 +48,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 	private static final Logger LOG = LoggerFactory
 			.getLogger(JatkuvaSijoitteluRouteImpl.class);
 	private final String DEADLETTERCHANNEL = "direct:jatkuvan_sijoittelun_deadletterchannel";
-	private final SijoitteluAsyncResource sijoitteluAsyncResource;
+	private final SijoitteleAsyncResource sijoitteluAsyncResource;
 	private final SijoittelunSeurantaResource sijoittelunSeurantaResource;
 	private final String jatkuvaSijoitteluTimer;
 	private final String jatkuvaSijoitteluQueue;
@@ -61,13 +62,13 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 
 	@Value("${jatkuvasijoittelu.autostart:true}")
 	private boolean autoStartup = true;
-	
+
 	@Autowired
 	public JatkuvaSijoitteluRouteImpl(
 			// tarkistetaan viidentoista minuutin valein tilanne
 			@Value("timer://jatkuvaSijoitteluTimer?fixedRate=true&period=5minutes") String jatkuvaSijoitteluTimer,
 			@Value("seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue") String jatkuvaSijoitteluQueue,
-			SijoitteluAsyncResource sijoitteluAsyncResource,
+			SijoitteleAsyncResource sijoitteluAsyncResource,
 			SijoittelunSeurantaResource sijoittelunSeurantaResource,
 			@Qualifier("jatkuvaSijoitteluDelayedQueue") DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue) {
 		this.jatkuvaSijoitteluTimer = jatkuvaSijoitteluTimer;
@@ -82,7 +83,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 			// tarkistetaan viidentoista minuutin valein tilanne
 			String jatkuvaSijoitteluTimer,
 			String jatkuvaSijoitteluQueue,
-			SijoitteluAsyncResource sijoitteluAsyncResource,
+			SijoitteleAsyncResource sijoitteluAsyncResource,
 			SijoittelunSeurantaResource sijoittelunSeurantaResource,
 			DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue,
 			ConcurrentHashMap<String, Long> ajossaHakuOids) {

@@ -32,25 +32,23 @@ import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 
 /**
  * 
  * @author jussija
  *
- *         fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource <br>
- *         sijoitteluResource.hakemukset( hakuOid, SijoitteluResource.LATEST,
- *         true, null, null, hakukohteet, null, null);
  */
 @Service
-public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
+public class SijoitteleAsyncResourceImpl implements SijoitteleAsyncResource {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SijoitteluAsyncResourceImpl.class);
 	private final WebClient webClient;
 	private final String address;
 
 	@Autowired
-	public SijoitteluAsyncResourceImpl(
+	public SijoitteleAsyncResourceImpl(
 			//
 			@Value("${web.url.cas}") String webCasUrl,
 			// ${cas.service.suoritusrekisteri}
@@ -71,16 +69,6 @@ public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
 				.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
 		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
 		bean.setProviders(providers);
-		List<Interceptor<? extends Message>> interceptors = Lists
-				.newArrayList();
-
-		CasApplicationAsAUserInterceptor cas = new CasApplicationAsAUserInterceptor();
-		cas.setWebCasUrl(webCasUrl);
-		cas.setTargetService(targetService);
-		cas.setAppClientUsername(appClientUsername);
-		cas.setAppClientPassword(appClientPassword);
-		interceptors.add(cas);
-		bean.setOutInterceptors(interceptors);
 		this.webClient = bean.createWebClient();
 		ClientConfiguration c = WebClient.getConfig(webClient);
 		/**
@@ -94,65 +82,23 @@ public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
 	}
 
 	@Override
-	public Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(
-			String hakuOid) {
-		/*
-		 * private SijoitteluResource sijoitteluResource;
-		 * 
-		 * @Autowired public SijoitteluIlmankoulutuspaikkaaKomponentti(
-		 * SijoitteluResource sijoitteluResource) { this.sijoitteluResource =
-		 * sijoitteluResource; }
-		 * 
-		 * public List<HakijaDTO> ilmankoulutuspaikkaa(
-		 * 
-		 * @Property("hakuOid") String hakuOid,
-		 * 
-		 * @Property("sijoitteluajoId") String sijoitteluajoId) {
-		 * 
-		 * final HakijaPaginationObject result = sijoitteluResource.hakemukset(
-		 * hakuOid, SijoitteluResource.LATEST, null, true, null, null, null,
-		 * null); return result.getResults(); }
-		 */
-		// https://${host.virkailija}/sijoittelu-service/resources/.../sijoitteluajo/latest/hakemukset?hyvaksytyt=true&hakukohdeOid=
-		StringBuilder urlBuilder = new StringBuilder().append("/sijoittelu/")
-				.append(hakuOid).append("/sijoitteluajo/")
-				.append(SijoitteluResource.LATEST).append("/hakemukset");
-		String url = urlBuilder.toString();
-		LOG.warn("Asynkroninen kutsu: {}{}?ilmanHyvaksyntaa=true", address, url);
-		return WebClient.fromClient(webClient)
-		//
-				.path(url)
-				//
-				.query("ilmanHyvaksyntaa", true)
-				//
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				//
-				.async().get(new GenericType<HakijaPaginationObject>() {
-				});
-	}
+	public void sijoittele(String hakuOid, Consumer<String> callback,
+			Consumer<Throwable> failureCallback) {
+		// fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource
+		String url = new StringBuilder().append("/sijoittele/").append(hakuOid)
+				.toString();
+		try {
 
-	@Override
-	public Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(
-			String hakuOid, String hakukohdeOid) {
-		// https://${host.virkailija}/sijoittelu-service/resources/.../sijoitteluajo/latest/hakemukset?hyvaksytyt=true&hakukohdeOid=
-		StringBuilder urlBuilder = new StringBuilder().append("/sijoittelu/")
-				.append(hakuOid).append("/sijoitteluajo/")
-				.append(SijoitteluResource.LATEST).append("/hakemukset");
-		String url = urlBuilder.toString();
-		LOG.warn("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}",
-				address, url, hakukohdeOid);
-		return WebClient.fromClient(webClient)
-		//
-				.path(url)
-				//
-				.query("hyvaksytyt", true)
-				//
-				.query("hakukohdeOid", hakukohdeOid)
-				//
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				//
-				.async().get(new GenericType<HakijaPaginationObject>() {
-				});
+			WebClient
+					.fromClient(webClient)
+					.path(url)
+					.async()
+					.get(new Callback<String>(address, url, callback,
+							failureCallback, new TypeToken<String>() {
+							}.getType()));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+		}
 	}
 
 }

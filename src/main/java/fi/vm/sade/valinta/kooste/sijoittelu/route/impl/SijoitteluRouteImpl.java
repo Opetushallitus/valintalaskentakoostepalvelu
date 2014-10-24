@@ -22,6 +22,8 @@ import com.google.common.cache.RemovalNotification;
 
 import fi.vm.sade.valinta.kooste.KoostepalveluRouteBuilder;
 import fi.vm.sade.valinta.kooste.Reititys;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
@@ -48,10 +50,10 @@ public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu>
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SijoitteluRouteImpl.class);
 	private final String DEADLETTERCHANNEL = "direct:sijoittelun_deadletterchannel";
-	private final SijoitteluResource sijoitteluResource;
+	private final SijoitteleAsyncResource sijoitteluResource;
 
 	@Autowired
-	public SijoitteluRouteImpl(SijoitteluResource sijoitteluResource) {
+	public SijoitteluRouteImpl(SijoitteleAsyncResource sijoitteluResource) {
 		this.sijoitteluResource = sijoitteluResource;
 	}
 
@@ -118,23 +120,23 @@ public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu>
 				.threads()
 				//
 				.process(
-						Reititys.<Sijoittelu> kuluttaja(
-								(s -> {
-									LOG.error(
-											"Aloitetaan sijoittelu haulle {}",
-											s.getHakuOid());
-									sijoitteluResource.sijoittele(s
-											.getHakuOid());
-									s.setValmis();
-								}),
-								((s, e) -> {
-									LOG.error(
-											"Sijoittelu epaonnistui haulle {}. {}\r\n{}",
-											s.getHakuOid(), e.getMessage(),
-											e.getStackTrace());
-									s.setOhitettu();
-									return false;
-								})));
+						Reititys.<Sijoittelu> kuluttaja((s -> {
+							LOG.error("Aloitetaan sijoittelu haulle {}",
+									s.getHakuOid());
+							sijoitteluResource.sijoittele(
+									s.getHakuOid(),
+									success -> {
+										s.setValmis();
+									},
+									e -> {
+										LOG.error(
+												"Sijoittelu epaonnistui haulle {}. {}\r\n{}",
+												s.getHakuOid(), e.getMessage(),
+												e.getStackTrace());
+										s.setOhitettu();
+									});
+
+						})));
 	}
 
 	@Override
