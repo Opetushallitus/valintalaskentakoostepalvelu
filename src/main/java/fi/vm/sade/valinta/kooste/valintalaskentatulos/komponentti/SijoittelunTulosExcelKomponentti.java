@@ -117,7 +117,7 @@ public class SijoittelunTulosExcelKomponentti {
 					hakemusTilat = Collections.emptyMap();
 				}
 			}
-			// rivit.add(new Object[] { "Valintatapajono", jono.getOid() });
+			rivit.add(new Object[] { "Valintatapajono", jono.getNimi() });
 			rivit.add(new Object[] { "Jonosija", "Hakemus", "Hakija",
 					//
 					"Osoite", "Sähköposti", "Puhelinnumero", "Lupa julkaisuun",

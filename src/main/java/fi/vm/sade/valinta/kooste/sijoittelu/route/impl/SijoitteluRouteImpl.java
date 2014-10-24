@@ -1,18 +1,14 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import static fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute.SIJOITTELU_REITTI;
 
-import org.apache.camel.AsyncCallback;
-import org.apache.camel.AsyncProcessor;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.impl.converter.AsyncProcessorTypeConverter;
-import org.apache.camel.util.AsyncProcessorConverterHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.cache.Cache;
@@ -23,20 +19,8 @@ import com.google.common.cache.RemovalNotification;
 import fi.vm.sade.valinta.kooste.KoostepalveluRouteBuilder;
 import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
-import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SuoritaSijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoittelunValvonta;
-import static fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute.*;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
-import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 
 /**
  * 

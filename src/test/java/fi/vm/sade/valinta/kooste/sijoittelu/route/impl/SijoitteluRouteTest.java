@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
-import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import junit.framework.Assert;
@@ -11,13 +10,9 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 
 /**
