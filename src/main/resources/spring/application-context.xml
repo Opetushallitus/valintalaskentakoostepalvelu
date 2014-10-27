@@ -582,8 +582,9 @@
 		class="fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl.SuoritusrekisteriAsyncResourceImpl" />
 	<!-- Sijoittelu Async -->
 	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteleAsyncResourceImpl" />
+<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteluAsyncResourceImpl" />
-
 	<!-- Vipa Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.ViestintapalveluAsyncResourceImpl" />
