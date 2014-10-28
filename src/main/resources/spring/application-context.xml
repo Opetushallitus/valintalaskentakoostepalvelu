@@ -219,6 +219,7 @@
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
 
+<!-- 
 	<jaxrs-client:client id="sijoitteluRestClient"
 		address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
 		serviceClass="fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource"
@@ -236,7 +237,7 @@
 			</bean>
 		</jaxrs-client:outInterceptors>
 	</jaxrs-client:client>
-
+ -->
 
 	<jaxrs-client:client id="SijoitteluServiceRestClient"
 		address="${valintalaskentakoostepalvelu.sijoittelu.rest.url}"
@@ -581,8 +582,9 @@
 		class="fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl.SuoritusrekisteriAsyncResourceImpl" />
 	<!-- Sijoittelu Async -->
 	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteleAsyncResourceImpl" />
+<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteluAsyncResourceImpl" />
-
 	<!-- Vipa Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.ViestintapalveluAsyncResourceImpl" />
@@ -590,6 +592,8 @@
 		class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetValintakoeAsyncResourceImpl" />
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaValintakoeAsyncResourceImpl" />
+
+    <bean class="fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl.OrganisaatioAsyncResourceImpl" />
 
 	<!-- Swagger -->
 	<!-- Swagger API listing resource -->

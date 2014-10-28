@@ -28,6 +28,8 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoArvo;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviListAdapter;
@@ -50,26 +52,22 @@ import fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource;
 public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(PistesyottoTuontiRouteImpl.class);
-	private final ValintakoeResource valintakoeResource;
+
+	private final ValintalaskentaValintakoeAsyncResource valintakoeResource;
+	private final ValintaperusteetAsyncResource valintaperusteetResource;
+	private final ApplicationAsyncResource applicationAsyncResource;
 	private final ApplicationResource applicationResource;
-	private final ValintaperusteetResource hakukohdeResource;
-	private final DokumenttiResource dokumenttiResource;
-	private final HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta;
-	private final HaeHakuTarjonnaltaKomponentti hakuTarjonnalta;
 
 	@Autowired
-	public PistesyottoTuontiRouteImpl(ValintakoeResource valintakoeResource,
-			ApplicationResource applicationResource,
-			DokumenttiResource dokumenttiResource,
-			ValintaperusteetResource hakukohdeResource,
-			HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta,
-			HaeHakuTarjonnaltaKomponentti hakuTarjonnalta) {
+	public PistesyottoTuontiRouteImpl(
+			ValintalaskentaValintakoeAsyncResource valintakoeResource,
+			ApplicationAsyncResource applicationAsyncResource,
+			ValintaperusteetAsyncResource valintaperusteetResource,
+			ApplicationResource applicationResource) {
 		this.valintakoeResource = valintakoeResource;
 		this.applicationResource = applicationResource;
-		this.hakukohdeResource = hakukohdeResource;
-		this.dokumenttiResource = dokumenttiResource;
-		this.hakukohdeTarjonnalta = hakukohdeTarjonnalta;
-		this.hakuTarjonnalta = hakuTarjonnalta;
+		this.applicationAsyncResource = applicationAsyncResource;
+		this.valintaperusteetResource = valintaperusteetResource;
 	}
 
 	@Override
@@ -105,12 +103,17 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						String hakuNimi = StringUtils.EMPTY;
 						String hakukohdeNimi = StringUtils.EMPTY;
 						String tarjoajaNimi = StringUtils.EMPTY;
-
+						Future<List<ValintakoeOsallistuminenDTO>> osallistumistiedotFuture = valintakoeResource
+								.haeHakutoiveelle(hakukohdeOid);
+						Future<List<ValintaperusteDTO>> valintaperusteetFuture = valintaperusteetResource
+								.findAvaimet(hakukohdeOid);
+						Future<List<ApplicationAdditionalDataDTO>> pistetiedotFuture = applicationAsyncResource
+								.getApplicationAdditionalData(hakuOid,
+										hakukohdeOid);
 						// LOG.error("Osallistumistiedot");
 						List<ValintakoeOsallistuminenDTO> osallistumistiedot;
 						try {
-							osallistumistiedot = valintakoeResource
-									.hakuByHakutoive(hakukohdeOid);
+							osallistumistiedot = osallistumistiedotFuture.get();
 							dokumenttiprosessi(exchange)
 									.inkrementoiTehtyjaToita();
 						} catch (Exception e) {
@@ -126,8 +129,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						// LOG.error("Valintaperusteet");
 						List<ValintaperusteDTO> valintaperusteet;
 						try {
-							valintaperusteet = hakukohdeResource
-									.findAvaimet(hakukohdeOid);
+							valintaperusteet = valintaperusteetFuture.get();
 						} catch (Exception e) {
 							dokumenttiprosessi(exchange)
 									.getPoikkeukset()
@@ -152,9 +154,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						// LOG.error("Additional data");
 						List<ApplicationAdditionalDataDTO> pistetiedot;
 						try {
-							pistetiedot = applicationResource
-									.getApplicationAdditionalData(hakuOid,
-											hakukohdeOid);
+							pistetiedot = pistetiedotFuture.get();
 						} catch (Exception e) {
 							dokumenttiprosessi(exchange)
 									.getPoikkeukset()

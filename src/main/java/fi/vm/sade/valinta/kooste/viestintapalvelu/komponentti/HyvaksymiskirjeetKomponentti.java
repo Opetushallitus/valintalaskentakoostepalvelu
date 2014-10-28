@@ -94,14 +94,11 @@ public class HyvaksymiskirjeetKomponentti {
 				.toString();
 	}
 
-	public LetterBatch teeHyvaksymiskirjeet(
-			@Body Collection<HakijaDTO> hakukohteenHakijat,
-			@Property("hakemukset") List<Hakemus> hakemukset,
-			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
-			@Simple("${property.hakuOid}") String hakuOid,
-			@Property("tarjoajaOid") String tarjoajaOid,
-			@Property("sisalto") String sisalto, @Property("tag") String tag,
-			@Property("templateName") String templateName) {
+	public LetterBatch teeHyvaksymiskirjeet(Osoite hakijapalveluidenOsoite,
+			Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
+			Collection<HakijaDTO> hakukohteenHakijat, List<Hakemus> hakemukset,
+			String hakukohdeOid, String hakuOid, String tarjoajaOid,
+			String sisalto, String tag, String templateName) {
 
 		LOG.debug(
 				"Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'",
@@ -120,17 +117,21 @@ public class HyvaksymiskirjeetKomponentti {
 			throw new HakemuspalveluException(
 					"Hakukohteella on oltava vähintään yksi hyväksytty hakija että hyväksymiskirjeet voidaan luoda!");
 		}
-		final Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = haeKiinnostavatHakukohteet(hakukohteenHakijat);
+		// final Map<String, MetaHakukohde>
+		// hyvaksymiskirjeessaKaytetytHakukohteet =
+		// haeKiinnostavatHakukohteet(hakukohteenHakijat);
 		final List<Letter> kirjeet = new ArrayList<Letter>();
 		final Teksti koulu;
 		final Teksti koulutus;
+		final String preferoituKielikoodi;
 		{
 			MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet
 					.get(hakukohdeOid);
 			koulu = metakohde.getTarjoajaNimi();
 			koulutus = metakohde.getHakukohdeNimi();
+			preferoituKielikoodi = metakohde.getHakukohteenKieli();// KieliUtil.SUOMI;
 		}
-		String preferoituKielikoodi = KieliUtil.SUOMI;
+
 		for (HakijaDTO hakija : hakukohteenHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
 			final Hakemus hakemus = hakukohteenHakemukset.get(hakemusOid);
@@ -211,9 +212,9 @@ public class HyvaksymiskirjeetKomponentti {
 
 					// Hyvaksytty valintatapajonossa -- oletataan etta
 					// hyvaksytty hakukohteeseen
-					if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
-						preferoituKielikoodi = metakohde.getHakukohteenKieli();
-					}
+					// if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
+					// preferoituKielikoodi = metakohde.getHakukohteenKieli();
+					// }
 					//
 					// OVT-6334 : Logiikka ei kuulu koostepalveluun!
 					//
@@ -291,6 +292,7 @@ public class HyvaksymiskirjeetKomponentti {
 				tulokset.put("hyvaksytyt", hyvaksytyt.toString());
 				tulokset.put("alinHyvaksyttyPistemaara", StringUtils.EMPTY);
 				tulokset.put("kaikkiHakeneet", StringUtils.EMPTY);
+				tulokset.put("hakijapalveluidenOsoite", hakijapalveluidenOsoite);
 				tulokset.put(
 						"hakukohteenNimi",
 						metakohde.getHakukohdeNimi().getTeksti(
@@ -348,7 +350,7 @@ public class HyvaksymiskirjeetKomponentti {
 	// niihin liittyvat hakukohteet - eli myos hakijoiden hylatyt hakukohteet!
 	// Metahakukohteille haetaan muun muassa tarjoajanimi!
 	//
-	private Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(
+	public Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(
 			Collection<HakijaDTO> hakukohteenHakijat) {
 		Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
 		for (HakijaDTO hakija : hakukohteenHakijat) {

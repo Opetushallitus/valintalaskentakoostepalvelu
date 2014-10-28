@@ -303,9 +303,11 @@ public class PistesyottoExcel {
 					.append(", ").append(data.getFirstNames()).toString()));
 			s.add(new TekstiArvo(Optional.ofNullable(
 					oidToHetu.get(data.getOid())).orElse(StringUtils.EMPTY)));
+			boolean syote = false;
 			if (!osallistuja) {
 				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
 					if (!valintaperuste.getVaatiiOsallistumisen()) {
+						syote = true;
 						if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
 								.getFunktiotyyppi())) {
 							Number value;
@@ -353,7 +355,7 @@ public class PistesyottoExcel {
 					if (Osallistuminen.OSALLISTUU.equals(valintakoe
 							.getOsallistuminenTulos().getOsallistuminen())
 							|| !valintaperuste.getVaatiiOsallistumisen()) {
-
+						syote = true;
 						if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
 								.getFunktiotyyppi())) {
 							Number value = asNumber(data.getAdditionalData()
@@ -390,7 +392,9 @@ public class PistesyottoExcel {
 					}
 				}
 			}
-			sx.add(s);
+			if (syote) {
+				sx.add(s);
+			}
 		}
 
 		if (sx.isEmpty()) {

@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
+import java.util.function.Consumer;
+
 import junit.framework.Assert;
 
 import org.apache.camel.Produce;
@@ -8,10 +10,9 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
-import org.mockito.Mockito;
 
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 
 /**
@@ -24,8 +25,16 @@ public class SijoitteluRouteTest extends CamelTestSupport {
 	@Produce(uri = SijoitteluAktivointiRoute.SIJOITTELU_REITTI)
 	protected ProducerTemplate template;
 
-	private SijoitteluResource sijoitteluResource = Mockito
-			.mock(SijoitteluResource.class);
+	private SijoitteleAsyncResource sijoitteluResource = new SijoitteleAsyncResource() {
+
+		@Override
+		public void sijoittele(String hakuOid,
+				Consumer<String> successCallback,
+				Consumer<Throwable> failureCallback) {
+			successCallback.accept("OK");
+		}
+
+	};
 
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new SijoitteluRouteImpl(sijoitteluResource);

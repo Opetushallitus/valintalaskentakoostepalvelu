@@ -8,8 +8,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
@@ -28,6 +30,7 @@ import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
@@ -89,6 +92,25 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		c.getHttpConduit().getClient()
 				.setReceiveTimeout(TimeUnit.HOURS.toMillis(1));
 		// org.apache.cxf.transport.http.async.SO_TIMEOUT
+	}
+
+	@Override
+	public Future<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(
+			String hakuOid, String hakukohdeOid) {
+		String url = new StringBuilder()
+				.append("/applications/additionalData/").append(hakuOid)
+				.append("/").append(hakukohdeOid).toString();
+		// new MediaType("application", "json", Charset.forName("UTF-8"));
+		return WebClient.fromClient(webClient).path(url)
+		//
+		//
+		// .accept("application/json;charset=UTF-8")
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				//
+				.async()
+				//
+				.get(new GenericType<List<ApplicationAdditionalDataDTO>>() {
+				});
 	}
 
 	// public static final String CHARSET_UTF_8 = ";charset=UTF-8";

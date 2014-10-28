@@ -10,9 +10,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 
 public interface SijoitteluAsyncResource {
 
-	void sijoittele(String hakuOid, Consumer<String> successCallback,
-			Consumer<Throwable> failureCallback);
-
 	Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(
 			String hakuOid, String hakukohdeOid);
 

@@ -77,6 +77,7 @@ public class SijoitteluAktivointiResource {
 
 	@POST
 	@Path("/aktivoi")
+	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_CRUD')")
 	@ApiOperation(value = "Sijoittelun aktivointi", response = String.class)
 	public void aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
 		if (!parametriService.valinnanhallintaEnabled(hakuOid)) {

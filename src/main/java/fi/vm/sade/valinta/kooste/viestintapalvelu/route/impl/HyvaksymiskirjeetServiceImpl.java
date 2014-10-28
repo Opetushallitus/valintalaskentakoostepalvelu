@@ -3,8 +3,10 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 import static rx.Observable.from;
 import static rx.Observable.zip;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -23,17 +25,23 @@ import rx.subjects.PublishSubject;
 
 import com.google.common.collect.Sets;
 
+import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.LueHakijapalvelunOsoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakijaBiPredicate;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 
@@ -46,23 +54,29 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService
 public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(HyvaksymiskirjeRouteImpl.class);
+			.getLogger(HyvaksymiskirjeetServiceImpl.class);
 	private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
 	private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
 	// private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
 	private final SijoitteluAsyncResource sijoitteluAsyncResource;
 	private final ApplicationAsyncResource applicationAsyncResource;
+	private final OrganisaatioAsyncResource organisaatioAsyncResource;
+	private final HaeOsoiteKomponentti haeOsoiteKomponentti;
 
 	@Autowired
 	public HyvaksymiskirjeetServiceImpl(
 			ViestintapalveluAsyncResource viestintapalveluAsyncResource,
 			HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
 			SijoitteluAsyncResource sijoitteluAsyncResource,
-			ApplicationAsyncResource applicationAsyncResource) {
+			ApplicationAsyncResource applicationAsyncResource,
+			OrganisaatioAsyncResource organisaatioAsyncResource,
+			HaeOsoiteKomponentti haeOsoiteKomponentti) {
 		this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
 		this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
 		this.sijoitteluAsyncResource = sijoitteluAsyncResource;
 		this.applicationAsyncResource = applicationAsyncResource;
+		this.organisaatioAsyncResource = organisaatioAsyncResource;
+		this.haeOsoiteKomponentti = haeOsoiteKomponentti;
 	}
 
 	@Override
@@ -75,12 +89,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 				.getKoulutuspaikkallisetHakijat(
 						hyvaksymiskirjeDTO.getHakuOid(),
 						hyvaksymiskirjeDTO.getHakukohdeOid());
-
+		Future<OrganisaatioRDTO> organisaatioFuture = organisaatioAsyncResource
+				.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
 		zip(
 				from(hakemuksetFuture),
 				from(hakijatFuture),
-				(hakemukset, hakijat) -> {
+				from(organisaatioFuture),
+				(hakemukset, hakijat, organisaatio) -> {
 					LOG.info("Tehdaan valituille hakijoille hyvaksytyt filtterointi.");
+
 					final Set<String> kohdeHakijat = Sets
 							.newHashSet(hakemusOids);
 					final String hakukohdeOid = hyvaksymiskirjeDTO
@@ -97,8 +114,25 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 									.getHakemusOid()))
 							//
 							.collect(Collectors.toList());
-
+					Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti
+							.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
+					Osoite hakijapalveluidenOsoite = null;
+					try {
+						MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet
+								.get(hyvaksymiskirjeDTO.getHakukohdeOid());
+						hakijapalveluidenOsoite = LueHakijapalvelunOsoite
+								.lueHakijapalvelunOsoite(haeOsoiteKomponentti,
+										kohdeHakukohde.getHakukohteenKieli(),
+										organisaatio);
+					} catch (Exception e) {
+						LOG.error(
+								"Hakijapalveluiden osoitteen haussa odottamaton virhe {},\r\n{}",
+								e.getMessage(),
+								Arrays.toString(e.getStackTrace()));
+					}
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+							hakijapalveluidenOsoite,
+							hyvaksymiskirjeessaKaytetytHakukohteet,
 							kohdeHakukohteessaHyvaksytyt, hakemukset,
 							hyvaksymiskirjeDTO.getHakukohdeOid(),
 							hyvaksymiskirjeDTO.getHakuOid(),
@@ -133,11 +167,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 				.getKoulutuspaikkallisetHakijat(
 						hyvaksymiskirjeDTO.getHakuOid(),
 						hyvaksymiskirjeDTO.getHakukohdeOid());
-
+		Future<OrganisaatioRDTO> organisaatioFuture = organisaatioAsyncResource
+				.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
 		zip(
 				from(hakemuksetFuture),
 				from(hakijatFuture),
-				(hakemukset, hakijat) -> {
+				from(organisaatioFuture),
+				(hakemukset, hakijat, organisaatio) -> {
 
 					LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi.");
 					final String hakukohdeOid = hyvaksymiskirjeDTO
@@ -149,8 +185,25 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							.stream()
 							.filter(h -> kohdeHakukohteessaHyvaksytty.test(h,
 									hakukohdeOid)).collect(Collectors.toList());
-
+					Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti
+							.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
+					Osoite hakijapalveluidenOsoite = null;
+					try {
+						MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet
+								.get(hyvaksymiskirjeDTO.getHakukohdeOid());
+						hakijapalveluidenOsoite = LueHakijapalvelunOsoite
+								.lueHakijapalvelunOsoite(haeOsoiteKomponentti,
+										kohdeHakukohde.getHakukohteenKieli(),
+										organisaatio);
+					} catch (Exception e) {
+						LOG.error(
+								"Hakijapalveluiden osoitteen haussa odottamaton virhe {},\r\n{}",
+								e.getMessage(),
+								Arrays.toString(e.getStackTrace()));
+					}
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+							hakijapalveluidenOsoite,
+							hyvaksymiskirjeessaKaytetytHakukohteet,
 							kohdeHakukohteessaHyvaksytyt, hakemukset,
 							hyvaksymiskirjeDTO.getHakukohdeOid(),
 							hyvaksymiskirjeDTO.getHakuOid(),

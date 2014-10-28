@@ -5,11 +5,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -26,12 +23,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.valinta.kooste.Reititys;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoitteluExchange;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.ModuloiPaivamaaraJaTunnit;
-import fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
@@ -47,7 +43,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 	private static final Logger LOG = LoggerFactory
 			.getLogger(JatkuvaSijoitteluRouteImpl.class);
 	private final String DEADLETTERCHANNEL = "direct:jatkuvan_sijoittelun_deadletterchannel";
-	private final SijoitteluAsyncResource sijoitteluAsyncResource;
+	private final SijoitteleAsyncResource sijoitteluAsyncResource;
 	private final SijoittelunSeurantaResource sijoittelunSeurantaResource;
 	private final String jatkuvaSijoitteluTimer;
 	private final String jatkuvaSijoitteluQueue;
@@ -59,12 +55,15 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 	private final int VAKIO_AJOTIHEYS = 24;// 24h
 	private final ConcurrentHashMap<String, Long> ajossaHakuOids;
 
+	@Value("${jatkuvasijoittelu.autostart:true}")
+	private boolean autoStartup = true;
+
 	@Autowired
 	public JatkuvaSijoitteluRouteImpl(
 			// tarkistetaan viidentoista minuutin valein tilanne
 			@Value("timer://jatkuvaSijoitteluTimer?fixedRate=true&period=5minutes") String jatkuvaSijoitteluTimer,
 			@Value("seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue") String jatkuvaSijoitteluQueue,
-			SijoitteluAsyncResource sijoitteluAsyncResource,
+			SijoitteleAsyncResource sijoitteluAsyncResource,
 			SijoittelunSeurantaResource sijoittelunSeurantaResource,
 			@Qualifier("jatkuvaSijoitteluDelayedQueue") DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue) {
 		this.jatkuvaSijoitteluTimer = jatkuvaSijoitteluTimer;
@@ -79,7 +78,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 			// tarkistetaan viidentoista minuutin valein tilanne
 			String jatkuvaSijoitteluTimer,
 			String jatkuvaSijoitteluQueue,
-			SijoitteluAsyncResource sijoitteluAsyncResource,
+			SijoitteleAsyncResource sijoitteluAsyncResource,
 			SijoittelunSeurantaResource sijoittelunSeurantaResource,
 			DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue,
 			ConcurrentHashMap<String, Long> ajossaHakuOids) {
@@ -231,6 +230,8 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 				.errorHandler(deadLetterChannel(DEADLETTERCHANNEL))
 				//
 				.routeId("Jatkuvan sijoittelun ajastin")
+				//
+				.autoStartup(autoStartup)
 				//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {

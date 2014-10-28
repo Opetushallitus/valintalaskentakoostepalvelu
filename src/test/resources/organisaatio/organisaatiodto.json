@@ -1,0 +1,386 @@
+{
+  "kayntiosoite" : {
+    "osoiteTyyppi" : "kaynti",
+    "yhteystietoOid" : "1.2.246.562.5.12531711302",
+    "postinumeroUri" : "posti_00014",
+    "osoite" : "Yliopistonkatu 4",
+    "postitoimipaikka" : "HELSINGIN YLIOPISTO",
+    "ytjPaivitysPvm" : null,
+    "lng" : null,
+    "lap" : null,
+    "coordinateType" : null,
+    "osavaltio" : null,
+    "extraRivi" : null,
+    "maaUri" : null
+  },
+  "kieletUris" : [ "oppilaitoksenopetuskieli_1#1", "oppilaitoksenopetuskieli_2#1" ],
+  "kotipaikkaUri" : "kunta_091",
+  "kuvaus2" : {
+  },
+  "maaUri" : "maatjavaltiot1_fin",
+  "oppilaitosTyyppiUri" : "oppilaitostyyppi_42#1",
+  "postiosoite" : {
+    "osoiteTyyppi" : "posti",
+    "yhteystietoOid" : "1.2.246.562.5.990369670010",
+    "postinumeroUri" : "posti_00014",
+    "osoite" : "PL 33",
+    "postitoimipaikka" : "HELSINGIN YLIOPISTO",
+    "ytjPaivitysPvm" : null,
+    "lng" : null,
+    "lap" : null,
+    "coordinateType" : null,
+    "osavaltio" : null,
+    "extraRivi" : null,
+    "maaUri" : null
+  },
+  "metadata" : {
+    "hakutoimistoEctsEmail" : {
+    },
+    "hakutoimistoEctsNimi" : {
+    },
+    "hakutoimistoEctsPuhelin" : {
+    },
+    "hakutoimistoEctsTehtavanimike" : {
+    },
+    "hakutoimistonNimi" : {
+      "kieli_fi#1" : "Hakijapalvelut",
+      "kieli_en#1" : "Admissions Services",
+      "kieli_sv#1" : "Ansökningsservicen"
+    },
+    "nimi" : {
+    },
+    "yhteystiedot" : [ {
+      "osoiteTyyppi" : "kaynti",
+      "kieli" : "kieli_fi#1",
+      "id" : "223754",
+      "yhteystietoOid" : "1.2.246.562.5.2014041612070222049544",
+      "osoite" : "Fabianinkatu 33, 1. krs",
+      "postinumeroUri" : "posti_00014",
+      "postitoimipaikka" : "HELSINGIN YLIOPISTO",
+      "ytjPaivitysPvm" : null,
+      "coordinateType" : null,
+      "lap" : null,
+      "lng" : null,
+      "osavaltio" : null,
+      "extraRivi" : null,
+      "maaUri" : null
+    }, {
+      "osoiteTyyppi" : "posti",
+      "kieli" : "kieli_fi#1",
+      "id" : "223755",
+      "yhteystietoOid" : "1.2.246.562.5.2014041612070222007610",
+      "osoite" : "PL 3",
+      "postinumeroUri" : "posti_00014",
+      "postitoimipaikka" : "HELSINGIN YLIOPISTO",
+      "ytjPaivitysPvm" : null,
+      "coordinateType" : null,
+      "lap" : null,
+      "lng" : null,
+      "osavaltio" : null,
+      "extraRivi" : null,
+      "maaUri" : null
+    }, {
+      "kieli" : "kieli_fi#1",
+      "id" : "223756",
+      "yhteystietoOid" : "13976392222180.3854752444547628",
+      "email" : "hakijapalvelut@helsinki.fi"
+    }, {
+      "kieli" : "kieli_fi#1",
+      "id" : "223757",
+      "yhteystietoOid" : "13976392222180.9642655278869416",
+      "www" : "http://www.helsinki.fi/opiskelijaksi"
+    }, {
+      "tyyppi" : "puhelin",
+      "kieli" : "kieli_fi#1",
+      "id" : "223758",
+      "yhteystietoOid" : "1.2.246.562.5.2014041612070222093381",
+      "numero" : "02941 24140"
+    }, {
+      "osoiteTyyppi" : "kaynti",
+      "kieli" : "kieli_sv#1",
+      "id" : "223759",
+      "yhteystietoOid" : "1.2.246.562.5.2014041612070222048328",
+      "osoite" : "Fabiansgatan 33, 1 vån",
+      "postinumeroUri" : "posti_00014",
+      "postitoimipaikka" : "HELSINGIN YLIOPISTO",
+      "ytjPaivitysPvm" : null,
+      "coordinateType" : null,
+      "lap" : null,
+      "lng" : null,
+      "osavaltio" : null,
+      "extraRivi" : null,
+      "maaUri" : null
+    }, {
+      "osoiteTyyppi" : "posti",
+      "kieli" : "kieli_sv#1",
+      "id" : "223760",
+      "yhteystietoOid" : "1.2.246.562.5.2014041612070222066394",
+      "osoite" : "PB 3",
+      "postinumeroUri" : "posti_00014",
+      "postitoimipaikka" : "HELSINGIN YLIOPISTO",
+      "ytjPaivitysPvm" : null,
+      "coordinateType" : null,
+      "lap" : null,
+      "lng" : null,
+      "osavaltio" : null,
+      "extraRivi" : null,
+      "maaUri" : null
+    }, {
+      "kieli" : "kieli_sv#1",
+      "id" : "223761",
+      "yhteystietoOid" : "13976392222180.5956790150699177",
+      "email" : "studera@helsinki.fi"
+    }, {
+      "kieli" : "kieli_sv#1",
+      "id" : "223762",
+      "yhteystietoOid" : "13976392222180.2849575640453794",
+      "www" : "http://www.helsinki.fi/ansokningen"
+    }, {
+      "tyyppi" : "puhelin",
+      "kieli" : "kieli_sv#1",
+      "id" : "223763",
+      "yhteystietoOid" : "1.2.246.562.5.2014041612070222083417",
+      "numero" : "02941 24140"
+    }, {
+      "osoiteTyyppi" : "ulkomainen_kaynti",
+      "kieli" : "kieli_en#1",
+      "id" : "223764",
+      "yhteystietoOid" : "1.2.246.562.5.2014041612172806056650",
+      "osoite" : "Fabianinkatu 33, 1st floor\nFI-00014 University of Helsinki\nFinland",
+      "postinumeroUri" : null,
+      "postitoimipaikka" : null,
+      "ytjPaivitysPvm" : null,
+      "coordinateType" : null,
+      "lap" : null,
+      "lng" : null,
+      "osavaltio" : null,
+      "extraRivi" : null,
+      "maaUri" : null
+    }, {
+      "osoiteTyyppi" : "ulkomainen_posti",
+      "kieli" : "kieli_en#1",
+      "id" : "223765",
+      "yhteystietoOid" : "1.2.246.562.5.2014041612172806085570",
+      "osoite" : "P.O. Box 3 (Fabianinkatu 33)\nFI-00014 University of Helsinki\nFinland",
+      "postinumeroUri" : null,
+      "postitoimipaikka" : null,
+      "ytjPaivitysPvm" : null,
+      "coordinateType" : null,
+      "lap" : null,
+      "lng" : null,
+      "osavaltio" : null,
+      "extraRivi" : null,
+      "maaUri" : null
+    }, {
+      "kieli" : "kieli_en#1",
+      "id" : "223766",
+      "yhteystietoOid" : "13976398480580.7748748547361911",
+      "email" : "admissions@helsinki.fi"
+    }, {
+      "kieli" : "kieli_en#1",
+      "id" : "223767",
+      "yhteystietoOid" : "13976398480580.09891147285698987",
+      "www" : "http://www.helsinki.fi/admissions"
+    }, {
+      "tyyppi" : "puhelin",
+      "kieli" : "kieli_en#1",
+      "id" : "223768",
+      "yhteystietoOid" : "1.2.246.562.5.2014041612172806153413",
+      "numero" : "+358 2941 24140"
+    } ],
+    "luontiPvm" : 1395655042591,
+    "muokkausPvm" : 1395655042591,
+    "data" : {
+      "VALINTAMENETTELY" : {
+      },
+      "VAPAA_AIKA" : {
+      },
+      "LINKED_IN" : {
+        "kieli_fi#1" : "http://www.linkedin.com/company/university-of-helsinki",
+        "kieli_en#1" : "http://www.linkedin.com/company/university-of-helsinki",
+        "kieli_sv#1" : "http://www.linkedin.com/company/university-of-helsinki"
+      },
+      "FACEBOOK" : {
+        "kieli_fi#1" : "https://www.facebook.com/YliopistoonTilluniversitetet",
+        "kieli_en#1" : "https://www.facebook.com/HelsinkiUniversity",
+        "kieli_sv#1" : "https://www.facebook.com/YliopistoonTilluniversitetet"
+      },
+      "TWITTER" : {
+        "kieli_fi#1" : "https://twitter.com/helsinkiuni",
+        "kieli_en#1" : "https://twitter.com/helsinkiuni",
+        "kieli_sv#1" : "https://twitter.com/helsinkiuni"
+      },
+      "RAHOITUS" : {
+      },
+      "OPISKELIJALIIKUNTA" : {
+      },
+      "AIEMMIN_HANKITTU_OSAAMINEN" : {
+      },
+      "MUU" : {
+        "kieli_fi#1" : "http://blogs.helsinki.fi/opiskelijataanessa",
+        "kieli_en#1" : "http://blogs.helsinki.fi/welcometouh/",
+        "kieli_sv#1" : "http://blogs.helsinki.fi/opiskelijataanessa/"
+      },
+      "OPISKELIJALIIKKUVUUS" : {
+      },
+      "OPPIMISYMPARISTO" : {
+      },
+      "KANSAINVALISET_KOULUTUSOHJELMAT" : {
+      },
+      "OPISKELIJARUOKAILU" : {
+      },
+      "GOOGLE_PLUS" : {
+      },
+      "TIETOA_ASUMISESTA" : {
+      },
+      "ESTEETOMYYS" : {
+      },
+      "TERVEYDENHUOLTOPALVELUT" : {
+      },
+      "VASTUUHENKILOT" : {
+      },
+      "VAKUUTUKSET" : {
+      },
+      "KIELIOPINNOT" : {
+      },
+      "VUOSIKELLO" : {
+      },
+      "YLEISKUVAUS" : {
+      },
+      "KUSTANNUKSET" : {
+      },
+      "TYOHARJOITTELU" : {
+      },
+      "OPISKELIJA_JARJESTOT" : {
+      }
+    }
+  },
+  "oid" : "1.2.246.562.10.39218317368",
+  "nimi" : {
+    "fi" : "Helsingin yliopisto",
+    "sv" : "Helsingfors universitet"
+  },
+  "yhteystietoArvos" : [ ],
+  "yhteystiedot" : [ {
+    "tyyppi" : "puhelin",
+    "kieli" : "kieli_fi#1",
+    "id" : "223770",
+    "yhteystietoOid" : "1.2.246.562.5.68222853928",
+    "numero" : "02941 1911"
+  }, {
+    "kieli" : "kieli_fi#1",
+    "id" : "223771",
+    "yhteystietoOid" : "1.2.246.562.5.84449246622",
+    "www" : "http://www.helsinki.fi/yliopisto"
+  }, {
+    "osoiteTyyppi" : "posti",
+    "kieli" : "kieli_fi#1",
+    "id" : "223772",
+    "yhteystietoOid" : "1.2.246.562.5.990369670010",
+    "osoite" : "PL 33",
+    "postinumeroUri" : "posti_00014",
+    "postitoimipaikka" : "HELSINGIN YLIOPISTO",
+    "ytjPaivitysPvm" : null,
+    "coordinateType" : null,
+    "lap" : null,
+    "lng" : null,
+    "osavaltio" : null,
+    "extraRivi" : null,
+    "maaUri" : null
+  }, {
+    "osoiteTyyppi" : "kaynti",
+    "kieli" : "kieli_fi#1",
+    "id" : "223773",
+    "yhteystietoOid" : "1.2.246.562.5.12531711302",
+    "osoite" : "Yliopistonkatu 4",
+    "postinumeroUri" : "posti_00014",
+    "postitoimipaikka" : "HELSINGIN YLIOPISTO",
+    "ytjPaivitysPvm" : null,
+    "coordinateType" : null,
+    "lap" : null,
+    "lng" : null,
+    "osavaltio" : null,
+    "extraRivi" : null,
+    "maaUri" : null
+  }, {
+    "osoiteTyyppi" : "kaynti",
+    "kieli" : "kieli_sv#1",
+    "id" : "223774",
+    "yhteystietoOid" : "1.2.246.562.5.2014041612070221938929",
+    "osoite" : "Universitetsgatan 4",
+    "postinumeroUri" : "posti_00014",
+    "postitoimipaikka" : "HELSINGIN YLIOPISTO",
+    "ytjPaivitysPvm" : null,
+    "coordinateType" : null,
+    "lap" : null,
+    "lng" : null,
+    "osavaltio" : null,
+    "extraRivi" : null,
+    "maaUri" : null
+  }, {
+    "osoiteTyyppi" : "posti",
+    "kieli" : "kieli_sv#1",
+    "id" : "223775",
+    "yhteystietoOid" : "1.2.246.562.5.2014041612070221977894",
+    "osoite" : "PB 33",
+    "postinumeroUri" : "posti_00014",
+    "postitoimipaikka" : "HELSINGIN YLIOPISTO",
+    "ytjPaivitysPvm" : null,
+    "coordinateType" : null,
+    "lap" : null,
+    "lng" : null,
+    "osavaltio" : null,
+    "extraRivi" : null,
+    "maaUri" : null
+  }, {
+    "kieli" : "kieli_sv#1",
+    "id" : "223776",
+    "yhteystietoOid" : "13976392222180.5035520152237374",
+    "www" : "http://www.helsinki.fi/universitetet"
+  }, {
+    "osoiteTyyppi" : "ulkomainen_kaynti",
+    "kieli" : "kieli_en#1",
+    "id" : "223777",
+    "yhteystietoOid" : "1.2.246.562.5.2014041612070222038070",
+    "osoite" : "Yliopistonkatu 4\n00014 University of Helsinki\nFinland",
+    "postinumeroUri" : null,
+    "postitoimipaikka" : null,
+    "ytjPaivitysPvm" : null,
+    "coordinateType" : null,
+    "lap" : null,
+    "lng" : null,
+    "osavaltio" : null,
+    "extraRivi" : null,
+    "maaUri" : null
+  }, {
+    "osoiteTyyppi" : "ulkomainen_posti",
+    "kieli" : "kieli_en#1",
+    "id" : "223778",
+    "yhteystietoOid" : "1.2.246.562.5.2014041612070222042505",
+    "osoite" : "P.O. Box 33 (Yliopistonkatu 4)\n00014 University of Helsinki\nFinland",
+    "postinumeroUri" : null,
+    "postitoimipaikka" : null,
+    "ytjPaivitysPvm" : null,
+    "coordinateType" : null,
+    "lap" : null,
+    "lng" : null,
+    "osavaltio" : null,
+    "extraRivi" : null,
+    "maaUri" : null
+  }, {
+    "kieli" : "kieli_en#1",
+    "id" : "223779",
+    "yhteystietoOid" : "13976392222180.9655690418521052",
+    "www" : "http://www.helsinki.fi/university"
+  } ],
+  "parentOidPath" : "|1.2.246.562.10.00000000001|1.2.246.562.10.53814745062|",
+  "parentOid" : "1.2.246.562.10.53814745062",
+  "tyypit" : [ "Oppilaitos" ],
+  "vuosiluokat" : [ ],
+  "ryhmatyypit" : [ ],
+  "kayttoryhmat" : [ ],
+  "alkuPvm" : "1993-01-01",
+  "oppilaitosKoodi" : "01901",
+  "toimipistekoodi" : "01901",
+  "version" : 15
+}
