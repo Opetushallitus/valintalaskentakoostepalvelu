@@ -1,9 +1,11 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import org.apache.cxf.interceptor.Interceptor;
+import org.apache.cxf.jaxrs.client.ClientConfiguration;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
@@ -68,6 +70,15 @@ public class SuoritusrekisteriAsyncResourceImpl implements
 		interceptors.add(cas);
 		bean.setOutInterceptors(interceptors);
 		this.webClient = bean.createWebClient();
+		ClientConfiguration c = WebClient.getConfig(webClient);
+		/**
+		 * WARNING! 0 ei ehka tarkoita ikuista.
+		 * http://cxf.547215.n5.nabble.com/Turn
+		 * -off-all-timeouts-with-WebClient-in-JAX-RS-td3364696.html
+		 */
+		c.getHttpConduit().getClient()
+				.setReceiveTimeout(TimeUnit.MINUTES.toMillis(5));
+		// org.apache.cxf.transport.http.async.SO_TIMEOUT
 	}
 
 	public Peruutettava getOppijatByHaku(String hakuOid,
