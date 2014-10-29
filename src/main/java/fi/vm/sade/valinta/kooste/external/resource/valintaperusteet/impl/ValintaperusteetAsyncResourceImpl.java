@@ -106,7 +106,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 		try {
 
 			StringBuilder urlBuilder = new StringBuilder().append(
-					"/valintaperusteet-service/resources/hakijaryhma/").append(
+					"/valintaperusteet-service/resources/valintaperusteet/hakijaryhma/").append(
 					hakukohdeOid);
 			String url = urlBuilder.toString();
 			return new PeruutettavaImpl(
