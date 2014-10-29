@@ -6,7 +6,11 @@ import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class MonivalintaJoukko {
 
 	private final Collection<String> joukko;

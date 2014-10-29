@@ -3,7 +3,11 @@ package fi.vm.sade.valinta.kooste.excel;
 import java.util.Date;
 
 import fi.vm.sade.valinta.kooste.util.Formatter;
-
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class Paivamaara extends Solu {
 
 	private final Date paivamaara;

@@ -3,7 +3,11 @@ package fi.vm.sade.valinta.kooste.excel;
 import java.util.Collection;
 
 import com.google.common.collect.Lists;
-
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
 public class RiviBuilder {
 
 	private Collection<Rivi> rivit;
