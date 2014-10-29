@@ -77,7 +77,7 @@ public class SuoritusrekisteriAsyncResourceImpl implements
 		 * -off-all-timeouts-with-WebClient-in-JAX-RS-td3364696.html
 		 */
 		c.getHttpConduit().getClient()
-				.setReceiveTimeout(TimeUnit.MINUTES.toMillis(5));
+				.setReceiveTimeout(TimeUnit.MINUTES.toMillis(10));
 		// org.apache.cxf.transport.http.async.SO_TIMEOUT
 	}
 
