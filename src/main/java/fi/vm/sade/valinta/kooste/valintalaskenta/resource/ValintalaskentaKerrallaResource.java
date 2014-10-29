@@ -90,6 +90,7 @@ public class ValintalaskentaKerrallaResource {
 	@Consumes(APPLICATION_JSON)
 	@Produces(APPLICATION_JSON)
 	public void valintalaskentaHaulle(@PathParam("hakuOid") String hakuOid,
+			@QueryParam("erillishaku") Boolean erillishaku,
 			@QueryParam("valinnanvaihe") Integer valinnanvaihe,
 			@QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
 			@PathParam("tyyppi") LaskentaTyyppi tyyppi,
@@ -155,6 +156,7 @@ public class ValintalaskentaKerrallaResource {
 							seurantaAsyncResource.luoLaskenta(
 									hakuOid,
 									tyyppi,
+									erillishaku,
 									valinnanvaihe,
 									valintakoelaskenta,
 									hakukohdeDtos,
@@ -176,7 +178,9 @@ public class ValintalaskentaKerrallaResource {
 												.build());
 									});
 						}
-					}, LaskentaTyyppi.VALINTARYHMA.equals(tyyppi),
+					}, 
+					Boolean.TRUE.equals(erillishaku),
+					LaskentaTyyppi.VALINTARYHMA.equals(tyyppi),
 					valinnanvaihe, valintakoelaskenta, asyncResponse);
 		} catch (Exception e) {
 			LOG.error(
@@ -238,7 +242,7 @@ public class ValintalaskentaKerrallaResource {
 									.collect(Collectors.toList())), (
 									hakuJaHakukohteet, laskennanAloitus) -> {
 								laskennanAloitus.accept(laskenta.getUuid());
-							}, LaskentaTyyppi.VALINTARYHMA.equals(laskenta
+							}, Boolean.TRUE.equals(laskenta.isErillishaku()), LaskentaTyyppi.VALINTARYHMA.equals(laskenta
 									.getTyyppi()), laskenta.getValinnanvaihe(),
 									laskenta.getValintakoelaskenta(),
 									asyncResponse);
@@ -261,6 +265,7 @@ public class ValintalaskentaKerrallaResource {
 			String hakuOid,
 			Maski maski,
 			BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
+			boolean erillishaku,
 			boolean valintaryhmalaskenta, Integer valinnanvaihe,
 			Boolean valintakoelaskenta, AsyncResponse asyncResponse) {
 		if (StringUtils.isBlank(hakuOid)) {
@@ -308,7 +313,7 @@ public class ValintalaskentaKerrallaResource {
 							uuid -> {
 								valintalaskentaRoute
 										.suoritaValintalaskentaKerralla(new LaskentaAloitus(
-												uuid, hakuOid, maski.isMask(),
+												uuid, hakuOid, erillishaku, maski.isMask(),
 												valintaryhmalaskenta,
 												valinnanvaihe,
 												valintakoelaskenta, finalOids,

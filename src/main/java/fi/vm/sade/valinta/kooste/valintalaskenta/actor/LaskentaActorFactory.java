@@ -57,7 +57,9 @@ public class LaskentaActorFactory {
 	}
 
 	public LaskentaActor createValintaryhmaActor(final String uuid,
-			final String hakuOid, final Integer valinnanvaihe,
+			final String hakuOid, 
+			boolean erillishaku,
+			final Integer valinnanvaihe,
 			final Collection<HakukohdeJaOrganisaatio> hakukohdeOids) {
 		final PalvelukutsuStrategia laskentaStrategia = createStrategia();
 		final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
@@ -119,6 +121,7 @@ public class LaskentaActorFactory {
 				});
 
 		ValintaryhmatKatenoivaValintalaskentaPalvelukutsu laskentaPk = new ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
+				erillishaku,
 				new HakukohdeJaOrganisaatio("kaikkiHakukohteet",
 						"kaikkiOrganisaatiot"), valintalaskentaAsyncResource,
 				valintaryhmaPalvelukutsuYhdiste, hakemuksetPalvelukutsut,
@@ -133,7 +136,9 @@ public class LaskentaActorFactory {
 	}
 
 	public LaskentaActor createValintakoelaskentaActor(final String uuid,
-			final String hakuOid, final Integer valinnanvaihe,
+			final String hakuOid, 
+			boolean erillishaku,
+			final Integer valinnanvaihe,
 			final Collection<HakukohdeJaOrganisaatio> hakukohdeOids) {
 		final PalvelukutsuStrategia laskentaStrategia = createStrategia();
 		final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
@@ -145,6 +150,7 @@ public class LaskentaActorFactory {
 		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
 				.parallelStream()
 				.map(hakukohdeOid -> new ValintakoelaskentaPalvelukutsu(
+						erillishaku,
 						hakukohdeOid, valintalaskentaAsyncResource,
 						new HakemuksetPalvelukutsu(hakuOid, hakukohdeOid,
 								applicationAsyncResource),
@@ -161,7 +167,9 @@ public class LaskentaActorFactory {
 	}
 
 	public LaskentaActor createValintalaskentaActor(final String uuid,
-			final String hakuOid, final Integer valinnanvaihe,
+			final String hakuOid,
+			boolean erillishaku,
+			final Integer valinnanvaihe,
 			final Collection<HakukohdeJaOrganisaatio> hakukohdeOids) {
 		final PalvelukutsuStrategia laskentaStrategia = createStrategia();
 		final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
@@ -175,6 +183,7 @@ public class LaskentaActorFactory {
 		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
 				.parallelStream()
 				.map(hakukohdeOid -> new ValintalaskentaPalvelukutsu(
+						erillishaku,
 						hakukohdeOid, valintalaskentaAsyncResource,
 						new HakemuksetPalvelukutsu(hakuOid, hakukohdeOid,
 								applicationAsyncResource),
@@ -194,6 +203,7 @@ public class LaskentaActorFactory {
 
 	public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(
 			final String uuid, final String hakuOid,
+			boolean erillishaku,
 			final Integer valinnanvaihe,
 			final Collection<HakukohdeJaOrganisaatio> hakukohdeOids) {
 		final PalvelukutsuStrategia laskentaStrategia = createStrategia();
@@ -208,6 +218,7 @@ public class LaskentaActorFactory {
 		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
 				.parallelStream()
 				.map(hakukohdeOid -> new ValintalaskentaJaValintakoelaskentaPalvelukutsu(
+						erillishaku,
 						hakukohdeOid, valintalaskentaAsyncResource,
 						new HakemuksetPalvelukutsu(hakuOid, hakukohdeOid,
 								applicationAsyncResource),

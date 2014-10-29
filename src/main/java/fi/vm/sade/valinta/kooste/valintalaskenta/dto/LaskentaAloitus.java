@@ -27,13 +27,14 @@ public class LaskentaAloitus implements LaskentaInfo {
 												// yksittainen hakukohde tai
 												// osajoukko haun hakukohteista
 	private final Integer valinnanvaihe;
+	private final boolean erillishaku;
 	private final Boolean valintakoelaskenta;
 	private final boolean valintaryhmalaskenta;
 	private final Collection<HakukohdeJaOrganisaatio> hakukohdeDtos;
 	private final LaskentaTyyppi tyyppi;
 
-	public LaskentaAloitus(String uuid, String hakuOid, Integer valinnanvaihe,
-			Boolean valintakoelaskenta,
+	public LaskentaAloitus(String uuid, String hakuOid, boolean erillishaku,
+			Integer valinnanvaihe, Boolean valintakoelaskenta,
 			Collection<HakukohdeJaOrganisaatio> hakukohdeDtos,
 			LaskentaTyyppi tyyppi) {
 		this.uuid = uuid;
@@ -44,9 +45,10 @@ public class LaskentaAloitus implements LaskentaInfo {
 		this.hakukohdeDtos = hakukohdeDtos;
 		this.valintaryhmalaskenta = false;
 		this.tyyppi = tyyppi;
+		this.erillishaku = erillishaku;
 	}
 
-	public LaskentaAloitus(String uuid, String hakuOid,
+	public LaskentaAloitus(String uuid, String hakuOid, boolean erillishaku,
 			boolean osittainenLaskenta, boolean valintaryhmalaskenta,
 			Integer valinnanvaihe, Boolean valintakoelaskenta,
 			Collection<HakukohdeJaOrganisaatio> hakukohdeDtos,
@@ -59,6 +61,7 @@ public class LaskentaAloitus implements LaskentaInfo {
 		this.valintakoelaskenta = valintakoelaskenta;
 		this.hakukohdeDtos = hakukohdeDtos;
 		this.tyyppi = tyyppi;
+		this.erillishaku = erillishaku;
 	}
 
 	public LaskentaTyyppi getTyyppi() {
@@ -82,6 +85,14 @@ public class LaskentaAloitus implements LaskentaInfo {
 	}
 
 	public boolean isValintaryhmaLaskenta() {
+		return valintaryhmalaskenta;
+	}
+
+	public boolean isErillishaku() {
+		return erillishaku;
+	}
+
+	public boolean isValintaryhmalaskenta() {
 		return valintaryhmalaskenta;
 	}
 
