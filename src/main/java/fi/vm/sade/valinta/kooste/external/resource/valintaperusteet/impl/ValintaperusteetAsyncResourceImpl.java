@@ -5,6 +5,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
@@ -90,8 +91,11 @@ public class ValintaperusteetAsyncResourceImpl implements
 		String url = new StringBuilder()
 				.append("/valintaperusteet-service/resources/hakukohde/avaimet/")
 				.append(hakukohdeOid).toString();
-		return WebClient.fromClient(webClient).path(url).async()
-				.get(new GenericType<List<ValintaperusteDTO>>() {
+		return WebClient.fromClient(webClient).path(url)
+		//
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				//
+				.async().get(new GenericType<List<ValintaperusteDTO>>() {
 				});
 	}
 
@@ -101,14 +105,17 @@ public class ValintaperusteetAsyncResourceImpl implements
 			Consumer<Throwable> failureCallback) {
 		try {
 
-			StringBuilder urlBuilder = new StringBuilder()
-					.append("/valintaperusteet-service/resources/valintaperusteet/hakijaryhma/")
-					.append(hakukohdeOid);
+			StringBuilder urlBuilder = new StringBuilder().append(
+					"/valintaperusteet-service/resources/hakijaryhma/").append(
+					hakukohdeOid);
 			String url = urlBuilder.toString();
 			return new PeruutettavaImpl(
-					WebClient
-							.fromClient(webClient)
+					WebClient.fromClient(webClient)
 							.path(url)
+							//
+
+							.accept(MediaType.APPLICATION_JSON_TYPE)
+							//
 							.async()
 							.get(new Callback<List<ValintaperusteetHakijaryhmaDTO>>(
 									address,
@@ -136,8 +143,12 @@ public class ValintaperusteetAsyncResourceImpl implements
 			if (valinnanVaiheJarjestysluku != null) {
 				wc.query("vaihe", valinnanVaiheJarjestysluku);
 			}
-			return new PeruutettavaImpl(wc.async().get(
-					new Callback<List<ValintaperusteetDTO>>(address, url
+			return new PeruutettavaImpl(wc
+			//
+					.accept(MediaType.APPLICATION_JSON_TYPE)
+					//
+					.async()
+					.get(new Callback<List<ValintaperusteetDTO>>(address, url
 							+ "?vaihe=" + valinnanVaiheJarjestysluku, callback,
 							failureCallback,
 							new TypeToken<List<ValintaperusteetDTO>>() {
@@ -158,6 +169,9 @@ public class ValintaperusteetAsyncResourceImpl implements
 			return new PeruutettavaImpl(WebClient
 					.fromClient(webClient)
 					.path(url)
+					//
+					.accept(MediaType.APPLICATION_JSON_TYPE)
+					//
 					.async()
 					.get(new Callback<List<HakukohdeViiteDTO>>(address, url,
 							callback, failureCallback,
