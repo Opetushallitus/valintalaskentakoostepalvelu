@@ -46,7 +46,11 @@ public class HakemusWrapper {
 				Optional.ofNullable(henkilotiedot.get(SYNTYMAAIKA)).orElse(
 						StringUtils.EMPTY));
 	}
-
+	public String getSyntymaaika() {
+		getHenkilotiedot();
+		return Optional.ofNullable(henkilotiedot.get(SYNTYMAAIKA)).orElse(
+						StringUtils.EMPTY);
+	}
 	public String getHenkilotunnus() {
 		getHenkilotiedot();
 		return Optional.ofNullable(henkilotiedot.get(HETU)).orElse(

@@ -20,6 +20,10 @@ import org.springframework.stereotype.Controller;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
+import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
+import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
+import fi.vm.sade.valinta.kooste.erillishaku.service.ErillishaunTuontiService;
+import fi.vm.sade.valinta.kooste.erillishaku.service.ErillishaunVientiService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
@@ -37,34 +41,46 @@ public class ErillishakuResource {
 
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiKomponentti;
-	
+
+	@Autowired
+	private ErillishaunTuontiService tuontiService;
+	private ErillishaunVientiService vientiService;
+
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
 	@POST
 	@Path("/vienti")
 	@Consumes("application/json")
 	@ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen vienti taulukkolaskentaan", response = ProsessiId.class)
 	public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid,
-			@QueryParam("hakukohdeOid") String hakukohdeOid) {
-		DokumenttiProsessi prosessi = new DokumenttiProsessi("Erillishaku",
-				"vienti", hakuOid, Arrays.asList(hakukohdeOid));
+			@QueryParam("hakukohdeOid") String hakukohdeOid,
+			@QueryParam("tarjoajaOid") String tarjoajaOid,
+			@QueryParam("valintatapajonoOid") String valintatapajonoOid) {
+		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 		//
+		vientiService.vie(prosessi, new ErillishakuDTO(hakuOid, hakukohdeOid,
+				tarjoajaOid, valintatapajonoOid));
 		return prosessi.toProsessiId();
 	}
+
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
 	@POST
 	@Path("/tuonti")
 	@Consumes("application/octet-stream")
 	@ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen tuonti taulukkolaskennalla", response = ProsessiId.class)
 	public ProsessiId tuonti(@QueryParam("hakuOid") String hakuOid,
-			@QueryParam("hakukohdeOid") String hakukohdeOid, InputStream file)
-			throws IOException {
+			@QueryParam("hakukohdeOid") String hakukohdeOid,
+			@QueryParam("tarjoajaOid") String tarjoajaOid,
+			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
+			InputStream file) throws IOException {
 		ByteArrayOutputStream b;
 		IOUtils.copy(file, b = new ByteArrayOutputStream());
 		IOUtils.closeQuietly(file);
-		DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö",
-				"tuonti", hakuOid, Arrays.asList(hakukohdeOid));
+		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
+		tuontiService.tuo(prosessi, new ErillishakuDTO(hakuOid, hakukohdeOid,
+				tarjoajaOid, valintatapajonoOid),
+				new ByteArrayInputStream(b.toByteArray()));
 		//
 		return prosessi.toProsessiId();
 	}

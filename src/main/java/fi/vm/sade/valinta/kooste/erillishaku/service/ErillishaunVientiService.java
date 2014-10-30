@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service;
 
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 
 /**
  * 
@@ -9,5 +10,5 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
  */
 public interface ErillishaunVientiService {
 	
-	void vie(ErillishakuDTO erillishaku);
+	void vie(KirjeProsessi prosessi, ErillishakuDTO erillishaku);
 }

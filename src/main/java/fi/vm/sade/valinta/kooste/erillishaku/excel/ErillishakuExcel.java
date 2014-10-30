@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,7 +30,21 @@ public class ErillishakuExcel {
 
 	
 	private final Excel excel;
-
+	
+	public ErillishakuExcel(ErillishakuRiviKuuntelija kuuntelija) {
+		this(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.emptyList(),kuuntelija);
+	}
+	
+	public ErillishakuExcel(String hakuNimi, String hakukohdeNimi,
+			String tarjoajaNimi, Collection<ErillishakuRivi> erillishakurivit) {
+		this(hakuNimi,hakukohdeNimi,tarjoajaNimi,erillishakurivit,new ErillishakuRiviKuuntelija() {
+			
+			@Override
+			public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
+				
+			}
+		});
+	}
 	public ErillishakuExcel(String hakuNimi, String hakukohdeNimi,
 			String tarjoajaNimi, Collection<ErillishakuRivi> erillishakurivit,
 			ErillishakuRiviKuuntelija kuuntelija) {

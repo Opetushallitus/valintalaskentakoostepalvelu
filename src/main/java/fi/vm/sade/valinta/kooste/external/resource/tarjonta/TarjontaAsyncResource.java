@@ -1,12 +1,15 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 
-public interface HakuV1AsyncResource {
+public interface TarjontaAsyncResource {
 
 	// @GET
 	// @Path("/{oid}")
@@ -14,7 +17,7 @@ public interface HakuV1AsyncResource {
 	// @ApiOperation(value = "Palauttaa haun annetulla oid:lla", notes =
 	// "Palauttaa haun annetulla oid:lla", response = HakuV1RDTO.class)
 	//
-	Peruutettava findByOid(String oid,
-			Consumer<ResultV1RDTO<HakuV1RDTO>> callback,
-			Consumer<Throwable> failureCallback);
+	Future<HakuV1RDTO> haeHaku(String hakuOid);
+	
+	Future<HakukohdeDTO> haeHakukohde(String hakukohdeOid);
 }

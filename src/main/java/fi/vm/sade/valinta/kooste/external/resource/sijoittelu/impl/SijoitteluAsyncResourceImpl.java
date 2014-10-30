@@ -1,10 +1,16 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
@@ -15,6 +21,7 @@ import org.apache.cxf.jaxrs.client.ClientConfiguration;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
+import org.codehaus.jackson.map.annotate.JsonView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +30,15 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
+import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.JsonViews;
+import fi.vm.sade.sijoittelu.tulos.dto.SijoitteluDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.SijoitteluajoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
@@ -131,6 +145,30 @@ public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
 				});
 	}
 
+	//@Path("sijoittelu")
+//	@Api(value = "/sijoittelu", description = "Resurssi sijoittelun tuloksien hakemiseen")
+	//public interface SijoitteluResource {
+
+		//static final String LATEST = "latest";
+
+		//@GET
+	//	@Produces(APPLICATION_JSON)
+//		@Path("/{hakuOid}/sijoitteluajo/{sijoitteluajoId}/hakukohde/{hakukohdeOid}")
+	public Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid) {
+		StringBuilder urlBuilder = new StringBuilder().append("/sijoittelu/")
+				.append(hakuOid).append("/sijoitteluajo/")
+				.append(SijoitteluResource.LATEST).append("/hakukohde/").append(hakukohdeOid);
+		String url = urlBuilder.toString();
+		return WebClient.fromClient(webClient)
+		//
+				.path(url)
+				//
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				//
+				.async().get(new GenericType<HakukohdeDTO>() {
+				});
+	}
+	
 	@Override
 	public Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(
 			String hakuOid, String hakukohdeOid) {

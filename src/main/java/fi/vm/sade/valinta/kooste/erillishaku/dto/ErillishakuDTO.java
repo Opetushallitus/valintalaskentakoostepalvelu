@@ -9,12 +9,22 @@ public class ErillishakuDTO {
 
 	private final String hakuOid;
 	private final String hakukohdeOid;
+	private final String tarjoajaOid;
+	private final String valintatapajonoOid;
 	
-	public ErillishakuDTO(String hakuOid, String hakukohdeOid) {
+	public ErillishakuDTO(String hakuOid, String hakukohdeOid, String tarjoajaOid, String valintatapajonoOid) {
 		this.hakuOid = hakuOid;
 		this.hakukohdeOid = hakukohdeOid;
+		this.tarjoajaOid = tarjoajaOid;
+		this.valintatapajonoOid = valintatapajonoOid;
 	}
 	
+	public String getTarjoajaOid() {
+		return tarjoajaOid;
+	}
+	public String getValintatapajonoOid() {
+		return valintatapajonoOid;
+	}
 	public String getHakukohdeOid() {
 		return hakukohdeOid;
 	}
