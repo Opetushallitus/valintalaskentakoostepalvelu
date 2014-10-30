@@ -92,6 +92,7 @@ public class SijoitteleAsyncResourceImpl implements SijoitteleAsyncResource {
 			WebClient
 					.fromClient(webClient)
 					.path(url)
+					.accept(MediaType.WILDCARD_TYPE)
 					.async()
 					.get(new Callback<String>(address, url, callback,
 							failureCallback, new TypeToken<String>() {
