@@ -11,7 +11,9 @@ public class KonversioBuilder {
 	public KonversioBuilder() {
 		this.konversiotaulu = Maps.newHashMap();
 	}
-
+	public KonversioBuilder addKonversio(Object[] objs) {
+		return this;
+	}
 	public KonversioBuilder addKonversio(String arvo, String nimike) {
 		konversiotaulu.put(arvo, nimike);
 		return this;
