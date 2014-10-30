@@ -568,7 +568,9 @@
 	<!-- Valintaperusteet Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl" />
-
+	<!-- Valintaperusteet Avaimet Async -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAvaimetAsyncResourceImpl" />
 	<!-- HakuApp Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl" />

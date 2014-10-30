@@ -82,22 +82,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 		this.webClient = bean.createWebClient();
 	}
 
-	// @GET
-	// @Path("/avaimet/{oid}")
-	// @Produces(MediaType.APPLICATION_JSON)
-	// List<ValintaperusteDTO> findAvaimet(@PathParam("oid") String oid);
-	@Override
-	public Future<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
-		String url = new StringBuilder()
-				.append("/valintaperusteet-service/resources/hakukohde/avaimet/")
-				.append(hakukohdeOid).append("/").toString();
-		return WebClient.fromClient(webClient).path(url)
-		//
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				//
-				.async().get(new GenericType<List<ValintaperusteDTO>>() {
-				});
-	}
+
 
 	// /valintaperusteet/hakijaryhmä/{hakukohdeoid}
 	public Peruutettava haeHakijaryhmat(String hakukohdeOid,

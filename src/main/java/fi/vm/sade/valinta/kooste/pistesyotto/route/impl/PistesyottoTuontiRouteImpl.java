@@ -30,6 +30,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAvaimetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoArvo;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviListAdapter;
@@ -54,7 +55,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 			.getLogger(PistesyottoTuontiRouteImpl.class);
 
 	private final ValintalaskentaValintakoeAsyncResource valintakoeResource;
-	private final ValintaperusteetAsyncResource valintaperusteetResource;
+	private final ValintaperusteetAvaimetAsyncResource valintaperusteetResource;
 	private final ApplicationAsyncResource applicationAsyncResource;
 	private final ApplicationResource applicationResource;
 
@@ -62,7 +63,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 	public PistesyottoTuontiRouteImpl(
 			ValintalaskentaValintakoeAsyncResource valintakoeResource,
 			ApplicationAsyncResource applicationAsyncResource,
-			ValintaperusteetAsyncResource valintaperusteetResource,
+			ValintaperusteetAvaimetAsyncResource valintaperusteetResource,
 			ApplicationResource applicationResource) {
 		this.valintakoeResource = valintakoeResource;
 		this.applicationResource = applicationResource;
