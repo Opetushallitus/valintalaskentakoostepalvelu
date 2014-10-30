@@ -85,7 +85,7 @@ public class SijoitteleAsyncResourceImpl implements SijoitteleAsyncResource {
 	public void sijoittele(String hakuOid, Consumer<String> callback,
 			Consumer<Throwable> failureCallback) {
 		// fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource
-		String url = new StringBuilder().append("/sijoittele/").append(hakuOid)
+		String url = new StringBuilder().append("/sijoittele/").append(hakuOid).append("/")
 				.toString();
 		try {
 

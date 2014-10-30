@@ -90,7 +90,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 	public Future<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
 		String url = new StringBuilder()
 				.append("/valintaperusteet-service/resources/hakukohde/avaimet/")
-				.append(hakukohdeOid).toString();
+				.append(hakukohdeOid).append("/").toString();
 		return WebClient.fromClient(webClient).path(url)
 		//
 				.accept(MediaType.APPLICATION_JSON_TYPE)
