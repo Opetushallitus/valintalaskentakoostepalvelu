@@ -92,7 +92,7 @@ public class TilaAsyncResourceImpl implements TilaAsyncResource{
 		//@Path("tila")
 		StringBuilder urlBuilder = new StringBuilder().append("/tila/erillishaku/")
 				.append(hakuOid).append("/hakukohde/")
-				.append(hakukohdeOid);
+				.append(hakukohdeOid).append("/");
 		String url = urlBuilder.toString();
 		LOG.warn("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}",
 				address, url, hakukohdeOid);

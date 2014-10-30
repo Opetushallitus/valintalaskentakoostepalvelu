@@ -9,6 +9,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.cxf.interceptor.Interceptor;
@@ -75,30 +76,55 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
 				.setReceiveTimeout(TimeUnit.MINUTES.toMillis(5));
 		// org.apache.cxf.transport.http.async.SO_TIMEOUT
 	}
-	
+
 	@Override
 	public Future<HakuV1RDTO> haeHaku(String hakuOid) {
 		// TODO Auto-generated method stub
 		/*
-		@Path("/v1/haku")
-		public interface HakuV1Resource {
-
-			@GET
-			@Path("/{oid}")
-			@Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-			// @ApiOperation(value = "Palauttaa haun annetulla oid:lla", notes =
-			// "Palauttaa haun annetulla oid:lla", response = HakuV1RDTO.class)
-			public ResultV1RDTO<HakuV1RDTO> findByOid(@PathParam("oid") String oid);
-			*/
-		return null;
+		 * @Path("/v1/haku") public interface HakuV1Resource {
+		 * 
+		 * @GET
+		 * 
+		 * @Path("/{oid}")
+		 * 
+		 * @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8") //
+		 * @ApiOperation(value = "Palauttaa haun annetulla oid:lla", notes = //
+		 * "Palauttaa haun annetulla oid:lla", response = HakuV1RDTO.class)
+		 * public ResultV1RDTO<HakuV1RDTO> findByOid(@PathParam("oid") String
+		 * oid);
+		 */
+		StringBuilder urlBuilder = new StringBuilder().append("/v1/haku/")
+				.append(hakuOid).append("/");
+		String url = urlBuilder.toString();
+		return WebClient.fromClient(webClient)
+		//
+				.path(url)
+				//
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				//
+				.async().get(HakuV1RDTO.class);
 	}
-	
+
 	@Override
 	public Future<HakukohdeDTO> haeHakukohde(String hakukohdeOid) {
 		// TODO Auto-generated method stub
 		/*
 		 * /hakukohde
 		 */
-		return null;
+		// @Path("tila")
+		StringBuilder urlBuilder = new StringBuilder().append("/hakukohde/")
+				.append(hakukohdeOid).append("/");
+		String url = urlBuilder.toString();
+		return WebClient.fromClient(webClient)
+		//
+				.path(url)
+				//
+				// .query("hyvaksytyt", true)
+				//
+				// .query("hakukohdeOid", hakukohdeOid)
+				//
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				//
+				.async().get(HakukohdeDTO.class);
 	}
 }
