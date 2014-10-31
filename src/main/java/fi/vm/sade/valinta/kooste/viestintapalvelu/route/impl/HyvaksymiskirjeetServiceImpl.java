@@ -222,8 +222,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 						},
 						throwable -> {
 							LOG.error(
-									"Sijoittelu tai hakemuspalvelukutsu epaonnistui {}",
-									throwable.getMessage());
+									"Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}",
+									throwable.getMessage(), Arrays.asList(throwable.getStackTrace()));
 							prosessi.keskeyta();
 						});
 	}
