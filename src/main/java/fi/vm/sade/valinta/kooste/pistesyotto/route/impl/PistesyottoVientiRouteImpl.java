@@ -11,6 +11,7 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -211,6 +212,8 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 		 */
 		from(luontiEpaonnistui)
 		//
+		.log(LoggingLevel.ERROR,
+						"Pistesyoton vienti epaonnistui: ${exception.message}\r\n${exception.stacktrace}")
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						String syy;

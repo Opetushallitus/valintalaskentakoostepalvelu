@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -249,6 +250,9 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 		 */
 		from(luontiEpaonnistui)
 		//
+		.log(LoggingLevel.ERROR,
+						"Pistesyoton tuonti epaonnistui: ${exception.message}\r\n${exception.stacktrace}")
+						//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						if (dokumenttiprosessi(exchange).getPoikkeukset()
