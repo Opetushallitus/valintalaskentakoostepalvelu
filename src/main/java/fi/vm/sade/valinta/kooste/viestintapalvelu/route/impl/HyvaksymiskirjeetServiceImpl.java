@@ -151,8 +151,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 						},
 						throwable -> {
 							LOG.error(
-									"Sijoittelu tai hakemuspalvelukutsu epaonnistui {}",
-									throwable.getMessage());
+									"Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}",
+									throwable.getMessage(), Arrays.toString(throwable.getStackTrace()));
 							prosessi.keskeyta();
 						});
 	}
@@ -223,7 +223,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 						throwable -> {
 							LOG.error(
 									"Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}",
-									throwable.getMessage(), Arrays.asList(throwable.getStackTrace()));
+									throwable.getMessage(), Arrays.toString(throwable.getStackTrace()));
 							prosessi.keskeyta();
 						});
 	}
