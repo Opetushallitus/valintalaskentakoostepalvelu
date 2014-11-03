@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl;
 
 import java.util.concurrent.Future;
 
+import com.google.common.util.concurrent.Futures;
 import org.springframework.stereotype.Service;
 
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
@@ -25,6 +26,6 @@ public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource 
 	@Override
 	public Future<OrganisaatioRDTO> haeOrganisaatio(String organisaatioOid) {
 
-		return null;
+        return Futures.immediateFuture(null);
 	}
 }
