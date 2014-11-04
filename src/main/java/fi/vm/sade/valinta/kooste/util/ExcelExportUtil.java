@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import java.awt.Color;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,11 +11,20 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+
+import fi.vm.sade.valinta.kooste.util.excel.Highlight;
+import fi.vm.sade.valinta.kooste.util.excel.Span;
 
 /**
  * 
@@ -30,42 +40,27 @@ public class ExcelExportUtil {
 	public static byte[] exportGridSheetsAsXlsBytes(
 			Map<String, Object[][]> grids) {
 		assert (grids != null);
-		Workbook wb = new HSSFWorkbook();
+		HSSFWorkbook wb = new HSSFWorkbook();
+		CellStyle alignCenterStyle = wb.createCellStyle();
+		alignCenterStyle.setAlignment(CellStyle.ALIGN_CENTER);
+		HSSFCellStyle highlight = wb.createCellStyle();
+		
+		//highlight.setFillBackgroundColor((short)0x0ff);
+		//highlight.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		//highlight.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
+		HSSFCellStyle spanhighlight = wb.createCellStyle();
+				
+				//highlight.setFillBackgroundColor((short)0x0ff);
+		//spanhighlight.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		//spanhighlight.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
+		spanhighlight.setAlignment(CellStyle.ALIGN_CENTER);
+		
 		for (Entry<String, Object[][]> sheetAndGrid : grids.entrySet()) {
 			Sheet sheet = wb.createSheet(sheetAndGrid.getKey());// DATE_FORMAT.format(new
 																// Date()));
-			int numberOfcolumns = 0;
-			//
-			// Create rows!
-			//
-			short rowIndex = 0;
-			Object[][] grid = sheetAndGrid.getValue();
-			for (Object[] dataRow : grid) {
-				assert (dataRow != null);
-				Row excelRow = sheet.createRow(rowIndex);
-				//
-				// Create columns!
-				//
-				short cellIndex = 0;
-				for (Object dataCell : dataRow) {
-					if (dataCell == null) {
-						dataCell = StringUtils.EMPTY;
-					}
-					numberOfcolumns = Math.max(numberOfcolumns, cellIndex);
-					Cell excelCell = excelRow.createCell(cellIndex);
-					String value = dataCell.toString();
-					excelCell.setCellValue(value);
-					++cellIndex;
-				}
-				++rowIndex;
-			}
-			for (int column = 0; column <= numberOfcolumns; ++column) {
-				sheet.autoSizeColumn(column);
-			}
+			exportGridToSheet(sheetAndGrid.getValue(),sheet, alignCenterStyle,spanhighlight,highlight);
+			
 		}
-		//
-		// Auto size used columns!
-		//
 
 		ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
 		try {
@@ -76,11 +71,8 @@ public class ExcelExportUtil {
 		}
 		return bytesOut.toByteArray();
 	}
-
-	public static byte[] exportGridAsXlsBytes(Object[][] grid) {
-		assert (grid != null);
-		Workbook wb = new HSSFWorkbook();
-		Sheet sheet = wb.createSheet(DATE_FORMAT.format(new Date()));
+	
+	private static void exportGridToSheet(Object[][] grid, Sheet sheet, CellStyle spanStyle, CellStyle highlightSpanStyle, CellStyle highlightStyle) {
 		int numberOfcolumns = 0;
 		//
 		// Create rows!
@@ -97,11 +89,40 @@ public class ExcelExportUtil {
 				if (dataCell == null) {
 					dataCell = StringUtils.EMPTY;
 				}
-				numberOfcolumns = Math.max(numberOfcolumns, cellIndex);
-				Cell excelCell = excelRow.createCell(cellIndex);
-				String value = dataCell.toString();
-				excelCell.setCellValue(value);
-				++cellIndex;
+				if(dataCell instanceof Span) {
+					//
+					// Span over multiple columns
+					//
+					Span span = (Span)dataCell;
+					Cell excelCell = excelRow.createCell(cellIndex);
+					if(span.isAlsoHighlight()) {
+						excelCell.setCellStyle(highlightSpanStyle);
+					} else {
+					excelCell.setCellStyle(spanStyle);
+					}
+					sheet.addMergedRegion(new CellRangeAddress(rowIndex, // first
+							// row
+							// (0-based)
+							rowIndex, // last row (0-based)
+							cellIndex, // first column (0-based)
+							cellIndex + span.getSpanColumns() - 1 // last column
+															// (0-based)
+					));
+					excelCell.setCellValue(span.getText());
+					cellIndex += span.getSpanColumns();
+				} else {
+					//
+					// Normal cell
+					//
+					numberOfcolumns = Math.max(numberOfcolumns, cellIndex);
+					Cell excelCell = excelRow.createCell(cellIndex);
+					if(dataCell instanceof Highlight) {
+						excelCell.setCellStyle(highlightStyle);
+					}
+					String value = dataCell.toString();
+					excelCell.setCellValue(value);
+					++cellIndex;
+				}
 			}
 			++rowIndex;
 		}
@@ -111,6 +132,26 @@ public class ExcelExportUtil {
 		for (int column = 0; column <= numberOfcolumns; ++column) {
 			sheet.autoSizeColumn(column);
 		}
+	}
+	
+	public static byte[] exportGridAsXlsBytes(Object[][] grid) {
+		assert (grid != null);
+		HSSFWorkbook wb = new HSSFWorkbook();
+		CellStyle alignCenterStyle = wb.createCellStyle();
+		alignCenterStyle.setAlignment(CellStyle.ALIGN_CENTER);
+		HSSFCellStyle highlight = wb.createCellStyle();
+		
+		//highlight.setFillBackgroundColor((short)0x0ff);
+		//highlight.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		//highlight.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
+		HSSFCellStyle spanhighlight = wb.createCellStyle();
+				
+				//highlight.setFillBackgroundColor((short)0x0ff);
+		//spanhighlight.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		//spanhighlight.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
+		spanhighlight.setAlignment(CellStyle.ALIGN_CENTER);
+		Sheet sheet = wb.createSheet(DATE_FORMAT.format(new Date()));
+		exportGridToSheet(grid,sheet, alignCenterStyle,spanhighlight, highlight);
 
 		ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
 		try {

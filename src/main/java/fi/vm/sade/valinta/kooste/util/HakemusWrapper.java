@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -8,6 +9,8 @@ import java.util.TreeMap;
 import org.apache.commons.lang.StringUtils;
 
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 
 /**
  * 
@@ -29,11 +32,26 @@ public class HakemusWrapper {
 	private final static String HETU = "Henkilotunnus";
 	private final static String SAHKOPOSTI = "Sähköposti";
 	private final static String SYNTYMAAIKA = "syntymaaika";
-
+	private Yhteystiedot yhteystiedot = null;
 	public HakemusWrapper(Hakemus hakemus) {
+		if(hakemus == null) {
+			this.henkilotiedot = Collections.emptyMap();
+			this.lisatiedot = Collections.emptyMap();
+			this.hakutoiveet = Collections.emptyMap();
+		}
 		this.hakemus = hakemus;
 	}
-
+	public Osoite getOsoite() {
+		return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, null, null);
+	}
+	public String getPuhelinnumero() {
+		if(yhteystiedot == null) {
+		this.yhteystiedot = Yhteystiedot
+				.yhteystiedotHakemukselta(hakemus);
+		}
+		return yhteystiedot.getPuhelinnumerotAsString();
+	}
+	
 	public String getSahkopostiOsoite() {
 		getHenkilotiedot();
 		return Optional.ofNullable(henkilotiedot.get(SAHKOPOSTI)).orElse(
