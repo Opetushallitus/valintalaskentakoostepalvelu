@@ -291,7 +291,7 @@ public class PistesyottoExcel {
 		}
 		Map<String, String> oidToHetu = hakemukset.stream().collect(
 				Collectors.toMap(Hakemus::getOid,
-						h -> new HakemusWrapper(h).getHenkilotunnus()));
+						h -> new HakemusWrapper(h).getHenkilotunnusTaiSyntymaaika()));
 		for (ApplicationAdditionalDataDTO data : pistetiedot) {
 			boolean osallistuja = osallistujat.contains(data.getOid());
 			// Hakemuksen <tunniste, valintakoeDTO> tiedot

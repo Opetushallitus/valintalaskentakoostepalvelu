@@ -131,7 +131,7 @@ public class Excel {
 		editableStyle.setAlignment(CellStyle.ALIGN_RIGHT);
 		editableStyle.setLocked(false);
 		// lockedStyle.setFillBackgroundColor(new XSSFColor(Color.GREEN));
-		sheet.enableLocking();
+		//sheet.enableLocking();
 		List<Integer> leveysPreferenssit = Lists.newArrayList();
 		int rowIndex = 0;
 		int maxCellNum = 0;
@@ -139,6 +139,7 @@ public class Excel {
 				.newHashMap();
 		Map<Collection<Number>, ArvovaliJoukko> numberConstraintSets = Maps
 				.newHashMap();
+		
 		for (Rivi toisteinenrivi : rivit) {
 			for (Rivi rivi : toisteinenrivi.getToisteisetRivit()) {
 				XSSFRow row = sheet.createRow(rowIndex);
@@ -258,15 +259,8 @@ public class Excel {
 				sheet.setColumnWidth(i, preferenssi);
 			}
 		}
-		sheet.lockDeleteColumns();
-		sheet.lockDeleteRows();
-		sheet.lockFormatCells();
-		sheet.lockFormatColumns();
-
-		sheet.lockFormatRows();
-		sheet.lockInsertColumns();
-		sheet.lockInsertHyperlinks();
-		sheet.lockInsertRows();
+		
+		
 		ByteArrayOutputStream b;
 		try {
 			workbook.write(b = new ByteArrayOutputStream());
