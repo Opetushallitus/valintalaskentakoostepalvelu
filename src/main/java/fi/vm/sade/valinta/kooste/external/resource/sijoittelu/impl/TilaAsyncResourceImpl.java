@@ -1,16 +1,17 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
+import javax.ws.rs.Path;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import org.apache.camel.Property;
 import org.apache.cxf.interceptor.Interceptor;
-import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.apache.cxf.jaxrs.client.ClientConfiguration;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -22,33 +23,26 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
-import fi.vm.sade.valinta.kooste.external.resource.Callback;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
-
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 /**
  * 
  * @author jussija
  *
+ *         fi.vm.sade.sijoittelu.laskenta.resource.TilaResource <br>
  */
 @Service
-public class SijoitteleAsyncResourceImpl implements SijoitteleAsyncResource {
+public class TilaAsyncResourceImpl implements TilaAsyncResource{
 	private static final Logger LOG = LoggerFactory
-			.getLogger(SijoitteluAsyncResourceImpl.class);
+			.getLogger(TilaAsyncResourceImpl.class);
 	private final WebClient webClient;
 	private final String address;
-
 	@Autowired
-	public SijoitteleAsyncResourceImpl(
+	public TilaAsyncResourceImpl(
 			//
 			@Value("${web.url.cas}") String webCasUrl,
 			// ${cas.service.suoritusrekisteri}
@@ -69,6 +63,16 @@ public class SijoitteleAsyncResourceImpl implements SijoitteleAsyncResource {
 				.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
 		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
 		bean.setProviders(providers);
+		List<Interceptor<? extends Message>> interceptors = Lists
+				.newArrayList();
+
+		CasApplicationAsAUserInterceptor cas = new CasApplicationAsAUserInterceptor();
+		cas.setWebCasUrl(webCasUrl);
+		cas.setTargetService(targetService);
+		cas.setAppClientUsername(appClientUsername);
+		cas.setAppClientPassword(appClientPassword);
+		interceptors.add(cas);
+		bean.setOutInterceptors(interceptors);
 		this.webClient = bean.createWebClient();
 		ClientConfiguration c = WebClient.getConfig(webClient);
 		/**
@@ -80,26 +84,29 @@ public class SijoitteleAsyncResourceImpl implements SijoitteleAsyncResource {
 				.setReceiveTimeout(TimeUnit.MINUTES.toMillis(50));
 		// org.apache.cxf.transport.http.async.SO_TIMEOUT
 	}
-
+	//@Path("erillishaku/{hakuOid}/hakukohde/{hakukohdeOid}")
 	@Override
-	public void sijoittele(String hakuOid, Consumer<String> callback,
-			Consumer<Throwable> failureCallback) {
-		// fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluResource
-		String url = new StringBuilder().append("/sijoittele/").append(hakuOid).append("/")
-				.toString();
-		try {
-
-			WebClient
-					.fromClient(webClient)
-					.path(url)
-					.accept(MediaType.WILDCARD_TYPE)
-					.async()
-					.get(new Callback<String>(address, url, callback,
-							failureCallback, new TypeToken<String>() {
-							}.getType()));
-		} catch (Exception e) {
-			failureCallback.accept(e);
-		}
+	public Future<Response> tuoErillishaunTilat(
+			String hakuOid, String hakukohdeOid,
+			Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
+		//@Path("tila")
+		StringBuilder urlBuilder = new StringBuilder().append("/tila/erillishaku/")
+				.append(hakuOid).append("/hakukohde/")
+				.append(hakukohdeOid).append("/");
+		String url = urlBuilder.toString();
+		LOG.warn("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}",
+				address, url, hakukohdeOid);
+		return WebClient.fromClient(webClient)
+		//
+				.path(url)
+				//
+				//.query("hyvaksytyt", true)
+				//
+				//.query("hakukohdeOid", hakukohdeOid)
+				//
+				//.accept(MediaType.APPLICATION_JSON_TYPE)
+				//
+				.async().post(Entity.entity(erillishaunHakijat,
+						MediaType.APPLICATION_JSON_TYPE));
 	}
-
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
+import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 
@@ -14,4 +15,6 @@ public interface SijoitteluAsyncResource {
 			String hakuOid, String hakukohdeOid);
 
 	Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
+	
+	Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid);
 }

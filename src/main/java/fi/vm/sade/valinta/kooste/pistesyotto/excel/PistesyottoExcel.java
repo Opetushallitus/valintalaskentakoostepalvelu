@@ -347,14 +347,10 @@ public class PistesyottoExcel {
 				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
 					ValintakoeDTO valintakoe = tunnisteDTO.get(valintaperuste
 							.getTunniste());
-					// if ("1_2_246_562_5_85532589612_urheilija_lisapiste"
-					// .equals(valintakoe.getValintakoeTunniste())) {
-					// LOG.error("{}", "");
-					// }
-
-					if (Osallistuminen.OSALLISTUU.equals(valintakoe
-							.getOsallistuminenTulos().getOsallistuminen())
-							|| !valintaperuste.getVaatiiOsallistumisen()) {
+					
+					
+					if (!valintaperuste.getVaatiiOsallistumisen() || Osallistuminen.OSALLISTUU.equals(valintakoe
+							.getOsallistuminenTulos().getOsallistuminen())) {
 						syote = true;
 						if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
 								.getFunktiotyyppi())) {

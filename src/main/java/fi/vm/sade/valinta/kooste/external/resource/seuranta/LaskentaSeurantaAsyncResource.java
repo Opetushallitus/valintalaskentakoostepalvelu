@@ -40,6 +40,7 @@ public interface LaskentaSeurantaAsyncResource {
 			Consumer<Throwable> failureCallback);
 
 	void luoLaskenta(String hakuOid, LaskentaTyyppi tyyppi,
+			Boolean erillishaku,
 			Integer valinnanvaihe, Boolean valintakoelaskenta,
 			List<HakukohdeDto> hakukohdeOids, Consumer<String> callback,
 			Consumer<Throwable> failureCallback);

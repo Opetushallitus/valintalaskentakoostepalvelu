@@ -35,9 +35,10 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 	private final List<ValintaryhmaPalvelukutsuYhdiste> valintaryhmaPalvelukutsuYhdiste;
 	private final AtomicReference<Runnable> callback = new AtomicReference<>();
-
+	private final boolean erillishaku;
 	@SuppressWarnings("unchecked")
 	public ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
+			boolean erillishaku,
 			HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			List<ValintaryhmaPalvelukutsuYhdiste> valintaryhmaPalvelukutsuYhdiste,
@@ -49,6 +50,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 				.concat(hakemuksetPalvelukutsut, valintaperusteetPalvelukutsut,
 						hakijaryhmatPalvelukutsut,
 						suoritusrekisteriPalvelukutsut)));
+		this.erillishaku = erillishaku;
 		this.valintaryhmaPalvelukutsuYhdiste = valintaryhmaPalvelukutsuYhdiste;
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
 	}
@@ -71,7 +73,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 				.stream()
 				.map(y -> {
 					try {
-						LaskeDTO l = new LaskeDTO(y.getHakukohdeOid(),
+						LaskeDTO l = new LaskeDTO(erillishaku,y.getHakukohdeOid(),
 								muodostaHakemuksetDTO(y.getHakukohdeOid(), y
 										.getHakemuksetPalvelukutsu()
 										.getHakemukset(), y

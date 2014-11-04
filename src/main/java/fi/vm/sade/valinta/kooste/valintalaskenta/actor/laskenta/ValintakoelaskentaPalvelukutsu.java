@@ -35,8 +35,11 @@ public class ValintakoelaskentaPalvelukutsu extends
 	private final HakemuksetPalvelukutsu hakemuksetPalvelukutsu;
 	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
-
-	public ValintakoelaskentaPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
+	private final boolean erillishaku;
+	
+	public ValintakoelaskentaPalvelukutsu(
+			boolean erillishaku,
+			HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
 			ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
@@ -57,6 +60,7 @@ public class ValintakoelaskentaPalvelukutsu extends
 		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
 		this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
 		this.suoritusrekisteriPalvelukutsu = suoritusrekisteriPalvelukutsu;
+		this.erillishaku = erillishaku;
 	}
 
 	@Override
@@ -76,7 +80,7 @@ public class ValintakoelaskentaPalvelukutsu extends
 		if (valintaperusteet == null) {
 			throw new NullPointerException("Valintaperusteet oli null dataa!");
 		}
-		return new LaskeDTO(getHakukohdeOid(), muodostaHakemuksetDTO(
+		return new LaskeDTO(erillishaku,getHakukohdeOid(), muodostaHakemuksetDTO(
 				getHakukohdeOid(), hakemukset,
 				suoritusrekisteriPalvelukutsu.getOppijat()), valintaperusteet);
 	}

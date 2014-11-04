@@ -143,6 +143,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 	}
 
 	public void luoLaskenta(String hakuOid, LaskentaTyyppi tyyppi,
+			Boolean erillishaku,
 			Integer valinnanvaihe, Boolean valintakoelaskenta,
 			List<HakukohdeDto> hakukohdeOids, Consumer<String> callback,
 			Consumer<Throwable> failureCallback) {
@@ -151,6 +152,10 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 					.append(hakuOid).append("/tyyppi/").append(tyyppi)
 					.toString();
 			WebClient wc = WebClient.fromClient(webClient).path(url);
+			//
+			if (erillishaku != null) {
+				wc.query("erillishaku", erillishaku);
+			}
 			//
 			if (valinnanvaihe != null) {
 				wc.query("valinnanvaihe", valinnanvaihe);

@@ -24,11 +24,6 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
  * 
  */
 public interface ValintaperusteetAsyncResource {
-	// @GET
-	// @Path("/avaimet/{oid}")
-	// @Produces(MediaType.APPLICATION_JSON)
-	// List<ValintaperusteDTO> findAvaimet(@PathParam("oid") String oid);
-	Future<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
 
 	Peruutettava haeHakijaryhmat(String hakukohdeOid,
 			Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback,

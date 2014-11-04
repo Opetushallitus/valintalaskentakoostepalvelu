@@ -2,10 +2,6 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -19,10 +15,6 @@ import akka.actor.TypedActorExtension;
 import akka.actor.TypedProps;
 import akka.japi.Creator;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 import com.typesafe.config.ConfigFactory;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -33,10 +25,8 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaJaHaku;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 
 /**
  * 
@@ -83,6 +73,7 @@ public class LaskentaActorSystem implements
 				.getValinnanvaihe());
 		final String uuid = laskentaAloitus.getUuid();
 		final String hakuOid = laskentaAloitus.getHakuOid();
+		final boolean erillishaku = laskentaAloitus.isErillishaku();
 		final Collection<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatio = laskentaAloitus
 				.getHakukohdeDtos()
 				.stream()
@@ -101,6 +92,7 @@ public class LaskentaActorSystem implements
 										return laskentaActorFactory
 												.createValintaryhmaActor(uuid,
 														hakuOid,
+														erillishaku,
 														valinnanvaiheet,
 														hakukohdeJaOrganisaatio);
 									} else {
@@ -110,6 +102,7 @@ public class LaskentaActorSystem implements
 											return laskentaActorFactory
 													.createValintakoelaskentaActor(
 															uuid, hakuOid,
+															erillishaku,
 															valinnanvaiheet,
 															hakukohdeJaOrganisaatio);
 										}
@@ -119,6 +112,7 @@ public class LaskentaActorSystem implements
 											return laskentaActorFactory
 													.createValintalaskentaActor(
 															uuid, hakuOid,
+															erillishaku,
 															valinnanvaiheet,
 															hakukohdeJaOrganisaatio);
 										} else {
@@ -131,6 +125,7 @@ public class LaskentaActorSystem implements
 											return laskentaActorFactory
 													.createValintalaskentaJaValintakoelaskentaActor(
 															uuid, hakuOid,
+															erillishaku,
 															valinnanvaiheet,
 															hakukohdeJaOrganisaatio);
 										}

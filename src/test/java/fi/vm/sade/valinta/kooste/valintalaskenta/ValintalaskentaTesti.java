@@ -73,7 +73,7 @@ public class ValintalaskentaTesti {
 				suoritusrekisteriAsyncResource);
 
 		ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute = laskentaActorSystem;
-		LaskentaAloitus laskentaJaHaku = new LaskentaAloitus(uuid, hakuOid,
+		LaskentaAloitus laskentaJaHaku = new LaskentaAloitus(uuid, hakuOid,false,
 				null, null, hakukohdeOids, LaskentaTyyppi.HAKUKOHDE);
 		valintalaskentaKerrallaRoute
 				.suoritaValintalaskentaKerralla(laskentaJaHaku);

@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAvaimetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoArvo;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviListAdapter;
@@ -54,7 +56,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 			.getLogger(PistesyottoTuontiRouteImpl.class);
 
 	private final ValintalaskentaValintakoeAsyncResource valintakoeResource;
-	private final ValintaperusteetAsyncResource valintaperusteetResource;
+	private final ValintaperusteetAvaimetAsyncResource valintaperusteetResource;
 	private final ApplicationAsyncResource applicationAsyncResource;
 	private final ApplicationResource applicationResource;
 
@@ -62,7 +64,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 	public PistesyottoTuontiRouteImpl(
 			ValintalaskentaValintakoeAsyncResource valintakoeResource,
 			ApplicationAsyncResource applicationAsyncResource,
-			ValintaperusteetAsyncResource valintaperusteetResource,
+			ValintaperusteetAvaimetAsyncResource valintaperusteetResource,
 			ApplicationResource applicationResource) {
 		this.valintakoeResource = valintakoeResource;
 		this.applicationResource = applicationResource;
@@ -248,6 +250,9 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 		 */
 		from(luontiEpaonnistui)
 		//
+		.log(LoggingLevel.ERROR,
+						"Pistesyoton tuonti epaonnistui: ${exception.message}\r\n${exception.stacktrace}")
+						//
 				.process(new Processor() {
 					public void process(Exchange exchange) throws Exception {
 						if (dokumenttiprosessi(exchange).getPoikkeukset()

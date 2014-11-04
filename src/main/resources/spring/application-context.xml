@@ -568,11 +568,15 @@
 	<!-- Valintaperusteet Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl" />
-
+	<!-- Valintaperusteet Avaimet Async -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAvaimetAsyncResourceImpl" />
 	<!-- HakuApp Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl" />
-
+	<!-- Tarjonta Async -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl" />
 	<!-- Valintalaskenta Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaAsyncResourceImpl" />
@@ -585,6 +589,8 @@
 		class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteleAsyncResourceImpl" />
 <bean
 		class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteluAsyncResourceImpl" />
+<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.TilaAsyncResourceImpl" />
 	<!-- Vipa Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.ViestintapalveluAsyncResourceImpl" />

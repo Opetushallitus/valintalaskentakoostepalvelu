@@ -1,0 +1,53 @@
+package fi.vm.sade.valinta.kooste.erillishaku.excel;
+
+/**
+ * 
+ * @author Jussi Jartamo
+ * 
+ */
+public class ErillishakuRivi {
+
+	private final String etunimi;
+	private final String sukunimi;
+	private final String henkilotunnus;
+	private final String syntymaAika;
+	
+	private final String hakemuksenTila;
+	private final String vastaanottoTila;
+	private final String ilmoittautumisTila;
+	
+	public ErillishakuRivi(String sukunimi,String etunimi,  String henkilotunnus, String syntymaAika, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila) {
+		this.etunimi = etunimi;
+		this.sukunimi = sukunimi;
+		this.henkilotunnus = henkilotunnus;
+		this.syntymaAika = syntymaAika;
+		
+		this.hakemuksenTila = hakemuksenTila;
+		this.vastaanottoTila = vastaanottoTila;
+		this.ilmoittautumisTila = ilmoittautumisTila;
+	}
+	
+	public String getEtunimi() {
+		return etunimi;
+	}
+	public String getHenkilotunnus() {
+		return henkilotunnus;
+	}
+	public String getSukunimi() {
+		return sukunimi;
+	}
+	public String getSyntymaAika() {
+		return syntymaAika;
+	}
+	
+	public String getHakemuksenTila() {
+		return hakemuksenTila;
+	}
+	public String getIlmoittautumisTila() {
+		return ilmoittautumisTila;
+	}
+	public String getVastaanottoTila() {
+		return vastaanottoTila;
+	}
+	
+}

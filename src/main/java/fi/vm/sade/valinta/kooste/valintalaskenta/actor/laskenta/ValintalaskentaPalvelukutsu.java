@@ -33,7 +33,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 	private final HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu;
 	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
-
+	private final boolean erillishaku;
 	@Override
 	public void vapautaResurssit() {
 		valintaperusteetPalvelukutsu.vapautaResurssit();
@@ -42,7 +42,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 		suoritusrekisteriPalvelukutsu.vapautaResurssit();
 	}
 
-	public ValintalaskentaPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
+	public ValintalaskentaPalvelukutsu(boolean erillishaku, HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
 			ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
@@ -65,6 +65,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								suoritusrekisteriPalvelukutsu,
 								suoritusrekisteriStrategia)));
+		this.erillishaku = erillishaku;
 		this.hakijaryhmatPalvelukutsu = hakijaryhmatPalvelukutsu;
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
 		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
@@ -73,7 +74,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 	}
 
 	private LaskeDTO muodostaLaskeDTO() {
-		LaskeDTO l = new LaskeDTO(getHakukohdeOid(), muodostaHakemuksetDTO(
+		LaskeDTO l = new LaskeDTO(erillishaku,getHakukohdeOid(), muodostaHakemuksetDTO(
 				getHakukohdeOid(), hakemuksetPalvelukutsu.getHakemukset(),
 				suoritusrekisteriPalvelukutsu.getOppijat()),
 				valintaperusteetPalvelukutsu.getValintaperusteet(),
