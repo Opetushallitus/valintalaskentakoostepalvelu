@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 import static rx.Observable.from;
 import static rx.Observable.zip;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +15,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +30,7 @@ import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
 
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
@@ -78,6 +85,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 		this.organisaatioAsyncResource = organisaatioAsyncResource;
 		this.haeOsoiteKomponentti = haeOsoiteKomponentti;
 	}
+	
+	private OrganisaatioRDTO responseToOrganisaatio(Response organisaatioResponse) throws IOException {
+		InputStream stream = (InputStream) organisaatioResponse.getEntity();
+		String json = StringUtils.trimToEmpty(IOUtils.toString(stream));
+		IOUtils.closeQuietly(stream);
+		return new Gson().fromJson(json,OrganisaatioRDTO.class);
+	}
 
 	@Override
 	public void hyvaksymiskirjeetHakemuksille(final KirjeProsessi prosessi,
@@ -89,13 +103,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 				.getKoulutuspaikkallisetHakijat(
 						hyvaksymiskirjeDTO.getHakuOid(),
 						hyvaksymiskirjeDTO.getHakukohdeOid());
-		Future<OrganisaatioRDTO> organisaatioFuture = organisaatioAsyncResource
+		Future<Response> organisaatioFuture = organisaatioAsyncResource
 				.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
 		zip(
 				from(hakemuksetFuture),
 				from(hakijatFuture),
 				from(organisaatioFuture),
-				(hakemukset, hakijat, organisaatio) -> {
+				(hakemukset, hakijat, organisaatioResponse) -> {
 					LOG.info("Tehdaan valituille hakijoille hyvaksytyt filtterointi.");
 
 					final Set<String> kohdeHakijat = Sets
@@ -123,7 +137,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 						hakijapalveluidenOsoite = LueHakijapalvelunOsoite
 								.lueHakijapalvelunOsoite(haeOsoiteKomponentti,
 										kohdeHakukohde.getHakukohteenKieli(),
-										organisaatio);
+										responseToOrganisaatio(organisaatioResponse));
 					} catch (Exception e) {
 						LOG.error(
 								"Hakijapalveluiden osoitteen haussa odottamaton virhe {},\r\n{}",
@@ -167,13 +181,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 				.getKoulutuspaikkallisetHakijat(
 						hyvaksymiskirjeDTO.getHakuOid(),
 						hyvaksymiskirjeDTO.getHakukohdeOid());
-		Future<OrganisaatioRDTO> organisaatioFuture = organisaatioAsyncResource
+		Future<Response> organisaatioFuture = organisaatioAsyncResource
 				.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
 		zip(
 				from(hakemuksetFuture),
 				from(hakijatFuture),
 				from(organisaatioFuture),
-				(hakemukset, hakijat, organisaatio) -> {
+				(hakemukset, hakijat, organisaatioResponse) -> {
 
 					LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi.");
 					final String hakukohdeOid = hyvaksymiskirjeDTO
@@ -194,7 +208,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 						hakijapalveluidenOsoite = LueHakijapalvelunOsoite
 								.lueHakijapalvelunOsoite(haeOsoiteKomponentti,
 										kohdeHakukohde.getHakukohteenKieli(),
-										organisaatio);
+										responseToOrganisaatio(organisaatioResponse));
 					} catch (Exception e) {
 						LOG.error(
 								"Hakijapalveluiden osoitteen haussa odottamaton virhe {},\r\n{}",

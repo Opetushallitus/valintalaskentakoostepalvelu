@@ -131,7 +131,12 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
 						LOG.error("Excelin tuonti epaonnistui! {}", e.getMessage());
 						throw new RuntimeException(e);
 					}
-					
+					if(!hakijat.isEmpty()) {
+						tilaAsyncResource.tuoErillishaunTilat(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid(), hakijat);
+					} else {
+						LOG.error("Taulukkolaskentatiedostosta ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
+						throw new RuntimeException("Taulukkolaskentatiedostosta ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
+					}
 				},
 				poikkeus-> {
 					LOG.error("Erillishaun tuonti keskeytyi virheeseen {}. {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));

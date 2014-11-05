@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.external.resource.organisaatio;
 
 import java.util.concurrent.Future;
 
+import javax.ws.rs.core.Response;
+
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 
 /**
@@ -17,5 +19,5 @@ public interface OrganisaatioAsyncResource {
 	 *            == tarjoajaOid
 	 * @return Organisaation tiedot
 	 */
-	Future<OrganisaatioRDTO> haeOrganisaatio(String organisaatioOid);
+	Future<Response> haeOrganisaatio(String organisaatioOid);
 }
