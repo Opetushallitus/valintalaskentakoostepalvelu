@@ -5,15 +5,18 @@ import java.io.InputStreamReader;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 
 public class HakijapalvelunOsoiteTest {
 
@@ -26,6 +29,7 @@ public class HakijapalvelunOsoiteTest {
 						"organisaatio/organisaatiodto.json").getInputStream()),
 				OrganisaatioRDTO.class);
 	}
+
 	@Ignore
 	@Test
 	public void testaaHakijapalvelunOsoitteenHaku2() throws JsonSyntaxException,

@@ -24,7 +24,7 @@ public class Osoite implements Serializable {
 	private String country; // ":"Suomi",
 	private String countryCode; // ":"FI"
 	@JsonIgnore
-	private boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
+	private Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
 
 	public Osoite(
 			String firstName,
@@ -37,7 +37,7 @@ public class Osoite implements Serializable {
 			String region,
 			String country,
 			String countryCode,
-			boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt) {
+			Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt) {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.addressline = addressline;

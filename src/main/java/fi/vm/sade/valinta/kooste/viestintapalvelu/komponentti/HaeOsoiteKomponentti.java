@@ -151,11 +151,11 @@ public class HaeOsoiteKomponentti {
 								// todennettu
 								// etta lisays tuotannossa toimii
 		}
-		return new Osoite(StringUtils.EMPTY, StringUtils.EMPTY,
+		return new Osoite(null, null,
 				yhteystiedot.get("osoite"), null, null,
 				postinumero(yhteystiedot.get("postinumeroUri")),
-				maakoodi.getPostitoimipaikka(), StringUtils.EMPTY,
-				maakoodi.getMaa(), StringUtils.EMPTY, false);
+				maakoodi.getPostitoimipaikka(), null,
+				maakoodi.getMaa(), null, false);
 	}
 
 	private String postinumero(String url) {
