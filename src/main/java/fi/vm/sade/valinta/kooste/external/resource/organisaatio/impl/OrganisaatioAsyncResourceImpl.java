@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
@@ -83,7 +84,7 @@ public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource 
 	}
 
 	@Override
-	public Future<OrganisaatioRDTO> haeOrganisaatio(String organisaatioOid) {
+	public Future<Response> haeOrganisaatio(String organisaatioOid) {
 		// /organisaatio/1.2.246.562.10.39218317368
 		String url = new StringBuilder().append("/organisaatio/")
 				.append(organisaatioOid).append("/").toString();
@@ -94,7 +95,6 @@ public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource 
 				//
 				.async()
 				//
-				.get(new GenericType<OrganisaatioRDTO>() {
-				});
+				.get();//new GenericType<OrganisaatioRDTO>() {}
 	}
 }
