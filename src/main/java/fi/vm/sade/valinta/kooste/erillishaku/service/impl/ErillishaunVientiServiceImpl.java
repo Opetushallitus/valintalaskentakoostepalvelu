@@ -140,7 +140,7 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 					LOG.warn("Aloitetaan dokumenttipalveluun tallennus");
 					String uuid = UUID.randomUUID().toString();
 					dokumenttiResource.tallenna(uuid, "erillishaku.xlsx", DateTime.now().plusHours(1).toDate().getTime(), 
-							Arrays.asList("erillishaku"), "", e.getExcel().vieXlsx());
+							Arrays.asList("erillishaku"), "application/octet-stream", e.getExcel().vieXlsx());
 					prosessi.vaiheValmistui();
 					prosessi.valmistui(uuid);
 				},
