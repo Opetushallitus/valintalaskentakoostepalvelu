@@ -474,6 +474,7 @@
 	</bean>
 
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.erillishaku"  />
 
 
 	<!-- Sijoittelu -->

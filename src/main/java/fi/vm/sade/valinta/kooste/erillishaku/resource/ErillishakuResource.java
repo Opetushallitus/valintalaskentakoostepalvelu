@@ -44,6 +44,8 @@ public class ErillishakuResource {
 
 	@Autowired
 	private ErillishaunTuontiService tuontiService;
+	
+	@Autowired
 	private ErillishaunVientiService vientiService;
 
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
