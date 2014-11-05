@@ -268,11 +268,16 @@ public class PistesyottoExcel {
 									.replace(".", ","), VAKIO_OSALLISTUI,
 							StringUtils.trimToEmpty(valintaperuste
 									.getOsallistuminenTunniste())));
-				} else {
-					dataArvot.add(new DataArvo(StringUtils
-							.trimToEmpty(valintaperuste.getTunniste()),
+				} else if(valintaperuste.getArvot() != null&& !valintaperuste.getArvot().isEmpty()){
+					dataArvot.add(new DiskreettiDataArvo(valintaperuste.getArvot(),
+							VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, StringUtils
+									.trimToEmpty(valintaperuste.getTunniste())
+									.replace(".", ","), VAKIO_OSALLISTUI,
 							StringUtils.trimToEmpty(valintaperuste
 									.getOsallistuminenTunniste())));
+				} else {
+					LOG.error("Tunnistamaton lukuarvofunktio! Pistesyottoa ei voida toteuttaa!");
+					throw new RuntimeException("Tunnistamaton lukuarvofunktio! Pistesyotto keskeytetty!");
 				}
 			} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(valintaperuste
 					.getFunktiotyyppi())) {
@@ -283,10 +288,8 @@ public class PistesyottoExcel {
 								.trimToEmpty(valintaperuste
 										.getOsallistuminenTunniste())));
 			} else {
-				dataArvot.add(new DataArvo(StringUtils
-						.trimToEmpty(valintaperuste.getTunniste()),
-						StringUtils.trimToEmpty(valintaperuste
-								.getOsallistuminenTunniste())));
+				LOG.error("Tunnistamaton funktiotyyppi! Peruutetaan pistesyoton luonti!");
+				throw new RuntimeException("Tunnistamaton syote! Peruutetaan pistesyoton luonti!");
 			}
 		}
 		Map<String, String> oidToHetu = hakemukset.stream().collect(
@@ -306,22 +309,33 @@ public class PistesyottoExcel {
 			boolean syote = false;
 			if (!osallistuja) {
 				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
-					if (!valintaperuste.getVaatiiOsallistumisen()) {
+					if (valintaperuste.getVaatiiOsallistumisen()) {
 						syote = true;
 						if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
 								.getFunktiotyyppi())) {
-							Number value;
-							if (data.getAdditionalData() == null) {
-								value = asNumber(null);
+							if(valintaperuste.getArvot() != null && !valintaperuste.getArvot().isEmpty()) {
+								// TODO
+								String value = null;
+								if (data.getAdditionalData() == null) {
+									value = null;
+								} else {
+									value = data.getAdditionalData().get(
+											valintaperuste.getTunniste());
+								}
+								s.add(new MonivalintaArvo(value,valintaperuste.getArvot()));
 							} else {
-								value = asNumber(data.getAdditionalData().get(
-										valintaperuste.getTunniste()));
+								Number value;
+								if (data.getAdditionalData() == null) {
+									value = asNumber(null);
+								} else {
+									value = asNumber(data.getAdditionalData().get(
+											valintaperuste.getTunniste()));
+								}
+								Number max = asNumber(valintaperuste.getMax());
+								Number min = asNumber(valintaperuste.getMin());
+	
+								s.add(new NumeroArvo(value, min, max));
 							}
-							Number max = asNumber(valintaperuste.getMax());
-							Number min = asNumber(valintaperuste.getMin());
-
-							s.add(new NumeroArvo(value, min, max));
-
 						} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO
 								.equals(valintaperuste.getFunktiotyyppi())) {
 							String value = StringUtils.trimToEmpty(data
@@ -349,7 +363,7 @@ public class PistesyottoExcel {
 							.getTunniste());
 					
 					
-					if (!valintaperuste.getVaatiiOsallistumisen() || Osallistuminen.OSALLISTUU.equals(valintakoe
+					if (Osallistuminen.OSALLISTUU.equals(valintakoe
 							.getOsallistuminenTulos().getOsallistuminen())) {
 						syote = true;
 						if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste

@@ -55,4 +55,16 @@ public class PistesyottoRivi {
 		return oid;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[oid=").append(oid).append(",nimi=").append(nimi).append(",hetu=").append(hetu).append(",");
+		for(PistesyottoArvo arvo: arvot) {
+			sb.append("\r\n\t[tunniste=").append(arvo.getTunniste()).append(",arvo=").append(arvo.getArvo())
+			.append(",tila=").append(arvo.getTila())
+			.append(",osallistumisenTunniste=").append(arvo.getOsallistuminenTunniste()).append("]");
+		}
+		sb.append("]");
+		return sb.toString();
+	}
 }

@@ -13,10 +13,12 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import rx.schedulers.Schedulers;
 import static rx.Observable.*;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
@@ -40,6 +42,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKom
  * @author Jussi Jartamo
  * 
  */
+@Service
 public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 
 	private static final Logger LOG = LoggerFactory
@@ -89,8 +92,10 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 					try {
 						hakukohde = hakukohdeFuture.get();
 					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						LOG.error("Sijoittelusta ei saatu tietoja hakukohteelle vientia varten!"
+								+ "Resurssi /sijoittelu/{}/sijoitteluajo/{}/hakukohde/{} "
+								+ "{}: {}", erillishaku.getHakuOid(),
+								erillishaku.getHakukohdeOid(),SijoitteluResource.LATEST, e1.getMessage(), Arrays.toString(e1.getStackTrace()));
 						throw new RuntimeException(e1);
 					}
 					if (hakukohde.getValintatapajonot().isEmpty()) {
@@ -135,12 +140,12 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 					LOG.warn("Aloitetaan dokumenttipalveluun tallennus");
 					String uuid = UUID.randomUUID().toString();
 					dokumenttiResource.tallenna(uuid, "erillishaku.xlsx", DateTime.now().plusHours(1).toDate().getTime(), 
-							Arrays.asList("erillishaku"), "", e.getExcel().vieXlsx());
+							Arrays.asList("erillishaku"), "application/octet-stream", e.getExcel().vieXlsx());
 					prosessi.vaiheValmistui();
 					prosessi.valmistui(uuid);
 				},
 				poikkeus -> {
-					LOG.error("Erillishaun vienti keskeytyi virheeseen {}", poikkeus.getMessage());
+					LOG.error("Erillishaun vienti keskeytyi virheeseen {}. {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
 					prosessi.keskeyta();
 				},
 				() -> {

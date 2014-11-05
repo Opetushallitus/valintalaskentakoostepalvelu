@@ -92,6 +92,8 @@ public class ValintalaskentaValintakoeAsyncResourceImpl implements
 	@Override
 	public Future<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(
 			String hakukohdeOid) {
+		// valintalaskentakoostepalvelu.valintalaskenta.rest.url
+		// /valintalaskenta-laskenta-service/resources/valintakoe/hakutoive/...
 		StringBuilder urlBuilder = new StringBuilder().append(
 				"/valintakoe/hakutoive/").append(hakukohdeOid);
 		String url = urlBuilder.toString();

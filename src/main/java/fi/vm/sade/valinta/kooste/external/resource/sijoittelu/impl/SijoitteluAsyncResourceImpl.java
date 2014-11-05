@@ -163,7 +163,7 @@ public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
 		//
 				.path(url)
 				//
-				.accept(MediaType.APPLICATION_JSON_TYPE)
+				.accept(MediaType.WILDCARD)
 				//
 				.async().get(new GenericType<HakukohdeDTO>() {
 				});

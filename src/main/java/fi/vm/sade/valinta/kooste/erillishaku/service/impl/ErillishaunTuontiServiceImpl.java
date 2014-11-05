@@ -4,6 +4,7 @@ import java.io.InputStream;
 
 
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -27,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 
 
+import org.springframework.stereotype.Service;
+
 import com.google.common.collect.Lists;
 
 import rx.schedulers.Schedulers;
@@ -49,6 +52,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
  * @author Jussi Jartamo
  * 
  */
+@Service
 public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
 	
 	private static final Logger LOG = LoggerFactory
@@ -130,7 +134,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
 					
 				},
 				poikkeus-> {
-					LOG.error("Erillishaun tuonti epaonnistui! {}", poikkeus.getMessage());
+					LOG.error("Erillishaun tuonti keskeytyi virheeseen {}. {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
 					prosessi.keskeyta();
 				});
 	}

@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.google.common.collect.Maps;
 
 /**
@@ -88,6 +90,9 @@ public class Teksti {
 	 * @return preferoi suomea
 	 */
 	public String getTeksti() {
+		if(normalisoituKieliJaKoodi.isEmpty()){
+			return StringUtils.EMPTY;
+		}
 		if (normalisoituKieliJaKoodi.containsKey(SUOMI)) {
 			return normalisoituKieliJaKoodi.get(SUOMI);
 		} else if (normalisoituKieliJaKoodi.containsKey(RUOTSI)) {
