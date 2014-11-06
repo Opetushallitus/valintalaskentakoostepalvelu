@@ -137,6 +137,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
 						LOG.error("Taulukkolaskentatiedostosta ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
 						throw new RuntimeException("Taulukkolaskentatiedostosta ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
 					}
+					prosessi.valmistui("ok");
 				},
 				poikkeus-> {
 					LOG.error("Erillishaun tuonti keskeytyi virheeseen {}. {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
