@@ -128,8 +128,8 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						Future<List<ApplicationAdditionalDataDTO>> pistetiedotFuture = applicationAsyncResource
 								.getApplicationAdditionalData(hakuOid,
 										hakukohdeOid);
-						//Future<List<HakukohdeJaValintakoeDTO>> hakukohdeJaValintakoeFuture =
-						//valintaperusteetValintakoeResource.haeValintakokeetHakukohteille(Arrays.asList(hakukohdeOid));
+						Future<List<HakukohdeJaValintakoeDTO>> hakukohdeJaValintakoeFuture =
+						valintaperusteetValintakoeResource.haeValintakokeetHakukohteille(Arrays.asList(hakukohdeOid));
 						
 						HakukohdeDTO hnimi = hakukohdeTarjonnalta
 								.haeHakukohdeNimi(hakukohdeOid);
@@ -193,8 +193,8 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						}
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita(); // OSALLISTUMISTIEDOT
 						
-						Set<String> kaikkiKutsutaanTunnisteet = Collections.emptySet(); 
-						//hakukohdeJaValintakoeFuture.get().stream().flatMap(h -> h.getValintakoeDTO().stream()).filter(v -> Boolean.TRUE.equals(v.getKutsutaankoKaikki())).map(v -> v.getTunniste()).collect(Collectors.toSet());
+						Set<String> kaikkiKutsutaanTunnisteet = //Collections.emptySet(); 
+						hakukohdeJaValintakoeFuture.get().stream().flatMap(h -> h.getValintakoeDTO().stream()).filter(v -> Boolean.TRUE.equals(v.getKutsutaankoKaikki())).map(v -> v.getTunniste()).collect(Collectors.toSet());
 						
 						PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
 								hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi,
