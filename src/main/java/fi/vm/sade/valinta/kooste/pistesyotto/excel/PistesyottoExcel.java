@@ -126,33 +126,37 @@ public class PistesyottoExcel {
 	public PistesyottoExcel(String hakuOid, String hakukohdeOid,
 			String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
 			String tarjoajaNimi, Collection<Hakemus> hakemukset,
+			Set<String> kaikkiKutsutaanTunnisteet,
 			Collection<String> valintakoeTunnisteet,
 			List<ValintakoeOsallistuminenDTO> osallistumistiedot,
 			List<ValintaperusteDTO> valintaperusteet,
 			List<ApplicationAdditionalDataDTO> pistetiedot) {
 		this(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi,
-				tarjoajaNimi, hakemukset, valintakoeTunnisteet,
-				osallistumistiedot, valintaperusteet, pistetiedot, Collections
+				tarjoajaNimi, hakemukset, kaikkiKutsutaanTunnisteet,
+				valintakoeTunnisteet, osallistumistiedot, valintaperusteet,
+				pistetiedot, Collections
 						.<PistesyottoDataRiviKuuntelija> emptyList());
 	}
 
 	public PistesyottoExcel(String hakuOid, String hakukohdeOid,
 			String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
 			String tarjoajaNimi, Collection<Hakemus> hakemukset,
+			Set<String> kaikkiKutsutaanTunnisteet,
 			Collection<String> valintakoeTunnisteet,
 			List<ValintakoeOsallistuminenDTO> osallistumistiedot,
 			List<ValintaperusteDTO> valintaperusteet,
 			List<ApplicationAdditionalDataDTO> pistetiedot,
 			PistesyottoDataRiviKuuntelija kuuntelija) {
 		this(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi,
-				tarjoajaNimi, hakemukset, valintakoeTunnisteet,
-				osallistumistiedot, valintaperusteet, pistetiedot, Arrays
-						.asList(kuuntelija));
+				tarjoajaNimi, hakemukset, kaikkiKutsutaanTunnisteet,
+				valintakoeTunnisteet, osallistumistiedot, valintaperusteet,
+				pistetiedot, Arrays.asList(kuuntelija));
 	}
 
 	public PistesyottoExcel(String hakuOid, String hakukohdeOid,
 			String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
 			String tarjoajaNimi, Collection<Hakemus> hakemukset,
+			Set<String> kaikkiKutsutaanTunnisteet,
 			Collection<String> valintakoeTunnisteet,
 			List<ValintakoeOsallistuminenDTO> osallistumistiedot,
 			List<ValintaperusteDTO> valintaperusteet,
@@ -311,67 +315,67 @@ public class PistesyottoExcel {
 			s.add(new TekstiArvo(Optional.ofNullable(
 					oidToHetu.get(data.getOid())).orElse(StringUtils.EMPTY)));
 			boolean syote = false;
-			if (!osallistuja) {
-				//
-			} else {
-				for (ValintaperusteDTO valintaperuste : valintaperusteet) {
-					ValintakoeDTO valintakoe = tunnisteDTO.get(valintaperuste
-							.getTunniste());
-					if (Osallistuminen.OSALLISTUU.equals(valintakoe
-							.getOsallistuminenTulos().getOsallistuminen())) {
-						syote = true;
-						if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
-								.getFunktiotyyppi())) {
-							if (valintaperuste.getArvot() != null
-									&& !valintaperuste.getArvot().isEmpty()) {
-								String value = null;
-								if (data.getAdditionalData() == null) {
-									value = null;
-								} else {
-									value = data.getAdditionalData().get(
-											valintaperuste.getTunniste());
-								}
-								s.add(new MonivalintaArvo(value, valintaperuste
-										.getArvot()));
+			for (ValintaperusteDTO valintaperuste : valintaperusteet) {
+				ValintakoeDTO valintakoe = tunnisteDTO.get(valintaperuste
+						.getTunniste());
+				if (!Boolean.TRUE.equals(valintakoe.getKutsutaankoKaikki()) && !osallistuja) {
+					//
+					valintaperuste.getTunniste();
+					continue;
+				}
+				if (Osallistuminen.OSALLISTUU.equals(valintakoe
+						.getOsallistuminenTulos().getOsallistuminen())) {
+					syote = true;
+					if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
+							.getFunktiotyyppi())) {
+						if (valintaperuste.getArvot() != null
+								&& !valintaperuste.getArvot().isEmpty()) {
+							String value = null;
+							if (data.getAdditionalData() == null) {
+								value = null;
 							} else {
-								Number value;
-								if (data.getAdditionalData() == null) {
-									value = asNumber(null);
-								} else {
-									value = asNumber(data.getAdditionalData()
-											.get(valintaperuste.getTunniste()));
-								}
-								Number max = asNumber(valintaperuste.getMax());
-								Number min = asNumber(valintaperuste.getMin());
-
-								s.add(new NumeroArvo(value, min, max));
+								value = data.getAdditionalData().get(
+										valintaperuste.getTunniste());
 							}
-						} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO
-								.equals(valintaperuste.getFunktiotyyppi())) {
-							String value = StringUtils.trimToEmpty(data
-									.getAdditionalData().get(
-											valintaperuste.getTunniste()));
-							s.add(new BooleanArvo(value, TOTUUSARVO, TOSI,
-									EPATOSI, TYHJA));
+							s.add(new MonivalintaArvo(value, valintaperuste
+									.getArvot()));
 						} else {
-							s.add(new TekstiArvo(data.getAdditionalData().get(
-									StringUtils.trimToEmpty(valintaperuste
-											.getTunniste())), false));
-						}
+							Number value;
+							if (data.getAdditionalData() == null) {
+								value = asNumber(null);
+							} else {
+								value = asNumber(data.getAdditionalData().get(
+										valintaperuste.getTunniste()));
+							}
+							Number max = asNumber(valintaperuste.getMax());
+							Number min = asNumber(valintaperuste.getMin());
 
-						// s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO
-						// .get(VAKIO_EI_VAADITA), VAIHTOEHDOT));
-						s.add(new MonivalintaArvo(
-								VAIHTOEHDOT_KONVERSIO
-										.get(StringUtils.trimToEmpty(data
-												.getAdditionalData()
-												.get(valintaperuste
-														.getOsallistuminenTunniste()))),
-								VAIHTOEHDOT));
+							s.add(new NumeroArvo(value, min, max));
+						}
+					} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO
+							.equals(valintaperuste.getFunktiotyyppi())) {
+						String value = StringUtils.trimToEmpty(data
+								.getAdditionalData().get(
+										valintaperuste.getTunniste()));
+						s.add(new BooleanArvo(value, TOTUUSARVO, TOSI, EPATOSI,
+								TYHJA));
 					} else {
-						s.add(TekstiArvo.tyhja(false));
-						s.add(TekstiArvo.tyhja(false));
+						s.add(new TekstiArvo(data.getAdditionalData().get(
+								StringUtils.trimToEmpty(valintaperuste
+										.getTunniste())), false));
 					}
+
+					// s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO
+					// .get(VAKIO_EI_VAADITA), VAIHTOEHDOT));
+					s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO
+							.get(StringUtils.trimToEmpty(data
+									.getAdditionalData()
+									.get(valintaperuste
+											.getOsallistuminenTunniste()))),
+							VAIHTOEHDOT));
+				} else {
+					s.add(TekstiArvo.tyhja(false));
+					s.add(TekstiArvo.tyhja(false));
 				}
 			}
 			if (syote) {
