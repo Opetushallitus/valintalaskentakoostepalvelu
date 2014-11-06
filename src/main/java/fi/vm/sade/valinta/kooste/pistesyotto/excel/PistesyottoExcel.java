@@ -318,12 +318,12 @@ public class PistesyottoExcel {
 			for (ValintaperusteDTO valintaperuste : valintaperusteet) {
 				ValintakoeDTO valintakoe = Optional.ofNullable(tunnisteDTO.get(valintaperuste
 						.getTunniste())).orElse(new ValintakoeDTO());
-				if (!Boolean.TRUE.equals(valintakoe.getKutsutaankoKaikki()) && !osallistuja) {
+				boolean kutsutaankoKaikki = Boolean.TRUE.equals(valintakoe.getKutsutaankoKaikki());
+				if (!kutsutaankoKaikki && !osallistuja) {
 					//
-					valintaperuste.getTunniste();
 					continue;
 				}
-				if (Osallistuminen.OSALLISTUU.equals(valintakoe
+				if (kutsutaankoKaikki || Osallistuminen.OSALLISTUU.equals(valintakoe
 						.getOsallistuminenTulos().getOsallistuminen())) {
 					syote = true;
 					if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
