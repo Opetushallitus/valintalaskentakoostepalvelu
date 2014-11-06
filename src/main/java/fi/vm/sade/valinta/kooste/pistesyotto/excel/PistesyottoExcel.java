@@ -306,8 +306,8 @@ public class PistesyottoExcel {
 		for (ApplicationAdditionalDataDTO data : pistetiedot) {
 			boolean osallistuja = osallistujat.contains(data.getOid());
 			// Hakemuksen <tunniste, valintakoeDTO> tiedot
-			Map<String, ValintakoeDTO> tunnisteDTO = tunnisteValintakoe
-					.get(data.getOid());
+			Map<String, ValintakoeDTO> tunnisteDTO = Optional.ofNullable(tunnisteValintakoe
+					.get(data.getOid())).orElse(Collections.emptyMap());
 			Collection<Arvo> s = Lists.newArrayList();
 			s.add(new TekstiArvo(data.getOid()));
 			s.add(new TekstiArvo(new StringBuilder().append(data.getLastName())
@@ -316,8 +316,8 @@ public class PistesyottoExcel {
 					oidToHetu.get(data.getOid())).orElse(StringUtils.EMPTY)));
 			boolean syote = false;
 			for (ValintaperusteDTO valintaperuste : valintaperusteet) {
-				ValintakoeDTO valintakoe = tunnisteDTO.get(valintaperuste
-						.getTunniste());
+				ValintakoeDTO valintakoe = Optional.ofNullable(tunnisteDTO.get(valintaperuste
+						.getTunniste())).orElse(new ValintakoeDTO());
 				if (!Boolean.TRUE.equals(valintakoe.getKutsutaankoKaikki()) && !osallistuja) {
 					//
 					valintaperuste.getTunniste();
