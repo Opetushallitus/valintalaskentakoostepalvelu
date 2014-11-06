@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -194,7 +195,11 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita(); // OSALLISTUMISTIEDOT
 						
 						Set<String> kaikkiKutsutaanTunnisteet = //Collections.emptySet(); 
-						hakukohdeJaValintakoeFuture.get().stream().flatMap(h -> h.getValintakoeDTO().stream()).filter(v -> Boolean.TRUE.equals(v.getKutsutaankoKaikki())).map(v -> v.getTunniste()).collect(Collectors.toSet());
+						hakukohdeJaValintakoeFuture.get().stream().flatMap(h -> {
+							Optional.ofNullable(h.getValintakoeDTO()).orElse(Collections.emptyList()).forEach(vk -> LOG.error("Valintakoetunniste=={}, kutsutaankokaikki={}", vk.getTunniste(),vk.getKutsutaankoKaikki()));
+							return h.getValintakoeDTO().stream();	
+						})
+						.filter(v -> Boolean.TRUE.equals(v.getKutsutaankoKaikki())).map(v -> v.getTunniste()).collect(Collectors.toSet());
 						
 						PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
 								hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi,

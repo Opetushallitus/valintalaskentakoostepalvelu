@@ -261,6 +261,7 @@ public class PistesyottoExcel {
 		// Asennetaan konvertterit
 		Collection<PistesyottoDataArvo> dataArvot = Lists.newArrayList();
 		for (ValintaperusteDTO valintaperuste : valintaperusteet) {
+			LOG.error("Tunniste=={}, osallistumisentunniste={}", valintaperuste.getTunniste(), valintaperuste.getOsallistuminenTunniste());
 			if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
 					.getFunktiotyyppi())) {
 				Double max = asNumber(valintaperuste.getMax());
