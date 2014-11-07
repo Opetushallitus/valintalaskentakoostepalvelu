@@ -6,6 +6,7 @@ import static fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil.SUOMI;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +37,7 @@ public class HaeOsoiteKomponentti {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HaeOsoiteKomponentti.class);
 	private static final String MAAT_JA_VALTIOT_PREFIX = "maatjavaltiot1_";
+	private static final String SUOMI = "fin";
 	private static final String POSTI = "posti_";
 	private final Cache<String, Maakoodi> koodiCache = CacheBuilder
 			.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).build();
@@ -54,10 +56,12 @@ public class HaeOsoiteKomponentti {
 		// hae koodistosta maa
 		{
 			String countryCode = yhteystiedot.getMaaUri();
+			if (countryCode == null) {
+				countryCode = SUOMI;
+			}
 			final String uri = new StringBuilder()
 					.append(MAAT_JA_VALTIOT_PREFIX)
 					.append(countryCode.toLowerCase()).toString();
-
 			try {
 
 				maakoodi = koodiCache.get(uri, new Callable<Maakoodi>() {
@@ -152,11 +156,10 @@ public class HaeOsoiteKomponentti {
 								// todennettu
 								// etta lisays tuotannossa toimii
 		}
-		return new Osoite(null, null,
-				yhteystiedot.getOsoite(), null, null,
+		return new Osoite(null, null, yhteystiedot.getOsoite(), null, null,
 				postinumero(yhteystiedot.getPostinumeroUri()),
-				maakoodi.getPostitoimipaikka(), null,
-				maakoodi.getMaa(), null, false);
+				maakoodi.getPostitoimipaikka(), null, maakoodi.getMaa(), null,
+				false);
 	}
 
 	private String postinumero(String url) {
