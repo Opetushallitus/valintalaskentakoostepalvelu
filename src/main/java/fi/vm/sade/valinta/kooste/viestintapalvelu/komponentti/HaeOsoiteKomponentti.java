@@ -25,6 +25,7 @@ import fi.vm.sade.koodisto.service.types.common.KieliType;
 import fi.vm.sade.koodisto.service.types.common.KoodiMetadataType;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
+import fi.vm.sade.service.valintaperusteet.dto.model.Kieli;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
@@ -99,9 +100,13 @@ public class HaeOsoiteKomponentti {
 			// countryNotFound(hakemusOid, countryCode, uri);
 			maakoodi = new Maakoodi(StringUtils.EMPTY, "FI");
 		}
+		String country = null;
+		if(Kieli.EN.equals(preferoitutyyppi)) {
+			country = "FINLAND";
+		}
 		return new Osoite(null, null, yhteystiedot.getOsoite(), null, null,
 				postinumero(yhteystiedot.getPostinumeroUri()),
-				maakoodi.getPostitoimipaikka(), null, null, null,
+				StringUtils.capitalize(StringUtils.lowerCase(maakoodi.getPostitoimipaikka())), null, country, null,
 				null);
 	}
 
