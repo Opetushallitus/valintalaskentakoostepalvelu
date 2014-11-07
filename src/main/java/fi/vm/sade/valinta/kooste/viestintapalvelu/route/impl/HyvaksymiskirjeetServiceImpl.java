@@ -40,6 +40,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
@@ -88,16 +89,16 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 		this.haeOsoiteKomponentti = haeOsoiteKomponentti;
 	}
 	
-	private OrganisaatioRDTO responseToOrganisaatio(Response organisaatioResponse) throws IOException {
+	private Organisaatio responseToOrganisaatio(Response organisaatioResponse) throws IOException {
 		InputStream stream = (InputStream) organisaatioResponse.getEntity();
 		String json = StringUtils.trimToEmpty(IOUtils.toString(stream));
 		IOUtils.closeQuietly(stream);
-		return new Gson().fromJson(json,OrganisaatioRDTO.class);
+		return new Gson().fromJson(json,Organisaatio.class);
 	}
 	private Osoite haeOsoiteHierarkisesti(String kieli, List<String> oids, Response organisaatioResponse) {
 		Osoite hakijapalveluidenOsoite = null;
 		try {
-			OrganisaatioRDTO rdto = responseToOrganisaatio(organisaatioResponse);
+			Organisaatio rdto = responseToOrganisaatio(organisaatioResponse);
 			hakijapalveluidenOsoite = LueHakijapalvelunOsoite
 					.lueHakijapalvelunOsoite(haeOsoiteKomponentti,
 							kieli,rdto);

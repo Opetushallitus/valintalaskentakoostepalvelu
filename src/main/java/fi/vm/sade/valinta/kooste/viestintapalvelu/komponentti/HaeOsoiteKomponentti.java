@@ -25,6 +25,7 @@ import fi.vm.sade.koodisto.service.types.common.KoodiMetadataType;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Maakoodi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -46,13 +47,13 @@ public class HaeOsoiteKomponentti {
 		this.koodiService = koodiService;
 	}
 
-	public Osoite haeOsoiteYhteystiedoista(Map<String, String> yhteystiedot,
+	public Osoite haeOsoiteYhteystiedoista(Yhteystieto yhteystiedot,
 			KieliType preferoitutyyppi) {
 		Maakoodi maakoodi = null;
 		// onko ulkomaalainen?
 		// hae koodistosta maa
 		{
-			String countryCode = yhteystiedot.get("maaUri");
+			String countryCode = yhteystiedot.getMaaUri();
 			final String uri = new StringBuilder()
 					.append(MAAT_JA_VALTIOT_PREFIX)
 					.append(countryCode.toLowerCase()).toString();
@@ -105,7 +106,7 @@ public class HaeOsoiteKomponentti {
 			// onko ulkomaalainen?
 
 			// hae koodistosta maa
-			String postCode = yhteystiedot.get("postinumeroUri");
+			String postCode = yhteystiedot.getPostinumeroUri();
 			final String uri = new StringBuilder().append(POSTI)
 					.append(postCode).toString();
 			try {
@@ -152,8 +153,8 @@ public class HaeOsoiteKomponentti {
 								// etta lisays tuotannossa toimii
 		}
 		return new Osoite(null, null,
-				yhteystiedot.get("osoite"), null, null,
-				postinumero(yhteystiedot.get("postinumeroUri")),
+				yhteystiedot.getOsoite(), null, null,
+				postinumero(yhteystiedot.getPostinumeroUri()),
 				maakoodi.getPostitoimipaikka(), null,
 				maakoodi.getMaa(), null, false);
 	}
