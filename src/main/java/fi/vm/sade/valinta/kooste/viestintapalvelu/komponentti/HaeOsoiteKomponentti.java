@@ -6,6 +6,7 @@ import static fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil.SUOMI;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +26,7 @@ import fi.vm.sade.koodisto.service.types.common.KoodiMetadataType;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Maakoodi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -35,6 +37,7 @@ public class HaeOsoiteKomponentti {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HaeOsoiteKomponentti.class);
 	private static final String MAAT_JA_VALTIOT_PREFIX = "maatjavaltiot1_";
+	private static final String SUOMI = "fin";
 	private static final String POSTI = "posti_";
 	private final Cache<String, Maakoodi> koodiCache = CacheBuilder
 			.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).build();
@@ -46,17 +49,19 @@ public class HaeOsoiteKomponentti {
 		this.koodiService = koodiService;
 	}
 
-	public Osoite haeOsoiteYhteystiedoista(Map<String, String> yhteystiedot,
+	public Osoite haeOsoiteYhteystiedoista(Yhteystieto yhteystiedot,
 			KieliType preferoitutyyppi) {
 		Maakoodi maakoodi = null;
 		// onko ulkomaalainen?
 		// hae koodistosta maa
 		{
-			String countryCode = yhteystiedot.get("maaUri");
+			String countryCode = yhteystiedot.getMaaUri();
+			if (countryCode == null) {
+				countryCode = SUOMI;
+			}
 			final String uri = new StringBuilder()
 					.append(MAAT_JA_VALTIOT_PREFIX)
 					.append(countryCode.toLowerCase()).toString();
-
 			try {
 
 				maakoodi = koodiCache.get(uri, new Callable<Maakoodi>() {
@@ -105,7 +110,7 @@ public class HaeOsoiteKomponentti {
 			// onko ulkomaalainen?
 
 			// hae koodistosta maa
-			String postCode = yhteystiedot.get("postinumeroUri");
+			String postCode = yhteystiedot.getPostinumeroUri();
 			final String uri = new StringBuilder().append(POSTI)
 					.append(postCode).toString();
 			try {
@@ -151,11 +156,10 @@ public class HaeOsoiteKomponentti {
 								// todennettu
 								// etta lisays tuotannossa toimii
 		}
-		return new Osoite(null, null,
-				yhteystiedot.get("osoite"), null, null,
-				postinumero(yhteystiedot.get("postinumeroUri")),
-				maakoodi.getPostitoimipaikka(), null,
-				maakoodi.getMaa(), null, false);
+		return new Osoite(null, null, yhteystiedot.getOsoite(), null, null,
+				postinumero(yhteystiedot.getPostinumeroUri()),
+				maakoodi.getPostitoimipaikka(), null, maakoodi.getMaa(), null,
+				false);
 	}
 
 	private String postinumero(String url) {

@@ -113,6 +113,7 @@ public class PistesyotonTuontiTest {
 				"",
 				"",
 				Collections.emptyList(),
+				Collections.<String>emptySet(),
 				Arrays.asList(
 						"1_2_246_562_5_85532589612_urheilija_lisapiste",
 						"Eläintenhoidon koulutusohjelma, pk (Maatalousalan perustutkinto), pääsy- ja soveltuvuuskoe",

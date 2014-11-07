@@ -174,6 +174,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 						PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
 								hakuOid, hakukohdeOid, null, hakuNimi,
 								hakukohdeNimi, tarjoajaNimi, hakemukset,
+								Collections.emptySet(),
 								valintakoeTunnisteet, osallistumistiedot,
 								valintaperusteet, pistetiedot,
 								pistesyottoTuontiAdapteri);

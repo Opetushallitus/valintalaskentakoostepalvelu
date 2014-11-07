@@ -19,6 +19,9 @@ import fi.vm.sade.koodisto.service.types.common.KieliType;
 import fi.vm.sade.koodisto.util.KoodistoHelper;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioMetaDataRDTO;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Metadata;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -42,15 +45,15 @@ public class LueHakijapalvelunOsoite {
 	 */
 	public static Osoite lueHakijapalvelunOsoite(
 			HaeOsoiteKomponentti osoiteKomponentti,
-			String preferoitukielikoodi, OrganisaatioRDTO organisaatio) {
+			String preferoitukielikoodi, Organisaatio organisaatio) {
 		if (organisaatio == null) {
 			LOG.warn("Yritettiin hakea hakijapalvelun osoitetta tyhjasta organisaatio oliosta!");
 			return null;
 		}
-		List<Map<String, String>> yhteystiedot = Optional
+		List<Yhteystieto> yhteystiedot = Optional
 				.ofNullable(
 						Optional.ofNullable(organisaatio.getMetadata())
-								.orElse(new OrganisaatioMetaDataRDTO())
+								.orElse(new Metadata())
 								.getYhteystiedot())
 				.orElse(Collections.emptyList()).stream()
 				.filter(kiinnostavaYhteystieto()).collect(Collectors.toList());
@@ -62,11 +65,11 @@ public class LueHakijapalvelunOsoite {
 		}
 
 		if (KieliUtil.RUOTSI.equals(preferoitukielikoodi)) {
-			List<Map<String, String>> ruotsinkielisetYhteystiedot = yhteystiedot
+			List<Yhteystieto> ruotsinkielisetYhteystiedot = yhteystiedot
 					.stream().filter(ruotsinkieliset())
 					.collect(Collectors.toList());
 
-			List<Map<String, String>> postit = ruotsinkielisetYhteystiedot
+			List<Yhteystieto> postit = ruotsinkielisetYhteystiedot
 					.stream().filter(postiTyyppia())
 					.collect(Collectors.toList());
 			if (!postit.isEmpty()) {
@@ -79,7 +82,7 @@ public class LueHakijapalvelunOsoite {
 						KieliType.SV);
 			}
 		}
-		List<Map<String, String>> postit = yhteystiedot.stream()
+		List<Yhteystieto> postit = yhteystiedot.stream()
 				.filter(postiTyyppia()).collect(Collectors.toList());
 		if (!postit.isEmpty()) {
 			return osoiteKomponentti.haeOsoiteYhteystiedoista(postit.iterator()
@@ -92,19 +95,18 @@ public class LueHakijapalvelunOsoite {
 		return null;
 	}
 
-	private static Predicate<Map<String, String>> postiTyyppia() {
-		return yhteystiedot -> POSTI_TYYPPI.equals(yhteystiedot
-				.get("osoiteTyyppi"));
+	private static Predicate<Yhteystieto> postiTyyppia() {
+		return yhteystiedot -> POSTI_TYYPPI.equals(yhteystiedot.getOsoiteTyyppi());
 	}
 
-	private static Predicate<Map<String, String>> kiinnostavaYhteystieto() {
-		return yhteystiedot -> kiinnostavatYhteystiedot.contains(yhteystiedot
-				.get("osoiteTyyppi"));
+	private static Predicate<Yhteystieto> kiinnostavaYhteystieto() {
+		return yhteystiedot -> kiinnostavatYhteystiedot.contains(yhteystiedot.getOsoiteTyyppi()
+				);
 	}
 
-	private static Predicate<Map<String, String>> ruotsinkieliset() {
+	private static Predicate<Yhteystieto> ruotsinkieliset() {
 		return yhteystiedot -> KieliUtil.RUOTSI.equals(KieliUtil
 				.normalisoiKielikoodi(TarjontaUriToKoodistoUtil
-						.cleanUri(yhteystiedot.get("kieli"))));
+						.cleanUri(yhteystiedot.getKieli())));
 	}
 }

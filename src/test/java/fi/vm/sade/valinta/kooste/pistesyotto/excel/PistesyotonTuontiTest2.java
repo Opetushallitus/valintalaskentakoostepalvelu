@@ -145,7 +145,7 @@ public class PistesyotonTuontiTest2 {
 		//pistetiedot.forEach(t -> LOG.error("{}", t));
 		PistesyottoExcel pistesyottoExcel = new PistesyottoExcel("testioidi1",
 				"1.2.246.562.20.61064567623", "jep", "", "", "",
-				hakemukset, valintakoeTunnisteet,
+				hakemukset,Collections.<String>emptySet(), valintakoeTunnisteet,
 				osallistumistiedot, valintaperusteet, pistetiedot, kuuntelija);
 		Excel excel = pistesyottoExcel.getExcel();
 		// new FileInputStream("02.xlsx"));//
