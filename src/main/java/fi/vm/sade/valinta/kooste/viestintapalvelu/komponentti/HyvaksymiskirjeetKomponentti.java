@@ -292,7 +292,6 @@ public class HyvaksymiskirjeetKomponentti {
 				tulokset.put("hyvaksytyt", hyvaksytyt.toString());
 				tulokset.put("alinHyvaksyttyPistemaara", StringUtils.EMPTY);
 				tulokset.put("kaikkiHakeneet", StringUtils.EMPTY);
-				tulokset.put("hakijapalveluidenOsoite", hakijapalveluidenOsoite);
 				tulokset.put(
 						"hakukohteenNimi",
 						metakohde.getHakukohdeNimi().getTeksti(
@@ -305,6 +304,7 @@ public class HyvaksymiskirjeetKomponentti {
 			replacements.put("tulokset", tulosList);
 			replacements.put("koulu", koulu.getTeksti(preferoituKielikoodi,
 					vakioTarjoajanNimi(hakukohdeOid)));
+			replacements.put("hakijapalveluidenOsoite", hakijapalveluidenOsoite);
 			replacements.put("henkilotunnus",
 					new HakemusWrapper(hakemus).getHenkilotunnus());
 			replacements.put("koulutus", koulutus.getTeksti(

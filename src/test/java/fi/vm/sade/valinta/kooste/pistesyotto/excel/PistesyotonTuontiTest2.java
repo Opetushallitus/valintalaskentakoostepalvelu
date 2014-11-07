@@ -144,13 +144,13 @@ public class PistesyotonTuontiTest2 {
 		}
 		//pistetiedot.forEach(t -> LOG.error("{}", t));
 		PistesyottoExcel pistesyottoExcel = new PistesyottoExcel("testioidi1",
-				"1.2.246.562.5.85532589612", "jep", "", "", "",
-				hakemukset, valintakoeTunnisteet,
+				"1.2.246.562.20.61064567623", "jep", "", "", "",
+				hakemukset,Collections.<String>emptySet(), valintakoeTunnisteet,
 				osallistumistiedot, valintaperusteet, pistetiedot, kuuntelija);
 		Excel excel = pistesyottoExcel.getExcel();
 		// new FileInputStream("02.xlsx"));//
 
-		excel.tuoXlsx(new ClassPathResource("pistesyotto/2/pistesyotto.xlsx").getInputStream());
+		//excel.tuoXlsx(new ClassPathResource("pistesyotto/2/pistesyotto.xlsx").getInputStream());
 
 		// Arrays.asList(Sarake.PIILOTETTU));
 

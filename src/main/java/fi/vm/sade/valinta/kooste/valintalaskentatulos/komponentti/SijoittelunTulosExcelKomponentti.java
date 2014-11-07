@@ -161,7 +161,7 @@ public class SijoittelunTulosExcelKomponentti {
 						}
 					});
 		List<Object> valintatapajonoOtsikkoRivi = Lists.newArrayList();
-		valintatapajonoOtsikkoRivi.addAll(Arrays.asList("","","","","","","")); // alun tyhjat pystyrivit
+		valintatapajonoOtsikkoRivi.addAll(Arrays.asList("","","","","","","","")); // alun tyhjat pystyrivit
 		List<Object> otsikkoRivi = Lists.newArrayList();
 		otsikkoRivi.addAll(Arrays.asList("Hakemus", "Hakija","Henkilötunnus",
 				"Osoite", "Sähköposti", "Puhelinnumero", "Lupa julkaisuun", "Hakutoive"));

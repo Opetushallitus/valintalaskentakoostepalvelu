@@ -16,9 +16,27 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
+import fi.vm.sade.valinta.kooste.util.Kieli;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.LueHakijapalvelunOsoite;
 
 public class HakijapalvelunOsoiteTest {
+
+	@Ignore
+	@Test
+	public void testaaHakijapalvelunOsoitteenHaku3() throws JsonSyntaxException,
+			JsonIOException, IOException {
+		Organisaatio organisaatio = new Gson().fromJson(
+				new InputStreamReader(new ClassPathResource(
+						"organisaatio/osoite.json").getInputStream()),
+						Organisaatio.class);
+		HaeOsoiteKomponentti h = new HaeOsoiteKomponentti(null);
+		System.err.println(new GsonBuilder().setPrettyPrinting().create().toJson(organisaatio));
+		Osoite osoite = LueHakijapalvelunOsoite.lueHakijapalvelunOsoite(h, KieliUtil.SUOMI, organisaatio);
+	}
 
 	@Ignore
 	@Test
