@@ -269,9 +269,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 					return;
 				}
 				LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
-				String batchId = viestintapalveluAsyncResource
-						.viePdfJaOdotaReferenssi(letterBatch).get(35L,
+				final String batchId; 
+				try {
+					batchId=viestintapalveluAsyncResource
+						.viePdfJaOdotaReferenssi(letterBatch).get(165L,
 								TimeUnit.SECONDS);
+				}catch(Exception e){
+					LOG.error("Viestintapalvelukutsu epaonnistui virheeseen {}", e.getMessage());
+					throw new RuntimeException(e);
+				}
 				LOG.info("Saatiin kirjeen seurantaId {}", batchId);
 				prosessi.vaiheValmistui();
 				PublishSubject<String> stop = PublishSubject.create();

@@ -50,124 +50,67 @@ public class HaeOsoiteKomponentti {
 	}
 
 	public Osoite haeOsoiteYhteystiedoista(Yhteystieto yhteystiedot,
-			KieliType preferoitutyyppi) {
+			final KieliType preferoitutyyppi) {
 		Maakoodi maakoodi = null;
 		// onko ulkomaalainen?
 		// hae koodistosta maa
-		{
-			String countryCode = yhteystiedot.getMaaUri();
-			if (countryCode == null) {
-				countryCode = SUOMI;
-			}
-			final String uri = new StringBuilder()
-					.append(MAAT_JA_VALTIOT_PREFIX)
-					.append(countryCode.toLowerCase()).toString();
-			try {
-
-				maakoodi = koodiCache.get(uri, new Callable<Maakoodi>() {
-					@Override
-					public Maakoodi call() throws Exception {
-						String postitoimipaikka = StringUtils.EMPTY;
-						String maa = StringUtils.EMPTY;
-						for (KoodiType koodi : koodiService
-								.searchKoodis(KoodiServiceSearchCriteriaBuilder
-										.latestKoodisByUris(uri))) {
-							if (koodi.getMetadata() == null) {
-								LOG.error(
-										"Koodistosta palautuu tyhjiä koodeja! Koodisto uri {}",
-										uri);
-								continue;
-							}
-							// preferoidaan englantia
-							maa = getKuvaus(koodi.getMetadata(),
-									preferoitutyyppi);
-							if (maa == null) {
-								maa = getKuvaus(koodi.getMetadata()); // jos
-																		// suomea
-																		// ei
-																		// loydy
-																		// kaikki
-																		// kay
-							}
-							LOG.debug("Haettiin maa {} urille {}",
-									new Object[] { maa, uri });
-							if (maa != null) {
-								break;
-							}
-						}
-						return new Maakoodi(postitoimipaikka, maa);
-					}
-				});
-			} catch (Exception e) {
-				LOG.error(
-						"Yhteystiedoille ei saatu haettua maata koodistosta! Koodisto URI {}",
-						uri);
-				// countryNotFound(hakemusOid, countryCode, uri);
-			}
-		}
-
+		String postCode = yhteystiedot.getPostinumeroUri();
+		final String uri = postCode;
 		try {
-			// onko ulkomaalainen?
-
 			// hae koodistosta maa
-			String postCode = yhteystiedot.getPostinumeroUri();
-			final String uri = new StringBuilder().append(POSTI)
-					.append(postCode).toString();
-			try {
-				maakoodi = koodiCache.get(uri, new Callable<Maakoodi>() {
-					public Maakoodi call() throws Exception {
-						String postitoimipaikka = StringUtils.EMPTY;
-						String maa = StringUtils.EMPTY;
-						for (KoodiType koodi : koodiService
-								.searchKoodis(KoodiServiceSearchCriteriaBuilder
-										.latestKoodisByUris(uri))) {
-							if (koodi.getMetadata() == null) {
-								LOG.error(
-										"Koodistosta palautuu tyhjiä koodeja! Koodisto uri {}",
-										uri);
-								continue;
-							}
-							// preferoidaan englantia
-							postitoimipaikka = getKuvaus(koodi.getMetadata(),
-									KieliType.FI);
-							if (maa == null) {
-								maa = getKuvaus(koodi.getMetadata()); // jos
-																		// suomea
-																		// ei
-																		// loydy
-																		// kaikki
-																		// kay
-							}
-							LOG.debug("Haettiin postitoimipaikka {} urille {}",
-									new Object[] { postitoimipaikka, uri });
-							if (postitoimipaikka != null) {
-								break;
-							}
+
+			maakoodi = koodiCache.get(uri, new Callable<Maakoodi>() {
+				@Override
+				public Maakoodi call() throws Exception {
+					String postitoimipaikka = StringUtils.EMPTY;
+					for (KoodiType koodi : koodiService
+							.searchKoodis(KoodiServiceSearchCriteriaBuilder
+									.latestKoodisByUris(uri))) {
+						if (koodi.getMetadata() == null) {
+							LOG.error(
+									"Koodistosta palautuu tyhjiä koodeja! Koodisto uri {}",
+									uri);
+							continue;
 						}
-						return new Maakoodi(postitoimipaikka, maa);
-
+						// preferoidaan englantia
+						postitoimipaikka = getKuvaus(koodi.getMetadata(),
+								preferoitutyyppi);
+						if (postitoimipaikka == null) {
+							postitoimipaikka = getKuvaus(koodi.getMetadata()); // jos
+																	// suomea
+																	// ei
+																	// loydy
+																	// kaikki
+																	// kay
+						}
+						LOG.debug("Haettiin postitoimipaikka {} urille {}",
+								new Object[] { postitoimipaikka, uri });
+						if (postitoimipaikka != null) {
+							break;
+						}
 					}
-				});
-			} catch (Exception e) {
-				maakoodi = new Maakoodi(null, null);
-			}
-
-		} catch (Exception e) { // ei tarvita mutta pidetaan kunnes
-								// todennettu
-								// etta lisays tuotannossa toimii
+					return new Maakoodi(postitoimipaikka, "FI");
+				}
+			});
+		} catch (Exception e) {
+			LOG.error(
+					"Yhteystiedoille ei saatu haettua maata koodistosta! Koodisto URI {}",
+					uri);
+			// countryNotFound(hakemusOid, countryCode, uri);
+			maakoodi = new Maakoodi(StringUtils.EMPTY, "FI");
 		}
 		return new Osoite(null, null, yhteystiedot.getOsoite(), null, null,
 				postinumero(yhteystiedot.getPostinumeroUri()),
-				maakoodi.getPostitoimipaikka(), null, maakoodi.getMaa(), null,
-				false);
+				maakoodi.getPostitoimipaikka(), null, null, null,
+				null);
 	}
 
 	private String postinumero(String url) {
 		if (url != null) {
 
-			String[] o = url.split("#");
+			String[] o = url.split("_");
 			if (o != null && o.length > 0) {
-				return o[0];
+				return o[1];
 			}
 
 		}
