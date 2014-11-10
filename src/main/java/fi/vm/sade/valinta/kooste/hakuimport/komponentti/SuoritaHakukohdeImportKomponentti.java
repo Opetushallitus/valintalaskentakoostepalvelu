@@ -45,6 +45,7 @@ public class SuoritaHakukohdeImportKomponentti {
 			HakukohdeImportDTO importTyyppi = new HakukohdeImportDTO();
 
 			importTyyppi.setTarjoajaOid(data.getTarjoajaOid());
+            importTyyppi.setHaunkohdejoukkoUri(data.getHakuKohdejoukkoUri());
 
 			if (data.getTarjoajaNimi() != null) {
 				for (String s : data.getTarjoajaNimi().keySet()) {
