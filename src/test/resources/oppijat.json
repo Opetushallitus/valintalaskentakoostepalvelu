@@ -1,5 +1,128 @@
 [
     {
+        "oppijanumero": "1.2.246.562.24.61765738054",
+        "opiskelu": [],
+        "suoritukset": [
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.61765738054",
+                    "source": "1.2.246.562.10.2013112012294919827487",
+                    "vahvistettu": true,
+                    "komo": "koulutus_855201",
+                    "myontaja": "1.2.246.562.10.259480292910",
+                    "tila": "VALMIS",
+                    "valmistuminen": "05.06.2013",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "23f6b442-2ca0-4a8a-8bac-b6e6b90c7034"
+                },
+                "arvosanat": []
+            },
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.61765738054",
+                    "source": "1.2.246.562.10.2013112012294919827487",
+                    "vahvistettu": true,
+                    "komo": "koulutus_751201",
+                    "myontaja": "1.2.246.562.10.259480292910",
+                    "tila": "VALMIS",
+                    "valmistuminen": "09.04.2003",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "cc449461-bcae-4f8c-aa9a-e5d2bf15de65"
+                },
+                "arvosanat": []
+            },
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.61765738054",
+                    "source": "1.2.246.562.10.43628088406",
+                    "vahvistettu": true,
+                    "komo": "1.2.246.562.5.2013061010184237348007",
+                    "myontaja": "1.2.246.562.10.43628088406",
+                    "tila": "KESKEN",
+                    "valmistuminen": "21.12.2014",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "7dd44e75-05b3-4ca1-801e-ff547b22ceb8"
+                },
+                "arvosanat": [
+                    {
+                        "id": "71710e89-caa7-424d-963c-c8cbcdac0f55",
+                        "suoritus": "7dd44e75-05b3-4ca1-801e-ff547b22ceb8",
+                        "arvio": {
+                            "arvosana": "A",
+                            "asteikko": "YO",
+                            "pisteet": 12
+                        },
+                        "aine": "LYHYT",
+                        "lisatieto": "MA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.1994",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1cc724b-3c4d-4fba-a038-b503689aafb3",
+                        "suoritus": "7dd44e75-05b3-4ca1-801e-ff547b22ceb8",
+                        "arvio": {
+                            "arvosana": "M",
+                            "asteikko": "YO",
+                            "pisteet": 255
+                        },
+                        "aine": "A",
+                        "lisatieto": "EN",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.1994",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "26fa9461-7462-41db-a4d2-34ae26fec700",
+                        "suoritus": "7dd44e75-05b3-4ca1-801e-ff547b22ceb8",
+                        "arvio": {
+                            "arvosana": "M",
+                            "asteikko": "YO"
+                        },
+                        "aine": "AI",
+                        "lisatieto": "FI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.1984",
+                        "source": "1.2.246.562.24.84454504851"
+                    },
+                    {
+                        "id": "48891262-81a7-472a-b23b-d99837f13802",
+                        "suoritus": "7dd44e75-05b3-4ca1-801e-ff547b22ceb8",
+                        "arvio": {
+                            "arvosana": "M",
+                            "asteikko": "YO"
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "HI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.1984",
+                        "source": "1.2.246.562.24.84454504851"
+                    },
+                    {
+                        "id": "828d165e-0586-4ede-96ed-7e8d931a804e",
+                        "suoritus": "7dd44e75-05b3-4ca1-801e-ff547b22ceb8",
+                        "arvio": {
+                            "arvosana": "M",
+                            "asteikko": "YO"
+                        },
+                        "aine": "LYHYT",
+                        "lisatieto": "MA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.1984",
+                        "source": "1.2.246.562.24.84454504851"
+                    }
+                ]
+            }
+        ],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": false,
+        "id": "1.2.246.562.24.61765738054",
+        "source": "1.2.246.562.10.00000000001"
+    },
+    {
         "oppijanumero": "1.2.246.562.24.39262195452",
         "opiskelu": [ ],
         "suoritukset": [
