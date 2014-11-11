@@ -131,7 +131,7 @@ public class HaeOsoiteKomponentti {
 
 		// onko ulkomaalainen?
 		if (!SUOMI
-				.equals(hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA))) {
+				.equalsIgnoreCase(hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA))) {
 			// hae koodistosta maa
 			String countryCode = henkilotiedot.get(ASUINMAA);
 			final String uri = new StringBuilder()
@@ -182,7 +182,7 @@ public class HaeOsoiteKomponentti {
 
 		try {
 			// onko ulkomaalainen?
-			if (SUOMI.equals(hakemus.getAnswers().getHenkilotiedot()
+			if (SUOMI.equalsIgnoreCase(hakemus.getAnswers().getHenkilotiedot()
 					.get(ASUINMAA))) {
 
 				// hae koodistosta maa
