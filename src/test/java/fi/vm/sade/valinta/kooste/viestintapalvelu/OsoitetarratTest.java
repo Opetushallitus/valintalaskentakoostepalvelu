@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
 import java.util.Arrays;
 
-import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -17,7 +16,7 @@ import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.KoostepalveluContext;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -28,6 +27,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.OsoitetarratRouteImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.ViestintapalveluConfig;
+import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource;
 
@@ -108,8 +108,8 @@ public class OsoitetarratTest {
 	}
 
 	@Bean
-	public ValintaperusteetValintakoeResource getValintaperusteetValintakoeResource() {
-		return Mockito.mock(ValintaperusteetValintakoeResource.class);
+	public ValintaperusteetAsyncResource  getValintaperusteetValintakoeResource() {
+		return Mockito.mock(ValintaperusteetAsyncResource.class);
 	}
 
 	@Bean

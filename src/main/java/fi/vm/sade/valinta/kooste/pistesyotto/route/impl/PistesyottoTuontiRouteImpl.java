@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -24,26 +23,20 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAvaimetAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoArvo;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoRivi;
 import fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoTuontiRoute;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
-import fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource;
 
 /**
  * 
@@ -56,7 +49,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 			.getLogger(PistesyottoTuontiRouteImpl.class);
 
 	private final ValintalaskentaValintakoeAsyncResource valintakoeResource;
-	private final ValintaperusteetAvaimetAsyncResource valintaperusteetResource;
+	private final ValintaperusteetAsyncResource valintaperusteetResource;
 	private final ApplicationAsyncResource applicationAsyncResource;
 	private final ApplicationResource applicationResource;
 
@@ -64,7 +57,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 	public PistesyottoTuontiRouteImpl(
 			ValintalaskentaValintakoeAsyncResource valintakoeResource,
 			ApplicationAsyncResource applicationAsyncResource,
-			ValintaperusteetAvaimetAsyncResource valintaperusteetResource,
+			ValintaperusteetAsyncResource valintaperusteetResource,
 			ApplicationResource applicationResource) {
 		this.valintakoeResource = valintakoeResource;
 		this.applicationResource = applicationResource;

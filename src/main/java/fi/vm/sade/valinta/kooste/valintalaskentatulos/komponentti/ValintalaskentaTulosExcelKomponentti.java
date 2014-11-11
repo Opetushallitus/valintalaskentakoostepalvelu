@@ -11,13 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Resource;
-
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintatietoResource;
-import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO;
-import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 import org.apache.camel.Header;
 import org.apache.camel.Property;
 import org.apache.commons.lang.StringUtils;
@@ -35,7 +28,8 @@ import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeResource;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintatietoResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
@@ -43,6 +37,10 @@ import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.dto.ValintakoeNimi;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.dto.ValintakoeRivi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 
 /**
  * KOEKUTSUEXCEL
@@ -60,7 +58,7 @@ public class ValintalaskentaTulosExcelKomponentti {
     @Autowired
 	private ValintatietoResource valintatietoService;
 	@Autowired
-	private ValintaperusteetValintakoeResource valintaperusteetValintakoeResource;
+	private ValintaperusteetAsyncResource valintaperusteetValintakoeResource;
 	@Autowired
 	private HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
 	@Autowired
@@ -82,7 +80,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 		List<ValintakoeNimi> tunnisteet = Lists.newArrayList();
 		for (String oid : valintakoeOids) {
 			ValintakoeDTO koe = valintaperusteetValintakoeResource
-					.readByOid(oid);
+					.haeValintakokeet(Arrays.asList(oid)).get().iterator().next();
 			tunnisteet.add(new ValintakoeNimi(koe.getNimi(), koe.getOid()));
 			if (Boolean.TRUE.equals(koe.getKutsutaankoKaikki())) {
 				nivelvaiheenKoekutsut.put(oid, "Kutsutaan");

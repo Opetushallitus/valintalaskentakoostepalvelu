@@ -5,7 +5,6 @@ import static rx.Observable.zip;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,13 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import rx.Observable;
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
 
@@ -38,12 +35,12 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.KoekutsukirjeetKomponentti;
@@ -62,7 +59,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 	private final KoekutsukirjeetKomponentti koekutsukirjeetKomponentti;
 	private final ApplicationAsyncResource applicationAsyncResource;
 	private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
-	private final ValintaperusteetValintakoeAsyncResource valintakoeResource;
+	private final ValintaperusteetAsyncResource valintakoeResource;
 	private final ValintalaskentaValintakoeAsyncResource osallistumisetResource;
 
 	@Autowired
@@ -70,7 +67,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 			KoekutsukirjeetKomponentti koekutsukirjeetKomponentti,
 			ApplicationAsyncResource applicationAsyncResource,
 			ViestintapalveluAsyncResource viestintapalveluAsyncResource,
-			ValintaperusteetValintakoeAsyncResource valintaperusteetValintakoeAsyncResource,
+			ValintaperusteetAsyncResource valintaperusteetValintakoeAsyncResource,
 			ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
 		this.koekutsukirjeetKomponentti = koekutsukirjeetKomponentti;
 		this.applicationAsyncResource = applicationAsyncResource;

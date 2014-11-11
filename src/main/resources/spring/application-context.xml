@@ -79,49 +79,6 @@
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
 
-	<jaxrs-client:client id="ValintatapajonoClient"
-		serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValintatapajonoResource"
-		address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}/">
-		<jaxrs-client:outInterceptors>
-			<ref bean="ticketInterceptor" />
-		</jaxrs-client:outInterceptors>
-		<jaxrs-client:providers>
-			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
-			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-		</jaxrs-client:providers>
-	</jaxrs-client:client>
-	<jaxrs-client:client id="ValinnanVaiheClient"
-		serviceClass="fi.vm.sade.service.valintaperusteet.resource.ValinnanVaiheResource"
-		address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}/">
-		<jaxrs-client:outInterceptors>
-			<ref bean="ticketInterceptor" />
-		</jaxrs-client:outInterceptors>
-		<jaxrs-client:providers>
-			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
-			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-		</jaxrs-client:providers>
-	</jaxrs-client:client>
-
-	<jaxrs-client:client id="ValintaperusteetValintakoeRestClient"
-		serviceClass="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeResource"
-		address="https://${host.virkailija}" inheritHeaders="true">
-		<jaxrs-client:outInterceptors>
-			<bean
-				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-				<property name="webCasUrl" value="${web.url.cas}" />
-				<property name="targetService"
-					value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check" />
-				<property name="appClientUsername"
-					value="${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}" />
-				<property name="appClientPassword"
-					value="${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}" />
-			</bean>
-		</jaxrs-client:outInterceptors>
-		<jaxrs-client:providers>
-			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
-			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-		</jaxrs-client:providers>
-	</jaxrs-client:client>
 	<jaxrs-client:client id="ValintakoeRestClient"
 		serviceClass="fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource"
 		address="${valintalaskentakoostepalvelu.valintalaskenta.rest.url}">
@@ -260,27 +217,7 @@
 			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 		</jaxrs-client:providers>
 	</jaxrs-client:client>
-	<jaxrs-client:client id="ValintaperusteetHakukohdeRestClient"
-		address="https://${host.virkailija}"
-		serviceClass="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource"
-		inheritHeaders="true">
-		<jaxrs-client:outInterceptors>
-			<bean
-				class="fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor">
-				<property name="webCasUrl" value="${web.url.cas}" />
-				<property name="targetService"
-					value="${cas.service.valintaperusteet-service}/j_spring_cas_security_check" />
-				<property name="appClientUsername"
-					value="${valintalaskentakoostepalvelu.app.username.to.valintatieto}" />
-				<property name="appClientPassword"
-					value="${valintalaskentakoostepalvelu.app.password.to.valintatieto}" />
-			</bean>
-		</jaxrs-client:outInterceptors>
-		<jaxrs-client:providers>
-			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
-			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-		</jaxrs-client:providers>
-	</jaxrs-client:client>
+
 
 	<jaxrs-client:client id="ValintaperusteetLaskentaRestClient"
 		address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}"
@@ -557,9 +494,6 @@
 	<!-- Valintaperusteet Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl" />
-	<!-- Valintaperusteet Avaimet Async -->
-	<bean
-		class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAvaimetAsyncResourceImpl" />
 	<!-- HakuApp Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl" />
@@ -583,8 +517,6 @@
 	<!-- Vipa Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.ViestintapalveluAsyncResourceImpl" />
-	<bean
-		class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetValintakoeAsyncResourceImpl" />
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaValintakoeAsyncResourceImpl" />
 

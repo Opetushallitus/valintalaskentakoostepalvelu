@@ -33,7 +33,7 @@ import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKomponentti;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
@@ -72,7 +72,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final String osoitetarrat;
 	private final DokumenttiResource dokumenttiResource;
 	private final ApplicationResource applicationResource;
-	private final ValintaperusteetValintakoeResource valintaperusteetValintakoeResource;
+	private final ValintaperusteetAsyncResource valintaperusteetValintakoeResource;
 	private final HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti;
 
 	@Autowired
@@ -84,7 +84,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 			SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy,
 			ApplicationResource applicationResource,
 			DokumenttiResource dokumenttiResource,
-			ValintaperusteetValintakoeResource valintaperusteetValintakoeResource,
+			ValintaperusteetAsyncResource valintaperusteetValintakoeResource,
 			HaeHakukohteenHakemuksetKomponentti haeHakukohteenHakemuksetKomponentti) {
 		super();
 		this.valintaperusteetValintakoeResource = valintaperusteetValintakoeResource;
@@ -349,7 +349,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 							for (String oid : valintakoeOids(exchange)) {
 								if (Boolean.TRUE
 										.equals(valintaperusteetValintakoeResource
-												.readByOid(oid)
+												.haeValintakokeet(Arrays.asList(oid)).get().iterator().next()
 												.getKutsutaankoKaikki())) {
 
 									for (SuppeaHakemus hakemus : haeHakukohteenHakemuksetKomponentti
