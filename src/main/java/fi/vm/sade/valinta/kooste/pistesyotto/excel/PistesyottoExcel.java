@@ -326,8 +326,8 @@ public class PistesyottoExcel {
 					//
 					continue;
 				}
-				if (kutsutaankoKaikki || Osallistuminen.OSALLISTUU.equals(valintakoe
-						.getOsallistuminenTulos().getOsallistuminen())) {
+				if (kutsutaankoKaikki || (valintakoe != null && Osallistuminen.OSALLISTUU.equals(valintakoe
+						.getOsallistuminenTulos().getOsallistuminen()))) {
 					syote = true;
 					if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
 							.getFunktiotyyppi())) {
