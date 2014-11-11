@@ -6,12 +6,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.core.Response;
 
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -24,11 +22,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.util.EnumConverter;
@@ -43,6 +41,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 
 /**
  * 
@@ -55,7 +55,7 @@ public class ValintatapajonoTuontiRouteImpl extends
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintatapajonoTuontiRouteImpl.class);
 
-	private final ValintaperusteetResource valintaperusteetResource;
+	private final ValintaperusteetAsyncResource valintaperusteetResource;
 	private final ApplicationResource applicationResource;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta;
 	private final HaeHakuTarjonnaltaKomponentti hakuTarjonnalta;
@@ -64,7 +64,7 @@ public class ValintatapajonoTuontiRouteImpl extends
 	@Autowired
 	public ValintatapajonoTuontiRouteImpl(
 			ApplicationResource applicationResource,
-			ValintaperusteetResource valintaperusteetResource,
+			ValintaperusteetAsyncResource valintaperusteetResource,
 			HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta,
 			HaeHakuTarjonnaltaKomponentti hakuTarjonnalta,
 			HakukohdeResource hakukohdeResource) {
@@ -343,9 +343,9 @@ public class ValintatapajonoTuontiRouteImpl extends
 	}
 
 	private ValintatietoValinnanvaiheDTO luoValinnanVaihe(String hakukohdeOid,
-			String hakuOid, String valintatapajonoOid) {
+			String hakuOid, String valintatapajonoOid) throws InterruptedException, ExecutionException {
 		ValinnanVaiheJonoillaDTO vaihe = haeVaihe(valintatapajonoOid,
-				valintaperusteetResource.ilmanLaskentaa(hakukohdeOid));
+				valintaperusteetResource.ilmanLaskentaa(hakukohdeOid).get());
 		if (vaihe == null) {
 			throw new RuntimeException(
 					"Tälle valintatapajonolle ei löydy valintaperusteista valinnanvaihetta!");

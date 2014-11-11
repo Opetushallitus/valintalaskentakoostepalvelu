@@ -74,10 +74,10 @@ public class HaeOsoiteKomponentti {
 							continue;
 						}
 						// preferoidaan englantia
-						postitoimipaikka = getKuvaus(koodi.getMetadata(),
+						postitoimipaikka = getNimi(koodi.getMetadata(),
 								preferoitutyyppi);
 						if (postitoimipaikka == null) {
-							postitoimipaikka = getKuvaus(koodi.getMetadata()); // jos
+							postitoimipaikka = getNimi(koodi.getMetadata()); // jos
 																	// suomea
 																	// ei
 																	// loydy
@@ -131,7 +131,7 @@ public class HaeOsoiteKomponentti {
 
 		// onko ulkomaalainen?
 		if (!SUOMI
-				.equals(hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA))) {
+				.equalsIgnoreCase(hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA))) {
 			// hae koodistosta maa
 			String countryCode = henkilotiedot.get(ASUINMAA);
 			final String uri = new StringBuilder()
@@ -154,9 +154,9 @@ public class HaeOsoiteKomponentti {
 								continue;
 							}
 							// preferoidaan englantia
-							maa = getKuvaus(koodi.getMetadata(), KieliType.EN);
+							maa = getNimi(koodi.getMetadata(), KieliType.EN);
 							if (maa == null) {
-								maa = getKuvaus(koodi.getMetadata()); // jos
+								maa = getNimi(koodi.getMetadata()); // jos
 																		// suomea
 																		// ei
 																		// loydy
@@ -182,7 +182,7 @@ public class HaeOsoiteKomponentti {
 
 		try {
 			// onko ulkomaalainen?
-			if (SUOMI.equals(hakemus.getAnswers().getHenkilotiedot()
+			if (SUOMI.equalsIgnoreCase(hakemus.getAnswers().getHenkilotiedot()
 					.get(ASUINMAA))) {
 
 				// hae koodistosta maa
@@ -206,10 +206,10 @@ public class HaeOsoiteKomponentti {
 									continue;
 								}
 								// preferoidaan englantia
-								postitoimipaikka = getKuvaus(
+								postitoimipaikka = getNimi(
 										koodi.getMetadata(), KieliType.FI);
 								if (maa == null) {
-									maa = getKuvaus(koodi.getMetadata()); // jos
+									maa = getNimi(koodi.getMetadata()); // jos
 																			// suomea
 																			// ei
 																			// loydy
@@ -253,18 +253,18 @@ public class HaeOsoiteKomponentti {
 		}
 	}
 
-	private static String getKuvaus(List<KoodiMetadataType> meta) {
+	private static String getNimi(List<KoodiMetadataType> meta) {
 		for (KoodiMetadataType data : meta) {
-			return data.getKuvaus();
+			return data.getNimi();
 		}
 		return null;
 	}
 
-	private static String getKuvaus(List<KoodiMetadataType> meta,
+	private static String getNimi(List<KoodiMetadataType> meta,
 			KieliType kieli) {
 		for (KoodiMetadataType data : meta) {
 			if (kieli.equals(data.getKieli())) {
-				return data.getKuvaus();
+				return data.getNimi();
 			}
 		}
 		return null;

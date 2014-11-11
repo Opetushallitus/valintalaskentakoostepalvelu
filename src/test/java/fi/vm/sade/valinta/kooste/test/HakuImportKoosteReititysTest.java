@@ -1,16 +1,18 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import fi.vm.sade.koodisto.service.GenericFault;
-import fi.vm.sade.koodisto.service.KoodiService;
-import fi.vm.sade.koodisto.service.types.SearchKoodisByKoodistoCriteriaType;
-import fi.vm.sade.koodisto.service.types.SearchKoodisCriteriaType;
-import fi.vm.sade.koodisto.service.types.common.*;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
-import fi.vm.sade.tarjonta.service.TarjontaPublicService;
-import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
-import fi.vm.sade.tarjonta.service.types.TarjontaTyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
-import fi.vm.sade.valinta.kooste.hakuimport.resource.HakuImportResource;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.jws.WebParam;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -24,13 +26,21 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.jws.WebParam;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import fi.vm.sade.koodisto.service.GenericFault;
+import fi.vm.sade.koodisto.service.KoodiService;
+import fi.vm.sade.koodisto.service.types.SearchKoodisByKoodistoCriteriaType;
+import fi.vm.sade.koodisto.service.types.SearchKoodisCriteriaType;
+import fi.vm.sade.koodisto.service.types.common.KieliType;
+import fi.vm.sade.koodisto.service.types.common.KoodiMetadataType;
+import fi.vm.sade.koodisto.service.types.common.KoodiType;
+import fi.vm.sade.koodisto.service.types.common.KoodiUriAndVersioType;
+import fi.vm.sade.koodisto.service.types.common.SuhteenTyyppiType;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
+import fi.vm.sade.tarjonta.service.TarjontaPublicService;
+import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
+import fi.vm.sade.tarjonta.service.types.TarjontaTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.hakuimport.resource.HakuImportResource;
 
 /**
  * User: wuoti
@@ -55,8 +65,8 @@ public class HakuImportKoosteReititysTest {
     private HakuImportResource hakuImportAktivointiResource;
 
     @Bean
-    public ValintaperusteetRestResource getValintaperusteServiceMock() {
-        return mock(ValintaperusteetRestResource.class);
+    public ValintaperusteetAsyncResource  getValintaperusteServiceMock() {
+        return mock(ValintaperusteetAsyncResource.class);
     }
 
     @Bean
@@ -139,7 +149,7 @@ public class HakuImportKoosteReititysTest {
     }
 
     @Autowired
-    private ValintaperusteetRestResource valintaperusteService;
+    private ValintaperusteetAsyncResource valintaperusteService;
 
     @Autowired
     private KoodiService koodiService;

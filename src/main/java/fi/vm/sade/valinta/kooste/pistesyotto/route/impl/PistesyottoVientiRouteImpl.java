@@ -8,10 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -26,19 +23,14 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAvaimetAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoVientiRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
@@ -47,7 +39,6 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
-import fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource;
 
 /**
  * 
@@ -60,22 +51,19 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 			.getLogger(PistesyottoVientiRouteImpl.class);
 
 	private final ValintalaskentaValintakoeAsyncResource valintakoeResource;
-	private final ValintaperusteetAvaimetAsyncResource valintaperusteetResource;
+	private final ValintaperusteetAsyncResource valintaperusteetResource;
 	private final DokumenttiResource dokumenttiResource;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta;
 	private final HaeHakuTarjonnaltaKomponentti hakuTarjonnalta;
 	private final ApplicationAsyncResource applicationAsyncResource;
-	private final ValintaperusteetValintakoeAsyncResource valintaperusteetValintakoeResource;
 	@Autowired
 	public PistesyottoVientiRouteImpl(
 			ValintalaskentaValintakoeAsyncResource valintakoeResource,
 			DokumenttiResource dokumenttiResource,
-			ValintaperusteetAvaimetAsyncResource valintaperusteetResource,
+			ValintaperusteetAsyncResource valintaperusteetResource,
 			HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta,
 			HaeHakuTarjonnaltaKomponentti hakuTarjonnalta,
-			ApplicationAsyncResource applicationAsyncResource,
-			ValintaperusteetValintakoeAsyncResource valintaperusteetValintakoeResource) {
-		this.valintaperusteetValintakoeResource = valintaperusteetValintakoeResource;
+			ApplicationAsyncResource applicationAsyncResource) {
 		this.applicationAsyncResource = applicationAsyncResource;
 		this.valintakoeResource = valintakoeResource;
 		this.valintaperusteetResource = valintaperusteetResource;
@@ -130,7 +118,7 @@ public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {
 								.getApplicationAdditionalData(hakuOid,
 										hakukohdeOid);
 						Future<List<HakukohdeJaValintakoeDTO>> hakukohdeJaValintakoeFuture =
-						valintaperusteetValintakoeResource.haeValintakokeetHakukohteille(Arrays.asList(hakukohdeOid));
+						valintaperusteetResource.haeValintakokeetHakukohteille(Arrays.asList(hakukohdeOid));
 						
 						HakukohdeDTO hnimi = hakukohdeTarjonnalta
 								.haeHakukohdeNimi(hakukohdeOid);

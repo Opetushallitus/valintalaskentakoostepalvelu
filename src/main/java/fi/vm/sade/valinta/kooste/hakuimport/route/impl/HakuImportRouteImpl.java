@@ -9,9 +9,6 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Processor;
@@ -23,7 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.valinta.kooste.OPH;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
@@ -40,14 +39,14 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
 	private final SuoritaHakuImportKomponentti suoritaHakuImportKomponentti;
 	private final SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti;
-	private final ValintaperusteetRestResource valintaperusteetRestResource;
+	private final ValintaperusteetAsyncResource valintaperusteetRestResource;
 	private final ExecutorService hakuImportThreadPool;
 
 	@Autowired
 	public HakuImportRouteImpl(
 			@Value("${valintalaskentakoostepalvelu.hakuimport.threadpoolsize:10}") Integer hakuImportThreadpoolSize,
 			SuoritaHakuImportKomponentti suoritaHakuImportKomponentti,
-			ValintaperusteetRestResource valintaperusteetRestResource,
+			ValintaperusteetAsyncResource valintaperusteetRestResource,
 			SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti) {
 		this.suoritaHakuImportKomponentti = suoritaHakuImportKomponentti;
 		this.tarjontaJaKoodistoHakukohteenHakuKomponentti = tarjontaJaKoodistoHakukohteenHakuKomponentti;

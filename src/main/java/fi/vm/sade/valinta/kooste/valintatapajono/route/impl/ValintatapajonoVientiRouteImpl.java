@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -14,12 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeNimiRDTO;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetResource;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
@@ -27,7 +24,7 @@ import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRout
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
-import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 
 /**
  * 
@@ -40,7 +37,6 @@ public class ValintatapajonoVientiRouteImpl extends
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintatapajonoVientiRouteImpl.class);
 
-	private final ValintaperusteetResource valintaperusteetResource;
 	private final ApplicationResource applicationResource;
 	private final DokumenttiResource dokumenttiResource;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta;
@@ -51,13 +47,11 @@ public class ValintatapajonoVientiRouteImpl extends
 	public ValintatapajonoVientiRouteImpl(
 			ApplicationResource applicationResource,
 			DokumenttiResource dokumenttiResource,
-			ValintaperusteetResource valintaperusteetResource,
 			HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta,
 			HaeHakuTarjonnaltaKomponentti hakuTarjonnalta,
 			HakukohdeResource hakukohdeResource) {
 		this.applicationResource = applicationResource;
 		this.dokumenttiResource = dokumenttiResource;
-		this.valintaperusteetResource = valintaperusteetResource;
 		this.hakukohdeTarjonnalta = hakukohdeTarjonnalta;
 		this.hakuTarjonnalta = hakuTarjonnalta;
 		this.hakukohdeResource = hakukohdeResource;

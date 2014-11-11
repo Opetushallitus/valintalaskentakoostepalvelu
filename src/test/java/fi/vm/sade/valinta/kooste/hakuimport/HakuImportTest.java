@@ -23,9 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -38,7 +35,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeHakutulosV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakutuloksetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
@@ -112,8 +109,8 @@ public class HakuImportTest extends CamelTestSupport {
 						"1.2.246.562.20.27059719875");
 			}
 		};
-		ValintaperusteetRestResource valintaperusteetRestResource = Mockito
-				.mock(ValintaperusteetRestResource.class);
+		ValintaperusteetAsyncResource  valintaperusteetRestResource = Mockito
+				.mock(ValintaperusteetAsyncResource.class);
 		HakukohdeV1ResourceWrapper w = new HakukohdeV1ResourceWrapper() {
 			@Override
 			public ResultV1RDTO<HakukohdeValintaperusteetV1RDTO> findValintaperusteetByOid(
