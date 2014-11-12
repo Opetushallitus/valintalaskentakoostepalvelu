@@ -219,17 +219,6 @@
 	</jaxrs-client:client>
 
 
-	<jaxrs-client:client id="ValintaperusteetLaskentaRestClient"
-		address="${valintalaskentakoostepalvelu.valintaperusteet.rest.url}"
-		serviceClass="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetRestResource"
-		inheritHeaders="true">
-		<jaxrs-client:providers>
-			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
-			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
-		</jaxrs-client:providers>
-	</jaxrs-client:client>
-
-
 	<jaxrs-client:client id="ValintalaskentaHakukohdeRestClient"
 		address="https://${host.virkailija}"
 		serviceClass="fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource"
