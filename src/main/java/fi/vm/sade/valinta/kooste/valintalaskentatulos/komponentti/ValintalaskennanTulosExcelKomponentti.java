@@ -39,8 +39,8 @@ public class ValintalaskennanTulosExcelKomponentti {
 	private HakukohdeResource hakukohdeResource;
 	// @Autowired
 	// private ValinnanVaiheResource valinnanVaiheResource;
-	@Autowired
-	private ValintatapajonoResource valintatapajonoResource;
+//	@Autowired
+//	private ValintatapajonoResource valintatapajonoResource;
 
 	@Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}")
 	private String valintalaskentaResourceUrl;
