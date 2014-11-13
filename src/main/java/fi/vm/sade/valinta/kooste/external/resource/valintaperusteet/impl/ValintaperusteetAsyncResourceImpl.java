@@ -52,7 +52,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 
 	@Autowired
 	public ValintaperusteetAsyncResourceImpl(
-			@Value("https://${host.ilb}") String address
+			@Value("${host.ilb}") String address
 	//
 	) {
 		this.address = address;
