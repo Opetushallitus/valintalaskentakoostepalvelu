@@ -20,6 +20,7 @@ public class LetterBatch {
 	private String applicationPeriod;
 	private String fetchTarget;
 	private String tag;
+    private boolean iposti = false;
 
 	public Map<String, Object> getTemplateReplacements() {
 		return templateReplacements;
@@ -141,4 +142,11 @@ public class LetterBatch {
 				+ fetchTarget + ", tag=" + tag + "]";
 	}
 
+    public boolean isIposti() {
+        return iposti;
+    }
+
+    public void setIposti(boolean iposti) {
+        this.iposti = iposti;
+    }
 }
