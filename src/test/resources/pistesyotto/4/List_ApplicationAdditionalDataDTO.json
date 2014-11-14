@@ -1,0 +1,3994 @@
+[
+    {
+        "oid": "1.2.246.562.11.00001204847",
+        "personOid": "1.2.246.562.24.82665625974",
+        "firstNames": "Maryam Osman",
+        "lastName": "Abucar",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "HUM_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "KOE_LIIKETALOUS_PAIVA2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA3": "",
+            "KOE_LIIKETALOUS_PAIVA3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "amk_humanistinen_koe": "",
+            "KOE_LIIKETALOUS_PAIVA2": "",
+            "KOE_LIIKETALOUS_PAIVA3": "",
+            "HUM_kaikkiosiot": "",
+            "KOE_LIIKETALOUS_PAIVA1": "",
+            "KOE_LIIKETALOUS_PAIVA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "amk_humanistinen_koe-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001179176",
+        "personOid": "1.2.246.562.24.30201794211",
+        "firstNames": "Tiina Elisa",
+        "lastName": "Ahonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "59",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001231030",
+        "personOid": "1.2.246.562.24.42632137121",
+        "firstNames": "Heidi Sofia",
+        "lastName": "Ahponen",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001217656",
+        "personOid": "1.2.246.562.24.78788026558",
+        "firstNames": "Mikko Jussi Oskari",
+        "lastName": "Alamäki",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56.0",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_KYAMK_ENSIHOITO-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_KYAMK_ENSIHOITO": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001226058",
+        "personOid": "1.2.246.562.24.50437669158",
+        "firstNames": "Jenny Carita",
+        "lastName": "Alastalo",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "1",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA3": "29.0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001127092",
+        "personOid": "1.2.246.562.24.42640270504",
+        "firstNames": "Jenny Jasmiina",
+        "lastName": "Andersson",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "42.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001081549",
+        "personOid": "1.2.246.562.24.16412515892",
+        "firstNames": "Piia-Mari Kristiina",
+        "lastName": "Björn",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "57.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001141748",
+        "personOid": "1.2.246.562.24.62846453396",
+        "firstNames": "Matthew Juhani",
+        "lastName": "Bowie",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001185827",
+        "personOid": "1.2.246.562.24.40221238284",
+        "firstNames": "Maija Helena",
+        "lastName": "Byckling",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001073243",
+        "personOid": "1.2.246.562.24.64174072609",
+        "firstNames": "Vilma Regina",
+        "lastName": "Calveley",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "55.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001219023",
+        "personOid": "1.2.246.562.24.85002006357",
+        "firstNames": "Yen Nga",
+        "lastName": "Dinh",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "37",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_METROPOLIA_SAIRAANHOITAJA": "",
+            "SOTEKOE_METROPOLIA_SAIRAANHOITAJA-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001254046",
+        "personOid": "1.2.246.562.24.73519231627",
+        "firstNames": "Petra Emilia",
+        "lastName": "Eloranta",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_KYAMK_ENSIHOITO-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_KYAMK_ENSIHOITO": "",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001108244",
+        "personOid": "1.2.246.562.24.66159196401",
+        "firstNames": "Aleksi Valto Ilmari",
+        "lastName": "Esala",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "34.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001130063",
+        "personOid": "1.2.246.562.24.10783054596",
+        "firstNames": "Elli Anniina",
+        "lastName": "Eskelinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001062429",
+        "personOid": "1.2.246.562.24.36110605848",
+        "firstNames": "Heidi Maarit Kaarina",
+        "lastName": "Forsström",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001200265",
+        "personOid": "1.2.246.562.24.63371185581",
+        "firstNames": "Serkan",
+        "lastName": "Giray",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "60.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_KYAMK_ENSIHOITO-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "SOTEKOE_KYAMK_ENSIHOITO": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001272675",
+        "personOid": "1.2.246.562.24.80100117046",
+        "firstNames": "Kirsi Helmi Marie",
+        "lastName": "Goltseva",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001111493",
+        "personOid": "1.2.246.562.24.89183432736",
+        "firstNames": "Elisa Eerika",
+        "lastName": "Hahtonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "35.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001115800",
+        "personOid": "1.2.246.562.24.19721306171",
+        "firstNames": "Minttu Anna Sofia",
+        "lastName": "Hakkarainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "45.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001160020",
+        "personOid": "1.2.246.562.24.53645824504",
+        "firstNames": "Roni Santeri",
+        "lastName": "Hakulinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "51.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001031049",
+        "personOid": "1.2.246.562.24.72472106735",
+        "firstNames": "Marjukka Emilia",
+        "lastName": "Haltsonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001055452",
+        "personOid": "1.2.246.562.24.54438648514",
+        "firstNames": "Elina Kristiina",
+        "lastName": "Happonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001074475",
+        "personOid": "1.2.246.562.24.78886623015",
+        "firstNames": "Henna Tuuli Maria",
+        "lastName": "Haverinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "60.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001093142",
+        "personOid": "1.2.246.562.24.18484497085",
+        "firstNames": "Mari-Annika",
+        "lastName": "Heikkilä",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001103430",
+        "personOid": "1.2.246.562.24.21483759575",
+        "firstNames": "Niko Henrik Nestori",
+        "lastName": "Heino",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001255773",
+        "personOid": "1.2.246.562.24.93300172975",
+        "firstNames": "Heidi Emilia",
+        "lastName": "Heinonen",
+        "additionalData": {
+            "KOE_LIIKETALOUS_MONIMUOTO1": "6.0",
+            "KOE_LIIKETALOUS_MONIMUOTO2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot": "",
+            "KOE_LIIKETALOUS_MONIMUOTO3": "0",
+            "KOE_LIIKETALOUS_MONIMUOTO1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "",
+            "KOE_LIIKETALOUS_MONIMUOTO2": "3.83",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "KOE_LIIKETALOUS_MONIMUOTO3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001202988",
+        "personOid": "1.2.246.562.24.14769037397",
+        "firstNames": "Mia Anna-Liisa Katinka",
+        "lastName": "Heinonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "39.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001019469",
+        "personOid": "1.2.246.562.24.31225886780",
+        "firstNames": "Timo Pekka",
+        "lastName": "Heinonen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "1",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "38",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "42",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001030891",
+        "personOid": "1.2.246.562.24.24792752516",
+        "firstNames": "Minna Marjaana",
+        "lastName": "Heiskanen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "59.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001177482",
+        "personOid": "1.2.246.562.24.48034694693",
+        "firstNames": "Minna Maarit",
+        "lastName": "Helminen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "53.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001198364",
+        "personOid": "1.2.246.562.24.68058880418",
+        "firstNames": "Veera Arja Alise",
+        "lastName": "Hermola",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "53.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001123290",
+        "personOid": "1.2.246.562.24.20862245070",
+        "firstNames": "Marianne Annika",
+        "lastName": "Hiltunen",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001261602",
+        "personOid": "1.2.246.562.24.25591678379",
+        "firstNames": "Niina Maarit Susanna",
+        "lastName": "Hiltunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "45.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001077317",
+        "personOid": "1.2.246.562.24.97780890802",
+        "firstNames": "Pekka Santeri",
+        "lastName": "Hiltunen",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001081578",
+        "personOid": "1.2.246.562.24.70836309549",
+        "firstNames": "Venla Noora Elisa",
+        "lastName": "Hiltunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001175332",
+        "personOid": "1.2.246.562.24.35366515877",
+        "firstNames": "Erja Helvi Annika",
+        "lastName": "Hirvonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "30.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001212790",
+        "personOid": "1.2.246.562.24.58183159927",
+        "firstNames": "Jouni Samuel",
+        "lastName": "Hirvonen",
+        "additionalData": {
+            "KOE_TEKNIIKKA_PAIVA": "",
+            "KOE_TEKNIIKKA_PAIVA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "47.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001112405",
+        "personOid": "1.2.246.562.24.43356996362",
+        "firstNames": "Katja Satu Maarit",
+        "lastName": "Holm",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001237018",
+        "personOid": "1.2.246.562.24.36919287959",
+        "firstNames": "Tuomas Juhani",
+        "lastName": "Huovila",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001256277",
+        "personOid": "1.2.246.562.24.58802035102",
+        "firstNames": "Elina Anna Sofia",
+        "lastName": "Huttunen",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "1",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "37.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA3": "20.0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001051223",
+        "personOid": "1.2.246.562.24.29936266452",
+        "firstNames": "Heikki Oskari",
+        "lastName": "Huttunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001014118",
+        "personOid": "1.2.246.562.24.71470085053",
+        "firstNames": "Janesa Julia",
+        "lastName": "Huttunen",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "51.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001011629",
+        "personOid": "1.2.246.562.24.97319086922",
+        "firstNames": "Reetta Karoliina",
+        "lastName": "Hynynen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "51.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "amk_humanistinen_koe_monimuoto": "",
+            "amk_humanistinen_koe_monimuoto-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "HUM_kaikkiosiot_monimuoto": "",
+            "HUM_kaikkiosiot_monimuoto-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_METROPOLIA2": "",
+            "SOTEKOE_METROPOLIA2-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001082687",
+        "personOid": "1.2.246.562.24.21059086847",
+        "firstNames": "Roosa Ira Helena",
+        "lastName": "Hyttinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "58.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001087705",
+        "personOid": "1.2.246.562.24.28315273960",
+        "firstNames": "Kalle Samuli",
+        "lastName": "Hämäläinen",
+        "additionalData": {
+            "KOE_TEKNIIKKA_PAIVA": "",
+            "KOE_TEKNIIKKA_PAIVA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "37.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001128716",
+        "personOid": "1.2.246.562.24.86861134553",
+        "firstNames": "Mirka Iina",
+        "lastName": "Hämäläinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "44.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001253403",
+        "personOid": "1.2.246.562.24.15199233210",
+        "firstNames": "Saija-Mari Emilia",
+        "lastName": "Hämäläinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "41",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001198209",
+        "personOid": "1.2.246.562.24.38042555459",
+        "firstNames": "Antti Olli Antero",
+        "lastName": "Härmä",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001084876",
+        "personOid": "1.2.246.562.24.12408468122",
+        "firstNames": "Henri Risto Heikki",
+        "lastName": "Ignatius",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "40.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001210514",
+        "personOid": "1.2.246.562.24.19327647412",
+        "firstNames": "Veera Eveliina",
+        "lastName": "Ihalainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "44.0",
+            "KOE_LIIKETALOUS_PAIVA2-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_LIIKETALOUS_PAIVA3-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "KOE_LIIKETALOUS_PAIVA2": "6,5",
+            "KOE_LIIKETALOUS_PAIVA3": "3,75",
+            "KOE_LIIKETALOUS_PAIVA1": "10",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_LIIKETALOUS_PAIVA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001007895",
+        "personOid": "1.2.246.562.24.47933410157",
+        "firstNames": "Mari Marjaana",
+        "lastName": "Ikonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "46.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001094280",
+        "personOid": "1.2.246.562.24.71661773802",
+        "firstNames": "Suvi Maria",
+        "lastName": "Ikonen",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "1",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA3": "64.0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001118506",
+        "personOid": "1.2.246.562.24.32628189177",
+        "firstNames": "Tuukka Lauritsa",
+        "lastName": "Ikonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "36.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001236747",
+        "personOid": "1.2.246.562.24.59796047344",
+        "firstNames": "Matli Elspieta Jukantytär",
+        "lastName": "Impivaara",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "39.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001139336",
+        "personOid": "1.2.246.562.24.91462236463",
+        "firstNames": "Karoliina Maarit",
+        "lastName": "Isopahkala",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "1",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001213427",
+        "personOid": "1.2.246.562.24.95889289662",
+        "firstNames": "Toora Judit Mirjam",
+        "lastName": "Isoviita",
+        "additionalData": {
+            "KOE_LIIKETALOUS_PAIVA3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "KOE_LIIKETALOUS_PAIVA2": "",
+            "KOE_LIIKETALOUS_PAIVA3": "",
+            "KOE_LIIKETALOUS_PAIVA1": "",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "KOE_LIIKETALOUS_PAIVA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "KOE_LIIKETALOUS_PAIVA2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001228768",
+        "personOid": "1.2.246.562.24.87285287975",
+        "firstNames": "Kati Erja",
+        "lastName": "Jokinen",
+        "additionalData": {
+            "KOE_MARATA_OSIO1-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_MARATA_OSIO2": "21",
+            "KOE_MARATA_OSIO1": "19",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "38.0",
+            "KOE_LIIKETALOUS_PAIVA2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "KOE_LIIKETALOUS_PAIVA3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "KOE_MARATA_OSIO2-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_LIIKETALOUS_PAIVA2": "",
+            "KOE_LIIKETALOUS_PAIVA3": "",
+            "KOE_LIIKETALOUS_PAIVA1": "",
+            "KOE_LIIKETALOUS_PAIVA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001025518",
+        "personOid": "1.2.246.562.24.96966927765",
+        "firstNames": "Veera-Kaisa",
+        "lastName": "Jormalainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "47.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001160910",
+        "personOid": "1.2.246.562.24.94296905187",
+        "firstNames": "Anne Susanna",
+        "lastName": "Juntunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "36.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001034541",
+        "personOid": "1.2.246.562.24.34522123622",
+        "firstNames": "Petra Josefiina",
+        "lastName": "Juola",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "51.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001055135",
+        "personOid": "1.2.246.562.24.60556557911",
+        "firstNames": "Teppo Juhani",
+        "lastName": "Juutila",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "55.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001104303",
+        "personOid": "1.2.246.562.24.57371460018",
+        "firstNames": "Jukka Pekka",
+        "lastName": "Juvonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "63.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001267703",
+        "personOid": "1.2.246.562.24.73091250032",
+        "firstNames": "Oona Maria",
+        "lastName": "Juvonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "50.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001129391",
+        "personOid": "1.2.246.562.24.94200798225",
+        "firstNames": "Noora Kaarina",
+        "lastName": "Järvi",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "48.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001186538",
+        "personOid": "1.2.246.562.24.23854079374",
+        "firstNames": "Olli Martti Petteri",
+        "lastName": "Kaakinen",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_KYAMK_ENSIHOITO-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "SOTEKOE_KYAMK_ENSIHOITO": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001176043",
+        "personOid": "1.2.246.562.24.77688140218",
+        "firstNames": "Heidi Emilia",
+        "lastName": "Kalevo",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "49.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001030422",
+        "personOid": "1.2.246.562.24.52551806125",
+        "firstNames": "Milla Maarit",
+        "lastName": "Kantanen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "39.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001026986",
+        "personOid": "1.2.246.562.24.42708960976",
+        "firstNames": "Ella Maria",
+        "lastName": "Karhunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001146905",
+        "personOid": "1.2.246.562.24.29851766817",
+        "firstNames": "Nelli Eveliina",
+        "lastName": "Karjunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "48.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001147043",
+        "personOid": "1.2.246.562.24.64801924334",
+        "firstNames": "Ninni Karoliina",
+        "lastName": "Karjunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "46.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001250011",
+        "personOid": "1.2.246.562.24.77419236964",
+        "firstNames": "Noora Elena Anjukka",
+        "lastName": "Karppanen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "1",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "61.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "58.0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001203851",
+        "personOid": "1.2.246.562.24.62509565181",
+        "firstNames": "Sauli Mikael",
+        "lastName": "Karttunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "41.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001103935",
+        "personOid": "1.2.246.562.24.56882542581",
+        "firstNames": "Tia Maria",
+        "lastName": "Kasurinen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "0",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "57.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "40.5",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001217834",
+        "personOid": "1.2.246.562.24.77533225039",
+        "firstNames": "Riina Annika",
+        "lastName": "Kaverinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001255799",
+        "personOid": "1.2.246.562.24.42455976381",
+        "firstNames": "Henna Katriina",
+        "lastName": "Keltanen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001270923",
+        "personOid": "1.2.246.562.24.21397450740",
+        "firstNames": "Eini Karoliina",
+        "lastName": "Keskisaari",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "41.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001118881",
+        "personOid": "1.2.246.562.24.31479311250",
+        "firstNames": "Ella Katariina",
+        "lastName": "Kettunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "48.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001102282",
+        "personOid": "1.2.246.562.24.35608518752",
+        "firstNames": "Essi Eveliina",
+        "lastName": "Kiesilä",
+        "additionalData": {
+            "KOE_TEKNIIKKA_PAIVA": "6",
+            "KOE_TEKNIIKKA_PAIVA-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001116799",
+        "personOid": "1.2.246.562.24.77829189232",
+        "firstNames": "Henri Matias",
+        "lastName": "Kiiskinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "41.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001093870",
+        "personOid": "1.2.246.562.24.18253814514",
+        "firstNames": "Marko Antero",
+        "lastName": "Kiiskinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "59.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001066742",
+        "personOid": "1.2.246.562.24.21754965593",
+        "firstNames": "Vilma Aino Karelia",
+        "lastName": "Kiljunen",
+        "additionalData": {
+            "KOE_MYYNTITYO_PAIVA1": "",
+            "SOTE1_kaikkiosiot": "0",
+            "KOE_MYYNTITYO_PAIVA3": "",
+            "HUM_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA1": "28.75",
+            "KOE_MYYNTITYO_PAIVA2": "",
+            "KOE_MYYNTITYO_PAIVA2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "KOE_MYYNTITYO_PAIVA3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "amk_humanistinen_koe": "",
+            "HUM_kaikkiosiot": "",
+            "KOE_MYYNTITYO_PAIVA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "amk_humanistinen_koe-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "d6bb3029-4f5a-bb36-7311-cc17e6786c92": "",
+            "d6bb3029-4f5a-bb36-7311-cc17e6786c92-OSALLISTUMINEN": "EI_VAADITA",
+            "7318019c-0a62-e5d0-3cf0-3fcf2232cc3f": "",
+            "7318019c-0a62-e5d0-3cf0-3fcf2232cc3f-OSALLISTUMINEN": "EI_VAADITA",
+            "e3e1899e-b5b8-04cd-8c57-3fec1f178a01": "",
+            "e3e1899e-b5b8-04cd-8c57-3fec1f178a01-OSALLISTUMINEN": "EI_VAADITA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001096848",
+        "personOid": "1.2.246.562.24.92410366672",
+        "firstNames": "SUSAN NJOKI",
+        "lastName": "KIMANI",
+        "additionalData": {
+            "KOE_LIIKETALOUS_PAIVA3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "KOE_LIIKETALOUS_PAIVA2": "",
+            "KOE_LIIKETALOUS_PAIVA3": "",
+            "SOTE1_kaikkiosiot": "",
+            "KOE_LIIKETALOUS_PAIVA1": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "KOE_LIIKETALOUS_PAIVA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "KOE_LIIKETALOUS_PAIVA2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "83e7ce64-a940-f3f6-9b21-b9869385ae12": "",
+            "83e7ce64-a940-f3f6-9b21-b9869385ae12-OSALLISTUMINEN": "MERKITSEMATTA",
+            "4b3b8b34-43ce-0a3a-cc68-dcbb0f876c2e": "",
+            "4b3b8b34-43ce-0a3a-cc68-dcbb0f876c2e-OSALLISTUMINEN": "MERKITSEMATTA",
+            "60bbdba9-c0a7-9339-58a1-19f95c6e5f00": "",
+            "60bbdba9-c0a7-9339-58a1-19f95c6e5f00-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001035388",
+        "personOid": "1.2.246.562.24.73417960469",
+        "firstNames": "Jenni Karoliina",
+        "lastName": "Kinnunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001024742",
+        "personOid": "1.2.246.562.24.99505802099",
+        "firstNames": "Matias Juha Petteri",
+        "lastName": "Kinnunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "37.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001132207",
+        "personOid": "1.2.246.562.24.93724128107",
+        "firstNames": "Sini Hannele Eleonoora",
+        "lastName": "Kirkinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "35.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001085338",
+        "personOid": "1.2.246.562.24.86972950477",
+        "firstNames": "Niina Inkeri",
+        "lastName": "Klaavo",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001092295",
+        "personOid": "1.2.246.562.24.27820512612",
+        "firstNames": "Perttu Santeri",
+        "lastName": "Koivumaa",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001065950",
+        "personOid": "1.2.246.562.24.90580437255",
+        "firstNames": "Eetupekka Johannes",
+        "lastName": "Kojo",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001028146",
+        "personOid": "1.2.246.562.24.83948140803",
+        "firstNames": "Aliisa Marketta",
+        "lastName": "Kokko",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001009084",
+        "personOid": "1.2.246.562.24.89806314021",
+        "firstNames": "Marjut Susanna",
+        "lastName": "Kolehmainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "54.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001009068",
+        "personOid": "1.2.246.562.24.28594157276",
+        "firstNames": "Salla Marika",
+        "lastName": "Kolhonen",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "30",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001056419",
+        "personOid": "1.2.246.562.24.67939874476",
+        "firstNames": "Santeri Kalervo",
+        "lastName": "Kontro",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001112793",
+        "personOid": "1.2.246.562.24.79458129661",
+        "firstNames": "Salla Katri Maria",
+        "lastName": "Konttinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "55.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001249103",
+        "personOid": "1.2.246.562.24.66683478860",
+        "firstNames": "jani riku petteri",
+        "lastName": "Koponen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "42.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001200126",
+        "personOid": "1.2.246.562.24.65146572152",
+        "firstNames": "Tuomas Samuel",
+        "lastName": "Korhonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "35.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001231386",
+        "personOid": "1.2.246.562.24.82602664752",
+        "firstNames": "Eeva-Leena Maria",
+        "lastName": "Korkkinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001166503",
+        "personOid": "1.2.246.562.24.49908016571",
+        "firstNames": "Meini Katariina",
+        "lastName": "Korpela",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001047473",
+        "personOid": "1.2.246.562.24.70663800033",
+        "firstNames": "Sanna Tuulia",
+        "lastName": "Kortelainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "42.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001244357",
+        "personOid": "1.2.246.562.24.40606362762",
+        "firstNames": "Johanna",
+        "lastName": "Koski",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001259041",
+        "personOid": "1.2.246.562.24.39253583604",
+        "firstNames": "Noora Carita",
+        "lastName": "Kosunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "42.349999999999994",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001261482",
+        "personOid": "1.2.246.562.24.30476198626",
+        "firstNames": "Henri Johannes",
+        "lastName": "Kotila",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56.699999999999996",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001009123",
+        "personOid": "1.2.246.562.24.92358863224",
+        "firstNames": "Veikka Santeri",
+        "lastName": "Kuittinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001101212",
+        "personOid": "1.2.246.562.24.18042012624",
+        "firstNames": "Tiina Fedosja",
+        "lastName": "Kukkonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001073984",
+        "personOid": "1.2.246.562.24.60545483973",
+        "firstNames": "Tarmo Armas",
+        "lastName": "Kuosmanen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "24.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001235696",
+        "personOid": "1.2.246.562.24.66020244314",
+        "firstNames": "Mikko Pekka Albert",
+        "lastName": "Kupiainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001018570",
+        "personOid": "1.2.246.562.24.19388806755",
+        "firstNames": "Tiia Pauliina",
+        "lastName": "Kurki",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "57.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001152724",
+        "personOid": "1.2.246.562.24.87194180516",
+        "firstNames": "Riikka helena",
+        "lastName": "Kuronen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "40.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001053014",
+        "personOid": "1.2.246.562.24.66040810993",
+        "firstNames": "Krista Juulia",
+        "lastName": "Kurronen",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001208348",
+        "personOid": "1.2.246.562.24.95819078047",
+        "firstNames": "Joonas Petteri",
+        "lastName": "Kärkinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001013630",
+        "personOid": "1.2.246.562.24.34458870489",
+        "firstNames": "Johanna Marita",
+        "lastName": "Laakkonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "52.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001186648",
+        "personOid": "1.2.246.562.24.96606039489",
+        "firstNames": "Satu Eveliina",
+        "lastName": "Lahtela",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "43.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001172254",
+        "personOid": "1.2.246.562.24.71185785787",
+        "firstNames": "Kosti Taneli",
+        "lastName": "Laisi",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA3": "64.0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001246478",
+        "personOid": "1.2.246.562.24.67559778826",
+        "firstNames": "Camilla Emilia",
+        "lastName": "Laitinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "59.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001066894",
+        "personOid": "1.2.246.562.24.54836333560",
+        "firstNames": "Minttu Marjatta",
+        "lastName": "Laitinen",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001124037",
+        "personOid": "1.2.246.562.24.87146620435",
+        "firstNames": "Emmi Olga Vilhelmiina",
+        "lastName": "Lassila",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "64",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001015450",
+        "personOid": "1.2.246.562.24.16717058151",
+        "firstNames": "Jarna Amanda",
+        "lastName": "Lassila",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "1",
+            "SOTE_kaikkiosiot_ryhma2": "0",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA3": "45.0",
+            "SOTEKOE_VK_RYHMA2": "15.5",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001176849",
+        "personOid": "1.2.246.562.24.21922127480",
+        "firstNames": "Susanna Emilia",
+        "lastName": "Laurikainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001183939",
+        "personOid": "1.2.246.562.24.28436426379",
+        "firstNames": "Riina Johanna",
+        "lastName": "Leinonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001175251",
+        "personOid": "1.2.246.562.24.35839273086",
+        "firstNames": "Sonja Katariina",
+        "lastName": "Leminen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001199842",
+        "personOid": "1.2.246.562.24.99554033932",
+        "firstNames": "Alma Elisa",
+        "lastName": "Leppänen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "62.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001233287",
+        "personOid": "1.2.246.562.24.65834132859",
+        "firstNames": "Elina Aleksandra",
+        "lastName": "Leppänen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "34",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001223844",
+        "personOid": "1.2.246.562.24.71882765039",
+        "firstNames": "Sini-Johanna",
+        "lastName": "Lespi",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001031573",
+        "personOid": "1.2.246.562.24.11405918058",
+        "firstNames": "Jari Ville",
+        "lastName": "Lievonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001240555",
+        "personOid": "1.2.246.562.24.45796870994",
+        "firstNames": "Jarkko Tapio",
+        "lastName": "Lievonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001020953",
+        "personOid": "1.2.246.562.24.71043394841",
+        "firstNames": "Heidi Pirjo Maarit",
+        "lastName": "lindeman",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "45.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001043406",
+        "personOid": "1.2.246.562.24.56350482733",
+        "firstNames": "Linda Sofia",
+        "lastName": "Lindroos",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "47.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001142271",
+        "personOid": "1.2.246.562.24.38893755699",
+        "firstNames": "Simo Arvo Antero",
+        "lastName": "Lindstedt",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "29.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001222308",
+        "personOid": "1.2.246.562.24.34909426405",
+        "firstNames": "Matti Heikki",
+        "lastName": "Linnove",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "47.599999999999994",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001051689",
+        "personOid": "1.2.246.562.24.82713947850",
+        "firstNames": "Janette Elisa",
+        "lastName": "Lintunen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "42.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001092237",
+        "personOid": "1.2.246.562.24.56330616833",
+        "firstNames": "Sonja Maria",
+        "lastName": "Lintunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "31.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001039973",
+        "personOid": "1.2.246.562.24.27608113990",
+        "firstNames": "Jenni Iida Maria",
+        "lastName": "Loijas",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "47.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001144677",
+        "personOid": "1.2.246.562.24.61287350648",
+        "firstNames": "Mikael Pekka-Juhani",
+        "lastName": "Luusuaniemi",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "28.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001096796",
+        "personOid": "1.2.246.562.24.68334038793",
+        "firstNames": "Eetu Juhani",
+        "lastName": "Lähderinne",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "40",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001031696",
+        "personOid": "1.2.246.562.24.77863811540",
+        "firstNames": "Olli Aleksi",
+        "lastName": "Maijanen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "57.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001180262",
+        "personOid": "1.2.246.562.24.51231374758",
+        "firstNames": "Henna Johanna",
+        "lastName": "Makkonen",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "33",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001198869",
+        "personOid": "1.2.246.562.24.71091584658",
+        "firstNames": "Mirja Sinikka",
+        "lastName": "Mattinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001185047",
+        "personOid": "1.2.246.562.24.41489861379",
+        "firstNames": "Juuli Jessica",
+        "lastName": "Meriläinen",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "0",
+            "SOTEKOE_METROPOLIA_RONTGEN": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "50.0",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA3": "37.0",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_METROPOLIA_RONTGEN-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001109793",
+        "personOid": "1.2.246.562.24.67357473323",
+        "firstNames": "Miia Tanja Janita",
+        "lastName": "Mertanen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "43.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001070660",
+        "personOid": "1.2.246.562.24.24552179915",
+        "firstNames": "Anni Julia Johanna",
+        "lastName": "Miettinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "55.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001114034",
+        "personOid": "1.2.246.562.24.31548649882",
+        "firstNames": "Ida Maria",
+        "lastName": "Miettinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "57.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001188183",
+        "personOid": "1.2.246.562.24.67571521828",
+        "firstNames": "Tuija Laura Helinä",
+        "lastName": "Miettinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "61.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001019375",
+        "personOid": "1.2.246.562.24.57519926149",
+        "firstNames": "Anni Elina",
+        "lastName": "Mikkonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "52.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001056354",
+        "personOid": "1.2.246.562.24.92773429272",
+        "firstNames": "mirva karoliina",
+        "lastName": "moilanen",
+        "additionalData": {
+            "KOE_MARATA_OSIO1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "KOE_MARATA_OSIO2": "",
+            "KOE_MARATA_OSIO1": "",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA3": "",
+            "KOE_MARATA_OSIO2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001074569",
+        "personOid": "1.2.246.562.24.90224151635",
+        "firstNames": "Nuutti Kristian",
+        "lastName": "Mononen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001258217",
+        "personOid": "1.2.246.562.24.68824593162",
+        "firstNames": "Heli Anniina",
+        "lastName": "Montonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001213883",
+        "personOid": "1.2.246.562.24.13883770311",
+        "firstNames": "Laura Maria Elisa",
+        "lastName": "Mulari",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "27.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001037726",
+        "personOid": "1.2.246.562.24.13415408598",
+        "firstNames": "Hasse Antti Ferdinand",
+        "lastName": "Mustonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "41.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001230594",
+        "personOid": "1.2.246.562.24.59811218582",
+        "firstNames": "Samuli Simo Santeri",
+        "lastName": "Myller",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001270240",
+        "personOid": "1.2.246.562.24.18846994922",
+        "firstNames": "Elli Marjaana",
+        "lastName": "Myllärinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001193576",
+        "personOid": "1.2.246.562.24.88121295648",
+        "firstNames": "Otso Matti Lauri",
+        "lastName": "Myrsky",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001120015",
+        "personOid": "1.2.246.562.24.73935738704",
+        "firstNames": "Emmi Alma Loviisa",
+        "lastName": "Myöhänen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "34",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001192535",
+        "personOid": "1.2.246.562.24.50410170444",
+        "firstNames": "Petteri Henrik",
+        "lastName": "Mäkinen",
+        "additionalData": {
+            "kielikoe_metropolia": "",
+            "KOE_TEKNIIKKA_PAIVA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_metropolia-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "KOE_LIIKETALOUS_PAIVA2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "KOE_LIIKETALOUS_PAIVA3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "KOE_TEKNIIKKA_PAIVA": "",
+            "KOE_LIIKETALOUS_PAIVA2": "",
+            "KOE_LIIKETALOUS_PAIVA3": "",
+            "KOE_LIIKETALOUS_PAIVA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "KOE_LIIKETALOUS_PAIVA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001096437",
+        "personOid": "1.2.246.562.24.23454103462",
+        "firstNames": "Miiamaija Johanna",
+        "lastName": "Mäntylä",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "54.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001098891",
+        "personOid": "1.2.246.562.24.90869707664",
+        "firstNames": "Ella Marleena",
+        "lastName": "Möttönen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "53.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001058899",
+        "personOid": "1.2.246.562.24.48899800732",
+        "firstNames": "Hanna-Riikka Annikki",
+        "lastName": "Nevalainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "36",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001055397",
+        "personOid": "1.2.246.562.24.36039412125",
+        "firstNames": "Miia-Marika",
+        "lastName": "Nevalainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001105991",
+        "personOid": "1.2.246.562.24.81621882202",
+        "firstNames": "Roope Juhani",
+        "lastName": "Nevalainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "57.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001073065",
+        "personOid": "1.2.246.562.24.59892281758",
+        "firstNames": "Tarja Anneli",
+        "lastName": "Nevalainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "49.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001071070",
+        "personOid": "1.2.246.562.24.32387695834",
+        "firstNames": "Taru-Tuulia",
+        "lastName": "Nikkinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "58.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001012194",
+        "personOid": "1.2.246.562.24.45427933964",
+        "firstNames": "Tuija Maarit Hannele",
+        "lastName": "Nilmanen",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "1",
+            "SOTE_kaikkiosiot_ryhma2": "1",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "38.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA3": "28.0",
+            "SOTEKOE_VK_RYHMA2": "55.0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001043260",
+        "personOid": "1.2.246.562.24.95141526827",
+        "firstNames": "Petri Juhani",
+        "lastName": "Niskanen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001091270",
+        "personOid": "1.2.246.562.24.43729442197",
+        "firstNames": "Marika Johanna",
+        "lastName": "Nordström",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "55.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001160761",
+        "personOid": "1.2.246.562.24.57364562871",
+        "firstNames": "Minna Johanna",
+        "lastName": "Numminen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "45.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001209169",
+        "personOid": "1.2.246.562.24.82334984014",
+        "firstNames": "Marika Hannele",
+        "lastName": "Näivö",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "48.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001179448",
+        "personOid": "1.2.246.562.24.29787597079",
+        "firstNames": "Tiina Maria",
+        "lastName": "Näveri",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "34",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001032912",
+        "personOid": "1.2.246.562.24.28538176996",
+        "firstNames": "Essi Eveliina",
+        "lastName": "Oinonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "43.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001070932",
+        "personOid": "1.2.246.562.24.91911104444",
+        "firstNames": "Jenni Roosa Maria",
+        "lastName": "Oinonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "49.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001111260",
+        "personOid": "1.2.246.562.24.36460284553",
+        "firstNames": "Marika Katja Susanna",
+        "lastName": "Oinonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001261136",
+        "personOid": "1.2.246.562.24.68959617120",
+        "firstNames": "Janne Pekka Oskari",
+        "lastName": "Oksman",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "35.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_saimaa": "1",
+            "KOE_ENSIHOITO_SAIMAA": "48.25",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001148822",
+        "personOid": "1.2.246.562.24.86131312474",
+        "firstNames": "Heidi Tuulia",
+        "lastName": "Ollikainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "41.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001045336",
+        "personOid": "1.2.246.562.24.78016176439",
+        "firstNames": "Sini Henriikka",
+        "lastName": "Ollikainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001145100",
+        "personOid": "1.2.246.562.24.84720250842",
+        "firstNames": "Perttu Olavi",
+        "lastName": "Paakkola",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "47.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001072396",
+        "personOid": "1.2.246.562.24.52501024847",
+        "firstNames": "Hanna-Maria",
+        "lastName": "Paananen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "35",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001138434",
+        "personOid": "1.2.246.562.24.76081043887",
+        "firstNames": "Karipekka Topias",
+        "lastName": "Paaso",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "59.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001134962",
+        "personOid": "1.2.246.562.24.75647336641",
+        "firstNames": "Päivi Sinikka",
+        "lastName": "Pakarinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "51.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001216945",
+        "personOid": "1.2.246.562.24.95732217697",
+        "firstNames": "Jussi Aleksanteri",
+        "lastName": "Palosaari",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "0",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "27.0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001054589",
+        "personOid": "1.2.246.562.24.57512340706",
+        "firstNames": "Ellinoora",
+        "lastName": "Partanen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "45.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001056383",
+        "personOid": "1.2.246.562.24.21841144777",
+        "firstNames": "Paavo Pietari",
+        "lastName": "Pellikka",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001119301",
+        "personOid": "1.2.246.562.24.67623447766",
+        "firstNames": "juuli iida emilia",
+        "lastName": "pelo",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001044418",
+        "personOid": "1.2.246.562.24.66034476783",
+        "firstNames": "Janette Karoliina",
+        "lastName": "Peltokangas",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001077362",
+        "personOid": "1.2.246.562.24.81646470673",
+        "firstNames": "Simo Matias",
+        "lastName": "Peltovirta",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001163690",
+        "personOid": "1.2.246.562.24.94698329497",
+        "firstNames": "Janne Oskari",
+        "lastName": "Pennanen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "1",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "55.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "45.0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001217339",
+        "personOid": "1.2.246.562.24.32965567300",
+        "firstNames": "Elvi Malviina",
+        "lastName": "Penttilä",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "0",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "49",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001072723",
+        "personOid": "1.2.246.562.24.21997608691",
+        "firstNames": "Sanni Elina",
+        "lastName": "Penttinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "62.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001252268",
+        "personOid": "1.2.246.562.24.60872181618",
+        "firstNames": "Eeva Helena",
+        "lastName": "Peräkääly",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "32.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001041945",
+        "personOid": "1.2.246.562.24.50182013567",
+        "firstNames": "Elina Päivikki",
+        "lastName": "Pesonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "60",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001096592",
+        "personOid": "1.2.246.562.24.29806823297",
+        "firstNames": "Hanna Annika",
+        "lastName": "Pesonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001187524",
+        "personOid": "1.2.246.562.24.55735603329",
+        "firstNames": "Olga",
+        "lastName": "Pevkur",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "0",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "0.0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001037441",
+        "personOid": "1.2.246.562.24.64926275861",
+        "firstNames": "Heikki Petteri",
+        "lastName": "Pietarinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001095072",
+        "personOid": "1.2.246.562.24.65944313597",
+        "firstNames": "Miika Anton",
+        "lastName": "Pietarinen",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "53.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001274149",
+        "personOid": "1.2.246.562.24.60195170982",
+        "firstNames": "Jukka-Pekka",
+        "lastName": "Piitulainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "50.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001136575",
+        "personOid": "1.2.246.562.24.50766797018",
+        "firstNames": "Laura Maria Katarina",
+        "lastName": "Piitulainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "45.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001262656",
+        "personOid": "1.2.246.562.24.69732500932",
+        "firstNames": "Jarno Olavi",
+        "lastName": "Pikkarainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001012314",
+        "personOid": "1.2.246.562.24.84715690268",
+        "firstNames": "Marja Helena",
+        "lastName": "Pirinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "55.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001061488",
+        "personOid": "1.2.246.562.24.68849941061",
+        "firstNames": "Heidi Elisa",
+        "lastName": "Pisto",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "59.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001173978",
+        "personOid": "1.2.246.562.24.25161998528",
+        "firstNames": "Miina Kaisa Katariina",
+        "lastName": "Pisto",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001155420",
+        "personOid": "1.2.246.562.24.33091060592",
+        "firstNames": "TIMO MARKO TAPANI",
+        "lastName": "PULKKA",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "49.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001091102",
+        "personOid": "1.2.246.562.24.54802048795",
+        "firstNames": "Joni Petteri",
+        "lastName": "Pulkkinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "68.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001128606",
+        "personOid": "1.2.246.562.24.61577663032",
+        "firstNames": "Olli Pekka Juhani",
+        "lastName": "Pulli",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "52.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001189108",
+        "personOid": "1.2.246.562.24.21988193623",
+        "firstNames": "Katri Marja",
+        "lastName": "Pulliainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "61",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001267211",
+        "personOid": "1.2.246.562.24.86625009688",
+        "firstNames": "Tarmo Johannes",
+        "lastName": "Puoskari",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "45.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001130678",
+        "personOid": "1.2.246.562.24.28490541258",
+        "firstNames": "Noora Eveliina",
+        "lastName": "Puruskainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "53.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001246287",
+        "personOid": "1.2.246.562.24.73426183088",
+        "firstNames": "Tiia Marjaana",
+        "lastName": "Puumalainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "49.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001238664",
+        "personOid": "1.2.246.562.24.42240420974",
+        "firstNames": "Jenna Vilhelmiina",
+        "lastName": "Puustinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "38.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001060434",
+        "personOid": "1.2.246.562.24.37306004184",
+        "firstNames": "Jessica Katriina Natalia",
+        "lastName": "Pyykkö",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001070327",
+        "personOid": "1.2.246.562.24.29038750565",
+        "firstNames": "Emilia Iida Johanna",
+        "lastName": "Rajavuori",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "46.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001255058",
+        "personOid": "1.2.246.562.24.50875595651",
+        "firstNames": "Henna Maria",
+        "lastName": "Reinikainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001008577",
+        "personOid": "1.2.246.562.24.12136470178",
+        "firstNames": "Anne-Mari Päivikki",
+        "lastName": "Riihelä",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "38.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001016640",
+        "personOid": "1.2.246.562.24.28966440061",
+        "firstNames": "Tanja Ruut Maria",
+        "lastName": "Riissanen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "53.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001012288",
+        "personOid": "1.2.246.562.24.19113097496",
+        "firstNames": "Jenna Johanna",
+        "lastName": "Romppanen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "57.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001129786",
+        "personOid": "1.2.246.562.24.58335483043",
+        "firstNames": "Jesse Johannes",
+        "lastName": "Romppanen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "54.0",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_KYAMK_ENSIHOITO-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "SOTEKOE_KYAMK_ENSIHOITO": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001025974",
+        "personOid": "1.2.246.562.24.33059845869",
+        "firstNames": "Niina Toini Helena",
+        "lastName": "Romppanen",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "42.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001136915",
+        "personOid": "1.2.246.562.24.55631390464",
+        "firstNames": "Riia Johanna",
+        "lastName": "Romppanen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "57.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001107339",
+        "personOid": "1.2.246.562.24.73343073925",
+        "firstNames": "Jonna Anneli",
+        "lastName": "Ronkanen",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "38.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001181669",
+        "personOid": "1.2.246.562.24.60995562703",
+        "firstNames": "Jyri Juhani",
+        "lastName": "Rouhiainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001262300",
+        "personOid": "1.2.246.562.24.62736685436",
+        "firstNames": "Antti Pekka",
+        "lastName": "Rouvinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "53.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001228519",
+        "personOid": "1.2.246.562.24.64000557845",
+        "firstNames": "Tiia Eveliina",
+        "lastName": "Rummukainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "48.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001182435",
+        "personOid": "1.2.246.562.24.77040031839",
+        "firstNames": "Riikka Susanna",
+        "lastName": "Ruutinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "37",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001098244",
+        "personOid": "1.2.246.562.24.94896571908",
+        "firstNames": "Niko Allan",
+        "lastName": "Ryynänen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "34.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001238936",
+        "personOid": "1.2.246.562.24.79727021649",
+        "firstNames": "Maria Ida Jasmiina",
+        "lastName": "Räisänen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "53.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001228250",
+        "personOid": "1.2.246.562.24.72775129833",
+        "firstNames": "Moona Marja Aleksandra",
+        "lastName": "Räisänen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "64.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001055287",
+        "personOid": "1.2.246.562.24.31717018024",
+        "firstNames": "Niina Mari Eveliina",
+        "lastName": "Saarinen",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "41.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001154243",
+        "personOid": "1.2.246.562.24.27953638968",
+        "firstNames": "Pirita Kristiina",
+        "lastName": "Saarinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "41.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001185021",
+        "personOid": "1.2.246.562.24.97230462502",
+        "firstNames": "Mira Jenna Marika",
+        "lastName": "Saira",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001150166",
+        "personOid": "1.2.246.562.24.75453455499",
+        "firstNames": "Kiril",
+        "lastName": "Saliev",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "38.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001160211",
+        "personOid": "1.2.246.562.24.64382411890",
+        "firstNames": "Jasmin Karoliina",
+        "lastName": "Sallinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "33.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001248298",
+        "personOid": "1.2.246.562.24.32707805084",
+        "firstNames": "Sami Pauli Henrik",
+        "lastName": "Sallinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "1",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "43",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001011917",
+        "personOid": "1.2.246.562.24.96627113724",
+        "firstNames": "Karoliina Suvi Annika",
+        "lastName": "Salo",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "49.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001263671",
+        "personOid": "1.2.246.562.24.53542257915",
+        "firstNames": "Antti-Jussi",
+        "lastName": "Seppänen",
+        "additionalData": {
+            "KOE_MARATA_MONIMUOTO_OSIO2-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_MARATA_MONIMUOTO_OSIO1": "29.0",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "KOE_MARATA_MONIMUOTO_OSIO2": "18.0",
+            "KOE_MARATA_MONIMUOTO_OSIO1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "41.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001248382",
+        "personOid": "1.2.246.562.24.35065267125",
+        "firstNames": "Emilia Annika",
+        "lastName": "Silvast",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "59.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001183599",
+        "personOid": "1.2.246.562.24.36415148288",
+        "firstNames": "Sanni Sofia",
+        "lastName": "Simonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "68",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001114759",
+        "personOid": "1.2.246.562.24.86170388359",
+        "firstNames": "Kiran",
+        "lastName": "Singh",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001270046",
+        "personOid": "1.2.246.562.24.17225344495",
+        "firstNames": "Johanna Sofia",
+        "lastName": "Sinkko",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "47.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001261592",
+        "personOid": "1.2.246.562.24.51002612500",
+        "firstNames": "Jani Matias",
+        "lastName": "Sivonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "20.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001159248",
+        "personOid": "1.2.246.562.24.82852527762",
+        "firstNames": "Heidi Johanna",
+        "lastName": "Sormunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "53.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001089693",
+        "personOid": "1.2.246.562.24.91277779979",
+        "firstNames": "Riikka Maria",
+        "lastName": "Sorsa",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "45.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001233834",
+        "personOid": "1.2.246.562.24.39386627204",
+        "firstNames": "Sara-Anna Merette",
+        "lastName": "Sukuvaara",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "51.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001043419",
+        "personOid": "1.2.246.562.24.84734062233",
+        "firstNames": "Petra Julia",
+        "lastName": "Summanen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001236161",
+        "personOid": "1.2.246.562.24.98934241811",
+        "firstNames": "Sonja Katariina",
+        "lastName": "Suoniemi",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "1",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "56.5",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001051605",
+        "personOid": "1.2.246.562.24.92166251060",
+        "firstNames": "Niina Mirjam",
+        "lastName": "Sutinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "36.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001235159",
+        "personOid": "1.2.246.562.24.19744774751",
+        "firstNames": "Joona Visa Aleksi",
+        "lastName": "Suurnäkki",
+        "additionalData": {
+            "LUVA_kirjallinen_SEAMK-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "HUM_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "LUVA_HAASTATTELU_SEAMK": "32.0",
+            "amk_humanistinen_koe": "50",
+            "LUVA_kirjallinen_SEAMK": "13.0",
+            "HUM_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "amk_humanistinen_koe-OSALLISTUMINEN": "OSALLISTUI",
+            "LUVA_HAASTATTELU_SEAMK-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "9bffeb28-edd5-8d7b-cfa9-64d4133aa1b8": "",
+            "9bffeb28-edd5-8d7b-cfa9-64d4133aa1b8-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "5ed98cf9-e76e-d740-c06e-781c4d817433": "",
+            "5ed98cf9-e76e-d740-c06e-781c4d817433-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001057285",
+        "personOid": "1.2.246.562.24.28925575553",
+        "firstNames": "Jonna Jasmin",
+        "lastName": "Syrjäläinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001040289",
+        "personOid": "1.2.246.562.24.37982106998",
+        "firstNames": "Tero Juhani",
+        "lastName": "Särkkä",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "49.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001021224",
+        "personOid": "1.2.246.562.24.26443204696",
+        "firstNames": "riikka annika",
+        "lastName": "tahvanainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "46.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001151987",
+        "personOid": "1.2.246.562.24.26012411506",
+        "firstNames": "Eetu Veikko",
+        "lastName": "Tarkki",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001209622",
+        "personOid": "1.2.246.562.24.44048400929",
+        "firstNames": "Olli Ilari",
+        "lastName": "Tarvainen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001209952",
+        "personOid": "1.2.246.562.24.70396992917",
+        "firstNames": "Tuula Maritta",
+        "lastName": "Taskinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "38.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001127843",
+        "personOid": "1.2.246.562.24.72794582150",
+        "firstNames": "Outi Elina",
+        "lastName": "Teinilä",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001272565",
+        "personOid": "1.2.246.562.24.41586953782",
+        "firstNames": "Sonja Marianne",
+        "lastName": "Tervamäki",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001194517",
+        "personOid": "1.2.246.562.24.72212146625",
+        "firstNames": "Heidi Susanna",
+        "lastName": "Tiainen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "1",
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "12.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "55.0",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001160758",
+        "personOid": "1.2.246.562.24.55641608845",
+        "firstNames": "Teemu Juho",
+        "lastName": "Tiihonen",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "KOE_ENSIHOITO_SAIMAA-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_KYAMK_ENSIHOITO-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "kielikoe_amk_fi": "",
+            "SOTE_kaikkiosiot_saimaa-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_KYAMK_ENSIHOITO": "",
+            "SOTE_kaikkiosiot_saimaa": "",
+            "KOE_ENSIHOITO_SAIMAA": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001225499",
+        "personOid": "1.2.246.562.24.78510821701",
+        "firstNames": "Jennamiia Maria",
+        "lastName": "Tiilikainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "55.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001240953",
+        "personOid": "1.2.246.562.24.75839715575",
+        "firstNames": "Pia Theresa",
+        "lastName": "Tikka",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001156513",
+        "personOid": "1.2.246.562.24.17951008937",
+        "firstNames": "Sari Kristiina",
+        "lastName": "Tikka",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "50.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001156652",
+        "personOid": "1.2.246.562.24.59505623470",
+        "firstNames": "Hanna Eveliina",
+        "lastName": "Toivanen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001029475",
+        "personOid": "1.2.246.562.24.28376607180",
+        "firstNames": "Jenni Janita",
+        "lastName": "Tolonen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "57.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001045572",
+        "personOid": "1.2.246.562.24.88420820374",
+        "firstNames": "Anna-Kaisa",
+        "lastName": "Toropainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "54.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001187126",
+        "personOid": "1.2.246.562.24.77348127490",
+        "firstNames": "Aleksi Pekka Fredrik",
+        "lastName": "Turunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "38.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001117413",
+        "personOid": "1.2.246.562.24.55850767137",
+        "firstNames": "Jarmo Petteri",
+        "lastName": "Turunen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "0",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "51.5",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001214581",
+        "personOid": "1.2.246.562.24.74076816814",
+        "firstNames": "Jutta Karoliina",
+        "lastName": "Turunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "57.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001069464",
+        "personOid": "1.2.246.562.24.76687380559",
+        "firstNames": "Paula Marita Hannele",
+        "lastName": "Turunen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "0",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "36.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "44.5",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001052206",
+        "personOid": "1.2.246.562.24.96372592797",
+        "firstNames": "Sanna Katriina",
+        "lastName": "Turunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "41.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001071290",
+        "personOid": "1.2.246.562.24.68372515320",
+        "firstNames": "Sanna Maarit",
+        "lastName": "Turunen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "34.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001020380",
+        "personOid": "1.2.246.562.24.79820174956",
+        "firstNames": "Eeva Lisa Pauliina",
+        "lastName": "Udd",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "1",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "59.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "54.5",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001190414",
+        "personOid": "1.2.246.562.24.62195693289",
+        "firstNames": "Minna Liisa Emilia",
+        "lastName": "Vaakanainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "40.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001173868",
+        "personOid": "1.2.246.562.24.11047103315",
+        "firstNames": "Markus Mikael",
+        "lastName": "Valkeapää",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA1": "60",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001269798",
+        "personOid": "1.2.246.562.24.25693378894",
+        "firstNames": "Saila Mirjami",
+        "lastName": "Vallineva",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "20.75",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001214536",
+        "personOid": "1.2.246.562.24.41346377430",
+        "firstNames": "Jaana Pauliina",
+        "lastName": "Varila",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "51.099999999999994",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "kielikoe_amk_fi": "",
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001129126",
+        "personOid": "1.2.246.562.24.50777175687",
+        "firstNames": "Armi Helena",
+        "lastName": "Vartiainen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "25.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001127720",
+        "personOid": "1.2.246.562.24.66490959682",
+        "firstNames": "Ville Valtteri",
+        "lastName": "Vasarainen",
+        "additionalData": {
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma3": "1",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "44.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA3": "40.0",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001184763",
+        "personOid": "1.2.246.562.24.52632507314",
+        "firstNames": "Dmitry",
+        "lastName": "Vasilyev",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001120772",
+        "personOid": "1.2.246.562.24.27529194661",
+        "firstNames": "Sari Susanna",
+        "lastName": "Vehkamaa",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "62.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001269374",
+        "personOid": "1.2.246.562.24.74351416793",
+        "firstNames": "Teija Anneli",
+        "lastName": "Vepsäläinen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "0",
+            "SOTEKOE_VK_RYHMA1": "48.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001015418",
+        "personOid": "1.2.246.562.24.83647948717",
+        "firstNames": "Toni Osmo Tapio",
+        "lastName": "Vesala",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "42.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001231852",
+        "personOid": "1.2.246.562.24.24271923277",
+        "firstNames": "Henna Eveliina",
+        "lastName": "Väisänen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma2": "0",
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "55.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_VK_RYHMA2": "51.5",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001201248",
+        "personOid": "1.2.246.562.24.58195208484",
+        "firstNames": "Laura Emilia",
+        "lastName": "Välimäki",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "57.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001029925",
+        "personOid": "1.2.246.562.24.82270619540",
+        "firstNames": "Miika Kristian",
+        "lastName": "Vänskä",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "56.5",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001011894",
+        "personOid": "1.2.246.562.24.82490473032",
+        "firstNames": "Noora Aleksandra",
+        "lastName": "Väyrynen",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "46.25",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE_kaikkiosiot_ryhma3": "",
+            "SOTE_kaikkiosiot_ryhma3-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_VK_RYHMA3": "",
+            "SOTEKOE_VK_RYHMA3-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001247985",
+        "personOid": "1.2.246.562.24.82486323219",
+        "firstNames": "Julia Silja Raakel",
+        "lastName": "Väänänen",
+        "additionalData": {
+            "SOTE_kaikkiosiot_ryhma2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTE_kaikkiosiot_ryhma2": "",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA2-OSALLISTUMINEN": "EI_OSALLISTUNUT",
+            "SOTEKOE_VK_RYHMA2": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "EI_OSALLISTUNUT"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001098684",
+        "personOid": "1.2.246.562.24.96134985940",
+        "firstNames": "Mona Linnea Eveliina",
+        "lastName": "Ylhäinen",
+        "additionalData": {
+            "kielikoe_amk_fi-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTE1_kaikkiosiot": "",
+            "SOTEKOE_VK_RYHMA1": "43.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTEKOE_KYAMK_ENSIHOITO-OSALLISTUMINEN": "MERKITSEMATTA",
+            "kielikoe_amk_fi": "",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "MERKITSEMATTA",
+            "SOTEKOE_KYAMK_ENSIHOITO": ""
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001152449",
+        "personOid": "1.2.246.562.24.38583449480",
+        "firstNames": "Annie Rosa-Maria",
+        "lastName": "Yli-Leppälä",
+        "additionalData": {
+            "SOTE1_kaikkiosiot": "1",
+            "SOTEKOE_VK_RYHMA1": "29.0",
+            "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN": "OSALLISTUI",
+            "SOTE1_kaikkiosiot-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    }
+]

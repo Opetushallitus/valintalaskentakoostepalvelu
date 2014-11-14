@@ -27,10 +27,16 @@ public class PistesyottoRivi {
 
 	public Map<String, String> asAdditionalData() {
 		Map<String, String> data = Maps.newHashMap();
-		for (PistesyottoArvo arvo : arvot) {
-			data.put(arvo.getTunniste(), arvo.getArvo());
-			data.put(arvo.getOsallistuminenTunniste(), arvo.getTila());
-		}
+        arvot.stream()
+                .filter(arvo -> !arvo.isTyhja())
+                .forEach(arvo -> {
+                    data.put(arvo.getTunniste(), arvo.getArvo());
+                    data.put(arvo.getOsallistuminenTunniste(), arvo.getTila());
+                });
+//		for (PistesyottoArvo arvo : arvot) {
+//			data.put(arvo.getTunniste(), arvo.getArvo());
+//			data.put(arvo.getOsallistuminenTunniste(), arvo.getTila());
+//		}
 		return data;
 	}
 

@@ -1,0 +1,26 @@
+[
+    {
+        "tunniste": "f8523684-9274-fc59-12a6-a8fe79ec8b84",
+        "kuvaus": "Diak koe",
+        "funktiotyyppi": "LUKUARVOFUNKTIO",
+        "lahde": "SYOTETTAVA_ARVO",
+        "onPakollinen": true,
+        "min": "0",
+        "max": "100",
+        "arvot": null,
+        "osallistuminenTunniste": "f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN",
+        "vaatiiOsallistumisen": true
+    },
+    {
+        "tunniste": "582c0bbc-c323-cbff-6aea-0fddbe26d0e6",
+        "kuvaus": "PÃ¤rstÃ¤kerroin",
+        "funktiotyyppi": "LUKUARVOFUNKTIO",
+        "lahde": "SYOTETTAVA_ARVO",
+        "onPakollinen": false,
+        "min": "0",
+        "max": "5",
+        "arvot": null,
+        "osallistuminenTunniste": "582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN",
+        "vaatiiOsallistumisen": true
+    }
+]

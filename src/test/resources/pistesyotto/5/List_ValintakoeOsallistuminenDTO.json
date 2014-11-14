@@ -1,0 +1,430 @@
+﻿[
+    {
+        "hakuOid": "1.2.246.562.29.173465377510",
+        "hakemusOid": "1.2.246.562.11.00001025314",
+        "hakijaOid": "1.2.246.562.24.24330013785",
+        "etunimi": "Tiinass",
+        "sukunimi": "Testihakija AMK",
+        "hakutoiveet": [
+            {
+                "hakukohdeOid": "1.2.246.562.20.88759382968",
+                "valinnanVaiheet": [
+                    {
+                        "valinnanVaiheOid": "14145877405284872848660763802505",
+                        "valinnanVaiheJarjestysluku": 0,
+                        "valintakokeet": [
+                            {
+                                "valintakoeOid": "1415995511870-3987438754454302694",
+                                "valintakoeTunniste": "f8523684-9274-fc59-12a6-a8fe79ec8b84",
+                                "nimi": "testikoe Diak",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": true,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            },
+                            {
+                                "valintakoeOid": "1414587775263-9093474555308844176",
+                                "valintakoeTunniste": "582c0bbc-c323-cbff-6aea-0fddbe26d0e6",
+                                "nimi": "koe",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": false,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "hakuOid": "1.2.246.562.29.173465377510",
+        "hakemusOid": "1.2.246.562.11.00001022171",
+        "hakijaOid": "1.2.246.562.24.26669684809",
+        "etunimi": "Ã¶ster Ã¥sker",
+        "sukunimi": "bengt",
+        "hakutoiveet": [
+            {
+                "hakukohdeOid": "1.2.246.562.20.42250016427",
+                "valinnanVaiheet": [
+                    {
+                        "valinnanVaiheOid": "14145814133107843851236199923784",
+                        "valinnanVaiheJarjestysluku": 0,
+                        "valintakokeet": [
+                            {
+                                "valintakoeOid": "1414581586077675130555756851829",
+                                "valintakoeTunniste": "f8523684-9274-fc59-12a6-a8fe79ec8b84",
+                                "nimi": "testikoe Diak",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": true,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "hakukohdeOid": "1.2.246.562.20.88759382968",
+                "valinnanVaiheet": [
+                    {
+                        "valinnanVaiheOid": "14145877405284872848660763802505",
+                        "valinnanVaiheJarjestysluku": 0,
+                        "valintakokeet": [
+                            {
+                                "valintakoeOid": "1415995511870-3987438754454302694",
+                                "valintakoeTunniste": "f8523684-9274-fc59-12a6-a8fe79ec8b84",
+                                "nimi": "testikoe Diak",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "EI_OSALLISTU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": true,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            },
+                            {
+                                "valintakoeOid": "1414587775263-9093474555308844176",
+                                "valintakoeTunniste": "582c0bbc-c323-cbff-6aea-0fddbe26d0e6",
+                                "nimi": "koe",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": false,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "hakuOid": "1.2.246.562.29.173465377510",
+        "hakemusOid": "1.2.246.562.11.00000944713",
+        "hakijaOid": "1.2.246.562.24.50045866437",
+        "etunimi": "Tiina",
+        "sukunimi": "Testihakija AMK Turku",
+        "hakutoiveet": [
+            {
+                "hakukohdeOid": "1.2.246.562.20.88759382968",
+                "valinnanVaiheet": [
+                    {
+                        "valinnanVaiheOid": "14145877405284872848660763802505",
+                        "valinnanVaiheJarjestysluku": 0,
+                        "valintakokeet": [
+                            {
+                                "valintakoeOid": "1415995511870-3987438754454302694",
+                                "valintakoeTunniste": "f8523684-9274-fc59-12a6-a8fe79ec8b84",
+                                "nimi": "testikoe Diak",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": true,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            },
+                            {
+                                "valintakoeOid": "1414587775263-9093474555308844176",
+                                "valintakoeTunniste": "582c0bbc-c323-cbff-6aea-0fddbe26d0e6",
+                                "nimi": "koe",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": false,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "hakuOid": "1.2.246.562.29.173465377510",
+        "hakemusOid": "1.2.246.562.11.00000946368",
+        "hakijaOid": "1.2.246.562.24.88223006638",
+        "etunimi": "Pelle Runar",
+        "sukunimi": "Peloton",
+        "hakutoiveet": [
+            {
+                "hakukohdeOid": "1.2.246.562.20.42250016427",
+                "valinnanVaiheet": [
+                    {
+                        "valinnanVaiheOid": "14145814133107843851236199923784",
+                        "valinnanVaiheJarjestysluku": 0,
+                        "valintakokeet": [
+                            {
+                                "valintakoeOid": "1414581586077675130555756851829",
+                                "valintakoeTunniste": "f8523684-9274-fc59-12a6-a8fe79ec8b84",
+                                "nimi": "testikoe Diak",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": true,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "hakukohdeOid": "1.2.246.562.20.88759382968",
+                "valinnanVaiheet": [
+                    {
+                        "valinnanVaiheOid": "14145877405284872848660763802505",
+                        "valinnanVaiheJarjestysluku": 0,
+                        "valintakokeet": [
+                            {
+                                "valintakoeOid": "1415995511870-3987438754454302694",
+                                "valintakoeTunniste": "f8523684-9274-fc59-12a6-a8fe79ec8b84",
+                                "nimi": "testikoe Diak",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "EI_OSALLISTU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": true,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            },
+                            {
+                                "valintakoeOid": "1414587775263-9093474555308844176",
+                                "valintakoeTunniste": "582c0bbc-c323-cbff-6aea-0fddbe26d0e6",
+                                "nimi": "koe",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": false,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "hakuOid": "1.2.246.562.29.173465377510",
+        "hakemusOid": "1.2.246.562.11.00001022003",
+        "hakijaOid": "1.2.246.562.24.66047292271",
+        "etunimi": "Michael",
+        "sukunimi": "Knight",
+        "hakutoiveet": [
+            {
+                "hakukohdeOid": "1.2.246.562.20.88759382968",
+                "valinnanVaiheet": [
+                    {
+                        "valinnanVaiheOid": "14145877405284872848660763802505",
+                        "valinnanVaiheJarjestysluku": 0,
+                        "valintakokeet": [
+                            {
+                                "valintakoeOid": "1415995511870-3987438754454302694",
+                                "valintakoeTunniste": "f8523684-9274-fc59-12a6-a8fe79ec8b84",
+                                "nimi": "testikoe Diak",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": true,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            },
+                            {
+                                "valintakoeOid": "1414587775263-9093474555308844176",
+                                "valintakoeTunniste": "582c0bbc-c323-cbff-6aea-0fddbe26d0e6",
+                                "nimi": "koe",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": false,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "hakuOid": "1.2.246.562.29.173465377510",
+        "hakemusOid": "1.2.246.562.11.00001022113",
+        "hakijaOid": "1.2.246.562.24.21325940248",
+        "etunimi": "Alvar Simeon Aartimo Kaleva",
+        "sukunimi": "Aaltonen-Ruttunen",
+        "hakutoiveet": [
+            {
+                "hakukohdeOid": "1.2.246.562.20.42250016427",
+                "valinnanVaiheet": [
+                    {
+                        "valinnanVaiheOid": "14145814133107843851236199923784",
+                        "valinnanVaiheJarjestysluku": 0,
+                        "valintakokeet": [
+                            {
+                                "valintakoeOid": "1414581586077675130555756851829",
+                                "valintakoeTunniste": "f8523684-9274-fc59-12a6-a8fe79ec8b84",
+                                "nimi": "testikoe Diak",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": true,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "hakukohdeOid": "1.2.246.562.20.88759382968",
+                "valinnanVaiheet": [
+                    {
+                        "valinnanVaiheOid": "14145877405284872848660763802505",
+                        "valinnanVaiheJarjestysluku": 0,
+                        "valintakokeet": [
+                            {
+                                "valintakoeOid": "1415995511870-3987438754454302694",
+                                "valintakoeTunniste": "f8523684-9274-fc59-12a6-a8fe79ec8b84",
+                                "nimi": "testikoe Diak",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "EI_OSALLISTU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": true,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            },
+                            {
+                                "valintakoeOid": "1414587775263-9093474555308844176",
+                                "valintakoeTunniste": "582c0bbc-c323-cbff-6aea-0fddbe26d0e6",
+                                "nimi": "koe",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": false,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "hakuOid": "1.2.246.562.29.173465377510",
+        "hakemusOid": "1.2.246.562.11.00001022184",
+        "hakijaOid": "1.2.246.562.24.98346984397",
+        "etunimi": "Lauren",
+        "sukunimi": "Lobster",
+        "hakutoiveet": [
+            {
+                "hakukohdeOid": "1.2.246.562.20.88759382968",
+                "valinnanVaiheet": [
+                    {
+                        "valinnanVaiheOid": "14145877405284872848660763802505",
+                        "valinnanVaiheJarjestysluku": 0,
+                        "valintakokeet": [
+                            {
+                                "valintakoeOid": "1415995511870-3987438754454302694",
+                                "valintakoeTunniste": "f8523684-9274-fc59-12a6-a8fe79ec8b84",
+                                "nimi": "testikoe Diak",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": true,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            },
+                            {
+                                "valintakoeOid": "1414587775263-9093474555308844176",
+                                "valintakoeTunniste": "582c0bbc-c323-cbff-6aea-0fddbe26d0e6",
+                                "nimi": "koe",
+                                "aktiivinen": true,
+                                "osallistuminenTulos": {
+                                    "osallistuminen": "OSALLISTUU",
+                                    "kuvaus": null,
+                                    "laskentaTila": "HYVAKSYTTAVISSA",
+                                    "laskentaTulos": true
+                                },
+                                "lahetetaankoKoekutsut": false,
+                                "kutsutaankoKaikki": null,
+                                "kutsuttavienMaara": null
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
