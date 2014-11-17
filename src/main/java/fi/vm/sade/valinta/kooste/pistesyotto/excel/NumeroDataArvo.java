@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
+import java.math.RoundingMode;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -53,10 +54,16 @@ public class NumeroDataArvo extends TilaDataArvo {
 				lopullinenTila = PistesyottoExcel.VAKIO_MERKITSEMATTA;
 			}
 		}
-		return new PistesyottoArvo(arvo, lopullinenTila, isValidi(arvo)
+		return new PistesyottoArvo(konvertoi(arvo), lopullinenTila, isValidi(arvo)
 				&& isValidiTila(tila), tunniste, osallistuminenTunniste);
 	}
-
+	private String konvertoi(String arvo) {
+		try {
+			return new java.math.BigDecimal(arvo).setScale(2, RoundingMode.HALF_UP).toString();
+		}catch(Exception e) {
+		}
+		return arvo;
+	}
 	public Number getMax() {
 		return max;
 	}
