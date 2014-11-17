@@ -119,9 +119,19 @@ public class Converter {
 						hakemusTyyppi.getAvaimet().add(aa);
 
 						if (e.getKey().startsWith(PREFERENCE)) {
-							Integer prioriteetti = Integer.valueOf(e.getKey()
-									.replaceAll("\\D+", ""));
-
+							Integer prioriteetti;
+							String numberAfterPreference;
+							try {
+								numberAfterPreference = e.getKey()
+								.replaceAll("\\D+", "");
+								if(StringUtils.isBlank(numberAfterPreference)) {
+									continue;
+								}
+								prioriteetti = Integer.valueOf(numberAfterPreference);
+							}catch(Exception ee) {
+								LOG.error("Toivomusjarjestykseton preferenssi {}", e.getKey());
+								throw ee;
+							}
 							Hakutoive hakutoive = null;
 							if (!hakutoiveet.containsKey(prioriteetti)) {
 								hakutoive = new Hakutoive();
@@ -258,14 +268,14 @@ public class Converter {
 				.filter(pair -> {
 					boolean b = pair.getKey().startsWith("preference")
 							&& pair.getKey().endsWith("-Koulutus-id");
-					LOG.warn("Matsaako {} {}", pair, b);
+					LOG.debug("Matsaako {} {}", pair, b);
 					return b;
 				})
 				// eligibility with aoId exists
 				.filter(pair -> {
 					boolean b = eligibilityAndStatus.containsKey(pair
 							.getValue());
-					LOG.warn("Matsaako key({}) == {}", pair.getValue(), b);
+					LOG.debug("Matsaako key({}) == {}", pair.getValue(), b);
 					return b;
 				})
 				// Maps
