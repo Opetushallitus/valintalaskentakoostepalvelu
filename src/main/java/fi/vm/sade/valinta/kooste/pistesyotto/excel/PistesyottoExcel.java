@@ -320,7 +320,8 @@ public class PistesyottoExcel {
 				ValintakoeDTO valintakoe = Optional.ofNullable(tunnisteDTO.get(valintaperuste
 						.getTunniste())).orElse(new ValintakoeDTO());
 				boolean kutsutaankoKaikki =
-						kaikkiKutsutaanTunnisteet.contains(valintaperuste.getTunniste());
+						kaikkiKutsutaanTunnisteet.contains(valintaperuste.getTunniste())
+						|| Boolean.FALSE.equals(valintaperuste.getVaatiiOsallistumisen());
 						//Boolean.TRUE.equals(valintakoe.getKutsutaankoKaikki());
 				if (!kutsutaankoKaikki && !osallistuja) {
 					//
