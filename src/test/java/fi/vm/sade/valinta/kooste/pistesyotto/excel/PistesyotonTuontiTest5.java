@@ -150,6 +150,8 @@ public class PistesyotonTuontiTest5 {
         System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dada));
         assertEquals(dada.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84"), "5,5");
         assertEquals(dada.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN"), "OSALLISTUI");
+        assertEquals(dada.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6"), "2.00");
+        assertEquals(dada.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN"), "OSALLISTUI");
 
 	}
 
