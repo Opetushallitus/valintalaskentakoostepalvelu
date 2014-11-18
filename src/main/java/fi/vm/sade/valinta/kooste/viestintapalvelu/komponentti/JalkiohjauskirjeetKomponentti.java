@@ -278,6 +278,7 @@ public class JalkiohjauskirjeetKomponentti {
 		viesti.setOrganizationOid(null);
 		viesti.setTag(tag);
 		viesti.setTemplateName(templateName);
+        viesti.setIposti(true);
 		Map<String, Object> templateReplacements = Maps.newHashMap();
 		templateReplacements.put("sisalto", sisalto);
 		viesti.setTemplateReplacements(templateReplacements);

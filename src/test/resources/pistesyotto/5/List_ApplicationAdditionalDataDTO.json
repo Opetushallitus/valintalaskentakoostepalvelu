@@ -1,0 +1,86 @@
+[
+    {
+        "oid": "1.2.246.562.11.00001022113",
+        "personOid": "1.2.246.562.24.21325940248",
+        "firstNames": "Alvar Simeon Aartimo Kaleva",
+        "lastName": "Aaltonen-Ruttunen",
+        "additionalData": {
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84": "5,5",
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN": "OSALLISTUI",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6": "",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001022003",
+        "personOid": "1.2.246.562.24.66047292271",
+        "firstNames": "Michael",
+        "lastName": "Knight",
+        "additionalData": {
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84": "3.0",
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN": "OSALLISTUI",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6": "2.0",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001022171",
+        "personOid": "1.2.246.562.24.26669684809",
+        "firstNames": "öster åsker",
+        "lastName": "bengt",
+        "additionalData": {
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84": "88",
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN": "OSALLISTUI",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6": "",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN": "MERKITSEMATTA"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001022184",
+        "personOid": "1.2.246.562.24.98346984397",
+        "firstNames": "Lauren",
+        "lastName": "Lobster",
+        "additionalData": {
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84": "3.0",
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN": "OSALLISTUI",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6": "2.0",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00000946368",
+        "personOid": "1.2.246.562.24.88223006638",
+        "firstNames": "Pelle Runar",
+        "lastName": "Peloton",
+        "additionalData": {
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84": "1",
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN": "OSALLISTUI",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6": "3.0",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00000944713",
+        "personOid": "1.2.246.562.24.50045866437",
+        "firstNames": "Tiina",
+        "lastName": "Testihakija AMK Turku",
+        "additionalData": {
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84": "3.0",
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN": "OSALLISTUI",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6": "1.0",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    },
+    {
+        "oid": "1.2.246.562.11.00001025314",
+        "personOid": "1.2.246.562.24.24330013785",
+        "firstNames": "Tiinass",
+        "lastName": "Testihakija AMK",
+        "additionalData": {
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84": "3.0",
+            "f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN": "OSALLISTUI",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6": "4.0",
+            "582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN": "OSALLISTUI"
+        }
+    }
+]

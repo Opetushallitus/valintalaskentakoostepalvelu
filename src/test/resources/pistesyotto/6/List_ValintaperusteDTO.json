@@ -1,0 +1,26 @@
+[
+    {
+        "tunniste": "SOTE1_kaikkiosiot",
+        "kuvaus": "Kokeen pakollinen (0 = hylätty, 1 = hyväksytty)",
+        "funktiotyyppi": "LUKUARVOFUNKTIO",
+        "lahde": "SYOTETTAVA_ARVO",
+        "onPakollinen": false,
+        "min": null,
+        "max": null,
+        "arvot": ["0", "1"],
+        "osallistuminenTunniste": "SOTE1_kaikkiosiot-OSALLISTUMINEN",
+        "vaatiiOsallistumisen": true
+    },
+    {
+        "tunniste": "SOTEKOE_VK_RYHMA1",
+        "kuvaus": "Sosiaali- ja terveysalan valintakoe (0-70)",
+        "funktiotyyppi": "LUKUARVOFUNKTIO",
+        "lahde": "SYOTETTAVA_ARVO",
+        "onPakollinen": true,
+        "min": "0",
+        "max": "70",
+        "arvot": null,
+        "osallistuminenTunniste": "SOTEKOE_VK_RYHMA1-OSALLISTUMINEN",
+        "vaatiiOsallistumisen": true
+    }
+]

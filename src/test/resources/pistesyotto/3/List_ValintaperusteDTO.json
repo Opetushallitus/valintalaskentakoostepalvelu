@@ -1,0 +1,38 @@
+[
+    {
+        "tunniste": "KOE_LIIKETALOUS_PAIVA2",
+        "kuvaus": "Liiketalouden valintakoe (monivalintatehtävät max 15 p)",
+        "funktiotyyppi": "LUKUARVOFUNKTIO",
+        "lahde": "SYOTETTAVA_ARVO",
+        "onPakollinen": true,
+        "min": "0",
+        "max": "15",
+        "arvot": null,
+        "osallistuminenTunniste": "KOE_LIIKETALOUS_PAIVA2-OSALLISTUMINEN",
+        "vaatiiOsallistumisen": true
+    },
+    {
+        "tunniste": "KOE_LIIKETALOUS_PAIVA3",
+        "kuvaus": "Liiketalouden valintakoe (matemaattis-looginen osio max 15 p)",
+        "funktiotyyppi": "LUKUARVOFUNKTIO",
+        "lahde": "SYOTETTAVA_ARVO",
+        "onPakollinen": true,
+        "min": "0",
+        "max": "15",
+        "arvot": null,
+        "osallistuminenTunniste": "KOE_LIIKETALOUS_PAIVA3-OSALLISTUMINEN",
+        "vaatiiOsallistumisen": true
+    },
+    {
+        "tunniste": "KOE_LIIKETALOUS_PAIVA1",
+        "kuvaus": "Liiketalouden valintakoe (kirjoitelma tai haastattelu max 10 p)",
+        "funktiotyyppi": "LUKUARVOFUNKTIO",
+        "lahde": "SYOTETTAVA_ARVO",
+        "onPakollinen": true,
+        "min": "0",
+        "max": "10",
+        "arvot": null,
+        "osallistuminenTunniste": "KOE_LIIKETALOUS_PAIVA1-OSALLISTUMINEN",
+        "vaatiiOsallistumisen": true
+    }
+]

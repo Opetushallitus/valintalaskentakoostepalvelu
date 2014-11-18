@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * 
@@ -28,8 +29,14 @@ public class PistesyottoRivi {
 	public Map<String, String> asAdditionalData() {
 		Map<String, String> data = Maps.newHashMap();
 		for (PistesyottoArvo arvo : arvot) {
-			data.put(arvo.getTunniste(), arvo.getArvo());
-			data.put(arvo.getOsallistuminenTunniste(), arvo.getTila());
+            if(!StringUtils.isBlank(arvo.getArvo()) && !StringUtils.isBlank(arvo.getTila())) {
+                if(!arvo.getTila().equals(PistesyottoExcel.VAKIO_EI_OSALLISTUNUT)) {
+			        data.put(arvo.getTunniste(), arvo.getArvo());
+                }
+			    data.put(arvo.getOsallistuminenTunniste(), arvo.getTila());
+            } else if(StringUtils.isBlank(arvo.getArvo()) && arvo.getTila().equals(PistesyottoExcel.VAKIO_EI_OSALLISTUNUT)) {
+                data.put(arvo.getOsallistuminenTunniste(), arvo.getTila());
+            }
 		}
 		return data;
 	}

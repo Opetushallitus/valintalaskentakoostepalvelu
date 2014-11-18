@@ -72,7 +72,7 @@ public class OppijaToAvainArvoDTOConverter {
 		// <br>
 		// KESKIPITKA_KIELI = max(EB, FB, GB, HB, PB, SB, TB, VB)
 		// <br>
-		// LYHYT_KIELI = max(EC, FC, GC, L1, PC, SC, TC, VC)
+		// LYHYT_KIELI = max(EC, FC, GC, L1, PC, SC, TC, VC, KC)
 		// <br>
 		// AIDINKIELI = max(O, A, I, W, Z, O5, A5)
 		List<AvainArvoDTO> aaa = Arrays.asList(
@@ -92,7 +92,7 @@ public class OppijaToAvainArvoDTOConverter {
 				//
 				convert("LYHYT_KIELI",
 						max(find(yoArvosanat, "EC", "FC", "GC", "L1", "PC",
-								"SC", "TC", "VC"))),
+								"SC", "TC", "VC", "KC"))),
 				//
 				convert("AIDINKIELI",
 						max(find(yoArvosanat, "O", "A", "I", "W", "Z", "O5",
