@@ -1,5 +1,329 @@
 [
     {
+        "oppijanumero": "1.2.246.562.24.43285388245",
+        "opiskelu": [],
+        "suoritukset": [
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.43285388245",
+                    "source": "1.2.246.562.10.43628088406",
+                    "vahvistettu": true,
+                    "komo": "1.2.246.562.5.2013061010184237348007",
+                    "myontaja": "1.2.246.562.10.43628088406",
+                    "tila": "VALMIS",
+                    "valmistuminen": "01.06.2012",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "8008771f-06ca-4229-9ec7-a176fd9fa3fc"
+                },
+                "arvosanat": [
+                    {
+                        "id": "6710e896-78dc-4e59-8c7f-89a306b000d0",
+                        "suoritus": "8008771f-06ca-4229-9ec7-a176fd9fa3fc",
+                        "arvio": {
+                            "arvosana": "M",
+                            "asteikko": "YO",
+                            "pisteet": 69
+                        },
+                        "aine": "AI",
+                        "lisatieto": "FI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2012",
+                        "source": "1.2.246.562.10.43628088406",
+                        "core": {
+                            "suoritus": "8008771f-06ca-4229-9ec7-a176fd9fa3fc",
+                            "arvio": {
+                                "arvosana": "M",
+                                "asteikko": "YO",
+                                "pisteet": 69
+                            },
+                            "aine": "AI",
+                            "lisatieto": "FI",
+                            "valinnainen": false,
+                            "myonnetty": "01.06.2012"
+                        }
+                    },
+                    {
+                        "id": "1a1a5473-c610-441c-9bc6-0ec93d7c486f",
+                        "suoritus": "8008771f-06ca-4229-9ec7-a176fd9fa3fc",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 226
+                        },
+                        "aine": "B",
+                        "lisatieto": "RU",
+                        "valinnainen": false,
+                        "myonnetty": "21.12.2011",
+                        "source": "1.2.246.562.10.43628088406",
+                        "core": {
+                            "suoritus": "8008771f-06ca-4229-9ec7-a176fd9fa3fc",
+                            "arvio": {
+                                "arvosana": "E",
+                                "asteikko": "YO",
+                                "pisteet": 226
+                            },
+                            "aine": "B",
+                            "lisatieto": "RU",
+                            "valinnainen": false,
+                            "myonnetty": "21.12.2011"
+                        }
+                    },
+                    {
+                        "id": "d6080161-a6ee-4f7a-9238-319ec70d8dfd",
+                        "suoritus": "8008771f-06ca-4229-9ec7-a176fd9fa3fc",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 256
+                        },
+                        "aine": "A",
+                        "lisatieto": "EN",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2012",
+                        "source": "1.2.246.562.10.43628088406",
+                        "core": {
+                            "suoritus": "8008771f-06ca-4229-9ec7-a176fd9fa3fc",
+                            "arvio": {
+                                "arvosana": "E",
+                                "asteikko": "YO",
+                                "pisteet": 256
+                            },
+                            "aine": "A",
+                            "lisatieto": "EN",
+                            "valinnainen": false,
+                            "myonnetty": "01.06.2012"
+                        }
+                    },
+                    {
+                        "id": "b246a204-94e7-44d8-94bc-7108d8e4aefd",
+                        "suoritus": "8008771f-06ca-4229-9ec7-a176fd9fa3fc",
+                        "arvio": {
+                            "arvosana": "C",
+                            "asteikko": "YO",
+                            "pisteet": 22
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "HI",
+                        "valinnainen": false,
+                        "myonnetty": "21.12.2011",
+                        "source": "1.2.246.562.10.43628088406",
+                        "core": {
+                            "suoritus": "8008771f-06ca-4229-9ec7-a176fd9fa3fc",
+                            "arvio": {
+                                "arvosana": "C",
+                                "asteikko": "YO",
+                                "pisteet": 22
+                            },
+                            "aine": "AINEREAALI",
+                            "lisatieto": "HI",
+                            "valinnainen": false,
+                            "myonnetty": "21.12.2011"
+                        }
+                    },
+                    {
+                        "id": "b1a8c612-284f-40d1-bc39-84b71c92c6df",
+                        "suoritus": "8008771f-06ca-4229-9ec7-a176fd9fa3fc",
+                        "arvio": {
+                            "arvosana": "C",
+                            "asteikko": "YO",
+                            "pisteet": 217
+                        },
+                        "aine": "C",
+                        "lisatieto": "ES",
+                        "valinnainen": true,
+                        "myonnetty": "01.06.2012",
+                        "source": "1.2.246.562.10.43628088406",
+                        "core": {
+                            "suoritus": "8008771f-06ca-4229-9ec7-a176fd9fa3fc",
+                            "arvio": {
+                                "arvosana": "C",
+                                "asteikko": "YO",
+                                "pisteet": 217
+                            },
+                            "aine": "C",
+                            "lisatieto": "ES",
+                            "valinnainen": true,
+                            "myonnetty": "01.06.2012"
+                        }
+                    }
+                ]
+            },
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.43285388245",
+                    "source": "1.2.246.562.10.43628088406",
+                    "vahvistettu": true,
+                    "komo": "1.2.246.562.5.2013061010184237348007",
+                    "myontaja": "1.2.246.562.10.43628088406",
+                    "tila": "VALMIS",
+                    "valmistuminen": "01.06.2012",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "0c4efe56-c162-4f30-9900-327712c534e5"
+                },
+                "arvosanat": [
+                    {
+                        "id": "d1b61406-c415-4233-84dd-1f4a337f52e7",
+                        "suoritus": "0c4efe56-c162-4f30-9900-327712c534e5",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 256
+                        },
+                        "aine": "A",
+                        "lisatieto": "EN",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2012",
+                        "source": "1.2.246.562.10.43628088406",
+                        "core": {
+                            "suoritus": "0c4efe56-c162-4f30-9900-327712c534e5",
+                            "arvio": {
+                                "arvosana": "E",
+                                "asteikko": "YO",
+                                "pisteet": 256
+                            },
+                            "aine": "A",
+                            "lisatieto": "EN",
+                            "valinnainen": false,
+                            "myonnetty": "01.06.2012"
+                        }
+                    },
+                    {
+                        "id": "f476f72e-c1cd-4f67-9384-ac55425c3e30",
+                        "suoritus": "0c4efe56-c162-4f30-9900-327712c534e5",
+                        "arvio": {
+                            "arvosana": "M",
+                            "asteikko": "YO",
+                            "pisteet": 69
+                        },
+                        "aine": "AI",
+                        "lisatieto": "FI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2012",
+                        "source": "1.2.246.562.10.43628088406",
+                        "core": {
+                            "suoritus": "0c4efe56-c162-4f30-9900-327712c534e5",
+                            "arvio": {
+                                "arvosana": "M",
+                                "asteikko": "YO",
+                                "pisteet": 69
+                            },
+                            "aine": "AI",
+                            "lisatieto": "FI",
+                            "valinnainen": false,
+                            "myonnetty": "01.06.2012"
+                        }
+                    },
+                    {
+                        "id": "fb9c5bed-8dfb-4860-b54b-5a3bbed70b0e",
+                        "suoritus": "0c4efe56-c162-4f30-9900-327712c534e5",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 226
+                        },
+                        "aine": "B",
+                        "lisatieto": "RU",
+                        "valinnainen": false,
+                        "myonnetty": "21.12.2011",
+                        "source": "1.2.246.562.10.43628088406",
+                        "core": {
+                            "suoritus": "0c4efe56-c162-4f30-9900-327712c534e5",
+                            "arvio": {
+                                "arvosana": "E",
+                                "asteikko": "YO",
+                                "pisteet": 226
+                            },
+                            "aine": "B",
+                            "lisatieto": "RU",
+                            "valinnainen": false,
+                            "myonnetty": "21.12.2011"
+                        }
+                    },
+                    {
+                        "id": "9a3de4ab-57cd-4eba-baac-245e6ad9e46e",
+                        "suoritus": "0c4efe56-c162-4f30-9900-327712c534e5",
+                        "arvio": {
+                            "arvosana": "C",
+                            "asteikko": "YO",
+                            "pisteet": 217
+                        },
+                        "aine": "C",
+                        "lisatieto": "ES",
+                        "valinnainen": true,
+                        "myonnetty": "01.06.2012",
+                        "source": "1.2.246.562.10.43628088406",
+                        "core": {
+                            "suoritus": "0c4efe56-c162-4f30-9900-327712c534e5",
+                            "arvio": {
+                                "arvosana": "C",
+                                "asteikko": "YO",
+                                "pisteet": 217
+                            },
+                            "aine": "C",
+                            "lisatieto": "ES",
+                            "valinnainen": true,
+                            "myonnetty": "01.06.2012"
+                        }
+                    },
+                    {
+                        "id": "84f37134-d936-4f84-9209-04b9e506f634",
+                        "suoritus": "0c4efe56-c162-4f30-9900-327712c534e5",
+                        "arvio": {
+                            "arvosana": "C",
+                            "asteikko": "YO",
+                            "pisteet": 22
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "HI",
+                        "valinnainen": false,
+                        "myonnetty": "21.12.2011",
+                        "source": "1.2.246.562.10.43628088406",
+                        "core": {
+                            "suoritus": "0c4efe56-c162-4f30-9900-327712c534e5",
+                            "arvio": {
+                                "arvosana": "C",
+                                "asteikko": "YO",
+                                "pisteet": 22
+                            },
+                            "aine": "AINEREAALI",
+                            "lisatieto": "HI",
+                            "valinnainen": false,
+                            "myonnetty": "21.12.2011"
+                        }
+                    }
+                ]
+            }
+        ],
+        "opiskeluoikeudet": [
+            {
+                "id": "637c1392-d60d-4223-bbc2-05c0f0eead72",
+                "aika": {
+                    "alku": "2014-08-18T00:00:00.000+03:00",
+                    "loppu": "2017-12-31T00:00:00.000+02:00"
+                },
+                "henkiloOid": "1.2.246.562.24.43285388245",
+                "komo": "koulutus_681102",
+                "myontaja": "1.2.246.562.10.727160772010",
+                "source": "1.2.246.562.10.2013112012294919827487",
+                "core": {
+                    "aika": {
+                        "alku": "2014-08-18T00:00:00.000+03:00",
+                        "loppu": "2017-12-31T00:00:00.000+02:00"
+                    },
+                    "henkiloOid": "1.2.246.562.24.43285388245",
+                    "komo": "koulutus_681102",
+                    "myontaja": "1.2.246.562.10.727160772010"
+                }
+            }
+        ],
+        "ensikertalainen": false,
+        "id": "1.2.246.562.24.43285388245",
+        "source": "1.2.246.562.10.00000000001",
+        "core": "1.2.246.562.24.43285388245"
+    },
+    {
         "oppijanumero": "1.2.246.562.24.61765738054",
         "opiskelu": [],
         "suoritukset": [
