@@ -72,6 +72,7 @@ public class Converter {
 		HakemusDTO hakemusTyyppi = new HakemusDTO();
 		hakemusTyyppi.setHakemusoid(hakemus.getOid());
 		hakemusTyyppi.setHakijaOid(hakemus.getPersonOid());
+        hakemusTyyppi.setHakuoid(hakemus.getApplicationSystemId());
 
 		if (hakemus.getAnswers() != null) {
 			try {
