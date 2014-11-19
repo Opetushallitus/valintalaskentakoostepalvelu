@@ -1,0 +1,26 @@
+[
+    {
+        "tunniste": "3eb033b8-c3a1-9505-cd48-3438231b0e77",
+        "kuvaus": "TJT valintakoe",
+        "funktiotyyppi": "LUKUARVOFUNKTIO",
+        "lahde": "SYOTETTAVA_ARVO",
+        "onPakollinen": false,
+        "min": "0",
+        "max": "60",
+        "arvot": null,
+        "osallistuminenTunniste": "3eb033b8-c3a1-9505-cd48-3438231b0e77-OSALLISTUMINEN",
+        "vaatiiOsallistumisen": false
+    },
+    {
+        "tunniste": "379eac5f-9a76-ce96-6ed5-48f8a5cb6473",
+        "kuvaus": "TJT IB,EB,RP yopisteet",
+        "funktiotyyppi": "LUKUARVOFUNKTIO",
+        "lahde": "SYOTETTAVA_ARVO",
+        "onPakollinen": false,
+        "min": "0",
+        "max": "61",
+        "arvot": null,
+        "osallistuminenTunniste": "379eac5f-9a76-ce96-6ed5-48f8a5cb6473-OSALLISTUMINEN",
+        "vaatiiOsallistumisen": false
+    }
+]
