@@ -54,17 +54,6 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
 				.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
 		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
 		bean.setProviders(providers);
-		List<Interceptor<? extends Message>> interceptors = Lists
-				.newArrayList();
-
-		// CasApplicationAsAUserInterceptor cas = new
-		// CasApplicationAsAUserInterceptor();
-		// cas.setWebCasUrl(webCasUrl);
-		// cas.setTargetService(targetService);
-		// cas.setAppClientUsername(appClientUsername);
-		// cas.setAppClientPassword(appClientPassword);
-		// interceptors.add(cas);
-		bean.setOutInterceptors(interceptors);
 		this.webClient = bean.createWebClient();
 		ClientConfiguration c = WebClient.getConfig(webClient);
 		/**
