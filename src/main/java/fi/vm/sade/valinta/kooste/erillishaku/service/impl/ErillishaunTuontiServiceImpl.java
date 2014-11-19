@@ -124,7 +124,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
 							hakijat.add(hakija);
 						}
 					};
-					ErillishakuExcel erillishakuExcel = new ErillishakuExcel(kuuntelija);
+					ErillishakuExcel erillishakuExcel = new ErillishakuExcel(erillishaku.getHakutyyppi(), kuuntelija);
 					try {
 						erillishakuExcel.getExcel().tuoXlsx(data);
 					} catch (Exception e) {

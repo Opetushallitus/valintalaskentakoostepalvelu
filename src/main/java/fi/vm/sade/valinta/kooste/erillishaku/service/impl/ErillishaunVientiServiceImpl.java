@@ -105,7 +105,7 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 									wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSyntymaaika(), "HYLATTY", "","");
 							return r;
 						}).collect(Collectors.toList());
-						return  new ErillishakuExcel(hakuNimi, hakukohdeNimi,
+						return  new ErillishakuExcel(erillishaku.getHakutyyppi(), hakuNimi, hakukohdeNimi,
 								tarjoajaNimi, rivit);
 					} else {
 						Collection<ErillishakuRivi> erillishakurivit = hakukohde
@@ -125,7 +125,7 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 									return e;
 								}).collect(Collectors.toList());
 
-						return new ErillishakuExcel(hakuNimi, hakukohdeNimi,
+						return new ErillishakuExcel(erillishaku.getHakutyyppi(), hakuNimi, hakukohdeNimi,
 								tarjoajaNimi, erillishakurivit);
 					}
 

@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
+import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.RiviBuilder;
@@ -31,13 +32,13 @@ public class ErillishakuExcel {
 	
 	private final Excel excel;
 	
-	public ErillishakuExcel(ErillishakuRiviKuuntelija kuuntelija) {
-		this(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.emptyList(),kuuntelija);
+	public ErillishakuExcel(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija) {
+		this(tyyppi, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.emptyList(),kuuntelija);
 	}
 	
-	public ErillishakuExcel(String hakuNimi, String hakukohdeNimi,
+	public ErillishakuExcel(Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
 			String tarjoajaNimi, Collection<ErillishakuRivi> erillishakurivit) {
-		this(hakuNimi,hakukohdeNimi,tarjoajaNimi,erillishakurivit,new ErillishakuRiviKuuntelija() {
+		this(tyyppi, hakuNimi,hakukohdeNimi,tarjoajaNimi,erillishakurivit,new ErillishakuRiviKuuntelija() {
 			
 			@Override
 			public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
@@ -45,7 +46,7 @@ public class ErillishakuExcel {
 			}
 		});
 	}
-	public ErillishakuExcel(String hakuNimi, String hakukohdeNimi,
+	public ErillishakuExcel(final Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
 			String tarjoajaNimi, Collection<ErillishakuRivi> erillishakurivit,
 			ErillishakuRiviKuuntelija kuuntelija) {
 		
@@ -81,7 +82,7 @@ public class ErillishakuExcel {
 									
 									a.add(ErillishakuDataRivi.hakemuksenTila(rivi
 											.getHakemuksenTila()));
-									a.add(ErillishakuDataRivi.vastaanottoTila(rivi
+									a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi,rivi
 											.getVastaanottoTila()));
 									a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi
 											.getIlmoittautumisTila()));
