@@ -11,6 +11,7 @@ import org.joda.time.format.DateTimeFormatter;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
+import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.DataRivi;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.SoluLukija;
@@ -24,7 +25,7 @@ import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 public class ErillishakuDataRivi extends DataRivi {
 	
 	private static final DateTimeFormatter SYNTYMAAIKA = DateTimeFormat.forPattern("dd.MM.yyyy");
-	private ErillishakuRiviKuuntelija kuuntelija;
+	private final ErillishakuRiviKuuntelija kuuntelija;
 	public ErillishakuDataRivi(ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s) {
 		super(s);
 		this.kuuntelija = kuuntelija;
@@ -50,15 +51,39 @@ public class ErillishakuDataRivi extends DataRivi {
 		return true;
 	}
 	private static final Collection<String> HAKEMUKSENTILA_ARVOT =Arrays.asList(HakemuksenTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList()); 
-	private static final Collection<String> VASTAANOTTOTILA_ARVOT =Arrays.asList(ValintatuloksenTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList()); 
+	private static final Collection<String> VASTAANOTTOTILA_ARVOT =Arrays.asList(ValintatuloksenTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList());
+	private static final Collection<String> VASTAANOTTOTILA_ARVOT_KK =
+			Arrays.asList(
+					// KORKEAKOULUJEN VALINTATULOKSEN TILAT
+					ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA,
+					ValintatuloksenTila.PERUNUT,
+					ValintatuloksenTila.PERUUTETTU,
+					ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI,
+					ValintatuloksenTila.KESKEN
+					//
+					).stream().map(t -> t.toString()).collect(Collectors.toList());
+	private static final Collection<String> VASTAANOTTOTILA_ARVOT_TOINEN_ASTE =
+			Arrays.asList(
+					// TOISEN ASTEEN VALINTATULOKSEN TILAT
+					ValintatuloksenTila.VASTAANOTTANUT,
+					ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA,
+					ValintatuloksenTila.PERUNUT,
+					ValintatuloksenTila.KESKEN
+					//
+					).stream().map(t -> t.toString()).collect(Collectors.toList());
 	private static final Collection<String> ILMOITTAUTUMISTILA_ARVOT =Arrays.asList(IlmoittautumisTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList()); 
 	public static MonivalintaArvo hakemuksenTila(String arvo) {
 		
 		return new MonivalintaArvo(arvo, HAKEMUKSENTILA_ARVOT);
 	}
-	public static MonivalintaArvo vastaanottoTila(String arvo) {
-		
+	public static MonivalintaArvo vastaanottoTila(Hakutyyppi hakutyyppi, String arvo) {
+		if(Hakutyyppi.TOISEN_ASTEEN_OPPILAITOS.equals(hakutyyppi)) {
+			return new MonivalintaArvo(arvo, VASTAANOTTOTILA_ARVOT_TOINEN_ASTE);
+		} else if(Hakutyyppi.KORKEAKOULU.equals(hakutyyppi)) {
+			return new MonivalintaArvo(arvo, VASTAANOTTOTILA_ARVOT_KK);
+		} else{
 		return new MonivalintaArvo(arvo, VASTAANOTTOTILA_ARVOT);
+		}
 	}
 	public static MonivalintaArvo ilmoittautumisTila(String arvo) {
 		

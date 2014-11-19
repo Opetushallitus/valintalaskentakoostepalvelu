@@ -17,6 +17,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.Lists;
 
+import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 
@@ -31,7 +32,7 @@ public class ErillishakuExcelTest {
 	@Test
 	public void testaaTuontiKustomistaTiedostosta() throws ExcelValidointiPoikkeus, IOException {
 		final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
-		ErillishakuExcel eExcel = new ErillishakuExcel("Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi",Collections.emptyList(), new ErillishakuRiviKuuntelija() {
+		ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi",Collections.emptyList(), new ErillishakuRiviKuuntelija() {
 					
 					@Override
 					public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
@@ -54,7 +55,7 @@ public class ErillishakuExcelTest {
 		ErillishakuRivi rivi2= new ErillishakuRivi("sukunimi","etunimi2","hetu",syntymaAika, "HYLATTY", "", "");
 		rivit.add(rivi2);
 		final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
-		ErillishakuExcel eExcel = new ErillishakuExcel("Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit
+		ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit
 				, new ErillishakuRiviKuuntelija() {
 					
 					@Override
