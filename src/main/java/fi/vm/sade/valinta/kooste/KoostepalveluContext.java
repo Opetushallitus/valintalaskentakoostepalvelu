@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste;
 
+import fi.vm.sade.authentication.cas.CasFriendlyCache;
+import fi.vm.sade.authentication.cas.CasFriendlyCxfInterceptor;
 import fi.vm.sade.valinta.kooste.converter.HakemusToHakemusDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
@@ -14,11 +16,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 /**
  * @author Jussi Jartamo.
  */
@@ -31,6 +35,17 @@ public class KoostepalveluContext {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(KoostepalveluContext.class);
 
+	@Bean(name="sessionCache")
+	public CasFriendlyCache getCasFriendlyCache() {
+		return new CasFriendlyCache();
+	}
+	    
+	@Bean(name="casTicketInterceptor")
+	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public CasFriendlyCxfInterceptor<?> getCasFriendlyCxfInterceptor(CasFriendlyCache casCache) {
+		return new CasFriendlyCxfInterceptor<>();
+	}
+	
 	/**
 	 * Camel only Context (helps unit testing).
 	 */

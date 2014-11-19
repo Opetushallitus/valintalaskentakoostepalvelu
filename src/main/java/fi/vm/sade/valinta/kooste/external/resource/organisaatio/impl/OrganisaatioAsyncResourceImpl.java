@@ -18,10 +18,12 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+import fi.vm.sade.valinta.kooste.external.resource.AsennaCasFilter;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 
@@ -49,7 +51,8 @@ public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource 
 			@Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
 			//
 			@Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
-			@Value("${valintalaskentakoostepalvelu.organisaatioService.rest.url}") String address
+			@Value("${valintalaskentakoostepalvelu.organisaatioService.rest.url}") String address,
+			ApplicationContext context
 	//
 	) {
 		this.address = address;
@@ -61,16 +64,12 @@ public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource 
 				.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
 		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
 		bean.setProviders(providers);
-		List<Interceptor<? extends Message>> interceptors = Lists
-				.newArrayList();
-
-		CasApplicationAsAUserInterceptor cas = new CasApplicationAsAUserInterceptor();
-		cas.setWebCasUrl(webCasUrl);
-		cas.setTargetService(targetService);
-		cas.setAppClientUsername(appClientUsername);
-		cas.setAppClientPassword(appClientPassword);
-		interceptors.add(cas);
-		bean.setOutInterceptors(interceptors);
+		AsennaCasFilter.asennaCasFilter(
+				webCasUrl,
+				targetService,
+				appClientUsername,
+				appClientPassword,
+				bean,context);
 		this.webClient = bean.createWebClient();
 		ClientConfiguration c = WebClient.getConfig(webClient);
 		/**

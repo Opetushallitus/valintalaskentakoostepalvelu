@@ -24,6 +24,7 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -31,6 +32,7 @@ import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.valinta.kooste.external.resource.AsennaCasFilter;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
@@ -60,7 +62,8 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 			@Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String appClientUsername,
 			//
 			@Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword,
-			@Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String address
+			@Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String address,
+			ApplicationContext context
 	//
 	) {
 		this.address = address;
@@ -72,16 +75,15 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 				.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
 		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
 		bean.setProviders(providers);
-		List<Interceptor<? extends Message>> interceptors = Lists
-				.newArrayList();
-
-		CasApplicationAsAUserInterceptor cas = new CasApplicationAsAUserInterceptor();
-		cas.setWebCasUrl(webCasUrl);
-		cas.setTargetService(targetService);
-		cas.setAppClientUsername(appClientUsername);
-		cas.setAppClientPassword(appClientPassword);
-		interceptors.add(cas);
-		bean.setOutInterceptors(interceptors);
+		
+		AsennaCasFilter.asennaCasFilter(
+				webCasUrl,
+				targetService,
+				appClientUsername,
+				appClientPassword,
+				bean,
+				context);
+		
 		this.webClient = bean.createWebClient();
 		ClientConfiguration c = WebClient.getConfig(webClient);
 		/**
