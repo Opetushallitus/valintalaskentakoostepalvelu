@@ -18,6 +18,7 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
@@ -50,7 +51,8 @@ public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource 
 			@Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
 			//
 			@Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
-			@Value("${valintalaskentakoostepalvelu.organisaatioService.rest.url}") String address
+			@Value("${valintalaskentakoostepalvelu.organisaatioService.rest.url}") String address,
+			ApplicationContext context
 	//
 	) {
 		this.address = address;
@@ -67,7 +69,7 @@ public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource 
 				targetService,
 				appClientUsername,
 				appClientPassword,
-				bean);
+				bean,context);
 		this.webClient = bean.createWebClient();
 		ClientConfiguration c = WebClient.getConfig(webClient);
 		/**

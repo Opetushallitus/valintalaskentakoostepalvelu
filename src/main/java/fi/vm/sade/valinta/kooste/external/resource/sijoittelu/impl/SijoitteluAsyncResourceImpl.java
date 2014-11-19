@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -74,7 +75,8 @@ public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
 			@Value("${valintalaskentakoostepalvelu.app.username.to.sijoittelu}") String appClientUsername,
 			// ${valintalaskentakoostepalvelu.app.password.to.suoritusrekisteri}
 			@Value("${valintalaskentakoostepalvelu.app.password.to.sijoittelu}") String appClientPassword,
-			@Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String address
+			@Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String address,
+			ApplicationContext context
 	//
 	) {
 		this.address = address;
@@ -91,7 +93,7 @@ public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
 				targetService,
 				appClientUsername,
 				appClientPassword,
-				bean);
+				bean,context);
 		this.webClient = bean.createWebClient();
 		ClientConfiguration c = WebClient.getConfig(webClient);
 		/**

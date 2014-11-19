@@ -24,6 +24,7 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.cxf.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -61,7 +62,8 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 			@Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String appClientUsername,
 			//
 			@Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword,
-			@Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String address
+			@Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String address,
+			ApplicationContext context
 	//
 	) {
 		this.address = address;
@@ -79,7 +81,8 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 				targetService,
 				appClientUsername,
 				appClientPassword,
-				bean);
+				bean,
+				context);
 		
 		this.webClient = bean.createWebClient();
 		ClientConfiguration c = WebClient.getConfig(webClient);
