@@ -99,7 +99,7 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 						// ei viela tuloksia, joten tehdaan tuonti haetuista
 						// hakemuksista
 						LOG.warn("Hakemuksia ei ole viela tuotu ensimmaistakaan kertaa talle hakukohteelle! Generoidaan hakemuksista excel...");
-						Collection<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus -> {
+						List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus -> {
 							HakemusWrapper wrapper = new HakemusWrapper(hakemus);
 							ErillishakuRivi r = new ErillishakuRivi(wrapper.getSukunimi(), 
 									wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSyntymaaika(), "HYLATTY", "","");
@@ -108,7 +108,7 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 						return  new ErillishakuExcel(erillishaku.getHakutyyppi(), hakuNimi, hakukohdeNimi,
 								tarjoajaNimi, rivit);
 					} else {
-						Collection<ErillishakuRivi> erillishakurivit = hakukohde
+						List<ErillishakuRivi> erillishakurivit = hakukohde
 								.getValintatapajonot().stream()
 								.flatMap(v -> v.getHakemukset().stream())
 								//

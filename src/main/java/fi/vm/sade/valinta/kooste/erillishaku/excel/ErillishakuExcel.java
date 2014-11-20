@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ public class ErillishakuExcel {
 	}
 	
 	public ErillishakuExcel(Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
-			String tarjoajaNimi, Collection<ErillishakuRivi> erillishakurivit) {
+			String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit) {
 		this(tyyppi, hakuNimi,hakukohdeNimi,tarjoajaNimi,erillishakurivit,new ErillishakuRiviKuuntelija() {
 			
 			@Override
@@ -47,9 +48,9 @@ public class ErillishakuExcel {
 		});
 	}
 	public ErillishakuExcel(final Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
-			String tarjoajaNimi, Collection<ErillishakuRivi> erillishakurivit,
+			String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit,
 			ErillishakuRiviKuuntelija kuuntelija) {
-		
+		erillishakurivit = Lists.newArrayList(erillishakurivit);
 		List<Rivi> rivit = Lists.newArrayList();
 		Collection<Collection<Arvo>> esittelyt = Lists.newArrayList();
 		esittelyt.add(Arrays.asList(new TekstiArvo(hakuNimi, true, false, 4)));
@@ -63,6 +64,19 @@ public class ErillishakuExcel {
 				"Syntymäaika"), new TekstiArvo("Hakemuksentila"),
 				new TekstiArvo("Vastaanottotila"), new TekstiArvo(
 						"Ilmoittautumistila")));
+		Collections.sort(erillishakurivit, new Comparator<ErillishakuRivi>() {
+			@Override
+			public int compare(ErillishakuRivi h1, ErillishakuRivi h2) {
+				int i = h1.getSukunimi().toUpperCase()
+						.compareTo(h2.getSukunimi().toUpperCase());
+				if (i == 0) {
+					return h1.getEtunimi().toUpperCase()
+							.compareTo(h2.getEtunimi().toUpperCase());
+				} else {
+					return i;
+				}
+			}
+		});
 		ErillishakuDataRivi dataRivit = new ErillishakuDataRivi(
 				kuuntelija,
 				Stream.concat(

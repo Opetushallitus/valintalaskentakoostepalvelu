@@ -105,7 +105,8 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
 							hakija.setHakijaOid(hakemus.getPersonOid());
 							hakija.setHakukohdeOid(erillishaku.getHakukohdeOid());
 							hakija.setHakuOid(erillishaku.getHakuOid());
-							
+							hakija.setSukunimi(wrapper.getSukunimi());
+							hakija.setEtunimi(wrapper.getEtunimi());
 							try {
 								hakija.setIlmoittautumisTila(fi.vm.sade.sijoittelu.domain.IlmoittautumisTila.valueOf(rivi.getIlmoittautumisTila()));
 								}catch(Exception e) {
