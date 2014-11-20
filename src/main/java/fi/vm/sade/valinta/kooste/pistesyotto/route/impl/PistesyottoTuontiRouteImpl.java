@@ -180,54 +180,42 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 								.getRivit()) {
 							ApplicationAdditionalDataDTO additionalData = pistetiedotMapping
 									.get(rivi.getOid());
-							Map<String, String> originalPistetiedot = additionalData
-									.getAdditionalData();
-
 							Map<String, String> newPistetiedot = rivi
 									.asAdditionalData();
-							if (originalPistetiedot.equals(newPistetiedot)) {
-								LOG.debug("Ei muutoksia riville({},{})",
-										rivi.getOid(), rivi.getNimi());
+
+							if (rivi.isValidi()) {
+								LOG.debug("Rivi on muuttunut ja eheä. Tehdään päivitys hakupalveluun");
+								additionalData
+										.setAdditionalData(newPistetiedot);
+								uudetPistetiedot.add(additionalData);
 							} else {
-								if (rivi.isValidi()) {
-									LOG.debug("Rivi on muuttunut ja eheä. Tehdään päivitys hakupalveluun");
-									Map<String, String> uudetTiedot = Maps
-											.newHashMap(originalPistetiedot);
-									uudetTiedot.putAll(newPistetiedot);
-									additionalData
-											.setAdditionalData(uudetTiedot);
-									uudetPistetiedot.add(additionalData);
-								} else {
-									LOG.warn("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
+								LOG.warn("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
 
-									for (PistesyottoArvo arvo : rivi.getArvot()) {
-										if (!arvo.isValidi()) {
-											String virheIlmoitus = new StringBuffer()
-													.append("Henkilöllä ")
-													.append(rivi.getNimi())
-													//
-													.append(" (")
-													.append(rivi.getOid())
-													.append(")")
-													//
-													.append(" oli virheellinen arvo '")
-													.append(arvo.getArvo())
-													.append("'")
-													.append(" kohdassa ")
-													.append(arvo.getTunniste())
-													.toString();
-											dokumenttiprosessi(exchange)
-													.getPoikkeukset()
-													.add(new Poikkeus(
-															"Pistesyötön tuonti",
-															"", virheIlmoitus));
-											throw new RuntimeException(
-													virheIlmoitus);
-										}
+								for (PistesyottoArvo arvo : rivi.getArvot()) {
+									if (!arvo.isValidi()) {
+										String virheIlmoitus = new StringBuffer()
+												.append("Henkilöllä ")
+												.append(rivi.getNimi())
+												//
+												.append(" (")
+												.append(rivi.getOid())
+												.append(")")
+												//
+												.append(" oli virheellinen arvo '")
+												.append(arvo.getArvo())
+												.append("'")
+												.append(" kohdassa ")
+												.append(arvo.getTunniste())
+												.toString();
+										dokumenttiprosessi(exchange)
+												.getPoikkeukset()
+												.add(new Poikkeus(
+														"Pistesyötön tuonti",
+														"", virheIlmoitus));
+										throw new RuntimeException(
+												virheIlmoitus);
 									}
-
 								}
-
 							}
 						}
 						applicationResource.putApplicationAdditionalData(

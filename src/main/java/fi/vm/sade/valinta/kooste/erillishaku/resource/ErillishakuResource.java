@@ -22,6 +22,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
+import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.ErillishaunTuontiService;
 import fi.vm.sade.valinta.kooste.erillishaku.service.ErillishaunVientiService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -53,14 +54,16 @@ public class ErillishakuResource {
 	@Path("/vienti")
 	@Consumes("application/json")
 	@ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen vienti taulukkolaskentaan", response = ProsessiId.class)
-	public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid,
+	public ProsessiId vienti(
+			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
+			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid) {
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 		//
-		vientiService.vie(prosessi, new ErillishakuDTO(hakuOid, hakukohdeOid,
+		vientiService.vie(prosessi, new ErillishakuDTO(tyyppi,hakuOid, hakukohdeOid,
 				tarjoajaOid, valintatapajonoOid));
 		return prosessi.toProsessiId();
 	}
@@ -70,7 +73,9 @@ public class ErillishakuResource {
 	@Path("/tuonti")
 	@Consumes("application/octet-stream")
 	@ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen tuonti taulukkolaskennalla", response = ProsessiId.class)
-	public ProsessiId tuonti(@QueryParam("hakuOid") String hakuOid,
+	public ProsessiId tuonti(
+			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
+			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
@@ -80,7 +85,7 @@ public class ErillishakuResource {
 		IOUtils.closeQuietly(file);
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-		tuontiService.tuo(prosessi, new ErillishakuDTO(hakuOid, hakukohdeOid,
+		tuontiService.tuo(prosessi, new ErillishakuDTO(tyyppi,hakuOid, hakukohdeOid,
 				tarjoajaOid, valintatapajonoOid),
 				new ByteArrayInputStream(b.toByteArray()));
 		//
