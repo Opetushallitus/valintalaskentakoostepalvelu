@@ -97,7 +97,7 @@ public class ValintalaskentaKerrallaResource {
 			@PathParam("whitelist") boolean whitelist, List<String> maski,
 			@Suspended AsyncResponse asyncResponse) {
 		try {
-			asyncResponse.setTimeout(2L, TimeUnit.SECONDS);
+			asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
 			asyncResponse.setTimeoutHandler(new TimeoutHandler() {
 				public void handleTimeout(AsyncResponse asyncResponse) {
 					LOG.error(
@@ -205,7 +205,7 @@ public class ValintalaskentaKerrallaResource {
 	@Produces(APPLICATION_JSON)
 	public void uudelleenajoLaskennalle(@PathParam("uuid") String uuid,
 			@Suspended AsyncResponse asyncResponse) {
-		asyncResponse.setTimeout(2L, TimeUnit.SECONDS);
+		asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
 		asyncResponse.setTimeoutHandler(new TimeoutHandler() {
 			public void handleTimeout(AsyncResponse asyncResponse) {
 				LOG.error("Uudelleen ajo laskennalle({}) timeouttasi!", uuid);
@@ -446,7 +446,7 @@ public class ValintalaskentaKerrallaResource {
 	@ApiOperation(value = "Valintalaskennan tila", response = LaskentaAloitus.class)
 	public void statusXls(final @PathParam("uuid") String uuid,
 			@Suspended AsyncResponse asyncResponse) {
-		asyncResponse.setTimeout(2L, TimeUnit.SECONDS);
+		asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
 		asyncResponse.setTimeoutHandler(new TimeoutHandler() {
 			public void handleTimeout(AsyncResponse asyncResponse) {
 				Map<String, Object[][]> sheetAndGrid = Maps.newHashMap();
