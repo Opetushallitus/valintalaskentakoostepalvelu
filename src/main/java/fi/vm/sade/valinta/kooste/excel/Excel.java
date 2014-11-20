@@ -128,7 +128,7 @@ public class Excel {
 		editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204,
 				153)));
 		editableStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-		editableStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+		editableStyle.setAlignment(CellStyle.ALIGN_LEFT);
 		editableStyle.setLocked(false);
 		// lockedStyle.setFillBackgroundColor(new XSSFColor(Color.GREEN));
 		//sheet.enableLocking();
