@@ -100,10 +100,26 @@ public class ValintalaskentaKerrallaResource {
 			asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
 			asyncResponse.setTimeoutHandler(new TimeoutHandler() {
 				public void handleTimeout(AsyncResponse asyncResponse) {
+					String hakukohdeOids = null;
+					if(maski != null && !maski.isEmpty()) {
+						try {
+						Object[] hakukohdeOidArray = maski.toArray();
+						StringBuilder sb = new StringBuilder();
+						sb.append(Arrays.toString(Arrays.copyOfRange(hakukohdeOidArray, 0, Math.min(hakukohdeOidArray.length, 10))));
+						if(hakukohdeOidArray.length > 10) {
+							sb.append(" ensimmaiset 10 hakukohdetta maskissa jossa on yhteensa hakukohteita ").append(hakukohdeOidArray.length);
+						} else {
+							sb.append(" maskin hakukohteet");
+						}
+						hakukohdeOids = sb.toString();
+						}catch(Exception e) {
+							hakukohdeOids = e.getMessage();
+						}
+					}
 					LOG.error(
-							"Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}",
+							"Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}\r\n{}",
 							hakuOid, tyyppi, whitelist, valinnanvaihe,
-							valintakoelaskenta);
+							valintakoelaskenta, hakukohdeOids, hakukohdeOids);
 					asyncResponse.resume(Response.serverError()
 							.entity("Uudelleen ajo laskennalle aikakatkaistu!")
 							.build());
