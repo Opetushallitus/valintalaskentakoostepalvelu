@@ -27,11 +27,15 @@ public class AsennaCasFilter {
 			String appClientPassword,
 			JAXRSClientFactoryBean bean,
 			ApplicationContext context) {
-		CasFriendlyCxfInterceptor<?> cas = context.getBean(CasFriendlyCxfInterceptor.class);
-		
+		List<Interceptor<? extends Message>> interceptors = Lists
+				.newArrayList();
+
+		CasApplicationAsAUserInterceptor cas = new CasApplicationAsAUserInterceptor();
+		cas.setWebCasUrl(webCasUrl);
+		cas.setTargetService(targetService);
 		cas.setAppClientUsername(appClientUsername);
 		cas.setAppClientPassword(appClientPassword);
-		bean.setOutInterceptors(Arrays.asList(cas));
-		bean.setInInterceptors(Arrays.asList(cas));
+		interceptors.add(cas);
+		bean.setOutInterceptors(interceptors);
 	}
 }
