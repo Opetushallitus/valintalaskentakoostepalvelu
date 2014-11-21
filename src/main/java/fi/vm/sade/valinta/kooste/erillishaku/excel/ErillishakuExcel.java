@@ -67,13 +67,21 @@ public class ErillishakuExcel {
 		Collections.sort(erillishakurivit, new Comparator<ErillishakuRivi>() {
 			@Override
 			public int compare(ErillishakuRivi h1, ErillishakuRivi h2) {
-				int i = h1.getSukunimi().toUpperCase()
-						.compareTo(h2.getSukunimi().toUpperCase());
-				if (i == 0) {
-					return h1.getEtunimi().toUpperCase()
-							.compareTo(h2.getEtunimi().toUpperCase());
+				if (h1 == null || h2 == null || h1.getSukunimi() == null
+						|| h2.getSukunimi() == null) {
+					return 0;
 				} else {
-					return i;
+					int i = h1.getSukunimi().toUpperCase()
+							.compareTo(h2.getSukunimi().toUpperCase());
+					if (i == 0) {
+						if(h1.getEtunimi() == null || h2.getEtunimi() == null) {
+							return 0;
+						}
+						return h1.getEtunimi().toUpperCase()
+								.compareTo(h2.getEtunimi().toUpperCase());
+					} else {
+						return i;
+					}
 				}
 			}
 		});
