@@ -427,11 +427,17 @@ public class ValintalaskentaKerrallaResource {
 	//
 	//
 	//
-
+	@GET
+	@Path("/status")
+	@Produces(APPLICATION_JSON)
+	@ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
+	public List<Laskenta> status() {
+		return valintalaskentaValvomo.ajossaOlevatLaskennat();
+	}
 	@GET
 	@Path("/status/{uuid}")
 	@Produces(APPLICATION_JSON)
-	@ApiOperation(value = "Valintalaskennan tila", response = LaskentaAloitus.class)
+	@ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
 	public Laskenta status(@PathParam("uuid") String uuid) {
 		try {
 			return valintalaskentaValvomo.haeLaskenta(uuid);
