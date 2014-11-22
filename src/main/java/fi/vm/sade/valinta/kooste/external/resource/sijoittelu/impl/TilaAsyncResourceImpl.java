@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -12,6 +13,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.ClientConfiguration;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
@@ -106,7 +108,7 @@ public class TilaAsyncResourceImpl implements TilaAsyncResource{
 				//
 				//.accept(MediaType.APPLICATION_JSON_TYPE)
 				//
-				.query("valintatapajononNimi", valintatapajononNimi)
+				.query("valintatapajononNimi", Optional.ofNullable(valintatapajononNimi).orElse(StringUtils.EMPTY))
 				//
 				.async().post(Entity.entity(erillishaunHakijat,
 						MediaType.APPLICATION_JSON_TYPE));
