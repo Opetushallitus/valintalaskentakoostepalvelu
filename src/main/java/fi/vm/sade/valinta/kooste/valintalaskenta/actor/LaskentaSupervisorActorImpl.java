@@ -1,22 +1,18 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
-
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.typesafe.config.ConfigFactory;
-
-import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.TypedActor;
-import akka.actor.TypedActorExtension;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 
 /**
@@ -28,49 +24,60 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 public class LaskentaSupervisorActorImpl implements LaskentaSupervisor {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(LaskentaSupervisorActorImpl.class);
-	private final Set<LaskentaActorWrapper> ajossaOlevatLaskennat;
-
-	public LaskentaSupervisorActorImpl() {
-		this.ajossaOlevatLaskennat = Sets.newHashSet();
+	private final Map<String,LaskentaActorWrapper> ajossaOlevatLaskennat;
+	private final ActorSystem actorSystem;
+	public LaskentaSupervisorActorImpl(ActorSystem actorSystem) {
+		this.ajossaOlevatLaskennat = Maps.newConcurrentMap();
+		this.actorSystem = actorSystem;
 	}
 
 	@Override
 	public void valmis(String uuid) {
-		ajossaOlevatLaskennat.removeIf(l -> {
-			if (uuid.equals(l.getUuid())) {
-				try {
-					TypedActor.get(TypedActor.context().system()).poisonPill(
-							l.laskentaActor());
-					LOG.error(
-							"PoisonPill lahetetty onnistuneesti Actorille {}",
-							uuid);
-				} catch (Exception e) {
-					LOG.error(
-							"PoisonPill lahetys epaonnistui Actorille {}: {}",
-							uuid, e.getMessage());
-				}
-				return true;
-			}
-			return false;
-		});
+		lopeta(uuid, ajossaOlevatLaskennat.remove(uuid));
 	}
-
+	
+	private void lopeta(String uuid, LaskentaActorWrapper l) {
+		if(l != null) {
+			try {
+				TypedActor.get(actorSystem).poisonPill(
+						l.laskentaActor());
+				LOG.error(
+						"PoisonPill lahetetty onnistuneesti Actorille {}",
+						uuid);
+			} catch (Exception e) {
+				LOG.error(
+						"PoisonPill lahetys epaonnistui Actorille {}: {}",
+						uuid, e.getMessage());
+			}
+		} else {
+			LOG.error("Yritettiin valmistaa laskentaa {} mutta laskenta ei ollut enaa ajossa!", uuid);
+		}
+	}
+	
 	public void luoJaKaynnistaLaskenta(String uuid, String hakuOid,
 			boolean osittainen,
 			Function<LaskentaSupervisor, LaskentaActor> laskentaProducer) {
-		LaskentaActor laskentaActor = laskentaProducer.apply(TypedActor.self());
-		laskentaActor.aloita();
-		ajossaOlevatLaskennat.add(new LaskentaActorWrapper(uuid, hakuOid,
-				osittainen, laskentaActor));
+		LaskentaActor laskentaActor = laskentaProducer.apply(this);
+		try {
+			laskentaActor.aloita();
+		} catch(Exception e) {
+			LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid);
+		}
+		ajossaOlevatLaskennat.merge(uuid, new LaskentaActorWrapper(uuid, hakuOid,
+				osittainen, laskentaActor), (oldValue, value) -> {
+					LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} oli jo kaynnissa! Lopetataan vanha laskenta!\r\n###", uuid, hakuOid);
+					lopeta(uuid, oldValue);
+					return value;
+				});
+		
 	}
 
 	public List<Laskenta> ajossaOlevatLaskennat() {
-		return Lists.newArrayList(ajossaOlevatLaskennat);
+		return Lists.newArrayList(ajossaOlevatLaskennat.values());
 	}
 
 	public Laskenta haeLaskenta(String uuid) {
-		return ajossaOlevatLaskennat.stream()
-				.filter(l -> uuid.equals(l.getUuid())).findAny().orElse(null);
+		return ajossaOlevatLaskennat.get(uuid);
 	}
 
 }
