@@ -133,7 +133,9 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
 						throw new RuntimeException(e);
 					}
 					if(!hakijat.isEmpty()) {
-						tilaAsyncResource.tuoErillishaunTilat(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid(), hakijat);
+						tilaAsyncResource.tuoErillishaunTilat(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid()
+								,erillishaku.getValintatapajononNimi(),
+								 hakijat);
 					} else {
 						LOG.error("Taulukkolaskentatiedostosta ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
 						throw new RuntimeException("Taulukkolaskentatiedostosta ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");

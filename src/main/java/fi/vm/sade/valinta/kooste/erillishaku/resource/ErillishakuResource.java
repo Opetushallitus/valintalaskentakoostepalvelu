@@ -59,12 +59,13 @@ public class ErillishakuResource {
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
-			@QueryParam("valintatapajonoOid") String valintatapajonoOid) {
+			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
+			@QueryParam("valintatapajononNimi") String valintatapajononNimi) {
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 		//
 		vientiService.vie(prosessi, new ErillishakuDTO(tyyppi,hakuOid, hakukohdeOid,
-				tarjoajaOid, valintatapajonoOid));
+				tarjoajaOid, valintatapajonoOid, valintatapajononNimi));
 		return prosessi.toProsessiId();
 	}
 
@@ -79,6 +80,7 @@ public class ErillishakuResource {
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
+			@QueryParam("valintatapajononNimi") String valintatapajononNimi,
 			InputStream file) throws IOException {
 		ByteArrayOutputStream b;
 		IOUtils.copy(file, b = new ByteArrayOutputStream());
@@ -86,7 +88,7 @@ public class ErillishakuResource {
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 		tuontiService.tuo(prosessi, new ErillishakuDTO(tyyppi,hakuOid, hakukohdeOid,
-				tarjoajaOid, valintatapajonoOid),
+				tarjoajaOid, valintatapajonoOid, valintatapajononNimi),
 				new ByteArrayInputStream(b.toByteArray()));
 		//
 		return prosessi.toProsessiId();
