@@ -36,6 +36,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 
 import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
+import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.JsonViews;
 import fi.vm.sade.sijoittelu.tulos.dto.SijoitteluDTO;
@@ -144,6 +145,21 @@ public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
 				});
 	}
 
+	public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
+		StringBuilder urlBuilder = new StringBuilder().append("/tila/hakukohde/")
+				//.append(hakuOid).append("/sijoitteluajo/")
+				.append(hakukohdeOid).append("/").append(valintatapajonoOid);
+		String url = urlBuilder.toString();
+		return WebClient.fromClient(webClient)
+		//
+				.path(url)
+				//
+				.accept(MediaType.WILDCARD)
+				//
+				.async().get(new GenericType<List<Valintatulos>>() {
+				});
+	}
+	
 	//@Path("sijoittelu")
 //	@Api(value = "/sijoittelu", description = "Resurssi sijoittelun tuloksien hakemiseen")
 	//public interface SijoitteluResource {

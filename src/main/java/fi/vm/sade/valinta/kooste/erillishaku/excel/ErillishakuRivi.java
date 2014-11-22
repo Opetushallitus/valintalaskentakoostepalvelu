@@ -16,6 +16,16 @@ public class ErillishakuRivi {
 	private final String vastaanottoTila;
 	private final String ilmoittautumisTila;
 	
+	public ErillishakuRivi() {
+		this.etunimi =  null;
+		this.sukunimi = null;
+		this.henkilotunnus = null;
+		this.syntymaAika = null;
+		this.hakemuksenTila = null;
+		this.vastaanottoTila = null;
+		this.ilmoittautumisTila = null;
+	}
+	
 	public ErillishakuRivi(String sukunimi,String etunimi,  String henkilotunnus, String syntymaAika, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila) {
 		this.etunimi = etunimi;
 		this.sukunimi = sukunimi;

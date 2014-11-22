@@ -54,6 +54,7 @@ public class ErillishakuExcelTest {
 		rivit.add(rivi);
 		ErillishakuRivi rivi2= new ErillishakuRivi("sukunimi","etunimi2","hetu",syntymaAika, "HYLATTY", "", "");
 		rivit.add(rivi2);
+		rivit.add(new ErillishakuRivi());
 		final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
 		ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit
 				, new ErillishakuRiviKuuntelija() {

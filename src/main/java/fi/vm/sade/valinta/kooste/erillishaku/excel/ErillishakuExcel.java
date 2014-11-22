@@ -6,10 +6,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -30,7 +33,7 @@ import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
  */
 public class ErillishakuExcel {
 
-	
+	private final static Logger LOG = LoggerFactory.getLogger(ErillishakuExcel.class);
 	private final Excel excel;
 	
 	public ErillishakuExcel(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija) {
@@ -67,21 +70,17 @@ public class ErillishakuExcel {
 		Collections.sort(erillishakurivit, new Comparator<ErillishakuRivi>() {
 			@Override
 			public int compare(ErillishakuRivi h1, ErillishakuRivi h2) {
-				if (h1 == null || h2 == null || h1.getSukunimi() == null
-						|| h2.getSukunimi() == null) {
-					return 0;
+				ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(new ErillishakuRivi());
+				ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(new ErillishakuRivi());
+				String s1 = Optional.ofNullable(e1.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
+				String s2 = Optional.ofNullable(e2.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
+				int i = s1.compareTo(s2);
+				if(i != 0) {
+					return i;
 				} else {
-					int i = h1.getSukunimi().toUpperCase()
-							.compareTo(h2.getSukunimi().toUpperCase());
-					if (i == 0) {
-						if(h1.getEtunimi() == null || h2.getEtunimi() == null) {
-							return 0;
-						}
-						return h1.getEtunimi().toUpperCase()
-								.compareTo(h2.getEtunimi().toUpperCase());
-					} else {
-						return i;
-					}
+					String ee1 = Optional.ofNullable(e1.getEtunimi()).orElse(StringUtils.EMPTY).toUpperCase();
+					String ee2 = Optional.ofNullable(e2.getEtunimi()).orElse(StringUtils.EMPTY).toUpperCase();
+					return ee1.compareTo(ee2);
 				}
 			}
 		});

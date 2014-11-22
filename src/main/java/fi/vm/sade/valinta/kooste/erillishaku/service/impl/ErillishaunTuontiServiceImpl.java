@@ -70,7 +70,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
 	
 	@Override
 	public void tuo(KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
-		
+		LOG.error("Aloitetaan tuonti");
 		from(applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid()))
 		//
 				.subscribeOn(Schedulers.newThread())
@@ -123,15 +123,23 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
 							hakija.setTarjoajaOid(erillishaku.getTarjoajaOid());
 							hakija.setValintatapajonoOid(erillishaku.getValintatapajonoOid());
 							hakijat.add(hakija);
+							
 						}
 					};
-					ErillishakuExcel erillishakuExcel = new ErillishakuExcel(erillishaku.getHakutyyppi(), kuuntelija);
+					ErillishakuExcel erillishakuExcel;
 					try {
-						erillishakuExcel.getExcel().tuoXlsx(data);
-					} catch (Exception e) {
-						LOG.error("Excelin tuonti epaonnistui! {}", e.getMessage());
+					 erillishakuExcel = new ErillishakuExcel(erillishaku.getHakutyyppi(), kuuntelija);
+					}catch(Exception e) {
+						LOG.error("Excelin muodostus epaonnistui! {}", e.getMessage());
 						throw new RuntimeException(e);
 					}
+					try {
+						erillishakuExcel.getExcel().tuoXlsx(data);
+					} catch (Throwable e) {
+						LOG.error("Excelin tuonti epaonnistui! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+						throw new RuntimeException(e);
+					}
+					LOG.error("Viedaan hakijoita {} jonoon {}", hakijat.size(),erillishaku.getValintatapajononNimi());
 					if(!hakijat.isEmpty()) {
 						tilaAsyncResource.tuoErillishaunTilat(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid()
 								,erillishaku.getValintatapajononNimi(),
@@ -144,7 +152,11 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
 					prosessi.valmistui("ok");
 				},
 				poikkeus-> {
-					LOG.error("Erillishaun tuonti keskeytyi virheeseen {}. {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
+					if(poikkeus == null) {
+						LOG.error("Suoritus keskeytyi tuntemattomaan NPE poikkeukseen!");
+					} else {
+						LOG.error("Erillishaun tuonti keskeytyi virheeseen {}. {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
+					}
 					prosessi.keskeyta();
 				});
 	}
