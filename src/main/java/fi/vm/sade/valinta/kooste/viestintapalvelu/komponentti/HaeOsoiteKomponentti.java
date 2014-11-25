@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.common.KieliType;
@@ -64,9 +65,11 @@ public class HaeOsoiteKomponentti {
 				@Override
 				public Maakoodi call() throws Exception {
 					String postitoimipaikka = StringUtils.EMPTY;
-					for (KoodiType koodi : koodiService
-							.searchKoodis(KoodiServiceSearchCriteriaBuilder
-									.latestKoodisByUris(uri))) {
+					List<KoodiType> koodiTypes=  koodiService
+					.searchKoodis(KoodiServiceSearchCriteriaBuilder
+							.latestKoodisByUris(uri));
+					LOG.error("From koodisto {}", new GsonBuilder().setPrettyPrinting().create().toJson(koodiTypes));
+					for (KoodiType koodi : koodiTypes) {
 						if (koodi.getMetadata() == null) {
 							LOG.error(
 									"Koodistosta palautuu tyhjiä koodeja! Koodisto uri {}",
@@ -74,7 +77,7 @@ public class HaeOsoiteKomponentti {
 							continue;
 						}
 						// preferoidaan englantia
-						postitoimipaikka = getNimi(koodi.getMetadata(),
+						postitoimipaikka = getKuvaus(koodi.getMetadata(),
 								preferoitutyyppi);
 						if (postitoimipaikka == null) {
 							postitoimipaikka = getNimi(koodi.getMetadata()); // jos
@@ -104,10 +107,20 @@ public class HaeOsoiteKomponentti {
 		if(Kieli.EN.equals(preferoitutyyppi)) {
 			country = "FINLAND";
 		}
-		return new Osoite(null, null, yhteystiedot.getOsoite(), null, null,
-				postinumero(yhteystiedot.getPostinumeroUri()),
-				StringUtils.capitalize(StringUtils.lowerCase(maakoodi.getPostitoimipaikka())), null, country, null,
-				organisaationimi,null);
+		return new Osoite(
+				null, null,  // firstname, lastname
+				//
+				yhteystiedot.getOsoite(), // addressline1
+				//
+				null, null, // addressline2, addressline3
+				//
+				postinumero(yhteystiedot.getPostinumeroUri()), // postalCode
+				StringUtils.capitalize(StringUtils.lowerCase(maakoodi.getPostitoimipaikka())), // city
+				//
+				null, country, null,
+				organisaationimi,
+				//
+				null);
 	}
 
 	private String postinumero(String url) {
@@ -265,6 +278,21 @@ public class HaeOsoiteKomponentti {
 		for (KoodiMetadataType data : meta) {
 			if (kieli.equals(data.getKieli())) {
 				return data.getNimi();
+			}
+		}
+		return null;
+	}
+	private static String getKuvaus(List<KoodiMetadataType> meta) {
+		for (KoodiMetadataType data : meta) {
+			return data.getKuvaus();
+		}
+		return null;
+	}
+	private static String getKuvaus(List<KoodiMetadataType> meta,
+			KieliType kieli) {
+		for (KoodiMetadataType data : meta) {
+			if (kieli.equals(data.getKieli())) {
+				return data.getKuvaus();
 			}
 		}
 		return null;
