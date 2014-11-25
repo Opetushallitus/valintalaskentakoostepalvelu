@@ -47,7 +47,8 @@ public class LueHakijapalvelunOsoite {
 	 */
 	public static Osoite lueHakijapalvelunOsoite(
 			HaeOsoiteKomponentti osoiteKomponentti,
-			String preferoitukielikoodi, Organisaatio organisaatio) {
+			String preferoitukielikoodi, Organisaatio organisaatio,
+			Teksti organisaationimi) {
 		if (organisaatio == null) {
 			LOG.warn("Yritettiin hakea hakijapalvelun osoitetta tyhjasta organisaatio oliosta!");
 			return null;
@@ -76,23 +77,23 @@ public class LueHakijapalvelunOsoite {
 					.collect(Collectors.toList());
 			if (!postit.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(postit
-						.iterator().next(), KieliType.SV,new Teksti(organisaatio.getNimi()).getTeksti(KieliUtil.RUOTSI));
+						.iterator().next(), KieliType.SV,organisaationimi.getTeksti(KieliUtil.RUOTSI));
 			}
 			if (!ruotsinkielisetYhteystiedot.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(
 						ruotsinkielisetYhteystiedot.iterator().next(),
-						KieliType.SV,new Teksti(organisaatio.getNimi()).getTeksti(KieliUtil.RUOTSI));
+						KieliType.SV,organisaationimi.getTeksti(KieliUtil.RUOTSI));
 			}
 		}
 		List<Yhteystieto> postit = yhteystiedot.stream()
 				.filter(postiTyyppia()).collect(Collectors.toList());
 		if (!postit.isEmpty()) {
 			return osoiteKomponentti.haeOsoiteYhteystiedoista(postit.iterator()
-					.next(), KieliType.FI,new Teksti(organisaatio.getNimi()).getTeksti(KieliUtil.SUOMI));
+					.next(), KieliType.FI,organisaationimi.getTeksti(KieliUtil.SUOMI));
 		}
 		if (!yhteystiedot.isEmpty()) {
 			return osoiteKomponentti.haeOsoiteYhteystiedoista(yhteystiedot
-					.iterator().next(), KieliType.FI, new Teksti(organisaatio.getNimi()).getTeksti(KieliUtil.SUOMI));
+					.iterator().next(), KieliType.FI, organisaationimi.getTeksti(KieliUtil.SUOMI));
 		}
 		return null;
 	}

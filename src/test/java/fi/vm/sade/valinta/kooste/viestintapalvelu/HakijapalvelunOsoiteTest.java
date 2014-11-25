@@ -20,6 +20,7 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio
 import fi.vm.sade.valinta.kooste.util.Kieli;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.LueHakijapalvelunOsoite;
 
@@ -35,7 +36,7 @@ public class HakijapalvelunOsoiteTest {
 						Organisaatio.class);
 		HaeOsoiteKomponentti h = new HaeOsoiteKomponentti(null);
 		System.err.println(new GsonBuilder().setPrettyPrinting().create().toJson(organisaatio));
-		Osoite osoite = LueHakijapalvelunOsoite.lueHakijapalvelunOsoite(h, KieliUtil.SUOMI, organisaatio);
+		Osoite osoite = LueHakijapalvelunOsoite.lueHakijapalvelunOsoite(h, KieliUtil.SUOMI, organisaatio, new Teksti());
 	}
 
 	@Ignore

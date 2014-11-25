@@ -47,6 +47,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
@@ -95,13 +96,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 		IOUtils.closeQuietly(stream);
 		return new Gson().fromJson(json,Organisaatio.class);
 	}
-	private Osoite haeOsoiteHierarkisesti(String kieli, List<String> oids, Response organisaatioResponse) {
+	private Osoite haeOsoiteHierarkisesti(String kieli, List<String> oids, Organisaatio rdto, Teksti organisaationimi) {
 		Osoite hakijapalveluidenOsoite = null;
 		try {
-			Organisaatio rdto = responseToOrganisaatio(organisaatioResponse);
+			if(organisaationimi.isArvoton()) {
+				organisaationimi = new Teksti(rdto.getNimi());
+			}
 			hakijapalveluidenOsoite = LueHakijapalvelunOsoite
 					.lueHakijapalvelunOsoite(haeOsoiteKomponentti,
-							kieli,rdto);
+							kieli,rdto, organisaationimi);
 			if(rdto == null) {
 				LOG.error("Organisaatiopalvelusta ei saatu organisaatiota tunnisteelle {}. Eli ei saatu hakijapalveluiden osoitetta.", Arrays.toString(oids.toArray()));
 				return null;
@@ -113,8 +116,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 			}
 			if(hakijapalveluidenOsoite==null && rdto.getParentOid() != null) {
 				LOG.error("Ei saatu hakijapalveluiden osoitetta talta organisaatiolta. Tutkitaan seuraava {}", Arrays.toString(oids.toArray()));
-				return haeOsoiteHierarkisesti(kieli, oids, organisaatioAsyncResource
-				.haeOrganisaatio(rdto.getParentOid()).get());
+				return haeOsoiteHierarkisesti(kieli, oids, responseToOrganisaatio(organisaatioAsyncResource
+				.haeOrganisaatio(rdto.getParentOid()).get()), organisaationimi);
 			} else {
 				LOG.error("Ei saatu hakijapalveluiden osoitetta! Kaytiin lapi organisaatiot {}!", Arrays.toString(oids.toArray()));
 				return null;
@@ -169,8 +172,18 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
 					List<String> oids = Lists.newArrayList();
 					oids.add(hyvaksymiskirjeDTO.getTarjoajaOid());
+					Organisaatio org;
+					Teksti organisaationimi;
+					try {
+						 org = responseToOrganisaatio(organisaatioResponse);
+						 organisaationimi = new Teksti(org.getNimi());
+					}catch(Exception e) {
+						LOG.error("Ei saatu organisaatiota!");
+						prosessi.keskeyta();
+						throw new RuntimeException(e);
+					}
 					Osoite hakijapalveluidenOsoite = haeOsoiteHierarkisesti(
-							kohdeHakukohde.getHakukohteenKieli(),oids, organisaatioResponse);
+							kohdeHakukohde.getHakukohteenKieli(),oids, org, organisaationimi);
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
 							hakijapalveluidenOsoite,
 							hyvaksymiskirjeessaKaytetytHakukohteet,
@@ -232,8 +245,18 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
 					List<String> oids = Lists.newArrayList();
 					oids.add(hyvaksymiskirjeDTO.getTarjoajaOid());
+					Organisaatio org;
+					Teksti organisaationimi;
+					try {
+						 org = responseToOrganisaatio(organisaatioResponse);
+						 organisaationimi = new Teksti(org.getNimi());
+					}catch(Exception e) {
+						LOG.error("Ei saatu organisaatiota!");
+						prosessi.keskeyta();
+						throw new RuntimeException(e);
+					}
 					Osoite hakijapalveluidenOsoite = haeOsoiteHierarkisesti(
-							kohdeHakukohde.getHakukohteenKieli(),oids, organisaatioResponse);
+							kohdeHakukohde.getHakukohteenKieli(),oids, org,organisaationimi);
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
 							hakijapalveluidenOsoite,
 							hyvaksymiskirjeessaKaytetytHakukohteet,

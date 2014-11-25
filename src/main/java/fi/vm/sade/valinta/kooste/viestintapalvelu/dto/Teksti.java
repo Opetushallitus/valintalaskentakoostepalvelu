@@ -5,6 +5,7 @@ import static fi.vm.sade.valinta.kooste.util.KieliUtil.RUOTSI;
 import static fi.vm.sade.valinta.kooste.util.KieliUtil.SUOMI;
 import static fi.vm.sade.valinta.kooste.util.KieliUtil.normalisoiKielikoodi;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -24,6 +25,9 @@ public class Teksti {
 	private final static String EI_ARVOA = "<< ei arvoa >>";
 	private final TreeMap<String, String> normalisoituKieliJaKoodi;
 
+	public Teksti() {
+		this.normalisoituKieliJaKoodi = Maps.newTreeMap();
+	}
 	public Teksti(Map<String, String> kieletJaKoodit) {
 		this.normalisoituKieliJaKoodi = Maps.newTreeMap();
 		if (kieletJaKoodit != null && !kieletJaKoodit.isEmpty()) {
