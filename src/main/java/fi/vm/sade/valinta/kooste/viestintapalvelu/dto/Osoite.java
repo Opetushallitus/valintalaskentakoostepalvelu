@@ -23,6 +23,7 @@ public class Osoite implements Serializable {
 	private String region;// ":"Kallio",
 	private String country; // ":"Suomi",
 	private String countryCode; // ":"FI"
+	private String organisaationimi;
 	@JsonIgnore
 	private Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
 
@@ -49,8 +50,38 @@ public class Osoite implements Serializable {
 		this.country = country;
 		this.countryCode = countryCode;
 		this.ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
+		this.organisaationimi = null;
 	}
-
+	public Osoite(
+			String firstName,
+			String lastName,
+			String addressline,
+			String addressline2,
+			String addressline3,
+			String postalCode,
+			String city,
+			String region,
+			String country,
+			String countryCode,
+			String organisaationimi,
+			Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.addressline = addressline;
+		this.addressline2 = addressline2;
+		this.addressline3 = addressline3;
+		this.postalCode = postalCode;
+		this.city = city;
+		this.region = region;
+		this.country = country;
+		this.countryCode = countryCode;
+		this.ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
+		this.organisaationimi = organisaationimi;
+	}
+	public String getOrganisaationimi() {
+		return organisaationimi;
+	}
+	
 	@JsonIgnore
 	public boolean isUlkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt() {
 		return ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;

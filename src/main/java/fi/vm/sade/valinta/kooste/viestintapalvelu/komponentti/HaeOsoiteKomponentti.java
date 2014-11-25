@@ -51,7 +51,7 @@ public class HaeOsoiteKomponentti {
 	}
 
 	public Osoite haeOsoiteYhteystiedoista(Yhteystieto yhteystiedot,
-			final KieliType preferoitutyyppi) {
+			final KieliType preferoitutyyppi, String organisaationimi) {
 		Maakoodi maakoodi = null;
 		// onko ulkomaalainen?
 		// hae koodistosta maa
@@ -107,7 +107,7 @@ public class HaeOsoiteKomponentti {
 		return new Osoite(null, null, yhteystiedot.getOsoite(), null, null,
 				postinumero(yhteystiedot.getPostinumeroUri()),
 				StringUtils.capitalize(StringUtils.lowerCase(maakoodi.getPostitoimipaikka())), null, country, null,
-				null);
+				organisaationimi,null);
 	}
 
 	private String postinumero(String url) {

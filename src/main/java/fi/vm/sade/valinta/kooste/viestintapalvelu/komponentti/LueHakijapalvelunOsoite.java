@@ -19,12 +19,14 @@ import fi.vm.sade.koodisto.service.types.common.KieliType;
 import fi.vm.sade.koodisto.util.KoodistoHelper;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioMetaDataRDTO;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
+import fi.vm.sade.service.valintaperusteet.dto.model.Kieli;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Metadata;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 
 public class LueHakijapalvelunOsoite {
 	private static final String KAYNTI_TYYPPI = "kaynti";
@@ -74,23 +76,23 @@ public class LueHakijapalvelunOsoite {
 					.collect(Collectors.toList());
 			if (!postit.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(postit
-						.iterator().next(), KieliType.SV);
+						.iterator().next(), KieliType.SV,new Teksti(organisaatio.getNimi()).getTeksti(KieliUtil.RUOTSI));
 			}
 			if (!ruotsinkielisetYhteystiedot.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(
 						ruotsinkielisetYhteystiedot.iterator().next(),
-						KieliType.SV);
+						KieliType.SV,new Teksti(organisaatio.getNimi()).getTeksti(KieliUtil.RUOTSI));
 			}
 		}
 		List<Yhteystieto> postit = yhteystiedot.stream()
 				.filter(postiTyyppia()).collect(Collectors.toList());
 		if (!postit.isEmpty()) {
 			return osoiteKomponentti.haeOsoiteYhteystiedoista(postit.iterator()
-					.next(), KieliType.FI);
+					.next(), KieliType.FI,new Teksti(organisaatio.getNimi()).getTeksti(KieliUtil.SUOMI));
 		}
 		if (!yhteystiedot.isEmpty()) {
 			return osoiteKomponentti.haeOsoiteYhteystiedoista(yhteystiedot
-					.iterator().next(), KieliType.FI);
+					.iterator().next(), KieliType.FI, new Teksti(organisaatio.getNimi()).getTeksti(KieliUtil.SUOMI));
 		}
 		return null;
 	}
