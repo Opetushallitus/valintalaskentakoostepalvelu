@@ -14,20 +14,35 @@ public class MetaHakukohde {
 	private final Teksti hakukohdeNimi;
 	private final Teksti tarjoajaNimi;
 	private final String hakukohteenKieli;
+	private final String opetuskieli;
 
 	public MetaHakukohde(Teksti hakukohdeNimi, Teksti tarjoajaNimi) {
 		this.hakukohdeNimi = hakukohdeNimi;
 		this.tarjoajaNimi = tarjoajaNimi;
 		this.hakukohteenKieli = null;
+		this.opetuskieli = null;
 	}
 
+	public MetaHakukohde(Teksti hakukohdeNimi, Teksti tarjoajaNimi,
+			String hakukohteenKieli, String opetuskieli) {
+		this.hakukohdeNimi = hakukohdeNimi;
+		this.tarjoajaNimi = tarjoajaNimi;
+		this.hakukohteenKieli = hakukohteenKieli;
+		this.opetuskieli= opetuskieli;
+	}
 	public MetaHakukohde(Teksti hakukohdeNimi, Teksti tarjoajaNimi,
 			String hakukohteenKieli) {
 		this.hakukohdeNimi = hakukohdeNimi;
 		this.tarjoajaNimi = tarjoajaNimi;
 		this.hakukohteenKieli = hakukohteenKieli;
+		this.opetuskieli= null;
 	}
-
+	public String getOpetuskieli() {
+		if (opetuskieli == null) {
+			return getHakukohteenKieli();
+		}
+		return opetuskieli;
+	}
 	public String getHakukohteenKieli() {
 		if (hakukohteenKieli == null) {
 			if (hakukohdeNimi == null) {

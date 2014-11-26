@@ -50,6 +50,13 @@ public class KieliUtil {
 			return RUOTSI;
 		} else if (ENGLANTI_KOODI.equalsIgnoreCase(kielikoodi)) {
 			return ENGLANTI;
+			
+		} else if (SUOMI.equalsIgnoreCase(kielikoodi)) {
+			return SUOMI;
+		} else if (RUOTSI.equalsIgnoreCase(kielikoodi)) {
+			return RUOTSI;
+		} else if (ENGLANTI.equalsIgnoreCase(kielikoodi)) {
+			return ENGLANTI;
 		}
 		// Ei tarkkaa osumaa. Kokeillaan nimenosilla ja preferoidaan suomea,
 		// sitten ruotsia ja lopuksi englanti

@@ -68,7 +68,7 @@ public class HaeOsoiteKomponentti {
 					List<KoodiType> koodiTypes=  koodiService
 					.searchKoodis(KoodiServiceSearchCriteriaBuilder
 							.latestKoodisByUris(uri));
-					LOG.error("From koodisto {}", new GsonBuilder().setPrettyPrinting().create().toJson(koodiTypes));
+					//LOG.error("From koodisto {}", new GsonBuilder().setPrettyPrinting().create().toJson(koodiTypes));
 					for (KoodiType koodi : koodiTypes) {
 						if (koodi.getMetadata() == null) {
 							LOG.error(

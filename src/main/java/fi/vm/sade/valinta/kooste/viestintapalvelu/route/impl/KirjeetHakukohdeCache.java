@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
 import java.util.Collection;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
+import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
@@ -45,27 +47,37 @@ public class KirjeetHakukohdeCache {
 						HakukohdeV1RDTO
 						 hakukohde = hakukohdeV1Resource
 								.findByOid(hakukohdeOid).getResult();
-						
 						Teksti hakukohdeNimi = new Teksti(hakukohde
 								.getHakukohteenNimet());
+						String opetuskieli = getOpetuskieli(hakukohde.getOpetusKielet());
+						LOG.error("Hakukohdekieli({}) Oid({}) Opetuskieli({})",hakukohdeNimi.getKieli(), hakukohdeOid, opetuskieli);
+						
 						Teksti tarjoajaNimi = new Teksti(hakukohde
 								.getTarjoajaNimet());
-						Collection<String> preferoitukieli = Sets.newTreeSet();
-						for (String opetuskieli : hakukohde.getOpetusKielet()) {
-							preferoitukieli.add(KieliUtil
-									.normalisoiKielikoodi(opetuskieli));
-						}
-						if (preferoitukieli.contains(KieliUtil.SUOMI)) {
-							return new MetaHakukohde(hakukohdeNimi,
-									tarjoajaNimi, KieliUtil.SUOMI);
-						} else if (preferoitukieli.contains(KieliUtil.RUOTSI)) {
-							return new MetaHakukohde(hakukohdeNimi,
-									tarjoajaNimi, KieliUtil.RUOTSI);
-						}
+						
+						/*
+						
+						*/
 						return new MetaHakukohde(hakukohdeNimi, tarjoajaNimi,
-								KieliUtil.SUOMI);
+								hakukohdeNimi.getKieli(),opetuskieli);
 					}
 
 				});
+	}
+	
+	private static String getOpetuskieli(Collection<String> opetuskielet) {
+		TreeSet<String> preferoitukieli = Sets.newTreeSet();
+		for (String opetuskieli :opetuskielet) {
+			preferoitukieli.add(KieliUtil
+					.normalisoiKielikoodi(opetuskieli));
+		}
+		if (preferoitukieli.contains(KieliUtil.SUOMI)) {
+			return  KieliUtil.SUOMI;
+		} else if (preferoitukieli.contains(KieliUtil.RUOTSI)) {
+			return KieliUtil.RUOTSI;
+		} else if (preferoitukieli.contains(KieliUtil.ENGLANTI)) {
+			return KieliUtil.ENGLANTI;
+		}
+		return KieliUtil.SUOMI;
 	}
 }
