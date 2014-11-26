@@ -198,14 +198,14 @@ public class HyvaksymiskirjeetKomponentti {
 									.orElse(0) - 1;
 					int kkHyvaksytyt = Optional.ofNullable(
 							valintatapajono.getHyvaksytty()).orElse(0);
-					int kkPiste = Optional
+					String kkPiste = suomennaNumero(Optional
 							.ofNullable(valintatapajono.getPisteet())
-							.orElse(BigDecimal.ZERO).intValue();
-					int kkMinimi = Optional
+							.orElse(BigDecimal.ZERO));
+					String kkMinimi = suomennaNumero(Optional
 							.ofNullable(
 									valintatapajono
 											.getAlinHyvaksyttyPistemaara())
-							.orElse(BigDecimal.ZERO).intValue();
+							.orElse(BigDecimal.ZERO));
 					kkSijoitukset.add(new Sijoitus(kkNimi, kkJonosija,
 							kkHyvaksytyt));
 					kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
