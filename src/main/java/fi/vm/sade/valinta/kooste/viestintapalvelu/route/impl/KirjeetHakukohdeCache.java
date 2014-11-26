@@ -15,6 +15,9 @@ import com.google.common.collect.Sets;
 
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1Resource;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -28,8 +31,9 @@ public class KirjeetHakukohdeCache {
 
 	// private HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
 	@Autowired
-	private HakukohdeResource hakukohdeResource;
-
+	private HakukohdeV1Resource hakukohdeV1Resource;
+	//private HakukohdeResource hakukohdeResource;
+	
 	public MetaHakukohde haeHakukohde(final String hakukohdeOid)
 			throws Exception {
 
@@ -37,14 +41,17 @@ public class KirjeetHakukohdeCache {
 				new Callable<MetaHakukohde>() {
 					@Override
 					public MetaHakukohde call() throws Exception {
-						HakukohdeDTO hakukohde = hakukohdeResource
-								.getByOID(hakukohdeOid);
+						
+						HakukohdeV1RDTO
+						 hakukohde = hakukohdeV1Resource
+								.findByOid(hakukohdeOid).getResult();
+						
 						Teksti hakukohdeNimi = new Teksti(hakukohde
-								.getHakukohdeNimi());
+								.getHakukohteenNimet());
 						Teksti tarjoajaNimi = new Teksti(hakukohde
-								.getTarjoajaNimi());
+								.getTarjoajaNimet());
 						Collection<String> preferoitukieli = Sets.newTreeSet();
-						for (String opetuskieli : hakukohde.getOpetuskielet()) {
+						for (String opetuskieli : hakukohde.getOpetusKielet()) {
 							preferoitukieli.add(KieliUtil
 									.normalisoiKielikoodi(opetuskieli));
 						}
@@ -57,8 +64,6 @@ public class KirjeetHakukohdeCache {
 						}
 						return new MetaHakukohde(hakukohdeNimi, tarjoajaNimi,
 								KieliUtil.SUOMI);
-						// LOG.error("preferoitukieli on {}", preferoitukieli);
-
 					}
 
 				});
