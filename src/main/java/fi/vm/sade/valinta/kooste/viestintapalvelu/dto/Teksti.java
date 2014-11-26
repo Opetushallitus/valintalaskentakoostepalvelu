@@ -32,7 +32,7 @@ public class Teksti {
 		this.normalisoituKieliJaKoodi = Maps.newTreeMap();
 		if (kieletJaKoodit != null && !kieletJaKoodit.isEmpty()) {
 			for (Entry<String, String> kk : kieletJaKoodit.entrySet()) {
-				if (kk.getKey() == null || kk.getValue() == null) {
+				if (StringUtils.isBlank(kk.getKey()) || StringUtils.isBlank(kk.getValue())) {
 					// EI LISATA ARVOTONTA KOODIA
 					// normalisoituKieliJaKoodi.put(normalisoiKielikoodi(kk.getKey()),
 					// EI_ARVOA);
