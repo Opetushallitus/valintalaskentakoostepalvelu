@@ -31,7 +31,7 @@ public class KirjeetHakukohdeCache {
 
 	// private HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
 	@Autowired
-	private HakukohdeV1Resource hakukohdeV1Resource;
+	private fi.vm.sade.valinta.kooste.external.resource.haku.HakukohdeV1Resource hakukohdeV1Resource;
 	//private HakukohdeResource hakukohdeResource;
 	
 	public MetaHakukohde haeHakukohde(final String hakukohdeOid)
