@@ -132,14 +132,16 @@ public class HyvaksymiskirjeetKomponentti {
 			koulutus = metakohde.getHakukohdeNimi();
 			preferoituKielikoodi = metakohde.getHakukohteenKieli();// KieliUtil.SUOMI;
 		}
-		final Map<HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
-		tilaToPrioriteetti.put(HakemuksenTila.HYVAKSYTTY, 1);
-		tilaToPrioriteetti.put(HakemuksenTila.VARASIJALTA_HYVAKSYTTY, 2);
-		tilaToPrioriteetti.put(HakemuksenTila.VARALLA, 3);
-		tilaToPrioriteetti.put(HakemuksenTila.PERUNUT, 4);
-		tilaToPrioriteetti.put(HakemuksenTila.PERUUTETTU, 5);
-		tilaToPrioriteetti.put(HakemuksenTila.PERUUNTUNUT, 6);
-		tilaToPrioriteetti.put(HakemuksenTila.HYLATTY, 7);
+		final Map<fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HARKINNANVARAISESTI_HYVAKSYTTY, 1);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY, 2);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARASIJALTA_HYVAKSYTTY, 3);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA, 4);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUNUT, 5);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUTETTU, 6);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUNTUNUT, 7);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY, 8);
+	
 		for (HakijaDTO hakija : hakukohteenHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
 			final Hakemus hakemus = hakukohteenHakemukset.get(hakemusOid);
