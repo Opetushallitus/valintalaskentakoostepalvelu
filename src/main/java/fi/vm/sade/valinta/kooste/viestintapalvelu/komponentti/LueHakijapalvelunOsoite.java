@@ -60,13 +60,63 @@ public class LueHakijapalvelunOsoite {
 								.getYhteystiedot())
 				.orElse(Collections.emptyList()).stream()
 				.filter(kiinnostavaYhteystieto()).collect(Collectors.toList());
+		List<Yhteystieto> puhelinnumerot = Optional
+				.ofNullable(
+						Optional.ofNullable(organisaatio.getMetadata())
+								.orElse(new Metadata())
+								.getYhteystiedot())
+				.orElse(Collections.emptyList()).stream()
+				.filter(puhelinnumero()).collect(Collectors.toList());
+		List<Yhteystieto> emailit = Optional
+				.ofNullable(
+						Optional.ofNullable(organisaatio.getMetadata())
+								.orElse(new Metadata())
+								.getYhteystiedot())
+				.orElse(Collections.emptyList()).stream()
+				.filter(email()).collect(Collectors.toList());
 		if (yhteystiedot.isEmpty()) {
 			LOG.warn(
 					"Organisaatiolla {} ei ole tyyppia posti tai kaynti olevaa hakijapalvelun osoitetta!",
 					organisaatio.getOid());
 			return null;
 		}
-
+		String numero = null;
+		String email = null;
+		if(!puhelinnumerot.isEmpty()) {
+			numero = puhelinnumerot.get(0).getNumero();
+		}
+		if(!emailit.isEmpty()) {
+			email = emailit.get(0).getEmail();
+		}
+		if (KieliUtil.ENGLANTI.equals(preferoitukielikoodi)) {
+			List<Yhteystieto> englanninkielisetYhteystiedot = yhteystiedot
+					.stream().filter(englanninkieliset())
+					.collect(Collectors.toList());
+			List<Yhteystieto> englanninkielisetNumerot = puhelinnumerot
+					.stream().filter(englanninkieliset())
+					.collect(Collectors.toList());
+			List<Yhteystieto> englanninkielisetEmailit = emailit
+					.stream().filter(englanninkieliset())
+					.collect(Collectors.toList());
+			if(!englanninkielisetNumerot.isEmpty()) {
+				numero = englanninkielisetNumerot.get(0).getNumero();
+			}
+			if(!englanninkielisetEmailit.isEmpty()) {
+				email = englanninkielisetEmailit.get(0).getEmail();
+			}
+			List<Yhteystieto> postit = englanninkielisetYhteystiedot
+					.stream().filter(postiTyyppia())
+					.collect(Collectors.toList());
+			if (!postit.isEmpty()) {
+				return osoiteKomponentti.haeOsoiteYhteystiedoista(postit
+						.iterator().next(), KieliType.EN,organisaationimi.getTeksti(KieliUtil.ENGLANTI),email, numero);
+			}
+			if (!englanninkielisetYhteystiedot.isEmpty()) {
+				return osoiteKomponentti.haeOsoiteYhteystiedoista(
+						englanninkielisetYhteystiedot.iterator().next(),
+						KieliType.EN,organisaationimi.getTeksti(KieliUtil.ENGLANTI),email, numero);
+			}
+		}
 		if (KieliUtil.RUOTSI.equals(preferoitukielikoodi)) {
 			List<Yhteystieto> ruotsinkielisetYhteystiedot = yhteystiedot
 					.stream().filter(ruotsinkieliset())
@@ -75,25 +125,61 @@ public class LueHakijapalvelunOsoite {
 			List<Yhteystieto> postit = ruotsinkielisetYhteystiedot
 					.stream().filter(postiTyyppia())
 					.collect(Collectors.toList());
+			
+			List<Yhteystieto> ruotsinkielisetNumerot = puhelinnumerot
+					.stream().filter(ruotsinkieliset())
+					.collect(Collectors.toList());
+			List<Yhteystieto> ruotsinkielisetEmailit = emailit
+					.stream().filter(ruotsinkieliset())
+					.collect(Collectors.toList());
+			if(!ruotsinkielisetNumerot.isEmpty()) {
+				numero = ruotsinkielisetNumerot.get(0).getNumero();
+			}
+			if(!ruotsinkielisetEmailit.isEmpty()) {
+				email = ruotsinkielisetEmailit.get(0).getEmail();
+			}
 			if (!postit.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(postit
-						.iterator().next(), KieliType.SV,organisaationimi.getTeksti(KieliUtil.RUOTSI));
+						.iterator().next(), KieliType.SV,organisaationimi.getTeksti(KieliUtil.RUOTSI), email, numero);
 			}
 			if (!ruotsinkielisetYhteystiedot.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(
 						ruotsinkielisetYhteystiedot.iterator().next(),
-						KieliType.SV,organisaationimi.getTeksti(KieliUtil.RUOTSI));
+						KieliType.SV,organisaationimi.getTeksti(KieliUtil.RUOTSI), email, numero);
 			}
+		}
+
+		List<Yhteystieto> suomenkielisetNumerot = puhelinnumerot
+				.stream().filter(suomenkieliset())
+				.collect(Collectors.toList());
+		List<Yhteystieto> suomenkielisetEmailit = emailit
+				.stream().filter(suomenkieliset())
+				.collect(Collectors.toList());
+		if(!suomenkielisetNumerot.isEmpty()) {
+			numero = suomenkielisetNumerot.get(0).getNumero();
+		}
+		if(!suomenkielisetEmailit.isEmpty()) {
+			email = suomenkielisetEmailit.get(0).getEmail();
+		}
+		List<Yhteystieto> suomenkielisetYhteystiedot = yhteystiedot
+				.stream().filter(suomenkieliset())
+				.collect(Collectors.toList());
+		List<Yhteystieto> suomenkielisetPostit = suomenkielisetYhteystiedot
+				.stream().filter(postiTyyppia())
+				.collect(Collectors.toList());
+		if(!suomenkielisetPostit.isEmpty()) {
+			return osoiteKomponentti.haeOsoiteYhteystiedoista(suomenkielisetPostit.iterator()
+					.next(), KieliType.FI,organisaationimi.getTeksti(KieliUtil.SUOMI), email, numero);
 		}
 		List<Yhteystieto> postit = yhteystiedot.stream()
 				.filter(postiTyyppia()).collect(Collectors.toList());
 		if (!postit.isEmpty()) {
 			return osoiteKomponentti.haeOsoiteYhteystiedoista(postit.iterator()
-					.next(), KieliType.FI,organisaationimi.getTeksti(KieliUtil.SUOMI));
+					.next(), KieliType.FI,organisaationimi.getTeksti(KieliUtil.SUOMI), email, numero);
 		}
 		if (!yhteystiedot.isEmpty()) {
 			return osoiteKomponentti.haeOsoiteYhteystiedoista(yhteystiedot
-					.iterator().next(), KieliType.FI, organisaationimi.getTeksti(KieliUtil.SUOMI));
+					.iterator().next(), KieliType.FI, organisaationimi.getTeksti(KieliUtil.SUOMI), email, numero);
 		}
 		return null;
 	}
@@ -107,9 +193,26 @@ public class LueHakijapalvelunOsoite {
 				);
 	}
 
+	private static Predicate<Yhteystieto> puhelinnumero() {
+		return yhteystiedot -> "puhelin".equals(yhteystiedot.getTyyppi()) && !StringUtils.isBlank(yhteystiedot.getNumero());
+	}
+	private static Predicate<Yhteystieto> email() {
+		return yhteystiedot -> !StringUtils.isBlank(yhteystiedot.getEmail());
+	}
+	private static Predicate<Yhteystieto> suomenkieliset() {
+		return yhteystiedot -> KieliUtil.SUOMI.equals(KieliUtil
+				.normalisoiKielikoodi(TarjontaUriToKoodistoUtil
+						.cleanUri(yhteystiedot.getKieli())));
+	}
 	private static Predicate<Yhteystieto> ruotsinkieliset() {
 		return yhteystiedot -> KieliUtil.RUOTSI.equals(KieliUtil
 				.normalisoiKielikoodi(TarjontaUriToKoodistoUtil
 						.cleanUri(yhteystiedot.getKieli())));
 	}
+	private static Predicate<Yhteystieto> englanninkieliset() {
+		return yhteystiedot -> KieliUtil.ENGLANTI.equals(KieliUtil
+				.normalisoiKielikoodi(TarjontaUriToKoodistoUtil
+						.cleanUri(yhteystiedot.getKieli())));
+	}
+	
 }

@@ -52,7 +52,7 @@ public class HaeOsoiteKomponentti {
 	}
 
 	public Osoite haeOsoiteYhteystiedoista(Yhteystieto yhteystiedot,
-			final KieliType preferoitutyyppi, String organisaationimi) {
+			final KieliType preferoitutyyppi, String organisaationimi, String email, String numero) {
 		Maakoodi maakoodi = null;
 		// onko ulkomaalainen?
 		// hae koodistosta maa
@@ -119,6 +119,8 @@ public class HaeOsoiteKomponentti {
 				//
 				null, country, null,
 				organisaationimi,
+				numero,
+				email,
 				//
 				null);
 	}
