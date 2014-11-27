@@ -178,7 +178,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 						 org = responseToOrganisaatio(organisaatioResponse);
 						 organisaationimi = new Teksti(org.getNimi());
 					}catch(Exception e) {
-						LOG.error("Ei saatu organisaatiota!");
+						LOG.error("Ei saatu organisaatiota! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
 						prosessi.keskeyta();
 						throw new RuntimeException(e);
 					}
@@ -251,7 +251,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 						 org = responseToOrganisaatio(organisaatioResponse);
 						 organisaationimi = new Teksti(org.getNimi());
 					}catch(Exception e) {
-						LOG.error("Ei saatu organisaatiota!");
+						LOG.error("Ei saatu organisaatiota! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
 						prosessi.keskeyta();
 						throw new RuntimeException(e);
 					}
