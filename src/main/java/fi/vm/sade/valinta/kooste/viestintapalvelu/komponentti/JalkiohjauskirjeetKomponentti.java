@@ -9,6 +9,8 @@ import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
@@ -113,6 +116,14 @@ public class JalkiohjauskirjeetKomponentti {
 		} else {
 			preferoituKielikoodi = KieliUtil.SUOMI;
 		}
+		final Map<HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
+		tilaToPrioriteetti.put(HakemuksenTila.HYVAKSYTTY, 1);
+		tilaToPrioriteetti.put(HakemuksenTila.VARASIJALTA_HYVAKSYTTY, 2);
+		tilaToPrioriteetti.put(HakemuksenTila.VARALLA, 3);
+		tilaToPrioriteetti.put(HakemuksenTila.PERUNUT, 4);
+		tilaToPrioriteetti.put(HakemuksenTila.PERUUTETTU, 5);
+		tilaToPrioriteetti.put(HakemuksenTila.PERUUNTUNUT, 6);
+		tilaToPrioriteetti.put(HakemuksenTila.HYLATTY, 7);
 		for (HakijaDTO hakija : hyvaksymattomatHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
 			if (!hakemusOidHakemukset.containsKey(hakemusOid)) {
@@ -228,6 +239,37 @@ public class JalkiohjauskirjeetKomponentti {
 					// on useampi
 					// Nykyinen PDF formaatti ei kykene esittamaan usean jonon
 					// selitteita jarkevasti
+					
+					if (valintatapajono.getHyvaksytty() == null) {
+						viestintapalveluLogi("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
+						throw new SijoittelupalveluException(
+								"Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
+					}
+					if (valintatapajono.getHakeneet() == null) {
+						viestintapalveluLogi("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
+						throw new SijoittelupalveluException(
+								"Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
+					}
+				}
+				Collections.sort(hakutoive.getHakutoiveenValintatapajonot(),
+						new Comparator<HakutoiveenValintatapajonoDTO>() {
+							@Override
+							public int compare(HakutoiveenValintatapajonoDTO o1,
+									HakutoiveenValintatapajonoDTO o2) {
+								fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila h1 = Optional.ofNullable(o1.getTila()).orElse(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY);
+								fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila h2 = Optional.ofNullable(o2.getTila()).orElse(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY);
+								if(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA.equals(h1) 
+										//
+										&& fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA.equals(h2)) {
+									Integer i1 = Optional.ofNullable(o1.getVarasijanNumero()).orElse(0);
+									Integer i2 = Optional.ofNullable(o2.getVarasijanNumero()).orElse(0);
+									return i1.compareTo(i2);
+								}
+								return tilaToPrioriteetti.get(h1).compareTo(tilaToPrioriteetti.get(h2));
+							}
+						});
+				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
+						.getHakutoiveenValintatapajonot()) {
 					if (VARALLA.equals(valintatapajono.getTila())
 							&& valintatapajono.getVarasijanNumero() != null) {
 						tulokset.put("varasija", HakemusUtil
@@ -243,16 +285,7 @@ public class JalkiohjauskirjeetKomponentti {
 					tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(
 							valintatapajono.getTila(), preferoituKielikoodi,
 							valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
-					if (valintatapajono.getHyvaksytty() == null) {
-						viestintapalveluLogi("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
-						throw new SijoittelupalveluException(
-								"Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
-					}
-					if (valintatapajono.getHakeneet() == null) {
-						viestintapalveluLogi("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
-						throw new SijoittelupalveluException(
-								"Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
-					}
+					break;
 				}
 				tulokset.put("omatPisteet", omatPisteet.toString());
 				tulokset.put("hyvaksytyt", hyvaksytyt.toString());
