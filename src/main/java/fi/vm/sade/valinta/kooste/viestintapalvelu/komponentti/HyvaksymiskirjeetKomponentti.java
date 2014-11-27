@@ -283,7 +283,7 @@ public class HyvaksymiskirjeetKomponentti {
 						});
 				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
 						.getHakutoiveenValintatapajonot()) {
-					if (VARALLA.equals(valintatapajono.getTila())
+					if (fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA.equals(valintatapajono.getTila())
 							&& valintatapajono.getVarasijanNumero() != null) {
 
 						tulokset.put("varasija", HakemusUtil
@@ -298,7 +298,11 @@ public class HyvaksymiskirjeetKomponentti {
 					// LOG.error("\r\nEpätyhjä hylkäysperuste,\r\n{}\r\n",
 					// hylkaysperuste);
 					// }
-					tulokset.put("hylkaysperuste", hylkaysperuste);
+					if(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY.equals(valintatapajono.getTila())) {
+						tulokset.put("hylkaysperuste", hylkaysperuste);
+					} else {
+						tulokset.put("hylkaysperuste", StringUtils.EMPTY);
+					}
 					tulokset.put(
 							"valinnanTulos",
 							HakemusUtil.tilaConverter(
