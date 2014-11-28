@@ -31,6 +31,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 public class LueHakijapalvelunOsoite {
 	private static final String KAYNTI_TYYPPI = "kaynti";
 	private static final String POSTI_TYYPPI = "posti";
+	private static final String ULKOMAINEN_POSTI_TYYPPI = "ulkomainen_posti";
+	
 	public static final Set<String> kiinnostavatYhteystiedot = Collections
 			.unmodifiableSet(Sets.newHashSet(Arrays.asList(KAYNTI_TYYPPI,
 					POSTI_TYYPPI)));
@@ -110,7 +112,7 @@ public class LueHakijapalvelunOsoite {
 				email = englanninkielisetEmailit.get(0).getEmail();
 			}
 			List<Yhteystieto> postit = englanninkielisetYhteystiedot
-					.stream().filter(postiTyyppia())
+					.stream().filter(ulkomainenPostiTyyppia())
 					.collect(Collectors.toList());
 			if (!postit.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(postit
@@ -193,6 +195,11 @@ public class LueHakijapalvelunOsoite {
 		return yhteystiedot -> POSTI_TYYPPI.equals(yhteystiedot.getOsoiteTyyppi());
 	}
 
+	private static Predicate<Yhteystieto> ulkomainenPostiTyyppia() {
+		return yhteystiedot -> ULKOMAINEN_POSTI_TYYPPI.equals(yhteystiedot.getOsoiteTyyppi());
+	}
+
+	
 	private static Predicate<Yhteystieto> kiinnostavaYhteystieto() {
 		return yhteystiedot -> kiinnostavatYhteystiedot.contains(yhteystiedot.getOsoiteTyyppi()
 				);
