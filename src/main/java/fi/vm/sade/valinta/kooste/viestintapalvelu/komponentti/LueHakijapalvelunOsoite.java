@@ -87,6 +87,7 @@ public class LueHakijapalvelunOsoite {
 					organisaatio.getOid());
 			return null;
 		}
+		LOG.error("!!!!!!!!!!!!!! preferoitukieli "+preferoitukielikoodi);
 		String numero = null;
 		String email = null;
 		if(!puhelinnumerot.isEmpty()) {
