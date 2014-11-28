@@ -150,7 +150,7 @@ public class LueHakijapalvelunOsoite {
 			if (!ruotsinkielisetYhteystiedot.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(
 						ruotsinkielisetYhteystiedot.iterator().next(),
-						KieliType.SV, organisaatio.organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_sv#1"), email, numero);
+						KieliType.SV, organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_sv#1"), email, numero);
 			}
 		}
 
