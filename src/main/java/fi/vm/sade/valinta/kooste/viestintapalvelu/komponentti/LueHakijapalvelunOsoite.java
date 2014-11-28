@@ -115,6 +115,8 @@ public class LueHakijapalvelunOsoite {
 			List<Yhteystieto> postit = englanninkielisetYhteystiedot
 					.stream().filter(ulkomainenPostiTyyppia())
 					.collect(Collectors.toList());
+			LOG.error("!!!!!!!!!!!!!! postit "+ englanninkielisetYhteystiedot + "\n !!!!!!!!!!!1 \n" + postit);
+			
 			if (!postit.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(postit
 						.iterator().next(), KieliType.EN, organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_en#1"),email, numero);
