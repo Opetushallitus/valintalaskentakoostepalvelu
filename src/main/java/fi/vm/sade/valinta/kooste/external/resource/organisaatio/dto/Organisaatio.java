@@ -7,20 +7,12 @@ public class Organisaatio {
 	private String parentOid;
 	private Metadata metadata;
 	private Map<String,String> nimi;
-	private Map<String,String> hakutoimistonNimi;
 	
 	public Map<String, String> getNimi() {
 		return nimi;
 	}
 	public void setNimi(Map<String, String> nimi) {
 		this.nimi = nimi;
-	}
-	
-	public Map<String, String> getHakutoimistonNimi() {
-		return hakutoimistonNimi;
-	}
-	public void setHakutoimistonNimi(Map<String, String> hakutoimistonNimi) {
-		this.hakutoimistonNimi = hakutoimistonNimi;
 	}
 	
 	public Metadata getMetadata() {

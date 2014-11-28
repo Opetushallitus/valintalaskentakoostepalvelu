@@ -53,7 +53,7 @@ public class LueHakijapalvelunOsoite {
 			LOG.warn("Yritettiin hakea hakijapalvelun osoitetta tyhjasta organisaatio oliosta!");
 			return null;
 		}
-		if (organisaatio.getHakutoimistonNimi() == null) {
+		if (organisaatio.getMetadata().getHakutoimistonNimi() == null) {
 			LOG.warn("Yritettiin hakea hakijapalvelun organisaatiosta jossa ei hakutoimistoa!");
 			return null;
 		}
@@ -114,12 +114,12 @@ public class LueHakijapalvelunOsoite {
 					.collect(Collectors.toList());
 			if (!postit.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(postit
-						.iterator().next(), KieliType.EN, organisaatio.getHakutoimistonNimi().get("kieli_en#1"),email, numero);
+						.iterator().next(), KieliType.EN, organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_en#1"),email, numero);
 			}
 			if (!englanninkielisetYhteystiedot.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(
 						englanninkielisetYhteystiedot.iterator().next(),
-						KieliType.EN, organisaatio.getHakutoimistonNimi().get("kieli_en#1"),email, numero);
+						KieliType.EN, organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_en#1"),email, numero);
 			}
 		}
 		if (KieliUtil.RUOTSI.equals(preferoitukielikoodi)) {
@@ -145,12 +145,12 @@ public class LueHakijapalvelunOsoite {
 			}
 			if (!postit.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(postit
-						.iterator().next(), KieliType.SV, organisaatio.getHakutoimistonNimi().get("kieli_sv#1"), email, numero);
+						.iterator().next(), KieliType.SV, organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_sv#1"), email, numero);
 			}
 			if (!ruotsinkielisetYhteystiedot.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(
 						ruotsinkielisetYhteystiedot.iterator().next(),
-						KieliType.SV, organisaatio.getHakutoimistonNimi().get("kieli_sv#1"), email, numero);
+						KieliType.SV, organisaatio.organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_sv#1"), email, numero);
 			}
 		}
 
@@ -174,17 +174,17 @@ public class LueHakijapalvelunOsoite {
 				.collect(Collectors.toList());
 		if(!suomenkielisetPostit.isEmpty()) {
 			return osoiteKomponentti.haeOsoiteYhteystiedoista(suomenkielisetPostit.iterator()
-					.next(), KieliType.FI, organisaatio.getHakutoimistonNimi().get("kieli_fi#1"), email, numero);
+					.next(), KieliType.FI, organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_fi#1"), email, numero);
 		}
 		List<Yhteystieto> postit = yhteystiedot.stream()
 				.filter(postiTyyppia()).collect(Collectors.toList());
 		if (!postit.isEmpty()) {
 			return osoiteKomponentti.haeOsoiteYhteystiedoista(postit.iterator()
-					.next(), KieliType.FI, organisaatio.getHakutoimistonNimi().get("kieli_fi#1"), email, numero);
+					.next(), KieliType.FI, organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_fi#1"), email, numero);
 		}
 		if (!yhteystiedot.isEmpty()) {
 			return osoiteKomponentti.haeOsoiteYhteystiedoista(yhteystiedot
-					.iterator().next(), KieliType.FI, organisaatio.getHakutoimistonNimi().get("kieli_fi#1"), email, numero);
+					.iterator().next(), KieliType.FI, organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_fi#1"), email, numero);
 		}
 		return null;
 	}
