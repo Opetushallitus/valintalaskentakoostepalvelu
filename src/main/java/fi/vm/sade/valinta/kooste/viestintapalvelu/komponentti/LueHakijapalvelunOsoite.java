@@ -87,7 +87,6 @@ public class LueHakijapalvelunOsoite {
 					organisaatio.getOid());
 			return null;
 		}
-		LOG.error("!!!!!!!!!!!!!! preferoitukieli "+preferoitukielikoodi);
 		String numero = null;
 		String email = null;
 		if(!puhelinnumerot.isEmpty()) {
@@ -115,7 +114,6 @@ public class LueHakijapalvelunOsoite {
 			List<Yhteystieto> postit = englanninkielisetYhteystiedot
 					.stream().filter(ulkomainenPostiTyyppia())
 					.collect(Collectors.toList());
-			LOG.error("!!!!!!!!!!!!!! postit "+ englanninkielisetYhteystiedot + "\n !!!!!!!!!!!1 \n" + postit);
 			
 			if (!postit.isEmpty()) {
 				return osoiteKomponentti.haeOsoiteYhteystiedoista(postit
