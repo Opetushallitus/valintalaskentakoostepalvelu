@@ -35,7 +35,7 @@ public class LueHakijapalvelunOsoite {
 	
 	public static final Set<String> kiinnostavatYhteystiedot = Collections
 			.unmodifiableSet(Sets.newHashSet(Arrays.asList(KAYNTI_TYYPPI,
-					POSTI_TYYPPI)));
+					POSTI_TYYPPI, ULKOMAINEN_POSTI_TYYPPI)));
 	private static final Logger LOG = LoggerFactory
 			.getLogger(LueHakijapalvelunOsoite.class);
 
