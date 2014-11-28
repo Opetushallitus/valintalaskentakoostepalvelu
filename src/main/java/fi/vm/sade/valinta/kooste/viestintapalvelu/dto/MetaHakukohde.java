@@ -53,6 +53,17 @@ public class MetaHakukohde {
 		return hakukohteenKieli;
 	}
 
+	public String getHakukohteenNonEmptyKieli() {
+		if (hakukohteenKieli == null) {
+			if (hakukohdeNimi == null) {
+				return KieliUtil.SUOMI;
+			}
+			return getHakukohdeNimi().getNonEmptyKieli();
+		}
+		return hakukohteenKieli;
+	}
+
+	
 	public Teksti getHakukohdeNimi() {
 		return hakukohdeNimi;
 	}

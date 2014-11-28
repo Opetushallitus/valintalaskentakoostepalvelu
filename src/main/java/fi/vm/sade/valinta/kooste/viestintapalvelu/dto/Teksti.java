@@ -62,6 +62,16 @@ public class Teksti {
 		}
 	}
 
+	public String getNonEmptyKieli() {
+		if (normalisoituKieliJaKoodi.containsKey(SUOMI) && !StringUtils.isEmpty(normalisoituKieliJaKoodi.get(SUOMI))) {
+			return SUOMI;
+		} else if (normalisoituKieliJaKoodi.containsKey(RUOTSI)&& !StringUtils.isEmpty(normalisoituKieliJaKoodi.get(RUOTSI))) {
+			return RUOTSI;
+		} else {
+			return ENGLANTI;
+		}
+	}
+	
 	/**
 	 * 
 	 * @param normalisoituKielikoodi
