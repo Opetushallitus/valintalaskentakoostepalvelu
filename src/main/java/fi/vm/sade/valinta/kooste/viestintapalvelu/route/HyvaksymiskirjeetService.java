@@ -22,6 +22,9 @@ public interface HyvaksymiskirjeetService {
 	void hyvaksymiskirjeetHakemuksille(KirjeProsessi prosessi,
 			HyvaksymiskirjeDTO hyvaksymiskirjeDTO, List<String> hakemusOids);
 
+	void jalkiohjauskirjeHakukohteelle(KirjeProsessi prosessi,
+			final HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
+	
 	void hyvaksymiskirjeetHakukohteelle(KirjeProsessi prosessi,
 			HyvaksymiskirjeDTO hyvaksymiskirjeDTO);
 }

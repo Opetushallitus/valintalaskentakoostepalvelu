@@ -10,7 +10,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 public interface SijoitteluAsyncResource {
 
 	Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid);
-	
+	Future<HakijaPaginationObject> getKaikkiHakijat(
+			String hakuOid, String hakukohdeOid);
 	Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(
 			String hakuOid, String hakukohdeOid);
 
