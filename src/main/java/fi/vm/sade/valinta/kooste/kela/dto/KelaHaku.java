@@ -22,11 +22,12 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakutoiveDto;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakemusSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.LinjakoodiSource;
@@ -41,10 +42,10 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HakutoiveenValinta
  */
 public class KelaHaku extends KelaAbstraktiHaku {
 	private final static Logger LOG = LoggerFactory.getLogger(KelaHaku.class);
-	private final Collection<HakijaDTO> hakijat;
+	private final Collection<ValintaTulosServiceDto> hakijat;
 
-	public KelaHaku(Collection<HakijaDTO> hakijat, HakuV1RDTO haku,
-			PaivamaaraSource paivamaaraSource) {
+	public KelaHaku(Collection<ValintaTulosServiceDto> hakijat,
+			HakuV1RDTO haku, PaivamaaraSource paivamaaraSource) {
 		super(haku, paivamaaraSource);
 		this.hakijat = hakijat;
 	}
@@ -54,66 +55,54 @@ public class KelaHaku extends KelaAbstraktiHaku {
 			HakemusSource hakemusSource, HakukohdeSource hakukohdeSource,
 			LinjakoodiSource linjakoodiSource, OppilaitosSource oppilaitosSource) {
 		Collection<KelaHakijaRivi> valitut = Lists.newArrayList();
-		for (HakijaDTO hakija : hakijat) {
-			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-				Collections.sort(hakutoive.getHakutoiveenValintatapajonot(),
-						HakutoiveenValintatapajonoComparator.DEFAULT);
-				for (HakutoiveenValintatapajonoDTO jono : hakutoive
-						.getHakutoiveenValintatapajonot()) {
-					if ((HakemuksenTila.HYVAKSYTTY.equals(jono.getTila()) || HakemuksenTila.VARASIJALTA_HYVAKSYTTY
-							.equals(jono.getTila()))
-							&& (jono.getVastaanottotieto() != null && jono
-									.getVastaanottotieto().equals(
-											ValintatuloksenTila.VASTAANOTTANUT))) {
-						Hakemus hakemus = hakemusSource.getHakemusByOid(hakija
-								.getHakemusOid());
-						Map<String, String> henkilotiedot = henkilotiedot(hakemus);
-						String hakukohdeOid = hakutoive.getHakukohdeOid();
+		for (ValintaTulosServiceDto hakija : hakijat) {
+			hakija.getHakutoiveet()
+					.stream()
+					//
+					.filter(h -> h == null || h.getValintatila() == null
+							|| h.getVastaanottotila() == null)
+					//
+					.filter(hakutoive ->
+					//
+					hakutoive.getValintatila().isHyvaksytty()
+							&& hakutoive.getVastaanottotila()
+									.isVastaanottanut())
+					//
+					.findFirst()
+					.ifPresent(
+							hakutoive -> {
+								Hakemus hakemus = hakemusSource
+										.getHakemusByOid(hakija.getHakemusOid());
+								Map<String, String> henkilotiedot = henkilotiedot(hakemus);
+								String hakukohdeOid = hakutoive
+										.getHakukohdeOid();
 
-						/*
-						 * HakukohdeDTO hakukohde = hakukohdeSource
-						 * .getHakukohdeByOid(hakukohdeOid);
-						 */
-						final String etunimi = henkilotiedot.get(ETUNIMET);
-						final String sukunimi = henkilotiedot.get(SUKUNIMI);
-						final String henkilotunnus = henkilotiedot
-								.get(HENKILOTUNNUS);
-						final String syntymaaika = henkilotiedot
-								.get(SYNTYMAAIKA);
-						final Date lukuvuosi = getPaivamaaraSource().lukuvuosi(
-								getHaku());
-						final Date poimintapaivamaara = getPaivamaaraSource()
-								.poimintapaivamaara(getHaku());
-						final Date valintapaivamaara = getPaivamaaraSource()
-								.valintapaivamaara(getHaku());
-						/*
-						 * final String linjakoodi = linjakoodiSource
-						 * .getLinjakoodi(hakukohde.getHakukohdeNimiUri());
-						 */
-						/*
-						 * final String oppilaitos = oppilaitosSource
-						 * .getOppilaitosKoodi(hakutoive.getTarjoajaOid());
-						 */
-						final String oppilaitosnumero = oppilaitosSource
-								.getOppilaitosnumero(hakutoive.getTarjoajaOid());
-						final String organisaatioOid = hakutoive
-								.getTarjoajaOid();
+								final String etunimi = henkilotiedot
+										.get(ETUNIMET);
+								final String sukunimi = henkilotiedot
+										.get(SUKUNIMI);
+								final String henkilotunnus = henkilotiedot
+										.get(HENKILOTUNNUS);
+								final String syntymaaika = henkilotiedot
+										.get(SYNTYMAAIKA);
+								final Date lukuvuosi = getPaivamaaraSource()
+										.lukuvuosi(getHaku());
+								final Date poimintapaivamaara = getPaivamaaraSource()
+										.poimintapaivamaara(getHaku());
+								final Date valintapaivamaara = getPaivamaaraSource()
+										.valintapaivamaara(getHaku());
+								final String oppilaitosnumero = oppilaitosSource
+										.getOppilaitosnumero(hakutoive
+												.getTarjoajaOid());
+								final String organisaatioOid = hakutoive
+										.getTarjoajaOid();
 
-						valitut.add(new KelaHakijaRivi(etunimi, sukunimi,
-								henkilotunnus, lukuvuosi, poimintapaivamaara,
-								valintapaivamaara, oppilaitosnumero,
-								organisaatioOid, hakukohdeOid, syntymaaika));
-						/*
-						 * valitut.add(new KelaHakijaRivi(etunimi, sukunimi,
-						 * henkilotunnus, lukuvuosi, poimintapaivamaara,
-						 * valintapaivamaara, linjakoodi, oppilaitos,
-						 * syntymaaika));
-						 */
-					} else {
-						break;
-					}
-				}
-			}
+								valitut.add(new KelaHakijaRivi(etunimi,
+										sukunimi, henkilotunnus, lukuvuosi,
+										poimintapaivamaara, valintapaivamaara,
+										oppilaitosnumero, organisaatioOid,
+										hakukohdeOid, syntymaaika));
+							});
 		}
 		return valitut;
 	}

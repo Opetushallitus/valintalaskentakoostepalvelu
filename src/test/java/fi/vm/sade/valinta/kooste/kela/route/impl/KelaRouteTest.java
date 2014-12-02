@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import jersey.repackaged.com.google.common.util.concurrent.Futures;
+
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -38,6 +40,8 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusList;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.SuppeaHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
@@ -65,8 +69,8 @@ public class KelaRouteTest extends CamelTestSupport {
 			.mock(KelaHakijaRiviKomponenttiImpl.class);
 	private final KelaDokumentinLuontiKomponenttiImpl dkRivi = Mockito
 			.mock(KelaDokumentinLuontiKomponenttiImpl.class);
-	private final SijoitteluKaikkiPaikanVastaanottaneet sijoitteluKaikkiPaikanVastaanottaneet = Mockito
-			.mock(SijoitteluKaikkiPaikanVastaanottaneet.class);
+	private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource = Mockito
+			.mock(ValintaTulosServiceAsyncResource.class);
 	private final HaunTyyppiKomponentti haunTyyppiKomponentti = Mockito
 			.mock(HaunTyyppiKomponentti.class);
 	private final ApplicationResource applicationResource = Mockito
@@ -94,7 +98,10 @@ public class KelaRouteTest extends CamelTestSupport {
 		return hakukohdeDTO;
 	}
 
-	private Collection<HakijaDTO> createHakijat() {
+	private List<ValintaTulosServiceDto> createHakijat() {
+		ValintaTulosServiceDto vts = new ValintaTulosServiceDto();
+		vts.setHakemusOid(HAKEMUS1);
+		/*
 		HakijaDTO h = new HakijaDTO();
 		h.setEtunimi("Eero");
 		h.setHakemusOid(HAKEMUS1);
@@ -106,14 +113,15 @@ public class KelaRouteTest extends CamelTestSupport {
 		htoive.getHakutoiveenValintatapajonot().add(jono);
 		hakutoiveet.add(htoive);
 		h.setHakutoiveet(hakutoiveet);
-		return Arrays.asList(h);
+		*/
+		return Arrays.asList();
 	}
 
 	@Test
 	public void kelaLuonninTestaus() {
 		Mockito.when(
-				sijoitteluKaikkiPaikanVastaanottaneet.vastaanottaneet(Mockito
-						.anyString())).thenReturn(createHakijat());
+				valintaTulosServiceAsyncResource.getValintatulokset(Mockito
+						.anyString())).thenReturn(Futures.immediateFuture(createHakijat()));
 		Mockito.when(hakukohdeResource.getByOID(Mockito.anyString()))
 				.thenReturn(createHakukohdeDTO());
 		Mockito.when(hakuResource.findByOid(Mockito.anyString())).then(
@@ -161,11 +169,6 @@ public class KelaRouteTest extends CamelTestSupport {
 						return createHakemukset();
 					}
 				});
-		// Mockito.when(hakuResource.findByOid(Mockito.eq(HAKU1))).thenReturn(
-		// new ResultV1RDTO<HakuV1RDTO>(createHaku(HAKU1)));
-		// Mockito.when(hakuResource.findByOid(Mockito.eq(HAKU2))).thenReturn(
-		// new ResultV1RDTO<HakuV1RDTO>(createHaku(HAKU2)));
-
 		Collection<String> hakuOids = Arrays.asList(HAKU1, HAKU2);
 		KelaProsessi kelaProsessi = new KelaProsessi("luonti", hakuOids);
 		KelaLuonti kelaLuonti = new KelaLuonti(UUID, hakuOids,
@@ -200,10 +203,10 @@ public class KelaRouteTest extends CamelTestSupport {
 	@Override
 	protected RouteBuilder createRouteBuilder() throws Exception {
 		return new KelaRouteImpl(DIRECT_KELA, dokumenttiResource, hkRivi,
-				dkRivi, sijoitteluKaikkiPaikanVastaanottaneet, hakuResource,
+				dkRivi, hakuResource,
 				haunTyyppiKomponentti, applicationResource,
 				oppilaitosKomponentti, linjakoodiKomponentti,
-				hakukohdeResource, koodiService);
+				hakukohdeResource, koodiService,valintaTulosServiceAsyncResource);
 	}
 
 	private HakuV1RDTO createHaku(String oid) {
