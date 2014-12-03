@@ -115,7 +115,7 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 						List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus -> {
 							HakemusWrapper wrapper = new HakemusWrapper(hakemus);
 							ErillishakuRivi r = new ErillishakuRivi(wrapper.getSukunimi(), 
-									wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSyntymaaika(), "HYLATTY", "","");
+									wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSyntymaaika(), "HYLATTY", "","", false);
 							return r;
 						}).collect(Collectors.toList());
 						return  new ErillishakuExcel(erillishaku.getHakutyyppi(), hakuNimi, hakukohdeNimi,
@@ -135,8 +135,8 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 									Valintatulos tulos = valintatulokset.get(h.getHakemusOid());
 									ErillishakuRivi e =new ErillishakuRivi(h
 											.getSukunimi(), h.getEtunimi(),h0.getHenkilotunnus(),h0.getSyntymaaika(),
-											hakemuksenTila,tulos.getTila().toString(),tulos.getIlmoittautumisTila().toString()
-											);
+											hakemuksenTila,tulos.getTila().toString(),tulos.getIlmoittautumisTila().toString(),
+											tulos.getJulkaistavissa());
 									return e;
 								}).collect(Collectors.toList());
 

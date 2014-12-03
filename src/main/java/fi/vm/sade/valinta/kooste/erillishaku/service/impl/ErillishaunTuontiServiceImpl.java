@@ -119,7 +119,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
 									// tuntematon tila tai todennakoisesti asettamatta
 									hakija.setIlmoittautumisTila(null);
 								}
-							hakija.setJulkaistavissa(wrapper.getLupaJulkaisuun());
+							hakija.setJulkaistavissa(rivi.isJulkaistaankoTiedot());
 							hakija.setTarjoajaOid(erillishaku.getTarjoajaOid());
 							hakija.setValintatapajonoOid(erillishaku.getValintatapajonoOid());
 							hakijat.add(hakija);

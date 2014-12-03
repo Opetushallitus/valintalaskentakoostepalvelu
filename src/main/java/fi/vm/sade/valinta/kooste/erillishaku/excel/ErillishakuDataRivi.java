@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -47,7 +48,8 @@ public class ErillishakuDataRivi extends DataRivi {
 		String hakemuksenTila = lukija.getArvoAt(4);
 		String vastaanottoTila = lukija.getArvoAt(5);
 		String ilmoittautumisTila = lukija.getArvoAt(6);
-		kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(sukunimi,etunimi, henkilotunnus, syntymaAika, hakemuksenTila, vastaanottoTila, ilmoittautumisTila));
+		boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(lukija.getArvoAt(7));
+		kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(sukunimi,etunimi, henkilotunnus, syntymaAika, hakemuksenTila, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot));
 		return true;
 	}
 	private static final Collection<String> HAKEMUKSENTILA_ARVOT =Arrays.asList(HakemuksenTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList()); 
@@ -71,7 +73,12 @@ public class ErillishakuDataRivi extends DataRivi {
 					ValintatuloksenTila.KESKEN
 					//
 					).stream().map(t -> t.toString()).collect(Collectors.toList());
-	private static final Collection<String> ILMOITTAUTUMISTILA_ARVOT =Arrays.asList(IlmoittautumisTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList()); 
+	private static final Collection<String> ILMOITTAUTUMISTILA_ARVOT =
+			Arrays.asList(IlmoittautumisTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList()); 
+	private static final String LUPA_JULKAISUUN = "LUPA JULKAISUUN";
+	private static final Collection<String> JULKAISU_LUPA_ARVOT =
+			Arrays.asList(LUPA_JULKAISUUN, StringUtils.EMPTY); 
+	
 	public static MonivalintaArvo hakemuksenTila(String arvo) {
 		
 		return new MonivalintaArvo(arvo, HAKEMUKSENTILA_ARVOT);
@@ -84,6 +91,9 @@ public class ErillishakuDataRivi extends DataRivi {
 		} else{
 		return new MonivalintaArvo(arvo, VASTAANOTTOTILA_ARVOT);
 		}
+	}
+public static MonivalintaArvo julkaisuLupa(boolean arvo) {
+		return new MonivalintaArvo(arvo ? LUPA_JULKAISUUN: StringUtils.EMPTY, JULKAISU_LUPA_ARVOT);
 	}
 	public static MonivalintaArvo ilmoittautumisTila(String arvo) {
 		

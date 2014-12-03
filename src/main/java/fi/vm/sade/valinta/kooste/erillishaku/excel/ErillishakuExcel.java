@@ -66,7 +66,9 @@ public class ErillishakuExcel {
 				"Etunimi"), new TekstiArvo("Henkilötunnus"), new TekstiArvo(
 				"Syntymäaika"), new TekstiArvo("Hakemuksentila"),
 				new TekstiArvo("Vastaanottotila"), new TekstiArvo(
-						"Ilmoittautumistila")));
+						"Ilmoittautumistila")
+		,new TekstiArvo(
+						"Julkaistaanko tiedot")));
 		Collections.sort(erillishakurivit, new Comparator<ErillishakuRivi>() {
 			@Override
 			public int compare(ErillishakuRivi h1, ErillishakuRivi h2) {
@@ -107,6 +109,8 @@ public class ErillishakuExcel {
 											.getVastaanottoTila()));
 									a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi
 											.getIlmoittautumisTila()));
+									a.add(ErillishakuDataRivi.julkaisuLupa(rivi
+											.isJulkaistaankoTiedot()));
 									return a;
 								})).collect(Collectors.toList()));
 
