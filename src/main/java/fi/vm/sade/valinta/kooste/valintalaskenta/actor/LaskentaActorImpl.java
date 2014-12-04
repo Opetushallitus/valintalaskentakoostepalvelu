@@ -80,7 +80,18 @@ public class LaskentaActorImpl implements LaskentaActor {
 			uudetPalvelukutsutKayntiin();
 		}));
 	}
-
+	@Override
+	public void postStop() {
+		if(!hakukohdeLaskuri.isDone()) {
+			try {
+				LOG.error("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
+				laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
+						LaskentaTila.PERUUTETTU);
+			} catch (Exception e) {
+				LOG.error("Virhe {}", e.getMessage());
+			}
+		}
+	}
 	private String tulkinta(HakukohdeTila tila) {
 		if (HakukohdeTila.VALMIS.equals(tila)) {
 			return "Seuraavaksi suoritetaan hakukohteelle laskentakutsu!";

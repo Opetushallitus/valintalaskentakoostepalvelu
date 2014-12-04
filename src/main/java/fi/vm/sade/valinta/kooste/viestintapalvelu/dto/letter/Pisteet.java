@@ -7,20 +7,20 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter;
  */
 public class Pisteet {
 	private String nimi;
-	private int oma;
-	private int minimi;
+	private String oma;
+	private String minimi;
 
 	public Pisteet() {
 
 	}
 
-	public Pisteet(String nimi, int oma, int minimi) {
+	public Pisteet(String nimi, String oma, String minimi) {
 		this.nimi = nimi;
 		this.oma = oma;
 		this.minimi = minimi;
 	}
 
-	public int getMinimi() {
+	public String getMinimi() {
 		return minimi;
 	}
 
@@ -28,7 +28,7 @@ public class Pisteet {
 		return nimi;
 	}
 
-	public int getOma() {
+	public String getOma() {
 		return oma;
 	}
 }

@@ -2,15 +2,18 @@ package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.ClientConfiguration;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
@@ -86,15 +89,15 @@ public class TilaAsyncResourceImpl implements TilaAsyncResource{
 	//@Path("erillishaku/{hakuOid}/hakukohde/{hakukohdeOid}")
 	@Override
 	public Future<Response> tuoErillishaunTilat(
-			String hakuOid, String hakukohdeOid,
+			String hakuOid, String hakukohdeOid, String valintatapajononNimi,
 			Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
 		//@Path("tila")
 		StringBuilder urlBuilder = new StringBuilder().append("/tila/erillishaku/")
 				.append(hakuOid).append("/hakukohde/")
 				.append(hakukohdeOid).append("/");
 		String url = urlBuilder.toString();
-		LOG.warn("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}",
-				address, url, hakukohdeOid);
+		LOG.warn("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}&valintatapajononNimi={}",
+				address, url, hakukohdeOid, valintatapajononNimi);
 		return WebClient.fromClient(webClient)
 		//
 				.path(url)
@@ -104,6 +107,8 @@ public class TilaAsyncResourceImpl implements TilaAsyncResource{
 				//.query("hakukohdeOid", hakukohdeOid)
 				//
 				//.accept(MediaType.APPLICATION_JSON_TYPE)
+				//
+				.query("valintatapajononNimi", Optional.ofNullable(valintatapajononNimi).orElse(StringUtils.EMPTY))
 				//
 				.async().post(Entity.entity(erillishaunHakijat,
 						MediaType.APPLICATION_JSON_TYPE));

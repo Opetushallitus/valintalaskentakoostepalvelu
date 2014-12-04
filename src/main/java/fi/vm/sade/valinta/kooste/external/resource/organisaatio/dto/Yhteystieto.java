@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto;
 
 public class Yhteystieto {
 	private String osoiteTyyppi;
+	private String tyyppi;
 	private String kieli;
 	private String id;
 	private String yhteystietoOid;
@@ -15,7 +16,26 @@ public class Yhteystieto {
 	private String osavaltio;
 	private String extraRivi;
 	private String maaUri;
-	
+	private String email;
+	private String numero;
+	public String getTyyppi() {
+		return tyyppi;
+	}
+	public void setTyyppi(String tyyppi) {
+		this.tyyppi = tyyppi;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public String getNumero() {
+		return numero;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public void setNumero(String numero) {
+		this.numero = numero;
+	}
 	public String getCoordinateType() {
 		return coordinateType;
 	}

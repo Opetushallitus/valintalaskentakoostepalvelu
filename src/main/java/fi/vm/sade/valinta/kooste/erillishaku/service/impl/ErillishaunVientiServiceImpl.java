@@ -4,7 +4,6 @@ import static rx.Observable.from;
 import static rx.Observable.zip;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -18,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import rx.schedulers.Schedulers;
+import fi.vm.sade.sijoittelu.domain.Hakukohde;
+import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
@@ -65,9 +67,14 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 		Future<List<Hakemus>> hakemusFuture = applicationAsyncResource
 				.getApplicationsByOid(erillishaku.getHakuOid(),
 						erillishaku.getHakukohdeOid());
+		
 		Future<HakukohdeDTO> hakukohdeFuture = sijoitteluAsyncResource
 				.getLatestHakukohdeBySijoittelu(erillishaku.getHakuOid(),
 						erillishaku.getHakukohdeOid());
+		
+		Future<List<Valintatulos>> valintatulosFuture = sijoitteluAsyncResource
+				.getValintatuloksetHakukohteelle(
+						erillishaku.getHakukohdeOid(), erillishaku.getValintatapajonoOid());
 		Future<HakuV1RDTO> hakuFuture = hakuV1AsyncResource.haeHaku(erillishaku
 				.getHakuOid());
 		Future<fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO> tarjontaHakukohdeFuture = hakuV1AsyncResource
@@ -85,8 +92,13 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 					Map<String,Hakemus> oidToHakemus = hakemukset.stream().collect(Collectors.toMap(
 							h -> h.getOid(),h -> h
 							));
+					Map<String, Valintatulos> valintatulokset;
 					HakukohdeDTO hakukohde;
 					try {
+						valintatulokset = valintatulosFuture.get().stream()
+								.filter(v -> erillishaku.getValintatapajonoOid().equals(v.getValintatapajonoOid()))
+								.collect(Collectors.toMap(
+								v -> v.getHakemusOid(), v-> v));
 						hakukohde = hakukohdeFuture.get();
 					} catch (Exception e1) {
 						LOG.error("Sijoittelusta ei saatu tietoja hakukohteelle vientia varten!"
@@ -95,19 +107,21 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 								erillishaku.getHakukohdeOid(),SijoitteluResource.LATEST, e1.getMessage(), Arrays.toString(e1.getStackTrace()));
 						throw new RuntimeException(e1);
 					}
-					if (hakukohde.getValintatapajonot().isEmpty()) {
+					
+					if (valintatulokset == null || valintatulokset.isEmpty()) {
 						// ei viela tuloksia, joten tehdaan tuonti haetuista
 						// hakemuksista
-						LOG.warn("Hakemuksia ei ole viela tuotu ensimmaistakaan kertaa talle hakukohteelle! Generoidaan hakemuksista excel...");
+						LOG.error("Hakemuksia ei ole viela tuotu ensimmaistakaan kertaa talle hakukohteelle! Generoidaan hakemuksista excel...");
 						List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus -> {
 							HakemusWrapper wrapper = new HakemusWrapper(hakemus);
 							ErillishakuRivi r = new ErillishakuRivi(wrapper.getSukunimi(), 
-									wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSyntymaaika(), "HYLATTY", "","");
+									wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSyntymaaika(), "HYLATTY", "","", false);
 							return r;
 						}).collect(Collectors.toList());
 						return  new ErillishakuExcel(erillishaku.getHakutyyppi(), hakuNimi, hakukohdeNimi,
 								tarjoajaNimi, rivit);
 					} else {
+						LOG.error("Muodostetaan Excel valintaperusteista!");
 						List<ErillishakuRivi> erillishakurivit = hakukohde
 								.getValintatapajonot().stream()
 								.flatMap(v -> v.getHakemukset().stream())
@@ -118,10 +132,11 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
 									if(h.getTila() != null) {
 										hakemuksenTila = h.getTila().toString();
 									}
+									Valintatulos tulos = valintatulokset.get(h.getHakemusOid());
 									ErillishakuRivi e =new ErillishakuRivi(h
 											.getSukunimi(), h.getEtunimi(),h0.getHenkilotunnus(),h0.getSyntymaaika(),
-											hakemuksenTila,"",""
-											);
+											hakemuksenTila,tulos.getTila().toString(),tulos.getIlmoittautumisTila().toString(),
+											tulos.getJulkaistavissa());
 									return e;
 								}).collect(Collectors.toList());
 

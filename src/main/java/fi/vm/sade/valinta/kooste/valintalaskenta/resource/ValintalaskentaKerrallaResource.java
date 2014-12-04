@@ -97,13 +97,33 @@ public class ValintalaskentaKerrallaResource {
 			@PathParam("whitelist") boolean whitelist, List<String> maski,
 			@Suspended AsyncResponse asyncResponse) {
 		try {
-			asyncResponse.setTimeout(15L, TimeUnit.SECONDS);
+			asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
 			asyncResponse.setTimeoutHandler(new TimeoutHandler() {
 				public void handleTimeout(AsyncResponse asyncResponse) {
+					String hakukohdeOids = null;
+					if (maski != null && !maski.isEmpty()) {
+						try {
+							Object[] hakukohdeOidArray = maski.toArray();
+							StringBuilder sb = new StringBuilder();
+							sb.append(Arrays.toString(Arrays.copyOfRange(
+									hakukohdeOidArray, 0,
+									Math.min(hakukohdeOidArray.length, 10))));
+							if (hakukohdeOidArray.length > 10) {
+								sb.append(
+										" ensimmaiset 10 hakukohdetta maskissa jossa on yhteensa hakukohteita ")
+										.append(hakukohdeOidArray.length);
+							} else {
+								sb.append(" maskin hakukohteet");
+							}
+							hakukohdeOids = sb.toString();
+						} catch (Exception e) {
+							hakukohdeOids = e.getMessage();
+						}
+					}
 					LOG.error(
-							"Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}",
+							"Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}\r\n{}",
 							hakuOid, tyyppi, whitelist, valinnanvaihe,
-							valintakoelaskenta);
+							valintakoelaskenta, hakukohdeOids, hakukohdeOids);
 					asyncResponse.resume(Response.serverError()
 							.entity("Uudelleen ajo laskennalle aikakatkaistu!")
 							.build());
@@ -163,10 +183,28 @@ public class ValintalaskentaKerrallaResource {
 									uuid -> {
 										if (uuid == null) {
 											LOG.error("Laskentaa ei saatu luotua!");
+											asyncResponse
+													.resume(Response
+															.serverError()
+															.entity("Laskentaa ei saatu luotua!")
+															.build());
 											throw new RuntimeException(
 													"Laskentaa ei saatu luotua!");
 										}
-										laskennanAloitus.accept(uuid);
+										try {
+											laskennanAloitus.accept(uuid);
+										} catch (Throwable e) {
+											LOG.error(
+													"Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}",
+													e.getMessage());
+											asyncResponse
+													.resume(Response
+															.serverError()
+															.entity("Odottamaton virhe laskennan kaynnistamisessa! "
+																	+ e.getMessage())
+															.build());
+											throw e;
+										}
 									},
 									poikkeus -> {
 										LOG.error(
@@ -178,11 +216,10 @@ public class ValintalaskentaKerrallaResource {
 												.build());
 									});
 						}
-					}, 
-					Boolean.TRUE.equals(erillishaku),
-					LaskentaTyyppi.VALINTARYHMA.equals(tyyppi),
-					valinnanvaihe, valintakoelaskenta, asyncResponse);
-		} catch (Exception e) {
+					}, Boolean.TRUE.equals(erillishaku),
+					LaskentaTyyppi.VALINTARYHMA.equals(tyyppi), valinnanvaihe,
+					valintakoelaskenta, asyncResponse);
+		} catch (Throwable e) {
 			LOG.error(
 					"Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}",
 					e.getMessage());
@@ -190,6 +227,7 @@ public class ValintalaskentaKerrallaResource {
 					.serverError()
 					.entity("Odottamaton virhe laskennan kaynnistamisessa! "
 							+ e.getMessage()).build());
+			throw e;
 		}
 	}
 
@@ -205,59 +243,97 @@ public class ValintalaskentaKerrallaResource {
 	@Produces(APPLICATION_JSON)
 	public void uudelleenajoLaskennalle(@PathParam("uuid") String uuid,
 			@Suspended AsyncResponse asyncResponse) {
-		asyncResponse.setTimeout(15L, TimeUnit.SECONDS);
-		asyncResponse.setTimeoutHandler(new TimeoutHandler() {
-			public void handleTimeout(AsyncResponse asyncResponse) {
-				LOG.error("Uudelleen ajo laskennalle({}) timeouttasi!", uuid);
-				asyncResponse.resume(Response.serverError()
-						.entity("Uudelleen ajo laskennalle timeouttasi!")
+		try {
+			asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+			asyncResponse.setTimeoutHandler(new TimeoutHandler() {
+				public void handleTimeout(AsyncResponse asyncResponse) {
+					LOG.error("Uudelleen ajo laskennalle({}) timeouttasi!",
+							uuid);
+					asyncResponse.resume(Response.serverError()
+							.entity("Uudelleen ajo laskennalle timeouttasi!")
+							.build());
+				}
+			});
+			Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
+			if (l != null && !l.isValmis()) {
+				LOG.warn(
+						"Laskenta {} on viela ajossa, joten palautetaan linkki siihen.",
+						uuid);
+				asyncResponse.resume(Response.ok(Vastaus.uudelleenOhjaus(uuid))
 						.build());
 			}
-		});
-		Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
-		if (l != null && !l.isValmis()) {
-			LOG.warn(
-					"Laskenta {} on viela ajossa, joten palautetaan linkki siihen.",
-					uuid);
-			asyncResponse.resume(Response.ok(Vastaus.uudelleenOhjaus(uuid))
-					.build());
+			seurantaAsyncResource
+					.resetoiTilat(
+							uuid,
+							laskenta -> {
+								try {
+									List<HakukohdeJaOrganisaatio> maski = laskenta
+											.getHakukohteet()
+											.stream()
+											.filter(h -> !HakukohdeTila.VALMIS
+													.equals(h.getTila()))
+											.map(h -> new HakukohdeJaOrganisaatio(
+													h.getHakukohdeOid(),
+													h.getOrganisaatioOid()))
+											.collect(Collectors.toList());
+									kaynnistaLaskenta(
+											laskenta.getTyyppi(),
+											laskenta.getHakuOid(),
+											new Maski(
+													true,
+													maski.stream()
+															.map(hk -> hk
+																	.getHakukohdeOid())
+															.collect(
+																	Collectors
+																			.toList())),
+											(hakuJaHakukohteet,
+													laskennanAloitus) -> {
+												laskennanAloitus
+														.accept(laskenta
+																.getUuid());
+											}, Boolean.TRUE.equals(laskenta
+													.isErillishaku()),
+											LaskentaTyyppi.VALINTARYHMA
+													.equals(laskenta
+															.getTyyppi()),
+											laskenta.getValinnanvaihe(),
+											laskenta.getValintakoelaskenta(),
+											asyncResponse);
+								} catch (Throwable e) {
+									LOG.error(
+											"Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}",
+											e.getMessage());
+									asyncResponse
+											.resume(Response
+													.serverError()
+													.entity("Odottamaton virhe laskennan kaynnistamisessa! "
+															+ e.getMessage())
+													.build());
+									throw e;
+								}
+							},
+							t -> {
+								LOG.error(
+										"Uudelleen ajo laskennalle heitti poikkeuksen {}:\r\n{}",
+										t.getMessage(),
+										Arrays.toString(t.getStackTrace()));
+								asyncResponse
+										.resume(Response
+												.serverError()
+												.entity("Uudelleen ajo laskennalle heitti poikkeuksen!")
+												.build());
+							});
+		} catch (Throwable e) {
+			LOG.error(
+					"Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}",
+					e.getMessage());
+			asyncResponse.resume(Response
+					.serverError()
+					.entity("Odottamaton virhe laskennan kaynnistamisessa! "
+							+ e.getMessage()).build());
+			throw e;
 		}
-		seurantaAsyncResource
-				.resetoiTilat(
-						uuid,
-						laskenta -> {
-
-							List<HakukohdeJaOrganisaatio> maski = laskenta
-									.getHakukohteet()
-									.stream()
-									.filter(h -> !HakukohdeTila.VALMIS.equals(h
-											.getTila()))
-									.map(h -> new HakukohdeJaOrganisaatio(h
-											.getHakukohdeOid(), h
-											.getOrganisaatioOid()))
-									.collect(Collectors.toList());
-							kaynnistaLaskenta(laskenta.getTyyppi(), laskenta
-									.getHakuOid(), new Maski(true, maski
-									.stream().map(hk -> hk.getHakukohdeOid())
-									.collect(Collectors.toList())), (
-									hakuJaHakukohteet, laskennanAloitus) -> {
-								laskennanAloitus.accept(laskenta.getUuid());
-							}, Boolean.TRUE.equals(laskenta.isErillishaku()), LaskentaTyyppi.VALINTARYHMA.equals(laskenta
-									.getTyyppi()), laskenta.getValinnanvaihe(),
-									laskenta.getValintakoelaskenta(),
-									asyncResponse);
-						},
-						t -> {
-							LOG.error(
-									"Uudelleen ajo laskennalle heitti poikkeuksen {}:\r\n{}",
-									t.getMessage(),
-									Arrays.toString(t.getStackTrace()));
-							asyncResponse
-									.resume(Response
-											.serverError()
-											.entity("Uudelleen ajo laskennalle heitti poikkeuksen!")
-											.build());
-						});
 	}
 
 	private void kaynnistaLaskenta(
@@ -265,9 +341,9 @@ public class ValintalaskentaKerrallaResource {
 			String hakuOid,
 			Maski maski,
 			BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
-			boolean erillishaku,
-			boolean valintaryhmalaskenta, Integer valinnanvaihe,
-			Boolean valintakoelaskenta, AsyncResponse asyncResponse) {
+			boolean erillishaku, boolean valintaryhmalaskenta,
+			Integer valinnanvaihe, Boolean valintakoelaskenta,
+			AsyncResponse asyncResponse) {
 		if (StringUtils.isBlank(hakuOid)) {
 			LOG.error("HakuOid on pakollinen");
 			throw new RuntimeException("HakuOid on pakollinen");
@@ -313,7 +389,8 @@ public class ValintalaskentaKerrallaResource {
 							uuid -> {
 								valintalaskentaRoute
 										.suoritaValintalaskentaKerralla(new LaskentaAloitus(
-												uuid, hakuOid, erillishaku, maski.isMask(),
+												uuid, hakuOid, erillishaku,
+												maski.isMask(),
 												valintaryhmalaskenta,
 												valinnanvaihe,
 												valintakoelaskenta, finalOids,
@@ -411,11 +488,18 @@ public class ValintalaskentaKerrallaResource {
 	//
 	//
 	//
+	@GET
+	@Path("/status")
+	@Produces(APPLICATION_JSON)
+	@ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
+	public List<Laskenta> status() {
+		return valintalaskentaValvomo.ajossaOlevatLaskennat();
+	}
 
 	@GET
 	@Path("/status/{uuid}")
 	@Produces(APPLICATION_JSON)
-	@ApiOperation(value = "Valintalaskennan tila", response = LaskentaAloitus.class)
+	@ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
 	public Laskenta status(@PathParam("uuid") String uuid) {
 		try {
 			return valintalaskentaValvomo.haeLaskenta(uuid);
@@ -446,7 +530,7 @@ public class ValintalaskentaKerrallaResource {
 	@ApiOperation(value = "Valintalaskennan tila", response = LaskentaAloitus.class)
 	public void statusXls(final @PathParam("uuid") String uuid,
 			@Suspended AsyncResponse asyncResponse) {
-		asyncResponse.setTimeout(2L, TimeUnit.SECONDS);
+		asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
 		asyncResponse.setTimeoutHandler(new TimeoutHandler() {
 			public void handleTimeout(AsyncResponse asyncResponse) {
 				Map<String, Object[][]> sheetAndGrid = Maps.newHashMap();
@@ -474,7 +558,7 @@ public class ValintalaskentaKerrallaResource {
 										.laskentaDtoAsExcel(laskenta);
 								asyncResponse.resume(excelResponse(bytes,
 										"yhteenveto.xls"));
-							} catch (Exception e) {
+							} catch (Throwable e) {
 								LOG.error(
 										"Excelin muodostuksessa(kohteelle /laskenta/{}) tapahtui virhe: {}",
 										uuid, e.getMessage());
@@ -492,6 +576,7 @@ public class ValintalaskentaKerrallaResource {
 										.exportGridSheetsAsXlsBytes(sheetAndGrid);
 								asyncResponse.resume(excelResponse(bytes,
 										"yhteenveto_virhe.xls"));
+								throw e;
 							}
 						},
 						poikkeus -> {

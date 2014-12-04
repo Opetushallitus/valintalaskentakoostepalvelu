@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
@@ -129,9 +130,18 @@ public class HyvaksymiskirjeetKomponentti {
 					.get(hakukohdeOid);
 			koulu = metakohde.getTarjoajaNimi();
 			koulutus = metakohde.getHakukohdeNimi();
-			preferoituKielikoodi = metakohde.getHakukohteenKieli();// KieliUtil.SUOMI;
+			preferoituKielikoodi = metakohde.getHakukohteenNonEmptyKieli();// KieliUtil.SUOMI;
 		}
-
+		final Map<fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HARKINNANVARAISESTI_HYVAKSYTTY, 1);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY, 2);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARASIJALTA_HYVAKSYTTY, 3);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA, 4);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUNUT, 5);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUTETTU, 6);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUNTUNUT, 7);
+		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY, 8);
+	
 		for (HakijaDTO hakija : hakukohteenHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
 			final Hakemus hakemus = hakukohteenHakemukset.get(hakemusOid);
@@ -177,10 +187,6 @@ public class HyvaksymiskirjeetKomponentti {
 
 				StringBuilder omatPisteet = new StringBuilder();
 				StringBuilder hyvaksytyt = new StringBuilder();
-				boolean firstOnly = true;
-				// ei sortata! pitaisi olla jo oikeassa jarjestyksessa
-				// Collections.sort(hakutoive.getHakutoiveenValintatapajonot(),
-				// HakutoiveenValintatapajonoComparator.DEFAULT);
 				//
 				// VT-1036
 				//
@@ -198,14 +204,14 @@ public class HyvaksymiskirjeetKomponentti {
 									.orElse(0) - 1;
 					int kkHyvaksytyt = Optional.ofNullable(
 							valintatapajono.getHyvaksytty()).orElse(0);
-					int kkPiste = Optional
+					String kkPiste = suomennaNumero(Optional
 							.ofNullable(valintatapajono.getPisteet())
-							.orElse(BigDecimal.ZERO).intValue();
-					int kkMinimi = Optional
+							.orElse(BigDecimal.ZERO));
+					String kkMinimi = suomennaNumero(Optional
 							.ofNullable(
 									valintatapajono
 											.getAlinHyvaksyttyPistemaara())
-							.orElse(BigDecimal.ZERO).intValue();
+							.orElse(BigDecimal.ZERO));
 					kkSijoitukset.add(new Sijoitus(kkNimi, kkJonosija,
 							kkHyvaksytyt));
 					kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
@@ -248,32 +254,6 @@ public class HyvaksymiskirjeetKomponentti {
 					// on useampi
 					// Nykyinen PDF formaatti ei kykene esittamaan usean jonon
 					// selitteita jarkevasti
-					if (firstOnly) {
-						if (VARALLA.equals(valintatapajono.getTila())
-								&& valintatapajono.getVarasijanNumero() != null) {
-
-							tulokset.put("varasija", HakemusUtil
-									.varasijanNumeroConverter(valintatapajono
-											.getVarasijanNumero(),
-											preferoituKielikoodi));
-						}
-						String hylkaysperuste = new Teksti(
-								valintatapajono.getTilanKuvaukset()).getTeksti(
-								preferoituKielikoodi, StringUtils.EMPTY);
-						// if (StringUtils.isNotBlank(hylkaysperuste)) {
-						// LOG.error("\r\nEpätyhjä hylkäysperuste,\r\n{}\r\n",
-						// hylkaysperuste);
-						// }
-						tulokset.put("hylkaysperuste", hylkaysperuste);
-						tulokset.put(
-								"valinnanTulos",
-								HakemusUtil.tilaConverter(
-										valintatapajono.getTila(),
-										preferoituKielikoodi,
-										valintatapajono
-												.isHyvaksyttyHarkinnanvaraisesti()));
-						firstOnly = false;
-					}
 					if (valintatapajono.getHyvaksytty() == null) {
 						throw new SijoittelupalveluException(
 								"Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
@@ -283,6 +263,56 @@ public class HyvaksymiskirjeetKomponentti {
 								"Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
 					}
 				}
+				
+				Collections.sort(hakutoive.getHakutoiveenValintatapajonot(),
+						new Comparator<HakutoiveenValintatapajonoDTO>() {
+							@Override
+							public int compare(HakutoiveenValintatapajonoDTO o1,
+									HakutoiveenValintatapajonoDTO o2) {
+								fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila h1 = Optional.ofNullable(o1.getTila()).orElse(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY);
+								fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila h2 = Optional.ofNullable(o2.getTila()).orElse(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY);
+								if(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA.equals(h1) 
+										//
+										&& fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA.equals(h2)) {
+									Integer i1 = Optional.ofNullable(o1.getVarasijanNumero()).orElse(0);
+									Integer i2 = Optional.ofNullable(o2.getVarasijanNumero()).orElse(0);
+									return i1.compareTo(i2);
+								}
+								return tilaToPrioriteetti.get(h1).compareTo(tilaToPrioriteetti.get(h2));
+							}
+						});
+				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
+						.getHakutoiveenValintatapajonot()) {
+					if (fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA.equals(valintatapajono.getTila())
+							&& valintatapajono.getVarasijanNumero() != null) {
+
+						tulokset.put("varasija", HakemusUtil
+								.varasijanNumeroConverter(valintatapajono
+										.getVarasijanNumero(),
+										preferoituKielikoodi));
+					}
+					String hylkaysperuste = new Teksti(
+							valintatapajono.getTilanKuvaukset()).getTeksti(
+							preferoituKielikoodi, StringUtils.EMPTY);
+					// if (StringUtils.isNotBlank(hylkaysperuste)) {
+					// LOG.error("\r\nEpätyhjä hylkäysperuste,\r\n{}\r\n",
+					// hylkaysperuste);
+					// }
+					if(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY.equals(valintatapajono.getTila())) {
+						tulokset.put("hylkaysperuste", hylkaysperuste);
+					} else {
+						tulokset.put("hylkaysperuste", StringUtils.EMPTY);
+					}
+					tulokset.put(
+							"valinnanTulos",
+							HakemusUtil.tilaConverter(
+									valintatapajono.getTila(),
+									preferoituKielikoodi,
+									valintatapajono
+											.isHyvaksyttyHarkinnanvaraisesti()));
+					break; 
+				}
+			
 				tulokset.put(
 						"organisaationNimi",
 						metakohde.getTarjoajaNimi().getTeksti(

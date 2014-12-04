@@ -54,11 +54,9 @@ public class LaskentaActorSystem implements
 			SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
 		this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem",
 				ConfigFactory.defaultOverrides());
+		
 		this.typed = TypedActor.get(actorSystem);
-		this.laskentaSupervisor = typed
-				.typedActorOf(new TypedProps<LaskentaSupervisorActorImpl>(
-						LaskentaSupervisor.class,
-						LaskentaSupervisorActorImpl.class));
+		this.laskentaSupervisor = new LaskentaSupervisorActorImpl(actorSystem);
 		this.laskentaActorFactory = new LaskentaActorFactory(
 				valintalaskentaAsyncResource, applicationAsyncResource,
 				valintaperusteetAsyncResource, seurantaAsyncResource,

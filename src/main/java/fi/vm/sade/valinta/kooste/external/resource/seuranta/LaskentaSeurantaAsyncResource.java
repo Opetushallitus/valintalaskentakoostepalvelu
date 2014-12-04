@@ -45,7 +45,7 @@ public interface LaskentaSeurantaAsyncResource {
 			List<HakukohdeDto> hakukohdeOids, Consumer<String> callback,
 			Consumer<Throwable> failureCallback);
 
-	void haeAsync(String hakuOid, Consumer<Collection<YhteenvetoDto>> callback);
+	//void haeAsync(String hakuOid, Consumer<Collection<YhteenvetoDto>> callback);
 
 	void lisaaIlmoitusHakukohteelle(String uuid, String hakukohdeOid,
 			IlmoitusDto ilmoitus);

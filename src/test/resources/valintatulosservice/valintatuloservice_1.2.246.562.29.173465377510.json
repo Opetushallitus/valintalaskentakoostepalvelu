@@ -1,0 +1,138 @@
+[
+  {
+    "hakemusOid": "1.2.246.562.11.00001149575",
+    "hakijaOid": "",
+    "aikataulu": {},
+    "hakutoiveet": [
+      {
+        "hakukohdeOid": "1.2.246.562.20.10957176919",
+        "tarjoajaOid": "1.2.246.562.10.45852282313",
+        "valintatapajonoOid": "",
+        "valintatila": "KESKEN",
+        "vastaanottotila": "KESKEN",
+        "ilmoittautumistila": {
+          "ilmoittautumisaika": {},
+          "ilmoittautumistapa": {
+            "nimi": {
+              "fi": "Oili",
+              "sv": "Oili",
+              "en": "Oili"
+            },
+            "url": "/oili/"
+          },
+          "ilmoittautumistila": "EI_TEHTY",
+          "ilmoittauduttavissa": false
+        },
+        "vastaanotettavuustila": "EI_VASTAANOTETTAVISSA",
+        "julkaistavissa": true,
+        "tilanKuvaukset": {}
+      }
+    ]
+  },
+  {
+    "hakemusOid": "1.2.246.562.11.00001010222",
+    "hakijaOid": "",
+    "aikataulu": {},
+    "hakutoiveet": [
+      {
+        "hakukohdeOid": "1.2.246.562.20.29536110819",
+        "tarjoajaOid": "1.2.246.562.10.52306976201",
+        "valintatapajonoOid": "",
+        "valintatila": "KESKEN",
+        "vastaanottotila": "KESKEN",
+        "ilmoittautumistila": {
+          "ilmoittautumisaika": {},
+          "ilmoittautumistapa": {
+            "nimi": {
+              "fi": "Oili",
+              "sv": "Oili",
+              "en": "Oili"
+            },
+            "url": "/oili/"
+          },
+          "ilmoittautumistila": "EI_TEHTY",
+          "ilmoittauduttavissa": false
+        },
+        "vastaanotettavuustila": "EI_VASTAANOTETTAVISSA",
+        "julkaistavissa": true,
+        "tilanKuvaukset": {}
+      },
+      {
+        "hakukohdeOid": "1.2.246.562.20.82363790419",
+        "tarjoajaOid": "1.2.246.562.10.13905763275",
+        "valintatapajonoOid": "",
+        "valintatila": "KESKEN",
+        "vastaanottotila": "KESKEN",
+        "ilmoittautumistila": {
+          "ilmoittautumisaika": {},
+          "ilmoittautumistapa": {
+            "nimi": {
+              "fi": "Oili",
+              "sv": "Oili",
+              "en": "Oili"
+            },
+            "url": "/oili/"
+          },
+          "ilmoittautumistila": "EI_TEHTY",
+          "ilmoittauduttavissa": false
+        },
+        "vastaanotettavuustila": "EI_VASTAANOTETTAVISSA",
+        "julkaistavissa": true,
+        "tilanKuvaukset": {}
+      },
+      {
+        "hakukohdeOid": "1.2.246.562.20.80737829715",
+        "tarjoajaOid": "1.2.246.562.10.81835478767",
+        "valintatapajonoOid": "",
+        "valintatila": "KESKEN",
+        "vastaanottotila": "KESKEN",
+        "ilmoittautumistila": {
+          "ilmoittautumisaika": {},
+          "ilmoittautumistapa": {
+            "nimi": {
+              "fi": "Oili",
+              "sv": "Oili",
+              "en": "Oili"
+            },
+            "url": "/oili/"
+          },
+          "ilmoittautumistila": "EI_TEHTY",
+          "ilmoittauduttavissa": false
+        },
+        "vastaanotettavuustila": "EI_VASTAANOTETTAVISSA",
+        "julkaistavissa": true,
+        "tilanKuvaukset": {}
+      }
+    ]
+  },
+  {
+    "hakemusOid": "1.2.246.562.11.00001077472",
+    "hakijaOid": "",
+    "aikataulu": {},
+    "hakutoiveet": [
+      {
+        "hakukohdeOid": "1.2.246.562.20.57381534197",
+        "tarjoajaOid": "1.2.246.562.10.45852282313",
+        "valintatapajonoOid": "",
+        "valintatila": "KESKEN",
+        "vastaanottotila": "KESKEN",
+        "ilmoittautumistila": {
+          "ilmoittautumisaika": {},
+          "ilmoittautumistapa": {
+            "nimi": {
+              "fi": "Oili",
+              "sv": "Oili",
+              "en": "Oili"
+            },
+            "url": "/oili/"
+          },
+          "ilmoittautumistila": "EI_TEHTY",
+          "ilmoittauduttavissa": false
+        },
+        "vastaanotettavuustila": "EI_VASTAANOTETTAVISSA",
+        "julkaistavissa": true,
+        "tilanKuvaukset": {}
+      }
+    ]
+  }
+]

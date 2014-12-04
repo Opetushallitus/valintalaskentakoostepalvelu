@@ -510,7 +510,9 @@
 		class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaValintakoeAsyncResourceImpl" />
 
     <bean class="fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl.OrganisaatioAsyncResourceImpl" />
-
+	<!-- Valinta Tulos Service Async -->
+	<bean
+		class="fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl" />
 	<!-- Swagger -->
 	<!-- Swagger API listing resource -->
 	<bean id="swaggerResourceJSON"

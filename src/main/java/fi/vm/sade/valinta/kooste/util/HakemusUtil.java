@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.util;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HARKINNANVARAISESTI_HYVAKSYTTY;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARASIJALTA_HYVAKSYTTY;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUNUT;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUNTUNUT;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
@@ -167,6 +168,7 @@ public class HakemusUtil {
 		Map<HakemuksenTila, String> fi = new HashMap<HakemuksenTila, String>();
 		fi.put(HYLATTY, "Hylätty");
 		fi.put(VARALLA, "Varalla");
+		fi.put(VARASIJALTA_HYVAKSYTTY, "Varasijalta hyväksytty");
 		fi.put(PERUUNTUNUT, "Peruuntunut");
 		fi.put(HYVAKSYTTY, "Hyväksytty");
 		fi.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Harkinnanvaraisesti hyväksytty");
@@ -175,6 +177,7 @@ public class HakemusUtil {
 		Map<HakemuksenTila, String> sv = new HashMap<HakemuksenTila, String>();
 		sv.put(HYLATTY, "Underkänd");
 		sv.put(VARALLA, "På reservplats");
+		sv.put(VARASIJALTA_HYVAKSYTTY, "Godkänd från reservplats");
 		sv.put(PERUUNTUNUT, "Annullerad");
 		sv.put(HYVAKSYTTY, "Godkänd");
 		sv.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Godkänd enligt prövning");
@@ -185,6 +188,7 @@ public class HakemusUtil {
 		en.put(VARALLA, "In reserve");
 		en.put(PERUUNTUNUT, "Cancelled");
 		en.put(HYVAKSYTTY, "Accepted");
+		en.put(VARASIJALTA_HYVAKSYTTY, "Accepted from reserve");
 		en.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Accepted");
 		en.put(HakemuksenTila.PERUUTETTU, "Canceled");
 		en.put(PERUNUT, "Canceled");

@@ -231,7 +231,42 @@ public class ViestintapalveluAktivointiResource {
 					"Jälkiohjauskirjeiden luonti epäonnistui!", e);
 		}
 	}
+	@POST
+	@Path("/hakukohteessahylatyt/aktivoi")
+	@Consumes("application/json")
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+	@ApiOperation(value = "Aktivoi hakukohteessa hylatyille kirjeiden luonnin", response = Response.class)
+	public ProsessiId aktivoiHakukohteessahylatyilleLuonti(
+	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
+			@QueryParam("hakukohdeOid") String hakukohdeOid,
+			@QueryParam("tarjoajaOid") String tarjoajaOid,
+			@QueryParam("templateName") String templateName,
+			@QueryParam("tag") String tag,
+			@QueryParam("hakuOid") String hakuOid,
+			@QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
+		try {
+			if (templateName == null) {
+				templateName = "jalkiohjauskirje";
+			}
+			if (hakemuksillaRajaus == null) {
+				hakemuksillaRajaus = new DokumentinLisatiedot();
+			}
+			tag = hakemuksillaRajaus.getTag();
+			KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
+			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+			HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
+					tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
+					templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId);
+			hyvaksymiskirjeetService.jalkiohjauskirjeHakukohteelle(prosessi, hyvaksymiskirjeDTO);
+			return prosessi.toProsessiId();
+		} catch (Exception e) {
+			LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
 
+			throw new RuntimeException(
+					"Hyväksymiskirjeiden luonti epäonnistui! " + e.getMessage(),
+					e);
+		}
+	}
 	@POST
 	@Path("/hyvaksymiskirjeet/aktivoi")
 	@Consumes("application/json")

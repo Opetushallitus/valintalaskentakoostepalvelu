@@ -31,11 +31,11 @@ public class SijoittelussaHyvaksyttyHakijaPredicate implements
 			for (HakutoiveDTO h : input.getHakutoiveet()) {
 
 				if (hakukohdeOid.equals(h.getHakukohdeOid())) {
-					final boolean checkFirstValintatapajonoOnly = true;
+					final boolean checkFirstValintatapajonoOnly = false;
 					// sort by
 					// priority
-					Collections.sort(h.getHakutoiveenValintatapajonot(),
-							HakutoiveenValintatapajonoComparator.DEFAULT);
+//					Collections.sort(h.getHakutoiveenValintatapajonot(),
+//							HakutoiveenValintatapajonoComparator.DEFAULT);
 
 					for (HakutoiveenValintatapajonoDTO vjono : h
 							.getHakutoiveenValintatapajonot()) {

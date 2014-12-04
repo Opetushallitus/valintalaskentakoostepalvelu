@@ -11,5 +11,6 @@ public interface TilaAsyncResource {
 
 	Future<Response> tuoErillishaunTilat(
 			String hakuOid, String hakukohdeOid,
+			String valintatapajononNimi,
 			Collection<ErillishaunHakijaDTO> erillishaunHakijat);
 }

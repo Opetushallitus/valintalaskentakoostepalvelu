@@ -45,11 +45,8 @@ public class LaskentaActorSystemTest {
 	private final TypedActorExtension typed = TypedActor.get(actorSystem);
 
 	@Test
-	public void testaaActorSupervisor() {
-		LaskentaSupervisor laskentaSupervisor = typed
-				.typedActorOf(new TypedProps<LaskentaSupervisorActorImpl>(
-						LaskentaSupervisor.class,
-						LaskentaSupervisorActorImpl.class));
+	public void testaaActorSupervisor() throws InterruptedException {
+		LaskentaSupervisorActorImpl laskentaSupervisor = new LaskentaSupervisorActorImpl(actorSystem);
 
 		LOG.info("Ajossa olevat laskennat nyt {}",
 				laskentaSupervisor.ajossaOlevatLaskennat());
@@ -59,7 +56,8 @@ public class LaskentaActorSystemTest {
 
 		LOG.info("Ajossa olevat laskennat nyt {}",
 				laskentaSupervisor.ajossaOlevatLaskennat());
-
+		laskentaSupervisor.valmis(UUID);
+		
 	}
 
 	private LaskentaActor create(final LaskentaSupervisor laskentaSupervisor) {
@@ -67,6 +65,9 @@ public class LaskentaActorSystemTest {
 				LaskentaActor.class, new Creator<LaskentaActor>() {
 					public LaskentaActor create() throws Exception {
 						return new LaskentaActor() {
+							@Override
+							public void postStop() {
+							}
 							private Thread t;
 							private volatile boolean valmis = false;
 							private AtomicReference<ActorRef> refinery = new AtomicReference<>();

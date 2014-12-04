@@ -50,10 +50,11 @@ public class ErillishakuExcelTest {
 	public void testaaVienti() throws FileNotFoundException, IOException {
 		List<ErillishakuRivi> rivit = Lists.newArrayList();
 		String syntymaAika = "11.11.2011";
-		ErillishakuRivi rivi = new ErillishakuRivi("sukunimi","etunimi1","hetu",syntymaAika, "HYLATTY", "", "");
+		ErillishakuRivi rivi = new ErillishakuRivi("sukunimi","etunimi1","hetu",syntymaAika, "HYLATTY", "", "", false);
 		rivit.add(rivi);
-		ErillishakuRivi rivi2= new ErillishakuRivi("sukunimi","etunimi2","hetu",syntymaAika, "HYLATTY", "", "");
+		ErillishakuRivi rivi2= new ErillishakuRivi("sukunimi","etunimi2","hetu",syntymaAika, "HYLATTY", "", "", true);
 		rivit.add(rivi2);
+		rivit.add(new ErillishakuRivi());
 		final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
 		ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit
 				, new ErillishakuRiviKuuntelija() {

@@ -1,11 +1,13 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import akka.actor.TypedActor;
+
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
-public interface LaskentaActor {
+public interface LaskentaActor extends TypedActor.PostStop {
 
 	String getHakuOid();
 

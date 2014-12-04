@@ -5,6 +5,7 @@ import static fi.vm.sade.valinta.kooste.util.KieliUtil.RUOTSI;
 import static fi.vm.sade.valinta.kooste.util.KieliUtil.SUOMI;
 import static fi.vm.sade.valinta.kooste.util.KieliUtil.normalisoiKielikoodi;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -24,11 +25,14 @@ public class Teksti {
 	private final static String EI_ARVOA = "<< ei arvoa >>";
 	private final TreeMap<String, String> normalisoituKieliJaKoodi;
 
+	public Teksti() {
+		this.normalisoituKieliJaKoodi = Maps.newTreeMap();
+	}
 	public Teksti(Map<String, String> kieletJaKoodit) {
 		this.normalisoituKieliJaKoodi = Maps.newTreeMap();
 		if (kieletJaKoodit != null && !kieletJaKoodit.isEmpty()) {
 			for (Entry<String, String> kk : kieletJaKoodit.entrySet()) {
-				if (kk.getKey() == null || kk.getValue() == null) {
+				if (StringUtils.isBlank(kk.getKey()) || StringUtils.isBlank(kk.getValue())) {
 					// EI LISATA ARVOTONTA KOODIA
 					// normalisoituKieliJaKoodi.put(normalisoiKielikoodi(kk.getKey()),
 					// EI_ARVOA);
@@ -58,6 +62,16 @@ public class Teksti {
 		}
 	}
 
+	public String getNonEmptyKieli() {
+		if (normalisoituKieliJaKoodi.containsKey(SUOMI) && !StringUtils.isEmpty(normalisoituKieliJaKoodi.get(SUOMI))) {
+			return SUOMI;
+		} else if (normalisoituKieliJaKoodi.containsKey(RUOTSI)&& !StringUtils.isEmpty(normalisoituKieliJaKoodi.get(RUOTSI))) {
+			return RUOTSI;
+		} else {
+			return ENGLANTI;
+		}
+	}
+	
 	/**
 	 * 
 	 * @param normalisoituKielikoodi

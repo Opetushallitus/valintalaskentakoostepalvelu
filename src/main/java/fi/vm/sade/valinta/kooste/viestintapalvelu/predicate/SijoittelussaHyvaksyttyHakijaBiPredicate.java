@@ -29,7 +29,7 @@ public class SijoittelussaHyvaksyttyHakijaBiPredicate implements
 			for (HakutoiveDTO h : hakija.getHakutoiveet()) {
 
 				if (hakukohdeOid.equals(h.getHakukohdeOid())) {
-					final boolean checkFirstValintatapajonoOnly = true;
+					final boolean checkFirstValintatapajonoOnly = false;
 					// sort by
 					// priority
 					Collections.sort(h.getHakutoiveenValintatapajonot(),
