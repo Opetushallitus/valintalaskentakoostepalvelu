@@ -235,7 +235,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 					
 					LOG.info("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.getResults().size());
 					
-					BiPredicate<HakijaDTO, String> kohdeHakukohteessaHylatyt = new HakukohteessaHylattyHakijaBiPredicate();
+					BiPredicate<HakijaDTO, String> kohdeHakukohteessaHylatyt = new HaussaHylattyHakijaBiPredicate();
 
 					Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat
 							.getResults()
