@@ -602,7 +602,9 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 															//
 															e.getDefaultValue(),
 															tag,
-															"hyvaksmiskirje");
+															"hyvaksmiskirje",
+															null,
+															null);
 											if (pakkaaTiedostotTarriin) {
 												Tiedosto tiedosto = new Tiedosto(
 														"hyvaksymiskirje_"
