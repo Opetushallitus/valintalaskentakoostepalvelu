@@ -333,8 +333,8 @@ public class HyvaksymiskirjeetKomponentti {
 				tulosList.add(tulokset);
 			}
 			Map<String, Object> replacements = Maps.newHashMap();
-			replacements.put("palautusAika", palautusAika);
-			replacements.put("palautusPvm", palautusPvm);
+			replacements.put("palautusAika", StringUtils.trimToNull(palautusAika));
+			replacements.put("palautusPvm", StringUtils.trimToNull(palautusPvm));
 			replacements.put("tulokset", tulosList);
 			replacements.put("koulu", koulu.getTeksti(preferoituKielikoodi,
 					vakioTarjoajanNimi(hakukohdeOid)));
