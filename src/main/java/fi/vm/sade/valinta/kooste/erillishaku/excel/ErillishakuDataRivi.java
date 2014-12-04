@@ -75,7 +75,7 @@ public class ErillishakuDataRivi extends DataRivi {
 					).stream().map(t -> t.toString()).collect(Collectors.toList());
 	private static final Collection<String> ILMOITTAUTUMISTILA_ARVOT =
 			Arrays.asList(IlmoittautumisTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList()); 
-	private static final String LUPA_JULKAISUUN = "LUPA JULKAISUUN";
+	private static final String LUPA_JULKAISUUN = "JULKAISTAVISSA";
 	private static final Collection<String> JULKAISU_LUPA_ARVOT =
 			Arrays.asList(LUPA_JULKAISUUN, StringUtils.EMPTY); 
 	

@@ -68,7 +68,7 @@ public class ErillishakuExcel {
 				new TekstiArvo("Vastaanottotila"), new TekstiArvo(
 						"Ilmoittautumistila")
 		,new TekstiArvo(
-						"Julkaistaanko tiedot")));
+						"Julkaistavissa")));
 		Collections.sort(erillishakurivit, new Comparator<ErillishakuRivi>() {
 			@Override
 			public int compare(ErillishakuRivi h1, ErillishakuRivi h2) {
