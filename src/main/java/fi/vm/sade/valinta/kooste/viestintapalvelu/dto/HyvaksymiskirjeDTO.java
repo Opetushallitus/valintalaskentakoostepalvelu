@@ -13,10 +13,12 @@ public class HyvaksymiskirjeDTO {
 	private final String hakukohdeOid;
 	private final String hakuOid;
 	private final Long sijoitteluajoId;
-
+	private final String palautusPvm;
+	private final String palautusAika;
+	
 	public HyvaksymiskirjeDTO(String tarjoajaOid, String sisalto,
 			String templateName, String tag, String hakukohdeOid,
-			String hakuOid, Long sijoitteluajoId) {
+			String hakuOid, Long sijoitteluajoId, String palautusPvm, String palautusAika) {
 		this.tarjoajaOid = tarjoajaOid;
 		this.sisalto = sisalto;
 		this.templateName = templateName;
@@ -24,8 +26,17 @@ public class HyvaksymiskirjeDTO {
 		this.hakukohdeOid = hakukohdeOid;
 		this.hakuOid = hakuOid;
 		this.sijoitteluajoId = sijoitteluajoId;
+		this.palautusAika = palautusAika;
+		this.palautusPvm = palautusPvm;
 	}
 
+	public String getPalautusAika() {
+		return palautusAika;
+	}
+	public String getPalautusPvm() {
+		return palautusPvm;
+	}
+	
 	public String getHakukohdeOid() {
 		return hakukohdeOid;
 	}

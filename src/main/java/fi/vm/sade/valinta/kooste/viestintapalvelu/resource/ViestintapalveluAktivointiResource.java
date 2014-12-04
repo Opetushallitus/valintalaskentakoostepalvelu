@@ -241,6 +241,8 @@ public class ViestintapalveluAktivointiResource {
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("templateName") String templateName,
+			@QueryParam("palautusAika") String palautusAika,
+			@QueryParam("palautusPvm") String palautusPvm,
 			@QueryParam("tag") String tag,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
@@ -256,7 +258,7 @@ public class ViestintapalveluAktivointiResource {
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 			HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
 					tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
-					templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId);
+					templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId,palautusPvm,palautusAika);
 			hyvaksymiskirjeetService.jalkiohjauskirjeHakukohteelle(prosessi, hyvaksymiskirjeDTO);
 			return prosessi.toProsessiId();
 		} catch (Exception e) {
@@ -276,6 +278,8 @@ public class ViestintapalveluAktivointiResource {
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
+			@QueryParam("palautusAika") String palautusAika,
+			@QueryParam("palautusPvm") String palautusPvm,
 			@QueryParam("templateName") String templateName,
 			@QueryParam("tag") String tag,
 			@QueryParam("hakuOid") String hakuOid,
@@ -292,7 +296,7 @@ public class ViestintapalveluAktivointiResource {
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 			HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
 					tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
-					templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId);
+					templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId,palautusPvm,palautusAika);
 			if (hakemuksillaRajaus.getHakemusOids() == null) {
 				hyvaksymiskirjeetService.hyvaksymiskirjeetHakukohteelle(
 						prosessi, hyvaksymiskirjeDTO);

@@ -196,7 +196,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							hyvaksymiskirjeDTO.getTarjoajaOid(),
 							hyvaksymiskirjeDTO.getSisalto(),
 							hyvaksymiskirjeDTO.getTag(),
-							hyvaksymiskirjeDTO.getTemplateName());
+							hyvaksymiskirjeDTO.getTemplateName(),
+							hyvaksymiskirjeDTO.getPalautusPvm(),
+							hyvaksymiskirjeDTO.getPalautusAika());
 				})
 		//
 				.subscribeOn(Schedulers.newThread())
@@ -265,7 +267,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							hyvaksymiskirjeDTO.getTarjoajaOid(),
 							hyvaksymiskirjeDTO.getSisalto(),
 							hyvaksymiskirjeDTO.getTag(),
-							hyvaksymiskirjeDTO.getTemplateName());
+							hyvaksymiskirjeDTO.getTemplateName(),
+							hyvaksymiskirjeDTO.getPalautusPvm(),
+							hyvaksymiskirjeDTO.getPalautusAika());
 				})
 		//
 				.subscribeOn(Schedulers.newThread())
@@ -326,7 +330,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							hyvaksymiskirjeDTO.getTarjoajaOid(),
 							hyvaksymiskirjeDTO.getSisalto(),
 							hyvaksymiskirjeDTO.getTag(),
-							hyvaksymiskirjeDTO.getTemplateName());
+							hyvaksymiskirjeDTO.getTemplateName(),
+							hyvaksymiskirjeDTO.getPalautusPvm(),
+							hyvaksymiskirjeDTO.getPalautusAika());
 				})
 		//
 				.subscribeOn(Schedulers.newThread())

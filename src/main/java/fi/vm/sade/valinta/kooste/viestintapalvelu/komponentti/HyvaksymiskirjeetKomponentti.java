@@ -99,7 +99,9 @@ public class HyvaksymiskirjeetKomponentti {
 			Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
 			Collection<HakijaDTO> hakukohteenHakijat, List<Hakemus> hakemukset,
 			String hakukohdeOid, String hakuOid, String tarjoajaOid,
-			String sisalto, String tag, String templateName) {
+			String sisalto, String tag, String templateName,
+			String palautusPvm,
+			String palautusAika) {
 
 		LOG.debug(
 				"Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'",
@@ -331,6 +333,8 @@ public class HyvaksymiskirjeetKomponentti {
 				tulosList.add(tulokset);
 			}
 			Map<String, Object> replacements = Maps.newHashMap();
+			replacements.put("palautusAika", palautusAika);
+			replacements.put("palautusPvm", palautusPvm);
 			replacements.put("tulokset", tulosList);
 			replacements.put("koulu", koulu.getTeksti(preferoituKielikoodi,
 					vakioTarjoajanNimi(hakukohdeOid)));
