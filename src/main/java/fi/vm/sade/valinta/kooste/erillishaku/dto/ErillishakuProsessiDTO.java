@@ -34,6 +34,14 @@ public class ErillishakuProsessiDTO extends DokumenttiProsessi implements
 	public boolean isKeskeytetty() {
 		return !getPoikkeukset().isEmpty();
 	}
+	
+	@Override
+	public void keskeyta(String syy) {
+		if (getDokumenttiId() == null) {
+			getPoikkeukset().add(
+					new Poikkeus(syy,syy));
+		}
+	}
 
 	public void keskeyta() {
 		if (getDokumenttiId() == null) {
