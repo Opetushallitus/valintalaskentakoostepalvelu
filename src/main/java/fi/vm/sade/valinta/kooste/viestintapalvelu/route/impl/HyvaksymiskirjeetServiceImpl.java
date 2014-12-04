@@ -235,23 +235,31 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 					
 					LOG.info("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.getResults().size());
 					
-					BiPredicate<HakijaDTO, String> kohdeHakukohteessaHylatyt = new HaussaHylattyHakijaBiPredicate();
+					BiPredicate<HakijaDTO, String> kohdeHakukohteessaHylatytTest = new HaussaHylattyHakijaBiPredicate();
 
-					Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat
+					Collection<HakijaDTO> kohdeHakukohteessaHylatyt = hakijat
 							.getResults()
 							.stream()
-							.filter(h -> kohdeHakukohteessaHylatyt.test(h,
+							.filter(h -> kohdeHakukohteessaHylatytTest.test(h,
 									hakukohdeOid)).collect(Collectors.toList());
+					if(kohdeHakukohteessaHylatyt.isEmpty()) {
+						LOG.error(
+								"Hakukohteessa {} ei ole jälkiohjattavia hakijoita!",
+								hyvaksymiskirjeDTO.getHakukohdeOid());
+						prosessi.keskeyta("Hakukohteessa ei ole jälkiohjattavia hakijoita!");
+						throw new RuntimeException("Hakukohteessa "+hyvaksymiskirjeDTO.getHakukohdeOid()+" ei ole jälkiohjattavia hakijoita!");
+					}
 					Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti
-							.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
+							.haeKiinnostavatHakukohteet(kohdeHakukohteessaHylatyt);
 					MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet
 							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
-					
+					List<String> tarjoajaOidList = Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid());
+					Osoite hakijapalveluidenOsoite = organisaatioResponseToHakijapalveluidenOsoite(tarjoajaOidList, 
+							kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-							organisaatioResponseToHakijapalveluidenOsoite(newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())), 
-									kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
+							hakijapalveluidenOsoite,
 							hyvaksymiskirjeessaKaytetytHakukohteet,
-							kohdeHakukohteessaHyvaksytyt, hakemukset,
+							kohdeHakukohteessaHylatyt, hakemukset,
 							hyvaksymiskirjeDTO.getHakukohdeOid(),
 							hyvaksymiskirjeDTO.getHakuOid(),
 							hyvaksymiskirjeDTO.getTarjoajaOid(),

@@ -34,6 +34,14 @@ public class KoekutsuProsessiImpl extends DokumenttiProsessi implements
 	public boolean isKeskeytetty() {
 		return !getPoikkeukset().isEmpty();
 	}
+	
+	@Override
+	public void keskeyta(String syy) {
+		if (getDokumenttiId() == null) {
+			getPoikkeukset().add(
+					new Poikkeus(Poikkeus.KOOSTEPALVELU, syy));
+		}
+	}
 
 	public void keskeyta() {
 		if (getDokumenttiId() == null) {
