@@ -27,6 +27,17 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>fi.vm.sade.auth</groupId>
+			<artifactId>authentication-domain</artifactId>
+			<version>8.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>joda-time</groupId>
+          			<artifactId>joda-time</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>com.netflix.rxjava</groupId>
 			<artifactId>rxjava-core</artifactId>
 			<version>0.20.6</version>
