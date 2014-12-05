@@ -18,11 +18,13 @@ public class HaussaHylattyHakijaBiPredicate implements
 	public boolean test(HakijaDTO hakija, String hakukohdeOid) {
 		if (hakija.getHakutoiveet() == null) {
 		} else {
+			LOG.error("Tutkitaan onko hakija (hakemusOid=={}) hyväksytty edes yhteen hakukohteeseen.", hakija.getHakemusOid());
 			for (HakutoiveDTO h : hakija.getHakutoiveet()) {
 				for (HakutoiveenValintatapajonoDTO vjono : h
 						.getHakutoiveenValintatapajonot()) {
 					if (vjono.getTila() != null
 							&& vjono.getTila().isHyvaksytty()) {
+						LOG.error("Hakija (hakemusOid=={}) oli hyväksytty hakukohteeseen {}, {}", hakija.getHakemusOid(), h.getHakukohdeOid(), vjono.getValintatapajonoOid());
 						return false;
 					}
 				}

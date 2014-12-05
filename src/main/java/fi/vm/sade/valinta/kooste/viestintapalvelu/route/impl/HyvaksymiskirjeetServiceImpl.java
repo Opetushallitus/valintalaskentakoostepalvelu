@@ -216,13 +216,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 						});
 	}
 	@Override
-	public void jalkiohjauskirjeHakukohteelle(KirjeProsessi prosessi,
+	public void jalkiohjauskirjeHakukohteelle(final KirjeProsessi prosessi,
 			final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
 		Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource
 				.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(),
 						hyvaksymiskirjeDTO.getHakukohdeOid());
 		Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource
-				.getKoulutuspaikkallisetHakijat(
+				.getKaikkiHakijat(
 						hyvaksymiskirjeDTO.getHakuOid(),
 						hyvaksymiskirjeDTO.getHakukohdeOid());
 		Future<Response> organisaatioFuture = organisaatioAsyncResource
@@ -235,7 +235,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 				from(organisaatioFuture),
 				(hakemukset, hakijat, organisaatioResponse) -> {
 					
-					LOG.info("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.getResults().size());
+					LOG.error("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.getResults().size());
 					
 					BiPredicate<HakijaDTO, String> kohdeHakukohteessaHylatytTest = new HaussaHylattyHakijaBiPredicate();
 
