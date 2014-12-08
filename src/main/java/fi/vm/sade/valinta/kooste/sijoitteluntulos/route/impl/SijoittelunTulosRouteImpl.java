@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import org.apache.camel.Exchange;
@@ -35,6 +36,8 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
@@ -592,6 +595,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 													.haeKiinnostavatHakukohteet(hakukohteenHakijat);
 											LetterBatch l = hyvaksymiskirjeetKomponentti
 													.teeHyvaksymiskirjeet(
+															todellisenJonosijanRatkaisin(hakukohteenHakijat),
 															null,
 															hyvaksymiskirjeessaKaytetytHakukohteet,
 															hakukohteenHakijat,
@@ -921,5 +925,33 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 		tarOutputStream.close();
 		return new ByteArrayInputStream(tarFileBytes.toByteArray());
+	}
+	private Map<String, Map<Integer, HakijaDTO>> todellisenJonosijanRatkaisin(Collection<HakijaDTO> hakukohteenHakijat) {
+		Map<String, Map<Integer, HakijaDTO>> valintatapajonoToJonosijaToHakija = Maps.newHashMap();
+		for (HakijaDTO hakija : hakukohteenHakijat) {
+			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
+						.getHakutoiveenValintatapajonot()) {
+					if(!valintatapajonoToJonosijaToHakija.containsKey(valintatapajono.getValintatapajonoOid())) {
+						valintatapajonoToJonosijaToHakija.put(valintatapajono.getValintatapajonoOid(), Maps.newTreeMap());
+					}
+					int kkJonosija = Optional.ofNullable(
+							valintatapajono.getJonosija()).orElse(0)
+							+ Optional.ofNullable(
+									valintatapajono.getTasasijaJonosija())
+									.orElse(0) - 1;
+					if(valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).containsKey(kkJonosija)) {
+						HakijaDTO hakija2 = valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).get(kkJonosija);
+						LOG.error("Hakijalla {} ja hakijalla {} on valintatapajonossa {} sama jonosija {}!",
+								hakija.getHakemusOid(), hakija2.getHakemusOid(), valintatapajono.getValintatapajonoOid(), kkJonosija);
+						throw new RuntimeException("Hakijalla "+hakija.getHakemusOid()+
+								" ja hakijalla "+hakija2.getHakemusOid()+" on valintatapajonossa "+
+								valintatapajono.getValintatapajonoOid()+" sama jonosija "+kkJonosija +"!");
+					}
+					valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).put(kkJonosija, hakija);
+				}
+			}
+		}
+		return valintatapajonoToJonosijaToHakija;
 	}
 }

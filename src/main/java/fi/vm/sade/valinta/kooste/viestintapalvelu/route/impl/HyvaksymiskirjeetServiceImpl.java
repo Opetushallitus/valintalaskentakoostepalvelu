@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -28,9 +29,10 @@ import rx.Observable;
 import rx.functions.Action3;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
-
 import static com.google.common.collect.Lists.*;
+
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -38,6 +40,8 @@ import com.google.gson.GsonBuilder;
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
@@ -144,6 +148,36 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 		return haeOsoiteHierarkisesti(
 				kieli,oids, org, organisaationimi);
 	}
+	
+	private Map<String, Map<Integer, HakijaDTO>> todellisenJonosijanRatkaisin(Collection<HakijaDTO> hakukohteenHakijat) {
+		Map<String, Map<Integer, HakijaDTO>> valintatapajonoToJonosijaToHakija = Maps.newHashMap();
+		for (HakijaDTO hakija : hakukohteenHakijat) {
+			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
+						.getHakutoiveenValintatapajonot()) {
+					if(!valintatapajonoToJonosijaToHakija.containsKey(valintatapajono.getValintatapajonoOid())) {
+						valintatapajonoToJonosijaToHakija.put(valintatapajono.getValintatapajonoOid(), Maps.newTreeMap());
+					}
+					int kkJonosija = Optional.ofNullable(
+							valintatapajono.getJonosija()).orElse(0)
+							+ Optional.ofNullable(
+									valintatapajono.getTasasijaJonosija())
+									.orElse(0) - 1;
+					if(valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).containsKey(kkJonosija)) {
+						HakijaDTO hakija2 = valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).get(kkJonosija);
+						LOG.error("Hakijalla {} ja hakijalla {} on valintatapajonossa {} sama jonosija {}!",
+								hakija.getHakemusOid(), hakija2.getHakemusOid(), valintatapajono.getValintatapajonoOid(), kkJonosija);
+						throw new RuntimeException("Hakijalla "+hakija.getHakemusOid()+
+								" ja hakijalla "+hakija2.getHakemusOid()+" on valintatapajonossa "+
+								valintatapajono.getValintatapajonoOid()+" sama jonosija "+kkJonosija +"!");
+					}
+					valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).put(kkJonosija, hakija);
+				}
+			}
+		}
+		return valintatapajonoToJonosijaToHakija;
+	}
+	
 	@Override
 	public void hyvaksymiskirjeetHakemuksille(final KirjeProsessi prosessi,
 			final HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
@@ -187,6 +221,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
 					
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+							todellisenJonosijanRatkaisin(hakijat
+							.getResults()),
 							organisaatioResponseToHakijapalveluidenOsoite(newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())), 
 									kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
 							hyvaksymiskirjeessaKaytetytHakukohteet,
@@ -259,6 +295,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 					Osoite hakijapalveluidenOsoite = organisaatioResponseToHakijapalveluidenOsoite(tarjoajaOidList, 
 							kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+							todellisenJonosijanRatkaisin(hakijat
+									.getResults()),
 							hakijapalveluidenOsoite,
 							hyvaksymiskirjeessaKaytetytHakukohteet,
 							kohdeHakukohteessaHylatyt, hakemukset,
@@ -321,6 +359,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
 					
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+							todellisenJonosijanRatkaisin(hakijat
+									.getResults()),
 							organisaatioResponseToHakijapalveluidenOsoite(newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())), 
 									kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
 							hyvaksymiskirjeessaKaytetytHakukohteet,

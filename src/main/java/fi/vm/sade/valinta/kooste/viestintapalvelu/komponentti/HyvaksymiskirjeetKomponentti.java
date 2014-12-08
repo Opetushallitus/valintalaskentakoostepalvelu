@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Map.Entry;
 
 import org.apache.camel.Body;
 import org.apache.camel.Property;
@@ -95,7 +96,9 @@ public class HyvaksymiskirjeetKomponentti {
 				.toString();
 	}
 
-	public LetterBatch teeHyvaksymiskirjeet(Osoite hakijapalveluidenOsoite,
+	public LetterBatch teeHyvaksymiskirjeet(
+			Map<String, Map<Integer, HakijaDTO>> valintatapajonoToJonosijaToHakija,
+			Osoite hakijapalveluidenOsoite,
 			Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
 			Collection<HakijaDTO> hakukohteenHakijat, List<Hakemus> hakemukset,
 			String hakukohdeOid, String hakuOid, String tarjoajaOid,
@@ -143,7 +146,7 @@ public class HyvaksymiskirjeetKomponentti {
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUTETTU, 6);
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUNTUNUT, 7);
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY, 8);
-	
+		
 		for (HakijaDTO hakija : hakukohteenHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
 			final Hakemus hakemus = hakukohteenHakemukset.get(hakemusOid);
@@ -204,6 +207,13 @@ public class HyvaksymiskirjeetKomponentti {
 							+ Optional.ofNullable(
 									valintatapajono.getTasasijaJonosija())
 									.orElse(0) - 1;
+					int todellinenKkJonosija = 0;
+					for(Entry<Integer, HakijaDTO> entry : valintatapajonoToJonosijaToHakija.get(hakutoive.getHakukohdeOid()).entrySet()) {
+						++todellinenKkJonosija;
+						if(entry.getKey().equals(kkJonosija)) {
+							break;
+						}
+					}
 					int kkHyvaksytyt = Optional.ofNullable(
 							valintatapajono.getHyvaksytty()).orElse(0);
 					String kkPiste = suomennaNumero(Optional
@@ -214,7 +224,7 @@ public class HyvaksymiskirjeetKomponentti {
 									valintatapajono
 											.getAlinHyvaksyttyPistemaara())
 							.orElse(BigDecimal.ZERO));
-					kkSijoitukset.add(new Sijoitus(kkNimi, kkJonosija,
+					kkSijoitukset.add(new Sijoitus(kkNimi, todellinenKkJonosija,
 							kkHyvaksytyt));
 					kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
 
