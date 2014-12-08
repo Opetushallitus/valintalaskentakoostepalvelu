@@ -7,8 +7,6 @@ package fi.vm.sade.valinta.kooste.external.resource.haku.dto;
  */
 public class HakemusPrototyyppi {
 
-	private String hakuOid;
-	private String hakukohdeOid;
 	private String hakijaOid;
 	private String etunimi;
 	private String sukunimi;
@@ -20,12 +18,6 @@ public class HakemusPrototyyppi {
 	}
 	public void setHakijaOid(String hakijaOid) {
 		this.hakijaOid = hakijaOid;
-	}
-	public void setHakukohdeOid(String hakukohdeOid) {
-		this.hakukohdeOid = hakukohdeOid;
-	}
-	public void setHakuOid(String hakuOid) {
-		this.hakuOid = hakuOid;
 	}
 	public void setHenkilotunnus(String henkilotunnus) {
 		this.henkilotunnus = henkilotunnus;
@@ -42,12 +34,6 @@ public class HakemusPrototyyppi {
 	}
 	public String getHakijaOid() {
 		return hakijaOid;
-	}
-	public String getHakukohdeOid() {
-		return hakukohdeOid;
-	}
-	public String getHakuOid() {
-		return hakuOid;
 	}
 	public String getHenkilotunnus() {
 		return henkilotunnus;
