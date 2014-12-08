@@ -156,7 +156,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
 				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
 						.getHakutoiveenValintatapajonot()) {
-					
+					if(!valintatapajono.getTila().isHyvaksytty()) {
+						continue;
+					}
 					if(!valintatapajonoToJonosijaToHakija.containsKey(valintatapajono.getValintatapajonoOid())) {
 						valintatapajonoToJonosijaToHakija.put(valintatapajono.getValintatapajonoOid(), 
 								

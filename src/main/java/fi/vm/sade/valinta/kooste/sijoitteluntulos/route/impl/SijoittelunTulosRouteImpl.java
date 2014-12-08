@@ -933,7 +933,9 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
 				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
 						.getHakutoiveenValintatapajonot()) {
-					
+					if(!valintatapajono.getTila().isHyvaksytty()) {
+						continue;
+					}
 					if(!valintatapajonoToJonosijaToHakija.containsKey(valintatapajono.getValintatapajonoOid())) {
 						valintatapajonoToJonosijaToHakija.put(valintatapajono.getValintatapajonoOid(), 
 								
