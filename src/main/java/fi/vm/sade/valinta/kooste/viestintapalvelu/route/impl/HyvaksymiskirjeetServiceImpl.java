@@ -115,7 +115,16 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 				LOG.error("Organisaatiopalvelusta ei saatu organisaatiota tunnisteelle {}. Eli ei saatu hakijapalveluiden osoitetta.", Arrays.toString(oids.toArray()));
 				return null;
 			}
+			if(oids == null) {
+				LOG.error("Oidi-listaa ei voitu kerätä kun listaa ei ollut annettu!");
+				return null;
+			}
+			try {
 			oids.add(rdto.getParentOid());
+			} catch(Exception e) {
+				LOG.error("Oidia ei voitu lisätä oidilistaan: {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+				throw new RuntimeException("Oidia ei voitu lisätä oidilistaan: " + e.getMessage());
+			}
 			if(hakijapalveluidenOsoite != null) {
 				LOG.error("Hakijapalveluiden osoite saatiin tarjoajalta {}.\r\n{}", Arrays.toString(oids.toArray()), new GsonBuilder().setPrettyPrinting().create().toJson(hakijapalveluidenOsoite));
 				return hakijapalveluidenOsoite;
@@ -290,7 +299,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							.haeKiinnostavatHakukohteet(kohdeHakukohteessaHylatyt);
 					MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet
 							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
-					List<String> tarjoajaOidList = Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid());
+					List<String> tarjoajaOidList = newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid()));
 					Osoite hakijapalveluidenOsoite = organisaatioResponseToHakijapalveluidenOsoite(tarjoajaOidList, 
 							kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
