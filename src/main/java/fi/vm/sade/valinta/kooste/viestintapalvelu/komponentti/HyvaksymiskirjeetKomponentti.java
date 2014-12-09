@@ -36,6 +36,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.TodellisenJonosijanLaskentaUtiliteetti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -201,13 +202,9 @@ public class HyvaksymiskirjeetKomponentti {
 							+ Optional.ofNullable(
 									valintatapajono.getTasasijaJonosija())
 									.orElse(0) - 1;
-					int todellinenKkJonosija = 1;
-					for(com.google.common.collect.Multiset.Entry<Integer> entry : valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).entrySet()) {
-						if(entry.equals(kkJonosija)) {
-							break;
-						}
-						todellinenKkJonosija += entry.getCount();
-					}
+					int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(kkJonosija, 
+							valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()));
+					
 					int kkHyvaksytyt = Optional.ofNullable(
 							valintatapajono.getHyvaksytty()).orElse(0);
 					String kkPiste = suomennaNumero(Optional
