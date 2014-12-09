@@ -332,7 +332,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 													.getHakutoiveet()
 													.stream()
 													// non nulls
-													.filter(h -> h != null && h.getValintatila() != null || h.getVastaanottotila() != null)
+													.filter(h -> h != null && h.getValintatila() != null && h.getVastaanottotila() != null)
 													.anyMatch(
 															hakutoive ->
 
