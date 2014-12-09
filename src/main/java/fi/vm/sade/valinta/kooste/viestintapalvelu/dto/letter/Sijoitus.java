@@ -7,20 +7,20 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter;
  */
 public class Sijoitus {
 	private String nimi;
-	private int oma;
-	private int hyvaksytyt;
+	private Integer oma;
+	private Integer hyvaksytyt;
 
 	public Sijoitus() {
 
 	}
 
-	public Sijoitus(String nimi, int oma, int hyvaksytyt) {
+	public Sijoitus(String nimi, Integer oma, Integer hyvaksytyt) {
 		this.nimi = nimi;
 		this.oma = oma;
 		this.hyvaksytyt = hyvaksytyt;
 	}
 
-	public int getHyvaksytyt() {
+	public Integer getHyvaksytyt() {
 		return hyvaksytyt;
 	}
 
@@ -28,7 +28,7 @@ public class Sijoitus {
 		return nimi;
 	}
 
-	public int getOma() {
+	public Integer getOma() {
 		return oma;
 	}
 }

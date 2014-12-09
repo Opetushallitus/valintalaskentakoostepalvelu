@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -197,14 +198,6 @@ public class HyvaksymiskirjeetKomponentti {
 				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
 						.getHakutoiveenValintatapajonot()) {
 					String kkNimi = valintatapajono.getValintatapajonoNimi();
-					int kkJonosija = Optional.ofNullable(
-							valintatapajono.getJonosija()).orElse(0)
-							+ Optional.ofNullable(
-									valintatapajono.getTasasijaJonosija())
-									.orElse(0) - 1;
-					int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(kkJonosija, 
-							valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()));
-					
 					int kkHyvaksytyt = Optional.ofNullable(
 							valintatapajono.getHyvaksytty()).orElse(0);
 					String kkPiste = suomennaNumero(Optional
@@ -215,10 +208,23 @@ public class HyvaksymiskirjeetKomponentti {
 									valintatapajono
 											.getAlinHyvaksyttyPistemaara())
 							.orElse(BigDecimal.ZERO));
+					if(valintatapajono.getTila().isHyvaksytty()) {
+						int kkJonosija = Optional.ofNullable(
+								valintatapajono.getJonosija()).orElse(0)
+								+ Optional.ofNullable(
+										valintatapajono.getTasasijaJonosija())
+										.orElse(0) - 1;
+					int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(kkJonosija, 
+							valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()));
+					
 					kkSijoitukset.add(new Sijoitus(kkNimi, todellinenKkJonosija,
 							kkHyvaksytyt));
 					kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
-
+					}else {
+					kkSijoitukset.add(new Sijoitus(kkNimi, null,
+							kkHyvaksytyt));
+					kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
+					}
 					// Hyvaksytty valintatapajonossa -- oletataan etta
 					// hyvaksytty hakukohteeseen
 					// if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
