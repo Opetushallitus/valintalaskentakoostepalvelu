@@ -2,11 +2,13 @@ package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.cxf.jaxrs.client.ClientConfiguration;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.slf4j.Logger;
@@ -48,6 +50,14 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
 		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
 		bean.setProviders(providers);
 		this.webClient = bean.createWebClient();
+		ClientConfiguration c = WebClient.getConfig(webClient);
+		/**
+		 * WARNING! 0 ei ehka tarkoita ikuista.
+		 * http://cxf.547215.n5.nabble.com/Turn
+		 * -off-all-timeouts-with-WebClient-in-JAX-RS-td3364696.html
+		 */
+		c.getHttpConduit().getClient()
+				.setReceiveTimeout(TimeUnit.HOURS.toMillis(1));
 	}
 	
 	@Override
