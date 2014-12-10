@@ -59,8 +59,8 @@ public class KelaHaku extends KelaAbstraktiHaku {
 			hakija.getHakutoiveet()
 					.stream()
 					//
-					.filter(h -> h == null || h.getValintatila() == null
-							|| h.getVastaanottotila() == null)
+					.filter(h -> h != null && h.getValintatila() != null
+							&& h.getVastaanottotila() != null)
 					//
 					.filter(hakutoive ->
 					//

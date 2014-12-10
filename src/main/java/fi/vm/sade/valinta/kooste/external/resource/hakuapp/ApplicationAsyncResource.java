@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 
 /**
  * 
@@ -22,6 +23,8 @@ public interface ApplicationAsyncResource {
 	Future<List<Hakemus>> getApplicationsByOid(String hakuOid,
 			String hakukohdeOid);
 
+	Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit);
+	
 	Future<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids);
 
 	Peruutettava getApplicationsByOid(String hakuOid, String hakukohdeOid,

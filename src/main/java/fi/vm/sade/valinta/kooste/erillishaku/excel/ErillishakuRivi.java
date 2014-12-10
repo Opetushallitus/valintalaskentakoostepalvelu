@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -66,6 +68,24 @@ public class ErillishakuRivi {
 	}
 	public String getVastaanottoTila() {
 		return vastaanottoTila;
+	}
+	
+	@Override
+	public String toString() {
+		return new StringBuilder()
+		.append(etunimi)
+		.append(", ")
+		.append(sukunimi)
+		.append(", ")
+		.append(hakemuksenTila)
+		.append(", hetu == ")
+		.append(StringUtils.trimToNull(henkilotunnus) != null)
+		.append(", ")
+		.append(syntymaAika)
+		.append(", ")
+		.append(ilmoittautumisTila)
+		.append(", ")
+		.append(vastaanottoTila).toString();
 	}
 	
 }

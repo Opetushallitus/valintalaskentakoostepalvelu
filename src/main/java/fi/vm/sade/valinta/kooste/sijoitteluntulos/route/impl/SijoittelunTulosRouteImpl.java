@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import org.apache.camel.Exchange;
@@ -32,9 +33,12 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.TreeMultiset;
 import com.google.gson.Gson;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
@@ -592,6 +596,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 													.haeKiinnostavatHakukohteet(hakukohteenHakijat);
 											LetterBatch l = hyvaksymiskirjeetKomponentti
 													.teeHyvaksymiskirjeet(
+															todellisenJonosijanRatkaisin(hakukohteenHakijat),
 															null,
 															hyvaksymiskirjeessaKaytetytHakukohteet,
 															hakukohteenHakijat,
@@ -602,7 +607,9 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 															//
 															e.getDefaultValue(),
 															tag,
-															"hyvaksmiskirje");
+															"hyvaksmiskirje",
+															null,
+															null);
 											if (pakkaaTiedostotTarriin) {
 												Tiedosto tiedosto = new Tiedosto(
 														"hyvaksymiskirje_"
@@ -919,5 +926,31 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 		tarOutputStream.close();
 		return new ByteArrayInputStream(tarFileBytes.toByteArray());
+	}
+	private Map<String, TreeMultiset<Integer>> todellisenJonosijanRatkaisin(Collection<HakijaDTO> hakukohteenHakijat) {
+		Map<String,  TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija = Maps.newHashMap();
+		for (HakijaDTO hakija : hakukohteenHakijat) {
+			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
+						.getHakutoiveenValintatapajonot()) {
+					if(!valintatapajono.getTila().isHyvaksytty()) {
+						continue;
+					}
+					if(!valintatapajonoToJonosijaToHakija.containsKey(valintatapajono.getValintatapajonoOid())) {
+						valintatapajonoToJonosijaToHakija.put(valintatapajono.getValintatapajonoOid(), 
+								
+								TreeMultiset.<Integer>create());
+					}
+					int kkJonosija = Optional.ofNullable(
+							valintatapajono.getJonosija()).orElse(0)
+							+ Optional.ofNullable(
+									valintatapajono.getTasasijaJonosija())
+									.orElse(0) - 1;
+					//if(hakutoive.)
+					valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).add(kkJonosija);
+				}
+			}
+		}
+		return valintatapajonoToJonosijaToHakija;
 	}
 }

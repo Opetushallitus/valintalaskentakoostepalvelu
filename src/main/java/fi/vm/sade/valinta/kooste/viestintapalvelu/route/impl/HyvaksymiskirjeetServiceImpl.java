@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -28,16 +29,20 @@ import rx.Observable;
 import rx.functions.Action3;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
-
 import static com.google.common.collect.Lists.*;
+
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.collect.TreeMultiset;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
@@ -110,7 +115,16 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 				LOG.error("Organisaatiopalvelusta ei saatu organisaatiota tunnisteelle {}. Eli ei saatu hakijapalveluiden osoitetta.", Arrays.toString(oids.toArray()));
 				return null;
 			}
+			if(oids == null) {
+				LOG.error("Oidi-listaa ei voitu kerätä kun listaa ei ollut annettu!");
+				return null;
+			}
+			try {
 			oids.add(rdto.getParentOid());
+			} catch(Exception e) {
+				LOG.error("Oidia ei voitu lisätä oidilistaan: {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+				throw new RuntimeException("Oidia ei voitu lisätä oidilistaan: " + e.getMessage());
+			}
 			if(hakijapalveluidenOsoite != null) {
 				LOG.error("Hakijapalveluiden osoite saatiin tarjoajalta {}.\r\n{}", Arrays.toString(oids.toArray()), new GsonBuilder().setPrettyPrinting().create().toJson(hakijapalveluidenOsoite));
 				return hakijapalveluidenOsoite;
@@ -144,6 +158,34 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 		return haeOsoiteHierarkisesti(
 				kieli,oids, org, organisaationimi);
 	}
+	
+	private Map<String, TreeMultiset<Integer>> todellisenJonosijanRatkaisin(Collection<HakijaDTO> hakukohteenHakijat) {
+		Map<String,  TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija = Maps.newHashMap();
+		for (HakijaDTO hakija : hakukohteenHakijat) {
+			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
+						.getHakutoiveenValintatapajonot()) {
+					if(!valintatapajono.getTila().isHyvaksytty()) {
+						continue;
+					}
+					if(!valintatapajonoToJonosijaToHakija.containsKey(valintatapajono.getValintatapajonoOid())) {
+						valintatapajonoToJonosijaToHakija.put(valintatapajono.getValintatapajonoOid(), 
+								
+								TreeMultiset.<Integer>create());
+					}
+					int kkJonosija = Optional.ofNullable(
+							valintatapajono.getJonosija()).orElse(0)
+							+ Optional.ofNullable(
+									valintatapajono.getTasasijaJonosija())
+									.orElse(0) - 1;
+					//if(hakutoive.)
+					valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).add(kkJonosija);
+				}
+			}
+		}
+		return valintatapajonoToJonosijaToHakija;
+	}
+	
 	@Override
 	public void hyvaksymiskirjeetHakemuksille(final KirjeProsessi prosessi,
 			final HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
@@ -187,6 +229,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
 					
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+							todellisenJonosijanRatkaisin(hakijat
+							.getResults()),
 							organisaatioResponseToHakijapalveluidenOsoite(newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())), 
 									kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
 							hyvaksymiskirjeessaKaytetytHakukohteet,
@@ -196,7 +240,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							hyvaksymiskirjeDTO.getTarjoajaOid(),
 							hyvaksymiskirjeDTO.getSisalto(),
 							hyvaksymiskirjeDTO.getTag(),
-							hyvaksymiskirjeDTO.getTemplateName());
+							hyvaksymiskirjeDTO.getTemplateName(),
+							hyvaksymiskirjeDTO.getPalautusPvm(),
+							hyvaksymiskirjeDTO.getPalautusAika());
 				})
 		//
 				.subscribeOn(Schedulers.newThread())
@@ -214,13 +260,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 						});
 	}
 	@Override
-	public void jalkiohjauskirjeHakukohteelle(KirjeProsessi prosessi,
+	public void jalkiohjauskirjeHakukohteelle(final KirjeProsessi prosessi,
 			final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
 		Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource
 				.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(),
 						hyvaksymiskirjeDTO.getHakukohdeOid());
 		Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource
-				.getKoulutuspaikkallisetHakijat(
+				.getKaikkiHakijat(
 						hyvaksymiskirjeDTO.getHakuOid(),
 						hyvaksymiskirjeDTO.getHakukohdeOid());
 		Future<Response> organisaatioFuture = organisaatioAsyncResource
@@ -233,7 +279,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 				from(organisaatioFuture),
 				(hakemukset, hakijat, organisaatioResponse) -> {
 					
-					LOG.info("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.getResults().size());
+					LOG.error("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.getResults().size());
 					
 					BiPredicate<HakijaDTO, String> kohdeHakukohteessaHylatytTest = new HaussaHylattyHakijaBiPredicate();
 
@@ -253,10 +299,12 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							.haeKiinnostavatHakukohteet(kohdeHakukohteessaHylatyt);
 					MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet
 							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
-					List<String> tarjoajaOidList = Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid());
+					List<String> tarjoajaOidList = newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid()));
 					Osoite hakijapalveluidenOsoite = organisaatioResponseToHakijapalveluidenOsoite(tarjoajaOidList, 
 							kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+							todellisenJonosijanRatkaisin(hakijat
+									.getResults()),
 							hakijapalveluidenOsoite,
 							hyvaksymiskirjeessaKaytetytHakukohteet,
 							kohdeHakukohteessaHylatyt, hakemukset,
@@ -265,7 +313,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							hyvaksymiskirjeDTO.getTarjoajaOid(),
 							hyvaksymiskirjeDTO.getSisalto(),
 							hyvaksymiskirjeDTO.getTag(),
-							hyvaksymiskirjeDTO.getTemplateName());
+							hyvaksymiskirjeDTO.getTemplateName(),
+							hyvaksymiskirjeDTO.getPalautusPvm(),
+							hyvaksymiskirjeDTO.getPalautusAika());
 				})
 		//
 				.subscribeOn(Schedulers.newThread())
@@ -317,6 +367,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
 					
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+							todellisenJonosijanRatkaisin(hakijat
+									.getResults()),
 							organisaatioResponseToHakijapalveluidenOsoite(newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())), 
 									kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
 							hyvaksymiskirjeessaKaytetytHakukohteet,
@@ -326,7 +378,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 							hyvaksymiskirjeDTO.getTarjoajaOid(),
 							hyvaksymiskirjeDTO.getSisalto(),
 							hyvaksymiskirjeDTO.getTag(),
-							hyvaksymiskirjeDTO.getTemplateName());
+							hyvaksymiskirjeDTO.getTemplateName(),
+							hyvaksymiskirjeDTO.getPalautusPvm(),
+							hyvaksymiskirjeDTO.getPalautusAika());
 				})
 		//
 				.subscribeOn(Schedulers.newThread())

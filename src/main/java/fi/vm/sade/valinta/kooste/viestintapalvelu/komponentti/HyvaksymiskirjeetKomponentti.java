@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
-import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_EROTIN;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
@@ -15,11 +13,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Map.Entry;
 
-import org.apache.camel.Body;
-import org.apache.camel.Property;
-import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +25,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.TreeMultiset;
 
-import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
@@ -40,7 +37,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.util.TodellisenJonosijanLaskentaUtiliteetti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -95,11 +92,15 @@ public class HyvaksymiskirjeetKomponentti {
 				.toString();
 	}
 
-	public LetterBatch teeHyvaksymiskirjeet(Osoite hakijapalveluidenOsoite,
+	public LetterBatch teeHyvaksymiskirjeet(
+			Map<String, TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija,
+			Osoite hakijapalveluidenOsoite,
 			Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
 			Collection<HakijaDTO> hakukohteenHakijat, List<Hakemus> hakemukset,
 			String hakukohdeOid, String hakuOid, String tarjoajaOid,
-			String sisalto, String tag, String templateName) {
+			String sisalto, String tag, String templateName,
+			String palautusPvm,
+			String palautusAika) {
 
 		LOG.debug(
 				"Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'",
@@ -141,7 +142,7 @@ public class HyvaksymiskirjeetKomponentti {
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUTETTU, 6);
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUNTUNUT, 7);
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY, 8);
-	
+		
 		for (HakijaDTO hakija : hakukohteenHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
 			final Hakemus hakemus = hakukohteenHakemukset.get(hakemusOid);
@@ -197,11 +198,6 @@ public class HyvaksymiskirjeetKomponentti {
 				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
 						.getHakutoiveenValintatapajonot()) {
 					String kkNimi = valintatapajono.getValintatapajonoNimi();
-					int kkJonosija = Optional.ofNullable(
-							valintatapajono.getJonosija()).orElse(0)
-							+ Optional.ofNullable(
-									valintatapajono.getTasasijaJonosija())
-									.orElse(0) - 1;
 					int kkHyvaksytyt = Optional.ofNullable(
 							valintatapajono.getHyvaksytty()).orElse(0);
 					String kkPiste = suomennaNumero(Optional
@@ -212,10 +208,23 @@ public class HyvaksymiskirjeetKomponentti {
 									valintatapajono
 											.getAlinHyvaksyttyPistemaara())
 							.orElse(BigDecimal.ZERO));
-					kkSijoitukset.add(new Sijoitus(kkNimi, kkJonosija,
+					if(valintatapajono.getTila().isHyvaksytty()) {
+						int kkJonosija = Optional.ofNullable(
+								valintatapajono.getJonosija()).orElse(0)
+								+ Optional.ofNullable(
+										valintatapajono.getTasasijaJonosija())
+										.orElse(0) - 1;
+					int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(kkJonosija, 
+							valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()));
+					
+					kkSijoitukset.add(new Sijoitus(kkNimi, todellinenKkJonosija,
 							kkHyvaksytyt));
 					kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
-
+					}else {
+					kkSijoitukset.add(new Sijoitus(kkNimi, null,
+							kkHyvaksytyt));
+					kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
+					}
 					// Hyvaksytty valintatapajonossa -- oletataan etta
 					// hyvaksytty hakukohteeseen
 					// if (HYVAKSYTTY.equals(valintatapajono.getTila())) {
@@ -331,6 +340,8 @@ public class HyvaksymiskirjeetKomponentti {
 				tulosList.add(tulokset);
 			}
 			Map<String, Object> replacements = Maps.newHashMap();
+			replacements.put("palautusAika", StringUtils.trimToNull(palautusAika));
+			replacements.put("palautusPvm", StringUtils.trimToNull(palautusPvm));
 			replacements.put("tulokset", tulosList);
 			replacements.put("koulu", koulu.getTeksti(preferoituKielikoodi,
 					vakioTarjoajanNimi(hakukohdeOid)));

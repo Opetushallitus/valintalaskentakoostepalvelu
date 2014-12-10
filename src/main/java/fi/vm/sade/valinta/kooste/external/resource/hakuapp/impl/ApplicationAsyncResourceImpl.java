@@ -39,6 +39,8 @@ import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppiBatch;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 
 /**
@@ -75,15 +77,10 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 				.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
 		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
 		bean.setProviders(providers);
-		
-		AsennaCasFilter.asennaCasFilter(
-				webCasUrl,
-				targetService,
-				appClientUsername,
-				appClientPassword,
-				bean,
-				context);
-		
+
+		AsennaCasFilter.asennaCasFilter(webCasUrl, targetService,
+				appClientUsername, appClientPassword, bean, context);
+
 		this.webClient = bean.createWebClient();
 		ClientConfiguration c = WebClient.getConfig(webClient);
 		/**
@@ -94,6 +91,31 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		c.getHttpConduit().getClient()
 				.setReceiveTimeout(TimeUnit.HOURS.toMillis(1));
 		// org.apache.cxf.transport.http.async.SO_TIMEOUT
+	}
+
+	@Override
+	public Future<List<Hakemus>> putApplicationPrototypes(
+			String hakuOid,
+			String hakukohdeOid,
+			String tarjoajaOid,
+			Collection<HakemusPrototyyppi> hakemusPrototyypit) {
+		String url = new StringBuilder()
+				.append("/applications/additionalData/")
+				.toString();
+				//.append(hakuOid).append("/").append(hakukohdeOid).toString();
+		// new MediaType("application", "json", Charset.forName("UTF-8"));
+		return WebClient.fromClient(webClient).path(url)
+		//
+		//
+		// .accept("application/json;charset=UTF-8")
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				//
+				.async()
+				//
+				.put(Entity.entity(
+						new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit)
+						, MediaType.APPLICATION_JSON),new GenericType<List<Hakemus>>() {
+				});
 	}
 
 	@Override
