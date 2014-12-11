@@ -1,27 +1,18 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
-import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.ClientConfiguration;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.apache.cxf.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -30,8 +21,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.AsennaCasFilter;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
@@ -46,8 +35,6 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 /**
  *
  * @author Jussi Jartamo
- *
- *         ApplicationResource
  */
 @Service
 public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
@@ -62,7 +49,6 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 			@Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword,
 			@Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String address,
 			ApplicationContext context
-	//
 	) {
 		this.address = address;
 		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
@@ -100,7 +86,6 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 				.get(new GenericType<List<ApplicationAdditionalDataDTO>>() { });
 	}
 
-	// public static final String CHARSET_UTF_8 = ";charset=UTF-8";
 	@Override
 	public Future<List<Hakemus>> getApplicationsByOid(String hakuOid,
 			String hakukohdeOid) {
@@ -165,8 +150,7 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 									url,
 									callback,
 									failureCallback,
-									new TypeToken<List<ApplicationAdditionalDataDTO>>() {
-									}.getType())));
+									new TypeToken<List<ApplicationAdditionalDataDTO>>() { }.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
