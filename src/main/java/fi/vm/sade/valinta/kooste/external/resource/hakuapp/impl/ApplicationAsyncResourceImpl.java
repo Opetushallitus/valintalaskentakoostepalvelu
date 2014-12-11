@@ -44,9 +44,9 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppiBa
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 
 /**
- * 
+ *
  * @author Jussi Jartamo
- * 
+ *
  *         ApplicationResource
  */
 @Service
@@ -69,49 +69,35 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		bean.setAddress(address);
 		bean.setThreadSafe(true);
 		List<Object> providers = Lists.newArrayList();
-		providers
-				.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
+		providers.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
 		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
 		bean.setProviders(providers);
 
-		AsennaCasFilter.asennaCasFilter(webCasUrl, targetService,
-				appClientUsername, appClientPassword, bean, context);
+		AsennaCasFilter.asennaCasFilter(webCasUrl, targetService, appClientUsername, appClientPassword, bean, context);
 
 		this.webClient = bean.createWebClient();
 		ClientConfiguration c = WebClient.getConfig(webClient);
-		c.getHttpConduit().getClient()
-				.setReceiveTimeout(TimeUnit.HOURS.toMillis(1));
+		c.getHttpConduit().getClient().setReceiveTimeout(TimeUnit.HOURS.toMillis(1));
 	}
 
 	@Override
-	public Future<List<Hakemus>> putApplicationPrototypes(
-			String hakuOid,
-			String hakukohdeOid,
-			String tarjoajaOid,
-			Collection<HakemusPrototyyppi> hakemusPrototyypit) {
-		String url = new StringBuilder()
-				.append("/applications/additionalData/")
-				.toString();
+	public Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit) {
+		String url = "/applications/additionalData/";
 		return WebClient.fromClient(webClient).path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
-				.put(Entity.entity(
-						new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit)
-						, MediaType.APPLICATION_JSON),new GenericType<List<Hakemus>>() {
-				});
+				.put(Entity.entity(new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit), MediaType.APPLICATION_JSON),new GenericType<List<Hakemus>>() { });
 	}
 
 	@Override
-	public Future<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(
-			String hakuOid, String hakukohdeOid) {
+	public Future<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(String hakuOid, String hakukohdeOid) {
 		String url = new StringBuilder()
 				.append("/applications/additionalData/").append(hakuOid)
 				.append("/").append(hakukohdeOid).toString();
 		return WebClient.fromClient(webClient).path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
-				.get(new GenericType<List<ApplicationAdditionalDataDTO>>() {
-				});
+				.get(new GenericType<List<ApplicationAdditionalDataDTO>>() { });
 	}
 
 	// public static final String CHARSET_UTF_8 = ";charset=UTF-8";
@@ -127,13 +113,11 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 				.query("aoOid", hakukohdeOid)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
-				.get(new GenericType<List<Hakemus>>() {
-				});
+				.get(new GenericType<List<Hakemus>>() { });
 	}
 
 	@Override
-	public Future<List<Hakemus>> getApplicationsByOids(
-			Collection<String> hakemusOids) {
+	public Future<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids) {
 		String url = new StringBuilder().append("/applications/list")
 				.toString();
 		return WebClient.fromClient(webClient)
@@ -141,17 +125,11 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 				.query("rows", 100000)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
-				.post(Entity.entity(Lists.newArrayList(hakemusOids),
-						MediaType.APPLICATION_JSON_TYPE),
-						new GenericType<List<Hakemus>>() {
-						});
-	}
+				.post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new GenericType<List<Hakemus>>() { });
+    }
 
-	public Peruutettava getApplicationsByOid(String hakuOid,
-			String hakukohdeOid, Consumer<List<Hakemus>> callback,
-			Consumer<Throwable> failureCallback) {
-		String url = new StringBuilder().append("/applications/listfull")
-				.toString();
+	public Peruutettava getApplicationsByOid(String hakuOid, String hakukohdeOid, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
+		String url = "/applications/listfull";
 		try {
 			return new PeruutettavaImpl(
 					WebClient
@@ -164,28 +142,18 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 							.async()
 							.get(new Callback<List<Hakemus>>(
 									address,
-									new StringBuilder()
-											.append(url)
-											.append("?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=")
-											.append(hakukohdeOid)
-											.append("&asId=").append(hakuOid)
-											.toString(), callback,
+									url+"?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid="+hakukohdeOid+"&asId="+hakuOid,
+                                    callback,
 									failureCallback,
-									new TypeToken<List<Hakemus>>() {
-									}.getType())));
+									new TypeToken<List<Hakemus>>() { }.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
 
-	public Peruutettava getApplicationAdditionalData(String hakuOid,
-			String hakukohdeOid,
-			Consumer<List<ApplicationAdditionalDataDTO>> callback,
-			Consumer<Throwable> failureCallback) {
-		String url = new StringBuilder()
-				.append("/applications/additionalData/").append(hakuOid)
-				.append("/").append(hakukohdeOid).toString();
+	public Peruutettava getApplicationAdditionalData(String hakuOid, String hakukohdeOid, Consumer<List<ApplicationAdditionalDataDTO>> callback, Consumer<Throwable> failureCallback) {
+		String url = "/applications/additionalData/" + hakuOid + "/" + hakukohdeOid;
 		try {
 			return new PeruutettavaImpl(
 					WebClient
