@@ -56,13 +56,9 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 
 	@Autowired
 	public ApplicationAsyncResourceImpl(
-			//
 			@Value("${web.url.cas}") String webCasUrl,
-			//
 			@Value("${cas.service.haku-service}/j_spring_cas_security_check") String targetService,
-			//
 			@Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String appClientUsername,
-			//
 			@Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword,
 			@Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String address,
 			ApplicationContext context
@@ -83,14 +79,8 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 
 		this.webClient = bean.createWebClient();
 		ClientConfiguration c = WebClient.getConfig(webClient);
-		/**
-		 * WARNING! 0 ei ehka tarkoita ikuista.
-		 * http://cxf.547215.n5.nabble.com/Turn
-		 * -off-all-timeouts-with-WebClient-in-JAX-RS-td3364696.html
-		 */
 		c.getHttpConduit().getClient()
 				.setReceiveTimeout(TimeUnit.HOURS.toMillis(1));
-		// org.apache.cxf.transport.http.async.SO_TIMEOUT
 	}
 
 	@Override
@@ -102,16 +92,9 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		String url = new StringBuilder()
 				.append("/applications/additionalData/")
 				.toString();
-				//.append(hakuOid).append("/").append(hakukohdeOid).toString();
-		// new MediaType("application", "json", Charset.forName("UTF-8"));
 		return WebClient.fromClient(webClient).path(url)
-		//
-		//
-		// .accept("application/json;charset=UTF-8")
 				.accept(MediaType.APPLICATION_JSON_TYPE)
-				//
 				.async()
-				//
 				.put(Entity.entity(
 						new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit)
 						, MediaType.APPLICATION_JSON),new GenericType<List<Hakemus>>() {
@@ -124,15 +107,9 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		String url = new StringBuilder()
 				.append("/applications/additionalData/").append(hakuOid)
 				.append("/").append(hakukohdeOid).toString();
-		// new MediaType("application", "json", Charset.forName("UTF-8"));
 		return WebClient.fromClient(webClient).path(url)
-		//
-		//
-		// .accept("application/json;charset=UTF-8")
 				.accept(MediaType.APPLICATION_JSON_TYPE)
-				//
 				.async()
-				//
 				.get(new GenericType<List<ApplicationAdditionalDataDTO>>() {
 				});
 	}
@@ -143,22 +120,13 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 			String hakukohdeOid) {
 		String url = new StringBuilder().append("/applications/listfull")
 				.toString();
-		// new MediaType("application", "json", Charset.forName("UTF-8"));
 		return WebClient.fromClient(webClient).path(url)
-		//
 				.query("appState", "ACTIVE", "INCOMPLETE")
-				//
 				.query("rows", 100000)
-				//
 				.query("asId", hakuOid)
-				//
 				.query("aoOid", hakukohdeOid)
-				//
-				// .accept("application/json;charset=UTF-8")
 				.accept(MediaType.APPLICATION_JSON_TYPE)
-				//
 				.async()
-				//
 				.get(new GenericType<List<Hakemus>>() {
 				});
 	}
@@ -168,18 +136,11 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 			Collection<String> hakemusOids) {
 		String url = new StringBuilder().append("/applications/list")
 				.toString();
-		// new MediaType("application", "json", Charset.forName("UTF-8"));
 		return WebClient.fromClient(webClient)
-		//
 				.path(url)
-				// .accept("application/json;charset=UTF-8")
-				//
 				.query("rows", 100000)
-				//
 				.accept(MediaType.APPLICATION_JSON_TYPE)
-				//
 				.async()
-				//
 				.post(Entity.entity(Lists.newArrayList(hakemusOids),
 						MediaType.APPLICATION_JSON_TYPE),
 						new GenericType<List<Hakemus>>() {
@@ -196,17 +157,11 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 					WebClient
 							.fromClient(webClient)
 							.path(url)
-							//
 							.query("appState", "ACTIVE", "INCOMPLETE")
-							//
 							.query("rows", 100000)
-							//
 							.query("asId", hakuOid)
-							//
 							.query("aoOid", hakukohdeOid)
-							//
 							.async()
-							//
 							.get(new Callback<List<Hakemus>>(
 									address,
 									new StringBuilder()
