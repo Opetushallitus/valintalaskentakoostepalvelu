@@ -86,7 +86,7 @@ public class HakemusWrapper {
             for (Entry<String, String> s : hakutoiveet.entrySet()) {
                 if (hakukohdeOid.equals(s.getValue())) {
                     String value = s.getKey().split("preference")[1].split("-")[0];
-                    return NumberUtils.createInteger(value);
+                    return NumberUtils.isNumber(value) ? NumberUtils.toInt(value) : null;
                 }
             }
         }
