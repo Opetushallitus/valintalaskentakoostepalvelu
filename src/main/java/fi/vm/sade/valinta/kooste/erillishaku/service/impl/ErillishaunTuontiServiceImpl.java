@@ -5,6 +5,8 @@ import com.google.common.collect.Maps;
 import com.google.gson.GsonBuilder;
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
+import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
+import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
@@ -12,6 +14,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.ErillishaunTuontiService;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
@@ -28,6 +31,8 @@ import rx.schedulers.Schedulers;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static rx.Observable.from;
@@ -88,42 +93,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
                                 }).collect(Collectors.toList()))
                         .get()
                         .stream()
-                        .map(hakemus -> {
-                            ErillishaunHakijaDTO hakija = new ErillishaunHakijaDTO();
-                            HakemusWrapper wrapper = new HakemusWrapper(hakemus);
-                            ErillishakuRivi rivi = hetuToRivi.get(wrapper.getHenkilotunnusTaiSyntymaaika());
-                            try {
-                                hakija.setHakemuksenTila(HakemuksenTila.valueOf(rivi.getHakemuksenTila()));
-                            } catch (Exception e) {
-                                // tuntematon tila tai
-                                // todennakoisesti asettamatta
-                                hakija.setHakemuksenTila(HakemuksenTila.HYLATTY);
-                            }
-                            hakija.setHakemusOid(hakemus.getOid());
-                            hakija.setHakijaOid(hakemus.getPersonOid());
-                            hakija.setHakukohdeOid(erillishaku.getHakukohdeOid());
-                            hakija.setHakuOid(erillishaku.getHakuOid());
-                            hakija.setSukunimi(wrapper.getSukunimi());
-                            hakija.setEtunimi(wrapper.getEtunimi());
-                            try {
-                                hakija.setIlmoittautumisTila(fi.vm.sade.sijoittelu.domain.IlmoittautumisTila.valueOf(rivi.getIlmoittautumisTila()));
-                            } catch (Exception e) {
-                                // tuntematon tila tai
-                                // todennakoisesti asettamatta
-                                hakija.setIlmoittautumisTila(null);
-                            }
-                            try {
-                                hakija.setValintatuloksenTila(fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.valueOf(rivi.getVastaanottoTila()));
-                            } catch (Exception e) {
-                                // tuntematon tila tai
-                                // todennakoisesti asettamatta
-                                hakija.setIlmoittautumisTila(null);
-                            }
-                            hakija.setJulkaistavissa(rivi.isJulkaistaankoTiedot());
-                            hakija.setTarjoajaOid(erillishaku.getTarjoajaOid());
-                            hakija.setValintatapajonoOid(erillishaku.getValintatapajonoOid());
-                            return hakija;
-                        }).collect(Collectors.toList());
+                        .map(hakemusToHakija(erillishaku, hetuToRivi)).collect(Collectors.toList());
 
             } catch (Throwable e) {
                 LOG.error("Excelin tuonti epaonnistui! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
@@ -142,11 +112,52 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
             if (poikkeus == null) {
                 LOG.error("Suoritus keskeytyi tuntemattomaan NPE poikkeukseen!");
             } else {
-                LOG.error(
-                        "Erillishaun tuonti keskeytyi virheeseen {}. {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
+                LOG.error("Erillishaun tuonti keskeytyi virheeseen {}. {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
             }
             prosessi.keskeyta();
         });
+    }
+
+    private Function<Hakemus, ErillishaunHakijaDTO> hakemusToHakija(ErillishakuDTO erillishaku, Map<String, ErillishakuRivi> hetuToRivi) {
+        return hakemus -> {
+            HakemusWrapper wrapper = new HakemusWrapper(hakemus);
+            ErillishakuRivi rivi = hetuToRivi.get(wrapper.getHenkilotunnusTaiSyntymaaika());
+
+            ErillishaunHakijaDTO hakija = new ErillishaunHakijaDTO();
+            hakija.setHakemuksenTila(hakemuksenTila(rivi));
+            hakija.setHakemusOid(hakemus.getOid());
+            hakija.setHakijaOid(hakemus.getPersonOid());
+            hakija.setHakukohdeOid(erillishaku.getHakukohdeOid());
+            hakija.setHakuOid(erillishaku.getHakuOid());
+            hakija.setSukunimi(wrapper.getSukunimi());
+            hakija.setEtunimi(wrapper.getEtunimi());
+            hakija.setIlmoittautumisTila(ilmoittautumisTila(rivi));
+            hakija.setValintatuloksenTila(valintatuloksenTila(rivi));
+            hakija.setJulkaistavissa(rivi.isJulkaistaankoTiedot());
+            hakija.setTarjoajaOid(erillishaku.getTarjoajaOid());
+            hakija.setValintatapajonoOid(erillishaku.getValintatapajonoOid());
+            return hakija;
+        };
+    }
+
+    private HakemuksenTila hakemuksenTila(ErillishakuRivi rivi) {
+        return Optional.ofNullable(parseField(() -> HakemuksenTila.valueOf(rivi.getHakemuksenTila()))).orElse(HakemuksenTila.HYLATTY);
+    }
+
+    private IlmoittautumisTila ilmoittautumisTila(ErillishakuRivi rivi) {
+        return parseField(() -> IlmoittautumisTila.valueOf(rivi.getIlmoittautumisTila()));
+    }
+
+    private ValintatuloksenTila valintatuloksenTila(ErillishakuRivi rivi) {
+        return parseField(() -> ValintatuloksenTila.valueOf(rivi.getVastaanottoTila()));
+    }
+
+    private <T> T parseField(Supplier<T> lambda) {
+        try {
+            return lambda.get();
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private Date parseSyntymaAika(ErillishakuRivi rivi) {
