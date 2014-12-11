@@ -58,9 +58,7 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 		providers.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
 		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
 		bean.setProviders(providers);
-
 		AsennaCasFilter.asennaCasFilter(webCasUrl, targetService, appClientUsername, appClientPassword, bean, context);
-
 		this.webClient = bean.createWebClient();
 		ClientConfiguration c = WebClient.getConfig(webClient);
 		c.getHttpConduit().getClient().setReceiveTimeout(TimeUnit.HOURS.toMillis(1));

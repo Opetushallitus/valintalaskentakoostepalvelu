@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -239,54 +241,58 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 				LOG.error(
 						"Aloitetaan jalkiohjauskirjeiden vienti! Kirjeita {}kpl",
 						letterBatch.getLetters().size());
-				String batchId = viestintapalveluAsyncResource
+				LetterResponse batchId = viestintapalveluAsyncResource
 						.viePdfJaOdotaReferenssi(letterBatch).get(30L,
 								TimeUnit.MINUTES);
 				LOG.error(
 						"Saatiin jalkiohjauskirjeen seurantaId {} ja aloitetaan valmistumisen pollaus! (Timeout 60min)",
-						batchId);
+						batchId.getBatchId());
 				prosessi.vaiheValmistui();
-				PublishSubject<String> stop = PublishSubject.create();
-				Observable
-						.interval(1, TimeUnit.SECONDS)
-						.take(ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
-						.takeUntil(stop)
-						.subscribe(
-								pulse -> {
-									try {
-										LOG.warn(
-												"Tehdaan status kutsu seurantaId:lle {}",
-												batchId);
-										LetterBatchStatusDto status = viestintapalveluAsyncResource
-												.haeStatus(batchId).get(900L,
-														TimeUnit.MILLISECONDS);
-										if (prosessi.isKeskeytetty()) {
-											LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta!");
-											stop.onNext(null);
-											return;
-										}
-										if ("error".equals(status.getStatus())) {
-											LOG.error("Jalkiohjauskirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
-											prosessi.keskeyta();
-											stop.onNext(null);
-										}
-										if ("ready".equals(status.getStatus())) {
-											prosessi.vaiheValmistui();
-											LOG.error("Jalkiohjauskirjeet valmistui!");
-											prosessi.valmistui(batchId);
-											stop.onNext(null);
-										}
-									} catch (Exception e) {
-										LOG.error(
-												"Statuksen haku epaonnistui {}",
-												e.getMessage());
-									}
-
-								}, throwable -> {
-									prosessi.keskeyta();
-								}, () -> {
-									prosessi.keskeyta();
-								});
+                if(batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
+                    LOG.error("############ Kirjeiden status ok #############");
+                    PublishSubject<String> stop = PublishSubject.create();
+                    Observable
+                            .interval(1, TimeUnit.SECONDS)
+                            .take(ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
+                            .takeUntil(stop)
+                            .subscribe(
+                                    pulse -> {
+                                        try {
+                                            LOG.warn(
+                                                    "Tehdaan status kutsu seurantaId:lle {}",
+                                                    batchId);
+                                            LetterBatchStatusDto status = viestintapalveluAsyncResource
+                                                    .haeStatus(batchId.getBatchId()).get(900L,
+                                                            TimeUnit.MILLISECONDS);
+                                            if (prosessi.isKeskeytetty()) {
+                                                LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta!");
+                                                stop.onNext(null);
+                                                return;
+                                            }
+                                            if ("error".equals(status.getStatus())) {
+                                                LOG.error("Jalkiohjauskirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
+                                                prosessi.keskeyta();
+                                                stop.onNext(null);
+                                            }
+                                            if ("ready".equals(status.getStatus())) {
+                                                prosessi.vaiheValmistui();
+                                                LOG.error("Jalkiohjauskirjeet valmistui!");
+                                                prosessi.valmistui(batchId.getBatchId());
+                                                stop.onNext(null);
+                                            }
+                                        } catch (Exception e) {
+                                            LOG.error(
+                                                    "Statuksen haku epaonnistui {}",
+                                                    e.getMessage());
+                                        }
+                                 }, throwable -> {
+                                prosessi.keskeyta();
+                            }, () -> {
+                                prosessi.keskeyta();
+                            });
+                } else {
+                    prosessi.keskeyta("Hakemuksissa oli virheitä", batchId.getErrors());
+                }
 			} catch (Exception e) {
 				LOG.error("Virhe haulle {}: {}", kirje.getHakuOid(),
 						e.getMessage());

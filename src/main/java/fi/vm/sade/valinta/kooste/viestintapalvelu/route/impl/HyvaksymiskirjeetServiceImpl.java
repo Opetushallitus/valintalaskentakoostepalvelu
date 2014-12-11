@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -406,7 +407,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 					return;
 				}
 				LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
-				final String batchId; 
+				final LetterResponse batchId;
 				try {
 					batchId=viestintapalveluAsyncResource
 						.viePdfJaOdotaReferenssi(letterBatch).get(165L,
@@ -415,49 +416,53 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 					LOG.error("Viestintapalvelukutsu epaonnistui virheeseen {}", e.getMessage());
 					throw new RuntimeException(e);
 				}
-				LOG.info("Saatiin kirjeen seurantaId {}", batchId);
+				LOG.info("Saatiin kirjeen seurantaId {}", batchId.getBatchId());
 				prosessi.vaiheValmistui();
-				PublishSubject<String> stop = PublishSubject.create();
-				Observable
-						.interval(1, TimeUnit.SECONDS)
-						.take(ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
-						.takeUntil(stop)
-						.subscribe(
-								pulse -> {
-									try {
-										LOG.warn(
-												"Tehdaan status kutsu seurantaId:lle {}",
-												batchId);
-										LetterBatchStatusDto status = viestintapalveluAsyncResource
-												.haeStatus(batchId).get(900L,
-														TimeUnit.MILLISECONDS);
-										if (prosessi.isKeskeytetty()) {
-											LOG.error("Hyvaksymiskirjeiden luonti on keskeytetty kayttajantoimesta!");
-											stop.onNext(null);
-											return;
-										}
-										if ("error".equals(status.getStatus())) {
-											LOG.error("Hyvaksymiskirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
-											prosessi.keskeyta();
-											stop.onNext(null);
-										}
-										if ("ready".equals(status.getStatus())) {
-											prosessi.vaiheValmistui();
-											LOG.error("Hyvaksymiskirjeet valmistui!");
-											prosessi.valmistui(batchId);
-											stop.onNext(null);
-										}
-									} catch (Exception e) {
-										LOG.error(
-												"Statuksen haku epaonnistui {}",
-												e.getMessage());
-									}
+                if(batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
+                    PublishSubject<String> stop = PublishSubject.create();
+                    Observable
+                            .interval(1, TimeUnit.SECONDS)
+                            .take(ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
+                            .takeUntil(stop)
+                            .subscribe(
+                                    pulse -> {
+                                        try {
+                                            LOG.warn(
+                                                    "Tehdaan status kutsu seurantaId:lle {}",
+                                                    batchId);
+                                            LetterBatchStatusDto status = viestintapalveluAsyncResource
+                                                    .haeStatus(batchId.getBatchId()).get(900L,
+                                                            TimeUnit.MILLISECONDS);
+                                            if (prosessi.isKeskeytetty()) {
+                                                LOG.error("Hyvaksymiskirjeiden luonti on keskeytetty kayttajantoimesta!");
+                                                stop.onNext(null);
+                                                return;
+                                            }
+                                            if ("error".equals(status.getStatus())) {
+                                                LOG.error("Hyvaksymiskirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
+                                                prosessi.keskeyta();
+                                                stop.onNext(null);
+                                            }
+                                            if ("ready".equals(status.getStatus())) {
+                                                prosessi.vaiheValmistui();
+                                                LOG.error("Hyvaksymiskirjeet valmistui!");
+                                                prosessi.valmistui(batchId.getBatchId());
+                                                stop.onNext(null);
+                                            }
+                                        } catch (Exception e) {
+                                            LOG.error(
+                                                    "Statuksen haku epaonnistui {}",
+                                                    e.getMessage());
+                                        }
 
-								}, throwable -> {
-									prosessi.keskeyta();
-								}, () -> {
-									prosessi.keskeyta();
-								});
+                                    }, throwable -> {
+                                prosessi.keskeyta();
+                            }, () -> {
+                                prosessi.keskeyta();
+                            });
+                }  else {
+                    prosessi.keskeyta("Hakemuksissa oli virheitä", batchId.getErrors());
+                }
 			} catch (Exception e) {
 				LOG.error("Virhe hakukohteelle {}: {}",
 						kirje.getHakukohdeOid(), e.getMessage());

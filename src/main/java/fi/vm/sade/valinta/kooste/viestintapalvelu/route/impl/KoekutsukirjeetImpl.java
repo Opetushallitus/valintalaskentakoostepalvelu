@@ -15,6 +15,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.gson.Gson;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -340,50 +342,53 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 									koekutsu.getTag(),
 									koekutsu.getTemplateName());
 					LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
-					String batchId = viestintapalveluAsyncResource
+					LetterResponse batchId = viestintapalveluAsyncResource
 							.viePdfJaOdotaReferenssi(letterBatch).get(35L,
 									TimeUnit.SECONDS);
-					LOG.info("Saatiin kirjeen seurantaId {}", batchId);
+					LOG.info("Saatiin kirjeen seurantaId {}", batchId.getBatchId());
 					prosessi.vaiheValmistui();
-					PublishSubject<String> stop = PublishSubject.create();
-					Observable
-							.interval(1, TimeUnit.SECONDS)
-							.take(ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
-							.takeUntil(stop)
-							.subscribe(
-									pulse -> {
-										try {
-											LOG.warn(
-													"Tehdaan status kutsu seurantaId:lle {}",
-													batchId);
-											LetterBatchStatusDto status = viestintapalveluAsyncResource
-													.haeStatus(batchId)
-													.get(900L,
-															TimeUnit.MILLISECONDS);
-											if ("error".equals(status
-													.getStatus())) {
-												LOG.error("Koekutsukirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
-												prosessi.keskeyta();
-												stop.onNext(null);
-											}
-											if ("ready".equals(status
-													.getStatus())) {
-												prosessi.vaiheValmistui();
-												LOG.error("Koekutsukirjeet valmistui!");
-												prosessi.valmistui(batchId);
-												stop.onNext(null);
-											}
-										} catch (Exception e) {
-											LOG.error(
-													"Statuksen haku epaonnistui {}",
-													e.getMessage());
-										}
-
-									}, throwable -> {
-										prosessi.keskeyta();
-									}, () -> {
-										prosessi.keskeyta();
-									});
+                    if(batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
+                        PublishSubject<String> stop = PublishSubject.create();
+                        Observable
+                                .interval(1, TimeUnit.SECONDS)
+                                .take(ViestintapalveluAsyncResource.VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA)
+                                .takeUntil(stop)
+                                .subscribe(
+                                        pulse -> {
+                                            try {
+                                                LOG.warn(
+                                                        "Tehdaan status kutsu seurantaId:lle {}",
+                                                        batchId);
+                                                LetterBatchStatusDto status = viestintapalveluAsyncResource
+                                                        .haeStatus(batchId.getBatchId())
+                                                        .get(900L,
+                                                                TimeUnit.MILLISECONDS);
+                                                if ("error".equals(status
+                                                        .getStatus())) {
+                                                    LOG.error("Koekutsukirjeiden muodostus paattyi viestintapalvelun sisaiseen virheeseen!");
+                                                    prosessi.keskeyta();
+                                                    stop.onNext(null);
+                                                }
+                                                if ("ready".equals(status
+                                                        .getStatus())) {
+                                                    prosessi.vaiheValmistui();
+                                                    LOG.error("Koekutsukirjeet valmistui!");
+                                                    prosessi.valmistui(batchId.getBatchId());
+                                                    stop.onNext(null);
+                                                }
+                                            } catch (Exception e) {
+                                                LOG.error(
+                                                        "Statuksen haku epaonnistui {}",
+                                                        e.getMessage());
+                                            }
+                                     }, throwable -> {
+                                    prosessi.keskeyta();
+                                }, () -> {
+                                    prosessi.keskeyta();
+                                });
+                    }  else {
+                        prosessi.keskeyta("Hakemuksissa oli virheitä", batchId.getErrors());
+                    }
 				} catch (Exception e) {
 					LOG.error("Virhe hakutoiveelle {}: {}",
 							koekutsu.getHakukohdeOid(), e.getMessage());

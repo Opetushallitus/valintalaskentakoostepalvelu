@@ -46,7 +46,7 @@ public class HenkiloAsyncResourceImpl implements HenkiloAsyncResource {
         // org.apache.cxf.transport.http.async.SO_TIMEOUT
     }
 
-    public Future<List<Henkilo>> haeHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit) {
+    public Future<List<Henkilo>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit) {
         String url = "/resources/s2s/koostepalvelu";
         return WebClient.fromClient(webClient)
             .path(url)

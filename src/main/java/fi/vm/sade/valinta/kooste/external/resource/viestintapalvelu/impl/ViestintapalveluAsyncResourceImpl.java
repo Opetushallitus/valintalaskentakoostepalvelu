@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.ClientConfiguration;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
@@ -92,7 +93,7 @@ public class ViestintapalveluAsyncResourceImpl implements
 				.get(LetterBatchStatusDto.class);
 	}
 
-	public Future<String> viePdfJaOdotaReferenssi(LetterBatch letterBatch) {
+	public Future<LetterResponse> viePdfJaOdotaReferenssi(LetterBatch letterBatch) {
 		StringBuilder urlBuilder = new StringBuilder()
 				.append("/api/v1/letter/async/letter");
 		String url = urlBuilder.toString();
@@ -102,6 +103,6 @@ public class ViestintapalveluAsyncResourceImpl implements
 				// MediaType.TEXT_PLAIN_TYPE)
 				.async()
 				.post(Entity.entity(GSON.toJson(letterBatch),
-						MediaType.APPLICATION_JSON_TYPE), String.class);
+						MediaType.APPLICATION_JSON_TYPE), LetterResponse.class);
 	}
 }
