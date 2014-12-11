@@ -62,7 +62,7 @@ public class ErillishaunTuontiServiceTest {
         final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
         assertEquals(1, tilaResult.erillishaunHakijat.size());
         final ErillishaunHakijaDTO hakija = tilaResult.erillishaunHakijat.iterator().next();
-        assertEquals("jono1", hakija.getValintatapajonoOid());
+        assertEquals("jono1", hakija.valintatapajonoOid);
         System.out.println(new Gson().toJson(tilaAsyncResource.results));
     }
 }

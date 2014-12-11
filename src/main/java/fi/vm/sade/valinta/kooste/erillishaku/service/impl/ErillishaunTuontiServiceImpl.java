@@ -114,21 +114,20 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
         return hakemus -> {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus);
             ErillishakuRivi rivi = hetuToRivi.get(wrapper.getHenkilotunnusTaiSyntymaaika());
-
-            ErillishaunHakijaDTO hakija = new ErillishaunHakijaDTO();
-            hakija.setHakemuksenTila(hakemuksenTila(rivi));
-            hakija.setHakemusOid(hakemus.getOid());
-            hakija.setHakijaOid(hakemus.getPersonOid());
-            hakija.setHakukohdeOid(erillishaku.getHakukohdeOid());
-            hakija.setHakuOid(erillishaku.getHakuOid());
-            hakija.setSukunimi(wrapper.getSukunimi());
-            hakija.setEtunimi(wrapper.getEtunimi());
-            hakija.setIlmoittautumisTila(ilmoittautumisTila(rivi));
-            hakija.setValintatuloksenTila(valintatuloksenTila(rivi));
-            hakija.setJulkaistavissa(rivi.isJulkaistaankoTiedot());
-            hakija.setTarjoajaOid(erillishaku.getTarjoajaOid());
-            hakija.setValintatapajonoOid(erillishaku.getValintatapajonoOid());
-            return hakija;
+            return new ErillishaunHakijaDTO(
+                erillishaku.getValintatapajonoOid(),
+                hakemus.getOid(),
+                erillishaku.getHakukohdeOid(),
+                rivi.isJulkaistaankoTiedot(),
+                hakemus.getPersonOid(),
+                erillishaku.getHakuOid(),
+                erillishaku.getTarjoajaOid(),
+                valintatuloksenTila(rivi),
+                ilmoittautumisTila(rivi),
+                hakemuksenTila(rivi),
+                wrapper.getEtunimi(),
+                wrapper.getSukunimi()
+            );
         };
     }
 
