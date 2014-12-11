@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
+import java.util.Map;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -14,6 +16,8 @@ public interface KirjeProsessi {
 	void keskeyta();
 	
 	void keskeyta(String syy);
+
+    void keskeyta(String syy, Map<String, String> virheet);
 
 	boolean isKeskeytetty();
 }
