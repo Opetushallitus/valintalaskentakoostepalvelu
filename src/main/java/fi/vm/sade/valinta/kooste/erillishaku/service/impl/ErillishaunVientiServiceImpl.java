@@ -50,8 +50,8 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
     public ErillishaunVientiServiceImpl(
             ApplicationAsyncResource applicationAsyncResource,
             SijoitteluAsyncResource sijoitteluAsyncResource,
-            TarjontaAsyncResource hakuV1AsyncResource,
-            DokumenttiResource dokumenttiResource) {
+            TarjontaAsyncResource hakuV1AsyncResource
+            , DokumenttiResource dokumenttiResource) {
         this.sijoitteluAsyncResource = sijoitteluAsyncResource;
         this.hakuV1AsyncResource = hakuV1AsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
@@ -80,20 +80,14 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
                 from(tarjontaHakukohdeFuture),
                 (hakemukset, haku, tarjontaHakukohde) -> {
                     String hakuNimi = new Teksti(haku.getNimi()).getTeksti();
-                    String hakukohdeNimi = new Teksti(tarjontaHakukohde
-                            .getHakukohdeNimi()).getTeksti();
-                    String tarjoajaNimi = new Teksti(tarjontaHakukohde
-                            .getTarjoajaNimi()).getTeksti();
-                    Map<String, Hakemus> oidToHakemus = hakemukset.stream().collect(Collectors.toMap(
-                            h -> h.getOid(), h -> h
-                    ));
+                    String hakukohdeNimi = new Teksti(tarjontaHakukohde.getHakukohdeNimi()).getTeksti();
+                    String tarjoajaNimi = new Teksti(tarjontaHakukohde.getTarjoajaNimi()).getTeksti();
                     Map<String, Valintatulos> valintatulokset;
                     HakukohdeDTO hakukohde;
                     try {
                         valintatulokset = valintatulosFuture.get().stream()
                                 .filter(v -> erillishaku.getValintatapajonoOid().equals(v.getValintatapajonoOid()))
-                                .collect(Collectors.toMap(
-                                        v -> v.getHakemusOid(), v -> v));
+                                .collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v));
                         hakukohde = hakukohdeFuture.get();
                     } catch (Exception e1) {
                         LOG.error("Sijoittelusta ei saatu tietoja hakukohteelle vientia varten!"
@@ -116,6 +110,9 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
                                 tarjoajaNimi, rivit);
                     } else {
                         LOG.error("Muodostetaan Excel valintaperusteista!");
+                        Map<String, Hakemus> oidToHakemus = hakemukset.stream().collect(Collectors.toMap(
+                            h -> h.getOid(), h -> h
+                        ));
                         List<ErillishakuRivi> erillishakurivit = hakukohde
                                 .getValintatapajonot().stream()
                                 .flatMap(v -> v.getHakemukset().stream())
@@ -148,7 +145,7 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
                             prosessi.valmistui(uuid);
                         },
                         poikkeus -> {
-                            LOG.error("Erillishaun vienti keskeytyi virheeseen {}. {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
+                            LOG.error("Erillishaun vienti keskeytyi virheeseen", poikkeus);
                             prosessi.keskeyta();
                         },
                         () -> {
