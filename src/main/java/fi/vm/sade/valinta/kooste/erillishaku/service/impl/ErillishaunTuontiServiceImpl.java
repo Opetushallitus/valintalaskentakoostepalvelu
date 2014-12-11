@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -66,8 +67,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
     }
 
     @Override
-    public void tuo(KirjeProsessi prosessi, ErillishakuDTO erillishaku,
-                    InputStream data) {
+    public void tuo(KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
         LOG.info("Aloitetaan tuonti");
         Observable.just(erillishaku).subscribeOn(Schedulers.newThread()).subscribe(haku -> {
             final Collection<ErillishaunHakijaDTO> hakijat = tuoHakijatJaLuoHakemukset(data, haku);
@@ -75,7 +75,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
             if (hakijat.isEmpty()) {
                 throw new RuntimeException("Taulukkolaskentatiedostosta ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
             }
-            tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijat);
+            tuoErillishaunTilat(haku, hakijat);
             prosessi.vaiheValmistui();
             prosessi.valmistui("ok");
         }, poikkeus -> {
@@ -86,6 +86,15 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
             }
             prosessi.keskeyta();
         });
+    }
+
+    private void tuoErillishaunTilat(final ErillishakuDTO haku, final Collection<ErillishaunHakijaDTO> hakijat) {
+        try {
+            tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijat).get();
+        } catch (Exception e) {
+            LOG.error("Erillishaun tilojen tuonti epaonnistui", e);
+            throw new RuntimeException(e);
+        }
     }
 
     private Collection<ErillishaunHakijaDTO> tuoHakijatJaLuoHakemukset(final InputStream data, final ErillishakuDTO haku) {
