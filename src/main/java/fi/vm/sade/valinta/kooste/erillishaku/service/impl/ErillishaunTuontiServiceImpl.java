@@ -1,8 +1,27 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
+import static rx.Observable.from;
+
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.format.DateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.GsonBuilder;
+
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
@@ -21,14 +40,9 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import jersey.repackaged.com.google.common.util.concurrent.Futures;
-import org.apache.commons.lang.StringUtils;
-import org.joda.time.format.DateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import rx.schedulers.Schedulers;
 
+<<<<<<< Updated upstream
 import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
@@ -37,6 +51,15 @@ import java.util.stream.Collectors;
 
 import static rx.Observable.from;
 
+||||||| merged common ancestors
+import java.io.InputStream;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static rx.Observable.from;
+
+=======
+>>>>>>> Stashed changes
 /**
  * @author Jussi Jartamo
  */
@@ -49,6 +72,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
     private final ApplicationAsyncResource applicationAsyncResource;
     private final HenkiloAsyncResource henkiloAsyncResource;
     private final org.joda.time.format.DateTimeFormatter dtf = DateTimeFormat.forPattern("dd.MM.yyyy");
+
 
     @Autowired
     public ErillishaunTuontiServiceImpl(TilaAsyncResource tilaAsyncResource,
@@ -77,7 +101,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
                     henkiloPrototyypit.add(new HenkiloCreateDTO(rivi.getEtunimi(), rivi.getSukunimi(), rivi.getHenkilotunnus(), parseSyntymaAika(rivi), HenkiloTyyppi.OPPIJA));
                 });
             } catch (Exception e) {
-                LOG.error("Excelin muodostus epaonnistui! {}", e.getMessage());
+                LOG.error("Excelin muodostus epaonnistui! {}", e);
                 throw new RuntimeException(e);
             }
             final Collection<ErillishaunHakijaDTO> hakijat;
@@ -96,7 +120,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
                         .map(hakemusToHakija(erillishaku, hetuToRivi)).collect(Collectors.toList());
 
             } catch (Throwable e) {
-                LOG.error("Excelin tuonti epaonnistui! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+                LOG.error("Excelin tuonti epaonnistui", e);
                 throw new RuntimeException(e);
             }
             LOG.error("Viedaan hakijoita {} jonoon {}", hakijat.size(), erillishaku.getValintatapajononNimi());
@@ -112,7 +136,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
             if (poikkeus == null) {
                 LOG.error("Suoritus keskeytyi tuntemattomaan NPE poikkeukseen!");
             } else {
-                LOG.error("Erillishaun tuonti keskeytyi virheeseen {}. {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
+                LOG.error("Erillishaun tuonti keskeytyi virheeseen", poikkeus);
             }
             prosessi.keskeyta();
         });
