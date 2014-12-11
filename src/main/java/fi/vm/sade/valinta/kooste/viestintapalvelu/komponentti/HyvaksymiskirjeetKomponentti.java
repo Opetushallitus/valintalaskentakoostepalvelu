@@ -350,6 +350,7 @@ public class HyvaksymiskirjeetKomponentti {
 					new HakemusWrapper(hakemus).getHenkilotunnus());
 			replacements.put("koulutus", koulutus.getTeksti(
 					preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
+			replacements.put("hakemusOid", hakemus.getOid());
 			kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi,
 					replacements));
 		}

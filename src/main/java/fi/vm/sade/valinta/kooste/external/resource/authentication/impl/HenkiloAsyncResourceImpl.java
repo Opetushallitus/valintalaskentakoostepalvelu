@@ -22,69 +22,37 @@ import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.valinta.kooste.external.resource.AsennaCasFilter;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
  */
 @Service
 public class HenkiloAsyncResourceImpl implements HenkiloAsyncResource {
+    private final WebClient webClient;
 
-	private final WebClient webClient;
+    @Autowired
+    public HenkiloAsyncResourceImpl(@Value("${web.url.cas}") String webCasUrl, @Value("${cas.service.authentication-service}/j_spring_cas_security_check") String targetService, @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String appClientUsername, @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword, @Value("${valintalaskentakoostepalvelu.authentication.rest.url}") String address, ApplicationContext context) {
+        JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
+        bean.setAddress(address);
+        bean.setThreadSafe(true);
+        List<Object> providers = Lists.newArrayList();
+        providers.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
+        providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
+        bean.setProviders(providers);
+        AsennaCasFilter.asennaCasFilter(webCasUrl, targetService, appClientUsername, appClientPassword, bean, context);
+        this.webClient = bean.createWebClient();
+        ClientConfiguration c = WebClient.getConfig(webClient);
+        c.getHttpConduit().getClient().setReceiveTimeout(TimeUnit.HOURS.toMillis(1));
+        // org.apache.cxf.transport.http.async.SO_TIMEOUT
+    }
 
-	@Autowired
-	public HenkiloAsyncResourceImpl(
-			//
-			@Value("${web.url.cas}") String webCasUrl,
-			//
-			@Value("${cas.service.authentication-service}/j_spring_cas_security_check") String targetService,
-			//
-			@Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String appClientUsername,
-			//
-			@Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword,
-			@Value("${valintalaskentakoostepalvelu.authentication.rest.url}") String address,
-			ApplicationContext context
-	//
-	) {
-		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
-		bean.setAddress(address);
-		bean.setThreadSafe(true);
-		List<Object> providers = Lists.newArrayList();
-		providers
-				.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
-		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
-		bean.setProviders(providers);
-
-		AsennaCasFilter.asennaCasFilter(webCasUrl, targetService,
-				appClientUsername, appClientPassword, bean, context);
-
-		this.webClient = bean.createWebClient();
-		ClientConfiguration c = WebClient.getConfig(webClient);
-		c.getHttpConduit().getClient()
-				.setReceiveTimeout(TimeUnit.HOURS.toMillis(1));
-		// org.apache.cxf.transport.http.async.SO_TIMEOUT
-	}
-
-	// REST: /authentication-service/resources/s2s/koostepalvelu, POST JSON
-	// List<HenkiloCreateDTO>
-	public Future<List<Henkilo>> haeHenkilot(
-			List<HenkiloCreateDTO> henkiloPrototyypit) {
-		String url = new StringBuilder().append("/resources/s2s/koostepalvelu")
-				.toString();
-		// new MediaType("application", "json", Charset.forName("UTF-8"));
-		return WebClient.fromClient(webClient).path(url)
-		//
-		//
-		// .accept("application/json;charset=UTF-8")
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				//
-				.async()
-				//
-				.post(Entity.entity(henkiloPrototyypit,
-						MediaType.APPLICATION_JSON_TYPE),
-						new GenericType<List<Henkilo>>() {
-						});
-	}
+    public Future<List<Henkilo>> haeHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit) {
+        String url = "/resources/s2s/koostepalvelu";
+        return WebClient.fromClient(webClient)
+            .path(url)
+            .accept(MediaType.APPLICATION_JSON_TYPE)
+            .async()
+            .post(Entity.entity(henkiloPrototyypit, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<Henkilo>>() {
+        });
+    }
 }
