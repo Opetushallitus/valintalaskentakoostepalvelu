@@ -101,7 +101,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
         final Collection<ErillishaunHakijaDTO> hakijat;
         try {
             ErillishakuExcelImporter erillishakuExcel = new ErillishakuExcelImporter(haku, data);
-            final List<HakemusPrototyyppi> hakemusPrototyypit = henkiloAsyncResource.haeHenkilot(erillishakuExcel.henkiloPrototyypit).get().stream()
+            final List<HakemusPrototyyppi> hakemusPrototyypit = henkiloAsyncResource.haeTaiLuoHenkilot(erillishakuExcel.henkiloPrototyypit).get().stream()
                 .map(personToHakemusPrototyyppi).collect(Collectors.toList());
             final Future<List<Hakemus>> hakemukset = applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit);
             hakijat = hakemukset.get().stream()
