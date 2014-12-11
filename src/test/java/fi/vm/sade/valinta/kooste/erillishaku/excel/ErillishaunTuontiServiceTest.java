@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -14,6 +16,8 @@ import javax.ws.rs.core.Response;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
+
+import com.google.gson.Gson;
 
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
@@ -36,14 +40,30 @@ public class ErillishaunTuontiServiceTest {
     @Test
     public void tuontiSuoritetaan() throws IOException, InterruptedException {
         final HenkiloAsyncResource henkiloAsyncResource = new MockHenkiloAsyncResource();
-        final ApplicationAsyncResource applicationAsyncResource = new MockApplicationAsyncResource();
-        final TilaAsyncResource tilaAsyncResource = new MockTilaAsyncResource();
+        final MockApplicationAsyncResource applicationAsyncResource = new MockApplicationAsyncResource();
+        final MockTilaAsyncResource tilaAsyncResource = new MockTilaAsyncResource();
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource);
-        final ErillishakuDTO erillisHaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1", "varsinainen jono");
+        final ErillishakuDTO erillisHaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "haku1", "kohde1", "tarjoaja1", "jono1", "varsinainen jono");
         final InputStream inputStream = new ClassPathResource("kustom_erillishaku.xlsx").getInputStream();
         final KirjeProsessi prosessi = Mockito.mock(KirjeProsessi.class);
         tuontiService.tuo(prosessi, erillisHaku, inputStream);
         Mockito.verify(prosessi, Mockito.timeout(1000).times(1)).valmistui("ok");
+        // tarkistetaan hakemukset
+        assertEquals(1, applicationAsyncResource.results.size());
+        final MockApplicationAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
+        assertEquals("haku1", appResult.hakuOid);
+        assertEquals("kohde1", appResult.hakukohdeOid);
+        assertEquals("tarjoaja1", appResult.tarjoajaOid);
+        assertEquals(1, appResult.hakemusPrototyypit.size());
+        final HakemusPrototyyppi prototyyppi = appResult.hakemusPrototyypit.iterator().next();
+        assertEquals("hetu", prototyyppi.henkilotunnus);
+        // tarkistetaan tilatulokset
+        assertEquals(1, tilaAsyncResource.results.size());
+        final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
+        assertEquals(1, tilaResult.erillishaunHakijat.size());
+        final ErillishaunHakijaDTO hakija = tilaResult.erillishaunHakijat.iterator().next();
+        assertEquals("jono1", hakija.getValintatapajonoOid());
+        System.out.println(new Gson().toJson(tilaAsyncResource.results));
     }
 }
 
@@ -70,8 +90,23 @@ class MockTilaAsyncResource implements TilaAsyncResource {
 }
 
 class MockApplicationAsyncResource implements ApplicationAsyncResource {
+    static class Result {
+        public final  String hakuOid;
+        public final String hakukohdeOid;
+        public final String tarjoajaOid;
+        public final Collection<HakemusPrototyyppi> hakemusPrototyypit;
+
+        public Result(final String hakuOid, final String hakukohdeOid, final String tarjoajaOid, final Collection<HakemusPrototyyppi> hakemusPrototyypit) {
+            this.hakuOid = hakuOid;
+            this.hakukohdeOid = hakukohdeOid;
+            this.tarjoajaOid = tarjoajaOid;
+            this.hakemusPrototyypit = hakemusPrototyypit;
+        }
+    }
+    public final List<Result> results = new ArrayList<>();
     @Override
     public Future<List<Hakemus>> putApplicationPrototypes(final String hakuOid, final String hakukohdeOid, final String tarjoajaOid, final Collection<HakemusPrototyyppi> hakemusPrototyypit) {
+        results.add(new Result(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit));
         return Futures.immediateFuture(hakemusPrototyypit.stream()
                 .map(prototyyppi -> toHakemus(prototyyppi))
                 .collect(Collectors.toList())
