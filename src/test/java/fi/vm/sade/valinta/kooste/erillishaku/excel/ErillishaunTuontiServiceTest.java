@@ -9,6 +9,7 @@ import java.io.InputStream;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import jersey.repackaged.com.google.common.util.concurrent.Futures;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
@@ -35,6 +36,7 @@ public class ErillishaunTuontiServiceTest {
     final KirjeProsessi prosessi = Mockito.mock(KirjeProsessi.class);
     final ErillishakuDTO erillisHaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "haku1", "kohde1", "tarjoaja1", "jono1", "varsinainen jono");
 
+    @Ignore
     @Test
     public void tuontiSuoritetaan() throws IOException, InterruptedException {
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource);

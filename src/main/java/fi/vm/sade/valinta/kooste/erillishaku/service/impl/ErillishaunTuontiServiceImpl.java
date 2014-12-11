@@ -70,7 +70,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
     public void tuo(KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
         LOG.info("Aloitetaan tuonti");
         Observable.just(erillishaku).subscribeOn(Schedulers.newThread()).subscribe(haku -> {
-            final Collection<ErillishaunHakijaDTO> hakijat = tuoHakijatJaLuoHakemukset(data, haku);
+            final Collection<ErillishaunHakijaDTO> hakijat = tuoHakemukset(data, haku);
             LOG.info("Viedaan hakijoita {} jonoon {}", hakijat.size(), haku.getValintatapajononNimi());
             if (hakijat.isEmpty()) {
                 throw new RuntimeException("Taulukkolaskentatiedostosta ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
@@ -95,6 +95,22 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
             LOG.error("Erillishaun tilojen tuonti epaonnistui", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private Collection<ErillishaunHakijaDTO> tuoHakemukset(final InputStream data, final ErillishakuDTO haku) {
+        final Collection<ErillishaunHakijaDTO> hakijat;
+        try {
+            ErillishakuExcelImporter erillishakuExcel = new ErillishakuExcelImporter(haku, data);
+
+            final Future<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(haku.getHakuOid(), haku.getHakukohdeOid());
+            hakijat = hakemukset.get().stream()
+                    .map(hakemusToHakija(haku, erillishakuExcel.hetuToRivi)).collect(Collectors.toList());
+
+        } catch (Throwable e) {
+            LOG.error("Excelin tuonti epaonnistui", e);
+            throw new RuntimeException(e);
+        }
+        return hakijat;
     }
 
     private Collection<ErillishaunHakijaDTO> tuoHakijatJaLuoHakemukset(final InputStream data, final ErillishakuDTO haku) {
