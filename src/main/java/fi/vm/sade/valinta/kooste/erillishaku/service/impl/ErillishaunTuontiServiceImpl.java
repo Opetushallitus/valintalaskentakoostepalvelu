@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
-import static rx.Observable.from;
-
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
@@ -12,6 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.authentication.model.Henkilo;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
@@ -40,7 +39,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
-import jersey.repackaged.com.google.common.util.concurrent.Futures;
+import rx.Observable;
 import rx.schedulers.Schedulers;
 
 /**
@@ -70,19 +69,12 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
     public void tuo(KirjeProsessi prosessi, ErillishakuDTO erillishaku,
                     InputStream data) {
         LOG.error("Aloitetaan tuonti");
-        from(Futures.immediateFuture(new Object())).subscribeOn(Schedulers.newThread()).subscribe(object -> {
+        Observable.just(erillishaku).subscribeOn(Schedulers.newThread()).subscribe(haku -> {
             ErillishakuExcel erillishakuExcel;
             final List<HenkiloCreateDTO> henkiloPrototyypit = Lists.newArrayList();
             final Map<String, ErillishakuRivi> hetuToRivi = Maps.newHashMap();
             try {
-                erillishakuExcel = new ErillishakuExcel(erillishaku.getHakutyyppi(), rivi -> {
-                    if (rivi.getHenkilotunnus() == null || rivi.getSyntymaAika() == null) {
-                        LOG.warn("Käyttökelvoton rivi {}", rivi);
-                        return;
-                    }
-                    hetuToRivi.put(Optional.ofNullable(StringUtils.trimToNull(rivi.getHenkilotunnus())).orElse(rivi.getSyntymaAika()), rivi);
-                    henkiloPrototyypit.add(new HenkiloCreateDTO(rivi.getEtunimi(), rivi.getSukunimi(), rivi.getHenkilotunnus(), parseSyntymaAika(rivi), HenkiloTyyppi.OPPIJA));
-                });
+                erillishakuExcel = createExcel(haku, henkiloPrototyypit, hetuToRivi);
             } catch (Exception e) {
                 LOG.error("Excelin muodostus epaonnistui! {}", e);
                 throw new RuntimeException(e);
@@ -90,25 +82,22 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
             final Collection<ErillishaunHakijaDTO> hakijat;
             try {
                 erillishakuExcel.getExcel().tuoXlsx(data);
-                hakijat = applicationAsyncResource.putApplicationPrototypes(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid(), erillishaku.getTarjoajaOid(),
+                hakijat = applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(),
                         henkiloAsyncResource.haeHenkilot(henkiloPrototyypit)
                                 .get()
                                 .stream()
-                                .map(h -> {
-                                    LOG.error("Hakija {}", new GsonBuilder().setPrettyPrinting().create().toJson(h));
-                                    return new HakemusPrototyyppi(h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), null);
-                                }).collect(Collectors.toList()))
+                                .map(personToHakemusPrototyyppi).collect(Collectors.toList()))
                         .get()
                         .stream()
-                        .map(hakemusToHakija(erillishaku, hetuToRivi)).collect(Collectors.toList());
+                        .map(hakemusToHakija(haku, hetuToRivi)).collect(Collectors.toList());
 
             } catch (Throwable e) {
                 LOG.error("Excelin tuonti epaonnistui", e);
                 throw new RuntimeException(e);
             }
-            LOG.error("Viedaan hakijoita {} jonoon {}", hakijat.size(), erillishaku.getValintatapajononNimi());
+            LOG.error("Viedaan hakijoita {} jonoon {}", hakijat.size(), haku.getValintatapajononNimi());
             if (!hakijat.isEmpty()) {
-                tilaAsyncResource.tuoErillishaunTilat(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid(), erillishaku.getValintatapajononNimi(), hakijat);
+                tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijat);
             } else {
                 LOG.error("Taulukkolaskentatiedostosta ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
                 throw new RuntimeException("Taulukkolaskentatiedostosta ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
@@ -125,7 +114,23 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
         });
     }
 
-    private Function<Hakemus, ErillishaunHakijaDTO> hakemusToHakija(ErillishakuDTO erillishaku, Map<String, ErillishakuRivi> hetuToRivi) {
+    private ErillishakuExcel createExcel(ErillishakuDTO haku, List<HenkiloCreateDTO> henkiloPrototyypit, Map<String, ErillishakuRivi> hetuToRivi) {
+        return new ErillishakuExcel(haku.getHakutyyppi(), rivi -> {
+            if (rivi.getHenkilotunnus() == null || rivi.getSyntymaAika() == null) {
+                LOG.warn("Käyttökelvoton rivi {}", rivi);
+                return;
+            }
+            hetuToRivi.put(Optional.ofNullable(StringUtils.trimToNull(rivi.getHenkilotunnus())).orElse(rivi.getSyntymaAika()), rivi);
+            henkiloPrototyypit.add(new HenkiloCreateDTO(rivi.getEtunimi(), rivi.getSukunimi(), rivi.getHenkilotunnus(), parseSyntymaAika(rivi), HenkiloTyyppi.OPPIJA));
+        });
+    }
+
+    private Function<Henkilo, HakemusPrototyyppi> personToHakemusPrototyyppi = h -> {
+        LOG.error("Hakija {}", new GsonBuilder().setPrettyPrinting().create().toJson(h));
+        return new HakemusPrototyyppi(h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), null);
+    };
+
+    private Function<Hakemus, ErillishaunHakijaDTO> hakemusToHakija(final ErillishakuDTO erillishaku, final Map<String, ErillishakuRivi> hetuToRivi) {
         return hakemus -> {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus);
             ErillishakuRivi rivi = hetuToRivi.get(wrapper.getHenkilotunnusTaiSyntymaaika());
