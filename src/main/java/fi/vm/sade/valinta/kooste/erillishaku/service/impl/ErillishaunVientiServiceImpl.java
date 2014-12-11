@@ -50,8 +50,8 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
     public ErillishaunVientiServiceImpl(
             ApplicationAsyncResource applicationAsyncResource,
             SijoitteluAsyncResource sijoitteluAsyncResource,
-            TarjontaAsyncResource hakuV1AsyncResource
-            , DokumenttiResource dokumenttiResource) {
+            TarjontaAsyncResource hakuV1AsyncResource,
+            DokumenttiResource dokumenttiResource) {
         this.sijoitteluAsyncResource = sijoitteluAsyncResource;
         this.hakuV1AsyncResource = hakuV1AsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
@@ -119,7 +119,6 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
                         List<ErillishakuRivi> erillishakurivit = hakukohde
                                 .getValintatapajonot().stream()
                                 .flatMap(v -> v.getHakemukset().stream())
-                                        //
                                 .map(h -> {
                                     HakemusWrapper h0 = new HakemusWrapper(oidToHakemus.get(h.getHakemusOid()));
                                     String hakemuksenTila = "";
