@@ -3,12 +3,13 @@ package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 import static rx.Observable.from;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -42,24 +43,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import jersey.repackaged.com.google.common.util.concurrent.Futures;
 import rx.schedulers.Schedulers;
 
-<<<<<<< Updated upstream
-import java.io.InputStream;
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import static rx.Observable.from;
-
-||||||| merged common ancestors
-import java.io.InputStream;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static rx.Observable.from;
-
-=======
->>>>>>> Stashed changes
 /**
  * @author Jussi Jartamo
  */
