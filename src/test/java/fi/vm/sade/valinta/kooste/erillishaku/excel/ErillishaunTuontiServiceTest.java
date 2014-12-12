@@ -1,21 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
-import jersey.repackaged.com.google.common.util.concurrent.Futures;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.springframework.core.io.ClassPathResource;
-
 import com.google.gson.Gson;
-
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
@@ -25,9 +10,21 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.mocks.MockHenkiloAsyncResourc
 import fi.vm.sade.valinta.kooste.erillishaku.excel.mocks.MockTilaAsyncResource;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiServiceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import jersey.repackaged.com.google.common.util.concurrent.Futures;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.springframework.core.io.ClassPathResource;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ErillishaunTuontiServiceTest {
     final MockHenkiloAsyncResource henkiloAsyncResource = new MockHenkiloAsyncResource();
@@ -36,7 +33,6 @@ public class ErillishaunTuontiServiceTest {
     final KirjeProsessi prosessi = Mockito.mock(KirjeProsessi.class);
     final ErillishakuDTO erillisHaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "haku1", "kohde1", "tarjoaja1", "jono1", "varsinainen jono");
 
-    @Ignore
     @Test
     public void tuontiSuoritetaan() throws IOException, InterruptedException {
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource);
@@ -90,7 +86,7 @@ public class ErillishaunTuontiServiceTest {
         Mockito.when(failingHenkiloResource.haeTaiLuoHenkilot(Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(tilaAsyncResource, applicationAsyncResource, failingHenkiloResource);
         tuontiService.tuo(prosessi, erillisHaku, getInputStream());
-        Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).keskeyta();
+        Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
     }
 
     @Test
@@ -106,9 +102,10 @@ public class ErillishaunTuontiServiceTest {
     public void hakemustenLuontiEpaonnistuu() {
         final ApplicationAsyncResource failingResource = Mockito.mock(ApplicationAsyncResource.class);
         Mockito.when(failingResource.putApplicationPrototypes(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
+        Mockito.when(failingResource.getApplicationsByOid(Mockito.anyString(), Mockito.anyString())).thenReturn(applicationAsyncResource.getApplicationsByOid("haku1", "kohde1"));
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(tilaAsyncResource, failingResource, henkiloAsyncResource);
         tuontiService.tuo(prosessi, erillisHaku, getInputStream());
-        Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).keskeyta();
+        Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
     }
 
     private InputStream getInputStream() {
