@@ -7,40 +7,21 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.cxf.jaxrs.client.ClientConfiguration;
-import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
-
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
-import fi.vm.sade.valinta.kooste.external.resource.AsennaCasFilter;
+import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 
-/**
- * 
- * @author jussija
- *
- *         fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource <br>
- *         sijoitteluResource.hakemukset( hakuOid, SijoitteluResource.LATEST,
- *         true, null, null, hakukohteet, null, null);
- */
 @Service
-public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(SijoitteluAsyncResourceImpl.class);
-	private final WebClient webClient;
-	private final String address;
-
+public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements SijoitteluAsyncResource {
 	@Autowired
 	public SijoitteluAsyncResourceImpl(
 			@Value("${web.url.cas}") String webCasUrl,
@@ -50,18 +31,7 @@ public class SijoitteluAsyncResourceImpl implements SijoitteluAsyncResource {
 			@Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String address,
 			ApplicationContext context
 	) {
-		this.address = address;
-		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
-		bean.setAddress(address);
-		bean.setThreadSafe(true);
-		List<Object> providers = Lists.newArrayList();
-		providers.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
-		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
-		bean.setProviders(providers);
-		AsennaCasFilter.asennaCasFilter(webCasUrl, targetService, appClientUsername, appClientPassword, bean, context);
-		this.webClient = bean.createWebClient();
-		ClientConfiguration c = WebClient.getConfig(webClient);
-		c.getHttpConduit().getClient().setReceiveTimeout(TimeUnit.MINUTES.toMillis(50));
+		super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(50));
 	}
 
 	@Override

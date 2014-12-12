@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -11,20 +10,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.cxf.jaxrs.client.ClientConfiguration;
-import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
-
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
-import fi.vm.sade.valinta.kooste.external.resource.AsennaCasFilter;
+import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 /**
  * 
@@ -33,11 +26,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
  *         fi.vm.sade.sijoittelu.laskenta.resource.TilaResource <br>
  */
 @Service
-public class TilaAsyncResourceImpl implements TilaAsyncResource{
-	private static final Logger LOG = LoggerFactory
-			.getLogger(TilaAsyncResourceImpl.class);
-	private final WebClient webClient;
-	private final String address;
+public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaAsyncResource{
 	@Autowired
 	public TilaAsyncResourceImpl(
 			@Value("${web.url.cas}") String webCasUrl,
@@ -47,23 +36,7 @@ public class TilaAsyncResourceImpl implements TilaAsyncResource{
 			@Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String address,
 			ApplicationContext context
 	) {
-		this.address = address;
-		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
-		bean.setAddress(address);
-		bean.setThreadSafe(true);
-		List<Object> providers = Lists.newArrayList();
-		providers.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
-		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
-		bean.setProviders(providers);
-		AsennaCasFilter.asennaCasFilter(
-				webCasUrl,
-				targetService,
-				appClientUsername,
-				appClientPassword,
-				bean,context);
-		this.webClient = bean.createWebClient();
-		ClientConfiguration c = WebClient.getConfig(webClient);
-		c.getHttpConduit().getClient().setReceiveTimeout(TimeUnit.MINUTES.toMillis(50));
+		super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(50));
 	}
 
 	@Override
@@ -71,8 +44,7 @@ public class TilaAsyncResourceImpl implements TilaAsyncResource{
 			String hakuOid, String hakukohdeOid, String valintatapajononNimi,
 			Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
 		String url = "/tila/erillishaku/"+hakuOid+"/hakukohde/"+hakukohdeOid+"/";
-		LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}&valintatapajononNimi={}",
-				address, url, hakukohdeOid, valintatapajononNimi);
+		LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}&valintatapajononNimi={}", address, url, hakukohdeOid, valintatapajononNimi);
 		return WebClient.fromClient(webClient)
 				.path(url)
 				.query("valintatapajononNimi", Optional.ofNullable(valintatapajononNimi).orElse(StringUtils.EMPTY))
