@@ -66,7 +66,7 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 
 	@Override
 	public Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit) {
-		String url = "/applications/additionalData/";
+		String url = "/applications/syntheticApplication";
 		return WebClient.fromClient(webClient).path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
