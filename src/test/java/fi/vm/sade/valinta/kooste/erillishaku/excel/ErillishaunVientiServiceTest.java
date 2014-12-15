@@ -40,7 +40,6 @@ public class ErillishaunVientiServiceTest {
                 new ErillishaunVientiServiceImpl(failingResource, mockSijoitteluAsyncResource, mockTarjontaAsyncService, mockDokumenttiResource);
 
         erillishaunVientiService.vie(prosessi, erillishaku);
-
         Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).keskeyta();
     }
 }
