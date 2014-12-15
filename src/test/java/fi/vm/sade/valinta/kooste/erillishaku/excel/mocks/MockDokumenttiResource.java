@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class MockDokumenttiResource implements DokumenttiResource {
+
     @Override
     public Collection<MetaData> hae(List<String> tags) {
         throw new UnsupportedOperationException();
@@ -27,17 +28,17 @@ public class MockDokumenttiResource implements DokumenttiResource {
 
     @Override
     public void tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata) {
-
+        System.out.println("mock tallennus");
     }
 
     @Override
     public void viesti(Message message) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void tyhjenna() {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override

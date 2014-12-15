@@ -56,6 +56,9 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         Hakemus hakemus = new Hakemus();
         hakemus.setOid("hakemus1");
         hakemus.setPersonOid("hakija1");
+        Answers answers = new Answers();
+        answers.getHenkilotiedot().put("Henkilotunnus", "hetu");
+        hakemus.setAnswers(answers);
         return Futures.immediateFuture(Arrays.asList(hakemus));
     }
     @Override

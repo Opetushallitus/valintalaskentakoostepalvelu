@@ -10,8 +10,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.cxf.jaxrs.client.ClientConfiguration;
-import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.valinta.kooste.external.resource.AsennaCasFilter;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
@@ -31,16 +28,14 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppiBatch;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 
 /**
  *
  * @author Jussi Jartamo
  */
 @Service
-public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
-	private final WebClient webClient;
-	private final String address;
-
+public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implements ApplicationAsyncResource {
 	@Autowired
 	public ApplicationAsyncResourceImpl(
 			@Value("${web.url.cas}") String webCasUrl,
@@ -50,23 +45,12 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
 			@Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String address,
 			ApplicationContext context
 	) {
-		this.address = address;
-		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
-		bean.setAddress(address);
-		bean.setThreadSafe(true);
-		List<Object> providers = Lists.newArrayList();
-		providers.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
-		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
-		bean.setProviders(providers);
-		AsennaCasFilter.asennaCasFilter(webCasUrl, targetService, appClientUsername, appClientPassword, bean, context);
-		this.webClient = bean.createWebClient();
-		ClientConfiguration c = WebClient.getConfig(webClient);
-		c.getHttpConduit().getClient().setReceiveTimeout(TimeUnit.HOURS.toMillis(1));
+		super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.HOURS.toMillis(1));
 	}
 
 	@Override
 	public Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit) {
-		String url = "/applications/additionalData/";
+		String url = "/applications/syntheticApplication";
 		return WebClient.fromClient(webClient).path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()

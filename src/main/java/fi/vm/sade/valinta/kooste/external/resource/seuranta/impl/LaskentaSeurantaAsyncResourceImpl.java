@@ -1,44 +1,30 @@
 package fi.vm.sade.valinta.kooste.external.resource.seuranta.impl;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
-import org.apache.cxf.interceptor.Interceptor;
-import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.apache.cxf.message.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
-import fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor;
-import fi.vm.sade.valinta.kooste.external.resource.AsennaCasFilter;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.ResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.AsyncResource;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
-import fi.vm.sade.valinta.seuranta.dto.YhteenvetoDto;
 
 /**
  * 
@@ -46,37 +32,19 @@ import fi.vm.sade.valinta.seuranta.dto.YhteenvetoDto;
  * 
  */
 @Service
-public class LaskentaSeurantaAsyncResourceImpl implements
-		LaskentaSeurantaAsyncResource {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(LaskentaSeurantaAsyncResourceImpl.class);
-	private final WebClient webClient;
+public class LaskentaSeurantaAsyncResourceImpl extends AsyncResource implements LaskentaSeurantaAsyncResource {
 	private final Gson gson = new Gson();
 	private final ResponseCallback responseCallback = new ResponseCallback();
-	private final String address;
 
 	@Autowired
-	public LaskentaSeurantaAsyncResourceImpl(
-			@Value("${host.ilb}") String address
-	//
-	) {
-		this.address = address;
-		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
-		bean.setAddress(address);
-		bean.setThreadSafe(true);
-		List<Object> providers = Lists.newArrayList();
-		providers
-				.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
-		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
-		bean.setProviders(providers);
-		this.webClient = bean.createWebClient();
+	public LaskentaSeurantaAsyncResourceImpl(@Value("${host.ilb}") String address) {
+		super(address, TimeUnit.HOURS.toMillis(1));
 	}
 
 	public void laskenta(String uuid, Consumer<LaskentaDto> callback,
 			Consumer<Throwable> failureCallback) {
 		try {
-			String url = new StringBuilder().append("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/")
-					.append(uuid).toString();
+			String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + uuid;
 			WebClient
 					.fromClient(webClient)
 					.path(url)
@@ -89,11 +57,9 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 		}
 	}
 
-	public void resetoiTilat(String uuid, Consumer<LaskentaDto> callback,
-			Consumer<Throwable> failureCallback) {
+	public void resetoiTilat(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback) {
 		try {
-			String url = new StringBuilder().append("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/")
-					.append(uuid).append("/resetoi").toString();
+			String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+uuid+"/resetoi";
 			WebClient
 					.fromClient(webClient)
 					.path(url)
@@ -114,38 +80,27 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 			List<HakukohdeDto> hakukohdeOids, Consumer<String> callback,
 			Consumer<Throwable> failureCallback) {
 		try {
-			String url = new StringBuilder().append("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/")
-					.append(hakuOid).append("/tyyppi/").append(tyyppi)
-					.toString();
+			String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+hakuOid+"/tyyppi/"+tyyppi;
 			WebClient wc = WebClient.fromClient(webClient).path(url);
-			//
 			if (erillishaku != null) {
 				wc.query("erillishaku", erillishaku);
 			}
-			//
 			if (valinnanvaihe != null) {
 				wc.query("valinnanvaihe", valinnanvaihe);
 			}
-			//
 			if (valintakoelaskenta != null) {
 				wc.query("valintakoelaskenta", valintakoelaskenta);
 			}
-			//
 			wc.async()
-			//
-					.post(Entity.entity(hakukohdeOids,
-							MediaType.APPLICATION_JSON_TYPE),
-							new Callback<String>(address, url, callback,
-									failureCallback, new TypeToken<String>() {
-									}.getType()));
+					.post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new Callback<String>(address, url, callback, failureCallback, new TypeToken<String>() {
+						}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
 	}
 
 	public void merkkaaLaskennanTila(String uuid, LaskentaTila tila) {
-		String url = new StringBuilder().append("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/")
-				.append(uuid).append("/tila/").append(tila).toString();
+		String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+uuid+"/tila/"+tila;
 		try {
 			WebClient
 					.fromClient(webClient)
@@ -161,9 +116,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 
 	public void merkkaaLaskennanTila(String uuid, LaskentaTila tila,
 			HakukohdeTila hakukohdetila) {
-		String url = new StringBuilder().append("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/")
-				.append(uuid).append("/tila/").append(tila)
-				.append("/hakukohde/").append(hakukohdetila).toString();
+		String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+uuid+"/tila/"+tila+"/hakukohde/"+hakukohdetila;
 		try {
 			WebClient
 					.fromClient(webClient)
@@ -180,9 +133,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 	@Override
 	public void merkkaaHakukohteenTila(String uuid, String hakukohdeOid,
 			HakukohdeTila tila) {
-		String url = new StringBuilder().append("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/")
-				.append(uuid).append("/hakukohde/").append(hakukohdeOid)
-				.append("/tila/").append(tila).toString();
+		String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+uuid+"/hakukohde/"+hakukohdeOid+"/tila/"+tila;
 		try {
 			WebClient
 					.fromClient(webClient)
@@ -198,9 +149,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements
 
 	public void lisaaIlmoitusHakukohteelle(String uuid, String hakukohdeOid,
 			IlmoitusDto ilmoitus) {
-		String url = new StringBuilder().append("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/")
-				.append(uuid).append("/hakukohde/").append(hakukohdeOid)
-				.toString();
+		String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+uuid+"/hakukohde/"+hakukohdeOid;
 		try {
 			WebClient
 					.fromClient(webClient)
