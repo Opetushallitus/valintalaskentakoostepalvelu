@@ -15,5 +15,31 @@
            http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd">
 
 	<ctx:annotation-config />
+  <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.mocks"/>
+  <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.erillishaku"/>
+  <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.komponentti"/>
+  <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
+  <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
+
+  <beans
+    xmlns:mockito="http://www.mockito.org/spring/mockito"
+    xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd"
+    profile="it">
+    <mockito:mock id="applicationResource" class="fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource" />
+    <mockito:mock id="hakuV1Resource" class="fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource" />
+    <mockito:mock id="hakukohdeV1Resource" class="fi.vm.sade.valinta.kooste.external.resource.haku.HakukohdeV1Resource" />
+    <mockito:mock id="hakokohdeResource" class="fi.vm.sade.tarjonta.service.resources.HakukohdeResource" />
+    <mockito:mock id="viestintapalveluAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource" />
+    <mockito:mock id="viestintapalveluResource" class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource" />
+    <mockito:mock id="organisaatioAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource" />
+    <mockito:mock id="valintaperusteetAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource" />
+    <mockito:mock id="valintalaskentaValintakoeAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource" />
+    <mockito:mock id="valintakoeResource" class="fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource" />
+    <mockito:mock id="sijoitteluResource" class="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource" />
+
+    <mockito:mock id="kirjeetHakukohdeCache" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache" />
+
+  </beans>
+
 
 </beans>

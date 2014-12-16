@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.erillishaku.excel.mocks;
+package fi.vm.sade.valinta.kooste.mocks;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
@@ -13,6 +13,9 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     public static class Result {
         public final String hakuOid;

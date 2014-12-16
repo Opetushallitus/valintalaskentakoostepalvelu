@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.erillishaku.excel.mocks;
+package fi.vm.sade.valinta.kooste.mocks;
 
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
@@ -10,7 +10,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import org.springframework.stereotype.Service;
 
+@Service
 public class MockTilaAsyncResource implements TilaAsyncResource {
     public static class Result {
         public final String hakuOid;

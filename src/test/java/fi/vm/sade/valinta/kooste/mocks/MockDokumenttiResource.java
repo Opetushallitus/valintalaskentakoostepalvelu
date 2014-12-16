@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.erillishaku.excel.mocks;
+package fi.vm.sade.valinta.kooste.mocks;
 
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.Message;
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.MetaData;
@@ -9,6 +9,9 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class MockDokumenttiResource implements DokumenttiResource {
 
     @Override

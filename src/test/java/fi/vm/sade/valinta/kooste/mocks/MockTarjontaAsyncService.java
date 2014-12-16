@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.erillishaku.excel.mocks;
+package fi.vm.sade.valinta.kooste.mocks;
 
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
@@ -7,6 +7,9 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 
 import java.util.concurrent.Future;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class MockTarjontaAsyncService implements TarjontaAsyncResource {
 
     @Override
