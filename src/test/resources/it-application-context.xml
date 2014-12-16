@@ -20,6 +20,10 @@
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.komponentti"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
+  <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.resource">
+    <ctx:exclude-filter type="regex" expression=".*ViestintapalveluAktivointiResource.*"/>
+  </ctx:component-scan>
+
 
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"
