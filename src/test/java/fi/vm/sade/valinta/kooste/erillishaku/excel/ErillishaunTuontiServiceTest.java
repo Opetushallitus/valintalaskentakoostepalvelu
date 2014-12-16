@@ -23,8 +23,7 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class ErillishaunTuontiServiceTest {
     final MockHenkiloAsyncResource henkiloAsyncResource = new MockHenkiloAsyncResource();
@@ -85,6 +84,8 @@ public class ErillishaunTuontiServiceTest {
         final HenkiloAsyncResource failingHenkiloResource = Mockito.mock(HenkiloAsyncResource.class);
         Mockito.when(failingHenkiloResource.haeTaiLuoHenkilot(Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(tilaAsyncResource, applicationAsyncResource, failingHenkiloResource);
+        assertEquals(0, tilaAsyncResource.results.size());
+        assertEquals(0, applicationAsyncResource.results.size());
         tuontiService.tuo(prosessi, erillisHaku, getInputStream());
         Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
     }
@@ -94,6 +95,8 @@ public class ErillishaunTuontiServiceTest {
         final TilaAsyncResource failingResource = Mockito.mock(TilaAsyncResource.class);
         Mockito.when(failingResource.tuoErillishaunTilat(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(failingResource, applicationAsyncResource, henkiloAsyncResource);
+        assertEquals(0, applicationAsyncResource.results.size());
+        assertNull(henkiloAsyncResource.henkiloPrototyypit);
         tuontiService.tuo(prosessi, erillisHaku, getInputStream());
         Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).keskeyta();
     }
@@ -104,6 +107,8 @@ public class ErillishaunTuontiServiceTest {
         Mockito.when(failingResource.putApplicationPrototypes(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
         Mockito.when(failingResource.getApplicationsByOid(Mockito.anyString(), Mockito.anyString())).thenReturn(applicationAsyncResource.getApplicationsByOid("haku1", "kohde1"));
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(tilaAsyncResource, failingResource, henkiloAsyncResource);
+        assertEquals(0, tilaAsyncResource.results.size());
+        assertNull(henkiloAsyncResource.henkiloPrototyypit);
         tuontiService.tuo(prosessi, erillisHaku, getInputStream());
         Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
     }
