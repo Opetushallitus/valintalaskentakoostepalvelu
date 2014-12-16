@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
+import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.ResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResource;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
@@ -32,7 +32,7 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
  * 
  */
 @Service
-public class LaskentaSeurantaAsyncResourceImpl extends AsyncResource implements LaskentaSeurantaAsyncResource {
+public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements LaskentaSeurantaAsyncResource {
 	private final Gson gson = new Gson();
 	private final ResponseCallback responseCallback = new ResponseCallback();
 

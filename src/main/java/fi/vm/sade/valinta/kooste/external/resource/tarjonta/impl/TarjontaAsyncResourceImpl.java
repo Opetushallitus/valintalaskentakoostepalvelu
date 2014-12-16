@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResource;
+import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 
 /**
@@ -21,7 +21,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
  * 
  */
 @Service
-public class TarjontaAsyncResourceImpl extends AsyncResource implements TarjontaAsyncResource {
+public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaAsyncResource {
 	@Autowired
 	public TarjontaAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}") String address) {
 		super(address, TimeUnit.MINUTES.toMillis(5));
