@@ -1,11 +1,5 @@
 package fi.vm.sade.valinta.kooste;
 
-/**
- * User: jukais
- * Date: 16.1.2013
- * Time: 18.03
- */
-
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
@@ -13,11 +7,7 @@ import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
+
 @Provider
 public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
 

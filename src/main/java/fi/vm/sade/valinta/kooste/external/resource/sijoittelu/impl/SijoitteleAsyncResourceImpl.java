@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResource;
+import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
 
@@ -22,7 +22,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncRes
  *
  */
 @Service
-public class SijoitteleAsyncResourceImpl extends AsyncResource implements SijoitteleAsyncResource {
+public class SijoitteleAsyncResourceImpl extends HttpResource implements SijoitteleAsyncResource {
 	@Autowired
 	public SijoitteleAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String address) {
 		super(address, TimeUnit.MINUTES.toMillis(50));

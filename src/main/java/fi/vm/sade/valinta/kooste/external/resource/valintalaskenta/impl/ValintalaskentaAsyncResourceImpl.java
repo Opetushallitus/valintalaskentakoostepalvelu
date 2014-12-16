@@ -14,11 +14,11 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.reflect.TypeToken;
 
+import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
@@ -28,7 +28,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
  * 
  */
 @Service
-public class ValintalaskentaAsyncResourceImpl extends AsyncResource implements ValintalaskentaAsyncResource {
+public class ValintalaskentaAsyncResourceImpl extends HttpResource implements ValintalaskentaAsyncResource {
 
 	@Autowired
 	public ValintalaskentaAsyncResourceImpl(

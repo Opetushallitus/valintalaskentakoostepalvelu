@@ -2,7 +2,9 @@ package fi.vm.sade.valinta.kooste.external.resource;
 
 import org.springframework.context.ApplicationContext;
 
-public class AsyncResourceWithCas extends AsyncResource {
+import fi.vm.sade.valinta.http.HttpResource;
+
+public class AsyncResourceWithCas extends HttpResource {
     public AsyncResourceWithCas(
         String webCasUrl,
         String targetService,
