@@ -1,12 +1,12 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import java.io.InputStream;
 import java.util.Arrays;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
@@ -15,24 +15,23 @@ import org.junit.Test;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.integrationtest.SharedTomcat;
 import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
+import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 
 public class ErillishakuResourceTest {
     String hakuOid = "1.2.246.562.5.2013080813081926341928";
     String hakukohdeOid = "1.2.246.562.5.72607738902";
-    String hakemusOid = "1.2.246.562.11.00000441369";
     String tarjoajaOid = "1.2.246.562.10.591352080610";
     String valintatapajonoOid = "14090336922663576781797489829886";
-    String hakijaOid = "1.2.246.562.24.14229104472";
     final String root = "http://localhost:" + SharedTomcat.port + "/valintalaskentakoostepalvelu/resources";
 
     @Before
     public void startServer() {
         ValintaKoosteTomcat.startShared();
     }
+
     @Test
-    public void smokeTest() {
+    public void vientiExcelTiedostoon() {
 
         final String url = root + "/erillishaku/vienti";
         final ProsessiId prosessiId = createClient(url)
@@ -46,18 +45,20 @@ public class ErillishakuResourceTest {
             .accept(MediaType.APPLICATION_JSON_TYPE)
             .post(Entity.entity(Arrays.asList(), MediaType.APPLICATION_JSON), ProsessiId.class);
 
-        odotaProsessia(prosessiId);
+        String documentId = odotaDokumenttiaJaPalautaId(prosessiId);
+        final InputStream storedDocument = MockDokumenttiResource.getStoredDocument(documentId);
+        assertNotNull(storedDocument);
 
-        // TODO Tarkista että excel muodostui (paranna MockDocumenttiResourcea tarvittaessa)
-
+        // TODO: tarkista dokumentin sisältö
     }
 
-    private void odotaProsessia(final ProsessiId prosessiId) {
+    private String odotaDokumenttiaJaPalautaId(final ProsessiId prosessiId) {
         final Prosessi dokumenttiProsessi = createClient(root + "/dokumenttiprosessi/" + prosessiId.getId())
             .accept(MediaType.APPLICATION_JSON).get(Prosessi.class);
         if (!dokumenttiProsessi.valmis()) {
-            odotaProsessia(prosessiId);
+            return odotaDokumenttiaJaPalautaId(prosessiId);
         }
+        return dokumenttiProsessi.dokumenttiId;
     }
 
     private WebClient createClient(String url) {
@@ -67,18 +68,19 @@ public class ErillishakuResourceTest {
 
     // Simple data transfer object (deserialization of DocumenttiProsessi doesn't work)
     static class Prosessi {
-        public final Osatyo kokonaistyo = new Osatyo();
+        public Osatyo kokonaistyo = new Osatyo();
+        public String dokumenttiId;
 
         public boolean valmis() {
-            return kokonaistyo.valmis();
+            return dokumenttiId != null;
         }
 
         static class Osatyo {
-            public final int tehty = 0;
-            public final int kokonaismaara = 0;
+            public int tehty = 0;
+            public int kokonaismaara = 0;
 
             public boolean valmis() {
-                return tehty == kokonaismaara;
+                return tehty == 1;
             }
         }
     }
