@@ -30,7 +30,7 @@ public class MockHenkiloAsyncResource implements HenkiloAsyncResource {
         henkilo.setSukunimi(proto.sukunimi);
         henkilo.setEtunimet(proto.etunimet);
         henkilo.setHetu(proto.hetu);
-        henkilo.setOidHenkilo("hakija1");
+        henkilo.setOidHenkilo(MockData.hakijaOid);
         return henkilo;
     }
 }

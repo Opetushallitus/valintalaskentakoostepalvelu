@@ -46,7 +46,8 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         henkilotiedot.put("Etunimet", prototyyppi.etunimi);
         henkilotiedot.put("Kutsumanimi", prototyyppi.etunimi);
         henkilotiedot.put("Sukunimi", prototyyppi.sukunimi);
-        hakemus.setOid("hakemus1");
+        henkilotiedot.put("syntymaaika", prototyyppi.syntymaAika);
+        hakemus.setOid(MockData.hakemusOid);
         hakemus.setPersonOid(prototyyppi.hakijaOid);
         return hakemus;
     }
@@ -57,10 +58,14 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     @Override
     public Future<List<Hakemus>> getApplicationsByOid(final String hakuOid, final String hakukohdeOid) {
         Hakemus hakemus = new Hakemus();
-        hakemus.setOid("hakemus1");
-        hakemus.setPersonOid("hakija1");
+        hakemus.setOid(MockData.hakemusOid);
+        hakemus.setPersonOid(MockData.hakijaOid);
         Answers answers = new Answers();
-        answers.getHenkilotiedot().put("Henkilotunnus", "hetu");
+        answers.getHenkilotiedot().put("Henkilotunnus", MockData.hetu);
+        answers.getHenkilotiedot().put("Etunimet", MockData.etunimi);
+        answers.getHenkilotiedot().put("Kutsumanimi", MockData.etunimi);
+        answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
+        answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
         hakemus.setAnswers(answers);
         return Futures.immediateFuture(Arrays.asList(hakemus));
     }

@@ -22,7 +22,7 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     @Override
     public Future<HakukohdeDTO> haeHakukohde(String hakukohdeOid) {
         HakukohdeDTO hakukohdeDTO = new HakukohdeDTO();
-        hakukohdeDTO.setHakuOid("haku1");
+        hakukohdeDTO.setHakuOid(MockData.hakuOid);
         hakukohdeDTO.setOid(hakukohdeOid);
         return Futures.immediateFuture(hakukohdeDTO);
     }

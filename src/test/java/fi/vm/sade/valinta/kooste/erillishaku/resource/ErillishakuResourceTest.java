@@ -1,7 +1,9 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
@@ -12,9 +14,16 @@ import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
 import org.junit.Test;
 
+import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.integrationtest.SharedTomcat;
 import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
+import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
+import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
+import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
+import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 
@@ -31,8 +40,7 @@ public class ErillishakuResourceTest {
     }
 
     @Test
-    public void vientiExcelTiedostoon() {
-
+    public void vientiExcelTiedostoon() throws IOException {
         final String url = root + "/erillishaku/vienti";
         final ProsessiId prosessiId = createClient(url)
             .query("hakutyyppi", "KORKEAKOULU")
@@ -45,18 +53,43 @@ public class ErillishakuResourceTest {
             .accept(MediaType.APPLICATION_JSON_TYPE)
             .post(Entity.entity(Arrays.asList(), MediaType.APPLICATION_JSON), ProsessiId.class);
 
-        String documentId = odotaDokumenttiaJaPalautaId(prosessiId);
+        String documentId = odotaProsessiaPalautaDokumenttiId(prosessiId);
         final InputStream storedDocument = MockDokumenttiResource.getStoredDocument(documentId);
         assertNotNull(storedDocument);
-
-        // TODO: tarkista dokumentin sisältö
+        verifyCreatedExcelDocument(storedDocument);
     }
 
-    private String odotaDokumenttiaJaPalautaId(final ProsessiId prosessiId) {
+    @Test
+    public void tuontiExcelTiedostosta() {
+        final String url = root + "/erillishaku/tuonti";
+
+        final ProsessiId prosessiId = createClient(url)
+            .query("hakutyyppi", "KORKEAKOULU")
+            .query("hakuOid", hakuOid)
+            .query("hakikohdeOid", hakukohdeOid)
+            .query("tarjoajaOid", tarjoajaOid)
+            .query("valintatapajonoOid", valintatapajonoOid)
+            .query("valintatapajononNimi", "varsinainen jono")
+            .accept(MediaType.APPLICATION_JSON_TYPE)
+            .post(Entity.entity(ExcelTestData.exampleExcelData(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
+
+        odotaProsessiaPalautaDokumenttiId(prosessiId);
+
+
+    }
+
+    private void verifyCreatedExcelDocument(final InputStream storedDocument) throws IOException {
+        final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
+        assertEquals(1, tulos.henkiloPrototyypit.size());
+        final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO("etunimi", "sukunimi", MockData.hetu, ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(), HenkiloTyyppi.OPPIJA);
+        assertEquals(expectedHenkilo, tulos.henkiloPrototyypit.get(0));
+    }
+
+    private String odotaProsessiaPalautaDokumenttiId(final ProsessiId prosessiId) {
         final Prosessi dokumenttiProsessi = createClient(root + "/dokumenttiprosessi/" + prosessiId.getId())
             .accept(MediaType.APPLICATION_JSON).get(Prosessi.class);
         if (!dokumenttiProsessi.valmis()) {
-            return odotaDokumenttiaJaPalautaId(prosessiId);
+            return odotaProsessiaPalautaDokumenttiId(prosessiId);
         }
         return dokumenttiProsessi.dokumenttiId;
     }
@@ -72,7 +105,7 @@ public class ErillishakuResourceTest {
         public String dokumenttiId;
 
         public boolean valmis() {
-            return dokumenttiId != null;
+            return kokonaistyo.valmis();
         }
 
         static class Osatyo {
@@ -80,7 +113,7 @@ public class ErillishakuResourceTest {
             public int kokonaismaara = 0;
 
             public boolean valmis() {
-                return tehty == 1;
+                return tehty == kokonaismaara;
             }
         }
     }
