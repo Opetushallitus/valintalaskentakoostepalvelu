@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.erillishaku.excel.mocks;
+package fi.vm.sade.valinta.kooste.mocks;
 
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class MockHenkiloAsyncResource implements HenkiloAsyncResource {
     public List<HenkiloCreateDTO> henkiloPrototyypit;
 

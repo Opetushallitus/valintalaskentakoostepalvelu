@@ -13,7 +13,7 @@ public class ValintaKoosteTomcat {
     static final String VALINTAKOOSTE_CONTEXT_PATH = "valintalaskentakoostepalvelu";
 
     public final static void main(String... args) throws ServletException, LifecycleException {
-        new EmbeddedTomcat(Integer.parseInt(System.getProperty("sijoittelu-service.port", "8080")), VALINTAKOOSTE_MODULE_ROOT, VALINTAKOOSTE_CONTEXT_PATH).start().await();
+        new EmbeddedTomcat(Integer.parseInt(System.getProperty("valintakooste.port", "8080")), VALINTAKOOSTE_MODULE_ROOT, VALINTAKOOSTE_CONTEXT_PATH).start().await();
     }
 
     public static void startShared() {

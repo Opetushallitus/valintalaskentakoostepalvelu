@@ -7,8 +7,11 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
  *         Paluuviesti prosessiId:n välittämiseen käyttöliittymään
  */
 public class ProsessiId {
-
 	private final String id;
+
+	private ProsessiId() {
+		this("");
+	}
 
 	public ProsessiId(String id) {
 		this.id = id;

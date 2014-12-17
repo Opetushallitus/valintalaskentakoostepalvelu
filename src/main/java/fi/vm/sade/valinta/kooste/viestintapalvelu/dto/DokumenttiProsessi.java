@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +31,10 @@ public class DokumenttiProsessi extends Prosessi {
 	private final Collection<Poikkeus> poikkeukset = new CopyOnWriteArrayList<Poikkeus>();
 	private final Collection<Varoitus> varoitukset = new CopyOnWriteArrayList<Varoitus>();
 	private final transient Collection<Poikkeus> poikkeuksetUudelleenYrityksessa = new CopyOnWriteArrayList<Poikkeus>();
+
+	private DokumenttiProsessi() {
+		this("", "", "", Arrays.asList());
+	}
 
 	public DokumenttiProsessi(String resurssi, String toiminto, String hakuOid,
 			List<String> tags) {

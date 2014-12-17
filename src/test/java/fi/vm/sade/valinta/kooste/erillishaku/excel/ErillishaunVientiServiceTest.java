@@ -2,10 +2,10 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.mocks.MockDokumenttiResource;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.mocks.MockSijoitteluAsyncResource;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.mocks.MockTarjontaAsyncService;
+import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
+import fi.vm.sade.valinta.kooste.mocks.MockSijoitteluAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunVientiServiceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
