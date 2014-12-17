@@ -22,6 +22,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
+import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 
@@ -60,7 +61,7 @@ public class ErillishakuResourceTest {
     private void verifyCreatedExcelDocument(final InputStream storedDocument) throws IOException {
         final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
         assertEquals(1, tulos.henkiloPrototyypit.size());
-        final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO("etunimi", "sukunimi", "010101-123N", ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(), HenkiloTyyppi.OPPIJA);
+        final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO("etunimi", "sukunimi", MockData.hetu, ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(), HenkiloTyyppi.OPPIJA);
         assertEquals(expectedHenkilo, tulos.henkiloPrototyypit.get(0));
     }
 

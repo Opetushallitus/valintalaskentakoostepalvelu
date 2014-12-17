@@ -1,30 +1,34 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.springframework.core.io.ClassPathResource;
+
 import com.google.gson.Gson;
+
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockData;
-import fi.vm.sade.valinta.kooste.mocks.MockHenkiloAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockTilaAsyncResource;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiServiceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockData;
+import fi.vm.sade.valinta.kooste.mocks.MockHenkiloAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockTilaAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import jersey.repackaged.com.google.common.util.concurrent.Futures;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.springframework.core.io.ClassPathResource;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import static org.junit.Assert.*;
 
 public class ErillishaunTuontiServiceTest {
     final MockHenkiloAsyncResource henkiloAsyncResource = new MockHenkiloAsyncResource();
@@ -45,7 +49,7 @@ public class ErillishaunTuontiServiceTest {
         assertEquals("etunimi", henkilo.etunimet);
         assertEquals("etunimi", henkilo.kutsumanimi);
         assertEquals("sukunimi", henkilo.sukunimi);
-        assertEquals("hetu", henkilo.hetu);
+        assertEquals(MockData.hetu, henkilo.hetu);
         assertNotNull(henkilo.syntymaaika);
         assertEquals(HenkiloTyyppi.OPPIJA, henkilo.henkiloTyyppi);
 
@@ -59,7 +63,7 @@ public class ErillishaunTuontiServiceTest {
         assertEquals(1, appResult.hakemusPrototyypit.size());
         final HakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
         assertEquals("hakija1", hakemusProto.hakijaOid);
-        assertEquals("hetu", hakemusProto.henkilotunnus);
+        assertEquals(MockData.hetu, hakemusProto.henkilotunnus);
         assertEquals("etunimi", hakemusProto.etunimi);
         assertEquals("sukunimi", hakemusProto.sukunimi);
         assertEquals(null, hakemusProto.syntymaAika);
