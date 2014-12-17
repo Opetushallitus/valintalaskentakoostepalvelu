@@ -16,8 +16,8 @@ import org.junit.Test;
 
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.integrationtest.SharedTomcat;
-import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
+import fi.vm.sade.valinta.integrationtest.tomcat.SharedTomcat;
+import fi.vm.sade.valinta.integrationtest.tomcat.ValintaKoosteTomcat;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
