@@ -71,11 +71,13 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
             prosessi.valmistui("ok");
         }, poikkeus -> {
             if (poikkeus == null) {
-                LOG.info("Suoritus keskeytyi tuntemattomaan NPE poikkeukseen!");
+                LOG.error("Suoritus keskeytyi tuntemattomaan NPE poikkeukseen!");
             } else {
-                LOG.info("Erillishaun tuonti keskeytyi virheeseen", poikkeus);
+                LOG.error("Erillishaun tuonti keskeytyi virheeseen", poikkeus);
             }
             prosessi.keskeyta();
+        }, () -> {
+            LOG.info("Tuonti onnistui");
         });
     }
 
