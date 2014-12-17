@@ -21,4 +21,8 @@ public class ProsessiId {
 		return id;
 	}
 
+	@Override
+	public String toString() {
+		return id;
+	}
 }

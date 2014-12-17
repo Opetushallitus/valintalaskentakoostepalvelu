@@ -20,6 +20,7 @@ import fi.vm.sade.valinta.integrationtest.SharedTomcat;
 import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.mocks.MockData;
@@ -52,10 +53,29 @@ public class ErillishakuResourceTest {
             .accept(MediaType.APPLICATION_JSON_TYPE)
             .post(Entity.entity(Arrays.asList(), MediaType.APPLICATION_JSON), ProsessiId.class);
 
-        String documentId = odotaDokumenttiaJaPalautaId(prosessiId);
+        String documentId = odotaProsessiaPalautaDokumenttiId(prosessiId);
         final InputStream storedDocument = MockDokumenttiResource.getStoredDocument(documentId);
         assertNotNull(storedDocument);
         verifyCreatedExcelDocument(storedDocument);
+    }
+
+    @Test
+    public void tuontiExcelTiedostosta() {
+        final String url = root + "/erillishaku/tuonti";
+
+        final ProsessiId prosessiId = createClient(url)
+            .query("hakutyyppi", "KORKEAKOULU")
+            .query("hakuOid", hakuOid)
+            .query("hakikohdeOid", hakukohdeOid)
+            .query("tarjoajaOid", tarjoajaOid)
+            .query("valintatapajonoOid", valintatapajonoOid)
+            .query("valintatapajononNimi", "varsinainen jono")
+            .accept(MediaType.APPLICATION_JSON_TYPE)
+            .post(Entity.entity(ExcelTestData.exampleExcelData(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
+
+        odotaProsessiaPalautaDokumenttiId(prosessiId);
+
+
     }
 
     private void verifyCreatedExcelDocument(final InputStream storedDocument) throws IOException {
@@ -65,11 +85,11 @@ public class ErillishakuResourceTest {
         assertEquals(expectedHenkilo, tulos.henkiloPrototyypit.get(0));
     }
 
-    private String odotaDokumenttiaJaPalautaId(final ProsessiId prosessiId) {
+    private String odotaProsessiaPalautaDokumenttiId(final ProsessiId prosessiId) {
         final Prosessi dokumenttiProsessi = createClient(root + "/dokumenttiprosessi/" + prosessiId.getId())
             .accept(MediaType.APPLICATION_JSON).get(Prosessi.class);
         if (!dokumenttiProsessi.valmis()) {
-            return odotaDokumenttiaJaPalautaId(prosessiId);
+            return odotaProsessiaPalautaDokumenttiId(prosessiId);
         }
         return dokumenttiProsessi.dokumenttiId;
     }
@@ -85,7 +105,7 @@ public class ErillishakuResourceTest {
         public String dokumenttiId;
 
         public boolean valmis() {
-            return dokumenttiId != null;
+            return kokonaistyo.valmis();
         }
 
         static class Osatyo {
@@ -93,7 +113,7 @@ public class ErillishakuResourceTest {
             public int kokonaismaara = 0;
 
             public boolean valmis() {
-                return tehty == 1;
+                return tehty == kokonaismaara;
             }
         }
     }

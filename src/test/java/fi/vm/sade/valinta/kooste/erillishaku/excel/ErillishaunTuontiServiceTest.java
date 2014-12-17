@@ -1,15 +1,14 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
+import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.exampleExcelData;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.springframework.core.io.ClassPathResource;
 
 import com.google.gson.Gson;
 
@@ -40,7 +39,7 @@ public class ErillishaunTuontiServiceTest {
     @Test
     public void tuontiSuoritetaan() throws IOException, InterruptedException {
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource);
-        tuontiService.tuo(prosessi, erillisHaku, getInputStream());
+        tuontiService.tuo(prosessi, erillisHaku, exampleExcelData());
         Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
 
         // tarkistetaan henkilöt
@@ -91,7 +90,7 @@ public class ErillishaunTuontiServiceTest {
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(tilaAsyncResource, applicationAsyncResource, failingHenkiloResource);
         assertEquals(0, tilaAsyncResource.results.size());
         assertEquals(0, applicationAsyncResource.results.size());
-        tuontiService.tuo(prosessi, erillisHaku, getInputStream());
+        tuontiService.tuo(prosessi, erillisHaku, exampleExcelData());
         Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
     }
 
@@ -102,7 +101,7 @@ public class ErillishaunTuontiServiceTest {
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(failingResource, applicationAsyncResource, henkiloAsyncResource);
         assertEquals(0, applicationAsyncResource.results.size());
         assertNull(henkiloAsyncResource.henkiloPrototyypit);
-        tuontiService.tuo(prosessi, erillisHaku, getInputStream());
+        tuontiService.tuo(prosessi, erillisHaku, exampleExcelData());
         Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).keskeyta();
     }
 
@@ -114,16 +113,7 @@ public class ErillishaunTuontiServiceTest {
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(tilaAsyncResource, failingResource, henkiloAsyncResource);
         assertEquals(0, tilaAsyncResource.results.size());
         assertNull(henkiloAsyncResource.henkiloPrototyypit);
-        tuontiService.tuo(prosessi, erillisHaku, getInputStream());
+        tuontiService.tuo(prosessi, erillisHaku, exampleExcelData());
         Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
     }
-
-    private InputStream getInputStream() {
-        try {
-            return new ClassPathResource("kustom_erillishaku.xlsx").getInputStream();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 }
