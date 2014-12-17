@@ -6,6 +6,7 @@ import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockHenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockTilaAsyncResource;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiServiceImpl;
@@ -66,14 +67,14 @@ public class ErillishaunTuontiServiceTest {
         // tarkistetaan tilatulokset
         assertEquals(1, tilaAsyncResource.results.size());
         final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
-        assertEquals("haku1", tilaResult.hakuOid);
-        assertEquals("kohde1", tilaResult.hakukohdeOid);
+        assertEquals(MockData.hakuOid, tilaResult.hakuOid);
+        assertEquals(MockData.kohdeOid, tilaResult.hakukohdeOid);
         assertEquals("varsinainen jono", tilaResult.valintatapajononNimi);
         assertEquals(1, tilaResult.erillishaunHakijat.size());
         final ErillishaunHakijaDTO hakija = tilaResult.erillishaunHakijat.iterator().next();
         assertEquals("etunimi", hakija.etunimi);
         assertEquals("sukunimi", hakija.sukunimi);
-        assertEquals("jono1", hakija.valintatapajonoOid);
+        assertEquals(MockData.valintatapajonoOid, hakija.valintatapajonoOid);
         assertEquals("hakemus1", hakija.hakemusOid);
         assertEquals("hakija1", hakija.hakijaOid);
         System.out.println(new Gson().toJson(tilaAsyncResource.results));

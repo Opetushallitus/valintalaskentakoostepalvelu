@@ -24,8 +24,7 @@ import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
  * 
  */
 public class ErillishakuDataRivi extends DataRivi {
-	
-	private static final DateTimeFormatter SYNTYMAAIKA = DateTimeFormat.forPattern("dd.MM.yyyy");
+	public static final DateTimeFormatter SYNTYMAAIKA = DateTimeFormat.forPattern("dd.MM.yyyy");
 	private final ErillishakuRiviKuuntelija kuuntelija;
 	public ErillishakuDataRivi(ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s) {
 		super(s);

@@ -1,9 +1,14 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
 
+import static fi.vm.sade.valinta.kooste.mocks.MockData.*;
+
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 
@@ -15,13 +20,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
+
     @Override
     public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
         Valintatulos valintatulos = new Valintatulos();
-        valintatulos.setHakemusOid("hakemus1");
-        valintatulos.setHakijaOid("hakija1");
+        valintatulos.setHakemusOid(hakemusOid);
+        valintatulos.setHakijaOid(hakijaOid);
         valintatulos.setHakukohdeOid(hakukohdeOid);
-        valintatulos.setHakuOid("haku1");
+        valintatulos.setHakuOid(hakuOid);
         valintatulos.setValintatapajonoOid(valintatapajonoOid);
         return Futures.immediateFuture(Arrays.asList(valintatulos));
     }
@@ -45,8 +51,17 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
     public Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid) {
         HakukohdeDTO hakukohdeDTO = new HakukohdeDTO();
         hakukohdeDTO.setOid(hakukohdeOid);
-        hakukohdeDTO.setTarjoajaOid("tarjoaja1");
-
+        hakukohdeDTO.setTarjoajaOid(MockData.tarjoajaOid);
+        final ValintatapajonoDTO jono = new ValintatapajonoDTO();
+        jono.setOid(MockData.valintatapajonoOid);
+        final HakemusDTO hakemus = new HakemusDTO();
+        hakemus.setHakemusOid(MockData.hakemusOid);
+        hakemus.setHakijaOid(MockData.hakijaOid);
+        hakemus.setTila(HakemuksenTila.HYLATTY);
+        hakemus.setEtunimi(MockData.etunimi);
+        hakemus.setSukunimi(MockData.sukunimi);
+        jono.getHakemukset().add(hakemus);
+        hakukohdeDTO.getValintatapajonot().add(jono);
 
         return Futures.immediateFuture(hakukohdeDTO);
     }
