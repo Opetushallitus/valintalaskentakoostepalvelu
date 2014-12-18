@@ -12,18 +12,18 @@ public class HakemusPrototyyppiBatch {
 	private String hakuOid;
 	private String hakukohdeOid;
 	private String tarjoajaOid;
-	private Collection<HakemusPrototyyppi> hakemusprototyypit;
+	private Collection<HakemusPrototyyppi> hakemukset;
 	
 	public HakemusPrototyyppiBatch(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit) {
 		this.hakuOid = hakuOid;
 		this.hakukohdeOid = hakukohdeOid;
 		this.tarjoajaOid = tarjoajaOid;
-		this.hakemusprototyypit = hakemusPrototyypit;
+		this.hakemukset = hakemusPrototyypit;
 	}
 	
-	public void setHakemusprototyypit(
-			Collection<HakemusPrototyyppi> hakemusprototyypit) {
-		this.hakemusprototyypit = hakemusprototyypit;
+	public void setHakemukset(
+			Collection<HakemusPrototyyppi> hakemukset) {
+		this.hakemukset = hakemukset;
 	}
 	public void setHakukohdeOid(String hakukohdeOid) {
 		this.hakukohdeOid = hakukohdeOid;
@@ -34,8 +34,8 @@ public class HakemusPrototyyppiBatch {
 	public void setTarjoajaOid(String tarjoajaOid) {
 		this.tarjoajaOid = tarjoajaOid;
 	}
-	public Collection<HakemusPrototyyppi> getHakemusprototyypit() {
-		return hakemusprototyypit;
+	public Collection<HakemusPrototyyppi> getHakemukset() {
+		return hakemukset;
 	}
 	public String getHakukohdeOid() {
 		return hakukohdeOid;
