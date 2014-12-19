@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.Entity;
@@ -40,14 +39,12 @@ public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaA
 	}
 
 	@Override
-	public Future<Response> tuoErillishaunTilat(
-			String hakuOid, String hakukohdeOid, String valintatapajononNimi,
-			Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
+	public Response tuoErillishaunTilat(String hakuOid, String hakukohdeOid, String valintatapajononNimi, Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
 		String url = "/tila/erillishaku/"+hakuOid+"/hakukohde/"+hakukohdeOid+"/";
 		LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}&valintatapajononNimi={}", address, url, hakukohdeOid, valintatapajononNimi);
 		return WebClient.fromClient(webClient)
 				.path(url)
 				.query("valintatapajononNimi", Optional.ofNullable(valintatapajononNimi).orElse(StringUtils.EMPTY))
-				.async().post(Entity.entity(erillishaunHakijat, MediaType.APPLICATION_JSON_TYPE));
+				.post(Entity.entity(erillishaunHakijat, MediaType.APPLICATION_JSON_TYPE));
 	}
 }

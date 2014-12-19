@@ -9,8 +9,5 @@ import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 
 public interface TilaAsyncResource {
 
-	Future<Response> tuoErillishaunTilat(
-			String hakuOid, String hakukohdeOid,
-			String valintatapajononNimi,
-			Collection<ErillishaunHakijaDTO> erillishaunHakijat);
+	Response tuoErillishaunTilat(String hakuOid, String hakukohdeOid, String valintatapajononNimi, Collection<ErillishaunHakijaDTO> erillishaunHakijat);
 }
