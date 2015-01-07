@@ -27,6 +27,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.ErillishaunTuontiService;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -107,9 +108,11 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
 
     private List<Hakemus> hakemukset(ErillishakuDTO haku, ImportedErillisHakuExcel erillishakuExcel) throws InterruptedException, ExecutionException {
         try {
-            LOG.info("Haetaan henkilöt ja käsitellään hakemukset");
-            final List<HakemusPrototyyppi> hakemusPrototyypit = henkiloAsyncResource.haeTaiLuoHenkilot(erillishakuExcel.henkiloPrototyypit).get().stream()
+            final List<HenkiloCreateDTO> henkiloPrototyypit = erillishakuExcel.henkiloPrototyypit;
+            LOG.info("Haetaan henkilöt ja käsitellään hakemukset (" + henkiloPrototyypit.size() + " riviä)");
+            final List<HakemusPrototyyppi> hakemusPrototyypit = henkiloAsyncResource.haeTaiLuoHenkilot(henkiloPrototyypit).get().stream()
                     .map(personToHakemusPrototyyppi).collect(Collectors.toList());
+            LOG.info("Henkilöitä luotu/löydetty " + hakemusPrototyypit.size());
             return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
         } catch (ExecutionException e) { // temporary catch to avoid missing service dependencies
             LOG.warn("Fallback: käytetään hakemusten hakua oidien perusteella", e);
