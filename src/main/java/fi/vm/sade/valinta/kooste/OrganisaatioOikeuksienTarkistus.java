@@ -14,7 +14,7 @@ import java.util.Arrays;
 public class OrganisaatioOikeuksienTarkistus {
 
     private static final Logger LOG = LoggerFactory.getLogger(OrganisaatioOikeuksienTarkistus.class);
-    public static final String VALINTOJENTOTEUTTAMINEN = "APP_VALINTOJENTOTEUTTAMINEN_CRUD_";
+    public static final String VALINTOJENTOTEUTTAMINEN = "APP_HAKEMUS_CRUD_";
 
     public static String kayttajanKayttooikeudet() {
         try {

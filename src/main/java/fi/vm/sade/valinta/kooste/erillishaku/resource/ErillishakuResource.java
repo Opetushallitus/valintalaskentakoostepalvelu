@@ -47,7 +47,7 @@ public class ErillishakuResource {
 	private ErillishaunVientiService vientiService;
 
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')" +
-			" && @hasOrganization.hasOrganization(#tarjoajaOid)")
+			" and @hasOrganization.hasOrganization(#tarjoajaOid)")
 	@POST
 	@Path("/vienti")
 	@Consumes("application/json")
@@ -68,7 +68,7 @@ public class ErillishakuResource {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')" +
-			" && @hasOrganization.hasOrganization(#tarjoajaOid)")
+			" and @hasOrganization.hasOrganization(#tarjoajaOid)")
 	@POST
 	@Path("/tuonti")
 	@Consumes("application/octet-stream")
