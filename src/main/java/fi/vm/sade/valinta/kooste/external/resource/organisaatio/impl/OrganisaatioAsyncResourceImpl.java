@@ -47,4 +47,14 @@ public class OrganisaatioAsyncResourceImpl extends AsyncResourceWithCas implemen
 				.async()
 				.get();
 	}
+
+	@Override
+	public Future<String> haeOrganisaationOidKetju(String organisaatioOid) {
+		String url = "/organisaatio/"+organisaatioOid+"/parentoids";
+
+		return WebClient.fromClient(webClient).path(url)
+				.accept(MediaType.WILDCARD)
+				.async()
+				.get(String.class);
+	}
 }

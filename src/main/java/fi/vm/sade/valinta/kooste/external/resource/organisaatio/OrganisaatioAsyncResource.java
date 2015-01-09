@@ -20,4 +20,12 @@ public interface OrganisaatioAsyncResource {
 	 * @return Organisaation tiedot
 	 */
 	Future<Response> haeOrganisaatio(String organisaatioOid);
+
+	/**
+	 *
+	 * @param organisaatioOid
+	 * @return esim formaatissa 1.2.246.562.10.xxxx/1.2.246.562.10.xxxx/1.2.246.562.10.xxxx
+	 */
+	Future<String> haeOrganisaationOidKetju(String organisaatioOid);
+
 }

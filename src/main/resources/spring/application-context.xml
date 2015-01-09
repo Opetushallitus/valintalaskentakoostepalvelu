@@ -20,7 +20,7 @@
 		location="classpath:META-INF/kela.properties, classpath:META-INF/valintalaskentakoostepalvelu.properties, classpath:META-INF/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valinta.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/override.properties"
 		ignore-resource-not-found="true" properties-ref="defaultProps" />
 
-
+	<bean id="hasOrganization" class="fi.vm.sade.valinta.kooste.security.HasOrganizationImpl"/>
 
 	<bean id="defaultProps"
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
