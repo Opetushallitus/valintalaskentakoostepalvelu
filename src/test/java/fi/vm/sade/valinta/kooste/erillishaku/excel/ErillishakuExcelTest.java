@@ -34,7 +34,7 @@ public class ErillishakuExcelTest {
 					
 					@Override
 					public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
-						LOG.error("adfsga {}", rivi.getEtunimi());
+						LOG.error("Onko laillinen {}", rivi.getEtunimi());
 						//Assert.assertTrue("Syntyma-aika ei tasmaa", syntymaAika.equals(rivi.getSyntymaAika()));
 						tarkistusTapahtui.incrementAndGet();
 					}
@@ -43,7 +43,23 @@ public class ErillishakuExcelTest {
 		eExcel.getExcel().tuoXlsx(new ClassPathResource("kustom_erillishaku.xlsx").getInputStream());
 		Assert.assertTrue(tarkistusTapahtui.get()==1);
 	}
-	
+
+	@Test
+	public void testaaTuontiKustomistaTiedostostaOtsikoilla() throws ExcelValidointiPoikkeus, IOException {
+		final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
+		ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi",Collections.emptyList(), new ErillishakuRiviKuuntelija() {
+
+			@Override
+			public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
+				LOG.error("Onko laillinen {}", rivi.getEtunimi());
+				//Assert.assertTrue("Syntyma-aika ei tasmaa", syntymaAika.equals(rivi.getSyntymaAika()));
+				tarkistusTapahtui.incrementAndGet();
+			}
+		});
+
+		eExcel.getExcel().tuoXlsx(new ClassPathResource("kustom_erillishaku_otsikoilla.xlsx").getInputStream());
+		Assert.assertTrue(tarkistusTapahtui.get()==1);
+	}
 	@Test
 	public void testaaVienti() throws FileNotFoundException, IOException {
 		List<ErillishakuRivi> rivit = Lists.newArrayList();
