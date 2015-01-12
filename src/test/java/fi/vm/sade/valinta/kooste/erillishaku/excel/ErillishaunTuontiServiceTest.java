@@ -45,9 +45,9 @@ public class ErillishaunTuontiServiceTest {
         // tarkistetaan henkilöt
         assertEquals(1, henkiloAsyncResource.henkiloPrototyypit.size());
         final HenkiloCreateDTO henkilo = henkiloAsyncResource.henkiloPrototyypit.get(0);
-        assertEquals("etunimi", henkilo.etunimet);
-        assertEquals("etunimi", henkilo.kutsumanimi);
-        assertEquals("sukunimi", henkilo.sukunimi);
+        assertEquals("Tuomas", henkilo.etunimet);
+        assertEquals("Tuomas", henkilo.kutsumanimi);
+        assertEquals("Hakkarainen", henkilo.sukunimi);
         assertEquals(MockData.hetu, henkilo.hetu);
         assertNotNull(henkilo.syntymaaika);
         assertEquals(HenkiloTyyppi.OPPIJA, henkilo.henkiloTyyppi);
@@ -63,8 +63,8 @@ public class ErillishaunTuontiServiceTest {
         final HakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
         assertEquals("hakija1", hakemusProto.hakijaOid);
         assertEquals(MockData.hetu, hakemusProto.henkilotunnus);
-        assertEquals("etunimi", hakemusProto.etunimi);
-        assertEquals("sukunimi", hakemusProto.sukunimi);
+        assertEquals("Tuomas", hakemusProto.etunimi);
+        assertEquals("Hakkarainen", hakemusProto.sukunimi);
         assertEquals(null, hakemusProto.syntymaAika);
 
         // tarkistetaan tilatulokset
@@ -75,8 +75,8 @@ public class ErillishaunTuontiServiceTest {
         assertEquals("varsinainen jono", tilaResult.valintatapajononNimi);
         assertEquals(1, tilaResult.erillishaunHakijat.size());
         final ErillishaunHakijaDTO hakija = tilaResult.erillishaunHakijat.iterator().next();
-        assertEquals("etunimi", hakija.etunimi);
-        assertEquals("sukunimi", hakija.sukunimi);
+        assertEquals("Tuomas", hakija.etunimi);
+        assertEquals("Hakkarainen", hakija.sukunimi);
         assertEquals(MockData.valintatapajonoOid, hakija.valintatapajonoOid);
         assertEquals("hakemus1", hakija.hakemusOid);
         assertEquals("hakija1", hakija.hakijaOid);
