@@ -4,12 +4,15 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -89,6 +92,29 @@ public class ErillishakuResource {
 		tuontiService.tuo(prosessi, new ErillishakuDTO(tyyppi,hakuOid, hakukohdeOid,
 				tarjoajaOid, valintatapajonoOid, valintatapajononNimi),
 				new ByteArrayInputStream(b.toByteArray()));
+		//
+		return prosessi.toProsessiId();
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')" +
+			" and @hasOrganization.hasOrganization(#tarjoajaOid)")
+	@POST
+	@Path("/tuonti/json")
+	@Consumes("application/json")
+	@ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen tuonti JSON-tietueella", response = ProsessiId.class)
+	public ProsessiId tuontiJson(
+			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
+			@QueryParam("hakuOid") String hakuOid,
+			@QueryParam("hakukohdeOid") String hakukohdeOid,
+			@QueryParam("tarjoajaOid") String tarjoajaOid,
+			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
+			@QueryParam("valintatapajononNimi") String valintatapajononNimi,
+			List<ErillishakuRivi> erillishakuRivit) throws IOException {
+		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
+		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
+		tuontiService.tuo(prosessi, new ErillishakuDTO(tyyppi,hakuOid, hakukohdeOid,
+						tarjoajaOid, valintatapajonoOid, valintatapajononNimi),
+				erillishakuRivit);
 		//
 		return prosessi.toProsessiId();
 	}

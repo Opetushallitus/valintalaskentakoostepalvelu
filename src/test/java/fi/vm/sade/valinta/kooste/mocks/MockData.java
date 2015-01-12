@@ -7,8 +7,8 @@ public class MockData {
     public static String kohdeOid = "kohde1";
     public static String hakijaOid = "hakija1";
     public static String hakemusOid = "hakemus1";
-    public static String hetu = "hetu";
-    public static String etunimi = "etunimi";
-    public static String sukunimi = "sukunimi";
+    public static String hetu = "010101-123N";
+    public static String etunimi = "Tuomas";
+    public static String sukunimi = "Hakkarainen";
     public static String syntymaAika = "1.1.1901";
 }
