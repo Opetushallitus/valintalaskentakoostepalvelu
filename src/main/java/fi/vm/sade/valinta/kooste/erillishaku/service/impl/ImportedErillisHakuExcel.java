@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
@@ -25,16 +26,26 @@ public class ImportedErillisHakuExcel {
     private static final Logger LOG = LoggerFactory
         .getLogger(ImportedErillisHakuExcel.class);
     private final static org.joda.time.format.DateTimeFormatter dtf = DateTimeFormat.forPattern("dd.MM.yyyy");
-    public final List<HenkiloCreateDTO> henkiloPrototyypit = Lists.newArrayList();
-    public final Map<String, ErillishakuRivi> hetuToRivi = Maps.newHashMap();
+    public final List<HenkiloCreateDTO> henkiloPrototyypit;
+    public final Map<String, ErillishakuRivi> hetuToRivi;
 
     public ImportedErillisHakuExcel(Hakutyyppi hakutyyppi, InputStream inputStream) throws IOException {
+        hetuToRivi = Maps.newHashMap();
+        henkiloPrototyypit = Lists.newArrayList();
         createExcel(hakutyyppi).getExcel().tuoXlsx(inputStream);
+    }
+
+    public ImportedErillisHakuExcel(Hakutyyppi hakutyyppi, List<ErillishakuRivi> erillishakuRivi) throws IOException {
+        henkiloPrototyypit = erillishakuRivi.stream().map(
+                rivi -> new HenkiloCreateDTO(rivi.getEtunimi(), rivi.getSukunimi(), rivi.getHenkilotunnus(),
+                        parseSyntymaAika(rivi), HenkiloTyyppi.OPPIJA)).collect(Collectors.toList());
+        hetuToRivi = erillishakuRivi.stream().collect(Collectors.
+                toMap(rivi -> Optional.ofNullable(StringUtils.trimToNull(rivi.getHenkilotunnus())).orElse(rivi.getSyntymaAika()), rivi -> rivi));
+
     }
 
     private ErillishakuExcel createExcel(Hakutyyppi hakutyyppi) {
         try {
-
             return new ErillishakuExcel(hakutyyppi, rivi -> {
                 if (rivi.getHenkilotunnus() == null || rivi.getSyntymaAika() == null) {
                     LOG.warn("Käyttökelvoton rivi {}", rivi);
