@@ -11,6 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+import com.wordnik.swagger.annotations.ApiParam;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import org.apache.poi.util.IOUtils;
@@ -103,6 +104,7 @@ public class ErillishakuResource {
 	@Consumes("application/json")
 	@ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen tuonti JSON-tietueella", response = ProsessiId.class)
 	public ProsessiId tuontiJson(
+			@ApiParam(allowableValues = "[TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU]")
 			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
