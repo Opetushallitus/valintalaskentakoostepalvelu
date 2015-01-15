@@ -13,7 +13,6 @@ import javax.ws.rs.core.MediaType;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
@@ -29,7 +28,6 @@ import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 
-@Ignore
 public class ErillishakuResourceTest {
     String hakuOid = "1.2.246.562.5.2013080813081926341928";
     String hakukohdeOid = "1.2.246.562.5.72607738902";
@@ -48,7 +46,7 @@ public class ErillishakuResourceTest {
         final ProsessiId prosessiId = createClient(url)
             .query("hakutyyppi", "KORKEAKOULU")
             .query("hakuOid", hakuOid)
-            .query("hakikohdeOid", hakukohdeOid)
+            .query("hakukohdeOid", hakukohdeOid)
             .query("tarjoajaOid", tarjoajaOid)
             .query("valintatapajonoOid", valintatapajonoOid)
             .query("valintatapajononNimi", "varsinainen jono")
@@ -69,7 +67,7 @@ public class ErillishakuResourceTest {
         final ProsessiId prosessiId = createClient(url)
             .query("hakutyyppi", "KORKEAKOULU")
             .query("hakuOid", hakuOid)
-            .query("hakikohdeOid", hakukohdeOid)
+            .query("hakukohdeOid", hakukohdeOid)
             .query("tarjoajaOid", tarjoajaOid)
             .query("valintatapajonoOid", valintatapajonoOid)
             .query("valintatapajononNimi", "varsinainen jono")
