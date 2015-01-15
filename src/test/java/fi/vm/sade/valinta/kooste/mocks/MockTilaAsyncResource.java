@@ -8,7 +8,6 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Future;
 
 import org.springframework.stereotype.Service;
 
@@ -29,8 +28,8 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
     }
     public final List<Result> results = new ArrayList<>();
     @Override
-    public Future<Response> tuoErillishaunTilat(final String hakuOid, final String hakukohdeOid, final String valintatapajononNimi, final Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
+    public Response tuoErillishaunTilat(final String hakuOid, final String hakukohdeOid, final String valintatapajononNimi, final Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
         results.add(new Result(hakuOid, hakukohdeOid, valintatapajononNimi, erillishaunHakijat));
-        return Futures.immediateFuture(null);
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.kela.route.impl;
+package fi.vm.sade.valinta.kooste.kela;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteImpl;
 import jersey.repackaged.com.google.common.util.concurrent.Futures;
 
 import org.apache.camel.Produce;

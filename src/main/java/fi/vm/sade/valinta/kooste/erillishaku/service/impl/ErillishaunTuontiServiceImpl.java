@@ -110,7 +110,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
     }
     private void tuoErillishaunTilat(final ErillishakuDTO haku, final Collection<ErillishaunHakijaDTO> hakijat) {
         try {
-            tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijat).get();
+            tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijat);
         } catch (Exception e) {
             LOG.error("Erillishaun tilojen tuonti epaonnistui", e);
             throw new RuntimeException(e);

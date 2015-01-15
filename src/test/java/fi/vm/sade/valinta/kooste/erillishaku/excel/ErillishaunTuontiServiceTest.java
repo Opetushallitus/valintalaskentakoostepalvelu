@@ -97,7 +97,7 @@ public class ErillishaunTuontiServiceTest {
     @Test
     public void tilojenTuontiEpaonnistuu() {
         final TilaAsyncResource failingResource = Mockito.mock(TilaAsyncResource.class);
-        Mockito.when(failingResource.tuoErillishaunTilat(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
+        Mockito.when(failingResource.tuoErillishaunTilat(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(new RuntimeException("simulated HTTP fail"));
         final ErillishaunTuontiServiceImpl tuontiService = new ErillishaunTuontiServiceImpl(failingResource, applicationAsyncResource, henkiloAsyncResource);
         assertEquals(0, applicationAsyncResource.results.size());
         assertNull(henkiloAsyncResource.henkiloPrototyypit);
