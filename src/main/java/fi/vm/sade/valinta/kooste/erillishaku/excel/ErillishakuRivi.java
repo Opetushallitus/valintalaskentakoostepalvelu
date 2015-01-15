@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
+import com.wordnik.swagger.annotations.ApiModel;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -7,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
  * @author Jussi Jartamo
  * 
  */
+@ApiModel
 public class ErillishakuRivi {
 
 	private final String etunimi;
