@@ -104,7 +104,7 @@ public class ErillishakuResource {
 	@Consumes("application/json")
 	@ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen tuonti JSON-tietueella", response = ProsessiId.class)
 	public ProsessiId tuontiJson(
-			@ApiParam(allowableValues = "[TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU]")
+			@ApiParam(allowableValues = "TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU")
 			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
