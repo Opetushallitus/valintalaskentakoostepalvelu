@@ -15,6 +15,7 @@ public class ErillishakuRivi {
 	private final String sukunimi;
 	private final String henkilotunnus;
 	private final String syntymaAika;
+	private final String personOid;
 	
 	private final String hakemuksenTila;
 	private final String vastaanottoTila;
@@ -26,6 +27,7 @@ public class ErillishakuRivi {
 		this.etunimi =  null;
 		this.sukunimi = null;
 		this.henkilotunnus = null;
+		this.personOid = null;
 		this.syntymaAika = null;
 		this.hakemuksenTila = null;
 		this.vastaanottoTila = null;
@@ -33,12 +35,12 @@ public class ErillishakuRivi {
 		this.julkaistaankoTiedot = false;
 	}
 	
-	public ErillishakuRivi(String sukunimi,String etunimi,  String henkilotunnus, String syntymaAika, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot) {
+	public ErillishakuRivi(String sukunimi,String etunimi,  String henkilotunnus, String syntymaAika, String personOid, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot) {
 		this.etunimi = etunimi;
 		this.sukunimi = sukunimi;
 		this.henkilotunnus = henkilotunnus;
 		this.syntymaAika = syntymaAika;
-		
+		this.personOid = personOid;
 		this.hakemuksenTila = hakemuksenTila;
 		this.vastaanottoTila = vastaanottoTila;
 		this.ilmoittautumisTila = ilmoittautumisTila;
@@ -51,6 +53,9 @@ public class ErillishakuRivi {
 	}
 	public String getEtunimi() {
 		return etunimi;
+	}
+	public String getPersonOid() {
+		return personOid;
 	}
 	public String getHenkilotunnus() {
 		return henkilotunnus;

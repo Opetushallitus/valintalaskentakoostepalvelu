@@ -60,13 +60,18 @@ public class ErillishakuExcel {
 		esittelyt.add(Arrays
 				.asList(new TekstiArvo(tarjoajaNimi, true, false, 4)));
 		esittelyt.add(Arrays.asList(new TekstiArvo(StringUtils.EMPTY)));
-		esittelyt.add(Arrays.asList(new TekstiArvo("Sukunimi"), new TekstiArvo(
-						"Etunimi"), new TekstiArvo("Henkilötunnus"), new TekstiArvo(
-						"Syntymäaika"), new TekstiArvo("Hakemuksentila"),
-				new TekstiArvo("Vastaanottotila"), new TekstiArvo(
-						"Ilmoittautumistila")
-				, new TekstiArvo(
-						"Julkaistavissa")));
+
+		esittelyt.add(Arrays.asList(
+			new TekstiArvo("Sukunimi"),
+			new TekstiArvo("Etunimi"),
+			new TekstiArvo("Henkilötunnus"),
+			new TekstiArvo("Syntymäaika"),
+			new TekstiArvo("Hakija-oid"),
+			new TekstiArvo("Hakemuksentila"),
+			new TekstiArvo("Vastaanottotila"),
+			new TekstiArvo("Ilmoittautumistila"),
+			new TekstiArvo("Julkaistavissa")));
+
 		Collections.sort(erillishakurivit, new Comparator<ErillishakuRivi>() {
 			@Override
 			public int compare(ErillishakuRivi h1, ErillishakuRivi h2) {
@@ -96,7 +101,7 @@ public class ErillishakuExcel {
 
 	private Stream<ErillishakuRivi> arvoRivit(List<ErillishakuRivi> erillishakurivit) {
 		if (erillishakurivit.isEmpty()) {
-			return ImmutableList.of(new ErillishakuRivi("Esimerkki", "Rivi", "123456-7890", "12.34.1956", "HYVAKSYTTY", "KESKEN", "EI_TEHTY", true)).stream();
+			return ImmutableList.of(new ErillishakuRivi("Esimerkki", "Rivi", "123456-7890", "12.34.1956", "", "HYVAKSYTTY", "KESKEN", "EI_TEHTY", true)).stream();
 		} else {
 			return erillishakurivit
 					.stream();
@@ -106,26 +111,18 @@ public class ErillishakuExcel {
 
 	private Function<ErillishakuRivi, Collection<Arvo>> luoArvot(Hakutyyppi tyyppi) {
 		return rivi -> {
-            Collection<Arvo> a = Lists.newArrayList();
-            a.add(new TekstiArvo(rivi.getSukunimi(),
-                    true, true));
-            a.add(new TekstiArvo(rivi.getEtunimi(),
-                    true, true));
-            a.add(new TekstiArvo(rivi
-                    .getHenkilotunnus(), true, true));
-            a.add(new TekstiArvo(rivi.getSyntymaAika(),
-                    true, true));
-
-            a.add(ErillishakuDataRivi.hakemuksenTila(rivi
-					.getHakemuksenTila()));
-            a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi
-                    .getVastaanottoTila()));
-            a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi
-                    .getIlmoittautumisTila()));
-            a.add(ErillishakuDataRivi.julkaisuLupa(rivi
-                    .isJulkaistaankoTiedot()));
-            return a;
-        };
+			Collection<Arvo> a = Lists.newArrayList();
+			a.add(new TekstiArvo(rivi.getSukunimi(), true, true));
+			a.add(new TekstiArvo(rivi.getEtunimi(), true, true));
+			a.add(new TekstiArvo(rivi.getHenkilotunnus(), true, true));
+			a.add(new TekstiArvo(rivi.getSyntymaAika(), true, true));
+			a.add(new TekstiArvo(rivi.getPersonOid(), true, true));
+			a.add(ErillishakuDataRivi.hakemuksenTila(rivi.getHakemuksenTila()));
+			a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
+			a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
+			a.add(ErillishakuDataRivi.julkaisuLupa(rivi.isJulkaistaankoTiedot()));
+			return a;
+		};
 	}
 
 

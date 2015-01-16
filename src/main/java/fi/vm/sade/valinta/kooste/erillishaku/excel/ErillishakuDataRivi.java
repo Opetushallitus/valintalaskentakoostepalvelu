@@ -43,12 +43,13 @@ public class ErillishakuDataRivi extends DataRivi {
 		} catch(Exception e){
 			return true;
 		}
+		String oid = lukija.getArvoAt(4);
 		
-		String hakemuksenTila = lukija.getArvoAt(4);
-		String vastaanottoTila = lukija.getArvoAt(5);
-		String ilmoittautumisTila = lukija.getArvoAt(6);
+		String hakemuksenTila = lukija.getArvoAt(5);
+		String vastaanottoTila = lukija.getArvoAt(6);
+		String ilmoittautumisTila = lukija.getArvoAt(7);
 		boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(lukija.getArvoAt(7));
-		kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(sukunimi,etunimi, henkilotunnus, syntymaAika, hakemuksenTila, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot));
+		kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(sukunimi,etunimi, henkilotunnus, syntymaAika, oid, hakemuksenTila, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot));
 		return true;
 	}
 	private static final Collection<String> HAKEMUKSENTILA_ARVOT =Arrays.asList(HakemuksenTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList()); 

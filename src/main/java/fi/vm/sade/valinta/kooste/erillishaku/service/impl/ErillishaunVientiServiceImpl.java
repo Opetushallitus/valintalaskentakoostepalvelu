@@ -103,13 +103,13 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
                 .getValintatapajonot().stream()
                 .flatMap(v -> v.getHakemukset().stream())
                 .map(h -> {
-                    HakemusWrapper h0 = new HakemusWrapper(oidToHakemus.get(h.getHakemusOid()));
+                    HakemusWrapper wrapper = new HakemusWrapper(oidToHakemus.get(h.getHakemusOid()));
                     String hakemuksenTila = "";
                     if (h.getTila() != null) {
                         hakemuksenTila = h.getTila().toString();
                     }
                     Valintatulos tulos = valintatulokset.get(h.getHakemusOid());
-                    ErillishakuRivi e = new ErillishakuRivi(h.getSukunimi(), h.getEtunimi(), h0.getHenkilotunnus(), h0.getSyntymaaika(), hakemuksenTila, tulos.getTila().toString(), tulos.getIlmoittautumisTila().toString(), tulos.getJulkaistavissa());
+                    ErillishakuRivi e = new ErillishakuRivi(h.getSukunimi(), h.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSyntymaaika(), wrapper.getPersonOid(), hakemuksenTila, tulos.getTila().toString(), tulos.getIlmoittautumisTila().toString(), tulos.getJulkaistavissa());
                     return e;
                 }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohdeNimi()), teksti(tarjontaHakukohde.getTarjoajaNimi()), erillishakurivit);
@@ -120,7 +120,7 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
         List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus -> {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus);
             ErillishakuRivi r = new ErillishakuRivi(wrapper.getSukunimi(),
-                    wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSyntymaaika(), "HYLATTY", "", "", false);
+                    wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSyntymaaika(), wrapper.getPersonOid(), "HYLATTY", "", "", false);
             return r;
         }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohdeNimi()), teksti(tarjontaHakukohde.getTarjoajaNimi()), rivit);

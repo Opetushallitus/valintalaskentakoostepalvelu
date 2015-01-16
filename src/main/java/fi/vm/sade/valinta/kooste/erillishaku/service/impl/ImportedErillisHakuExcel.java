@@ -36,9 +36,7 @@ public class ImportedErillisHakuExcel {
     }
 
     public ImportedErillisHakuExcel(Hakutyyppi hakutyyppi, List<ErillishakuRivi> erillishakuRivi) throws IOException {
-        henkiloPrototyypit = erillishakuRivi.stream().map(
-                rivi -> new HenkiloCreateDTO(rivi.getEtunimi(), rivi.getSukunimi(), rivi.getHenkilotunnus(),
-                        parseSyntymaAika(rivi), HenkiloTyyppi.OPPIJA)).collect(Collectors.toList());
+        henkiloPrototyypit = erillishakuRivi.stream().map(rivi -> convert(rivi)).collect(Collectors.toList());
         hetuToRivi = erillishakuRivi.stream().collect(Collectors.
                 toMap(rivi -> Optional.ofNullable(StringUtils.trimToNull(rivi.getHenkilotunnus())).orElse(rivi.getSyntymaAika()), rivi -> rivi));
 
@@ -52,12 +50,16 @@ public class ImportedErillisHakuExcel {
                     return;
                 }
                 hetuToRivi.put(Optional.ofNullable(StringUtils.trimToNull(rivi.getHenkilotunnus())).orElse(rivi.getSyntymaAika()), rivi);
-                henkiloPrototyypit.add(new HenkiloCreateDTO(rivi.getEtunimi(), rivi.getSukunimi(), rivi.getHenkilotunnus(), parseSyntymaAika(rivi), HenkiloTyyppi.OPPIJA));
+                henkiloPrototyypit.add(convert(rivi));
             });
         } catch (Exception e) {
             LOG.error("Excelin muodostus epaonnistui! {}", e);
             throw e;
         }
+    }
+
+    private HenkiloCreateDTO convert(final ErillishakuRivi rivi) {
+        return new HenkiloCreateDTO(rivi.getEtunimi(), rivi.getSukunimi(), rivi.getHenkilotunnus(), parseSyntymaAika(rivi), rivi.getPersonOid(), HenkiloTyyppi.OPPIJA);
     }
 
     private static Date parseSyntymaAika(ErillishakuRivi rivi) {

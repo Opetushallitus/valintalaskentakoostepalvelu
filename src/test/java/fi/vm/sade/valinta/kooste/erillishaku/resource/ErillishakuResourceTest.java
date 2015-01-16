@@ -33,6 +33,7 @@ public class ErillishakuResourceTest {
     String hakukohdeOid = "1.2.246.562.5.72607738902";
     String tarjoajaOid = "1.2.246.562.10.591352080610";
     String valintatapajonoOid = "14090336922663576781797489829886";
+    String henkiloOid = "hakija1";
     final String root = "http://localhost:" + SharedTomcat.port + "/valintalaskentakoostepalvelu/resources";
 
     @Before
@@ -75,14 +76,12 @@ public class ErillishakuResourceTest {
             .post(Entity.entity(ExcelTestData.exampleExcelData(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
         odotaProsessiaPalautaDokumenttiId(prosessiId);
-
-
     }
 
     private void verifyCreatedExcelDocument(final InputStream storedDocument) throws IOException {
         final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
         assertEquals(1, tulos.henkiloPrototyypit.size());
-        final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO("Tuomas", "Hakkarainen", MockData.hetu, ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(), HenkiloTyyppi.OPPIJA);
+        final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO("Tuomas", "Hakkarainen", MockData.hetu, ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(), henkiloOid, HenkiloTyyppi.OPPIJA);
         assertEquals(expectedHenkilo, tulos.henkiloPrototyypit.get(0));
     }
 
@@ -90,6 +89,11 @@ public class ErillishakuResourceTest {
         final Prosessi dokumenttiProsessi = createClient(root + "/dokumenttiprosessi/" + prosessiId.getId())
             .accept(MediaType.APPLICATION_JSON).get(Prosessi.class);
         if (!dokumenttiProsessi.valmis()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             return odotaProsessiaPalautaDokumenttiId(prosessiId);
         }
         return dokumenttiProsessi.dokumenttiId;
