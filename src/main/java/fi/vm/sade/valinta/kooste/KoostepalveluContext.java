@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste;
 import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.authentication.cas.CasFriendlyCache;
 import fi.vm.sade.authentication.cas.CasFriendlyCxfInterceptor;
+import fi.vm.sade.security.OidProvider;
 import fi.vm.sade.security.OrganisationHierarchyAuthorizer;
 import fi.vm.sade.security.ThreadLocalAuthorizer;
 import fi.vm.sade.valinta.kooste.converter.HakemusToHakemusDTOConverter;
@@ -48,6 +49,10 @@ public class KoostepalveluContext {
 	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 	public CasFriendlyCxfInterceptor<?> getCasFriendlyCxfInterceptor(CasFriendlyCache casCache) {
 		return new CasFriendlyCxfInterceptor<>();
+	}
+	@Bean
+	public OidProvider getOidProvider() {
+		return new OidProvider();
 	}
 	@Bean
 	public OrganisationHierarchyAuthorizer getOrganisationHierarchyAuthorizer() {
