@@ -29,6 +29,7 @@
     xmlns:mockito="http://www.mockito.org/spring/mockito"
     xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd"
     profile="it">
+    <mockito:mock id="authorizer" class="fi.vm.sade.authentication.business.service.Authorizer" />
     <mockito:mock id="applicationResource" class="fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource" />
     <mockito:mock id="hakuV1Resource" class="fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource" />
     <mockito:mock id="hakukohdeV1Resource" class="fi.vm.sade.valinta.kooste.external.resource.haku.HakukohdeV1Resource" />
