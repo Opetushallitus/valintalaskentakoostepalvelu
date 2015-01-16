@@ -10,6 +10,11 @@ public class Oid {
 	private final String oid;
 	private final String tyyppi;
 
+	public Oid() {
+		oid = null;
+		tyyppi = null;
+	}
+
 	public Oid(String oid, String tyyppi) {
 		this.oid = oid;
 		this.tyyppi = tyyppi;

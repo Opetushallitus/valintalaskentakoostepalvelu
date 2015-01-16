@@ -32,9 +32,7 @@ public class SijoitteleAsyncResourceImpl extends HttpResource implements Sijoitt
 	public void sijoittele(String hakuOid, Consumer<String> callback, Consumer<Throwable> failureCallback) {
 		String url = "/sijoittele/" + hakuOid+ "/";
 		try {
-
-			WebClient
-					.fromClient(webClient)
+			getWebClient()
 					.path(url)
 					.accept(MediaType.WILDCARD_TYPE)
 					.async()

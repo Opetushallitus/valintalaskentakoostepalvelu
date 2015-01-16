@@ -42,7 +42,7 @@ public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaA
 	public Response tuoErillishaunTilat(String hakuOid, String hakukohdeOid, String valintatapajononNimi, Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
 		String url = "/tila/erillishaku/"+hakuOid+"/hakukohde/"+hakukohdeOid+"/";
 		LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}&valintatapajononNimi={}", address, url, hakukohdeOid, valintatapajononNimi);
-		return WebClient.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.query("valintatapajononNimi", Optional.ofNullable(valintatapajononNimi).orElse(StringUtils.EMPTY))
 				.post(Entity.entity(erillishaunHakijat, MediaType.APPLICATION_JSON_TYPE));

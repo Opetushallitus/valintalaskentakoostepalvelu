@@ -48,6 +48,13 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
 public class ErillishakuResource {
 	private static final Logger LOG = LoggerFactory.getLogger(ErillishakuResource.class);
 	private static final String ROLE_APP_HAKEMUS_CRUD = "ROLE_APP_HAKEMUS_CRUD";
+
+	public static final String POIKKEUS_TYHJA_DATAJOUKKO = "Syötteestä ei saatu poimittua yhtään hakijaa sijoitteluun tuotavaksi!";
+	public static final String POIKKEUS_VIALLINEN_DATAJOUKKO = "Syötteestä oli virheitä!";
+	public static final String POIKKEUS_HENKILOPALVELUN_VIRHE = "Henkilöpalvelukutsu epäonnistui!";
+	public static final String POIKKEUS_HAKEMUSPALVELUN_VIRHE = "Hakemuspalvelukutsu epäonnistui!";
+	public static final String POIKKEUS_SIJOITTELUPALVELUN_VIRHE = "Sijoittelupalvelukutsu epäonnistui!";
+
 	@Autowired
 	private Authorizer authorizer;
 
@@ -125,13 +132,15 @@ public class ErillishakuResource {
 			@QueryParam("valintatapajononNimi") String valintatapajononNimi,
 			@ApiParam("hakemuksenTila=[HYLATTY|VARALLA|PERUUNTUNUT|HYVAKSYTTY|VARASIJALTA_HYVAKSYTTY|HARKINNANVARAISESTI_HYVAKSYTTY|PERUNUT|PERUUTETTU]<br>" +
 					"vastaanottoTila=[PERUNUT|KESKEN|EI_VASTAANOTTANUT_MAARA_AIKANA|VASTAANOTTANUT|VASTAANOTTANUT_SITOVASTI|PERUUTETTU]<br>" +
-					"ilmoittautumisTila=[EI_TEHTY|LASNA_KOKO_LUKUVUOSI|POISSA_KOKO_LUKUVUOSI|EI_ILMOITTAUTUNUT|LASNA_SYKSY|POISSA_SYKSY|LASNA|POISSA]") ErillishakuJson json) throws IOException {
+					"ilmoittautumisTila=[EI_TEHTY|LASNA_KOKO_LUKUVUOSI|POISSA_KOKO_LUKUVUOSI|EI_ILMOITTAUTUNUT|LASNA_SYKSY|POISSA_SYKSY|LASNA|POISSA]")
+			// Body
+			ErillishakuJson json) throws IOException {
 		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_APP_HAKEMUS_CRUD);
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 		tuontiService.tuo(prosessi, new ErillishakuDTO(tyyppi,hakuOid, hakukohdeOid,
 						tarjoajaOid, valintatapajonoOid, valintatapajononNimi),
-				json.rivit);
+				json.getRivit());
 		//
 		return prosessi.toProsessiId();
 	}

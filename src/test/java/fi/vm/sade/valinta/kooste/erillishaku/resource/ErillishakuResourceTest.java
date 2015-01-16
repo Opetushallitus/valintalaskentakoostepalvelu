@@ -10,6 +10,7 @@ import java.util.Arrays;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
+import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -97,26 +98,7 @@ public class ErillishakuResourceTest {
     }
 
     private WebClient createClient(String url) {
-        return new HttpResource(url, 1000).webClient;
+        return new HttpResource(url).getWebClient();
     }
 
-
-    // Simple data transfer object (deserialization of DocumenttiProsessi doesn't work)
-    static class Prosessi {
-        public Osatyo kokonaistyo = new Osatyo();
-        public String dokumenttiId;
-
-        public boolean valmis() {
-            return kokonaistyo.valmis();
-        }
-
-        static class Osatyo {
-            public int tehty = 0;
-            public int kokonaismaara = 0;
-
-            public boolean valmis() {
-                return tehty == kokonaismaara;
-            }
-        }
-    }
 }

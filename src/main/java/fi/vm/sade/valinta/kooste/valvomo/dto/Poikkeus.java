@@ -1,9 +1,12 @@
 package fi.vm.sade.valinta.kooste.valvomo.dto;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * 
@@ -36,6 +39,30 @@ public class Poikkeus {
 	private final String viesti;
 	private final String palvelukutsu;
 
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Poikkeus) {
+			Poikkeus p = (Poikkeus)obj;
+			return
+					Optional.ofNullable(this.palvelukutsu).orElse(StringUtils.EMPTY).equals(p.getPalvelukutsu())
+							//
+							&& Optional.ofNullable(this.viesti).orElse(StringUtils.EMPTY).equals(p.getViesti())
+							//
+							&& Optional.ofNullable(this.palvelu).orElse(StringUtils.EMPTY).equals(p.getPalvelu()) &&
+							//
+							Optional.ofNullable(this.oidit).orElse(Collections.emptyList()).equals(p.getOidit());
+		} else {
+			return false;
+		}
+	}
+
+	public Poikkeus() {
+		oidit= null;
+		palvelu = null;
+		viesti = null;
+		palvelukutsu = null;
+	}
+
 	public Poikkeus(String palvelu, String palvelukutsu, Oid... oidit) {
 		this.oidit = new CopyOnWriteArrayList<Oid>(oidit);
 		this.palvelu = palvelu;
@@ -57,6 +84,10 @@ public class Poikkeus {
 		this.palvelu = palvelu;
 		this.viesti = viesti;
 		this.palvelukutsu = palvelukutsu;
+	}
+
+	public static Poikkeus koostepalvelupoikkeus(String syy) {
+		return new Poikkeus(KOOSTEPALVELU, StringUtils.EMPTY,syy);
 	}
 
 	public Collection<Oid> getOidit() {

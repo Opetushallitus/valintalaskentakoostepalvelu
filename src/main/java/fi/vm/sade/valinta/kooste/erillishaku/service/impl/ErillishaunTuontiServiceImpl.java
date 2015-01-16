@@ -9,7 +9,9 @@ import java.util.stream.Collectors;
 
 import fi.vm.sade.authentication.model.Henkilo;
 
+import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,13 +62,7 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
         LOG.info("Aloitetaan tuonti");
         Observable.just(erillishaku).subscribeOn(Schedulers.newThread()).subscribe(haku -> {
             final Collection<ErillishaunHakijaDTO> hakijat = tuoHakijatJaLuoHakemukset(data, haku);
-            LOG.info("Viedaan hakijoita {} jonoon {}", hakijat.size(), haku.getValintatapajononNimi());
-            if (hakijat.isEmpty()) {
-                throw new RuntimeException("Taulukkolaskentatiedostosta ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
-            }
-            tuoErillishaunTilat(haku, hakijat);
-            prosessi.vaiheValmistui();
-            prosessi.valmistui("ok");
+            teeTuontiPuretulleDatalle(prosessi, erillishaku, hakijat);
         }, poikkeus -> {
             if (poikkeus == null) {
                 LOG.error("Suoritus keskeytyi tuntemattomaan NPE poikkeukseen!");
@@ -78,6 +74,19 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
             LOG.info("Tuonti onnistui");
         });
     }
+
+    private void teeTuontiPuretulleDatalle(KirjeProsessi prosessi, ErillishakuDTO erillishaku, final Collection<ErillishaunHakijaDTO> hakijat) {
+        LOG.info("Viedaan hakijoita {} jonoon {}", hakijat.size(), erillishaku.getValintatapajononNimi());
+        if (hakijat.isEmpty()) {
+            LOG.error("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
+            prosessi.keskeyta(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
+            throw new RuntimeException("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
+        }
+        tuoErillishaunTilat(erillishaku, hakijat);
+        prosessi.vaiheValmistui();
+        prosessi.valmistui("ok");
+    }
+
     @Override
     public void tuo(KirjeProsessi prosessi, ErillishakuDTO erillishaku, List<ErillishakuRivi> erillishakuRivit) {
         LOG.info("Aloitetaan tuonti");
@@ -90,18 +99,12 @@ public class ErillishaunTuontiServiceImpl implements ErillishaunTuontiService {
                 LOG.error("JSON:lla tuonti epaonnistui! {} {}", e.getMessage(), Arrays.asList(e.getStackTrace()));
                 throw new RuntimeException(e);
             }
-            LOG.info("Viedaan hakijoita {} jonoon {}", hakijat.size(), haku.getValintatapajononNimi());
-            if (hakijat.isEmpty()) {
-                throw new RuntimeException("Taulukkolaskentatiedostosta ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
-            }
-            tuoErillishaunTilat(haku, hakijat);
-            prosessi.vaiheValmistui();
-            prosessi.valmistui("ok");
+            teeTuontiPuretulleDatalle(prosessi,erillishaku,hakijat);
         }, poikkeus -> {
             if (poikkeus == null) {
                 LOG.error("Suoritus keskeytyi tuntemattomaan NPE poikkeukseen!");
             } else {
-                LOG.error("Erillishaun tuonti keskeytyi virheeseen", poikkeus);
+                LOG.error("Erillishaun tuonti keskeytyi virheeseen! {} {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
             }
             prosessi.keskeyta();
         }, () -> {

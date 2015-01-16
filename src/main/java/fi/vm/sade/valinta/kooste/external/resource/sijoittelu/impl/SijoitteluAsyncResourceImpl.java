@@ -38,7 +38,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 	public Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
 		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakemukset";
 		LOG.info("Asynkroninen kutsu: {}{}?ilmanHyvaksyntaa=true", address, url);
-		return WebClient.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.query("ilmanHyvaksyntaa", true)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
@@ -47,7 +47,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 
 	public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
 		String url = "/tila/hakukohde/"+hakukohdeOid+"/"+valintatapajonoOid;
-		return WebClient.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.accept(MediaType.WILDCARD)
 				.async().get(new GenericType<List<Valintatulos>>() { });
@@ -55,7 +55,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 
 	public Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid) {
 		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakukohde/"+hakukohdeOid;
-		return WebClient.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.accept(MediaType.WILDCARD)
 				.async().get(new GenericType<HakukohdeDTO>() { });
@@ -65,7 +65,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 	public Future<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
 		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakemukset";
 		LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}", address, url, hakukohdeOid);
-		return WebClient.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.query("hakukohdeOid", hakukohdeOid)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
@@ -76,7 +76,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 	public Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid) {
 		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakemukset";
 		LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}", address, url, hakukohdeOid);
-		return WebClient.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.query("hyvaksytyt", true)
 				.query("hakukohdeOid", hakukohdeOid)

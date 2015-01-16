@@ -45,8 +45,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 			Consumer<Throwable> failureCallback) {
 		try {
 			String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + uuid;
-			WebClient
-					.fromClient(webClient)
+			getWebClient()
 					.path(url)
 					.async()
 					.get(new Callback<LaskentaDto>(address, url, callback,
@@ -60,8 +59,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 	public void resetoiTilat(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback) {
 		try {
 			String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+uuid+"/resetoi";
-			WebClient
-					.fromClient(webClient)
+			getWebClient()
 					.path(url)
 					.async()
 					.put(Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE),
@@ -81,7 +79,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 			Consumer<Throwable> failureCallback) {
 		try {
 			String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+hakuOid+"/tyyppi/"+tyyppi;
-			WebClient wc = WebClient.fromClient(webClient).path(url);
+			WebClient wc = getWebClient().path(url);
 			if (erillishaku != null) {
 				wc.query("erillishaku", erillishaku);
 			}
@@ -102,8 +100,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 	public void merkkaaLaskennanTila(String uuid, LaskentaTila tila) {
 		String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+uuid+"/tila/"+tila;
 		try {
-			WebClient
-					.fromClient(webClient)
+			getWebClient()
 					.path(url)
 					.async()
 					.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE),
@@ -118,8 +115,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 			HakukohdeTila hakukohdetila) {
 		String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+uuid+"/tila/"+tila+"/hakukohde/"+hakukohdetila;
 		try {
-			WebClient
-					.fromClient(webClient)
+			getWebClient()
 					.path(url)
 					.async()
 					.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE),
@@ -135,8 +131,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 			HakukohdeTila tila) {
 		String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+uuid+"/hakukohde/"+hakukohdeOid+"/tila/"+tila;
 		try {
-			WebClient
-					.fromClient(webClient)
+			getWebClient()
 					.path(url)
 					.async()
 					.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE),
@@ -151,8 +146,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 			IlmoitusDto ilmoitus) {
 		String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+uuid+"/hakukohde/"+hakukohdeOid;
 		try {
-			WebClient
-					.fromClient(webClient)
+			getWebClient()
 					.path(url)
 					.async()
 					.post(Entity.entity(gson.toJson(ilmoitus),
