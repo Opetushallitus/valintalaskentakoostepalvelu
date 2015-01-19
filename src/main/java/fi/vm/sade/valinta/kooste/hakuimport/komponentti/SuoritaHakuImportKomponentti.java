@@ -46,7 +46,6 @@ public class SuoritaHakuImportKomponentti {
 		// Sets.newHashSet(Collections2.filter(
 		// Collections2.transform(a, new Function<OidRDTO, String>() {
 		// public String apply(OidRDTO input) {
-		// return input.getOid();
 		// }
 		// }), Predicates.notNull()));
 

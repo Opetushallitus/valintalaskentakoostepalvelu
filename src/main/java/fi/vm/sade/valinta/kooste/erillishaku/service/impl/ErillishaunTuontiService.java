@@ -7,9 +7,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 
+import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +36,11 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import rx.Observable;
+import rx.Scheduler;
 import rx.schedulers.Schedulers;
+
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
 
 /**
  * @author Jussi Jartamo
@@ -45,12 +53,17 @@ public class ErillishaunTuontiService {
     private final TilaAsyncResource tilaAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final HenkiloAsyncResource henkiloAsyncResource;
+    private final Scheduler scheduler;
 
-    @Autowired
-    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource) {
+    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource, Scheduler scheduler) {
         this.applicationAsyncResource = applicationAsyncResource;
         this.tilaAsyncResource = tilaAsyncResource;
         this.henkiloAsyncResource = henkiloAsyncResource;
+        this.scheduler = scheduler;
+    }
+    @Autowired
+    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource) {
+        this(tilaAsyncResource,applicationAsyncResource,henkiloAsyncResource,Schedulers.newThread());
     }
 
     public void tuoExcelistä(KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
@@ -62,12 +75,14 @@ public class ErillishaunTuontiService {
     }
 
     void tuoData(KirjeProsessi prosessi, ErillishakuDTO erillishaku, Function<ErillishakuDTO, ImportedErillisHakuExcel> importer) {
-        Observable.just(erillishaku).subscribeOn(Schedulers.newThread()).subscribe(haku -> {
+        Observable.just(erillishaku).subscribeOn(scheduler).subscribe(haku -> {
+            final ImportedErillisHakuExcel erillishakuExcel;
             try {
-                final ImportedErillisHakuExcel erillishakuExcel = importer.apply(haku);
+                erillishakuExcel = importer.apply(haku);
                 tuoHakijatJaLuoHakemukset(prosessi, erillishakuExcel, haku);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch(Exception e) {
+                LOG.error("Poikkeus {}", e.getMessage());
+                prosessi.keskeyta();
             }
         }, poikkeus -> {
             LOG.error("Erillishaun tuonti keskeytyi virheeseen", poikkeus);
@@ -86,15 +101,34 @@ public class ErillishaunTuontiService {
             prosessi.keskeyta(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
             throw new RuntimeException("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
         }
+        Collection<ErillishaunDataException.PoikkeusRivi> poikkeusRivis = Lists.newArrayList();
+        int indeksi = 0;
+        for(ErillishakuRivi rivi : rivit) {
+            ++indeksi;
+            String validointiVirhe = rivi.validoi();
+            if(validointiVirhe != null) {
+                poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, validointiVirhe));
+            }
+        }
+        if(!poikkeusRivis.isEmpty()) {
+            prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO,
+                    poikkeusRivis.stream().map(p -> new Tunniste("Rivi " + p.getIndeksi() + ": " + p.getSelite(),ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN)).collect(Collectors.toList())));
+            throw new ErillishaunDataException(poikkeusRivis);
+        }
 
 
         LOG.info("Haetaan/luodaan henkilöt");
-        final List<Henkilo> henkilot = henkiloAsyncResource.haeTaiLuoHenkilot(rivit.stream().map(rivi -> {
-            return rivi.toHenkilo();
-        }).collect(Collectors.toList())).get();
-
+        final List<Henkilo> henkilot;
+        try {
+            henkilot= henkiloAsyncResource.haeTaiLuoHenkilot(rivit.stream().map(rivi -> {
+                return rivi.toHenkilo();
+            }).collect(Collectors.toList())).get();
+        }catch(Exception e) {
+            prosessi.keskeyta(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_HENKILOPALVELUN_VIRHE));
+            throw e;
+        }
         LOG.info("Käsitellään hakemukset");
-        final List<Hakemus> hakemukset = kasitteleHakemukset(haku, henkilot);
+        final List<Hakemus> hakemukset = kasitteleHakemukset(haku, henkilot, prosessi);
 
         LOG.info("Viedaan hakijoita {} jonoon {}", rivit.size(), haku.getValintatapajononNimi());
         tuoErillishaunTilat(haku, rivit, hakemukset);
@@ -103,17 +137,18 @@ public class ErillishaunTuontiService {
         prosessi.valmistui("ok");
     }
 
-    private List<Hakemus> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot) throws InterruptedException, ExecutionException {
+    private List<Hakemus> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
         try {
             final List<HakemusPrototyyppi> hakemusPrototyypit = henkilot.stream()
-                .map(h -> {
-                    LOG.info("Hakija {}", new GsonBuilder().setPrettyPrinting().create().toJson(h));
-                    return new HakemusPrototyyppi(h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), null);
-                }).collect(Collectors.toList());
+                    .map(h -> {
+                        //LOG.info("Hakija {}", new GsonBuilder().setPrettyPrinting().create().toJson(h));
+                        return new HakemusPrototyyppi(h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), null);
+                    }).collect(Collectors.toList());
+
             return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
-        } catch (ExecutionException e) { // temporary catch to avoid missing service dependencies
-            LOG.warn("Fallback: käytetään hakemusten hakua oidien perusteella", e);
-            return applicationAsyncResource.getApplicationsByOid(haku.getHakuOid(), haku.getHakukohdeOid()).get();
+        } catch (Throwable e) { // temporary catch to avoid missing service dependencies
+            prosessi.keskeyta(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_HAKEMUSPALVELUN_VIRHE));
+            throw e;
         }
     }
 

@@ -4,7 +4,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.valinta.kooste.excel.Solu;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.spi.LoggerFactory;
 import org.joda.time.DateTime;
+import static org.apache.commons.lang.StringUtils.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -17,12 +21,15 @@ import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.SoluLukija;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
+import org.slf4j.Logger;
+
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
 public class ErillishakuDataRivi extends DataRivi {
+	private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ErillishakuDataRivi.class);
 	public static final DateTimeFormatter SYNTYMAAIKA = DateTimeFormat.forPattern("dd.MM.yyyy");
 	private final ErillishakuRiviKuuntelija kuuntelija;
 	public ErillishakuDataRivi(ErillishakuRiviKuuntelija kuuntelija, Collection<Collection<Arvo>> s) {
@@ -37,19 +44,27 @@ public class ErillishakuDataRivi extends DataRivi {
 		String etunimi = lukija.getArvoAt(1);
 		String henkilotunnus = lukija.getArvoAt(2);
 		String syntymaAika = lukija.getArvoAt(3);
-		try {
-			DateTime p = SYNTYMAAIKA.parseDateTime(syntymaAika);
-		} catch(Exception e){
-			// syntymäaikaa käytetään validoimaan rivi: esim otsikkorivit skipataan tällä kätevästi
-			return true;
-		}
 		String oid = lukija.getArvoAt(4);
-
+		
 		String hakemuksenTila = lukija.getArvoAt(5);
 		String vastaanottoTila = lukija.getArvoAt(6);
 		String ilmoittautumisTila = lukija.getArvoAt(7);
 		boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(lukija.getArvoAt(7));
-		kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(sukunimi,etunimi, henkilotunnus, syntymaAika, oid, hakemuksenTila, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot));
+		if(rivi.isTyhja() || rivi.getSolut().size() != 9 || "Syntymäaika".equals(syntymaAika)) {
+			// tunnistetaan otsikkorivit ja ei välitetä prosessointiin
+		} else {
+			int i = 0;
+			for(Solu s : rivi.getSolut()) {
+				if(StringUtils.isBlank(s.toTeksti().getTeksti())) {
+					++i;
+				}
+
+			}
+			if(i >= 8) {
+				return true;
+			}
+			kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(sukunimi, etunimi, henkilotunnus, syntymaAika, oid, hakemuksenTila, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot));
+		}
 		return true;
 	}
 	private static final Collection<String> HAKEMUKSENTILA_ARVOT =Arrays.asList(HakemuksenTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList());

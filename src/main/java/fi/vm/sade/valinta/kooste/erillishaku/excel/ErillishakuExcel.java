@@ -40,7 +40,6 @@ public class ErillishakuExcel {
 	public ErillishakuExcel(Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
 							String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit) {
 		this(tyyppi, hakuNimi, hakukohdeNimi, tarjoajaNimi, erillishakurivit, new ErillishakuRiviKuuntelija() {
-
 			@Override
 			public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
 
@@ -60,7 +59,6 @@ public class ErillishakuExcel {
 		esittelyt.add(Arrays
 				.asList(new TekstiArvo(tarjoajaNimi, true, false, 4)));
 		esittelyt.add(Arrays.asList(new TekstiArvo(StringUtils.EMPTY)));
-
 		esittelyt.add(Arrays.asList(
 			new TekstiArvo("Sukunimi"),
 			new TekstiArvo("Etunimi"),
@@ -71,7 +69,6 @@ public class ErillishakuExcel {
 			new TekstiArvo("Vastaanottotila"),
 			new TekstiArvo("Ilmoittautumistila"),
 			new TekstiArvo("Julkaistavissa")));
-
 		Collections.sort(erillishakurivit, new Comparator<ErillishakuRivi>() {
 			@Override
 			public int compare(ErillishakuRivi h1, ErillishakuRivi h2) {

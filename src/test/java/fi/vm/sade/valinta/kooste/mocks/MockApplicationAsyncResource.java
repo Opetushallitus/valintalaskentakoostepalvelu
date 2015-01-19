@@ -10,6 +10,7 @@ import jersey.repackaged.com.google.common.util.concurrent.Futures;
 
 import java.util.*;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MockApplicationAsyncResource implements ApplicationAsyncResource {
+    public static AtomicBoolean serviceIsAvailable = new AtomicBoolean(true);
+
     public static class Result {
         public final String hakuOid;
         public final String hakukohdeOid;
@@ -30,12 +33,24 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         }
     }
     public final List<Result> results = new ArrayList<>();
+
+    private static <T> Future<T> serviceAvailableCheck() {
+        if(!serviceIsAvailable.get()) {
+            return Futures.immediateFailedFuture(new RuntimeException("MockHakemuspalvelu on kytketty pois päältä!"));
+        }
+        return null;
+    }
+
     @Override
     public Future<List<Hakemus>> putApplicationPrototypes(final String hakuOid, final String hakukohdeOid, final String tarjoajaOid, final Collection<HakemusPrototyyppi> hakemusPrototyypit) {
-        results.add(new Result(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit));
-        return Futures.immediateFuture(hakemusPrototyypit.stream()
-                        .map(prototyyppi -> toHakemus(prototyyppi))
-                        .collect(Collectors.toList())
+        return Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(
+                () -> {
+                    results.add(new Result(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit));
+                    return Futures.immediateFuture(hakemusPrototyypit.stream()
+                                    .map(prototyyppi -> toHakemus(prototyyppi))
+                                    .collect(Collectors.toList())
+                    );
+                }
         );
     }
     private Hakemus toHakemus(HakemusPrototyyppi prototyyppi) {
@@ -57,17 +72,21 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
     @Override
     public Future<List<Hakemus>> getApplicationsByOid(final String hakuOid, final String hakukohdeOid) {
-        Hakemus hakemus = new Hakemus();
-        hakemus.setOid(MockData.hakemusOid);
-        hakemus.setPersonOid(MockData.hakijaOid);
-        Answers answers = new Answers();
-        answers.getHenkilotiedot().put("Henkilotunnus", MockData.hetu);
-        answers.getHenkilotiedot().put("Etunimet", MockData.etunimi);
-        answers.getHenkilotiedot().put("Kutsumanimi", MockData.etunimi);
-        answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
-        answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
-        hakemus.setAnswers(answers);
-        return Futures.immediateFuture(Arrays.asList(hakemus));
+        return Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(
+                () -> {
+                    Hakemus hakemus = new Hakemus();
+                    hakemus.setOid(MockData.hakemusOid);
+                    hakemus.setPersonOid(MockData.hakijaOid);
+                    Answers answers = new Answers();
+                    answers.getHenkilotiedot().put("Henkilotunnus", MockData.hetu);
+                    answers.getHenkilotiedot().put("Etunimet", MockData.etunimi);
+                    answers.getHenkilotiedot().put("Kutsumanimi", MockData.etunimi);
+                    answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
+                    answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
+                    hakemus.setAnswers(answers);
+                    return Futures.immediateFuture(Arrays.asList(hakemus));
+                }
+        );
     }
     @Override
     public Future<List<Hakemus>> getApplicationsByOids(final Collection<String> hakemusOids) {

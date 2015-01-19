@@ -30,6 +30,10 @@ public class ErillishakuProsessiDTO extends DokumenttiProsessi implements
 		inkrementoiTehtyjaToita();
 	}
 
+	public boolean isValmis() {
+		return getDokumenttiId() != null;
+	}
+
 	public void valmistui(String dokumentId) {
 		setDokumenttiId(dokumentId);
 	}
@@ -73,7 +77,7 @@ public class ErillishakuProsessiDTO extends DokumenttiProsessi implements
     }
 
     public void keskeyta() {
-		if (getDokumenttiId() == null) {
+		if (getDokumenttiId() == null && getPoikkeukset().isEmpty()) {
 			getPoikkeukset().add(
 					new Poikkeus(Poikkeus.KOOSTEPALVELU, StringUtils.EMPTY));
 		}

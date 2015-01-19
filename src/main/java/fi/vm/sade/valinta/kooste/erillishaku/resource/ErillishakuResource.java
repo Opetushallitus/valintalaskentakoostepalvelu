@@ -46,6 +46,7 @@ public class ErillishakuResource {
 	private static final String ROLE_APP_HAKEMUS_CRUD = "ROLE_APP_HAKEMUS_CRUD";
 
 	public static final String POIKKEUS_TYHJA_DATAJOUKKO = "Syötteestä ei saatu poimittua yhtään hakijaa sijoitteluun tuotavaksi!";
+	public static final String RIVIN_TUNNISTE_KAYTTOLIITTYMAAN = "Syöte"; // Datarivin tunniste käyttöliittymään
 	public static final String POIKKEUS_VIALLINEN_DATAJOUKKO = "Syötteestä oli virheitä!";
 	public static final String POIKKEUS_HENKILOPALVELUN_VIRHE = "Henkilöpalvelukutsu epäonnistui!";
 	public static final String POIKKEUS_HAKEMUSPALVELUN_VIRHE = "Hakemuspalvelukutsu epäonnistui!";

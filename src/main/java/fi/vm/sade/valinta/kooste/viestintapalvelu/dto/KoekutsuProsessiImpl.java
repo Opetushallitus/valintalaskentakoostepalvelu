@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -8,7 +7,6 @@ import java.util.Map;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import org.apache.commons.lang.StringUtils;
 
-import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 
 /**
@@ -24,7 +22,9 @@ public class KoekutsuProsessiImpl extends DokumenttiProsessi implements
 				Collections.emptyList());
 		setKokonaistyo(vaiheet);
 	}
-
+	public boolean isValmis() {
+		return getDokumenttiId() != null;
+	}
 	@Override
 	public void vaiheValmistui() {
 		inkrementoiTehtyjaToita();

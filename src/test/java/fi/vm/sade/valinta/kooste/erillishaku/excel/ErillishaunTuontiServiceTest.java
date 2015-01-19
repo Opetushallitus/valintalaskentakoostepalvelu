@@ -6,9 +6,13 @@ import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisH
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.Collections;
 
+import static org.hamcrest.CoreMatchers.*;
+import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -32,13 +36,14 @@ import fi.vm.sade.valinta.kooste.mocks.MockHenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockTilaAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import jersey.repackaged.com.google.common.util.concurrent.Futures;
+import rx.schedulers.Schedulers;
 
 @RunWith(Enclosed.class)
 public class ErillishaunTuontiServiceTest {
     public final static class HetullaJaSyntymaAjalla extends ErillisHakuTuontiTestCase {
         @Test
         public void tuontiSuoritetaan() throws IOException, InterruptedException {
-            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource);
+            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
             tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
             Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
 
@@ -87,7 +92,7 @@ public class ErillishaunTuontiServiceTest {
     public final static class SyntymaAjalla extends ErillisHakuTuontiTestCase {
         @Test
         public void tuodaan() {
-            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource);
+            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
             tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuSyntymaAjalla());
             Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
         }
@@ -97,7 +102,7 @@ public class ErillishaunTuontiServiceTest {
     public final static class HakijaOidilla extends ErillisHakuTuontiTestCase {
         @Test
         public void tuodaan() {
-            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource);
+            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
             tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHenkiloOidilla());
             Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
         }
@@ -108,7 +113,7 @@ public class ErillishaunTuontiServiceTest {
         public void henkilonLuontiEpaonnistuu() {
             final HenkiloAsyncResource failingHenkiloResource = Mockito.mock(HenkiloAsyncResource.class);
             Mockito.when(failingHenkiloResource.haeTaiLuoHenkilot(Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
-            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, failingHenkiloResource);
+            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, failingHenkiloResource, Schedulers.immediate());
             assertEquals(0, tilaAsyncResource.results.size());
             assertEquals(0, applicationAsyncResource.results.size());
             tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
@@ -119,7 +124,7 @@ public class ErillishaunTuontiServiceTest {
         public void tilojenTuontiEpaonnistuu() {
             final TilaAsyncResource failingResource = Mockito.mock(TilaAsyncResource.class);
             Mockito.when(failingResource.tuoErillishaunTilat(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(new RuntimeException("simulated HTTP fail"));
-            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(failingResource, applicationAsyncResource, henkiloAsyncResource);
+            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(failingResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
             assertEquals(0, applicationAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
             tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
@@ -131,11 +136,12 @@ public class ErillishaunTuontiServiceTest {
             final ApplicationAsyncResource failingResource = Mockito.mock(ApplicationAsyncResource.class);
             Mockito.when(failingResource.putApplicationPrototypes(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
             Mockito.when(failingResource.getApplicationsByOid(Mockito.anyString(), Mockito.anyString())).thenReturn(applicationAsyncResource.getApplicationsByOid("haku1", "kohde1"));
-            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, failingResource, henkiloAsyncResource);
+            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, failingResource, henkiloAsyncResource, Schedulers.immediate());
             assertEquals(0, tilaAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
+            KirjeProsessi prosessi = new ErillishakuProsessiDTO(1);
             tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
-            Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
+            assertTrue(prosessi.isKeskeytetty());
         }
     }
 

@@ -21,7 +21,7 @@ import org.joda.time.DateTime;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.kooste.OPH;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -112,7 +112,7 @@ public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder 
 	}
 
 	protected Exception kasittelePoikkeus(String palvelu, Exchange exchange,
-			Exception exception, Oid... oids) {
+			Exception exception, Tunniste... oids) {
 		exchange.setException(exception);
 		dokumenttiprosessi(exchange).getPoikkeukset().add(
 				new Poikkeus(palvelu, StringUtils.EMPTY,

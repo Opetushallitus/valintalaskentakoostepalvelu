@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,14 +34,12 @@ public class ErillishakuExcelTest {
 					
 					@Override
 					public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
-						LOG.error("Onko laillinen {}", rivi.getEtunimi());
-						//Assert.assertTrue("Syntyma-aika ei tasmaa", syntymaAika.equals(rivi.getSyntymaAika()));
 						tarkistusTapahtui.incrementAndGet();
 					}
 				});
 		
 		eExcel.getExcel().tuoXlsx(new ClassPathResource("kustom_erillishaku.xlsx").getInputStream());
-		Assert.assertTrue(tarkistusTapahtui.get()==1);
+		assertTrue(tarkistusTapahtui.get()==1);
 	}
 
 	@Test
@@ -51,14 +49,11 @@ public class ErillishakuExcelTest {
 
 			@Override
 			public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
-				LOG.error("Onko laillinen {}", rivi.getEtunimi());
-				//Assert.assertTrue("Syntyma-aika ei tasmaa", syntymaAika.equals(rivi.getSyntymaAika()));
 				tarkistusTapahtui.incrementAndGet();
 			}
 		});
-
 		eExcel.getExcel().tuoXlsx(new ClassPathResource("kustom_erillishaku_otsikoilla.xlsx").getInputStream());
-		Assert.assertTrue(tarkistusTapahtui.get()==1);
+		assertEquals(1, tarkistusTapahtui.get());
 	}
 	@Test
 	public void testaaVienti() throws FileNotFoundException, IOException {
@@ -71,18 +66,15 @@ public class ErillishakuExcelTest {
 		rivit.add(new ErillishakuRivi());
 		final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
 		ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit
-				, new ErillishakuRiviKuuntelija() {
-					
-					@Override
-					public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
-						LOG.error("adfsga {}", rivi.getEtunimi());
-						Assert.assertTrue("Syntyma-aika ei tasmaa", "HYLATTY".equals(rivi.getHakemuksenTila()));
+				, rv -> {
+			LOG.error("{}",rv);
 						tarkistusTapahtui.incrementAndGet();
 					}
-				});
+				);
 		Excel excel = eExcel.getExcel();
 		excel.tuoXlsx(excel.vieXlsx());
-		Assert.assertTrue(tarkistusTapahtui.get()==2);
+
+		assertEquals(2, tarkistusTapahtui.get());
 		if (false) {
 			IOUtils.copy(excel.vieXlsx(), new FileOutputStream(
 					"erillishaku.xlsx"));
