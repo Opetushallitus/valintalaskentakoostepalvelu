@@ -73,7 +73,7 @@ public class ErillishakuResourceTest {
             .query("valintatapajonoOid", valintatapajonoOid)
             .query("valintatapajononNimi", "varsinainen jono")
             .accept(MediaType.APPLICATION_JSON_TYPE)
-            .post(Entity.entity(ExcelTestData.exampleExcelData(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
+            .post(Entity.entity(ExcelTestData.erillisHakuHetullaJaSyntymaAjalla(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
         odotaProsessiaPalautaDokumenttiId(prosessiId);
     }
