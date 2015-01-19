@@ -75,5 +75,6 @@ public class ErillishaunVientiServiceTest {
         ErillishakuRivi erillishakuRivi = excel.hetuToRivi.get("123456-7890");
         assertEquals("Rivi", erillishakuRivi.getEtunimi());
         assertEquals("Esimerkki", erillishakuRivi.getSukunimi());
+        assertEquals(false, erillishakuRivi.isJulkaistaankoTiedot());
     }
 }

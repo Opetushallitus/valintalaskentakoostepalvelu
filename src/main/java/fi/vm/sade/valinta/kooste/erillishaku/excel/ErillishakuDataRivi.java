@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -76,8 +75,9 @@ public class ErillishakuDataRivi extends DataRivi {
 	private static final Collection<String> ILMOITTAUTUMISTILA_ARVOT =
 			Arrays.asList(IlmoittautumisTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList()); 
 	private static final String LUPA_JULKAISUUN = "JULKAISTAVISSA";
+	private static final String EI_LUPAA_JULKAISUUN = "EI JULKAISTAVISSA";
 	private static final Collection<String> JULKAISU_LUPA_ARVOT =
-			Arrays.asList(LUPA_JULKAISUUN, StringUtils.EMPTY); 
+			Arrays.asList(LUPA_JULKAISUUN, EI_LUPAA_JULKAISUUN);
 	
 	public static MonivalintaArvo hakemuksenTila(String arvo) {
 		
@@ -93,7 +93,7 @@ public class ErillishakuDataRivi extends DataRivi {
 		}
 	}
 public static MonivalintaArvo julkaisuLupa(boolean arvo) {
-		return new MonivalintaArvo(arvo ? LUPA_JULKAISUUN: StringUtils.EMPTY, JULKAISU_LUPA_ARVOT);
+		return new MonivalintaArvo(arvo ? LUPA_JULKAISUUN: EI_LUPAA_JULKAISUUN, JULKAISU_LUPA_ARVOT);
 	}
 	public static MonivalintaArvo ilmoittautumisTila(String arvo) {
 		

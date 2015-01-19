@@ -101,7 +101,7 @@ public class ErillishakuExcel {
 
 	private Stream<ErillishakuRivi> arvoRivit(List<ErillishakuRivi> erillishakurivit) {
 		if (erillishakurivit.isEmpty()) {
-			return ImmutableList.of(new ErillishakuRivi("Esimerkki", "Rivi", "123456-7890", "01.01.1901", "", "HYVAKSYTTY", "KESKEN", "EI_TEHTY", true)).stream();
+			return ImmutableList.of(new ErillishakuRivi("Esimerkki", "Rivi", "123456-7890", "01.01.1901", "", "HYVAKSYTTY", "KESKEN", "EI_TEHTY", false)).stream();
 		} else {
 			return erillishakurivit
 					.stream();
