@@ -71,8 +71,9 @@ public class ErillishaunVientiServiceTest {
         verify(prosessi, timeout(10000).times(1)).valmistui(anyString());
 
         ImportedErillisHakuExcel excel = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, MockDokumenttiResource.getStoredDocument(prosessi.getDokumenttiId()));
-        assertEquals(1, excel.hetuToRivi.size());
-        ErillishakuRivi erillishakuRivi = excel.hetuToRivi.get("123456-7890");
+        assertEquals(1, excel.rivit.size());
+        ErillishakuRivi erillishakuRivi = excel.rivit.get(0);
+        assertEquals("123456-7890", erillishakuRivi.getHenkilotunnus());
         assertEquals("Rivi", erillishakuRivi.getEtunimi());
         assertEquals("Esimerkki", erillishakuRivi.getSukunimi());
         assertEquals(false, erillishakuRivi.isJulkaistaankoTiedot());

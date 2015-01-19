@@ -10,8 +10,12 @@ public class ExcelTestData {
         return getInputStream("kustom_erillishaku.xlsx");
     }
 
-    public static InputStream erillisHakuOidilla() {
+    public static InputStream erillisHakuHenkiloOidilla() {
         return getInputStream("erillishaku_oidilla.xlsx");
+    }
+
+    public static InputStream erillisHakuSyntymaAjalla() {
+        return getInputStream("erillishaku_syntymaajalla.xlsx");
     }
 
     private static InputStream getInputStream(final String filename) {

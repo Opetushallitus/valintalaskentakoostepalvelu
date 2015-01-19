@@ -1,0 +1,155 @@
+package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
+
+import java.io.InputStream;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import fi.vm.sade.authentication.model.Henkilo;
+import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.codepoetics.protonpack.StreamUtils;
+import com.google.gson.GsonBuilder;
+
+import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
+import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
+import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
+import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
+import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import rx.Observable;
+import rx.schedulers.Schedulers;
+
+/**
+ * @author Jussi Jartamo
+ */
+@Service
+public class ErillishaunTuontiService {
+
+    private static final Logger LOG = LoggerFactory
+            .getLogger(ErillishaunTuontiService.class);
+    private final TilaAsyncResource tilaAsyncResource;
+    private final ApplicationAsyncResource applicationAsyncResource;
+    private final HenkiloAsyncResource henkiloAsyncResource;
+
+    @Autowired
+    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource) {
+        this.applicationAsyncResource = applicationAsyncResource;
+        this.tilaAsyncResource = tilaAsyncResource;
+        this.henkiloAsyncResource = henkiloAsyncResource;
+    }
+
+    public void tuoExcelistä(KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
+        tuoData(prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(haku.getHakutyyppi(), data));
+    }
+
+    public void tuoJson(KirjeProsessi prosessi, ErillishakuDTO erillishaku, List<ErillishakuRivi> erillishakuRivit) {
+        tuoData(prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(erillishaku.getHakutyyppi(), erillishakuRivit));
+    }
+
+    void tuoData(KirjeProsessi prosessi, ErillishakuDTO erillishaku, Function<ErillishakuDTO, ImportedErillisHakuExcel> importer) {
+        Observable.just(erillishaku).subscribeOn(Schedulers.newThread()).subscribe(haku -> {
+            try {
+                final ImportedErillisHakuExcel erillishakuExcel = importer.apply(haku);
+                tuoHakijatJaLuoHakemukset(prosessi, erillishakuExcel, haku);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, poikkeus -> {
+            LOG.error("Erillishaun tuonti keskeytyi virheeseen", poikkeus);
+            prosessi.keskeyta();
+        }, () -> {
+            LOG.info("Tuonti onnistui");
+        });
+    }
+
+
+    private void tuoHakijatJaLuoHakemukset(final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final ErillishakuDTO haku) throws Exception {
+        LOG.info("Aloitetaan tuonti");
+        final List<ErillishakuRivi> rivit = erillishakuExcel.rivit;
+        if (rivit.isEmpty()) {
+            LOG.error("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
+            prosessi.keskeyta(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
+            throw new RuntimeException("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
+        }
+
+
+        LOG.info("Haetaan/luodaan henkilöt");
+        final List<Henkilo> henkilot = henkiloAsyncResource.haeTaiLuoHenkilot(rivit.stream().map(rivi -> {
+            return rivi.toHenkilo();
+        }).collect(Collectors.toList())).get();
+
+        LOG.info("Käsitellään hakemukset");
+        final List<Hakemus> hakemukset = kasitteleHakemukset(haku, henkilot);
+
+        LOG.info("Viedaan hakijoita {} jonoon {}", rivit.size(), haku.getValintatapajononNimi());
+        tuoErillishaunTilat(haku, rivit, hakemukset);
+
+        prosessi.vaiheValmistui();
+        prosessi.valmistui("ok");
+    }
+
+    private List<Hakemus> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot) throws InterruptedException, ExecutionException {
+        try {
+            final List<HakemusPrototyyppi> hakemusPrototyypit = henkilot.stream()
+                .map(h -> {
+                    LOG.info("Hakija {}", new GsonBuilder().setPrettyPrinting().create().toJson(h));
+                    return new HakemusPrototyyppi(h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), null);
+                }).collect(Collectors.toList());
+            return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
+        } catch (ExecutionException e) { // temporary catch to avoid missing service dependencies
+            LOG.warn("Fallback: käytetään hakemusten hakua oidien perusteella", e);
+            return applicationAsyncResource.getApplicationsByOid(haku.getHakuOid(), haku.getHakukohdeOid()).get();
+        }
+    }
+
+    private void tuoErillishaunTilat(final ErillishakuDTO haku, final List<ErillishakuRivi> rivit, final List<Hakemus> hakemukset) {
+        assert(hakemukset.size() == rivit.size()); // 1-1 relationship assumed
+        final List<ErillishaunHakijaDTO> hakijat = StreamUtils.zip(hakemukset.stream(), rivit.stream(), (hakemus, rivi) -> {
+            HakemusWrapper wrapper = new HakemusWrapper(hakemus);
+            return new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), hakemus.getOid(), haku.getHakukohdeOid(), rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(), haku.getTarjoajaOid(), valintatuloksenTila(rivi), ilmoittautumisTila(rivi), hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi());
+        }).collect(Collectors.toList());
+
+        try {
+            tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijat);
+        } catch (Exception e) {
+            LOG.error("Erillishaun tilojen tuonti epaonnistui", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private HakemuksenTila hakemuksenTila(ErillishakuRivi rivi) {
+        return Optional.ofNullable(nullIfFails(() -> HakemuksenTila.valueOf(rivi.getHakemuksenTila()))).orElse(HakemuksenTila.HYLATTY);
+    }
+
+    private IlmoittautumisTila ilmoittautumisTila(ErillishakuRivi rivi) {
+        return nullIfFails(() -> IlmoittautumisTila.valueOf(rivi.getIlmoittautumisTila()));
+    }
+
+    private ValintatuloksenTila valintatuloksenTila(ErillishakuRivi rivi) {
+        return nullIfFails(() -> ValintatuloksenTila.valueOf(rivi.getVastaanottoTila()));
+    }
+
+    private <T> T nullIfFails(Supplier<T> lambda) {
+        try {
+            return lambda.get();
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+}
+

@@ -4,35 +4,31 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
-import fi.vm.sade.authentication.business.service.Authorizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.access.method.P;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
-import com.wordnik.swagger.annotations.ApiParam;
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
-import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import org.apache.poi.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 
+import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.service.ErillishaunTuontiService;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
 import fi.vm.sade.valinta.kooste.erillishaku.service.ErillishaunVientiService;
+import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 
@@ -109,9 +105,7 @@ public class ErillishakuResource {
 		IOUtils.closeQuietly(file);
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-		tuontiService.tuo(prosessi, new ErillishakuDTO(tyyppi,hakuOid, hakukohdeOid,
-				tarjoajaOid, valintatapajonoOid, valintatapajononNimi),
-				new ByteArrayInputStream(b.toByteArray()));
+		tuontiService.tuoExcelistä(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, valintatapajononNimi), new ByteArrayInputStream(b.toByteArray()));
 		//
 		return prosessi.toProsessiId();
 	}
@@ -138,9 +132,7 @@ public class ErillishakuResource {
 		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_APP_HAKEMUS_CRUD);
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-		tuontiService.tuo(prosessi, new ErillishakuDTO(tyyppi,hakuOid, hakukohdeOid,
-						tarjoajaOid, valintatapajonoOid, valintatapajononNimi),
-				json.getRivit());
+		tuontiService.tuoJson(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, valintatapajononNimi), json.getRivit());
 		//
 		return prosessi.toProsessiId();
 	}

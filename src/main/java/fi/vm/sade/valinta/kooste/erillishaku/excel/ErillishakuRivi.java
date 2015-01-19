@@ -1,7 +1,15 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
+import java.util.Date;
+
 import com.wordnik.swagger.annotations.ApiModel;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.format.DateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import fi.vm.sade.authentication.model.HenkiloTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 
 /**
  * 
@@ -10,6 +18,8 @@ import org.apache.commons.lang.StringUtils;
  */
 @ApiModel
 public class ErillishakuRivi {
+	private static final Logger LOG = LoggerFactory.getLogger(ErillishakuRivi.class);
+	private final static org.joda.time.format.DateTimeFormatter dtf = DateTimeFormat.forPattern("dd.MM.yyyy");
 
 	private final String etunimi;
 	private final String sukunimi;
@@ -94,5 +104,17 @@ public class ErillishakuRivi {
 		.append(", ")
 		.append(vastaanottoTila).toString();
 	}
-	
+
+	public HenkiloCreateDTO toHenkilo() {
+		return new HenkiloCreateDTO(getEtunimi(), getSukunimi(), getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA);
+	}
+
+	public Date parseSyntymaAika() {
+		try {
+			return dtf.parseDateTime(getSyntymaAika()).toDate();
+		} catch (Exception e) {
+			LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", getSyntymaAika());
+			return null;
+		}
+	}
 }

@@ -14,16 +14,16 @@ public class HenkiloCreateDTO {
     public final  String sukunimi;
     public final String hetu;
     public final Date syntymaaika;
-    public final String oid;
+    public final String oidHenkilo;
     public final HenkiloTyyppi henkiloTyyppi;
 
-    public HenkiloCreateDTO(String etunimet, String sukunimi, String hetu, Date syntymaaika, String oid, HenkiloTyyppi henkiloTyyppi) {
+    public HenkiloCreateDTO(String etunimet, String sukunimi, String hetu, Date syntymaaika, String oidHenkilo, HenkiloTyyppi henkiloTyyppi) {
         this.etunimet = etunimet;
         this.kutsumanimi = etunimet;
         this.sukunimi = sukunimi;
         this.hetu = hetu;
         this.syntymaaika = syntymaaika;
-        this.oid = oid;
+        this.oidHenkilo = oidHenkilo;
         this.henkiloTyyppi = henkiloTyyppi;
     }
 

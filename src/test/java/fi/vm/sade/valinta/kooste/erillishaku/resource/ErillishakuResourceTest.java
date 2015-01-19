@@ -80,9 +80,9 @@ public class ErillishakuResourceTest {
 
     private void verifyCreatedExcelDocument(final InputStream storedDocument) throws IOException {
         final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
-        assertEquals(1, tulos.henkiloPrototyypit.size());
+        assertEquals(1, tulos.rivit.size());
         final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO("Tuomas", "Hakkarainen", MockData.hetu, ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(), henkiloOid, HenkiloTyyppi.OPPIJA);
-        assertEquals(expectedHenkilo, tulos.henkiloPrototyypit.get(0));
+        assertEquals(expectedHenkilo, tulos.rivit.get(0).toHenkilo());
     }
 
     private String odotaProsessiaPalautaDokumenttiId(final ProsessiId prosessiId) {
