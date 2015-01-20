@@ -124,6 +124,7 @@ public class ErillishaunTuontiService {
                 return rivi.toHenkilo();
             }).collect(Collectors.toList())).get();
         }catch(Exception e) {
+            LOG.error("{}: {} {}",POIKKEUS_HENKILOPALVELUN_VIRHE,e.getMessage(),Arrays.toString(e.getStackTrace()));
             prosessi.keskeyta(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_HENKILOPALVELUN_VIRHE));
             throw e;
         }
@@ -147,6 +148,7 @@ public class ErillishaunTuontiService {
 
             return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
         } catch (Throwable e) { // temporary catch to avoid missing service dependencies
+            LOG.error("{}: {} {}",POIKKEUS_HAKEMUSPALVELUN_VIRHE,e.getMessage(),Arrays.toString(e.getStackTrace()));
             prosessi.keskeyta(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_HAKEMUSPALVELUN_VIRHE));
             throw e;
         }
