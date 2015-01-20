@@ -85,6 +85,7 @@ public class ErillishaunTuontiServiceTest {
             assertEquals(MockData.valintatapajonoOid, hakija.valintatapajonoOid);
             assertEquals("hakemus1", hakija.hakemusOid);
             assertEquals("hakija1", hakija.hakijaOid);
+            assertEquals(true, hakija.julkaistavissa);
             System.out.println(new Gson().toJson(tilaAsyncResource.results));
         }
     }
