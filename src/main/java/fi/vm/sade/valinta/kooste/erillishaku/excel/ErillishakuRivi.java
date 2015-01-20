@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 import java.util.Date;
 
 import com.wordnik.swagger.annotations.ApiModel;
+import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.*;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
@@ -77,6 +78,9 @@ public class ErillishakuRivi {
 		}
 		if(StringUtils.isBlank(etunimi)&&StringUtils.isBlank(sukunimi)) {
 			return "Etunimi ja sukunimi on pakollisia. " + this.toString();
+		}
+		if(!StringUtils.isBlank(henkilotunnus) && !tarkistaHenkilotunnus(henkilotunnus)) {
+			return "Henkilötunnus ("+henkilotunnus+") oli virheellinen. " + this.toString();
 		}
 		return null;
 	}
