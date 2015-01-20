@@ -68,7 +68,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
                 // Odotetaan tyhjää datajoukko palautetta!
                 .poikkeukset, equalTo(asList(Poikkeus.koostepalvelupoikkeus(POIKKEUS_VIALLINEN_DATAJOUKKO, asList(
                 new Tunniste(
-                        "Rivi 2: Henkilötunnus, syntymäaika ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. Etunimi, Sukunimi, HYVAKSYTTY, ***HENKILOTUNNUS***, , EI_ILMOITTAUTUNUT, VASTAANOTTANUT",
+                        "Rivi 2: Henkilötunnus, syntymäaika ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. Etunimi, Sukunimi, HYVAKSYTTY, ***HENKILOTUNNUS***, , EI_ILMOITTAUTUNUT, VASTAANOTTANUT, true",
                         ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN
                 )
         )))));
