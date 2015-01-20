@@ -130,7 +130,9 @@ public class ErillishakuRivi {
 		.append(", ")
 		.append(ilmoittautumisTila)
 		.append(", ")
-		.append(vastaanottoTila).toString();
+		.append(vastaanottoTila)
+		.append(", ")
+		.append(julkaistaankoTiedot).toString();
 	}
 
 	public HenkiloCreateDTO toHenkilo() {

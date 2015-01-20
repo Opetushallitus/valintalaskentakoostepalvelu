@@ -63,18 +63,19 @@ public class ErillishakuExcelTest {
 		rivit.add(rivi);
 		ErillishakuRivi rivi2= new ErillishakuRivi("sukunimi","etunimi2","hetu",syntymaAika, "", "HYLATTY", "", "", true);
 		rivit.add(rivi2);
-		rivit.add(new ErillishakuRivi());
+		ErillishakuRivi rivi3 = new ErillishakuRivi();
+		rivit.add(rivi3);
 		final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
 		ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit
-				, rv -> {
-			LOG.error("{}",rv);
-						tarkistusTapahtui.incrementAndGet();
-					}
+				, rv -> tarkistusTapahtui.incrementAndGet()
 				);
 		Excel excel = eExcel.getExcel();
 		excel.tuoXlsx(excel.vieXlsx());
 
-		assertEquals(2, tarkistusTapahtui.get());
+		assertEquals(
+				2 // tavalliset rivit
+				+1 // tyhjärivi julkaisulupasyötteellä
+				, tarkistusTapahtui.get());
 		if (false) {
 			IOUtils.copy(excel.vieXlsx(), new FileOutputStream(
 					"erillishaku.xlsx"));
