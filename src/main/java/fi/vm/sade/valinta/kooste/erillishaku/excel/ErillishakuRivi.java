@@ -75,6 +75,9 @@ public class ErillishakuRivi {
 				return "Syntymäaika '" + syntymaAika + "' on väärin muotoiltu. Syntymäaika on syötettävä muodossa pp.mm.vvvv. " + this.toString();
 			}
 		}
+		if(StringUtils.isBlank(etunimi)&&StringUtils.isBlank(sukunimi)) {
+			return "Etunimi ja sukunimi on pakollisia. " + this.toString();
+		}
 		return null;
 	}
 
