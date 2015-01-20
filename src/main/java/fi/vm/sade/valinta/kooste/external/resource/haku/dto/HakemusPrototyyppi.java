@@ -1,5 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.haku.dto;
 
+import java.util.Date;
+
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
+
 /**
  * @author Jussi Jartamo
  */
@@ -17,5 +21,15 @@ public class HakemusPrototyyppi {
         this.sukunimi = sukunimi;
         this.henkilotunnus = henkilotunnus;
         this.syntymaAika = syntymaAika;
+    }
+
+    public HakemusPrototyyppi(final String hakijaOid, final String etunimi, final String sukunimi, final String henkilotunnus, final Date syntymaAika) {
+        this(hakijaOid, etunimi, sukunimi, henkilotunnus, parseDate(syntymaAika));
+
+    }
+
+    private static String parseDate(final Date syntymaAika) {
+        if (syntymaAika == null) return null;
+        return ErillishakuDataRivi.SYNTYMAAIKA.print(syntymaAika.getTime());
     }
 }

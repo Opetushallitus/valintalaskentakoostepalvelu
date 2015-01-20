@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.authentication.model.Henkilo;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 
 import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
@@ -143,7 +144,7 @@ public class ErillishaunTuontiService {
             final List<HakemusPrototyyppi> hakemusPrototyypit = henkilot.stream()
                     .map(h -> {
                         //LOG.info("Hakija {}", new GsonBuilder().setPrettyPrinting().create().toJson(h));
-                        return new HakemusPrototyyppi(h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), null);
+                        return new HakemusPrototyyppi(h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), h.getSyntymaaika());
                     }).collect(Collectors.toList());
 
             return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();

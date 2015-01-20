@@ -70,7 +70,7 @@ public class ErillishaunTuontiServiceTest {
             assertEquals(MockData.hetu, hakemusProto.henkilotunnus);
             assertEquals("Tuomas", hakemusProto.etunimi);
             assertEquals("Hakkarainen", hakemusProto.sukunimi);
-            assertEquals(null, hakemusProto.syntymaAika);
+            assertEquals("01.01.1901", hakemusProto.syntymaAika);
 
             // tarkistetaan tilatulokset
             assertEquals(1, tilaAsyncResource.results.size());
@@ -96,6 +96,19 @@ public class ErillishaunTuontiServiceTest {
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
             tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuSyntymaAjalla());
             Mockito.verify(prosessi).valmistui("ok");
+
+            assertEquals(1, applicationAsyncResource.results.size());
+            applicationAsyncResource.results.get(0);
+            final MockApplicationAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
+            assertEquals("haku1", appResult.hakuOid);
+            assertEquals("kohde1", appResult.hakukohdeOid);
+            assertEquals("tarjoaja1", appResult.tarjoajaOid);
+            assertEquals(1, appResult.hakemusPrototyypit.size());
+            final HakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
+            assertEquals("hakija1", hakemusProto.hakijaOid);
+            assertEquals("Tuomas", hakemusProto.etunimi);
+            assertEquals("Hakkarainen", hakemusProto.sukunimi);
+            assertEquals("01.01.1901", hakemusProto.syntymaAika);
         }
     }
 

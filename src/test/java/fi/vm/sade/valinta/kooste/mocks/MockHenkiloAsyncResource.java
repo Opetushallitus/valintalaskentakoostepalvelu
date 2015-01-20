@@ -48,6 +48,7 @@ public class MockHenkiloAsyncResource implements HenkiloAsyncResource {
         henkilo.setEtunimet(proto.etunimet);
         henkilo.setHetu(proto.hetu);
         henkilo.setOidHenkilo(MockData.hakijaOid);
+        henkilo.setSyntymaaika(proto.syntymaaika);
         return henkilo;
     }
     private static <T> Future<T> serviceAvailableCheck() {
