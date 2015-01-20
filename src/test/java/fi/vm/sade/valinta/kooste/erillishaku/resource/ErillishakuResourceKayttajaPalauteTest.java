@@ -6,7 +6,6 @@ import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
 import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.*;
 import static org.hamcrest.CoreMatchers.*;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.*;
 
@@ -18,7 +17,6 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +52,18 @@ public class ErillishakuResourceKayttajaPalauteTest {
     }
 
     @Test
+    public void tuontiVirheTyhjaTietoJoukkoPalaute() throws IOException {
+        final ProsessiId prosessiId =
+                jsonClient()
+                        .post(Entity.json(new ErillishakuJson(emptyList()))
+                                //
+                                , ProsessiId.class);
+
+        assertTrue(odotaVirhettaTaiEpaonnistuTimeouttiin(prosessiId)
+                // Odotetaan tyhjää datajoukko palautetta!
+                .poikkeukset.contains(Poikkeus.koostepalvelupoikkeus(POIKKEUS_TYHJA_DATAJOUKKO)));
+    }
+    @Test
     public void tuontiVirheitaTuoduissaTiedoissaPalaute() {
         final ProsessiId prosessiId =
                 jsonClient()
@@ -64,7 +74,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
                                 //
                                 , ProsessiId.class);
 
-        assertThat(odotaPaluuarvoTaiEpaonnistuTimeouttiin(prosessiId)
+        assertThat(odotaVirhettaTaiEpaonnistuTimeouttiin(prosessiId)
                 // Odotetaan tyhjää datajoukko palautetta!
                 .poikkeukset, equalTo(asList(Poikkeus.koostepalvelupoikkeus(POIKKEUS_VIALLINEN_DATAJOUKKO, asList(
                 new Tunniste(
@@ -75,20 +85,6 @@ public class ErillishakuResourceKayttajaPalauteTest {
     }
 
     @Test
-    public void tuontiVirheTyhjaTietoJoukkoPalaute() throws IOException {
-        final ProsessiId prosessiId =
-                jsonClient()
-                        .post(Entity.json(new ErillishakuJson(emptyList()))
-                                //
-                                , ProsessiId.class);
-
-        assertTrue(odotaPaluuarvoTaiEpaonnistuTimeouttiin(prosessiId)
-                // Odotetaan tyhjää datajoukko palautetta!
-                .poikkeukset.contains(Poikkeus.koostepalvelupoikkeus(POIKKEUS_TYHJA_DATAJOUKKO)));
-    }
-
-    @Ignore
-    @Test
     public void tuontiVirheHakemuspalveluKutsussaPalaute() {
         try {
             MockApplicationAsyncResource.serviceIsAvailable.set(false);
@@ -98,14 +94,13 @@ public class ErillishakuResourceKayttajaPalauteTest {
                                     //
                                     , ProsessiId.class);
 
-            assertThat(odotaPaluuarvoTaiEpaonnistuTimeouttiin(prosessiId)
+            assertThat(odotaVirhettaTaiEpaonnistuTimeouttiin(prosessiId)
                     // Odotetaan hakemuspalvelun epäonnistumisesta johtuvaa palautetta!
                     .poikkeukset, equalTo(asList(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_HAKEMUSPALVELUN_VIRHE))));
         } finally {
             MockApplicationAsyncResource.serviceIsAvailable.set(true);
         }
     }
-    @Ignore
     @Test
     public void tuontiVirheHenkilopalveluKutsussaPalaute() {
         try {
@@ -116,15 +111,14 @@ public class ErillishakuResourceKayttajaPalauteTest {
                                     //
                                     , ProsessiId.class);
 
-            assertThat(odotaPaluuarvoTaiEpaonnistuTimeouttiin(prosessiId)
+            assertThat(odotaVirhettaTaiEpaonnistuTimeouttiin(prosessiId)
                     // Odotetaan hakemuspalvelun epäonnistumisesta johtuvaa palautetta!
                     .poikkeukset, equalTo(asList(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_HENKILOPALVELUN_VIRHE))));
         } finally {
             MockHenkiloAsyncResource.serviceIsAvailable.set(true);
         }
     }
-
-    private Prosessi odotaPaluuarvoTaiEpaonnistuTimeouttiin(final ProsessiId prosessiId) {
+    private Prosessi odotaVirhettaTaiEpaonnistuTimeouttiin(final ProsessiId prosessiId) {
         return odotaPaluuarvoTaiEpaonnistuTimeouttiin(prosessiId, DEFAULT_POLL_TIMEOUT_MS);
     }
     private Prosessi odotaPaluuarvoTaiEpaonnistuTimeouttiin(final ProsessiId prosessiId, long timeout) {
@@ -134,10 +128,9 @@ public class ErillishakuResourceKayttajaPalauteTest {
         long t0 = System.currentTimeMillis();
         final Prosessi dokumenttiProsessi = prosessiResource.getWebClient().path(prosessiId.getId())
                 .accept(MediaType.APPLICATION_JSON).get(Prosessi.class);
-        if (dokumenttiProsessi.dokumenttiId != null) {
+        if (dokumenttiProsessi.poikkeukset.isEmpty()) {
             try {
-                LOG.error("Polling service!");
-                Thread.sleep(100L);
+                Thread.sleep(0L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
