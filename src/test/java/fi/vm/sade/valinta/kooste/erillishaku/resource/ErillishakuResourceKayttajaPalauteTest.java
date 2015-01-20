@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,19 +54,6 @@ public class ErillishakuResourceKayttajaPalauteTest {
     }
 
     @Test
-    public void tuontiVirheTyhjaTietoJoukkoPalaute() throws IOException {
-        final ProsessiId prosessiId =
-                jsonClient()
-                              .post(Entity.json(new ErillishakuJson(emptyList()))
-                                      //
-                                      , ProsessiId.class);
-
-        assertTrue(odotaPaluuarvoTaiEpaonnistuTimeouttiin(prosessiId)
-                // Odotetaan tyhjää datajoukko palautetta!
-                .poikkeukset.contains(Poikkeus.koostepalvelupoikkeus(POIKKEUS_TYHJA_DATAJOUKKO)));
-  }
-
-    @Test
     public void tuontiVirheitaTuoduissaTiedoissaPalaute() {
         final ProsessiId prosessiId =
                 jsonClient()
@@ -79,12 +67,27 @@ public class ErillishakuResourceKayttajaPalauteTest {
         assertThat(odotaPaluuarvoTaiEpaonnistuTimeouttiin(prosessiId)
                 // Odotetaan tyhjää datajoukko palautetta!
                 .poikkeukset, equalTo(asList(Poikkeus.koostepalvelupoikkeus(POIKKEUS_VIALLINEN_DATAJOUKKO, asList(
-                        new Tunniste(
-                                "Rivi 2: Henkilötunnus, syntymäaika ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. Etunimi, Sukunimi, HYVAKSYTTY, ***HENKILOTUNNUS***, , EI_ILMOITTAUTUNUT, VASTAANOTTANUT",
-                                ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN
-                        )
-                )))));
+                new Tunniste(
+                        "Rivi 2: Henkilötunnus, syntymäaika ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. Etunimi, Sukunimi, HYVAKSYTTY, ***HENKILOTUNNUS***, , EI_ILMOITTAUTUNUT, VASTAANOTTANUT",
+                        ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN
+                )
+        )))));
     }
+
+    @Test
+    public void tuontiVirheTyhjaTietoJoukkoPalaute() throws IOException {
+        final ProsessiId prosessiId =
+                jsonClient()
+                        .post(Entity.json(new ErillishakuJson(emptyList()))
+                                //
+                                , ProsessiId.class);
+
+        assertTrue(odotaPaluuarvoTaiEpaonnistuTimeouttiin(prosessiId)
+                // Odotetaan tyhjää datajoukko palautetta!
+                .poikkeukset.contains(Poikkeus.koostepalvelupoikkeus(POIKKEUS_TYHJA_DATAJOUKKO)));
+    }
+
+    @Ignore
     @Test
     public void tuontiVirheHakemuspalveluKutsussaPalaute() {
         try {
@@ -102,6 +105,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
             MockApplicationAsyncResource.serviceIsAvailable.set(true);
         }
     }
+    @Ignore
     @Test
     public void tuontiVirheHenkilopalveluKutsussaPalaute() {
         try {
