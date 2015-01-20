@@ -8,7 +8,6 @@ import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
-import fi.vm.sade.valinta.kooste.erillishaku.service.ErillishaunVientiService;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
@@ -38,15 +37,15 @@ import static rx.Observable.zip;
  * @author Jussi Jartamo
  */
 @Service
-public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
-    private static final Logger LOG = LoggerFactory.getLogger(ErillishaunVientiServiceImpl.class);
+public class ErillishaunVientiService {
+    private static final Logger LOG = LoggerFactory.getLogger(ErillishaunVientiService.class);
     private final SijoitteluAsyncResource sijoitteluAsyncResource;
     private final TarjontaAsyncResource hakuV1AsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final DokumenttiResource dokumenttiResource;
 
     @Autowired
-    public ErillishaunVientiServiceImpl(ApplicationAsyncResource applicationAsyncResource, SijoitteluAsyncResource sijoitteluAsyncResource, TarjontaAsyncResource hakuV1AsyncResource, DokumenttiResource dokumenttiResource) {
+    public ErillishaunVientiService(ApplicationAsyncResource applicationAsyncResource, SijoitteluAsyncResource sijoitteluAsyncResource, TarjontaAsyncResource hakuV1AsyncResource, DokumenttiResource dokumenttiResource) {
         this.sijoitteluAsyncResource = sijoitteluAsyncResource;
         this.hakuV1AsyncResource = hakuV1AsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
@@ -57,7 +56,6 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
         return new Teksti(nimi).getTeksti();
     }
 
-    @Override
     public void vie(KirjeProsessi prosessi, ErillishakuDTO erillishaku) {
         Future<List<Hakemus>> hakemusFuture = applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
         Future<HakukohdeDTO> hakukohdeFuture = sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());

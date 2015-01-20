@@ -11,7 +11,7 @@ import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
 import fi.vm.sade.valinta.kooste.mocks.MockSijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
-import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunVientiServiceImpl;
+import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunVientiService;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import org.junit.Test;
@@ -33,8 +33,8 @@ public class ErillishaunVientiServiceTest {
     public void suoritaVientiTest() {
         final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1", "varsinainen jono");
         final KirjeProsessi prosessi = mock(KirjeProsessi.class);
-        final ErillishaunVientiServiceImpl erillishaunVientiService =
-                new ErillishaunVientiServiceImpl(mockApplicationAsyncResource, mockSijoitteluAsyncResource, mockTarjontaAsyncService, mockDokumenttiResource);
+        final ErillishaunVientiService erillishaunVientiService =
+                new ErillishaunVientiService(mockApplicationAsyncResource, mockSijoitteluAsyncResource, mockTarjontaAsyncService, mockDokumenttiResource);
 
         erillishaunVientiService.vie(prosessi, erillishaku);
         verify(prosessi, timeout(10000).times(1)).valmistui(anyString());
@@ -45,8 +45,8 @@ public class ErillishaunVientiServiceTest {
         final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1", "varsinainen jono");
         final KirjeProsessi prosessi = mock(KirjeProsessi.class);
         final ApplicationAsyncResource failingResource = mock(ApplicationAsyncResource.class);
-        final ErillishaunVientiServiceImpl erillishaunVientiService =
-                new ErillishaunVientiServiceImpl(failingResource, mockSijoitteluAsyncResource, mockTarjontaAsyncService, mockDokumenttiResource);
+        final ErillishaunVientiService erillishaunVientiService =
+                new ErillishaunVientiService(failingResource, mockSijoitteluAsyncResource, mockTarjontaAsyncService, mockDokumenttiResource);
 
         erillishaunVientiService.vie(prosessi, erillishaku);
         verify(prosessi, timeout(10000).times(1)).keskeyta();
@@ -64,8 +64,8 @@ public class ErillishaunVientiServiceTest {
         when(sijoitteluMock.getValintatuloksetHakukohteelle(anyString(), anyString())).thenReturn(Futures.immediateFuture(ImmutableList.of()));
         when(sijoitteluMock.getLatestHakukohdeBySijoittelu(anyString(), anyString())).thenReturn(mockSijoitteluAsyncResource.getLatestHakukohdeBySijoittelu("1", "2"));
 
-        final ErillishaunVientiServiceImpl erillishaunVientiService =
-                new ErillishaunVientiServiceImpl(applicationMock, sijoitteluMock, mockTarjontaAsyncService, mockDokumenttiResource);
+        final ErillishaunVientiService erillishaunVientiService =
+                new ErillishaunVientiService(applicationMock, sijoitteluMock, mockTarjontaAsyncService, mockDokumenttiResource);
         erillishaunVientiService.vie(prosessi, erillishaku);
 
         verify(prosessi, timeout(10000).times(1)).valmistui(anyString());
