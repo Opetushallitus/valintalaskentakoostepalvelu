@@ -94,7 +94,7 @@ public class ErillishaunTuontiServiceTest {
         public void tuodaan() {
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
             tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuSyntymaAjalla());
-            Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
+            Mockito.verify(prosessi).valmistui("ok");
         }
     }
 
@@ -104,7 +104,7 @@ public class ErillishaunTuontiServiceTest {
         public void tuodaan() {
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
             tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHenkiloOidilla());
-            Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).valmistui("ok");
+            Mockito.verify(prosessi).valmistui("ok");
         }
     }
 
@@ -117,7 +117,7 @@ public class ErillishaunTuontiServiceTest {
             assertEquals(0, tilaAsyncResource.results.size());
             assertEquals(0, applicationAsyncResource.results.size());
             tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
-            Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).keskeyta();
+            Mockito.verify(prosessi).keskeyta();
         }
 
         @Test
@@ -128,7 +128,7 @@ public class ErillishaunTuontiServiceTest {
             assertEquals(0, applicationAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
             tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
-            Mockito.verify(prosessi, Mockito.timeout(10000).times(1)).keskeyta();
+            Mockito.verify(prosessi).keskeyta();
         }
 
         @Test
