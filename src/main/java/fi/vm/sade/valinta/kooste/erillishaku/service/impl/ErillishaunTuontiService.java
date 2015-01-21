@@ -164,7 +164,11 @@ public class ErillishaunTuontiService {
         assert(hakemukset.size() == rivit.size()); // 1-1 relationship assumed
         final List<ErillishaunHakijaDTO> hakijat = StreamUtils.zip(hakemukset.stream(), rivit.stream(), (hakemus, rivi) -> {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus);
-            return new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), hakemus.getOid(), haku.getHakukohdeOid(), rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(), haku.getTarjoajaOid(), valintatuloksenTila(rivi), ilmoittautumisTila(rivi), hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi());
+            return new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), hakemus.getOid(), haku.getHakukohdeOid(),
+                    rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(),
+                    haku.getTarjoajaOid(),
+                    convertValintatuloksenTilaHakuTyypinMukaan(valintatuloksenTila(rivi), haku.getHakutyyppi()), ilmoittautumisTila(rivi),
+                    hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi());
         }).collect(Collectors.toList());
 
         try {
