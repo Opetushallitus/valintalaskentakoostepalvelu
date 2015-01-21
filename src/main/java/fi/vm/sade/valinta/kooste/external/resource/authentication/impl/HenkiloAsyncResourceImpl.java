@@ -31,7 +31,7 @@ public class HenkiloAsyncResourceImpl extends AsyncResourceWithCas implements He
 
     public Future<List<Henkilo>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit) {
         String url = "/resources/s2s/koostepalvelu";
-        return WebClient.fromClient(webClient)
+        return getWebClient()
             .path(url)
             .accept(MediaType.APPLICATION_JSON_TYPE)
             .async()

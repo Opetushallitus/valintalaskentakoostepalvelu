@@ -8,7 +8,6 @@ import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
-import fi.vm.sade.valinta.kooste.erillishaku.service.ErillishaunVientiService;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
@@ -38,15 +37,15 @@ import static rx.Observable.zip;
  * @author Jussi Jartamo
  */
 @Service
-public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
-    private static final Logger LOG = LoggerFactory.getLogger(ErillishaunVientiServiceImpl.class);
+public class ErillishaunVientiService {
+    private static final Logger LOG = LoggerFactory.getLogger(ErillishaunVientiService.class);
     private final SijoitteluAsyncResource sijoitteluAsyncResource;
     private final TarjontaAsyncResource hakuV1AsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final DokumenttiResource dokumenttiResource;
 
     @Autowired
-    public ErillishaunVientiServiceImpl(ApplicationAsyncResource applicationAsyncResource, SijoitteluAsyncResource sijoitteluAsyncResource, TarjontaAsyncResource hakuV1AsyncResource, DokumenttiResource dokumenttiResource) {
+    public ErillishaunVientiService(ApplicationAsyncResource applicationAsyncResource, SijoitteluAsyncResource sijoitteluAsyncResource, TarjontaAsyncResource hakuV1AsyncResource, DokumenttiResource dokumenttiResource) {
         this.sijoitteluAsyncResource = sijoitteluAsyncResource;
         this.hakuV1AsyncResource = hakuV1AsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
@@ -57,7 +56,6 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
         return new Teksti(nimi).getTeksti();
     }
 
-    @Override
     public void vie(KirjeProsessi prosessi, ErillishakuDTO erillishaku) {
         Future<List<Hakemus>> hakemusFuture = applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
         Future<HakukohdeDTO> hakukohdeFuture = sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
@@ -103,13 +101,13 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
                 .getValintatapajonot().stream()
                 .flatMap(v -> v.getHakemukset().stream())
                 .map(h -> {
-                    HakemusWrapper h0 = new HakemusWrapper(oidToHakemus.get(h.getHakemusOid()));
+                    HakemusWrapper wrapper = new HakemusWrapper(oidToHakemus.get(h.getHakemusOid()));
                     String hakemuksenTila = "";
                     if (h.getTila() != null) {
                         hakemuksenTila = h.getTila().toString();
                     }
                     Valintatulos tulos = valintatulokset.get(h.getHakemusOid());
-                    ErillishakuRivi e = new ErillishakuRivi(h.getSukunimi(), h.getEtunimi(), h0.getHenkilotunnus(), h0.getSyntymaaika(), hakemuksenTila, tulos.getTila().toString(), tulos.getIlmoittautumisTila().toString(), tulos.getJulkaistavissa());
+                    ErillishakuRivi e = new ErillishakuRivi(h.getSukunimi(), h.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSahkopostiOsoite(), wrapper.getSyntymaaika(), wrapper.getPersonOid(), hakemuksenTila, tulos.getTila().toString(), tulos.getIlmoittautumisTila().toString(), tulos.getJulkaistavissa());
                     return e;
                 }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohdeNimi()), teksti(tarjontaHakukohde.getTarjoajaNimi()), erillishakurivit);
@@ -120,7 +118,7 @@ public class ErillishaunVientiServiceImpl implements ErillishaunVientiService {
         List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus -> {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus);
             ErillishakuRivi r = new ErillishakuRivi(wrapper.getSukunimi(),
-                    wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSyntymaaika(), "HYLATTY", "", "", false);
+                    wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSahkopostiOsoite(), wrapper.getSyntymaaika(), wrapper.getPersonOid(), "HYLATTY", "", "", false);
             return r;
         }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohdeNimi()), teksti(tarjontaHakukohde.getTarjoajaNimi()), rivit);

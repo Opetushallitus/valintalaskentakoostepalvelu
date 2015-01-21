@@ -42,8 +42,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 			Consumer<Throwable> failureCallback) {
 		try {
 			String url = "/valintalaskenta/laske";
-			return new PeruutettavaImpl(WebClient
-					.fromClient(webClient)
+			return new PeruutettavaImpl(getWebClient()
 					.path(url)
 					.async()
 					.post(Entity.entity(laskeDTO,
@@ -63,8 +62,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 			Consumer<String> callback, Consumer<Throwable> failureCallback) {
 		try {
 			String url = "/valintalaskenta/laskekaikki";
-			return new PeruutettavaImpl(WebClient
-					.fromClient(webClient)
+			return new PeruutettavaImpl(getWebClient()
 					.path(url)
 					.async()
 					.post(Entity.entity(laskeDTO,
@@ -84,8 +82,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 		try {
 			String url = "/valintalaskenta/laskejasijoittele";
 			return new PeruutettavaImpl(
-					WebClient
-							.fromClient(webClient)
+					getWebClient()
 							.path(url)
 							.async()
 							.post(Entity.entity(lista,
@@ -105,8 +102,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 			Consumer<String> callback, Consumer<Throwable> failureCallback) {
 		try {
 			String url = "/valintalaskenta/valintakokeet";
-			return new PeruutettavaImpl(WebClient
-					.fromClient(webClient)
+			return new PeruutettavaImpl(getWebClient()
 					.path(url)
 					.async()
 					.post(Entity.entity(laskeDTO,

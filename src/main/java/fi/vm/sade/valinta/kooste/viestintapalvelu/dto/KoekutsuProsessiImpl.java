@@ -1,13 +1,12 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import org.apache.commons.lang.StringUtils;
 
-import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 
 /**
@@ -23,7 +22,9 @@ public class KoekutsuProsessiImpl extends DokumenttiProsessi implements
 				Collections.emptyList());
 		setKokonaistyo(vaiheet);
 	}
-
+	public boolean isValmis() {
+		return getDokumenttiId() != null;
+	}
 	@Override
 	public void vaiheValmistui() {
 		inkrementoiTehtyjaToita();
@@ -36,12 +37,25 @@ public class KoekutsuProsessiImpl extends DokumenttiProsessi implements
 	public boolean isKeskeytetty() {
 		return !getPoikkeukset().isEmpty();
 	}
-	
+
+
+	public void keskeyta(Poikkeus syy) {
+		if (getDokumenttiId() == null) {
+			getPoikkeukset().add(
+					syy);
+		}
+	}
+
+	public void keskeyta(Collection<Poikkeus> syyt) {
+		if (getDokumenttiId() == null) {
+			getPoikkeukset().addAll(syyt);
+		}
+	}
 	@Override
 	public void keskeyta(String syy) {
 		if (getDokumenttiId() == null) {
 			getPoikkeukset().add(
-					new Poikkeus(Poikkeus.KOOSTEPALVELU, syy));
+					Poikkeus.koostepalvelupoikkeus(syy));
 		}
 	}
 

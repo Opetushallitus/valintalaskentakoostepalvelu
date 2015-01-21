@@ -42,7 +42,7 @@ public class OrganisaatioAsyncResourceImpl extends AsyncResourceWithCas implemen
 	public Future<Response> haeOrganisaatio(String organisaatioOid) {
 		String url = "/organisaatio/"+organisaatioOid+"/";
 
-		return WebClient.fromClient(webClient).path(url)
+		return getWebClient().path(url)
 				.accept(MediaType.WILDCARD)
 				.async()
 				.get();
@@ -52,7 +52,7 @@ public class OrganisaatioAsyncResourceImpl extends AsyncResourceWithCas implemen
 	public Future<String> haeOrganisaationOidKetju(String organisaatioOid) {
 		String url = "/organisaatio/"+organisaatioOid+"/parentoids";
 
-		return WebClient.fromClient(webClient).path(url)
+		return getWebClient().path(url)
 				.accept(MediaType.WILDCARD)
 				.async()
 				.get(String.class);

@@ -51,7 +51,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 	@Override
 	public Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit) {
 		String url = "/applications/syntheticApplication";
-		return WebClient.fromClient(webClient).path(url)
+		return getWebClient().path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
 				.put(Entity.entity(new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit), MediaType.APPLICATION_JSON),new GenericType<List<Hakemus>>() { });
@@ -62,7 +62,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 		String url = new StringBuilder()
 				.append("/applications/additionalData/").append(hakuOid)
 				.append("/").append(hakukohdeOid).toString();
-		return WebClient.fromClient(webClient).path(url)
+		return getWebClient().path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
 				.get(new GenericType<List<ApplicationAdditionalDataDTO>>() { });
@@ -73,7 +73,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 			String hakukohdeOid) {
 		String url = new StringBuilder().append("/applications/listfull")
 				.toString();
-		return WebClient.fromClient(webClient).path(url)
+		return getWebClient().path(url)
 				.query("appState", "ACTIVE", "INCOMPLETE")
 				.query("rows", 100000)
 				.query("asId", hakuOid)
@@ -87,7 +87,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 	public Future<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids) {
 		String url = new StringBuilder().append("/applications/list")
 				.toString();
-		return WebClient.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.query("rows", 100000)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
@@ -99,8 +99,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 		String url = "/applications/listfull";
 		try {
 			return new PeruutettavaImpl(
-					WebClient
-							.fromClient(webClient)
+					getWebClient()
 							.path(url)
 							.query("appState", "ACTIVE", "INCOMPLETE")
 							.query("rows", 100000)
@@ -123,8 +122,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 		String url = "/applications/additionalData/" + hakuOid + "/" + hakukohdeOid;
 		try {
 			return new PeruutettavaImpl(
-					WebClient
-							.fromClient(webClient)
+					getWebClient()
 							.path(url)
 							.async()
 							.get(new Callback<List<ApplicationAdditionalDataDTO>>(

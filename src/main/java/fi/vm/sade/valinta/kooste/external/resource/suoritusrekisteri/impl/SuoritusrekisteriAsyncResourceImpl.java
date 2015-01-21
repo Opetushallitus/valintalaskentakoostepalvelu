@@ -38,8 +38,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 	public Peruutettava getOppijatByHaku(String hakuOid, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
 		String url = "/suoritusrekisteri/rest/v1/oppijat";
 		try {
-			return new PeruutettavaImpl(WebClient
-					.fromClient(webClient)
+			return new PeruutettavaImpl(getWebClient()
 					.path(url)
 					.query("haku", hakuOid)
 					.async()
@@ -54,8 +53,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 	public Peruutettava getOppijatByHakukohde(String hakukohdeOid, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
 		String url = "/suoritusrekisteri/rest/v1/oppijat";
 		try {
-			return new PeruutettavaImpl(WebClient
-					.fromClient(webClient)
+			return new PeruutettavaImpl(getWebClient()
 					.path(url)
 					.query("hakukohde", hakukohdeOid)
 					.async()
@@ -70,8 +68,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 	public Peruutettava getOppijatByOrganisaatio(String organisaatioOid, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
 		String url = "/suoritusrekisteri/rest/v1/oppijat";
 		try {
-			return new PeruutettavaImpl(WebClient
-					.fromClient(webClient)
+			return new PeruutettavaImpl(getWebClient()
 					.path(url)
 					.query("organisaatio", organisaatioOid)
 					.async()

@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.camel.Endpoint;
@@ -28,9 +27,6 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
@@ -63,10 +59,8 @@ import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaHakijaRiviKomponentti
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.LinjakoodiKomponentti;
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.OppilaitosKomponentti;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKaikkiPaikanVastaanottaneet;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HakutoiveenValintatapajonoComparator;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 
 /**
@@ -197,7 +191,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 											.add(new Poikkeus(
 													Poikkeus.TARJONTA,
 													"Haun haku oid:lla.",
-													new Oid(hakuOid,
+													new Tunniste(hakuOid,
 															Poikkeus.HAKUOID)));
 									throw e;
 								}
@@ -210,7 +204,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 													Poikkeus.KOODISTO,
 													"Lukuvuoden haku haulle koodistosta URI:lla "
 															+ haku.getKoulutuksenAlkamiskausiUri(),
-													new Oid(hakuOid,
+													new Tunniste(hakuOid,
 															Poikkeus.HAKUOID)));
 									throw e;
 								}
@@ -256,7 +250,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 													"Haun tyypille "
 															+ hakutyyppiUri
 															+ " ei saatu arvoa koodistosta",
-													new Oid(
+													new Tunniste(
 															hakutyyppiUri,
 															Poikkeus.KOODISTOURI)));
 									throw e;
@@ -359,7 +353,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 													Poikkeus.SIJOITTELU,
 													"Vastaanottaneiden haku sijoittelusta epäonnistui haulle, koska: "
 															+ e.getMessage(),
-													new Oid(haku.getOid(),
+													new Tunniste(haku.getOid(),
 															Poikkeus.HAKUOID)));
 									throw new RuntimeException(e);
 								}

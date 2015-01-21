@@ -45,14 +45,14 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
 	@Override
 	public Future<LetterBatchStatusDto> haeStatus(String letterBatchId) {
 		String url = "/api/v1/letter/async/letter/status/"+letterBatchId;
-		return WebClient.fromClient(webClient).path(url)
+		return getWebClient().path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE).async()
 				.get(LetterBatchStatusDto.class);
 	}
 
 	public Future<LetterResponse> viePdfJaOdotaReferenssi(LetterBatch letterBatch) {
 		String url = "/api/v1/letter/async/letter";
-		return WebClient.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()

@@ -10,9 +10,9 @@ import java.util.Arrays;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
+import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
@@ -28,12 +28,12 @@ import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 
-@Ignore
 public class ErillishakuResourceTest {
     String hakuOid = "1.2.246.562.5.2013080813081926341928";
     String hakukohdeOid = "1.2.246.562.5.72607738902";
     String tarjoajaOid = "1.2.246.562.10.591352080610";
     String valintatapajonoOid = "14090336922663576781797489829886";
+    String henkiloOid = "hakija1";
     final String root = "http://localhost:" + SharedTomcat.port + "/valintalaskentakoostepalvelu/resources";
 
     @Before
@@ -47,7 +47,7 @@ public class ErillishakuResourceTest {
         final ProsessiId prosessiId = createClient(url)
             .query("hakutyyppi", "KORKEAKOULU")
             .query("hakuOid", hakuOid)
-            .query("hakikohdeOid", hakukohdeOid)
+            .query("hakukohdeOid", hakukohdeOid)
             .query("tarjoajaOid", tarjoajaOid)
             .query("valintatapajonoOid", valintatapajonoOid)
             .query("valintatapajononNimi", "varsinainen jono")
@@ -68,55 +68,39 @@ public class ErillishakuResourceTest {
         final ProsessiId prosessiId = createClient(url)
             .query("hakutyyppi", "KORKEAKOULU")
             .query("hakuOid", hakuOid)
-            .query("hakikohdeOid", hakukohdeOid)
+            .query("hakukohdeOid", hakukohdeOid)
             .query("tarjoajaOid", tarjoajaOid)
             .query("valintatapajonoOid", valintatapajonoOid)
             .query("valintatapajononNimi", "varsinainen jono")
             .accept(MediaType.APPLICATION_JSON_TYPE)
-            .post(Entity.entity(ExcelTestData.exampleExcelData(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
+            .post(Entity.entity(ExcelTestData.erillisHakuHetullaJaSyntymaAjalla(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
         odotaProsessiaPalautaDokumenttiId(prosessiId);
-
-
     }
 
     private void verifyCreatedExcelDocument(final InputStream storedDocument) throws IOException {
         final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
-        assertEquals(1, tulos.henkiloPrototyypit.size());
-        final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO("Tuomas", "Hakkarainen", MockData.hetu, ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(), HenkiloTyyppi.OPPIJA);
-        assertEquals(expectedHenkilo, tulos.henkiloPrototyypit.get(0));
+        assertEquals(1, tulos.rivit.size());
+        final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO("Tuomas", "Hakkarainen", MockData.hetu, ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(), henkiloOid, HenkiloTyyppi.OPPIJA);
+        assertEquals(expectedHenkilo, tulos.rivit.get(0).toHenkilo());
     }
 
     private String odotaProsessiaPalautaDokumenttiId(final ProsessiId prosessiId) {
         final Prosessi dokumenttiProsessi = createClient(root + "/dokumenttiprosessi/" + prosessiId.getId())
             .accept(MediaType.APPLICATION_JSON).get(Prosessi.class);
         if (!dokumenttiProsessi.valmis()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             return odotaProsessiaPalautaDokumenttiId(prosessiId);
         }
         return dokumenttiProsessi.dokumenttiId;
     }
 
     private WebClient createClient(String url) {
-        return new HttpResource(url, 1000).webClient;
+        return new HttpResource(url).getWebClient();
     }
 
-
-    // Simple data transfer object (deserialization of DocumenttiProsessi doesn't work)
-    static class Prosessi {
-        public Osatyo kokonaistyo = new Osatyo();
-        public String dokumenttiId;
-
-        public boolean valmis() {
-            return kokonaistyo.valmis();
-        }
-
-        static class Osatyo {
-            public int tehty = 0;
-            public int kokonaismaara = 0;
-
-            public boolean valmis() {
-                return tehty == kokonaismaara;
-            }
-        }
-    }
 }

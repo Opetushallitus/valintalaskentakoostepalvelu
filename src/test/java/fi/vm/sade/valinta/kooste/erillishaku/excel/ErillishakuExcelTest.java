@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,14 +34,12 @@ public class ErillishakuExcelTest {
 					
 					@Override
 					public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
-						LOG.error("Onko laillinen {}", rivi.getEtunimi());
-						//Assert.assertTrue("Syntyma-aika ei tasmaa", syntymaAika.equals(rivi.getSyntymaAika()));
 						tarkistusTapahtui.incrementAndGet();
 					}
 				});
 		
 		eExcel.getExcel().tuoXlsx(new ClassPathResource("kustom_erillishaku.xlsx").getInputStream());
-		Assert.assertTrue(tarkistusTapahtui.get()==1);
+		assertTrue(tarkistusTapahtui.get()==1);
 	}
 
 	@Test
@@ -51,38 +49,33 @@ public class ErillishakuExcelTest {
 
 			@Override
 			public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
-				LOG.error("Onko laillinen {}", rivi.getEtunimi());
-				//Assert.assertTrue("Syntyma-aika ei tasmaa", syntymaAika.equals(rivi.getSyntymaAika()));
 				tarkistusTapahtui.incrementAndGet();
 			}
 		});
-
 		eExcel.getExcel().tuoXlsx(new ClassPathResource("kustom_erillishaku_otsikoilla.xlsx").getInputStream());
-		Assert.assertTrue(tarkistusTapahtui.get()==1);
+		assertEquals(1, tarkistusTapahtui.get());
 	}
 	@Test
 	public void testaaVienti() throws FileNotFoundException, IOException {
 		List<ErillishakuRivi> rivit = Lists.newArrayList();
 		String syntymaAika = "11.11.2011";
-		ErillishakuRivi rivi = new ErillishakuRivi("sukunimi","etunimi1","hetu",syntymaAika, "HYLATTY", "", "", false);
+		ErillishakuRivi rivi = new ErillishakuRivi("sukunimi","etunimi1","hetu","test.email@example.com", syntymaAika, "", "HYLATTY", "", "", false);
 		rivit.add(rivi);
-		ErillishakuRivi rivi2= new ErillishakuRivi("sukunimi","etunimi2","hetu",syntymaAika, "HYLATTY", "", "", true);
+		ErillishakuRivi rivi2= new ErillishakuRivi("sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, "", "HYLATTY", "", "", true);
 		rivit.add(rivi2);
-		rivit.add(new ErillishakuRivi());
+		ErillishakuRivi rivi3 = new ErillishakuRivi();
+		rivit.add(rivi3);
 		final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
 		ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit
-				, new ErillishakuRiviKuuntelija() {
-					
-					@Override
-					public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
-						LOG.error("adfsga {}", rivi.getEtunimi());
-						Assert.assertTrue("Syntyma-aika ei tasmaa", "HYLATTY".equals(rivi.getHakemuksenTila()));
-						tarkistusTapahtui.incrementAndGet();
-					}
-				});
+				, rv -> tarkistusTapahtui.incrementAndGet()
+				);
 		Excel excel = eExcel.getExcel();
 		excel.tuoXlsx(excel.vieXlsx());
-		Assert.assertTrue(tarkistusTapahtui.get()==2);
+
+		assertEquals(
+				2 // tavalliset rivit
+				+1 // tyhjärivi julkaisulupasyötteellä
+				, tarkistusTapahtui.get());
 		if (false) {
 			IOUtils.copy(excel.vieXlsx(), new FileOutputStream(
 					"erillishaku.xlsx"));
