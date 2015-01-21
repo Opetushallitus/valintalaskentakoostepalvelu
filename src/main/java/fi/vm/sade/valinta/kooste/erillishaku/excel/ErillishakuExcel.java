@@ -63,6 +63,7 @@ public class ErillishakuExcel {
 			new TekstiArvo("Sukunimi"),
 			new TekstiArvo("Etunimi"),
 			new TekstiArvo("Henkilötunnus"),
+			new TekstiArvo("Sähköposti"),
 			new TekstiArvo("Syntymäaika"),
 			new TekstiArvo("Hakija-oid"),
 			new TekstiArvo("Hakemuksentila"),
@@ -98,7 +99,7 @@ public class ErillishakuExcel {
 
 	private Stream<ErillishakuRivi> arvoRivit(List<ErillishakuRivi> erillishakurivit) {
 		if (erillishakurivit.isEmpty()) {
-			return ImmutableList.of(new ErillishakuRivi("Esimerkki", "Rivi", "123456-7890", "01.01.1901", "", "HYVAKSYTTY", "KESKEN", "EI_TEHTY", false)).stream();
+			return ImmutableList.of(new ErillishakuRivi("Esimerkki", "Rivi", "123456-7890", "esimerkki.rivi@example.com", "01.01.1901", "", "HYVAKSYTTY", "KESKEN", "EI_TEHTY", false)).stream();
 		} else {
 			return erillishakurivit
 					.stream();
@@ -112,6 +113,7 @@ public class ErillishakuExcel {
 			a.add(new TekstiArvo(rivi.getSukunimi(), true, true));
 			a.add(new TekstiArvo(rivi.getEtunimi(), true, true));
 			a.add(new TekstiArvo(rivi.getHenkilotunnus(), true, true));
+			a.add(new TekstiArvo(rivi.getSahkoposti(), true, true));
 			a.add(new TekstiArvo(rivi.getSyntymaAika(), true, true));
 			a.add(new TekstiArvo(rivi.getPersonOid(), true, true));
 			a.add(ErillishakuDataRivi.hakemuksenTila(rivi.getHakemuksenTila()));
