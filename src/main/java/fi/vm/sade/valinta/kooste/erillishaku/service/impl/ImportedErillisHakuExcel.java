@@ -48,7 +48,6 @@ public class ImportedErillisHakuExcel {
     public ImportedErillisHakuExcel(Hakutyyppi hakutyyppi, List<ErillishakuRivi> erillishakuRivi, boolean kasitteleVirheetDatassaVaroituksinaPoikkeuksenSijaan) {
         this.kasitteleVirheetDatassaVaroituksinaPoikkeuksenSijaan = kasitteleVirheetDatassaVaroituksinaPoikkeuksenSijaan;
         LOG.info("Muodostetaan erillishaunriveistä ({}kpl) henkilönluotioliot", erillishakuRivi.size());
-        validoi(erillishakuRivi);
         henkiloPrototyypit = erillishakuRivi.stream().map(rivi -> convert(rivi)).collect(Collectors.toList());
         hetuToRivi = erillishakuRivi.stream().collect(Collectors.
                 toMap(rivi -> Optional.ofNullable(StringUtils.trimToNull(rivi.getHenkilotunnus())).orElse(rivi.getSyntymaAika()), rivi -> rivi));
@@ -59,31 +58,11 @@ public class ImportedErillisHakuExcel {
         this(hakutyyppi,erillishakuRivi, true);
     }
 
-    private void validoi(List<ErillishakuRivi> erillishakuRivi) {
-        List<ErillishaunDataException.PoikkeusRivi> poikkeukset = Lists.newArrayList();
-        int index = 0;
-        for(ErillishakuRivi rivi: erillishakuRivi) {
-            ++index;
-            String validointiVirhe = rivi.validoi();
-            if(validointiVirhe != null) {
-                poikkeukset.add(new ErillishaunDataException.PoikkeusRivi(index, validointiVirhe));
-            }
-        }
-        if(!poikkeukset.isEmpty()) {
-            LOG.error("{}", ErillishaunDataException.formatoi(poikkeukset));
-            if(!kasitteleVirheetDatassaVaroituksinaPoikkeuksenSijaan) {
-                throw new ErillishaunDataException(poikkeukset);
-            }
-        }
-    }
-
-
     private List<ErillishakuRivi> createExcel(Hakutyyppi hakutyyppi, InputStream inputStream) throws IOException {
         final List<ErillishakuRivi> rivit = Lists.newArrayList();
         new ErillishakuExcel(hakutyyppi, rivi -> {
             rivit.add(rivi);
         }).getExcel().tuoXlsx(inputStream);
-        validoi(rivit);
         try {
             rivit.forEach(rivi -> {
                 hetuToRivi.put(Optional.ofNullable(StringUtils.trimToNull(rivi.getHenkilotunnus())).orElse(rivi.getSyntymaAika()), rivi);

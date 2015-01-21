@@ -23,7 +23,7 @@ import org.joda.time.format.DateTimeFormatter;
 @ApiModel
 public class ErillishakuRivi {
 	private static final Logger LOG = LoggerFactory.getLogger(ErillishakuRivi.class);
-	private final static org.joda.time.format.DateTimeFormatter dtf = DateTimeFormat.forPattern("dd.MM.yyyy");
+	public final static org.joda.time.format.DateTimeFormatter SYNTYMAAIKAFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy");
 
 	public static final DateTimeFormatter SYNTYMAAIKA = DateTimeFormat.forPattern("dd.MM.yyyy");
 	private final String etunimi;
@@ -60,29 +60,6 @@ public class ErillishakuRivi {
 		this.vastaanottoTila = vastaanottoTila;
 		this.ilmoittautumisTila = ilmoittautumisTila;
 		this.julkaistaankoTiedot = julkaistaankoTiedot;
-	}
-
-	/**
-	 * @return Validointivirhe tai null jos kaikki ok
-	 */
-	public String validoi() {
-		if(StringUtils.isBlank(syntymaAika)&&StringUtils.isBlank(henkilotunnus)&&StringUtils.isBlank(personOid)) {
-			return "Henkilötunnus, syntymäaika ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. " + this.toString();
-		}
-		if(!StringUtils.isBlank(syntymaAika)) {
-			try {
-				DateTime p = SYNTYMAAIKA.parseDateTime(syntymaAika);
-			} catch(Exception e){
-				return "Syntymäaika '" + syntymaAika + "' on väärin muotoiltu. Syntymäaika on syötettävä muodossa pp.mm.vvvv. " + this.toString();
-			}
-		}
-		if(StringUtils.isBlank(etunimi)&&StringUtils.isBlank(sukunimi)) {
-			return "Etunimi ja sukunimi on pakollisia. " + this.toString();
-		}
-		if(!StringUtils.isBlank(henkilotunnus) && !tarkistaHenkilotunnus(henkilotunnus)) {
-			return "Henkilötunnus ("+henkilotunnus+") oli virheellinen. " + this.toString();
-		}
-		return null;
 	}
 
 	public boolean isJulkaistaankoTiedot() {
@@ -148,7 +125,7 @@ public class ErillishakuRivi {
 
 	public Date parseSyntymaAika() {
 		try {
-			return dtf.parseDateTime(getSyntymaAika()).toDate();
+			return SYNTYMAAIKAFORMAT.parseDateTime(getSyntymaAika()).toDate();
 		} catch (Exception e) {
 			LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", getSyntymaAika());
 			return null;

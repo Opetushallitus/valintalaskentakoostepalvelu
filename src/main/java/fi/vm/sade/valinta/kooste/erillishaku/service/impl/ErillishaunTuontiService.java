@@ -9,12 +9,16 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.authentication.model.Henkilo;
+import static fi.vm.sade.valinta.kooste.converter.ValintatuloksenTilaHakuTyypinMukaanConverter.*;
+import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 
 import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +46,7 @@ import rx.schedulers.Schedulers;
 
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
 
 /**
  * @author Jussi Jartamo
@@ -106,7 +111,7 @@ public class ErillishaunTuontiService {
         int indeksi = 0;
         for(ErillishakuRivi rivi : rivit) {
             ++indeksi;
-            String validointiVirhe = rivi.validoi();
+            String validointiVirhe = validoi(haku.getHakutyyppi(), rivi);
             if(validointiVirhe != null) {
                 poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, validointiVirhe));
             }
@@ -188,6 +193,38 @@ public class ErillishaunTuontiService {
         } catch (IllegalArgumentException e) {
             return null;
         }
+    }
+
+    /**
+     * @return Validointivirhe tai null jos kaikki ok
+     */
+    public String validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi) {
+        // Yksilöinti onnistuu, eli joku kolmesta löytyy: henkilötunnus,syntymäaika,henkilö-oid
+        if(StringUtils.isBlank(rivi.getSyntymaAika())&&StringUtils.isBlank(rivi.getHenkilotunnus())&&StringUtils.isBlank(rivi.getPersonOid())) {
+            return "Henkilötunnus, syntymäaika ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. " + rivi.toString();
+        }
+        // Syntymäaika oikeassa formaatissa
+        if(!StringUtils.isBlank(rivi.getSyntymaAika())) {
+            try {
+                DateTime p = ErillishakuRivi.SYNTYMAAIKAFORMAT.parseDateTime(rivi.getSyntymaAika());
+            } catch(Exception e){
+                return "Syntymäaika '" + rivi.getSyntymaAika() + "' on väärin muotoiltu. Syntymäaika on syötettävä muodossa pp.mm.vvvv. " + rivi.toString();
+            }
+        }
+        // Henkilölle on syötetty nimi
+        if(StringUtils.isBlank(rivi.getEtunimi())&&StringUtils.isBlank(rivi.getSukunimi())) {
+            return "Etunimi ja sukunimi on pakollisia. " + rivi.toString();
+        }
+        // Henkilötunnus on oikeassa formaatissa jos sellainen on syötetty
+        if(!StringUtils.isBlank(rivi.getHenkilotunnus()) && !tarkistaHenkilotunnus(rivi.getHenkilotunnus())) {
+            return "Henkilötunnus ("+rivi.getHenkilotunnus()+") on virheellinen. " + rivi.toString();
+        }
+        // Valintatuloksen tila on hakua vastaava
+        ValintatuloksenTila vt = valintatuloksenTila(rivi);
+        if(vt != null && convertValintatuloksenTilaHakuTyypinMukaan(vt, tyyppi) == null) {
+            return "Valintatuloksen tila ("+vt+") on virheellinen. " + rivi.toString();
+        }
+        return null;
     }
 }
 
