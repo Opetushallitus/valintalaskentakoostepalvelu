@@ -42,18 +42,19 @@ public class ErillishakuDataRivi extends DataRivi {
 		String sukunimi = lukija.getArvoAt(0);
 		String etunimi = lukija.getArvoAt(1);
 		String henkilotunnus = lukija.getArvoAt(2);
-		String syntymaAika = lukija.getArvoAt(3);
-		String oid = lukija.getArvoAt(4);
+		String sahkoposti = lukija.getArvoAt(3);
+		String syntymaAika = lukija.getArvoAt(4);
+		String oid = lukija.getArvoAt(5);
 		
-		String hakemuksenTila = lukija.getArvoAt(5);
-		String vastaanottoTila = lukija.getArvoAt(6);
-		String ilmoittautumisTila = lukija.getArvoAt(7);
+		String hakemuksenTila = lukija.getArvoAt(6);
+		String vastaanottoTila = lukija.getArvoAt(7);
+		String ilmoittautumisTila = lukija.getArvoAt(8);
 		boolean julkaistaankoTiedot =
-				LUPA_JULKAISUUN.equals(lukija.getArvoAt(8));
-		if(rivi.isTyhja() || rivi.getSolut().size() != 9 || "Syntymäaika".equals(syntymaAika)) {
+				LUPA_JULKAISUUN.equals(lukija.getArvoAt(9));
+		if(rivi.isTyhja() || rivi.getSolut().size() != 10 || "Syntymäaika".equals(syntymaAika)) {
 			// tunnistetaan otsikkorivit ja ei välitetä prosessointiin
 		} else {
-			kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(sukunimi, etunimi, henkilotunnus, syntymaAika, oid, hakemuksenTila, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot));
+			kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, oid, hakemuksenTila, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot));
 		}
 		return true;
 	}

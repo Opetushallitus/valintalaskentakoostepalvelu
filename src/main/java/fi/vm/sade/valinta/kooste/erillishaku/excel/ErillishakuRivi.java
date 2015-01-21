@@ -29,6 +29,7 @@ public class ErillishakuRivi {
 	private final String etunimi;
 	private final String sukunimi;
 	private final String henkilotunnus;
+	private final String sahkoposti;
 	private final String syntymaAika;
 	private final String personOid;
 
@@ -42,6 +43,7 @@ public class ErillishakuRivi {
 		this.etunimi =  null;
 		this.sukunimi = null;
 		this.henkilotunnus = null;
+		this.sahkoposti = null;
 		this.personOid = null;
 		this.syntymaAika = null;
 		this.hakemuksenTila = null;
@@ -50,10 +52,11 @@ public class ErillishakuRivi {
 		this.julkaistaankoTiedot = false;
 	}
 
-	public ErillishakuRivi(String sukunimi,String etunimi,  String henkilotunnus, String syntymaAika, String personOid, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot) {
+	public ErillishakuRivi(String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika, String personOid, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot) {
 		this.etunimi = etunimi;
 		this.sukunimi = sukunimi;
 		this.henkilotunnus = henkilotunnus;
+		this.sahkoposti = sahkoposti;
 		this.syntymaAika = syntymaAika;
 		this.personOid = personOid;
 		this.hakemuksenTila = hakemuksenTila;
@@ -73,6 +76,9 @@ public class ErillishakuRivi {
 	}
 	public String getHenkilotunnus() {
 		return henkilotunnus;
+	}
+	public String getSahkoposti() {
+		return sahkoposti;
 	}
 	public String getSukunimi() {
 		return sukunimi;
@@ -105,6 +111,8 @@ public class ErillishakuRivi {
 		.append(etunimi)
 		.append(", ")
 		.append(sukunimi)
+		.append(", ")
+		.append(sahkoposti)
 		.append(", ")
 		.append(hakemuksenTila)
 		.append(", ")
