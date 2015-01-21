@@ -7,7 +7,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import fi.vm.sade.authentication.model.Henkilo;
 import static fi.vm.sade.valinta.kooste.converter.ValintatuloksenTilaHakuTyypinMukaanConverter.*;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
@@ -109,6 +111,12 @@ public class ErillishaunTuontiService {
         }
         Collection<ErillishaunDataException.PoikkeusRivi> poikkeusRivis = Lists.newArrayList();
         int indeksi = 0;
+
+        Map<String, String> sahkopostit = ImmutableMap.<String, String>builder()
+                .putAll(rivit.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getPersonOid())).collect(Collectors.toMap(rivi -> rivi.getPersonOid(), rivi -> rivi.getSahkoposti())))
+                .putAll(rivit.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getHenkilotunnus())).collect(Collectors.toMap(rivi -> rivi.getHenkilotunnus(), rivi -> rivi.getSahkoposti())))
+                .build();
+
         for(ErillishakuRivi rivi : rivit) {
             ++indeksi;
             String validointiVirhe = validoi(haku.getHakutyyppi(), rivi);
@@ -135,7 +143,7 @@ public class ErillishaunTuontiService {
             throw e;
         }
         LOG.info("Käsitellään hakemukset");
-        final List<Hakemus> hakemukset = kasitteleHakemukset(haku, henkilot, prosessi);
+        final List<Hakemus> hakemukset = kasitteleHakemukset(haku, henkilot, sahkopostit, prosessi);
 
         LOG.info("Viedaan hakijoita {} jonoon {}", rivit.size(), haku.getValintatapajononNimi());
         tuoErillishaunTilat(haku, rivit, hakemukset);
@@ -144,12 +152,12 @@ public class ErillishaunTuontiService {
         prosessi.valmistui("ok");
     }
 
-    private List<Hakemus> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
+    private List<Hakemus> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, Map<String, String> sahkopostit, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
         try {
             final List<HakemusPrototyyppi> hakemusPrototyypit = henkilot.stream()
                     .map(h -> {
                         //LOG.info("Hakija {}", new GsonBuilder().setPrettyPrinting().create().toJson(h));
-                        return new HakemusPrototyyppi(h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), h.getSyntymaaika());
+                        return new HakemusPrototyyppi(h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), selectEmail(h, sahkopostit).orElse(""), h.getSyntymaaika());
                     }).collect(Collectors.toList());
 
             return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
@@ -157,6 +165,15 @@ public class ErillishaunTuontiService {
             LOG.error("{}: {} {}",POIKKEUS_HAKEMUSPALVELUN_VIRHE,e.getMessage(),Arrays.toString(e.getStackTrace()));
             prosessi.keskeyta(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_HAKEMUSPALVELUN_VIRHE));
             throw e;
+        }
+    }
+
+    private Optional<String> selectEmail(Henkilo henkilo, Map<String, String> sahkopostit) {
+        Optional<String> email = Optional.ofNullable(sahkopostit.get(henkilo.getOidHenkilo()));
+        if (email.isPresent()) {
+            return email;
+        } else {
+            return Optional.ofNullable(sahkopostit.get(henkilo.getHetu()));
         }
     }
 
