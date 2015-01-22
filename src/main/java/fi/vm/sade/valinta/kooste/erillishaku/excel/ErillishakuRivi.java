@@ -127,7 +127,7 @@ public class ErillishakuRivi {
 		.append(julkaistaankoTiedot).toString();
 	}
 
-	public HenkiloCreateDTO toHenkilo() {
+	public HenkiloCreateDTO toHenkiloCreateDTO() {
 		return new HenkiloCreateDTO(getEtunimi(), getSukunimi(), getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA);
 	}
 

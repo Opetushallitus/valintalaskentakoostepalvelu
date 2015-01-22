@@ -1,24 +1,21 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
+import static fi.vm.sade.valinta.kooste.converter.ValintatuloksenTilaHakuTyypinMukaanConverter.convertValintatuloksenTilaHakuTyypinMukaan;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
+
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import fi.vm.sade.authentication.model.Henkilo;
-import static fi.vm.sade.valinta.kooste.converter.ValintatuloksenTilaHakuTyypinMukaanConverter.*;
-import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
-import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
-
-import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -27,28 +24,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.codepoetics.protonpack.StreamUtils;
-import com.google.gson.GsonBuilder;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
+import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
+import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
+import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
-
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
 
 /**
  * @author Jussi Jartamo
@@ -134,8 +134,8 @@ public class ErillishaunTuontiService {
         LOG.info("Haetaan/luodaan henkilöt");
         final List<Henkilo> henkilot;
         try {
-            henkilot= henkiloAsyncResource.haeTaiLuoHenkilot(rivit.stream().map(rivi -> {
-                return rivi.toHenkilo();
+            henkilot = henkiloAsyncResource.haeTaiLuoHenkilot(rivit.stream().map(rivi -> {
+                return rivi.toHenkiloCreateDTO();
             }).collect(Collectors.toList())).get();
         }catch(Exception e) {
             LOG.error("{}: {} {}",POIKKEUS_HENKILOPALVELUN_VIRHE,e.getMessage(),Arrays.toString(e.getStackTrace()));
@@ -159,7 +159,6 @@ public class ErillishaunTuontiService {
                         //LOG.info("Hakija {}", new GsonBuilder().setPrettyPrinting().create().toJson(h));
                         return new HakemusPrototyyppi(h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), selectEmail(h, sahkopostit).orElse(""), h.getSyntymaaika());
                     }).collect(Collectors.toList());
-
             return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
         } catch (Throwable e) { // temporary catch to avoid missing service dependencies
             LOG.error("{}: {} {}",POIKKEUS_HAKEMUSPALVELUN_VIRHE,e.getMessage(),Arrays.toString(e.getStackTrace()));

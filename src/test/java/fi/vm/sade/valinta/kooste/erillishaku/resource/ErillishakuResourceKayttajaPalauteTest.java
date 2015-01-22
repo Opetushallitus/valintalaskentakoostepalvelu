@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.integrationtest.tomcat.SharedTomcat;
+import fi.vm.sade.integrationtest.tomcat.SharedTomcat;
 import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
 import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.*;
 import static org.hamcrest.CoreMatchers.*;
