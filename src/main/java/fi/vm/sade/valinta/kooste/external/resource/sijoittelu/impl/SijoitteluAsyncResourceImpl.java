@@ -3,10 +3,14 @@ package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
+import com.google.common.reflect.TypeToken;
+import fi.vm.sade.valinta.kooste.external.resource.Callback;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +56,16 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 				.accept(MediaType.WILDCARD)
 				.async().get(new GenericType<List<Valintatulos>>() { });
 	}
-
+	public void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid
+	, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
+		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakukohde/"+hakukohdeOid;
+		getWebClient()
+				.path(url)
+				.accept(MediaType.WILDCARD)
+				.async().get(new Callback<HakukohdeDTO>(
+						address,url, hakukohde,poikkeus,
+						new TypeToken<List<HakukohdeDTO>>() { }.getType()));
+	}
 	public Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid) {
 		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakukohde/"+hakukohdeOid;
 		return getWebClient()

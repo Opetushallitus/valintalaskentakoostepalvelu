@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.sijoittelu;
 
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
@@ -18,4 +19,6 @@ public interface SijoitteluAsyncResource {
 	Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
 	
 	Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid);
+	void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid,
+										Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus);
 }

@@ -14,6 +14,16 @@ public class HakutoiveDto {
 	private String valintatapajonoOid;
 	private Valintatila valintatila;
 	private ValintatuloksenTila vastaanottotila;
+	private IlmoittautumistilaDto ilmoittautumistila;
+
+	public IlmoittautumistilaDto getIlmoittautumistila() {
+		return ilmoittautumistila;
+	}
+
+	public void setIlmoittautumistila(IlmoittautumistilaDto ilmoittautumistila) {
+		this.ilmoittautumistila = ilmoittautumistila;
+	}
+
 	public Valintatila getValintatila() {
 		return valintatila;
 	}
