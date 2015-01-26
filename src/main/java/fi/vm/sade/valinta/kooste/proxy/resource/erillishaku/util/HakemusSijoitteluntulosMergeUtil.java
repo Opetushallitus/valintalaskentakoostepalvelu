@@ -18,6 +18,7 @@ public class HakemusSijoitteluntulosMergeUtil {
     public static List<HakemusSijoitteluntulosMergeDto> merge(
             List<Hakemus> hakemukset,
             HakukohdeDTO hakukohdeDTO,
+            List<ValinnanVaiheJonoillaDTO> valinnanvaiheet,
             List<ValintatietoValinnanvaiheDTO> laskennantulokset,
             Map<Long,HakukohdeDTO> hakukohteetBySijoitteluAjoId
     // <- empty map jos ei erillissijoittelun hakukohteita

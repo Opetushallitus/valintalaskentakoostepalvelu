@@ -81,11 +81,14 @@ public class ErillishakuProxyResource {
         });
 
         final AtomicReference<List<Hakemus>> hakemukset = new AtomicReference<>();
+        final AtomicReference<List<ValinnanVaiheJonoillaDTO>> valinnanvaiheet = new AtomicReference<>();
         final AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset = new AtomicReference<>();
         final AtomicReference<HakukohdeDTO> hakukohde = new AtomicReference<>();
         final AtomicReference<Map<Long,HakukohdeDTO>> hakukohteetBySijoitteluAjoId = new AtomicReference<>();
 
         AtomicInteger counter = new AtomicInteger(
+                        1 +
+                        //
                         1 +
                         //
                         1 +
@@ -98,7 +101,7 @@ public class ErillishakuProxyResource {
         Supplier<Void> mergeSuplier = () -> {
             if(counter.decrementAndGet() == 0) {
                 LOG.error("Saatiin vastaus muodostettua. Palautetaan se asynkronisena paluuarvona.");
-                r(asyncResponse,merge(hakemukset.get(),hakukohde.get(),valintatulokset.get(),hakukohteetBySijoitteluAjoId.get()));
+                r(asyncResponse,merge(hakemukset.get(),hakukohde.get(),valinnanvaiheet.get(),valintatulokset.get(),hakukohteetBySijoitteluAjoId.get()));
             }
             return null;
         };
@@ -117,6 +120,23 @@ public class ErillishakuProxyResource {
                     } catch (Exception e) {
                         // kilpailutilanne timeoutin ja virheen kanssa. Oikeastaan sama mitä käyttäjälle näytetään tässä kohtaa.
                         LOG.error("Haku-app virhe tuli yhtäaikaa timeoutin kanssa! {}", e.getMessage());
+                    }
+                }
+        );
+
+        valintaperusteetAsyncResource.haeValinnanvaiheetHakukohteelle(hakukohdeOid,
+                v -> {
+                    valinnanvaiheet.set(v);
+                    mergeSuplier.get();
+                },
+                poikkeus -> {
+                    try {
+                        asyncResponse.resume(Response.serverError()
+                                .entity("Erillishakuproxy -palvelukutsu epäonnistui valintaperusteetpalvelun virheeseen: " + poikkeus.getMessage())
+                                .build());
+                    } catch (Exception e) {
+                        // kilpailutilanne timeoutin ja virheen kanssa. Oikeastaan sama mitä käyttäjälle näytetään tässä kohtaa.
+                        LOG.error("Valintaperusteetpalvelun virhe tuli yhtäaikaa timeoutin kanssa! {}", e.getMessage());
                     }
                 }
         );
