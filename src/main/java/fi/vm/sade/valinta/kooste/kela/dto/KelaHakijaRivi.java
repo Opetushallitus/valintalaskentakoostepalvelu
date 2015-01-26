@@ -9,24 +9,24 @@ import java.util.Date;
  */
 public class KelaHakijaRivi {
 
+	private final String siirtotunnus;
 	private final String henkilotunnus;
 	private final String etunimi;
 	private final String sukunimi;
 	private final Date lukuvuosi;
+	private final String tutkinnontaso;
 	private final Date poimintapaivamaara;
 	private final Date valintapaivamaara;
 	private final String oppilaitosnumero;
 	private final String organisaatio;
 	private final String hakukohde;
-	//private final String linjakoodi;
-	//private final String oppilaitos;
 	private final String syntymaaika; // 04.05.1965
 
-	public KelaHakijaRivi(String etunimi, String sukunimi,
+	public KelaHakijaRivi(String siirtotunnus, String etunimi, String sukunimi,
 			String henkilotunnus, Date lukuvuosi, Date poimintapaivamaara,
 			Date valintapaivamaara, String oppilaitosnumero, String organisaatio, String  hakukohde,
-			String syntymaaika) {
-		
+			String syntymaaika, String tutkinnontaso) {
+		this.siirtotunnus = siirtotunnus;
 		this.etunimi = etunimi;
 		this.sukunimi = sukunimi;
 		this.henkilotunnus = henkilotunnus;
@@ -37,6 +37,11 @@ public class KelaHakijaRivi {
 		this.organisaatio = organisaatio;
 		this.hakukohde = hakukohde;
 		this.syntymaaika = syntymaaika;
+		this.tutkinnontaso = tutkinnontaso;
+	}
+
+	public String getSiirtotunnus() {
+		return siirtotunnus;
 	}
 
 	public String getSyntymaaika() {
@@ -83,4 +88,7 @@ public class KelaHakijaRivi {
 		return hakukohde;
 	}
 
+	public String getTutkinnontaso() {
+		return tutkinnontaso;
+	}
 }

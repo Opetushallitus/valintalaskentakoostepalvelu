@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.kela.dto;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -11,6 +12,8 @@ import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.LinjakoodiSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.OppilaitosSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.TilaSource;
+import fi.vm.sade.valinta.kooste.kela.komponentti.TutkinnontasoSource;
 
 /**
  * 
@@ -47,8 +50,12 @@ public abstract class KelaAbstraktiHaku {
 
 	// public Collection<String> hakemusOids();
 	public abstract Collection<KelaHakijaRivi> createHakijaRivit(
+			Date alkuPvm,
+			Date loppuPvm,			
+			String hakuOid,
+			KelaProsessi prosessi,
 			HakemusSource hakemusSource, HakukohdeSource hakukohdeSource,
-			LinjakoodiSource linjakoodiSource, OppilaitosSource oppilaitosSource);
+			LinjakoodiSource linjakoodiSource, OppilaitosSource oppilaitosSource, TutkinnontasoSource tutkinnontasoSource, TilaSource tilaSource);
 
 	/**
 	 * @return case insensitive map
@@ -66,4 +73,5 @@ public abstract class KelaAbstraktiHaku {
 		henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
 		return henkilotiedot;
 	}
+
 }

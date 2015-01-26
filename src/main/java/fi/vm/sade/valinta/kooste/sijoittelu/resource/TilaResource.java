@@ -18,7 +18,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 
 @Controller
 @Path("tila")
-@PreAuthorize("isAuthenticated()")
+//@PreAuthorize("isAuthenticated()")
 @Api(value = "/tila", description = "Valintatulokset")
 public interface TilaResource {
 

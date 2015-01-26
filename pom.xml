@@ -26,6 +26,11 @@
 	</build>
 
 	<dependencies>
+	    	<dependency>
+	                 <groupId>fi.vm.sade.rajapinnat</groupId>
+	                 <artifactId>kela-api</artifactId>
+	                 <version>${kela.version}</version>
+	    	</dependency>	
 		<dependency>
 			<groupId>fi.vm.sade.auth</groupId>
 			<artifactId>authentication-domain</artifactId>

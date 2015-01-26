@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.dto;
 
+import java.util.List;
+
 import fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
 
@@ -19,6 +21,8 @@ public class Valintatulos {
 	private ValintatuloksenTila tila = ValintatuloksenTila.KESKEN;
 	private IlmoittautumisTila ilmoittautumisTila = IlmoittautumisTila.EI_TEHTY;
 
+	private List<LogEntry> logEntries;
+	
 	public IlmoittautumisTila getIlmoittautumisTila() {
 		return ilmoittautumisTila;
 	}
@@ -79,4 +83,11 @@ public class Valintatulos {
 		this.hakuOid = hakuOid;
 	}
 
+	public List<LogEntry> getLogEntries() {
+		return logEntries;
+	}
+
+	public void setLogEntries(List<LogEntry> logEntries) {
+		this.logEntries = logEntries;
+	}
 }

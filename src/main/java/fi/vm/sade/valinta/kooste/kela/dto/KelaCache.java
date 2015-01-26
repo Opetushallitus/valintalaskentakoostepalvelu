@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.kela.dto;
 import static fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil.toSearchCriteria;
 
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.StringUtils;
@@ -31,10 +32,12 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
 	private final ConcurrentHashMap<String, HakukohdeDTO> hakukohteet = new ConcurrentHashMap<String, HakukohdeDTO>();
 	private final ConcurrentHashMap<String, Hakemus> hakemukset = new ConcurrentHashMap<String, Hakemus>();
 	private final ConcurrentHashMap<String, String> hakutyyppiArvo = new ConcurrentHashMap<String, String>();
+	private final ConcurrentHashMap<String, String> haunKohdejoukkoArvo = new ConcurrentHashMap<String, String>();
 	private final ConcurrentHashMap<String, Date> lukuvuosi = new ConcurrentHashMap<String, Date>();
 	private final Date now;
 	private final KoodiService koodiService;
-
+	
+	
 	public KelaCache(KoodiService koodiService) {
 		now = new Date();
 		this.koodiService = koodiService;
@@ -50,30 +53,55 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
 		if (!lukuvuosi.contains(uri)) {
 			int vuosi = hakuDTO.getKoulutuksenAlkamisVuosi();
 			int kuukausi = 1;
+			List<KoodiType> koodis = null;
 			// haku.get
-			try {
-				for (KoodiType koodi : koodiService
-						.searchKoodis(toSearchCriteria(hakuDTO
-								.getKoulutuksenAlkamiskausiUri()))) {
-					if ("S".equals(StringUtils.upperCase(koodi.getKoodiArvo()))) {
-
-						kuukausi = 8;
-					} else if ("K".equals(StringUtils.upperCase(koodi
-							.getKoodiArvo()))) {
-						kuukausi = 1;
-					} else {
-						LOG.error(
-								"Viallinen arvo {}, koodilla {} ",
-								new Object[] { koodi.getKoodiArvo(),
-										hakuDTO.getKoulutuksenAlkamiskausiUri() });
+			
+			int tries=0;
+			
+			while(true) {
+				try {
+					koodis =koodiService.searchKoodis(toSearchCriteria(hakuDTO.getKoulutuksenAlkamiskausiUri()));
+					if (tries>0) {
+						LOG.error("retry ok");
+					}
+					break;
+				} catch (Exception e) {
+					if (tries==30) {
+						LOG.error("give up");
+						throw e;
+					}	
+					tries++;
+					LOG.error("koodiService ei jaksa palvella {}. Yritet‰‰n viel‰ uudestaan. "+tries+"/30...", e.getMessage());
+					try {
+						Thread.sleep(15000L);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
 					}
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				LOG.error("Ei voitu hakea lukuvuotta tarjonnalta syyst√§ {}",
-						e.getMessage());
-				throw new RuntimeException(e);
 			}
+			
+			
+							try {
+								for (KoodiType koodi : koodis) {
+									if ("S".equals(StringUtils.upperCase(koodi.getKoodiArvo()))) {
+				
+										kuukausi = 8;
+									} else if ("K".equals(StringUtils.upperCase(koodi
+											.getKoodiArvo()))) {
+										kuukausi = 1;
+									} else {
+										LOG.error(
+												"Viallinen arvo {}, koodilla {} ",
+												new Object[] { koodi.getKoodiArvo(),
+														hakuDTO.getKoulutuksenAlkamiskausiUri() });
+									}
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+								LOG.error("Ei voitu hakea lukuvuotta tarjonnalta syyst√§ {}",
+										e.getMessage());
+								throw new RuntimeException(e);
+							}
 			lukuvuosi.put(uri, new DateTime(vuosi, kuukausi, 1, 1, 1).toDate());
 		}
 		return lukuvuosi.get(uri);
@@ -112,5 +140,13 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
 
 	public String getHakutyyppi(String hakutyyppi) {
 		return hakutyyppiArvo.get(hakutyyppi);
+	}
+	
+	public void putHaunKohdejoukko(String kohdejoukko, String arvo) {
+		haunKohdejoukkoArvo.put(kohdejoukko, arvo);
+	}
+
+	public String getHaunKohdejoukko(String kohdejoukko) {
+		return haunKohdejoukkoArvo.get(kohdejoukko);
 	}
 }
