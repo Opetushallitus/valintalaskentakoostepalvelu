@@ -14,6 +14,7 @@ public class ValidoiTilatUtil {
      * @return (null if ok) validation error
      */
     public static String validoi(HakemuksenTila hakemuksenTila, ValintatuloksenTila valintatuloksenTila, IlmoittautumisTila ilmoittautumisTila) {
-
+        return null;
+        
     }
 }
