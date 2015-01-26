@@ -19,6 +19,10 @@ public interface SijoitteluAsyncResource {
 	Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
 	
 	Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid);
+
 	void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid,
 										Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus);
+
+	void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId
+			, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus);
 }
