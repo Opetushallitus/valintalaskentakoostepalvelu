@@ -37,7 +37,7 @@ public interface ValintalaskentaAsyncResource {
 			Consumer<String> callback, Consumer<Throwable> failureCallback);
 
 	Peruutettava laskennantulokset(String hakuOid, String hakukohdeOid,
-								   Consumer<ValintatietoValinnanvaiheDTO> callback, Consumer<Throwable> failureCallback);
+								   Consumer<List<ValintatietoValinnanvaiheDTO>> callback, Consumer<Throwable> failureCallback);
 
 
 }

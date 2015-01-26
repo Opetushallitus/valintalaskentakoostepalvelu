@@ -82,7 +82,7 @@ public class ErillishakuProxyResource {
 
         final AtomicReference<List<Hakemus>> hakemukset = new AtomicReference<>();
         final AtomicReference<List<ValinnanVaiheJonoillaDTO>> valinnanvaiheet = new AtomicReference<>();
-        final AtomicReference<ValintatietoValinnanvaiheDTO> valintatulokset = new AtomicReference<>();
+        final AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset = new AtomicReference<>();
         final AtomicReference<HakukohdeDTO> hakukohde = new AtomicReference<>();
         final AtomicReference<Map<Long,HakukohdeDTO>> hakukohteetBySijoitteluAjoId = new AtomicReference<>();
 
@@ -163,7 +163,7 @@ public class ErillishakuProxyResource {
                     valintatulokset.set(v);
 
                     Set<Long> sijoitteluAjoIdSetti =
-                    v.getValintatapajonot().stream().filter(v0 ->
+                    v.stream().flatMap(v0 -> v0.getValintatapajonot().stream()).filter(v0 ->
                         v0.getSijoitteluajoId() != null
                     ).map(v0 -> v0.getSijoitteluajoId()).collect(Collectors.toSet());
                     //

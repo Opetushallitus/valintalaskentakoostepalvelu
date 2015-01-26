@@ -19,7 +19,7 @@ public class HakemusSijoitteluntulosMergeUtil {
             List<Hakemus> hakemukset,
             HakukohdeDTO hakukohdeDTO,
             List<ValinnanVaiheJonoillaDTO> valinnanvaiheet,
-            ValintatietoValinnanvaiheDTO laskennantulokset,
+            List<ValintatietoValinnanvaiheDTO> laskennantulokset,
             Map<Long,HakukohdeDTO> hakukohteetBySijoitteluAjoId
     // <- empty map jos ei erillissijoittelun hakukohteita
     ) {

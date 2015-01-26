@@ -39,15 +39,15 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	}
 
 	@Override
-	public Peruutettava laskennantulokset(String hakuOid, String hakukohdeOid, Consumer<ValintatietoValinnanvaiheDTO> callback, Consumer<Throwable> failureCallback) {
+	public Peruutettava laskennantulokset(String hakuOid, String hakukohdeOid, Consumer<List<ValintatietoValinnanvaiheDTO>> callback, Consumer<Throwable> failureCallback) {
 		try {
 
 			String url = new StringBuilder("/valintalaskenta/hakukohde/").append(hakukohdeOid).append("/valinnanvaihe").toString();
 			return new PeruutettavaImpl(getWebClient()
 					.path(url)
 					.async()
-					.get(new Callback<ValintatietoValinnanvaiheDTO>(address, url, callback,
-							failureCallback, new TypeToken<ValintatietoValinnanvaiheDTO>() {
+					.get(new Callback<List<ValintatietoValinnanvaiheDTO>>(address, url, callback,
+							failureCallback, new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {
 					}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
