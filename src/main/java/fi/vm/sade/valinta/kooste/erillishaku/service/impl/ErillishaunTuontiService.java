@@ -16,6 +16,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -243,6 +244,10 @@ public class ErillishaunTuontiService {
         ValintatuloksenTila vt = valintatuloksenTila(rivi);
         if(vt != null && convertValintatuloksenTilaHakuTyypinMukaan(vt, tyyppi) == null) {
             return "Valintatuloksen tila ("+vt+") on virheellinen. " + rivi.toString();
+        }
+        String tilaVirhe = ValidoiTilatUtil.validoi(hakemuksenTila(rivi), vt, ilmoittautumisTila(rivi));
+        if(tilaVirhe != null) {
+            return tilaVirhe + ". " + rivi.toString();
         }
         return null;
     }
