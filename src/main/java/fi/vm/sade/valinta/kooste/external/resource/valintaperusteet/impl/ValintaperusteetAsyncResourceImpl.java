@@ -103,6 +103,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 	public Peruutettava haeValinnanvaiheetHakukohteelle(String hakukohdeOid,
 											Consumer<List<ValinnanVaiheJonoillaDTO>> callback,
 											Consumer<Throwable> failureCallback) {
+		LOG.info("Valinnanvaiheiden haku...");
 		try {
 			String url = new StringBuilder()
 					.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/")
