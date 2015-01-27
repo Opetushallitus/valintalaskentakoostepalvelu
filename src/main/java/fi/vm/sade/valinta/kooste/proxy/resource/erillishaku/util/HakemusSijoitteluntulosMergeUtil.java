@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
+import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
@@ -30,7 +31,7 @@ public class HakemusSijoitteluntulosMergeUtil {
             List<ValinnanVaiheJonoillaDTO> valinnanvaiheet,
             List<ValintatietoValinnanvaiheDTO> laskennantulokset,
             Map<Long,HakukohdeDTO> hakukohteetBySijoitteluAjoId,
-            List<ValintaTulosServiceDto> valintaTulosServiceDtos
+            List<Valintatulos> valintatulosDtos
     // <- empty map jos ei erillissijoittelun hakukohteita
     ) {
 

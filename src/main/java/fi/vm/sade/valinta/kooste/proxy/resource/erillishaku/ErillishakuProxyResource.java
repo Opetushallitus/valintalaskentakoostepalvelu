@@ -4,10 +4,12 @@ import com.google.common.collect.Maps;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
+import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -51,7 +53,7 @@ public class ErillishakuProxyResource {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishakuProxyResource.class);
 
     @Autowired
-    private ValintaTulosServiceAsyncResource valintaTulosService;
+    private TilaAsyncResource tilaResource;
     @Autowired
     private ApplicationAsyncResource applicationAsyncResource;
     @Autowired
@@ -88,7 +90,7 @@ public class ErillishakuProxyResource {
         final AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset = new AtomicReference<>();
         final AtomicReference<HakukohdeDTO> hakukohde = new AtomicReference<>();
         final AtomicReference<Map<Long,HakukohdeDTO>> hakukohteetBySijoitteluAjoId = new AtomicReference<>();
-        final AtomicReference<List<ValintaTulosServiceDto>> vtsValintatulokset = new AtomicReference<>();
+        final AtomicReference<List<Valintatulos>> vtsValintatulokset = new AtomicReference<>();
         AtomicInteger counter = new AtomicInteger(
                         1 +
                         //
@@ -163,7 +165,7 @@ public class ErillishakuProxyResource {
                 }
         );
 
-        valintaTulosService.getValintatulokset(hakuOid,hakukohdeOid, vts -> {
+        tilaResource.getValintatulokset(hakuOid, hakukohdeOid, vts -> {
             vtsValintatulokset.set(vts);
             mergeSuplier.get();
         }, poikkeus -> {
