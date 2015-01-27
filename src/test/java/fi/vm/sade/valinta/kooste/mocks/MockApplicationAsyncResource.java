@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -11,6 +12,7 @@ import jersey.repackaged.com.google.common.util.concurrent.Futures;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -39,6 +41,20 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
             return Futures.immediateFailedFuture(new RuntimeException("MockHakemuspalvelu on kytketty pois päältä!"));
         }
         return null;
+    }
+    private static AtomicReference<List<Hakemus>> resultReference = new AtomicReference<>();
+
+    public static void setResult(List<Hakemus> result) {
+        resultReference.set(result);
+    }
+    public static void clear() {
+        resultReference.set(null);
+    }
+
+    @Override
+    public Peruutettava getApplicationsByOid(final String hakuOid, final String hakukohdeOid, final Consumer<List<Hakemus>> callback, final Consumer<Throwable> failureCallback) {
+        callback.accept(resultReference.get());
+        return new PeruutettavaImpl(Futures.immediateCancelledFuture());
     }
 
     @Override
@@ -92,10 +108,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     public Future<List<Hakemus>> getApplicationsByOids(final Collection<String> hakemusOids) {
         throw new UnsupportedOperationException();
     }
-    @Override
-    public Peruutettava getApplicationsByOid(final String hakuOid, final String hakukohdeOid, final Consumer<List<Hakemus>> callback, final Consumer<Throwable> failureCallback) {
-        throw new UnsupportedOperationException();
-    }
+
     @Override
     public Peruutettava getApplicationAdditionalData(final String hakuOid, final String hakukohdeOid, final Consumer<List<ApplicationAdditionalDataDTO>> callback, final Consumer<Throwable> failureCallback) {
         throw new UnsupportedOperationException();

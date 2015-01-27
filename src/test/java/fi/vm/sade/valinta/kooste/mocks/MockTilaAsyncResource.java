@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.mocks;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import jersey.repackaged.com.google.common.util.concurrent.Futures;
 
@@ -9,6 +10,7 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.springframework.stereotype.Service;
@@ -28,10 +30,17 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
             this.erillishaunHakijat = erillishaunHakijat;
         }
     }
+    private static AtomicReference<List<Valintatulos>> resultReference = new AtomicReference<>();
 
+    public static void setResult(List<Valintatulos> result) {
+        resultReference.set(result);
+    }
+    public static void clear() {
+        resultReference.set(null);
+    }
     @Override
     public void getValintatulokset(String hakuOid, String hakukohdeOid, Consumer<List<Valintatulos>> valintatulokset, Consumer<Throwable> poikkeus) {
-        throw new UnsupportedOperationException();
+        valintatulokset.accept(resultReference.get());
     }
 
     public final List<Result> results = new ArrayList<>();

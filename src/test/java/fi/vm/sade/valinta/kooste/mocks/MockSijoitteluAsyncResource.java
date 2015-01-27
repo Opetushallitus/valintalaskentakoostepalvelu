@@ -10,17 +10,33 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.springframework.stereotype.Service;
 
 @Service
 public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
+
+    private static final AtomicReference<HakukohdeDTO> resultReference = new AtomicReference<>();
+
+    public static void setResult(HakukohdeDTO result) {
+        resultReference.set(result);
+    }
+    public static void clear() {
+        resultReference.set(null);
+    }
+
+    @Override
+    public void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
+        hakukohde.accept(resultReference.get());
+    }
 
     @Override
     public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
@@ -45,11 +61,6 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
 
     @Override
     public Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
         throw new UnsupportedOperationException();
     }
 

@@ -116,6 +116,7 @@ public class ErillishakuProxyResource {
         // kertaluokassa nopeampaa kuin futureilla, koska säikeet ei blokkaile
         applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid,
                 h -> {
+                    LOG.info("Haetaan hakemuksia");
                     hakemukset.set(h);
                     mergeSuplier.get();
                 },
@@ -133,6 +134,7 @@ public class ErillishakuProxyResource {
 
         valintaperusteetAsyncResource.haeValinnanvaiheetHakukohteelle(hakukohdeOid,
                 v -> {
+                    LOG.info("Haetaan valinnanvaiheita");
                     valinnanvaiheet.set(v);
                     mergeSuplier.get();
                 },
@@ -150,6 +152,7 @@ public class ErillishakuProxyResource {
 
         sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(hakuOid, hakukohdeOid,
                 s -> {
+                    LOG.info("Haetaan sijoittelusta hakukohteen tiedot");
                     hakukohde.set(s);
                     mergeSuplier.get();
                 },
@@ -166,6 +169,7 @@ public class ErillishakuProxyResource {
         );
 
         tilaResource.getValintatulokset(hakuOid, hakukohdeOid, vts -> {
+            LOG.info("Haetaan sijoittelusta valintatulokset");
             vtsValintatulokset.set(vts);
             mergeSuplier.get();
         }, poikkeus -> {
@@ -181,6 +185,7 @@ public class ErillishakuProxyResource {
 
         valintalaskentaAsyncResource.laskennantulokset(hakuOid, hakukohdeOid,
                 v -> {
+                    LOG.info("Haetaan valintalaskennasta tulokset");
                     valintatulokset.set(v);
 
                     Set<Long> sijoitteluAjoIdSetti =

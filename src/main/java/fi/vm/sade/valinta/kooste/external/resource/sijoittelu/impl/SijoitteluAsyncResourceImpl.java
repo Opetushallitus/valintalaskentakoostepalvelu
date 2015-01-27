@@ -63,7 +63,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 				.accept(MediaType.WILDCARD)
 				.async().get(new Callback<HakukohdeDTO>(
 				address,url, hakukohde,poikkeus,
-				new TypeToken<List<HakukohdeDTO>>() { }.getType()));
+				new TypeToken<HakukohdeDTO>() { }.getType()));
 	}
 
 	@Override
