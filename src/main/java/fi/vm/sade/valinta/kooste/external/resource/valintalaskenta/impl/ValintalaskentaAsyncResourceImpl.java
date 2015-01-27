@@ -42,7 +42,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	public Peruutettava laskennantulokset(String hakuOid, String hakukohdeOid, Consumer<List<ValintatietoValinnanvaiheDTO>> callback, Consumer<Throwable> failureCallback) {
 		try {
 
-			String url = new StringBuilder("/valintalaskenta/hakukohde/").append(hakukohdeOid).append("/valinnanvaihe").toString();
+			String url = new StringBuilder("/hakukohde/").append(hakukohdeOid).append("/valinnanvaihe").toString();
 			return new PeruutettavaImpl(getWebClient()
 					.path(url)
 					.async()
