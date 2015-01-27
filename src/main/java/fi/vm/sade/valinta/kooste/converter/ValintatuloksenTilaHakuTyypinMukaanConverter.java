@@ -24,10 +24,10 @@ public class ValintatuloksenTilaHakuTyypinMukaanConverter {
         korkeakouluToToinenAsteMappaus.put(KESKEN,KESKEN);
         korkeakouluToToinenAsteMappaus.put(VASTAANOTTANUT_SITOVASTI,VASTAANOTTANUT);
         korkeakouluToToinenAsteMappaus.put(VASTAANOTTANUT,VASTAANOTTANUT);
-        korkeakouluToToinenAsteMappaus.put(ILMOITETTU,null);
-        korkeakouluToToinenAsteMappaus.put(VASTAANOTTANUT_LASNA,null);
-        korkeakouluToToinenAsteMappaus.put(VASTAANOTTANUT_POISSAOLEVA,null);
-        korkeakouluToToinenAsteMappaus.put(EHDOLLISESTI_VASTAANOTTANUT,null);
+        korkeakouluToToinenAsteMappaus.put(ILMOITETTU,ILMOITETTU);
+        korkeakouluToToinenAsteMappaus.put(VASTAANOTTANUT_LASNA,VASTAANOTTANUT);
+        korkeakouluToToinenAsteMappaus.put(VASTAANOTTANUT_POISSAOLEVA,VASTAANOTTANUT);
+        korkeakouluToToinenAsteMappaus.put(EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT);
 
         // Varmistaa etta korkeakoululle ei vieda toisen asteen tyyppeja
         Map<ValintatuloksenTila, ValintatuloksenTila> toinenAsteToKorkeakouluMappaus = Maps.newEnumMap(ValintatuloksenTila.class);
@@ -37,10 +37,10 @@ public class ValintatuloksenTilaHakuTyypinMukaanConverter {
         toinenAsteToKorkeakouluMappaus.put(KESKEN,KESKEN);
         toinenAsteToKorkeakouluMappaus.put(VASTAANOTTANUT_SITOVASTI,VASTAANOTTANUT_SITOVASTI);
         toinenAsteToKorkeakouluMappaus.put(VASTAANOTTANUT,VASTAANOTTANUT_SITOVASTI);
-        toinenAsteToKorkeakouluMappaus.put(ILMOITETTU,null);
-        toinenAsteToKorkeakouluMappaus.put(VASTAANOTTANUT_LASNA,null);
-        toinenAsteToKorkeakouluMappaus.put(VASTAANOTTANUT_POISSAOLEVA,null);
-        toinenAsteToKorkeakouluMappaus.put(EHDOLLISESTI_VASTAANOTTANUT,null);
+        toinenAsteToKorkeakouluMappaus.put(ILMOITETTU,ILMOITETTU);
+        toinenAsteToKorkeakouluMappaus.put(VASTAANOTTANUT_LASNA,VASTAANOTTANUT);
+        toinenAsteToKorkeakouluMappaus.put(VASTAANOTTANUT_POISSAOLEVA,VASTAANOTTANUT);
+        toinenAsteToKorkeakouluMappaus.put(EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT);
 
         Map<Hakutyyppi,Map<ValintatuloksenTila, ValintatuloksenTila>> m = Maps.newEnumMap(Hakutyyppi.class);
         m.put(Hakutyyppi.KORKEAKOULU, toinenAsteToKorkeakouluMappaus);
@@ -49,6 +49,9 @@ public class ValintatuloksenTilaHakuTyypinMukaanConverter {
     }
 
     public static ValintatuloksenTila convertValintatuloksenTilaHakuTyypinMukaan(ValintatuloksenTila tila, Hakutyyppi hakutyyppi) {
+        if(tila == null || hakutyyppi == null) {
+            return tila;
+        }
         return tyyppiTilaMappaus.get(hakutyyppi).get(tila);
     }
 }

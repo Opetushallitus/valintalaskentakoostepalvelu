@@ -242,10 +242,11 @@ public class ErillishaunTuontiService {
         }
         // Valintatuloksen tila on hakua vastaava
         ValintatuloksenTila vt = valintatuloksenTila(rivi);
-        if(vt != null && convertValintatuloksenTilaHakuTyypinMukaan(vt, tyyppi) == null) {
+        ValintatuloksenTila vtc = convertValintatuloksenTilaHakuTyypinMukaan(vt, tyyppi);
+        if(vt != null && vtc == null) {
             return "Valintatuloksen tila ("+vt+") on virheellinen. " + rivi.toString();
         }
-        String tilaVirhe = ValidoiTilatUtil.validoi(hakemuksenTila(rivi), vt, ilmoittautumisTila(rivi));
+        String tilaVirhe = ValidoiTilatUtil.validoi(hakemuksenTila(rivi), vtc, ilmoittautumisTila(rivi));
         if(tilaVirhe != null) {
             return tilaVirhe + ". " + rivi.toString();
         }
