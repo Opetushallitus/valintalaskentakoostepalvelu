@@ -13,6 +13,8 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.HakemusSijoitteluntulosMergeDto;
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.HakemusSijoitteluntulosMergeUtil.*;
+
+import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.slf4j.Logger;
@@ -213,7 +215,7 @@ public class ErillishakuProxyResource {
                 }
         );
     }
-    private void r(AsyncResponse asyncResponse, List<HakemusSijoitteluntulosMergeDto> msg) {
+    private void r(AsyncResponse asyncResponse, List<MergeValinnanvaiheDTO> msg) {
         asyncResponse.resume(Response.ok(msg).build());
     }
 
