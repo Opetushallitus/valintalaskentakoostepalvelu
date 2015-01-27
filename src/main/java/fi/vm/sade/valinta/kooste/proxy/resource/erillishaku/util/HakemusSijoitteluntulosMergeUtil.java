@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.HakemusSijoittel
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeHakemusDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValintatapajonoDTO;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
@@ -172,8 +173,14 @@ public class HakemusSijoitteluntulosMergeUtil {
     private static MergeHakemusDTO luo(Optional<Hakemus> hakemus) {
         MergeHakemusDTO dto = new MergeHakemusDTO();
         if(hakemus.isPresent()) {
+            HakemusWrapper wrapper = new HakemusWrapper(hakemus.get());
             dto.setLoytyiHakemuksista(true);
-            // TODO hakemuksen tiedot
+            dto.setEtunimi(wrapper.getEtunimi());
+            dto.setSukunimi(wrapper.getSukunimi());
+            dto.setSahkoposti(wrapper.getSahkopostiOsoite());
+            dto.setHakemusOid(hakemus.get().getOid());
+            dto.setHakijaOid(hakemus.get().getPersonOid());
+            dto.setHenkilotunnus(wrapper.getHenkilotunnus());
         }
         return dto;
     }
