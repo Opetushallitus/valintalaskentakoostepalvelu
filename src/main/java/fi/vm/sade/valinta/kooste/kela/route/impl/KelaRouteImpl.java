@@ -67,7 +67,7 @@ import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.LogEntry;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
+//import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 
@@ -210,8 +210,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 											.add(new Poikkeus(
 													Poikkeus.TARJONTA,
 													"Haun haku oid:lla.",
-													new Oid(hakuOid,
-															Poikkeus.HAKUOID)));
+													hakuOid));
 									throw e;
 								}
 								try {
@@ -223,8 +222,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 													Poikkeus.KOODISTO,
 													"Lukuvuoden haku haulle koodistosta URI:lla "
 															+ haku.getKoulutuksenAlkamiskausiUri(),
-													new Oid(hakuOid,
-															Poikkeus.HAKUOID)));
+													hakuOid));
 									throw e;
 								}
 							}
@@ -270,9 +268,8 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 													"Haun tyypille "
 															+ hakutyyppiUri
 															+ " ei saatu arvoa koodistosta",
-													new Oid(
-															hakutyyppiUri,
-															Poikkeus.KOODISTOURI)));
+															hakutyyppiUri
+															));
 									throw e;
 								}
 								String hakutyypinArvo = luontiJaHaut
@@ -306,9 +303,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                                     "Haun kohdejoukolle "
                                                             + haunKohdejoukkoUri
                                                             + " ei saatu arvoa koodistosta",
-                                                    new Oid(
-                                                            haunKohdejoukkoUri,
-                                                            Poikkeus.KOODISTOURI)));
+                                                            haunKohdejoukkoUri));
                                     throw e;
                                 }
                                 String haunKohdejoukonArvo = luontiJaHaut
@@ -335,9 +330,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 											.getProsessi()
 											.getPoikkeuksetUudelleenYrityksessa()
 											.add(new Poikkeus(
-													Poikkeus.KOOSTEPALVELU, virhe,new Oid(
-															haunKohdejoukonArvo,
-															Poikkeus.KOODISTOURI)));
+													Poikkeus.KOOSTEPALVELU, virhe,haunKohdejoukonArvo));
 									throw new RuntimeException(virhe);
 								}
 								haut.add(new TunnistettuHaku(haku.getAsTarjontaHakuDTO(), kkhaku, lisahaku));
@@ -421,8 +414,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 													Poikkeus.SIJOITTELU,
 													"Vastaanottaneiden haku sijoittelusta ep�onnistui haulle, koska: "
 															+ e.getMessage(),
-													new Oid(haku.getOid(),
-															Poikkeus.HAKUOID)));
+													haku.getOid()));
 									throw new RuntimeException(e);
 								}
 
