@@ -41,8 +41,4 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
         return null;
     }
 
-    @Override
-    public void getValintatulokset(String hakuOid, String hakukohdeOid, Consumer<List<Valintatulos>> valintatulokset, Consumer<Throwable> poikkeus) {
-
-    }
 }
