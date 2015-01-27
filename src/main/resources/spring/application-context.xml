@@ -55,6 +55,16 @@
 
 	<bean id="jacksonMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
 
+	<jaxrs-client:client id="KelaServiceRestClient"
+		address="${valintalaskentakoostepalvelu.rajapinnat.kela-service.rest.url:not_defined}"
+		serviceClass="fi.vm.sade.organisaatio.resource.api.KelaResource"
+		inheritHeaders="true">
+		<jaxrs-client:providers>
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
+			<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+		</jaxrs-client:providers>
+	</jaxrs-client:client>
+	
 	<jaxrs-client:client id="viestintapalveluClient"
 		name="ViestintapalveluRestClient"
 		serviceClass="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource"

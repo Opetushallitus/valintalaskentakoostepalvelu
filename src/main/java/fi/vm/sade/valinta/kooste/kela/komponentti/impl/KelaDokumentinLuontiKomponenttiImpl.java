@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.kela.komponentti.impl;
 
 import static fi.vm.sade.valinta.kooste.kela.route.KelaRoute.PROPERTY_AINEISTONNIMI;
 import static fi.vm.sade.valinta.kooste.kela.route.KelaRoute.PROPERTY_ORGANISAATIONNIMI;
+import static fi.vm.sade.valinta.kooste.kela.route.KelaRoute.PROPERTY_SIIRTOTUNNUS;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -37,7 +38,9 @@ public class KelaDokumentinLuontiKomponenttiImpl {
 	//
 			@Property(PROPERTY_AINEISTONNIMI) String aineistonNimi,
 			//
-			@Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi)
+			@Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi,
+			//
+			@Property(PROPERTY_SIIRTOTUNNUS) String siirtotunnus)
 			throws Exception {
 
 		int count = rivit.size();
@@ -46,27 +49,29 @@ public class KelaDokumentinLuontiKomponenttiImpl {
 
 		for (TKUVAYHVA t : rivit) {
 			streams.add(new ByteArrayInputStream(addLineEnding(t.toByteArray(),
-					createBuffer(200))));
+					createBuffer())));
 		}
 
 		Date ajopvm = new Date();
 		streams.addFirst(new ByteArrayInputStream(addLineEnding(
 				new TKUVAALKU.Builder().setAjopaivamaara(ajopvm)
+						.setSiirtotunnus(siirtotunnus)
 						.setAineistonnimi(aineistonNimi)
 						.setOrganisaationimi(organisaationNimi).build()
-						.toByteArray(), createBuffer(150))));
+						.toByteArray(), createBuffer())));
 		streams.addLast(new ByteArrayInputStream(addLineEnding(
 				new TKUVALOPPU.Builder().setAjopaivamaara(ajopvm)
+						.setSiirtotunnus(siirtotunnus)
 						.setTietuelukumaara(count).build().toByteArray(),
-				createBuffer(150))));
+				createBuffer())));
 
 		InputStream input = new SequenceInputStream(
 				Collections.enumeration(streams));
 		return IOUtils.toByteArray(input);
 	}
 
-	private ByteBuffer createBuffer(int i) {
-		return ByteBuffer.allocate(i + KelaUtil.RIVINVAIHTO.length);
+	private ByteBuffer createBuffer() {
+		return ByteBuffer.allocate(200 + KelaUtil.RIVINVAIHTO.length);
 	}
 
 	//

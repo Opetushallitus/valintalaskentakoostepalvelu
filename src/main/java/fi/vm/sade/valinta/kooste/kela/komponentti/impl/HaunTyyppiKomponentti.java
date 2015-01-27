@@ -64,4 +64,34 @@ public class HaunTyyppiKomponentti {
 				+ koodiUri + " ja käytetylle versiolle " + koodiVersio);
 
 	}
+	
+	public String haunKohdejoukko(String haunKohdejoukkoUri) {
+		LOG.error("Tehdään koodistokutsu tuntemattomalle haunKohdejoukkoUri:lle {}",
+				haunKohdejoukkoUri);
+		String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(haunKohdejoukkoUri);
+		Integer koodiVersio = TarjontaUriToKoodistoUtil
+				.stripVersion(haunKohdejoukkoUri);
+		SearchKoodisCriteriaType koodistoHaku = TarjontaUriToKoodistoUtil
+				.toSearchCriteria(koodiUri, koodiVersio);
+		List<KoodiType> koodiTypes = koodiService.searchKoodis(koodistoHaku);
+		if (koodiTypes.isEmpty()) {
+			throw new KoodistoException(
+					"Koodisto palautti tyhjän koodijoukon urille " + koodiUri
+							+ " ja käytetylle versiolle " + koodiVersio);
+		}
+		for (KoodiType koodi : koodiTypes) {
+			String arvo = koodi.getKoodiArvo();
+			if (arvo != null) {
+				LOG.error("HaunTyyppiUri {} == {}", haunKohdejoukkoUri, arvo);
+				return arvo;
+			} else {
+				LOG.error(
+						"Koodistosta palautui null arvo uri:lle {}, versio {}",
+						new Object[] { koodiUri, koodiVersio });
+			}
+		}
+		throw new KoodistoException("Koodistosta ei saatu arvoa urille "
+				+ koodiUri + " ja käytetylle versiolle " + koodiVersio);
+
+	}
 }

@@ -66,6 +66,10 @@ public interface KelaRoute {
 	 */
 	final String PROPERTY_AINEISTONNIMI = "aineistonNimi";
 	/**
+	 * Property siirtoTunnus
+	 */
+	final String PROPERTY_SIIRTOTUNNUS = "siirtoTunnus";	
+	/**
 	 * Property organisaationNimi
 	 */
 	final String PROPERTY_ORGANISAATIONNIMI = "organisaationNimi";
