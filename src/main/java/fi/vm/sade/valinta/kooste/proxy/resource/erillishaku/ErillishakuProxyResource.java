@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.HakemusSijoitteluntulosMergeDto;
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.HakemusSijoitteluntulosMergeUtil.*;
 
@@ -49,8 +50,8 @@ import java.util.stream.Collectors;
 public class ErillishakuProxyResource {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishakuProxyResource.class);
 
-    //@Autowired
-    //private ValintaTulosServiceAsyncResource valintaTulosService;
+    @Autowired
+    private ValintaTulosServiceAsyncResource valintaTulosService;
     @Autowired
     private ApplicationAsyncResource applicationAsyncResource;
     @Autowired
@@ -87,7 +88,7 @@ public class ErillishakuProxyResource {
         final AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset = new AtomicReference<>();
         final AtomicReference<HakukohdeDTO> hakukohde = new AtomicReference<>();
         final AtomicReference<Map<Long,HakukohdeDTO>> hakukohteetBySijoitteluAjoId = new AtomicReference<>();
-
+        final AtomicReference<List<ValintaTulosServiceDto>> vtsValintatulokset = new AtomicReference<>();
         AtomicInteger counter = new AtomicInteger(
                         1 +
                         //
@@ -96,6 +97,8 @@ public class ErillishakuProxyResource {
                         1 +
                         //
                         1 +
+                        // valinta-tulos-service
+                        1 +
                         //
                 1 // <- erillissijoittelu
         );
@@ -103,7 +106,7 @@ public class ErillishakuProxyResource {
         Supplier<Void> mergeSuplier = () -> {
             if(counter.decrementAndGet() == 0) {
                 LOG.error("Saatiin vastaus muodostettua. Palautetaan se asynkronisena paluuarvona.");
-                r(asyncResponse,merge(hakemukset.get(),hakukohde.get(),valinnanvaiheet.get(),valintatulokset.get(),hakukohteetBySijoitteluAjoId.get()));
+                r(asyncResponse,merge(hakemukset.get(),hakukohde.get(),valinnanvaiheet.get(),valintatulokset.get(),hakukohteetBySijoitteluAjoId.get(),vtsValintatulokset.get()));
             }
             return null;
         };
@@ -159,6 +162,20 @@ public class ErillishakuProxyResource {
                     }
                 }
         );
+
+        valintaTulosService.getValintatulokset(hakuOid,hakukohdeOid, vts -> {
+            vtsValintatulokset.set(vts);
+            mergeSuplier.get();
+        }, poikkeus -> {
+            try {
+                asyncResponse.resume(Response.serverError()
+                        .entity("Erillishakuproxy -palvelukutsu epäonnistui valintatulosservice-palvelun virheeseen: " + poikkeus.getMessage())
+                        .build());
+            } catch (Exception e) {
+                // kilpailutilanne timeoutin ja virheen kanssa. Oikeastaan sama mitä käyttäjälle näytetään tässä kohtaa.
+                LOG.error("Valintatulosservice-palvelun virhe tuli yhtäaikaa timeoutin kanssa! {}", e.getMessage());
+            }
+        });
 
         valintalaskentaAsyncResource.laskennantulokset(hakuOid, hakukohdeOid,
                 v -> {

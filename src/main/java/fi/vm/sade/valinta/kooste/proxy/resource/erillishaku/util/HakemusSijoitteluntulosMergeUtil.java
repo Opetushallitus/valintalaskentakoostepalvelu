@@ -5,6 +5,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.HakemusSijoitteluntulosMergeDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeHakemusDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
@@ -28,7 +29,8 @@ public class HakemusSijoitteluntulosMergeUtil {
             HakukohdeDTO hakukohdeDTO,
             List<ValinnanVaiheJonoillaDTO> valinnanvaiheet,
             List<ValintatietoValinnanvaiheDTO> laskennantulokset,
-            Map<Long,HakukohdeDTO> hakukohteetBySijoitteluAjoId
+            Map<Long,HakukohdeDTO> hakukohteetBySijoitteluAjoId,
+            List<ValintaTulosServiceDto> valintaTulosServiceDtos
     // <- empty map jos ei erillissijoittelun hakukohteita
     ) {
 
