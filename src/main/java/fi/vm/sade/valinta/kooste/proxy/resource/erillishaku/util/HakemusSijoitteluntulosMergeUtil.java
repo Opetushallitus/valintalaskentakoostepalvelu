@@ -17,6 +17,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanva
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 import scala.annotation.meta.companionClass;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,7 @@ public class HakemusSijoitteluntulosMergeUtil {
                     .stream()
                     .map(jono -> {
                         MergeValintatapajonoDTO jonoDTO = luoSijoittelunTiedoista(jono);
-                        jonoDTO.setHakemukset(mergaaSijoittelusta(hakemukset, jono.getHakemukset()));
+                        jonoDTO.setHakemukset(mergaaSijoittelusta(hakemukset, jono.getHakemukset(), valintatulosDtos));
                         return jonoDTO;
                     }).collect(Collectors.toList());
             dto.setValintatapajonot(valintatapajonot);
@@ -65,7 +66,6 @@ public class HakemusSijoitteluntulosMergeUtil {
                 List<MergeValintatapajonoDTO> valintatapajonot = vv.getValintatapajonot().stream().map(jono -> {
                     MergeValintatapajonoDTO jonoDTO = luoLaskennanTiedoista(jono);
                     jonoDTO.setHakemukset(mergaaLaskennasta(hakemukset, jono.getJonosijat()));
-                    // TODO mergaa erillissijoittelut
                     if(jonoDTO.getSijoitteluajoId() != null && hakukohteetBySijoitteluAjoId.containsKey(jonoDTO.getSijoitteluajoId())) {
                         Optional<ValintatapajonoDTO> sJono = hakukohteetBySijoitteluAjoId.get(jonoDTO.getSijoitteluajoId())
                                 .getValintatapajonot()
@@ -73,7 +73,7 @@ public class HakemusSijoitteluntulosMergeUtil {
                                 .filter(j -> j.getOid().equals(jonoDTO.getOid()))
                                 .findFirst();
                         if(sJono.isPresent()) {
-                            asetaSijoittelunTiedoista(jonoDTO, sJono.get());
+                            asetaSijoittelunTiedoista(jonoDTO, sJono.get(), valintatulosDtos);
                         }
                     }
                     return jonoDTO;
@@ -97,7 +97,7 @@ public class HakemusSijoitteluntulosMergeUtil {
                             .findFirst();
 
                     if (sJono.isPresent()) {
-                        asetaSijoittelunTiedoista(jonoDTO, sJono.get());
+                        asetaSijoittelunTiedoista(jonoDTO, sJono.get(), valintatulosDtos);
                     }
                     return jonoDTO;
                 }).collect(Collectors.toList());
@@ -142,7 +142,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         return jonoDTO;
     }
 
-    private static void asetaSijoittelunTiedoista(MergeValintatapajonoDTO jonoDTO, ValintatapajonoDTO jono) {
+    private static void asetaSijoittelunTiedoista(MergeValintatapajonoDTO jonoDTO, ValintatapajonoDTO jono, List<Valintatulos> valintatulosDtos) {
         jonoDTO.setAlinHyvaksyttyPistemaara(jono.getAlinHyvaksyttyPistemaara());
         jonoDTO.setAloituspaikat(jono.getAloituspaikat());
         jonoDTO.setEiVarasijatayttoa(jono.getEiVarasijatayttoa());
@@ -156,7 +156,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         jonoDTO.setTasasijasaanto(jono.getTasasijasaanto());
         jonoDTO.setVaralla(jono.getVaralla());
 
-        mergaaLaskentaJaSijoittelu(jonoDTO.getHakemukset(), jono.getHakemukset());
+        mergaaLaskentaJaSijoittelu(jonoDTO.getHakemukset(), jono.getHakemukset(), valintatulosDtos);
     }
 
     private static MergeValintatapajonoDTO luoLaskennanTiedoista(ValintatietoValintatapajonoDTO jono) {
@@ -172,7 +172,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         return jonoDTO;
     }
 
-    private static List<MergeHakemusDTO> mergaaSijoittelusta(List<Hakemus> hakemukset, List<HakemusDTO> sijoittelunHakemukset) {
+    private static List<MergeHakemusDTO> mergaaSijoittelusta(List<Hakemus> hakemukset, List<HakemusDTO> sijoittelunHakemukset, List<Valintatulos> valintatulosDtos) {
         final Map<String, Hakemus> hakemusOidMap = hakemusOidMap(hakemukset);
         final Set<String> sijoitteluOidSet = hakemusOiditSijoittelusta(sijoittelunHakemukset);
 
@@ -182,7 +182,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         // Asetetaan sijoittelun tulokset
         List<MergeHakemusDTO> mergatut = sijoittelunHakemukset
                 .stream()
-                .map(h -> asetaSijoittelunTiedot(luo(Optional.ofNullable(hakemusOidMap.get(h.getHakemusOid()))), h))
+                .map(h -> asetaSijoittelunTiedot(luo(Optional.ofNullable(hakemusOidMap.get(h.getHakemusOid()))), h, haeValintatulos(valintatulosDtos, h)))
                 .collect(Collectors.toList());
 
         // Luodaan sijoittelun tuloksista puuttuvat hakemukset
@@ -220,18 +220,25 @@ public class HakemusSijoitteluntulosMergeUtil {
         return mergatut;
     }
 
-    private static void mergaaLaskentaJaSijoittelu(List<MergeHakemusDTO> hakemukset, List<HakemusDTO> sijoittelunHakemukset) {
+    private static void mergaaLaskentaJaSijoittelu(List<MergeHakemusDTO> hakemukset, List<HakemusDTO> sijoittelunHakemukset, List<Valintatulos> valintatulosDtos) {
         final Set<String> mergatutOidSet = hakemusOiditMergatuista(hakemukset);
 
         sijoittelunHakemukset.forEach(h -> {
             if(!mergatutOidSet.contains(h.getHakemusOid())) {
-                hakemukset.add(asetaSijoittelunTiedot(luo(Optional.empty()), h));
+                hakemukset.add(asetaSijoittelunTiedot(luo(Optional.empty()), h, haeValintatulos(valintatulosDtos, h)));
             } else {
                 MergeHakemusDTO mergeHakemusDTO = hakemukset.stream().filter(hakemus -> hakemus.getHakemusOid().equals(h.getHakemusOid())).findFirst().get();
-                asetaSijoittelunTiedot(mergeHakemusDTO, h);
+                asetaSijoittelunTiedot(mergeHakemusDTO, h, haeValintatulos(valintatulosDtos, h));
             }
         });
 
+    }
+
+    private static Optional<Valintatulos> haeValintatulos(List<Valintatulos> valintatulosDtos, HakemusDTO h) {
+        return valintatulosDtos
+                .parallelStream()
+                .filter(v -> v.getHakemusOid().equals(h.getHakemusOid()) && v.getValintatapajonoOid().equals(h.getValintatapajonoOid()))
+                .findFirst();
     }
 
     private static Set<String> puuttuvatOidit(Set<String> hakemusOidit, Set<String> vertailtava) {
@@ -253,7 +260,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         return dto;
     }
 
-    private static MergeHakemusDTO asetaSijoittelunTiedot(MergeHakemusDTO dto, HakemusDTO h) {
+    private static MergeHakemusDTO asetaSijoittelunTiedot(MergeHakemusDTO dto, HakemusDTO h, Optional<Valintatulos> valintatulos) {
 
         // Asetetaan perustiedot jos hakemusta ei löytynyt
         if(!dto.isLoytyiHakemuksista() && !dto.isLoytyiLaskennasta()) {
@@ -269,8 +276,13 @@ public class HakemusSijoitteluntulosMergeUtil {
         dto.setTasasijaJonosija(h.getTasasijaJonosija());
         dto.setPaasyJaSoveltuvuusKokeenTulos(h.getPaasyJaSoveltuvuusKokeenTulos());
         dto.setPisteet(h.getPisteet());
+        dto.setHakemuksentila(h.getTila());
 
-        // TODO valintatulokset
+        if(valintatulos.isPresent()) {
+            dto.setValintatuloksentila(valintatulos.get().getTila());
+            dto.setIlmoittautumistila(valintatulos.get().getIlmoittautumisTila());
+            dto.setJulkaistavissa(valintatulos.get().getJulkaistavissa());
+        }
         return dto;
     }
 

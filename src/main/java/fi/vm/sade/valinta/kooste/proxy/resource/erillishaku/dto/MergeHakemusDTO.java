@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto;
 
-import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
 
 import java.math.BigDecimal;
@@ -38,6 +38,7 @@ public class MergeHakemusDTO {
     private int tasasijaJonosija;
     private int varasijanNumero;
     private int todellinenJonosija;
+    private boolean julkaistavissa = false;
 
     // Laskennan tiedot
     private SortedSet<JarjestyskriteeritulosDTO> jarjestyskriteerit = new TreeSet<JarjestyskriteeritulosDTO>();
@@ -227,5 +228,13 @@ public class MergeHakemusDTO {
 
     public void setHylattyValisijoittelussa(boolean hylattyValisijoittelussa) {
         this.hylattyValisijoittelussa = hylattyValisijoittelussa;
+    }
+
+    public boolean isJulkaistavissa() {
+        return julkaistavissa;
+    }
+
+    public void setJulkaistavissa(boolean julkaistavissa) {
+        this.julkaistavissa = julkaistavissa;
     }
 }
