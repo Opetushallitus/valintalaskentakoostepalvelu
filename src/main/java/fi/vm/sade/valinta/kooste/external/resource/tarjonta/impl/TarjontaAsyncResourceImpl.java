@@ -30,7 +30,7 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
 	@Override
 	public Future<HakuV1RDTO> haeHaku(String hakuOid) {
 		String url = "/v1/haku/"+hakuOid+"/";
-		return WebClient.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async().get(HakuV1RDTO.class);
@@ -39,7 +39,7 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
 	@Override
 	public Future<HakukohdeDTO> haeHakukohde(String hakukohdeOid) {
 		String url = "/hakukohde/"+hakukohdeOid+"/";
-		return WebClient.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async().get(HakukohdeDTO.class);

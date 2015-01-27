@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.dto;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -29,6 +30,10 @@ public class ErillishakuProsessiDTO extends DokumenttiProsessi implements
 		inkrementoiTehtyjaToita();
 	}
 
+	public boolean isValmis() {
+		return getDokumenttiId() != null;
+	}
+
 	public void valmistui(String dokumentId) {
 		setDokumenttiId(dokumentId);
 	}
@@ -36,12 +41,24 @@ public class ErillishakuProsessiDTO extends DokumenttiProsessi implements
 	public boolean isKeskeytetty() {
 		return !getPoikkeukset().isEmpty();
 	}
-	
+
+	public void keskeyta(Poikkeus syy) {
+		if (getDokumenttiId() == null) {
+			getPoikkeukset().add(
+					syy);
+		}
+	}
+
+	public void keskeyta(Collection<Poikkeus> syyt) {
+		if (getDokumenttiId() == null) {
+			getPoikkeukset().addAll(syyt);
+		}
+	}
 	@Override
 	public void keskeyta(String syy) {
 		if (getDokumenttiId() == null) {
 			getPoikkeukset().add(
-					new Poikkeus(syy,syy));
+					Poikkeus.koostepalvelupoikkeus(syy));
 		}
 	}
 
@@ -60,7 +77,7 @@ public class ErillishakuProsessiDTO extends DokumenttiProsessi implements
     }
 
     public void keskeyta() {
-		if (getDokumenttiId() == null) {
+		if (getDokumenttiId() == null && getPoikkeukset().isEmpty()) {
 			getPoikkeukset().add(
 					new Poikkeus(Poikkeus.KOOSTEPALVELU, StringUtils.EMPTY));
 		}

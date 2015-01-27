@@ -6,9 +6,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,24 +32,24 @@ public class ErillishakuExcel {
 
 	private final static Logger LOG = LoggerFactory.getLogger(ErillishakuExcel.class);
 	private final Excel excel;
-	
+
 	public ErillishakuExcel(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija) {
-		this(tyyppi, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.emptyList(),kuuntelija);
+		this(tyyppi, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.emptyList(), kuuntelija);
 	}
-	
+
 	public ErillishakuExcel(Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
-			String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit) {
-		this(tyyppi, hakuNimi,hakukohdeNimi,tarjoajaNimi,erillishakurivit,new ErillishakuRiviKuuntelija() {
-			
+							String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit) {
+		this(tyyppi, hakuNimi, hakukohdeNimi, tarjoajaNimi, erillishakurivit, new ErillishakuRiviKuuntelija() {
 			@Override
 			public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
-				
+
 			}
 		});
 	}
+
 	public ErillishakuExcel(final Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
-			String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit,
-			ErillishakuRiviKuuntelija kuuntelija) {
+							String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit,
+							ErillishakuRiviKuuntelija kuuntelija) {
 		erillishakurivit = Lists.newArrayList(erillishakurivit);
 		List<Rivi> rivit = Lists.newArrayList();
 		Collection<Collection<Arvo>> esittelyt = Lists.newArrayList();
@@ -57,13 +59,17 @@ public class ErillishakuExcel {
 		esittelyt.add(Arrays
 				.asList(new TekstiArvo(tarjoajaNimi, true, false, 4)));
 		esittelyt.add(Arrays.asList(new TekstiArvo(StringUtils.EMPTY)));
-		esittelyt.add(Arrays.asList(new TekstiArvo("Sukunimi"), new TekstiArvo(
-				"Etunimi"), new TekstiArvo("Henkilötunnus"), new TekstiArvo(
-				"Syntymäaika"), new TekstiArvo("Hakemuksentila"),
-				new TekstiArvo("Vastaanottotila"), new TekstiArvo(
-						"Ilmoittautumistila")
-		,new TekstiArvo(
-						"Julkaistavissa")));
+		esittelyt.add(Arrays.asList(
+			new TekstiArvo("Sukunimi"),
+			new TekstiArvo("Etunimi"),
+			new TekstiArvo("Henkilötunnus"),
+			new TekstiArvo("Sähköposti"),
+			new TekstiArvo("Syntymäaika"),
+			new TekstiArvo("Hakija-oid"),
+			new TekstiArvo("Hakemuksentila"),
+			new TekstiArvo("Vastaanottotila"),
+			new TekstiArvo("Ilmoittautumistila"),
+			new TekstiArvo("Julkaistavissa")));
 		Collections.sort(erillishakurivit, new Comparator<ErillishakuRivi>() {
 			@Override
 			public int compare(ErillishakuRivi h1, ErillishakuRivi h2) {
@@ -72,7 +78,7 @@ public class ErillishakuExcel {
 				String s1 = Optional.ofNullable(e1.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
 				String s2 = Optional.ofNullable(e2.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
 				int i = s1.compareTo(s2);
-				if(i != 0) {
+				if (i != 0) {
 					return i;
 				} else {
 					String ee1 = Optional.ofNullable(e1.getEtunimi()).orElse(StringUtils.EMPTY).toUpperCase();
@@ -85,33 +91,39 @@ public class ErillishakuExcel {
 				kuuntelija,
 				Stream.concat(
 						esittelyt.stream(),
-						erillishakurivit
-								.stream()
-								.map(rivi -> {
-									Collection<Arvo> a = Lists.newArrayList();
-									a.add(new TekstiArvo(rivi.getSukunimi(),
-											true, true));
-									a.add(new TekstiArvo(rivi.getEtunimi(),
-											true, true));
-									a.add(new TekstiArvo(rivi
-											.getHenkilotunnus(), true, true));
-									a.add(new TekstiArvo(rivi.getSyntymaAika(),
-											true, true));
-									
-									a.add(ErillishakuDataRivi.hakemuksenTila(rivi
-											.getHakemuksenTila()));
-									a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi,rivi
-											.getVastaanottoTila()));
-									a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi
-											.getIlmoittautumisTila()));
-									a.add(ErillishakuDataRivi.julkaisuLupa(rivi
-											.isJulkaistaankoTiedot()));
-									return a;
-								})).collect(Collectors.toList()));
+						arvoRivit(erillishakurivit).map(luoArvot(tyyppi))).collect(Collectors.toList()));
 
 		rivit.add(dataRivit);
 		this.excel = new Excel("Erillishaku", rivit);
 	}
+
+	private Stream<ErillishakuRivi> arvoRivit(List<ErillishakuRivi> erillishakurivit) {
+		if (erillishakurivit.isEmpty()) {
+			return ImmutableList.of(new ErillishakuRivi("Esimerkki", "Rivi", "123456-7890", "esimerkki.rivi@example.com", "01.01.1901", "", "HYVAKSYTTY", "KESKEN", "EI_TEHTY", false)).stream();
+		} else {
+			return erillishakurivit
+					.stream();
+		}
+
+	}
+
+	private Function<ErillishakuRivi, Collection<Arvo>> luoArvot(Hakutyyppi tyyppi) {
+		return rivi -> {
+			Collection<Arvo> a = Lists.newArrayList();
+			a.add(new TekstiArvo(rivi.getSukunimi(), true, true));
+			a.add(new TekstiArvo(rivi.getEtunimi(), true, true));
+			a.add(new TekstiArvo(rivi.getHenkilotunnus(), true, true));
+			a.add(new TekstiArvo(rivi.getSahkoposti(), true, true));
+			a.add(new TekstiArvo(rivi.getSyntymaAika(), true, true));
+			a.add(new TekstiArvo(rivi.getPersonOid(), true, true));
+			a.add(ErillishakuDataRivi.hakemuksenTila(rivi.getHakemuksenTila()));
+			a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
+			a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
+			a.add(ErillishakuDataRivi.julkaisuLupa(rivi.isJulkaistaankoTiedot()));
+			return a;
+		};
+	}
+
 
 	public Excel getExcel() {
 		return excel;

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * 
@@ -37,7 +38,12 @@ public class Rivi {
 	}
 
 	public boolean isTyhja() {
-		return solut.isEmpty();
+
+		if(solut.isEmpty()) {
+			return true;
+		} else {
+			return solut.stream().allMatch(s -> StringUtils.isBlank(s.toTeksti().getTeksti()));
+		}
 	}
 
 	public boolean validoi(Rivi rivi) {
@@ -81,7 +87,7 @@ public class Rivi {
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		for (Solu s : solut) {
-			b.append(s);
+			b.append(s).append(", ");
 		}
 		return b.toString();
 	}

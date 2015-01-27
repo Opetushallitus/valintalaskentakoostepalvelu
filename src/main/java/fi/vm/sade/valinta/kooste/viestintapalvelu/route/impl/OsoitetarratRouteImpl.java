@@ -38,7 +38,7 @@ import fi.vm.sade.valinta.kooste.hakemus.komponentti.HaeHakukohteenHakemuksetKom
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -381,7 +381,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 							LOG.error(
 									"Valintatietojen haku hakukohteelle({}) epäonnistui:{}",
 									hakukohdeOid(exchange), e.getMessage());
-							Collection<Oid> oidit = Lists.newArrayList(Poikkeus
+							Collection<Tunniste> oidit = Lists.newArrayList(Poikkeus
 									.valintakoeOids(valintakoeOids(exchange)));
 							oidit.add(Poikkeus
 									.hakukohdeOid(hakukohdeOid(exchange)));
@@ -434,7 +434,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 									"Sijoittelussa hyväksyttyjä ei saatu haettua haussa({}) hakukohteelle({}): {}",
 									hakuOid(exchange), hakukohdeOid(exchange),
 									e.getMessage());
-							Collection<Oid> oidit = Lists.newArrayList(Poikkeus
+							Collection<Tunniste> oidit = Lists.newArrayList(Poikkeus
 									.hakuOid(hakuOid(exchange)), Poikkeus
 									.hakukohdeOid(hakukohdeOid(exchange)));
 
@@ -447,7 +447,7 @@ public class OsoitetarratRouteImpl extends AbstractDokumenttiRouteBuilder {
 							throw e;
 						}
 						if (o.isEmpty()) {
-							Collection<Oid> oidit = Lists.newArrayList(Poikkeus
+							Collection<Tunniste> oidit = Lists.newArrayList(Poikkeus
 									.hakuOid(hakuOid(exchange)), Poikkeus
 									.hakukohdeOid(hakukohdeOid(exchange)));
 							dokumenttiprosessi(exchange)

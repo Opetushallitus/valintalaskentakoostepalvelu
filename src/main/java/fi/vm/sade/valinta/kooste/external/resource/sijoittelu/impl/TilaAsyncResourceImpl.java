@@ -1,14 +1,19 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.common.reflect.TypeToken;
+import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import org.apache.commons.lang.StringUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +44,26 @@ public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaA
 		super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(50));
 	}
 
+	public void getValintatulokset(String hakuOid, String hakukohdeOid
+			, Consumer<List<Valintatulos>> valintatulokset, Consumer<Throwable> poikkeus) {
+		String url = "/tila/hakukohde/"+hakukohdeOid;
+		getWebClient()
+				.path(url)
+				.accept(MediaType.WILDCARD)
+				.async().get(new Callback<List<Valintatulos> >(
+				address,url, valintatulokset,poikkeus,
+				new TypeToken<List<Valintatulos>>() { }.getType()));
+	}
+
 	@Override
-	public Future<Response> tuoErillishaunTilat(
-			String hakuOid, String hakukohdeOid, String valintatapajononNimi,
-			Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
+	public Response tuoErillishaunTilat(String hakuOid, String hakukohdeOid, String valintatapajononNimi, Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
 		String url = "/tila/erillishaku/"+hakuOid+"/hakukohde/"+hakukohdeOid+"/";
 		LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}&valintatapajononNimi={}", address, url, hakukohdeOid, valintatapajononNimi);
-		return WebClient.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.query("valintatapajononNimi", Optional.ofNullable(valintatapajononNimi).orElse(StringUtils.EMPTY))
-				.async().post(Entity.entity(erillishaunHakijat, MediaType.APPLICATION_JSON_TYPE));
+				.post(Entity.entity(erillishaunHakijat, MediaType.APPLICATION_JSON_TYPE));
 	}
+
+
 }

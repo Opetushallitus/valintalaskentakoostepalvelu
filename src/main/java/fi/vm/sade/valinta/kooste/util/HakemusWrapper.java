@@ -79,6 +79,10 @@ public class HakemusWrapper {
                 StringUtils.EMPTY);
     }
 
+    public String getPersonOid() {
+        return hakemus.getPersonOid();
+    }
+
     public Integer getHakutoiveenPrioriteetti(String hakukohdeOid) {
         getHakutoiveet();
 

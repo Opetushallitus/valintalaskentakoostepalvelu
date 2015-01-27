@@ -15,6 +15,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncRes
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 import org.springframework.stereotype.Service;
 
@@ -33,12 +34,22 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
     }
 
     @Override
+    public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Future<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
         throw new UnsupportedOperationException();
     }
 
