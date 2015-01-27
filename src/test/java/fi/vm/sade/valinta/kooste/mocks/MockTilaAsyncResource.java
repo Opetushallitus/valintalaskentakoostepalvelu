@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import jersey.repackaged.com.google.common.util.concurrent.Futures;
@@ -8,6 +9,7 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.springframework.stereotype.Service;
 
@@ -31,5 +33,10 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
     public Response tuoErillishaunTilat(final String hakuOid, final String hakukohdeOid, final String valintatapajononNimi, final Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
         results.add(new Result(hakuOid, hakukohdeOid, valintatapajononNimi, erillishaunHakijat));
         return null;
+    }
+
+    @Override
+    public void getValintatulokset(String hakuOid, String hakukohdeOid, Consumer<List<Valintatulos>> valintatulokset, Consumer<Throwable> poikkeus) {
+
     }
 }
