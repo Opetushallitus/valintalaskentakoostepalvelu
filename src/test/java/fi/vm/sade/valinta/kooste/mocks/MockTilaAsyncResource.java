@@ -28,6 +28,12 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
             this.erillishaunHakijat = erillishaunHakijat;
         }
     }
+
+    @Override
+    public void getValintatulokset(String hakuOid, String hakukohdeOid, Consumer<List<Valintatulos>> valintatulokset, Consumer<Throwable> poikkeus) {
+        throw new UnsupportedOperationException();
+    }
+
     public final List<Result> results = new ArrayList<>();
     @Override
     public Response tuoErillishaunTilat(final String hakuOid, final String hakukohdeOid, final String valintatapajononNimi, final Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
@@ -35,8 +41,4 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
         return null;
     }
 
-    @Override
-    public void getValintatulokset(String hakuOid, String hakukohdeOid, Consumer<List<Valintatulos>> valintatulokset, Consumer<Throwable> poikkeus) {
-
-    }
 }
