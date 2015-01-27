@@ -11,6 +11,7 @@ import javax.ws.rs.Produces;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 
 /**
  * 
@@ -34,4 +35,9 @@ public interface ValintalaskentaAsyncResource {
 	// @POST
 	Peruutettava laskeJaSijoittele(List<LaskeDTO> lista,
 			Consumer<String> callback, Consumer<Throwable> failureCallback);
+
+	Peruutettava laskennantulokset(String hakuOid, String hakukohdeOid,
+								   Consumer<List<ValintatietoValinnanvaiheDTO>> callback, Consumer<Throwable> failureCallback);
+
+
 }

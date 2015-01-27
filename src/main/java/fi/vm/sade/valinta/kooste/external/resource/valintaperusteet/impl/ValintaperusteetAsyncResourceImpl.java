@@ -10,6 +10,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -99,7 +100,29 @@ public class ValintaperusteetAsyncResourceImpl implements
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
+	public Peruutettava haeValinnanvaiheetHakukohteelle(String hakukohdeOid,
+											Consumer<List<ValinnanVaiheJonoillaDTO>> callback,
+											Consumer<Throwable> failureCallback) {
+		try {
+			String url = new StringBuilder()
+					.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/")
+					.append(hakukohdeOid).append("/valinnanvaihe").toString();
 
+			WebClient wc = WebClient.fromClient(webClient).path(url);
+			return new PeruutettavaImpl(wc
+					//
+					.accept(MediaType.APPLICATION_JSON_TYPE)
+							//
+					.async()
+					.get(new Callback<List<ValinnanVaiheJonoillaDTO>>(address, url, callback,
+							failureCallback,
+							new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {
+							}.getType())));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
+		}
+	}
 	public Peruutettava haeValintaperusteet(String hakukohdeOid,
 			Integer valinnanVaiheJarjestysluku,
 			Consumer<List<ValintaperusteetDTO>> callback,

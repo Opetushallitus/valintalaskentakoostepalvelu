@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.integrationtest.tomcat.SharedTomcat;
+import fi.vm.sade.integrationtest.tomcat.SharedTomcat;
 import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
@@ -82,7 +82,7 @@ public class ErillishakuResourceTest {
         final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
         assertEquals(1, tulos.rivit.size());
         final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO("Tuomas", "Hakkarainen", MockData.hetu, ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(), henkiloOid, HenkiloTyyppi.OPPIJA);
-        assertEquals(expectedHenkilo, tulos.rivit.get(0).toHenkilo());
+        assertEquals(expectedHenkilo, tulos.rivit.get(0).toHenkiloCreateDTO());
     }
 
     private String odotaProsessiaPalautaDokumenttiId(final ProsessiId prosessiId) {

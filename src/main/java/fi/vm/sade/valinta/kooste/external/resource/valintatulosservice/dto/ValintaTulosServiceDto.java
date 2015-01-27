@@ -10,9 +10,11 @@ public class ValintaTulosServiceDto {
 	private String hakemusOid;
 	private String hakijaOid;
 	private Collection<HakutoiveDto> hakutoiveet;
+
 	public Collection<HakutoiveDto> getHakutoiveet() {
 		return hakutoiveet;
 	}
+
 	public void setHakutoiveet(Collection<HakutoiveDto> hakutoiveet) {
 		this.hakutoiveet = hakutoiveet;
 	}

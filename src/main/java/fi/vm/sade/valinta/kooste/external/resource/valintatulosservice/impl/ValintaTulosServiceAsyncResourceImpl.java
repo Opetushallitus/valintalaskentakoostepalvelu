@@ -3,11 +3,17 @@ package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
+import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.common.reflect.TypeToken;
+import fi.vm.sade.valinta.kooste.external.resource.Callback;
+import fi.vm.sade.valinta.kooste.external.resource.ResponseCallback;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import org.apache.cxf.jaxrs.client.ClientConfiguration;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -42,7 +48,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
 	) {
 		this.address = address;
 		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
-		bean.setAddress(address);
+		bean.setAddress(this.address);
 		bean.setThreadSafe(true);
 		List<Object> providers = Lists.newArrayList();
 		providers
@@ -59,7 +65,25 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
 		c.getHttpConduit().getClient()
 				.setReceiveTimeout(TimeUnit.HOURS.toMillis(1));
 	}
-	
+
+	@Override
+	public void getValintatulokset(String hakuOid, String hakukohdeOid,
+								   Consumer<List<ValintaTulosServiceDto>> vts,
+								   Consumer<Throwable> poikkeus) {
+		StringBuilder urlBuilder = new StringBuilder().append(
+				"/valinta-tulos-service/haku/").append(hakuOid).append("/hakukohde/").append(hakukohdeOid);
+		String url = urlBuilder.toString();
+		WebClient
+				.fromClient(webClient)
+				.path(url)
+						//
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+						//
+				.async()
+				.get(new Callback<List<ValintaTulosServiceDto>>(address, url, vts, poikkeus,
+						new TypeToken<List<ValintaTulosServiceDto>>() { }.getType()));
+	}
+
 	@Override
 	public Future<List<ValintaTulosServiceDto>> getValintatulokset(String hakuOid) {
 		StringBuilder urlBuilder = new StringBuilder().append(

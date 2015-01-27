@@ -715,8 +715,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>fi.vm.sade.valintaperusteet</groupId>
-			<artifactId>integration-testing</artifactId>
+			<groupId>fi.vm.sade</groupId>
+			<artifactId>embedded-tomcat</artifactId>
 			<version>1.0-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>

@@ -111,20 +111,32 @@ public class Excel {
 		XSSFDrawing drawing = sheet.createDrawingPatriarch();
 		XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(sheet);
 		XSSFDataFormat format = workbook.createDataFormat();
+
+		XSSFDataFormat fmt = workbook.createDataFormat();
+		CellStyle textStyle = workbook.createCellStyle();
+		textStyle.setDataFormat(fmt.getFormat("@"));
+		textStyle.setAlignment(CellStyle.ALIGN_LEFT);
+		for(int i = 0; i < 20; ++i){
+			sheet.setDefaultColumnStyle(i, textStyle);
+		}
 		XSSFCellStyle hiddenStyle = workbook.createCellStyle();
 		hiddenStyle.setHidden(true);
 
-		XSSFCellStyle numberStyle = workbook.createCellStyle();
-		numberStyle.setDataFormat(format.getFormat("0,0"));
+		//XSSFCellStyle numberStyle = workbook.createCellStyle();
+		//numberStyle
+
 		XSSFCellStyle alignRightStyle = workbook.createCellStyle();
+		alignRightStyle.setDataFormat(fmt.getFormat("@"));
 		XSSFCellStyle alignCenterStyle = workbook.createCellStyle();
+		alignCenterStyle.setDataFormat(fmt.getFormat("@"));
 		//
 		alignCenterStyle.setAlignment(CellStyle.ALIGN_CENTER);
 		XSSFCellStyle lockedStyle = workbook.createCellStyle();
 		lockedStyle.setFillForegroundColor(new XSSFColor(Color.GRAY));
 		lockedStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-
+		lockedStyle.setDataFormat(fmt.getFormat("@"));
 		XSSFCellStyle editableStyle = workbook.createCellStyle();
+		editableStyle.setDataFormat(fmt.getFormat("@"));
 		editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204,
 				153)));
 		editableStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);

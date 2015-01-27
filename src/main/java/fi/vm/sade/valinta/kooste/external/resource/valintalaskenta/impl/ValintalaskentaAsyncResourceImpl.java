@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +39,24 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	}
 
 	@Override
+	public Peruutettava laskennantulokset(String hakuOid, String hakukohdeOid, Consumer<List<ValintatietoValinnanvaiheDTO>> callback, Consumer<Throwable> failureCallback) {
+		try {
+
+			String url = new StringBuilder("/valintalaskenta/hakukohde/").append(hakukohdeOid).append("/valinnanvaihe").toString();
+			return new PeruutettavaImpl(getWebClient()
+					.path(url)
+					.async()
+					.get(new Callback<List<ValintatietoValinnanvaiheDTO>>(address, url, callback,
+							failureCallback, new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {
+					}.getType())));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
+		}
+	}
+
+
+	@Override
 	public Peruutettava laske(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback) {
 		try {
@@ -66,10 +85,10 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 					.path(url)
 					.async()
 					.post(Entity.entity(laskeDTO,
-							MediaType.APPLICATION_JSON_TYPE),
+									MediaType.APPLICATION_JSON_TYPE),
 							new Callback<String>(address, url, callback,
 									failureCallback, new TypeToken<String>() {
-									}.getType())));
+							}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
@@ -96,6 +115,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
+
 
 	@Override
 	public Peruutettava valintakokeet(LaskeDTO laskeDTO,
