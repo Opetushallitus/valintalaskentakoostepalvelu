@@ -28,7 +28,8 @@ public class ValidoiTilatUtil {
 
     private static final Set<HakemuksenTila> PERUNEENA =
             Sets.newEnumSet(Arrays.asList(HakemuksenTila.PERUNUT,HakemuksenTila.PERUUTETTU,HakemuksenTila.PERUUNTUNUT),HakemuksenTila.class);
-
+    private static final Set<ValintatuloksenTila> KAYTOSTAPOISTETTU_VASTAANOTTOTILA =
+            Sets.newEnumSet(Arrays.asList(VASTAANOTTANUT_LASNA),ValintatuloksenTila.class);
     private static final Set<ValintatuloksenTila> VASTAANOTTANEENA =
             Sets.newEnumSet(Arrays.asList(VASTAANOTTANUT,VASTAANOTTANUT_LASNA,VASTAANOTTANUT_POISSAOLEVA,EI_VASTAANOTETTU_MAARA_AIKANA,
                     EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT_SITOVASTI),ValintatuloksenTila.class);
@@ -54,7 +55,9 @@ public class ValidoiTilatUtil {
         if(ILMOITETTU.equals(valintatuloksenTila)) {
             return virheellinenTilaYhdistelma(new StringBuilder("Ilmoitettutila on poistettu käytöstä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
         }
-
+        if(KAYTOSTAPOISTETTU_VASTAANOTTOTILA.equals(valintatuloksenTila)) {
+            return virheellinenTilaYhdistelma(new StringBuilder("Valintatuloksen tila on poistettu käytöstä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
+        }
         if(EI_ILMOITTAUTUMISTA != ilmoittautumisTila) {
             if(HYVAKSYTTYNA.contains(hakemuksenTila) && VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
                 return null; // OK
