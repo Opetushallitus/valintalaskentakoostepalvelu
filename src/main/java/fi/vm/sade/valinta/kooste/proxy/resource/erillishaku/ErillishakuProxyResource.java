@@ -111,7 +111,7 @@ public class ErillishakuProxyResource {
         Supplier<Void> mergeSuplier = () -> {
             if(counter.decrementAndGet() == 0) {
                 LOG.error("Saatiin vastaus muodostettua. Palautetaan se asynkronisena paluuarvona.");
-                r(asyncResponse,merge(hakemukset.get(),hakukohde.get(),valinnanvaiheet.get(),valintatulokset.get(),hakukohteetBySijoitteluAjoId.get(),vtsValintatulokset.get()));
+                r(asyncResponse,merge(hakuOid,hakukohdeOid, hakemukset.get(),hakukohde.get(),valinnanvaiheet.get(),valintatulokset.get(),hakukohteetBySijoitteluAjoId.get(),vtsValintatulokset.get()));
             }
             return null;
         };
