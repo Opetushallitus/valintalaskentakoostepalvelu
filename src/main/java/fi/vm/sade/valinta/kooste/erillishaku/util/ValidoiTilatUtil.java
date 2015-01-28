@@ -21,6 +21,8 @@ public class ValidoiTilatUtil {
 
     private static final Set<HakemuksenTila> HYVAKSYTTYNA =
             Sets.newEnumSet(Arrays.asList(HakemuksenTila.HYVAKSYTTY,HakemuksenTila.VARASIJALTA_HYVAKSYTTY),HakemuksenTila.class);
+    private static final Set<HakemuksenTila> HYVAKSYTTYNA_TAI_PERUNEENA =
+            Sets.newEnumSet(Arrays.asList(HakemuksenTila.HYVAKSYTTY,HakemuksenTila.VARASIJALTA_HYVAKSYTTY, HakemuksenTila.PERUNUT, HakemuksenTila.PERUUNTUNUT, HakemuksenTila.PERUUTETTU),HakemuksenTila.class);
     private static final Set<HakemuksenTila> HYLATTY_TAI_VARALLA =
             Sets.newEnumSet(Arrays.asList(HakemuksenTila.HYLATTY,HakemuksenTila.VARALLA),HakemuksenTila.class);
 
@@ -35,9 +37,11 @@ public class ValidoiTilatUtil {
                     EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT_SITOVASTI, PERUNUT, PERUUTETTU),ValintatuloksenTila.class);
     private static final Set<ValintatuloksenTila> KESKEN_TAI_PERUNUT_VASTAANOTTAJA =
             Sets.newHashSet(Arrays.asList(null, KESKEN, PERUUTETTU, PERUNUT));
-
+    private static final IlmoittautumisTila EI_ILMOITTAUTUMISTA = null;
+/*
     private static final Set<IlmoittautumisTila> EI_ILMOITTAUTUMISTA =
-            Sets.newHashSet(Arrays.asList(null, IlmoittautumisTila.EI_TEHTY));
+            Sets.newHashSet(Arrays.asList(null));
+    */
     /**
      *
      * @return (null if ok) validation error
@@ -50,6 +54,15 @@ public class ValidoiTilatUtil {
         if(ILMOITETTU.equals(valintatuloksenTila)) {
             return virheellinenTilaYhdistelma(new StringBuilder("Ilmoitettutila on poistettu käytöstä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
         }
+
+        if(EI_ILMOITTAUTUMISTA != ilmoittautumisTila) {
+            if(HYVAKSYTTYNA.contains(hakemuksenTila) && VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
+                return null; // OK
+            } else {
+                return virheellinenTilaYhdistelma(new StringBuilder("Ilmoittautumistieto voi olla ainoastaan hyväksytyillä ja vastaanottaneilla hakijoilla. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
+            }
+        }
+
         if(VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
             if(HYVAKSYTTYNA.contains(hakemuksenTila)) {
                 return null; // OK
@@ -57,15 +70,9 @@ public class ValidoiTilatUtil {
                 return virheellinenTilaYhdistelma(new StringBuilder("Vastaanottaneen tai peruneen hakijan tulisi olla hyväksyttynä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
             }
         }
-        if(!EI_ILMOITTAUTUMISTA.contains(ilmoittautumisTila)) {
-            if(HYVAKSYTTYNA.contains(hakemuksenTila) && VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
-                return null; // OK
-            } else {
-                return virheellinenTilaYhdistelma(new StringBuilder("Ilmoittautumistieto voi olla ainoastaan hyväksytyillä ja vastaanottaneilla hakijoilla. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
-            }
-        }
+
         if(HYLATTY_TAI_VARALLA.contains(hakemuksenTila)) {
-            if(!VASTAANOTTANEENA.contains(valintatuloksenTila) && EI_ILMOITTAUTUMISTA.contains(ilmoittautumisTila)) {
+            if(!VASTAANOTTANEENA.contains(valintatuloksenTila) && EI_ILMOITTAUTUMISTA == ilmoittautumisTila) {
                 return null; // OK
             } else {
                 return virheellinenTilaYhdistelma(new StringBuilder("Hylätty tai varalla oleva hakija ei voi olla ilmoittautunut tai vastaanottanut. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
