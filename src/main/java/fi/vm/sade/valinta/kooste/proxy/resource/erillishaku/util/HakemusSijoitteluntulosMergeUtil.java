@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 public class HakemusSijoitteluntulosMergeUtil {
 
     public static List<MergeValinnanvaiheDTO> merge(
+            String hakuOid,
+            String hakukohdeOid,
             List<Hakemus> hakemukset,
             HakukohdeDTO hakukohdeDTO,
             List<ValinnanVaiheJonoillaDTO> valinnanvaiheet,
@@ -62,7 +64,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         // Ei sijoittelun tuloksia, yhdistetään hakemukset ja laskennan tulokset
         else if(hakukohdeDTO == null || hakukohdeDTO.getValintatapajonot().isEmpty()) {
             List<MergeValinnanvaiheDTO> mergatutValinnanvaiheet = laskennantulokset.stream().map(vv -> {
-                MergeValinnanvaiheDTO dto = createValinnanvaihe(vv);
+                MergeValinnanvaiheDTO dto = createValinnanvaihe(hakuOid, vv);
                 List<MergeValintatapajonoDTO> valintatapajonot = vv.getValintatapajonot().stream().map(jono -> {
                     MergeValintatapajonoDTO jonoDTO = luoLaskennanTiedoista(jono);
                     jonoDTO.setHakemukset(mergaaLaskennasta(hakemukset, jono.getJonosijat()));
@@ -87,7 +89,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         // Laskenta ja sijoittelu löytyi
         else {
             List<MergeValinnanvaiheDTO> mergatutValinnanvaiheet = laskennantulokset.stream().map(vv -> {
-                MergeValinnanvaiheDTO dto = createValinnanvaihe(vv);
+                MergeValinnanvaiheDTO dto = createValinnanvaihe(hakuOid, vv);
                 List<MergeValintatapajonoDTO> valintatapajonot = vv.getValintatapajonot().stream().map(jono -> {
                     MergeValintatapajonoDTO jonoDTO = luoLaskennanTiedoista(jono);
                     jonoDTO.setHakemukset(mergaaLaskennasta(hakemukset, jono.getJonosijat()));
@@ -116,10 +118,10 @@ public class HakemusSijoitteluntulosMergeUtil {
         return dto;
     }
 
-    private static MergeValinnanvaiheDTO createValinnanvaihe(ValintatietoValinnanvaiheDTO vv) {
+    private static MergeValinnanvaiheDTO createValinnanvaihe(String hakuOid, ValintatietoValinnanvaiheDTO vv) {
         MergeValinnanvaiheDTO dto = new MergeValinnanvaiheDTO();
         dto.setJarjestysnumero(vv.getJarjestysnumero());
-        dto.setHakuOid(vv.getHakuOid());
+        dto.setHakuOid(hakuOid);
         dto.setNimi(vv.getNimi());
         dto.setValinnanvaiheoid(vv.getValinnanvaiheoid());
         return dto;

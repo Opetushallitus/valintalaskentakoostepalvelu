@@ -21,9 +21,11 @@ import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.HakemusS
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
@@ -242,9 +244,8 @@ public class ErillishakuProxyResource {
         );
     }
     private void r(AsyncResponse asyncResponse, List<MergeValinnanvaiheDTO> msg) {
-        //LOG.info("{}",new GsonBuilder().setPrettyPrinting().create().toJson(msg));
         try {
-            asyncResponse.resume(Response.ok().header("Content-Type","application/json").entity(msg).build());//new GsonBuilder().setPrettyPrinting().create().toJson()).build());
+            asyncResponse.resume(Response.ok().header("Content-Type","application/json").entity(msg).build());
         } catch(Throwable e){
             LOG.error("Paluuarvon muodostos epäonnistui! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
         }
