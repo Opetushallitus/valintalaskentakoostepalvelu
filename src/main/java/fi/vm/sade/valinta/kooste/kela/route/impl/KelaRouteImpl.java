@@ -370,7 +370,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 								
 								if (haku == null) {
 									throw new RuntimeException(
-											"Reitill� oli null hakuDTO!");
+											"Reitillä oli null hakuDTO!");
 								}
 								// haetaan kaikki hakemukset lisahaulle koska ei
 								// voida
@@ -412,7 +412,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 											.getPoikkeuksetUudelleenYrityksessa()
 											.add(new Poikkeus(
 													Poikkeus.SIJOITTELU,
-													"Vastaanottaneiden haku sijoittelusta ep�onnistui haulle, koska: "
+													"Vastaanottaneiden haku sijoittelusta epäonnistui haulle, koska: "
 															+ e.getMessage(),
 													haku.getOid()));
 									throw new RuntimeException(e);
@@ -459,7 +459,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 									n += MAKSIMI_MAARA_HAKEMUKSIA_KERRALLA_HAKEMUSPALVELULTA;
 								} while (n < hakemusOidit.size());
 								List<Hakemus> hakemukset = Lists.newArrayList();
-								LOG.warn("Haetaan {} hakemusta, {} er�ss�",
+								LOG.warn("Haetaan {} hakemusta, {} erässä",
 										hakemusOidit.size(),
 										oiditSivutettuna.size());
 								for (List<String> oidit : oiditSivutettuna) {
@@ -468,12 +468,12 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 												.getApplicationsByOids(oidit);
 										hakemukset.addAll(h);
 										LOG.warn(
-												"Saatiin er� hakemuksia {}. {}/{}",
+												"Saatiin erä hakemuksia {}. {}/{}",
 												h.size(), hakemukset.size(),
 												hakemusOidit.size());
 									} catch (Exception e) {
 										LOG.error(
-												"Hakemuspalvelu ei jaksa tarjoilla hakemuksia {}. Yritet��n viel� uudestaan.",
+												"Hakemuspalvelu ei jaksa tarjoilla hakemuksia {}. Yritetään vielä uudestaan.",
 												e.getMessage());
 										// annetaan hakuapp:lle vahan aikaa
 										// toipua
@@ -616,7 +616,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 												throw e;
 											}	
 											tries++;
-											LOG.error("tilaResource ei jaksa palvella {}. Yritet��n viel� uudestaan. "+tries+"/20...", e.getMessage());
+											LOG.error("tilaResource ei jaksa palvella {}. Yritetään vielä uudestaan. "+tries+"/20...", e.getMessage());
 											try {
 												Thread.sleep(10000L);
 											} catch (InterruptedException e1) {
@@ -660,7 +660,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 						}
 						
 						if (rivit.isEmpty()) {
-							String virhe = "Kela-dokumenttia ei voi luoda hauille joissa ei ole yht��n valittua hakijaa!";
+							String virhe = "Kela-dokumenttia ei voi luoda hauille joissa ei ole yhtään valittua hakijaa!";
 							luontiJaRivit
 									.getLuonti()
 									.getProsessi()
@@ -757,7 +757,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 										.getPoikkeuksetUudelleenYrityksessa()
 										.add(new Poikkeus(
 												Poikkeus.DOKUMENTTIPALVELU,
-												"Kela-dokumentin tallennus dokumenttipalveluun ep�onnistui"));
+												"Kela-dokumentin tallennus dokumenttipalveluun epäonnistui"));
 								try {
 									throw e;
 								} catch (Exception e1) {

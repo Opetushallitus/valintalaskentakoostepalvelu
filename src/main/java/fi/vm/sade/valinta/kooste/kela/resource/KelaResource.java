@@ -61,7 +61,7 @@ public class KelaResource {
 		if (hakuTietue == null || hakuTietue.getHakuOids() == null || hakuTietue.getAlkupvm() == null || hakuTietue.getLoppupvm() == null  
 				|| hakuTietue.getHakuOids().isEmpty()) {
 			throw new RuntimeException(
-					"V�hint��n yksi hakuOid ja alku- ja loppupvm on annettava Kela-dokumentin luontia varten.");
+					"Vähintään yksi hakuOid ja alku- ja loppupvm on annettava Kela-dokumentin luontia varten.");
 		}
 		String aineistonNimi = hakuTietue.getAineisto();
 		Date alkuPvm = hakuTietue.getAlkupvm();
