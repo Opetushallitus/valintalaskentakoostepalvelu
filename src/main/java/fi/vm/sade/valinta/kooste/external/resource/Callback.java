@@ -30,7 +30,7 @@ import com.google.gson.reflect.TypeToken;
  */
 public class Callback<T> implements InvocationCallback<Response> {
 	private final static Logger LOG = LoggerFactory.getLogger(Callback.class);
-	private final Gson gson = new Gson();
+	private final Gson gson;
 	private final Consumer<T> callback;
 	private final Consumer<Throwable> failureCallback;
 	private final String palvelukutsu;
@@ -53,14 +53,18 @@ public class Callback<T> implements InvocationCallback<Response> {
 
 	public Callback(String url, String palvelukutsu, Consumer<T> callback,
 			Consumer<Throwable> failureCallback, Type type) {
+		this(new Gson(), url, palvelukutsu, callback, failureCallback, type);
+	}
+	public Callback(Gson gson, String url, String palvelukutsu, Consumer<T> callback,
+					Consumer<Throwable> failureCallback, Type type) {
 		this.callback = callback;
 		this.failureCallback = failureCallback;
 		this.palvelukutsu = palvelukutsu;
 		this.url = url;
 		// this.clazz = clazz;
 		this.type = type;
+		this.gson = gson;
 	}
-
 	private boolean isTextHtml(Response response) {
 		try {
 			return Optional.of(response.getMetadata().getFirst("Content-Type"))

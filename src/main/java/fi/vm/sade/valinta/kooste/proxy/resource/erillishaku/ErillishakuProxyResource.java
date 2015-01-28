@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.erillishaku;
 
 import com.google.common.collect.Maps;
+import com.google.gson.GsonBuilder;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
@@ -20,9 +21,11 @@ import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.HakemusS
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
@@ -108,7 +111,7 @@ public class ErillishakuProxyResource {
         Supplier<Void> mergeSuplier = () -> {
             if(counter.decrementAndGet() == 0) {
                 LOG.error("Saatiin vastaus muodostettua. Palautetaan se asynkronisena paluuarvona.");
-                r(asyncResponse,merge(hakemukset.get(),hakukohde.get(),valinnanvaiheet.get(),valintatulokset.get(),hakukohteetBySijoitteluAjoId.get(),vtsValintatulokset.get()));
+                r(asyncResponse,merge(hakuOid,hakukohdeOid, hakemukset.get(),hakukohde.get(),valinnanvaiheet.get(),valintatulokset.get(),hakukohteetBySijoitteluAjoId.get(),vtsValintatulokset.get()));
             }
             return null;
         };
@@ -241,7 +244,11 @@ public class ErillishakuProxyResource {
         );
     }
     private void r(AsyncResponse asyncResponse, List<MergeValinnanvaiheDTO> msg) {
-        asyncResponse.resume(Response.ok(msg).build());
+        try {
+            asyncResponse.resume(Response.ok().header("Content-Type","application/json").entity(msg).build());
+        } catch(Throwable e){
+            LOG.error("Paluuarvon muodostos epäonnistui! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+        }
     }
 
 
