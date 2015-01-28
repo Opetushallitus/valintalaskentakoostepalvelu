@@ -104,6 +104,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 											Consumer<List<ValinnanVaiheJonoillaDTO>> callback,
 											Consumer<Throwable> failureCallback) {
 		LOG.info("Valinnanvaiheiden haku...");
+		// /valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
 		try {
 			String url = new StringBuilder()
 					.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/")

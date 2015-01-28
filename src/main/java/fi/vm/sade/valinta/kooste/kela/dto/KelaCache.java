@@ -71,7 +71,7 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
 						throw e;
 					}	
 					tries++;
-					LOG.error("koodiService ei jaksa palvella {}. Yritet‰‰n viel‰ uudestaan. "+tries+"/30...", e.getMessage());
+					LOG.error("koodiService ei jaksa palvella {}. Yritet√§√§n viel√§ uudestaan. "+tries+"/30...", e.getMessage());
 					try {
 						Thread.sleep(15000L);
 					} catch (InterruptedException e1) {

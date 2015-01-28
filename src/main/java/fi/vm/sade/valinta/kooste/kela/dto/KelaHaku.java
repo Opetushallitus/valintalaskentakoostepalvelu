@@ -89,7 +89,7 @@ public class KelaHaku extends KelaAbstraktiHaku {
 								LogEntry valintaEntry = tilaSource.getVastaanottopvm(hakemus.getOid(), hakuOid , hakukohdeOid, hakutoive.getValintatapajonoOid());
 								
 								if (valintaEntry==null) {
-									LOG.error("ERROR vastaanottopaivamaaraa ei löytynyt (tila ei VASTAANOTTANUT_SITOVASTI, VASTAANOTTANUT tai EHDOLLISESTI_VASTAANOTTANUT) :"+hakutoive.getTarjoajaOid()+ ":" + sukunimi+ " "+ etunimi+ "("+henkilotunnus+") hakukohde:"+hakukohdeOid+ " ");
+									LOG.error("ERROR vastaanottopaivamaaraa ei lÃ¶ytynyt (tila ei VASTAANOTTANUT_SITOVASTI, VASTAANOTTANUT tai EHDOLLISESTI_VASTAANOTTANUT) :"+hakutoive.getTarjoajaOid()+ ":" + sukunimi+ " "+ etunimi+ "("+henkilotunnus+") hakukohde:"+hakukohdeOid+ " ");
 									return;
 								}
 								final Date valintapaivamaara = valintaEntry.getLuotu();
