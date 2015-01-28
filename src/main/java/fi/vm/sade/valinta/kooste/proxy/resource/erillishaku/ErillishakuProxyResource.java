@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.erillishaku;
 
 import com.google.common.collect.Maps;
+import com.google.gson.GsonBuilder;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
@@ -241,7 +242,12 @@ public class ErillishakuProxyResource {
         );
     }
     private void r(AsyncResponse asyncResponse, List<MergeValinnanvaiheDTO> msg) {
-        asyncResponse.resume(Response.ok(msg).build());
+        //LOG.info("{}",new GsonBuilder().setPrettyPrinting().create().toJson(msg));
+        try {
+            asyncResponse.resume(Response.ok().header("Content-Type","application/json").entity(msg).build());//new GsonBuilder().setPrettyPrinting().create().toJson()).build());
+        } catch(Throwable e){
+            LOG.error("Paluuarvon muodostos epäonnistui! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+        }
     }
 
 
