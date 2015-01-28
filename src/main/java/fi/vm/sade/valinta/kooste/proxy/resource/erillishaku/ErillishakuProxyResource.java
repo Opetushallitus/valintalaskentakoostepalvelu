@@ -99,7 +99,7 @@ public class ErillishakuProxyResource {
                         1 +
                         //
                         1 +
-                        // valinta-tulos-service
+                        //
                         1 +
                         //
                 1 // <- erillissijoittelu
@@ -112,8 +112,8 @@ public class ErillishakuProxyResource {
             }
             return null;
         };
-        final AtomicReference<List<Hakemus>> tmp = new AtomicReference<>();
         // kertaluokassa nopeampaa kuin futureilla, koska säikeet ei blokkaile
+        ///haku-app/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid={hakukohdeOid}&asId={hakuOid}
         applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid,
                 h -> {
                     LOG.info("Haetaan hakemuksia");
@@ -131,7 +131,7 @@ public class ErillishakuProxyResource {
                     }
                 }
         );
-
+        ///valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
         valintaperusteetAsyncResource.haeValinnanvaiheetHakukohteelle(hakukohdeOid,
                 v -> {
                     LOG.info("Haetaan valinnanvaiheita");
@@ -149,7 +149,7 @@ public class ErillishakuProxyResource {
                     }
                 }
         );
-
+        ///sijoittelu-service/resources/sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
         sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(hakuOid, hakukohdeOid,
                 s -> {
                     LOG.info("Haetaan sijoittelusta hakukohteen tiedot");
@@ -167,7 +167,7 @@ public class ErillishakuProxyResource {
                     }
                 }
         );
-
+        ///sijoittelu-service/resources/tila/hakukohde/{hakukohdeOid}
         tilaResource.getValintatulokset(hakuOid, hakukohdeOid, vts -> {
             LOG.info("Haetaan sijoittelusta valintatulokset");
             vtsValintatulokset.set(vts);
@@ -182,7 +182,7 @@ public class ErillishakuProxyResource {
                 LOG.error("Valintatulosservice-palvelun virhe tuli yhtäaikaa timeoutin kanssa! {}", e.getMessage());
             }
         });
-
+        ///valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
         valintalaskentaAsyncResource.laskennantulokset(hakuOid, hakukohdeOid,
                 v -> {
                     LOG.info("Haetaan valintalaskennasta tulokset");
@@ -197,8 +197,9 @@ public class ErillishakuProxyResource {
                     //
                     if(!sijoitteluAjoIdSetti.isEmpty()) {
                         LOG.error("Saatiin sijoitteluajoid:eitä: {} ja haetaan ne erikseen.", Arrays.toString(sijoitteluAjoIdSetti.toArray()));
-                        Map<Long,HakukohdeDTO> erillissijoittelutmp = Maps.newConcurrentMap();
-                        AtomicInteger erillissijoitteluCounter = new AtomicInteger(sijoitteluAjoIdSetti.size());
+                        final Map<Long,HakukohdeDTO> erillissijoittelutmp = Maps.newConcurrentMap();
+                        final AtomicInteger erillissijoitteluCounter = new AtomicInteger(sijoitteluAjoIdSetti.size());
+                        ///sijoittelu-service/resources/erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
                         sijoitteluAjoIdSetti.forEach(id -> {
                             sijoitteluAsyncResource.getLatestHakukohdeBySijoitteluAjoId(hakuOid, hakukohdeOid, id,
                                     s0 -> {

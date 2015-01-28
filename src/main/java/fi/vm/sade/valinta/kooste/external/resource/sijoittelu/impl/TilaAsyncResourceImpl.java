@@ -46,6 +46,7 @@ public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaA
 
 	public void getValintatulokset(String hakuOid, String hakukohdeOid
 			, Consumer<List<Valintatulos>> valintatulokset, Consumer<Throwable> poikkeus) {
+		///tila/hakukohde/{hakukohdeOid}
 		String url = "/tila/hakukohde/"+hakukohdeOid;
 		getWebClient()
 				.path(url)

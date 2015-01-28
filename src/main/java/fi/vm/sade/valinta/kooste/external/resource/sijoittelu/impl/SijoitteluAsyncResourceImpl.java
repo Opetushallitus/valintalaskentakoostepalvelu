@@ -47,6 +47,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 	}
 	public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId
 			, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
+		///erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
 		String url = "/erillissijoittelu/"+hakuOid+"/sijoitteluajo/"+sijoitteluAjoId+"/hakukohde/"+hakukohdeOid;
 		getWebClient()
 				.path(url)
@@ -57,6 +58,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 	}
 	public void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid
 			, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
+		///sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
 		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakukohde/"+hakukohdeOid;
 		getWebClient()
 				.path(url)
