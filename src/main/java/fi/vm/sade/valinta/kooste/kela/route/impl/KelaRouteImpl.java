@@ -741,15 +741,19 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 										.getTime();
 								List<String> tags = luontiJaDokumentti
 										.getLuonti().getProsessi().getTags();
-								dokumenttiResource.tallenna(id, 
+								throw new UnsupportedOperationException("createTiedostoNimiOuhare metodia ei löydy rajapinnat-moduulista!");
+								/*
+								dokumenttiResource.tallenna(id,
 										luontiJaDokumentti.getLuonti().isKkHaku() ? KelaUtil.createTiedostoNimiOuhare(new Date()) : KelaUtil.createTiedostoNimiYhva14(new Date()),
 										expirationTime, tags,
-										"application/octet-stream", filedata);							
+										"application/octet-stream", filedata);
+
 								luontiJaDokumentti.getLuonti().getProsessi()
 										.setDokumenttiId(id);
 								luontiJaDokumentti.getLuonti().getProsessi()
 										.inkrementoiTehtyjaToita();
 								LOG.info("DONE");
+								*/
 							} catch (Exception e) {
 								luontiJaDokumentti
 										.getLuonti()
