@@ -52,7 +52,7 @@ public class ErillishakuProxyResourceTest {
             })
             .create();
 
-    @Before
+    //@Before
     public void startServer() {
         ValintaKoosteTomcat.startShared();
     }
