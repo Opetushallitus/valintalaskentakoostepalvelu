@@ -41,8 +41,18 @@ public class ErillishakuProxyResourceTest {
     String tarjoajaOid = "1.2.246.562.10.591352080610";
     String valintatapajonoOid = "14090336922663576781797489829886";
     final HttpResource proxyResource = new HttpResource(root + "/proxy/erillishaku/haku/"+hakuOid+"/hakukohde/" + hakukohdeOid);
+    final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(Date.class, new JsonDeserializer() {
+                @Override
+                public Object deserialize(JsonElement json, Type typeOfT,
+                                          JsonDeserializationContext context)
+                        throws JsonParseException {
+                    return new Date(json.getAsJsonPrimitive().getAsLong());
+                }
+            })
+            .create();
 
-    @Before
+    //@Before
     public void startServer() {
         ValintaKoosteTomcat.startShared();
     }
@@ -50,27 +60,18 @@ public class ErillishakuProxyResourceTest {
         return IOUtils.toString(new ClassPathResource(path).getInputStream());
     }
     @Test
-    public void testaaProxyResurssi() throws Exception {
+    public void testaaProxyResurssiIlmanLaskentaaHakukohteelle() throws Exception {
         LOG.error("{}",root + "/proxy/erillishaku/haku/"+hakuOid+"/hakukohde/" + hakukohdeOid);
         List<ValintatietoValinnanvaiheDTO> valintatieto = Collections.emptyList(); // ei valinnanvaiheita
         //
-        List<Hakemus> hakemukset = new Gson().fromJson(classpathResourceAsString("/proxy/erillishaku/data/listfull.json"), new TypeToken<List<Hakemus>>() {
+        List<Hakemus> hakemukset = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/ilmanlaskentaa/listfull.json"), new TypeToken<List<Hakemus>>() {
         }.getType());
-        List<Valintatulos> valintatulokset =
-                new GsonBuilder()
-                        .registerTypeAdapter(Date.class, new JsonDeserializer() {
-                            @Override
-                            public Object deserialize(JsonElement json, Type typeOfT,
-                                                      JsonDeserializationContext context)
-                                    throws JsonParseException {
-                                return new Date(json.getAsJsonPrimitive().getAsLong());
-                            }
-                        })
-                        .create().fromJson(classpathResourceAsString("/proxy/erillishaku/data/tila.json"), new TypeToken<List<Valintatulos>>() {
+        List<Valintatulos> valintatulokset = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/ilmanlaskentaa/tila.json"), new TypeToken<List<Valintatulos>>() {
                 }.getType());
         List<ValinnanVaiheJonoillaDTO> valinnanvaihejonoilla =
-                new Gson().fromJson(classpathResourceAsString("/proxy/erillishaku/data/valinnanvaihe.json"),new TypeToken<List<ValinnanVaiheJonoillaDTO>>() { }.getType());
-        HakukohdeDTO hakukohde = new Gson().fromJson(classpathResourceAsString("/proxy/erillishaku/data/hakukohde.json"),HakukohdeDTO.class);
+                GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/ilmanlaskentaa/valinnanvaihe.json"), new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {
+                }.getType());
+        HakukohdeDTO hakukohde = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/ilmanlaskentaa/hakukohde.json"), HakukohdeDTO.class);
         try {
             MockApplicationAsyncResource.setResult(hakemukset);
             MockSijoitteluAsyncResource.setResult(hakukohde);
@@ -78,7 +79,36 @@ public class ErillishakuProxyResourceTest {
             MockTilaAsyncResource.setResult(valintatulokset);
             MockValintaperusteetAsyncResource.setResult(valinnanvaihejonoilla);
             String json = StringUtils.trimToEmpty(IOUtils.toString((InputStream)proxyResource.getWebClient().get().getEntity()));
-            LOG.info("{} {}", json, json.length());
+            LOG.info("{}", json);
+        } finally {
+            MockApplicationAsyncResource.clear();
+            MockSijoitteluAsyncResource.clear();
+            MockTilaAsyncResource.clear();
+            MockValintalaskentaAsyncResource.clear();
+            MockValintaperusteetAsyncResource.clear();
+        }
+    }
+    @Test
+    public void testaaProxyResurssiHakukohteelleLaskennalla() throws Exception {
+        LOG.error("{}",root + "/proxy/erillishaku/haku/"+hakuOid+"/hakukohde/" + hakukohdeOid);
+        List<ValintatietoValinnanvaiheDTO> valintatieto = Collections.emptyList(); // ei valinnanvaiheita
+        //
+        List<Hakemus> hakemukset = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/listfull.json"), new TypeToken<List<Hakemus>>() {
+        }.getType());
+        List<Valintatulos> valintatulokset = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/tila.json"), new TypeToken<List<Valintatulos>>() {
+        }.getType());
+        List<ValinnanVaiheJonoillaDTO> valinnanvaihejonoilla =
+                GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/valinnanvaihe.json"), new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {
+                }.getType());
+        HakukohdeDTO hakukohde = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/hakukohde.json"),HakukohdeDTO.class);
+        try {
+            MockApplicationAsyncResource.setResult(hakemukset);
+            MockSijoitteluAsyncResource.setResult(hakukohde);
+            MockValintalaskentaAsyncResource.setResult(valintatieto);
+            MockTilaAsyncResource.setResult(valintatulokset);
+            MockValintaperusteetAsyncResource.setResult(valinnanvaihejonoilla);
+            String json = StringUtils.trimToEmpty(IOUtils.toString((InputStream)proxyResource.getWebClient().get().getEntity()));
+            LOG.info("{}", json);
         } finally {
             MockApplicationAsyncResource.clear();
             MockSijoitteluAsyncResource.clear();

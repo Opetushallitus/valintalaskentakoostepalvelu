@@ -111,7 +111,7 @@ public class ErillishakuProxyResource {
 
         Supplier<Void> mergeSuplier = () -> {
             if(counter.decrementAndGet() == 0) {
-                LOG.error("Saatiin vastaus muodostettua. Palautetaan se asynkronisena paluuarvona.");
+                LOG.info("Saatiin vastaus muodostettua. Palautetaan se asynkronisena paluuarvona.");
                 r(asyncResponse,merge(hakuOid,hakukohdeOid, hakemukset.get(),hakukohde.get(),valinnanvaiheet.get(),valintatulokset.get(),hakukohteetBySijoitteluAjoId.get(),vtsValintatulokset.get()));
             }
             return null;
@@ -207,6 +207,7 @@ public class ErillishakuProxyResource {
                         sijoitteluAjoIdSetti.forEach(id -> {
                             sijoitteluAsyncResource.getLatestHakukohdeBySijoitteluAjoId(hakuOid, hakukohdeOid, id,
                                     s0 -> {
+                                        LOG.error("Saatiin sijoitteluajoid:eitä: {} ja haetaan ne erikseen.", Arrays.toString(sijoitteluAjoIdSetti.toArray()));
                                         erillissijoittelutmp.put(id, s0);
                                         if(erillissijoitteluCounter.decrementAndGet() == 0) {
                                             hakukohteetBySijoitteluAjoId.set(erillissijoittelutmp);
@@ -225,7 +226,7 @@ public class ErillishakuProxyResource {
                                     });
                         });
                     } else {
-                        LOG.error("Ei saatu erillisiä sijoitteluajoideitä.");
+                        LOG.info("Ei saatu erillisiä sijoitteluajoideitä.");
                         hakukohteetBySijoitteluAjoId.set(Collections.emptyMap());
                         mergeSuplier.get();
                     }
