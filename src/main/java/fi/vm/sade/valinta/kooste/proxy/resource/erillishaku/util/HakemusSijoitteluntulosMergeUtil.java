@@ -78,12 +78,12 @@ public class HakemusSijoitteluntulosMergeUtil {
                 Optional<MergeValinnanvaiheDTO> opt = findVaihe(result, vv.getValinnanvaiheoid());
 
                 MergeValinnanvaiheDTO dto;
-                if(opt.isPresent()) {
+                if (opt.isPresent()) {
                     dto = opt.get();
                     dto.setJarjestysnumero(vv.getJarjestysnumero());
                 } else {
                     result.add(createValinnanvaihe(hakuOid, vv));
-                    dto = result.get(result.size()-1);
+                    dto = result.get(result.size() - 1);
                 }
 
                 vv.getValintatapajonot().stream().forEach(jono -> {
@@ -92,7 +92,7 @@ public class HakemusSijoitteluntulosMergeUtil {
 
                     MergeValintatapajonoDTO jonoDTO;
 
-                    if(jonoOpt.isPresent()) {
+                    if (jonoOpt.isPresent()) {
                         jonoDTO = jonoOpt.get();
                         yhdistaLaskennanTiedoista(jonoDTO, jono);
                     } else {
@@ -101,13 +101,13 @@ public class HakemusSijoitteluntulosMergeUtil {
                     }
 
                     jonoDTO.setHakemukset(mergaaLaskennasta(hakemukset, jono.getJonosijat()));
-                    if(jonoDTO.getSijoitteluajoId() != null && hakukohteetBySijoitteluAjoId.containsKey(jonoDTO.getSijoitteluajoId())) {
+                    if (jonoDTO.getSijoitteluajoId() != null && hakukohteetBySijoitteluAjoId.containsKey(jonoDTO.getSijoitteluajoId())) {
                         Optional<ValintatapajonoDTO> sJono = hakukohteetBySijoitteluAjoId.get(jonoDTO.getSijoitteluajoId())
                                 .getValintatapajonot()
                                 .stream()
                                 .filter(j -> j.getOid().equals(jonoDTO.getOid()))
                                 .findFirst();
-                        if(sJono.isPresent()) {
+                        if (sJono.isPresent()) {
                             asetaSijoittelunTiedoista(jonoDTO, sJono.get(), valintatulosDtos);
                         }
                     }
@@ -156,6 +156,9 @@ public class HakemusSijoitteluntulosMergeUtil {
 
 
         }
+
+        result.get(result.size()-1).setViimeinenVaihe(true);
+
         return result;
 
     }
