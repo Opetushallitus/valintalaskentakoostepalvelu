@@ -52,6 +52,19 @@ public class HakemusSijoitteluntulosMergeUtil {
         // Pelkät hakemukset tai ei mitään dataa
         if(laskennantulokset.isEmpty() && hakukohdeDTO.getValintatapajonot().isEmpty()) {
 
+            // Ei valintaperusteita
+            if(result.get(0).getValintatapajonot().isEmpty()) {
+                MergeValintatapajonoDTO jonoDTO = new MergeValintatapajonoDTO();
+                jonoDTO.setKaytetaanValintalaskentaa(false);
+                List<MergeHakemusDTO> luodut = hakemukset.stream().map(h -> luo(Optional.of(h))).collect(Collectors.toList());
+                jonoDTO.setHakemukset(luodut);
+                result.get(0).getValintatapajonot().add(jonoDTO);
+            } else {
+                result.forEach(v -> v.getValintatapajonot().forEach(j -> {
+                    List<MergeHakemusDTO> luodut = hakemukset.stream().map(h -> luo(Optional.of(h))).collect(Collectors.toList());
+                    j.setHakemukset(luodut);
+                }));
+            }
             MergeValintatapajonoDTO jonoDTO = new MergeValintatapajonoDTO();
             jonoDTO.setKaytetaanValintalaskentaa(false);
             List<MergeHakemusDTO> luodut = hakemukset.stream().map(h -> luo(Optional.of(h))).collect(Collectors.toList());
