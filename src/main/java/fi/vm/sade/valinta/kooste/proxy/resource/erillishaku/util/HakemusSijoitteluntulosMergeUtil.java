@@ -41,6 +41,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         // Pelkät hakemukset tai ei mitään dataa
         if(laskennantulokset.isEmpty() && hakukohdeDTO.getValintatapajonot().isEmpty()) {
             MergeValinnanvaiheDTO dto = createValinnanvaihe(0);
+            dto.setHakuOid(hakuOid);
             MergeValintatapajonoDTO jonoDTO = new MergeValintatapajonoDTO();
             List<MergeHakemusDTO> luodut = hakemukset.stream().map(h -> luo(Optional.of(h))).collect(Collectors.toList());
             jonoDTO.setHakemukset(luodut);
@@ -50,6 +51,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         // Ei laskennan tuloksia, generoidaan valinnanvaihe sijoittelun tuloksille ja mergataan hakemukset
         else if(laskennantulokset.isEmpty()) {
             MergeValinnanvaiheDTO dto = createValinnanvaihe(0);
+            dto.setHakuOid(hakuOid);
             List<MergeValintatapajonoDTO> valintatapajonot = hakukohdeDTO
                     .getValintatapajonot()
                     .stream()
@@ -65,6 +67,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         else if(hakukohdeDTO == null || hakukohdeDTO.getValintatapajonot().isEmpty()) {
             List<MergeValinnanvaiheDTO> mergatutValinnanvaiheet = laskennantulokset.stream().map(vv -> {
                 MergeValinnanvaiheDTO dto = createValinnanvaihe(hakuOid, vv);
+                dto.setHakuOid(hakuOid);
                 List<MergeValintatapajonoDTO> valintatapajonot = vv.getValintatapajonot().stream().map(jono -> {
                     MergeValintatapajonoDTO jonoDTO = luoLaskennanTiedoista(jono);
                     jonoDTO.setHakemukset(mergaaLaskennasta(hakemukset, jono.getJonosijat()));
