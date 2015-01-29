@@ -21,6 +21,7 @@ public class MergeHakemusDTO {
     private String henkilotunnus;
     private String hakijaOid;
     private String hakemusOid;
+    private String syntymaaika;
 
     // flägit
     private boolean loytyiSijoittelusta = true;
@@ -73,6 +74,15 @@ public class MergeHakemusDTO {
     public String getSahkoposti() {
         return sahkoposti;
     }
+
+    public String getSyntymaaika() {
+        return syntymaaika;
+    }
+
+    public void setSyntymaaika(String syntymaaika) {
+        this.syntymaaika = syntymaaika;
+    }
+
 
     public String getSukunimi() {
         return sukunimi;

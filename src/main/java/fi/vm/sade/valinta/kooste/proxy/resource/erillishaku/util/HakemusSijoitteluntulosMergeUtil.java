@@ -170,7 +170,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         jonoDTO.setOid(jono.getOid());
         jonoDTO.setPrioriteetti(jono.getPrioriteetti());
         jonoDTO.setSiirretaanSijoitteluun(jono.isSiirretaanSijoitteluun());
-        jonoDTO.setKaytetaanValintalaskentaa(jono.getKaytetaanValintalaskentaa());
+        jonoDTO.setKaytetaanValintalaskentaa(Boolean.TRUE.equals(jono.getKaytetaanValintalaskentaa()));
         jonoDTO.setValmisSijoiteltavaksi(jono.getValmisSijoiteltavaksi());
         jonoDTO.setSijoitteluajoId(jono.getSijoitteluajoId());
 
@@ -259,6 +259,7 @@ public class HakemusSijoitteluntulosMergeUtil {
             dto.setSukunimi(wrapper.getSukunimi());
             dto.setSahkoposti(wrapper.getSahkopostiOsoite());
             dto.setHakemusOid(hakemus.get().getOid());
+            dto.setSyntymaaika(wrapper.getSyntymaaika());
             dto.setHakijaOid(hakemus.get().getPersonOid());
             dto.setHenkilotunnus(wrapper.getHenkilotunnus());
         }
