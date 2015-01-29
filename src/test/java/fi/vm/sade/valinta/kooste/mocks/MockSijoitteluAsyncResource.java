@@ -15,6 +15,8 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncRes
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -25,12 +27,17 @@ import org.springframework.stereotype.Service;
 public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
 
     private static final AtomicReference<HakukohdeDTO> resultReference = new AtomicReference<>();
-
+    private static final Map<Long, HakukohdeDTO> resultMap = new ConcurrentHashMap<>();
     public static void setResult(HakukohdeDTO result) {
         resultReference.set(result);
     }
     public static void clear() {
         resultReference.set(null);
+        resultMap.clear();
+    }
+
+    public static Map<Long, HakukohdeDTO> getResultMap() {
+        return resultMap;
     }
 
     @Override
@@ -51,7 +58,7 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
 
     @Override
     public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
-        throw new UnsupportedOperationException();
+        hakukohde.accept(resultMap.get(sijoitteluAjoId));
     }
 
     @Override

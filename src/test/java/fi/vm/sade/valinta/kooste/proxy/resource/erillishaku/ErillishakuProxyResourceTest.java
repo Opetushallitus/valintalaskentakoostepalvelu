@@ -10,7 +10,9 @@ import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.mocks.*;
+import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import junit.framework.Assert;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
@@ -78,9 +80,19 @@ public class ErillishakuProxyResourceTest {
             MockValintalaskentaAsyncResource.setResult(valintatieto);
             MockTilaAsyncResource.setResult(valintatulokset);
             MockValintaperusteetAsyncResource.setResult(valinnanvaihejonoilla);
-            String json = StringUtils.trimToEmpty(IOUtils.toString((InputStream)proxyResource.getWebClient().get().getEntity()));
-            LOG.info("{}", json);
-        } finally {
+            List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = GSON.fromJson(IOUtils.toString((InputStream) proxyResource.getWebClient().get().getEntity()), new TypeToken<List<MergeValinnanvaiheDTO>>() {}.getType());
+            mergeValinnanvaiheDTOs.forEach(valinnanvaihe->
+
+                {
+                    valinnanvaihe.getValintatapajonot().forEach(
+                            valintatapajono -> {
+                                Assert.assertFalse(valintatapajono.isKaytetaanValintalaskentaa());
+                            }
+                    );
+                }
+
+                );
+            }finally {
             MockApplicationAsyncResource.clear();
             MockSijoitteluAsyncResource.clear();
             MockTilaAsyncResource.clear();
@@ -91,7 +103,8 @@ public class ErillishakuProxyResourceTest {
     @Test
     public void testaaProxyResurssiHakukohteelleLaskennalla() throws Exception {
         LOG.error("{}",root + "/proxy/erillishaku/haku/"+hakuOid+"/hakukohde/" + hakukohdeOid);
-        List<ValintatietoValinnanvaiheDTO> valintatieto = Collections.emptyList(); // ei valinnanvaiheita
+        List<ValintatietoValinnanvaiheDTO> valintatieto = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/laskenta_valinnanvaihe.json"), new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {
+        }.getType());
         //
         List<Hakemus> hakemukset = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/listfull.json"), new TypeToken<List<Hakemus>>() {
         }.getType());
@@ -101,14 +114,23 @@ public class ErillishakuProxyResourceTest {
                 GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/valinnanvaihe.json"), new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {
                 }.getType());
         HakukohdeDTO hakukohde = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/hakukohde.json"),HakukohdeDTO.class);
+        HakukohdeDTO hakukohde_1422533823300 = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/hakukohde_1422533823300.json"),HakukohdeDTO.class);
         try {
             MockApplicationAsyncResource.setResult(hakemukset);
             MockSijoitteluAsyncResource.setResult(hakukohde);
+            MockSijoitteluAsyncResource.getResultMap().put(1422533823300L, hakukohde_1422533823300);
             MockValintalaskentaAsyncResource.setResult(valintatieto);
             MockTilaAsyncResource.setResult(valintatulokset);
             MockValintaperusteetAsyncResource.setResult(valinnanvaihejonoilla);
-            String json = StringUtils.trimToEmpty(IOUtils.toString((InputStream)proxyResource.getWebClient().get().getEntity()));
-            LOG.info("{}", json);
+            List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = GSON.fromJson(IOUtils.toString((InputStream) proxyResource.getWebClient().get().getEntity()), new TypeToken<List<MergeValinnanvaiheDTO>>() {
+            }.getType());
+            mergeValinnanvaiheDTOs.forEach(valinnanvaihe -> {
+                valinnanvaihe.getValintatapajonot().forEach(
+                        valintatapajono -> {
+                            Assert.assertTrue(valintatapajono.isKaytetaanValintalaskentaa());
+                        }
+                );
+            });
         } finally {
             MockApplicationAsyncResource.clear();
             MockSijoitteluAsyncResource.clear();

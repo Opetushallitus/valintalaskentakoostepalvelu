@@ -49,6 +49,11 @@ import java.util.stream.Collectors;
 /**
  * @author Jussi Jartamo
  */
+///valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
+///haku-app/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid={hakukohdeOid}&asId={hakuOid}
+///sijoittelu-service/resources/sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
+///valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
+///sijoittelu-service/resources/tila/hakukohde/{hakukohdeOid}
 @Controller
 @Path("proxy/erillishaku")
 @PreAuthorize("isAuthenticated()")
@@ -88,7 +93,6 @@ public class ErillishakuProxyResource {
                         .build());
             }
         });
-
         final AtomicReference<List<Hakemus>> hakemukset = new AtomicReference<>();
         final AtomicReference<List<ValinnanVaiheJonoillaDTO>> valinnanvaiheet = new AtomicReference<>();
         final AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset = new AtomicReference<>();

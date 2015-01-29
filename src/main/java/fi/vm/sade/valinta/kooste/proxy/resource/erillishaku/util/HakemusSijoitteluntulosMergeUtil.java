@@ -276,7 +276,7 @@ public class HakemusSijoitteluntulosMergeUtil {
 
     private static MergeValintatapajonoDTO yhdistaLaskennanTiedoista(MergeValintatapajonoDTO jonoDTO, ValintatietoValintatapajonoDTO jono) {
         jonoDTO.setPrioriteetti(jono.getPrioriteetti());
-        jonoDTO.setSiirretaanSijoitteluun(jono.isSiirretaanSijoitteluun());
+        jonoDTO.setSiirretaanSijoitteluun(Boolean.TRUE.equals(jono.isSiirretaanSijoitteluun()));
         jonoDTO.setKaytetaanValintalaskentaa(true);
         jonoDTO.setValmisSijoiteltavaksi(jono.getValmisSijoiteltavaksi());
         jonoDTO.setSijoitteluajoId(jono.getSijoitteluajoId());
