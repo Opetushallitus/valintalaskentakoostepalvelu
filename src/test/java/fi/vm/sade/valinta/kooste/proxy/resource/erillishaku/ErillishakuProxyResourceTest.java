@@ -92,6 +92,7 @@ public class ErillishakuProxyResourceTest {
                 }
 
                 );
+            //LOG.info("{}",new GsonBuilder().setPrettyPrinting().create().toJson(mergeValinnanvaiheDTOs));
             }finally {
             MockApplicationAsyncResource.clear();
             MockSijoitteluAsyncResource.clear();
@@ -131,6 +132,7 @@ public class ErillishakuProxyResourceTest {
                         }
                 );
             });
+            //LOG.info("{}",new GsonBuilder().setPrettyPrinting().create().toJson(mergeValinnanvaiheDTOs));
         } finally {
             MockApplicationAsyncResource.clear();
             MockSijoitteluAsyncResource.clear();
