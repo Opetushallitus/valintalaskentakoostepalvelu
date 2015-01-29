@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
+import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -7,6 +9,7 @@ import java.util.function.Consumer;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
+import com.google.gson.*;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +33,16 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
  */
 @Service
 public class ValintalaskentaAsyncResourceImpl extends HttpResource implements ValintalaskentaAsyncResource {
-
+	private static final Gson GSON= new GsonBuilder()
+			.registerTypeAdapter(Date.class, new JsonDeserializer() {
+				@Override
+				public Object deserialize(JsonElement json, Type typeOfT,
+										  JsonDeserializationContext context)
+						throws JsonParseException {
+					return new Date(json.getAsJsonPrimitive().getAsLong());
+				}
+			})
+			.create();
 	@Autowired
 	public ValintalaskentaAsyncResourceImpl(
 			@Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}") String address
@@ -46,7 +58,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 			return new PeruutettavaImpl(getWebClient()
 					.path(url)
 					.async()
-					.get(new Callback<List<ValintatietoValinnanvaiheDTO>>(address, url, callback,
+					.get(new Callback<List<ValintatietoValinnanvaiheDTO>>(GSON,address, url, callback,
 							failureCallback, new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {
 					}.getType())));
 		} catch (Exception e) {
