@@ -24,7 +24,19 @@ public class MergeValinnanvaiheDTO {
     @ApiModelProperty(value = "Valinnan vaiheen nimi")
     private String nimi;
 
+    @ApiModelProperty(value = "Onko viimeinen valinnanvaihe")
     private boolean viimeinenVaihe = false;
+
+    @ApiModelProperty(value = "Valinnan vaiheen hakukohteen OID")
+    private String hakukohdeOid;
+
+    public String getHakukohdeOid() {
+        return hakukohdeOid;
+    }
+
+    public void setHakukohdeOid(String hakukohdeOid) {
+        this.hakukohdeOid = hakukohdeOid;
+    }
 
     private List<MergeValintatapajonoDTO> valintatapajonot = new ArrayList<>();
 
