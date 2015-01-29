@@ -211,7 +211,7 @@ public class ErillishakuProxyResource {
                         sijoitteluAjoIdSetti.forEach(id -> {
                             sijoitteluAsyncResource.getLatestHakukohdeBySijoitteluAjoId(hakuOid, hakukohdeOid, id,
                                     s0 -> {
-                                        LOG.error("Saatiin sijoitteluajoid:eitä: {} ja haetaan ne erikseen.", Arrays.toString(sijoitteluAjoIdSetti.toArray()));
+                                        LOG.error("Haettiin laskenta sijoitteluajoid:llä {}.", id);
                                         erillissijoittelutmp.put(id, s0);
                                         if(erillissijoitteluCounter.decrementAndGet() == 0) {
                                             hakukohteetBySijoitteluAjoId.set(erillissijoittelutmp);
