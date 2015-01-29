@@ -23,9 +23,9 @@ public class MergeHakemusDTO {
     private String hakemusOid;
 
     // flägit
-    private boolean loytyiSijoittelusta = true;
-    private boolean loytyiHakemuksista = true;
-    private boolean loytyiLaskennasta = true;
+    private boolean loytyiSijoittelusta = false;
+    private boolean loytyiHakemuksista = false;
+    private boolean loytyiLaskennasta = false;
 
     // Sijoittelun tiedot
     private BigDecimal pisteet;
@@ -39,6 +39,7 @@ public class MergeHakemusDTO {
     private int varasijanNumero;
     private int todellinenJonosija;
     private boolean julkaistavissa = false;
+    private boolean hyvaksyttyVarasijalta = false;
 
     // Laskennan tiedot
     private SortedSet<JarjestyskriteeritulosDTO> jarjestyskriteerit = new TreeSet<JarjestyskriteeritulosDTO>();
@@ -236,5 +237,13 @@ public class MergeHakemusDTO {
 
     public void setJulkaistavissa(boolean julkaistavissa) {
         this.julkaistavissa = julkaistavissa;
+    }
+
+    public boolean isHyvaksyttyVarasijalta() {
+        return hyvaksyttyVarasijalta;
+    }
+
+    public void setHyvaksyttyVarasijalta(boolean hyvaksyttyVarasijalta) {
+        this.hyvaksyttyVarasijalta = hyvaksyttyVarasijalta;
     }
 }
