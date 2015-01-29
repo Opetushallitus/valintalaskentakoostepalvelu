@@ -26,7 +26,7 @@ public class MergeValinnanvaiheDTO {
 
     @ApiModelProperty(value = "Onko viimeinen valinnanvaihe")
     private boolean viimeinenVaihe = false;
-    
+
     @ApiModelProperty(value = "Valinnan vaiheen hakukohteen OID")
     private String hakukohdeOid;
 

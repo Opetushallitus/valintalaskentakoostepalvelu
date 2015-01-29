@@ -41,10 +41,10 @@ public class HakemusSijoitteluntulosMergeUtil {
 
         if(valinnanvaiheet.isEmpty()) {
             // Ei yhtään valinnanvaihetta, generoidaan yksi
-            result.add(createValinnanvaihe(0));
+            result.add(createValinnanvaihe(hakuOid,hakukohdeOid,0));
         } else {
             valinnanvaiheet.forEach(vaihe -> {
-                result.add(createValinnanvaihe(hakuOid, vaihe));
+                result.add(createValinnanvaihe(hakuOid,hakukohdeOid, vaihe));
             });
         }
 
@@ -177,8 +177,10 @@ public class HakemusSijoitteluntulosMergeUtil {
                 .findFirst();
     }
 
-    private static MergeValinnanvaiheDTO createValinnanvaihe(int jarjestysnumero) {
+    private static MergeValinnanvaiheDTO createValinnanvaihe(String hakuOid, String hakukohdeOid, int jarjestysnumero) {
         MergeValinnanvaiheDTO dto = new MergeValinnanvaiheDTO();
+        dto.setHakuOid(hakuOid);
+        dto.setHakukohdeOid(hakukohdeOid);
         dto.setJarjestysnumero(jarjestysnumero);
         return dto;
     }
@@ -193,9 +195,10 @@ public class HakemusSijoitteluntulosMergeUtil {
         return dto;
     }
 
-    private static MergeValinnanvaiheDTO createValinnanvaihe(String hakuOid, ValinnanVaiheJonoillaDTO vv) {
+    private static MergeValinnanvaiheDTO createValinnanvaihe(String hakuOid, String hakukohdeOid, ValinnanVaiheJonoillaDTO vv) {
         MergeValinnanvaiheDTO dto = new MergeValinnanvaiheDTO();
         dto.setHakuOid(hakuOid);
+        dto.setHakukohdeOid(hakukohdeOid);
         dto.setNimi(vv.getNimi());
         dto.setValinnanvaiheoid(vv.getOid());
         vv.getJonot().forEach(jono -> {
