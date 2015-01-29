@@ -341,7 +341,6 @@ public class HakemusSijoitteluntulosMergeUtil {
         MergeHakemusDTO dto = new MergeHakemusDTO();
         if(hakemus.isPresent()) {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus.get());
-            dto.setLoytyiHakemuksista(true);
             dto.setEtunimi(wrapper.getEtunimi());
             dto.setSukunimi(wrapper.getSukunimi());
             dto.setSahkoposti(wrapper.getSahkopostiOsoite());
