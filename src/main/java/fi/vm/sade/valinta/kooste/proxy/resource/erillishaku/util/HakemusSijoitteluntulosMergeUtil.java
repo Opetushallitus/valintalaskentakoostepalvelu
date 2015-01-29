@@ -267,7 +267,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         jonoDTO.setOid(jono.getOid());
         jonoDTO.setPrioriteetti(jono.getPrioriteetti());
         jonoDTO.setSiirretaanSijoitteluun(jono.isSiirretaanSijoitteluun());
-        jonoDTO.setKaytetaanValintalaskentaa(Boolean.TRUE.equals(jono.getKaytetaanValintalaskentaa()));
+        jonoDTO.setKaytetaanValintalaskentaa(true);
         jonoDTO.setValmisSijoiteltavaksi(jono.getValmisSijoiteltavaksi());
         jonoDTO.setSijoitteluajoId(jono.getSijoitteluajoId());
 
@@ -277,7 +277,7 @@ public class HakemusSijoitteluntulosMergeUtil {
     private static MergeValintatapajonoDTO yhdistaLaskennanTiedoista(MergeValintatapajonoDTO jonoDTO, ValintatietoValintatapajonoDTO jono) {
         jonoDTO.setPrioriteetti(jono.getPrioriteetti());
         jonoDTO.setSiirretaanSijoitteluun(jono.isSiirretaanSijoitteluun());
-        jonoDTO.setKaytetaanValintalaskentaa(jono.getKaytetaanValintalaskentaa());
+        jonoDTO.setKaytetaanValintalaskentaa(true);
         jonoDTO.setValmisSijoiteltavaksi(jono.getValmisSijoiteltavaksi());
         jonoDTO.setSijoitteluajoId(jono.getSijoitteluajoId());
 
