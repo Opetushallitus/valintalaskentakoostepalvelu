@@ -170,6 +170,8 @@ public class HakemusSijoitteluntulosMergeUtil {
 
         }
 
+        Collections.sort(result, (v1, v2) -> Integer.compare(v1.getJarjestysnumero(), v2.getJarjestysnumero()));
+
         result.get(result.size()-1).setViimeinenVaihe(true);
 
         return result;
