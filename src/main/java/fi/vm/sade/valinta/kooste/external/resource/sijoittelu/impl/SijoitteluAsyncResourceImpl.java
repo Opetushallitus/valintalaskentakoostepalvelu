@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
+import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -12,6 +14,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
 import com.google.common.reflect.TypeToken;
+import com.google.gson.*;
 import com.wordnik.swagger.annotations.Api;
 import fi.vm.sade.sijoittelu.tulos.dto.JsonViews;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
@@ -34,7 +37,19 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Service
 public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements SijoitteluAsyncResource {
-	@Autowired
+
+    private static final Gson GSON= new GsonBuilder()
+            .registerTypeAdapter(Date.class, new JsonDeserializer() {
+                @Override
+                public Object deserialize(JsonElement json, Type typeOfT,
+                                          JsonDeserializationContext context)
+                        throws JsonParseException {
+                    return new Date(json.getAsJsonPrimitive().getAsLong());
+                }
+            })
+            .create();
+
+    @Autowired
 	public SijoitteluAsyncResourceImpl(
 			@Value("${web.url.cas}") String webCasUrl,
 			@Value("${cas.service.sijoittelu-service}/j_spring_cas_security_check") String targetService,
@@ -52,7 +67,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 		getWebClient()
 				.path(url)
 				.accept(MediaType.WILDCARD)
-				.async().get(new Callback<HakukohdeDTO>(
+				.async().get(new Callback<HakukohdeDTO>(GSON,
 				address,url, hakukohde,poikkeus,
 				new TypeToken<HakukohdeDTO>() { }.getType()));
 	}
@@ -63,7 +78,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 		getWebClient()
 				.path(url)
 				.accept(MediaType.WILDCARD)
-				.async().get(new Callback<HakukohdeDTO>(
+				.async().get(new Callback<HakukohdeDTO>(GSON,
 				address,url, hakukohde,poikkeus,
 				new TypeToken<HakukohdeDTO>() { }.getType()));
 	}
