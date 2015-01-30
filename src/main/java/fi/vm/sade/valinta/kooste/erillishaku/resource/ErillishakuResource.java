@@ -73,7 +73,6 @@ public class ErillishakuResource {
 			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@P("tarjoajaOid")
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
 			@QueryParam("valintatapajononNimi") String valintatapajononNimi) {
@@ -95,11 +94,11 @@ public class ErillishakuResource {
 			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@P("tarjoajaOid")
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
 			@QueryParam("valintatapajononNimi") String valintatapajononNimi,
 			InputStream file) throws IOException {
+		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_APP_HAKEMUS_CRUD);
 		ByteArrayOutputStream b;
 		IOUtils.copy(file, b = new ByteArrayOutputStream());
 		IOUtils.closeQuietly(file);
@@ -120,7 +119,6 @@ public class ErillishakuResource {
 			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@P("tarjoajaOid")
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
 			@QueryParam("valintatapajononNimi") String valintatapajononNimi,

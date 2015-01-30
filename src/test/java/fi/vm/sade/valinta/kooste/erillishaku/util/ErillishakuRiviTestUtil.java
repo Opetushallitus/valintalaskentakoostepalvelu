@@ -19,10 +19,10 @@ public class ErillishakuRiviTestUtil {
     private static final String SYNTYMAAIKA = "19.01.1995";
 
     public static ErillishakuRivi laillinenRivi() {
-        return new ErillishakuRivi(SUKUNIMI,ETUNIMI,HETU,StringUtils.EMPTY, SYNTYMAAIKA,StringUtils.EMPTY, HakemuksenTila.HYVAKSYTTY.toString(), ValintatuloksenTila.VASTAANOTTANUT.toString(), IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(),true, Optional.empty());
+        return new ErillishakuRivi(null, SUKUNIMI,ETUNIMI,HETU,StringUtils.EMPTY, SYNTYMAAIKA,StringUtils.EMPTY, HakemuksenTila.HYVAKSYTTY.toString(), ValintatuloksenTila.VASTAANOTTANUT.toString(), IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(),true, Optional.empty());
     }
     public static ErillishakuRivi viallinenRiviPuuttuvillaTunnisteilla() {
-        return new ErillishakuRivi(SUKUNIMI,ETUNIMI,
+        return new ErillishakuRivi(null, SUKUNIMI,ETUNIMI,
                 // HETU, SYNTYMAAIKA, HENKILOOID => TUNNISTEET
                 StringUtils.EMPTY, StringUtils.EMPTY,StringUtils.EMPTY, StringUtils.EMPTY,
                 //
