@@ -131,10 +131,7 @@ public class ErillishaunTuontiService {
             throw new RuntimeException("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
         }
 
-        Map<String, String> sahkopostit = ImmutableMap.<String, String>builder()
-                .putAll(rivit.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getPersonOid())).collect(Collectors.toMap(rivi -> rivi.getPersonOid(), rivi -> rivi.getSahkoposti())))
-                .putAll(rivit.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getHenkilotunnus())).collect(Collectors.toMap(rivi -> rivi.getHenkilotunnus(), rivi -> rivi.getSahkoposti())))
-                .build();
+
 
         validoiRivit(prosessi,haku,rivit);
 
@@ -158,6 +155,10 @@ public class ErillishaunTuontiService {
                 throw e;
             }
             LOG.info("Käsitellään hakemukset");
+            Map<String, String> sahkopostit = ImmutableMap.<String, String>builder()
+                    .putAll(lisattavat.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getPersonOid())).collect(Collectors.toMap(rivi -> rivi.getPersonOid(), rivi -> rivi.getSahkoposti())))
+                    .putAll(lisattavat.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getHenkilotunnus())).collect(Collectors.toMap(rivi -> rivi.getHenkilotunnus(), rivi -> rivi.getSahkoposti())))
+                    .build();
             hakemukset = kasitteleHakemukset(haku, henkilot, sahkopostit, prosessi);
         } else {
             hakemukset = Collections.emptyList();
