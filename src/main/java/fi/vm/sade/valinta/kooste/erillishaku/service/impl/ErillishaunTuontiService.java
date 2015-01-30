@@ -185,7 +185,7 @@ public class ErillishaunTuontiService {
                     rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(),
                     haku.getTarjoajaOid(),
                     convertValintatuloksenTilaHakuTyypinMukaan(valintatuloksenTila(rivi), haku.getHakutyyppi()), ilmoittautumisTila(rivi),
-                    hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi());
+                    hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi(), Optional.of(rivi.isPoistetaankoRivi()));
         }).collect(Collectors.toList());
 
         try {
