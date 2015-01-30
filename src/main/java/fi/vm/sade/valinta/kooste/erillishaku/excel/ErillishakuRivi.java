@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import java.util.Date;
+import java.util.Optional;
 
 import com.wordnik.swagger.annotations.ApiModel;
 import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.*;
@@ -38,6 +39,7 @@ public class ErillishakuRivi {
 	private final String ilmoittautumisTila;
 
 	private final boolean julkaistaankoTiedot;
+    private final boolean poistetaankoRivi;
 
 	public ErillishakuRivi() {
 		this.etunimi =  null;
@@ -50,9 +52,10 @@ public class ErillishakuRivi {
 		this.vastaanottoTila = null;
 		this.ilmoittautumisTila = null;
 		this.julkaistaankoTiedot = false;
+        this.poistetaankoRivi = false;
 	}
 
-	public ErillishakuRivi(String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika, String personOid, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot) {
+	public ErillishakuRivi(String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika, String personOid, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, Optional<Boolean> poistetaankoRivi) {
 		this.etunimi = etunimi;
 		this.sukunimi = sukunimi;
 		this.henkilotunnus = henkilotunnus;
@@ -63,6 +66,7 @@ public class ErillishakuRivi {
 		this.vastaanottoTila = vastaanottoTila;
 		this.ilmoittautumisTila = ilmoittautumisTila;
 		this.julkaistaankoTiedot = julkaistaankoTiedot;
+        this.poistetaankoRivi = poistetaankoRivi.orElse(false);
 	}
 
 	public boolean isJulkaistaankoTiedot() {
@@ -139,4 +143,8 @@ public class ErillishakuRivi {
 			return null;
 		}
 	}
+
+    public boolean isPoistetaankoRivi() {
+        return poistetaankoRivi;
+    }
 }
