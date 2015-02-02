@@ -65,11 +65,6 @@ public class HakemusSijoitteluntulosMergeUtil {
                     j.setHakemukset(luodut);
                 }));
             }
-            MergeValintatapajonoDTO jonoDTO = new MergeValintatapajonoDTO();
-            jonoDTO.setKaytetaanValintalaskentaa(false);
-            List<MergeHakemusDTO> luodut = hakemukset.stream().map(h -> luo(Optional.of(h))).collect(Collectors.toList());
-            jonoDTO.setHakemukset(luodut);
-            result.get(0).getValintatapajonot().add(jonoDTO);
         }
         // Ei laskennan tuloksia, generoidaan valinnanvaihe sijoittelun tuloksille ja mergataan hakemukset
         else if(laskennantulokset.isEmpty()) {
