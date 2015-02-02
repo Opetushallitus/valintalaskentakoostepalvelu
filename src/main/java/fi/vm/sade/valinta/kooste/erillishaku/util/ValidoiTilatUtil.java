@@ -37,12 +37,9 @@ public class ValidoiTilatUtil {
             Sets.newEnumSet(Arrays.asList(VASTAANOTTANUT,VASTAANOTTANUT_LASNA,VASTAANOTTANUT_POISSAOLEVA,EI_VASTAANOTETTU_MAARA_AIKANA,
                     EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT_SITOVASTI, PERUNUT, PERUUTETTU),ValintatuloksenTila.class);
     private static final Set<ValintatuloksenTila> KESKEN_TAI_PERUNUT_VASTAANOTTAJA =
-            Sets.newHashSet(Arrays.asList(null, KESKEN, PERUUTETTU, PERUNUT));
-    private static final IlmoittautumisTila EI_ILMOITTAUTUMISTA = null;
-/*
+            Sets.newHashSet(Arrays.asList(KESKEN, PERUUTETTU, PERUNUT));
     private static final Set<IlmoittautumisTila> EI_ILMOITTAUTUMISTA =
-            Sets.newHashSet(Arrays.asList(null));
-    */
+            Sets.newHashSet(Arrays.asList(IlmoittautumisTila.EI_TEHTY));
     /**
      *
      * @return (null if ok) validation error
@@ -52,38 +49,41 @@ public class ValidoiTilatUtil {
         if(VIALLISET_VALINTATULOKSENTILAT.contains(valintatuloksenTila)) {
             return "Valintatuloksentila " + valintatuloksenTila + " on viallinen. ";
         }*/
-        if(ILMOITETTU.equals(valintatuloksenTila)) {
+        if (hakemuksenTila == null || valintatuloksenTila == null || ilmoittautumisTila == null) {
+            return virheellinenTilaYhdistelma(new StringBuilder("Tila ei saa olla tyhjä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
+        }
+        if (ILMOITETTU.equals(valintatuloksenTila)) {
             return virheellinenTilaYhdistelma(new StringBuilder("Ilmoitettutila on poistettu käytöstä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
         }
-        if(KAYTOSTAPOISTETTU_VASTAANOTTOTILA.equals(valintatuloksenTila)) {
+        if (KAYTOSTAPOISTETTU_VASTAANOTTOTILA.equals(valintatuloksenTila)) {
             return virheellinenTilaYhdistelma(new StringBuilder("Valintatuloksen tila on poistettu käytöstä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
         }
-        if(EI_ILMOITTAUTUMISTA != ilmoittautumisTila) {
-            if(HYVAKSYTTYNA.contains(hakemuksenTila) && VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
+        if (!EI_ILMOITTAUTUMISTA.contains(ilmoittautumisTila)) {
+            if (HYVAKSYTTYNA.contains(hakemuksenTila) && VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
                 return null; // OK
             } else {
                 return virheellinenTilaYhdistelma(new StringBuilder("Ilmoittautumistieto voi olla ainoastaan hyväksytyillä ja vastaanottaneilla hakijoilla. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
             }
         }
 
-        if(VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
-            if(HYVAKSYTTYNA.contains(hakemuksenTila)) {
+        if (VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
+            if (HYVAKSYTTYNA.contains(hakemuksenTila)) {
                 return null; // OK
             } else {
                 return virheellinenTilaYhdistelma(new StringBuilder("Vastaanottaneen tai peruneen hakijan tulisi olla hyväksyttynä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
             }
         }
 
-        if(HYLATTY_TAI_VARALLA.contains(hakemuksenTila)) {
-            if(!VASTAANOTTANEENA.contains(valintatuloksenTila) && EI_ILMOITTAUTUMISTA == ilmoittautumisTila) {
+        if (HYLATTY_TAI_VARALLA.contains(hakemuksenTila)) {
+            if (!VASTAANOTTANEENA.contains(valintatuloksenTila) && EI_ILMOITTAUTUMISTA.contains(ilmoittautumisTila)) {
                 return null; // OK
             } else {
                 return virheellinenTilaYhdistelma(new StringBuilder("Hylätty tai varalla oleva hakija ei voi olla ilmoittautunut tai vastaanottanut. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
             }
         }
 
-        if(PERUNEENA.contains(hakemuksenTila)) {
-            if(KESKEN_TAI_PERUNUT_VASTAANOTTAJA.contains(valintatuloksenTila)) {
+        if (PERUNEENA.contains(hakemuksenTila)) {
+            if (KESKEN_TAI_PERUNUT_VASTAANOTTAJA.contains(valintatuloksenTila)) {
                 return null; // OK
             } else {
                 return virheellinenTilaYhdistelma(new StringBuilder("Peruneella vastaanottajalla ei voi olla vastaanottotilaa. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
