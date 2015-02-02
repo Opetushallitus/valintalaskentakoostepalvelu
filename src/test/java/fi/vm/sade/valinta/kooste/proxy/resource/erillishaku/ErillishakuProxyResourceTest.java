@@ -23,7 +23,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.util.Collections;
+import static java.util.Collections.*;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -64,7 +64,7 @@ public class ErillishakuProxyResourceTest {
     @Test
     public void testaaProxyResurssiIlmanLaskentaaHakukohteelle() throws Exception {
         LOG.error("{}",root + "/proxy/erillishaku/haku/"+hakuOid+"/hakukohde/" + hakukohdeOid);
-        List<ValintatietoValinnanvaiheDTO> valintatieto = Collections.emptyList(); // ei valinnanvaiheita
+        List<ValintatietoValinnanvaiheDTO> valintatieto = emptyList(); // ei valinnanvaiheita
         //
         List<Hakemus> hakemukset = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/ilmanlaskentaa/listfull.json"), new TypeToken<List<Hakemus>>() {
         }.getType());
@@ -141,4 +141,30 @@ public class ErillishakuProxyResourceTest {
             MockValintaperusteetAsyncResource.clear();
         }
     }
+
+    @Test
+    public void testaaProxyResurssinJononGenerointiKunValintaperusteetPuuttuu() throws Exception {
+        try {
+            MockApplicationAsyncResource.setResult(emptyList());
+            MockSijoitteluAsyncResource.setResult(new HakukohdeDTO());
+            MockValintalaskentaAsyncResource.setResult(emptyList());
+            MockTilaAsyncResource.setResult(emptyList());
+            MockValintaperusteetAsyncResource.setResult(emptyList());
+            List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = GSON.fromJson(IOUtils.toString((InputStream) proxyResource.getWebClient().get().getEntity()), new TypeToken<List<MergeValinnanvaiheDTO>>() {
+            }.getType());
+            Assert.assertEquals(1, mergeValinnanvaiheDTOs.size());//
+            MergeValinnanvaiheDTO vv = mergeValinnanvaiheDTOs.iterator().next();
+            Assert.assertEquals(1, vv.getValintatapajonot().size());
+            //LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(mergeValinnanvaiheDTOs));
+        } finally {
+            MockApplicationAsyncResource.clear();
+            MockSijoitteluAsyncResource.clear();
+            MockTilaAsyncResource.clear();
+            MockValintalaskentaAsyncResource.clear();
+            MockValintaperusteetAsyncResource.clear();
+        }
+
+
+    }
+
 }
