@@ -219,6 +219,7 @@ public class HakemusSijoitteluntulosMergeUtil {
             jonoDTO.setNimi(jono.getNimi());
             jonoDTO.setOid(jono.getOid());
             jonoDTO.setPoissaOlevaTaytto(Boolean.TRUE.equals(jono.getPoissaOlevaTaytto()));
+            jonoDTO.setKaytetaanValintalaskentaa(Boolean.TRUE.equals(jono.getKaytetaanValintalaskentaa()));
             dto.getValintatapajonot().add(jonoDTO);
         });
         return dto;
