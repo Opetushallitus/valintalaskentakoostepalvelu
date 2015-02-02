@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 public class HakemusSijoitteluntulosMergeUtil {
 
     public static List<MergeValinnanvaiheDTO> merge(
+            String hakuOid,
+            String hakukohdeOid,
             List<Hakemus> hakemukset,
             HakukohdeDTO hakukohdeDTO,
             List<ValinnanVaiheJonoillaDTO> valinnanvaiheet,
@@ -35,61 +37,117 @@ public class HakemusSijoitteluntulosMergeUtil {
             List<Valintatulos> valintatulosDtos
     // <- empty map jos ei erillissijoittelun hakukohteita
     ) {
+        List<MergeValinnanvaiheDTO> result = new ArrayList<>();
+
+        if(valinnanvaiheet.isEmpty()) {
+            // Ei yhtään valinnanvaihetta, generoidaan yksi
+            result.add(createValinnanvaihe(hakuOid,hakukohdeOid,0));
+        } else {
+            valinnanvaiheet.forEach(vaihe -> {
+                result.add(createValinnanvaihe(hakuOid,hakukohdeOid, vaihe));
+            });
+        }
+
 
         // Pelkät hakemukset tai ei mitään dataa
         if(laskennantulokset.isEmpty() && hakukohdeDTO.getValintatapajonot().isEmpty()) {
-            MergeValinnanvaiheDTO dto = createValinnanvaihe(0);
-            MergeValintatapajonoDTO jonoDTO = new MergeValintatapajonoDTO();
-            List<MergeHakemusDTO> luodut = hakemukset.stream().map(h -> luo(Optional.of(h))).collect(Collectors.toList());
-            jonoDTO.setHakemukset(luodut);
-            dto.getValintatapajonot().add(jonoDTO);
-            return Arrays.asList(dto);
+
+            // Ei valintaperusteita
+            if(result.get(0).getValintatapajonot().isEmpty()) {
+                MergeValintatapajonoDTO jonoDTO = new MergeValintatapajonoDTO();
+                jonoDTO.setKaytetaanValintalaskentaa(false);
+                List<MergeHakemusDTO> luodut = hakemukset.stream().map(h -> luo(Optional.of(h))).collect(Collectors.toList());
+                jonoDTO.setHakemukset(luodut);
+                result.get(0).getValintatapajonot().add(jonoDTO);
+            } else {
+                result.forEach(v -> v.getValintatapajonot().forEach(j -> {
+                    List<MergeHakemusDTO> luodut = hakemukset.stream().map(h -> luo(Optional.of(h))).collect(Collectors.toList());
+                    j.setHakemukset(luodut);
+                }));
+            }
         }
         // Ei laskennan tuloksia, generoidaan valinnanvaihe sijoittelun tuloksille ja mergataan hakemukset
         else if(laskennantulokset.isEmpty()) {
-            MergeValinnanvaiheDTO dto = createValinnanvaihe(0);
             List<MergeValintatapajonoDTO> valintatapajonot = hakukohdeDTO
                     .getValintatapajonot()
                     .stream()
                     .map(jono -> {
                         MergeValintatapajonoDTO jonoDTO = luoSijoittelunTiedoista(jono);
                         jonoDTO.setHakemukset(mergaaSijoittelusta(hakemukset, jono.getHakemukset(), valintatulosDtos));
+                        jonoDTO.setKaytetaanValintalaskentaa(false);
                         return jonoDTO;
                     }).collect(Collectors.toList());
-            dto.setValintatapajonot(valintatapajonot);
-            return Arrays.asList(dto);
+            result.get(0).setValintatapajonot(valintatapajonot);
         }
         // Ei sijoittelun tuloksia, yhdistetään hakemukset ja laskennan tulokset
         else if(hakukohdeDTO == null || hakukohdeDTO.getValintatapajonot().isEmpty()) {
-            List<MergeValinnanvaiheDTO> mergatutValinnanvaiheet = laskennantulokset.stream().map(vv -> {
-                MergeValinnanvaiheDTO dto = createValinnanvaihe(vv);
-                List<MergeValintatapajonoDTO> valintatapajonot = vv.getValintatapajonot().stream().map(jono -> {
-                    MergeValintatapajonoDTO jonoDTO = luoLaskennanTiedoista(jono);
+            laskennantulokset.stream().forEach(vv -> {
+
+                Optional<MergeValinnanvaiheDTO> opt = findVaihe(result, vv.getValinnanvaiheoid());
+
+                MergeValinnanvaiheDTO dto;
+                if (opt.isPresent()) {
+                    dto = opt.get();
+                    dto.setJarjestysnumero(vv.getJarjestysnumero());
+                } else {
+                    result.add(createValinnanvaihe(hakuOid, hakukohdeOid, vv));
+                    dto = result.get(result.size() - 1);
+                }
+
+                vv.getValintatapajonot().stream().forEach(jono -> {
+
+                    Optional<MergeValintatapajonoDTO> jonoOpt = findJono(dto.getValintatapajonot(), jono.getOid());
+
+                    MergeValintatapajonoDTO jonoDTO;
+
+                    if (jonoOpt.isPresent()) {
+                        jonoDTO = jonoOpt.get();
+                        yhdistaLaskennanTiedoista(jonoDTO, jono);
+                    } else {
+                        jonoDTO = luoLaskennanTiedoista(jono);
+                        dto.getValintatapajonot().add(jonoDTO);
+                    }
+
                     jonoDTO.setHakemukset(mergaaLaskennasta(hakemukset, jono.getJonosijat()));
-                    if(jonoDTO.getSijoitteluajoId() != null && hakukohteetBySijoitteluAjoId.containsKey(jonoDTO.getSijoitteluajoId())) {
+                    if (jonoDTO.getSijoitteluajoId() != null && hakukohteetBySijoitteluAjoId.containsKey(jonoDTO.getSijoitteluajoId())) {
                         Optional<ValintatapajonoDTO> sJono = hakukohteetBySijoitteluAjoId.get(jonoDTO.getSijoitteluajoId())
                                 .getValintatapajonot()
                                 .stream()
                                 .filter(j -> j.getOid().equals(jonoDTO.getOid()))
                                 .findFirst();
-                        if(sJono.isPresent()) {
+                        if (sJono.isPresent()) {
                             asetaSijoittelunTiedoista(jonoDTO, sJono.get(), valintatulosDtos);
                         }
                     }
-                    return jonoDTO;
-                }).collect(Collectors.toList());
-                dto.setValintatapajonot(valintatapajonot);
-                return dto;
-            }).collect(Collectors.toList());
+                });
+            });
 
-            return mergatutValinnanvaiheet;
         }
         // Laskenta ja sijoittelu löytyi
         else {
-            List<MergeValinnanvaiheDTO> mergatutValinnanvaiheet = laskennantulokset.stream().map(vv -> {
-                MergeValinnanvaiheDTO dto = createValinnanvaihe(vv);
-                List<MergeValintatapajonoDTO> valintatapajonot = vv.getValintatapajonot().stream().map(jono -> {
-                    MergeValintatapajonoDTO jonoDTO = luoLaskennanTiedoista(jono);
+            laskennantulokset.stream().forEach(vv -> {
+                Optional<MergeValinnanvaiheDTO> opt = findVaihe(result, vv.getValinnanvaiheoid());
+
+                MergeValinnanvaiheDTO dto;
+                if (opt.isPresent()) {
+                    dto = opt.get();
+                    dto.setJarjestysnumero(vv.getJarjestysnumero());
+                } else {
+                    result.add(createValinnanvaihe(hakuOid, hakukohdeOid, vv));
+                    dto = result.get(result.size() - 1);
+                }
+                vv.getValintatapajonot().stream().forEach(jono -> {
+                    Optional<MergeValintatapajonoDTO> jonoOpt = findJono(dto.getValintatapajonot(), jono.getOid());
+
+                    MergeValintatapajonoDTO jonoDTO;
+
+                    if (jonoOpt.isPresent()) {
+                        jonoDTO = jonoOpt.get();
+                        yhdistaLaskennanTiedoista(jonoDTO, jono);
+                    } else {
+                        jonoDTO = luoLaskennanTiedoista(jono);
+                        dto.getValintatapajonot().add(jonoDTO);
+                    }
                     jonoDTO.setHakemukset(mergaaLaskennasta(hakemukset, jono.getJonosijat()));
                     Optional<ValintatapajonoDTO> sJono = hakukohdeDTO.getValintatapajonot()
                             .stream()
@@ -99,29 +157,71 @@ public class HakemusSijoitteluntulosMergeUtil {
                     if (sJono.isPresent()) {
                         asetaSijoittelunTiedoista(jonoDTO, sJono.get(), valintatulosDtos);
                     }
-                    return jonoDTO;
-                }).collect(Collectors.toList());
-                dto.setValintatapajonot(valintatapajonot);
-                return dto;
-            }).collect(Collectors.toList());
+                });
 
-            return mergatutValinnanvaiheet;
+
+            });
+
+
         }
+
+        Collections.sort(result, (v1, v2) -> Integer.compare(v1.getJarjestysnumero(), v2.getJarjestysnumero()));
+
+        result.get(result.size()-1).setViimeinenVaihe(true);
+
+        return result;
 
     }
 
-    private static MergeValinnanvaiheDTO createValinnanvaihe(int jarjestysnumero) {
+    private static Optional<MergeValinnanvaiheDTO> findVaihe(List<MergeValinnanvaiheDTO> vaiheet, String valinnanvaiheOid) {
+        return vaiheet
+                .stream()
+                .filter(vaihe -> vaihe.getValinnanvaiheoid().equals(valinnanvaiheOid))
+                .findFirst();
+    }
+
+    private static Optional<MergeValintatapajonoDTO> findJono(List<MergeValintatapajonoDTO> jonot, String jonoOid) {
+        return jonot
+                .stream()
+                .filter(j -> j.getOid().equals(jonoOid))
+                .findFirst();
+    }
+
+    private static MergeValinnanvaiheDTO createValinnanvaihe(String hakuOid, String hakukohdeOid, int jarjestysnumero) {
         MergeValinnanvaiheDTO dto = new MergeValinnanvaiheDTO();
+        dto.setHakuOid(hakuOid);
+        dto.setHakukohdeOid(hakukohdeOid);
         dto.setJarjestysnumero(jarjestysnumero);
         return dto;
     }
 
-    private static MergeValinnanvaiheDTO createValinnanvaihe(ValintatietoValinnanvaiheDTO vv) {
+    private static MergeValinnanvaiheDTO createValinnanvaihe(String hakuOid, String hakukohdeOid, ValintatietoValinnanvaiheDTO vv) {
         MergeValinnanvaiheDTO dto = new MergeValinnanvaiheDTO();
         dto.setJarjestysnumero(vv.getJarjestysnumero());
-        dto.setHakuOid(vv.getHakuOid());
+        dto.setHakuOid(hakuOid);
+        dto.setHakukohdeOid(hakukohdeOid);
         dto.setNimi(vv.getNimi());
         dto.setValinnanvaiheoid(vv.getValinnanvaiheoid());
+        return dto;
+    }
+
+    private static MergeValinnanvaiheDTO createValinnanvaihe(String hakuOid, String hakukohdeOid, ValinnanVaiheJonoillaDTO vv) {
+        MergeValinnanvaiheDTO dto = new MergeValinnanvaiheDTO();
+        dto.setHakuOid(hakuOid);
+        dto.setHakukohdeOid(hakukohdeOid);
+        dto.setNimi(vv.getNimi());
+        dto.setValinnanvaiheoid(vv.getOid());
+        vv.getJonot().forEach(jono -> {
+            MergeValintatapajonoDTO jonoDTO = new MergeValintatapajonoDTO();
+            jonoDTO.setAloituspaikat(jono.getAloituspaikat());
+            jonoDTO.setEiVarasijatayttoa(Boolean.TRUE.equals(jono.getEiVarasijatayttoa()));
+            jonoDTO.setKaikkiEhdonTayttavatHyvaksytaan(Boolean.TRUE.equals(jono.getKaikkiEhdonTayttavatHyvaksytaan()));
+            jonoDTO.setNimi(jono.getNimi());
+            jonoDTO.setOid(jono.getOid());
+            jonoDTO.setPoissaOlevaTaytto(Boolean.TRUE.equals(jono.getPoissaOlevaTaytto()));
+            jonoDTO.setKaytetaanValintalaskentaa(Boolean.TRUE.equals(jono.getKaytetaanValintalaskentaa()));
+            dto.getValintatapajonot().add(jonoDTO);
+        });
         return dto;
     }
 
@@ -129,13 +229,13 @@ public class HakemusSijoitteluntulosMergeUtil {
         MergeValintatapajonoDTO jonoDTO = new MergeValintatapajonoDTO();
         jonoDTO.setAlinHyvaksyttyPistemaara(jono.getAlinHyvaksyttyPistemaara());
         jonoDTO.setAloituspaikat(jono.getAloituspaikat());
-        jonoDTO.setEiVarasijatayttoa(jono.getEiVarasijatayttoa());
+        jonoDTO.setEiVarasijatayttoa(Boolean.TRUE.equals(jono.getEiVarasijatayttoa()));
         jonoDTO.setHakeneet(jono.getHakeneet());
         jonoDTO.setHyvaksytty(jono.getHyvaksytty());
-        jonoDTO.setKaikkiEhdonTayttavatHyvaksytaan(jono.getKaikkiEhdonTayttavatHyvaksytaan());
+        jonoDTO.setKaikkiEhdonTayttavatHyvaksytaan(Boolean.TRUE.equals(jono.getKaikkiEhdonTayttavatHyvaksytaan()));
         jonoDTO.setNimi(jono.getNimi());
         jonoDTO.setOid(jono.getOid());
-        jonoDTO.setPoissaOlevaTaytto(jono.getPoissaOlevaTaytto());
+        jonoDTO.setPoissaOlevaTaytto(Boolean.TRUE.equals(jono.getPoissaOlevaTaytto()));
         jonoDTO.setPrioriteetti(jono.getPrioriteetti());
         jonoDTO.setTasasijasaanto(jono.getTasasijasaanto());
         jonoDTO.setVaralla(jono.getVaralla());
@@ -165,7 +265,17 @@ public class HakemusSijoitteluntulosMergeUtil {
         jonoDTO.setOid(jono.getOid());
         jonoDTO.setPrioriteetti(jono.getPrioriteetti());
         jonoDTO.setSiirretaanSijoitteluun(jono.isSiirretaanSijoitteluun());
-        jonoDTO.setKaytetaanValintalaskentaa(jono.getKaytetaanValintalaskentaa());
+        jonoDTO.setKaytetaanValintalaskentaa(true);
+        jonoDTO.setValmisSijoiteltavaksi(jono.getValmisSijoiteltavaksi());
+        jonoDTO.setSijoitteluajoId(jono.getSijoitteluajoId());
+
+        return jonoDTO;
+    }
+
+    private static MergeValintatapajonoDTO yhdistaLaskennanTiedoista(MergeValintatapajonoDTO jonoDTO, ValintatietoValintatapajonoDTO jono) {
+        jonoDTO.setPrioriteetti(jono.getPrioriteetti());
+        jonoDTO.setSiirretaanSijoitteluun(Boolean.TRUE.equals(jono.isSiirretaanSijoitteluun()));
+        jonoDTO.setKaytetaanValintalaskentaa(true);
         jonoDTO.setValmisSijoiteltavaksi(jono.getValmisSijoiteltavaksi());
         jonoDTO.setSijoitteluajoId(jono.getSijoitteluajoId());
 
@@ -249,13 +359,14 @@ public class HakemusSijoitteluntulosMergeUtil {
         MergeHakemusDTO dto = new MergeHakemusDTO();
         if(hakemus.isPresent()) {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus.get());
-            dto.setLoytyiHakemuksista(true);
             dto.setEtunimi(wrapper.getEtunimi());
             dto.setSukunimi(wrapper.getSukunimi());
             dto.setSahkoposti(wrapper.getSahkopostiOsoite());
             dto.setHakemusOid(hakemus.get().getOid());
+            dto.setSyntymaaika(wrapper.getSyntymaaika());
             dto.setHakijaOid(hakemus.get().getPersonOid());
             dto.setHenkilotunnus(wrapper.getHenkilotunnus());
+            dto.setLoytyiHakemuksista(true);
         }
         return dto;
     }
@@ -273,7 +384,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         dto.setLoytyiSijoittelusta(true);
         dto.setJonosija(h.getJonosija());
         dto.setPrioriteetti(h.getPrioriteetti());
-        dto.setTasasijaJonosija(h.getTasasijaJonosija());
+        dto.setTasasijaJonosija(Optional.ofNullable(h.getTasasijaJonosija()).orElse(0));
         dto.setPaasyJaSoveltuvuusKokeenTulos(h.getPaasyJaSoveltuvuusKokeenTulos());
         dto.setPisteet(h.getPisteet());
         dto.setHakemuksentila(h.getTila());
@@ -282,6 +393,7 @@ public class HakemusSijoitteluntulosMergeUtil {
             dto.setValintatuloksentila(valintatulos.get().getTila());
             dto.setIlmoittautumistila(valintatulos.get().getIlmoittautumisTila());
             dto.setJulkaistavissa(valintatulos.get().getJulkaistavissa());
+            dto.setHyvaksyttyVarasijalta(valintatulos.get().getHyvaksyttyVarasijalta());
         }
         return dto;
     }

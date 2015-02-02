@@ -1,9 +1,11 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.erillishaku;
 
 import com.google.common.collect.Maps;
+import com.google.gson.GsonBuilder;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
+import fi.vm.sade.service.valintaperusteet.dto.model.ValinnanVaiheTyyppi;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -20,9 +22,11 @@ import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.HakemusS
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
@@ -45,6 +49,11 @@ import java.util.stream.Collectors;
 /**
  * @author Jussi Jartamo
  */
+///valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
+///haku-app/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid={hakukohdeOid}&asId={hakuOid}
+///sijoittelu-service/resources/sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
+///valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
+///sijoittelu-service/resources/tila/hakukohde/{hakukohdeOid}
 @Controller
 @Path("proxy/erillishaku")
 @PreAuthorize("isAuthenticated()")
@@ -84,7 +93,6 @@ public class ErillishakuProxyResource {
                         .build());
             }
         });
-
         final AtomicReference<List<Hakemus>> hakemukset = new AtomicReference<>();
         final AtomicReference<List<ValinnanVaiheJonoillaDTO>> valinnanvaiheet = new AtomicReference<>();
         final AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset = new AtomicReference<>();
@@ -99,7 +107,7 @@ public class ErillishakuProxyResource {
                         1 +
                         //
                         1 +
-                        // valinta-tulos-service
+                        //
                         1 +
                         //
                 1 // <- erillissijoittelu
@@ -107,13 +115,13 @@ public class ErillishakuProxyResource {
 
         Supplier<Void> mergeSuplier = () -> {
             if(counter.decrementAndGet() == 0) {
-                LOG.error("Saatiin vastaus muodostettua. Palautetaan se asynkronisena paluuarvona.");
-                r(asyncResponse,merge(hakemukset.get(),hakukohde.get(),valinnanvaiheet.get(),valintatulokset.get(),hakukohteetBySijoitteluAjoId.get(),vtsValintatulokset.get()));
+                LOG.info("Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.", hakukohdeOid, hakuOid);
+                r(asyncResponse,merge(hakuOid,hakukohdeOid, hakemukset.get(),hakukohde.get(),valinnanvaiheet.get(),valintatulokset.get(),hakukohteetBySijoitteluAjoId.get(),vtsValintatulokset.get()));
             }
             return null;
         };
-        final AtomicReference<List<Hakemus>> tmp = new AtomicReference<>();
         // kertaluokassa nopeampaa kuin futureilla, koska säikeet ei blokkaile
+        ///haku-app/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid={hakukohdeOid}&asId={hakuOid}
         applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid,
                 h -> {
                     LOG.info("Haetaan hakemuksia");
@@ -131,11 +139,11 @@ public class ErillishakuProxyResource {
                     }
                 }
         );
-
+        ///valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
         valintaperusteetAsyncResource.haeValinnanvaiheetHakukohteelle(hakukohdeOid,
                 v -> {
                     LOG.info("Haetaan valinnanvaiheita");
-                    valinnanvaiheet.set(v);
+                    valinnanvaiheet.set(v.stream().filter(vaihe -> vaihe.getValinnanVaiheTyyppi().equals(ValinnanVaiheTyyppi.TAVALLINEN)).collect(Collectors.toList()));
                     mergeSuplier.get();
                 },
                 poikkeus -> {
@@ -149,7 +157,7 @@ public class ErillishakuProxyResource {
                     }
                 }
         );
-
+        ///sijoittelu-service/resources/sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
         sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(hakuOid, hakukohdeOid,
                 s -> {
                     LOG.info("Haetaan sijoittelusta hakukohteen tiedot");
@@ -167,7 +175,7 @@ public class ErillishakuProxyResource {
                     }
                 }
         );
-
+        ///sijoittelu-service/resources/tila/hakukohde/{hakukohdeOid}
         tilaResource.getValintatulokset(hakuOid, hakukohdeOid, vts -> {
             LOG.info("Haetaan sijoittelusta valintatulokset");
             vtsValintatulokset.set(vts);
@@ -182,7 +190,7 @@ public class ErillishakuProxyResource {
                 LOG.error("Valintatulosservice-palvelun virhe tuli yhtäaikaa timeoutin kanssa! {}", e.getMessage());
             }
         });
-
+        ///valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
         valintalaskentaAsyncResource.laskennantulokset(hakuOid, hakukohdeOid,
                 v -> {
                     LOG.info("Haetaan valintalaskennasta tulokset");
@@ -197,11 +205,13 @@ public class ErillishakuProxyResource {
                     //
                     if(!sijoitteluAjoIdSetti.isEmpty()) {
                         LOG.error("Saatiin sijoitteluajoid:eitä: {} ja haetaan ne erikseen.", Arrays.toString(sijoitteluAjoIdSetti.toArray()));
-                        Map<Long,HakukohdeDTO> erillissijoittelutmp = Maps.newConcurrentMap();
-                        AtomicInteger erillissijoitteluCounter = new AtomicInteger(sijoitteluAjoIdSetti.size());
+                        final Map<Long,HakukohdeDTO> erillissijoittelutmp = Maps.newConcurrentMap();
+                        final AtomicInteger erillissijoitteluCounter = new AtomicInteger(sijoitteluAjoIdSetti.size());
+                        ///sijoittelu-service/resources/erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
                         sijoitteluAjoIdSetti.forEach(id -> {
                             sijoitteluAsyncResource.getLatestHakukohdeBySijoitteluAjoId(hakuOid, hakukohdeOid, id,
                                     s0 -> {
+                                        LOG.error("Haettiin laskenta sijoitteluajoid:llä {}.", id);
                                         erillissijoittelutmp.put(id, s0);
                                         if(erillissijoitteluCounter.decrementAndGet() == 0) {
                                             hakukohteetBySijoitteluAjoId.set(erillissijoittelutmp);
@@ -220,7 +230,7 @@ public class ErillishakuProxyResource {
                                     });
                         });
                     } else {
-                        LOG.error("Ei saatu erillisiä sijoitteluajoideitä.");
+                        LOG.info("Ei saatu erillisiä sijoitteluajoideitä.");
                         hakukohteetBySijoitteluAjoId.set(Collections.emptyMap());
                         mergeSuplier.get();
                     }
@@ -240,7 +250,11 @@ public class ErillishakuProxyResource {
         );
     }
     private void r(AsyncResponse asyncResponse, List<MergeValinnanvaiheDTO> msg) {
-        asyncResponse.resume(Response.ok(msg).build());
+        try {
+            asyncResponse.resume(Response.ok().header("Content-Type","application/json").entity(msg).build());
+        } catch(Throwable e){
+            LOG.error("Paluuarvon muodostos epäonnistui! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+        }
     }
 
 

@@ -25,13 +25,17 @@
 	<build>
 		<finalName>${project.artifactId}</finalName>
 	</build>
-
 	<dependencies>
 	    	<dependency>
 	                 <groupId>fi.vm.sade.rajapinnat</groupId>
 	                 <artifactId>kela-api</artifactId>
 	                 <version>${kela.version}</version>
-	    	</dependency>	
+	    	</dependency>
+			<dependency>
+    			<groupId>com.codepoetics</groupId>
+    			<artifactId>protonpack</artifactId>
+    		<version>1.0</version>
+	</dependency>	    		
 		<dependency>
 			<groupId>fi.vm.sade.authentication</groupId>
 			<artifactId>authentication-domain</artifactId>
@@ -298,6 +302,11 @@
 			<artifactId>commons-compress</artifactId>
 			<version>1.8.1</version>
 		</dependency>
+        <dependency>
+            <groupId>com.codepoetics</groupId>
+            <artifactId>protonpack</artifactId>
+            <version>1.0</version>
+        </dependency>
 
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
@@ -691,12 +700,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>com.codepoetics</groupId>
-			<artifactId>protonpack</artifactId>
-			<version>1.0</version>
-		</dependency>
-
 
 		<!-- Tests -->
 		<dependency>

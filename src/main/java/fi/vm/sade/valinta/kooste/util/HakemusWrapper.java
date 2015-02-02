@@ -80,6 +80,9 @@ public class HakemusWrapper {
     }
 
     public String getPersonOid() {
+        if(hakemus == null) {
+            return null;
+        }
         return hakemus.getPersonOid();
     }
 

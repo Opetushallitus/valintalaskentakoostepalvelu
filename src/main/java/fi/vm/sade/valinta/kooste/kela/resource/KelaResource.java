@@ -61,7 +61,7 @@ public class KelaResource {
 		if (hakuTietue == null || hakuTietue.getHakuOids() == null || hakuTietue.getAlkupvm() == null || hakuTietue.getLoppupvm() == null  
 				|| hakuTietue.getHakuOids().isEmpty()) {
 			throw new RuntimeException(
-					"V‰hint‰‰n yksi hakuOid ja alku- ja loppupvm on annettava Kela-dokumentin luontia varten.");
+					"V√§hint√§√§n yksi hakuOid ja alku- ja loppupvm on annettava Kela-dokumentin luontia varten.");
 		}
 		String aineistonNimi = hakuTietue.getAineisto();
 		Date alkuPvm = hakuTietue.getAlkupvm();
@@ -78,11 +78,11 @@ public class KelaResource {
 		return kelaProsessi.toProsessiId();
 	}
     
-	@PUT
-	@Path("/laheta/{documentId}")
+	@POST
+	@Path("/laheta")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "FTP-siirto", response = Response.class)
-	public Response laheta(@PathParam("documentId") String documentId) {
+	public Response laheta(String documentId) {
 		LOG.warn("Kela-ftp siirto aloitettu {}", documentId);
 		kelaFtpRoute.aloitaKelaSiirto(documentId);
 		return Response.ok().build();

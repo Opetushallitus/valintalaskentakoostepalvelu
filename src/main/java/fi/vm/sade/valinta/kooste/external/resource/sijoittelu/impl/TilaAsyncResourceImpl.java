@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.google.common.reflect.TypeToken;
+import com.google.gson.*;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
@@ -32,6 +35,18 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
  */
 @Service
 public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaAsyncResource{
+
+	private static final Gson GSON= new GsonBuilder()
+	.registerTypeAdapter(Date.class, new JsonDeserializer() {
+		@Override
+		public Object deserialize(JsonElement json, Type typeOfT,
+				JsonDeserializationContext context)
+		throws JsonParseException {
+			return new Date(json.getAsJsonPrimitive().getAsLong());
+		}
+	})
+			.create();
+
 	@Autowired
 	public TilaAsyncResourceImpl(
 			@Value("${web.url.cas}") String webCasUrl,
@@ -46,11 +61,12 @@ public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaA
 
 	public void getValintatulokset(String hakuOid, String hakukohdeOid
 			, Consumer<List<Valintatulos>> valintatulokset, Consumer<Throwable> poikkeus) {
+		///tila/hakukohde/{hakukohdeOid}
 		String url = "/tila/hakukohde/"+hakukohdeOid;
 		getWebClient()
 				.path(url)
 				.accept(MediaType.WILDCARD)
-				.async().get(new Callback<List<Valintatulos> >(
+				.async().get(new Callback<List<Valintatulos> >(GSON,
 				address,url, valintatulokset,poikkeus,
 				new TypeToken<List<Valintatulos>>() { }.getType()));
 	}

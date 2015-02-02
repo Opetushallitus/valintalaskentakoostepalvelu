@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.excel.Solu;
@@ -54,7 +55,7 @@ public class ErillishakuDataRivi extends DataRivi {
 		if(rivi.isTyhja() || rivi.getSolut().size() != 10 || "Syntymäaika".equals(syntymaAika)) {
 			// tunnistetaan otsikkorivit ja ei välitetä prosessointiin
 		} else {
-			kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, oid, hakemuksenTila, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot));
+			kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, oid, hakemuksenTila, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, Optional.empty()));
 		}
 		return true;
 	}

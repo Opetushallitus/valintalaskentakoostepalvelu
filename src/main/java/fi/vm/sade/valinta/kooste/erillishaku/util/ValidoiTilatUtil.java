@@ -21,12 +21,15 @@ public class ValidoiTilatUtil {
 
     private static final Set<HakemuksenTila> HYVAKSYTTYNA =
             Sets.newEnumSet(Arrays.asList(HakemuksenTila.HYVAKSYTTY,HakemuksenTila.VARASIJALTA_HYVAKSYTTY),HakemuksenTila.class);
+    private static final Set<HakemuksenTila> HYVAKSYTTYNA_TAI_PERUNEENA =
+            Sets.newEnumSet(Arrays.asList(HakemuksenTila.HYVAKSYTTY,HakemuksenTila.VARASIJALTA_HYVAKSYTTY, HakemuksenTila.PERUNUT, HakemuksenTila.PERUUNTUNUT, HakemuksenTila.PERUUTETTU),HakemuksenTila.class);
     private static final Set<HakemuksenTila> HYLATTY_TAI_VARALLA =
             Sets.newEnumSet(Arrays.asList(HakemuksenTila.HYLATTY,HakemuksenTila.VARALLA),HakemuksenTila.class);
 
     private static final Set<HakemuksenTila> PERUNEENA =
             Sets.newEnumSet(Arrays.asList(HakemuksenTila.PERUNUT,HakemuksenTila.PERUUTETTU,HakemuksenTila.PERUUNTUNUT),HakemuksenTila.class);
-
+    private static final Set<ValintatuloksenTila> KAYTOSTAPOISTETTU_VASTAANOTTOTILA =
+            Sets.newEnumSet(Arrays.asList(VASTAANOTTANUT_LASNA),ValintatuloksenTila.class);
     private static final Set<ValintatuloksenTila> VASTAANOTTANEENA =
             Sets.newEnumSet(Arrays.asList(VASTAANOTTANUT,VASTAANOTTANUT_LASNA,VASTAANOTTANUT_POISSAOLEVA,EI_VASTAANOTETTU_MAARA_AIKANA,
                     EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT_SITOVASTI),ValintatuloksenTila.class);
@@ -34,10 +37,9 @@ public class ValidoiTilatUtil {
             Sets.newEnumSet(Arrays.asList(VASTAANOTTANUT,VASTAANOTTANUT_LASNA,VASTAANOTTANUT_POISSAOLEVA,EI_VASTAANOTETTU_MAARA_AIKANA,
                     EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT_SITOVASTI, PERUNUT, PERUUTETTU),ValintatuloksenTila.class);
     private static final Set<ValintatuloksenTila> KESKEN_TAI_PERUNUT_VASTAANOTTAJA =
-            Sets.newHashSet(Arrays.asList(null, KESKEN, PERUUTETTU, PERUNUT));
-
+            Sets.newHashSet(Arrays.asList(KESKEN, PERUUTETTU, PERUNUT));
     private static final Set<IlmoittautumisTila> EI_ILMOITTAUTUMISTA =
-            Sets.newHashSet(Arrays.asList(null, IlmoittautumisTila.EI_TEHTY));
+            Sets.newHashSet(Arrays.asList(IlmoittautumisTila.EI_TEHTY));
     /**
      *
      * @return (null if ok) validation error
@@ -47,33 +49,41 @@ public class ValidoiTilatUtil {
         if(VIALLISET_VALINTATULOKSENTILAT.contains(valintatuloksenTila)) {
             return "Valintatuloksentila " + valintatuloksenTila + " on viallinen. ";
         }*/
-        if(ILMOITETTU.equals(valintatuloksenTila)) {
+        if (hakemuksenTila == null || valintatuloksenTila == null || ilmoittautumisTila == null) {
+            return virheellinenTilaYhdistelma(new StringBuilder("Tila ei saa olla tyhjä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
+        }
+        if (ILMOITETTU.equals(valintatuloksenTila)) {
             return virheellinenTilaYhdistelma(new StringBuilder("Ilmoitettutila on poistettu käytöstä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
         }
-        if(VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
-            if(HYVAKSYTTYNA.contains(hakemuksenTila)) {
-                return null; // OK
-            } else {
-                return virheellinenTilaYhdistelma(new StringBuilder("Vastaanottaneen tai peruneen hakijan tulisi olla hyväksyttynä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
-            }
+        if (KAYTOSTAPOISTETTU_VASTAANOTTOTILA.equals(valintatuloksenTila)) {
+            return virheellinenTilaYhdistelma(new StringBuilder("Valintatuloksen tila on poistettu käytöstä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
         }
-        if(!EI_ILMOITTAUTUMISTA.contains(ilmoittautumisTila)) {
-            if(HYVAKSYTTYNA.contains(hakemuksenTila) && VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
+        if (!EI_ILMOITTAUTUMISTA.contains(ilmoittautumisTila)) {
+            if (HYVAKSYTTYNA.contains(hakemuksenTila) && VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
                 return null; // OK
             } else {
                 return virheellinenTilaYhdistelma(new StringBuilder("Ilmoittautumistieto voi olla ainoastaan hyväksytyillä ja vastaanottaneilla hakijoilla. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
             }
         }
-        if(HYLATTY_TAI_VARALLA.contains(hakemuksenTila)) {
-            if(!VASTAANOTTANEENA.contains(valintatuloksenTila) && EI_ILMOITTAUTUMISTA.contains(ilmoittautumisTila)) {
+
+        if (VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
+            if (HYVAKSYTTYNA.contains(hakemuksenTila)) {
+                return null; // OK
+            } else {
+                return virheellinenTilaYhdistelma(new StringBuilder("Vastaanottaneen tai peruneen hakijan tulisi olla hyväksyttynä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
+            }
+        }
+
+        if (HYLATTY_TAI_VARALLA.contains(hakemuksenTila)) {
+            if (!VASTAANOTTANEENA.contains(valintatuloksenTila) && EI_ILMOITTAUTUMISTA.contains(ilmoittautumisTila)) {
                 return null; // OK
             } else {
                 return virheellinenTilaYhdistelma(new StringBuilder("Hylätty tai varalla oleva hakija ei voi olla ilmoittautunut tai vastaanottanut. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
             }
         }
 
-        if(PERUNEENA.contains(hakemuksenTila)) {
-            if(KESKEN_TAI_PERUNUT_VASTAANOTTAJA.contains(valintatuloksenTila)) {
+        if (PERUNEENA.contains(hakemuksenTila)) {
+            if (KESKEN_TAI_PERUNUT_VASTAANOTTAJA.contains(valintatuloksenTila)) {
                 return null; // OK
             } else {
                 return virheellinenTilaYhdistelma(new StringBuilder("Peruneella vastaanottajalla ei voi olla vastaanottotilaa. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();

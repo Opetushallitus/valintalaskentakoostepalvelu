@@ -6,15 +6,12 @@ import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource
 import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
 
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
 import org.apache.commons.lang.StringUtils;
@@ -101,6 +98,29 @@ public class ErillishaunTuontiService {
         });
     }
 
+    private void validoiRivit(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> rivit) {
+        int indeksi = 0;
+        Collection<ErillishaunDataException.PoikkeusRivi> poikkeusRivis = Lists.newArrayList();
+        for(ErillishakuRivi rivi : rivit) {
+            ++indeksi;
+            if(!rivi.isPoistetaankoRivi()) {
+                String validointiVirhe = validoi(haku.getHakutyyppi(), rivi);
+                if(validointiVirhe != null) {
+                    poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, validointiVirhe));
+                }
+            } else {
+                // validoi poistettavaksi merkitty rivi
+                if(rivi.getHakemusOid() == null) {
+                    poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, "Poistettavaksi merkatulla riville ei löytynyt hakemuksen tunnistetta"));
+                }
+            }
+        }
+        if(!poikkeusRivis.isEmpty()) {
+            prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO,
+                    poikkeusRivis.stream().map(p -> new Tunniste("Rivi " + p.getIndeksi() + ": " + p.getSelite(),ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN)).collect(Collectors.toList())));
+            throw new ErillishaunDataException(poikkeusRivis);
+        }
+    }
 
     private void tuoHakijatJaLuoHakemukset(final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final ErillishakuDTO haku) throws Exception {
         LOG.info("Aloitetaan tuonti");
@@ -110,44 +130,42 @@ public class ErillishaunTuontiService {
             prosessi.keskeyta(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
             throw new RuntimeException("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
         }
-        Collection<ErillishaunDataException.PoikkeusRivi> poikkeusRivis = Lists.newArrayList();
-        int indeksi = 0;
 
-        Map<String, String> sahkopostit = ImmutableMap.<String, String>builder()
-                .putAll(rivit.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getPersonOid())).collect(Collectors.toMap(rivi -> rivi.getPersonOid(), rivi -> rivi.getSahkoposti())))
-                .putAll(rivit.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getHenkilotunnus())).collect(Collectors.toMap(rivi -> rivi.getHenkilotunnus(), rivi -> rivi.getSahkoposti())))
-                .build();
 
-        for(ErillishakuRivi rivi : rivit) {
-            ++indeksi;
-            String validointiVirhe = validoi(haku.getHakutyyppi(), rivi);
-            if(validointiVirhe != null) {
-                poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, validointiVirhe));
+
+        validoiRivit(prosessi,haku,rivit);
+
+        List<ErillishakuRivi> lisattavat = rivit.stream()
+                .filter(rivi -> !rivi.isPoistetaankoRivi()).collect(Collectors.toList());
+
+        List<ErillishakuRivi> poistettavat = rivit.stream()
+                .filter(rivi -> rivi.isPoistetaankoRivi()).collect(Collectors.toList());
+        final List<Hakemus> hakemukset;
+        if(!lisattavat.isEmpty()) {
+            LOG.info("Haetaan/luodaan henkilöt");
+            final List<Henkilo> henkilot;
+            try {
+                henkilot = henkiloAsyncResource.haeTaiLuoHenkilot(lisattavat.stream()
+                        .map(rivi -> {
+                            return rivi.toHenkiloCreateDTO();
+                        }).collect(Collectors.toList())).get();
+            } catch (Exception e) {
+                LOG.error("{}: {} {}", POIKKEUS_HENKILOPALVELUN_VIRHE, e.getMessage(), Arrays.toString(e.getStackTrace()));
+                prosessi.keskeyta(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_HENKILOPALVELUN_VIRHE));
+                throw e;
             }
+            LOG.info("Käsitellään hakemukset");
+            Map<String, String> sahkopostit = ImmutableMap.<String, String>builder()
+                    .putAll(lisattavat.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getPersonOid())).collect(Collectors.toMap(rivi -> rivi.getPersonOid(), rivi -> rivi.getSahkoposti())))
+                    .putAll(lisattavat.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getHenkilotunnus())).collect(Collectors.toMap(rivi -> rivi.getHenkilotunnus(), rivi -> rivi.getSahkoposti())))
+                    .build();
+            hakemukset = kasitteleHakemukset(haku, henkilot, sahkopostit, prosessi);
+        } else {
+            hakemukset = Collections.emptyList();
         }
-        if(!poikkeusRivis.isEmpty()) {
-            prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO,
-                    poikkeusRivis.stream().map(p -> new Tunniste("Rivi " + p.getIndeksi() + ": " + p.getSelite(),ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN)).collect(Collectors.toList())));
-            throw new ErillishaunDataException(poikkeusRivis);
-        }
-
-
-        LOG.info("Haetaan/luodaan henkilöt");
-        final List<Henkilo> henkilot;
-        try {
-            henkilot = henkiloAsyncResource.haeTaiLuoHenkilot(rivit.stream().map(rivi -> {
-                return rivi.toHenkiloCreateDTO();
-            }).collect(Collectors.toList())).get();
-        }catch(Exception e) {
-            LOG.error("{}: {} {}",POIKKEUS_HENKILOPALVELUN_VIRHE,e.getMessage(),Arrays.toString(e.getStackTrace()));
-            prosessi.keskeyta(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_HENKILOPALVELUN_VIRHE));
-            throw e;
-        }
-        LOG.info("Käsitellään hakemukset");
-        final List<Hakemus> hakemukset = kasitteleHakemukset(haku, henkilot, sahkopostit, prosessi);
 
         LOG.info("Viedaan hakijoita {} jonoon {}", rivit.size(), haku.getValintatapajononNimi());
-        tuoErillishaunTilat(haku, rivit, hakemukset);
+        tuoErillishaunTilat(haku, lisattavat, poistettavat, hakemukset);
 
         prosessi.vaiheValmistui();
         prosessi.valmistui("ok");
@@ -177,19 +195,34 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private void tuoErillishaunTilat(final ErillishakuDTO haku, final List<ErillishakuRivi> rivit, final List<Hakemus> hakemukset) {
-        assert(hakemukset.size() == rivit.size()); // 1-1 relationship assumed
-        final List<ErillishaunHakijaDTO> hakijat = StreamUtils.zip(hakemukset.stream(), rivit.stream(), (hakemus, rivi) -> {
-            HakemusWrapper wrapper = new HakemusWrapper(hakemus);
-            return new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), hakemus.getOid(), haku.getHakukohdeOid(),
-                    rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(),
-                    haku.getTarjoajaOid(),
-                    convertValintatuloksenTilaHakuTyypinMukaan(valintatuloksenTila(rivi), haku.getHakutyyppi()), ilmoittautumisTila(rivi),
-                    hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi());
-        }).collect(Collectors.toList());
-
+    private void tuoErillishaunTilat(final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavat, final List<ErillishakuRivi> poistettavat,final List<Hakemus> hakemukset) {
+        final Stream<ErillishaunHakijaDTO> hakijat;
+        final Stream<ErillishaunHakijaDTO> pois;
+        if(!lisattavat.isEmpty()){
+            assert (hakemukset.size() == lisattavat.size()); // 1-1 relationship assumed
+            hakijat = StreamUtils.zip(hakemukset.stream(), lisattavat.stream(), (hakemus, rivi) -> {
+                HakemusWrapper wrapper = new HakemusWrapper(hakemus);
+                return new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), hakemus.getOid(), haku.getHakukohdeOid(),
+                        rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(),
+                        haku.getTarjoajaOid(),
+                        convertValintatuloksenTilaHakuTyypinMukaan(valintatuloksenTila(rivi), haku.getHakutyyppi()), ilmoittautumisTila(rivi),
+                        hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi(), Optional.of(rivi.isPoistetaankoRivi()));
+            });
+        } else {
+            hakijat = Stream.empty();
+        }
+        if(!poistettavat.isEmpty()) {
+            pois = poistettavat.stream().map(rivi ->
+                new ErillishaunHakijaDTO(
+                       haku.getValintatapajonoOid(), rivi.getHakemusOid(), haku.getHakukohdeOid(), rivi.isJulkaistaankoTiedot(), rivi.getPersonOid(),
+                       haku.getHakuOid(),  haku.getTarjoajaOid(), null,null,null, rivi.getEtunimi(), rivi.getSukunimi(),
+                       Optional.of(true)));
+        } else {
+            pois = Stream.empty();
+        }
         try {
-            tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijat);
+            tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(),
+                    Stream.concat(hakijat, pois).collect(Collectors.toList()));
         } catch (Exception e) {
             LOG.error("Erillishaun tilojen tuonti epaonnistui", e);
             throw new RuntimeException(e);
