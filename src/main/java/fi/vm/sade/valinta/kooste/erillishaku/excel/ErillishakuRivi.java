@@ -145,7 +145,12 @@ public class ErillishakuRivi {
 
 	public Date parseSyntymaAika() {
 		try {
-			return SYNTYMAAIKAFORMAT.parseDateTime(getSyntymaAika()).toDate();
+			String s = StringUtils.trimToNull(getSyntymaAika());
+			if(s == null) {
+				return null;
+			} else {
+				return SYNTYMAAIKAFORMAT.parseDateTime(s).toDate();
+			}
 		} catch (Exception e) {
 			LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", getSyntymaAika());
 			return null;
