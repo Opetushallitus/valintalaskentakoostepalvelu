@@ -1,12 +1,9 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.route.impl;
 
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
@@ -230,7 +227,7 @@ public class ValintatapajonoTuontiRouteImpl extends
 									valintatapajonoOid, valinnanvaiheet);
 							if (vaihe == null) {
 								vaihe = luoValinnanVaihe(hakukohdeOid, hakuOid,
-										valintatapajonoOid);
+										Optional.ofNullable(valintatapajonoOid));
 
 							}
 							ValintatapajonoDTO jono = haeValintatapajono(
@@ -343,15 +340,42 @@ public class ValintatapajonoTuontiRouteImpl extends
 	}
 
 	private ValintatietoValinnanvaiheDTO luoValinnanVaihe(String hakukohdeOid,
-			String hakuOid, String valintatapajonoOid) throws InterruptedException, ExecutionException {
-		ValinnanVaiheJonoillaDTO vaihe = haeVaihe(valintatapajonoOid,
+			String hakuOid, Optional<String> valintatapajonoOid) throws InterruptedException, ExecutionException {
+
+        final List<ValinnanVaiheJonoillaDTO> ilmanLaskentaaVaiheet = valintaperusteetResource.ilmanLaskentaa(hakukohdeOid).get();
+        List<fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO> ilmanLaskentaaJonot;
+
+        String jonoOid;
+
+        if(!valintatapajonoOid.isPresent()) {
+            ilmanLaskentaaJonot =
+                    ilmanLaskentaaVaiheet
+                            .stream()
+                            .flatMap(v -> v.getJonot().stream())
+                            .collect(Collectors.toList());
+            if(ilmanLaskentaaJonot.isEmpty()) {
+                throw new RuntimeException(
+                        "Yhtään valintatapajonoa ilman laskentaa ei löytynyt");
+            }
+
+            if(ilmanLaskentaaJonot.size() > 1) {
+                throw new RuntimeException(
+                        "ValintatapajonoOidia ei annettu ja löytyi useampia kuin yksi valintatapajono ilman laskentaa");
+            }
+
+            jonoOid = ilmanLaskentaaJonot.get(0).getOid();
+        } else {
+            jonoOid = valintatapajonoOid.get();
+        }
+
+        ValinnanVaiheJonoillaDTO vaihe = haeVaihe(jonoOid,
 				valintaperusteetResource.ilmanLaskentaa(hakukohdeOid).get());
 		if (vaihe == null) {
 			throw new RuntimeException(
 					"Tälle valintatapajonolle ei löydy valintaperusteista valinnanvaihetta!");
 		}
 		fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO jono = haeJono(
-				valintatapajonoOid, vaihe);
+				jonoOid, vaihe);
 
 		// luodaan uusi
 		LOG.warn(
@@ -370,13 +394,13 @@ public class ValintatapajonoTuontiRouteImpl extends
 				.getKaikkiEhdonTayttavatHyvaksytaan());
 		vx.setKaytetaanValintalaskentaa(jono.getKaytetaanValintalaskentaa());
 		vx.setNimi(jono.getNimi());
-		vx.setOid(valintatapajonoOid);
+		vx.setOid(jonoOid);
 		vx.setPoissaOlevaTaytto(jono.getPoissaOlevaTaytto());
 		vx.setPrioriteetti(0);
 		vx.setSiirretaanSijoitteluun(jono.getSiirretaanSijoitteluun());
 		vx.setTasasijasaanto(EnumConverter.convert(Tasasijasaanto.class,
 				jono.getTasapistesaanto()));
-		vx.setValintatapajonooid(valintatapajonoOid);
+		vx.setValintatapajonooid(jonoOid);
 		v0.getValintatapajonot().add(vx);
 		return v0;
 	}
