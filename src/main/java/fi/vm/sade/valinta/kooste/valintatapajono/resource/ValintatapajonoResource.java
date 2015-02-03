@@ -48,7 +48,7 @@ public class ValintatapajonoResource {
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
 	@POST
 	@Path("/vienti")
 	@Consumes("application/json")
@@ -64,7 +64,7 @@ public class ValintatapajonoResource {
 		return prosessi.toProsessiId();
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
 	@POST
 	@Path("/tuonti")
 	@Consumes("application/octet-stream")
