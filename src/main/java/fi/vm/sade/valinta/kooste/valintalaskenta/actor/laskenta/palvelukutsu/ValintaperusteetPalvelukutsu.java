@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
+import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +55,20 @@ public class ValintaperusteetPalvelukutsu extends AbstraktiPalvelukutsu
 										failureCallback(takaisinkutsu);
 										return;
 									}
+
+                                    // Filteröidään pois jonot, joissa ei käytetä laskentaa
+                                    final List<ValintaperusteetDTO> filteroidyt = valintaperusteet.stream().map(vp -> {
+                                        List<ValintatapajonoJarjestyskriteereillaDTO> laskentaJonot = vp.getValinnanVaihe()
+                                                .getValintatapajono()
+                                                .stream()
+                                                .filter(j -> j.getKaytetaanValintalaskentaa() == null || j.getKaytetaanValintalaskentaa())
+                                                .collect(Collectors.toList());
+                                        vp.getValinnanVaihe().setValintatapajono(laskentaJonot);
+                                        return vp;
+                                    }).collect(Collectors.toList());
+
 									ValintaperusteetPalvelukutsu.this.valintaperusteet
-											.set(valintaperusteet);
+											.set(filteroidyt);
 									takaisinkutsu
 											.accept(ValintaperusteetPalvelukutsu.this);
 								}, failureCallback(takaisinkutsu));

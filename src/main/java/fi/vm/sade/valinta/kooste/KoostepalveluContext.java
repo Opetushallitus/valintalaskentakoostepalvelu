@@ -83,16 +83,18 @@ public class KoostepalveluContext {
 				throws Exception {
 			SpringCamelContext camelContext = new SpringCamelContext(
 					applicationContext);
+			/*
 			ThreadPoolProfile t = new ThreadPoolProfile();
 			t.setId("ValintalaskentakoostepalveluThreadPool");
 			t.setDefaultProfile(true);
-			t.setPoolSize(threadPoolSize);
+			t.setPoolSize(1);
 			t.setMaxPoolSize(threadPoolSize);
 			t.setMaxQueueSize(10000);
 			t.setRejectedPolicy(ThreadPoolRejectedPolicy.CallerRuns);
 			// defaultThreadPoolProfile
 			camelContext.getExecutorServiceManager()
 					.setDefaultThreadPoolProfile(t);
+			*/
 			// <threadPoolProfile id="defaultThreadPoolProfile"
 			// defaultProfile="true"
 			// poolSize="10" maxPoolSize="20" maxQueueSize="1000"
@@ -104,7 +106,7 @@ public class KoostepalveluContext {
                     HakemusDTO.class, Hakemus.class,
                     new HakemusToHakemusDTOConverter());
 
-			// camelContext.disableJMX();
+			camelContext.disableJMX();
 			camelContext.setAutoStartup(true);
 			for (RoutesBuilder route : routes) {
 				camelContext.addRoutes(route);

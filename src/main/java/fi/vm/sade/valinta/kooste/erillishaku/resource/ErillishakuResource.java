@@ -43,7 +43,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
 @Api(value = "/erillishaku", description = "Resurssi erillishaun tietojen tuontiin ja vientiin")
 public class ErillishakuResource {
 	private static final Logger LOG = LoggerFactory.getLogger(ErillishakuResource.class);
-	private static final String ROLE_APP_HAKEMUS_CRUD = "ROLE_APP_HAKEMUS_CRUD";
+	private static final String ROLE_TULOSTENTUONTI = "ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI";
 
 	public static final String POIKKEUS_TYHJA_DATAJOUKKO = "Syötteestä ei saatu poimittua yhtään hakijaa sijoitteluun tuotavaksi!";
 	public static final String RIVIN_TUNNISTE_KAYTTOLIITTYMAAN = "Syöte"; // Datarivin tunniste käyttöliittymään
@@ -64,7 +64,7 @@ public class ErillishakuResource {
 	@Autowired
 	private ErillishaunVientiService vientiService;
 
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
 	@POST
 	@Path("/vienti")
 	@Consumes("application/json")
@@ -76,7 +76,7 @@ public class ErillishakuResource {
 			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
 			@QueryParam("valintatapajononNimi") String valintatapajononNimi) {
-		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_APP_HAKEMUS_CRUD);
+		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 		//
@@ -85,7 +85,7 @@ public class ErillishakuResource {
 		return prosessi.toProsessiId();
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
 	@POST
 	@Path("/tuonti")
 	@Consumes("application/octet-stream")
@@ -98,7 +98,7 @@ public class ErillishakuResource {
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
 			@QueryParam("valintatapajononNimi") String valintatapajononNimi,
 			InputStream file) throws IOException {
-		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_APP_HAKEMUS_CRUD);
+		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
 		ByteArrayOutputStream b;
 		IOUtils.copy(file, b = new ByteArrayOutputStream());
 		IOUtils.closeQuietly(file);
@@ -109,7 +109,7 @@ public class ErillishakuResource {
 		return prosessi.toProsessiId();
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
 	@POST
 	@Path("/tuonti/json")
 	@Consumes("application/json")
@@ -127,7 +127,7 @@ public class ErillishakuResource {
 					"ilmoittautumisTila=[EI_TEHTY|LASNA_KOKO_LUKUVUOSI|POISSA_KOKO_LUKUVUOSI|EI_ILMOITTAUTUNUT|LASNA_SYKSY|POISSA_SYKSY|LASNA|POISSA]")
 			// Body
 			ErillishakuJson json) throws IOException {
-		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_APP_HAKEMUS_CRUD);
+		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 		tuontiService.tuoJson(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, valintatapajononNimi), json.getRivit());
