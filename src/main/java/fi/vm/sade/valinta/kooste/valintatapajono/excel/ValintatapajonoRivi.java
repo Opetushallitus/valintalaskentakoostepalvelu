@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.valintatapajono.excel;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import com.wordnik.swagger.annotations.ApiModel;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Maps;
@@ -10,6 +11,10 @@ import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila;
 
+/**
+ * @author Jussi Jartamo
+ */
+@ApiModel
 public class ValintatapajonoRivi {
 	private final String oid;
 	private final String nimi;

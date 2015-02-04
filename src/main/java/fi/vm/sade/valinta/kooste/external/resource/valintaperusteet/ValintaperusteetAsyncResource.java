@@ -56,7 +56,17 @@ public interface ValintaperusteetAsyncResource {
 
 	// @GET
 	///valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
+	Peruutettava haeIlmanlaskentaa(String hakukohdeOid,
+								   Consumer<List<ValinnanVaiheJonoillaDTO>> callback,
+								   Consumer<Throwable> failureCallback);
+
+	// @GET
+	///valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
 	Future<List<ValinnanVaiheJonoillaDTO>> ilmanLaskentaa(String hakukohdeOid);
+
+	// @GET
+	///valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
+	//Future<List<ValinnanVaiheJonoillaDTO>> ilmanLaskentaa(String hakukohdeOid);
 
 	// @POST
 	///valintaperusteet-service/resources/valintaperusteet/tuoHakukohde/

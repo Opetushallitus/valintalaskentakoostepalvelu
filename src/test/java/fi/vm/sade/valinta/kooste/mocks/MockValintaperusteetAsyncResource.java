@@ -73,4 +73,8 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Peruutettava haeIlmanlaskentaa(String hakukohdeOid, Consumer<List<ValinnanVaiheJonoillaDTO>> callback, Consumer<Throwable> failureCallback) {
+        throw new UnsupportedOperationException();
+    }
 }

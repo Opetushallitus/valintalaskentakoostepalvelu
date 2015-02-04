@@ -3,9 +3,11 @@ package fi.vm.sade.valinta.kooste.mocks;
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 import org.springframework.stereotype.Service;
 
@@ -25,5 +27,10 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
         hakukohdeDTO.setHakuOid(MockData.hakuOid);
         hakukohdeDTO.setOid(hakukohdeOid);
         return Futures.immediateFuture(hakukohdeDTO);
+    }
+
+    @Override
+    public Peruutettava haeHakukohde(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> callback, Consumer<Throwable> failureCallback) {
+        throw new RuntimeException("Not implemented!");
     }
 }

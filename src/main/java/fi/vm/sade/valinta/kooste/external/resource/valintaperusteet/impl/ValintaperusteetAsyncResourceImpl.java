@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -10,6 +12,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.gson.*;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
@@ -46,6 +49,16 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 @Service
 public class ValintaperusteetAsyncResourceImpl implements
 		ValintaperusteetAsyncResource {
+	protected static final Gson GSON= new GsonBuilder()
+			.registerTypeAdapter(Date.class, new JsonDeserializer() {
+				@Override
+				public Object deserialize(JsonElement json, Type typeOfT,
+										  JsonDeserializationContext context)
+						throws JsonParseException {
+					return new Date(json.getAsJsonPrimitive().getAsLong());
+				}
+			})
+			.create();
 	private final WebClient webClient;
 	private final String address;
 	private final static Logger LOG = LoggerFactory
@@ -117,6 +130,31 @@ public class ValintaperusteetAsyncResourceImpl implements
 							//
 					.async()
 					.get(new Callback<List<ValinnanVaiheJonoillaDTO>>(address, url, callback,
+							failureCallback,
+							new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {
+							}.getType())));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
+		}
+	}
+	public Peruutettava haeIlmanlaskentaa(String hakukohdeOid,
+														Consumer<List<ValinnanVaiheJonoillaDTO>> callback,
+														Consumer<Throwable> failureCallback) {
+		LOG.info("Valinnanvaiheiden haku...");
+		// /valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
+		try {
+			String url = new StringBuilder()
+					.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/")
+					.append(hakukohdeOid).append("/ilmanlaskentaa").toString();
+
+			WebClient wc = WebClient.fromClient(webClient).path(url);
+			return new PeruutettavaImpl(wc
+					//
+					.accept(MediaType.APPLICATION_JSON_TYPE)
+							//
+					.async()
+					.get(new Callback<List<ValinnanVaiheJonoillaDTO>>(GSON, address, url, callback,
 							failureCallback,
 							new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {
 							}.getType())));
