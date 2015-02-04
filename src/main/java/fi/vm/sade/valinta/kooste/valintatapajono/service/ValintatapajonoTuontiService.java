@@ -13,7 +13,6 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.util.EnumConverter;
-import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoProsessi;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
@@ -92,6 +91,7 @@ public class ValintatapajonoTuontiService {
                     poikkeusKasittelija("Rivien lukeminen annetuista tiedoista epäonnistui",asyncResponse,dokumenttiIdRef).accept(t);
                     return null;
                 }
+                try {
                 valintalaskentaAsyncResource.lisaaTuloksia(hakuOid,hakukohdeOid,ValintatapajonoTuontiConverter.konvertoi(
                                 hakuOid,
                                 hakukohdeOid,
@@ -117,7 +117,10 @@ public class ValintatapajonoTuontiService {
                         "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...",
                         dontcare->{},
                         dontcare-> {});
-
+                } catch(Throwable t) {
+                    poikkeusKasittelija("Tallennus valintapalveluun epäonnistui",asyncResponse,dokumenttiIdRef).accept(t);
+                    return null;
+                }
             }
             return null;
         };
@@ -166,9 +169,9 @@ public class ValintatapajonoTuontiService {
     private Consumer<Throwable> poikkeusKasittelija(String viesti, AsyncResponse asyncResponse, AtomicReference<String> dokumenttiIdRef) {
         return poikkeus -> {
             if(poikkeus == null) {
-                LOG.error("{}", viesti);
+                LOG.error("Poikkeus tuonnissa {}", viesti);
             } else {
-                LOG.error("{}: {} {}", viesti, poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
+                LOG.error("Poikkeus tuonnissa {}: {} {}", viesti, poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
             }
             try {
                 asyncResponse.resume(Response.serverError()
@@ -177,8 +180,9 @@ public class ValintatapajonoTuontiService {
             } catch (Throwable t) {
                 // ei väliä vaikka response jos tehty
             }
-            if (dokumenttiIdRef.get() != null) {
-                dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiIdRef.get(),
+            String dokumenttiId = dokumenttiIdRef.get();
+            if (dokumenttiId != null) {
+                dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId,
                         Arrays.asList(new VirheilmoitusDto("", viesti)),
                         dontcare -> {
                         },

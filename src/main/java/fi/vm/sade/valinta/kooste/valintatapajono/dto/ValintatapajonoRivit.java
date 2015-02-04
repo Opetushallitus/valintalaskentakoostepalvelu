@@ -21,7 +21,7 @@ public class ValintatapajonoRivit {
         this.rivit = rivit;
     }
 
-    public Collection<ValintatapajonoRivi> getRivit() {
+    public List<ValintatapajonoRivi> getRivit() {
         return rivit;
     }
 

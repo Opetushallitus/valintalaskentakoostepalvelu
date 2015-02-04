@@ -71,7 +71,7 @@ public class ValintatapajonoTuontiConverter {
         // ottaa vastaan
         // sellaista
         vaihe.setCreatedAt(null); // ei konvertteria
-        return null;
+        return vaihe;
     }
     private static ValintatietoValinnanvaiheDTO haeValinnanVaihe(
             String valintatapajonoOid,

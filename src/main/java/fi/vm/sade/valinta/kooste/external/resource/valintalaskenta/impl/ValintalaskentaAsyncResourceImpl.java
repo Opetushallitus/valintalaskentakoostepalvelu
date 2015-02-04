@@ -64,7 +64,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 			return new PeruutettavaImpl(getWebClient()
 					.path(url)
 					.async()
-					.post(Entity.json(vaihe), new ResponseCallback()));
+					.post(Entity.json(vaihe), new ResponseCallback(true,callback,failureCallback)));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();

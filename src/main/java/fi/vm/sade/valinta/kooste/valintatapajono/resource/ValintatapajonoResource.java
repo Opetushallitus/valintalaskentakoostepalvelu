@@ -16,10 +16,11 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.container.TimeoutHandler;
 import javax.ws.rs.core.Response;
 
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.config.FilterFactory;
 import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoProsessi;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoRivit;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
@@ -31,10 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoTuontiRoute;
 import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -66,8 +65,6 @@ public class ValintatapajonoResource {
 
 	@Autowired
 	private ValintatapajonoVientiRoute valintatapajonoVienti;
-	@Autowired
-	private ValintatapajonoTuontiRoute valintatapajonoTuonti;
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 
@@ -109,31 +106,33 @@ public class ValintatapajonoResource {
 						.build());
 			}
 		});
-		/*
+		final ByteArrayOutputStream bytes;
 		try {
-			ByteArrayOutputStream b;
-			IOUtils.copy(file, b = new ByteArrayOutputStream());
+
+			IOUtils.copy(file, bytes = new ByteArrayOutputStream());
 			IOUtils.closeQuietly(file);
-			valintatapajonoTuonti.tuo(
-					new ByteArrayInputStream(b.toByteArray()), prosessi,
-					hakuOid, hakukohdeOid, valintatapajonoOid);
-		*/
-		valintatapajonoTuontiService.tuo((valinnanvaiheet, hakemukset) -> {
-			ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
-			try {
-			ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(
-						hakuOid, hakukohdeOid, valintatapajonoOid,
-						"", "",
-						//
-						valinnanvaiheet, hakemukset, Arrays
-						.asList(listaus));
-				valintatapajonoExcel.getExcel().tuoXlsx(file);
-			} catch(Throwable t) {
-			//	poikkeusKasittelija("Excelin luku epäonnistui",asyncResponse,dokumenttiIdRef).accept(t);
-				throw new RuntimeException(t);
-			}
-			return listaus.getRivit();
-		}, hakuOid, hakukohdeOid, valintatapajonoOid, asyncResponse);
+			valintatapajonoTuontiService.tuo((valinnanvaiheet, hakemukset) -> {
+				ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
+				try {
+					ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(
+							hakuOid, hakukohdeOid, valintatapajonoOid,
+							"", "",
+							//
+							valinnanvaiheet, hakemukset, Arrays
+							.asList(listaus));
+					valintatapajonoExcel.getExcel().tuoXlsx(new ByteArrayInputStream(bytes.toByteArray()));
+				} catch(Throwable t) {
+					//	poikkeusKasittelija("Excelin luku epäonnistui",asyncResponse,dokumenttiIdRef).accept(t);
+					throw new RuntimeException(t);
+				}
+				return listaus.getRivit();
+			}, hakuOid, hakukohdeOid, valintatapajonoOid, asyncResponse);
+		} catch(Throwable t) {
+			asyncResponse.resume(Response.serverError()
+					.entity("Valintatapajonon tuonti epäonnistui tiedoston lukemiseen")
+					.build());
+		}
+
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
