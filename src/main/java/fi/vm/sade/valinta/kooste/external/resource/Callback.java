@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -93,9 +94,9 @@ public class Callback<T> implements InvocationCallback<Response> {
 				callback.accept(t);
 			} catch (Exception e) {
 				LOG.error(
-						"Asynkronisen kutsun ({}{}) paluuarvonkasittelija heitti poikkeuksen {}:\r\nRESPONSE {} ->\r\n{} {}",
-						url, palvelukutsu, e.getMessage(),
-						response.getStatus(),
+						"Asynkronisen kutsun ({}{}) paluuarvonkasittelija heitti poikkeuksen {}{}:\r\nRESPONSE {} ->\r\n{} {}",
+						url, palvelukutsu, e.getMessage(), Arrays.toString(e.getStackTrace()),
+                        response.getStatus(),
 						response.getMetadata().getFirst("Content-Type"),
 						format(response, json));
 				failureCallback.accept(e);
