@@ -6,9 +6,11 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -54,5 +56,9 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, ValinnanvaiheDTO vaihe, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
+        throw new UnsupportedOperationException();
+    }
 }
 

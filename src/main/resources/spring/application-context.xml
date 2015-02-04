@@ -444,7 +444,7 @@
 	<bean
 		class="fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResource" />
 	<ctx:component-scan
-		base-package="fi.vm.sade.valinta.kooste.valintatapajono.route.impl" />
+		base-package="fi.vm.sade.valinta.kooste.valintatapajono" />
 	<!-- Pistesyotto -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
@@ -487,8 +487,9 @@
 
 	<!-- Seuranta Async -->
 	<bean
-		class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.LaskentaSeurantaAsyncResourceImpl" />
-
+		class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.DokumentinSeurantaAsyncResourceImpl" />
+	<bean
+			class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.LaskentaSeurantaAsyncResourceImpl" />
 	<!-- Valintaperusteet Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl" />
