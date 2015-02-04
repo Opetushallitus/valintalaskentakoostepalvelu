@@ -48,9 +48,16 @@ public class HakemusSijoitteluntulosMergeUtil {
             });
         }
 
+        boolean laskennanTulosLoytyi = laskennantulokset
+                .stream()
+                .flatMap(v -> v.getValintatapajonot().stream())
+                .flatMap(j -> j.getJonosijat().stream())
+                .findAny()
+                .isPresent();
+
 
         // Pelkät hakemukset tai ei mitään dataa
-        if(laskennantulokset.isEmpty() && hakukohdeDTO.getValintatapajonot().isEmpty()) {
+        if(!laskennanTulosLoytyi && hakukohdeDTO.getValintatapajonot().isEmpty()) {
 
             // Ei valintaperusteita
             if(result.get(0).getValintatapajonot().isEmpty()) {
@@ -67,7 +74,7 @@ public class HakemusSijoitteluntulosMergeUtil {
             }
         }
         // Ei laskennan tuloksia, generoidaan valinnanvaihe sijoittelun tuloksille ja mergataan hakemukset
-        else if(laskennantulokset.isEmpty()) {
+        else if(!laskennanTulosLoytyi) {
             List<MergeValintatapajonoDTO> valintatapajonot = hakukohdeDTO
                     .getValintatapajonot()
                     .stream()
