@@ -93,7 +93,7 @@ public class ValintatapajonoTest {
         */
         ValintatapajonoRivi rivi = new ValintatapajonoRivi(
                 "1.2.246.562.11.00000000181",
-                "1","Ilman laskentaa","Hyväksyttävissä","","",""
+                "1","Ilman laskentaa","HYVAKSYTTAVISSA","","",""
 
         );
         ValintatapajonoRivit rivit = new ValintatapajonoRivit(Arrays.asList(rivi));

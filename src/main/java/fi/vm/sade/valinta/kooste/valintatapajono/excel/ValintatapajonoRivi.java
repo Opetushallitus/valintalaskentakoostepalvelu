@@ -19,7 +19,8 @@ import fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila;
 public class ValintatapajonoRivi {
 	private final String oid;
 	private final String nimi;
-	@ApiModelProperty(allowableValues = "Määrittelemätön,Hyväksyttävissä,Hylätty,Hyväksytty harkinnanvaraisesti")
+
+	@ApiModelProperty(allowableValues = "MAARITTELEMATON,HYVAKSYTTAVISSA,HYLATTY,HYVAKSYTTY_HARKINNANVARAISESTI")
 	private final String tila;
 	private final boolean validi;
 	private final JarjestyskriteerituloksenTila kriteeriTila;
@@ -45,14 +46,12 @@ public class ValintatapajonoRivi {
 		}
 		this.tila = tila;
 		boolean errors = false;
-		JarjestyskriteerituloksenTila defaultTila = JarjestyskriteerituloksenTila.MAARITTELEMATON;
-		if (ValintatapajonoExcel.HYLATTY.equals(tila)) {
+		JarjestyskriteerituloksenTila defaultTila = JarjestyskriteerituloksenTila.HYLATTY;
+		if (ValintatapajonoExcel.HYLATTY.equals(tila) || ValintatapajonoExcel.VAKIO_HYLATTY.equals(tila)) {
 			defaultTila = JarjestyskriteerituloksenTila.HYLATTY;
-		} else if (ValintatapajonoExcel.HYVAKSYTTAVISSA.equals(tila)) {
+		} else if (ValintatapajonoExcel.HYVAKSYTTAVISSA.equals(tila) || ValintatapajonoExcel.VAKIO_HYVAKSYTTAVISSA.equals(tila)) {
 			defaultTila = JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
-		} else if (ValintatapajonoExcel.MAARITTELEMATON.equals(tila)) {
-			defaultTila = JarjestyskriteerituloksenTila.MAARITTELEMATON;
-		} else if (ValintatapajonoExcel.HYVAKSYTTY_HARKINNANVARAISESTI.equals(tila)) {
+		} else if (ValintatapajonoExcel.HYVAKSYTTY_HARKINNANVARAISESTI.equals(tila) || ValintatapajonoExcel.VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI.equals(tila)) {
 			defaultTila = JarjestyskriteerituloksenTila.HYVAKSYTTY_HARKINNANVARAISESTI;
 		} else {
 			defaultVirhe.append("Tuntematon tila ").append(tila).append(".");
