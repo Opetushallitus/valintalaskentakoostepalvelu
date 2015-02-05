@@ -539,18 +539,6 @@
 		scope="singleton" />
 
 	<!-- Swagger configuration -->
-	<!--
-	<bean id="asyncResponseFilter" class="fi.vm.sade.valinta.kooste.swagger.AsyncResponseFilter"/>
-	<bean id="installSwaggerFilterByInvokingStaticMethod" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<property name="targetClass" value="com.wordnik.swagger.config.FilterFactory" />
-		<property name="targetMethod" value="setFilter" />
-		<property name="arguments">
-			<list>
-				<ref bean="asyncResponseFilter"/>
-			</list>
-		</property>
-	</bean>
-	-->
 	<bean id="swaggerConfig" class="com.wordnik.swagger.jaxrs.config.BeanConfig">
 		<property name="resourcePackage" value="fi.vm.sade.valinta.kooste" />
 		<property name="version" value="1.0" />

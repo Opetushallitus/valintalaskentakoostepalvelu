@@ -19,6 +19,8 @@ import javax.ws.rs.core.Response;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.config.FilterFactory;
 import fi.vm.sade.authentication.business.service.Authorizer;
+import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1Resource;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoRivit;
@@ -50,7 +52,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/valintatapajonolaskenta", description = "Valintatapajonon tuonti ja vienti taulukkolaskentaan")
 public class ValintatapajonoResource {
-	private static final String ROLE_TULOSTENTUONTI = "ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI";
+	public static final String ROLE_TULOSTENTUONTI = "ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI";
 	private final Logger LOG = LoggerFactory
 			.getLogger(ValintatapajonoResource.class);
 
@@ -58,8 +60,6 @@ public class ValintatapajonoResource {
 	private Authorizer authorizer;
 	@Autowired
 	private ValintatapajonoTuontiService valintatapajonoTuontiService;
-	@Autowired
-	private TarjontaAsyncResource tarjontaResource;
 	@Autowired
 	private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
 
@@ -75,8 +75,14 @@ public class ValintatapajonoResource {
 	@ApiOperation(consumes = "application/json", value = "Valintatapajonon vienti taulukkolaskentaan", response = ProsessiId.class)
 	public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
+			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid) {
+		//hakukohdeResource.findByOid(hakukohdeOid).getResult().getTarjoajaOids().iterator().next();
 		//authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
+		//authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
+		authorizer.checkOrganisationAccess(tarjoajaOid,
+				ValintatapajonoResource.ROLE_TULOSTENTUONTI
+		);
 		DokumenttiProsessi prosessi = new DokumenttiProsessi("Valintatapajono",
 				"vienti", hakuOid, Arrays.asList(hakukohdeOid));
 		valintatapajonoVienti.vie(prosessi, hakuOid, hakukohdeOid,
@@ -92,6 +98,7 @@ public class ValintatapajonoResource {
 	@ApiOperation(consumes = "application/octet-stream", value = "Valintatapajonon tuonti taulukkolaskennasta", response = ProsessiId.class)
 	public void tuonti(@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
+			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
 			InputStream file,
 			@Suspended AsyncResponse asyncResponse) throws IOException {
@@ -106,6 +113,9 @@ public class ValintatapajonoResource {
 						.build());
 			}
 		});
+		authorizer.checkOrganisationAccess(tarjoajaOid,
+				ValintatapajonoResource.ROLE_TULOSTENTUONTI
+		);
 		final ByteArrayOutputStream bytes;
 		try {
 
@@ -142,10 +152,10 @@ public class ValintatapajonoResource {
 	@ApiOperation(consumes = "application/json", value = "Valintatapajonon tuonti jsonista", response = ProsessiId.class)
 	public void tuonti(@QueryParam("hakuOid") String hakuOid,
 					   @QueryParam("hakukohdeOid") String hakukohdeOid,
+					   @QueryParam("tarjoajaOid") String tarjoajaOid,
 					   @QueryParam("valintatapajonoOid") String valintatapajonoOid,
 					   ValintatapajonoRivit rivit,
 					   @Suspended AsyncResponse asyncResponse) throws IOException {
-
 		asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
 		asyncResponse.setTimeoutHandler(new TimeoutHandler() {
 			public void handleTimeout(AsyncResponse asyncResponse) {
@@ -157,6 +167,9 @@ public class ValintatapajonoResource {
 						.build());
 			}
 		});
+		authorizer.checkOrganisationAccess(tarjoajaOid,
+				ValintatapajonoResource.ROLE_TULOSTENTUONTI
+		);
 		valintatapajonoTuontiService.tuo(
 				(valinnanvaiheet, hakemukset) -> {
 					return rivit.getRivit();

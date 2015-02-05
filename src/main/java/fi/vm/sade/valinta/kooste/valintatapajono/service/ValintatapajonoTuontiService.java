@@ -2,12 +2,14 @@ package fi.vm.sade.valinta.kooste.valintatapajono.service;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
@@ -17,6 +19,7 @@ import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviLi
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRiviAsJonosijaConverter;
+import fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
@@ -51,7 +54,6 @@ public class ValintatapajonoTuontiService {
 
     private static final Logger LOG = LoggerFactory
             .getLogger(ValintatapajonoTuontiService.class);
-    private static final String ERROR ="err";
     private static final String VALMIS ="valmis";
     @Autowired
     private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
@@ -61,10 +63,8 @@ public class ValintatapajonoTuontiService {
     private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
     @Autowired
     private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
-//    private final HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeTarjonnalta;
-//    private final HaeHakuTarjonnaltaKomponentti hakuTarjonnalta;
-
-
+    @Autowired
+    private TarjontaAsyncResource tarjontaResource;
 
     public void tuo(
             BiFunction<List<ValintatietoValinnanvaiheDTO>, List<Hakemus>, Collection<ValintatapajonoRivi>> riviFunction,
@@ -78,10 +78,13 @@ public class ValintatapajonoTuontiService {
                 +1 // valintaperusteet
                 +1 // hakemukset
                 +1 // dokumentti
+                //+1 // org oikeuksien tarkistus
         );
         AtomicReference<List<ValintatietoValinnanvaiheDTO>> valinnanvaiheetRef = new AtomicReference<>();
         AtomicReference<List<ValinnanVaiheJonoillaDTO>> valintaperusteetRef = new AtomicReference<>();
         AtomicReference<List<Hakemus>> hakemuksetRef = new AtomicReference<>();
+        AtomicReference<String> tarjoajaOidRef = new AtomicReference<>();
+
         final Supplier<Void> mergeSuplier = () -> {
             if(counter.decrementAndGet() == 0) {
                 Collection<ValintatapajonoRivi> rivit;
@@ -92,31 +95,30 @@ public class ValintatapajonoTuontiService {
                     return null;
                 }
                 try {
-                valintalaskentaAsyncResource.lisaaTuloksia(hakuOid,hakukohdeOid,ValintatapajonoTuontiConverter.konvertoi(
-                                hakuOid,
-                                hakukohdeOid,
-                                valintatapajonoOid,
-                                valintaperusteetRef.get(),
-                                hakemuksetRef.get(),
-                                valinnanvaiheetRef.get(),
-                                rivit
-                        ),
-                        ok -> {
-                            LOG.error("Onnistui! {}", ok);
-                            dokumentinSeurantaAsyncResource.paivitaDokumenttiId(
-                                    dokumenttiIdRef.get(),
-                                    VALMIS,
-                                    dontcare -> {
-                                    },
-                                    dontcare-> {});
-                        },
-                        poikkeusKasittelija("Tallennus valintapalveluun epäonnistui",asyncResponse,dokumenttiIdRef));
-                LOG.info("Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.", hakukohdeOid, hakuOid);
-                dokumentinSeurantaAsyncResource.paivitaKuvaus(
-                        dokumenttiIdRef.get(),
-                        "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...",
-                        dontcare->{},
-                        dontcare-> {});
+                    valintalaskentaAsyncResource.lisaaTuloksia(hakuOid,hakukohdeOid,ValintatapajonoTuontiConverter.konvertoi(
+                                    hakuOid,
+                                    hakukohdeOid,
+                                    valintatapajonoOid,
+                                    valintaperusteetRef.get(),
+                                    hakemuksetRef.get(),
+                                    valinnanvaiheetRef.get(),
+                                    rivit
+                            ),
+                            ok -> {
+                                dokumentinSeurantaAsyncResource.paivitaDokumenttiId(
+                                        dokumenttiIdRef.get(),
+                                        VALMIS,
+                                        dontcare -> {
+                                        },
+                                        dontcare-> {});
+                            },
+                            poikkeusKasittelija("Tallennus valintapalveluun epäonnistui",asyncResponse,dokumenttiIdRef));
+                    LOG.info("Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.", hakukohdeOid, hakuOid);
+                    dokumentinSeurantaAsyncResource.paivitaKuvaus(
+                            dokumenttiIdRef.get(),
+                            "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...",
+                            dontcare->{},
+                            dontcare-> {});
                 } catch(Throwable t) {
                     poikkeusKasittelija("Tallennus valintapalveluun epäonnistui",asyncResponse,dokumenttiIdRef).accept(t);
                     return null;
@@ -124,6 +126,21 @@ public class ValintatapajonoTuontiService {
             }
             return null;
         };
+        /*
+        tarjontaResource.haeHakukohde(
+                hakuOid,
+                hakukohdeOid,
+                hakukohde -> {
+                    tarjoajaOidRef.set(hakukohde.getTarjoajaOid());
+                    try {
+
+                        mergeSuplier.get();
+                    } catch(Throwable t) {
+                        poikkeusKasittelija("Organisaatiooikeudet puuttuu",asyncResponse,dokumenttiIdRef).accept(t);
+                    }
+                }, poikkeusKasittelija("Organisaatiooikeuksien tarkistus epäonnistui",asyncResponse,dokumenttiIdRef)
+        );
+        */
         valintalaskentaAsyncResource.laskennantulokset(
                 hakuOid, hakukohdeOid,
                 valinnanvaiheet -> {
