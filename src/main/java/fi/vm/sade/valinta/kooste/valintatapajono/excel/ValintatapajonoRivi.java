@@ -50,6 +50,8 @@ public class ValintatapajonoRivi {
 			defaultTila = JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
 		} else if (ValintatapajonoExcel.MAARITTELEMATON.equals(tila)) {
 			defaultTila = JarjestyskriteerituloksenTila.MAARITTELEMATON;
+		} else if (ValintatapajonoExcel.HYVAKSYTTY_HARKINNANVARAISESTI.equals(tila)) {
+			defaultTila = JarjestyskriteerituloksenTila.HYVAKSYTTY_HARKINNANVARAISESTI;
 		} else {
 			defaultVirhe.append("Tuntematon tila ").append(tila).append(".");
 			errors = true;

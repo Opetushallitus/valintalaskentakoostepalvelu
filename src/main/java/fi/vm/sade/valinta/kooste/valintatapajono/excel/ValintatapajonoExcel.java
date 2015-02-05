@@ -39,10 +39,12 @@ public class ValintatapajonoExcel {
 	public final static String MAARITTELEMATON = "Määrittelemätön";
 	public final static String HYVAKSYTTAVISSA = "Hyväksyttävissä";
 	public final static String HYLATTY = "Hylätty";
+	public final static String HYVAKSYTTY_HARKINNANVARAISESTI = "Hyväksytty harkinnanvaraisesti";
 
 	public final static String VAKIO_MAARITTELEMATON = "MAARITTELEMATON";
 	public final static String VAKIO_HYVAKSYTTAVISSA = "HYVAKSYTTAVISSA";
 	public final static String VAKIO_HYLATTY = "HYLATTY";
+	public final static String VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI = "HYVAKSYTTY_HARKINNANVARAISESTI";
 
 	private final static Collection<String> VAIHTOEHDOT = Arrays.asList(
 			MAARITTELEMATON, HYVAKSYTTAVISSA, HYLATTY);
@@ -54,7 +56,9 @@ public class ValintatapajonoExcel {
 			//
 			.addKonversio(VAKIO_HYVAKSYTTAVISSA, HYVAKSYTTAVISSA)
 			//
-			.addKonversio(VAKIO_HYLATTY, HYLATTY).build();
+			.addKonversio(VAKIO_HYLATTY, HYLATTY)
+			//
+			.addKonversio(VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI, HYVAKSYTTY_HARKINNANVARAISESTI).build();
 	private final static Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO = new KonversioBuilder()
 	//
 			.addKonversio(StringUtils.EMPTY, VAKIO_MAARITTELEMATON)
@@ -63,7 +67,9 @@ public class ValintatapajonoExcel {
 			//
 			.addKonversio(HYVAKSYTTAVISSA, VAKIO_HYVAKSYTTAVISSA)
 			//
-			.addKonversio(HYLATTY, VAKIO_HYLATTY).build();
+			.addKonversio(HYLATTY, VAKIO_HYLATTY)
+			//
+			.addKonversio(HYVAKSYTTY_HARKINNANVARAISESTI, VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI).build();
 
 	private final Excel excel;
 
