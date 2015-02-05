@@ -13,6 +13,8 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockHenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoRivit;
+import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviListAdapter;
+import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
 import fi.vm.sade.valinta.kooste.valintatapajono.service.ValintatapajonoTuontiConverter;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -32,6 +34,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -56,7 +59,29 @@ import static org.junit.Assert.assertTrue;
 public class ValintatapajonoTest {
     final static Logger LOG = LoggerFactory.getLogger(ValintatapajonoTest.class);
 
+    @Test
+    public void testaaExcel() throws Exception {
+        List<Hakemus> hakemukset = GSON.fromJson(classpathResourceAsString("/valintatapajono/json_tuonti_listfull.json"), new TypeToken<List<Hakemus>>() {
+        }.getType());
+        List<ValintatietoValinnanvaiheDTO> valinnanvaiheet =
+                GSON.fromJson(classpathResourceAsString("/valintatapajono/json_tuonti_laskenta_valinnanvaihe.json"), new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {
+                }.getType());
 
+        ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
+        try {
+            ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(
+                    "1.2.246.562.29.173465377510", "1.2.246.562.20.85029108298", "14229501603804360431186491391519",
+                    "", "",
+                    //
+                    valinnanvaiheet, hakemukset, Arrays
+                    .asList(listaus));
+            valintatapajonoExcel.getExcel().tuoXlsx(new ClassPathResource("/valintatapajono/valintatapajono_yksi_hakija.xlsx").getInputStream());
+        } catch(Throwable t) {
+            //	poikkeusKasittelija("Excelin luku epäonnistui",asyncResponse,dokumenttiIdRef).accept(t);
+            throw new RuntimeException(t);
+        }
+        LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(listaus.getRivit()));
+    }
 
     @Test
     public void testaaValintatapajononTuontia() throws Exception {
