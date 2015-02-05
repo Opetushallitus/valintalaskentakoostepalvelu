@@ -110,23 +110,27 @@ public class ValintatapajonoTuontiService {
                     LOG.debug("{}", new GsonBuilder().setPrettyPrinting().create().toJson(valinnanvaihe));
                     valintalaskentaAsyncResource.lisaaTuloksia(hakuOid,hakukohdeOid,tarjoajaOid, valinnanvaihe,
                             ok -> {
-                                LOG.info("Tuli ok viesti");
+                                LOG.error("Tuli ok viesti");
                                 dokumentinSeurantaAsyncResource.paivitaDokumenttiId(
                                         dokumenttiIdRef.get(),
                                         VALMIS,
                                         dontcare -> {
+                                            LOG.error("Saatiin paivitettya dokId");
                                         },
-                                        dontcare-> {});
+                                        dontcare->
+                                        {
+                                            LOG.error("Ei saatu paivitettya {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
+                                        });
                             },
                             poikkeusKasittelija("Tallennus valintapalveluun epäonnistui",asyncResponse,dokumenttiIdRef));
                     LOG.info("Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.", hakukohdeOid, hakuOid);
                     dokumentinSeurantaAsyncResource.paivitaKuvaus(
                             dokumenttiIdRef.get(),
                             "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...",
-                            dontcare->{},
-                            dontcare-> {
+                            dontcare -> {
+                            },
+                            dontcare -> {
                                 LOG.error("Onnistumisen ilmoittamisessa virhe! {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
-
                             });
                 } catch(Throwable t) {
                     poikkeusKasittelija("Tallennus valintapalveluun epäonnistui",asyncResponse,dokumenttiIdRef).accept(t);

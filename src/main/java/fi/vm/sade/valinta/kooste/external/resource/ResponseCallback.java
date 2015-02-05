@@ -46,6 +46,8 @@ public class ResponseCallback implements InvocationCallback<Response> {
 			} else {
 				callback.accept(response);
 			}
+		} else {
+			LOG.error("Ohitettiin ilmoittaminen koska {} {}", callback, failure);
 		}
 	}
 
@@ -53,6 +55,8 @@ public class ResponseCallback implements InvocationCallback<Response> {
 	public void failed(Throwable throwable) {
 		if(callback != null && failure != null) {
 			failure.accept(throwable);
+		} else {
+			LOG.error("Ohitettiin virheilmoittaminen koska {} {}", callback, failure);
 		}
 	}
 
