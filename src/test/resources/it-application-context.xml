@@ -17,6 +17,8 @@
 	<ctx:annotation-config />
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.mocks"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.erillishaku"/>
+  <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatapajono.resource"/>
+  <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatapajono.service"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.komponentti"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
@@ -29,6 +31,7 @@
     xmlns:mockito="http://www.mockito.org/spring/mockito"
     xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd"
     profile="it">
+    <mockito:mock id="valintatapajononVientiRoute" class="fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute" />
     <mockito:mock id="authorizer" class="fi.vm.sade.authentication.business.service.Authorizer" />
     <mockito:mock id="applicationResource" class="fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource" />
     <mockito:mock id="hakuV1Resource" class="fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource" />

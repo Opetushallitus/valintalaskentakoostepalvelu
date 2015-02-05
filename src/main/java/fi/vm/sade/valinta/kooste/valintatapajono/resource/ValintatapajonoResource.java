@@ -7,10 +7,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.container.TimeoutHandler;
@@ -47,6 +44,9 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
  * @author Jussi Jartamo
  * 
  */
+///valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
+///haku-app/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid={hakukohdeOid}&asId={hakuOid}
+///valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
 @Controller
 @Path("valintatapajonolaskenta")
 @PreAuthorize("isAuthenticated()")
@@ -94,6 +94,7 @@ public class ValintatapajonoResource {
 	@POST
 	@Path("/tuonti")
 	@Consumes("application/octet-stream")
+	@Produces("text/plain")
 	@ApiOperation(consumes = "application/octet-stream", value = "Valintatapajonon tuonti taulukkolaskennasta", response = ProsessiId.class)
 	public void tuonti(@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
@@ -148,6 +149,7 @@ public class ValintatapajonoResource {
 	@POST
 	@Path("/tuonti/json")
 	@Consumes("application/json")
+	@Produces("text/plain")
 	@ApiOperation(consumes = "application/json", value = "Valintatapajonon tuonti jsonista", response = ProsessiId.class)
 	public void tuonti(@QueryParam("hakuOid") String hakuOid,
 					   @QueryParam("hakukohdeOid") String hakukohdeOid,

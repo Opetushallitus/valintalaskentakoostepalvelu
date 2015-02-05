@@ -40,8 +40,9 @@ public class ValintatapajonoTuontiConverter {
                     Optional.ofNullable(valintatapajonoOid));
 
         }
-        ValintatapajonoDTO jono = haeValintatapajono(
+        ValintatietoValintatapajonoDTO jono = haeValintatapajono(
                 valintatapajonoOid, vaihe);
+        vaihe.setValintatapajonot(Arrays.asList(jono));
         List<JonosijaDTO> jonosijat = Lists.newArrayList();
         Map<String, Hakemus> hakemusmappaus = mapHakemukset(hakemukset);
         for (ValintatapajonoRivi rivi : rivit) {
@@ -84,9 +85,9 @@ public class ValintatapajonoTuontiConverter {
         return null;
     }
 
-    private static ValintatapajonoDTO haeValintatapajono(String valintatapajonoOid,
+    private static ValintatietoValintatapajonoDTO haeValintatapajono(String valintatapajonoOid,
                                                   ValintatietoValinnanvaiheDTO v) {
-        for (ValintatapajonoDTO vx : v.getValintatapajonot()) {
+        for (ValintatietoValintatapajonoDTO vx : v.getValintatapajonot()) {
             if (valintatapajonoOid.equals(vx.getValintatapajonooid())) {
                 return vx;
             }
