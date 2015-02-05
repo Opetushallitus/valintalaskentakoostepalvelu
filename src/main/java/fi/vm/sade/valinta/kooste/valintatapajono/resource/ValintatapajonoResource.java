@@ -67,6 +67,8 @@ public class ValintatapajonoResource {
 	private ValintatapajonoVientiRoute valintatapajonoVienti;
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+	@Autowired
+	private TarjontaAsyncResource tarjontaResource;
 
 	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
 	@POST
@@ -75,11 +77,8 @@ public class ValintatapajonoResource {
 	@ApiOperation(consumes = "application/json", value = "Valintatapajonon vienti taulukkolaskentaan", response = ProsessiId.class)
 	public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("tarjoajaOid") String tarjoajaOid,
-			@QueryParam("valintatapajonoOid") String valintatapajonoOid) {
-		//hakukohdeResource.findByOid(hakukohdeOid).getResult().getTarjoajaOids().iterator().next();
-		//authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
-		//authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
+			@QueryParam("valintatapajonoOid") String valintatapajonoOid) throws Exception{
+		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
 		authorizer.checkOrganisationAccess(tarjoajaOid,
 				ValintatapajonoResource.ROLE_TULOSTENTUONTI
 		);
@@ -98,10 +97,9 @@ public class ValintatapajonoResource {
 	@ApiOperation(consumes = "application/octet-stream", value = "Valintatapajonon tuonti taulukkolaskennasta", response = ProsessiId.class)
 	public void tuonti(@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
 			InputStream file,
-			@Suspended AsyncResponse asyncResponse) throws IOException {
+			@Suspended AsyncResponse asyncResponse) throws Exception {
 		asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
 		asyncResponse.setTimeoutHandler(new TimeoutHandler() {
 			public void handleTimeout(AsyncResponse asyncResponse) {
@@ -113,6 +111,7 @@ public class ValintatapajonoResource {
 						.build());
 			}
 		});
+		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
 		authorizer.checkOrganisationAccess(tarjoajaOid,
 				ValintatapajonoResource.ROLE_TULOSTENTUONTI
 		);
@@ -152,10 +151,9 @@ public class ValintatapajonoResource {
 	@ApiOperation(consumes = "application/json", value = "Valintatapajonon tuonti jsonista", response = ProsessiId.class)
 	public void tuonti(@QueryParam("hakuOid") String hakuOid,
 					   @QueryParam("hakukohdeOid") String hakukohdeOid,
-					   @QueryParam("tarjoajaOid") String tarjoajaOid,
 					   @QueryParam("valintatapajonoOid") String valintatapajonoOid,
 					   ValintatapajonoRivit rivit,
-					   @Suspended AsyncResponse asyncResponse) throws IOException {
+					   @Suspended AsyncResponse asyncResponse) throws Exception {
 		asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
 		asyncResponse.setTimeoutHandler(new TimeoutHandler() {
 			public void handleTimeout(AsyncResponse asyncResponse) {
@@ -167,6 +165,7 @@ public class ValintatapajonoResource {
 						.build());
 			}
 		});
+		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
 		authorizer.checkOrganisationAccess(tarjoajaOid,
 				ValintatapajonoResource.ROLE_TULOSTENTUONTI
 		);

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 /**
@@ -24,6 +25,7 @@ public class ResponseCallback implements InvocationCallback<Response> {
 	private final Consumer<Throwable> failure;
 
 	public ResponseCallback(boolean only2xxIsCompleted, Consumer<Response> callback, Consumer<Throwable> failure) {
+		LOG.info("Luotiin response callback");
 		this.callback = callback;
 		this.failure = failure;
 		this.only2xxIsCompleted = only2xxIsCompleted;
@@ -35,29 +37,46 @@ public class ResponseCallback implements InvocationCallback<Response> {
 	}
 	@Override
 	public void completed(Response response) {
-		if(callback != null && failure != null) {
-			if(only2xxIsCompleted) {
-				int status = response.getStatus();
-				if(200 >= status && 300 < status) {
-					callback.accept(response);
+		try {
+			LOG.info("Saatiin jotain !!! {} {} {}", response.getStatus(), callback, failure);
+			if (callback != null && failure != null) {
+				if (only2xxIsCompleted) {
+					int status = response.getStatus();
+					if (200 >= status && 300 < status) {
+						callback.accept(response);
+					} else {
+						failure.accept(new RuntimeException(entityToString(response.getEntity())));
+					}
 				} else {
-					failure.accept(new RuntimeException(entityToString(response.getEntity())));
+					callback.accept(response);
 				}
 			} else {
-				callback.accept(response);
+				LOG.info("Ohitettiin ilmoittaminen koska {} {}", callback, failure);
 			}
-		} else {
-			LOG.error("Ohitettiin ilmoittaminen koska {} {}", callback, failure);
+		} catch(Throwable t) {
+			LOG.info("Jotain meni pieleen onnistuneen responsen käsittelyssä");
+			LOG.info("{} {}", t.getMessage(), Arrays.toString(t.getStackTrace()));
+		} finally {
+			LOG.info("Oltiin onnistuneessa käsittelyssä");
 		}
 	}
 
 	@Override
 	public void failed(Throwable throwable) {
-		if(callback != null && failure != null) {
-			failure.accept(throwable);
-		} else {
-			LOG.error("Ohitettiin virheilmoittaminen koska {} {}", callback, failure);
+		try {
+			LOG.info("Ei saatu mitään !!!");
+			if (callback != null && failure != null) {
+				failure.accept(throwable);
+			} else {
+				LOG.info("Ohitettiin virheilmoittaminen koska {} {}", callback, failure);
+			}
+		} catch(Throwable t) {
+			LOG.info("Jotain meni pieleen epäonnistuneen responsen käsittelyssä");
+			LOG.info("{} {}", t.getMessage(), Arrays.toString(t.getStackTrace()));
+		} finally {
+			LOG.info("Oltiin käsittelyssä");
 		}
+
 	}
 
 	private String entityToString(Object entity){

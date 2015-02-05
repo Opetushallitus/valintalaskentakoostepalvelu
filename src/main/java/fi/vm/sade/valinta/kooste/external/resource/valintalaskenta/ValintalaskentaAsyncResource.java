@@ -31,7 +31,7 @@ public interface ValintalaskentaAsyncResource {
 	Peruutettava laskeKaikki(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback);
 
-	Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<Response> callback, Consumer<Throwable> failureCallback);
+	Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<ValinnanvaiheDTO> callback, Consumer<Throwable> failureCallback);
 
 	// @Path("laskejasijoittele")
 	// @Consumes("application/json")

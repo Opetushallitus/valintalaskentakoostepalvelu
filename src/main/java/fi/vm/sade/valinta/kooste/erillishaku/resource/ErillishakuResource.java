@@ -10,6 +10,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +65,8 @@ public class ErillishakuResource {
 	
 	@Autowired
 	private ErillishaunVientiService vientiService;
+	@Autowired
+	private TarjontaAsyncResource tarjontaResource;
 
 	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
 	@POST
@@ -73,9 +77,9 @@ public class ErillishakuResource {
 			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
-			@QueryParam("valintatapajononNimi") String valintatapajononNimi) {
+			@QueryParam("valintatapajononNimi") String valintatapajononNimi) throws Exception {
+		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
 		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
@@ -94,10 +98,10 @@ public class ErillishakuResource {
 			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
 			@QueryParam("valintatapajononNimi") String valintatapajononNimi,
-			InputStream file) throws IOException {
+			InputStream file) throws Exception {
+		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
 		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
 		ByteArrayOutputStream b;
 		IOUtils.copy(file, b = new ByteArrayOutputStream());
@@ -119,14 +123,14 @@ public class ErillishakuResource {
 			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("tarjoajaOid") String tarjoajaOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
 			@QueryParam("valintatapajononNimi") String valintatapajononNimi,
 			@ApiParam("hakemuksenTila=[HYLATTY|VARALLA|PERUUNTUNUT|HYVAKSYTTY|VARASIJALTA_HYVAKSYTTY|HARKINNANVARAISESTI_HYVAKSYTTY|PERUNUT|PERUUTETTU]<br>" +
 					"vastaanottoTila=[PERUNUT|KESKEN|EI_VASTAANOTTANUT_MAARA_AIKANA|VASTAANOTTANUT|VASTAANOTTANUT_SITOVASTI|PERUUTETTU]<br>" +
 					"ilmoittautumisTila=[EI_TEHTY|LASNA_KOKO_LUKUVUOSI|POISSA_KOKO_LUKUVUOSI|EI_ILMOITTAUTUNUT|LASNA_SYKSY|POISSA_SYKSY|LASNA|POISSA]")
 			// Body
-			ErillishakuJson json) throws IOException {
+			ErillishakuJson json) throws Exception {
+		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
 		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);

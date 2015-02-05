@@ -107,7 +107,7 @@ public class ValintatapajonoTuontiService {
                             valinnanvaiheetRef.get(),
                             rivit
                     );
-                    LOG.debug("{}", new GsonBuilder().setPrettyPrinting().create().toJson(valinnanvaihe));
+                    LOG.info("{}", new GsonBuilder().setPrettyPrinting().create().toJson(valinnanvaihe));
                     valintalaskentaAsyncResource.lisaaTuloksia(hakuOid,hakukohdeOid,tarjoajaOid, valinnanvaihe,
                             ok -> {
                                 LOG.error("Tuli ok viesti");

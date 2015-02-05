@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +58,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	}
 
 	@Override
-	public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
+	public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<ValinnanvaiheDTO> callback, Consumer<Throwable> failureCallback) {
 		try {
 			///valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
 			String url = new StringBuilder("/valintalaskentakoostepalvelu/hakukohde/").append(hakukohdeOid).append("/valinnanvaihe").toString();
@@ -65,8 +66,12 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 					.path(url)
 					.query("tarjoajaOid", tarjoajaOid)
 					.async()
-					.post(Entity.json(vaihe), new ResponseCallback(true,callback,failureCallback)));
-		} catch (Exception e) {
+					.post(Entity.entity(vaihe,
+							MediaType.APPLICATION_JSON_TYPE), new Callback<ValinnanvaiheDTO>(GSON, address, url, callback,
+							failureCallback, new TypeToken<ValinnanvaiheDTO>() {
+					}.getType())));
+		} catch (Throwable e) {
+			LOG.error("Valintalaskentaan tulosten tuonti epäonnistui: {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
