@@ -61,9 +61,5 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, ValinnanvaiheDTO vaihe, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
-        throw new UnsupportedOperationException();
-    }
 }
 
