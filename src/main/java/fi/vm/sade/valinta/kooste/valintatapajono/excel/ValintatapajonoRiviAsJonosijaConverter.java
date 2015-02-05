@@ -31,7 +31,7 @@ public class ValintatapajonoRiviAsJonosijaConverter {
 		}
 		j.setPrioriteetti(prioriteetti);
 		JarjestyskriteeritulosDTO kriteeri = new JarjestyskriteeritulosDTO();
-		kriteeri.setArvo(BigDecimal.ONE.negate());
+		kriteeri.setArvo(new BigDecimal(rivi.getJonosija()).negate());
 		kriteeri.setNimi(StringUtils.EMPTY);
 		kriteeri.setTila(rivi.asTila());
 		kriteeri.setKuvaus(rivi.getKuvaus());
