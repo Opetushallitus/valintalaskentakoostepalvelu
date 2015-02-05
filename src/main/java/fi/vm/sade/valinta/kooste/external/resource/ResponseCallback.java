@@ -24,8 +24,8 @@ public class ResponseCallback implements InvocationCallback<Response> {
 	private final Consumer<Throwable> failure;
 
 	public ResponseCallback(boolean only2xxIsCompleted, Consumer<Response> callback, Consumer<Throwable> failure) {
-		this.callback = null;
-		this.failure = null;
+		this.callback = callback;
+		this.failure = failure;
 		this.only2xxIsCompleted = only2xxIsCompleted;
 	}
 	public ResponseCallback() {

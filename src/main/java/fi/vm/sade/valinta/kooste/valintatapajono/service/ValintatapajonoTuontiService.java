@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintatapajono.service;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.GsonBuilder;
 import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
@@ -23,6 +24,7 @@ import fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResourc
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
@@ -70,6 +72,7 @@ public class ValintatapajonoTuontiService {
             BiFunction<List<ValintatietoValinnanvaiheDTO>, List<Hakemus>, Collection<ValintatapajonoRivi>> riviFunction,
             final String hakuOid,
             final String hakukohdeOid,
+            final String tarjoajaOid,
             final String valintatapajonoOid,
             AsyncResponse asyncResponse) {
         AtomicReference<String> dokumenttiIdRef = new AtomicReference<>(null);
@@ -95,16 +98,19 @@ public class ValintatapajonoTuontiService {
                     return null;
                 }
                 try {
-                    valintalaskentaAsyncResource.lisaaTuloksia(hakuOid,hakukohdeOid,ValintatapajonoTuontiConverter.konvertoi(
-                                    hakuOid,
-                                    hakukohdeOid,
-                                    valintatapajonoOid,
-                                    valintaperusteetRef.get(),
-                                    hakemuksetRef.get(),
-                                    valinnanvaiheetRef.get(),
-                                    rivit
-                            ),
+                    ValinnanvaiheDTO valinnanvaihe = ValintatapajonoTuontiConverter.konvertoi(
+                            hakuOid,
+                            hakukohdeOid,
+                            valintatapajonoOid,
+                            valintaperusteetRef.get(),
+                            hakemuksetRef.get(),
+                            valinnanvaiheetRef.get(),
+                            rivit
+                    );
+                    LOG.debug("{}", new GsonBuilder().setPrettyPrinting().create().toJson(valinnanvaihe));
+                    valintalaskentaAsyncResource.lisaaTuloksia(hakuOid,hakukohdeOid,tarjoajaOid, valinnanvaihe,
                             ok -> {
+                                LOG.info("Tuli ok viesti");
                                 dokumentinSeurantaAsyncResource.paivitaDokumenttiId(
                                         dokumenttiIdRef.get(),
                                         VALMIS,
@@ -118,7 +124,10 @@ public class ValintatapajonoTuontiService {
                             dokumenttiIdRef.get(),
                             "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...",
                             dontcare->{},
-                            dontcare-> {});
+                            dontcare-> {
+                                LOG.error("Onnistumisen ilmoittamisessa virhe! {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
+
+                            });
                 } catch(Throwable t) {
                     poikkeusKasittelija("Tallennus valintapalveluun epäonnistui",asyncResponse,dokumenttiIdRef).accept(t);
                     return null;
@@ -186,9 +195,9 @@ public class ValintatapajonoTuontiService {
     private Consumer<Throwable> poikkeusKasittelija(String viesti, AsyncResponse asyncResponse, AtomicReference<String> dokumenttiIdRef) {
         return poikkeus -> {
             if(poikkeus == null) {
-                LOG.error("Poikkeus tuonnissa {}", viesti);
+                LOG.error("###\r\n###Poikkeus tuonnissa {}\r\n###", viesti);
             } else {
-                LOG.error("Poikkeus tuonnissa {}: {} {}", viesti, poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
+                LOG.error("###\r\n###Poikkeus tuonnissa {}: {} {}\r\n###", viesti, poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
             }
             try {
                 asyncResponse.resume(Response.serverError()
@@ -197,16 +206,20 @@ public class ValintatapajonoTuontiService {
             } catch (Throwable t) {
                 // ei väliä vaikka response jos tehty
             }
-            String dokumenttiId = dokumenttiIdRef.get();
-            if (dokumenttiId != null) {
-                dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId,
-                        Arrays.asList(new VirheilmoitusDto("", viesti)),
-                        dontcare -> {
-                        },
-                        dontcare -> {
-                        });
+            try {
+                String dokumenttiId = dokumenttiIdRef.get();
+                if (dokumenttiId != null) {
+                    dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId,
+                            Arrays.asList(new VirheilmoitusDto("", viesti)),
+                            dontcare -> {
+                            },
+                            dontcare -> {
+                                LOG.error("Virheen ilmoittamisessa virhe! {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
+                            });
+                }
+            } catch(Throwable t) {
+                LOG.error("Odottamaton virhe: {} {}", t.getMessage(), Arrays.toString(t.getStackTrace()));
             }
-
         };
     }
 

@@ -136,7 +136,7 @@ public class ValintatapajonoResource {
 					throw new RuntimeException(t);
 				}
 				return listaus.getRivit();
-			}, hakuOid, hakukohdeOid, valintatapajonoOid, asyncResponse);
+			}, hakuOid, hakukohdeOid,tarjoajaOid, valintatapajonoOid, asyncResponse);
 		} catch(Throwable t) {
 			asyncResponse.resume(Response.serverError()
 					.entity("Valintatapajonon tuonti epäonnistui tiedoston lukemiseen")
@@ -173,6 +173,6 @@ public class ValintatapajonoResource {
 		valintatapajonoTuontiService.tuo(
 				(valinnanvaiheet, hakemukset) -> {
 					return rivit.getRivit();
-				}, hakuOid, hakukohdeOid, valintatapajonoOid, asyncResponse);
+				}, hakuOid, hakukohdeOid,tarjoajaOid, valintatapajonoOid, asyncResponse);
 	}
 }

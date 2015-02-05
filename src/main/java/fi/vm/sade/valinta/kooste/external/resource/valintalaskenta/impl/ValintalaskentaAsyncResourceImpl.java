@@ -57,12 +57,13 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	}
 
 	@Override
-	public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, ValinnanvaiheDTO vaihe, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
+	public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
 		try {
 			///valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
 			String url = new StringBuilder("/valintalaskentakoostepalvelu/hakukohde/").append(hakukohdeOid).append("/valinnanvaihe").toString();
 			return new PeruutettavaImpl(getWebClient()
 					.path(url)
+					.query("tarjoajaOid", tarjoajaOid)
 					.async()
 					.post(Entity.json(vaihe), new ResponseCallback(true,callback,failureCallback)));
 		} catch (Exception e) {

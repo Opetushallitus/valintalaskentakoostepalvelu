@@ -87,7 +87,7 @@ public class DokumentinSeurantaAsyncResourceImpl extends HttpResource implements
             getWebClient()
                     .path(url)
                     .async()
-                    .post(Entity.entity(virheilmoitukset, MediaType.APPLICATION_JSON),
+                    .post(Entity.json(virheilmoitukset),
                             new Callback<DokumenttiDto>(address,url,callback,failureCallback, new TypeToken<DokumenttiDto>() {
                             }.getType()));
         } catch (Exception e) {
