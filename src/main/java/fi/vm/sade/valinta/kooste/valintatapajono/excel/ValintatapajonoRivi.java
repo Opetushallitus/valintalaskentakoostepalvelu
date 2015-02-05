@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Maps;
@@ -18,6 +19,7 @@ import fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila;
 public class ValintatapajonoRivi {
 	private final String oid;
 	private final String nimi;
+	@ApiModelProperty(allowableValues = "Määrittelemätön,Hyväksyttävissä,Hylätty,Hyväksytty harkinnanvaraisesti")
 	private final String tila;
 	private final boolean validi;
 	private final JarjestyskriteerituloksenTila kriteeriTila;
