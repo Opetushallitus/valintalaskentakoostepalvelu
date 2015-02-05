@@ -31,6 +31,11 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
     }
 
     @Override
+    public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Peruutettava laskennantulokset(String hakuOid, String hakukohdeOid, Consumer<List<ValintatietoValinnanvaiheDTO>> callback, Consumer<Throwable> failureCallback) {
         callback.accept(resultReference.get());
         return new PeruutettavaImpl(Futures.immediateCancelledFuture());
