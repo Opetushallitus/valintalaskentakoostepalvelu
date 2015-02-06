@@ -26,7 +26,7 @@ public class ValintatapajonoRivi {
 	private final String oid;
 	@ApiModelProperty(required = true)
 	private final String nimi;
-	@ApiModelProperty(required = true, allowableValues = "MAARITTELEMATON,HYVAKSYTTAVISSA,HYLATTY,HYVAKSYTTY_HARKINNANVARAISESTI")
+	@ApiModelProperty(required = true, allowableValues = "HYVAKSYTTAVISSA,HYLATTY,HYVAKSYTTY_HARKINNANVARAISESTI")
 	private final String tila;
 	@ApiModelProperty(required = true)
 	private final String jonosija;
