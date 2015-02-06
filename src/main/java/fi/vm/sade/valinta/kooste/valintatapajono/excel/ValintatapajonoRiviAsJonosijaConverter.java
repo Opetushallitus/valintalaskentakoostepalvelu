@@ -21,7 +21,7 @@ public class ValintatapajonoRiviAsJonosijaConverter {
 		j.setHakemusOid(hakemus.getOid());
 		j.setHakijaOid(hakemus.getPersonOid());
 		// j.setHarkinnanvarainen();
-		j.setJonosija(rivi.getJonosija());
+		j.setJonosija(rivi.asJonosija());
 		j.setMuokattu(false);
 		j.setHarkinnanvarainen(false);
 		Integer prioriteetti = h.getHakutoiveenPrioriteetti(hakukohdeOid);
@@ -31,7 +31,7 @@ public class ValintatapajonoRiviAsJonosijaConverter {
 		}
 		j.setPrioriteetti(prioriteetti);
 		JarjestyskriteeritulosDTO kriteeri = new JarjestyskriteeritulosDTO();
-		kriteeri.setArvo(new BigDecimal(rivi.getJonosija()).negate());
+		kriteeri.setArvo(new BigDecimal(rivi.asJonosija()).negate());
 		kriteeri.setNimi(StringUtils.EMPTY);
 		kriteeri.setTila(rivi.asTila());
 		kriteeri.setKuvaus(rivi.getKuvaus());

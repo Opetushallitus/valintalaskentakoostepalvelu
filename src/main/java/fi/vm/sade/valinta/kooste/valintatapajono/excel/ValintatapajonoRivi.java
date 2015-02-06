@@ -1,16 +1,21 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.excel;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
+import fi.vm.sade.valinta.kooste.valintatapajono.dto.Kuvaus;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Maps;
 
-import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import static fi.vm.sade.valinta.kooste.util.KieliUtil.*;
 import fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila;
+import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 
 /**
  * @author Jussi Jartamo
@@ -19,18 +24,46 @@ import fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila;
 public class ValintatapajonoRivi {
 	private final String oid;
 	private final String nimi;
-
 	@ApiModelProperty(allowableValues = "MAARITTELEMATON,HYVAKSYTTAVISSA,HYLATTY,HYVAKSYTTY_HARKINNANVARAISESTI")
 	private final String tila;
+	private final String jonosija;
+	private final Map<String,String> kuvaus;
+
+	@ApiModelProperty(hidden = false)
+	private transient Integer jonosijaNumerona;
+	@ApiModelProperty(hidden = false)
+	private transient JarjestyskriteerituloksenTila tilaEnumeraationa;
+	/*
+	@ApiModelProperty(hidden = false)
 	private final boolean validi;
+	@ApiModelProperty(hidden = false)
 	private final JarjestyskriteerituloksenTila kriteeriTila;
-	private final Map<String, String> kuvaus;
-	private final int jonosija;
+	@ApiModelProperty(hidden = false)
 	private final String virhe;
+	*/
+
+	public ValintatapajonoRivi() {
+		this.oid = null;
+		this.nimi = null;
+		this.tila = null;
+		this.kuvaus = null;
+		this.jonosija = null;
+	}
 
 	public ValintatapajonoRivi(String oid, String jonosija, String nimi,
-	//
 			String tila, String fi, String sv, String en) {
+
+		this.oid = oid;
+		this.jonosija = jonosija; //new BigDecimal(jonosija).intValue();
+		this.nimi = nimi;
+		this.tila = tila;
+		this.kuvaus =
+				Arrays.asList(new Kuvaus(SUOMI,fi), new Kuvaus(RUOTSI,sv), new Kuvaus(ENGLANTI,en)).stream()
+						.filter(k -> StringUtils.trimToNull(k.getTeksti()) != null)
+						.collect(Collectors.toMap(
+						k -> k.getKieli(), k -> k.getTeksti()
+				));
+		/*
 		StringBuilder defaultVirhe = new StringBuilder();
 		this.oid = oid;
 		this.nimi = nimi;
@@ -87,26 +120,47 @@ public class ValintatapajonoRivi {
 				|| defaultTila
 						.equals(JarjestyskriteerituloksenTila.MAARITTELEMATON);
 		this.virhe = defaultVirhe.toString().trim();
+		*/
+	}
+
+	public boolean isValidi() {
+		return asTila() != JarjestyskriteerituloksenTila.MAARITTELEMATON;
 	}
 
 	public JarjestyskriteerituloksenTila asTila() {
-		return kriteeriTila;
+		if(tilaEnumeraationa == null) {
+			if (tila == null) {
+				tilaEnumeraationa = JarjestyskriteerituloksenTila.MAARITTELEMATON;
+			} else
+			if (ValintatapajonoExcel.VAIHTOEHDOT_KONVERSIO.containsKey(tila)) {
+				tilaEnumeraationa = JarjestyskriteerituloksenTila.valueOf(tila);
+			} else
+			if (ValintatapajonoExcel.VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO.containsKey(tila)) {
+				tilaEnumeraationa = JarjestyskriteerituloksenTila.valueOf(ValintatapajonoExcel.VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO.get(tila));
+			}
+		}
+		return tilaEnumeraationa;
 	}
-
+	public int asJonosija() {
+		if(jonosijaNumerona == null) {
+			if(StringUtils.trimToNull(jonosija) == null) {
+				jonosijaNumerona = 0;
+			} else {
+				try {
+					jonosijaNumerona = new BigDecimal(jonosija).intValue();
+				} catch (Exception e) {
+					jonosijaNumerona = 0;
+				}
+			}
+		}
+		return jonosijaNumerona;
+	}
 	public String getTila() {
 		return tila;
 	}
 
-	public int getJonosija() {
+	public String getJonosija() {
 		return jonosija;
-	}
-
-	public String getVirhe() {
-		return virhe;
-	}
-
-	public boolean isValidi() {
-		return validi;
 	}
 
 	public Map<String, String> getKuvaus() {

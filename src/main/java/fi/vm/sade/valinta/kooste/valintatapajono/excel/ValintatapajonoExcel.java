@@ -48,7 +48,7 @@ public class ValintatapajonoExcel {
 
 	private final static Collection<String> VAIHTOEHDOT = Arrays.asList(
 			MAARITTELEMATON, HYVAKSYTTAVISSA, HYLATTY);
-	private final static Map<String, String> VAIHTOEHDOT_KONVERSIO = new KonversioBuilder()
+	public final static Map<String, String> VAIHTOEHDOT_KONVERSIO = new KonversioBuilder()
 	//
 			.addKonversio(StringUtils.EMPTY, MAARITTELEMATON)
 			//
@@ -59,7 +59,7 @@ public class ValintatapajonoExcel {
 			.addKonversio(VAKIO_HYLATTY, HYLATTY)
 			//
 			.addKonversio(VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI, HYVAKSYTTY_HARKINNANVARAISESTI).build();
-	private final static Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO = new KonversioBuilder()
+	public final static Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO = new KonversioBuilder()
 	//
 			.addKonversio(StringUtils.EMPTY, VAKIO_MAARITTELEMATON)
 			//

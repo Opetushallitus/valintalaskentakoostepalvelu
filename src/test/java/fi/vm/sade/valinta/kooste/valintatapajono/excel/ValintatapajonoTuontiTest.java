@@ -130,7 +130,7 @@ public class ValintatapajonoTuontiTest {
 						.getInputStream());
 		for (ValintatapajonoRivi r : listaus.getRivit()) {
 			LOG.error("{} {} {} {}", r.getJonosija(), r.getNimi(),
-					r.isValidi(), r.getVirhe());
+					r.isValidi(), r.getTila());
 
 		}
 		// Excel excel = valintatapajonoExcel.getExcel();
