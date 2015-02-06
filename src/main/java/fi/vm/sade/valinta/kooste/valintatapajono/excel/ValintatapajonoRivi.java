@@ -22,10 +22,13 @@ import org.springframework.security.config.annotation.authentication.configurati
  */
 @ApiModel
 public class ValintatapajonoRivi {
+	@ApiModelProperty(required = true)
 	private final String oid;
+	@ApiModelProperty(required = true)
 	private final String nimi;
-	@ApiModelProperty(allowableValues = "MAARITTELEMATON,HYVAKSYTTAVISSA,HYLATTY,HYVAKSYTTY_HARKINNANVARAISESTI")
+	@ApiModelProperty(required = true, allowableValues = "MAARITTELEMATON,HYVAKSYTTAVISSA,HYLATTY,HYVAKSYTTY_HARKINNANVARAISESTI")
 	private final String tila;
+	@ApiModelProperty(required = true)
 	private final String jonosija;
 	private final Map<String,String> kuvaus;
 
@@ -123,6 +126,7 @@ public class ValintatapajonoRivi {
 		*/
 	}
 
+	@ApiModelProperty(hidden = false)
 	public boolean isValidi() {
 		return asTila() != JarjestyskriteerituloksenTila.MAARITTELEMATON;
 	}

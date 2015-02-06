@@ -150,7 +150,9 @@ public class ValintatapajonoResource {
 	@Path("/tuonti/json")
 	@Consumes("application/json")
 	@Produces("text/plain")
-	@ApiOperation(consumes = "application/json", value = "Valintatapajonon tuonti jsonista", response = ProsessiId.class)
+	@ApiOperation(consumes = "application/json", value = "Valintatapajonon tuonti jsonista",
+
+			response = String.class)
 	public void tuonti(@QueryParam("hakuOid") String hakuOid,
 					   @QueryParam("hakukohdeOid") String hakukohdeOid,
 					   @QueryParam("valintatapajonoOid") String valintatapajonoOid,
