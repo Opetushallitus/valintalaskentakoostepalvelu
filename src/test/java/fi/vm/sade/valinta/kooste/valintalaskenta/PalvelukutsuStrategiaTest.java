@@ -38,10 +38,10 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.YksiPa
  * @author Jussi Jartamo
  * 
  */
-public class PalvelukutsuStrategiaTesti {
+public class PalvelukutsuStrategiaTest {
 
 	private final static Logger LOG = LoggerFactory
-			.getLogger(PalvelukutsuStrategiaTesti.class);
+			.getLogger(PalvelukutsuStrategiaTest.class);
 
 	private final HakukohdeJaOrganisaatio HAKUKOHDE_OID1 = new HakukohdeJaOrganisaatio(
 			"hakukohde.oid1", "org.oid1");

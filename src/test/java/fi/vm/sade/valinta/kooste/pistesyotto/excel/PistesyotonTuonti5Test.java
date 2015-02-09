@@ -30,14 +30,14 @@ import static org.junit.Assert.assertEquals;
  *         Pistesyoton tuonti XLSX-tiedostolla
  */
 // @Ignore
-public class PistesyotonTuontiTest6 {
+public class PistesyotonTuonti5Test {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(PistesyotonTuontiTest6.class);
+			.getLogger(PistesyotonTuonti5Test.class);
 
 	private String pistesyottoResurssi(String resurssi) throws IOException {
 		InputStream i;
-		String s = IOUtils.toString(i = new ClassPathResource("pistesyotto/6" +
+		String s = IOUtils.toString(i = new ClassPathResource("pistesyotto/5" +
                 "/"
 				+ resurssi).getInputStream(), "UTF-8");
 		IOUtils.closeQuietly(i);
@@ -83,13 +83,13 @@ public class PistesyotonTuontiTest6 {
         List<Hakemus> hakemukset = Collections.emptyList();
         PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
         PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
-                "1.2.246.562.29.173465377510", "1.2.246.562.20.27513650047", null, "Haku",
+                "1.2.246.562.29.173465377510", "1.2.246.562.20.88759382968", null, "Haku",
                 "hakukohdeNimi", "tarjoajaNimi", hakemukset,
                 Collections.emptySet(),
                 valintakoeTunnisteet, osallistumistiedot,
                 valintaperusteet, pistetiedot,
                 pistesyottoTuontiAdapteri);
-        pistesyottoExcel.getExcel().tuoXlsx(new ClassPathResource("pistesyotto/6/muplattu.xlsx").getInputStream());
+        pistesyottoExcel.getExcel().tuoXlsx(new ClassPathResource("pistesyotto/5/muplattu.xlsx").getInputStream());
         Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = asMap(pistetiedot);
 
         List<ApplicationAdditionalDataDTO> uudetPistetiedot = Lists
@@ -146,10 +146,12 @@ public class PistesyotonTuontiTest6 {
         }
 
 
-        ApplicationAdditionalDataDTO dada = pistetiedot.stream().filter(h -> h.getLastName().equals("Alander")).findFirst().get();
+        ApplicationAdditionalDataDTO dada = pistetiedot.stream().filter(h -> h.getLastName().equals("Aaltonen-Ruttunen")).findFirst().get();
         System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dada));
-        assertEquals(dada.getAdditionalData().get("SOTE1_kaikkiosiot-OSALLISTUMINEN"), "EI_OSALLISTUNUT");
-        assertEquals(dada.getAdditionalData().get("SOTEKOE_VK_RYHMA1-OSALLISTUMINEN"), "EI_OSALLISTUNUT");
+        assertEquals(dada.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84"), "5,5");
+        assertEquals(dada.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN"), "OSALLISTUI");
+        assertEquals(dada.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6"), "2.00");
+        assertEquals(dada.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN"), "OSALLISTUI");
 
 	}
 

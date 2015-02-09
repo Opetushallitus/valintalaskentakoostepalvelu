@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -43,9 +42,9 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminen
  * 
  *         Pistesyoton tuonti XLSX-tiedostolla
  */
-public class PistesyotonTuontiTest2 {
+public class PistesyotonTuonti2Test {
 	private static final Logger LOG = LoggerFactory
-			.getLogger(PistesyotonTuontiTest2.class);
+			.getLogger(PistesyotonTuonti2Test.class);
 
 	private String pistesyottoResurssi(String resurssi) throws IOException {
 		InputStream i;

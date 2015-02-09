@@ -12,7 +12,6 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditiona
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import org.apache.commons.io.IOUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -29,21 +30,20 @@ import java.util.*;
  *         Pistesyoton tuonti XLSX-tiedostolla
  */
 // @Ignore
-public class PistesyotonTuontiTest4 {
+public class PistesyotonTuonti6Test {
 
 	private static final Logger LOG = LoggerFactory
-			.getLogger(PistesyotonTuontiTest4.class);
+			.getLogger(PistesyotonTuonti6Test.class);
 
 	private String pistesyottoResurssi(String resurssi) throws IOException {
 		InputStream i;
-		String s = IOUtils.toString(i = new ClassPathResource("pistesyotto/4" +
+		String s = IOUtils.toString(i = new ClassPathResource("pistesyotto/6" +
                 "/"
 				+ resurssi).getInputStream(), "UTF-8");
 		IOUtils.closeQuietly(i);
 		return s;
 	}
 
-    @Ignore
 	@Test
 	public void testaaOutput() throws Exception {
 		List<ValintakoeOsallistuminenDTO> osallistumistiedot;
@@ -83,13 +83,13 @@ public class PistesyotonTuontiTest4 {
         List<Hakemus> hakemukset = Collections.emptyList();
         PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
         PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
-                "1.2.246.562.29.173465377510", "1.2.246.562.20.81959342411", null, "Haku",
+                "1.2.246.562.29.173465377510", "1.2.246.562.20.27513650047", null, "Haku",
                 "hakukohdeNimi", "tarjoajaNimi", hakemukset,
                 Collections.emptySet(),
                 valintakoeTunnisteet, osallistumistiedot,
                 valintaperusteet, pistetiedot,
                 pistesyottoTuontiAdapteri);
-        pistesyottoExcel.getExcel().tuoXlsx(new ClassPathResource("pistesyotto/4/muplattu.xlsx").getInputStream());
+        pistesyottoExcel.getExcel().tuoXlsx(new ClassPathResource("pistesyotto/6/muplattu.xlsx").getInputStream());
         Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = asMap(pistetiedot);
 
         List<ApplicationAdditionalDataDTO> uudetPistetiedot = Lists
@@ -104,11 +104,11 @@ public class PistesyotonTuontiTest4 {
             Map<String, String> newPistetiedot = rivi
                     .asAdditionalData();
             if (originalPistetiedot.equals(newPistetiedot)) {
-                LOG.debug("Ei muutoksia riville({},{})",
+                LOG.error("Ei muutoksia riville({},{})",
                         rivi.getOid(), rivi.getNimi());
             } else {
                 if (rivi.isValidi()) {
-                    LOG.debug("Rivi on muuttunut ja eheä. Tehdään päivitys hakupalveluun");
+                    LOG.error("Rivi on muuttunut ja eheä. Tehdään päivitys hakupalveluun");
                     Map<String, String> uudetTiedot = Maps
                             .newHashMap(originalPistetiedot);
                     uudetTiedot.putAll(newPistetiedot);
@@ -116,7 +116,7 @@ public class PistesyotonTuontiTest4 {
                             .setAdditionalData(uudetTiedot);
                     uudetPistetiedot.add(additionalData);
                 } else {
-                    LOG.warn("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
+                    LOG.error("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
 
                     for (PistesyottoArvo arvo : rivi.getArvot()) {
                         if (!arvo.isValidi()) {
@@ -145,7 +145,11 @@ public class PistesyotonTuontiTest4 {
             }
         }
 
-        pistetiedot.stream().filter(h -> h.getLastName().equals("Isopahkala")).forEach(h -> System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(h)));
+
+        ApplicationAdditionalDataDTO dada = pistetiedot.stream().filter(h -> h.getLastName().equals("Alander")).findFirst().get();
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dada));
+        assertEquals(dada.getAdditionalData().get("SOTE1_kaikkiosiot-OSALLISTUMINEN"), "EI_OSALLISTUNUT");
+        assertEquals(dada.getAdditionalData().get("SOTEKOE_VK_RYHMA1-OSALLISTUMINEN"), "EI_OSALLISTUNUT");
 
 	}
 

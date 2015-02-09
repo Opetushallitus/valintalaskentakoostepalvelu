@@ -1,14 +1,10 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -17,13 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.HakukohdeLaskuri;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.PalvelukutsuLaskuri;
 
@@ -33,9 +26,9 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Pal
  * 
  * 
  */
-public class LaskuriTesti {
+public class LaskuriTest {
 	private final static Logger LOG = LoggerFactory
-			.getLogger(LaskuriTesti.class);
+			.getLogger(LaskuriTest.class);
 
 	@Test
 	public void testaaHakukohdeLaskuri() throws JsonSyntaxException,
