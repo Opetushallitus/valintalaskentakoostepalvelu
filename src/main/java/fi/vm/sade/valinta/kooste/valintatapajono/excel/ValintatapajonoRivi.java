@@ -20,21 +20,22 @@ import org.springframework.security.config.annotation.authentication.configurati
 /**
  * @author Jussi Jartamo
  */
-@ApiModel
+@ApiModel()
 public class ValintatapajonoRivi {
-	@ApiModelProperty(required = true)
+	@ApiModelProperty(required = true, value = "Hakemuksen OID")
 	private final String oid;
-	@ApiModelProperty(hidden = false)
+	@ApiModelProperty(hidden = true)
 	private final String nimi;
 	@ApiModelProperty(required = true, allowableValues = "HYVAKSYTTAVISSA,HYLATTY,HYVAKSYTTY_HARKINNANVARAISESTI")
 	private final String tila;
 	@ApiModelProperty(required = true)
 	private final String jonosija;
+	@ApiModelProperty(required = false, value="Kielikoodi ja kuvaus. Esim {\"FI\":\"Suomenkielinen kuvaus\",\"SV\":\"...\"}")
 	private final Map<String,String> kuvaus;
 
-	@ApiModelProperty(hidden = false)
+	@ApiModelProperty(hidden = true)
 	private transient Integer jonosijaNumerona;
-	@ApiModelProperty(hidden = false)
+	@ApiModelProperty(hidden = true)
 	private transient JarjestyskriteerituloksenTila tilaEnumeraationa;
 
 	public ValintatapajonoRivi() {
@@ -60,7 +61,7 @@ public class ValintatapajonoRivi {
 				));
 	}
 
-	@ApiModelProperty(hidden = false)
+	@ApiModelProperty(hidden = true)
 	public boolean isValidi() {
 		return asTila() != JarjestyskriteerituloksenTila.MAARITTELEMATON;
 	}
