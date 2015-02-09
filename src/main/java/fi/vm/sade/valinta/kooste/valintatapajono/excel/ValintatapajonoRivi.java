@@ -24,7 +24,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 public class ValintatapajonoRivi {
 	@ApiModelProperty(required = true)
 	private final String oid;
-	@ApiModelProperty(required = true)
+	@ApiModelProperty(hidden = false)
 	private final String nimi;
 	@ApiModelProperty(required = true, allowableValues = "HYVAKSYTTAVISSA,HYLATTY,HYVAKSYTTY_HARKINNANVARAISESTI")
 	private final String tila;
@@ -36,14 +36,6 @@ public class ValintatapajonoRivi {
 	private transient Integer jonosijaNumerona;
 	@ApiModelProperty(hidden = false)
 	private transient JarjestyskriteerituloksenTila tilaEnumeraationa;
-	/*
-	@ApiModelProperty(hidden = false)
-	private final boolean validi;
-	@ApiModelProperty(hidden = false)
-	private final JarjestyskriteerituloksenTila kriteeriTila;
-	@ApiModelProperty(hidden = false)
-	private final String virhe;
-	*/
 
 	public ValintatapajonoRivi() {
 		this.oid = null;
@@ -66,64 +58,6 @@ public class ValintatapajonoRivi {
 						.collect(Collectors.toMap(
 						k -> k.getKieli(), k -> k.getTeksti()
 				));
-		/*
-		StringBuilder defaultVirhe = new StringBuilder();
-		this.oid = oid;
-		this.nimi = nimi;
-		this.kuvaus = Maps.newHashMap();
-		if (!StringUtils.isBlank(fi)) {
-			kuvaus.put(KieliUtil.SUOMI, fi);
-		}
-		if (!StringUtils.isBlank(sv)) {
-			kuvaus.put(KieliUtil.RUOTSI, sv);
-		}
-		if (!StringUtils.isBlank(en)) {
-			kuvaus.put(KieliUtil.ENGLANTI, en);
-		}
-		this.tila = tila;
-		boolean errors = false;
-		JarjestyskriteerituloksenTila defaultTila = JarjestyskriteerituloksenTila.HYLATTY;
-		if (ValintatapajonoExcel.HYLATTY.equals(tila) || ValintatapajonoExcel.VAKIO_HYLATTY.equals(tila)) {
-			defaultTila = JarjestyskriteerituloksenTila.HYLATTY;
-		} else if (ValintatapajonoExcel.HYVAKSYTTAVISSA.equals(tila) || ValintatapajonoExcel.VAKIO_HYVAKSYTTAVISSA.equals(tila)) {
-			defaultTila = JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
-		} else if (ValintatapajonoExcel.HYVAKSYTTY_HARKINNANVARAISESTI.equals(tila) || ValintatapajonoExcel.VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI.equals(tila)) {
-			defaultTila = JarjestyskriteerituloksenTila.HYVAKSYTTY_HARKINNANVARAISESTI;
-		} else {
-			defaultVirhe.append("Tuntematon tila ").append(tila).append(".");
-			errors = true;
-		}
-
-		int defaultJonosija = 0;
-		try {
-			if (StringUtils.isBlank(jonosija)) {
-				if (JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA
-						.equals(defaultTila)) {
-					errors = true;
-					defaultVirhe
-							.append(" Tyhjä jonosija vaikka hakija on hyväksyttävissä.");
-				}
-			} else {
-				defaultJonosija = new BigDecimal(jonosija).toBigInteger()
-						.intValue();
-				if (!JarjestyskriteerituloksenTila.HYLATTY.equals(defaultTila)) {
-					defaultTila = JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
-				}
-			}
-		} catch (Exception e) {
-			// e.printStackTrace();
-			errors = true;
-			defaultVirhe.append(" Jonosijaa ").append(jonosija)
-					.append(" ei voi muuttaa numeroksi.");
-
-		}
-		this.kriteeriTila = defaultTila;
-		this.jonosija = defaultJonosija;
-		this.validi = !errors
-				|| defaultTila
-						.equals(JarjestyskriteerituloksenTila.MAARITTELEMATON);
-		this.virhe = defaultVirhe.toString().trim();
-		*/
 	}
 
 	@ApiModelProperty(hidden = false)
