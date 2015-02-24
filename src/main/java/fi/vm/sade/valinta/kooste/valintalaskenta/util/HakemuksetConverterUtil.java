@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,8 +113,12 @@ public class HakemuksetConverterUtil {
 					if (personOid != null
 							&& oppijaNumeroJaOppija.containsKey(personOid)) {
 						Oppija oppija = oppijaNumeroJaOppija.get(personOid);
-						h.getAvaimet().addAll(
-								OppijaToAvainArvoDTOConverter.convert(oppija));
+						Map<String, AvainArvoDTO> arvot = h.getAvaimet().stream().collect(Collectors.toMap(a -> a.getAvain(), a-> a));
+						Map<String, AvainArvoDTO> sureArvot = OppijaToAvainArvoDTOConverter.convert(oppija).stream().collect(Collectors.toMap(a -> a.getAvain(), a -> a));
+						Map<String, AvainArvoDTO> merge = Maps.newHashMap();
+						merge.putAll(arvot);
+						merge.putAll(sureArvot);
+						h.setAvaimet(merge.entrySet().stream().map(s -> s.getValue()).collect(Collectors.toList()));
 					}
 				});
 			}
