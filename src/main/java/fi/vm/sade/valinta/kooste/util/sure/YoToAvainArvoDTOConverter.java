@@ -83,7 +83,7 @@ public class YoToAvainArvoDTOConverter {
                 //
                 convert("PITKA_KIELI",
                         max(find(yoArvosanat, "EA", "FA", "GA", "HA", "PA",
-                                "SA", "TA", "VA"))),
+                                "SA", "TA", "VA", "S9"))),
                 //
                 convert("KESKIPITKA_KIELI",
                         max(find(yoArvosanat, "EB", "FB", "GB", "HB", "PB",
@@ -91,7 +91,7 @@ public class YoToAvainArvoDTOConverter {
                 //
                 convert("LYHYT_KIELI",
                         max(find(yoArvosanat, "EC", "FC", "GC", "L1", "PC",
-                                "SC", "TC", "VC", "KC"))),
+                                "SC", "TC", "VC", "KC", "L7"))),
                 //
                 convert("AIDINKIELI",
                         max(find(yoArvosanat, "O", "A", "I", "W", "Z", "O5",
