@@ -106,13 +106,13 @@ public class OppijaToAvainArvoDTOConverter {
                             of(
                                     YoToAvainArvoDTOConverter.convert(of(s).filter(s0 -> wrap(s0).isYoTutkinto() && !wrap(s0).isKeskeytynyt()).findAny()),
                                     PERUSOPETUS.convert(of(s).filter(s0 -> wrap(s0).isPerusopetus() && !wrap(s0).isKeskeytynyt()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
-                                            LISAOPETUS.convert(of(s).filter(s0 -> wrap(s0).isLisaopetus()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
-                                            //AMMATTISTARTTI.convert(of(s).filter(s0 -> wrap(s0).isAmmattistartti()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
-                                            //VALMENTAVA.convert(of(s).filter(s0 -> wrap(s0).isValmentava()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
-                                            //AMMATILLISEEN_VALMENTAVA.convert(of(s).filter(s0 -> wrap(s0).isAmmatilliseenValmistava()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
-                                            //ULKOMAINEN_KORVAAVA.convert(of(s).filter(s0 -> wrap(s0).isUlkomainenKorvaava()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
-                                            LUKIO.convert(of(s).filter(s0 -> wrap(s0).isLukio() && !wrap(s0).isKeskeytynyt()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan)
-                                            //AMMATILLINEN.convert(of(s).filter(s0 -> wrap(s0).isAmmatillinen()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan)
+                                    LISAOPETUS.convert(of(s).filter(s0 -> wrap(s0).isLisaopetus()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
+                                    //AMMATTISTARTTI.convert(of(s).filter(s0 -> wrap(s0).isAmmattistartti()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
+                                    //VALMENTAVA.convert(of(s).filter(s0 -> wrap(s0).isValmentava()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
+                                    //AMMATILLISEEN_VALMENTAVA.convert(of(s).filter(s0 -> wrap(s0).isAmmatilliseenValmistava()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
+                                    //ULKOMAINEN_KORVAAVA.convert(of(s).filter(s0 -> wrap(s0).isUlkomainenKorvaava()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
+                                    LUKIO.convert(of(s).filter(s0 -> wrap(s0).isLukio() && !wrap(s0).isKeskeytynyt()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan)
+                                    //AMMATILLINEN.convert(of(s).filter(s0 -> wrap(s0).isAmmatillinen()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan)
                                     ).flatMap(sx -> sx)
                     )
                 .filter(Objects::nonNull).collect(Collectors.toList());

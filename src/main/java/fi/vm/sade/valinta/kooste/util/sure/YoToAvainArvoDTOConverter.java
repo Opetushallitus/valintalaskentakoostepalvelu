@@ -76,7 +76,7 @@ public class YoToAvainArvoDTOConverter {
         // LYHYT_KIELI = max(EC, FC, GC, L1, PC, SC, TC, VC, KC)
         // <br>
         // AIDINKIELI = max(O, A, I, W, Z, O5, A5)
-        List<AvainArvoDTO> aaa = Arrays.asList(
+        List<AvainArvoDTO> aaa = Stream.of(
                 convert("AINEREAALI",
                         max(find(yoArvosanat, "UE", "UO", "ET", "FF", "PS",
                                 "HI", "FY", "KE", "BI", "GE", "TE", "YH"))),
@@ -97,17 +97,28 @@ public class YoToAvainArvoDTOConverter {
                 //
                 convert("AIDINKIELI",
                         max(find(yoArvosanat, "O", "A", "I", "W", "Z", "O5",
-                                "A5"))));
+                                "A5")))).flatMap(a -> a).collect(Collectors.toList());
         List<AvainArvoDTO> avaimet = Lists.newArrayList(yoArvosanat.stream()
-                .map(a -> convert(a)).collect(Collectors.toList()));
+                .flatMap(a -> convert(a)).collect(Collectors.toList()));
         avaimet.addAll(aaa);
-        return Stream.concat(suorituksenTila(yoSuoritus),avaimet.stream().filter(Objects::nonNull));
+
+        return Stream.concat(suorituksenTila(yoSuoritus), avaimet.stream().filter(Objects::nonNull));
     }
 
     public static Arvosana max(List<Arvosana> arvosanat) {
         return arvosanat
                 .stream()
                 .reduce((a, b) -> {
+                    // JOS SAMAT ARVOSANAT NIIN PISTEISSA SUUREMPI PALAUTETAAN
+                    if (a.getArvio().getArvosana().equals(b.getArvio().getArvosana())) {
+                        if (Optional.ofNullable(a.getArvio().getPisteet()).orElse(-1).compareTo(
+                                Optional.ofNullable(b.getArvio().getPisteet()).orElse(-1)) == 1) {
+                            return a;
+                        } else {
+                            return b;
+                        }
+                    }
+                    // SUUREMPI ARVOSANA PALAUTETAAN
                     if (YO_ORDER.indexOf(a.getArvio().getArvosana()) < YO_ORDER
                             .indexOf(b.getArvio().getArvosana())) {
                         return a;
@@ -124,21 +135,35 @@ public class YoToAvainArvoDTOConverter {
                 .collect(Collectors.toList());
     }
 
-    private static AvainArvoDTO convert(String avain, Arvosana arvosana) {
+    private static Stream<AvainArvoDTO> convert(String avain, Arvosana arvosana) {
         if (arvosana == null) {
-            return null;
+            return Stream.empty();
         }
         AvainArvoDTO aa = new AvainArvoDTO();
         aa.setArvo(arvosana.getArvio().getArvosana());
         aa.setAvain(avain);
-        return aa;
+        if(arvosana.getArvio().getPisteet() == null) {
+            return Stream.of(aa);
+        }else {
+            AvainArvoDTO aaPisteet = new AvainArvoDTO();
+            aaPisteet.setArvo("" + arvosana.getArvio().getPisteet());
+            aaPisteet.setAvain(avain + "_PISTEET");
+            return Stream.of(aa, aaPisteet);
+        }
+
     }
 
-    private static AvainArvoDTO convert(Arvosana arvosana) {
+    private static Stream<AvainArvoDTO> convert(Arvosana arvosana) {
         AvainArvoDTO aa = new AvainArvoDTO();
         aa.setArvo(arvosana.getArvio().getArvosana());
         aa.setAvain(arvosana.getAine());
-        return aa;
+        if(arvosana.getArvio().getPisteet() == null) {
+            return Stream.of(aa);
+        }
+        AvainArvoDTO aaPisteet = new AvainArvoDTO();
+        aaPisteet.setArvo("" + arvosana.getArvio().getPisteet());
+        aaPisteet.setAvain(arvosana.getAine() + "_PISTEET");
+        return Stream.of(aa, aaPisteet);
     }
 
     private static String aineMapper(String aine, String lisatieto) {

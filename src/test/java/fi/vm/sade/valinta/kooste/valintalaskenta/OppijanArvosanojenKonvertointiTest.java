@@ -106,7 +106,32 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
     }
 
     @Test
-    public void pkSamanArvosananToistuessaKaytetaanParasta() {
+    public void pkSuoritusArvosanojenPoisFiltterointi() {
+        DateTime nyt = DateTime.now();
+        Oppija suoritus = oppija()
+                .suoritus()
+                .setPerusopetus()
+                .setValmis()
+                .arvosana()
+                .setAine("AI")
+                .setAsteikko("")
+                .setArvosana("S")
+                .setMyonnetty(nyt)
+                .build()
+                .build()
+                .build();
+        {
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, laskennanalkamisparametri(nyt.plusDays(1)));
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            Assert.assertTrue("PK_AI ei löydy ja sen arvo ei ole S",
+                    aa.stream().filter(a -> "PK_AI".equals(a.getAvain()) && "S".equals(a.getArvo())).count() == 0L);
+            Assert.assertTrue("PK_AI_SUORITETTU löytyy arvolla true",
+                    aa.stream().filter(a -> "PK_AI_SUORITETTU".equals(a.getAvain()) && "true".equals(a.getArvo())).count() == 1L);
+
+        }
+    }
+    @Test
+    public void pkSamanAineenToistuessaKaytetaanParasta() {
         DateTime nyt = DateTime.now();
         Oppija suoritus = oppija()
                 .suoritus()
@@ -482,6 +507,44 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                 Assert.assertTrue("YO_TILA löytyy ja sen arvo on false",
                         aa.stream().filter(a -> "YO_TILA".equals(a.getAvain()) && "false".equals(a.getArvo())).count() == 1L);
             }
+        }
+    }
+
+    @Test
+    public void yoArvosanojenYhdistelyssaIsommatPisteetPaatyyLaskentaan() {
+        Oppija suoritus = oppija()
+                .suoritus()
+                .setYo()
+                .setKesken()
+                .arvosana()
+                .setAine("AINEREAALI")
+                .setLisatieto("PS")
+                .setAsteikko_yo()
+                .setArvosana("M")
+                .setPisteet(20)
+                .build()
+                .arvosana()
+                .setAine("AINEREAALI")
+                .setLisatieto("PS")
+                .setAsteikko_yo()
+                .setArvosana("M")
+                .setPisteet(40)
+                .build()
+                .build()
+                .build();
+        {
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, null);
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            Assert.assertTrue("YO_TILA löytyy ja sen arvo on false",
+                    aa.stream().filter(a -> "YO_TILA".equals(a.getAvain()) && "false".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("AINEREAALI löytyy ja sen arvo on M",
+                    aa.stream().filter(a -> "AINEREAALI".equals(a.getAvain()) && "M".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("PS löytyy ja sen arvo on M",
+                    aa.stream().filter(a -> "PS".equals(a.getAvain()) && "M".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("AINEREAALI_PISTEET löytyy ja sen arvo on 40",
+                    aa.stream().filter(a -> "AINEREAALI_PISTEET".equals(a.getAvain()) && "40".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("PS_PISTEET löytyy ja sen arvo on 40",
+                    aa.stream().filter(a -> "PS_PISTEET".equals(a.getAvain()) && "40".equals(a.getArvo())).count() == 1L);
         }
     }
 

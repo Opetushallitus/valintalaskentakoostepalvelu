@@ -8,10 +8,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,6 +21,7 @@ import java.util.stream.StreamSupport;
  *
  */
 public class ArvosanaToAvainArvoDTOConverter {
+    private static final String SUORITUSMERKINTA = "S";
     private static final Logger LOG = LoggerFactory.getLogger(ArvosanaToAvainArvoDTOConverter.class);
     private final String prefiksi;
     private final String suffiksi;
@@ -97,27 +95,41 @@ public class ArvosanaToAvainArvoDTOConverter {
                 throw new RuntimeException("Valinnainen arvosana löytyy mutta arvosanaa ei löydy");
             }
             Arvosana paras;
-            if(eiValinnaisetArvosanat.size() > 1) {
-            TreeSet<Arvosana> arvosanaSet = new TreeSet<Arvosana>((c0, c1) -> {
-
-                String asteikko = ((String)(((Arvosana)c0).getArvio()).getAsteikko());
-                if(!asteikko.equals(c1.getArvio().getAsteikko())) {
-                    LOG.error("Asteikot ei täsmää: {} {}", new Gson().toJson(c0), new Gson().toJson(c1));
-                    throw new RuntimeException("Asteikot ei täsmää: " + c0.getArvio().getAsteikko() + " " + c1.getArvio().getAsteikko());
-                }
-                Integer i0 = Integer.parseInt((String) c0.getArvio().getArvosana());
-                Integer i1 = Integer.parseInt((String) c1.getArvio().getArvosana());
-                return i1.compareTo(i0);
-            });
-            arvosanaSet.addAll(eiValinnaisetArvosanat);
-            paras = arvosanaSet.first();
+            Map<String, List<Arvosana>> byArvosanat =
+            eiValinnaisetArvosanat.stream().collect(Collectors.groupingBy(d -> ((Arvosana) d).getArvio().getArvosana(),
+                    Collectors.mapping(d -> d, Collectors.<Arvosana>toList())));
+            if(byArvosanat.size() == 1) {
+                // ihan sama mika otetaan kun vain samoja suorituksia loytyy, eli esim kolme kpl 8:ja
+                paras = byArvosanat.entrySet().iterator().next().getValue().iterator().next();
             } else {
-                paras = eiValinnaisetArvosanat.iterator().next();
+                if (eiValinnaisetArvosanat.size() > 1) {
+                    TreeSet<Arvosana> arvosanaSet = new TreeSet<Arvosana>((c0, c1) -> {
+
+                        String asteikko = ((String) (((Arvosana) c0).getArvio()).getAsteikko());
+                        if (!asteikko.equals(c1.getArvio().getAsteikko())) {
+                            LOG.error("Asteikot ei täsmää: {} {}", new Gson().toJson(c0), new Gson().toJson(c1));
+                            throw new RuntimeException("Asteikot ei täsmää: " + c0.getArvio().getAsteikko() + " " + c1.getArvio().getAsteikko());
+                        }
+                        Integer i0 = Integer.parseInt((String) c0.getArvio().getArvosana());
+                        Integer i1 = Integer.parseInt((String) c1.getArvio().getArvosana());
+                        int comp = i1.compareTo(i0);
+                        return comp;
+                    });
+                    arvosanaSet.addAll(eiValinnaisetArvosanat);
+                    paras = arvosanaSet.first();
+                } else {
+                    paras = eiValinnaisetArvosanat.iterator().next();
+                }
             }
 
             AvainArvoDTO a0 = new AvainArvoDTO();
-            a0.setArvo(paras.getArvio().getArvosana());
-            a0.setAvain(new StringBuilder(p).append(paras.getAine()).append(Optional.ofNullable(s).orElse("")).toString());
+            if(SUORITUSMERKINTA.equalsIgnoreCase(paras.getArvio().getArvosana())) {
+                a0.setArvo("true");
+                a0.setAvain(new StringBuilder(p).append(paras.getAine()).append("_SUORITETTU").append(Optional.ofNullable(s).orElse("")).toString());
+            } else {
+                a0.setArvo(paras.getArvio().getArvosana());
+                a0.setAvain(new StringBuilder(p).append(paras.getAine()).append(Optional.ofNullable(s).orElse("")).toString());
+            }
             if (paras.getLisatieto() != null) {
                 AvainArvoDTO a1 = new AvainArvoDTO();
                 a1.setArvo(paras.getLisatieto());
