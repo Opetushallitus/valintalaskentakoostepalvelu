@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,12 +43,16 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 			.getLogger(AbstraktiLaskentaPalvelukutsu.class);
 	private final Collection<PalvelukutsuJaPalvelukutsuStrategia> palvelukutsut;
 	private final Consumer<Palvelukutsu> laskuri;
+	private final ParametritDTO parametritDTO;
 	private volatile HakukohdeTila tila = HakukohdeTila.TEKEMATTA;
 	private final AtomicReference<Consumer<LaskentaPalvelukutsu>> takaisinkutsu;
 
-	public AbstraktiLaskentaPalvelukutsu(String hakukohdeOid,
+	public AbstraktiLaskentaPalvelukutsu(
+			ParametritDTO parametritDTO,
+			String hakukohdeOid,
 			Collection<PalvelukutsuJaPalvelukutsuStrategia> palvelukutsut) {
 		super(hakukohdeOid);
+		this.parametritDTO = parametritDTO;
 		this.palvelukutsut = palvelukutsut;
 		this.takaisinkutsu = new AtomicReference<>();
 		final PalvelukutsuLaskuri palvelukutsulaskuri = new PalvelukutsuLaskuri(
@@ -143,6 +148,6 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 	protected List<HakemusDTO> muodostaHakemuksetDTO(String hakukohdeOid,
 			List<Hakemus> hakemukset, List<Oppija> oppijat) {
 		return HakemuksetConverterUtil.muodostaHakemuksetDTO(hakukohdeOid,
-				hakemukset, oppijat);
+				hakemukset, oppijat, parametritDTO);
 	}
 }

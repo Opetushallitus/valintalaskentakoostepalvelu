@@ -23,6 +23,17 @@ public class YoToAvainArvoDTOConverter {
     private static final List<String> YO_ORDER = Collections
             .unmodifiableList(Arrays.asList("L", "E", "M", "C", "B", "A", "I"));
 
+    private static Stream<AvainArvoDTO> suorituksenTila(SuoritusJaArvosanat suoritus) {
+        AvainArvoDTO a = new AvainArvoDTO();
+        a.setAvain(new StringBuilder("YO_").append("TILA").toString());
+        if(new SuoritusJaArvosanatWrapper(suoritus).isValmis()) {
+            a.setArvo("true");
+        } else {
+            a.setArvo("false");
+        }
+        return Stream.of(a);
+    }
+
     public static Stream<AvainArvoDTO> convert(
             SuoritusJaArvosanat yoSuoritus) {
 
@@ -88,7 +99,7 @@ public class YoToAvainArvoDTOConverter {
         List<AvainArvoDTO> avaimet = Lists.newArrayList(yoArvosanat.stream()
                 .map(a -> convert(a)).collect(Collectors.toList()));
         avaimet.addAll(aaa);
-        return avaimet.stream().filter(Objects::nonNull);
+        return Stream.concat(suorituksenTila(yoSuoritus),avaimet.stream().filter(Objects::nonNull));
     }
 
     public static Arvosana max(List<Arvosana> arvosanat) {

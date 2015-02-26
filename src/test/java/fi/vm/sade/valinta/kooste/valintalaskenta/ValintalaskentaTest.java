@@ -69,7 +69,7 @@ public class ValintalaskentaTest {
 		LaskentaAloitus laskentaJaHaku = new LaskentaAloitus(uuid, hakuOid,false,
 				null, null, hakukohdeOids, LaskentaTyyppi.HAKUKOHDE);
 		valintalaskentaKerrallaRoute
-				.suoritaValintalaskentaKerralla(laskentaJaHaku);
+				.suoritaValintalaskentaKerralla(null, laskentaJaHaku);
 	}
 
 	public static LaskentaSeurantaAsyncResource createMockLaskentaSeurantaAsyncResource() {

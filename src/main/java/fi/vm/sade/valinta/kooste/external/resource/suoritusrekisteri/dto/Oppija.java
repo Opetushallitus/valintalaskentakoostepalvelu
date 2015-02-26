@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
+import com.google.common.collect.Lists;
+
 import java.util.List;
 
 /**
@@ -11,7 +13,7 @@ public class Oppija {
 
 	private String oppijanumero;
 	private List<Opiskelu> opiskelu;
-	private List<SuoritusJaArvosanat> suoritukset;
+	private List<SuoritusJaArvosanat> suoritukset = Lists.newArrayList();
 	private List<Opiskeluoikeus> opiskeluoikeudet;
 	private boolean ensikertalainen;
 
@@ -25,6 +27,10 @@ public class Oppija {
 
 	public List<SuoritusJaArvosanat> getSuoritukset() {
 		return suoritukset;
+	}
+
+	public void setSuoritukset(List<SuoritusJaArvosanat> suoritukset) {
+		this.suoritukset = suoritukset;
 	}
 
 	public List<Opiskeluoikeus> getOpiskeluoikeudet() {

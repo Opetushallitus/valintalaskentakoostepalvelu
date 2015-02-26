@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,7 @@ public class LaskentaActorSystem implements
 
 	@Override
 	public void suoritaValintalaskentaKerralla(
+			final ParametritDTO parametritDTO,
 			final LaskentaAloitus laskentaAloitus) {
 		final LaskentaTyyppi laskentaTyyppi = asLaskentaTyyppi(laskentaAloitus);
 		final Integer valinnanvaiheet = asValinnanvaihe(laskentaAloitus
@@ -90,6 +92,7 @@ public class LaskentaActorSystem implements
 										return laskentaActorFactory
 												.createValintaryhmaActor(uuid,
 														hakuOid,
+														parametritDTO,
 														erillishaku,
 														valinnanvaiheet,
 														hakukohdeJaOrganisaatio);
@@ -100,6 +103,7 @@ public class LaskentaActorSystem implements
 											return laskentaActorFactory
 													.createValintakoelaskentaActor(
 															uuid, hakuOid,
+															parametritDTO,
 															erillishaku,
 															valinnanvaiheet,
 															hakukohdeJaOrganisaatio);
@@ -110,6 +114,7 @@ public class LaskentaActorSystem implements
 											return laskentaActorFactory
 													.createValintalaskentaActor(
 															uuid, hakuOid,
+															parametritDTO,
 															erillishaku,
 															valinnanvaiheet,
 															hakukohdeJaOrganisaatio);
@@ -123,6 +128,7 @@ public class LaskentaActorSystem implements
 											return laskentaActorFactory
 													.createValintalaskentaJaValintakoelaskentaActor(
 															uuid, hakuOid,
+															parametritDTO,
 															erillishaku,
 															valinnanvaiheet,
 															hakukohdeJaOrganisaatio);

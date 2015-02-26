@@ -9,10 +9,10 @@ public class Arvosana {
 	private String id;
 	private String suoritus;
 	private String aine;
-	private Boolean valinnainen;
+	private Boolean valinnainen = false;
 	private String myonnetty;
 	private String source;
-	private Arvio arvio;
+	private Arvio arvio = new Arvio();
     private String lisatieto;
 
 	public Arvosana() {
@@ -28,6 +28,34 @@ public class Arvosana {
 		this.source = source;
 		this.arvio = arvio;
         this.lisatieto = lisatieto;
+	}
+
+	public void setAine(String aine) {
+		this.aine = aine;
+	}
+
+	public void setArvio(Arvio arvio) {
+		this.arvio = arvio;
+	}
+
+	public void setLisatieto(String lisatieto) {
+		this.lisatieto = lisatieto;
+	}
+
+	public void setMyonnetty(String myonnetty) {
+		this.myonnetty = myonnetty;
+	}
+
+	public void setSuoritus(String suoritus) {
+		this.suoritus = suoritus;
+	}
+
+	public void setValinnainen(Boolean valinnainen) {
+		this.valinnainen = valinnainen;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
 	}
 
 	public Boolean isValinnainen() {

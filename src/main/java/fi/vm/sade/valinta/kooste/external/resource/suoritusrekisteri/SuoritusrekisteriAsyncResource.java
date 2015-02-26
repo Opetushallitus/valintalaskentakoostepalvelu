@@ -19,7 +19,7 @@ public interface SuoritusrekisteriAsyncResource {
 	Peruutettava getOppijatByOrganisaatio(String organisaatioOid,
 			Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback);
 
-	Peruutettava getOppijatByHakukohde(String hakukohdeOid,
-			Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback);
+	Peruutettava getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm,
+									   Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback);
 
 }

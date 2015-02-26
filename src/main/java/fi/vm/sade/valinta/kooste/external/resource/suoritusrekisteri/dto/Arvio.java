@@ -14,6 +14,18 @@ public class Arvio {
 
 	}
 
+	public void setArvosana(String arvosana) {
+		this.arvosana = arvosana;
+	}
+
+	public void setAsteikko(String asteikko) {
+		this.asteikko = asteikko;
+	}
+
+	public void setPisteet(Integer pisteet) {
+		this.pisteet = pisteet;
+	}
+
 	public Arvio(String arvosana, String asteikko, Integer pisteet) {
 		this.arvosana = arvosana;
 		this.asteikko = asteikko;

@@ -74,6 +74,7 @@ public class LaskentaPalvelukutsunTest {
 								p4));
 
 		LaskentaPalvelukutsu laskentaPalvelukutsu = new AbstraktiLaskentaPalvelukutsu(
+				null,
 				HAKUKOHDE_OID.getHakukohdeOid(), palvelukutsut) {
 			@Override
 			public void vapautaResurssit() {

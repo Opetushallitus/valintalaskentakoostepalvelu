@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +39,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 	private final boolean erillishaku;
 	@SuppressWarnings("unchecked")
 	public ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
+			ParametritDTO parametritDTO,
 			boolean erillishaku,
 			HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
@@ -46,7 +48,9 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<ValintaperusteetPalvelukutsu>> valintaperusteetPalvelukutsut,
 			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakijaryhmatPalvelukutsu>> hakijaryhmatPalvelukutsut,
 			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<SuoritusrekisteriPalvelukutsu>> suoritusrekisteriPalvelukutsut) {
-		super(hakukohdeOid.getHakukohdeOid(), Lists.newArrayList(Iterables
+		super(
+				parametritDTO,
+				hakukohdeOid.getHakukohdeOid(), Lists.newArrayList(Iterables
 				.concat(hakemuksetPalvelukutsut, valintaperusteetPalvelukutsut,
 						hakijaryhmatPalvelukutsut,
 						suoritusrekisteriPalvelukutsut)));

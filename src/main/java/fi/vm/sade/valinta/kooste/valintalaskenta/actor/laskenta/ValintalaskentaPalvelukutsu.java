@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +44,9 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 		suoritusrekisteriPalvelukutsu.vapautaResurssit();
 	}
 
-	public ValintalaskentaPalvelukutsu(boolean erillishaku, HakukohdeJaOrganisaatio hakukohdeOid,
+	public ValintalaskentaPalvelukutsu(
+			ParametritDTO parametriDTO,
+			boolean erillishaku, HakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
 			ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
@@ -52,7 +56,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 			PalvelukutsuStrategia valintaperusteetStrategia,
 			PalvelukutsuStrategia hakijaryhmatStrategia,
 			PalvelukutsuStrategia suoritusrekisteriStrategia) {
-		super(
+		super(parametriDTO,
 				hakukohdeOid.getHakukohdeOid(),
 				Arrays.asList(
 						new PalvelukutsuJaPalvelukutsuStrategiaImpl(

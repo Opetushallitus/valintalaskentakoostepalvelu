@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
@@ -57,7 +58,8 @@ public class LaskentaActorFactory {
 	}
 
 	public LaskentaActor createValintaryhmaActor(final String uuid,
-			final String hakuOid, 
+			final String hakuOid,
+			ParametritDTO parametritDTO,
 			boolean erillishaku,
 			final Integer valinnanvaihe,
 			final Collection<HakukohdeJaOrganisaatio> hakukohdeOids) {
@@ -121,6 +123,7 @@ public class LaskentaActorFactory {
 				});
 
 		ValintaryhmatKatenoivaValintalaskentaPalvelukutsu laskentaPk = new ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
+				parametritDTO,
 				erillishaku,
 				new HakukohdeJaOrganisaatio("kaikkiHakukohteet",
 						"kaikkiOrganisaatiot"), valintalaskentaAsyncResource,
@@ -136,7 +139,8 @@ public class LaskentaActorFactory {
 	}
 
 	public LaskentaActor createValintakoelaskentaActor(final String uuid,
-			final String hakuOid, 
+			final String hakuOid,
+			ParametritDTO parametritDTO,
 			boolean erillishaku,
 			final Integer valinnanvaihe,
 			final Collection<HakukohdeJaOrganisaatio> hakukohdeOids) {
@@ -150,6 +154,7 @@ public class LaskentaActorFactory {
 		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
 				.parallelStream()
 				.map(hakukohdeOid -> new ValintakoelaskentaPalvelukutsu(
+						parametritDTO,
 						erillishaku,
 						hakukohdeOid, valintalaskentaAsyncResource,
 						new HakemuksetPalvelukutsu(hakuOid, hakukohdeOid,
@@ -168,6 +173,7 @@ public class LaskentaActorFactory {
 
 	public LaskentaActor createValintalaskentaActor(final String uuid,
 			final String hakuOid,
+			ParametritDTO parametritDTO,
 			boolean erillishaku,
 			final Integer valinnanvaihe,
 			final Collection<HakukohdeJaOrganisaatio> hakukohdeOids) {
@@ -183,6 +189,7 @@ public class LaskentaActorFactory {
 		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
 				.parallelStream()
 				.map(hakukohdeOid -> new ValintalaskentaPalvelukutsu(
+						parametritDTO,
 						erillishaku,
 						hakukohdeOid, valintalaskentaAsyncResource,
 						new HakemuksetPalvelukutsu(hakuOid, hakukohdeOid,
@@ -203,6 +210,7 @@ public class LaskentaActorFactory {
 
 	public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(
 			final String uuid, final String hakuOid,
+			ParametritDTO parametritDTO,
 			boolean erillishaku,
 			final Integer valinnanvaihe,
 			final Collection<HakukohdeJaOrganisaatio> hakukohdeOids) {
@@ -218,6 +226,7 @@ public class LaskentaActorFactory {
 		final Collection<LaskentaPalvelukutsu> palvelukutsut = hakukohdeOids
 				.parallelStream()
 				.map(hakukohdeOid -> new ValintalaskentaJaValintakoelaskentaPalvelukutsu(
+						parametritDTO,
 						erillishaku,
 						hakukohdeOid, valintalaskentaAsyncResource,
 						new HakemuksetPalvelukutsu(hakuOid, hakukohdeOid,

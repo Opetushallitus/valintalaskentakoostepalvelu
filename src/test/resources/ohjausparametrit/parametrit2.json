@@ -1,0 +1,65 @@
+{
+  PH_TJT: {
+    date: null
+  },
+  PH_HKLPT: {
+    date: null
+  },
+  PH_HKMT: {
+    date: null
+  },
+  PH_KKM: {
+    dateStart: null,
+    dateEnd: null
+  },
+  PH_HVVPTP: {
+    date: null
+  },
+  PH_KTT: {
+    dateStart: null,
+    dateEnd: null
+  },
+  PH_OLVVPKE: {
+    dateStart: null,
+    dateEnd: null
+  },
+  PH_VLS: {
+    dateStart: null,
+    dateEnd: null
+  },
+  PH_SS: {
+    dateStart: 1413450506467,
+    dateEnd: 1414663713984
+  },
+  PH_JKLIP: {
+    date: null
+  },
+  PH_HKP: {
+    date: null
+  },
+  PH_VTSSV: {
+    date: null
+  },
+  PH_VSSAV: {
+    date: null
+  },
+  PH_VTJH: {
+    dateStart: 1414836530968,
+    dateEnd: 1412154542511
+  },
+  PH_EVR: {
+    date: null
+  },
+  PH_OPVP: {
+    date: null
+  },
+  PH_HPVOA: {
+    date: null
+  },
+  PH_IP: {
+    date: null
+  },
+  target: "1.2.246.562.29.75150641266",
+  __modified__: 1408007459270,
+  __modifiedBy__: "1.2.246.562.24.480305445310"
+}

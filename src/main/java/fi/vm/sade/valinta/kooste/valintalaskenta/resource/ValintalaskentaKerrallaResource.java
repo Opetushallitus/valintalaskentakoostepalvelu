@@ -27,6 +27,7 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.container.TimeoutHandler;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,8 @@ public class ValintalaskentaKerrallaResource {
 	private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 	@Autowired
 	private ValintalaskentaKerrallaRouteValvomo valintalaskentaValvomo;
+	@Autowired
+	private OhjausparametritAsyncResource ohjausparametritAsyncResource;
 
 	/**
 	 * Koko haun laskenta
@@ -233,8 +236,7 @@ public class ValintalaskentaKerrallaResource {
 
 	/**
 	 * Uudelleen aja vanha haku
-	 * 
-	 * @param hakuOid
+	 *
 	 * @return
 	 */
 	@POST
@@ -384,19 +386,29 @@ public class ValintalaskentaKerrallaResource {
 						oids = haunHakukohteetOids;
 					}
 					final Collection<HakukohdeJaOrganisaatio> finalOids = oids;
-					seurantaTunnus.accept(
-							finalOids,
-							uuid -> {
-								valintalaskentaRoute
-										.suoritaValintalaskentaKerralla(new LaskentaAloitus(
-												uuid, hakuOid, erillishaku,
-												maski.isMask(),
-												valintaryhmalaskenta,
-												valinnanvaihe,
-												valintakoelaskenta, finalOids,
-												tyyppi));
-								asyncResponse.resume(Response.ok(
-										Vastaus.uudelleenOhjaus(uuid)).build());
+					ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametrit -> {
+								seurantaTunnus.accept(
+										finalOids,
+										uuid -> {
+											valintalaskentaRoute
+													.suoritaValintalaskentaKerralla(
+															parametrit,
+															new LaskentaAloitus(
+															uuid, hakuOid, erillishaku,
+															maski.isMask(),
+															valintaryhmalaskenta,
+															valinnanvaihe,
+															valintakoelaskenta, finalOids,
+															tyyppi));
+											asyncResponse.resume(Response.ok(
+													Vastaus.uudelleenOhjaus(uuid)).build());
+										});
+					},
+							poikkeus -> {
+								LOG.error("Ohjausparametrien luku epäonnistui: {} {}", poikkeus.getMessage(),
+										Arrays.toString(poikkeus.getStackTrace()));
+								asyncResponse.resume(Response.serverError()
+										.entity(poikkeus.getMessage()).build());
 							});
 				}, poikkeus -> {
 					asyncResponse.resume(Response.serverError()

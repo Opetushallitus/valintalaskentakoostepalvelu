@@ -505,7 +505,11 @@
 
 	<!-- Suoritusrekisteri (SURE) Async -->
 	<bean
-		class="fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl.SuoritusrekisteriAsyncResourceImpl" />
+			class="fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl.SuoritusrekisteriAsyncResourceImpl" />
+
+	<!-- Ohjausparametrit Async -->
+	<bean
+			class="fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.impl.OhjausparametritAsyncResourceImpl" />
 	<!-- Sijoittelu Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteleAsyncResourceImpl" />

@@ -50,14 +50,18 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 		}
 	}
 
-	public Peruutettava getOppijatByHakukohde(String hakukohdeOid, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
+	public Peruutettava getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
 		String url = "/suoritusrekisteri/rest/v1/oppijat";
 		try {
-			return new PeruutettavaImpl(getWebClient()
-					.path(url)
+			WebClient client = getWebClient()
+					.path(url);
+			if(referenssiPvm != null) {
+				client.query("ensikertalaisuudenReferenssiPvm", referenssiPvm);
+			}
+			return new PeruutettavaImpl(client
 					.query("hakukohde", hakukohdeOid)
 					.async()
-					.get(new Callback<List<Oppija>>(address, url + "?hakukohde=" + hakukohdeOid, callback, failureCallback, new TypeToken<List<Oppija>>() {
+					.get(new Callback<List<Oppija>>(address, url + "?hakukohde=" + hakukohdeOid + "&ensikertalaisuudenReferenssiPvm=" + referenssiPvm, callback, failureCallback, new TypeToken<List<Oppija>>() {
 					}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);

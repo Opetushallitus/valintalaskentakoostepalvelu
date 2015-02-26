@@ -47,6 +47,7 @@ public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu
 				return suoritusrekisteriAsyncResource
 						.getOppijatByHakukohde(
 								getHakukohdeOid(),
+								null, // referenssiPvm ensikertalaisuutta varten
 								oppijat -> {
 									SuoritusrekisteriPalvelukutsu.this.oppijat
 											.set(oppijat);

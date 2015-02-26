@@ -2,14 +2,18 @@ package fi.vm.sade.valinta.kooste.valintalaskenta;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.util.sure.ArvosanaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.YoToAvainArvoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import org.apache.commons.io.IOUtils;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -43,7 +47,13 @@ public class SureKonvertointiTest {
 		SuoritusJaArvosanat pk = o.getSuoritukset().stream().filter(s -> new SuoritusJaArvosanatWrapper(s).isPerusopetus()).findFirst().get();
 		SuoritusJaArvosanat yo = o.getSuoritukset().stream().filter(s -> new SuoritusJaArvosanatWrapper(s).isYoTutkinto()).findFirst().get();
 
-		List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(o);
+
+		ParametritDTO pmetrit = new ParametritDTO();
+		ParametriDTO ph_vls = new ParametriDTO();
+		ph_vls.setDateStart(DateTime.now().minusDays(1).toDate()); // LASKENTA ALKANUT PAIVA SITTEN
+		pmetrit.setPH_VLS(ph_vls);
+
+		List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(o, pmetrit);
 
 		aa.stream().forEach(a -> {
 			LOG.info("{}\t\t{}", a.getAvain(), a.getArvo());
@@ -83,7 +93,7 @@ public class SureKonvertointiTest {
 								.setPrettyPrinting()
 								.create()
 								.toJson(OppijaToAvainArvoDTOConverter
-										.convert(o)));
+										.convert(o,null)));
 
 			}
 		}

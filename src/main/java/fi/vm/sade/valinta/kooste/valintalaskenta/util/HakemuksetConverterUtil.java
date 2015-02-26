@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,8 @@ public class HakemuksetConverterUtil {
 			.getLogger(HakemuksetConverterUtil.class);
 
 	public static List<HakemusDTO> muodostaHakemuksetDTO(String hakukohdeOid,
-			List<Hakemus> hakemukset, List<Oppija> oppijat) {
+			List<Hakemus> hakemukset, List<Oppija> oppijat,
+			ParametritDTO parametritDTO) {
 		Map<String, String> hakemusOidToPersonOid;
 		List<String> virheellisetHakemukset = Lists.newArrayList();
 		try {
@@ -114,7 +116,7 @@ public class HakemuksetConverterUtil {
 							&& oppijaNumeroJaOppija.containsKey(personOid)) {
 						Oppija oppija = oppijaNumeroJaOppija.get(personOid);
 						Map<String, AvainArvoDTO> arvot = h.getAvaimet().stream().collect(Collectors.toMap(a -> a.getAvain(), a-> a));
-						Map<String, AvainArvoDTO> sureArvot = OppijaToAvainArvoDTOConverter.convert(oppija).stream().collect(Collectors.toMap(a -> a.getAvain(), a -> a));
+						Map<String, AvainArvoDTO> sureArvot = OppijaToAvainArvoDTOConverter.convert(oppija, parametritDTO).stream().collect(Collectors.toMap(a -> a.getAvain(), a -> a));
 						Map<String, AvainArvoDTO> merge = Maps.newHashMap();
 						merge.putAll(arvot);
 						merge.putAll(sureArvot);

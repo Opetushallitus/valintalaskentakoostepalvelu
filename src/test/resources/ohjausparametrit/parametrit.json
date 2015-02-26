@@ -1,0 +1,44 @@
+{
+  PH_TJT: {
+    date: null
+  },
+  PH_HKLPT: {
+    date: null
+  },
+  PH_HKMT: {
+    date: null
+  },
+  PH_YNH: {
+    dateStart: null,
+    dateEnd: null
+  },
+  PH_VTSSV: {
+    date: null
+  },
+  PH_VSSAV: {
+    date: null
+  },
+  PH_SS: {
+    dateStart: null,
+    dateEnd: null
+  },
+  PH_VTJH: {
+    dateStart: null,
+    dateEnd: null
+  },
+  PH_EVR: {
+    date: null
+  },
+  PH_OPVP: {
+    date: null
+  },
+  PH_IP: {
+    date: null
+  },
+  PH_HKP: {
+    date: null
+  },
+  target: "1.2.246.562.29.173465377510",
+  __modified__: 1422430542294,
+  __modifiedBy__: "1.2.246.562.24.69423911513"
+}
