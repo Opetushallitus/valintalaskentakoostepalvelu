@@ -352,7 +352,27 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
     // PK_TILA_10 = false // default
     // VAAN YKS SUORITUS (LISÄOPETUS)
     // PK_***_10 SUFFIX
-
+    @Test
+    public void kymppiluokanKorotuksissaMyosKeskeytettySuoritusHuomioidaan() {
+        Oppija oikeinKoskaKeskenerainenSuoritus = oppija()
+                .suoritus()
+                .setKymppiluokka()
+                .setKeskeytynyt()
+                .arvosana()
+                .setAine("AI")
+                .setArvosana("7")
+                .build()
+                .build()
+                .build();
+        {
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(oikeinKoskaKeskenerainenSuoritus, null);
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            Assert.assertTrue("PK_TILA_10 löytyy ja sen arvo on false",
+                    aa.stream().filter(a -> "PK_TILA_10".equals(a.getAvain()) && "false".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("PK_AI_10 löytyy ja sen arvo on 7",
+                    aa.stream().filter(a -> "PK_AI_10".equals(a.getAvain()) && "7".equals(a.getArvo())).count() == 1L);
+        }
+    }
     @Test
     public void kymppiluokkaTilaOnTrueJosSuoritusOnMerkittyValmiiksiMuutoinFalse() {
         Oppija oikeinKoskaKeskenerainenSuoritus = oppija()
@@ -365,17 +385,6 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
             List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(oikeinKoskaKeskenerainenSuoritus, null);
             Assert.assertTrue("PK_TILA_10 löytyy ja sen arvo on false",
                     aa.stream().filter(a -> "PK_TILA_10".equals(a.getAvain()) && "false".equals(a.getArvo())).count() == 1L);
-        }
-        Oppija oikeinKoskaEiSuorituksia = oppija()
-                .suoritus()
-                .setKymppiluokka()
-                .setKeskeytynyt()
-                .build()
-                .build();
-        {
-            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(oikeinKoskaEiSuorituksia, null);
-            Assert.assertTrue("PK_TILA_10 ei löydy",
-                    aa.stream().filter(a -> "PK_TILA_10".equals(a.getAvain())).count() == 0L);
         }
     }
 
@@ -418,7 +427,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                     aa.stream().filter(a -> "AINEREAALI".equals(a.getAvain()) && "L".equals(a.getArvo())).count() == 1L);
         }
     }
-
+    
     @Test
     public void yoTilaOnTrueJosSuoritusOnMerkittyValmiiksiMuutoinFalse() {
         {

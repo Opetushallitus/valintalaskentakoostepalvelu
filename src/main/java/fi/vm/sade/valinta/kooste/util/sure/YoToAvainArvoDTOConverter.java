@@ -33,13 +33,15 @@ public class YoToAvainArvoDTOConverter {
         }
         return Stream.of(a);
     }
-
     public static Stream<AvainArvoDTO> convert(
-            SuoritusJaArvosanat yoSuoritus) {
-
+            Optional<SuoritusJaArvosanat> suoritusOption) {
+        SuoritusJaArvosanat yoSuoritus = suoritusOption.orElse(null);
+        if(yoSuoritus == null) {
+            return Stream.empty();
+        }
         Map<String, Arvosana> yoArvosanatMap = Stream.of(yoSuoritus)
                         //
-                .filter(s -> new SuoritusJaArvosanatWrapper(s).isYoTutkinto())
+
                         //
                 .flatMap(s -> s.getArvosanat().stream())
                         //
