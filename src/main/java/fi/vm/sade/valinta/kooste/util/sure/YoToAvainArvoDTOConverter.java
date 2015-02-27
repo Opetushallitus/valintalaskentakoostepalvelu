@@ -6,6 +6,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosan
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
+import org.joda.time.DateTime;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import java.util.stream.Stream;
 public class YoToAvainArvoDTOConverter {
 
     private static final String YO_ASTEIKKO = "YO";
+    private static final String PREFIKSI = "YO_";
     private static final List<String> YO_ORDER = Collections
             .unmodifiableList(Arrays.asList("L", "E", "M", "C", "B", "A", "I"));
 
@@ -30,6 +32,22 @@ public class YoToAvainArvoDTOConverter {
             a.setArvo("true");
         } else {
             a.setArvo("false");
+        }
+        if(suoritus.getSuoritus().getValmistuminen() != null) {
+            DateTime valmistumisPvm = new SuoritusJaArvosanatWrapper(suoritus).getValmistuminenAsDateTime();
+
+            AvainArvoDTO as = new AvainArvoDTO();
+            as.setAvain(new StringBuilder(PREFIKSI).append("SUORITUSVUOSI").toString());
+            as.setArvo(""+valmistumisPvm.getYear());
+
+            AvainArvoDTO asl = new AvainArvoDTO();
+            asl.setAvain(new StringBuilder(PREFIKSI).append("SUORITUSLUKUKAUSI").toString());
+            if(valmistumisPvm.isBefore(SuoritusJaArvosanatWrapper.VALMISTUMIS_DTF.parseDateTime("01.08." + valmistumisPvm.getYear()))) {
+                asl.setArvo("2");
+            } else {
+                asl.setArvo("1");
+            }
+            return Stream.of(a,as,asl);
         }
         return Stream.of(a);
     }
@@ -61,48 +79,49 @@ public class YoToAvainArvoDTOConverter {
                 .collect(Collectors.toMap(Arvosana::getAine, a -> a,
                         (s, a) -> max(Arrays.asList(s, a))));
         if(yoArvosanatMap.isEmpty()) {
-            return Stream.empty();
+            return suorituksenTila(yoSuoritus);
+        } else {
+            List<Arvosana> yoArvosanat = new ArrayList<>(yoArvosanatMap.values());
+
+            // AINEREAALI = max(UE, UO, ET, FF, PS, HI, FY, KE, BI, GE, TE, YH)
+            // <br>
+            // REAALI = max(RR, RO, RY)
+            // <br>
+            // PITKA_KIELI = max(EA, FA, GA, HA, PA, SA, TA, VA)
+            // <br>
+            // KESKIPITKA_KIELI = max(EB, FB, GB, HB, PB, SB, TB, VB)
+            // <br>
+            // LYHYT_KIELI = max(EC, FC, GC, L1, PC, SC, TC, VC, KC)
+            // <br>
+            // AIDINKIELI = max(O, A, I, W, Z, O5, A5)
+            List<AvainArvoDTO> aaa = Stream.of(
+                    convert("AINEREAALI",
+                            max(find(yoArvosanat, "UE", "UO", "ET", "FF", "PS",
+                                    "HI", "FY", "KE", "BI", "GE", "TE", "YH"))),
+                    //
+                    convert("REAALI", max(find(yoArvosanat, "RR", "RO", "RY"))),
+                    //
+                    convert("PITKA_KIELI",
+                            max(find(yoArvosanat, "EA", "FA", "GA", "HA", "PA",
+                                    "SA", "TA", "VA", "S9"))),
+                    //
+                    convert("KESKIPITKA_KIELI",
+                            max(find(yoArvosanat, "EB", "FB", "GB", "HB", "PB",
+                                    "SB", "TB", "VB"))),
+                    //
+                    convert("LYHYT_KIELI",
+                            max(find(yoArvosanat, "EC", "FC", "GC", "L1", "PC",
+                                    "SC", "TC", "VC", "KC", "L7"))),
+                    //
+                    convert("AIDINKIELI",
+                            max(find(yoArvosanat, "O", "A", "I", "W", "Z", "O5",
+                                    "A5")))).flatMap(a -> a).collect(Collectors.toList());
+            List<AvainArvoDTO> avaimet = Lists.newArrayList(yoArvosanat.stream()
+                    .flatMap(a -> convert(a)).collect(Collectors.toList()));
+            avaimet.addAll(aaa);
+
+            return Stream.concat(suorituksenTila(yoSuoritus), avaimet.stream().filter(Objects::nonNull));
         }
-        List<Arvosana> yoArvosanat = new ArrayList<>(yoArvosanatMap.values());
-
-        // AINEREAALI = max(UE, UO, ET, FF, PS, HI, FY, KE, BI, GE, TE, YH)
-        // <br>
-        // REAALI = max(RR, RO, RY)
-        // <br>
-        // PITKA_KIELI = max(EA, FA, GA, HA, PA, SA, TA, VA)
-        // <br>
-        // KESKIPITKA_KIELI = max(EB, FB, GB, HB, PB, SB, TB, VB)
-        // <br>
-        // LYHYT_KIELI = max(EC, FC, GC, L1, PC, SC, TC, VC, KC)
-        // <br>
-        // AIDINKIELI = max(O, A, I, W, Z, O5, A5)
-        List<AvainArvoDTO> aaa = Stream.of(
-                convert("AINEREAALI",
-                        max(find(yoArvosanat, "UE", "UO", "ET", "FF", "PS",
-                                "HI", "FY", "KE", "BI", "GE", "TE", "YH"))),
-                //
-                convert("REAALI", max(find(yoArvosanat, "RR", "RO", "RY"))),
-                //
-                convert("PITKA_KIELI",
-                        max(find(yoArvosanat, "EA", "FA", "GA", "HA", "PA",
-                                "SA", "TA", "VA", "S9"))),
-                //
-                convert("KESKIPITKA_KIELI",
-                        max(find(yoArvosanat, "EB", "FB", "GB", "HB", "PB",
-                                "SB", "TB", "VB"))),
-                //
-                convert("LYHYT_KIELI",
-                        max(find(yoArvosanat, "EC", "FC", "GC", "L1", "PC",
-                                "SC", "TC", "VC", "KC", "L7"))),
-                //
-                convert("AIDINKIELI",
-                        max(find(yoArvosanat, "O", "A", "I", "W", "Z", "O5",
-                                "A5")))).flatMap(a -> a).collect(Collectors.toList());
-        List<AvainArvoDTO> avaimet = Lists.newArrayList(yoArvosanat.stream()
-                .flatMap(a -> convert(a)).collect(Collectors.toList()));
-        avaimet.addAll(aaa);
-
-        return Stream.concat(suorituksenTila(yoSuoritus), avaimet.stream().filter(Objects::nonNull));
     }
 
     public static Arvosana max(List<Arvosana> arvosanat) {

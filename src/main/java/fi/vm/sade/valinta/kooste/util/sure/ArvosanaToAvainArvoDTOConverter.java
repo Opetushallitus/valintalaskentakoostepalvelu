@@ -43,6 +43,22 @@ public class ArvosanaToAvainArvoDTOConverter {
         } else {
             a.setArvo("false");
         }
+        if(suoritus.getSuoritus().getValmistuminen() != null) {
+            DateTime valmistumisPvm = new SuoritusJaArvosanatWrapper(suoritus).getValmistuminenAsDateTime();
+
+            AvainArvoDTO as = new AvainArvoDTO();
+            as.setAvain(new StringBuilder(prefiksi).append("SUORITUSVUOSI").append(suffiksi).toString());
+            as.setArvo(""+valmistumisPvm.getYear());
+
+            AvainArvoDTO asl = new AvainArvoDTO();
+            asl.setAvain(new StringBuilder(prefiksi).append("SUORITUSLUKUKAUSI").append(suffiksi).toString());
+            if(valmistumisPvm.isBefore(SuoritusJaArvosanatWrapper.VALMISTUMIS_DTF.parseDateTime("01.08." + valmistumisPvm.getYear()))) {
+                asl.setArvo("2");
+            } else {
+                asl.setArvo("1");
+            }
+            return Stream.of(a,as,asl);
+        }
         return Stream.of(a);
     }
     public Stream<AvainArvoDTO> convert(

@@ -88,6 +88,10 @@ public class SuoritusrekisteriSpec {
             suoritus.setTila("KESKEYTYNYT");
             return SuoritusBuilder.this;
         }
+        public SuoritusBuilder setValmistuminen(String valmistuminen) {
+            suoritus.setValmistuminen(valmistuminen);
+            return SuoritusBuilder.this;
+        }
         public SuoritusBuilder setPerusopetus() {
             suoritus.setKomo(SuoritusJaArvosanatWrapper.PK_KOMO);
             return SuoritusBuilder.this;

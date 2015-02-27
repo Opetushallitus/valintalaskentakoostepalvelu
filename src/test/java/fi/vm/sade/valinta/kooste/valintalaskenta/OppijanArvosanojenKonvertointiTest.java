@@ -64,6 +64,78 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
     }
 
     @Test
+    public void perusopetusSuoritusvuosiJaSuorituskausi() {
+        /*
+        PK_SUORITUSLUKUKAUSI = 1/2
+        1.1. - 31.7. ->  2
+        1.8. -> 31.12. -> 1
+                */
+        {
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setPerusopetus()
+                    .setValmistuminen("31.07.2008")
+                    .setValmis()
+                    .build()
+                    .build();
+
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, null);
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            Assert.assertTrue("PK_SUORITUSVUOSI löytyy ja sen arvo on 2008",
+                    aa.stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2008".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 2",
+                    aa.stream().filter(a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain()) && "2".equals(a.getArvo())).count() == 1L);
+        }
+        {
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setPerusopetus()
+                    .setValmistuminen("01.01.2018")
+                    .setValmis()
+                    .build()
+                    .build();
+
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, null);
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            Assert.assertTrue("PK_SUORITUSVUOSI löytyy ja sen arvo on 2018",
+                    aa.stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2018".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 2",
+                    aa.stream().filter(a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain()) && "2".equals(a.getArvo())).count() == 1L);
+        }
+        {
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setPerusopetus()
+                    .setValmistuminen("01.08.2008")
+                    .setValmis()
+                    .build()
+                    .build();
+
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, null);
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            Assert.assertTrue("PK_SUORITUSVUOSI löytyy ja sen arvo on 2008",
+                    aa.stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2008".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 1",
+                    aa.stream().filter(a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain()) && "1".equals(a.getArvo())).count() == 1L);
+        }
+        {
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setPerusopetus()
+                    .setValmistuminen("31.12.2008")
+                    .setValmis()
+                    .build()
+                    .build();
+
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, null);
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            Assert.assertTrue("PK_SUORITUSVUOSI löytyy ja sen arvo on 2008",
+                    aa.stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2008".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 1",
+                    aa.stream().filter(a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain()) && "1".equals(a.getArvo())).count() == 1L);
+        }
+    }
+    @Test
     public void perusopetusOikeinKoskaVainValmisSuoritus() {
         Oppija oikeinKoskaVainValmisSuoritus = oppija()
                 .suoritus()
@@ -576,7 +648,78 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                 .build();
         OppijaToAvainArvoDTOConverter.convert(suoritus, null);
     }
+    @Test
+    public void yoSuoritusvuosiJaSuorituskausi() {
+        /*
+        PK_SUORITUSLUKUKAUSI = 1/2
+        1.1. - 31.7. ->  2
+        1.8. -> 31.12. -> 1
+                */
+        {
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmistuminen("31.07.2008")
+                    .setValmis()
+                    .build()
+                    .build();
 
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, null);
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            Assert.assertTrue("YO_SUORITUSVUOSI löytyy ja sen arvo on 2008",
+                    aa.stream().filter(a -> "YO_SUORITUSVUOSI".equals(a.getAvain()) && "2008".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("YO_SUORITUSLUKUKAUSI löytyy ja sen arvo on 2",
+                    aa.stream().filter(a -> "YO_SUORITUSLUKUKAUSI".equals(a.getAvain()) && "2".equals(a.getArvo())).count() == 1L);
+        }
+        {
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmistuminen("01.01.2018")
+                    .setValmis()
+                    .build()
+                    .build();
+
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, null);
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            Assert.assertTrue("YO_SUORITUSVUOSI löytyy ja sen arvo on 2018",
+                    aa.stream().filter(a -> "YO_SUORITUSVUOSI".equals(a.getAvain()) && "2018".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("YO_SUORITUSLUKUKAUSI löytyy ja sen arvo on 2",
+                    aa.stream().filter(a -> "YO_SUORITUSLUKUKAUSI".equals(a.getAvain()) && "2".equals(a.getArvo())).count() == 1L);
+        }
+        {
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmistuminen("01.08.2008")
+                    .setValmis()
+                    .build()
+                    .build();
+
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, null);
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            Assert.assertTrue("YO_SUORITUSVUOSI löytyy ja sen arvo on 2008",
+                    aa.stream().filter(a -> "YO_SUORITUSVUOSI".equals(a.getAvain()) && "2008".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("YO_SUORITUSLUKUKAUSI löytyy ja sen arvo on 1",
+                    aa.stream().filter(a -> "YO_SUORITUSLUKUKAUSI".equals(a.getAvain()) && "1".equals(a.getArvo())).count() == 1L);
+        }
+        {
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmistuminen("31.12.2008")
+                    .setValmis()
+                    .build()
+                    .build();
+
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, null);
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            Assert.assertTrue("YO_SUORITUSVUOSI löytyy ja sen arvo on 2008",
+                    aa.stream().filter(a -> "YO_SUORITUSVUOSI".equals(a.getAvain()) && "2008".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("YO_SUORITUSLUKUKAUSI löytyy ja sen arvo on 1",
+                    aa.stream().filter(a -> "YO_SUORITUSLUKUKAUSI".equals(a.getAvain()) && "1".equals(a.getArvo())).count() == 1L);
+        }
+    }
     // AMMATILLINEN:
     // SUORITUKSIA USEAMPI
     // EI VOI MITENKÄÄN MAPATA

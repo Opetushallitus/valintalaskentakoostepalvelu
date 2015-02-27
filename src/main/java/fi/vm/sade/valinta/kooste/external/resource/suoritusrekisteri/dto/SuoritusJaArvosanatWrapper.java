@@ -1,6 +1,11 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
@@ -11,6 +16,7 @@ import java.util.function.Function;
  * @author Jussi Jartamo
  */
 public class SuoritusJaArvosanatWrapper {
+    private static final Logger LOG = LoggerFactory.getLogger(SuoritusJaArvosanatWrapper.class);
     public static final String YO_KOMO = "1.2.246.562.5.2013061010184237348007";
     public static final String PK_KOMO = "1.2.246.562.13.62959769647";
     public static final String PK_10_KOMO = "1.2.246.562.5.2013112814572435044876";
@@ -27,7 +33,15 @@ public class SuoritusJaArvosanatWrapper {
         return Collections.unmodifiableMap(tmp);
     }
     private final SuoritusJaArvosanat suoritusJaArvosanat;
+    public static final org.joda.time.format.DateTimeFormatter VALMISTUMIS_DTF = DateTimeFormat.forPattern("dd.MM.yyyy");
 
+    public DateTime getValmistuminenAsDateTime() {
+        if(suoritusJaArvosanat.getSuoritus().getValmistuminen() == null) {
+            LOG.error("Suorituksella ei ole valmistumispäivämäärää: {}", new Gson().toJson(suoritusJaArvosanat.getSuoritus()));
+            throw new RuntimeException("Suorituksella ei ole valmistumispäivämäärää");
+        }
+        return VALMISTUMIS_DTF.parseDateTime(suoritusJaArvosanat.getSuoritus().getValmistuminen());
+    }
     public static SuoritusJaArvosanatWrapper wrap(SuoritusJaArvosanat s) {
         return new SuoritusJaArvosanatWrapper(s);
     }
