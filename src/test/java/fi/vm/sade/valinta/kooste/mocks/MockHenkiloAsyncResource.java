@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -22,21 +24,29 @@ public class MockHenkiloAsyncResource implements HenkiloAsyncResource {
     public static AtomicBoolean serviceIsAvailable = new AtomicBoolean(true);
     private static final Logger LOG = LoggerFactory.getLogger(MockHenkiloAsyncResource.class);
     public List<HenkiloCreateDTO> henkiloPrototyypit = null;
-
+    private final Function<List<HenkiloCreateDTO>, Future<List<Henkilo>>> futureSupplier;
+    public MockHenkiloAsyncResource() {
+        this.futureSupplier = hp -> {
+            if (hp == null) {
+                LOG.error("Null-prototyyppi lista!");
+                throw new RuntimeException("Null-prototyyppi lista!");
+            }
+            //this.henkiloPrototyypit = henkiloPrototyypit;
+            LOG.info("MockHenkilöAsyncResource sai {}kpl henkilöitä. Tehdään konversio ja palautetaan immediate future.", hp.size());
+            henkiloPrototyypit = hp;
+            return Futures.immediateFuture(henkiloPrototyypit.stream()
+                    .map(prototyyppi -> toHenkilo(prototyyppi))
+                    .collect(Collectors.toList()));
+        };
+    }
+    public MockHenkiloAsyncResource(Function<List<HenkiloCreateDTO>, Future<List<Henkilo>>> futureSupplier) {
+        this.futureSupplier = futureSupplier;
+    }
     @Override
     public Future<List<Henkilo>> haeTaiLuoHenkilot(final List<HenkiloCreateDTO> hp) {
         return Optional.ofNullable(MockHenkiloAsyncResource.<List<Henkilo>>serviceAvailableCheck()).orElseGet(
                 () -> {
-                    if (hp == null) {
-                        LOG.error("Null-prototyyppi lista!");
-                        throw new RuntimeException("Null-prototyyppi lista!");
-                    }
-                    //this.henkiloPrototyypit = henkiloPrototyypit;
-                    LOG.info("MockHenkilöAsyncResource sai {}kpl henkilöitä. Tehdään konversio ja palautetaan immediate future.", hp.size());
-                    henkiloPrototyypit = hp;
-                    return Futures.immediateFuture(henkiloPrototyypit.stream()
-                            .map(prototyyppi -> toHenkilo(prototyyppi))
-                            .collect(Collectors.toList()));
+                    return futureSupplier.apply(hp);
                 });
     }
 

@@ -13,7 +13,9 @@ public class ExcelTestData {
     public static InputStream kkHakuToisenAsteenValintatuloksella() {
         return getInputStream("kkhaku_toisenasteen_valintatuloksella.xlsx");
     }
-
+    public static InputStream puutteellisiaTietojaAutotayttoaVarten() {
+        return getInputStream("puutteellisiaTietojaAutotayttoaVarten.xlsx");
+    }
     public static InputStream erillisHakuHenkiloOidilla() {
         return getInputStream("erillishaku_oidilla.xlsx");
     }

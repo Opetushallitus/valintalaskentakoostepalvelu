@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -87,7 +88,11 @@ public class ErillishaunTuontiService {
                 erillishakuExcel = importer.apply(haku);
                 tuoHakijatJaLuoHakemukset(prosessi, erillishakuExcel, haku);
             } catch(Exception e) {
-                LOG.error("Poikkeus {}", e.getMessage());
+                LOG.error("Poikkeus {} {}: {}",  e.getMessage(),
+                        Arrays.asList(e.getStackTrace())
+                                .stream()
+                                .map(i -> i.toString())
+                                .collect(Collectors.joining("\r\n")));
                 prosessi.keskeyta();
             }
         }, poikkeus -> {
@@ -99,39 +104,69 @@ public class ErillishaunTuontiService {
     }
 
     private void validoiRivit(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> rivit) {
-        int indeksi = 0;
-        Collection<ErillishaunDataException.PoikkeusRivi> poikkeusRivis = Lists.newArrayList();
-        for(ErillishakuRivi rivi : rivit) {
-            ++indeksi;
-            if(!rivi.isPoistetaankoRivi()) {
-                String validointiVirhe = validoi(haku.getHakutyyppi(), rivi);
-                if(validointiVirhe != null) {
-                    poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, validointiVirhe));
-                }
-            } else {
-                // validoi poistettavaksi merkitty rivi
-                if(rivi.getHakemusOid() == null) {
-                    poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, "Poistettavaksi merkatulla riville ei löytynyt hakemuksen tunnistetta"));
-                }
-            }
-        }
-        if(!poikkeusRivis.isEmpty()) {
-            prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO,
-                    poikkeusRivis.stream().map(p -> new Tunniste("Rivi " + p.getIndeksi() + ": " + p.getSelite(),ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN)).collect(Collectors.toList())));
-            throw new ErillishaunDataException(poikkeusRivis);
-        }
-    }
-
-    private void tuoHakijatJaLuoHakemukset(final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final ErillishakuDTO haku) throws Exception {
-        LOG.info("Aloitetaan tuonti");
-        final List<ErillishakuRivi> rivit = erillishakuExcel.rivit;
         if (rivit.isEmpty()) {
             LOG.error("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
             prosessi.keskeyta(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
             throw new RuntimeException("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
         }
 
+        Collection<ErillishaunDataException.PoikkeusRivi> poikkeusRivis = Lists.newArrayList();
+        StreamUtils.zipWithIndex(rivit.stream()
+                .map(rivi -> {
+                    // AUTOTAYTTO VA
+                    rivi.getHakemuksenTila();
+                    return rivi;
+                })).forEach(riviJaIndeksi -> {
+            int indeksi = ((int) riviJaIndeksi.getIndex()) + 1;
+            ErillishakuRivi rivi = riviJaIndeksi.getValue();
 
+            if (!rivi.isPoistetaankoRivi()) {
+                String validointiVirhe = validoi(haku.getHakutyyppi(), rivi);
+                if (validointiVirhe != null) {
+                    poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, validointiVirhe));
+                }
+            } else {
+                // validoi poistettavaksi merkitty rivi
+                if (rivi.getHakemusOid() == null) {
+                    poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, "Poistettavaksi merkatulla riville ei löytynyt hakemuksen tunnistetta"));
+                }
+            }
+        });
+        if(!poikkeusRivis.isEmpty()) {
+            prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO,
+                    poikkeusRivis.stream().map(p -> new Tunniste("Rivi " + p.getIndeksi() + ": " + p.getSelite(),ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN)).collect(Collectors.toList())));
+            throw new ErillishaunDataException(poikkeusRivis);
+        }
+    }
+    private static final List<HakemuksenTila> VAIN_HAKEMUKSENTILALLISET_TILAT =
+            Arrays.asList(HakemuksenTila.PERUNUT, HakemuksenTila.PERUUTETTU, HakemuksenTila.HYLATTY,
+            HakemuksenTila.VARALLA,HakemuksenTila.PERUUNTUNUT);
+
+    private List<ErillishakuRivi> autoTaytto(final List<ErillishakuRivi> rivit) {
+        // jos hakemuksentila on hylatty tai varalla niin autotaytetaan loput tilat KESKEN, EI_TEHTY
+
+        return rivit.stream().map(rivi -> {
+            if (VAIN_HAKEMUKSENTILALLISET_TILAT.contains(hakemuksenTila(rivi))) {
+                return new ErillishakuRivi(
+                        rivi.getHakemusOid(),
+                        rivi.getSukunimi(),
+                        rivi.getEtunimi(),
+                        rivi.getHenkilotunnus(),
+                        rivi.getSahkoposti(),
+                        rivi.getSyntymaAika(),
+                        rivi.getPersonOid(),
+                        rivi.getHakemuksenTila(),
+                        "KESKEN", "EI_TEHTY",
+                        rivi.isJulkaistaankoTiedot(), Optional.of(rivi.isPoistetaankoRivi()));
+            } else {
+                return rivi;
+                }
+            }).collect(Collectors.toList());
+        }
+
+    private void tuoHakijatJaLuoHakemukset(final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final ErillishakuDTO haku) throws Exception {
+        LOG.info("Aloitetaan tuonti");
+        final List<ErillishakuRivi> rivit = autoTaytto(erillishakuExcel.rivit);
 
         validoiRivit(prosessi,haku,rivit);
 
