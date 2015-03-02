@@ -41,19 +41,19 @@ public class OppijaToAvainArvoDTOConverter {
                 if (oppija == null || oppija.getSuoritukset() == null) {
                 return Collections.emptyList();
                 }
-                List<AvainArvoDTO> avainArvot = convert(oppija, oppija.getSuoritukset(),parametritDTO);
+                Stream<AvainArvoDTO> avainArvot = convert(oppija, oppija.getSuoritukset(),parametritDTO);
                 AvainArvoDTO ensikertalaisuus = new AvainArvoDTO();
                 ensikertalaisuus.setAvain("ensikertalainen");
                 ensikertalaisuus.setArvo(String.valueOf(oppija.isEnsikertalainen()));
-                avainArvot.add(ensikertalaisuus);
-                return avainArvot;
+                //avainArvot.add(ensikertalaisuus);
+                return concat(of(ensikertalaisuus), avainArvot).collect(Collectors.toList());
         }
 
-        public static List<AvainArvoDTO> convert(
+        private static Stream<AvainArvoDTO> convert(
                 Oppija oppija,
                 List<SuoritusJaArvosanat> suorituksetJaArvosanat, ParametritDTO parametritDTO) {
                 if (suorituksetJaArvosanat == null) {
-                        return Collections.emptyList();
+                        return empty();
                 }
                 List<SuoritusJaArvosanat> suoritukset =
                         suorituksetJaArvosanat.stream()
@@ -63,7 +63,7 @@ public class OppijaToAvainArvoDTOConverter {
                                         //
                                 .filter(s -> s.getArvosanat() != null).collect(Collectors.toList());
                 if(suoritukset.isEmpty()) {
-                        return Collections.emptyList();
+                        return empty();
                 }
 
                 final DateTime pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan =
@@ -97,25 +97,25 @@ public class OppijaToAvainArvoDTOConverter {
                 return convertP(suoritukset.stream(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan);
         }
 
-	private static List<AvainArvoDTO> convertP(
+	private static Stream<AvainArvoDTO> convertP(
 			Stream<SuoritusJaArvosanat> suoritukset, DateTime pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan) {
 
 
             return suoritukset
                     .flatMap(s ->
-                            of(
-                                    YoToAvainArvoDTOConverter.convert(of(s).filter(s0 -> wrap(s0).isYoTutkinto() && !wrap(s0).isKeskeytynyt()).findAny()),
-                                    PERUSOPETUS.convert(of(s).filter(s0 -> wrap(s0).isPerusopetus() && !wrap(s0).isKeskeytynyt()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
-                                    LISAOPETUS.convert(of(s).filter(s0 -> wrap(s0).isLisaopetus()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
-                                    //AMMATTISTARTTI.convert(of(s).filter(s0 -> wrap(s0).isAmmattistartti()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
-                                    //VALMENTAVA.convert(of(s).filter(s0 -> wrap(s0).isValmentava()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
-                                    //AMMATILLISEEN_VALMENTAVA.convert(of(s).filter(s0 -> wrap(s0).isAmmatilliseenValmistava()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
-                                    //ULKOMAINEN_KORVAAVA.convert(of(s).filter(s0 -> wrap(s0).isUlkomainenKorvaava()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
-                                    LUKIO.convert(of(s).filter(s0 -> wrap(s0).isLukio() && !wrap(s0).isKeskeytynyt()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan)
-                                    //AMMATILLINEN.convert(of(s).filter(s0 -> wrap(s0).isAmmatillinen()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan)
+                                    of(
+                                            YoToAvainArvoDTOConverter.convert(of(s).filter(s0 -> wrap(s0).isYoTutkinto() && !wrap(s0).isKeskeytynyt()).findAny()),
+                                            PERUSOPETUS.convert(of(s).filter(s0 -> wrap(s0).isPerusopetus() && !wrap(s0).isKeskeytynyt()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
+                                            LISAOPETUS.convert(of(s).filter(s0 -> wrap(s0).isLisaopetus()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
+                                            //AMMATTISTARTTI.convert(of(s).filter(s0 -> wrap(s0).isAmmattistartti()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
+                                            //VALMENTAVA.convert(of(s).filter(s0 -> wrap(s0).isValmentava()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
+                                            //AMMATILLISEEN_VALMENTAVA.convert(of(s).filter(s0 -> wrap(s0).isAmmatilliseenValmistava()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
+                                            //ULKOMAINEN_KORVAAVA.convert(of(s).filter(s0 -> wrap(s0).isUlkomainenKorvaava()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
+                                            LUKIO.convert(of(s).filter(s0 -> wrap(s0).isLukio() && !wrap(s0).isKeskeytynyt()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan)
+                                            //AMMATILLINEN.convert(of(s).filter(s0 -> wrap(s0).isAmmatillinen()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan)
                                     ).flatMap(sx -> sx)
                     )
-                .filter(Objects::nonNull).collect(Collectors.toList());
+                .filter(Objects::nonNull);
 	}
 
 }
