@@ -126,8 +126,8 @@ public class HakemuksetConverterUtil {
 			}
 		} catch (Exception e) {
 			LOG.error(
-					"\r\n###\r\n### SURE YO-arvosanojen konversiossa odottamaton virhe {}\r\n###",
-					e.getMessage());
+					"\r\n###\r\n### SURE YO-arvosanojen konversiossa odottamaton virhe {}\r\n{}\r\n###",
+					e.getMessage(), Arrays.toString(e.getStackTrace()));
 			throw e;
 		}
 		return hakemusDtot;
