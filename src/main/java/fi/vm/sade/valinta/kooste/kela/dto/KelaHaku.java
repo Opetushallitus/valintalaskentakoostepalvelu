@@ -92,7 +92,14 @@ public class KelaHaku extends KelaAbstraktiHaku {
 									LOG.error("ERROR vastaanottopaivamaaraa ei löytynyt (tila ei VASTAANOTTANUT_SITOVASTI, VASTAANOTTANUT tai EHDOLLISESTI_VASTAANOTTANUT) :"+hakutoive.getTarjoajaOid()+ ":" + sukunimi+ " "+ etunimi+ "("+henkilotunnus+") hakukohde:"+hakukohdeOid+ " ");
 									return;
 								}
+								
 								final Date valintapaivamaara = valintaEntry.getLuotu();
+
+								if( valintapaivamaara == null 
+										|| 	valintapaivamaara.compareTo(alkuPvm)<=0
+										|| 	valintapaivamaara.compareTo(loppuPvm)>=0){
+									return;
+								}
 								String organisaatioOid = hakutoive.getTarjoajaOid();
 								String oppilaitosnumero = "XXXXX";
 								
