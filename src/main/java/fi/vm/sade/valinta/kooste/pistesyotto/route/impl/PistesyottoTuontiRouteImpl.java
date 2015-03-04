@@ -1,11 +1,10 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.route.impl;
 
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -72,7 +71,7 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 		from(pistesyottoTuonti)
 		//
 				.errorHandler(
-				//
+						//
 						deadLetterChannel(luontiEpaonnistui)
 								//
 								.maximumRedeliveries(0)
@@ -83,179 +82,218 @@ public class PistesyottoTuontiRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.process(new Processor() {
 
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						dokumenttiprosessi(exchange).setKokonaistyo(
-						// osallistumistiedot + valintaperusteet +
-						// hakemuspistetiedot
-								1 + 1
-								// luonti
-								+ 1
-								// tuonti hakupalveluun
-								+ 1);
-						String hakuOid = hakuOid(exchange);
-						String hakukohdeOid = hakukohdeOid(exchange);
-						String hakuNimi = StringUtils.EMPTY;
-						String hakukohdeNimi = StringUtils.EMPTY;
-						String tarjoajaNimi = StringUtils.EMPTY;
-						Future<List<ValintakoeOsallistuminenDTO>> osallistumistiedotFuture = valintakoeResource
-								.haeHakutoiveelle(hakukohdeOid);
-						Future<List<ValintaperusteDTO>> valintaperusteetFuture = valintaperusteetResource
-								.findAvaimet(hakukohdeOid);
-						Future<List<ApplicationAdditionalDataDTO>> pistetiedotFuture = applicationAsyncResource
-								.getApplicationAdditionalData(hakuOid,
-										hakukohdeOid);
-						// LOG.error("Osallistumistiedot");
-						List<ValintakoeOsallistuminenDTO> osallistumistiedot;
-						try {
-							osallistumistiedot = osallistumistiedotFuture.get();
-							dokumenttiprosessi(exchange)
-									.inkrementoiTehtyjaToita();
-						} catch (Exception e) {
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(
-											Poikkeus.VALINTALASKENTA,
-											"Osallistumistietojen haku valintalaskennoista epäonnistui. ",
-											e.getMessage(), Poikkeus
-													.hakukohdeOid(hakukohdeOid)));
-							throw e;
-						}
-						// LOG.error("Valintaperusteet");
-						List<ValintaperusteDTO> valintaperusteet;
-						try {
-							valintaperusteet = valintaperusteetFuture.get();
-						} catch (Exception e) {
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(
-											Poikkeus.VALINTAPERUSTEET,
-											"Valintaperusteiden haku epäonnistui. ",
-											e.getMessage(), Poikkeus
-													.hakukohdeOid(hakukohdeOid)));
-							throw e;
-						}
-						Collection<String> valintakoeTunnisteet = FluentIterable
-								.from(valintaperusteet)
-								.transform(
-										new Function<ValintaperusteDTO, String>() {
-											@Override
-											public String apply(
-													ValintaperusteDTO input) {
-												return input.getTunniste();
-											}
-										}).toList();
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-						// LOG.error("Additional data");
-						List<ApplicationAdditionalDataDTO> pistetiedot;
-						try {
-							pistetiedot = pistetiedotFuture.get();
-						} catch (Exception e) {
-							dokumenttiprosessi(exchange)
-									.getPoikkeukset()
-									.add(new Poikkeus(Poikkeus.HAKU,
-											"Pistetietojen haku epäonnistui. ",
-											e.getMessage(), Poikkeus
-													.hakuOid(hakuOid), Poikkeus
-													.hakukohdeOid(hakukohdeOid)));
-							throw e;
-						}
-						List<Hakemus> hakemukset = Collections.emptyList();
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-						// LOG.error("Excelin luonti");
-						PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
-						PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
-								hakuOid, hakukohdeOid, null, hakuNimi,
-								hakukohdeNimi, tarjoajaNimi, hakemukset,
-								Collections.emptySet(),
-								valintakoeTunnisteet, osallistumistiedot,
-								valintaperusteet, pistetiedot,
-								pistesyottoTuontiAdapteri);
-						pistesyottoExcel.getExcel().tuoXlsx(
-								exchange.getIn().getBody(InputStream.class));
-						Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = asMap(pistetiedot);
-						List<ApplicationAdditionalDataDTO> uudetPistetiedot = Lists
-								.newArrayList();
-						for (PistesyottoRivi rivi : pistesyottoTuontiAdapteri
-								.getRivit()) {
-							ApplicationAdditionalDataDTO additionalData = pistetiedotMapping
-									.get(rivi.getOid());
-							Map<String, String> newPistetiedot = rivi
-									.asAdditionalData();
+							 @Override
+							 public void process(Exchange exchange) throws Exception {
+								 dokumenttiprosessi(exchange).setKokonaistyo(
+										 // osallistumistiedot + valintaperusteet +
+										 // hakemuspistetiedot
+										 1 + 1
+												 // luonti
+												 + 1
+												 // tuonti hakupalveluun
+												 + 1);
+								 String hakuOid = hakuOid(exchange);
+								 String hakukohdeOid = hakukohdeOid(exchange);
+								 String hakuNimi = StringUtils.EMPTY;
+								 String hakukohdeNimi = StringUtils.EMPTY;
+								 String tarjoajaNimi = StringUtils.EMPTY;
+								 Future<List<ValintakoeOsallistuminenDTO>> osallistumistiedotFuture = valintakoeResource
+										 .haeHakutoiveelle(hakukohdeOid);
+								 Future<List<ValintaperusteDTO>> valintaperusteetFuture = valintaperusteetResource
+										 .findAvaimet(hakukohdeOid);
+								 Future<List<ApplicationAdditionalDataDTO>> pistetiedotFuture = applicationAsyncResource
+										 .getApplicationAdditionalData(hakuOid,
+												 hakukohdeOid);
+								 // LOG.error("Osallistumistiedot");
+								 List<ValintakoeOsallistuminenDTO> osallistumistiedot;
+								 try {
+									 osallistumistiedot = osallistumistiedotFuture.get();
+									 dokumenttiprosessi(exchange)
+											 .inkrementoiTehtyjaToita();
+								 } catch (Exception e) {
+									 dokumenttiprosessi(exchange)
+											 .getPoikkeukset()
+											 .add(new Poikkeus(
+													 Poikkeus.VALINTALASKENTA,
+													 "Osallistumistietojen haku valintalaskennoista epäonnistui. ",
+													 e.getMessage(), Poikkeus
+													 .hakukohdeOid(hakukohdeOid)));
+									 throw e;
+								 }
+								 // LOG.error("Valintaperusteet");
+								 List<ValintaperusteDTO> valintaperusteet;
+								 try {
+									 valintaperusteet = valintaperusteetFuture.get();
+								 } catch (Exception e) {
+									 dokumenttiprosessi(exchange)
+											 .getPoikkeukset()
+											 .add(new Poikkeus(
+													 Poikkeus.VALINTAPERUSTEET,
+													 "Valintaperusteiden haku epäonnistui. ",
+													 e.getMessage(), Poikkeus
+													 .hakukohdeOid(hakukohdeOid)));
+									 throw e;
+								 }
+								 Collection<String> valintakoeTunnisteet = FluentIterable
+										 .from(valintaperusteet)
+										 .transform(
+												 new Function<ValintaperusteDTO, String>() {
+													 @Override
+													 public String apply(
+															 ValintaperusteDTO input) {
+														 return input.getTunniste();
+													 }
+												 }).toList();
+								 dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+								 // LOG.error("Additional data");
+								 List<ApplicationAdditionalDataDTO> pistetiedot;
+								 try {
+									 pistetiedot = pistetiedotFuture.get();
+								 } catch (Exception e) {
+									 dokumenttiprosessi(exchange)
+											 .getPoikkeukset()
+											 .add(new Poikkeus(Poikkeus.HAKU,
+													 "Pistetietojen haku epäonnistui. ",
+													 e.getMessage(), Poikkeus
+													 .hakuOid(hakuOid), Poikkeus
+													 .hakukohdeOid(hakukohdeOid)));
+									 throw e;
+								 }
+								 List<Hakemus> hakemukset = Collections.emptyList();
+								 dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+								 // LOG.error("Excelin luonti");
+								 PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
+								 PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
+										 hakuOid, hakukohdeOid, null, hakuNimi,
+										 hakukohdeNimi, tarjoajaNimi, hakemukset,
+										 Collections.emptySet(),
+										 valintakoeTunnisteet, osallistumistiedot,
+										 valintaperusteet, pistetiedot,
+										 pistesyottoTuontiAdapteri);
+								 pistesyottoExcel.getExcel().tuoXlsx(
+										 exchange.getIn().getBody(InputStream.class));
+								 Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = asMap(pistetiedot);
 
-							if (rivi.isValidi()) {
-								LOG.debug("Rivi on muuttunut ja eheä. Tehdään päivitys hakupalveluun");
-								additionalData
-										.setAdditionalData(newPistetiedot);
-								uudetPistetiedot.add(additionalData);
-							} else {
-								LOG.warn("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
 
-								for (PistesyottoArvo arvo : rivi.getArvot()) {
-									if (!arvo.isValidi()) {
-										String virheIlmoitus = new StringBuffer()
-												.append("Henkilöllä ")
-												.append(rivi.getNimi())
-												//
-												.append(" (")
-												.append(rivi.getOid())
-												.append(")")
-												//
-												.append(" oli virheellinen arvo '")
-												.append(arvo.getArvo())
-												.append("'")
-												.append(" kohdassa ")
-												.append(arvo.getTunniste())
-												.toString();
-										dokumenttiprosessi(exchange)
-												.getPoikkeukset()
-												.add(new Poikkeus(
-														"Pistesyötön tuonti",
-														"", virheIlmoitus));
-										throw new RuntimeException(
-												virheIlmoitus);
-									}
-								}
-							}
-						}
-						applicationResource.putApplicationAdditionalData(
-								hakuOid, hakukohdeOid, uudetPistetiedot);
-						dokumenttiprosessi(exchange).setDokumenttiId("valmis");
-						dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-						// LOG.error("Done");
-					}
-				})
-				//
-				.stop();
-		/**
-		 * DEAD LETTER CHANNEL
-		 */
-		from(luontiEpaonnistui)
-		//
-		.log(LoggingLevel.ERROR,
+								 // TARKISTETAAN VIRHEET
+								 List<String> virheet = pistesyottoTuontiAdapteri
+										 .getRivit().stream()
+										 .filter(rivi -> !rivi.isValidi()).flatMap(
+												 rivi -> {
+													 LOG.warn("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
+
+													 for (PistesyottoArvo arvo : rivi.getArvot()) {
+														 if (!arvo.isValidi()) {
+															 String virheIlmoitus = new StringBuffer()
+																	 .append("Henkilöllä ")
+																	 .append(rivi.getNimi())
+																			 //
+																	 .append(" (")
+																	 .append(rivi.getOid())
+																	 .append(")")
+																			 //
+																	 .append(" oli virheellinen arvo '")
+																	 .append(arvo.getArvo())
+																	 .append("'")
+																	 .append(" kohdassa ")
+																	 .append(arvo.getTunniste())
+																	 .toString();
+															 return Stream.of(virheIlmoitus);
+													 /*
+
+													 */
+														 }
+													 }
+													 return Stream.empty();
+												 }
+										 ).collect(Collectors.toList());
+
+								 if (!virheet.isEmpty()) {
+									 String v = virheet.stream().collect(Collectors.joining(", "));
+									 dokumenttiprosessi(exchange)
+											 .getPoikkeukset()
+											 .add(new Poikkeus(
+													 "Pistesyötön tuonti",
+													 "", v));
+									 throw new RuntimeException(
+											 v);
+								 }
+								 List<ApplicationAdditionalDataDTO> uudetPistetiedot =
+										 pistesyottoTuontiAdapteri
+												 .getRivit().stream()
+												 //
+												 .filter(PistesyottoRivi::isValidi)
+														 //
+												 .flatMap(rivi -> {
+													 ApplicationAdditionalDataDTO additionalData = pistetiedotMapping
+															 .get(rivi.getOid());
+													 Map<String, String> newPistetiedot = rivi
+															 .asAdditionalData();
+													 if (newPistetiedot == null || newPistetiedot.isEmpty()) {
+														 LOG.info("Rivi on muuttunut ja eheä mutta pistetiedot on tyhjäjoukko. Hakemuspalvelu tallentaa vain muutokset joten ohitetaan rivi.");
+														 return Stream.empty();
+													 }
+													 LOG.debug("Rivi on muuttunut ja eheä. Tehdään päivitys hakupalveluun");
+													 additionalData
+															 .setAdditionalData(newPistetiedot);
+													 return Stream.of(additionalData);
+												 }).filter(Objects::nonNull).collect(Collectors.toList());
+
+								 if (uudetPistetiedot.isEmpty()) {
+									LOG.info("Ei tallennettavaa");
+								 } else {
+									 applicationResource.putApplicationAdditionalData(
+											 hakuOid, hakukohdeOid, uudetPistetiedot);
+								 }
+								 dokumenttiprosessi(exchange).setDokumenttiId("valmis");
+								 dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
+								 // LOG.error("Done");
+							 }
+						 }
+
+				)
+							//
+							.
+
+					stop();
+
+					/**
+					 * DEAD LETTER CHANNEL
+					 */
+					from(luontiEpaonnistui)
+					//
+					.
+
+					log(LoggingLevel.ERROR,
 						"Pistesyoton tuonti epaonnistui: ${exception.message}\r\n${exception.stacktrace}")
-						//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						if (dokumenttiprosessi(exchange).getPoikkeukset()
-								.isEmpty()) {
-							String syy;
-							if (exchange.getException() == null) {
-								syy = "Pistesyötön tuonti taulukkolaskennalla epäonnistui. Ota yhteys ylläpitoon.";
-							} else {
-								syy = exchange.getException().getMessage();
+					//
+					.
+
+					process(new Processor() {
+						public void process (Exchange exchange)throws Exception {
+							if (dokumenttiprosessi(exchange).getPoikkeukset()
+									.isEmpty()) {
+								String syy;
+								if (exchange.getException() == null) {
+									syy = "Pistesyötön tuonti taulukkolaskennalla epäonnistui. Ota yhteys ylläpitoon.";
+								} else {
+									syy = exchange.getException().getMessage();
+								}
+								dokumenttiprosessi(exchange).getPoikkeukset().add(
+										new Poikkeus(Poikkeus.KOOSTEPALVELU,
+												"Pistesyötön tuonti:", syy));
 							}
-							dokumenttiprosessi(exchange).getPoikkeukset().add(
-									new Poikkeus(Poikkeus.KOOSTEPALVELU,
-											"Pistesyötön tuonti:", syy));
 						}
 					}
-				})
-				//
-				.stop();
-	}
 
-	private Map<String, ApplicationAdditionalDataDTO> asMap(
+					)
+							//
+							.
+
+					stop();
+				}
+
+		private Map<String, ApplicationAdditionalDataDTO> asMap(
 			Collection<ApplicationAdditionalDataDTO> datas) {
 		Map<String, ApplicationAdditionalDataDTO> mapping = Maps.newHashMap();
 		for (ApplicationAdditionalDataDTO data : datas) {
