@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 /**
  * @author Jussi Jartamo
@@ -31,6 +32,18 @@ public class HakemusWrapper {
     private final static String HETU = "Henkilotunnus";
     private final static String SAHKOPOSTI = "Sähköposti";
     private final static String SYNTYMAAIKA = "syntymaaika";
+    private final static String KANSALLINEN_ID = "kansallinenIdTunnus";
+    private final static String PASSINNUMERO = "passinnumero";
+    private final static String KANSALAISUUS = "kansalaisuus";
+    private final static String POSTINUMERO_ULKOMAA = "postinumeroUlkomaa";
+    private final static String KAUPUNKI_ULKOMAA = "kaupunkiUlkomaa";
+    private final static String ASUINMAA = "asuinmaa";
+    private final static String SUOMALAINEN_LAHIOSOITE = "lahiosoite";
+    private final static String SUOMALAINEN_POSTINUMERO = "Postinumero";
+    private final static String OSOITE_ULKOMAA = "osoiteUlkomaa";
+    private final static String SUKUPUOLI = "sukupuoli";
+    private final static String NAINEN = "2";
+    private final static String MIES = "1";
     private Yhteystiedot yhteystiedot = null;
 
     public HakemusWrapper(Hakemus hakemus) {
@@ -41,9 +54,71 @@ public class HakemusWrapper {
         }
         this.hakemus = hakemus;
     }
+    public String getUlkomainenLahiosoite() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(OSOITE_ULKOMAA)).orElse(
+                StringUtils.EMPTY);
+    }
+    public String getSukupuoli() {
+        getHenkilotiedot();
+        return Stream.of(Optional.ofNullable(henkilotiedot.get(SUKUPUOLI)).orElse(
+                StringUtils.EMPTY)).map(s -> {
+            if(NAINEN.equals(s)) {
+                return "Nainen";
+            } else if(MIES.equals(s)) {
+                return "Mies";
+            }
+            return s;
+        }).findAny().get();
+    }
+    public String getKaupunkiUlkomaa() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(KAUPUNKI_ULKOMAA)).orElse(
+                StringUtils.EMPTY);
+    }
+    public String getUlkomainenPostinumero() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(POSTINUMERO_ULKOMAA)).orElse(
+                StringUtils.EMPTY);
+    }
+    public String getSuomalainenLahiosoite() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(SUOMALAINEN_LAHIOSOITE)).orElse(
+                StringUtils.EMPTY);
+    }
+    public String getSuomalainenPostinumero() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(SUOMALAINEN_POSTINUMERO)).orElse(
+                StringUtils.EMPTY);
+    }
 
     public Osoite getOsoite() {
         return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, null, null);
+    }
+
+    public String getAsuinmaa() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(ASUINMAA)).orElse(
+                StringUtils.EMPTY);
+    }
+
+
+    public String getKansallinenId() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(KANSALLINEN_ID)).orElse(
+                StringUtils.EMPTY);
+    }
+
+    public String getKansalaisuus() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(KANSALAISUUS)).orElse(
+                StringUtils.EMPTY);
+    }
+
+    public String getPassinnumero() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(PASSINNUMERO)).orElse(
+                StringUtils.EMPTY);
     }
 
     public String getPuhelinnumero() {

@@ -45,7 +45,18 @@ public class ExcelExportUtilTest {
 	@Ignore
 	@Test
 	public void testExport() throws IOException {
-		List<Valintatulos> valintatulokset = new Gson().fromJson(new InputStreamReader(new ClassPathResource("util/tilat.json").getInputStream()),  new TypeToken<List<Valintatulos>>() {
+		List<Valintatulos> valintatulokset = new GsonBuilder()
+				.registerTypeAdapter(Date.class, new JsonDeserializer() {
+					@Override
+					public Object deserialize(JsonElement json, Type typeOfT,
+											  JsonDeserializationContext context)
+							throws JsonParseException {
+						// TODO Auto-generated method stub
+						return new Date(json.getAsJsonPrimitive().getAsLong());
+					}
+
+				})
+				.create().fromJson(new InputStreamReader(new ClassPathResource("util/tilat.json").getInputStream()), new TypeToken<List<Valintatulos>>() {
 				}.getType());
 		
 		HakukohdeDTO sijoittelu =  new GsonBuilder()

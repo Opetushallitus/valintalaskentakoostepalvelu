@@ -161,10 +161,16 @@ public class SijoittelunTulosExcelKomponentti {
 						}
 					});
 		List<Object> valintatapajonoOtsikkoRivi = Lists.newArrayList();
-		valintatapajonoOtsikkoRivi.addAll(Arrays.asList("","","","","","","","")); // alun tyhjat pystyrivit
+		valintatapajonoOtsikkoRivi.addAll(Arrays.asList(
+				"","","","","","","","","",
+				"","","","","","","","")); // alun tyhjat pystyrivit
 		List<Object> otsikkoRivi = Lists.newArrayList();
-		otsikkoRivi.addAll(Arrays.asList("Hakemus", "Hakija","Henkilötunnus",
-				"Osoite", "Sähköposti", "Puhelinnumero", "Lupa julkaisuun", "Hakutoive"));
+		otsikkoRivi.addAll(Arrays.asList("Hakemus", "Hakija","Henkilötunnus", "Syntymäaika", "Sukupuoli",
+				"Lähiosoite", "Postinumero", "Osoite (ulkomaa)", "Postinumero (ulkomaa)", "Kaupunki (ulkomaa)",
+				"Asuinmaa",
+				"Kansallinen ID",
+				"Passin numero"
+				, "Sähköposti", "Puhelinnumero", "Lupa julkaisuun", "Hakutoive"));
 		{
 		int index = 0;
 		for(ValintatapajonoDTO jono : valintatapajonot) {
@@ -189,28 +195,25 @@ public class SijoittelunTulosExcelKomponentti {
 		valintatapajonot.stream().collect(Collectors.toMap(v -> v.getOid(), v -> v.getHakemukset().stream().collect(Collectors.toMap(h -> ((HakemusDTO)h).getHakemusOid(), h -> h))));
 		
 		for (HakemusDTO hDto : tarkeimmanPrioriteetinValintatapajono.getHakemukset()) {
-			/*
-			Map<String, IlmoittautumisTila> hakemusTilat = Collections
-					.emptyMap();
-			if (valintatapajononTilat.containsKey(jono.getOid())) {
-				hakemusTilat = valintatapajononTilat.get(jono.getOid());
-				if (hakemusTilat == null) {
-					hakemusTilat = Collections.emptyMap();
-				}
-			}
-			*/
-			
 			HakemusWrapper wrapper = new HakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
 			String nimi = new StringBuilder().append(wrapper.getSukunimi()).append(", ")
 			.append(wrapper.getEtunimi()).toString();
-	
-	
 			//"Hakemus", "Hakija","Henkilotunnus", "Osoite", "Sähköposti", "Puhelinnumero", "Lupa julkaisuun", "Hakutoive"
 			List<Object> hakemusRivi = Lists.newArrayList();
 			
 			hakemusRivi.addAll(Arrays.asList(hDto.getHakemusOid(),nimi, 
-					wrapper.getHenkilotunnusTaiSyntymaaika(),
-					wrapper.getOsoite(), wrapper.getSahkopostiOsoite(),
+					wrapper.getHenkilotunnus(),
+					wrapper.getSyntymaaika(),
+					wrapper.getSukupuoli(),
+					wrapper.getSuomalainenLahiosoite(),
+					wrapper.getSuomalainenPostinumero(),
+					wrapper.getUlkomainenLahiosoite(),
+					wrapper.getUlkomainenPostinumero(),
+					wrapper.getKaupunkiUlkomaa(),
+					wrapper.getAsuinmaa(),
+					wrapper.getKansallinenId(),
+					wrapper.getPassinnumero(),
+					wrapper.getSahkopostiOsoite(),
 					
 					wrapper.getPuhelinnumero(),
 					HakemusUtil.lupaJulkaisuun(wrapper.getLupaJulkaisuun()),wrapper.getHakutoiveenPrioriteetti(hakukohdeOid)
