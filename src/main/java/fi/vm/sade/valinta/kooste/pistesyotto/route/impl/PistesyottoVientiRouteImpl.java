@@ -43,7 +43,14 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminen
 /**
  * 
  * @author Jussi Jartamo
- * 
+ *
+ *
+ * /valintalaskenta-laskenta-service/resources/valintakoe/hakutoive/{hakukohdeOid}
+ * /haku-app/applications/listfull?appState=ACTIVE&appState=INCOMPLETE&rows=100000&asId={hakuOid}&aoOid={hakukohdeOid}
+ * /valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/{hakukohdeOid}
+ * /haku-app/applications/additionalData/{hakuOid}/{hakukohdeOid}
+ * POST [hakukohdeOids] /valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe
+ *
  */
 @Component
 public class PistesyottoVientiRouteImpl extends AbstractDokumenttiRouteBuilder {

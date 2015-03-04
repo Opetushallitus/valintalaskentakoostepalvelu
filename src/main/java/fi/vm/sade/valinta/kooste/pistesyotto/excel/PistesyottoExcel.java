@@ -210,7 +210,7 @@ public class PistesyottoExcel {
 					.addTeksti(tarjoajaNimi, 4).build());
 		}
 		rivit.add(Rivi.tyhjaRivi());
-		rivit.add(new RiviBuilder().addTyhja().addTyhja()
+		rivit.add(new RiviBuilder().addTyhja().addTyhja().addTyhja()
 				.addRivi(new OidRivi(tunnisteet, 2, true)).build());
 		final RiviBuilder valintakoeOtsikkoRiviBuilder = new RiviBuilder();
 		final RiviBuilder otsikkoRiviBuilder = new RiviBuilder()
@@ -325,6 +325,8 @@ public class PistesyottoExcel {
 						//Boolean.TRUE.equals(valintakoe.getKutsutaankoKaikki());
 				if (!kutsutaankoKaikki && !osallistuja) {
 					//
+					s.add(TekstiArvo.tyhja(false));
+					s.add(TekstiArvo.tyhja(false));
 					continue;
 				}
 				if (kutsutaankoKaikki || (valintakoe != null && Osallistuminen.OSALLISTUU.equals(valintakoe
