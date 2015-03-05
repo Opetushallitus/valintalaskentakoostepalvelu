@@ -5,7 +5,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,8 +116,20 @@ public class HakemuksetConverterUtil {
 						if (personOid != null
 								&& oppijaNumeroJaOppija.containsKey(personOid)) {
 							Oppija oppija = oppijaNumeroJaOppija.get(personOid);
+
 							Map<String, AvainArvoDTO> arvot = Optional.ofNullable(h.getAvaimet())
-									.orElse(Collections.emptyList()).stream().filter(Objects::nonNull).filter(a -> a.getAvain() != null).collect(Collectors.toMap(a -> a.getAvain(), a -> a));
+									.orElse(Collections.emptyList()).stream().filter(Objects::nonNull).filter(a -> StringUtils.isNotBlank(a.getAvain()))
+									.collect(Collectors.groupingBy(a -> a.getAvain(), Collectors.mapping(a -> a, Collectors.toList())))
+									.entrySet().stream()
+									.map(a -> {
+										if (a.getValue().size() != 1) {
+											LOG.error("Duplikaattiavain {} hakemuksella {} hakukohteessa {}", a.getKey(), h.getHakemusoid(), hakukohdeOid);
+											errors.put(h.getHakemusoid(), new RuntimeException("Duplikaattiavain "+a.getKey()+" hakemuksella "+ h.getHakemusoid()+" hakukohteessa " + hakukohdeOid));
+										}
+										return a.getValue().iterator().next();
+									})
+									.collect(Collectors.toMap(a -> a.getAvain(), a -> a));
+
 							Map<String, AvainArvoDTO> sureArvot = OppijaToAvainArvoDTOConverter.convert(oppija, parametritDTO).stream().collect(Collectors.toMap(a -> a.getAvain(), a -> a));
 							Map<String, AvainArvoDTO> merge = Maps.newHashMap();
 							merge.putAll(arvot);
