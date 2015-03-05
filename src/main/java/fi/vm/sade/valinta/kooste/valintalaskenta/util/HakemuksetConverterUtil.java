@@ -117,18 +117,8 @@ public class HakemuksetConverterUtil {
 								&& oppijaNumeroJaOppija.containsKey(personOid)) {
 							Oppija oppija = oppijaNumeroJaOppija.get(personOid);
 
-							Map<String, AvainArvoDTO> arvot = Optional.ofNullable(h.getAvaimet())
-									.orElse(Collections.emptyList()).stream().filter(Objects::nonNull).filter(a -> StringUtils.isNotBlank(a.getAvain()))
-									.collect(Collectors.groupingBy(a -> a.getAvain(), Collectors.mapping(a -> a, Collectors.toList())))
-									.entrySet().stream()
-									.map(a -> {
-										if (a.getValue().size() != 1) {
-											LOG.error("Duplikaattiavain {} hakemuksella {} hakukohteessa {}", a.getKey(), h.getHakemusoid(), hakukohdeOid);
-											errors.put(h.getHakemusoid(), new RuntimeException("Duplikaattiavain "+a.getKey()+" hakemuksella "+ h.getHakemusoid()+" hakukohteessa " + hakukohdeOid));
-										}
-										return a.getValue().iterator().next();
-									})
-									.collect(Collectors.toMap(a -> a.getAvain(), a -> a));
+							Map<String, AvainArvoDTO> arvot =
+									toAvainMap(h.getAvaimet(), h.getHakemusoid(), hakukohdeOid, errors);
 
 							Map<String, AvainArvoDTO> sureArvot = OppijaToAvainArvoDTOConverter.convert(oppija, parametritDTO).stream().collect(Collectors.toMap(a -> a.getAvain(), a -> a));
 							Map<String, AvainArvoDTO> merge = Maps.newHashMap();
@@ -157,6 +147,21 @@ public class HakemuksetConverterUtil {
 			throw new RuntimeException(errors.entrySet().iterator().next().getValue());
 		}
 		return hakemusDtot;
-
 	}
+
+	public static Map<String, AvainArvoDTO> toAvainMap(List<AvainArvoDTO> avaimet, String hakemusOid, String hakukohdeOid, Map<String, Exception> poikkeukset) {
+		return Optional.ofNullable(avaimet)
+				.orElse(Collections.emptyList()).stream().filter(Objects::nonNull).filter(a -> StringUtils.isNotBlank(a.getAvain()))
+				.collect(Collectors.groupingBy(a -> a.getAvain(), Collectors.mapping(a -> a, Collectors.toList())))
+				.entrySet().stream()
+				.map(a -> {
+					if (a.getValue().size() != 1) {
+						LOG.error("Duplikaattiavain {} hakemuksella {} hakukohteessa {}", a.getKey(), hakemusOid, hakukohdeOid);
+						poikkeukset.put(hakemusOid, new RuntimeException("Duplikaattiavain "+a.getKey()+" hakemuksella "+ hakemusOid +" hakukohteessa " + hakukohdeOid));
+					}
+					return a.getValue().iterator().next();
+				})
+				.collect(Collectors.toMap(a -> a.getAvain(), a -> a));
+	}
+
 }

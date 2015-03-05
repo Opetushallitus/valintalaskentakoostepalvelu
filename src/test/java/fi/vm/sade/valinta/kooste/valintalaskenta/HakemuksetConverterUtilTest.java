@@ -1,13 +1,13 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Maps;
+import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -26,6 +26,37 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 public class HakemuksetConverterUtilTest {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HakemuksetConverterUtilTest.class);
+
+	@Test
+	public void testaaToAvainMap() {
+		{
+			Map<String, Exception> poikkeukset = Maps.newHashMap();
+			HakemuksetConverterUtil.toAvainMap(Collections.emptyList(), "", "", poikkeukset);
+			Assert.assertTrue(poikkeukset.isEmpty());
+		}
+		{
+			Map<String, Exception> poikkeukset = Maps.newHashMap();
+			HakemuksetConverterUtil.toAvainMap(Arrays.asList(avain("a")), "", "", poikkeukset);
+			Assert.assertTrue(poikkeukset.isEmpty());
+		}
+		{
+			Map<String, Exception> poikkeukset = Maps.newHashMap();
+			HakemuksetConverterUtil.toAvainMap(Arrays.asList(avain("b"),avain("a")), "", "", poikkeukset);
+			Assert.assertTrue(poikkeukset.isEmpty());
+		}
+		{
+			Map<String, Exception> poikkeukset = Maps.newHashMap();
+			HakemuksetConverterUtil.toAvainMap(Arrays.asList(avain("a"),avain("a")), "", "", poikkeukset);
+			Assert.assertTrue(!poikkeukset.isEmpty());
+		}
+	}
+
+	private AvainArvoDTO avain(String avain) {
+		AvainArvoDTO a= new AvainArvoDTO();
+		a.setAvain(avain);
+		return a;
+	}
+
 
 	@Ignore
 	@Test
