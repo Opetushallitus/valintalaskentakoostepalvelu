@@ -49,6 +49,10 @@ public class SuoritusrekisteriSpec {
             arvosana.getArvio().setAsteikko("1-5");
             return ArvosanaBuilder.this;
         }
+        public ArvosanaBuilder setAsteikko_Osakoe() {
+            arvosana.getArvio().setAsteikko("OSAKOE");
+            return ArvosanaBuilder.this;
+        }
         public ArvosanaBuilder setAsteikko_yo() {
             arvosana.getArvio().setAsteikko("YO");
             return ArvosanaBuilder.this;

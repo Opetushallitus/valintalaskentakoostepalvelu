@@ -120,7 +120,9 @@ public class HakemuksetConverterUtil {
 							Map<String, AvainArvoDTO> arvot =
 									toAvainMap(h.getAvaimet(), h.getHakemusoid(), hakukohdeOid, errors);
 
-							Map<String, AvainArvoDTO> sureArvot = OppijaToAvainArvoDTOConverter.convert(oppija, parametritDTO).stream().collect(Collectors.toMap(a -> a.getAvain(), a -> a));
+							Map<String, AvainArvoDTO> sureArvot =
+									toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija, parametritDTO), h.getHakemusoid(), hakukohdeOid, errors);
+
 							Map<String, AvainArvoDTO> merge = Maps.newHashMap();
 							merge.putAll(arvot);
 							merge.putAll(sureArvot);
@@ -156,7 +158,7 @@ public class HakemuksetConverterUtil {
 				.entrySet().stream()
 				.map(a -> {
 					if (a.getValue().size() != 1) {
-						LOG.error("Duplikaattiavain {} hakemuksella {} hakukohteessa {}", a.getKey(), hakemusOid, hakukohdeOid);
+						LOG.error("Duplikaattiavain (avain={}) hakemuksella tai suoritusrekisterin arvosanassa (hakemusOid={}) hakukohteessa (hakukohdeOid={}). Jos kyseessä on osakokeen tunnus niin tarkista ettei samalla suorituksella/arvosanalla ole osakoeduplikaatteja.", a.getKey(), hakemusOid, hakukohdeOid);
 						poikkeukset.put(hakemusOid, new RuntimeException("Duplikaattiavain "+a.getKey()+" hakemuksella "+ hakemusOid +" hakukohteessa " + hakukohdeOid));
 					}
 					return a.getValue().iterator().next();

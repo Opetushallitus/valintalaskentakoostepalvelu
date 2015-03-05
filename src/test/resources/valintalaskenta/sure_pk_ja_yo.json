@@ -1,1 +1,988 @@
-{"oppijanumero":"1.2.246.562.24.63965854383","opiskelu":[],"suoritukset":[{"suoritus":{"henkiloOid":"1.2.246.562.24.63965854383","source":"1.2.246.562.24.41327169638","vahvistettu":true,"komo":"1.2.246.562.5.2013061010184237348007","myontaja":"1.2.246.562.10.43628088406","tila":"VALMIS","valmistuminen":"01.06.2008","yksilollistaminen":"Ei","suoritusKieli":"FI","id":"00350630-7d74-4485-9f90-9b1d63f13ccc"},"arvosanat":[{"id":"6596b42c-c269-4583-b17e-ebff9642c0b7","suoritus":"00350630-7d74-4485-9f90-9b1d63f13ccc","arvio":{"arvosana":"M","asteikko":"YO","pisteet":20},"aine":"AINEREAALI","lisatieto":"PS","valinnainen":false,"myonnetty":"21.12.2007","source":"1.2.246.562.10.43628088406","core":{"suoritus":"00350630-7d74-4485-9f90-9b1d63f13ccc","arvio":{"arvosana":"M","asteikko":"YO","pisteet":20},"aine":"AINEREAALI","lisatieto":"PS","valinnainen":false,"myonnetty":"21.12.2007"}},{"id":"c4f173b3-ab17-4e55-95b4-2f5732f4c6d9","suoritus":"00350630-7d74-4485-9f90-9b1d63f13ccc","arvio":{"arvosana":"M","asteikko":"YO","pisteet":26},"aine":"AINEREAALI","lisatieto":"HI","valinnainen":true,"myonnetty":"01.06.2008","source":"1.2.246.562.10.43628088406","core":{"suoritus":"00350630-7d74-4485-9f90-9b1d63f13ccc","arvio":{"arvosana":"M","asteikko":"YO","pisteet":26},"aine":"AINEREAALI","lisatieto":"HI","valinnainen":true,"myonnetty":"01.06.2008"}},{"id":"727183a4-8150-48c1-aef5-6393b116620e","suoritus":"00350630-7d74-4485-9f90-9b1d63f13ccc","arvio":{"arvosana":"E","asteikko":"YO","pisteet":252},"aine":"A","lisatieto":"EN","valinnainen":false,"myonnetty":"01.06.2008","source":"1.2.246.562.10.43628088406","core":{"suoritus":"00350630-7d74-4485-9f90-9b1d63f13ccc","arvio":{"arvosana":"E","asteikko":"YO","pisteet":252},"aine":"A","lisatieto":"EN","valinnainen":false,"myonnetty":"01.06.2008"}},{"id":"a78d32e8-e07f-4ff2-9673-57ee3939acc2","suoritus":"00350630-7d74-4485-9f90-9b1d63f13ccc","arvio":{"arvosana":"E","asteikko":"YO","pisteet":266},"aine":"B","lisatieto":"RU","valinnainen":false,"myonnetty":"21.12.2007","source":"1.2.246.562.10.43628088406","core":{"suoritus":"00350630-7d74-4485-9f90-9b1d63f13ccc","arvio":{"arvosana":"E","asteikko":"YO","pisteet":266},"aine":"B","lisatieto":"RU","valinnainen":false,"myonnetty":"21.12.2007"}},{"id":"ab0f94a0-d7b0-4215-b3a0-510a5dfc6880","suoritus":"00350630-7d74-4485-9f90-9b1d63f13ccc","arvio":{"arvosana":"E","asteikko":"YO","pisteet":86},"aine":"AI","lisatieto":"FI","valinnainen":false,"myonnetty":"01.06.2008","source":"1.2.246.562.10.43628088406","core":{"suoritus":"00350630-7d74-4485-9f90-9b1d63f13ccc","arvio":{"arvosana":"E","asteikko":"YO","pisteet":86},"aine":"AI","lisatieto":"FI","valinnainen":false,"myonnetty":"01.06.2008"}}]},{"suoritus":{"henkiloOid":"1.2.246.562.24.63965854383","source":"1.2.246.562.24.41327169638","vahvistettu":true,"komo":"1.2.246.562.13.62959769647","myontaja":"1.2.246.562.10.16546622305","tila":"VALMIS","valmistuminen":"03.02.2015","yksilollistaminen":"Ei","suoritusKieli":"SM","id":"a25fe559-ca59-4178-925e-2f11c10cfc08"},"arvosanat":[{"id":"e084676b-552f-46cf-bb19-472d96501523","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"LI","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"LI","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"bb1e709e-b383-4080-b08b-775d5e7305e9","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"LI","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"LI","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"336a1f93-492a-4561-b82a-f5233953e79d","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"KS","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"KS","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"da9fb250-fda6-4b56-8c5d-74e905ff11d0","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"KS","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"KS","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"be87424e-6ee3-43a7-8d90-72edf0a4dbe2","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"KS","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"KS","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"f508af9b-9071-4095-8965-b40ae956956f","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"KU","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"KU","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"a5fa3e5f-8a4f-46d5-ad90-0eb859ae4af2","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"9","asteikko":"4-10"},"aine":"YH","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"9","asteikko":"4-10"},"aine":"YH","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"f5e37afc-af03-457b-89cc-a92442a92f8d","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"KU","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"KU","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"0c4076b2-834a-492a-b553-52d667be85ff","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"HI","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"HI","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"598427d7-e781-48a7-9333-d84b0080dbdf","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"4","asteikko":"4-10"},"aine":"KT","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"4","asteikko":"4-10"},"aine":"KT","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"22d3864a-39c5-4785-b4ef-619ddf53f0aa","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"HI","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"HI","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"350ed01f-694c-4d05-bfbb-ae094e85db73","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"KT","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"KT","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"04e63029-1461-4830-972e-7b009ea2d49a","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"KT","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"KT","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"9cda1394-0044-4616-8823-73083e2faf6f","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"TE","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"TE","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"a1523fcc-db2c-49e0-ae25-e896d8e35973","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"HI","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"HI","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"f4df877e-138c-4590-9562-f982fc50b9f9","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"KE","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"KE","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"07b6a637-0a50-4ae9-88be-4d9742de742d","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"KE","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"KE","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"0763d64f-4649-4315-bd1a-2f6b3e887c44","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"KE","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"KE","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"e2005184-b54f-4b1e-99be-459a8ab0e96e","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"7","asteikko":"4-10"},"aine":"TE","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"7","asteikko":"4-10"},"aine":"TE","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"c3a08b8c-29e9-4141-8c39-e850fd5d9355","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"B23","lisatieto":"FR","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"B23","lisatieto":"FR","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"d2546eed-d6d3-488f-befc-7529fc16983c","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"9","asteikko":"4-10"},"aine":"B22","lisatieto":"RU","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"9","asteikko":"4-10"},"aine":"B22","lisatieto":"RU","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"1f4ab957-ff61-442b-8e9d-c6fcfb8429da","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"B2","lisatieto":"DE","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"8","asteikko":"4-10"},"aine":"B2","lisatieto":"DE","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"4d5ca947-5f40-4301-8c05-c64e52a6637c","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"B1","lisatieto":"IT","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"B1","lisatieto":"IT","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"40ca5cc1-9a59-40d8-9b0d-eb2abbb9cbbe","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"B1","lisatieto":"IT","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"B1","lisatieto":"IT","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"bd1ae1d1-5fe2-4a70-b2f7-efad80110210","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"10","asteikko":"4-10"},"aine":"A2","lisatieto":"LA","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"10","asteikko":"4-10"},"aine":"A2","lisatieto":"LA","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"55171dae-8f10-41b7-b3c4-858d274a9f7c","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"A12","lisatieto":"ES","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"A12","lisatieto":"ES","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"42adb362-844c-4a95-ac7a-0d4c077dca3c","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"A12","lisatieto":"ES","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"A12","lisatieto":"ES","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"9f163ec0-3ef0-48b2-a2e3-d8e1f4a217ed","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"7","asteikko":"4-10"},"aine":"B1","lisatieto":"IT","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"7","asteikko":"4-10"},"aine":"B1","lisatieto":"IT","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"a088c4d1-849e-443d-a45f-f530dc071eec","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"7","asteikko":"4-10"},"aine":"A22","lisatieto":"EN","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"7","asteikko":"4-10"},"aine":"A22","lisatieto":"EN","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"2a0726e0-d95e-4155-b5c6-c4d49ed15b5c","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"A1","lisatieto":"ZH","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"A1","lisatieto":"ZH","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"d6eb32ed-f2c4-480a-a9fe-2efc8bfdcf34","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"AI","lisatieto":"FI","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"AI","lisatieto":"FI","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"39757dfd-e624-403b-a5b7-b72151f2b076","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"A1","lisatieto":"ZH","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"5","asteikko":"4-10"},"aine":"A1","lisatieto":"ZH","valinnainen":true,"myonnetty":"01.01.2015"}},{"id":"b0365470-58f3-4c5b-b98a-c9cda5743b4b","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"7","asteikko":"4-10"},"aine":"A1","lisatieto":"ZH","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"7","asteikko":"4-10"},"aine":"A1","lisatieto":"ZH","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"7d6791ea-0e48-41c3-b901-575c7387d1fa","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"AI","lisatieto":"FI","valinnainen":false,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"6","asteikko":"4-10"},"aine":"AI","lisatieto":"FI","valinnainen":false,"myonnetty":"01.01.2015"}},{"id":"50f12ac7-2dbc-462a-98b3-b0a83a13fc94","suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"7","asteikko":"4-10"},"aine":"AI","lisatieto":"FI","valinnainen":true,"myonnetty":"01.01.2015","source":"1.2.246.562.24.41327169638","core":{"suoritus":"a25fe559-ca59-4178-925e-2f11c10cfc08","arvio":{"arvosana":"7","asteikko":"4-10"},"aine":"AI","lisatieto":"FI","valinnainen":true,"myonnetty":"01.01.2015"}}]}],"opiskeluoikeudet":[],"ensikertalainen":true,"id":"1.2.246.562.24.63965854383","source":"1.2.246.562.10.00000000001","core":"1.2.246.562.24.63965854383"}
+{
+  "oppijanumero": "1.2.246.562.24.63965854383",
+  "opiskelu": [],
+  "suoritukset": [
+    {
+      "suoritus": {
+        "henkiloOid": "1.2.246.562.24.63965854383",
+        "source": "1.2.246.562.24.41327169638",
+        "vahvistettu": true,
+        "komo": "1.2.246.562.5.2013061010184237348007",
+        "myontaja": "1.2.246.562.10.43628088406",
+        "tila": "VALMIS",
+        "valmistuminen": "01.06.2008",
+        "yksilollistaminen": "Ei",
+        "suoritusKieli": "FI",
+        "id": "00350630-7d74-4485-9f90-9b1d63f13ccc"
+      },
+      "arvosanat": [
+        {
+          "id": "6596b42c-c269-4583-b17e-ebff9642c0b7",
+          "suoritus": "00350630-7d74-4485-9f90-9b1d63f13ccc",
+          "arvio": {
+            "arvosana": "M",
+            "asteikko": "YO",
+            "pisteet": 20
+          },
+          "aine": "AINEREAALI",
+          "lisatieto": "PS",
+          "valinnainen": false,
+          "myonnetty": "21.12.2007",
+          "source": "1.2.246.562.10.43628088406",
+          "core": {
+            "suoritus": "00350630-7d74-4485-9f90-9b1d63f13ccc",
+            "arvio": {
+              "arvosana": "M",
+              "asteikko": "YO",
+              "pisteet": 20
+            },
+            "aine": "AINEREAALI",
+            "lisatieto": "PS",
+            "valinnainen": false,
+            "myonnetty": "21.12.2007"
+          }
+        },
+        {
+          "id": "c4f173b3-ab17-4e55-95b4-2f5732f4c6d9",
+          "suoritus": "00350630-7d74-4485-9f90-9b1d63f13ccc",
+          "arvio": {
+            "arvosana": "M",
+            "asteikko": "YO",
+            "pisteet": 26
+          },
+          "aine": "AINEREAALI",
+          "lisatieto": "HI",
+          "valinnainen": true,
+          "myonnetty": "01.06.2008",
+          "source": "1.2.246.562.10.43628088406",
+          "core": {
+            "suoritus": "00350630-7d74-4485-9f90-9b1d63f13ccc",
+            "arvio": {
+              "arvosana": "M",
+              "asteikko": "YO",
+              "pisteet": 26
+            },
+            "aine": "AINEREAALI",
+            "lisatieto": "HI",
+            "valinnainen": true,
+            "myonnetty": "01.06.2008"
+          }
+        },
+        {
+          "id": "727183a4-8150-48c1-aef5-6393b116620e",
+          "suoritus": "00350630-7d74-4485-9f90-9b1d63f13ccc",
+          "arvio": {
+            "arvosana": "E",
+            "asteikko": "YO",
+            "pisteet": 252
+          },
+          "aine": "A",
+          "lisatieto": "EN",
+          "valinnainen": false,
+          "myonnetty": "01.06.2008",
+          "source": "1.2.246.562.10.43628088406",
+          "core": {
+            "suoritus": "00350630-7d74-4485-9f90-9b1d63f13ccc",
+            "arvio": {
+              "arvosana": "E",
+              "asteikko": "YO",
+              "pisteet": 252
+            },
+            "aine": "A",
+            "lisatieto": "EN",
+            "valinnainen": false,
+            "myonnetty": "01.06.2008"
+          }
+        },
+        {
+          "id": "a78d32e8-e07f-4ff2-9673-57ee3939acc2",
+          "suoritus": "00350630-7d74-4485-9f90-9b1d63f13ccc",
+          "arvio": {
+            "arvosana": "E",
+            "asteikko": "YO",
+            "pisteet": 266
+          },
+          "aine": "B",
+          "lisatieto": "RU",
+          "valinnainen": false,
+          "myonnetty": "21.12.2007",
+          "source": "1.2.246.562.10.43628088406",
+          "core": {
+            "suoritus": "00350630-7d74-4485-9f90-9b1d63f13ccc",
+            "arvio": {
+              "arvosana": "E",
+              "asteikko": "YO",
+              "pisteet": 266
+            },
+            "aine": "B",
+            "lisatieto": "RU",
+            "valinnainen": false,
+            "myonnetty": "21.12.2007"
+          }
+        },
+        {
+          "id": "ab0f94a0-d7b0-4215-b3a0-510a5dfc6880",
+          "suoritus": "00350630-7d74-4485-9f90-9b1d63f13ccc",
+          "arvio": {
+            "arvosana": "E",
+            "asteikko": "YO",
+            "pisteet": 86
+          },
+          "aine": "AI",
+          "lisatieto": "FI",
+          "valinnainen": false,
+          "myonnetty": "01.06.2008",
+          "source": "1.2.246.562.10.43628088406",
+          "core": {
+            "suoritus": "00350630-7d74-4485-9f90-9b1d63f13ccc",
+            "arvio": {
+              "arvosana": "E",
+              "asteikko": "YO",
+              "pisteet": 86
+            },
+            "aine": "AI",
+            "lisatieto": "FI",
+            "valinnainen": false,
+            "myonnetty": "01.06.2008"
+          }
+        },
+        {
+          "id": "ab0f94a0-d7b0-4215-b3a0-510a5dfc6880",
+          "suoritus": "00350630-7d74-4485-9f90-9b1d63f13ccc",
+          "arvio": {
+            "arvosana": "34",
+            "asteikko": "OSAKOE"
+          },
+          "aine": "AI_T000",
+          "lisatieto": "FI",
+          "valinnainen": false,
+          "myonnetty": "01.06.2008",
+          "source": "1.2.246.562.10.43628088406"
+        }
+      ]
+    },
+    {
+      "suoritus": {
+        "henkiloOid": "1.2.246.562.24.63965854383",
+        "source": "1.2.246.562.24.41327169638",
+        "vahvistettu": true,
+        "komo": "1.2.246.562.13.62959769647",
+        "myontaja": "1.2.246.562.10.16546622305",
+        "tila": "VALMIS",
+        "valmistuminen": "03.02.2015",
+        "yksilollistaminen": "Ei",
+        "suoritusKieli": "SM",
+        "id": "a25fe559-ca59-4178-925e-2f11c10cfc08"
+      },
+      "arvosanat": [
+        {
+          "id": "e084676b-552f-46cf-bb19-472d96501523",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "LI",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "6",
+              "asteikko": "4-10"
+            },
+            "aine": "LI",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "bb1e709e-b383-4080-b08b-775d5e7305e9",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "LI",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "6",
+              "asteikko": "4-10"
+            },
+            "aine": "LI",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "336a1f93-492a-4561-b82a-f5233953e79d",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "8",
+            "asteikko": "4-10"
+          },
+          "aine": "KS",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "8",
+              "asteikko": "4-10"
+            },
+            "aine": "KS",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "da9fb250-fda6-4b56-8c5d-74e905ff11d0",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "KS",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "6",
+              "asteikko": "4-10"
+            },
+            "aine": "KS",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "be87424e-6ee3-43a7-8d90-72edf0a4dbe2",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "5",
+            "asteikko": "4-10"
+          },
+          "aine": "KS",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "5",
+              "asteikko": "4-10"
+            },
+            "aine": "KS",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "f508af9b-9071-4095-8965-b40ae956956f",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "KU",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "6",
+              "asteikko": "4-10"
+            },
+            "aine": "KU",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "a5fa3e5f-8a4f-46d5-ad90-0eb859ae4af2",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "9",
+            "asteikko": "4-10"
+          },
+          "aine": "YH",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "9",
+              "asteikko": "4-10"
+            },
+            "aine": "YH",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "f5e37afc-af03-457b-89cc-a92442a92f8d",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "5",
+            "asteikko": "4-10"
+          },
+          "aine": "KU",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "5",
+              "asteikko": "4-10"
+            },
+            "aine": "KU",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "0c4076b2-834a-492a-b553-52d667be85ff",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "5",
+            "asteikko": "4-10"
+          },
+          "aine": "HI",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "5",
+              "asteikko": "4-10"
+            },
+            "aine": "HI",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "598427d7-e781-48a7-9333-d84b0080dbdf",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "4",
+            "asteikko": "4-10"
+          },
+          "aine": "KT",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "4",
+              "asteikko": "4-10"
+            },
+            "aine": "KT",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "22d3864a-39c5-4785-b4ef-619ddf53f0aa",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "8",
+            "asteikko": "4-10"
+          },
+          "aine": "HI",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "8",
+              "asteikko": "4-10"
+            },
+            "aine": "HI",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "350ed01f-694c-4d05-bfbb-ae094e85db73",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "5",
+            "asteikko": "4-10"
+          },
+          "aine": "KT",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "5",
+              "asteikko": "4-10"
+            },
+            "aine": "KT",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "04e63029-1461-4830-972e-7b009ea2d49a",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "KT",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "6",
+              "asteikko": "4-10"
+            },
+            "aine": "KT",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "9cda1394-0044-4616-8823-73083e2faf6f",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "TE",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "6",
+              "asteikko": "4-10"
+            },
+            "aine": "TE",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "a1523fcc-db2c-49e0-ae25-e896d8e35973",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "HI",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "6",
+              "asteikko": "4-10"
+            },
+            "aine": "HI",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "f4df877e-138c-4590-9562-f982fc50b9f9",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "8",
+            "asteikko": "4-10"
+          },
+          "aine": "KE",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "8",
+              "asteikko": "4-10"
+            },
+            "aine": "KE",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "07b6a637-0a50-4ae9-88be-4d9742de742d",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "KE",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "6",
+              "asteikko": "4-10"
+            },
+            "aine": "KE",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "0763d64f-4649-4315-bd1a-2f6b3e887c44",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "5",
+            "asteikko": "4-10"
+          },
+          "aine": "KE",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "5",
+              "asteikko": "4-10"
+            },
+            "aine": "KE",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "e2005184-b54f-4b1e-99be-459a8ab0e96e",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "7",
+            "asteikko": "4-10"
+          },
+          "aine": "TE",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "7",
+              "asteikko": "4-10"
+            },
+            "aine": "TE",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "c3a08b8c-29e9-4141-8c39-e850fd5d9355",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "5",
+            "asteikko": "4-10"
+          },
+          "aine": "B23",
+          "lisatieto": "FR",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "5",
+              "asteikko": "4-10"
+            },
+            "aine": "B23",
+            "lisatieto": "FR",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "d2546eed-d6d3-488f-befc-7529fc16983c",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "9",
+            "asteikko": "4-10"
+          },
+          "aine": "B22",
+          "lisatieto": "RU",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "9",
+              "asteikko": "4-10"
+            },
+            "aine": "B22",
+            "lisatieto": "RU",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "1f4ab957-ff61-442b-8e9d-c6fcfb8429da",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "8",
+            "asteikko": "4-10"
+          },
+          "aine": "B2",
+          "lisatieto": "DE",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "8",
+              "asteikko": "4-10"
+            },
+            "aine": "B2",
+            "lisatieto": "DE",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "4d5ca947-5f40-4301-8c05-c64e52a6637c",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "B1",
+          "lisatieto": "IT",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "6",
+              "asteikko": "4-10"
+            },
+            "aine": "B1",
+            "lisatieto": "IT",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "40ca5cc1-9a59-40d8-9b0d-eb2abbb9cbbe",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "5",
+            "asteikko": "4-10"
+          },
+          "aine": "B1",
+          "lisatieto": "IT",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "5",
+              "asteikko": "4-10"
+            },
+            "aine": "B1",
+            "lisatieto": "IT",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "bd1ae1d1-5fe2-4a70-b2f7-efad80110210",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "10",
+            "asteikko": "4-10"
+          },
+          "aine": "A2",
+          "lisatieto": "LA",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "10",
+              "asteikko": "4-10"
+            },
+            "aine": "A2",
+            "lisatieto": "LA",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "55171dae-8f10-41b7-b3c4-858d274a9f7c",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "A12",
+          "lisatieto": "ES",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "6",
+              "asteikko": "4-10"
+            },
+            "aine": "A12",
+            "lisatieto": "ES",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "42adb362-844c-4a95-ac7a-0d4c077dca3c",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "5",
+            "asteikko": "4-10"
+          },
+          "aine": "A12",
+          "lisatieto": "ES",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "5",
+              "asteikko": "4-10"
+            },
+            "aine": "A12",
+            "lisatieto": "ES",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "9f163ec0-3ef0-48b2-a2e3-d8e1f4a217ed",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "7",
+            "asteikko": "4-10"
+          },
+          "aine": "B1",
+          "lisatieto": "IT",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "7",
+              "asteikko": "4-10"
+            },
+            "aine": "B1",
+            "lisatieto": "IT",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "a088c4d1-849e-443d-a45f-f530dc071eec",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "7",
+            "asteikko": "4-10"
+          },
+          "aine": "A22",
+          "lisatieto": "EN",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "7",
+              "asteikko": "4-10"
+            },
+            "aine": "A22",
+            "lisatieto": "EN",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "2a0726e0-d95e-4155-b5c6-c4d49ed15b5c",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "A1",
+          "lisatieto": "ZH",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "6",
+              "asteikko": "4-10"
+            },
+            "aine": "A1",
+            "lisatieto": "ZH",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "d6eb32ed-f2c4-480a-a9fe-2efc8bfdcf34",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "5",
+            "asteikko": "4-10"
+          },
+          "aine": "AI",
+          "lisatieto": "FI",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "5",
+              "asteikko": "4-10"
+            },
+            "aine": "AI",
+            "lisatieto": "FI",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "39757dfd-e624-403b-a5b7-b72151f2b076",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "5",
+            "asteikko": "4-10"
+          },
+          "aine": "A1",
+          "lisatieto": "ZH",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "5",
+              "asteikko": "4-10"
+            },
+            "aine": "A1",
+            "lisatieto": "ZH",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "b0365470-58f3-4c5b-b98a-c9cda5743b4b",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "7",
+            "asteikko": "4-10"
+          },
+          "aine": "A1",
+          "lisatieto": "ZH",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "7",
+              "asteikko": "4-10"
+            },
+            "aine": "A1",
+            "lisatieto": "ZH",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "7d6791ea-0e48-41c3-b901-575c7387d1fa",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "AI",
+          "lisatieto": "FI",
+          "valinnainen": false,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "6",
+              "asteikko": "4-10"
+            },
+            "aine": "AI",
+            "lisatieto": "FI",
+            "valinnainen": false,
+            "myonnetty": "01.01.2015"
+          }
+        },
+        {
+          "id": "50f12ac7-2dbc-462a-98b3-b0a83a13fc94",
+          "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+          "arvio": {
+            "arvosana": "7",
+            "asteikko": "4-10"
+          },
+          "aine": "AI",
+          "lisatieto": "FI",
+          "valinnainen": true,
+          "myonnetty": "01.01.2015",
+          "source": "1.2.246.562.24.41327169638",
+          "core": {
+            "suoritus": "a25fe559-ca59-4178-925e-2f11c10cfc08",
+            "arvio": {
+              "arvosana": "7",
+              "asteikko": "4-10"
+            },
+            "aine": "AI",
+            "lisatieto": "FI",
+            "valinnainen": true,
+            "myonnetty": "01.01.2015"
+          }
+        }
+      ]
+    }
+  ],
+  "opiskeluoikeudet": [],
+  "ensikertalainen": true,
+  "id": "1.2.246.562.24.63965854383",
+  "source": "1.2.246.562.10.00000000001",
+  "core": "1.2.246.562.24.63965854383"
+}

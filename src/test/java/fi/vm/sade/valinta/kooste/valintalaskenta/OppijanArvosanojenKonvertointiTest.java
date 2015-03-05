@@ -524,7 +524,215 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                     aa.stream().filter(a -> "AINEREAALI".equals(a.getAvain()) && "L".equals(a.getArvo())).count() == 1L);
         }
     }
-    
+
+    @Test
+    public void osakoeArvosanat() {
+        {
+            DateTime nyt = DateTime.now();
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmis()
+                    .arvosana()
+                    .setAine("AI")
+                    .setLisatieto("FI")
+                    .setAsteikko_yo()
+                    .setArvosana("L")
+                    .setPisteet(23)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+
+                    .arvosana()
+                    .setAine("AI")
+                    .setLisatieto("FI")
+                    .setAsteikko_yo()
+                    .setArvosana("M")
+                    .setPisteet(30)
+                    .setMyonnetty(nyt.minusDays(2))
+                    .build()
+
+                    .arvosana()
+                    .setAine("AI_01")
+                    .setLisatieto("FI")
+                    .setAsteikko_Osakoe()
+                    .setArvosana("45")
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+
+                    .arvosana()
+                    .setAine("AI_01")
+                    .setLisatieto("FI")
+                    .setAsteikko_Osakoe()
+                    .setArvosana("15")
+                    .setMyonnetty(nyt.minusDays(2))
+                    .build()
+                    .build()
+                    .build();
+            {
+                List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, laskennanalkamisparametri(nyt));
+                //LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+                Assert.assertTrue("A löytyy ja sen arvo on L",
+                        aa.stream().filter(a -> "A".equals(a.getAvain()) && "L".equals(a.getArvo())).count() == 1L);
+                // 45pisteen osakoetuloksella on parempi YO-arvosana
+                Assert.assertTrue("01 löytyy ja sen arvo on 45",
+                        aa.stream().filter(a -> "01".equals(a.getAvain()) && "45".equals(a.getArvo())).count() == 1L);
+            }
+        }
+        {
+            DateTime nyt = DateTime.now();
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmis()
+                    .arvosana()
+                    .setAine("AI")
+                    .setLisatieto("FI")
+                    .setAsteikko_yo()
+                    .setArvosana("M")
+                    .setPisteet(40)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+
+                    .arvosana()
+                    .setAine("AI")
+                    .setLisatieto("FI")
+                    .setAsteikko_yo()
+                    .setArvosana("M")
+                    .setPisteet(30)
+                    .setMyonnetty(nyt.minusDays(2))
+                    .build()
+
+                    .arvosana()
+                    .setAine("AI_01")
+                    .setLisatieto("FI")
+                    .setAsteikko_Osakoe()
+                    .setArvosana("45")
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+
+                    .arvosana()
+                    .setAine("AI_01")
+                    .setLisatieto("FI")
+                    .setAsteikko_Osakoe()
+                    .setArvosana("15")
+                    .setMyonnetty(nyt.minusDays(2))
+                    .build()
+                    .build()
+                    .build();
+            {
+                List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, laskennanalkamisparametri(nyt));
+                //LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+                Assert.assertTrue("A löytyy ja sen arvo on M",
+                        aa.stream().filter(a -> "A".equals(a.getAvain()) && "M".equals(a.getArvo())).count() == 1L);
+                // 45pisteen osakoetuloksella on paremmat pisteet
+                Assert.assertTrue("01 löytyy ja sen arvo on 45",
+                        aa.stream().filter(a -> "01".equals(a.getAvain()) && "45".equals(a.getArvo())).count() == 1L);
+            }
+        }
+        {
+            DateTime nyt = DateTime.now();
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmis()
+                    .arvosana()
+                    .setAine("AI")
+                    .setLisatieto("FI")
+                    .setAsteikko_yo()
+                    .setArvosana("M")
+                    .setPisteet(20)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+
+                    .arvosana()
+                    .setAine("AI_01")
+                    .setLisatieto("FI")
+                    .setAsteikko_Osakoe()
+                    .setArvosana("45")
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+
+                    .build()
+                    .build();
+            {
+                List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, laskennanalkamisparametri(nyt));
+                //LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+                Assert.assertTrue("A löytyy ja sen arvo on M",
+                        aa.stream().filter(a -> "A".equals(a.getAvain()) && "M".equals(a.getArvo())).count() == 1L);
+                // myonnetty samaan aikaan joten pitaisi loytya
+                Assert.assertTrue("01 löytyy ja sen arvo on 45",
+                        aa.stream().filter(a -> "01".equals(a.getAvain()) && "45".equals(a.getArvo())).count() == 1L);
+            }
+        }
+        {
+            DateTime nyt = DateTime.now();
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmis()
+                    .arvosana()
+                    .setAine("AI")
+                    .setLisatieto("FI")
+                    .setAsteikko_yo()
+                    .setArvosana("M")
+                    .setPisteet(20)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+
+                    .arvosana()
+                    .setAine("AI_R233") // joku osakoetunnus mista ei olla kiinnostuneita
+                    .setLisatieto("FI")
+                    .setAsteikko_Osakoe()
+                    .setArvosana("45")
+                    .setMyonnetty(nyt.plusDays(1))
+                    .build()
+
+                    .build()
+                    .build();
+            {
+                List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, laskennanalkamisparametri(nyt));
+                //LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+                Assert.assertTrue("A löytyy ja sen arvo on M",
+                        aa.stream().filter(a -> "A".equals(a.getAvain()) && "M".equals(a.getArvo())).count() == 1L);
+            }
+        }
+        {
+            DateTime nyt = DateTime.now();
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmis()
+                    .arvosana()
+                    .setAine("AI")
+                    .setLisatieto("FI")
+                    .setAsteikko_yo()
+                    .setArvosana("M")
+                    .setPisteet(20)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+
+                    .arvosana()
+                    .setAine("AI_01")
+                    .setLisatieto("FI")
+                    .setAsteikko_Osakoe()
+                    .setArvosana("45")
+                    .setMyonnetty(nyt.plusDays(1))
+                    .build()
+
+                    .build()
+                    .build();
+            {
+                List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, laskennanalkamisparametri(nyt));
+                //LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+                Assert.assertTrue("A löytyy ja sen arvo on M",
+                        aa.stream().filter(a -> "A".equals(a.getAvain()) && "M".equals(a.getArvo())).count() == 1L);
+                // Ei myonnetty samaan aikaan joten ei saisi loytya
+                Assert.assertTrue("01 löytyy ja sen arvo on 45",
+                        aa.stream().filter(a -> "01".equals(a.getAvain()) && "45".equals(a.getArvo())).count() == 0L);
+            }
+        }
+    }
+
     @Test
     public void yoTilaOnTrueJosSuoritusOnMerkittyValmiiksiMuutoinFalse() {
         {

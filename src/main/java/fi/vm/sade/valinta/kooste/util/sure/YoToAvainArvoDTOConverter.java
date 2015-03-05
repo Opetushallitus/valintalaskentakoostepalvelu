@@ -3,10 +3,13 @@ package fi.vm.sade.valinta.kooste.util.sure;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.ArvosanaWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,9 +22,12 @@ import java.util.stream.Stream;
  *
  */
 public class YoToAvainArvoDTOConverter {
-
+    private static final Logger LOG = LoggerFactory.getLogger(YoToAvainArvoDTOConverter.class);
+    private static final String OSAKOE_ASTEIKKO = "OSAKOE";
     private static final String YO_ASTEIKKO = "YO";
     private static final String PREFIKSI = "YO_";
+    private static final Set<String> OSAKOETUNNUS_WHITELIST =
+            Collections.unmodifiableSet(Sets.newHashSet(Arrays.asList("01","02","03","04","05","06","07","08","09","10")));
     private static final List<String> YO_ORDER = Collections
             .unmodifiableList(Arrays.asList("L", "E", "M", "C", "B", "A", "I"));
 
@@ -51,12 +57,48 @@ public class YoToAvainArvoDTOConverter {
         }
         return Stream.of(a);
     }
+
+    private static Arvosana normalisoi(Arvosana a) {
+        if(OSAKOE_ASTEIKKO.equals(a.getArvio().getAsteikko())) {
+            return new Arvosana(a.getId(), a.getSuoritus(),
+                    aineMapper(a.getAine().split("_")[0], a.getLisatieto()), a.getValinnainen(), a.getMyonnetty(), a.getSource(),
+                    a.getArvio(), a.getLisatieto());
+        } else {
+            return new Arvosana(a.getId(), a.getSuoritus(),
+                    aineMapper(a.getAine(), a.getLisatieto()), a.getValinnainen(), a.getMyonnetty(), a.getSource(),
+                    a.getArvio(), a.getLisatieto());
+        }
+    }
     public static Stream<AvainArvoDTO> convert(
             Optional<SuoritusJaArvosanat> suoritusOption) {
         SuoritusJaArvosanat yoSuoritus = suoritusOption.orElse(null);
         if(yoSuoritus == null) {
             return Stream.empty();
         }
+
+
+        Stream<ArvosanaJaAvainArvo> osakoeArvosanat = Stream.of(yoSuoritus)
+                //
+
+                //
+                .flatMap(s -> s.getArvosanat().stream())
+                        //
+                .filter(a -> a.getAine() != null && a.getArvio() != null
+                                && a.getArvio().getArvosana() != null
+                                && OSAKOE_ASTEIKKO.equals(a.getArvio().getAsteikko())
+                                && a.getAine().split("_").length == 2
+                                && OSAKOETUNNUS_WHITELIST.contains(a.getAine().split("_")[1])
+                )
+                //
+                .map(a -> {
+                    Arvosana normalisoituArvosana = normalisoi(a);
+                    AvainArvoDTO a0 = new AvainArvoDTO();
+                    a0.setArvo(a.getArvio().getArvosana());
+                    String[] avainJaOsakoetunnus = a.getAine().split("_");
+                    a0.setAvain(avainJaOsakoetunnus[1]);
+                    return new ArvosanaJaAvainArvo(normalisoituArvosana.getAine(), normalisoituArvosana, a0);
+                });
+
         Map<String, Arvosana> yoArvosanatMap = Stream.of(yoSuoritus)
                         //
 
@@ -65,16 +107,10 @@ public class YoToAvainArvoDTOConverter {
                         //
                 .filter(a -> a.getAine() != null && a.getArvio() != null
                                 && a.getArvio().getArvosana() != null
-                        //        && YO_ASTEIKKO.equals(a.getArvio().getAsteikko())
+                                && YO_ASTEIKKO.equals(a.getArvio().getAsteikko())
                 )
                         //
-                .map(a -> {
-                    String uusiAine = aineMapper(a.getAine(), a.getLisatieto());
-                    Arvosana arvosana = new Arvosana(a.getId(), a.getSuoritus(),
-                            uusiAine, a.getValinnainen(), a.getMyonnetty(), a.getSource(),
-                            a.getArvio(), a.getLisatieto());
-                    return arvosana;
-                })
+                .map(a -> normalisoi(a))
                         //
                 .collect(Collectors.toMap(Arvosana::getAine, a -> a,
                         (s, a) -> max(Arrays.asList(s, a))));
@@ -94,7 +130,7 @@ public class YoToAvainArvoDTOConverter {
             // LYHYT_KIELI = max(EC, FC, GC, L1, PC, SC, TC, VC, KC)
             // <br>
             // AIDINKIELI = max(O, A, I, W, Z, O5, A5)
-            List<AvainArvoDTO> aaa = Stream.of(
+            Stream<AvainArvoDTO> aaa = Stream.concat(osakoeArvosanat,Stream.of(
                     convert("AINEREAALI",
                             max(find(yoArvosanat, "UE", "UO", "ET", "FF", "PS",
                                     "HI", "FY", "KE", "BI", "GE", "TE", "YH"))),
@@ -115,12 +151,44 @@ public class YoToAvainArvoDTOConverter {
                     //
                     convert("AIDINKIELI",
                             max(find(yoArvosanat, "O", "A", "I", "W", "Z", "O5",
-                                    "A5")))).flatMap(a -> a).collect(Collectors.toList());
+                                    "A5"))),
+                    yoArvosanat.stream()
+                            .flatMap(a -> convert(a))).flatMap(a -> a))
+                    // Poista ylimaaraiset osakokeet (myonnetty eri paivana kuin mukaan otettu YO-arvosana)
+                    .collect(Collectors.groupingBy(a -> a.avain,
+                            Collectors.mapping(a -> a, Collectors.toList()))).entrySet().stream()
+                    .flatMap(a -> {
+                                LOG.error("{}", a.getValue().stream().map(x -> x.avain + ":" + x.getAvainArvoDTO().getAvain()).collect(Collectors.joining(",")));
+                                if (a.getValue().size() == 1) {
+                                // yksi avain joten palautetaan se jos yo-arvosana
+                                    return a.getValue().stream().filter(x0 -> YO_ASTEIKKO.equals(x0.getArvosana().getArvio().getAsteikko())).map(x0 -> x0.avainArvoDTO);
+                                } else {
+
+                                    Map<DateTime, List<ArvosanaJaAvainArvo>> myonnettyPvmMappingToArvosana =
+                                    a.getValue().stream().collect(Collectors.groupingBy(x -> ArvosanaWrapper.ARVOSANA_DTF.parseDateTime(x.arvosana.getMyonnetty()),
+                                            Collectors.mapping(x -> x, Collectors.toList()))).entrySet().stream()
+                                            // filteroidaan pelkat osakoetunnukset pois (ilman yo-arvosanaa) näitä ei kyllä pitäisi olla
+                                            .filter(x -> x.getValue().stream()
+                                                    // Onko edes yksi YO-arvosana
+                                                    .filter(x0 -> YO_ASTEIKKO.equals(x0.getArvosana().getArvio().getAsteikko())).findFirst().isPresent())
+                                                    .collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+
+                                    if(myonnettyPvmMappingToArvosana.size() > 1) {
+                                        // duplikaatti yo-arvosanoja
+                                        LOG.error("Duplikaatti YO-arvosanoja! {}");
+                                    }
+                                    Stream<AvainArvoDTO> s =
+                                    myonnettyPvmMappingToArvosana.entrySet().stream().flatMap(x -> x.getValue().stream().map(x0 -> x0.getAvainArvoDTO()));
+                                    return s;
+                                }                            }
+                    );
+            /*
             List<AvainArvoDTO> avaimet = Lists.newArrayList(yoArvosanat.stream()
                     .flatMap(a -> convert(a)).collect(Collectors.toList()));
-            avaimet.addAll(aaa);
+            */
+            //avaimet.addAll(aaa);
 
-            return Stream.concat(suorituksenTila(yoSuoritus), avaimet.stream().filter(Objects::nonNull));
+            return Stream.concat(suorituksenTila(yoSuoritus), aaa.filter(Objects::nonNull));
         }
     }
 
@@ -154,7 +222,7 @@ public class YoToAvainArvoDTOConverter {
                 .collect(Collectors.toList());
     }
 
-    private static Stream<AvainArvoDTO> convert(String avain, Arvosana arvosana) {
+    private static Stream<ArvosanaJaAvainArvo> convert(String avain, Arvosana arvosana) {
         if (arvosana == null) {
             return Stream.empty();
         }
@@ -162,27 +230,26 @@ public class YoToAvainArvoDTOConverter {
         aa.setArvo(arvosana.getArvio().getArvosana());
         aa.setAvain(avain);
         if(arvosana.getArvio().getPisteet() == null) {
-            return Stream.of(aa);
+            return Stream.of(new ArvosanaJaAvainArvo(arvosana,aa));
         }else {
             AvainArvoDTO aaPisteet = new AvainArvoDTO();
             aaPisteet.setArvo("" + arvosana.getArvio().getPisteet());
             aaPisteet.setAvain(avain + "_PISTEET");
-            return Stream.of(aa, aaPisteet);
+            return Stream.of(new ArvosanaJaAvainArvo(arvosana,aa), new ArvosanaJaAvainArvo(arvosana,aaPisteet));
         }
-
     }
 
-    private static Stream<AvainArvoDTO> convert(Arvosana arvosana) {
+    private static Stream<ArvosanaJaAvainArvo> convert(Arvosana arvosana) {
         AvainArvoDTO aa = new AvainArvoDTO();
         aa.setArvo(arvosana.getArvio().getArvosana());
         aa.setAvain(arvosana.getAine());
         if(arvosana.getArvio().getPisteet() == null) {
-            return Stream.of(aa);
+            return Stream.of(new ArvosanaJaAvainArvo(arvosana.getAine(),arvosana,aa));
         }
         AvainArvoDTO aaPisteet = new AvainArvoDTO();
         aaPisteet.setArvo("" + arvosana.getArvio().getPisteet());
         aaPisteet.setAvain(arvosana.getAine() + "_PISTEET");
-        return Stream.of(aa, aaPisteet);
+        return Stream.of(new ArvosanaJaAvainArvo(arvosana.getAine(),arvosana,aa), new ArvosanaJaAvainArvo(arvosana,aaPisteet));
     }
 
     private static String aineMapper(String aine, String lisatieto) {
@@ -292,5 +359,42 @@ public class YoToAvainArvoDTOConverter {
         }
 
     }
+    private static class ArvosanaJaAvainArvo implements Comparable<ArvosanaJaAvainArvo> {
+        private final Arvosana arvosana;
+        private final AvainArvoDTO avainArvoDTO;
+        private final String avain;
 
+        public ArvosanaJaAvainArvo(String avain, Arvosana arvosana, AvainArvoDTO avainArvoDTO) {
+            this.arvosana = arvosana;
+            this.avainArvoDTO = avainArvoDTO;
+            this.avain = avain;
+        }
+        public ArvosanaJaAvainArvo(Arvosana arvosana, AvainArvoDTO avainArvoDTO) {
+            this.arvosana = arvosana;
+            this.avainArvoDTO = avainArvoDTO;
+            this.avain = avainArvoDTO.getAvain();
+        }
+        @Override
+        public boolean equals(Object obj) {
+            if(avain == null || obj == null || !(obj instanceof ArvosanaJaAvainArvo)) {
+                return false;
+            } else {
+                return avain.equals(((ArvosanaJaAvainArvo)obj).avain);
+            }
+
+        }
+
+        @Override
+        public int compareTo(ArvosanaJaAvainArvo o) {
+            return avain.compareTo(o.avain);
+        }
+
+        public Arvosana getArvosana() {
+            return arvosana;
+        }
+
+        public AvainArvoDTO getAvainArvoDTO() {
+            return avainArvoDTO;
+        }
+    }
 }
