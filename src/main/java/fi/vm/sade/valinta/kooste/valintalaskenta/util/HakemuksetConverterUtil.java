@@ -99,34 +99,48 @@ public class HakemuksetConverterUtil {
 							+ Arrays.toString(epaonnistuneetKonversiot.keySet()
 									.toArray()) + "!");
 		}
-
+		Map<String, Exception> errors = Maps.newHashMap();
 		try {
 			if (oppijat != null) {
 				Map<String, Oppija> oppijaNumeroJaOppija = oppijat.stream()
 						.collect(
 								Collectors.toMap(o -> o.getOppijanumero(),
 										o -> o, (o1, o2) -> o2));
-				hakemusDtot.forEach(h -> {
-					String personOid = hakemusOidToPersonOid.get(h
-							.getHakemusoid());
-					if (personOid != null
-							&& oppijaNumeroJaOppija.containsKey(personOid)) {
-						Oppija oppija = oppijaNumeroJaOppija.get(personOid);
-						Map<String, AvainArvoDTO> arvot = Optional.ofNullable(h.getAvaimet())
-								.orElse(Collections.emptyList()).stream().filter(Objects::nonNull).filter(a -> a.getAvain() != null).collect(Collectors.toMap(a -> a.getAvain(), a-> a));
-						Map<String, AvainArvoDTO> sureArvot = OppijaToAvainArvoDTOConverter.convert(oppija, parametritDTO).stream().collect(Collectors.toMap(a -> a.getAvain(), a -> a));
-						Map<String, AvainArvoDTO> merge = Maps.newHashMap();
-						merge.putAll(arvot);
-						merge.putAll(sureArvot);
-						h.setAvaimet(merge.entrySet().stream().map(s -> s.getValue()).collect(Collectors.toList()));
+
+				hakemusDtot.stream().filter(h -> h.getHakemusoid() != null).forEach(h -> {
+					try {
+						String personOid = hakemusOidToPersonOid.get(h
+								.getHakemusoid());
+						if (personOid != null
+								&& oppijaNumeroJaOppija.containsKey(personOid)) {
+							Oppija oppija = oppijaNumeroJaOppija.get(personOid);
+							Map<String, AvainArvoDTO> arvot = Optional.ofNullable(h.getAvaimet())
+									.orElse(Collections.emptyList()).stream().filter(Objects::nonNull).filter(a -> a.getAvain() != null).collect(Collectors.toMap(a -> a.getAvain(), a -> a));
+							Map<String, AvainArvoDTO> sureArvot = OppijaToAvainArvoDTOConverter.convert(oppija, parametritDTO).stream().collect(Collectors.toMap(a -> a.getAvain(), a -> a));
+							Map<String, AvainArvoDTO> merge = Maps.newHashMap();
+							merge.putAll(arvot);
+							merge.putAll(sureArvot);
+							h.setAvaimet(merge.entrySet().stream().map(s -> s.getValue()).collect(Collectors.toList()));
+						}
+					} catch (Exception e) {
+						errors.put(h.getHakemusoid(), e);
 					}
 				});
 			}
 		} catch (Exception e) {
 			LOG.error(
-					"\r\n###\r\n### SURE YO-arvosanojen konversiossa odottamaton virhe {}\r\n{}\r\n###",
-					e.getMessage(), Arrays.toString(e.getStackTrace()));
+					"\r\n###\r\n### SURE YO-arvosanojen konversiossa (hakukohde={}) odottamaton virhe {}\r\n{}\r\n###",
+					hakukohdeOid, e.getMessage(), Arrays.toString(e.getStackTrace()));
 			throw e;
+		}
+		if(!errors.isEmpty()) {
+			errors.entrySet().forEach(err -> {
+				Exception e = err.getValue();
+				LOG.error(
+						"\r\n###\r\n### SURE YO-arvosanojen konversiossa (hakukohde={}, hakemus={}) odottamaton virhe {}\r\n{}\r\n###",
+						hakukohdeOid, err.getKey(), e.getMessage(), Arrays.toString(e.getStackTrace()));
+			});
+			throw new RuntimeException(errors.entrySet().iterator().next().getValue());
 		}
 		return hakemusDtot;
 
