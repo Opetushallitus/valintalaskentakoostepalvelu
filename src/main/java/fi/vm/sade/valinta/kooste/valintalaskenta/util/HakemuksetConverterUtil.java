@@ -1,9 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.util;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -115,7 +112,8 @@ public class HakemuksetConverterUtil {
 					if (personOid != null
 							&& oppijaNumeroJaOppija.containsKey(personOid)) {
 						Oppija oppija = oppijaNumeroJaOppija.get(personOid);
-						Map<String, AvainArvoDTO> arvot = h.getAvaimet().stream().collect(Collectors.toMap(a -> a.getAvain(), a-> a));
+						Map<String, AvainArvoDTO> arvot = Optional.ofNullable(h.getAvaimet())
+								.orElse(Collections.emptyList()).stream().filter(Objects::nonNull).filter(a -> a.getAvain() != null).collect(Collectors.toMap(a -> a.getAvain(), a-> a));
 						Map<String, AvainArvoDTO> sureArvot = OppijaToAvainArvoDTOConverter.convert(oppija, parametritDTO).stream().collect(Collectors.toMap(a -> a.getAvain(), a -> a));
 						Map<String, AvainArvoDTO> merge = Maps.newHashMap();
 						merge.putAll(arvot);
