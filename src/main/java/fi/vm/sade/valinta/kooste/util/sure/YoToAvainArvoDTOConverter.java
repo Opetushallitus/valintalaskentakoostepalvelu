@@ -158,7 +158,7 @@ public class YoToAvainArvoDTOConverter {
                     .collect(Collectors.groupingBy(a -> a.avain,
                             Collectors.mapping(a -> a, Collectors.toList()))).entrySet().stream()
                     .flatMap(a -> {
-                                LOG.error("{}", a.getValue().stream().map(x -> x.avain + ":" + x.getAvainArvoDTO().getAvain()).collect(Collectors.joining(",")));
+                                //LOG.debug("{}", a.getValue().stream().map(x -> x.avain + ":" + x.getAvainArvoDTO().getAvain()).collect(Collectors.joining(",")));
                                 if (a.getValue().size() == 1) {
                                 // yksi avain joten palautetaan se jos yo-arvosana
                                     return a.getValue().stream().filter(x0 -> YO_ASTEIKKO.equals(x0.getArvosana().getArvio().getAsteikko())).map(x0 -> x0.avainArvoDTO);
@@ -171,11 +171,13 @@ public class YoToAvainArvoDTOConverter {
                                             .filter(x -> x.getValue().stream()
                                                     // Onko edes yksi YO-arvosana
                                                     .filter(x0 -> YO_ASTEIKKO.equals(x0.getArvosana().getArvio().getAsteikko())).findFirst().isPresent())
-                                                    .collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+                                                    .collect(Collectors.toMap(x -> x.getKey(), x -> (List<ArvosanaJaAvainArvo>)x.getValue()));
 
                                     if(myonnettyPvmMappingToArvosana.size() > 1) {
-                                        // duplikaatti yo-arvosanoja
-                                        LOG.error("Duplikaatti YO-arvosanoja! {}");
+                                        // duplikaatti yo-arvosanoja: pitäisi jäädä kiinni jo aikaisemmissa vaiheissa joten tänne tuskin tullaan
+                                        String aine = myonnettyPvmMappingToArvosana.entrySet().iterator().next().getValue().iterator().next().getArvosana().getAine();
+                                        LOG.error("Duplikaatti YO-arvosanoja! Aine = {}", aine);
+                                        throw new RuntimeException("Duplikaatti YO-arvosanoja! Aine = "+ aine);
                                     }
                                     Stream<AvainArvoDTO> s =
                                     myonnettyPvmMappingToArvosana.entrySet().stream().flatMap(x -> x.getValue().stream().map(x0 -> x0.getAvainArvoDTO()));
