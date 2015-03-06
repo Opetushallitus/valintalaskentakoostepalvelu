@@ -111,6 +111,7 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 				wrapper.getUlkomainenPostinumero(),
 				wrapper.getKaupunkiUlkomaa(),
 				wrapper.getAsuinmaa(),
+				wrapper.getKansalaisuus(),
 				wrapper.getKansallinenId(),
 				wrapper.getPassinnumero(),
 				yhteystiedot.getSahkoposti(),

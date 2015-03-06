@@ -205,6 +205,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 					"Postinumero (ulkomaa)",
 					"Kaupunki (ulkomaa)",
 					"Asuinmaa",
+					"Kansalaisuus",
 					"Kansallinen ID",
 					"Passin numero",
 					"Sähköpostiosoite",
