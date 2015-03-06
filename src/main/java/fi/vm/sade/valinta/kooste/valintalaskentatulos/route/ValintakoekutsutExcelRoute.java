@@ -22,6 +22,7 @@ public interface ValintakoekutsutExcelRoute {
 
 	void luoXls(
 			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) DokumenttiProsessi prosessi,
+			@Property(OPH.HAKUOID) String hakuOid,
 			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
 			@Property("valintakoeOid") List<String> valintakoeOids,
 			@Property("hakemusOids") List<String> hakemusOids,

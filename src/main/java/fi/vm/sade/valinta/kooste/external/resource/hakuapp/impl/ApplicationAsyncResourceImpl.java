@@ -68,6 +68,9 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 				.get(new GenericType<List<ApplicationAdditionalDataDTO>>() { });
 	}
 
+	/**
+	 * /haku-app/applications/listfull?appState=ACTIVE&appState=INCOMPLETE&rows=100000&asId={hakuOid}&aoOid={hakukohdeOid}
+	 */
 	@Override
 	public Future<List<Hakemus>> getApplicationsByOid(String hakuOid,
 			String hakukohdeOid) {

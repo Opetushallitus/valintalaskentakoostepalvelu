@@ -98,6 +98,7 @@ public class ValintalaskentaExcelResource {
 	@ApiOperation(value = "Hakukohteen hyväksytyt Excel-raporttina", response = Response.class)
 	public ProsessiId haeTuloksetExcelMuodossa(
 	/* OPTIONAL */DokumentinLisatiedot lisatiedot,
+	@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid) {
 		if (lisatiedot == null) {
 			throw new RuntimeException("ValintakoeOid on pakollinen!");
@@ -107,7 +108,7 @@ public class ValintalaskentaExcelResource {
 					"Valintalaskentaexcel",
 					"Valintakoekutsut taulukkolaskenta tiedosto", "",
 					Arrays.asList("valintakoekutsut", "taulukkolaskenta"));
-			valintalaskentaTulos.luoXls(p, hakukohdeOid, lisatiedot
+			valintalaskentaTulos.luoXls(p, hakuOid, hakukohdeOid, lisatiedot
 					.getValintakoeOids(), lisatiedot.getHakemusOids(),
 					SecurityContextHolder.getContext().getAuthentication());
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(p);
