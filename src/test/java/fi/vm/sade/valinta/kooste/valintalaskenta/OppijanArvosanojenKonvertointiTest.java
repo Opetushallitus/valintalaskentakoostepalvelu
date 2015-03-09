@@ -1,15 +1,12 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
 import com.google.gson.GsonBuilder;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
-import fi.vm.sade.valinta.kooste.valintalaskenta.suoritusrekisteri.SuoritusrekisteriSpec;
+import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import org.joda.time.DateTime;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

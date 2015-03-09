@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.valintalaskenta.suoritusrekisteri;
+package fi.vm.sade.valinta.kooste.valintalaskenta.spec;
 
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
