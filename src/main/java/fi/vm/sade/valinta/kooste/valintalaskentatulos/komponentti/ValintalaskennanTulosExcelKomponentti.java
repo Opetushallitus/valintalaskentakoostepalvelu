@@ -100,7 +100,7 @@ public class ValintalaskennanTulosExcelKomponentti {
 						.getNimi() });
 				rivit.add(new Object[] { "Valintatapajonon numero",
 						vaihe.getJarjestysnumero() });
-				rivit.add(new Object[] { "Jonosija", "Hakija", "Yhteispisteet",
+				rivit.add(new Object[] { "Jonosija", "Hakija", "Pisteet",
 						"Hakutoive", "Valintatieto" });
 
 				for (fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO jono : vaihe
