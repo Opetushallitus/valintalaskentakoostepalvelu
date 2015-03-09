@@ -26,6 +26,8 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 	private final String sukunimi;
 	private final String etunimet;
 	private final String hakemusOid;
+	private final String postitoimipaikka;
+	private final String asuinmaaEnglanniksi;
 	private final Osoite osoite;
 	private final Yhteystiedot yhteystiedot;
 	private final Date paivamaara;
@@ -36,6 +38,8 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 
 	public ValintakoeRivi(String sukunimi,
 						  String etunimet,
+						  String postitoimipaikka,
+						  String asuinmaaEnglanniksi,
 			HakemusWrapper wrapper,
 						  String hakemusOid,
 			Date paivamaara, Map<String, String> osallistumistiedot,
@@ -43,6 +47,8 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 			boolean osallistuuEdesYhteen) {
 		this.sukunimi = StringUtils.trimToEmpty(sukunimi);
 		this.etunimet = StringUtils.trimToEmpty(etunimet);
+		this.asuinmaaEnglanniksi = asuinmaaEnglanniksi;
+		this.postitoimipaikka = postitoimipaikka;
 		this.hakemusOid = hakemusOid;
 		this.paivamaara = paivamaara;
 		this.yhteystiedot = yhteystiedot;
@@ -107,10 +113,11 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 				wrapper.getSukupuoli(),
 				wrapper.getSuomalainenLahiosoite(),
 				wrapper.getSuomalainenPostinumero(),
+				postitoimipaikka,
 				wrapper.getUlkomainenLahiosoite(),
 				wrapper.getUlkomainenPostinumero(),
 				wrapper.getKaupunkiUlkomaa(),
-				wrapper.getAsuinmaa(),
+				asuinmaaEnglanniksi,
 				wrapper.getKansalaisuus(),
 				wrapper.getKansallinenId(),
 				wrapper.getPassinnumero(),
@@ -133,7 +140,7 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 		for (Entry<String, String> e : osallistumistiedot.entrySet()) {
 			m.put(e.getKey(), e.getValue());
 		}
-		return new ValintakoeRivi(sukunimi, etunimet, wrapper, hakemusOid, v.paivamaara,
+		return new ValintakoeRivi(sukunimi, etunimet, postitoimipaikka, asuinmaaEnglanniksi, wrapper, hakemusOid, v.paivamaara,
 				m, osoite, yhteystiedot, osallistuuEdesYhteen
 						|| v.osallistuuEdesYhteen);
 	}

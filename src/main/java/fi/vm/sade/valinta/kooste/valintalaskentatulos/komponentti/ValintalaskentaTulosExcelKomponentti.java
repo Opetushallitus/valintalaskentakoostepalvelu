@@ -1,20 +1,17 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import org.apache.camel.Header;
 import org.apache.camel.Property;
 import org.apache.commons.lang.StringUtils;
@@ -63,19 +60,24 @@ public class ValintalaskentaTulosExcelKomponentti {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaTulosExcelKomponentti.class);
+	public static final String MAAT_JA_VALTIOT_1 = "maatjavaltiot1";
+	public static final String POSTI = "posti";
 
 	private final ValintatietoResource valintatietoService;
 	private final ValintaperusteetAsyncResource valintaperusteetValintakoeResource;
 	private final ApplicationAsyncResource applicationResource;
+	private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
 	@Autowired
 	public ValintalaskentaTulosExcelKomponentti(
 			ValintatietoResource valintatietoService,
 			ApplicationAsyncResource applicationResource,
-			ValintaperusteetAsyncResource valintaperusteetValintakoeResource) {
+			ValintaperusteetAsyncResource valintaperusteetValintakoeResource,
+			KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
 		this.valintatietoService = valintatietoService;
 		this.applicationResource = applicationResource;
 		this.valintaperusteetValintakoeResource = valintaperusteetValintakoeResource;
+		this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
 	}
 
 	public InputStream luoTuloksetXlsMuodossa(
@@ -93,9 +95,10 @@ public class ValintalaskentaTulosExcelKomponentti {
 		Future<List<Hakemus>> hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid);
 		Map<String, Future<List<ValintakoeDTO>>> valintakoeFutures = valintakoeOids.stream().collect(Collectors.toMap(vk -> vk, oid -> valintaperusteetValintakoeResource
 				.haeValintakokeet(Arrays.asList(oid))));
+		final Map<String, Koodi> maatJaValtiot1 = koodistoCachedAsyncResource.haeKoodisto(MAAT_JA_VALTIOT_1);
+		final Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(POSTI);
 		List<HakemusOsallistuminenDTO> tiedotHakukohteelle = valintatietoService
-				.haeValintatiedotHakukohteelle(hakukohdeOid,valintakoeOids);
-
+				.haeValintatiedotHakukohteelle(hakukohdeOid, valintakoeOids);
 		final Map<String, String> nivelvaiheenKoekutsut = Maps.newHashMap();
 		List<ValintakoeNimi> tunnisteet = Lists.newArrayList();
 		for (String oid : valintakoeOids) {
@@ -147,7 +150,9 @@ public class ValintalaskentaTulosExcelKomponentti {
 					}
 					if(mapping.containsKey(tieto.getHakemusOid())) {
 						hakemusJaRivi.put(tieto.getHakemusOid(),
-								muodostaValintakoeRivi(mapping.get(tieto.getHakemusOid()), tieto, tunnisteet));
+								muodostaValintakoeRivi(
+										posti,maatJaValtiot1,
+										mapping.get(tieto.getHakemusOid()), tieto, tunnisteet));
 					}
 					//
 				}
@@ -168,6 +173,8 @@ public class ValintalaskentaTulosExcelKomponentti {
 
 						ValintakoeRivi v = new ValintakoeRivi(
 								wrapper.getSukunimi(), wrapper.getEtunimi(),
+								haeKoodistaArvo(posti.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero()),
+								haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa()),
 								wrapper,
 								hakemus.getOid(), null, nivelvaiheenKoekutsut,
 								osoite,
@@ -201,6 +208,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 					"Sukupuoli",
 					"Lähiosoite",
 					"Postinumero",
+					"Postitoimipaikka",
 					"Osoite (ulkomaa)",
 					"Postinumero (ulkomaa)",
 					"Kaupunki (ulkomaa)",
@@ -232,6 +240,21 @@ public class ValintalaskentaTulosExcelKomponentti {
 			throw e;
 		}
 	}
+	private String haeKoodistaArvo(Koodi koodi, final String preferoituKieli, String defaultArvo) {
+		if(koodi == null || koodi.getMetadata() == null) { // || koodi.getMetadata().isEmpty()
+			return defaultArvo;
+		} else {
+			return Stream.of(
+					// Nimi halutulla kielellä
+					koodi.getMetadata().stream().filter(m -> preferoituKieli.equals(m.getKieli())),
+					// tai suomenkielellä
+					koodi.getMetadata().stream().filter(m -> KieliUtil.SUOMI.equals(m.getKieli())),
+					// tai millä vaan kielellä
+					koodi.getMetadata().stream()).flatMap(a -> a).findFirst().map(m -> m.getNimi())
+					// tai tyhjä merkkijono
+					.orElse(defaultArvo);
+		}
+	}
 
 	private String suomenna(OsallistuminenDTO osallistuminen) {
 		if (osallistuminen != null) {
@@ -246,7 +269,10 @@ public class ValintalaskentaTulosExcelKomponentti {
 		return StringUtils.EMPTY;
 	}
 
-	private ValintakoeRivi muodostaValintakoeRivi(Hakemus h,
+	private ValintakoeRivi muodostaValintakoeRivi(
+			Map<String, Koodi> posti,
+			Map<String, Koodi> maatJaValtiot1,
+			Hakemus h,
 			HakemusOsallistuminenDTO o, List<ValintakoeNimi> tunnisteet) {
 
 		Date date = o.getLuontiPvm();
@@ -279,7 +305,11 @@ public class ValintalaskentaTulosExcelKomponentti {
 		//Hakemus h = applicationResource.getApplicationByOid(o.getHakemusOid());
 		Osoite osoite = OsoiteHakemukseltaUtil
 				.osoiteHakemuksesta(h, null, null);
-		return new ValintakoeRivi(o.getSukunimi(), o.getEtunimi(),new HakemusWrapper(h),
+		HakemusWrapper wrapper = new HakemusWrapper(h);
+		return new ValintakoeRivi(o.getSukunimi(), o.getEtunimi(),
+				haeKoodistaArvo(posti.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero()),
+				haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa()),
+				wrapper,
 				o.getHakemusOid(), date, osallistumistiedot, osoite,
 				Yhteystiedot.yhteystiedotHakemukselta(h), osallistuuEdesYhteen);
 	}

@@ -9,6 +9,15 @@ public class Metadata {
     //private String lyhytNimi;
     private String kieli;
 
+
+    public void setKieli(String kieli) {
+        this.kieli = kieli;
+    }
+
+    public void setNimi(String nimi) {
+        this.nimi = nimi;
+    }
+
     public String getKieli() {
         return kieli;
     }

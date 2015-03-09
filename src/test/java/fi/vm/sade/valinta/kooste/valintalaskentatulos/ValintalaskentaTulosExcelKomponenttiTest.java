@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Futures;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
@@ -8,6 +9,10 @@ import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.ValintatietoResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.ValintalaskentaTulosExcelKomponentti;
@@ -21,10 +26,7 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Future;
 
 /**
@@ -69,17 +71,43 @@ public class ValintalaskentaTulosExcelKomponenttiTest {
                 new TypeToken<List<ValintakoeDTO>>() {
                 }.getType()));
 
+
+
         ValintatietoResource valintatietoService = Mockito.mock(ValintatietoResource.class);
         ApplicationAsyncResource applicationResource = Mockito.mock(ApplicationAsyncResource.class);
         ValintaperusteetAsyncResource valintaperusteetValintakoeResource = Mockito.mock(ValintaperusteetAsyncResource.class);
 
+        //KoodistoAsyncResource koodistoAsyncResource = Mockito.mock(KoodistoAsyncResource.class);
+        //Mockito.when(koodistoAsyncResource.haeKoodisto(Mockito.eq("")).thenReturn(null);
+        Map<String, Koodi> maatJaValtiot1 = Maps.newHashMap();
+        Map<String, Koodi> posti = Maps.newHashMap();
+        {
+            Koodi npl = new Koodi();
+            Metadata nplFi = new Metadata();
+            nplFi.setKieli("SV");
+            nplFi.setNimi("Nepal");
+            npl.setMetadata(Arrays.asList(nplFi));
+            maatJaValtiot1.put("NPL", npl);
+        }
+        {
+            Koodi npl = new Koodi();
+            Metadata nplFi = new Metadata();
+            nplFi.setKieli("EN");
+            nplFi.setNimi("NEDERLAPPFORS");
+            npl.setMetadata(Arrays.asList(nplFi));
+            posti.put("68840", npl);
+        }
 
+        KoodistoCachedAsyncResource koodistoCachedAsyncResource = Mockito.mock(KoodistoCachedAsyncResource.class);
+        Mockito.when(koodistoCachedAsyncResource.haeKoodisto(Mockito.eq(ValintalaskentaTulosExcelKomponentti.MAAT_JA_VALTIOT_1))).thenReturn(maatJaValtiot1);
+        Mockito.when(koodistoCachedAsyncResource.haeKoodisto(Mockito.eq(ValintalaskentaTulosExcelKomponentti.POSTI))).thenReturn(posti);
         Mockito.when(valintatietoService.haeValintatiedotHakukohteelle(Mockito.anyString(), Mockito.anyList())).thenReturn(valintatiedot);
         Mockito.when(applicationResource.getApplicationsByOid(Mockito.anyString(), Mockito.anyString())).thenReturn(hakemukset);
         Mockito.when(valintaperusteetValintakoeResource.haeValintakokeet(Mockito.anyList())).thenReturn(valintakoe);
 
         ValintalaskentaTulosExcelKomponentti v = new ValintalaskentaTulosExcelKomponentti(
-                valintatietoService,applicationResource,valintaperusteetValintakoeResource
+                valintatietoService,applicationResource,valintaperusteetValintakoeResource,
+                koodistoCachedAsyncResource
         );
 
         InputStream inp = v.luoTuloksetXlsMuodossa("","",

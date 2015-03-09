@@ -17,6 +17,10 @@ public class Koodi {
     private String voimassaLoppuPvm;
     private List<Metadata> metadata;
 
+    public void setMetadata(List<Metadata> metadata) {
+        this.metadata = metadata;
+    }
+
     public int getVersio() {
         return versio;
     }
