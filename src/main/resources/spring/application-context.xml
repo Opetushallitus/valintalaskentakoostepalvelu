@@ -485,6 +485,11 @@
 	<bean
 		class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteImpl" />
 
+	<!--Koodisto -->
+	<bean
+			class="fi.vm.sade.valinta.kooste.external.resource.koodisto.impl.KoodistoAsyncResourceImpl" />
+	<bean
+			class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource" />
 	<!-- Seuranta Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.DokumentinSeurantaAsyncResourceImpl" />
