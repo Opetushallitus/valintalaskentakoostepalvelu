@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +43,7 @@ public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoA
                     .path(url)
                     .query("onlyValidKoodis", true)
                     //.query("koodistoVersio", 1)
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
                     .get(new Callback<List<Koodi>>(GSON, address, url, callback, failureCallback, new TypeToken<List<Koodi>>() {
                     }.getType())));
@@ -59,6 +61,7 @@ public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoA
                     .path(url)
                     .query("onlyValidKoodis", true)
                             //.query("koodistoVersio", 1)
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
                     .get(new GenericType<List<Koodi>>() {
                     });
