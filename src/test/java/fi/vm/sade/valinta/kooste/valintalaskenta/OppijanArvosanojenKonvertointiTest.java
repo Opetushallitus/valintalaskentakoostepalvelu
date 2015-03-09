@@ -524,6 +524,134 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                     aa.stream().filter(a -> "AINEREAALI".equals(a.getAvain()) && "L".equals(a.getArvo())).count() == 1L);
         }
     }
+    @Test
+    public void yoArvosanatRoolitukset() {
+        //
+        {
+            DateTime nyt = DateTime.now();
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmis()
+                    .arvosana()
+                    .setAine("VI2")
+                    .setLisatieto("FI")
+                    .setAsteikko_yo()
+                    .setArvosana("M")
+                    .setPisteet(20)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+                    .arvosana()
+                    .setAine("VI2")
+                    .setLisatieto("RU")
+                    .setAsteikko_yo()
+                    .setArvosana("M")
+                    .setPisteet(20)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+                    .build()
+                    .build();
+
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, laskennanalkamisparametri(nyt));
+            //LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            // AIDINKIELI
+            Assert.assertTrue("A5_ROOLI löytyy ja sen arvo on 14",
+                    aa.stream().filter(a -> "A5_ROOLI".equals(a.getAvain()) && "14".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("O5_ROOLI löytyy ja sen arvo on 14",
+                    aa.stream().filter(a -> "O5_ROOLI".equals(a.getAvain()) && "14".equals(a.getArvo())).count() == 1L);
+        }
+
+        {
+            DateTime nyt = DateTime.now();
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmis()
+                    .arvosana()
+                    .setAine("AI")
+                    .setLisatieto("FI")
+                    .setAsteikko_yo()
+                    .setArvosana("M")
+                    .setPisteet(20)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+                    .build()
+                    .build();
+
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, laskennanalkamisparametri(nyt));
+
+            // AIDINKIELI
+            Assert.assertTrue("A_ROOLI löytyy ja sen arvo on 11",
+                    aa.stream().filter(a -> "A_ROOLI".equals(a.getAvain()) && "11".equals(a.getArvo())).count() == 1L);
+        }
+        {
+            DateTime nyt = DateTime.now();
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmis()
+                    .arvosana()
+                    .setAine("AI")
+                    .setLisatieto("ZA")
+                    .setAsteikko_yo()
+                    // VAIN VALINNAISET VOI OLLA YLIMAARAISIA
+                    .setValinnainen()
+                    .setArvosana("M")
+                    .setPisteet(20)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+
+                    .arvosana()
+                    .setAine("AI")
+                    .setLisatieto("RU")
+                    .setAsteikko_yo()
+                            // VAIN VALINNAISET VOI OLLA YLIMAARAISIA
+                    .setValinnainen()
+                    .setArvosana("M")
+                    .setPisteet(20)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+
+                    .arvosana()
+                    .setAine("AI")
+                    .setLisatieto("IS")
+                    .setAsteikko_yo()
+                    .setArvosana("L")
+                    .setPisteet(44)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+
+                    .arvosana()
+                    .setAine("KYPSYYS")
+                    .setAsteikko_yo()
+                    .setLisatieto("EN")
+                    .setArvosana("M")
+                    .setPisteet(25)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+
+                    .build()
+                    .build();
+
+                List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, laskennanalkamisparametri(nyt));
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+                // KYPSYYSNÄYTE ENGLANNILLE
+                Assert.assertTrue("J_ROOLI löytyy ja sen arvo on 13",
+                        aa.stream().filter(a -> "J_ROOLI".equals(a.getAvain()) && "13".equals(a.getArvo())).count() == 1L);
+                // AIDINKIELI (SAAME)
+                Assert.assertTrue("I_ROOLI löytyy ja sen arvo on 12",
+                        aa.stream().filter(a -> "I_ROOLI".equals(a.getAvain()) && "12".equals(a.getArvo())).count() == 1L);
+                // TOINEN AIDINKIELI
+                Assert.assertTrue("Z_ROOLI löytyy ja sen arvo on 60",
+                        aa.stream().filter(a -> "Z_ROOLI".equals(a.getAvain()) && "60".equals(a.getArvo())).count() == 1L);
+                Assert.assertTrue("Z_ROOLI löytyy ja sen arvo ei ole 12",
+                    aa.stream().filter(a -> "Z_ROOLI".equals(a.getAvain()) && "12".equals(a.getArvo())).count() == 0L);
+                // TOINEN AIDINKIELI
+                Assert.assertTrue("O_ROOLI löytyy ja sen arvo on 60",
+                        aa.stream().filter(a -> "O_ROOLI".equals(a.getAvain()) && "60".equals(a.getArvo())).count() == 1L);
+        }
+
+    }
 
     @Test
     public void osakoeArvosanat() {

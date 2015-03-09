@@ -130,60 +130,78 @@ public class YoToAvainArvoDTOConverter {
             // LYHYT_KIELI = max(EC, FC, GC, L1, PC, SC, TC, VC, KC)
             // <br>
             // AIDINKIELI = max(O, A, I, W, Z, O5, A5)
-            Stream<AvainArvoDTO> aaa = Stream.concat(osakoeArvosanat,Stream.of(
-                    convert("AINEREAALI",
-                            max(find(yoArvosanat, "UE", "UO", "ET", "FF", "PS",
-                                    "HI", "FY", "KE", "BI", "GE", "TE", "YH"))),
-                    //
-                    convert("REAALI", max(find(yoArvosanat, "RR", "RO", "RY"))),
-                    //
-                    convert("PITKA_KIELI",
-                            max(find(yoArvosanat, "EA", "FA", "GA", "HA", "PA",
-                                    "SA", "TA", "VA", "S9"))),
-                    //
-                    convert("KESKIPITKA_KIELI",
-                            max(find(yoArvosanat, "EB", "FB", "GB", "HB", "PB",
-                                    "SB", "TB", "VB"))),
-                    //
-                    convert("LYHYT_KIELI",
-                            max(find(yoArvosanat, "EC", "FC", "GC", "L1", "PC",
-                                    "SC", "TC", "VC", "KC", "L7"))),
-                    //
-                    convert("AIDINKIELI",
-                            max(find(yoArvosanat, "O", "A", "I", "W", "Z", "O5",
-                                    "A5"))),
+            List<ArvosanaJaAvainArvo> mukaanOtetutYoArvosanat =
                     yoArvosanat.stream()
-                            .flatMap(a -> convert(a))).flatMap(a -> a))
-                    // Poista ylimaaraiset osakokeet (myonnetty eri paivana kuin mukaan otettu YO-arvosana)
-                    .collect(Collectors.groupingBy(a -> a.avain,
-                            Collectors.mapping(a -> a, Collectors.toList()))).entrySet().stream()
-                    .flatMap(a -> {
-                                //LOG.debug("{}", a.getValue().stream().map(x -> x.avain + ":" + x.getAvainArvoDTO().getAvain()).collect(Collectors.joining(",")));
-                                if (a.getValue().size() == 1) {
-                                // yksi avain joten palautetaan se jos yo-arvosana
-                                    return a.getValue().stream().filter(x0 -> YO_ASTEIKKO.equals(x0.getArvosana().getArvio().getAsteikko())).map(x0 -> x0.avainArvoDTO);
-                                } else {
+                            .flatMap(a -> convert(a)).collect(Collectors.toList());
 
-                                    Map<DateTime, List<ArvosanaJaAvainArvo>> myonnettyPvmMappingToArvosana =
-                                    a.getValue().stream().collect(Collectors.groupingBy(x -> ArvosanaWrapper.ARVOSANA_DTF.parseDateTime(x.arvosana.getMyonnetty()),
-                                            Collectors.mapping(x -> x, Collectors.toList()))).entrySet().stream()
-                                            // filteroidaan pelkat osakoetunnukset pois (ilman yo-arvosanaa) näitä ei kyllä pitäisi olla
-                                            .filter(x -> x.getValue().stream()
-                                                    // Onko edes yksi YO-arvosana
-                                                    .filter(x0 -> YO_ASTEIKKO.equals(x0.getArvosana().getArvio().getAsteikko())).findFirst().isPresent())
-                                                    .collect(Collectors.toMap(x -> x.getKey(), x -> (List<ArvosanaJaAvainArvo>)x.getValue()));
+            List<ArvosanaJaAvainArvo> mukaanOtetutYoArvosanaPisteet =
+                    yoArvosanat.stream()
+                            .flatMap(a -> convertToPisteet(a)).collect(Collectors.toList());
 
-                                    if(myonnettyPvmMappingToArvosana.size() > 1) {
-                                        // duplikaatti yo-arvosanoja: pitäisi jäädä kiinni jo aikaisemmissa vaiheissa joten tänne tuskin tullaan
-                                        String aine = myonnettyPvmMappingToArvosana.entrySet().iterator().next().getValue().iterator().next().getArvosana().getAine();
-                                        LOG.error("Duplikaatti YO-arvosanoja! Aine = {}", aine);
-                                        throw new RuntimeException("Duplikaatti YO-arvosanoja! Aine = "+ aine);
+            List<ArvosanaJaAvainArvo> koostetutYoArvosanat =
+                    Stream.of(
+                            convert("AINEREAALI",
+                                    max(find(yoArvosanat, "UE", "UO", "ET", "FF", "PS",
+                                            "HI", "FY", "KE", "BI", "GE", "TE", "YH"))),
+                            //
+                            convert("REAALI", max(find(yoArvosanat, "RR", "RO", "RY"))),
+                            //
+                            convert("PITKA_KIELI",
+                                    max(find(yoArvosanat, "EA", "FA", "GA", "HA", "PA",
+                                            "SA", "TA", "VA", "S9"))),
+                            //
+                            convert("KESKIPITKA_KIELI",
+                                    max(find(yoArvosanat, "EB", "FB", "GB", "HB", "PB",
+                                            "SB", "TB", "VB"))),
+                            //
+                            convert("LYHYT_KIELI",
+                                    max(find(yoArvosanat, "EC", "FC", "GC", "L1", "PC",
+                                            "SC", "TC", "VC", "KC", "L7"))),
+                            //
+                            convert("AIDINKIELI",
+                                    max(find(yoArvosanat, "O", "A", "I", "W", "Z", "O5",
+                                            "A5")))).flatMap(a -> a).collect(Collectors.toList());
+
+            Stream<AvainArvoDTO> aaa = Stream.concat(osakoeArvosanat,
+                    Stream.of(koostetutYoArvosanat.stream(),
+                            // Aineyhdistelmäroolit
+                            AineyhdistelmaroolitConverter.konvertoi(mukaanOtetutYoArvosanat),
+                            // YO-arvosanat
+                                    mukaanOtetutYoArvosanat.stream(), mukaanOtetutYoArvosanaPisteet.stream()).flatMap(a -> a))
+                            // Osakokeet
+                            //
+                            // Poista ylimaaraiset osakokeet (myonnetty eri paivana kuin mukaan otettu YO-arvosana)
+                            //
+                            .collect(Collectors.groupingBy(a -> a.getAvain(),
+                                    Collectors.mapping(a -> a, Collectors.toList()))).entrySet().stream()
+                            .flatMap(a -> {
+                                        //LOG.debug("{}", a.getValue().stream().map(x -> x.avain + ":" + x.getAvainArvoDTO().getAvain()).collect(Collectors.joining(",")));
+                                        if (a.getValue().size() == 1) {
+                                            // yksi avain joten palautetaan se jos yo-arvosana
+                                            return a.getValue().stream().filter(x0 -> YO_ASTEIKKO.equals(x0.getArvosana().getArvio().getAsteikko())).map(x0 -> x0.getAvainArvoDTO());
+                                        } else {
+
+                                            Map<DateTime, List<ArvosanaJaAvainArvo>> myonnettyPvmMappingToArvosana =
+                                                    a.getValue().stream().collect(Collectors.groupingBy(x -> ArvosanaWrapper.ARVOSANA_DTF.parseDateTime(x.getArvosana().getMyonnetty()),
+                                                            Collectors.mapping(x -> x, Collectors.toList()))).entrySet().stream()
+                                                            // filteroidaan pelkat osakoetunnukset pois (ilman yo-arvosanaa) näitä ei kyllä pitäisi olla
+                                                            .filter(x -> x.getValue().stream()
+                                                                    // Onko edes yksi YO-arvosana
+                                                                    .filter(x0 -> YO_ASTEIKKO.equals(x0.getArvosana().getArvio().getAsteikko())).findFirst().isPresent())
+                                                            .collect(Collectors.toMap(x -> x.getKey(), x -> (List<ArvosanaJaAvainArvo>) (((Map.Entry<DateTime, List<ArvosanaJaAvainArvo>>) x).getValue())));
+
+                                            if (myonnettyPvmMappingToArvosana.size() > 1) {
+                                                // duplikaatti yo-arvosanoja: pitäisi jäädä kiinni jo aikaisemmissa vaiheissa joten tänne tuskin tullaan
+                                                String aine = myonnettyPvmMappingToArvosana.entrySet().iterator().next().getValue().iterator().next().getArvosana().getAine();
+                                                LOG.error("Duplikaatti YO-arvosanoja! Aine = {}", aine);
+                                                throw new RuntimeException("Duplikaatti YO-arvosanoja! Aine = " + aine);
+                                            }
+                                            Stream<AvainArvoDTO> s =
+                                                    myonnettyPvmMappingToArvosana.entrySet().stream().flatMap(x -> x.getValue().stream().map(x0 -> x0.getAvainArvoDTO()));
+                                            return s;
+                                        }
                                     }
-                                    Stream<AvainArvoDTO> s =
-                                    myonnettyPvmMappingToArvosana.entrySet().stream().flatMap(x -> x.getValue().stream().map(x0 -> x0.getAvainArvoDTO()));
-                                    return s;
-                                }                            }
-                    );
+                            );
             /*
             List<AvainArvoDTO> avaimet = Lists.newArrayList(yoArvosanat.stream()
                     .flatMap(a -> convert(a)).collect(Collectors.toList()));
@@ -245,13 +263,16 @@ public class YoToAvainArvoDTOConverter {
         AvainArvoDTO aa = new AvainArvoDTO();
         aa.setArvo(arvosana.getArvio().getArvosana());
         aa.setAvain(arvosana.getAine());
+        return Stream.of(new ArvosanaJaAvainArvo(arvosana.getAine(),arvosana,aa));
+    }
+    private static Stream<ArvosanaJaAvainArvo> convertToPisteet(Arvosana arvosana) {
         if(arvosana.getArvio().getPisteet() == null) {
-            return Stream.of(new ArvosanaJaAvainArvo(arvosana.getAine(),arvosana,aa));
+            return Stream.empty();
         }
         AvainArvoDTO aaPisteet = new AvainArvoDTO();
         aaPisteet.setArvo("" + arvosana.getArvio().getPisteet());
         aaPisteet.setAvain(arvosana.getAine() + "_PISTEET");
-        return Stream.of(new ArvosanaJaAvainArvo(arvosana.getAine(),arvosana,aa), new ArvosanaJaAvainArvo(arvosana,aaPisteet));
+        return Stream.of(new ArvosanaJaAvainArvo(arvosana,aaPisteet));
     }
 
     private static String aineMapper(String aine, String lisatieto) {
@@ -360,43 +381,5 @@ public class YoToAvainArvoDTOConverter {
             return "XXX";
         }
 
-    }
-    private static class ArvosanaJaAvainArvo implements Comparable<ArvosanaJaAvainArvo> {
-        private final Arvosana arvosana;
-        private final AvainArvoDTO avainArvoDTO;
-        private final String avain;
-
-        public ArvosanaJaAvainArvo(String avain, Arvosana arvosana, AvainArvoDTO avainArvoDTO) {
-            this.arvosana = arvosana;
-            this.avainArvoDTO = avainArvoDTO;
-            this.avain = avain;
-        }
-        public ArvosanaJaAvainArvo(Arvosana arvosana, AvainArvoDTO avainArvoDTO) {
-            this.arvosana = arvosana;
-            this.avainArvoDTO = avainArvoDTO;
-            this.avain = avainArvoDTO.getAvain();
-        }
-        @Override
-        public boolean equals(Object obj) {
-            if(avain == null || obj == null || !(obj instanceof ArvosanaJaAvainArvo)) {
-                return false;
-            } else {
-                return avain.equals(((ArvosanaJaAvainArvo)obj).avain);
-            }
-
-        }
-
-        @Override
-        public int compareTo(ArvosanaJaAvainArvo o) {
-            return avain.compareTo(o.avain);
-        }
-
-        public Arvosana getArvosana() {
-            return arvosana;
-        }
-
-        public AvainArvoDTO getAvainArvoDTO() {
-            return avainArvoDTO;
-        }
     }
 }
