@@ -390,8 +390,8 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                         prosessi.keskeyta("Hakemuksissa oli virheitä", batchId.getErrors());
                     }
 				} catch (Exception e) {
-					LOG.error("Virhe hakutoiveelle {}: {}",
-							koekutsu.getHakukohdeOid(), e.getMessage());
+					LOG.error("Virhe hakutoiveelle {}: {} {}",
+							koekutsu.getHakukohdeOid(), e.getMessage(), Arrays.toString(e.getStackTrace()));
 					prosessi.keskeyta();
 				}
 			}
