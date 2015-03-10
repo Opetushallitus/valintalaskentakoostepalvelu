@@ -345,6 +345,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 					LetterResponse batchId = viestintapalveluAsyncResource
 							.viePdfJaOdotaReferenssi(letterBatch).get(35L,
 									TimeUnit.SECONDS);
+                    LOG.error("### BATCHID: {} {} {} ###", batchId.getBatchId(), batchId.getStatus(), batchId.getErrors());
 					LOG.info("Saatiin kirjeen seurantaId {}", batchId.getBatchId());
 					prosessi.vaiheValmistui();
                     if(batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
