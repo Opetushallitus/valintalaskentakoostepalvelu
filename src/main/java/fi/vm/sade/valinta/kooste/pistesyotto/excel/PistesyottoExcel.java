@@ -283,9 +283,13 @@ public class PistesyottoExcel {
 									.trimToEmpty(valintaperuste
 											.getOsallistuminenTunniste())));
 				} else {
-					LOG.error("Tunnistamaton lukuarvofunktio! Pistesyottoa ei voida toteuttaa!");
-					throw new RuntimeException(
-							"Tunnistamaton lukuarvofunktio! Pistesyotto keskeytetty!");
+                    dataArvot.add(new NumeroDataArvo(0, 0,
+                            VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, StringUtils
+                            .trimToEmpty(valintaperuste.getTunniste())
+                            .replace(".", ","), VAKIO_OSALLISTUI,
+                            StringUtils.trimToEmpty(valintaperuste
+                                    .getOsallistuminenTunniste())));
+
 				}
 			} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(valintaperuste
 					.getFunktiotyyppi())) {
