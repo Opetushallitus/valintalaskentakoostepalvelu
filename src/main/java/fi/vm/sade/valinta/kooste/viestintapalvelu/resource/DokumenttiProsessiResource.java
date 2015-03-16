@@ -26,7 +26,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
  * 
  *         Palauttaa prosessoidut dokumentit resursseina
  */
-@Controller
+@Controller("DokumenttiProsessiResource")
 @Path("dokumenttiprosessi")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/dokumenttiprosessi", description = "Dokumenttien luontiin liittyvää palautetta käyttäjälle")

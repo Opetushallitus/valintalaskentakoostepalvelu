@@ -23,7 +23,7 @@ import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 /**
  * User: tommiha Date: 8/20/13 Time: 2:51 PM
  */
-@Component
+@Component("ParametritResource")
 @Path("/parametrit")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/parametrit", description = "Ohjausparametrit palveluiden aktiviteettipäivämäärille")

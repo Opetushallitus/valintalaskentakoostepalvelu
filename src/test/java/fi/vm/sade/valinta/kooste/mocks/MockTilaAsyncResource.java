@@ -4,7 +4,6 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
-import jersey.repackaged.com.google.common.util.concurrent.Futures;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;

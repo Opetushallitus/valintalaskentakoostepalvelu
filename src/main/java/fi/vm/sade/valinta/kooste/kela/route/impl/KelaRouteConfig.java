@@ -18,7 +18,7 @@ import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 @Configuration
 //
 // @ComponentScan(basePackageClasses = KelaRouteConfig.class)
-public abstract class KelaRouteConfig {
+public class KelaRouteConfig {
 
 	@Bean(name = "kelaValvomo")
 	public ValvomoServiceImpl<KelaProsessi> getValvomoServiceImpl() {

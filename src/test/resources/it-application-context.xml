@@ -15,8 +15,13 @@
            http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd">
 
 	<ctx:annotation-config />
+
+  <import resource="classpath:META-INF/cxf/cxf.xml" />
+  <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.mocks"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.erillishaku"/>
+  <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.proxy.resource.erillishaku"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatapajono.resource"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatapajono.service"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.komponentti"/>
@@ -46,7 +51,46 @@
     <mockito:mock id="sijoitteluResource" class="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource" />
 
     <mockito:mock id="kirjeetHakukohdeCache" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache" />
+    <!-- Swagger -->
+    <!-- Swagger API listing resource -->
+    <bean id="swaggerResourceJSON"
+          class="com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON" />
 
+    <!-- Swagger writers -->
+    <bean id="resourceWriter"
+          class="com.wordnik.swagger.jaxrs.listing.ResourceListingProvider"
+          scope="singleton" />
+    <bean id="apiWriter"
+          class="com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider"
+          scope="singleton" />
+
+    <!-- Swagger configuration -->
+    <bean id="swaggerConfig" class="com.wordnik.swagger.jaxrs.config.BeanConfig">
+      <property name="resourcePackage" value="fi.vm.sade.valinta.kooste" />
+      <property name="version" value="1.0" />
+      <property name="filterClass" value="fi.vm.sade.valinta.kooste.swagger.AsyncResponseFilter"/>
+      <property name="basePath"
+                value="${valintalaskentakoostepalvelu.swagger.basepath}" />
+
+      <property name="title" value="Swagger API documentation" />
+      <property name="scan" value="true" />
+    </bean>
+
+    <bean id="jsonProvider" class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
+    <bean id="cors-filter" class="fi.vm.sade.valinta.kooste.filter.CorsResponseFilter"/>
+    <jaxrs:server id="koostepalveluResurssit">
+      <jaxrs:serviceBeans>
+        <ref bean="ErillishakuResource"/>
+        <ref bean="ErillishakuProxyResource"/>
+        <ref bean="DokumenttiProsessiResource"/>
+      </jaxrs:serviceBeans>
+      <jaxrs:providers>
+        <ref bean="jsonProvider" />
+        <ref bean="cors-filter"/>
+        <ref bean="resourceWriter" />
+        <ref bean="apiWriter" />
+      </jaxrs:providers>
+    </jaxrs:server>
   </beans>
 
 

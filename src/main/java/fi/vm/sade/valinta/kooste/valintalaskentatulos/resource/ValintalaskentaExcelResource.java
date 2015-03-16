@@ -38,7 +38,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
  * 
  *         Aktivoi valintalaskennan tulos service pyyntoja!
  */
-@Controller
+@Controller("ValintalaskentaExcelResource")
 @Path("valintalaskentaexcel")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/valintalaskentaexcel", description = "Excel-raportteja")

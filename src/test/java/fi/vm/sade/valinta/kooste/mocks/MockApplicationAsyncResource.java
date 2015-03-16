@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
@@ -7,7 +8,6 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditiona
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import jersey.repackaged.com.google.common.util.concurrent.Futures;
 
 import java.util.*;
 import java.util.concurrent.Future;

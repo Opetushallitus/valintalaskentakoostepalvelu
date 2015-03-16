@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 ///sijoittelu-service/resources/sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
 ///valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
 ///sijoittelu-service/resources/tila/hakukohde/{hakukohdeOid}
-@Controller
+@Controller("ErillishakuProxyResource")
 @Path("proxy/erillishaku")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/proxy/erillishaku", description = "Käyttöliittymäkutsujen välityspalvelin haku-app:n ja valinta-tulos-serviceen")

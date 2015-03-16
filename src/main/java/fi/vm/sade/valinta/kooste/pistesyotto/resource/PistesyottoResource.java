@@ -28,7 +28,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 
-@Controller
+@Controller("PistesyottoResource")
 @Path("pistesyotto")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/pistesyotto", description = "Pistesyötön tuonti ja vienti taulukkolaskentaan")

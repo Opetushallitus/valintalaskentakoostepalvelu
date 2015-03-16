@@ -39,7 +39,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
  * @author Jussi Jartamo
  * 
  */
-@Controller
+@Controller("ErillishakuResource")
 @Path("erillishaku")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/erillishaku", description = "Resurssi erillishaun tietojen tuontiin ja vientiin")

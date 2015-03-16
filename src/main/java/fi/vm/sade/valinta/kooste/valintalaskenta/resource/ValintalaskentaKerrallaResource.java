@@ -62,7 +62,7 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
  * @author Jussi Jartamo
  * 
  */
-@Controller
+@Controller("ValintalaskentaKerrallaResource")
 @Path("valintalaskentakerralla")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/valintalaskentakerralla", description = "Valintalaskenta kaikille valinnanvaiheille kerralla")

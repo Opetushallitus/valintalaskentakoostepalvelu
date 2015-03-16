@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.CoreMatchers.*;
 
 import com.codepoetics.protonpack.StreamUtils;
+import com.google.common.util.concurrent.Futures;
 import com.google.gson.GsonBuilder;
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
@@ -44,7 +45,6 @@ import fi.vm.sade.valinta.kooste.mocks.MockData;
 import fi.vm.sade.valinta.kooste.mocks.MockHenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockTilaAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
-import jersey.repackaged.com.google.common.util.concurrent.Futures;
 import rx.schedulers.Schedulers;
 
 @RunWith(Enclosed.class)

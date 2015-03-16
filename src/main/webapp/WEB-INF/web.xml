@@ -28,18 +28,14 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-	<servlet>
-        <servlet-name>Jersey REST Service</servlet-name>
-        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
-        <init-param>
-            <param-name>javax.ws.rs.Application</param-name>
-            <param-value>fi.vm.sade.valinta.kooste.KoostepalveluResourceConfig</param-value>
-        </init-param>
+    <servlet>
+        <servlet-name>cxf</servlet-name>
+        <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
         <async-supported>true</async-supported>
     </servlet>
     <servlet-mapping>
-        <servlet-name>Jersey REST Service</servlet-name>
+        <servlet-name>cxf</servlet-name>
         <url-pattern>/resources/*</url-pattern>
     </servlet-mapping>
 	

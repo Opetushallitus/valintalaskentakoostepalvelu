@@ -34,7 +34,7 @@ import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
 /**
  *
  */
-@Controller
+@Controller("SijoitteluAktivointiResource")
 @Path("koostesijoittelu")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/koostesijoittelu", description = "Ohjausparametrit palveluiden aktiviteettipäivämäärille")

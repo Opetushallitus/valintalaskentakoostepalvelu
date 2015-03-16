@@ -29,7 +29,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 
-@Controller
+@Controller("KelaResource")
 @Path("kela")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/kela", description = "Kela-dokumentin luontiin ja FTP-siirtoon")

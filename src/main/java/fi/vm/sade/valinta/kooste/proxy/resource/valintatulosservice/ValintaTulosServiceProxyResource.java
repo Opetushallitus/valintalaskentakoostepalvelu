@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Jussi Jartamo
  */
-@Controller
+@Controller("ValintaTulosServiceProxyResource")
 @Path("proxy/valintatulosservice")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/proxy/valintatulosservice", description = "Käyttöliittymäkutsujen välityspalvelin valinta-tulos-serviceen")
@@ -56,10 +56,10 @@ public class ValintaTulosServiceProxyResource {
                         .build());
             }
         });
-        /*
-        LOG.error("KUTSUTAAN {} {}", hakuOid, hakukohdeOid);
-        valintaTulosService.getValintatulokset(hakuOid,hakukohdeOid, null);
-        */
+
+        //LOG.error("KUTSUTAAN {} {}", hakuOid, hakukohdeOid);
+        //valintaTulosService.getValintatulokset(hakuOid,hakukohdeOid, null);
+
     }
 
 }

@@ -17,6 +17,9 @@
 
 	<ctx:annotation-config />
 
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+
 	<ctx:property-placeholder
 		location="classpath:META-INF/kela.properties, classpath:META-INF/valintalaskentakoostepalvelu.properties, classpath:META-INF/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valinta.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/override.properties"
 		ignore-resource-not-found="true" properties-ref="defaultProps" />
@@ -33,8 +36,7 @@
 			</util:properties>
 		</property>
 	</bean>
-	<import
-		resource="file:///${user.home:''}/oph-configuration/security-context-backend.xml" />
+	<import resource="file:///${user.home:''}/oph-configuration/security-context-backend.xml" />
 
 	<!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
 	<!--<import resource="classpath:authentication-client.xml"/> -->
@@ -403,7 +405,7 @@
 	<!-- Sijoittelu -->
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.komponentti" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.route.impl" />
-	<bean
+	<bean id="SijoitteluAktivointiResource"
 		class="fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluAktivointiResource" />
 
 	<!-- Valintalaskennan tulokset (Excel) -->
@@ -424,8 +426,7 @@
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatieto.route.impl" />
 
 	<!-- Parametrit -->
-	<bean
-		class="fi.vm.sade.valinta.kooste.parametrit.resource.ParametritResource" />
+	<bean id="ParametritResource" class="fi.vm.sade.valinta.kooste.parametrit.resource.ParametritResource" />
 	<bean
 		class="fi.vm.sade.valinta.kooste.parametrit.service.impl.ParametriServiceImpl" />
 	<bean id="parametrit" class="fi.vm.sade.valinta.kooste.parametrit.Parametrit">
@@ -436,21 +437,21 @@
 		<property name="hakuLoppupvm" value="${haku.loppupvm}" />
 	</bean>
 	<!-- Sijoitteluntulokset haulle -->
-	<bean
+	<bean id="SijoittelunTulosHaulleResource"
 		class="fi.vm.sade.valinta.kooste.sijoitteluntulos.resource.SijoittelunTulosHaulleResource" />
 	<ctx:component-scan
 		base-package="fi.vm.sade.valinta.kooste.sijoitteluntulos.route.impl" />
 	<!-- Valintatapajono -->
-	<bean
+	<bean id="ValintatapajonoResource"
 		class="fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResource" />
 	<ctx:component-scan
 		base-package="fi.vm.sade.valinta.kooste.valintatapajono" />
 	<!-- Pistesyotto -->
-	<bean
+	<bean id="PistesyottoResource"
 		class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.pistesyotto.route.impl" />
 	<!-- Valintalaskenta -->
-	<bean
+	<bean id="ValintalaskentaKerrallaResource"
 		class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.actor" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
@@ -460,9 +461,9 @@
 		base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti" />
 	<ctx:component-scan
 		base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl" />
-	<bean
+	<bean id="ViestintapalveluAktivointiResource"
 		class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluAktivointiResource" />
-	<bean
+	<bean id="DokumenttiProsessiResource"
 		class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.DokumenttiProsessiResource" />
 
 	<!-- Kela Export -->
@@ -478,8 +479,7 @@
 		class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti" />
 	<bean
 		class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti" />
-	<bean
-		class="fi.vm.sade.valinta.kooste.hakuimport.resource.HakuImportResource" />
+	<bean id="HakuImportResource" class="fi.vm.sade.valinta.kooste.hakuimport.resource.HakuImportResource" />
 	<bean
 		class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteConfig" />
 	<bean
@@ -488,7 +488,7 @@
 	<!--Koodisto -->
 	<bean
 			class="fi.vm.sade.valinta.kooste.external.resource.koodisto.impl.KoodistoAsyncResourceImpl" />
-	<bean
+	<bean id="KoodistoCachedAsyncResource"
 			class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource" />
 	<!-- Seuranta Async -->
 	<bean
@@ -534,6 +534,11 @@
 	<!-- Valinta Tulos Service Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl" />
+
+	<bean id="ErillishakuProxyResource"
+		  class="fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.ErillishakuProxyResource"/>
+	<bean id="ValintaTulosServiceProxyResource"
+		  class="fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.ValintaTulosServiceProxyResource"/>
 	<!-- Swagger -->
 	<!-- Swagger API listing resource -->
 	<bean id="swaggerResourceJSON"
@@ -558,4 +563,33 @@
 		<property name="title" value="Swagger API documentation" />
 		<property name="scan" value="true" />
 	</bean>
+
+	<bean id="jsonProvider" class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
+	<bean id="cors-filter" class="fi.vm.sade.valinta.kooste.filter.CorsResponseFilter"/>
+	<jaxrs:server id="koostepalveluResurssit">
+		<jaxrs:serviceBeans>
+			<ref bean="ErillishakuResource"/>
+			<ref bean="HakuImportResource"/>
+			<ref bean="KelaResource"/>
+			<ref bean="ParametritResource"/>
+			<ref bean="PistesyottoResource"/>
+			<ref bean="ErillishakuProxyResource"/>
+			<ref bean="ValintaTulosServiceProxyResource"/>
+			<ref bean="SijoitteluAktivointiResource"/>
+			<ref bean="SijoittelunTulosHaulleResource"/>
+			<ref bean="ValintalaskentaKerrallaResource"/>
+			<ref bean="ValintalaskentaExcelResource"/>
+			<ref bean="ValintatapajonoResource"/>
+			<ref bean="DokumenttiProsessiResource"/>
+			<ref bean="ViestintapalveluAktivointiResource"/>
+			<ref bean="swaggerResourceJSON"/>
+		</jaxrs:serviceBeans>
+		<jaxrs:providers>
+			<ref bean="jsonProvider" />
+			<ref bean="cors-filter"/>
+			<ref bean="resourceWriter" />
+			<ref bean="apiWriter" />
+		</jaxrs:providers>
+	</jaxrs:server>
+
 </beans>

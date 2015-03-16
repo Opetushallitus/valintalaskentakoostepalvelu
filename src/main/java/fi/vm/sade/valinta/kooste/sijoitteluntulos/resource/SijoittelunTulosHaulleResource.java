@@ -31,7 +31,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
  * @author Jussi Jartamo
  * 
  */
-@Controller
+@Controller("SijoittelunTulosHaulleResource")
 @Path("sijoitteluntuloshaulle")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/sijoitteluntuloshaulle", description = "Sijoitteluntulosten generointi koko haulle")

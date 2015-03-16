@@ -32,8 +32,8 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 /**
  * User: wuoti Date: 20.5.2013 Time: 10.34
  */
+@Controller("HakuImportResource")
 @Path("hakuimport")
-@Controller
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/hakuimport", description = "Haun tuontiin tarjonnalta")
 public class HakuImportResource {

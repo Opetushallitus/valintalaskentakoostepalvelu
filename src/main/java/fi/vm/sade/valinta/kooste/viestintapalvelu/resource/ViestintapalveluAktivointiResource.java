@@ -45,7 +45,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
  *         ladattavaksi tiedostoksi on ongelmallista (mutta ei mahdotonta - onko
  *         tarpeen?).
  */
-@Controller
+@Controller("ViestintapalveluAktivointiResource")
 @Path("viestintapalvelu")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/viestintapalvelu", description = "Osoitetarrojen, jälkiohjauskirjeiden ja hyväksymiskirjeiden tuottaminen")

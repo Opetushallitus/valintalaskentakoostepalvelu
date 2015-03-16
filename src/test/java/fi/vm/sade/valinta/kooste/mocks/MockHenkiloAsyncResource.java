@@ -1,10 +1,10 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import jersey.repackaged.com.google.common.util.concurrent.Futures;
 
 import java.util.List;
 import java.util.Optional;
