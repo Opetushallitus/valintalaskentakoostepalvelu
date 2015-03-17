@@ -157,7 +157,11 @@ public class ErillishakuRivi {
 		}
 	}
 
+	public boolean isKesken() {
+		return "KESKEN".equalsIgnoreCase(hakemuksenTila);
+	}
+
     public boolean isPoistetaankoRivi() {
-        return poistetaankoRivi;
-    }
+		return poistetaankoRivi;
+	}
 }

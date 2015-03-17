@@ -170,17 +170,17 @@ public class ErillishaunTuontiService {
 
         validoiRivit(prosessi,haku,rivit);
 
-        List<ErillishakuRivi> lisattavat = rivit.stream()
+        List<ErillishakuRivi> lisattavatTaiKeskeneraiset = rivit.stream()
                 .filter(rivi -> !rivi.isPoistetaankoRivi()).collect(Collectors.toList());
 
         List<ErillishakuRivi> poistettavat = rivit.stream()
-                .filter(rivi -> rivi.isPoistetaankoRivi()).collect(Collectors.toList());
+                .filter(rivi -> !rivi.isKesken() && rivi.isPoistetaankoRivi()).collect(Collectors.toList());
         final List<Hakemus> hakemukset;
-        if(!lisattavat.isEmpty()) {
+        if(!lisattavatTaiKeskeneraiset.isEmpty()) {
             LOG.info("Haetaan/luodaan henkilöt");
             final List<Henkilo> henkilot;
             try {
-                henkilot = henkiloAsyncResource.haeTaiLuoHenkilot(lisattavat.stream()
+                henkilot = henkiloAsyncResource.haeTaiLuoHenkilot(lisattavatTaiKeskeneraiset.stream()
                         .map(rivi -> {
                             return rivi.toHenkiloCreateDTO();
                         }).collect(Collectors.toList())).get();
@@ -189,10 +189,10 @@ public class ErillishaunTuontiService {
                 prosessi.keskeyta(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_HENKILOPALVELUN_VIRHE));
                 throw e;
             }
-            LOG.info("Käsitellään hakemukset");
+            LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());
             Map<String, String> sahkopostit = ImmutableMap.<String, String>builder()
-                    .putAll(lisattavat.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getPersonOid())).collect(Collectors.toMap(rivi -> rivi.getPersonOid(), rivi -> rivi.getSahkoposti())))
-                    .putAll(lisattavat.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getHenkilotunnus())).collect(Collectors.toMap(rivi -> rivi.getHenkilotunnus(), rivi -> rivi.getSahkoposti())))
+                    .putAll(lisattavatTaiKeskeneraiset.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getPersonOid())).collect(Collectors.toMap(rivi -> rivi.getPersonOid(), rivi -> rivi.getSahkoposti())))
+                    .putAll(lisattavatTaiKeskeneraiset.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getHenkilotunnus())).collect(Collectors.toMap(rivi -> rivi.getHenkilotunnus(), rivi -> rivi.getSahkoposti())))
                     .build();
             hakemukset = kasitteleHakemukset(haku, henkilot, sahkopostit, prosessi);
         } else {
@@ -200,7 +200,8 @@ public class ErillishaunTuontiService {
         }
 
         LOG.info("Viedaan hakijoita {} jonoon {}", rivit.size(), haku.getValintatapajononNimi());
-        tuoErillishaunTilat(haku, lisattavat, poistettavat, hakemukset);
+        tuoErillishaunTilat(haku, lisattavatTaiKeskeneraiset // <- EI SISÄLLÄ KESKENERÄISIÄ
+                , poistettavat, hakemukset);
 
         prosessi.vaiheValmistui();
         prosessi.valmistui("ok");
@@ -230,19 +231,23 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private void tuoErillishaunTilat(final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavat, final List<ErillishakuRivi> poistettavat,final List<Hakemus> hakemukset) {
+    private void tuoErillishaunTilat(final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat,final List<Hakemus> hakemukset) {
         final Stream<ErillishaunHakijaDTO> hakijat;
         final Stream<ErillishaunHakijaDTO> pois;
-        if(!lisattavat.isEmpty()){
-            assert (hakemukset.size() == lisattavat.size()); // 1-1 relationship assumed
-            hakijat = StreamUtils.zip(hakemukset.stream(), lisattavat.stream(), (hakemus, rivi) -> {
-                HakemusWrapper wrapper = new HakemusWrapper(hakemus);
-                return new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), hakemus.getOid(), haku.getHakukohdeOid(),
-                        rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(),
-                        haku.getTarjoajaOid(),
-                        convertValintatuloksenTilaHakuTyypinMukaan(valintatuloksenTila(rivi), haku.getHakutyyppi()), ilmoittautumisTila(rivi),
-                        hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi(), Optional.of(rivi.isPoistetaankoRivi()));
-            });
+        if(!lisattavatTaiKeskeneraiset.isEmpty()){
+            assert (hakemukset.size() == lisattavatTaiKeskeneraiset.size()); // 1-1 relationship assumed
+            hakijat = StreamUtils.zip(hakemukset.stream(), lisattavatTaiKeskeneraiset.stream(), (hakemus, rivi) -> {
+                if(rivi.isKesken()) {
+                    return Stream.<ErillishaunHakijaDTO>empty(); // Keskeneräisiä ei viedä sijoitteluun
+                } else {
+                    HakemusWrapper wrapper = new HakemusWrapper(hakemus);
+                    return Stream.of(new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), hakemus.getOid(), haku.getHakukohdeOid(),
+                            rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(),
+                            haku.getTarjoajaOid(),
+                            convertValintatuloksenTilaHakuTyypinMukaan(valintatuloksenTila(rivi), haku.getHakutyyppi()), ilmoittautumisTila(rivi),
+                            hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi(), Optional.of(rivi.isPoistetaankoRivi())));
+                }
+            }).flatMap(s -> s);
         } else {
             hakijat = Stream.empty();
         }
@@ -308,15 +313,19 @@ public class ErillishaunTuontiService {
         if(!StringUtils.isBlank(rivi.getHenkilotunnus()) && !tarkistaHenkilotunnus(rivi.getHenkilotunnus())) {
             return "Henkilötunnus ("+rivi.getHenkilotunnus()+") on virheellinen. " + rivi.toString();
         }
-        // Valintatuloksen tila on hakua vastaava
-        ValintatuloksenTila vt = valintatuloksenTila(rivi);
-        ValintatuloksenTila vtc = convertValintatuloksenTilaHakuTyypinMukaan(vt, tyyppi);
-        if(vt != null && vtc == null) {
-            return "Valintatuloksen tila ("+vt+") on virheellinen. " + rivi.toString();
-        }
-        String tilaVirhe = ValidoiTilatUtil.validoi(hakemuksenTila(rivi), vtc, ilmoittautumisTila(rivi));
-        if(tilaVirhe != null) {
-            return tilaVirhe + ". " + rivi.toString();
+        if("KESKEN".equalsIgnoreCase(rivi.getHakemuksenTila())) {
+            // KESKENERÄINEN JOTEN TILOILLA EI VÄLIÄ
+        } else {
+            // Valintatuloksen tila on hakua vastaava
+            ValintatuloksenTila vt = valintatuloksenTila(rivi);
+            ValintatuloksenTila vtc = convertValintatuloksenTilaHakuTyypinMukaan(vt, tyyppi);
+            if (vt != null && vtc == null) {
+                return "Valintatuloksen tila (" + vt + ") on virheellinen. " + rivi.toString();
+            }
+            String tilaVirhe = ValidoiTilatUtil.validoi(hakemuksenTila(rivi), vtc, ilmoittautumisTila(rivi));
+            if (tilaVirhe != null) {
+                return tilaVirhe + ". " + rivi.toString();
+            }
         }
         return null;
     }
