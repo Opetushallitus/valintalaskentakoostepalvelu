@@ -59,6 +59,8 @@ public class ErillishaunTuontiServiceTest {
 
             // tarkistetaan tilatulokset
             assertEquals(1, tilaAsyncResource.results.size());
+            assertEquals(5, tilaAsyncResource.results.stream()
+                    .flatMap(r -> r.erillishaunHakijat.stream()).count());
             tilaAsyncResource.results.stream()
                     .flatMap(r -> r.erillishaunHakijat.stream())
                     .forEach(r -> {

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import fi.vm.sade.valinta.kooste.excel.Solu;
 import org.apache.commons.lang.StringUtils;
@@ -59,7 +60,8 @@ public class ErillishakuDataRivi extends DataRivi {
 		}
 		return true;
 	}
-	private static final Collection<String> HAKEMUKSENTILA_ARVOT =Arrays.asList(HakemuksenTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList());
+	private static final Collection<String> HAKEMUKSENTILA_ARVOT = Stream.concat(Stream.of("KESKEN"),
+			Arrays.asList(HakemuksenTila.values()).stream().map(t -> t.toString())).collect(Collectors.toList());
 	private static final Collection<String> VASTAANOTTOTILA_ARVOT =Arrays.asList(ValintatuloksenTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList());
 	private static final Collection<String> VASTAANOTTOTILA_ARVOT_KK =
 			Arrays.asList(

@@ -198,8 +198,9 @@ public class ErillishaunTuontiService {
         } else {
             hakemukset = Collections.emptyList();
         }
-
-        LOG.info("Viedaan hakijoita {} jonoon {}", rivit.size(), haku.getValintatapajononNimi());
+        if(LOG.isInfoEnabled()) { // Count vie aikaa
+            LOG.info("Viedaan hakijoita ohittaen rivit hakemuksentilalla kesken ({}/{}) jonoon {}", lisattavatTaiKeskeneraiset.stream().filter(r -> !r.isKesken()).count(), rivit.size(), haku.getValintatapajononNimi());
+        }
         tuoErillishaunTilat(haku, lisattavatTaiKeskeneraiset // <- EI SISÄLLÄ KESKENERÄISIÄ
                 , poistettavat, hakemukset);
 

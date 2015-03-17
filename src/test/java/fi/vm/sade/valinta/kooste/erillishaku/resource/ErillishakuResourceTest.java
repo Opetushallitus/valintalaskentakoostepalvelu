@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.resource;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
+import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.junit.Before;
 import org.junit.Test;

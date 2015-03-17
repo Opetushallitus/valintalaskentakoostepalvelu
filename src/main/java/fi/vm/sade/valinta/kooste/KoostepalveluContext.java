@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.authentication.cas.CasFriendlyCache;
 import fi.vm.sade.authentication.cas.CasFriendlyCxfInterceptor;
@@ -32,7 +35,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 //@EnableGlobalMethodSecurity(prePostEnabled=true)
 //@EnableWebMvcSecurity
 //@EnableWebMvcSecurity
-@Import({ KelaRouteConfig.class, KoostepalveluContext.CamelConfig.class })
+@Import({ KelaRouteConfig.class, KoostepalveluContext.CamelConfig.class, JaxrsConfiguration.class })
 public class KoostepalveluContext {
 	
 	static final String TYHJA_ARVO_POIKKEUS = "Reititysta ei voida jatkaa tyhjalle arvolle!";
