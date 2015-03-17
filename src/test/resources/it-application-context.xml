@@ -76,7 +76,8 @@
       <property name="scan" value="true" />
     </bean>
 
-    <bean id="jsonProvider" class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
+    <bean id="jaxrsconfig" class="fi.vm.sade.valinta.kooste.JaxrsConfiguration"/>
+
     <bean id="cors-filter" class="fi.vm.sade.valinta.kooste.filter.CorsResponseFilter"/>
     <jaxrs:server id="koostepalveluResurssit">
       <jaxrs:serviceBeans>
