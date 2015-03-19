@@ -61,7 +61,10 @@ public class OppijaToAvainArvoDTOConverter {
                                         //
                                 .filter(s -> s.getSuoritus() != null)
                                         //
-                                .filter(s -> s.getArvosanat() != null).collect(Collectors.toList());
+                                .filter(s -> s.getArvosanat() != null)
+                                // EI ITSEILMOITETTUJA LASKENTAAN
+                                .filter(s -> !new SuoritusJaArvosanatWrapper(s).isItseIlmoitettu())
+                                .collect(Collectors.toList());
                 if(suoritukset.isEmpty()) {
                         return empty();
                 }

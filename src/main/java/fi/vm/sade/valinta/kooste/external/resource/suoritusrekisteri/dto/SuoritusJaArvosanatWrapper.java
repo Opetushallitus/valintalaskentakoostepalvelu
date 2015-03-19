@@ -46,6 +46,9 @@ public class SuoritusJaArvosanatWrapper {
         return new SuoritusJaArvosanatWrapper(s);
     }
 
+    public boolean isItseIlmoitettu() {
+        return suoritusJaArvosanat.getSuoritus().getHenkiloOid().equals(suoritusJaArvosanat.getSuoritus().getMyontaja());
+    }
     public boolean isValmis() {
         return "VALMIS".equals(suoritusJaArvosanat.getSuoritus().getTila());
     }
