@@ -523,6 +523,29 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
     }
     @Test
     public void yoArvosanatRoolitukset() {
+        {
+            DateTime nyt = DateTime.now();
+            Oppija suoritus = oppija()
+                    .suoritus()
+                    .setYo()
+                    .setValmis()
+                    .arvosana()
+                    .setAine("A")
+                    .setLisatieto("SA")
+                    .setAsteikko_yo()
+                    .setArvosana("M")
+                    .setPisteet(20)
+                    .setMyonnetty(nyt.minusDays(1))
+                    .build()
+                    .build()
+                    .build();
+
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, laskennanalkamisparametri(nyt));
+            // LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            // AIDINKIELI
+            Assert.assertTrue("SA_ROOLI löytyy ja sen arvo on 31",
+                    aa.stream().filter(a -> "SA_ROOLI".equals(a.getAvain()) && "31".equals(a.getArvo())).count() == 1L);
+        }
         //
         {
             DateTime nyt = DateTime.now();
@@ -631,7 +654,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                     .build();
 
                 List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus, laskennanalkamisparametri(nyt));
-            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            //LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
                 // KYPSYYSNÄYTE ENGLANNILLE
                 Assert.assertTrue("J_ROOLI löytyy ja sen arvo on 13",
                         aa.stream().filter(a -> "J_ROOLI".equals(a.getAvain()) && "13".equals(a.getArvo())).count() == 1L);
