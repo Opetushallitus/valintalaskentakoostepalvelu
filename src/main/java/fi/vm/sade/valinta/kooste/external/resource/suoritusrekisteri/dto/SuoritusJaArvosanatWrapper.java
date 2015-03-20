@@ -47,7 +47,11 @@ public class SuoritusJaArvosanatWrapper {
     }
 
     public boolean isItseIlmoitettu() {
-        return suoritusJaArvosanat.getSuoritus().getHenkiloOid().equals(suoritusJaArvosanat.getSuoritus().getMyontaja());
+        if(suoritusJaArvosanat.getSuoritus().getHenkiloOid() != null) {
+            return suoritusJaArvosanat.getSuoritus().getHenkiloOid().equals(suoritusJaArvosanat.getSuoritus().getMyontaja());
+        } else {
+            return false;
+        }
     }
     public boolean isValmis() {
         return "VALMIS".equals(suoritusJaArvosanat.getSuoritus().getTila());
