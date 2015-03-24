@@ -40,7 +40,28 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                 .build();
         OppijaToAvainArvoDTOConverter.convert(virheellinenKoskaUseampiSuoritus, null);
     }
-
+    @Test
+    public void useampiSuoritusJoistaEiOllaKiinnostuneita() {
+        Oppija virheellinenKoskaUseampiSuoritus = oppija()
+                .suoritus()
+                .setKomo("koulutus_732101")
+                .setKesken()
+                .build()
+                .suoritus()
+                .setKomo("koulutus_732101")
+                .setValmis()
+                .build()
+                .suoritus()
+                .setKomo("koulutus_671101")
+                .setKesken()
+                .build()
+                .suoritus()
+                .setKomo("koulutus_671101")
+                .setValmis()
+                .build()
+                .build();
+        OppijaToAvainArvoDTOConverter.convert(virheellinenKoskaUseampiSuoritus, null);
+    }
     @Test
     public void perusopetusOikeinKoskaVainValmisSuoritusJaKeskeytyneitaSuorituksia() {
         Oppija oikeinKoskaVainValmisSuoritusJaKeskeytyneitaSuorituksia = oppija()

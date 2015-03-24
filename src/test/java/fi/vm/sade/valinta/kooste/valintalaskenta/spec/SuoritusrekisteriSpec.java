@@ -100,6 +100,10 @@ public class SuoritusrekisteriSpec {
             suoritus.setKomo(SuoritusJaArvosanatWrapper.PK_KOMO);
             return SuoritusBuilder.this;
         }
+        public SuoritusBuilder setKomo(String komo) {
+            suoritus.setKomo(komo);
+            return SuoritusBuilder.this;
+        }
         public SuoritusBuilder setYo() {
             suoritus.setKomo(SuoritusJaArvosanatWrapper.YO_KOMO);
             return SuoritusBuilder.this;
