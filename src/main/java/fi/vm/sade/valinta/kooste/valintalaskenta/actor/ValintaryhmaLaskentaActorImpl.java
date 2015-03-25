@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 	private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
 	private final PalvelukutsuStrategia laskentaStrategia;
 	private final LaskentaSupervisor laskentaSupervisor;
-	private volatile boolean valmis = false;
+	private final AtomicBoolean valmis = new AtomicBoolean(false);
 
 	public ValintaryhmaLaskentaActorImpl(LaskentaSupervisor laskentaSupervisor,
 			String uuid, String hakuOid, LaskentaPalvelukutsu laskenta,
@@ -46,20 +47,19 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 
 			if (pkk.onkoPeruutettu()) {
 				try {
-					if(!valmis) {
+					if(!viimeisteleLaskentaJaPalautaOlikoJoViimeistelty()) {
 						laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
 								LaskentaTila.VALMIS, HakukohdeTila.VALMIS.equals(pkk.getHakukohdeTila()) ? HakukohdeTila.VALMIS : HakukohdeTila.KESKEYTETTY);
 					}
 				} catch (Exception e) {
 					LOG.error("Virhe {}", e.getMessage());
 				}
-				viimeisteleLaskenta();
 
 			} else {
 				LOG.error("Aloitetaan valintaryhman laskenta!");
 				laskentaStrategia.laitaPalvelukutsuJonoon(pkk, p -> {
 					try {
-						if(!valmis) {
+						if(!viimeisteleLaskentaJaPalautaOlikoJoViimeistelty()) {
 							laskentaSeurantaAsyncResource.merkkaaLaskennanTila(
 									uuid, LaskentaTila.VALMIS,
 									HakukohdeTila.VALMIS.equals(pkk.getHakukohdeTila()) ? HakukohdeTila.VALMIS : HakukohdeTila.KESKEYTETTY);
@@ -67,7 +67,6 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 					} catch (Exception e) {
 						LOG.error("Virhe {}", e.getMessage());
 					}
-					viimeisteleLaskenta();
 				});
 				laskentaStrategia.aloitaUusiPalvelukutsu();
 			}
@@ -75,7 +74,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 	}
 	@Override
 	public void postStop() {
-		if(!valmis) {
+		if(!valmis.get()) {
 			try {
 				LOG.error("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
 				laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
@@ -99,11 +98,11 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 	}
 
 	public boolean isValmis() {
-		return valmis;
+		return valmis.get();
 	}
 
-	private void viimeisteleLaskenta() {
-		valmis = true;
+	private boolean viimeisteleLaskentaJaPalautaOlikoJoViimeistelty() {
+		return valmis.getAndSet(true);
 	}
 
 	public void aloita() {
