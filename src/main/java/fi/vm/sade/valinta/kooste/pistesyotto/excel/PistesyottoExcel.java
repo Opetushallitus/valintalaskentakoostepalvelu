@@ -323,18 +323,15 @@ public class PistesyottoExcel {
 			for (ValintaperusteDTO valintaperuste : valintaperusteet) {
 				ValintakoeDTO valintakoe = Optional.ofNullable(tunnisteDTO.get(valintaperuste
 						.getTunniste())).orElse(new ValintakoeDTO());
-				boolean kutsutaankoKaikki =
+				boolean syotettavissaKaikille =
 						kaikkiKutsutaanTunnisteet.contains(valintaperuste.getTunniste())
-						|| Boolean.FALSE.equals(valintaperuste.getVaatiiOsallistumisen());
-						//Boolean.TRUE.equals(valintakoe.getKutsutaankoKaikki());
-				if (!kutsutaankoKaikki && !osallistuja) {
-					//
+						|| Boolean.TRUE.equals(valintaperuste.getSyotettavissaKaikille());
+				if (!syotettavissaKaikille && !osallistuja) {
 					s.add(TekstiArvo.tyhja(false));
 					s.add(TekstiArvo.tyhja(false));
 					continue;
 				}
-				if (kutsutaankoKaikki || (valintakoe != null && Osallistuminen.OSALLISTUU.equals(valintakoe
-						.getOsallistuminenTulos().getOsallistuminen()))) {
+				if (syotettavissaKaikille || (valintakoe != null && Osallistuminen.OSALLISTUU.equals(valintakoe.getOsallistuminenTulos().getOsallistuminen()))) {
 					syote = true;
 					if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
 							.getFunktiotyyppi())) {
