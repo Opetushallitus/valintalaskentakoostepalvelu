@@ -1,11 +1,13 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +53,9 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
 						.getSimpleName());
 				return;
 			}
-			LOG.error("{} epaonnistui! {}", self.getClass().getSimpleName(),
-					poikkeus.getMessage());
+			LOG.error("{} epaonnistui! {} {}", self.getClass().getSimpleName(),
+					poikkeus.getMessage()
+			);//, Arrays.asList(poikkeus.getStackTrace()).stream().map(a -> a.toString()).collect(Collectors.joining(",\r\n")));
 			try {
 				self.peruuta();
 				takaisinkutsu.accept(self);

@@ -42,20 +42,18 @@ public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu
 	}
 
 	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
-		aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
-			public Peruutettava get() {
-				return suoritusrekisteriAsyncResource
-						.getOppijatByHakukohde(
-								getHakukohdeOid(),
-								null, // referenssiPvm ensikertalaisuutta varten
-								oppijat -> {
-									SuoritusrekisteriPalvelukutsu.this.oppijat
-											.set(oppijat);
-									takaisinkutsu
-											.accept(SuoritusrekisteriPalvelukutsu.this);
-								}, failureCallback(takaisinkutsu));
-			}
-		});
+		aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() ->
+			suoritusrekisteriAsyncResource
+					.getOppijatByHakukohde(
+							getHakukohdeOid(),
+							null, // referenssiPvm ensikertalaisuutta varten
+							oppijat -> {
+								SuoritusrekisteriPalvelukutsu.this.oppijat
+										.set(oppijat);
+								takaisinkutsu
+										.accept(SuoritusrekisteriPalvelukutsu.this);
+							}, failureCallback(takaisinkutsu))
+		);
 		return this;
 	}
 

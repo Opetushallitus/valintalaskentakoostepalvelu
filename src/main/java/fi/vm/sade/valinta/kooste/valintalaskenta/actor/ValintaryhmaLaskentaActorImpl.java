@@ -46,8 +46,10 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 
 			if (pkk.onkoPeruutettu()) {
 				try {
-					laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
-							LaskentaTila.VALMIS, pkk.getHakukohdeTila());
+					if(!valmis) {
+						laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
+								LaskentaTila.VALMIS, HakukohdeTila.VALMIS.equals(pkk.getHakukohdeTila()) ? HakukohdeTila.VALMIS : HakukohdeTila.KESKEYTETTY);
+					}
 				} catch (Exception e) {
 					LOG.error("Virhe {}", e.getMessage());
 				}
@@ -57,9 +59,11 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 				LOG.error("Aloitetaan valintaryhman laskenta!");
 				laskentaStrategia.laitaPalvelukutsuJonoon(pkk, p -> {
 					try {
-						laskentaSeurantaAsyncResource.merkkaaLaskennanTila(
-								uuid, LaskentaTila.VALMIS,
-								pkk.getHakukohdeTila());
+						if(!valmis) {
+							laskentaSeurantaAsyncResource.merkkaaLaskennanTila(
+									uuid, LaskentaTila.VALMIS,
+									HakukohdeTila.VALMIS.equals(pkk.getHakukohdeTila()) ? HakukohdeTila.VALMIS : HakukohdeTila.KESKEYTETTY);
+						}
 					} catch (Exception e) {
 						LOG.error("Virhe {}", e.getMessage());
 					}
