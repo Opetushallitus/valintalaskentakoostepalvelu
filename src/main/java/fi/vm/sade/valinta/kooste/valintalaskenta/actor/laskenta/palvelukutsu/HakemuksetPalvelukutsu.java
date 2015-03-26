@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +31,9 @@ public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements
 	private final AtomicReference<List<Hakemus>> hakemukset;
 
 	public HakemuksetPalvelukutsu(String hakuOid,
-			HakukohdeJaOrganisaatio hakukohdeOid,
+			UuidHakukohdeJaOrganisaatio hakukohdeOid,
 			ApplicationAsyncResource applicationAsyncResource) {
-		super(hakukohdeOid.getHakukohdeOid());
+		super(hakukohdeOid);
 		this.hakuOid = hakuOid;
 		this.applicationAsyncResource = applicationAsyncResource;
 		this.hakemukset = new AtomicReference<>();

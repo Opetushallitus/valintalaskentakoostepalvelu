@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +30,9 @@ public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu
 	private final AtomicReference<List<Oppija>> oppijat;
 
 	public SuoritusrekisteriPalvelukutsu(
-			HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio,
+			UuidHakukohdeJaOrganisaatio hakukohdeJaOrganisaatio,
 			SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
-		super(hakukohdeJaOrganisaatio.getHakukohdeOid());
+		super(hakukohdeJaOrganisaatio);
 		this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
 		this.oppijat = new AtomicReference<>();
 	}

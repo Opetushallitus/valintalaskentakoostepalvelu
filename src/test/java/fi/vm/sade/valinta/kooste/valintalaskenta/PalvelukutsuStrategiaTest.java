@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -43,10 +44,10 @@ public class PalvelukutsuStrategiaTest {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(PalvelukutsuStrategiaTest.class);
 
-	private final HakukohdeJaOrganisaatio HAKUKOHDE_OID1 = new HakukohdeJaOrganisaatio(
-			"hakukohde.oid1", "org.oid1");
-	private final HakukohdeJaOrganisaatio HAKUKOHDE_OID2 = new HakukohdeJaOrganisaatio(
-			"hakukohde.oid2", "org.oid2");
+	private final UuidHakukohdeJaOrganisaatio HAKUKOHDE_OID1 = new UuidHakukohdeJaOrganisaatio("uuid",new HakukohdeJaOrganisaatio(
+			"hakukohde.oid1", "org.oid1"));
+	private final UuidHakukohdeJaOrganisaatio HAKUKOHDE_OID2 = new UuidHakukohdeJaOrganisaatio("uuid",new HakukohdeJaOrganisaatio(
+			"hakukohde.oid2", "org.oid2"));
 
 	@Test
 	public void palvelukutsustrategiaKaynnistaaPalvelukutsunTesti() {

@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +29,10 @@ public class ValintaperusteetPalvelukutsu extends AbstraktiPalvelukutsu
 	private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 	private final AtomicReference<List<ValintaperusteetDTO>> valintaperusteet;
 
-	public ValintaperusteetPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
+	public ValintaperusteetPalvelukutsu(UuidHakukohdeJaOrganisaatio hakukohdeOid,
 			Integer valinnanVaiheJarjestysluku,
 			ValintaperusteetAsyncResource valintaperusteetAsyncResource) {
-		super(hakukohdeOid.getHakukohdeOid());
+		super(hakukohdeOid);
 		this.valinnanVaiheJarjestysluku = valinnanVaiheJarjestysluku;
 		this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
 		this.valintaperusteet = new AtomicReference<>();

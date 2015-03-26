@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -40,8 +41,8 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.YksiPa
 public class LaskentaPalvelukutsunTest {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(LaskentaPalvelukutsunTest.class);
-	private static final HakukohdeJaOrganisaatio HAKUKOHDE_OID = new HakukohdeJaOrganisaatio(
-			"hk.oid", "org.oid");
+	private static final UuidHakukohdeJaOrganisaatio HAKUKOHDE_OID = new UuidHakukohdeJaOrganisaatio("uuid",new HakukohdeJaOrganisaatio(
+			"hk.oid", "org.oid"));
 
 	@Test
 	public void testaaLaskentaPalvelukutsunSuoritusta() {
@@ -75,7 +76,7 @@ public class LaskentaPalvelukutsunTest {
 
 		LaskentaPalvelukutsu laskentaPalvelukutsu = new AbstraktiLaskentaPalvelukutsu(
 				null,
-				HAKUKOHDE_OID.getHakukohdeOid(), palvelukutsut) {
+				HAKUKOHDE_OID, palvelukutsut) {
 			@Override
 			public void vapautaResurssit() {
 				// TODO Auto-generated method stub

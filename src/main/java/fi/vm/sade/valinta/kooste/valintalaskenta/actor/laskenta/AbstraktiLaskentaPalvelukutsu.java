@@ -10,6 +10,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,9 +51,9 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 
 	public AbstraktiLaskentaPalvelukutsu(
 			ParametritDTO parametritDTO,
-			String hakukohdeOid,
+			UuidHakukohdeJaOrganisaatio kuvaus,
 			Collection<PalvelukutsuJaPalvelukutsuStrategia> palvelukutsut) {
-		super(hakukohdeOid);
+		super(kuvaus);
 		this.parametritDTO = parametritDTO;
 		this.palvelukutsut = palvelukutsut;
 		this.takaisinkutsu = new AtomicReference<>();
@@ -65,6 +67,11 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 			if (pk.onkoPeruutettu()) { // peruutetaan laskenta talle
 										// hakukohteelle
 				try {
+					peruuta();
+				} catch(Exception e) {
+
+				}
+				try {
 					takaisinkutsu.getAndUpdate(tk -> {
 						if (tk != null) {
 							tk.accept(AbstraktiLaskentaPalvelukutsu.this);
@@ -77,12 +84,14 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 							e.getMessage());
 					throw e;
 				}
-				peruuta();
+
 			} else {
 				int yhteensa = palvelukutsulaskuri.getYhteensa();
 				int laskuriNyt = palvelukutsulaskuri.palvelukutsuSaapui();
-				LOG.error("Saatiin {} hakukohteelle {}: {}/{}", pk.getClass()
-						.getSimpleName(), getHakukohdeOid(), (-laskuriNyt)
+
+				LOG.error("Saatiin {} (uuid={},hakukohde/tunniste={}): {}/{}",
+						StringUtils.rightPad(pk.getClass()
+						.getSimpleName(),38),getUuid(), getHakukohdeOid(), (-laskuriNyt)
 						+ yhteensa, yhteensa);
 				if (laskuriNyt == 0) {
 					tila = HakukohdeTila.VALMIS;

@@ -6,6 +6,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto;
  * 
  */
 public class HakukohdeJaOrganisaatio {
+
 	private String hakukohdeOid;
 	private String organisaatioOid;
 

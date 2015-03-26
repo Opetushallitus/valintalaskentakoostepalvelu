@@ -9,6 +9,8 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,15 +28,15 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(AbstraktiPalvelukutsu.class);
 	private final AtomicReference<Peruutettava> peruutettava = new AtomicReference<>();
-	private final String hakukohdeOid;
+	private final UuidHakukohdeJaOrganisaatio kuvaus;
 
-	public AbstraktiPalvelukutsu(String hakukohdeOid) {
-		this.hakukohdeOid = hakukohdeOid;
+	public AbstraktiPalvelukutsu(UuidHakukohdeJaOrganisaatio kuvaus) {
+		this.kuvaus = kuvaus;
 	}
 
 	@Override
 	public int compareTo(Palvelukutsu o) {
-		return hakukohdeOid.compareTo(o.getHakukohdeOid());
+		return getHakukohdeOid().compareTo(o.getHakukohdeOid());
 	}
 
 	public boolean onkoPeruutettu() {
@@ -53,7 +55,8 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
 						.getSimpleName());
 				return;
 			}
-			LOG.error("{} epaonnistui! {} {}", self.getClass().getSimpleName(),
+			LOG.error("{} epaonnistui (uuid={}, hakukohde={})! {} {}", self.getClass().getSimpleName(),
+					getUuid(), getHakukohdeOid(),
 					poikkeus.getMessage()
 			);//, Arrays.asList(poikkeus.getStackTrace()).stream().map(a -> a.toString()).collect(Collectors.joining(",\r\n")));
 			try {
@@ -100,13 +103,15 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
 				return aikaisempiArvo;
 			}
 		}) != null) {
-			LOG.error("Palvelukutsun uudelleen aktivointi poikkeus!");
+			//LOG.error("Palvelukutsun uudelleen aktivointi poikkeus!");
 			throw new PalvelukutsunUudelleenAktivointiPoikkeus();
 		}
 		return true;
 	}
-
+	public String getUuid() {
+		return kuvaus.getUuid();
+	}
 	public String getHakukohdeOid() {
-		return hakukohdeOid;
+		return kuvaus.getHakukohdeJaOrganisaatio().getHakukohdeOid();
 	}
 }

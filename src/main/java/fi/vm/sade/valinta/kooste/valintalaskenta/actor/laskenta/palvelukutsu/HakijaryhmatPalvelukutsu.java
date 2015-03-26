@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +26,9 @@ public class HakijaryhmatPalvelukutsu extends AbstraktiPalvelukutsu implements
 	private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 	private final AtomicReference<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat;
 
-	public HakijaryhmatPalvelukutsu(HakukohdeJaOrganisaatio hakukohdeOid,
+	public HakijaryhmatPalvelukutsu(UuidHakukohdeJaOrganisaatio hakukohdeOid,
 			ValintaperusteetAsyncResource valintaperusteetAsyncResource) {
-		super(hakukohdeOid.getHakukohdeOid());
+		super(hakukohdeOid);
 		this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
 		this.hakijaryhmat = new AtomicReference<>();
 	}

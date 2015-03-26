@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 	public ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
 			ParametritDTO parametritDTO,
 			boolean erillishaku,
-			HakukohdeJaOrganisaatio hakukohdeOid,
+			UuidHakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			List<ValintaryhmaPalvelukutsuYhdiste> valintaryhmaPalvelukutsuYhdiste,
 			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakemuksetPalvelukutsu>> hakemuksetPalvelukutsut,
@@ -50,7 +51,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<SuoritusrekisteriPalvelukutsu>> suoritusrekisteriPalvelukutsut) {
 		super(
 				parametritDTO,
-				hakukohdeOid.getHakukohdeOid(), Lists.newArrayList(Iterables
+				hakukohdeOid, Lists.newArrayList(Iterables
 				.concat(hakemuksetPalvelukutsut, valintaperusteetPalvelukutsut,
 						hakijaryhmatPalvelukutsut,
 						suoritusrekisteriPalvelukutsut)));
@@ -100,16 +101,14 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 	@Override
 	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
 		try {
-			aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
-				public Peruutettava get() {
-					return valintalaskentaAsyncResource
+			aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() -> {
+				return valintalaskentaAsyncResource
 							.laskeJaSijoittele(
 									muodostaLaskeDTOs(),
 									laskentaCallback -> {
 										takaisinkutsu
 												.accept(ValintaryhmatKatenoivaValintalaskentaPalvelukutsu.this);
 									}, failureCallback(takaisinkutsu));
-				}
 			});
 		} catch (Exception e) {
 			LOG.error(

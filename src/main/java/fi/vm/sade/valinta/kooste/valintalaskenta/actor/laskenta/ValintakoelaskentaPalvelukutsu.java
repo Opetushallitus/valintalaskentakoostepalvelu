@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class ValintakoelaskentaPalvelukutsu extends
 	public ValintakoelaskentaPalvelukutsu(
 			ParametritDTO parametritDTO,
 			boolean erillishaku,
-			HakukohdeJaOrganisaatio hakukohdeOid,
+			UuidHakukohdeJaOrganisaatio hakukohdeOid,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
 			ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
@@ -49,7 +50,7 @@ public class ValintakoelaskentaPalvelukutsu extends
 			PalvelukutsuStrategia hakemuksetStrategia,
 			PalvelukutsuStrategia valintaperusteetStrategia,
 			PalvelukutsuStrategia suoritusrekisteriStrategia) {
-		super(parametritDTO, hakukohdeOid.getHakukohdeOid(), Arrays
+		super(parametritDTO, hakukohdeOid, Arrays
 				.asList(new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 						hakemuksetPalvelukutsu, hakemuksetStrategia),
 						new PalvelukutsuJaPalvelukutsuStrategiaImpl(

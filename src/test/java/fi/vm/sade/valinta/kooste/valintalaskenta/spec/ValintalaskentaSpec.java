@@ -95,7 +95,7 @@ public class ValintalaskentaSpec {
 
         @Override
         public void peruuta() {
-            p.accept(new RuntimeException("Peruutettu"));
+            //p.accept(new RuntimeException("Peruutettu"));
         }
 
         @Override

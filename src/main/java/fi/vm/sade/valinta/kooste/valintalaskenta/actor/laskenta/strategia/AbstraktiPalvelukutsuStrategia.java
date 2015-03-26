@@ -4,6 +4,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.PalvelukutsunUudelleenAktivointiPoikkeus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +65,10 @@ public abstract class AbstraktiPalvelukutsuStrategia implements
 										e.getMessage());
 							}
 						});
-
+			} catch(PalvelukutsunUudelleenAktivointiPoikkeus p) {
+				aloitetutPalvelukutsut
+						.remove(seuraavaPalvelukutsu.palvelukutsu);
+				throw p;
 			} catch (Exception e) {
 				LOG.error("Palvelukutsun kaynnistys heitti poikkeuksen: {}", e
 						.getClass().getSimpleName());
