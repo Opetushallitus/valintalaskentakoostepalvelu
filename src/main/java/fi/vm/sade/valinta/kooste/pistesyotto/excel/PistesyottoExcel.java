@@ -165,12 +165,8 @@ public class PistesyottoExcel {
 		if (pistetiedot == null) {
 			pistetiedot = Collections.emptyList();
 		}
-		Collections.sort(valintaperusteet, new Comparator<ValintaperusteDTO>() {
-			@Override
-			public int compare(ValintaperusteDTO o1, ValintaperusteDTO o2) {
-				return o1.getKuvaus().toUpperCase().compareTo(o2.getKuvaus());
-			}
-		});
+
+        Collections.sort(valintaperusteet, (o1, o2) -> o1.getKuvaus().compareTo(o2.getKuvaus()));
 
 		Map<String, Map<String, ValintakoeDTO>> tunnisteValintakoe = valintakoeOidit(
 				hakukohdeOid, Sets.newHashSet(valintakoeTunnisteet),
