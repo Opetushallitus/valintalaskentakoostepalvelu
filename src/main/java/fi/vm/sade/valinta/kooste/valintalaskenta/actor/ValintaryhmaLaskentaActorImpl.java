@@ -135,7 +135,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 		}
 		try {
 			laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
-					LaskentaTila.PERUUTETTU);
+					LaskentaTila.PERUUTETTU, HakukohdeTila.KESKEYTETTY);
 		} catch (Exception e) {
 			LOG.error("Virhe {}", e.getMessage());
 		}
