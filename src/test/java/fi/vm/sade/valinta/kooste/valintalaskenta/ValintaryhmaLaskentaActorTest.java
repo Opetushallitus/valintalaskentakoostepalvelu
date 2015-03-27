@@ -88,7 +88,6 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false,null, Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1)));
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
-
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.VALMIS));
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any());
