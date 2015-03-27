@@ -153,6 +153,12 @@ public class PistesyotonTuonti5Test {
         assertEquals(dada.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6"), "2.00");
         assertEquals(dada.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN"), "OSALLISTUI");
 
+        ApplicationAdditionalDataDTO dada2 = pistetiedot.stream().filter(h -> h.getLastName().equals("Peloton")).findFirst().get();
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dada2));
+        assertEquals(dada2.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84"), "1");
+        assertEquals(dada2.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN"), "OSALLISTUI");
+        assertEquals(dada2.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6"), "");
+        assertEquals(dada2.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN"), "MERKITSEMATTA");
 	}
 
     private Map<String, ApplicationAdditionalDataDTO> asMap(

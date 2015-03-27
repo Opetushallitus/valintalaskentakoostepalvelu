@@ -67,7 +67,9 @@ public class DiskreettiDataArvo extends TilaDataArvo {
 		} else {
 			lopullinenTila = konvertoiTila(tila);
 			if (getAsetettuTila().equals(lopullinenTila)) {
-				lopullinenTila = PistesyottoExcel.VAKIO_MERKITSEMATTA;
+                if(!(lopullinenTila.equals(PistesyottoExcel.VAKIO_OSALLISTUI) && !isAsetettu(arvo))) {
+                    lopullinenTila = PistesyottoExcel.VAKIO_MERKITSEMATTA;
+                }
 			}
 		}
 		return new PistesyottoArvo(konvertoi(arvo), lopullinenTila, isValidi(arvo)
