@@ -108,7 +108,8 @@ public class ArvosanaToAvainArvoDTOConverter {
             List<Arvosana> eiValinnaisetArvosanat = a.stream().filter(ax -> !ax.isValinnainen()).collect(Collectors.toList());
             if(eiValinnaisetArvosanat.isEmpty()) {
                 LOG.error("Valinnainen arvosana löytyy mutta arvosanaa ei löydy");
-                throw new RuntimeException("Valinnainen arvosana löytyy mutta arvosanaa ei löydy");
+                //throw new RuntimeException("Valinnainen arvosana löytyy mutta arvosanaa ei löydy");
+                return Stream.empty();
             }
             Arvosana paras;
             Map<String, List<Arvosana>> byArvosanat =
