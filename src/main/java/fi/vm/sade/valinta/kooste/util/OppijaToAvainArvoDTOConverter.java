@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.util;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,7 +16,6 @@ import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.
 
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.util.sure.ArvosanaToAvainArvoDTOConverter;
-import fi.vm.sade.valinta.kooste.util.sure.YoToAvainArvoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -104,6 +104,19 @@ public class OppijaToAvainArvoDTOConverter {
                 return convertP(suoritukset.stream(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan);
         }
 
+        private static Stream<AvainArvoDTO> yoTila(SuoritusJaArvosanat s) {
+                return of(s).filter(s0 -> wrap(s0).isYoTutkinto() && !wrap(s0).isKeskeytynyt()).map(suoritus -> {
+                        AvainArvoDTO a = new AvainArvoDTO();
+                        a.setAvain(new StringBuilder("YO_").append("TILA").toString());
+                        if(new SuoritusJaArvosanatWrapper(suoritus).isValmis()) {
+                                a.setArvo("true");
+                        } else {
+                                a.setArvo("false");
+                        }
+                        return of(a);
+                }).findAny().orElse(empty());
+        }
+
 	private static Stream<AvainArvoDTO> convertP(
 			Stream<SuoritusJaArvosanat> suoritukset, DateTime pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan) {
 
@@ -111,7 +124,7 @@ public class OppijaToAvainArvoDTOConverter {
             return suoritukset
                     .flatMap(s ->
                                     of(
-                                            YoToAvainArvoDTOConverter.convert(of(s).filter(s0 -> wrap(s0).isYoTutkinto() && !wrap(s0).isKeskeytynyt()).findAny()),
+                                            yoTila(s),
                                             PERUSOPETUS.convert(of(s).filter(s0 -> wrap(s0).isPerusopetus() && !wrap(s0).isKeskeytynyt()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
                                             LISAOPETUS.convert(of(s).filter(s0 -> wrap(s0).isLisaopetus()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
                                             //AMMATTISTARTTI.convert(of(s).filter(s0 -> wrap(s0).isAmmattistartti()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),

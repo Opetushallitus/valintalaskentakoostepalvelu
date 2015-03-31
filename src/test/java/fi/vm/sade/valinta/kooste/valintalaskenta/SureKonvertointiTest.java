@@ -9,8 +9,6 @@ import java.util.stream.Stream;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
-import fi.vm.sade.valinta.kooste.util.sure.ArvosanaToAvainArvoDTOConverter;
-import fi.vm.sade.valinta.kooste.util.sure.YoToAvainArvoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
@@ -38,7 +36,7 @@ public class SureKonvertointiTest {
 			.getLogger(SureKonvertointiTest.class);
 
 	@Test
-	public void testaaLukioYoKonvertointi() throws JsonSyntaxException,
+	public void testaaLukioKonvertointi() throws JsonSyntaxException,
 			IOException {
 		Oppija o = new Gson().fromJson(IOUtils
 				.toString(new ClassPathResource("valintalaskenta/sure_pk_ja_yo.json")
@@ -61,9 +59,6 @@ public class SureKonvertointiTest {
 
 		Assert.assertTrue("Ensikertalaisuus on datalla tosi",
 				aa.stream().filter(a -> "ensikertalainen".equals(a.getAvain()) && "true".equals(a.getArvo())).count() == 1L);
-
-		Assert.assertTrue("EA:n arvo on E",
-				aa.stream().filter(a -> "EA".equals(a.getAvain()) && "E".equals(a.getArvo())).count() == 1L);
 
 		Assert.assertTrue("Peruskoulutuksen A12 oppiaine on ES",
 				aa.stream().filter(a -> "PK_A12_OPPIAINE".equals(a.getAvain()) && "ES".equals(a.getArvo())).count() == 1L);
@@ -99,44 +94,4 @@ public class SureKonvertointiTest {
 		}
 	}
 
-	@Test
-	public void testaaArvosanaMax() {
-		String ARVOSANA = "L";
-		Arvosana a = new Arvosana(null, null, null, null, null, null,
-				new Arvio(ARVOSANA, null, null), null);
-		Assert.assertTrue(ARVOSANA.equals(YoToAvainArvoDTOConverter
-				.max(Arrays.asList(a)).getArvio().getArvosana()));
-	}
-
-	@Test
-	public void testaaArvosanaMaxNollalla() {
-		Assert.assertTrue(YoToAvainArvoDTOConverter.max(Arrays.asList()) == null);
-	}
-
-	@Test
-	public void testaaArvosanaMaxKahdella() {
-		String ARVOSANA = "L";
-		String ARVOSANA2 = "B";
-		Arvosana a = new Arvosana(null, null, null, null, null, null,
-				new Arvio(ARVOSANA, null, null), null);
-		Arvosana b = new Arvosana(null, null, null, null, null, null,
-				new Arvio(ARVOSANA2, null, null), null);
-		Assert.assertTrue(ARVOSANA.equals(YoToAvainArvoDTOConverter
-				.max(Arrays.asList(a, b)).getArvio().getArvosana()));
-	}
-
-	@Test
-	public void testaaArvosanaMaxKolmella() {
-		String ARVOSANA = "A";
-		String ARVOSANA2 = "B";
-		String ARVOSANA3 = "C";
-		Arvosana a = new Arvosana(null, null, null, null, null, null,
-				new Arvio(ARVOSANA, null, null), null);
-		Arvosana b = new Arvosana(null, null, null, null, null, null,
-				new Arvio(ARVOSANA2, null, null), null);
-		Arvosana c = new Arvosana(null, null, null, null, null, null,
-				new Arvio(ARVOSANA3, null, null), null);
-		Assert.assertTrue(ARVOSANA3.equals(YoToAvainArvoDTOConverter
-				.max(Arrays.asList(a, b, c)).getArvio().getArvosana()));
-	}
 }

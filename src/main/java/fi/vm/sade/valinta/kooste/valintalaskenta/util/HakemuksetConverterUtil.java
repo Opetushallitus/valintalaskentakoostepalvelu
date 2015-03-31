@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
+import fi.vm.sade.valinta.kooste.util.sure.YoToAvainSuoritustietoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -116,7 +117,8 @@ public class HakemuksetConverterUtil {
 						if (personOid != null
 								&& oppijaNumeroJaOppija.containsKey(personOid)) {
 							Oppija oppija = oppijaNumeroJaOppija.get(personOid);
-
+							h.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
+							oppija.getSuoritukset();
 							Map<String, AvainArvoDTO> arvot =
 									toAvainMap(h.getAvaimet(), h.getHakemusoid(), hakukohdeOid, errors);
 
@@ -132,6 +134,7 @@ public class HakemuksetConverterUtil {
 						errors.put(h.getHakemusoid(), e);
 					}
 				});
+
 			}
 		} catch (Exception e) {
 			LOG.error(

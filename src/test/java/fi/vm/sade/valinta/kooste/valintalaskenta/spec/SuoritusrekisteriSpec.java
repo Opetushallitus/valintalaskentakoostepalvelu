@@ -1,15 +1,70 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.spec;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
+import fi.vm.sade.valintalaskenta.domain.dto.AvainMetatiedotDTO;
 import org.joda.time.DateTime;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jussi Jartamo
  */
 public class SuoritusrekisteriSpec {
+    public static class SuoritustietoBuilder {
+        private final Map<String,String> m = Maps.newHashMap();
+        private final AvainBuilder a;
+        public SuoritustietoBuilder(AvainBuilder a) {
+            this.a = a;
+        }
+        public SuoritustietoBuilder suoritustieto(String suoritustieto, String arvo) {
+            m.put(suoritustieto,arvo);
+            return this;
+        }
+        public AvainBuilder build() {
+            a.l.add(m);
+            return a;
+        }
+    }
+    public static class AvainBuilder {
+        private final String avain;
+        private final List<Map<String,String>> l = Lists.newArrayList();
+        private final AvainSuoritusBuilder a;
+        public AvainBuilder(AvainSuoritusBuilder a, String avain) {
+            this.a = a;
+            this.avain = avain;
+        }
+        public SuoritustietoBuilder suoritustieto(String s, String a) {
+            return new SuoritustietoBuilder(this).suoritustieto(s,a);
+        }
 
+        public AvainSuoritusBuilder build() {
+            a.as.add(new AvainMetatiedotDTO(avain, l));
+            return a;
+        }
+    }
+    public static class AvainSuoritusBuilder {
+        private final List<AvainMetatiedotDTO> as = Lists.newArrayList();
+        public AvainBuilder avain(String avain) {
+            return new AvainBuilder(this, avain);
+        }
+        public List<AvainMetatiedotDTO> build() {
+            return as;
+        }
+        public AvainMetatiedotDTO buildOne() {
+            return as.iterator().next();
+        }
+    }
+    public AvainSuoritusBuilder avainsuoritustieto() {
+        return new AvainSuoritusBuilder();
+    }
+    public AvainBuilder avainsuoritustieto(String avain) {
+        return new AvainSuoritusBuilder().avain(avain);
+    }
     public static class ArvosanaBuilder {
         private final SuoritusBuilder suoritus;
         private final Arvosana arvosana = new Arvosana();
