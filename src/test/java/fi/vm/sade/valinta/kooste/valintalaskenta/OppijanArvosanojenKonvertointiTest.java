@@ -597,7 +597,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
         return aa.stream()
                 .filter(x -> x.getAvain().equals(a.getAvain()))
                 .anyMatch(
-                x -> testEquality(a.getSuoritustiedot(), x.getSuoritustiedot())
+                x -> testEquality(a.getMetatiedot(), x.getMetatiedot())
         );
     }
 
