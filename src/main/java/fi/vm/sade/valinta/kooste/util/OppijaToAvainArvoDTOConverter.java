@@ -41,7 +41,24 @@ public class OppijaToAvainArvoDTOConverter {
                 if (oppija == null || oppija.getSuoritukset() == null) {
                 return Collections.emptyList();
                 }
-                Stream<AvainArvoDTO> avainArvot = convert(oppija, oppija.getSuoritukset(),parametritDTO);
+                List<SuoritusJaArvosanat> suoritukset =
+                        oppija.getSuoritukset().stream()
+                                .filter(Objects::nonNull)
+                                        //
+                                .filter(s -> s.getSuoritus() != null)
+                                        //
+                                .filter(s -> s.getArvosanat() != null)
+                                        //
+                                .filter(s ->
+                                                wrap(s).isLukio() || wrap(s).isYoTutkinto() || wrap(s).isPerusopetus() || wrap(s).isLisaopetus()
+                                )
+                                        // EI ITSEILMOITETTUJA LASKENTAAN
+                                .filter(s -> !new SuoritusJaArvosanatWrapper(s).isItseIlmoitettu())
+                                .collect(Collectors.toList());
+                if (suoritukset.isEmpty()) {
+                        return Collections.emptyList();
+                }
+                Stream<AvainArvoDTO> avainArvot = convert(oppija, suoritukset,parametritDTO);
                 AvainArvoDTO ensikertalaisuus = new AvainArvoDTO();
                 ensikertalaisuus.setAvain("ensikertalainen");
                 ensikertalaisuus.setArvo(String.valueOf(oppija.isEnsikertalainen()));
@@ -51,28 +68,7 @@ public class OppijaToAvainArvoDTOConverter {
 
         private static Stream<AvainArvoDTO> convert(
                 Oppija oppija,
-                List<SuoritusJaArvosanat> suorituksetJaArvosanat, ParametritDTO parametritDTO) {
-                if (suorituksetJaArvosanat == null) {
-                        return empty();
-                }
-                List<SuoritusJaArvosanat> suoritukset =
-                        suorituksetJaArvosanat.stream()
-                                .filter(Objects::nonNull)
-                                        //
-                                .filter(s -> s.getSuoritus() != null)
-                                        //
-                                .filter(s -> s.getArvosanat() != null)
-                                //
-                                .filter(s ->
-                                        wrap(s).isLukio() || wrap(s).isYoTutkinto() || wrap(s).isPerusopetus() || wrap(s).isLisaopetus()
-                                )
-                                // EI ITSEILMOITETTUJA LASKENTAAN
-                                .filter(s -> !new SuoritusJaArvosanatWrapper(s).isItseIlmoitettu())
-                                .collect(Collectors.toList());
-                if(suoritukset.isEmpty()) {
-                        return empty();
-                }
-
+                List<SuoritusJaArvosanat> suoritukset, ParametritDTO parametritDTO) {
                 final DateTime pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan =
 
                         ofNullable(ofNullable(ofNullable(parametritDTO).orElse(new ParametritDTO()).getPH_VLS()).orElse(new ParametriDTO()).getDateStart()).map(
@@ -92,11 +88,11 @@ public class OppijaToAvainArvoDTOConverter {
                         .collect(Collectors.groupingBy(a -> ((SuoritusJaArvosanat) a).getSuoritus().getKomo(),
                         Collectors.mapping(a -> a, Collectors.<SuoritusJaArvosanat>toList()))).entrySet().stream()
                 .forEach(s -> {
-                        if(s.getValue().size() > 1) {
+                        if (s.getValue().size() > 1) {
                                 SuoritusJaArvosanat s0 = s.getValue().iterator().next();
                                 String komo = new SuoritusJaArvosanatWrapper(s0).komoToString();
-                                LOG.error("Sama suoritus löytyi moneen kertaan! Komo OID {} ({}), oppijalle {}", s0.getSuoritus().getKomo(), komo,oppija.getOppijanumero());
-                                throw new RuntimeException("Sama suoritus löytyi moneen kertaan! Komo OID "+s0.getSuoritus().getKomo()+" ("+komo+") oppijalle " + oppija.getOppijanumero());
+                                LOG.error("Sama suoritus löytyi moneen kertaan! Komo OID {} ({}), oppijalle {}", s0.getSuoritus().getKomo(), komo, oppija.getOppijanumero());
+                                throw new RuntimeException("Sama suoritus löytyi moneen kertaan! Komo OID " + s0.getSuoritus().getKomo() + " (" + komo + ") oppijalle " + oppija.getOppijanumero());
                         }
                 });
 

@@ -79,14 +79,15 @@ public class YoToAvainSuoritustietoDTOConverter {
         if(oppija == null || oppija.getSuoritukset() == null) {
             return Collections.emptyList();
         }
-        List<SuoritusJaArvosanat> yoSuoritukset = oppija.getSuoritukset().stream().filter(s -> new SuoritusJaArvosanatWrapper(s).isYoTutkinto()).collect(Collectors.toList());
+        List<SuoritusJaArvosanat> yoSuoritukset = oppija.getSuoritukset().stream().filter(s ->
+                new SuoritusJaArvosanatWrapper(s).isYoTutkinto() &&
+                        !new SuoritusJaArvosanatWrapper(s).isItseIlmoitettu()).collect(Collectors.toList());
         if(yoSuoritukset.isEmpty()) {
             return Collections.emptyList();
         }
         List<Arvosana> yoArvosanat = yoSuoritukset.iterator().next().getArvosanat().stream().flatMap(a -> normalisoi(a))
                 .collect(Collectors.toList());
-        LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(yoArvosanat));
-
+        
         Map<String, List<Arvosana>> arvosanaGrouping = yoArvosanat.stream().collect(Collectors.groupingBy(a -> ((Arvosana) a).getAine(), Collectors.mapping(identity(), Collectors.toList())));
 
 

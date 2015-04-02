@@ -135,6 +135,14 @@ public class SuoritusrekisteriSpec {
             this.oppija = oppija;
             this.suoritusJaArvosanat.setSuoritus(suoritus);
         }
+        public SuoritusBuilder setSource(String source) {
+            suoritus.setSource(source);
+            return SuoritusBuilder.this;
+        }
+        public SuoritusBuilder setHenkiloOid(String henkiloOid) {
+            suoritus.setHenkiloOid(henkiloOid);
+            return SuoritusBuilder.this;
+        }
         public SuoritusBuilder setValmis() {
             suoritus.setTila("VALMIS");
             return SuoritusBuilder.this;

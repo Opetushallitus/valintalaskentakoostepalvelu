@@ -510,7 +510,66 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
     // YO:ssa ei huomioida laskennan alkamispvm:aa liian myohaan kirjattujen arvosanojen filtteroinnissa
     // ONKO YO-VALMIS, SUORITUKSEN TILA GENEERINEN
     // YO:SSA SUORITUKSEN TILA HELPPO KOSKA VAAN YKS SUORITUS
+    @Test
+    public void itseilmoitetutOhitetaan() {
+        DateTime nyt = DateTime.now();
 
+        Oppija suoritus = oppija()
+                .suoritus()
+                .setHenkiloOid("HENKILO1")
+                .setSource("HENKILO1")
+                .setLukio()
+                .setValmis()
+                .arvosana()
+                .setAine("AINEREAALI")
+                .setLisatieto("PS")
+                .setAsteikko_4_10()
+                .setArvosana("7")
+                .setPisteet(20)
+                .setMyonnetty("01.08.2014")
+                .build()
+                .build()
+                .build();
+        {
+
+            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus,null);
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+            Assert.assertTrue(aa.isEmpty());
+        }
+    }
+    @Test
+    public void yoItseilmoitetutOhitetaan() {
+        DateTime nyt = DateTime.now();
+
+        Oppija suoritus = oppija()
+                .suoritus()
+                .setHenkiloOid("HENKILO1")
+                .setSource("HENKILO1")
+                .setYo()
+                .setValmis()
+                .arvosana()
+                .setAine("AINEREAALI")
+                .setLisatieto("PS")
+                .setAsteikko_yo()
+                .setArvosana("M")
+                .setPisteet(20)
+                .setMyonnetty("01.08.2014")
+                .build()
+                .arvosana()
+                .setAine("AINEREAALI")
+                .setLisatieto("PS")
+                .setAsteikko_yo()
+                .setArvosana("L")
+                .setPisteet(120)
+                .setMyonnetty("30.03.2015")
+                .build()
+                .build()
+                .build();
+        {
+            List<AvainMetatiedotDTO> aa = YoToAvainSuoritustietoDTOConverter.convert(suoritus);
+            Assert.assertTrue(aa.isEmpty());
+        }
+    }
     @Test
     public void yoArvosanatOtetaanHuomioonVaikkaKirjausOlisiTehtyLiianMyohaan() {
         DateTime nyt = DateTime.now();
@@ -567,14 +626,14 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                     avainsuoritustieto("PS")
                                             .suoritustieto("ARVO", "M")
                                             .suoritustieto("PISTEET", "20")
-                                            .suoritustieto("SUORITUSVUOSI","2014")
+                                            .suoritustieto("SUORITUSVUOSI", "2014")
                                             .suoritustieto("SUORITUSLUKUKAUSI", "2")
                                             .suoritustieto("ROOLI", "41")
                                             .build()
                                             .suoritustieto("ARVO", "L")
                                             .suoritustieto("PISTEET", "120")
-                                            .suoritustieto("SUORITUSVUOSI","2015")
-                                            .suoritustieto("SUORITUSLUKUKAUSI","1")
+                                            .suoritustieto("SUORITUSVUOSI", "2015")
+                                            .suoritustieto("SUORITUSLUKUKAUSI", "1")
                                             .suoritustieto("ROOLI", "41")
                                             .build()
                                             .build()
