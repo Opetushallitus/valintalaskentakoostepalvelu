@@ -88,7 +88,7 @@ public class LaskentaActorSystem implements
 								public LaskentaActor create() throws Exception {
 									if (fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi.VALINTARYHMA
 											.equals(laskentaAloitus.getTyyppi())) {
-										LOG.error("Muodostetaan VALINTARYHMALASKENTA");
+										LOG.info("Muodostetaan VALINTARYHMALASKENTA");
 										return laskentaActorFactory
 												.createValintaryhmaActor(uuid,
 														hakuOid,
@@ -99,7 +99,7 @@ public class LaskentaActorSystem implements
 									} else {
 										if (LaskentaTyyppi.VALINTAKOELASKENTA
 												.equals(laskentaTyyppi)) {
-											LOG.error("Muodostetaan VALINTAKOELASKENTA");
+											LOG.info("Muodostetaan VALINTAKOELASKENTA");
 											return laskentaActorFactory
 													.createValintakoelaskentaActor(
 															uuid, hakuOid,
@@ -110,7 +110,7 @@ public class LaskentaActorSystem implements
 										}
 										if (LaskentaTyyppi.VALINTALASKENTA
 												.equals(laskentaTyyppi)) {
-											LOG.error("Muodostetaan VALINTALASKENTA");
+											LOG.info("Muodostetaan VALINTALASKENTA");
 											return laskentaActorFactory
 													.createValintalaskentaActor(
 															uuid, hakuOid,
@@ -119,7 +119,7 @@ public class LaskentaActorSystem implements
 															valinnanvaiheet,
 															hakukohdeJaOrganisaatio);
 										} else {
-											LOG.error(
+											LOG.info(
 													"Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}",
 													laskentaAloitus
 															.getValinnanvaihe(),

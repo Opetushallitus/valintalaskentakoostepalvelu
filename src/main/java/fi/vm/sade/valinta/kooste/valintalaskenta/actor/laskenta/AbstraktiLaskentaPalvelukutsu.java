@@ -89,7 +89,7 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends
 				int yhteensa = palvelukutsulaskuri.getYhteensa();
 				int laskuriNyt = palvelukutsulaskuri.palvelukutsuSaapui();
 
-				LOG.error("Saatiin {} (uuid={},hakukohde/tunniste={}): {}/{}",
+				LOG.info("Saatiin {} (uuid={},hakukohde/tunniste={}): {}/{}",
 						StringUtils.rightPad(pk.getClass()
 						.getSimpleName(),38),getUuid(), getHakukohdeOid(), (-laskuriNyt)
 						+ yhteensa, yhteensa);
