@@ -90,7 +90,13 @@ public class ErillishaunVientiService {
                     prosessi.keskeyta();
                 });
     }
-
+    private String objectToString(Object o) {
+        if(o == null) {
+            return "";
+        } else {
+            return o.toString();
+        }
+    }
     private ErillishakuExcel generoiTuloksilla(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final HakuV1RDTO haku, final fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO tarjontaHakukohde, final HakukohdeDTO hakukohde, final Map<String, Valintatulos> valintatulokset) {
         LOG.info("Muodostetaan Excel valintaperusteista!");
         Map<String, Hakemus> oidToHakemus = hakemukset.stream().collect(Collectors.toMap(h -> h.getOid(), h -> h));
@@ -99,12 +105,20 @@ public class ErillishaunVientiService {
                 .flatMap(v -> v.getHakemukset().stream())
                 .map(h -> {
                     HakemusWrapper wrapper = new HakemusWrapper(oidToHakemus.get(h.getHakemusOid()));
-                    String hakemuksenTila = "";
-                    if (h.getTila() != null) {
-                        hakemuksenTila = h.getTila().toString();
-                    }
-                    Valintatulos tulos = valintatulokset.get(h.getHakemusOid());
-                    ErillishakuRivi e = new ErillishakuRivi(h.getHakemusOid(), h.getSukunimi(), h.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSahkopostiOsoite(), wrapper.getSyntymaaika(), wrapper.getPersonOid(), hakemuksenTila, tulos.getTila().toString(), tulos.getIlmoittautumisTila().toString(), tulos.getJulkaistavissa(), Optional.empty());
+                    Valintatulos tulos = Optional.ofNullable(valintatulokset.get(h.getHakemusOid())).orElse(new Valintatulos());
+                    ErillishakuRivi e = new ErillishakuRivi(
+                            h.getHakemusOid(),
+                            h.getSukunimi(),
+                            h.getEtunimi(),
+                            wrapper.getHenkilotunnus(),
+                            wrapper.getSahkopostiOsoite(),
+                            wrapper.getSyntymaaika(),
+                            wrapper.getPersonOid(),
+                            objectToString(h.getTila()),
+                            objectToString(tulos.getTila()),
+                            objectToString(tulos.getIlmoittautumisTila()),
+                            tulos.getJulkaistavissa(),
+                            Optional.empty());
                     return e;
                 }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohdeNimi()), teksti(tarjontaHakukohde.getTarjoajaNimi()), erillishakurivit);
