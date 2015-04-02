@@ -96,10 +96,23 @@ public class YoToAvainSuoritustietoDTOConverter {
                         a -> new AvainMetatiedotDTO(a.getKey(),
                                 a.getValue().stream().map(mapArvosana).collect(Collectors.toList()))),
                 // ainereaali
-                ainereaali(yoArvosanat.stream().filter(find(
+                arvosanaGroup("AINEREAALI", yoArvosanat.stream().filter(find(
                         "UE", "UO", "ET", "FF", "PS",
                         "HI", "FY", "KE", "BI", "GE",
-                        "TE", "YH")))).flatMap(identity()).collect(Collectors.toList());
+                        "TE", "YH"))),
+                arvosanaGroup("REAALI", yoArvosanat.stream().filter(find(
+                        "RR", "RO", "RY"))),
+                arvosanaGroup("PITKA_KIELI", yoArvosanat.stream().filter(find(
+                        "EA", "FA", "GA", "HA", "PA",
+                        "SA", "TA", "VA", "S9"))),
+                arvosanaGroup("KESKIPITKA_KIELI", yoArvosanat.stream().filter(find(
+                        "EB", "FB", "GB", "HB", "PB", "SB", "TB", "VB"))),
+                arvosanaGroup("LYHYT_KIELI", yoArvosanat.stream().filter(find(
+                        "EC", "FC", "GC", "L1", "PC",
+                        "SC", "TC", "VC", "KC", "L7"))),
+                arvosanaGroup("AIDINKIELI", yoArvosanat.stream().filter(find(
+                        "O", "A", "I", "W", "Z", "O5",
+                        "A5")))).flatMap(identity()).collect(Collectors.toList());
     }
 
     private static Predicate<Arvosana> find(String ... arvosana) {
@@ -107,12 +120,12 @@ public class YoToAvainSuoritustietoDTOConverter {
         return a -> aa.contains(a.getAine());
     }
 
-    private static Stream<AvainMetatiedotDTO> ainereaali(Stream<Arvosana> arvosanat) {
+    private static Stream<AvainMetatiedotDTO> arvosanaGroup(String group, Stream<Arvosana> arvosanat) {
         List<Arvosana> ar = arvosanat.collect(Collectors.toList());
         if (ar.isEmpty()) {
          return Stream.empty();
         } else {
-            return Stream.of(new AvainMetatiedotDTO("AINEREAALI", ar.stream().map(mapArvosanaWithLisatieto).collect(Collectors.toList())));
+            return Stream.of(new AvainMetatiedotDTO(group, ar.stream().map(mapArvosanaWithLisatieto).collect(Collectors.toList())));
         }
     }
 
