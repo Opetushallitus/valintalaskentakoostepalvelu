@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.util;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,7 +16,6 @@ import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.
 
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.util.sure.ArvosanaToAvainArvoDTOConverter;
-import fi.vm.sade.valinta.kooste.util.sure.YoToAvainArvoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -41,7 +41,24 @@ public class OppijaToAvainArvoDTOConverter {
                 if (oppija == null || oppija.getSuoritukset() == null) {
                 return Collections.emptyList();
                 }
-                Stream<AvainArvoDTO> avainArvot = convert(oppija, oppija.getSuoritukset(),parametritDTO);
+                List<SuoritusJaArvosanat> suoritukset =
+                        oppija.getSuoritukset().stream()
+                                .filter(Objects::nonNull)
+                                        //
+                                .filter(s -> s.getSuoritus() != null)
+                                        //
+                                .filter(s -> s.getArvosanat() != null)
+                                        //
+                                .filter(s ->
+                                                wrap(s).isLukio() || wrap(s).isYoTutkinto() || wrap(s).isPerusopetus() || wrap(s).isLisaopetus()
+                                )
+                                        // EI ITSEILMOITETTUJA LASKENTAAN
+                                .filter(s -> !new SuoritusJaArvosanatWrapper(s).isItseIlmoitettu())
+                                .collect(Collectors.toList());
+                if (suoritukset.isEmpty()) {
+                        return Collections.emptyList();
+                }
+                Stream<AvainArvoDTO> avainArvot = convert(oppija, suoritukset,parametritDTO);
                 AvainArvoDTO ensikertalaisuus = new AvainArvoDTO();
                 ensikertalaisuus.setAvain("ensikertalainen");
                 ensikertalaisuus.setArvo(String.valueOf(oppija.isEnsikertalainen()));
@@ -51,28 +68,7 @@ public class OppijaToAvainArvoDTOConverter {
 
         private static Stream<AvainArvoDTO> convert(
                 Oppija oppija,
-                List<SuoritusJaArvosanat> suorituksetJaArvosanat, ParametritDTO parametritDTO) {
-                if (suorituksetJaArvosanat == null) {
-                        return empty();
-                }
-                List<SuoritusJaArvosanat> suoritukset =
-                        suorituksetJaArvosanat.stream()
-                                .filter(Objects::nonNull)
-                                        //
-                                .filter(s -> s.getSuoritus() != null)
-                                        //
-                                .filter(s -> s.getArvosanat() != null)
-                                //
-                                .filter(s ->
-                                        wrap(s).isLukio() || wrap(s).isYoTutkinto() || wrap(s).isPerusopetus() || wrap(s).isLisaopetus()
-                                )
-                                // EI ITSEILMOITETTUJA LASKENTAAN
-                                .filter(s -> !new SuoritusJaArvosanatWrapper(s).isItseIlmoitettu())
-                                .collect(Collectors.toList());
-                if(suoritukset.isEmpty()) {
-                        return empty();
-                }
-
+                List<SuoritusJaArvosanat> suoritukset, ParametritDTO parametritDTO) {
                 final DateTime pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan =
 
                         ofNullable(ofNullable(ofNullable(parametritDTO).orElse(new ParametritDTO()).getPH_VLS()).orElse(new ParametriDTO()).getDateStart()).map(
@@ -92,16 +88,29 @@ public class OppijaToAvainArvoDTOConverter {
                         .collect(Collectors.groupingBy(a -> ((SuoritusJaArvosanat) a).getSuoritus().getKomo(),
                         Collectors.mapping(a -> a, Collectors.<SuoritusJaArvosanat>toList()))).entrySet().stream()
                 .forEach(s -> {
-                        if(s.getValue().size() > 1) {
+                        if (s.getValue().size() > 1) {
                                 SuoritusJaArvosanat s0 = s.getValue().iterator().next();
                                 String komo = new SuoritusJaArvosanatWrapper(s0).komoToString();
-                                LOG.error("Sama suoritus löytyi moneen kertaan! Komo OID {} ({}), oppijalle {}", s0.getSuoritus().getKomo(), komo,oppija.getOppijanumero());
-                                throw new RuntimeException("Sama suoritus löytyi moneen kertaan! Komo OID "+s0.getSuoritus().getKomo()+" ("+komo+") oppijalle " + oppija.getOppijanumero());
+                                LOG.error("Sama suoritus löytyi moneen kertaan! Komo OID {} ({}), oppijalle {}", s0.getSuoritus().getKomo(), komo, oppija.getOppijanumero());
+                                throw new RuntimeException("Sama suoritus löytyi moneen kertaan! Komo OID " + s0.getSuoritus().getKomo() + " (" + komo + ") oppijalle " + oppija.getOppijanumero());
                         }
                 });
 
 
                 return convertP(suoritukset.stream(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan);
+        }
+
+        private static Stream<AvainArvoDTO> yoTila(SuoritusJaArvosanat s) {
+                return of(s).filter(s0 -> wrap(s0).isYoTutkinto() && !wrap(s0).isKeskeytynyt()).map(suoritus -> {
+                        AvainArvoDTO a = new AvainArvoDTO();
+                        a.setAvain(new StringBuilder("YO_").append("TILA").toString());
+                        if(new SuoritusJaArvosanatWrapper(suoritus).isValmis()) {
+                                a.setArvo("true");
+                        } else {
+                                a.setArvo("false");
+                        }
+                        return of(a);
+                }).findAny().orElse(empty());
         }
 
 	private static Stream<AvainArvoDTO> convertP(
@@ -111,7 +120,7 @@ public class OppijaToAvainArvoDTOConverter {
             return suoritukset
                     .flatMap(s ->
                                     of(
-                                            YoToAvainArvoDTOConverter.convert(of(s).filter(s0 -> wrap(s0).isYoTutkinto() && !wrap(s0).isKeskeytynyt()).findAny()),
+                                            yoTila(s),
                                             PERUSOPETUS.convert(of(s).filter(s0 -> wrap(s0).isPerusopetus() && !wrap(s0).isKeskeytynyt()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
                                             LISAOPETUS.convert(of(s).filter(s0 -> wrap(s0).isLisaopetus()).findAny(), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),
                                             //AMMATTISTARTTI.convert(of(s).filter(s0 -> wrap(s0).isAmmattistartti()), pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan),

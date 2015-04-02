@@ -48,7 +48,7 @@ public class SuoritusJaArvosanatWrapper {
 
     public boolean isItseIlmoitettu() {
         if(suoritusJaArvosanat.getSuoritus().getHenkiloOid() != null) {
-            return suoritusJaArvosanat.getSuoritus().getHenkiloOid().equals(suoritusJaArvosanat.getSuoritus().getMyontaja());
+            return suoritusJaArvosanat.getSuoritus().getHenkiloOid().equals(suoritusJaArvosanat.getSuoritus().getSource());
         } else {
             return false;
         }

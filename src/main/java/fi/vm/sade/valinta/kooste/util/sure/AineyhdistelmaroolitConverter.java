@@ -20,139 +20,72 @@ public class AineyhdistelmaroolitConverter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AineyhdistelmaroolitConverter.class);
 
-    private static final Predicate<ArvosanaJaAvainArvo> PAKOLLINEN = arvo -> !arvo.getArvosana().isValinnainen();
-    private static final Predicate<ArvosanaJaAvainArvo> YLIMAARAINEN = arvo -> arvo.getArvosana().isValinnainen();
-    private static final Predicate<ArvosanaJaAvainArvo> AIDINKIELI = arvo -> new ArvosanaWrapper(arvo.getArvosana()).isAidinkieli();
+    private static final Predicate<Arvosana> PAKOLLINEN = arvo -> !arvo.isValinnainen();
+    private static final Predicate<Arvosana> YLIMAARAINEN = arvo -> arvo.isValinnainen();
+    private static final Predicate<Arvosana> AIDINKIELI = arvo -> new ArvosanaWrapper(arvo).isAidinkieli();
     private static final Predicate<ArvosanaJaAvainArvo> AIDINKIELI_JA_EI_ENGLANTI = arvo -> new ArvosanaWrapper(arvo.getArvosana()).isAidinkieli()
             &&
             // NOT ENGLANTI
             !"J".equals(arvo.getArvosana().getAine());
-    private static final Predicate<ArvosanaJaAvainArvo> SUOMI_RUOTSI_TOISENA_KIELENA = arvo -> new ArvosanaWrapper(arvo.getArvosana()).isSuomiRuotsiToisenaKielena();
-    private static final Predicate<ArvosanaJaAvainArvo> TOINEN_KOTIMAINEN = arvo -> new ArvosanaWrapper(arvo.getArvosana()).isToinenKotimainenKieli();
-    private static final Predicate<ArvosanaJaAvainArvo> VIERASKIELI = arvo -> new ArvosanaWrapper(arvo.getArvosana()).isVieraskieli();
-    private static final Predicate<ArvosanaJaAvainArvo> MATEMATIIKKA = arvo -> new ArvosanaWrapper(arvo.getArvosana()).isMatematiikka();
-    private static final Predicate<ArvosanaJaAvainArvo> REAALI = arvo -> new ArvosanaWrapper(arvo.getArvosana()).isReaali();
+    private static final Predicate<Arvosana> SUOMI_RUOTSI_TOISENA_KIELENA = arvo -> new ArvosanaWrapper(arvo).isSuomiRuotsiToisenaKielena();
+    private static final Predicate<Arvosana> TOINEN_KOTIMAINEN = arvo -> new ArvosanaWrapper(arvo).isToinenKotimainenKieli();
+    private static final Predicate<Arvosana> VIERASKIELI = arvo -> new ArvosanaWrapper(arvo).isVieraskieli();
+    private static final Predicate<Arvosana> MATEMATIIKKA = arvo -> new ArvosanaWrapper(arvo).isMatematiikka();
+    private static final Predicate<Arvosana> REAALI = arvo -> new ArvosanaWrapper(arvo).isReaali();
 
-    public static Stream<ArvosanaJaAvainArvo> konvertoi(List<ArvosanaJaAvainArvo> mukaanTulevatArvot) {
-        final List<ArvosanaJaAvainArvo> ylimaaraiset = mukaanTulevatArvot.stream().filter(YLIMAARAINEN).collect(Collectors.toList());
-        final List<ArvosanaJaAvainArvo> pakolliset = mukaanTulevatArvot.stream().filter(PAKOLLINEN).collect(Collectors.toList());
-
-
-        Stream<ArvosanaJaAvainArvo> aidinkielenRooli =
-                mukaanTulevatArvot.stream()
-                        .filter(AIDINKIELI)
-                        .flatMap(
-                                a -> {
-                                    if (PAKOLLINEN.test(a)) {
-                                        AvainArvoDTO aa = new AvainArvoDTO();
-                                        aa.setAvain(a.getArvosana().getAine() + "_ROOLI");
-                                        //LOG.error("AIDINKIELI {}", new ArvosanaWrapper(a.getArvosana()).isSaame());
-                                        if (new ArvosanaWrapper(a.getArvosana()).isSaame()) {
-                                            aa.setArvo("12");
-                                        } else if (new ArvosanaWrapper(a.getArvosana()).isEnglanti()) {
-                                            aa.setArvo("13"); // KYPSYYSNÄYTE
-                                        } else {
-                                            aa.setArvo("11");
-                                        }
-                                        return Stream.of(new ArvosanaJaAvainArvo(a.getArvosana(), aa));
-                                    } else {
-                                        if (new ArvosanaWrapper(a.getArvosana()).isEnglanti()) {
-                                            return Stream.empty();
-                                        } else {
-                                            AvainArvoDTO aa = new AvainArvoDTO();
-                                            aa.setAvain(a.getArvosana().getAine() + "_ROOLI");
-                                            aa.setArvo("60");
-                                            return Stream.of(new ArvosanaJaAvainArvo(a.getArvosana(), aa));
-                                        }
-                                    }
-                                    });
-
-                                    Stream<ArvosanaJaAvainArvo> toinenAidinkielenRooli =
-                                            mukaanTulevatArvot.stream()
-                                                    //
-                                                    .filter(SUOMI_RUOTSI_TOISENA_KIELENA)
-                                                    .map(a -> {
-                                                        AvainArvoDTO aa = new AvainArvoDTO();
-                                                        aa.setAvain(a.getArvosana().getAine() + "_ROOLI");
-                                                        aa.setArvo("14");
-                                                        return new ArvosanaJaAvainArvo(a.getArvosana(), aa);
-                                                    });
-
-
-                                    Stream<ArvosanaJaAvainArvo> matematiikka =
-                                            mukaanTulevatArvot.stream()
-                                                    //
-                                                    .filter(MATEMATIIKKA)
-                                                    .map(a -> {
-                                                        if (PAKOLLINEN.test(a)) {
-                                                            AvainArvoDTO aa = new AvainArvoDTO();
-                                                            aa.setAvain(a.getArvosana().getAine() + "_ROOLI");
-                                                            aa.setArvo("42"); // Pakollinen matematiikka
-                                                            return new ArvosanaJaAvainArvo(a.getArvosana(), aa);
-                                                        } else {
-                                                            AvainArvoDTO aa = new AvainArvoDTO();
-                                                            aa.setAvain(a.getArvosana().getAine() + "_ROOLI");
-                                                            aa.setArvo("81"); // Ylimääräinen matematiikka
-                                                            return new ArvosanaJaAvainArvo(a.getArvosana(), aa);
-                                                        }
-                                                    });
-
-                                    Stream<ArvosanaJaAvainArvo> reaali =
-                                            mukaanTulevatArvot.stream()
-                                                    //
-                                                    .filter(REAALI)
-                                                    .map(a -> {
-                                                        if (PAKOLLINEN.test(a)) {
-                                                            AvainArvoDTO aa = new AvainArvoDTO();
-                                                            aa.setAvain(a.getArvosana().getAine() + "_ROOLI");
-                                                            aa.setArvo("41"); // Pakollinen reaali
-                                                            return new ArvosanaJaAvainArvo(a.getArvosana(), aa);
-                                                        } else {
-                                                            AvainArvoDTO aa = new AvainArvoDTO();
-                                                            aa.setAvain(a.getArvosana().getAine() + "_ROOLI");
-                                                            aa.setArvo("71"); // Ylimääräinen reaali
-                                                            return new ArvosanaJaAvainArvo(a.getArvosana(), aa);
-                                                        }
-                                                    });
-
-                                    Stream<ArvosanaJaAvainArvo> toinenKotimainen =
-                                            mukaanTulevatArvot.stream()
-                                                    //
-                                                    .filter(TOINEN_KOTIMAINEN)
-                                                    .map(a -> {
-                                                        if (PAKOLLINEN.test(a)) {
-
-                                                            AvainArvoDTO aa = new AvainArvoDTO();
-                                                            aa.setAvain(a.getArvosana().getAine() + "_ROOLI");
-                                                            aa.setArvo("22"); // Pakollinen toinen kotimainen
-                                                            return new ArvosanaJaAvainArvo(a.getArvosana(), aa);
-                                                        } else {
-                                                            AvainArvoDTO aa = new AvainArvoDTO();
-                                                            aa.setAvain(a.getArvosana().getAine() + "_ROOLI");
-                                                            aa.setArvo("62"); // Ylimääräinen toinen kotimainen
-                                                            return new ArvosanaJaAvainArvo(a.getArvosana(), aa);
-                                                        }
-                                                    });
-
-                                    Stream<ArvosanaJaAvainArvo> vieraskieli =
-                                            mukaanTulevatArvot.stream()
-                                                    //
-                                                    .filter(VIERASKIELI)
-                                                    .map(a -> {
-                                                        if (PAKOLLINEN.test(a)) {
-                                                            AvainArvoDTO aa = new AvainArvoDTO();
-                                                            aa.setAvain(a.getArvosana().getAine() + "_ROOLI");
-                                                            aa.setArvo("31"); // Pakollinen vieraskieli
-                                                            return new ArvosanaJaAvainArvo(a.getArvosana(), aa);
-                                                        } else {
-                                                            AvainArvoDTO aa = new AvainArvoDTO();
-                                                            aa.setAvain(a.getArvosana().getAine() + "_ROOLI");
-                                                            aa.setArvo("61"); // Ylimääräinen vieraskieli
-                                                            return new ArvosanaJaAvainArvo(a.getArvosana(), aa);
-                                                        }
-                                                    });
-
-                                    return Stream.of(toinenKotimainen, vieraskieli, matematiikka, reaali, aidinkielenRooli, toinenAidinkielenRooli).flatMap(a -> a);
-
-                                }
+    public static Optional<String> rooliFromArvosana(Arvosana arvosana) {
+        return Stream.of(
+                Stream.of(arvosana).filter(AIDINKIELI).map(a -> {
+                    if (PAKOLLINEN.test(a)) {
+                        if (new ArvosanaWrapper(a).isSaame()) {
+                            return "12";
+                        } else if (new ArvosanaWrapper(a).isEnglanti()) {
+                            return "13"; // KYPSYYSNÄYTE
+                        } else {
+                            return "11";
+                        }
+                    } else {
+                        if (new ArvosanaWrapper(a).isEnglanti()) {
+                            return ""; //!!!
+                        } else {
+                            return "60";
+                        }
+                    }
+                }),
+                Stream.of(arvosana).filter(SUOMI_RUOTSI_TOISENA_KIELENA).map(a -> "14"),
+                Stream.of(arvosana).filter(MATEMATIIKKA)
+                        .map(a -> {
+                        if (PAKOLLINEN.test(a)) {
+                            return "42";// Pakollinen matematiikka
+                        } else {
+                            return "81";// Ylimääräinen matematiikka
+                        }
+                }),
+                Stream.of(arvosana).filter(REAALI)
+                        .map(a -> {
+                            if (PAKOLLINEN.test(a)) {
+                                return "41";// Pakollinen reaali
+                            } else {
+                                return "71";// Ylimääräinen reaali
+                            }
+                        }),
+                Stream.of(arvosana).filter(TOINEN_KOTIMAINEN)
+                        .map(a -> {
+                            if (PAKOLLINEN.test(a)) {
+                                return "22";// Pakollinen tk
+                            } else {
+                                return "62";// Ylimääräinen tk
+                            }
+                        }),
+                Stream.of(arvosana).filter(VIERASKIELI)
+                        .map(a -> {
+                            if (PAKOLLINEN.test(a)) {
+                                return "31";// Pakollinen vk
+                            } else {
+                                return "61";// Ylimääräinen vk
+                            }
+                        })
+                        ).flatMap(Function.identity()).findAny();
     }
+
+}

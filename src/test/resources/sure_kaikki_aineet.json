@@ -1,0 +1,915 @@
+[
+    {
+        "oppijanumero": "1.2.246.562.24.19689802908",
+        "opiskelu": [],
+        "suoritukset": [
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.19689802908",
+                    "source": "1.2.246.562.10.43628088406",
+                    "vahvistettu": true,
+                    "komo": "1.2.246.562.5.2013061010184237348007",
+                    "myontaja": "1.2.246.562.10.43628088406",
+                    "tila": "VALMIS",
+                    "valmistuminen": "21.12.2014",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "34958455-b0ef-44f7-b4cf-aa43b3fd36db"
+                },
+                "arvosanat": [
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "REAALI",
+                        "lisatieto": "ET",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "REAALI",
+                        "lisatieto": "UO",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "REAALI",
+                        "lisatieto": "UE",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+
+
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "A",
+                        "lisatieto": "SA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "A",
+                        "lisatieto": "EN",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "A",
+                        "lisatieto": "UN",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "A",
+                        "lisatieto": "VE",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "A",
+                        "lisatieto": "IT",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "A",
+                        "lisatieto": "RA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "A",
+                        "lisatieto": "FI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "A",
+                        "lisatieto": "RU",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "A",
+                        "lisatieto": "ES",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "A",
+                        "lisatieto": "PG",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+
+
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "B",
+                        "lisatieto": "SA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "B",
+                        "lisatieto": "EN",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "B",
+                        "lisatieto": "UN",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "B",
+                        "lisatieto": "VE",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "B",
+                        "lisatieto": "IT",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "B",
+                        "lisatieto": "RA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "B",
+                        "lisatieto": "FI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "B",
+                        "lisatieto": "RU",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "B",
+                        "lisatieto": "ES",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "B",
+                        "lisatieto": "PG",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+
+
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "SA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "EN",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "UN",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "VE",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "IT",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "RA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "FI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "RU",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "ES",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "PG",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+
+
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "IS",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "ZA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "KR",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "QS",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "C",
+                        "lisatieto": "LA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+
+
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AI",
+                        "lisatieto": "IS",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AI",
+                        "lisatieto": "RU",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AI",
+                        "lisatieto": "FI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AI",
+                        "lisatieto": "ZA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AI",
+                        "lisatieto": "QS",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+
+
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "VI2",
+                        "lisatieto": "RU",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "VI2",
+                        "lisatieto": "FI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+
+
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "PITKA",
+                        "lisatieto": "MA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "LYHYT",
+                        "lisatieto": "MA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "SAKSALKOUL",
+                        "lisatieto": "SA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "KYPSYYS",
+                        "lisatieto": "EN",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "D",
+                        "lisatieto": "LA",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+
+
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "UE",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "UO",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "ET",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "FF",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "PS",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "HI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "FY",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "KE",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "BI",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "GE",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "TE",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    },
+                    {
+                        "id": "e1aaa02d-180e-4ebb-bb34-f40a6f9d13ca",
+                        "suoritus": "34958455-b0ef-44f7-b4cf-aa43b3fd36db",
+                        "arvio": {
+                            "arvosana": "E",
+                            "asteikko": "YO",
+                            "pisteet": 27
+                        },
+                        "aine": "AINEREAALI",
+                        "lisatieto": "YH",
+                        "valinnainen": false,
+                        "myonnetty": "01.06.2014",
+                        "source": "1.2.246.562.10.43628088406"
+                    }
+
+
+                ]
+            }
+        ],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true,
+        "id": "1.2.246.562.24.19689802908",
+        "source": "1.2.246.562.10.00000000001",
+        "core": "1.2.246.562.24.19689802908"
+    }
+]
