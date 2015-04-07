@@ -173,9 +173,12 @@ public class ValintalaskentaKerrallaResource {
 							throw new RuntimeException(
 									"Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
 						} else {
-							LOG.error(
-									"Hakukohteita puuttuvien organisaatio-oidien vuoksi filtteroinnin jalkeen {}/{}!",
-									hakukohdeDtos.size(), hakukohdeOids.size());
+							if(hakukohdeDtos.size() < hakukohdeOids.size()) {
+								LOG.warn("Hakukohteita puuttuvien organisaatio-oidien vuoksi filtteroinnin jalkeen {}/{}!", hakukohdeDtos.size(), hakukohdeOids.size());
+							}
+							else {
+								LOG.info("Hakukohteita filtteroinnin jalkeen {}/{}!", hakukohdeDtos.size(), hakukohdeOids.size());
+							}
 							seurantaAsyncResource.luoLaskenta(
 									hakuOid,
 									tyyppi,
@@ -428,7 +431,7 @@ public class ValintalaskentaKerrallaResource {
 				.haunHakukohteet(
 						hakuOid,
 						hakukohdeViitteet -> {
-							LOG.error(
+							LOG.info(
 									"Tarkastellaan hakukohdeviitteita haulle {}",
 									hakuOid);
 							if (hakukohdeViitteet == null

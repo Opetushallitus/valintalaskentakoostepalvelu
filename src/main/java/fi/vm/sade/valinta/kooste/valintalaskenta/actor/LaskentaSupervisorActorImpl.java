@@ -41,7 +41,7 @@ public class LaskentaSupervisorActorImpl implements LaskentaSupervisor {
 			try {
 				TypedActor.get(actorSystem).poisonPill(
 						l.laskentaActor());
-				LOG.error(
+				LOG.info(
 						"PoisonPill lahetetty onnistuneesti Actorille {}",
 						uuid);
 			} catch (Exception e) {
@@ -50,7 +50,7 @@ public class LaskentaSupervisorActorImpl implements LaskentaSupervisor {
 						uuid, e.getMessage());
 			}
 		} else {
-			LOG.error("Yritettiin valmistaa laskentaa {} mutta laskenta ei ollut enaa ajossa!", uuid);
+			LOG.warn("Yritettiin valmistaa laskentaa {} mutta laskenta ei ollut enaa ajossa!", uuid);
 		}
 	}
 	
@@ -65,7 +65,7 @@ public class LaskentaSupervisorActorImpl implements LaskentaSupervisor {
 		}
 		ajossaOlevatLaskennat.merge(uuid, new LaskentaActorWrapper(uuid, hakuOid,
 				osittainen, laskentaActor), (oldValue, value) -> {
-					LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} oli jo kaynnissa! Lopetataan vanha laskenta!\r\n###", uuid, hakuOid);
+					LOG.warn("\r\n###\r\n### Laskenta uuid:lle {} haulle {} oli jo kaynnissa! Lopetataan vanha laskenta!\r\n###", uuid, hakuOid);
 					lopeta(uuid, oldValue);
 					return value;
 				});

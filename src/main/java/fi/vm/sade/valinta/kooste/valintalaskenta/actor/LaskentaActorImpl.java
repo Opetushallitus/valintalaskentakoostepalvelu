@@ -47,7 +47,7 @@ public class LaskentaActorImpl implements LaskentaActor {
 		this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
 		this.laskentaStrategia = laskentaStrategia;
 		palvelukutsut.forEach(pk -> pk.laitaTyojonoon(pkk -> {
-			LOG.error("Hakukohteen {} tila muuttunut statukseen {}. {}",
+			LOG.info("Hakukohteen {} tila muuttunut statukseen {}. {}",
 					pkk.getHakukohdeOid(), pkk.getHakukohdeTila(),
 					tulkinta(pkk.getHakukohdeTila()));
 			if (pkk.onkoPeruutettu()) {
@@ -84,7 +84,7 @@ public class LaskentaActorImpl implements LaskentaActor {
 	public void postStop() {
 		if(!hakukohdeLaskuri.isDone()) {
 			try {
-				LOG.error("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
+				LOG.warn("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
 				laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
 						LaskentaTila.PERUUTETTU);
 			} catch (Exception e) {
@@ -120,7 +120,7 @@ public class LaskentaActorImpl implements LaskentaActor {
 		}
 		try {
 			laskentaSupervisor.valmis(uuid);
-			LOG.error(
+			LOG.info(
 					"\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} uuid:lle {}!\r\n####",
 					hakukohdeLaskuri.getYhteensa(), hakuOid, uuid);
 		} catch (Exception e) {
