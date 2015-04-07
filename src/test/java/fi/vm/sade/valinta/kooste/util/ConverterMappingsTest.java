@@ -5,10 +5,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,17 +18,15 @@ import org.springframework.core.io.ClassPathResource;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Eligibility;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
-public class ConverterTestMappings {
+public class ConverterMappingsTest {
 	private static final Logger LOG = LoggerFactory
-			.getLogger(ConverterTestMappings.class);
+			.getLogger(ConverterMappingsTest.class);
 
 	@Test
 	public void testaaEligibilitiesOikeallaDatalla()
@@ -106,5 +105,34 @@ public class ConverterTestMappings {
 		Assert.assertTrue(ans.entrySet().iterator().next().getValue()
 				.equals("status1"));
 	}
+
+    @Test
+    public void testaaArvosanaFiletrointi()
+            throws JsonSyntaxException, IOException {
+        List<Hakemus> hakemukset = new Gson().fromJson(IOUtils
+                .toString(new ClassPathResource("osaaminen_ilman_suorituksia.json")
+                        .getInputStream()), new TypeToken<List<Hakemus>>() {
+        }.getType());
+        Hakemus hakemus = hakemukset.stream()
+                .filter(h -> "1.2.246.562.11.00003000803".equals(h.getOid()))
+                .distinct().iterator().next();
+        HakemusDTO dto = Converter.hakemusToHakemusDTO(hakemus);
+
+        final int yksi = dto.getAvaimet().stream()
+                .filter(a -> a.getAvain().startsWith("PK_") || a.getAvain().startsWith("LK_"))
+                .collect(Collectors.toList())
+                .size();
+
+        // PK_PAATTOTODISTUSVUOSI
+        Assert.assertEquals(1, yksi);
+
+        final AvainArvoDTO yleinen_kielitutkinto_sv = dto.getAvaimet().stream()
+                .filter(a -> a.getAvain().equals("yleinen_kielitutkinto_sv"))
+                .findFirst().get();
+
+        Assert.assertNotNull(yleinen_kielitutkinto_sv);
+
+
+    }
 
 }

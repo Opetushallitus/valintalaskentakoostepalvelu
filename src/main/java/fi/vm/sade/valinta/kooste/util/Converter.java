@@ -215,14 +215,18 @@ public class Converter {
 
 			try {
 				if (hakemus.getAnswers().getOsaaminen() != null) {
-					for (Map.Entry<String, String> e : hakemus.getAnswers()
-							.getOsaaminen().entrySet()) {
-						AvainArvoDTO aa = new AvainArvoDTO();
-						aa.setAvain(e.getKey());
-						aa.setArvo(sanitizeArvo(e.getValue()));
+                    final List<AvainArvoDTO> osaaminenIlmanArvosanoja = hakemus.getAnswers().getOsaaminen().entrySet()
+                            .stream()
+                            .filter(entry -> !entry.getKey().startsWith("PK_") && !entry.getKey().startsWith("LK_"))
+                            .map(e -> {
+                                AvainArvoDTO aa = new AvainArvoDTO();
+                                aa.setAvain(e.getKey());
+                                aa.setArvo(sanitizeArvo(e.getValue()));
+                                return aa;
+                            })
+                            .collect(Collectors.toList());
+                    hakemusTyyppi.getAvaimet().addAll(osaaminenIlmanArvosanoja);
 
-						hakemusTyyppi.getAvaimet().add(aa);
-					}
 				}
 			} catch (Exception e) {
 				LOG.error("Epaonnistuminen osaamisen konversioon {}!",
