@@ -58,7 +58,7 @@ public class ErillishakuRivi {
         this.poistetaankoRivi = false;
 	}
 
-	public ErillishakuRivi(String hakemusOid, String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika, String personOid, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, Optional<Boolean> poistetaankoRivi) {
+	public ErillishakuRivi(String hakemusOid, String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika, String personOid, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, boolean poistetaankoRivi) {
 		this.hakemusOid = hakemusOid;
 		this.etunimi = etunimi;
 		this.sukunimi = sukunimi;
@@ -70,7 +70,7 @@ public class ErillishakuRivi {
 		this.vastaanottoTila = vastaanottoTila;
 		this.ilmoittautumisTila = ilmoittautumisTila;
 		this.julkaistaankoTiedot = julkaistaankoTiedot;
-        this.poistetaankoRivi = poistetaankoRivi.orElse(false);
+        this.poistetaankoRivi = poistetaankoRivi;
 	}
 
 	public String getHakemusOid() {
@@ -81,32 +81,33 @@ public class ErillishakuRivi {
 		return julkaistaankoTiedot;
 	}
 	public String getEtunimi() {
-		return etunimi;
+		return StringUtils.trimToEmpty(etunimi);
 	}
 	public String getPersonOid() {
-		return personOid;
+		return StringUtils.trimToEmpty(personOid);
 	}
 	public String getHenkilotunnus() {
-		return henkilotunnus;
+		return
+				StringUtils.trimToEmpty(henkilotunnus);
 	}
 	public String getSahkoposti() {
-		return sahkoposti;
+		return StringUtils.trimToEmpty(sahkoposti);
 	}
 	public String getSukunimi() {
-		return sukunimi;
+		return StringUtils.trimToEmpty(sukunimi);
 	}
 	public String getSyntymaAika() {
-		return syntymaAika;
+		return StringUtils.trimToEmpty(syntymaAika);
 	}
 
 	public String getHakemuksenTila() {
-		return hakemuksenTila;
+		return StringUtils.trimToEmpty(hakemuksenTila);
 	}
 	public String getIlmoittautumisTila() {
-		return ilmoittautumisTila;
+		return StringUtils.trimToEmpty(ilmoittautumisTila);
 	}
 	public String getVastaanottoTila() {
-		return vastaanottoTila;
+		return StringUtils.trimToEmpty(vastaanottoTila);
 	}
 
 	private String suojaaHenkilotunnusLogeilta(String hetu) {

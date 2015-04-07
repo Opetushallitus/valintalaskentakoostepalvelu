@@ -80,6 +80,23 @@ public class ErillishakuResourceTest {
         odotaProsessiaPalautaDokumenttiId(prosessiId);
     }
 
+    @Test
+    public void tuontiExcelTiedostosta2() {
+        final String url = root + "/erillishaku/tuonti";
+
+        final ProsessiId prosessiId = createClient(url)
+                .query("hakutyyppi", "KORKEAKOULU")
+                .query("hakuOid", hakuOid)
+                .query("hakukohdeOid", hakukohdeOid)
+                .query("tarjoajaOid", tarjoajaOid)
+                .query("valintatapajonoOid", valintatapajonoOid)
+                .query("valintatapajononNimi", "varsinainen jono")
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .post(Entity.entity(ExcelTestData.erillisHakuHetullaJaSyntymaAjalla(), MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
+
+        odotaProsessiaPalautaDokumenttiId(prosessiId);
+    }
+
     private void verifyCreatedExcelDocument(final InputStream storedDocument) throws IOException {
         final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
         assertEquals(1, tulos.rivit.size());

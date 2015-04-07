@@ -118,7 +118,7 @@ public class ErillishaunVientiService {
                             objectToString(tulos.getTila()),
                             objectToString(tulos.getIlmoittautumisTila()),
                             tulos.getJulkaistavissa(),
-                            Optional.empty());
+                            false);
                     return e;
                 }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohdeNimi()), teksti(tarjontaHakukohde.getTarjoajaNimi()), erillishakurivit);
@@ -129,7 +129,7 @@ public class ErillishaunVientiService {
         List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus -> {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus);
             ErillishakuRivi r = new ErillishakuRivi(hakemus.getOid(), wrapper.getSukunimi(),
-                    wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSahkopostiOsoite(), wrapper.getSyntymaaika(), wrapper.getPersonOid(), "HYLATTY", "", "", false, Optional.empty());
+                    wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSahkopostiOsoite(), wrapper.getSyntymaaika(), wrapper.getPersonOid(), "HYLATTY", "", "", false, false);
             return r;
         }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohdeNimi()), teksti(tarjontaHakukohde.getTarjoajaNimi()), rivit);

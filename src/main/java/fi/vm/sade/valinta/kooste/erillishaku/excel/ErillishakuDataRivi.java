@@ -56,7 +56,11 @@ public class ErillishakuDataRivi extends DataRivi {
 		if(rivi.isTyhja() || rivi.getSolut().size() != 10 || "Syntymäaika".equals(syntymaAika)) {
 			// tunnistetaan otsikkorivit ja ei välitetä prosessointiin
 		} else {
-			kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, oid, hakemuksenTila, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, Optional.empty()));
+			kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,
+					sukunimi, etunimi, henkilotunnus,
+					sahkoposti, syntymaAika, oid, hakemuksenTila,
+					vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot,
+					false));
 		}
 		return true;
 	}

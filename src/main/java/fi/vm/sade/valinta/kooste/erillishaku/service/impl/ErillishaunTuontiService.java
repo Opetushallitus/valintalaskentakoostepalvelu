@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Sets;
+import com.google.gson.GsonBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -86,6 +87,12 @@ public class ErillishaunTuontiService {
             final ImportedErillisHakuExcel erillishakuExcel;
             try {
                 erillishakuExcel = importer.apply(haku);
+                /*
+                LOG.error("\n{}\nERILLISHAKU\n{}\n{}\n{}", new GsonBuilder().setPrettyPrinting().create().toJson(erillishakuExcel.rivit),
+                        new GsonBuilder().setPrettyPrinting().create().toJson(erillishaku),
+                        new GsonBuilder().setPrettyPrinting().create().toJson(erillishakuExcel.hetuToRivi),
+                new GsonBuilder().setPrettyPrinting().create().toJson(erillishakuExcel.henkiloPrototyypit));
+                */
                 tuoHakijatJaLuoHakemukset(prosessi, erillishakuExcel, haku);
             } catch(Exception e) {
                 LOG.error("Poikkeus {} {}: {}",  e.getMessage(),
@@ -157,7 +164,7 @@ public class ErillishaunTuontiService {
                         rivi.getPersonOid(),
                         rivi.getHakemuksenTila(),
                         "KESKEN", "EI_TEHTY",
-                        rivi.isJulkaistaankoTiedot(), Optional.of(rivi.isPoistetaankoRivi()));
+                        rivi.isJulkaistaankoTiedot(), rivi.isPoistetaankoRivi());
             } else {
                 return rivi;
                 }
@@ -201,8 +208,7 @@ public class ErillishaunTuontiService {
         if(LOG.isInfoEnabled()) { // Count vie aikaa
             LOG.info("Viedaan hakijoita ohittaen rivit hakemuksentilalla kesken ({}/{}) jonoon {}", lisattavatTaiKeskeneraiset.stream().filter(r -> !r.isKesken()).count(), rivit.size(), haku.getValintatapajononNimi());
         }
-        tuoErillishaunTilat(haku, lisattavatTaiKeskeneraiset // <- EI SISÄLLÄ KESKENERÄISIÄ
-                , poistettavat, hakemukset);
+        tuoErillishaunTilat(haku, lisattavatTaiKeskeneraiset, poistettavat, hakemukset);
 
         prosessi.vaiheValmistui();
         prosessi.valmistui("ok");
