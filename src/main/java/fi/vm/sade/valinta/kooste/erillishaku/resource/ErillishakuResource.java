@@ -4,12 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+import com.google.common.hash.HashCode;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import org.apache.poi.util.IOUtils;
@@ -109,7 +111,8 @@ public class ErillishakuResource {
 		IOUtils.closeQuietly(file);
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-		tuontiService.tuoExcelistä(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, valintatapajononNimi), new ByteArrayInputStream(b.toByteArray()));
+		tuontiService.tuoExcelistä(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid,
+				Optional.ofNullable(valintatapajonoOid).orElse(generoiValintatapajonoOIDHakukohteestaJaHausta(hakuOid,hakukohdeOid)), valintatapajononNimi), new ByteArrayInputStream(b.toByteArray()));
 		//
 		return prosessi.toProsessiId();
 	}
@@ -136,9 +139,17 @@ public class ErillishakuResource {
 		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-		tuontiService.tuoJson(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, valintatapajononNimi), json.getRivit());
+
+		tuontiService.tuoJson(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid,
+				Optional.ofNullable(valintatapajonoOid).orElse(generoiValintatapajonoOIDHakukohteestaJaHausta(hakuOid,hakukohdeOid)), valintatapajononNimi), json.getRivit());
 		//
 		return prosessi.toProsessiId();
+	}
+
+	private static String generoiValintatapajonoOIDHakukohteestaJaHausta(String hakuOID, String hakukohdeOID) {
+		String hakukohdeOIDIlmanPisteita = hakukohdeOID.replace(".","");
+		String hakuOIDReversedIlmanPisteita = new StringBuilder(hakuOID).reverse().toString().replace(".","");
+		return new StringBuilder(hakukohdeOIDIlmanPisteita).append(hakuOIDReversedIlmanPisteita).substring(0,32).toString();
 	}
 
 	private void checkOID(String valintatapajonoOid) {
