@@ -107,6 +107,9 @@ public class SureKonvertointiTest {
         }.getType());
 
         Oppija oppija = oppijat.get(0);
+
+        Assert.assertTrue(oppija.getSuoritukset().get(0).getSuoritus().isVahvistettu());
+
         final List<AvainMetatiedotDTO> konvertoitu = YoToAvainSuoritustietoDTOConverter.convert(oppija);
 
         final List<String> aineet = Arrays.asList("UE", "UO", "ET", "FF", "PS",
