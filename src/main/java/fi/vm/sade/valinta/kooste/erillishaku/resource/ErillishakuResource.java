@@ -101,6 +101,7 @@ public class ErillishakuResource {
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
 			@QueryParam("valintatapajononNimi") String valintatapajononNimi,
 			InputStream file) throws Exception {
+		checkOID(valintatapajonoOid);
 		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
 		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
 		ByteArrayOutputStream b;
@@ -130,6 +131,7 @@ public class ErillishakuResource {
 					"ilmoittautumisTila=[EI_TEHTY|LASNA_KOKO_LUKUVUOSI|POISSA_KOKO_LUKUVUOSI|EI_ILMOITTAUTUNUT|LASNA_SYKSY|POISSA_SYKSY|LASNA|POISSA]")
 			// Body
 			ErillishakuJson json) throws Exception {
+		checkOID(valintatapajonoOid);
 		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
 		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
@@ -137,5 +139,11 @@ public class ErillishakuResource {
 		tuontiService.tuoJson(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, valintatapajononNimi), json.getRivit());
 		//
 		return prosessi.toProsessiId();
+	}
+
+	private void checkOID(String valintatapajonoOid) {
+		if("null".equals(valintatapajonoOid)) {
+			throw new RuntimeException("valintatapajonoOid='null' ei ole validi OID! Jätä parametri antamatta tai syötä oikein formatoitu OID.");
+		}
 	}
 }
