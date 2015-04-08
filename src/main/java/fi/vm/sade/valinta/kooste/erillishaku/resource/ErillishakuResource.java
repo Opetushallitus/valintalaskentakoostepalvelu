@@ -14,6 +14,7 @@ import javax.ws.rs.QueryParam;
 import com.google.common.hash.HashCode;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,9 +148,10 @@ public class ErillishakuResource {
 	}
 
 	private static String generoiValintatapajonoOIDHakukohteestaJaHausta(String hakuOID, String hakukohdeOID) {
-		String hakukohdeOIDIlmanPisteita = hakukohdeOID.replace(".","");
-		String hakuOIDReversedIlmanPisteita = new StringBuilder(hakuOID).reverse().toString().replace(".","");
-		return new StringBuilder(hakukohdeOIDIlmanPisteita).append(hakuOIDReversedIlmanPisteita).substring(0,32).toString();
+		String hakukohdeOIDIlmanPisteita = Optional.ofNullable(hakukohdeOID).orElse("").replace(".", "");
+		String hakuOIDReversedIlmanPisteita = new StringBuilder(Optional.ofNullable(hakuOID).orElse("")).reverse().toString().replace(".","");
+
+		return StringUtils.substring(new StringBuilder(hakukohdeOIDIlmanPisteita).append(hakuOIDReversedIlmanPisteita).toString(),0,32);
 	}
 
 	private void checkOID(String valintatapajonoOid) {
