@@ -143,6 +143,11 @@ public class SuoritusrekisteriSpec {
             suoritus.setHenkiloOid(henkiloOid);
             return SuoritusBuilder.this;
         }
+
+        public SuoritusBuilder setVahvistettu(boolean vahvistettu) {
+            suoritus.setVahvistettu(vahvistettu);
+            return SuoritusBuilder.this;
+        }
         public SuoritusBuilder setValmis() {
             suoritus.setTila("VALMIS");
             return SuoritusBuilder.this;

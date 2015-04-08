@@ -28,20 +28,153 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
     // PK_TILA = false // default
     // PK-KESKEYTYNYT <- NÄMÄ POIS
     // PK-KAMOISSA JOS SUORITUKSIA USEEMPI KU YKS NIIN POIKKEUS JA PAKSUT VIRHEILMOITUKSET
-    @Test(expected = RuntimeException.class)
-    public void perusopetusVirheellinenKoskaUseampiSuoritus() {
-        Oppija virheellinenKoskaUseampiSuoritus = oppija()
+//    @Test(expected = RuntimeException.class)
+//    public void perusopetusVirheellinenKoskaUseampiSuoritus() {
+//        Oppija virheellinenKoskaUseampiSuoritus = oppija()
+//                .suoritus()
+//                .setPerusopetus()
+//                .setKesken()
+//                .build()
+//                .suoritus()
+//                .setPerusopetus()
+//                .setValmis()
+//                .build()
+//                .build();
+//        OppijaToAvainArvoDTOConverter.convert(virheellinenKoskaUseampiSuoritus, null);
+//    }
+
+    @Test
+    public void vainItseIlmoitettu() {
+        Oppija oppija = oppija()
                 .suoritus()
                 .setPerusopetus()
-                .setKesken()
+                .setVahvistettu(false)
+                .setValmistuminen("1.1.2013")
+                .setValmis()
                 .build()
                 .suoritus()
-                .setPerusopetus()
+                .setLukio()
+                .setVahvistettu(false)
+                .setValmistuminen("1.1.2013")
                 .setValmis()
                 .build()
                 .build();
-        OppijaToAvainArvoDTOConverter.convert(virheellinenKoskaUseampiSuoritus, null);
+
+        final List<AvainArvoDTO> konvertoitu = OppijaToAvainArvoDTOConverter.convert(oppija, null);
+        final String pk_suoritusvuosi = konvertoitu.stream()
+                .filter(a -> a.getAvain().equals("PK_SUORITUSVUOSI"))
+                .map(a -> a.getArvo())
+                .findFirst().get();
+        Assert.assertEquals("2013", pk_suoritusvuosi);
+
+        final String lk_suoritusvuosi = konvertoitu.stream()
+                .filter(a -> a.getAvain().equals("LK_SUORITUSVUOSI"))
+                .map(a -> a.getArvo())
+                .findFirst().get();
+        Assert.assertEquals("2013", lk_suoritusvuosi);
+
     }
+
+    @Test
+    public void itseIlmoitettuJaValmis() {
+        Oppija oppija = oppija()
+                .suoritus()
+                .setPerusopetus()
+                .setVahvistettu(false)
+                .setValmistuminen("1.1.2013")
+                .setValmis()
+                .build()
+                .suoritus()
+                .setPerusopetus()
+                .setVahvistettu(true)
+                .setValmistuminen("1.1.2015")
+                .setValmis()
+                .build()
+                .suoritus()
+                .setLukio()
+                .setVahvistettu(false)
+                .setValmistuminen("1.1.2013")
+                .setValmis()
+                .build()
+                .suoritus()
+                .setLukio()
+                .setVahvistettu(true)
+                .setValmistuminen("1.1.2015")
+                .setValmis()
+                .build()
+                .build();
+
+        final List<AvainArvoDTO> konvertoitu = OppijaToAvainArvoDTOConverter.convert(oppija, null);
+        final String pk_suoritusvuosi = konvertoitu.stream()
+                .filter(a -> a.getAvain().equals("PK_SUORITUSVUOSI"))
+                .map(a -> a.getArvo())
+                .findFirst().get();
+        Assert.assertEquals("2015", pk_suoritusvuosi);
+
+        final String lk_suoritusvuosi = konvertoitu.stream()
+                .filter(a -> a.getAvain().equals("LK_SUORITUSVUOSI"))
+                .map(a -> a.getArvo())
+                .findFirst().get();
+        Assert.assertEquals("2015", lk_suoritusvuosi);
+
+    }
+
+    @Test
+    public void itseIlmoitettuJaKaksiValmista() {
+        Oppija oppija = oppija()
+                .suoritus()
+                .setPerusopetus()
+                .setVahvistettu(false)
+                .setValmistuminen("1.1.2013")
+                .setValmis()
+                .build()
+                .suoritus()
+                .setPerusopetus()
+                .setVahvistettu(true)
+                .setValmistuminen("1.1.2015")
+                .setValmis()
+                .build()
+                .suoritus()
+                .setPerusopetus()
+                .setVahvistettu(true)
+                .setValmistuminen("1.1.2014")
+                .setValmis()
+                .build()
+                .suoritus()
+                .setLukio()
+                .setVahvistettu(false)
+                .setValmistuminen("1.1.2013")
+                .setValmis()
+                .build()
+                .suoritus()
+                .setLukio()
+                .setVahvistettu(true)
+                .setValmistuminen("1.1.2014")
+                .setValmis()
+                .build()
+                .suoritus()
+                .setLukio()
+                .setVahvistettu(true)
+                .setValmistuminen("1.1.2015")
+                .setValmis()
+                .build()
+                .build();
+
+        final List<AvainArvoDTO> konvertoitu = OppijaToAvainArvoDTOConverter.convert(oppija, null);
+        final String pk_suoritusvuosi = konvertoitu.stream()
+                .filter(a -> a.getAvain().equals("PK_SUORITUSVUOSI"))
+                .map(a -> a.getArvo())
+                .findFirst().get();
+        Assert.assertEquals("2015", pk_suoritusvuosi);
+
+        final String lk_suoritusvuosi = konvertoitu.stream()
+                .filter(a -> a.getAvain().equals("LK_SUORITUSVUOSI"))
+                .map(a -> a.getArvo())
+                .findFirst().get();
+        Assert.assertEquals("2015", lk_suoritusvuosi);
+
+    }
+
     @Test
     public void useampiSuoritusJoistaEiOllaKiinnostuneita() {
         Oppija virheellinenKoskaUseampiSuoritus = oppija()
@@ -64,6 +197,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                 .build();
         OppijaToAvainArvoDTOConverter.convert(virheellinenKoskaUseampiSuoritus, null);
     }
+
     @Test
     public void perusopetusOikeinKoskaVainValmisSuoritusJaKeskeytyneitaSuorituksia() {
         Oppija oikeinKoskaVainValmisSuoritusJaKeskeytyneitaSuorituksia = oppija()
@@ -173,17 +307,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
 
     @Test
     public void pkTilaOnTrueJosSuoritusOnMerkittyValmiiksiMuutoinFalse() {
-        Oppija oikeinKoskaKeskenerainenSuoritus = oppija()
-                .suoritus()
-                .setPerusopetus()
-                .setKesken()
-                .build()
-                .build();
-        {
-            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(oikeinKoskaKeskenerainenSuoritus, null);
-            Assert.assertTrue("PK_TILA löytyy ja sen arvo on false",
-                    aa.stream().filter(a -> "PK_TILA".equals(a.getAvain()) && "false".equals(a.getArvo())).count() == 1L);
-        }
+
         Oppija oikeinKoskaEiSuorituksia = oppija()
                 .suoritus()
                 .setPerusopetus()
@@ -400,17 +524,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
 
     @Test
     public void lkTilaOnTrueJosSuoritusOnMerkittyValmiiksiMuutoinFalse() {
-        Oppija oikeinKoskaKeskenerainenSuoritus = oppija()
-                .suoritus()
-                .setLukio()
-                .setKesken()
-                .build()
-                .build();
-        {
-            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(oikeinKoskaKeskenerainenSuoritus, null);
-            Assert.assertTrue("LK_TILA löytyy ja sen arvo on false",
-                    aa.stream().filter(a -> "LK_TILA".equals(a.getAvain()) && "false".equals(a.getArvo())).count() == 1L);
-        }
+
         Oppija oikeinKoskaEiSuorituksia = oppija()
                 .suoritus()
                 .setLukio()
@@ -424,7 +538,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
         }
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void lkSuoritusVainKerran() {
         Oppija virheellinenKoskaUseampiSuoritus = oppija()
                 .suoritus()
@@ -436,7 +550,9 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                 .setValmis()
                 .build()
                 .build();
-        OppijaToAvainArvoDTOConverter.convert(virheellinenKoskaUseampiSuoritus, null);
+        final List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(virheellinenKoskaUseampiSuoritus, null);
+        Assert.assertTrue("LK_TILA löytyy ja sen arvo on true",
+                aa.stream().filter(a -> "LK_TILA".equals(a.getAvain()) && "true".equals(a.getArvo())).count() == 1L);
     }
 
     @Test
@@ -505,38 +621,6 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
         }
     }
 
-    // YO:
-    // YO_TILA = false // default
-    // YO:ssa ei huomioida laskennan alkamispvm:aa liian myohaan kirjattujen arvosanojen filtteroinnissa
-    // ONKO YO-VALMIS, SUORITUKSEN TILA GENEERINEN
-    // YO:SSA SUORITUKSEN TILA HELPPO KOSKA VAAN YKS SUORITUS
-    @Test
-    public void itseilmoitetutOhitetaan() {
-        DateTime nyt = DateTime.now();
-
-        Oppija suoritus = oppija()
-                .suoritus()
-                .setHenkiloOid("HENKILO1")
-                .setSource("HENKILO1")
-                .setLukio()
-                .setValmis()
-                .arvosana()
-                .setAine("AINEREAALI")
-                .setLisatieto("PS")
-                .setAsteikko_4_10()
-                .setArvosana("7")
-                .setPisteet(20)
-                .setMyonnetty("01.08.2014")
-                .build()
-                .build()
-                .build();
-        {
-
-            List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus,null);
-            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
-            Assert.assertTrue(aa.isEmpty());
-        }
-    }
     @Test
     public void yoItseilmoitetutOhitetaan() {
         DateTime nyt = DateTime.now();

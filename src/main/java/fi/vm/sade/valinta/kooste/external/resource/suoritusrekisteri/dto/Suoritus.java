@@ -15,6 +15,7 @@ public class Suoritus {
 	private String yksilollistaminen;
 	private String suoritusKieli;
 	private String source;
+    private boolean vahvistettu;
 
 	public void setHenkiloOid(String henkiloOid) {
 		this.henkiloOid = henkiloOid;
@@ -88,4 +89,11 @@ public class Suoritus {
 		return yksilollistaminen;
 	}
 
+    public boolean isVahvistettu() {
+        return vahvistettu;
+    }
+
+    public void setVahvistettu(boolean vahvistettu) {
+        this.vahvistettu = vahvistettu;
+    }
 }
