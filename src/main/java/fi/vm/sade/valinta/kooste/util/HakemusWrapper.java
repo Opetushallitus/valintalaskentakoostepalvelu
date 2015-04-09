@@ -42,6 +42,7 @@ public class HakemusWrapper {
     private final static String SUOMALAINEN_POSTINUMERO = "Postinumero";
     private final static String OSOITE_ULKOMAA = "osoiteUlkomaa";
     private final static String SUKUPUOLI = "sukupuoli";
+    private final static String AIDINKIELI = "aidinkieli";
     private final static String NAINEN = "2";
     private final static String MIES = "1";
     private Yhteystiedot yhteystiedot = null;
@@ -70,6 +71,11 @@ public class HakemusWrapper {
             }
             return s;
         }).findAny().get();
+    }
+    public String getAidinkieli() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(AIDINKIELI)).orElse(
+                StringUtils.EMPTY);
     }
     public String getKaupunkiUlkomaa() {
         getHenkilotiedot();

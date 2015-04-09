@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.IOUtils;
@@ -62,9 +61,9 @@ public class ErillishakuExcelTest {
 	public void testaaVienti() throws FileNotFoundException, IOException {
 		List<ErillishakuRivi> rivit = Lists.newArrayList();
 		String syntymaAika = "11.11.2011";
-		ErillishakuRivi rivi = new ErillishakuRivi(null, "sukunimi","etunimi1","hetu","test.email@example.com", syntymaAika, "MIES", "","fi", "HYLATTY", "", "", false, false);
+		ErillishakuRivi rivi = new ErillishakuRivi(null, "sukunimi","etunimi1","hetu","test.email@example.com", syntymaAika, Sukupuoli.MIES, "", "FI", "HYLATTY", "", "", false, false);
 		rivit.add(rivi);
-		ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, "MIES", "","fi", "HYLATTY", "", "", true, false);
+		ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, Sukupuoli.NAINEN, "", "FI", "HYLATTY", "", "", true, false);
 		rivit.add(rivi2);
 		ErillishakuRivi rivi3 = emptyErillishakuRivi();
 		rivit.add(rivi3);

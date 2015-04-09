@@ -205,6 +205,7 @@ public class SijoittelunTulosExcelKomponentti {
 					wrapper.getHenkilotunnus(),
 					wrapper.getSyntymaaika(),
 					wrapper.getSukupuoli(),
+					wrapper.getAidinkieli(),
 					wrapper.getSuomalainenLahiosoite(),
 					wrapper.getSuomalainenPostinumero(),
 					wrapper.getUlkomainenLahiosoite(),

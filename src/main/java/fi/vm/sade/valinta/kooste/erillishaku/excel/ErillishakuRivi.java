@@ -19,6 +19,7 @@ import static org.apache.commons.lang.StringUtils.*;
  */
 @ApiModel
 public class ErillishakuRivi {
+
 	private static final Logger LOG = LoggerFactory.getLogger(ErillishakuRivi.class);
 	public final static DateTimeFormatter SYNTYMAAIKAFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy");
 
@@ -29,10 +30,9 @@ public class ErillishakuRivi {
 	private final String henkilotunnus;
 	private final String sahkoposti;
 	private final String syntymaAika;
-	private final String personOid;
-
-	private final String sukupuoli;
+	private final Sukupuoli sukupuoli;
 	private final String aidinkieli;
+	private final String personOid;
 
 	private final String hakemuksenTila;
 	private final String vastaanottoTila;
@@ -42,36 +42,35 @@ public class ErillishakuRivi {
     private final boolean poistetaankoRivi;
 
 	public static ErillishakuRivi emptyErillishakuRivi() {
-		return new ErillishakuRivi(null, null, null, null, null, null, null, null, null, null, null, null, false, false);
+		return new ErillishakuRivi(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, null, null, false, false);
 	}
 
-	public ErillishakuRivi(String hakemusOid, String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika,
-						   String sukupuoli,
-						   String personOid,
-						   String aidinkieli,
-						   String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, boolean poistetaankoRivi) {
+	public ErillishakuRivi() {
+		this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, null, null, false, false);
+	}
+
+	public ErillishakuRivi(String hakemusOid, String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika, String sukupuoli, String personOid, String aidinkieli, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, boolean poistetaankoRivi) {
+		this(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
+				Sukupuoli.fromString(sukupuoli), personOid, aidinkieli,
+				hakemuksenTila, vastaanottoTila, ilmoittautumisTila,
+				julkaistaankoTiedot, poistetaankoRivi);
+	}
+
+	public ErillishakuRivi(String hakemusOid, String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika, Sukupuoli sukupuoli, String personOid, String aidinkieli, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, boolean poistetaankoRivi) {
 		this.hakemusOid = hakemusOid;
 		this.etunimi = etunimi;
 		this.sukunimi = sukunimi;
-		this.sukupuoli = sukupuoli;
-		this.aidinkieli = aidinkieli;
 		this.henkilotunnus = henkilotunnus;
 		this.sahkoposti = sahkoposti;
 		this.syntymaAika = syntymaAika;
+		this.sukupuoli = sukupuoli;
+		this.aidinkieli = aidinkieli;
 		this.personOid = personOid;
 		this.hakemuksenTila = hakemuksenTila;
 		this.vastaanottoTila = vastaanottoTila;
 		this.ilmoittautumisTila = ilmoittautumisTila;
 		this.julkaistaankoTiedot = julkaistaankoTiedot;
         this.poistetaankoRivi = poistetaankoRivi;
-	}
-
-	public String getAidinkieli() {
-		return aidinkieli;
-	}
-
-	public String getSukupuoli() {
-		return sukupuoli;
 	}
 
 	public String getHakemusOid() {
@@ -104,6 +103,14 @@ public class ErillishakuRivi {
 
 	public String getSyntymaAika() {
 		return trimToEmpty(syntymaAika);
+	}
+
+	public Sukupuoli getSukupuoli() {
+		return sukupuoli;
+	}
+
+	public String getAidinkieli() {
+		return aidinkieli;
 	}
 
 	public String getHakemuksenTila() {
@@ -145,6 +152,8 @@ public class ErillishakuRivi {
 		.append(", ")
 		.append(syntymaAika)
 		.append(", ")
+		.append(sukupuoli)
+		.append(", ")
 		.append(ilmoittautumisTila)
 		.append(", ")
 		.append(vastaanottoTila)
@@ -153,7 +162,7 @@ public class ErillishakuRivi {
 	}
 
 	public HenkiloCreateDTO toHenkiloCreateDTO() {
-		return new HenkiloCreateDTO(getAidinkieli(), getSukupuoli(), getEtunimi(), getSukunimi(), getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA);
+		return new HenkiloCreateDTO(getAidinkieli(), getSukupuoli().toString(), getEtunimi(), getSukunimi(), getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA);
 	}
 
 	public Date parseSyntymaAika() {

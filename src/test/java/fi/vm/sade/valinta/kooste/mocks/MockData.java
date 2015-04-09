@@ -11,4 +11,6 @@ public class MockData {
     public static String etunimi = "Tuomas";
     public static String sukunimi = "Hakkarainen";
     public static String syntymaAika = "1.1.1901";
+    public static String sukupuoli = "MIES";
+    public static String aidinkieli = "FI";
 }

@@ -2,14 +2,10 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import fi.vm.sade.valinta.kooste.excel.Solu;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
-import static org.apache.commons.lang.StringUtils.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -46,7 +42,7 @@ public class ErillishakuDataRivi extends DataRivi {
 		String henkilotunnus = lukija.getArvoAt(2);
 		String sahkoposti = lukija.getArvoAt(3);
 		String syntymaAika = lukija.getArvoAt(4);
-		String sukupuoli = lukija.getArvoAt(5);
+		Sukupuoli sukupuoli = Sukupuoli.fromString(lukija.getArvoAt(5));
 		String oid = lukija.getArvoAt(6);
 		String aidinkieli = lukija.getArvoAt(7);
 
@@ -59,8 +55,8 @@ public class ErillishakuDataRivi extends DataRivi {
 			// tunnistetaan otsikkorivit ja ei välitetä prosessointiin
 		} else {
 			kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,
-					sukunimi, etunimi, henkilotunnus,
-					sahkoposti, syntymaAika, sukupuoli, oid, aidinkieli, hakemuksenTila,
+					sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
+					sukupuoli, oid, aidinkieli, hakemuksenTila,
 					vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot,
 					false));
 		}

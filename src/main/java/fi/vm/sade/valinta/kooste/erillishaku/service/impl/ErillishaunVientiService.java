@@ -8,6 +8,7 @@ import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
@@ -113,9 +114,9 @@ public class ErillishaunVientiService {
                             wrapper.getHenkilotunnus(),
                             wrapper.getSahkopostiOsoite(),
                             wrapper.getSyntymaaika(),
-                            wrapper.getSukupuoli(),
+                            Sukupuoli.fromString(wrapper.getSukupuoli()),
                             wrapper.getPersonOid(),
-                            null,
+                            wrapper.getAidinkieli(),
                             objectToString(h.getTila()),
                             objectToString(tulos.getTila()),
                             objectToString(tulos.getIlmoittautumisTila()),
@@ -131,11 +132,9 @@ public class ErillishaunVientiService {
         List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus -> {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus);
             ErillishakuRivi r = new ErillishakuRivi(hakemus.getOid(), wrapper.getSukunimi(),
-                    wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSahkopostiOsoite(), wrapper.getSyntymaaika(),
-                    wrapper.getSukupuoli(),
-                    wrapper.getPersonOid(),
-                    null,
-                    "HYLATTY", "", "", false, false);
+                    wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSahkopostiOsoite(),
+                    wrapper.getSyntymaaika(), Sukupuoli.valueOf(wrapper.getSukupuoli()), wrapper.getPersonOid(),
+                    wrapper.getAidinkieli(), "HYLATTY", "", "", false, false);
             return r;
         }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohdeNimi()), teksti(tarjontaHakukohde.getTarjoajaNimi()), rivit);
