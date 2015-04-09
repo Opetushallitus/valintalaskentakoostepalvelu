@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.wordnik.swagger.annotations.ApiModel;
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
@@ -30,6 +31,7 @@ public class ErillishakuRivi {
 	private final String henkilotunnus;
 	private final String sahkoposti;
 	private final String syntymaAika;
+	@JsonDeserialize(using = SukupuoliDeserializer.class)
 	private final Sukupuoli sukupuoli;
 	private final String aidinkieli;
 	private final String personOid;

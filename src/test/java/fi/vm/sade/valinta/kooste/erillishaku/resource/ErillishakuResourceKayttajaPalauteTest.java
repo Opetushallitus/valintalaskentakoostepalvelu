@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
+import com.google.gson.GsonBuilder;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.integrationtest.tomcat.SharedTomcat;
 import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
@@ -65,12 +66,11 @@ public class ErillishakuResourceKayttajaPalauteTest {
     }
     @Test
     public void tuontiVirheitaTuoduissaTiedoissaPalaute() {
+        LOG.error("\n{}", new GsonBuilder().create().toJson(viallinenJsonRiviPuuttuvillaTunnisteilla()));
         final ProsessiId prosessiId =
                 jsonClient()
-                        .post(Entity.json(new ErillishakuJson(asList(
-                                laillinenRivi(),
-                                viallinenRiviPuuttuvillaTunnisteilla()
-                        )))
+                        .post(Entity.json(viallinenJsonRiviPuuttuvillaTunnisteilla()
+                        )
                                 //
                                 , ProsessiId.class);
 
@@ -78,7 +78,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
                 // Odotetaan tyhjää datajoukko palautetta!
                 .poikkeukset, equalTo(asList(Poikkeus.koostepalvelupoikkeus(POIKKEUS_VIALLINEN_DATAJOUKKO, asList(
                 new Tunniste(
-                        "Rivi 2: Henkilötunnus, syntymäaika ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. Etunimi, Sukunimi, , HYVAKSYTTY, ***HENKILOTUNNUS***, , EI_SUKUPUOLTA, , EI_ILMOITTAUTUNUT, VASTAANOTTANUT, true",
+                        "Rivi 2: Henkilötunnus, syntymäaika ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. Etunimi, Sukunimi, , HYVAKSYTTY, ***HENKILOTUNNUS***, , NAINEN, , EI_ILMOITTAUTUNUT, VASTAANOTTANUT, true",
                         ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN
                 )
         )))));

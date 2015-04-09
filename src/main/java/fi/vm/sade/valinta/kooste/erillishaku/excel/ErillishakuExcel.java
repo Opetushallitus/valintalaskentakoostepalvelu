@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
+import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,9 +120,9 @@ public class ErillishakuExcel {
 			a.add(new TekstiArvo(rivi.getHenkilotunnus(), true, true));
 			a.add(new TekstiArvo(rivi.getSahkoposti(), true, true));
 			a.add(new TekstiArvo(rivi.getSyntymaAika(), true, true));
-			a.add(new TekstiArvo(rivi.getSukupuoli().toString(), true, true));
+			a.add(new MonivalintaArvo(rivi.getSukupuoli().toString(), ErillishakuDataRivi.SUKUPUOLEN_ARVOT));
 			a.add(new TekstiArvo(rivi.getPersonOid(), true, true));
-			a.add(new TekstiArvo(rivi.getAidinkieli(), true, true));
+			a.add(new MonivalintaArvo(rivi.getAidinkieli(), ErillishakuDataRivi.KIELITYYPIN_ARVOT));
 			a.add(ErillishakuDataRivi.hakemuksenTila(rivi.getHakemuksenTila()));
 			a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
 			a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));

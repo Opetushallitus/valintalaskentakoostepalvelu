@@ -62,6 +62,14 @@ public class ErillishakuDataRivi extends DataRivi {
 		}
 		return true;
 	}
+	public static final Collection<String> SUKUPUOLEN_ARVOT = Arrays.asList(Sukupuoli.values()).stream().map(Object::toString).collect(Collectors.toList());
+	public static final Collection<String> KIELITYYPIN_ARVOT =
+			Arrays.asList(
+					("fi|en|sv|ae|lo|sl|bm|mo|nr|kn|ga|tl|la|nv|ti|gl|to|sa|lv|hi|ke|ty|ho|cv|ts|kj|xx|vo|ro|mr|sd|ak|kv|98|fj|su|sq|" +
+					"ie|ab|ug|hr|my|hy|is|gd|ko|tg|am|bi|so|te|lg|dz|wo|az|oc|kl|kw|sk|uz|oj|ng|uk|gg|se|gu|ii|ne|ce|ee|ur|hu|mt|mg|je|zu|pa|sg|" +
+					"aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|" +
+					"ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|" +
+					"ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg").split("\\|"));
 	private static final Collection<String> HAKEMUKSENTILA_ARVOT = Stream.concat(Stream.of("KESKEN"),
 			Arrays.asList(HakemuksenTila.values()).stream().map(t -> t.toString())).collect(Collectors.toList());
 	private static final Collection<String> VASTAANOTTOTILA_ARVOT =Arrays.asList(ValintatuloksenTila.values()).stream().map(t -> t.toString()).collect(Collectors.toList());

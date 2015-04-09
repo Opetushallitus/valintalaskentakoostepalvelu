@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.util;
 
+import com.google.gson.GsonBuilder;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
@@ -32,5 +33,15 @@ public class ErillishakuRiviTestUtil {
                 EMPTY, EMPTY, EMPTY, Sukupuoli.EI_SUKUPUOLTA, EMPTY, EMPTY, HakemuksenTila.HYVAKSYTTY.toString(),
                 ValintatuloksenTila.VASTAANOTTANUT.toString(),
                 IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false);
+    }
+
+    public static String viallinenJsonRiviPuuttuvillaTunnisteilla() {
+
+        return "{\"rivit\":["+new GsonBuilder().create().toJson(laillinenRivi())+ ","+
+
+                "{\"etunimi\":\"Etunimi\",\"sukunimi\":\"Sukunimi\"," +
+                "\"henkilotunnus\":\"\",\"sahkoposti\":\"\",\"syntymaAika\"" +
+                ":\"\",\"sukupuoli\":\"2\",\"aidinkieli\":\"\",\"personOid\":\"\",\"hakemuksenTila\":\"HYVAKSYTTY\",\"vastaanottoTila\":\"VASTAANOTTANUT\",\"ilmoittautumisTila\":\"EI_ILMOITTAUTUNUT\",\"julkaistaankoTiedot\":true,\"poistetaankoRivi\":false}"
+                +"]}";
     }
 }
