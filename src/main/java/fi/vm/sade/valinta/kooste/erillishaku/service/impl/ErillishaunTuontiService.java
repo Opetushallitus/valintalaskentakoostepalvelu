@@ -69,6 +69,7 @@ public class ErillishaunTuontiService {
         this.henkiloAsyncResource = henkiloAsyncResource;
         this.scheduler = scheduler;
     }
+
     @Autowired
     public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource) {
         this(tilaAsyncResource,applicationAsyncResource,henkiloAsyncResource,Schedulers.newThread());
@@ -82,7 +83,7 @@ public class ErillishaunTuontiService {
         tuoData(prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(erillishaku.getHakutyyppi(), erillishakuRivit));
     }
 
-    void tuoData(KirjeProsessi prosessi, ErillishakuDTO erillishaku, Function<ErillishakuDTO, ImportedErillisHakuExcel> importer) {
+    private void tuoData(KirjeProsessi prosessi, ErillishakuDTO erillishaku, Function<ErillishakuDTO, ImportedErillisHakuExcel> importer) {
         Observable.just(erillishaku).subscribeOn(scheduler).subscribe(haku -> {
             final ImportedErillisHakuExcel erillishakuExcel;
             try {
@@ -110,7 +111,7 @@ public class ErillishaunTuontiService {
         });
     }
 
-    private void validoiRivit(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> rivit) {
+    private static void validoiRivit(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> rivit) {
         if (rivit.isEmpty()) {
             LOG.error("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
             prosessi.keskeyta(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
@@ -145,11 +146,12 @@ public class ErillishaunTuontiService {
             throw new ErillishaunDataException(poikkeusRivis);
         }
     }
+
     private static final List<HakemuksenTila> VAIN_HAKEMUKSENTILALLISET_TILAT =
             Arrays.asList(HakemuksenTila.PERUNUT, HakemuksenTila.PERUUTETTU, HakemuksenTila.HYLATTY,
             HakemuksenTila.VARALLA,HakemuksenTila.PERUUNTUNUT);
 
-    private List<ErillishakuRivi> autoTaytto(final List<ErillishakuRivi> rivit) {
+    private static List<ErillishakuRivi> autoTaytto(final List<ErillishakuRivi> rivit) {
         // jos hakemuksentila on hylatty tai varalla niin autotaytetaan loput tilat KESKEN, EI_TEHTY
 
         return rivit.stream().map(rivi -> {
@@ -229,7 +231,7 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private Optional<String> selectEmail(Henkilo henkilo, Map<String, String> sahkopostit) {
+    private static Optional<String> selectEmail(Henkilo henkilo, Map<String, String> sahkopostit) {
         Optional<String> email = Optional.ofNullable(sahkopostit.get(henkilo.getOidHenkilo()));
         if (email.isPresent()) {
             return email;
@@ -276,19 +278,19 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private HakemuksenTila hakemuksenTila(ErillishakuRivi rivi) {
+    private static HakemuksenTila hakemuksenTila(ErillishakuRivi rivi) {
         return Optional.ofNullable(nullIfFails(() -> HakemuksenTila.valueOf(rivi.getHakemuksenTila()))).orElse(HakemuksenTila.HYLATTY);
     }
 
-    private IlmoittautumisTila ilmoittautumisTila(ErillishakuRivi rivi) {
+    private static IlmoittautumisTila ilmoittautumisTila(ErillishakuRivi rivi) {
         return nullIfFails(() -> IlmoittautumisTila.valueOf(rivi.getIlmoittautumisTila()));
     }
 
-    private ValintatuloksenTila valintatuloksenTila(ErillishakuRivi rivi) {
+    private static ValintatuloksenTila valintatuloksenTila(ErillishakuRivi rivi) {
         return nullIfFails(() -> ValintatuloksenTila.valueOf(rivi.getVastaanottoTila()));
     }
 
-    private <T> T nullIfFails(Supplier<T> lambda) {
+    private static <T> T nullIfFails(Supplier<T> lambda) {
         try {
             return lambda.get();
         } catch (IllegalArgumentException e) {
@@ -299,7 +301,7 @@ public class ErillishaunTuontiService {
     /**
      * @return Validointivirhe tai null jos kaikki ok
      */
-    public String validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi) {
+    private static String validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi) {
         // Yksilöinti onnistuu, eli joku kolmesta löytyy: henkilötunnus,syntymäaika,henkilö-oid
         if(StringUtils.isBlank(rivi.getSyntymaAika())&&StringUtils.isBlank(rivi.getHenkilotunnus())&&StringUtils.isBlank(rivi.getPersonOid())) {
             return "Henkilötunnus, syntymäaika ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. " + rivi.toString();
