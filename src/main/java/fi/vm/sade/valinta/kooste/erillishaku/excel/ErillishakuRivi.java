@@ -136,10 +136,6 @@ public class ErillishakuRivi {
 	@Override
 	public String toString() {
 		return new StringBuilder()
-		.append(aidinkieli)
-		.append(", ")
-		.append(sukupuoli)
-		.append(", ")
 		.append(etunimi)
 		.append(", ")
 		.append(sukunimi)
@@ -153,6 +149,8 @@ public class ErillishakuRivi {
 		.append(syntymaAika)
 		.append(", ")
 		.append(sukupuoli)
+		.append(", ")
+		.append(aidinkieli)
 		.append(", ")
 		.append(ilmoittautumisTila)
 		.append(", ")
