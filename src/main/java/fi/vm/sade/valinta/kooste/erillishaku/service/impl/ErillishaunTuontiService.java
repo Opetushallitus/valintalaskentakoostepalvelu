@@ -1,9 +1,12 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
+import static com.codepoetics.protonpack.StreamUtils.*;
 import static fi.vm.sade.valinta.kooste.converter.ValintatuloksenTilaHakuTyypinMukaanConverter.convertValintatuloksenTilaHakuTyypinMukaan;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
 import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
+import static org.apache.commons.lang.StringUtils.*;
+import static rx.schedulers.Schedulers.newThread;
 
 import java.io.InputStream;
 import java.util.*;
@@ -13,17 +16,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.Sets;
-import com.google.gson.GsonBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.codepoetics.protonpack.StreamUtils;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
@@ -48,7 +47,6 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import rx.Observable;
 import rx.Scheduler;
-import rx.schedulers.Schedulers;
 
 /**
  * @author Jussi Jartamo
@@ -72,7 +70,7 @@ public class ErillishaunTuontiService {
 
     @Autowired
     public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource) {
-        this(tilaAsyncResource,applicationAsyncResource,henkiloAsyncResource,Schedulers.newThread());
+        this(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, newThread());
     }
 
     public void tuoExcelistä(KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
@@ -119,7 +117,7 @@ public class ErillishaunTuontiService {
         }
 
         Collection<ErillishaunDataException.PoikkeusRivi> poikkeusRivis = Lists.newArrayList();
-        StreamUtils.zipWithIndex(rivit.stream()
+        zipWithIndex(rivit.stream()
                 .map(rivi -> {
                     // AUTOTAYTTO VA
                     rivi.getHakemuksenTila();
@@ -200,8 +198,8 @@ public class ErillishaunTuontiService {
             }
             LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());
             Map<String, String> sahkopostit = ImmutableMap.<String, String>builder()
-                    .putAll(lisattavatTaiKeskeneraiset.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getPersonOid())).collect(Collectors.toMap(rivi -> rivi.getPersonOid(), rivi -> rivi.getSahkoposti())))
-                    .putAll(lisattavatTaiKeskeneraiset.stream().filter(rivi -> StringUtils.isNotBlank(rivi.getHenkilotunnus())).collect(Collectors.toMap(rivi -> rivi.getHenkilotunnus(), rivi -> rivi.getSahkoposti())))
+                    .putAll(lisattavatTaiKeskeneraiset.stream().filter(rivi -> isNotBlank(rivi.getPersonOid())).collect(Collectors.toMap(rivi -> rivi.getPersonOid(), rivi -> rivi.getSahkoposti())))
+                    .putAll(lisattavatTaiKeskeneraiset.stream().filter(rivi -> isNotBlank(rivi.getHenkilotunnus())).collect(Collectors.toMap(rivi -> rivi.getHenkilotunnus(), rivi -> rivi.getSahkoposti())))
                     .build();
             hakemukset = kasitteleHakemukset(haku, henkilot, sahkopostit, prosessi);
         } else {
@@ -245,7 +243,7 @@ public class ErillishaunTuontiService {
         final Stream<ErillishaunHakijaDTO> pois;
         if(!lisattavatTaiKeskeneraiset.isEmpty()){
             assert (hakemukset.size() == lisattavatTaiKeskeneraiset.size()); // 1-1 relationship assumed
-            hakijat = StreamUtils.zip(hakemukset.stream(), lisattavatTaiKeskeneraiset.stream(), (hakemus, rivi) -> {
+            hakijat = zip(hakemukset.stream(), lisattavatTaiKeskeneraiset.stream(), (hakemus, rivi) -> {
                 if(rivi.isKesken()) {
                     return Stream.<ErillishaunHakijaDTO>empty(); // Keskeneräisiä ei viedä sijoitteluun
                 } else {
@@ -303,11 +301,11 @@ public class ErillishaunTuontiService {
      */
     private static String validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi) {
         // Yksilöinti onnistuu, eli joku kolmesta löytyy: henkilötunnus,syntymäaika,henkilö-oid
-        if(StringUtils.isBlank(rivi.getSyntymaAika())&&StringUtils.isBlank(rivi.getHenkilotunnus())&&StringUtils.isBlank(rivi.getPersonOid())) {
+        if(isBlank(rivi.getSyntymaAika()) && isBlank(rivi.getHenkilotunnus()) && isBlank(rivi.getPersonOid())) {
             return "Henkilötunnus, syntymäaika ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. " + rivi.toString();
         }
         // Syntymäaika oikeassa formaatissa
-        if(!StringUtils.isBlank(rivi.getSyntymaAika())) {
+        if(!isBlank(rivi.getSyntymaAika())) {
             try {
                 DateTime p = ErillishakuRivi.SYNTYMAAIKAFORMAT.parseDateTime(rivi.getSyntymaAika());
             } catch(Exception e){
@@ -315,11 +313,11 @@ public class ErillishaunTuontiService {
             }
         }
         // Henkilölle on syötetty nimi
-        if(StringUtils.isBlank(rivi.getEtunimi())&&StringUtils.isBlank(rivi.getSukunimi())) {
+        if(isBlank(rivi.getEtunimi()) && isBlank(rivi.getSukunimi())) {
             return "Etunimi ja sukunimi on pakollisia. " + rivi.toString();
         }
         // Henkilötunnus on oikeassa formaatissa jos sellainen on syötetty
-        if(!StringUtils.isBlank(rivi.getHenkilotunnus()) && !tarkistaHenkilotunnus(rivi.getHenkilotunnus())) {
+        if(!isBlank(rivi.getHenkilotunnus()) && !tarkistaHenkilotunnus(rivi.getHenkilotunnus())) {
             return "Henkilötunnus ("+rivi.getHenkilotunnus()+") on virheellinen. " + rivi.toString();
         }
         if("KESKEN".equalsIgnoreCase(rivi.getHakemuksenTila())) {
