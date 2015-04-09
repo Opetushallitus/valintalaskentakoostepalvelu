@@ -17,8 +17,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fi.vm.sade.authentication.model.Kielisyys;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -353,6 +355,15 @@ public class ErillishaunTuontiService {
             if (tilaVirhe != null) {
                 return tilaVirhe + ". " + rivi.toString();
             }
+        }
+        if(!StringUtils.isBlank(rivi.getAidinkieli()) && !ErillishakuDataRivi.KIELITYYPIN_ARVOT.contains(rivi.getAidinkieli().toLowerCase())) {
+            return "Äidinkieli ("+rivi.getAidinkieli()+") on virheellinen. Lailliset arvot [" +
+            "fi|en|sv|ae|lo|sl|bm|mo|nr|kn|ga|tl|la|nv|ti|gl|to|sa|lv|hi|ke|ty|ho|cv|ts|kj|xx|vo|ro|mr|sd|ak|kv|98|fj|su|sq|" +
+            "ie|ab|ug|hr|my|hy|is|gd|ko|tg|am|bi|so|te|lg|dz|wo|az|oc|kl|kw|sk|uz|oj|ng|uk|gg|se|gu|ii|ne|ce|ee|ur|hu|mt|mg|je|zu|pa|sg|" +
+                    "aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|" +
+                    "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|" +
+                    "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg] "
+                    + rivi.toString();
         }
         return null;
     }

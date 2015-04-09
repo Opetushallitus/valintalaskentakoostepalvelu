@@ -122,7 +122,9 @@ public class ErillishakuExcel {
 			a.add(new TekstiArvo(rivi.getSyntymaAika(), true, true));
 			a.add(new MonivalintaArvo(rivi.getSukupuoli().toString(), ErillishakuDataRivi.SUKUPUOLEN_ARVOT));
 			a.add(new TekstiArvo(rivi.getPersonOid(), true, true));
-			a.add(new MonivalintaArvo(rivi.getAidinkieli(), ErillishakuDataRivi.KIELITYYPIN_ARVOT));
+			//a.add(new MonivalintaArvo(rivi.getAidinkieli(), ErillishakuDataRivi.KIELITYYPIN_ARVOT));
+			// HUOM! AIDINKIELESTÄ EI VOI TEHDÄ DROPDOWNIA KOSKA EXCEL EI TUE NIIN PITKÄÄ DROPDOWNIA
+			a.add(new TekstiArvo(rivi.getAidinkieli(),true,true));
 			a.add(ErillishakuDataRivi.hakemuksenTila(rivi.getHakemuksenTila()));
 			a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
 			a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
