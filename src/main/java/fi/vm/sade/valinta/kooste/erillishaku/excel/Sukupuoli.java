@@ -5,7 +5,13 @@ public enum Sukupuoli {
 
     public static Sukupuoli fromString(String s) {
         try {
-            return Sukupuoli.valueOf(s);
+            if("1".equals(s)) {
+                return MIES;
+            } else if("2".equals(s)) {
+                return NAINEN;
+            } else {
+                return Sukupuoli.valueOf(s);
+            }
         } catch(IllegalArgumentException e) {
             return EI_SUKUPUOLTA;
         }
