@@ -23,6 +23,8 @@ import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
 
+import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.emptyErillishakuRivi;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -73,8 +75,8 @@ public class ErillishakuExcel {
 		Collections.sort(erillishakurivit, new Comparator<ErillishakuRivi>() {
 			@Override
 			public int compare(ErillishakuRivi h1, ErillishakuRivi h2) {
-				ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(new ErillishakuRivi());
-				ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(new ErillishakuRivi());
+				ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(emptyErillishakuRivi());
+				ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(emptyErillishakuRivi());
 				String s1 = Optional.ofNullable(e1.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
 				String s2 = Optional.ofNullable(e2.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
 				int i = s1.compareTo(s2);

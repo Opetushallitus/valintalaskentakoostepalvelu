@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.IOUtils;
+
+import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.emptyErillishakuRivi;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -64,7 +66,7 @@ public class ErillishakuExcelTest {
 		rivit.add(rivi);
 		ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, "MIES", "","fi", "HYLATTY", "", "", true, false);
 		rivit.add(rivi2);
-		ErillishakuRivi rivi3 = new ErillishakuRivi();
+		ErillishakuRivi rivi3 = emptyErillishakuRivi();
 		rivit.add(rivi3);
 		final AtomicInteger tarkistusTapahtui = new AtomicInteger(0);
 		ErillishakuExcel eExcel = new ErillishakuExcel(null, "Haun nimi", "Hakukohteen nimi", "Tarjoajan nimi", rivit

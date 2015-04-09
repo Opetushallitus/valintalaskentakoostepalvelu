@@ -41,21 +41,8 @@ public class ErillishakuRivi {
 	private final boolean julkaistaankoTiedot;
     private final boolean poistetaankoRivi;
 
-	public ErillishakuRivi() {
-		this.hakemusOid = null;
-		this.etunimi =  null;
-		this.sukunimi = null;
-		this.henkilotunnus = null;
-		this.sukupuoli = null;
-		this.aidinkieli = null;
-		this.sahkoposti = null;
-		this.personOid = null;
-		this.syntymaAika = null;
-		this.hakemuksenTila = null;
-		this.vastaanottoTila = null;
-		this.ilmoittautumisTila = null;
-		this.julkaistaankoTiedot = false;
-        this.poistetaankoRivi = false;
+	public static ErillishakuRivi emptyErillishakuRivi() {
+		return new ErillishakuRivi(null, null, null, null, null, null, null, null, null, null, null, null, false, false);
 	}
 
 	public ErillishakuRivi(String hakemusOid, String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika,
