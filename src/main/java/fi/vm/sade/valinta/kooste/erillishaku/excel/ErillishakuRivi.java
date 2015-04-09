@@ -31,6 +31,9 @@ public class ErillishakuRivi {
 	private final String syntymaAika;
 	private final String personOid;
 
+	private final String sukupuoli;
+	private final String aidinkieli;
+
 	private final String hakemuksenTila;
 	private final String vastaanottoTila;
 	private final String ilmoittautumisTila;
@@ -43,6 +46,8 @@ public class ErillishakuRivi {
 		this.etunimi =  null;
 		this.sukunimi = null;
 		this.henkilotunnus = null;
+		this.sukupuoli = null;
+		this.aidinkieli = null;
 		this.sahkoposti = null;
 		this.personOid = null;
 		this.syntymaAika = null;
@@ -53,10 +58,16 @@ public class ErillishakuRivi {
         this.poistetaankoRivi = false;
 	}
 
-	public ErillishakuRivi(String hakemusOid, String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika, String personOid, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, boolean poistetaankoRivi) {
+	public ErillishakuRivi(String hakemusOid, String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika,
+						   String sukupuoli,
+						   String personOid,
+						   String aidinkieli,
+						   String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, boolean poistetaankoRivi) {
 		this.hakemusOid = hakemusOid;
 		this.etunimi = etunimi;
 		this.sukunimi = sukunimi;
+		this.sukupuoli = sukupuoli;
+		this.aidinkieli = aidinkieli;
 		this.henkilotunnus = henkilotunnus;
 		this.sahkoposti = sahkoposti;
 		this.syntymaAika = syntymaAika;
@@ -66,6 +77,14 @@ public class ErillishakuRivi {
 		this.ilmoittautumisTila = ilmoittautumisTila;
 		this.julkaistaankoTiedot = julkaistaankoTiedot;
         this.poistetaankoRivi = poistetaankoRivi;
+	}
+
+	public String getAidinkieli() {
+		return aidinkieli;
+	}
+
+	public String getSukupuoli() {
+		return sukupuoli;
 	}
 
 	public String getHakemusOid() {
@@ -123,6 +142,10 @@ public class ErillishakuRivi {
 	@Override
 	public String toString() {
 		return new StringBuilder()
+		.append(aidinkieli)
+		.append(", ")
+		.append(sukupuoli)
+		.append(", ")
 		.append(etunimi)
 		.append(", ")
 		.append(sukunimi)
@@ -143,7 +166,7 @@ public class ErillishakuRivi {
 	}
 
 	public HenkiloCreateDTO toHenkiloCreateDTO() {
-		return new HenkiloCreateDTO(getEtunimi(), getSukunimi(), getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA);
+		return new HenkiloCreateDTO(getAidinkieli(), getSukupuoli(), getEtunimi(), getSukunimi(), getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA);
 	}
 
 	public Date parseSyntymaAika() {

@@ -64,7 +64,10 @@ public class ImportedErillisHakuExcel {
     }
 
     private HenkiloCreateDTO convert(final ErillishakuRivi rivi) {
-        return new HenkiloCreateDTO(rivi.getEtunimi(), rivi.getSukunimi(), rivi.getHenkilotunnus(), parseSyntymaAika(rivi), rivi.getPersonOid(), HenkiloTyyppi.OPPIJA);
+        return new HenkiloCreateDTO(
+                rivi.getAidinkieli(),
+                rivi.getSyntymaAika(),
+                rivi.getEtunimi(), rivi.getSukunimi(), rivi.getHenkilotunnus(), parseSyntymaAika(rivi), rivi.getPersonOid(), HenkiloTyyppi.OPPIJA);
     }
 
     private static Date parseSyntymaAika(ErillishakuRivi rivi) {

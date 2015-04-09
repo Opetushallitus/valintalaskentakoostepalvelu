@@ -105,7 +105,7 @@ public class ErillishaunTuontiService {
             LOG.error("Erillishaun tuonti keskeytyi virheeseen", poikkeus);
             prosessi.keskeyta();
         }, () -> {
-            LOG.info("Tuonti onnistui");
+            LOG.info("Tuonti lopetettiin");
         });
     }
 
@@ -161,7 +161,9 @@ public class ErillishaunTuontiService {
                         rivi.getHenkilotunnus(),
                         rivi.getSahkoposti(),
                         rivi.getSyntymaAika(),
+                        rivi.getSukupuoli(),
                         rivi.getPersonOid(),
+                        rivi.getAidinkieli(),
                         rivi.getHakemuksenTila(),
                         "KESKEN", "EI_TEHTY",
                         rivi.isJulkaistaankoTiedot(), rivi.isPoistetaankoRivi());
@@ -244,7 +246,7 @@ public class ErillishaunTuontiService {
         if(!lisattavatTaiKeskeneraiset.isEmpty()){
             assert (hakemukset.size() == lisattavatTaiKeskeneraiset.size()); // 1-1 relationship assumed
             hakijat = zip(hakemukset.stream(), lisattavatTaiKeskeneraiset.stream(), (hakemus, rivi) -> {
-                if(rivi.isKesken()) {
+                if (rivi.isKesken()) {
                     return Stream.<ErillishaunHakijaDTO>empty(); // Keskeneräisiä ei viedä sijoitteluun
                 } else {
                     HakemusWrapper wrapper = new HakemusWrapper(hakemus);
@@ -301,7 +303,7 @@ public class ErillishaunTuontiService {
      */
     private static String validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi) {
         // Yksilöinti onnistuu, eli joku kolmesta löytyy: henkilötunnus,syntymäaika,henkilö-oid
-        if(isBlank(rivi.getSyntymaAika()) && isBlank(rivi.getHenkilotunnus()) && isBlank(rivi.getPersonOid())) {
+        if (isBlank(rivi.getSyntymaAika()) && isBlank(rivi.getHenkilotunnus()) && isBlank(rivi.getPersonOid())) {
             return "Henkilötunnus, syntymäaika ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. " + rivi.toString();
         }
         // Syntymäaika oikeassa formaatissa
@@ -313,7 +315,7 @@ public class ErillishaunTuontiService {
             }
         }
         // Henkilölle on syötetty nimi
-        if(isBlank(rivi.getEtunimi()) && isBlank(rivi.getSukunimi())) {
+        if (isBlank(rivi.getEtunimi()) && isBlank(rivi.getSukunimi())) {
             return "Etunimi ja sukunimi on pakollisia. " + rivi.toString();
         }
         // Henkilötunnus on oikeassa formaatissa jos sellainen on syötetty

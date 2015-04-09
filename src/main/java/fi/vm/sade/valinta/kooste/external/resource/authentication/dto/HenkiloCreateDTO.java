@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.external.resource.authentication.dto;
 
 import java.util.Date;
 
+import fi.vm.sade.authentication.model.Kielisyys;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
@@ -16,8 +18,17 @@ public class HenkiloCreateDTO {
     public final Date syntymaaika;
     public final String oidHenkilo;
     public final HenkiloTyyppi henkiloTyyppi;
+    public final String sukupuoli;
+    public final Kielisyys aidinkieli;
 
-    public HenkiloCreateDTO(String etunimet, String sukunimi, String hetu, Date syntymaaika, String oidHenkilo, HenkiloTyyppi henkiloTyyppi) {
+    public HenkiloCreateDTO(String aidinkieli, String sukupuoli, String etunimet, String sukunimi, String hetu, Date syntymaaika, String oidHenkilo, HenkiloTyyppi henkiloTyyppi) {
+        if(StringUtils.trimToNull(aidinkieli)==null){
+            this.aidinkieli = null;
+        } else {
+            this.aidinkieli = new Kielisyys();
+            this.aidinkieli.setKieliKoodi(aidinkieli);
+        }
+        this.sukupuoli = sukupuoli;
         this.etunimet = etunimet;
         this.kutsumanimi = etunimet;
         this.sukunimi = sukunimi;

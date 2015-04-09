@@ -11,6 +11,7 @@ import java.util.Arrays;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
+import com.google.gson.GsonBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -100,16 +101,20 @@ public class ErillishakuResourceTest {
     private void verifyCreatedExcelDocument(final InputStream storedDocument) throws IOException {
         final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, storedDocument);
         assertEquals(1, tulos.rivit.size());
-        final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO("Tuomas", "Hakkarainen", MockData.hetu, ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(), henkiloOid, HenkiloTyyppi.OPPIJA);
+        final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO("fi", "MIES", "Tuomas", "Hakkarainen", MockData.hetu, ErillishakuDataRivi.SYNTYMAAIKA.parseDateTime("1.1.1901").toDate(), henkiloOid, HenkiloTyyppi.OPPIJA);
         assertEquals(expectedHenkilo, tulos.rivit.get(0).toHenkiloCreateDTO());
     }
 
     private String odotaProsessiaPalautaDokumenttiId(final ProsessiId prosessiId) {
         final Prosessi dokumenttiProsessi = createClient(root + "/dokumenttiprosessi/" + prosessiId.getId())
             .accept(MediaType.APPLICATION_JSON).get(Prosessi.class);
+        if(dokumenttiProsessi.poikkeuksia()) {
+            throw new RuntimeException(dokumenttiProsessi.poikkeukset.toString());
+        }
         if (!dokumenttiProsessi.valmis()) {
             try {
                 Thread.sleep(100);
+                //System.err.println("odotetaan koska saatiin \n"+ new GsonBuilder().setPrettyPrinting().create().toJson(dokumenttiProsessi));
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

@@ -46,19 +46,21 @@ public class ErillishakuDataRivi extends DataRivi {
 		String henkilotunnus = lukija.getArvoAt(2);
 		String sahkoposti = lukija.getArvoAt(3);
 		String syntymaAika = lukija.getArvoAt(4);
-		String oid = lukija.getArvoAt(5);
-		
-		String hakemuksenTila = lukija.getArvoAt(6);
-		String vastaanottoTila = lukija.getArvoAt(7);
-		String ilmoittautumisTila = lukija.getArvoAt(8);
+		String sukupuoli = lukija.getArvoAt(5);
+		String oid = lukija.getArvoAt(6);
+		String aidinkieli = lukija.getArvoAt(7);
+
+		String hakemuksenTila = lukija.getArvoAt(8);
+		String vastaanottoTila = lukija.getArvoAt(9);
+		String ilmoittautumisTila = lukija.getArvoAt(10);
 		boolean julkaistaankoTiedot =
-				LUPA_JULKAISUUN.equals(lukija.getArvoAt(9));
-		if(rivi.isTyhja() || rivi.getSolut().size() != 10 || "Syntymäaika".equals(syntymaAika)) {
+				LUPA_JULKAISUUN.equals(lukija.getArvoAt(11));
+		if(rivi.isTyhja() || rivi.getSolut().size() != 12 || "Syntymäaika".equals(syntymaAika)) {
 			// tunnistetaan otsikkorivit ja ei välitetä prosessointiin
 		} else {
 			kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,
 					sukunimi, etunimi, henkilotunnus,
-					sahkoposti, syntymaAika, oid, hakemuksenTila,
+					sahkoposti, syntymaAika, sukupuoli, oid, aidinkieli, hakemuksenTila,
 					vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot,
 					false));
 		}

@@ -12,8 +12,12 @@ public class Prosessi {
     public String dokumenttiId;
     public Collection<Poikkeus> poikkeukset;
 
+    public boolean poikkeuksia() {
+        return !(poikkeukset == null || poikkeukset.isEmpty());
+    }
+
     public boolean valmis() {
-        return kokonaistyo.valmis();
+        return dokumenttiId != null || kokonaistyo.valmis();
     }
 
     static class Osatyo {

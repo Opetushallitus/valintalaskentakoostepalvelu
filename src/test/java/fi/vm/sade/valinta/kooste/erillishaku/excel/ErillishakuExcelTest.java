@@ -60,9 +60,9 @@ public class ErillishakuExcelTest {
 	public void testaaVienti() throws FileNotFoundException, IOException {
 		List<ErillishakuRivi> rivit = Lists.newArrayList();
 		String syntymaAika = "11.11.2011";
-		ErillishakuRivi rivi = new ErillishakuRivi(null, "sukunimi","etunimi1","hetu","test.email@example.com", syntymaAika, "", "HYLATTY", "", "", false, false);
+		ErillishakuRivi rivi = new ErillishakuRivi(null, "sukunimi","etunimi1","hetu","test.email@example.com", syntymaAika, "MIES", "","fi", "HYLATTY", "", "", false, false);
 		rivit.add(rivi);
-		ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, "", "HYLATTY", "", "", true, false);
+		ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, "MIES", "","fi", "HYLATTY", "", "", true, false);
 		rivit.add(rivi2);
 		ErillishakuRivi rivi3 = new ErillishakuRivi();
 		rivit.add(rivi3);
