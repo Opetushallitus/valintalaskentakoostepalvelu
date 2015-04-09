@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import fi.vm.sade.authentication.model.Kielisyys;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -233,7 +234,7 @@ public class ErillishaunTuontiService {
     }
     private String aidinkieliToString(Kielisyys kielisyys) {
         if(kielisyys == null) {
-            return null;
+            return "";
         } else {
             return kielisyys.getKieliKoodi();
         }
@@ -310,9 +311,16 @@ public class ErillishaunTuontiService {
      * @return Validointivirhe tai null jos kaikki ok
      */
     private static String validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi) {
-        // Yksilöinti onnistuu, eli joku kolmesta löytyy: henkilötunnus,syntymäaika,henkilö-oid
-        if (isBlank(rivi.getSyntymaAika()) && isBlank(rivi.getHenkilotunnus()) && isBlank(rivi.getPersonOid())) {
-            return "Henkilötunnus, syntymäaika ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. " + rivi.toString();
+        // Yksilöinti onnistuu, eli joku kolmesta löytyy: henkilötunnus,syntymäaika+sukupuoli,henkilö-oid
+        if (// mikään seuraavista ei ole totta:
+                !(// on syntymaika+sukupuoli tunnistus
+                (!isBlank(rivi.getSyntymaAika())
+                && !Sukupuoli.EI_SUKUPUOLTA.equals(rivi.getSukupuoli()))
+                || // on henkilotunnus
+                        !isBlank(rivi.getHenkilotunnus()) ||
+                        // on henkilo OID
+                        !isBlank(rivi.getPersonOid()))) {
+            return "Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. " + rivi.toString();
         }
         // Syntymäaika oikeassa formaatissa
         if(!isBlank(rivi.getSyntymaAika())) {
