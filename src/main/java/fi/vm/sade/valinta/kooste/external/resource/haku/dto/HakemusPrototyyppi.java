@@ -15,8 +15,12 @@ public class HakemusPrototyyppi {
     public final String henkilotunnus;
     public final String sahkoposti;
     public final String syntymaAika;
+    public final String sukupuoli;
+    public final String aidinkieli;
 
-    public HakemusPrototyyppi(String hakijaOid, String etunimi, String sukunimi, String henkilotunnus, String sahkoposti, String syntymaAika) {
+    public HakemusPrototyyppi(String sukupuoli, String aidinkieli, String hakijaOid, String etunimi, String sukunimi, String henkilotunnus, String sahkoposti, String syntymaAika) {
+        this.sukupuoli = sukupuoli;
+        this.aidinkieli = aidinkieli;
         this.hakijaOid = hakijaOid;
         this.etunimi = etunimi;
         this.sukunimi = sukunimi;
@@ -25,8 +29,8 @@ public class HakemusPrototyyppi {
         this.syntymaAika = syntymaAika;
     }
 
-    public HakemusPrototyyppi(final String hakijaOid, final String etunimi, final String sukunimi, final String henkilotunnus, final String sahkoposti, final Date syntymaAika) {
-        this(hakijaOid, etunimi, sukunimi, henkilotunnus, sahkoposti, parseDate(syntymaAika));
+    public HakemusPrototyyppi(final String sukupuoli, final String aidinkieli, final String hakijaOid, final String etunimi, final String sukunimi, final String henkilotunnus, final String sahkoposti, final Date syntymaAika) {
+        this(sukupuoli, aidinkieli, hakijaOid, etunimi, sukunimi, henkilotunnus, sahkoposti, parseDate(syntymaAika));
 
     }
 

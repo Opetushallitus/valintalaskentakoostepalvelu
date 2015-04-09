@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import fi.vm.sade.authentication.model.Kielisyys;
 import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -221,13 +222,20 @@ public class ErillishaunTuontiService {
             final List<HakemusPrototyyppi> hakemusPrototyypit = henkilot.stream()
                     .map(h -> {
                         //LOG.info("Hakija {}", new GsonBuilder().setPrettyPrinting().create().toJson(h));
-                        return new HakemusPrototyyppi(h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), selectEmail(h, sahkopostit).orElse(""), h.getSyntymaaika());
+                        return new HakemusPrototyyppi(h.getSukupuoli(), aidinkieliToString(h.getAidinkieli()), h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), selectEmail(h, sahkopostit).orElse(""), h.getSyntymaaika());
                     }).collect(Collectors.toList());
             return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
         } catch (Throwable e) { // temporary catch to avoid missing service dependencies
             LOG.error("{}: {} {}",POIKKEUS_HAKEMUSPALVELUN_VIRHE,e.getMessage(),Arrays.toString(e.getStackTrace()));
             prosessi.keskeyta(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_HAKEMUSPALVELUN_VIRHE));
             throw e;
+        }
+    }
+    private String aidinkieliToString(Kielisyys kielisyys) {
+        if(kielisyys == null) {
+            return null;
+        } else {
+            return kielisyys.getKieliKoodi();
         }
     }
 
