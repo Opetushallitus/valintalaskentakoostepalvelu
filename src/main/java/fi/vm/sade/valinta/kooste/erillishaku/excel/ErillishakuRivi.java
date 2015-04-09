@@ -1,20 +1,16 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
-import java.util.Date;
-import java.util.Optional;
-
 import com.wordnik.swagger.annotations.ApiModel;
-import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.*;
-import org.apache.commons.lang.StringUtils;
+import fi.vm.sade.authentication.model.HenkiloTyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fi.vm.sade.authentication.model.HenkiloTyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import java.util.Date;
+
+import static org.apache.commons.lang.StringUtils.*;
 
 /**
  *
@@ -24,9 +20,8 @@ import org.joda.time.format.DateTimeFormatter;
 @ApiModel
 public class ErillishakuRivi {
 	private static final Logger LOG = LoggerFactory.getLogger(ErillishakuRivi.class);
-	public final static org.joda.time.format.DateTimeFormatter SYNTYMAAIKAFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy");
+	public final static DateTimeFormatter SYNTYMAAIKAFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy");
 
-	public static final DateTimeFormatter SYNTYMAAIKA = DateTimeFormat.forPattern("dd.MM.yyyy");
 	private final String etunimi;
 	private final String sukunimi;
 	private final String hakemusOid;
@@ -80,41 +75,48 @@ public class ErillishakuRivi {
 	public boolean isJulkaistaankoTiedot() {
 		return julkaistaankoTiedot;
 	}
+
 	public String getEtunimi() {
-		return StringUtils.trimToEmpty(etunimi);
+		return trimToEmpty(etunimi);
 	}
+
 	public String getPersonOid() {
-		return StringUtils.trimToEmpty(personOid);
+		return trimToEmpty(personOid);
 	}
+
 	public String getHenkilotunnus() {
-		return
-				StringUtils.trimToEmpty(henkilotunnus);
+		return trimToEmpty(henkilotunnus);
 	}
+
 	public String getSahkoposti() {
-		return StringUtils.trimToEmpty(sahkoposti);
+		return trimToEmpty(sahkoposti);
 	}
+
 	public String getSukunimi() {
-		return StringUtils.trimToEmpty(sukunimi);
+		return trimToEmpty(sukunimi);
 	}
+
 	public String getSyntymaAika() {
-		return StringUtils.trimToEmpty(syntymaAika);
+		return trimToEmpty(syntymaAika);
 	}
 
 	public String getHakemuksenTila() {
-		return StringUtils.trimToEmpty(hakemuksenTila);
+		return trimToEmpty(hakemuksenTila);
 	}
+
 	public String getIlmoittautumisTila() {
-		return StringUtils.trimToEmpty(ilmoittautumisTila);
+		return trimToEmpty(ilmoittautumisTila);
 	}
+
 	public String getVastaanottoTila() {
-		return StringUtils.trimToEmpty(vastaanottoTila);
+		return trimToEmpty(vastaanottoTila);
 	}
 
 	private String suojaaHenkilotunnusLogeilta(String hetu) {
-		if(StringUtils.trimToNull(hetu) == null) {
+		if(trimToNull(hetu) == null) {
 			return "***HENKILOTUNNUS***";
 		} else {
-			return StringUtils.EMPTY;
+			return EMPTY;
 		}
 	}
 
@@ -146,7 +148,7 @@ public class ErillishakuRivi {
 
 	public Date parseSyntymaAika() {
 		try {
-			String s = StringUtils.trimToNull(getSyntymaAika());
+			String s = trimToNull(getSyntymaAika());
 			if(s == null) {
 				return null;
 			} else {
