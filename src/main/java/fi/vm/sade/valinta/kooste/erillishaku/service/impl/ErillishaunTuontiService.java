@@ -314,9 +314,11 @@ public class ErillishaunTuontiService {
                 return "Syntymäaika '" + rivi.getSyntymaAika() + "' on väärin muotoiltu. Syntymäaika on syötettävä muodossa pp.mm.vvvv. " + rivi.toString();
             }
         }
-        // Henkilölle on syötetty nimi
-        if (isBlank(rivi.getEtunimi()) && isBlank(rivi.getSukunimi())) {
-            return "Etunimi ja sukunimi on pakollisia. " + rivi.toString();
+        // Jos vahvatunniste puuttuu niin nimet on pakollisia tietoja
+        if(isBlank(rivi.getPersonOid())) {
+            if (isBlank(rivi.getEtunimi()) || isBlank(rivi.getSukunimi())) {
+                return "Etunimi ja sukunimi on pakollisia. " + rivi.toString();
+            }
         }
         // Henkilötunnus on oikeassa formaatissa jos sellainen on syötetty
         if(!isBlank(rivi.getHenkilotunnus()) && !tarkistaHenkilotunnus(rivi.getHenkilotunnus())) {
