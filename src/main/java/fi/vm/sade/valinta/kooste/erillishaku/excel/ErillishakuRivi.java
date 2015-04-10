@@ -5,6 +5,8 @@ import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
+import fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -110,6 +112,10 @@ public class ErillishakuRivi {
 	}
 
 	public Sukupuoli getSukupuoli() {
+		if(!StringUtils.isBlank(henkilotunnus)) {
+			// palauta hetun sukupuoli
+			return HenkilotunnusTarkistusUtil.palautaSukupuoli(henkilotunnus);
+		}
 		return sukupuoli;
 	}
 

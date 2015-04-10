@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,5 +32,15 @@ public class HenkilotunnusTarkistusUtil {
             return false;
         }
         return TARKISTUSMERKKI[(tarkistettavaNumero%31)]==henkilotunnus.charAt(10);
+    }
+
+    public static Sukupuoli palautaSukupuoli(String henkilotunnus) {
+        if(!tarkistaHenkilotunnus(henkilotunnus)) {
+            return Sukupuoli.EI_SUKUPUOLTA;
+        } else if(Integer.parseInt(""+henkilotunnus.charAt(9)) % 2 == 0) {
+            return Sukupuoli.NAINEN;
+        } else {
+            return Sukupuoli.MIES;
+        }
     }
 }

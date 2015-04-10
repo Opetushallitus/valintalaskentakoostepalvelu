@@ -356,7 +356,10 @@ public class ErillishaunTuontiService {
                 return tilaVirhe + ". " + rivi.toString();
             }
         }
-        if(!isBlank(rivi.getPersonOid()) && !ErillishakuDataRivi.KIELITYYPIN_ARVOT.contains(StringUtils.trimToEmpty(rivi.getAidinkieli()).toLowerCase())) {
+        if((isBlank(rivi.getPersonOid()) && isBlank(rivi.getHenkilotunnus())) && Sukupuoli.EI_SUKUPUOLTA.equals(rivi.getSukupuoli())) {
+            return "Sukupuoli ("+rivi.getSukupuoli()+") on pakollinen kun henkilötunnus ja personOID puuttuu. " + rivi.toString();
+        }
+        if(isBlank(rivi.getPersonOid()) && !ErillishakuDataRivi.KIELITYYPIN_ARVOT.contains(StringUtils.trimToEmpty(rivi.getAidinkieli()).toLowerCase())) {
             return "Äidinkieli ("+rivi.getAidinkieli()+") on virheellinen. Lailliset arvot [" +
             "fi|en|sv|ae|lo|sl|bm|mo|nr|kn|ga|tl|la|nv|ti|gl|to|sa|lv|hi|ke|ty|ho|cv|ts|kj|xx|vo|ro|mr|sd|ak|kv|98|fj|su|sq|" +
             "ie|ab|ug|hr|my|hy|is|gd|ko|tg|am|bi|so|te|lg|dz|wo|az|oc|kl|kw|sk|uz|oj|ng|uk|gg|se|gu|ii|ne|ce|ee|ur|hu|mt|mg|je|zu|pa|sg|" +
