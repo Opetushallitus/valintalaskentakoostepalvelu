@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import org.joda.time.format.DateTimeFormat;
@@ -33,13 +34,14 @@ public class ErillishakuRivi {
 	private final String syntymaAika;
 	@JsonDeserialize(using = SukupuoliDeserializer.class)
 	private final Sukupuoli sukupuoli;
+	@ApiModelProperty(required = true)
 	private final String aidinkieli;
 	private final String personOid;
-
+	@ApiModelProperty(required = true)
 	private final String hakemuksenTila;
 	private final String vastaanottoTila;
 	private final String ilmoittautumisTila;
-
+	@ApiModelProperty(required = true)
 	private final boolean julkaistaankoTiedot;
     private final boolean poistetaankoRivi;
 
