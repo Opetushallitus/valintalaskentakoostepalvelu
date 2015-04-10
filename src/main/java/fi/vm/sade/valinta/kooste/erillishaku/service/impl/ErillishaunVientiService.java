@@ -114,7 +114,7 @@ public class ErillishaunVientiService {
                             wrapper.getHenkilotunnus(),
                             wrapper.getSahkopostiOsoite(),
                             wrapper.getSyntymaaika(),
-                            Sukupuoli.fromString(wrapper.getSukupuoli()),
+                            Sukupuoli.fromString(wrapper.getSukupuoliAsIs()),
                             wrapper.getPersonOid(),
                             wrapper.getAidinkieli(),
                             objectToString(h.getTila()),
