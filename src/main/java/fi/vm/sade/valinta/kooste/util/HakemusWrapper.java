@@ -72,6 +72,11 @@ public class HakemusWrapper {
             return s;
         }).findAny().get();
     }
+    public String getSukupuoliAsIs() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(SUKUPUOLI)).orElse(
+                StringUtils.EMPTY);
+    }
     public String getAidinkieli() {
         getHenkilotiedot();
         return Optional.ofNullable(henkilotiedot.get(AIDINKIELI)).orElse(

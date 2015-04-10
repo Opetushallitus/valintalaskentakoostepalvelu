@@ -133,7 +133,7 @@ public class ErillishaunVientiService {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus);
             ErillishakuRivi r = new ErillishakuRivi(hakemus.getOid(), wrapper.getSukunimi(),
                     wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSahkopostiOsoite(),
-                    wrapper.getSyntymaaika(), Sukupuoli.valueOf(wrapper.getSukupuoli()), wrapper.getPersonOid(),
+                    wrapper.getSyntymaaika(), Sukupuoli.fromString(wrapper.getSukupuoliAsIs()), wrapper.getPersonOid(),
                     wrapper.getAidinkieli(), "HYLATTY", "", "", false, false);
             return r;
         }).collect(Collectors.toList());
