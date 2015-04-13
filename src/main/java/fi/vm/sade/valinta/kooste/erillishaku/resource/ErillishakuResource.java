@@ -14,6 +14,7 @@ import javax.ws.rs.QueryParam;
 import com.google.common.hash.HashCode;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
@@ -87,7 +88,7 @@ public class ErillishakuResource {
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 		//
-		vientiService.vie(prosessi, new ErillishakuDTO(tyyppi,hakuOid, hakukohdeOid,
+		vientiService.vie(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid,
 				tarjoajaOid, valintatapajonoOid, valintatapajononNimi));
 		return prosessi.toProsessiId();
 	}
@@ -104,7 +105,6 @@ public class ErillishakuResource {
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
 			@QueryParam("valintatapajononNimi") String valintatapajononNimi,
 			InputStream file) throws Exception {
-		checkOID(valintatapajonoOid);
 		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
 		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
 		ByteArrayOutputStream b;
@@ -113,7 +113,7 @@ public class ErillishakuResource {
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 		tuontiService.tuoExcelistä(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid,
-				Optional.ofNullable(valintatapajonoOid).orElse(generoiValintatapajonoOIDHakukohteestaJaHausta(hakuOid,hakukohdeOid)), valintatapajononNimi), new ByteArrayInputStream(b.toByteArray()));
+				Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi), new ByteArrayInputStream(b.toByteArray()));
 		//
 		return prosessi.toProsessiId();
 	}
@@ -142,28 +142,15 @@ public class ErillishakuResource {
 
 			// Body
 			ErillishakuJson json) throws Exception {
-		checkOID(valintatapajonoOid);
 		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
 		authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
 		ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 
 		tuontiService.tuoJson(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid,
-				Optional.ofNullable(valintatapajonoOid).orElse(generoiValintatapajonoOIDHakukohteestaJaHausta(hakuOid,hakukohdeOid)), valintatapajononNimi), json.getRivit());
+				Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi), json.getRivit());
 		//
 		return prosessi.toProsessiId();
 	}
 
-	private static String generoiValintatapajonoOIDHakukohteestaJaHausta(String hakuOID, String hakukohdeOID) {
-		String hakukohdeOIDIlmanPisteita = Optional.ofNullable(hakukohdeOID).orElse("").replace(".", "");
-		String hakuOIDReversedIlmanPisteita = new StringBuilder(Optional.ofNullable(hakuOID).orElse("")).reverse().toString().replace(".","");
-
-		return StringUtils.substring(new StringBuilder(hakukohdeOIDIlmanPisteita).append(hakuOIDReversedIlmanPisteita).toString(),0,32);
-	}
-
-	private void checkOID(String valintatapajonoOid) {
-		if("null".equals(valintatapajonoOid)) {
-			throw new RuntimeException("valintatapajonoOid='null' ei ole validi OID! Jätä parametri antamatta tai syötä oikein formatoitu OID.");
-		}
-	}
 }
