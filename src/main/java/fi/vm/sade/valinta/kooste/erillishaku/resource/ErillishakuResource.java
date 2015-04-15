@@ -89,7 +89,7 @@ public class ErillishakuResource {
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 		//
 		vientiService.vie(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid,
-				tarjoajaOid, valintatapajonoOid, valintatapajononNimi));
+				tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi));
 		return prosessi.toProsessiId();
 	}
 
