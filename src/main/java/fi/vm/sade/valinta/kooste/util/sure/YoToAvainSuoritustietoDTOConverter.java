@@ -222,6 +222,12 @@ public class YoToAvainSuoritustietoDTOConverter {
                 case "FI": return "A5";
                 default: return "VI2_"+lisatieto;
             }
+        } else if(aine.equals("TOINENKIELI")) { // Suomi/Ruotsi toisena kielenä
+            switch (lisatieto) {
+                case "RU": return "O5";
+                case "FI": return "A5";
+                default: return "TOINENKIELI_"+lisatieto;
+            }
         } else if(aine.equals("PITKA")) { // Pitkä matematiikka
             switch (lisatieto) {
                 case "MA": return "M";
