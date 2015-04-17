@@ -1,0 +1,90 @@
+[
+
+    {
+        "oppijanumero": "1.2.246.562.24.99654294684",
+        "opiskelu": [
+            {
+                "id": "3eade690-a2d5-4a80-8ae2-bb71960dae5b",
+                "oppilaitosOid": "1.2.246.562.10.27276156612",
+                "luokkataso": "10",
+                "luokka": "10a",
+                "henkiloOid": "1.2.246.562.24.99654294684",
+                "alkuPaiva": "2014-07-31T21:00:00.000Z",
+                "loppuPaiva": "2015-05-31T21:00:00.000Z",
+                "source": "1.2.246.562.24.33796645377",
+                "core": {
+                    "oppilaitosOid": "1.2.246.562.10.27276156612",
+                    "luokkataso": "10",
+                    "henkiloOid": "1.2.246.562.24.99654294684"
+                }
+            }
+        ],
+        "suoritukset": [
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.99654294684",
+                    "source": "1.2.246.562.24.33796645377",
+                    "vahvistettu": true,
+                    "komo": "1.2.246.562.13.62959769647",
+                    "myontaja": "1.2.246.562.10.27276156612",
+                    "tila": "VALMIS",
+                    "valmistuminen": "31.05.2014",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "23189712-aabd-48c2-9df5-269f92194bf7"
+                },
+                "arvosanat": []
+            },
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.99654294684",
+                    "source": "1.2.246.562.24.99654294684",
+                    "vahvistettu": false,
+                    "komo": "1.2.246.562.13.62959769647",
+                    "myontaja": "1.2.246.562.11.00001807655",
+                    "tila": "VALMIS",
+                    "valmistuminen": "30.05.2015",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "50913893-8da3-4703-bff8-af9d41931fb0"
+                },
+                "arvosanat": []
+            },
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.99654294684",
+                    "source": "1.2.246.562.24.99654294684",
+                    "vahvistettu": false,
+                    "komo": "1.2.246.562.5.2013112814572435044876",
+                    "myontaja": "1.2.246.562.11.00001807655",
+                    "tila": "VALMIS",
+                    "valmistuminen": "30.05.2015",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "fb76118a-631a-4e87-94d3-98846f668226"
+                },
+                "arvosanat": []
+            },
+            {
+                "suoritus": {
+                    "henkiloOid": "1.2.246.562.24.99654294684",
+                    "source": "1.2.246.562.24.33796645377",
+                    "vahvistettu": true,
+                    "komo": "1.2.246.562.5.2013112814572435044876",
+                    "myontaja": "1.2.246.562.10.27276156612",
+                    "tila": "KESKEN",
+                    "valmistuminen": "30.05.2015",
+                    "yksilollistaminen": "Ei",
+                    "suoritusKieli": "FI",
+                    "id": "b309535b-9d57-4fc0-a484-7fad8ff2458c"
+                },
+                "arvosanat": []
+            }
+        ],
+        "opiskeluoikeudet": [],
+        "ensikertalainen": true,
+        "id": "1.2.246.562.24.99654294684",
+        "source": "1.2.246.562.10.00000000001",
+        "core": "1.2.246.562.24.99654294684"
+    }
+]

@@ -97,6 +97,29 @@ public class SureKonvertointiTest {
 		}
 	}
 
+    @Test
+    public void testaaUseampiLisaopetusKonvertointi() throws JsonSyntaxException,
+            IOException {
+        List<Oppija> oppijat = new Gson().fromJson(IOUtils
+                .toString(new ClassPathResource("monta_lisaopetusta.json")
+                        .getInputStream()), new TypeToken<List<Oppija>>() {
+        }.getType());
+        for (Oppija o : oppijat) {
+            if (!o.getSuoritukset().isEmpty()) {
+                LOG.info("{}", new GsonBuilder().setPrettyPrinting().create()
+                        .toJson(o.getSuoritukset()));
+                LOG.info(
+                        "###\r\n{}",
+                        new GsonBuilder()
+                                .setPrettyPrinting()
+                                .create()
+                                .toJson(OppijaToAvainArvoDTOConverter
+                                        .convert(o,null)));
+
+            }
+        }
+    }
+
 
     @Test
     public void testaaSureKonvertointiKaikkiAIneet() throws JsonSyntaxException,

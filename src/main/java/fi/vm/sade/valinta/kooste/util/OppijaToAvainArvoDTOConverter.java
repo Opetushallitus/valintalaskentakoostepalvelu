@@ -71,6 +71,7 @@ public class OppijaToAvainArvoDTOConverter {
                             wrap(s).isLisaopetus()
                     )
                     .sorted((s0, s1) -> s0.compareTo(s1))
+                    .limit(1)
                     .collect(Collectors.toList());
 
             final List<SuoritusJaArvosanat> yo = oppijanSuoritukset.stream()
