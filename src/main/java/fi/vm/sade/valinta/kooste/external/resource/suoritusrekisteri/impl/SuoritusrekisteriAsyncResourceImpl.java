@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.reflect.TypeToken;
 
+import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 
@@ -35,21 +35,6 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 		super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(10));
 	}
 
-	public Peruutettava getOppijatByHaku(String hakuOid, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
-		String url = "/suoritusrekisteri/rest/v1/oppijat";
-		try {
-			return new PeruutettavaImpl(getWebClient()
-					.path(url)
-					.query("haku", hakuOid)
-					.async()
-					.get(new Callback<List<Oppija>>(address, url + "?haku=" + hakuOid, callback, failureCallback, new TypeToken<List<Oppija>>() {
-					}.getType())));
-		} catch (Exception e) {
-			failureCallback.accept(e);
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		}
-	}
-
 	public Peruutettava getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
 		String url = "/suoritusrekisteri/rest/v1/oppijat";
 		try {
@@ -62,21 +47,6 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 					.query("hakukohde", hakukohdeOid)
 					.async()
 					.get(new Callback<List<Oppija>>(address, url + "?hakukohde=" + hakukohdeOid + "&ensikertalaisuudenReferenssiPvm=" + referenssiPvm, callback, failureCallback, new TypeToken<List<Oppija>>() {
-					}.getType())));
-		} catch (Exception e) {
-			failureCallback.accept(e);
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		}
-	}
-
-	public Peruutettava getOppijatByOrganisaatio(String organisaatioOid, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
-		String url = "/suoritusrekisteri/rest/v1/oppijat";
-		try {
-			return new PeruutettavaImpl(getWebClient()
-					.path(url)
-					.query("organisaatio", organisaatioOid)
-					.async()
-					.get(new Callback<List<Oppija>>(address, url + "?organisaatio=" + organisaatioOid, callback, failureCallback, new TypeToken<List<Oppija>>() {
 					}.getType())));
 		} catch (Exception e) {
 			failureCallback.accept(e);
