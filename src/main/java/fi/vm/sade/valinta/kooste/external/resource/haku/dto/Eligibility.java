@@ -34,4 +34,7 @@ public class Eligibility {
 		return status;
 	}
 
+	public String getParsedEligibilityStatus() {
+		return status.equals("AUTOMATICALLY_CHECKED_ELIGIBLE") ? "ELIGIBLE" : status;
+	}
 }

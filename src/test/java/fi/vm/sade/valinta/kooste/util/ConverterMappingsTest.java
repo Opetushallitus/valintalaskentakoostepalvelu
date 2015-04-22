@@ -81,6 +81,17 @@ public class ConverterMappingsTest {
 	}
 
 	@Test
+	public void testaaEligibilitiesParsintaa() {
+		Map<String, String> m = Maps.newHashMap();
+		m.put("preference1-Koulutus-id", "hk1");
+		Map<String, String> ans = Converter.mapEligibilityAndStatus(
+				Arrays.asList(new Eligibility("hk1", "AUTOMATICALLY_CHECKED_ELIGIBLE", "")), m);
+		Assert.assertFalse(ans.isEmpty());
+		Assert.assertTrue(ans.size() == 1);
+		Assert.assertTrue(ans.entrySet().iterator().next().getValue().equals("ELIGIBLE"));
+	}
+
+	@Test
 	public void testaaEligibilitiesMappaustaMatsaakoKunYlimaaraisiaAvaimia() {
 		Map<String, String> m = Maps.newHashMap();
 		m.put("preference1-Koulutus-id", "hk1");

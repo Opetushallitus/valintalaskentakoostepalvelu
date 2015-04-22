@@ -263,7 +263,7 @@ public class Converter {
 				// .map(e -> e.getAoId())
 				.collect(Collectors.toList())
 				.stream()
-				.collect(Collectors.toMap(e -> e.getAoId(), e -> e.getStatus()));
+				.collect(Collectors.toMap(e -> e.getAoId(), e -> e.getParsedEligibilityStatus()));
 		return Optional
 				.ofNullable(hakutoiveet)
 				.orElse(Collections.emptyMap())
