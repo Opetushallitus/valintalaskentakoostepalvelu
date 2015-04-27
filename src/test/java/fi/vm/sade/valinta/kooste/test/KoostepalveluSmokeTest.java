@@ -8,6 +8,7 @@ import fi.vm.sade.valinta.http.HttpResource;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,10 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author Jussi Jartamo
+ *
+ * @Ignore Johtui Glassfishistä, minkä käytöstä on luovuttu. Ignoreen koska hidas testi eikä ole uusiutumassa, ellei implementaatiota taas vaihdeta.
  */
+@Ignore
 public class KoostepalveluSmokeTest {
     static final Logger LOG = LoggerFactory.getLogger(KoostepalveluSmokeTest.class);
     static final String VALINTAKOOSTE_MODULE_ROOT = ProjectRootFinder.findProjectRoot() + "/valintalaskentakoostepalvelu/smoketest";

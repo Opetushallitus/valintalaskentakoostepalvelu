@@ -7,7 +7,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
+import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
@@ -37,7 +37,7 @@ public class ErillishakuProxyResourceTest {
 
     public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); //5sec
     final static Logger LOG = LoggerFactory.getLogger(ErillishakuProxyResourceTest.class);
-    final String root = "http://localhost:" + SharedTomcat.port + "/valintalaskentakoostepalvelu/resources";
+    final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
     String hakuOid = "1.2.246.562.5.2013080813081926341928";
     String hakukohdeOid = "1.2.246.562.5.72607738902";
     String tarjoajaOid = "1.2.246.562.10.591352080610";
@@ -53,10 +53,9 @@ public class ErillishakuProxyResourceTest {
                 }
             })
             .create();
-
     @Before
     public void startServer() {
-        ValintaKoosteTomcat.startShared();
+        ValintaKoosteJetty.startShared();
     }
     private static String classpathResourceAsString(String path) throws Exception {
         return IOUtils.toString(new ClassPathResource(path).getInputStream());

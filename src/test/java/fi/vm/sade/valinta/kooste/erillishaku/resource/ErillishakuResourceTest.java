@@ -12,6 +12,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 import com.google.gson.GsonBuilder;
+import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -21,7 +22,6 @@ import org.junit.Test;
 import fi.vm.sade.authentication.model.HenkiloTyyppi;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.integrationtest.tomcat.SharedTomcat;
-import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
@@ -37,11 +37,11 @@ public class ErillishakuResourceTest {
     String tarjoajaOid = "1.2.246.562.10.591352080610";
     String valintatapajonoOid = "14090336922663576781797489829886";
     String henkiloOid = "hakija1";
-    final String root = "http://localhost:" + SharedTomcat.port + "/valintalaskentakoostepalvelu/resources";
+    final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
 
     @Before
     public void startServer() {
-        ValintaKoosteTomcat.startShared();
+        ValintaKoosteJetty.startShared();
     }
 
     @Test

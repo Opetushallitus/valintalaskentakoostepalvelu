@@ -5,7 +5,6 @@ import com.google.gson.*;
 import fi.vm.sade.integrationtest.tomcat.SharedTomcat;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;

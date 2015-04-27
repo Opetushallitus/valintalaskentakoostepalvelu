@@ -26,6 +26,18 @@
 		<finalName>${project.artifactId}</finalName>
 	</build>
 	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>9.2.10.v20150310</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
+			<version>9.2.10.v20150310</version>
+			<scope>test</scope>
+		</dependency>
 	    	<dependency>
 	                 <groupId>fi.vm.sade.rajapinnat</groupId>
 	                 <artifactId>kela-api</artifactId>

@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.resource;
 import com.google.gson.GsonBuilder;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.integrationtest.tomcat.SharedTomcat;
-import fi.vm.sade.valinta.kooste.ValintaKoosteTomcat;
+import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.*;
 import static org.hamcrest.CoreMatchers.*;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
@@ -38,7 +38,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
 
     public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); //5sec
     final static Logger LOG = LoggerFactory.getLogger(ErillishakuResourceKayttajaPalauteTest.class);
-    final String root = "http://localhost:" + SharedTomcat.port + "/valintalaskentakoostepalvelu/resources";
+    final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
     String hakuOid = "1.2.246.562.5.2013080813081926341928";
     String hakukohdeOid = "1.2.246.562.5.72607738902";
     String tarjoajaOid = "1.2.246.562.10.591352080610";
@@ -49,7 +49,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
 
     @Before
     public void startServer() {
-        ValintaKoosteTomcat.startShared();
+        ValintaKoosteJetty.startShared();
     }
 
     @Test

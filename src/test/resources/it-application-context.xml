@@ -19,6 +19,7 @@
   <import resource="classpath:META-INF/cxf/cxf.xml" />
   <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
 
+
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.mocks"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.erillishaku"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.proxy.resource.erillishaku"/>
@@ -31,11 +32,9 @@
     <ctx:exclude-filter type="regex" expression=".*ViestintapalveluAktivointiResource.*"/>
   </ctx:component-scan>
 
-
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"
-    xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd"
-    profile="it">
+    xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
     <mockito:mock id="valintatapajononVientiRoute" class="fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute" />
     <mockito:mock id="authorizer" class="fi.vm.sade.authentication.business.service.Authorizer" />
     <mockito:mock id="applicationResource" class="fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource" />
@@ -93,6 +92,5 @@
       </jaxrs:providers>
     </jaxrs:server>
   </beans>
-
 
 </beans>
