@@ -25,10 +25,12 @@ public class ResponseCallback implements InvocationCallback<Response> {
 	private final Consumer<Throwable> failure;
 
 	public ResponseCallback(boolean only2xxIsCompleted, Consumer<Response> callback, Consumer<Throwable> failure) {
-		LOG.info("Luotiin response callback");
 		this.callback = callback;
 		this.failure = failure;
 		this.only2xxIsCompleted = only2xxIsCompleted;
+	}
+	public ResponseCallback(Consumer<Response> callback, Consumer<Throwable> failure) {
+		this(true, callback, failure);
 	}
 	public ResponseCallback() {
 		this.only2xxIsCompleted = false;

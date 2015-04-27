@@ -1,0 +1,67 @@
+package fi.vm.sade.valinta.kooste.external.resource.dokumentti.impl;
+
+import com.google.common.reflect.TypeToken;
+import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.external.resource.*;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.InvocationCallback;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.InputStream;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+
+/**
+ * @author Jussi Jartamo
+ */
+public class DokumenttiAsyncResourceImpl extends AsyncResourceWithCas implements DokumenttiAsyncResource {
+
+    @Autowired
+    public DokumenttiAsyncResourceImpl(
+            @Value("${web.url.cas}") String webCasUrl,
+                                       @Value("${cas.service.haku-service}/j_spring_cas_security_check") String targetService,
+                                       @Value("${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}") String appClientUsername,
+                                       @Value("${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}") String appClientPassword,
+            @Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}") String address,
+                                       ApplicationContext context
+    ) {
+        super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.HOURS.toMillis(1));
+    }
+    /*
+        @PUT
+        @Path("/tallenna")
+        @Consumes("application/octet-stream")
+        void tallenna(@QueryParam("id") String id,
+                  @QueryParam("filename") String filename,
+                  @QueryParam("expirationDate") Long expirationDate,
+                  @QueryParam("tags") List<String> tags,
+                  @QueryParam("mimeType") String mimeType, InputStream filedata);
+        */
+    @Override
+    public Peruutettava tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata, Consumer<Response> responseCallback, Consumer<Throwable> failureCallback) {
+        String url = "/dokumentit/tallenna";
+
+        try {
+            return new PeruutettavaImpl(
+                    getWebClient()
+                            .path(url)
+                            .query("id", id)
+                            .query("filename", filename)
+                            .query("expirationDate", expirationDate)
+                            .query("tags", tags.toArray())
+                            .query("mimeType", mimeType)
+                            .async()
+                            .put(Entity.entity(filedata, MediaType.APPLICATION_OCTET_STREAM),new ResponseCallback(responseCallback, failureCallback)));
+        } catch (Exception e) {
+            failureCallback.accept(e);
+            return TyhjaPeruutettava.tyhjaPeruutettava();
+        }
+    }
+}
