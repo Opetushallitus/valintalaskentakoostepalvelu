@@ -566,6 +566,9 @@
 		<property name="scan" value="true" />
 	</bean>
 
+    <bean id="SessionResource"
+          class="fi.vm.sade.valinta.kooste.session.SessionResource" />
+
 	<bean id="cors-filter" class="fi.vm.sade.valinta.kooste.filter.CorsResponseFilter"/>
 	<jaxrs:server id="koostepalveluResurssit">
 		<jaxrs:serviceBeans>
@@ -583,6 +586,7 @@
 			<ref bean="ValintatapajonoResource"/>
 			<ref bean="DokumenttiProsessiResource"/>
 			<ref bean="ViestintapalveluAktivointiResource"/>
+			<ref bean="SessionResource"/>
 			<ref bean="swaggerResourceJSON"/>
 		</jaxrs:serviceBeans>
 		<jaxrs:providers>
