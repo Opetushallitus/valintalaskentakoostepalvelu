@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.gson.Gson;
+import static fi.vm.sade.service.valintaperusteet.dto.model.Koekutsu.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -86,15 +86,14 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 				.subscribeOn(Schedulers.newThread())
 				//
 				.subscribe(koekutsukirjeiksi(prosessi, koekutsu),
-						new Action1<Throwable>() {
-							public void call(Throwable t1) {
+						t1 -> {
 								LOG.error(
 										"Hakemuksien haussa hakutoiveelle {}: {}",
 										koekutsu.getHakukohdeOid(),
 										t1.getMessage());
 								prosessi.keskeyta();
 							}
-						});
+						);
 	}
 
 	@Override
@@ -110,10 +109,8 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 						koekutsu.getHakukohdeOid());
 
 		zip(from(valintakokeetFuture), from(hakemuksetFuture),
-				new Func2<List<ValintakoeDTO>, List<Hakemus>, List<Hakemus>>() {
-
-					public List<Hakemus> call(List<ValintakoeDTO> valintakoes,
-							List<Hakemus> hakemukset) {
+				(valintakoes, hakemukset) -> {
+					//valintakoes.stream().filter(vk -> HAKIJAN_VALINTA.equals(vk.getKutsunKohde())).findAny().isPresent();
 						// Haetaan valintaperusteista valintakokeet
 						// VT-838
 						//
@@ -156,11 +153,23 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 											haettavatValintakoeOids))
 									.map(vk -> vk.getHakemusOid())
 									.collect(Collectors.toSet());
+							Stream<Hakemus> hakukohteenUlkopuolisetHakemukset;
+							{
+								Set<String> hakemusOids = hakemukset.stream().map(h -> (String) h.getOid()).collect(Collectors.toSet());
+								Set<String> hakukohteenUlkopuolisetKoekutsuttavat = Sets.newHashSet(osallistujienHakemusOidit);
+								hakukohteenUlkopuolisetKoekutsuttavat.removeIf(h -> hakemusOids.contains(h));
+								if(!hakukohteenUlkopuolisetKoekutsuttavat.isEmpty()) {
+									hakukohteenUlkopuolisetHakemukset = applicationAsyncResource.getApplicationsByOids(hakukohteenUlkopuolisetKoekutsuttavat).get().stream();
+								} else {
+									hakukohteenUlkopuolisetHakemukset = Stream.empty();
+								}
+							}
 							// vain hakukohteen osallistujat
-							return hakemukset
+							return Stream.concat(hakukohteenUlkopuolisetHakemukset,
+									hakemukset
 									.stream()
 									.filter(h -> osallistujienHakemusOidit
-											.contains(h.getOid()))
+											.contains(h.getOid())))
 									.collect(Collectors.toList());
 						} catch (Exception e) {
 							LOG.error("Osallistumisia ei saatu valintalaskennasta! Valintakokeita oli "
@@ -171,29 +180,25 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 											+ ". Syy " + e.getMessage());
 						}
 
-					}
-
-				})
+					})
 		//
 				.subscribeOn(Schedulers.newThread())
-				//
+						//
 				.subscribe(koekutsukirjeiksi(prosessi, koekutsu),
-						new Action1<Throwable>() {
-							public void call(Throwable t1) {
-								LOG.error(
-										"Osallistumistietojen haussa hakutoiveelle {}: {}",
-										koekutsu.getHakukohdeOid(),
-										t1.getMessage());
-								prosessi.keskeyta();
-							}
-						});
+						t1 -> {
+							LOG.error(
+									"Osallistumistietojen haussa hakutoiveelle {}: {}",
+									koekutsu.getHakukohdeOid(),
+									t1.getMessage());
+							prosessi.keskeyta();
+						}
+				);
 
 	}
 
 	private Action1<List<Hakemus>> koekutsukirjeiksi(
 			final KirjeProsessi prosessi, final KoekutsuDTO koekutsu) {
-		return new Action1<List<Hakemus>>() {
-			public void call(List<Hakemus> hakemukset) {
+		return hakemukset -> {
 				if (hakemukset.isEmpty()) {
 					LOG.error(
 							"Hakutoiveeseen {} ei ole hakijoita. Yritettiin muodostaa koekutsukirjetta!",
@@ -210,14 +215,12 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 							//
 							.filter(Objects::nonNull)
 							//
-							.filter(e -> {
-								return StringUtils.trimToEmpty(e.getKey())
-										.endsWith("Opetuspiste-id");
-							})
+							.filter(e ->
+								 StringUtils.trimToEmpty(e.getKey())
+										.endsWith("Opetuspiste-id")
+							)
 							//
-							.map(e -> {
-								return e.getValue();
-							});
+							.map(e -> e.getValue());
 
 					LOG.error("Haetaan valintakokeet hakutoiveille!");
 					final Map<String, HakukohdeJaValintakoeDTO> valintakoeOidsHakutoiveille;
@@ -244,9 +247,6 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 										Collectors.toMap(
 												h -> h.getHakukohdeOid(),
 												h -> h));
-						LOG.error("\r\n{}",
-								new GsonBuilder().setPrettyPrinting().create()
-										.toJson(valintakoeOidsHakutoiveille));
 						if (valintakoeOidsHakutoiveille.isEmpty()) {
 							throw new RuntimeException(
 									"Yhdellekaan hakutoiveelle ei loytynyt valintakokeita!");
@@ -395,7 +395,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 							koekutsu.getHakukohdeOid(), e.getMessage(), Arrays.toString(e.getStackTrace()));
 					prosessi.keskeyta();
 				}
-			}
-		};
+			};
+
 	}
 }

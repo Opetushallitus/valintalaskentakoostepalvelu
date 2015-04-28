@@ -20,6 +20,14 @@ public class DokumentinLisatiedot {
 	private List<String> hakemusOids;
 	private List<String> valintakoeOids;
 
+	public DokumentinLisatiedot() {}
+	public DokumentinLisatiedot(String tag, String letterBodyText, String languageCode, List<String> hakemusOids, List<String> valintakoeOids) {
+		this.tag = tag;
+		this.letterBodyText = letterBodyText;
+		this.languageCode = languageCode;
+		this.hakemusOids = hakemusOids;
+		this.valintakoeOids = valintakoeOids;
+	}
 	public String getTag() {
 		return tag;
 	}

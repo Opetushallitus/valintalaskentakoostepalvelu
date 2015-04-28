@@ -28,14 +28,18 @@
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.komponentti"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
-  <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.resource">
-    <ctx:exclude-filter type="regex" expression=".*ViestintapalveluAktivointiResource.*"/>
-  </ctx:component-scan>
+  <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.resource"/>
+
+  <bean id="koekutsukirjeetImpl" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KoekutsukirjeetImpl"/>
 
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"
     xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
     <mockito:mock id="valintatapajononVientiRoute" class="fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute" />
+
+    <mockito:mock id="jalkiohjauskirjeService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService" />
+    <mockito:mock id="hyvaksymiskirjeetService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService" />
+    <mockito:mock id="osoitetarratRoute" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute" />
     <mockito:mock id="authorizer" class="fi.vm.sade.authentication.business.service.Authorizer" />
     <mockito:mock id="applicationResource" class="fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource" />
     <mockito:mock id="hakuV1Resource" class="fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource" />
@@ -83,6 +87,7 @@
         <ref bean="ErillishakuResource"/>
         <ref bean="ErillishakuProxyResource"/>
         <ref bean="DokumenttiProsessiResource"/>
+        <ref bean="ViestintapalveluAktivointiResource"/>
       </jaxrs:serviceBeans>
       <jaxrs:providers>
         <ref bean="jsonProvider" />

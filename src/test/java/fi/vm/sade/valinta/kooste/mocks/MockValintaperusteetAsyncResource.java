@@ -21,7 +21,10 @@ import java.util.function.Consumer;
 @Service
 public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncResource {
     private static AtomicReference<List<ValinnanVaiheJonoillaDTO>> resultReference = new AtomicReference<>();
-
+    private static AtomicReference<List<ValintakoeDTO>> valintakokeetResultReference = new AtomicReference<>();
+    public static void setValintakokeetResult(List<ValintakoeDTO> result) {
+        valintakokeetResultReference.set(result);
+    }
     public static void setResult(List<ValinnanVaiheJonoillaDTO> result) {
         resultReference.set(result);
     }
@@ -65,7 +68,7 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
 
     @Override
     public Future<List<ValintakoeDTO>> haeValintakokeet(Collection<String> oids) {
-        throw new UnsupportedOperationException();
+        return Futures.immediateFuture(valintakokeetResultReference.get());
     }
 
     @Override
