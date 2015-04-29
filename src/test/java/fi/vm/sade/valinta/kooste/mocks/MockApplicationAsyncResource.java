@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.core.Response;
+
 @Service
 public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     public static AtomicBoolean serviceIsAvailable = new AtomicBoolean(true);
@@ -104,6 +106,17 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
                 }
         );
     }
+
+    @Override
+    public Peruutettava getApplicationAdditionalData(Collection<String> hakemusOids, Consumer<List<ApplicationAdditionalDataDTO>> callback, Consumer<Throwable> failureCallback) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Peruutettava putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public Future<List<Hakemus>> getApplicationsByOids(final Collection<String> hakemusOids) {
         throw new UnsupportedOperationException();

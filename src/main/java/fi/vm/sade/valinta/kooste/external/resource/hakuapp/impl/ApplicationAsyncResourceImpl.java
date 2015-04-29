@@ -9,7 +9,9 @@ import java.util.function.Consumer;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.external.resource.*;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,16 +21,11 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.valinta.kooste.external.resource.Callback;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppiBatch;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 
 /**
  *
@@ -134,6 +131,48 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 									callback,
 									failureCallback,
 									new TypeToken<List<ApplicationAdditionalDataDTO>>() { }.getType())));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
+		}
+	}
+	public Peruutettava getApplicationAdditionalData(Collection<String> hakemusOids, Consumer<List<ApplicationAdditionalDataDTO>> callback, Consumer<Throwable> failureCallback) {
+		String url = "/applications/additionalData";
+		try {
+			return new PeruutettavaImpl(
+					getWebClient()
+							.path(url)
+							.async()
+							.post(Entity.json(hakemusOids),new Callback<List<ApplicationAdditionalDataDTO>>(
+									address,
+									url,
+									callback,
+									failureCallback,
+									new TypeToken<List<ApplicationAdditionalDataDTO>>() { }.getType())));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
+		}
+	}
+	/*
+	@PUT
+	@Path("additionalData/{asId}/{aoId}")
+	@Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
+	@Consumes(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
+	*/
+
+	@Override
+	public Peruutettava putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData,
+													 Consumer<Response> callback, Consumer<Throwable> failureCallback) {
+		String url = "/applications/additionalData/" + hakuOid + "/" + hakukohdeOid;
+		try {
+			return new PeruutettavaImpl(
+					getWebClient()
+							.path(url)
+							.async()
+							.put(Entity.json(additionalData), new ResponseCallback(
+									callback,
+									failureCallback)));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();

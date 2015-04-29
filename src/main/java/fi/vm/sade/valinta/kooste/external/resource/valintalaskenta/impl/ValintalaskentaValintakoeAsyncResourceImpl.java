@@ -3,11 +3,16 @@ package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
+import com.google.common.reflect.TypeToken;
+import fi.vm.sade.valinta.kooste.external.resource.*;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 
-import fi.vm.sade.valinta.kooste.external.resource.AsennaCasFilter;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 
@@ -27,10 +31,8 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminen
  * 
  */
 @Service
-public class ValintalaskentaValintakoeAsyncResourceImpl implements
+public class ValintalaskentaValintakoeAsyncResourceImpl extends AsyncResourceWithCas implements
 		ValintalaskentaValintakoeAsyncResource {
-
-	private final WebClient webClient;
 
 	@Autowired
 	public ValintalaskentaValintakoeAsyncResourceImpl(
@@ -45,21 +47,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl implements
 			@Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}") String address,ApplicationContext context
 	//
 	) {
-		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
-		bean.setAddress(address);
-		bean.setThreadSafe(true);
-		List<Object> providers = Lists.newArrayList();
-		providers
-				.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
-		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
-		bean.setProviders(providers);
-		AsennaCasFilter.asennaCasFilter(
-				webCasUrl,
-				targetService,
-				appClientUsername,
-				appClientPassword,
-				bean,context);
-		this.webClient = bean.createWebClient();
+		super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.HOURS.toMillis(1));
 	}
 
 	@Override
@@ -68,8 +56,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl implements
 		StringBuilder urlBuilder = new StringBuilder()
 				.append("/valintakoe/hakemus/");
 		String url = urlBuilder.toString();
-		return WebClient
-				.fromClient(webClient)
+		return getWebClient()
 				//
 				.path(url)
 				//
@@ -90,7 +77,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl implements
 		StringBuilder urlBuilder = new StringBuilder().append(
 				"/valintakoe/hakutoive/").append(hakukohdeOid);
 		String url = urlBuilder.toString();
-		return WebClient.fromClient(webClient)
+		return getWebClient()
 				//
 				.path(url)
 				//
@@ -99,5 +86,30 @@ public class ValintalaskentaValintakoeAsyncResourceImpl implements
 				.async()
 				.get(new GenericType<List<ValintakoeOsallistuminenDTO>>() {
 				});
+	}
+
+	@Override
+	public Peruutettava haeHakutoiveelle(
+			String hakukohdeOid,
+			Consumer<List<ValintakoeOsallistuminenDTO>> callback,
+			Consumer<Throwable> failureCallback) {
+		// valintalaskentakoostepalvelu.valintalaskenta.rest.url
+		// /valintalaskenta-laskenta-service/resources/valintakoe/hakutoive/...
+		StringBuilder urlBuilder = new StringBuilder().append(
+				"/valintakoe/hakutoive/").append(hakukohdeOid);
+		String url = urlBuilder.toString();
+		return new PeruutettavaImpl(getWebClient()
+				//
+				.path(url)
+						//
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+						//
+				.async()
+				.get(new Callback<List<ValintakoeOsallistuminenDTO>>(
+						address,
+						url,
+						callback,
+						failureCallback,
+						new TypeToken<List<ValintakoeOsallistuminenDTO>>() { }.getType())));
 	}
 }

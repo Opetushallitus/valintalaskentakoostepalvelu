@@ -75,7 +75,11 @@ public interface ValintaperusteetAsyncResource {
 	// @GET
 	///valintaperusteet-service/resources/hakukohde/avaimet/{}
 	Future<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
-	
+
+	Peruutettava findAvaimet(String hakukohdeOid,
+							 Consumer<List<ValintaperusteDTO>> callback,
+							 Consumer<Throwable> failureCallback);
+
 	// @POST
 	///valintaperusteet-service/resources/valintakoe/
 	Future<List<ValintakoeDTO>> haeValintakokeet(Collection<String> oids);

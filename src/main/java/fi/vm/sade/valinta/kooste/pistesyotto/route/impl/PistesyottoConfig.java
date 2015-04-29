@@ -27,13 +27,4 @@ public class PistesyottoConfig {
 				PistesyottoVientiRoute.class);
 	}
 
-	@Bean
-	public PistesyottoTuontiRoute getPistesyottoTuontiRoute(
-			@Value(PistesyottoTuontiRoute.SEDA_PISTESYOTTO_TUONTI) String pistesyottoTuonti,
-			@Qualifier("javaDslCamelContext") CamelContext context)
-			throws Exception {
-		return ProxyWithAnnotationHelper.createProxy(
-				context.getEndpoint(pistesyottoTuonti),
-				PistesyottoTuontiRoute.class);
-	}
 }
