@@ -20,6 +20,7 @@ import java.util.function.Consumer;
  */
 @Service
 public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncResource {
+    private static AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeResultReference = new AtomicReference<>();
     private static AtomicReference<List<ValinnanVaiheJonoillaDTO>> resultReference = new AtomicReference<>();
     private static AtomicReference<List<ValintakoeDTO>> valintakokeetResultReference = new AtomicReference<>();
     public static void setValintakokeetResult(List<ValintakoeDTO> result) {
@@ -27,6 +28,9 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
     public static void setResult(List<ValinnanVaiheJonoillaDTO> result) {
         resultReference.set(result);
+    }
+    public static void setHakukohdeResult(List<HakukohdeJaValintakoeDTO> result) {
+        hakukohdeResultReference.set(result);
     }
     public static void clear() {
         resultReference.set(null);
@@ -78,7 +82,7 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
 
     @Override
     public Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids) {
-        throw new UnsupportedOperationException();
+        return Futures.immediateFuture(hakukohdeResultReference.get());
     }
 
     @Override

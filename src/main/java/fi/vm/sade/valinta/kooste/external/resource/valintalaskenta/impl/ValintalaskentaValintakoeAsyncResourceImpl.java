@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +13,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
 import com.google.common.reflect.TypeToken;
+import com.google.gson.*;
 import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
@@ -33,6 +36,18 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminen
 @Service
 public class ValintalaskentaValintakoeAsyncResourceImpl extends AsyncResourceWithCas implements
 		ValintalaskentaValintakoeAsyncResource {
+
+	// Ohitetaan päivämäärät tarpeettomana tietona
+	private static final Gson GSON = new GsonBuilder()
+	.registerTypeAdapter(Date.class, new JsonDeserializer() {
+		@Override
+		public Object deserialize(JsonElement json,
+				Type typeOfT, JsonDeserializationContext context)
+		throws JsonParseException {
+			return null;
+		}
+
+	}).create();
 
 	@Autowired
 	public ValintalaskentaValintakoeAsyncResourceImpl(
@@ -106,6 +121,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends AsyncResourceWit
 						//
 				.async()
 				.get(new Callback<List<ValintakoeOsallistuminenDTO>>(
+						GSON,
 						address,
 						url,
 						callback,

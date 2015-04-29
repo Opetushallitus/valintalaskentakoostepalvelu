@@ -45,9 +45,13 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         return null;
     }
     private static AtomicReference<List<Hakemus>> resultReference = new AtomicReference<>();
+    private static AtomicReference<List<Hakemus>> resultByOidReference = new AtomicReference<>();
 
     public static void setResult(List<Hakemus> result) {
         resultReference.set(result);
+    }
+    public static void setResultByOid(List<Hakemus> result) {
+        resultByOidReference.set(result);
     }
     public static void clear() {
         resultReference.set(null);
@@ -92,17 +96,21 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     public Future<List<Hakemus>> getApplicationsByOid(final String hakuOid, final String hakukohdeOid) {
         return Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(
                 () -> {
-                    Hakemus hakemus = new Hakemus();
-                    hakemus.setOid(MockData.hakemusOid);
-                    hakemus.setPersonOid(MockData.hakijaOid);
-                    Answers answers = new Answers();
-                    answers.getHenkilotiedot().put("Henkilotunnus", MockData.hetu);
-                    answers.getHenkilotiedot().put("Etunimet", MockData.etunimi);
-                    answers.getHenkilotiedot().put("Kutsumanimi", MockData.etunimi);
-                    answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
-                    answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
-                    hakemus.setAnswers(answers);
-                    return Futures.immediateFuture(Arrays.asList(hakemus));
+                    if(resultReference.get() != null) {
+                        return Futures.immediateFuture(resultReference.get());
+                    } else {
+                        Hakemus hakemus = new Hakemus();
+                        hakemus.setOid(MockData.hakemusOid);
+                        hakemus.setPersonOid(MockData.hakijaOid);
+                        Answers answers = new Answers();
+                        answers.getHenkilotiedot().put("Henkilotunnus", MockData.hetu);
+                        answers.getHenkilotiedot().put("Etunimet", MockData.etunimi);
+                        answers.getHenkilotiedot().put("Kutsumanimi", MockData.etunimi);
+                        answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
+                        answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
+                        hakemus.setAnswers(answers);
+                        return Futures.immediateFuture(Arrays.asList(hakemus));
+                    }
                 }
         );
     }
@@ -119,7 +127,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     @Override
     public Future<List<Hakemus>> getApplicationsByOids(final Collection<String> hakemusOids) {
-        throw new UnsupportedOperationException();
+        return Futures.immediateFuture(resultByOidReference.get());
     }
 
     @Override
