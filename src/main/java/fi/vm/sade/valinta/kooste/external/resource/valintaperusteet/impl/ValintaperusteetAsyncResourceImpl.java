@@ -263,7 +263,22 @@ public class ValintaperusteetAsyncResourceImpl implements
 				.async().get(new GenericType<List<ValintaperusteDTO>>() {
 				});
 	}
-	
+
+	@Override
+	public Peruutettava findAvaimet(String hakukohdeOid, Consumer<List<ValintaperusteDTO>> callback, Consumer<Throwable> failureCallback) {
+		String url = new StringBuilder()
+				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/")
+				.append(hakukohdeOid).append("/").toString();
+		return new PeruutettavaImpl(WebClient.fromClient(webClient).path(url)
+				//
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+						//
+				.async()
+				.get(new Callback<List<ValintaperusteDTO>>(address, url,
+						callback, failureCallback,
+						new TypeToken<List<ValintaperusteDTO>>() {
+						}.getType())));
+	}
 
 	@Override
 	public Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(

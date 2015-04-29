@@ -11,6 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
 import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class PistesyottoResource {
 	@Autowired
 	private PistesyottoVientiRoute vientiRoute;
 	@Autowired
-	private PistesyottoTuontiRoute tuontiRoute;
+	private PistesyottoTuontiService tuontiService;
 
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
 	@POST
@@ -76,9 +77,9 @@ public class PistesyottoResource {
 		DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö",
 				"tuonti", hakuOid, Arrays.asList(hakukohdeOid));
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-		tuontiRoute.tuo(new ByteArrayInputStream(b.toByteArray()), prosessi,
-				hakukohdeOid, hakuOid, SecurityContextHolder.getContext()
-						.getAuthentication());
+
+		tuontiService.tuo(
+				hakukohdeOid, hakuOid, prosessi, new ByteArrayInputStream(b.toByteArray()));
 		return prosessi.toProsessiId();
 	}
 }

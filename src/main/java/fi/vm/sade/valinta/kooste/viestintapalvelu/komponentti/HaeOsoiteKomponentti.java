@@ -148,7 +148,7 @@ public class HaeOsoiteKomponentti {
 		if (!SUOMI
 				.equalsIgnoreCase(hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA))) {
 			// hae koodistosta maa
-			String countryCode = henkilotiedot.get(ASUINMAA);
+			String countryCode = Optional.ofNullable(henkilotiedot.get(ASUINMAA)).orElse("");
 			final String uri = new StringBuilder()
 					.append(MAAT_JA_VALTIOT_PREFIX)
 					.append(countryCode.toLowerCase()).toString();

@@ -449,6 +449,8 @@
 	<!-- Pistesyotto -->
 	<bean id="PistesyottoResource"
 		class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
+	<bean id="PistesyottoTuontiService"
+		  class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.pistesyotto.route.impl" />
 	<!-- Valintalaskenta -->
 	<bean id="ValintalaskentaKerrallaResource"

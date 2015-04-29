@@ -10,6 +10,10 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditiona
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -35,4 +39,12 @@ public interface ApplicationAsyncResource {
 			String hakukohdeOid,
 			Consumer<List<ApplicationAdditionalDataDTO>> callback,
 			Consumer<Throwable> failureCallback);
+
+	Peruutettava getApplicationAdditionalData(Collection<String> hakemusOids, Consumer<List<ApplicationAdditionalDataDTO>> callback, Consumer<Throwable> failureCallback);
+
+	Peruutettava putApplicationAdditionalData(String hakuOid,
+											 String hakukohdeOid,
+											 List<ApplicationAdditionalDataDTO> additionalData,
+											 Consumer<Response> callback, Consumer<Throwable> failureCallback);
+
 }

@@ -165,12 +165,15 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 								}
 							}
 							// vain hakukohteen osallistujat
-							return Stream.concat(hakukohteenUlkopuolisetHakemukset,
+
+							List<Hakemus> lopullinenHakemusJoukko = Stream.concat(hakukohteenUlkopuolisetHakemukset,
 									hakemukset
 									.stream()
 									.filter(h -> osallistujienHakemusOidit
 											.contains(h.getOid())))
 									.collect(Collectors.toList());
+							LOG.info("{}", lopullinenHakemusJoukko.size());
+							return lopullinenHakemusJoukko;
 						} catch (Exception e) {
 							LOG.error("Osallistumisia ei saatu valintalaskennasta! Valintakokeita oli "
 									+ haettavatValintakoeOids.size());
@@ -253,8 +256,8 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 						}
 					} catch (Exception e) {
 						LOG.error(
-								"Valintakokeiden haku hakutoiveille epaonnistui! {}",
-								e.getMessage());
+								"Valintakokeiden haku hakutoiveille epaonnistui!",
+								e);
 						throw e;
 					}
 					final Map<String, Collection<String>> hakemusOidJaHakijanMuutHakutoiveOids;
