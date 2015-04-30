@@ -22,7 +22,7 @@ public class ValintalaskentaKerrallaTimeoutHandler implements TimeoutHandler {
     private final List<String> maski;
     private final AsyncResponse asyncResponse;
 
-    public ValintalaskentaKerrallaTimeoutHandler(final String hakuOid, final Integer valinnanvaihe, final Boolean valintakoelaskenta, final LaskentaTyyppi tyyppi, final boolean whitelist, final List<String> maski, AsyncResponse asyncResponse){
+    public ValintalaskentaKerrallaTimeoutHandler(final String hakuOid, final Integer valinnanvaihe, final Boolean valintakoelaskenta, final LaskentaTyyppi tyyppi, final boolean whitelist, final List<String> maski, AsyncResponse asyncResponse) {
         this.hakuOid = hakuOid;
         this.valinnanvaihe = valinnanvaihe;
         this.valintakoelaskenta = valintakoelaskenta;
@@ -39,11 +39,11 @@ public class ValintalaskentaKerrallaTimeoutHandler implements TimeoutHandler {
                 Object[] hakukohdeOidArray = maski.toArray();
                 StringBuilder sb = new StringBuilder();
                 sb.append(Arrays.toString(Arrays.copyOfRange(
-                        hakukohdeOidArray, 0,
+                        hakukohdeOidArray,
+                        0,
                         Math.min(hakukohdeOidArray.length, 10))));
                 if (hakukohdeOidArray.length > 10) {
-                    sb.append(
-                            " ensimmaiset 10 hakukohdetta maskissa jossa on yhteensa hakukohteita ")
+                    sb.append(" ensimmaiset 10 hakukohdetta maskissa jossa on yhteensa hakukohteita ")
                             .append(hakukohdeOidArray.length);
                 } else {
                     sb.append(" maskin hakukohteet");
@@ -54,11 +54,10 @@ public class ValintalaskentaKerrallaTimeoutHandler implements TimeoutHandler {
             }
         }
 
-        LOG.error(
-                "Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}\r\n{}",
-                hakuOid, tyyppi, whitelist, valinnanvaihe,
-                valintakoelaskenta, hakukohdeOids, hakukohdeOids);
-        asyncResponse.resume(Response.serverError()
+        LOG.error("Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}\r\n{}",
+                hakuOid, tyyppi, whitelist, valinnanvaihe, valintakoelaskenta, hakukohdeOids, hakukohdeOids);
+        asyncResponse.resume(Response
+                .serverError()
                 .entity("Uudelleen ajo laskennalle aikakatkaistu!")
                 .build());
     }

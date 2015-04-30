@@ -45,13 +45,15 @@ public class ValintalaskentaKerrallaService {
     }
 
     void kaynnistaLaskenta(
-            LaskentaTyyppi tyyppi,
-            String hakuOid,
-            Maski maski,
-            BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
-            boolean erillishaku, boolean valintaryhmalaskenta,
-            Integer valinnanvaihe, Boolean valintakoelaskenta,
-            AsyncResponse asyncResponse) {
+            final LaskentaTyyppi tyyppi,
+            final String hakuOid,
+            final Maski maski,
+            final BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
+            final boolean erillishaku,
+            final boolean valintaryhmalaskenta,
+            final Integer valinnanvaihe,
+            final Boolean valintakoelaskenta,
+            final AsyncResponse asyncResponse) {
         if (StringUtils.isBlank(hakuOid)) {
             LOG.error("HakuOid on pakollinen");
             throw new RuntimeException("HakuOid on pakollinen");
@@ -59,20 +61,20 @@ public class ValintalaskentaKerrallaService {
         // maskilla kaynnistettaessa luodaan aina uusi laskenta
         if (!maski.isMask()) { // muuten tarkistetaan onko laskenta jo olemassa
             // Kaynnissa oleva laskenta koko haulle
-            Optional<Laskenta> ajossaOlevaLaskentaHaulle = valintalaskentaValvomo
-                    .ajossaOlevatLaskennat().stream()
-                            // Tama haku ...
+            final Optional<Laskenta> ajossaOlevaLaskentaHaulle = valintalaskentaValvomo
+                    .ajossaOlevatLaskennat()
+                    .stream()
+                    // Tama haku ... ja koko haun laskennasta on kyse
                     .filter(l -> hakuOid.equals(l.getHakuOid())
-                            // .. ja koko haun laskennasta on kyse
-                            && !l.isOsittainenLaskenta()).findFirst();
+                            && !l.isOsittainenLaskenta())
+                    .findFirst();
             if (ajossaOlevaLaskentaHaulle.isPresent()) {
-                // palautetaan seurattavaksi ajossa olevan hakukohteen
-                // seurantatunnus
-                String uuid = ajossaOlevaLaskentaHaulle.get().getUuid();
-                LOG.warn(
-                        "Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun",
+                // palautetaan seurattavaksi ajossa olevan hakukohteen seurantatunnus
+                final String uuid = ajossaOlevaLaskentaHaulle.get().getUuid();
+                LOG.warn("Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun",
                         hakuOid, uuid);
-                asyncResponse.resume(Response.ok(Vastaus.uudelleenOhjaus(uuid))
+                asyncResponse.resume(Response
+                        .ok(Vastaus.uudelleenOhjaus(uuid))
                         .build());
                 return;
             }
@@ -81,7 +83,9 @@ public class ValintalaskentaKerrallaService {
         haunHakukohteet(
                 hakuOid,
                 haunHakukohteetOids -> {
-                    kasitteleHaunkohteetOids(haunHakukohteetOids, tyyppi,
+                    kasitteleHaunkohteetOids(
+                            haunHakukohteetOids,
+                            tyyppi,
                             hakuOid,
                             maski,
                             seurantaTunnus,
@@ -90,44 +94,46 @@ public class ValintalaskentaKerrallaService {
                             valinnanvaihe,
                             valintakoelaskenta,
                             asyncResponse);
-                }, poikkeus -> {
-                    asyncResponse.resume(Response.serverError()
-                            .entity(poikkeus.getMessage()).build());
+                },
+                poikkeus -> {
+                    asyncResponse.resume(Response
+                            .serverError()
+                            .entity(poikkeus.getMessage())
+                            .build());
                 });
     }
 
 
-    void haunHakukohteet(String hakuOid,
-                                 Consumer<List<HakukohdeJaOrganisaatio>> hakukohdeJaOrganisaatioKasittelijaCallback,
-                                 Consumer<Throwable> failureCallback) {
+    void haunHakukohteet(
+            final String hakuOid,
+            final Consumer<List<HakukohdeJaOrganisaatio>> hakukohdeJaOrganisaatioKasittelijaCallback,
+            final Consumer<Throwable> failureCallback) {
         if (StringUtils.isBlank(hakuOid)) {
             LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
-            throw new RuntimeException(
-                    "Yritettiin hakea hakukohteita ilman hakuOidia!");
+            throw new RuntimeException("Yritettiin hakea hakukohteita ilman hakuOidia!");
         }
         valintaperusteetAsyncResource
                 .haunHakukohteet(
                         hakuOid,
                         hakukohdeViitteet -> {
                             kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, hakukohdeJaOrganisaatioKasittelijaCallback, failureCallback);
-                        }, poikkeus -> {
+                        },
+                        poikkeus -> {
                             failureCallback.accept(poikkeus);
                         });
     }
 
-    void kasitteleHakukohdeViitteet(List<HakukohdeViiteDTO> hakukohdeViitteet, String hakuOid, Consumer<List<HakukohdeJaOrganisaatio>> hakukohdeJaOrganisaatioKasittelijaCallback, Consumer<Throwable> failureCallback) {
-        LOG.info(
-                "Tarkastellaan hakukohdeviitteita haulle {}",
-                hakuOid);
-        if (hakukohdeViitteet == null
-                || hakukohdeViitteet.isEmpty()) {
-            LOG.error(
-                    "Valintaperusteet palautti tyhjat hakukohdeviitteet haulle {}!",
-                    hakuOid);
-            throw new NullPointerException(
-                    "Valintaperusteet palautti tyhjat hakukohdeviitteet!");
+    void kasitteleHakukohdeViitteet(
+            final List<HakukohdeViiteDTO> hakukohdeViitteet,
+            final String hakuOid, Consumer<List<HakukohdeJaOrganisaatio>> hakukohdeJaOrganisaatioKasittelijaCallback,
+            final Consumer<Throwable> failureCallback) {
+        LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
+
+        if (hakukohdeViitteet == null || hakukohdeViitteet.isEmpty()) {
+            LOG.error("Valintaperusteet palautti tyhjat hakukohdeviitteet haulle {}!", hakuOid);
+            throw new NullPointerException("Valintaperusteet palautti tyhjat hakukohdeviitteet!");
         }
-        List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet
+        final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet
                 .stream()
                 .filter(Objects::nonNull)
                 .filter(h -> {
@@ -136,50 +142,41 @@ public class ValintalaskentaKerrallaService {
                         return false;
                     }
                     if (h.getOid() == null) {
-                        LOG.error(
-                                "Hakukohdeviitteen oid oli null haussa {}",
-                                hakuOid);
+                        LOG.error("Hakukohdeviitteen oid oli null haussa {}", hakuOid);
                         return false;
                     }
                     if (h.getTila() == null) {
-                        LOG.error(
-                                "Hakukohdeviitteen tila oli null hakukohteelle {}",
-                                h.getOid());
+                        LOG.error("Hakukohdeviitteen tila oli null hakukohteelle {}", h.getOid());
                         return false;
                     }
-                    boolean julkaistu = "JULKAISTU"
-                            .equals(h.getTila());
-                    if (!julkaistu) {
-                        LOG.warn(
-                                "Ohitetaan hakukohde {} koska sen tila on {}.",
-                                h.getOid(), h.getTila());
+                    if (!"JULKAISTU".equals(h.getTila())) {
+                        LOG.warn("Ohitetaan hakukohde {} koska sen tila on {}.", h.getOid(), h.getTila());
+                        return false;
                     }
-                    return julkaistu;
+                    return true;
                 })
-                .map(u -> new HakukohdeJaOrganisaatio(u
-                        .getOid(), u.getTarjoajaOid()))
+                .map(u -> new HakukohdeJaOrganisaatio(u.getOid(), u.getTarjoajaOid()))
                 .collect(Collectors.toList());
         if (haunHakukohdeOidit.isEmpty()) {
-            LOG.error(
-                    "Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?",
-                    hakuOid);
-            failureCallback
-                    .accept(new RuntimeException(
-                            "Haulla "
-                                    + hakuOid
-                                    + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?"));
+            LOG.error("Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", hakuOid);
+            failureCallback.accept(
+                    new RuntimeException("Haulla " + hakuOid + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?"));
         } else {
             hakukohdeJaOrganisaatioKasittelijaCallback.accept(haunHakukohdeOidit);
         }
     }
 
-    public void kasitteleHaunkohteetOids(Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids, LaskentaTyyppi tyyppi,
-                                         String hakuOid,
-                                         Maski maski,
-                                         BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
-                                         boolean erillishaku, boolean valintaryhmalaskenta,
-                                         Integer valinnanvaihe, Boolean valintakoelaskenta,
-                                         AsyncResponse asyncResponse) {
+    public void kasitteleHaunkohteetOids(
+            final Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids,
+            final LaskentaTyyppi tyyppi,
+            final String hakuOid,
+            final Maski maski,
+            final BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
+            final boolean erillishaku,
+            final boolean valintaryhmalaskenta,
+            final Integer valinnanvaihe,
+            final Boolean valintakoelaskenta,
+            final AsyncResponse asyncResponse) {
         Collection<HakukohdeJaOrganisaatio> oids;
         if (maski.isMask()) {
             oids = maski.maskaa(haunHakukohteetOids);
@@ -190,62 +187,71 @@ public class ValintalaskentaKerrallaService {
         } else {
             oids = haunHakukohteetOids;
         }
-        final Collection<HakukohdeJaOrganisaatio> finalOids = oids;
         ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametrit -> {
                     seurantaTunnus.accept(
-                            finalOids,
+                            oids,
                             uuid -> {
-                                valintalaskentaRoute
-                                        .suoritaValintalaskentaKerralla(
-                                                parametrit,
-                                                new LaskentaAloitus(
-                                                        uuid, hakuOid, erillishaku,
-                                                        maski.isMask(),
-                                                        valintaryhmalaskenta,
-                                                        valinnanvaihe,
-                                                        valintakoelaskenta, finalOids,
-                                                        tyyppi));
-                                asyncResponse.resume(Response.ok(
-                                        Vastaus.uudelleenOhjaus(uuid)).build());
+                                valintalaskentaRoute.suoritaValintalaskentaKerralla(
+                                        parametrit,
+                                        new LaskentaAloitus(
+                                                uuid,
+                                                hakuOid,
+                                                erillishaku,
+                                                maski.isMask(),
+                                                valintaryhmalaskenta,
+                                                valinnanvaihe,
+                                                valintakoelaskenta,
+                                                oids,
+                                                tyyppi));
+                                asyncResponse.resume(Response
+                                        .ok(Vastaus.uudelleenOhjaus(uuid))
+                                        .build());
                             });
                 },
                 poikkeus -> {
-                    LOG.error("Ohjausparametrien luku epäonnistui: {} {}", poikkeus.getMessage(),
-                            Arrays.toString(poikkeus.getStackTrace()));
-                    asyncResponse.resume(Response.serverError()
-                            .entity(poikkeus.getMessage()).build());
+                    LOG.error("Ohjausparametrien luku epäonnistui: {} {}",
+                            poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
+                    asyncResponse.resume(Response
+                            .serverError()
+                            .entity(poikkeus.getMessage())
+                            .build());
                 });
     }
 
-    public void kasitteleLaskennanAloitus(String uuid, AsyncResponse asyncResponse, Consumer<String> laskennanAloitus) {
+    public void kasitteleLaskennanAloitus(
+            final String uuid,
+            final AsyncResponse asyncResponse,
+            final Consumer<String> laskennanAloitus) {
         if (uuid == null) {
             LOG.error("Laskentaa ei saatu luotua!");
-            asyncResponse
-                    .resume(Response
-                            .serverError()
-                            .entity("Laskentaa ei saatu luotua!")
-                            .build());
-            throw new RuntimeException(
-                    "Laskentaa ei saatu luotua!");
+            asyncResponse.resume(Response
+                    .serverError()
+                    .entity("Laskentaa ei saatu luotua!")
+                    .build());
+            throw new RuntimeException("Laskentaa ei saatu luotua!");
         }
         try {
             laskennanAloitus.accept(uuid);
         } catch (Throwable e) {
-            LOG.error(
-                    "Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}",
-                    e.getMessage());
-            asyncResponse
-                    .resume(Response
-                            .serverError()
-                            .entity("Odottamaton virhe laskennan kaynnistamisessa! "
-                                    + e.getMessage())
-                            .build());
+            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
+            asyncResponse.resume(Response
+                    .serverError()
+                    .entity("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage())
+                    .build());
             throw e;
         }
     }
 
-    public void kasitteleKokoPaska(Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus, AsyncResponse asyncResponse, LaskentaSeurantaAsyncResource seurantaAsyncResource, String hakuOid, LaskentaTyyppi tyyppi, Boolean erillishaku, Integer valinnanvaihe, Boolean valintakoelaskenta) {
-        List<HakukohdeDto> hakukohdeDtos = hakukohdeOids
+    public void kasitteleKokoPaska(
+            final Collection<HakukohdeJaOrganisaatio> hakukohdeOids,
+            final Consumer<String> laskennanAloitus,
+            final AsyncResponse asyncResponse,
+            final LaskentaSeurantaAsyncResource seurantaAsyncResource,
+            final String hakuOid, LaskentaTyyppi tyyppi,
+            final Boolean erillishaku,
+            final Integer valinnanvaihe,
+            final Boolean valintakoelaskenta) {
+        final List<HakukohdeDto> hakukohdeDtos = hakukohdeOids
                 .stream()
                 .filter(hk -> {
                     if (hk == null) {
@@ -253,33 +259,26 @@ public class ValintalaskentaKerrallaService {
                         return false;
                     }
                     if (hk.getHakukohdeOid() == null) {
-                        LOG.error(
-                                "HakukohdeOid oli null laskentaa luotaessa! OrganisaatioOid == {}, joten hakukohde ohitetaan!",
+                        LOG.error("HakukohdeOid oli null laskentaa luotaessa! OrganisaatioOid == {}, joten hakukohde ohitetaan!",
                                 hk.getOrganisaatioOid());
                         return false;
                     }
                     if (hk.getOrganisaatioOid() == null) {
-                        LOG.error(
-                                "OrganisaatioOid oli null laskentaa luotaessa! HakukohdeOid == {}, joten hakukohde ohitetaan!",
+                        LOG.error("OrganisaatioOid oli null laskentaa luotaessa! HakukohdeOid == {}, joten hakukohde ohitetaan!",
                                 hk.getHakukohdeOid());
                         return false;
                     }
                     return true;
                 })
-                .map(hk -> new HakukohdeDto(hk
-                        .getHakukohdeOid(), hk
-                        .getOrganisaatioOid()))
+                .map(hk -> new HakukohdeDto(hk.getHakukohdeOid(), hk.getOrganisaatioOid()))
                 .collect(Collectors.toList());
-        if (hakukohdeDtos.isEmpty()
-                || hakukohdeDtos.size() == 0) {
+        if (hakukohdeDtos.isEmpty() || hakukohdeDtos.size() == 0) {
             LOG.error("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
-            asyncResponse
-                    .resume(Response
-                            .serverError()
-                            .entity("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!")
-                            .build());
-            throw new RuntimeException(
-                    "Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
+            asyncResponse.resume(Response
+                    .serverError()
+                    .entity("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!")
+                    .build());
+            throw new RuntimeException("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
         } else {
             if (hakukohdeDtos.size() < hakukohdeOids.size()) {
                 LOG.warn("Hakukohteita puuttuvien organisaatio-oidien vuoksi filtteroinnin jalkeen {}/{}!", hakukohdeDtos.size(), hakukohdeOids.size());
@@ -298,9 +297,7 @@ public class ValintalaskentaKerrallaService {
                     kasitteleLaskennanAloitus(uuid, asyncResponse, laskennanAloitus);
                 },
                 poikkeus -> {
-                    LOG.error(
-                            "Seurannasta uuden laskennan haku paatyi virheeseen: {}",
-                            poikkeus.getMessage());
+                    LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen: {}", poikkeus.getMessage());
                     asyncResponse.resume(Response
                             .serverError()
                             .entity(poikkeus.getMessage())
@@ -308,16 +305,15 @@ public class ValintalaskentaKerrallaService {
                 });
     }
 
-    public void kasitteleKaynnistaLaskentaUudelleen(LaskentaDto laskenta, AsyncResponse asyncResponse) {
+    public void kasitteleKaynnistaLaskentaUudelleen(
+            final LaskentaDto laskenta,
+            final AsyncResponse asyncResponse) {
         try {
-            List<HakukohdeJaOrganisaatio> maski = laskenta
+            final List<HakukohdeJaOrganisaatio> maski = laskenta
                     .getHakukohteet()
                     .stream()
-                    .filter(h -> !HakukohdeTila.VALMIS
-                            .equals(h.getTila()))
-                    .map(h -> new HakukohdeJaOrganisaatio(
-                            h.getHakukohdeOid(),
-                            h.getOrganisaatioOid()))
+                    .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
+                    .map(h -> new HakukohdeJaOrganisaatio(h.getHakukohdeOid(), h.getOrganisaatioOid()))
                     .collect(Collectors.toList());
             kaynnistaLaskenta(
                     laskenta.getTyyppi(),
@@ -325,34 +321,22 @@ public class ValintalaskentaKerrallaService {
                     new Maski(
                             true,
                             maski.stream()
-                                    .map(hk -> hk
-                                            .getHakukohdeOid())
-                                    .collect(
-                                            Collectors
-                                                    .toList())),
-                    (hakuJaHakukohteet,
-                     laskennanAloitus) -> {
-                        laskennanAloitus
-                                .accept(laskenta
-                                        .getUuid());
-                    }, Boolean.TRUE.equals(laskenta
-                            .isErillishaku()),
-                    LaskentaTyyppi.VALINTARYHMA
-                            .equals(laskenta
-                                    .getTyyppi()),
+                                    .map(hk -> hk.getHakukohdeOid())
+                                    .collect(Collectors.toList())),
+                    (hakuJaHakukohteet, laskennanAloitus) -> {
+                        laskennanAloitus.accept(laskenta.getUuid());
+                    },
+                    Boolean.TRUE.equals(laskenta.isErillishaku()),
+                    LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
                     laskenta.getValinnanvaihe(),
                     laskenta.getValintakoelaskenta(),
                     asyncResponse);
         } catch (Throwable e) {
-            LOG.error(
-                    "Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}",
-                    e.getMessage());
-            asyncResponse
-                    .resume(Response
-                            .serverError()
-                            .entity("Odottamaton virhe laskennan kaynnistamisessa! "
-                                    + e.getMessage())
-                            .build());
+            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
+            asyncResponse.resume(Response
+                    .serverError()
+                    .entity("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage())
+                    .build());
             throw e;
         }
     }
