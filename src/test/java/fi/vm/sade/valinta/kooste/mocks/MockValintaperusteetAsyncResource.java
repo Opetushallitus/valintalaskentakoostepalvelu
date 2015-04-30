@@ -22,7 +22,11 @@ import java.util.function.Consumer;
 public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncResource {
     private static AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeResultReference = new AtomicReference<>();
     private static AtomicReference<List<ValinnanVaiheJonoillaDTO>> resultReference = new AtomicReference<>();
+    private static AtomicReference<List<ValintaperusteDTO>> valintaperusteetResultReference = new AtomicReference<>();
     private static AtomicReference<List<ValintakoeDTO>> valintakokeetResultReference = new AtomicReference<>();
+    public static void setValintaperusteetResultReference(List<ValintaperusteDTO> result) {
+        valintaperusteetResultReference.set(result);
+    }
     public static void setValintakokeetResult(List<ValintakoeDTO> result) {
         valintakokeetResultReference.set(result);
     }
@@ -52,7 +56,8 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
 
     @Override
     public Peruutettava findAvaimet(String hakukohdeOid, Consumer<List<ValintaperusteDTO>> callback, Consumer<Throwable> failureCallback) {
-        throw new UnsupportedOperationException();
+        callback.accept(valintaperusteetResultReference.get());
+        return new PeruutettavaImpl(Futures.immediateFuture(valintaperusteetResultReference.get()));
     }
 
     @Override

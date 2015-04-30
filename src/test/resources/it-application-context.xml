@@ -31,12 +31,17 @@
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.resource"/>
 
   <bean id="koekutsukirjeetImpl" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KoekutsukirjeetImpl"/>
+  <!-- Pistesyotto -->
+  <bean id="PistesyottoResource"
+        class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
+  <bean id="PistesyottoTuontiService"
+        class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService" />
 
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"
     xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
     <mockito:mock id="valintatapajononVientiRoute" class="fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute" />
-
+    <mockito:mock id="PistesyottoVientiService" class="fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoVientiRoute"/>
     <mockito:mock id="jalkiohjauskirjeService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService" />
     <mockito:mock id="hyvaksymiskirjeetService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService" />
     <mockito:mock id="osoitetarratRoute" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute" />
@@ -85,6 +90,7 @@
       <jaxrs:serviceBeans>
         <ref bean="ErillishakuResource"/>
         <ref bean="ErillishakuProxyResource"/>
+        <ref bean="PistesyottoResource"/>
         <ref bean="DokumenttiProsessiResource"/>
         <ref bean="ViestintapalveluAktivointiResource"/>
       </jaxrs:serviceBeans>

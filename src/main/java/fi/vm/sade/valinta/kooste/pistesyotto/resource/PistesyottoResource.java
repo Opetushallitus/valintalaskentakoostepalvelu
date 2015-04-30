@@ -6,12 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
+import org.apache.camel.Produce;
 import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +49,7 @@ public class PistesyottoResource {
 	@POST
 	@Path("/vienti")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@ApiOperation(consumes = "application/json", value = "Pistesyötön vienti taulukkolaskentaan", response = ProsessiId.class)
 	public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid) {
@@ -67,6 +66,7 @@ public class PistesyottoResource {
 	@POST
 	@Path("/tuonti")
 	@Consumes("application/octet-stream")
+	@Produces("application/json")
 	@ApiOperation(consumes = "application/json", value = "Pistesyötön tuonti taulukkolaskentaan", response = ProsessiId.class)
 	public ProsessiId tuonti(@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid, InputStream file)
@@ -79,7 +79,7 @@ public class PistesyottoResource {
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 
 		tuontiService.tuo(
-				hakukohdeOid, hakuOid, prosessi, new ByteArrayInputStream(b.toByteArray()));
+				hakuOid,hakukohdeOid, prosessi, new ByteArrayInputStream(b.toByteArray()));
 		return prosessi.toProsessiId();
 	}
 }

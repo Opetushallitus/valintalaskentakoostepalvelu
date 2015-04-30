@@ -32,6 +32,10 @@ public class ValintalaskentaSpec {
                         valintakoe.setOsallistuminenTulos(o);
                         return this;
                     }
+                    public ValintakoeBuilder setTunniste(String tunniste) {
+                        valintakoe.setValintakoeTunniste(tunniste);
+                        return this;
+                    }
                     public ValintakoeBuilder setValintakoeOid(String valintakoeOid) {
                         valintakoe.setValintakoeOid(valintakoeOid);
                         return this;

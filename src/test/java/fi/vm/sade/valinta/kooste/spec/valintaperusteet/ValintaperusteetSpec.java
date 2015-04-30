@@ -4,11 +4,41 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
+
+import java.util.Arrays;
 
 /**
  * @author Jussi Jartamo
  */
 public class ValintaperusteetSpec {
+
+    public static class ValintaperusteBuilder {
+        private final ValintaperusteDTO valintaperusteDTO = new ValintaperusteDTO();
+        public ValintaperusteBuilder setTunniste(String tunniste) {
+            valintaperusteDTO.setTunniste(tunniste);
+            return this;
+        }
+        public ValintaperusteBuilder setOsallistumisenTunniste(String tunniste) {
+            valintaperusteDTO.setOsallistuminenTunniste(tunniste);
+            return this;
+        }
+        public ValintaperusteBuilder setKuvaus(String kuvaus) {
+            valintaperusteDTO.setKuvaus(kuvaus);
+            return this;
+        }
+        public ValintaperusteBuilder setLukuarvofunktio() {
+            valintaperusteDTO.setFunktiotyyppi(Funktiotyyppi.LUKUARVOFUNKTIO);
+            return this;
+        }
+        public ValintaperusteBuilder setArvot(String ... arvot) {
+            valintaperusteDTO.setArvot(Arrays.asList(arvot));
+            return this;
+        }
+        public ValintaperusteDTO build() {
+            return valintaperusteDTO;
+        }
+    }
 
     public static class ValintakoeDTOBuilder {
         private final ValintakoeDTO valintaperusteDTO = new ValintakoeDTO();
@@ -41,6 +71,9 @@ public class ValintaperusteetSpec {
     }
 
 
+    public static ValintaperusteBuilder valintaperusteet() {
+        return new ValintaperusteBuilder();
+    }
     public static ValintakoeDTOBuilder valintakoe() {
         return new ValintakoeDTOBuilder();
     }
