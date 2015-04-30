@@ -9,6 +9,7 @@ import java.util.Arrays;
 import javax.ws.rs.*;
 
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import org.apache.camel.Produce;
 import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
@@ -20,9 +21,6 @@ import org.springframework.stereotype.Controller;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-
-import fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoTuontiRoute;
-import fi.vm.sade.valinta.kooste.pistesyotto.route.PistesyottoVientiRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
@@ -41,7 +39,7 @@ public class PistesyottoResource {
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiKomponentti;
 	@Autowired
-	private PistesyottoVientiRoute vientiRoute;
+	private PistesyottoVientiService vientiService;
 	@Autowired
 	private PistesyottoTuontiService tuontiService;
 
@@ -57,8 +55,7 @@ public class PistesyottoResource {
 		DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö",
 				"vienti", hakuOid, Arrays.asList(hakukohdeOid));
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-		vientiRoute.vie(prosessi, hakukohdeOid, hakuOid, SecurityContextHolder
-				.getContext().getAuthentication());
+		vientiService.vie(hakuOid, hakukohdeOid, prosessi);
 		return prosessi.toProsessiId();
 	}
 

@@ -298,7 +298,26 @@ public class ValintaperusteetAsyncResourceImpl implements
 						new GenericType<List<HakukohdeJaValintakoeDTO>>() {
 						});
 	}
-
+	@Override
+	public Peruutettava haeValintakokeetHakukohteille(
+			Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
+		StringBuilder urlBuilder = new StringBuilder()
+				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe");
+		String url = urlBuilder.toString();
+		// LOG.error("POST {}\r\n{}", url,
+		// Arrays.toString(hakukohdeOids.toArray()));
+		return new PeruutettavaImpl(WebClient
+				.fromClient(webClient)
+				.path(url)
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				.async()
+				.post(Entity.entity(hakukohdeOids,
+								MediaType.APPLICATION_JSON_TYPE),
+						new Callback<List<HakukohdeJaValintakoeDTO>>(address, url,
+								callback, failureCallback,
+								new TypeToken<List<HakukohdeJaValintakoeDTO>>() {
+								}.getType())));
+	}
 	@Override
 	public Future<List<ValintakoeDTO>> haeValintakokeet(Collection<String> oids) {
 		StringBuilder urlBuilder = new StringBuilder()

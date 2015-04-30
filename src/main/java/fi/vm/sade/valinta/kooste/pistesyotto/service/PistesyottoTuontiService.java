@@ -179,6 +179,10 @@ public class PistesyottoTuontiService {
 
 
     public void tuo(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi,InputStream stream){
+        prosessi.setKokonaistyo(
+                4
+                        // luonti
+                        + 1);
         Consumer<Throwable> poikkeusilmoitus = t -> {
             LOG.error("Pistesyötön tuonti epäonnistui", t);
             prosessi.getPoikkeukset().add(

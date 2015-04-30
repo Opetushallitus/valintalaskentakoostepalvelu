@@ -88,6 +88,8 @@ public interface ValintaperusteetAsyncResource {
 	///valintaperusteet-service/resources/hakukohde/valintakoe
 	Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
 			Collection<String> hakukohdeOids);
+	Peruutettava haeValintakokeetHakukohteille(
+			Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback);
 
 	Peruutettava haeValinnanvaiheetHakukohteelle(String hakukohdeOid,
 												 Consumer<List<ValinnanVaiheJonoillaDTO>> callback,

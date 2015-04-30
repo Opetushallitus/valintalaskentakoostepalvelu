@@ -52,7 +52,16 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async().get(HakukohdeDTO.class);
 	}
-
+	@Override
+	public Peruutettava haeHaku(String hakuOid, Consumer<HakuV1RDTO> callback, Consumer<Throwable> failureCallback) {
+		String url = "/v1/haku/"+hakuOid+"/";
+		return new PeruutettavaImpl(getWebClient()
+				.path(url)
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				.async().get(new Callback<HakuV1RDTO>(GSON,address, url, callback,
+						failureCallback, new TypeToken<HakuV1RDTO>() {
+				}.getType())));
+	}
 	public Peruutettava haeHakukohde(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> callback, Consumer<Throwable> failureCallback) {
 		try {
 			String url = new StringBuilder("/hakukohde/").append(hakukohdeOid).append("/").toString();

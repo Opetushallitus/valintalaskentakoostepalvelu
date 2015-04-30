@@ -39,6 +39,12 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     public static void clear() {
         resultReference.set(null);
     }
+
+    @Override
+    public Peruutettava haeValintakokeetHakukohteille(Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public Peruutettava haeValinnanvaiheetHakukohteelle(String hakukohdeOid, Consumer<List<ValinnanVaiheJonoillaDTO>> callback, Consumer<Throwable> failureCallback) {
         callback.accept(resultReference.get());
