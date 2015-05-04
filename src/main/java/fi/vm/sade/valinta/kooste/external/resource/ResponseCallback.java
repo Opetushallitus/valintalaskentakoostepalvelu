@@ -44,9 +44,10 @@ public class ResponseCallback implements InvocationCallback<Response> {
 			if (callback != null && failure != null) {
 				if (only2xxIsCompleted) {
 					int status = response.getStatus();
-					if (200 >= status && 300 < status) {
+					if (200 <= status && 300 > status) {
 						callback.accept(response);
 					} else {
+						LOG.error("Expected status code 200-299 but got code {} instead: {}",response.getStatus(), entityToString(response.getEntity()));
 						failure.accept(new RuntimeException(entityToString(response.getEntity())));
 					}
 				} else {
