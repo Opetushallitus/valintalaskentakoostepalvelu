@@ -46,7 +46,18 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
     private static AtomicReference<List<Hakemus>> resultReference = new AtomicReference<>();
     private static AtomicReference<List<Hakemus>> resultByOidReference = new AtomicReference<>();
-
+    private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataResultReference = new AtomicReference<>();
+    private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataResultByOidReference = new AtomicReference<>();
+    private static AtomicReference<List<ApplicationAdditionalDataDTO>> additionalDataPutReference = new AtomicReference<>();
+    public static void setAdditionalDataResult(List<ApplicationAdditionalDataDTO> result) {
+        additionalDataResultReference.set(result);
+    }
+    public static void setAdditionalDataResultByOid(List<ApplicationAdditionalDataDTO> result) {
+        additionalDataResultByOidReference.set(result);
+    }
+    public static List<ApplicationAdditionalDataDTO> getAdditionalDataInput() {
+        return additionalDataPutReference.get();
+    }
     public static void setResult(List<Hakemus> result) {
         resultReference.set(result);
     }
@@ -117,12 +128,15 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     @Override
     public Peruutettava getApplicationAdditionalData(Collection<String> hakemusOids, Consumer<List<ApplicationAdditionalDataDTO>> callback, Consumer<Throwable> failureCallback) {
-        throw new UnsupportedOperationException();
+        callback.accept(additionalDataResultByOidReference.get());
+        return new PeruutettavaImpl(Futures.immediateFuture(additionalDataResultByOidReference.get()));
     }
 
     @Override
     public Peruutettava putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
-        throw new UnsupportedOperationException();
+        additionalDataPutReference.set(additionalData);
+        callback.accept(Response.ok().build());
+        return new PeruutettavaImpl(Futures.immediateFuture(Response.ok().build()));
     }
 
     @Override
@@ -132,6 +146,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     @Override
     public Peruutettava getApplicationAdditionalData(final String hakuOid, final String hakukohdeOid, final Consumer<List<ApplicationAdditionalDataDTO>> callback, final Consumer<Throwable> failureCallback) {
-        throw new UnsupportedOperationException();
+        callback.accept(additionalDataResultReference.get());
+        return new PeruutettavaImpl(Futures.immediateFuture(additionalDataResultReference.get()));
     }
 }

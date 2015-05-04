@@ -94,6 +94,24 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 				.async()
 				.post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new GenericType<List<Hakemus>>() { });
     }
+	@Override
+	public Peruutettava getApplicationsByOids(Collection<String> hakemusOids,
+									   Consumer<List<Hakemus>> callback,
+									   Consumer<Throwable> failureCallback) {
+		String url = new StringBuilder().append("/applications/list")
+				.toString();
+		return new PeruutettavaImpl(getWebClient()
+				.path(url)
+				.query("rows", 100000)
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				.async()
+				.post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new Callback<List<Hakemus>>(
+						address,
+						url+"?rows=100000",
+						callback,
+						failureCallback,
+						new TypeToken<List<Hakemus>>() { }.getType())));
+	}
 
 	public Peruutettava getApplicationsByOid(String hakuOid, String hakukohdeOid, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
 		String url = "/applications/listfull";

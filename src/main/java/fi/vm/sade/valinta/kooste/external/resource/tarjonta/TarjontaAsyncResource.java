@@ -23,5 +23,7 @@ public interface TarjontaAsyncResource {
 	
 	Future<HakukohdeDTO> haeHakukohde(String hakukohdeOid);
 
+	Peruutettava haeHaku(String hakuOid, Consumer<HakuV1RDTO> callback, Consumer<Throwable> failureCallback);
+
 	Peruutettava haeHakukohde(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> callback, Consumer<Throwable> failureCallback);
 }
