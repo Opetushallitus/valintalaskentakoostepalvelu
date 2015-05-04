@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,8 @@ public class Mocks {
     private ViestintapalveluAsyncResource viestintapalveluAsyncResource;
     @Autowired
     private HakukohdeResource hakukohdeResource;
-
+    @Autowired
+    private DokumenttiAsyncResource dokumenttiAsyncResource;
     @PostConstruct
     public void init() {
         MOCKS = this;
@@ -31,5 +33,8 @@ public class Mocks {
 
     public static HakukohdeResource getHakukohdeResource() {
         return MOCKS.hakukohdeResource;
+    }
+    public static DokumenttiAsyncResource getDokumenttiAsyncResource() {
+        return MOCKS.dokumenttiAsyncResource;
     }
 }
