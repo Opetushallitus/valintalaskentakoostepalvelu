@@ -38,6 +38,11 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
     public final List<Result> results = new ArrayList<>();
 
+    @Override
+    public Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
+        return null;
+    }
+
     private static <T> Future<T> serviceAvailableCheck() {
         if(!serviceIsAvailable.get()) {
             return Futures.immediateFailedFuture(new RuntimeException("MockHakemuspalvelu on kytketty pois päältä!"));
