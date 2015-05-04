@@ -26,7 +26,7 @@ public class DokumenttiAsyncResourceImpl extends AsyncResourceWithCas implements
     @Autowired
     public DokumenttiAsyncResourceImpl(
             @Value("${web.url.cas}") String webCasUrl,
-                                       @Value("${cas.service.haku-service}/j_spring_cas_security_check") String targetService,
+                                       @Value("${cas.service.dokumenttipalvelu}/j_spring_cas_security_check") String targetService,
                                        @Value("${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}") String appClientUsername,
                                        @Value("${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}") String appClientPassword,
             @Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}") String address,

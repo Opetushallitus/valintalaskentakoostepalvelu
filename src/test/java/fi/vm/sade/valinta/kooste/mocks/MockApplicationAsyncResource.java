@@ -40,7 +40,8 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     @Override
     public Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
-        return null;
+        callback.accept(resultByOidReference.get());
+        return new PeruutettavaImpl(Futures.immediateFuture(resultByOidReference.get()));
     }
 
     private static <T> Future<T> serviceAvailableCheck() {

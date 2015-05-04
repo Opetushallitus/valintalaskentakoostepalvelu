@@ -87,6 +87,7 @@ public class PistesyottoResourceTest {
                         .setArvot("1", "2", "3")
                         .build()
         );
+
         MockValintaperusteetAsyncResource.setValintaperusteetResultReference(
                 valintaperusteet
         );
@@ -100,20 +101,22 @@ public class PistesyottoResourceTest {
         MockApplicationAsyncResource.setResult(Arrays.asList(
                 hakemus()
                         .setOid(HAKEMUS1)
-                        .build(),
+                        .build()
+        ));
+        MockApplicationAsyncResource.setResultByOid(Arrays.asList(
                 hakemus()
                         .setOid(HAKEMUS2)
                         .build()
         ));
-        MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(lisatiedot()
-                .setOid(HAKEMUS1).build()));
-        MockApplicationAsyncResource.setAdditionalDataResultByOid(
-                Arrays.asList(
-                        lisatiedot()
-                                .setOid(HAKEMUS2)
-                                .build()
-                )
-        );
+        MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
+                lisatiedot()
+                    .setOid(HAKEMUS1)
+                        .build()));
+        MockApplicationAsyncResource.setAdditionalDataResultByOid(Arrays.asList(
+                lisatiedot()
+                        .setOid(HAKEMUS2)
+                        .build()));
+
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
         Response r =
                 pistesyottoVientiResource.getWebClient()
