@@ -115,106 +115,116 @@ public class PistesyottoVientiService {
     }
 
     public void vie(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi) {
-        prosessi.setKokonaistyo(
-                7
-                        // luonti
-                        + 1
-                        // dokumenttipalveluun vienti
-                        + 1);
         Consumer<Throwable> poikkeuskasittelija = poikkeus -> {
             LOG.error("Pistesyötön viennissä tapatui poikkeus:", poikkeus);
             prosessi.getPoikkeukset().add(
                     new Poikkeus(Poikkeus.KOOSTEPALVELU,
                             "Pistesyötön vienti", poikkeus.getMessage()));
         };
-        AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedotRef = new AtomicReference<>();
-        AtomicReference<List<Hakemus>> hakemusRef = new AtomicReference<>();
-        AtomicReference<List<ValintaperusteDTO>> valintaperusteRef = new AtomicReference<>();
-        AtomicReference<List<ApplicationAdditionalDataDTO>> lisatiedotRef = new AtomicReference<>();
-        AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeJaValintakoeRef = new AtomicReference<>();
-        AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
-        AtomicReference<HakukohdeDTO> hakukohdeRef = new AtomicReference<>();
-        AtomicInteger laskuri = new AtomicInteger(7 + 2 // <- ylimaaraisten osallistujen hakemukset ja lisatiedot
-        );
-        AtomicInteger laskuriYlimaaraisilleOsallistujille = new AtomicInteger(3 // osallistujat + hakemukset + lisatiedot
-        );
-        Supplier<Void> viimeisteleTuonti = () -> {
-            if(laskuri.decrementAndGet() <= 0) {
-                vie(hakuOid, hakukohdeOid, prosessi,
-                        osallistumistiedotRef.get(),
-                        hakemusRef.get(),
-                        valintaperusteRef.get(),
-                        lisatiedotRef.get(),
-                        hakukohdeJaValintakoeRef.get(),
-                        hakuRef.get(),
-                        hakukohdeRef.get());
+        try {
+            prosessi.setKokonaistyo(
+                    7
+                            // luonti
+                            + 1
+                            // dokumenttipalveluun vienti
+                            + 1);
+            AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedotRef = new AtomicReference<>();
+            AtomicReference<List<Hakemus>> hakemusRef = new AtomicReference<>();
+            AtomicReference<List<ValintaperusteDTO>> valintaperusteRef = new AtomicReference<>();
+            AtomicReference<List<ApplicationAdditionalDataDTO>> lisatiedotRef = new AtomicReference<>();
+            AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeJaValintakoeRef = new AtomicReference<>();
+            AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
+            AtomicReference<HakukohdeDTO> hakukohdeRef = new AtomicReference<>();
+            Supplier<Void> viimeisteleTuonti;
+            {
+                AtomicInteger laskuri = new AtomicInteger(7 + 2 // <- ylimaaraisten osallistujen hakemukset ja lisatiedot
+                );
+                viimeisteleTuonti = () -> {
+                    if (laskuri.decrementAndGet() <= 0) {
+                        vie(hakuOid, hakukohdeOid, prosessi,
+                                osallistumistiedotRef.get(),
+                                hakemusRef.get(),
+                                valintaperusteRef.get(),
+                                lisatiedotRef.get(),
+                                hakukohdeJaValintakoeRef.get(),
+                                hakuRef.get(),
+                                hakukohdeRef.get());
+                    }
+                    return null;
+                };
             }
-            return null;
-        };
-        Supplier<Void> tarkistaYlimaaraisetOsallistujat = () -> {
-            if(laskuriYlimaaraisilleOsallistujille.decrementAndGet() <= 0) {
-                //osallistumistiedot.get().stream().filter(o -> o.getHakutoiveet().stream().anyMatch(o2 -> hakukohdeOid.equals(o2.getHakukohdeOid())));
-                Set<String> osallistujienHakemusOids = Sets.newHashSet(osallistumistiedotRef.get().stream().map(o -> o.getHakemusOid()).collect(Collectors.toSet()));
-                osallistujienHakemusOids.removeAll(lisatiedotRef.get().stream().map(a -> a.getOid()).collect(Collectors.toSet()));
-                if(!osallistujienHakemusOids.isEmpty()) {
-                    // haetaan puuttuvat lisätiedot ja hakemukset
-                    applicationAsyncResource.getApplicationAdditionalData(osallistujienHakemusOids, a -> {
-                        lisatiedotRef.set(Stream.concat(lisatiedotRef.get().stream(), a.stream()).collect(Collectors.toList()));
+            Supplier<Void> tarkistaYlimaaraisetOsallistujat;
+            {
+                AtomicInteger laskuriYlimaaraisilleOsallistujille = new AtomicInteger(3 // osallistujat + hakemukset + lisatiedot
+                );
+                tarkistaYlimaaraisetOsallistujat = () -> {
+                    if (laskuriYlimaaraisilleOsallistujille.decrementAndGet() <= 0) {
+                        //osallistumistiedot.get().stream().filter(o -> o.getHakutoiveet().stream().anyMatch(o2 -> hakukohdeOid.equals(o2.getHakukohdeOid())));
+                        Set<String> osallistujienHakemusOids = Sets.newHashSet(osallistumistiedotRef.get().stream().map(o -> o.getHakemusOid()).collect(Collectors.toSet()));
+                        osallistujienHakemusOids.removeAll(lisatiedotRef.get().stream().map(a -> a.getOid()).collect(Collectors.toSet()));
+                        if (!osallistujienHakemusOids.isEmpty()) {
+                            // haetaan puuttuvat lisätiedot ja hakemukset
+                            applicationAsyncResource.getApplicationAdditionalData(osallistujienHakemusOids, a -> {
+                                lisatiedotRef.set(Stream.concat(lisatiedotRef.get().stream(), a.stream()).collect(Collectors.toList()));
+                                viimeisteleTuonti.get();
+                            }, poikkeuskasittelija);
+                            applicationAsyncResource.getApplicationsByOids(osallistujienHakemusOids, a -> {
+                                hakemusRef.set(Stream.concat(hakemusRef.get().stream(), a.stream()).collect(Collectors.toList()));
+                                viimeisteleTuonti.get();
+                            }, poikkeuskasittelija);
+                        } else {
+                            viimeisteleTuonti.get();
+                            viimeisteleTuonti.get();
+                        }
+                    }
+                    return null;
+                };
+            }
+            valintakoeResource.haeHakutoiveelle(hakukohdeOid, osallistumistiedot -> {
+                osallistumistiedotRef.set(osallistumistiedot);
+                prosessi.inkrementoiTehtyjaToita();
+                viimeisteleTuonti.get();
+                tarkistaYlimaaraisetOsallistujat.get();
+            }, poikkeuskasittelija);
+            applicationAsyncResource
+                    .getApplicationsByOid(hakuOid, hakukohdeOid, hakemukset -> {
+                        hakemusRef.set(hakemukset);
+                        prosessi.inkrementoiTehtyjaToita();
                         viimeisteleTuonti.get();
-                    },poikkeuskasittelija);
-                    applicationAsyncResource.getApplicationsByOids(osallistujienHakemusOids, a -> {
-                        hakemusRef.set(Stream.concat(hakemusRef.get().stream(), a.stream()).collect(Collectors.toList()));
+                        tarkistaYlimaaraisetOsallistujat.get();
+                    }, poikkeuskasittelija);
+            valintaperusteetResource
+                    .findAvaimet(hakukohdeOid, avaimet -> {
+                        prosessi.inkrementoiTehtyjaToita();
+                        valintaperusteRef.set(avaimet);
                         viimeisteleTuonti.get();
                     }, poikkeuskasittelija);
-                } else {
-                    viimeisteleTuonti.get();
-                    viimeisteleTuonti.get();
-                }
-            }
-            return null;
-        };
-        valintakoeResource.haeHakutoiveelle(hakukohdeOid, osallistumistiedot -> {
-            osallistumistiedotRef.set(osallistumistiedot);
-            prosessi.inkrementoiTehtyjaToita();
-            viimeisteleTuonti.get();
-            laskuriYlimaaraisilleOsallistujille.get();
-        }, poikkeuskasittelija);
-        applicationAsyncResource
-                .getApplicationsByOid(hakuOid, hakukohdeOid, hakemukset -> {
-                    hakemusRef.set(hakemukset);
-                    prosessi.inkrementoiTehtyjaToita();
-                    viimeisteleTuonti.get();
-                    laskuriYlimaaraisilleOsallistujille.get();
-                }, poikkeuskasittelija);
-        valintaperusteetResource
-                .findAvaimet(hakukohdeOid, avaimet -> {
-                    prosessi.inkrementoiTehtyjaToita();
-                    valintaperusteRef.set(avaimet);
-                    viimeisteleTuonti.get();
-                }, poikkeuskasittelija);
-        applicationAsyncResource
-                .getApplicationAdditionalData(hakuOid,
-                        hakukohdeOid, lisatiedot -> {
-                            prosessi.inkrementoiTehtyjaToita();
-                            lisatiedotRef.set(lisatiedot);
-                            viimeisteleTuonti.get();
-                            laskuriYlimaaraisilleOsallistujille.get();
-                        },poikkeuskasittelija);
-        valintaperusteetResource.haeValintakokeetHakukohteille(Arrays.asList(hakukohdeOid), hakukohdeJaValintakoe -> {
-            prosessi.inkrementoiTehtyjaToita();
-            hakukohdeJaValintakoeRef.set(hakukohdeJaValintakoe);
-            viimeisteleTuonti.get();
-        }, poikkeuskasittelija);
-        tarjontaAsyncResource.haeHakukohde(hakuOid,hakukohdeOid, hakukohde -> {
-            prosessi.inkrementoiTehtyjaToita();
-            hakukohdeRef.set(hakukohde);
-            viimeisteleTuonti.get();
-        },poikkeuskasittelija);
-        tarjontaAsyncResource.haeHaku(hakuOid, haku -> {
-            prosessi.inkrementoiTehtyjaToita();
-            hakuRef.set(haku);
-            viimeisteleTuonti.get();
-        }, poikkeuskasittelija);
+            applicationAsyncResource
+                    .getApplicationAdditionalData(hakuOid,
+                            hakukohdeOid, lisatiedot -> {
+                                prosessi.inkrementoiTehtyjaToita();
+                                lisatiedotRef.set(lisatiedot);
+                                viimeisteleTuonti.get();
+                                tarkistaYlimaaraisetOsallistujat.get();
+                            }, poikkeuskasittelija);
+            valintaperusteetResource.haeValintakokeetHakukohteille(Arrays.asList(hakukohdeOid), hakukohdeJaValintakoe -> {
+                prosessi.inkrementoiTehtyjaToita();
+                hakukohdeJaValintakoeRef.set(hakukohdeJaValintakoe);
+                viimeisteleTuonti.get();
+            }, poikkeuskasittelija);
+            tarjontaAsyncResource.haeHakukohde(hakuOid, hakukohdeOid, hakukohde -> {
+                prosessi.inkrementoiTehtyjaToita();
+                hakukohdeRef.set(hakukohde);
+                viimeisteleTuonti.get();
+            }, poikkeuskasittelija);
+            tarjontaAsyncResource.haeHaku(hakuOid, haku -> {
+                prosessi.inkrementoiTehtyjaToita();
+                hakuRef.set(haku);
+                viimeisteleTuonti.get();
+            }, poikkeuskasittelija);
+        } catch(Throwable t) {
+            poikkeuskasittelija.accept(t);
+        }
     }
 
     protected Date defaultExpirationDate() {

@@ -36,7 +36,15 @@ public class PistesyottoResourceTest {
     final static Logger LOG = LoggerFactory.getLogger(PistesyottoResourceTest.class);
     public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); //5sec
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-    final HttpResource pistesyottoResource = new HttpResource(root + "/pistesyotto/tuonti");
+    final HttpResource pistesyottoTuontiResource = new HttpResource(root + "/pistesyotto/tuonti");
+    final HttpResource pistesyottoVientiResource = new HttpResource(root + "/pistesyotto/vienti");
+    final String HAKU1 = "HAKU1";
+    final String HAKUKOHDE1 = "HAKUKOHDE1";
+    final String TARJOAJA1 = "TARJOAJA1";
+    final String VALINTAKOE1 = "VALINTAKOE1";
+    final String HAKEMUS1 = "HAKEMUS1";
+    final String HAKEMUS2 = "HAKEMUS2";
+    final String TUNNISTE1 = "TUNNISTE1";
 
     @Before
     public void startServer() {
@@ -44,14 +52,80 @@ public class PistesyottoResourceTest {
     }
 
     @Test
+    public void pistesyottoVientiTest() {
+        List< ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
+                osallistuminen()
+                        .setHakemusOid(HAKEMUS1)
+                        .hakutoive()
+                        .valinnanvaihe()
+                        .valintakoe()
+                        .setValintakoeOid(VALINTAKOE1)
+                        .setTunniste(TUNNISTE1)
+                        .setOsallistuu()
+                        .build()
+                        .build()
+                        .build()
+                        .build(),
+                osallistuminen()
+                        .setHakemusOid(HAKEMUS2)
+                        .hakutoive()
+                        .valinnanvaihe()
+                        .valintakoe()
+                        .setValintakoeOid(VALINTAKOE1)
+                        .setTunniste(TUNNISTE1)
+                        .setOsallistuu()
+                        .build()
+                        .build()
+                        .build()
+                        .build());
+        List<ValintaperusteDTO> valintaperusteet = Arrays.asList(
+                valintaperusteet()
+                        .setKuvaus(TUNNISTE1)
+                        .setTunniste(TUNNISTE1)
+                        .setOsallistumisenTunniste(TUNNISTE1)
+                        .setLukuarvofunktio()
+                        .setArvot("1", "2", "3")
+                        .build()
+        );
+        MockValintaperusteetAsyncResource.setValintaperusteetResultReference(
+                valintaperusteet
+        );
+        MockValintaperusteetAsyncResource.setHakukohdeResult(
+                Arrays.asList(
+                        hakukohdeJaValintakoe()
+                                .addValintakoe(VALINTAKOE1)
+                                .build()
+                )
+        );
+        MockApplicationAsyncResource.setResult(Arrays.asList(
+                hakemus()
+                        .setOid(HAKEMUS1)
+                        .build(),
+                hakemus()
+                        .setOid(HAKEMUS2)
+                        .build()
+        ));
+        MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(lisatiedot()
+                .setOid(HAKEMUS1).build()));
+        MockApplicationAsyncResource.setAdditionalDataResultByOid(
+                Arrays.asList(
+                        lisatiedot()
+                                .setOid(HAKEMUS2)
+                                .build()
+                )
+        );
+        MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
+        Response r =
+                pistesyottoVientiResource.getWebClient()
+                        .query("hakuOid", HAKU1)
+                        .query("hakukohdeOid",HAKUKOHDE1)
+                        .post(Entity.entity("",
+                                "application/json"));
+        Assert.assertEquals(200, r.getStatus());
+    }
+
+    @Test
     public void pistesyottoTest() {
-        final String HAKU1 = "HAKU1";
-        final String HAKUKOHDE1 = "HAKUKOHDE1";
-        final String TARJOAJA1 = "TARJOAJA1";
-        final String VALINTAKOE1 = "VALINTAKOE1";
-        final String HAKEMUS1 = "HAKEMUS1";
-        final String HAKEMUS2 = "HAKEMUS2";
-        final String TUNNISTE1 = "TUNNISTE1";
         List< ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
                 osallistuminen()
                         .setHakemusOid(HAKEMUS1)
@@ -125,7 +199,7 @@ public class PistesyottoResourceTest {
                 ));
 
         Response r =
-                pistesyottoResource.getWebClient()
+                pistesyottoTuontiResource.getWebClient()
                         .query("hakuOid", HAKU1)
                         .query("hakukohdeOid",HAKUKOHDE1)
                         .post(Entity.entity(excel.getExcel().vieXlsx(),
