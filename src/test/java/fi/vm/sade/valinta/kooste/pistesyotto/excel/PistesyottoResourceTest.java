@@ -1,29 +1,45 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
+import fi.vm.sade.valinta.kooste.excel.DataRivi;
+import fi.vm.sade.valinta.kooste.excel.Excel;
+import fi.vm.sade.valinta.kooste.excel.Rivi;
+import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.*;
 
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.*;
@@ -52,7 +68,7 @@ public class PistesyottoResourceTest {
     }
 
     @Test
-    public void pistesyottoVientiTest() {
+    public void pistesyottoVientiTest() throws Throwable {
         List< ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
                 osallistuminen()
                         .setHakemusOid(HAKEMUS1)
@@ -118,6 +134,12 @@ public class PistesyottoResourceTest {
                         .build()));
 
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
+
+        ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
+        Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyLong(), Mockito.anyList(), Mockito.anyString(),
+                inputStreamArgumentCaptor.capture(), Mockito.any(Consumer.class), Mockito.any(Consumer.class))).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
+
         Response r =
                 pistesyottoVientiResource.getWebClient()
                         .query("hakuOid", HAKU1)
@@ -125,6 +147,11 @@ public class PistesyottoResourceTest {
                         .post(Entity.entity("",
                                 "application/json"));
         Assert.assertEquals(200, r.getStatus());
+        InputStream excelData = inputStreamArgumentCaptor.getValue();
+        Assert.assertTrue(excelData != null);
+        Collection<Rivi> rivit = ExcelImportUtil.importExcel(excelData);
+        Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS1.equals(r0.toTeksti().getTeksti()))));
+        Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS2.equals(r0.toTeksti().getTeksti()))));
     }
 
     @Test
