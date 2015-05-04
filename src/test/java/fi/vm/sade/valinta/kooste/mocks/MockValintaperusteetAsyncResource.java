@@ -42,7 +42,8 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
 
     @Override
     public Peruutettava haeValintakokeetHakukohteille(Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
-        throw new UnsupportedOperationException();
+        callback.accept(hakukohdeResultReference.get());
+        return new PeruutettavaImpl(Futures.immediateFuture(hakukohdeResultReference.get()));
     }
 
     @Override
