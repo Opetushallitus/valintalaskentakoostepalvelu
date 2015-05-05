@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,6 +29,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * 
@@ -145,24 +148,28 @@ public class SureKonvertointiTest {
 
 
         aineet.forEach(a -> {
-            final long count = konvertoitu.stream().filter(k -> k.getAvain().equals(a)).count();
-            Assert.assertEquals(count, 1);
+            final List values = konvertoitu.stream().filter(k -> k.getAvain().equals(a)).collect(Collectors.toList());
+            assertEquals("values for " + a + ": " + values, 1, values.size());
         });
 
-        final int ainereaali = konvertoitu.stream().filter(k -> k.getAvain().equals("AINEREAALI")).findFirst().get().getMetatiedot().size();
-        final int reaali = konvertoitu.stream().filter(k -> k.getAvain().equals("REAALI")).findFirst().get().getMetatiedot().size();
-        final int pitka_kieli = konvertoitu.stream().filter(k -> k.getAvain().equals("PITKA_KIELI")).findFirst().get().getMetatiedot().size();
-        final int keskipitka_kieli = konvertoitu.stream().filter(k -> k.getAvain().equals("KESKIPITKA_KIELI")).findFirst().get().getMetatiedot().size();
-        final int lyhyt_kieli = konvertoitu.stream().filter(k -> k.getAvain().equals("LYHYT_KIELI")).findFirst().get().getMetatiedot().size();
-        final int aidinkieli = konvertoitu.stream().filter(k -> k.getAvain().equals("AIDINKIELI")).findFirst().get().getMetatiedot().size();
+        final List<Map<String,String>> ainereaali = konvertoitu.stream().filter(k -> k.getAvain().equals("AINEREAALI")).findFirst().get().getMetatiedot();
+        assertEquals(12, ainereaali.size());
 
-        Assert.assertEquals(12, ainereaali);
-        Assert.assertEquals(3, reaali);
-        Assert.assertEquals(9, pitka_kieli);
-        Assert.assertEquals(8, keskipitka_kieli);
-        Assert.assertEquals(10, lyhyt_kieli);
-        Assert.assertEquals(7, aidinkieli);
+        final List<Map<String,String>>  reaali = konvertoitu.stream().filter(k -> k.getAvain().equals("REAALI")).findFirst().get().getMetatiedot();
+        assertEquals(3, reaali.size());
+        assertEquals("ET", reaali.stream().filter(m -> m.get("LISATIETO").equals("ET")).findFirst().get().get("ROOLI"));
 
+        final List<Map<String,String>>  pitka_kieli = konvertoitu.stream().filter(k -> k.getAvain().equals("PITKA_KIELI")).findFirst().get().getMetatiedot();
+        assertEquals(9, pitka_kieli.size());
+
+        final List<Map<String,String>>  keskipitka_kieli = konvertoitu.stream().filter(k -> k.getAvain().equals("KESKIPITKA_KIELI")).findFirst().get().getMetatiedot();
+        assertEquals(8, keskipitka_kieli.size());
+
+        final List<Map<String,String>>  lyhyt_kieli = konvertoitu.stream().filter(k -> k.getAvain().equals("LYHYT_KIELI")).findFirst().get().getMetatiedot();
+        assertEquals(10, lyhyt_kieli.size());
+
+        final List<Map<String,String>>  aidinkieli = konvertoitu.stream().filter(k -> k.getAvain().equals("AIDINKIELI")).findFirst().get().getMetatiedot();
+        assertEquals(7, aidinkieli.size());
 
     }
 
