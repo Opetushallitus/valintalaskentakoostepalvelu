@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
@@ -16,6 +19,8 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,5 +132,26 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends AsyncResourceWit
 						callback,
 						failureCallback,
 						new TypeToken<List<ValintakoeOsallistuminenDTO>>() { }.getType())));
+	}
+
+	@Override
+	public Peruutettava haeValintatiedotHakukohteelle(String hakukohdeOid,
+													  List<String> valintakoeOid,
+													  Consumer<List<HakemusOsallistuminenDTO>> callback, Consumer<Throwable> failureCallback) {
+		try {
+			// valintatieto/hakukohde/{hakukohdeOid}
+			String url = new StringBuilder("/valintatieto/hakukohde/").append(hakukohdeOid).toString();
+			return new PeruutettavaImpl(getWebClient()
+					.path(url)
+					.async()
+					.post(Entity.entity(valintakoeOid,
+							MediaType.APPLICATION_JSON_TYPE), new Callback<List<HakemusOsallistuminenDTO>>(GSON, address, url, callback,
+							failureCallback, new TypeToken<List<HakemusOsallistuminenDTO>>() {
+					}.getType())));
+		} catch (Throwable e) {
+			LOG.error("Hae valintatiedot hakukohteelle epäonnistui:", e);
+			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
+		}
 	}
 }

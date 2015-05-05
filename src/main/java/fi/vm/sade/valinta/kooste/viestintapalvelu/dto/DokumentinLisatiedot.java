@@ -32,6 +32,10 @@ public class DokumentinLisatiedot {
 		return tag;
 	}
 
+	public void setValintakoeOids(List<String> valintakoeOids) {
+		this.valintakoeOids = valintakoeOids;
+	}
+
 	public String getLanguageCode() {
 		if (StringUtils.isBlank(languageCode)) {
 			return StringUtils.EMPTY;

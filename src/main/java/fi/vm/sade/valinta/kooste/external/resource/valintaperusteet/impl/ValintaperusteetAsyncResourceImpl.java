@@ -333,4 +333,21 @@ public class ValintaperusteetAsyncResourceImpl implements
 						});
 	}
 
+	@Override
+	public Peruutettava haeValintakokeet(Collection<String> oids, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
+		StringBuilder urlBuilder = new StringBuilder()
+				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintakoe/");
+		String url = urlBuilder.toString();
+		return new PeruutettavaImpl(WebClient
+				.fromClient(webClient)
+				.path(url)
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				.async()
+				.post(Entity.entity(oids, MediaType.APPLICATION_JSON_TYPE),
+						new Callback<List<ValintakoeDTO>>(address, url,
+								callback, failureCallback,
+								new TypeToken<List<ValintakoeDTO>>() {
+								}.getType())));
+	}
+
 }

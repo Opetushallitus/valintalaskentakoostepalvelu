@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -232,6 +233,6 @@ public class PistesyottoVientiService {
     }
 
     protected String generateId() {
-        return org.jgroups.util.UUID.randomUUID().toString();
+        return UUID.randomUUID().toString();
     }
 }

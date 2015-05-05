@@ -27,7 +27,6 @@ import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.Valintalaskenn
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.ValintalaskentaTulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintakoekutsutExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
@@ -53,7 +52,6 @@ public class ValintalaskentaTulosRouteImpl extends
 	private ValintalaskentaTulosExcelKomponentti valintalaskentaTulosExcelKomponentti;
 	private final HaeHakukohdeNimiTarjonnaltaKomponentti haeHakukohdeNimiTarjonnaltaKomponentti;
 	private final DokumenttiResource dokumenttiResource;
-	private final String valintakoekutsutXls;
 	private final TilaResource tilaResource;
 
 	@Autowired
@@ -64,8 +62,7 @@ public class ValintalaskentaTulosRouteImpl extends
 			ValintalaskennanTulosExcelKomponentti valintalaskennanTulosExcelKomponentti,
 			ValintalaskentaTulosExcelKomponentti valintalaskentaTulosExcelKomponentti,
 			HaeHakukohdeNimiTarjonnaltaKomponentti haeHakukohdeNimiTarjonnaltaKomponentti,
-			DokumenttiResource dokumenttiResource,
-			@Value(ValintakoekutsutExcelRoute.SEDA_VALINTAKOE_EXCEL) String valintakoekutsutXls) {
+			DokumenttiResource dokumenttiResource) {
 		this.tilaResource = tilaResource;
 		this.jalkiohjaustulosExcelKomponentti = jalkiohjaustulosExcelKomponentti;
 		this.sijoittelunTulosExcelKomponentti = sijoittelunTulosExcelKomponentti;
@@ -73,7 +70,6 @@ public class ValintalaskentaTulosRouteImpl extends
 		this.valintalaskentaTulosExcelKomponentti = valintalaskentaTulosExcelKomponentti;
 		this.haeHakukohdeNimiTarjonnaltaKomponentti = haeHakukohdeNimiTarjonnaltaKomponentti;
 		this.dokumenttiResource = dokumenttiResource;
-		this.valintakoekutsutXls = valintakoekutsutXls;
 	}
 
 	private Processor haunJaHakukohteenNimet() {
@@ -185,78 +181,7 @@ public class ValintalaskentaTulosRouteImpl extends
 				//
 				.bean(valintalaskennanTulosExcelKomponentti);
 
-		//
-		//
-		//
-		from(valintakoekutsutXls)
-		//
-				.errorHandler(
-				//
-						deadLetterChannel(
-								"direct:valintakoekutsut_xls_deadletterchannel")
-								.logExhaustedMessageHistory(true)
-								.logExhausted(true).logStackTrace(true)
-								// hide retry/handled stacktrace
-								.logRetryStackTrace(false).logHandled(false))
-				//
-				.process(SecurityPreprocessor.SECURITY)
-				//
-				.process(haunJaHakukohteenNimet())
-				//
-				.bean(valintalaskentaTulosExcelKomponentti)
-				//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						try {
-							dokumenttiprosessi(exchange).setKokonaistyo(1);
-							InputStream xls = exchange.getIn().getBody(
-									InputStream.class);
-							// xls = valintalaskentaTulosExcelKomponentti
-							// .luoTuloksetXlsMuodossa(hakukohdeOid,
-							// valintakoeOids, hakemusOids);
-							String id = generateId();
-							try {
-								dokumenttiResource.tallenna(id,
-										"valintakoekutsut.xls",
-										defaultExpirationDate().getTime(),
-										dokumenttiprosessi(exchange).getTags(),
-										"application/vnd.ms-excel", xls);
-							} catch (Exception e) {
-								LOG.error("{} {}", e.getMessage(),
-										Arrays.toString(e.getStackTrace()));
-								dokumenttiprosessi(exchange)
-										.getPoikkeukset()
-										.add(new Poikkeus(
-												Poikkeus.DOKUMENTTIPALVELU,
-												"Dokumenttipalvelulle tallennus",
-												e.getMessage()));
-								throw e;
-							}
-							dokumenttiprosessi(exchange)
-									.inkrementoiTehtyjaToita();
-							dokumenttiprosessi(exchange).setDokumenttiId(id);
-						} catch (Exception e) {
-							LOG.error("{} {}", e.getMessage(),
-									Arrays.toString(e.getStackTrace()));
-							throw e;
-						}
-					}
-				})
-				//
-				.end();
-		from("direct:valintakoekutsut_xls_deadletterchannel")
-		//
-				.process(new Processor() {
-					public void process(Exchange exchange) throws Exception {
-						String message = null;
-						if (null != exchange.getException()) {
-							message = exchange.getException().getMessage();
-						}
-						dokumenttiprosessi(exchange).getPoikkeukset().add(
-								new Poikkeus(Poikkeus.VALINTALASKENTA,
-										"Valintatiedotpalvelukutsu", message));
-					}
-				});
+
 		from("direct:sijoitteluntulokset_xls_deadletterchannel")
 		//
 				.process(new Processor() {

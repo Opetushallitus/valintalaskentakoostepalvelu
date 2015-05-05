@@ -12,6 +12,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.service.ValintakoekutsutExcelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintakoekutsutExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -52,7 +52,7 @@ public class ValintalaskentaExcelResource {
 	@Autowired
 	private ValintalaskentaTulosExcelRoute valintalaskentaTulosProxy;
 	@Autowired
-	private ValintakoekutsutExcelRoute valintalaskentaTulos;
+	private ValintakoekutsutExcelService valintakoekutsutExcelService;
 	@Autowired
 	private SijoittelunTulosExcelRoute sijoittelunTulosExcelProxy;
 	@Autowired
@@ -108,16 +108,10 @@ public class ValintalaskentaExcelResource {
 					"Valintalaskentaexcel",
 					"Valintakoekutsut taulukkolaskenta tiedosto", "",
 					Arrays.asList("valintakoekutsut", "taulukkolaskenta"));
-			valintalaskentaTulos.luoXls(p, hakuOid, hakukohdeOid, lisatiedot
-					.getValintakoeOids(), lisatiedot.getHakemusOids(),
-					SecurityContextHolder.getContext().getAuthentication());
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(p);
+			valintakoekutsutExcelService.luoExcel(p, hakuOid, hakukohdeOid, lisatiedot
+					.getValintakoeOids(), lisatiedot.getHakemusOids());
 			return p.toProsessiId();
-			/*
-			 * return Response .ok(input, APPLICATION_VND_MS_EXCEL)
-			 * .header("content-disposition",
-			 * "inline; filename=valintakoetulos.xls").build();
-			 */
 		} catch (Exception e) {
 			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
 			// todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
@@ -130,14 +124,6 @@ public class ValintalaskentaExcelResource {
 									.toArray()), e.getMessage() });
 			throw new RuntimeException(
 					"Valintakoekutsut excelin luonti epäonnistui!", e);
-			// return Response
-			// .ok(ExcelExportUtil.exportGridAsXls(new Object[][] { new Object[]
-			// {
-			// "Tarvittavien tietojen hakeminen epäonnistui!",
-			// "Hakemuspalvelu saattaa olla ylikuormittunut!",
-			// "Yritä uudelleen!" } }), APPLICATION_VND_MS_EXCEL)
-			// .header("content-disposition",
-			// "inline; filename=yritauudelleen.xls").build();
 		}
 	}
 
