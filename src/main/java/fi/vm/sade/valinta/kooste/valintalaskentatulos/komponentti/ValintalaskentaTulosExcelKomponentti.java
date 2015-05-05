@@ -60,52 +60,31 @@ public class ValintalaskentaTulosExcelKomponentti {
 
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaTulosExcelKomponentti.class);
-	public static final String MAAT_JA_VALTIOT_1 = "maatjavaltiot1";
-	public static final String POSTI = "posti";
-
-	private final ValintatietoResource valintatietoService;
-	private final ValintaperusteetAsyncResource valintaperusteetValintakoeResource;
-	private final ApplicationAsyncResource applicationResource;
-	private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
-
-	@Autowired
-	public ValintalaskentaTulosExcelKomponentti(
-			ValintatietoResource valintatietoService,
-			ApplicationAsyncResource applicationResource,
-			ValintaperusteetAsyncResource valintaperusteetValintakoeResource,
-			KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
-		this.valintatietoService = valintatietoService;
-		this.applicationResource = applicationResource;
-		this.valintaperusteetValintakoeResource = valintaperusteetValintakoeResource;
-		this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
-	}
 
 	public InputStream luoTuloksetXlsMuodossa(
-			@Header("haunNimi") String haunNimi,
-			@Header("hakukohteenNimi") String hakukohteenNimi,
-			@Property(OPH.HAKUOID) String hakuOid,
-			@Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
-			@Property("valintakoeOid") List<String> valintakoeOids,
-			@Property("hakemusOids") List<String> hakemusOids) throws Exception {
+			String haunNimi,
+			String hakukohteenNimi,
+			String hakukohdeOid,
+			final Map<String, Koodi> maatJaValtiot1,
+			final Map<String, Koodi> posti,
+			List<String> valintakoeOids,
+			List<HakemusOsallistuminenDTO> tiedotHakukohteelle,
+			Map<String, ValintakoeDTO> valintakokeet,
+			List<Hakemus> haetutHakemukset,
+			Set<String> whiteList
+	) throws Exception {
 		if (valintakoeOids == null || valintakoeOids.isEmpty()) {
 			LOG.error("Ei voida luoda exceliä ilman valintakoeoideja!");
 			throw new RuntimeException(
 					"Ei voida luoda valintakokeista exceliä ilman että syötetään vähintään yksi valintakoeOid!");
 		}
-		Future<List<Hakemus>> hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid);
-		Map<String, Future<List<ValintakoeDTO>>> valintakoeFutures = valintakoeOids.stream().collect(Collectors.toMap(vk -> vk, oid -> valintaperusteetValintakoeResource
-				.haeValintakokeet(Arrays.asList(oid))));
-		final Map<String, Koodi> maatJaValtiot1 = koodistoCachedAsyncResource.haeKoodisto(MAAT_JA_VALTIOT_1);
-		final Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(POSTI);
-		List<HakemusOsallistuminenDTO> tiedotHakukohteelle = valintatietoService
-				.haeValintatiedotHakukohteelle(hakukohdeOid, valintakoeOids);
 		final Map<String, String> nivelvaiheenKoekutsut = Maps.newHashMap();
 		List<ValintakoeNimi> tunnisteet = Lists.newArrayList();
-		for (String oid : valintakoeOids) {
-			ValintakoeDTO koe = valintakoeFutures.get(oid).get().iterator().next();
+		for (Map.Entry<String, ValintakoeDTO> valintakoeEntry : valintakokeet.entrySet()) {
+			ValintakoeDTO koe = valintakoeEntry.getValue();
 			tunnisteet.add(new ValintakoeNimi(koe.getNimi(), koe.getOid()));
 			if (Boolean.TRUE.equals(koe.getKutsutaankoKaikki())) {
-				nivelvaiheenKoekutsut.put(oid, "Kutsutaan");
+				nivelvaiheenKoekutsut.put(valintakoeEntry.getKey(), "Kutsutaan");
 			}
 		}
 		if (tunnisteet.isEmpty()) {
@@ -128,13 +107,16 @@ public class ValintalaskentaTulosExcelKomponentti {
 					return o1.getNimi().compareTo(o2.getNimi());
 				}
 			});
+			/*
 			boolean useWhitelist = hakemusOids != null
 					&& !hakemusOids.isEmpty();
 			Set<String> whiteList = Collections.emptySet();
 			if (useWhitelist) {
 				whiteList = Sets.newHashSet(hakemusOids);
 			}
-			List<Hakemus> haetutHakemukset = hakemukset.get();
+			*/
+			boolean useWhitelist = !whiteList.isEmpty();
+			//List<Hakemus> haetutHakemukset = hakemukset.get();
 			Map<String, Hakemus> mapping = haetutHakemukset.stream().collect(Collectors.toMap(a -> a.getOid(), a -> a));
 			Map<String, ValintakoeRivi> hakemusJaRivi = Maps.newHashMap();
 			{
@@ -284,7 +266,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 		StringBuilder b = new StringBuilder();
 		b.append(o.getSukunimi()).append(", ").append(o.getEtunimi());
 		rivi.addAll(Arrays.asList(b.toString(), o.getHakemusOid(),
-				ExcelExportUtil.DATE_FORMAT.format(date)));
+				date == null ? "" : ExcelExportUtil.DATE_FORMAT.format(date)));
 		boolean osallistuuEdesYhteen = false;
 		Map<String, String> osallistumistiedot = Maps.newHashMap();
 		for (ValintakoeNimi tunniste : tunnisteet) {

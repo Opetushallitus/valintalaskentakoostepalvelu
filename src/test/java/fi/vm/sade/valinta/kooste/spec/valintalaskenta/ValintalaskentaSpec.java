@@ -1,13 +1,40 @@
 package fi.vm.sade.valinta.kooste.spec.valintalaskenta;
 
+import com.google.common.collect.Lists;
+import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.*;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.*;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 
 /**
  * @author Jussi Jartamo
  */
 public class ValintalaskentaSpec {
+
+    public static class HakemusOsallistuminenBuilder {
+        private final HakemusOsallistuminenDTO hakemusOsallistuminen;
+        public HakemusOsallistuminenBuilder() {
+            this.hakemusOsallistuminen = new HakemusOsallistuminenDTO();
+            this.hakemusOsallistuminen.setOsallistumiset(Lists.newArrayList());
+        }
+        public HakemusOsallistuminenBuilder setHakemusOid(String hakemusOid) {
+            this.hakemusOsallistuminen.setHakemusOid(hakemusOid);
+            return this;
+        }
+        public HakemusOsallistuminenBuilder addOsallistuminen(String valintakoeOid) {
+            fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO v = new fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO();
+            v.setValintakoeOid(valintakoeOid);
+            v.setOsallistuminen(OsallistuminenDTO.OSALLISTUU);
+            this.hakemusOsallistuminen.getOsallistumiset().add(v);
+            return this;
+        }
+
+        public HakemusOsallistuminenDTO build() {
+            return hakemusOsallistuminen;
+        }
+    }
 
     public static class ValintakoeOsallistuminenBuilder {
         private final ValintakoeOsallistuminenDTO osallistuminenDTO = new ValintakoeOsallistuminenDTO();
@@ -93,5 +120,9 @@ public class ValintalaskentaSpec {
 
     public static ValintakoeOsallistuminenBuilder osallistuminen() {
         return new ValintakoeOsallistuminenBuilder();
+    }
+
+    public static HakemusOsallistuminenBuilder hakemusOsallistuminen() {
+        return new HakemusOsallistuminenBuilder();
     }
 }

@@ -30,7 +30,8 @@
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.resource"/>
 
-  <bean id="koekutsukirjeetImpl" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KoekutsukirjeetImpl"/>
+  <bean id="koekutsukirjeetImpl"
+        class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KoekutsukirjeetImpl"/>
   <!-- Pistesyotto -->
   <bean id="PistesyottoResource"
         class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
@@ -38,6 +39,13 @@
         class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService" />
   <bean id="PistesyottoVientiService"
         class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService" />
+  <bean id="ValintalaskentaExcelResource"
+        class="fi.vm.sade.valinta.kooste.valintalaskentatulos.resource.ValintalaskentaExcelResource" />
+  <bean id="ValintakoekutsutExcelService"
+        class="fi.vm.sade.valinta.kooste.valintalaskentatulos.service.ValintakoekutsutExcelService" />
+  <bean id="KoodistoCachedAsyncResource"
+        class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource"/>
+
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"
     xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
@@ -57,7 +65,10 @@
     <mockito:mock id="valintakoeResource" class="fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource" />
     <mockito:mock id="sijoitteluResource" class="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource" />
     <mockito:mock id="dokumenttiResource" class="fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource" />
-
+    <mockito:mock id="KoodistoAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource"/>
+    <mockito:mock id="JalkiohjaustulosExcelRoute" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExcelRoute" />
+    <mockito:mock id="SijoittelunTulosExcelRoute" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute" />
+    <mockito:mock id="ValintalaskentaTulosExcelRoute" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute" />
     <mockito:mock id="kirjeetHakukohdeCache" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache" />
     <!-- Swagger -->
     <!-- Swagger API listing resource -->
@@ -94,6 +105,7 @@
         <ref bean="PistesyottoResource"/>
         <ref bean="DokumenttiProsessiResource"/>
         <ref bean="ViestintapalveluAktivointiResource"/>
+        <ref bean="ValintalaskentaExcelResource"/>
       </jaxrs:serviceBeans>
       <jaxrs:providers>
         <ref bean="jsonProvider" />

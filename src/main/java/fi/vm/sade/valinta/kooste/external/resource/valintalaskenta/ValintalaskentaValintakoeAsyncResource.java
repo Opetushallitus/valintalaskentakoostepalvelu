@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 
 /**
  * 
@@ -25,4 +26,9 @@ public interface ValintalaskentaValintakoeAsyncResource {
 			String hakukohdeOid,
 			Consumer<List<ValintakoeOsallistuminenDTO>> callback,
 			Consumer<Throwable> failureCallback);
+
+	Peruutettava haeValintatiedotHakukohteelle(String hakukohdeOid,
+											   List<String> valintakoeOid,
+											   Consumer<List<HakemusOsallistuminenDTO>> callback, Consumer<Throwable> failureCallback);
+
 }

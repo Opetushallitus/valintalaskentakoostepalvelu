@@ -414,6 +414,8 @@
 	<ctx:component-scan
 		base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.impl" />
 	<ctx:component-scan
+			base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.service" />
+	<ctx:component-scan
 		base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.resource" />
 
 	<!-- Tarjonta reitit -->

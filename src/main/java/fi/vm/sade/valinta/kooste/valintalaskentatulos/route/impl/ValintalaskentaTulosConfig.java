@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintakoekutsutExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute;
 
 /**
@@ -49,13 +48,4 @@ public class ValintalaskentaTulosConfig {
 						ValintalaskentaTulosExcelRoute.class);
 	}
 
-	@Bean
-	public ValintakoekutsutExcelRoute getValintakoekutsutExcelRoute(
-			@Value(ValintakoekutsutExcelRoute.SEDA_VALINTAKOE_EXCEL) String valintakoekutsutXls,
-			@Qualifier("javaDslCamelContext") CamelContext context)
-			throws Exception {
-		return ProxyWithAnnotationHelper.createProxy(
-				context.getEndpoint(valintakoekutsutXls),
-				ValintakoekutsutExcelRoute.class);
-	}
 }

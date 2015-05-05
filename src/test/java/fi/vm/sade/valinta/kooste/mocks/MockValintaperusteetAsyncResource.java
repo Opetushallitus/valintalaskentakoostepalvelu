@@ -41,6 +41,12 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
+    public Peruutettava haeValintakokeet(Collection<String> oids, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
+        callback.accept(valintakokeetResultReference.get());
+        return new PeruutettavaImpl(Futures.immediateFuture(valintakokeetResultReference.get()));
+    }
+
+    @Override
     public Peruutettava haeValintakokeetHakukohteille(Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
         callback.accept(hakukohdeResultReference.get());
         return new PeruutettavaImpl(Futures.immediateFuture(hakukohdeResultReference.get()));
