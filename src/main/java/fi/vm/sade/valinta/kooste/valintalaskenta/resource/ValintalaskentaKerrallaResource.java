@@ -2,13 +2,11 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import org.slf4j.Logger;
@@ -100,19 +98,7 @@ public class ValintalaskentaKerrallaResource {
                 LOG.error("Uudelleen ajo laskennalle({}) timeouttasi!", uuid);
                 asyncResponseTimeout.resume(errorResponce("Uudelleen ajo laskennalle timeouttasi!"));
             });
-            final Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
-            if (l != null && !l.isValmis()) {
-                LOG.warn("Laskenta {} on viela ajossa, joten palautetaan linkki siihen.", uuid);
-                asyncResponse.resume(Response.ok(Vastaus.uudelleenOhjaus(uuid)).build());
-            }
-            seurantaAsyncResource.resetoiTilat(
-                    uuid,
-                    (LaskentaDto laskenta) -> valintalaskentaKerrallaService.kasitteleKaynnistaLaskentaUudelleen(laskenta, (Response response) -> asyncResponse.resume(response)),
-                    (Throwable t) -> {
-                        LOG.error("Uudelleen ajo laskennalle heitti poikkeuksen {}:\r\n{}",
-                                t.getMessage(), Arrays.toString(t.getStackTrace()));
-                        asyncResponse.resume(errorResponce("Uudelleen ajo laskennalle heitti poikkeuksen!"));
-                    });
+            valintalaskentaKerrallaService.kaynnistaLaskentaUudelleen(uuid, (Response response) -> asyncResponse.resume(response));
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
             asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));

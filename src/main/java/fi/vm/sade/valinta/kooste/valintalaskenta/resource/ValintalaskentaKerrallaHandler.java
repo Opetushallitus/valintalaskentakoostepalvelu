@@ -75,22 +75,34 @@ public class ValintalaskentaKerrallaHandler {
                 callbackResponce);
     }
 
-    public void kasitteleKaynnistaLaskentaUudelleen(
-            final LaskentaDto laskenta,
+    public void kaynnistaLaskentaUudelleen(
+            final String uuid,
             final Consumer<Response> callbackResponce) {
         try {
-            kaynnistaLaskenta(
-                    laskenta.getTyyppi(),
-                    laskenta.getHakuOid(),
-                    luoMaskiLaskennanPohjalta(laskenta),
-                    (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> {
-                        laskennanAloitus.accept(laskenta.getUuid());
-                    },
-                    Boolean.TRUE.equals(laskenta.isErillishaku()),
-                    LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
-                    laskenta.getValinnanvaihe(),
-                    laskenta.getValintakoelaskenta(),
-                    callbackResponce);
+            final Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
+            if (l != null && !l.isValmis()) {
+                LOG.warn("Laskenta {} on viela ajossa, joten palautetaan linkki siihen.", uuid);
+                callbackResponce.accept(redirectResponce(uuid));
+            }
+            seurantaAsyncResource.resetoiTilat(
+                    uuid,
+                    (LaskentaDto laskenta) -> kaynnistaLaskenta(
+                            laskenta.getTyyppi(),
+                            laskenta.getHakuOid(),
+                            luoMaskiLaskennanPohjalta(laskenta),
+                            (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> {
+                                laskennanAloitus.accept(laskenta.getUuid());
+                            },
+                            Boolean.TRUE.equals(laskenta.isErillishaku()),
+                            LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
+                            laskenta.getValinnanvaihe(),
+                            laskenta.getValintakoelaskenta(),
+                            callbackResponce),
+                    (Throwable t) -> {
+                        LOG.error("Uudelleen ajo laskennalle heitti poikkeuksen {}:\r\n{}",
+                                t.getMessage(), Arrays.toString(t.getStackTrace()));
+                        callbackResponce.accept(errorResponce("Uudelleen ajo laskennalle heitti poikkeuksen!"));
+                    });
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
             callbackResponce.accept(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
