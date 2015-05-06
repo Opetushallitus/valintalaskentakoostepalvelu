@@ -28,8 +28,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
-public class ValintalaskentaKerrallaService {
-    private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaKerrallaService.class);
+public class ValintalaskentaKerrallaHandler {
+    private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaKerrallaHandler.class);
 
     @Autowired
     private ValintalaskentaKerrallaRouteValvomo valintalaskentaValvomo;
@@ -42,7 +42,7 @@ public class ValintalaskentaKerrallaService {
     @Autowired
     private LaskentaSeurantaAsyncResource seurantaAsyncResource;
 
-    public ValintalaskentaKerrallaService() {
+    public ValintalaskentaKerrallaHandler() {
     }
 
     public void kaynnistaLaskentaHaulle(

@@ -40,7 +40,7 @@ public class ValintalaskentaKerrallaResource {
     @Autowired
     private ValintalaskentaKerrallaRouteValvomo valintalaskentaValvomo;
     @Autowired
-    private ValintalaskentaKerrallaService valintalaskentaKerrallaService;
+    private ValintalaskentaKerrallaHandler valintalaskentaKerrallaService;
     @Autowired
     private ValintalaskentaStatusExcelHandler valintalaskentaStatusExcelHandler;
     @Autowired
