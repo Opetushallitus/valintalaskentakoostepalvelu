@@ -51,12 +51,10 @@ public class YoToAvainSuoritustietoDTOConverter {
         Optional.ofNullable(a.getArvio().getPisteet()).ifPresent(pisteet -> {
             x.put("PISTEET", "" + pisteet);
         });
-        x.put("ARVO",""+a.getArvio().getArvosana());
-        AineyhdistelmaroolitConverter.rooliFromArvosana(a).ifPresent(
-                r -> {
-                    x.put("ROOLI",r);
-                }
-        );
+        x.put("ARVO", "" + a.getArvio().getArvosana());
+        Optional.ofNullable(a.getLahdeArvot().get("aineyhdistelmarooli")).ifPresent(rooli -> {
+            x.put("ROOLI", "" + rooli);
+        });
         lisaaSuorituspvm(a,x);
         return x;
     };
@@ -68,11 +66,9 @@ public class YoToAvainSuoritustietoDTOConverter {
         });
         x.put("ARVO",""+a.getArvio().getArvosana());
         lisaaSuorituspvm(a,x);
-        AineyhdistelmaroolitConverter.rooliFromArvosana(a).ifPresent(
-                r -> {
-                    x.put("ROOLI",r);
-                }
-        );
+        Optional.ofNullable(a.getLahdeArvot().get("aineyhdistelmarooli")).ifPresent(rooli -> {
+            x.put("ROOLI", "" + rooli);
+        });
         return x;
     };
     public static List<AvainMetatiedotDTO> convert(Oppija oppija) {
@@ -138,11 +134,11 @@ public class YoToAvainSuoritustietoDTOConverter {
             }
             return Stream.of(new Arvosana(a.getId(), a.getSuoritus(),
                     osakoe, a.getValinnainen(), a.getMyonnetty(), a.getSource(),
-                    a.getArvio(), a.getLisatieto()));
+                    a.getLahdeArvot(), a.getArvio(), a.getLisatieto()));
         } else {
             return Stream.of(new Arvosana(a.getId(), a.getSuoritus(),
                     aineMapper(a.getAine(), a.getLisatieto()), a.getValinnainen(), a.getMyonnetty(), a.getSource(),
-                    a.getArvio(), a.getLisatieto()));
+                    a.getLahdeArvot(), a.getArvio(), a.getLisatieto()));
         }
     }
     private static String aineMapper(String aine, String lisatieto) {

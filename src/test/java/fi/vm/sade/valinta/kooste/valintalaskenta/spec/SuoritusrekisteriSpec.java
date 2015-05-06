@@ -121,10 +121,16 @@ public class SuoritusrekisteriSpec {
             return ArvosanaBuilder.this;
         }
 
+        public ArvosanaBuilder setAineyhdistelmarooli(String aineyhdistelmarooli) {
+            arvosana.getLahdeArvot().put("aineyhdistelmarooli", aineyhdistelmarooli);
+            return ArvosanaBuilder.this;
+        }
+
         public SuoritusBuilder build() {
             suoritus.suoritusJaArvosanat.getArvosanat().add(arvosana);
             return suoritus;
         }
+
     }
 
     public static class SuoritusBuilder {

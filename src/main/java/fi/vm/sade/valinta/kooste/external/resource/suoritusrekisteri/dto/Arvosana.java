@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 
  * @author Jussi Jartamo
@@ -12,20 +15,21 @@ public class Arvosana {
 	private Boolean valinnainen = false;
 	private String myonnetty;
 	private String source;
+	private Map<String,String> lahdeArvot = new HashMap<>();
 	private Arvio arvio = new Arvio();
     private String lisatieto;
 
 	public Arvosana() {
 	}
 
-	public Arvosana(String id, String suoritus, String aine,
-			Boolean valinnainen, String myonnetty, String source, Arvio arvio, String lisatieto) {
+	public Arvosana(String id, String suoritus, String aine, Boolean valinnainen, String myonnetty, String source, Map<String,String> lahdeArvot, Arvio arvio, String lisatieto) {
 		this.id = id;
 		this.suoritus = suoritus;
         this.aine = aine;
 		this.valinnainen = valinnainen;
 		this.myonnetty = myonnetty;
 		this.source = source;
+		this.lahdeArvot = lahdeArvot;
 		this.arvio = arvio;
         this.lisatieto = lisatieto;
 	}
@@ -93,4 +97,12 @@ public class Arvosana {
     public String getLisatieto() {
         return lisatieto;
     }
+
+	public Map<String, String> getLahdeArvot() {
+		return lahdeArvot;
+	}
+
+	public void setLahdeArvot(Map<String, String> lahdeArvot) {
+		this.lahdeArvot = lahdeArvot;
+	}
 }
