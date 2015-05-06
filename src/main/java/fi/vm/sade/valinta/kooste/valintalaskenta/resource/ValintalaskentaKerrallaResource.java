@@ -4,7 +4,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
@@ -23,10 +22,8 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -77,27 +74,7 @@ public class ValintalaskentaKerrallaResource {
                 asyncResponse.resume(errorResponce("Uudelleen ajo laskennalle aikakatkaistu!"));
             });
 
-            valintalaskentaKerrallaService.kaynnistaLaskenta(
-                    laskentatyyppi,
-                    hakuOid,
-                    new Maski(whitelist, stringMaski),
-                    (Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus) -> {
-                        valintalaskentaKerrallaService.kasitteleKokoPaska(
-                                hakukohdeOids,
-                                laskennanAloitus,
-                                asyncResponse,
-                                seurantaAsyncResource,
-                                hakuOid,
-                                laskentatyyppi,
-                                erillishaku,
-                                valinnanvaihe,
-                                valintakoelaskenta);
-                    },
-                    Boolean.TRUE.equals(erillishaku),
-                    LaskentaTyyppi.VALINTARYHMA.equals(laskentatyyppi),
-                    valinnanvaihe,
-                    valintakoelaskenta,
-                    asyncResponse);
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, new Maski(whitelist, stringMaski), Boolean.TRUE.equals(erillishaku), (Response response)-> asyncResponse.resume(response));
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
             asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
@@ -130,7 +107,7 @@ public class ValintalaskentaKerrallaResource {
             }
             seurantaAsyncResource.resetoiTilat(
                     uuid,
-                    (LaskentaDto laskenta) -> valintalaskentaKerrallaService.kasitteleKaynnistaLaskentaUudelleen(laskenta, asyncResponse),
+                    (LaskentaDto laskenta) -> valintalaskentaKerrallaService.kasitteleKaynnistaLaskentaUudelleen(laskenta, (Response response) -> asyncResponse.resume(response)),
                     (Throwable t) -> {
                         LOG.error("Uudelleen ajo laskennalle heitti poikkeuksen {}:\r\n{}",
                                 t.getMessage(), Arrays.toString(t.getStackTrace()));
