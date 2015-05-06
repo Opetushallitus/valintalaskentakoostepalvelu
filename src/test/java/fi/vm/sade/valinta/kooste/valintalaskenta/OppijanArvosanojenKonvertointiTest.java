@@ -795,6 +795,41 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
 
         }
     }
+
+    @Test
+    public void kaytetaanKoetunnustaAineenaJosAnnettu() {
+        Oppija suoritus = oppija()
+                .suoritus()
+                .setYo()
+                .setValmis()
+                .arvosana()
+                .setAine("AINEREAALI")
+                .setLisatieto("HI")
+                .setKoetunnus("HI")
+                .setAsteikko_yo()
+                .setArvosana("M")
+                .setPisteet(20)
+                .build()
+                .build()
+                .build();
+        {
+            List<AvainMetatiedotDTO> aa = YoToAvainSuoritustietoDTOConverter.convert(suoritus);
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
+
+            Assert.assertTrue("HI löytyy",
+                    aa.stream().filter(a -> "HI".equals(a.getAvain()) &&
+                            testEquality(a,
+                                    avainsuoritustieto("HI")
+                                            .suoritustieto("LISATIETO", "HI")
+                                            .suoritustieto("ARVO", "M")
+                                            .suoritustieto("PISTEET", "20")
+                                            .build()
+                                            .build()
+                                            .build())).count() == 1L);
+
+        }
+    }
+
     @Test
     public void yoArvosanatRoolitukset() {
         {

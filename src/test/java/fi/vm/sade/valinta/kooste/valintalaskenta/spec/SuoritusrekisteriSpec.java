@@ -126,11 +126,15 @@ public class SuoritusrekisteriSpec {
             return ArvosanaBuilder.this;
         }
 
+        public ArvosanaBuilder setKoetunnus(String koetunnus) {
+            arvosana.getLahdeArvot().put("koetunnus", koetunnus);
+            return ArvosanaBuilder.this;
+        }
+
         public SuoritusBuilder build() {
             suoritus.suoritusJaArvosanat.getArvosanat().add(arvosana);
             return suoritus;
         }
-
     }
 
     public static class SuoritusBuilder {

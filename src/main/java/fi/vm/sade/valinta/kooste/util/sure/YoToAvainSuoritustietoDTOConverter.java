@@ -137,10 +137,19 @@ public class YoToAvainSuoritustietoDTOConverter {
                     a.getLahdeArvot(), a.getArvio(), a.getLisatieto()));
         } else {
             return Stream.of(new Arvosana(a.getId(), a.getSuoritus(),
-                    aineMapper(a.getAine(), a.getLisatieto()), a.getValinnainen(), a.getMyonnetty(), a.getSource(),
+                    aineMapper(a), a.getValinnainen(), a.getMyonnetty(), a.getSource(),
                     a.getLahdeArvot(), a.getArvio(), a.getLisatieto()));
         }
     }
+    private static String aineMapper(Arvosana a) {
+        if (StringUtils.isNotEmpty(a.getLahdeArvot().get("koetunnus"))) {
+            return a.getLahdeArvot().get("koetunnus");
+        }
+        String aine = aineMapper(a.getAine(), a.getLisatieto());
+        LOG.warn("No koetunnus in YO arvosana: mapped aine '" + a.getAine() + "' and lisatieto '" + a.getLisatieto() + "' to aine " + aine);
+        return aine;
+    }
+
     private static String aineMapper(String aine, String lisatieto) {
         if (aine.equals("AINEREAALI")) {
             return lisatieto;
