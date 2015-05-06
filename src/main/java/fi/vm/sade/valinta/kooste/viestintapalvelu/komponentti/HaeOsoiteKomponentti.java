@@ -152,7 +152,8 @@ public class HaeOsoiteKomponentti {
 				String.CASE_INSENSITIVE_ORDER);
 		henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
 
-		String postitoimipaikka = KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero());
+		Koodi postiKoodi = posti.get(wrapper.getSuomalainenPostinumero());
+		String postitoimipaikka = KoodistoCachedAsyncResource.haeKoodistaArvo(postiKoodi, KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero());
 		String asuinmaaEnglanniksi = KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa());
 		/*
 		String suomalainenLahiosoite = wrapper.getSuomalainenLahiosoite();

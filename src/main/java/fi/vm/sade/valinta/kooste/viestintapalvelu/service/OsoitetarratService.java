@@ -22,6 +22,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponent
 import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakija;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -80,6 +82,7 @@ public class OsoitetarratService {
             String hakuOid) {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
+            LOG.error("Luodaan osoitetarrat sijoittelussa hyväksytyille (haku={}, hakukohde={})", hakuOid, hakukohdeOid);
             prosessi.setKokonaistyo(
                     3 // luonti
                     + 1
@@ -125,11 +128,12 @@ public class OsoitetarratService {
             DokumenttiProsessi prosessi,
             String hakuOid,
             String hakukohdeOid,
-            List<String> valintakoeOid) {
+            Set<String> valintakoeOid) {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
+            LOG.error("Luodaan osoitetarrat valintakokeeseen osallistujille (haku={}, hakukohde={})", hakuOid, hakukohdeOid);
             prosessi.setKokonaistyo(
-                5
+                7
                         // luonti
                         + 1
                         // dokumenttipalveluun vienti
@@ -140,9 +144,7 @@ public class OsoitetarratService {
             final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
                     .setLaskurinAlkuarvo(
-                            1 // valintakokeet
-                            +
-                            1 // osallistumistiedot
+                            2 // maat ja valtiot + posti
                             +
                             1 // ulkopuoliset hakijat
                     )
@@ -163,14 +165,17 @@ public class OsoitetarratService {
                     })
                     .setSynkronoituToiminto(() -> {
                         // Haetaan ulkopuoliset hakijat
+                        List<ValintakoeOsallistuminenDTO> osallistumistiedot = osallistumistiedotRef.get();
                         Set<String> valintakokeisiinOsallistujienHakemusOidit =
-                                osallistumistiedotRef.get().stream()
+                                osallistumistiedot.stream()
                                         .filter(o ->
                                                 o.getHakutoiveet().stream().anyMatch(h ->
-                                                        hakukohdeOid.equals(h.getHakukohdeOid()) && h.getValinnanVaiheet().stream().anyMatch(v ->
-                                                                v.getValintakokeet().stream().anyMatch(vk ->
-                                                                        valintakoeOid.contains(vk.getValintakoeOid()) &&
-                                                                                OsallistuminenDTO.OSALLISTUU.equals(vk.getOsallistuminenTulos())))))
+                                                        hakukohdeOid.equals(h.getHakukohdeOid()) && h.getValinnanVaiheet().stream()
+                                                                .anyMatch(v ->
+                                                                        v.getValintakokeet().stream()
+                                                                                .anyMatch(vk ->
+                                                                                        valintakoeOid.contains(vk.getValintakoeOid()) &&
+                                                                                                Osallistuminen.OSALLISTUU.equals(vk.getOsallistuminenTulos().getOsallistuminen())))))
                                         .map(o -> o.getHakemusOid()).collect(Collectors.toSet());
 
                         Set<String> mahdollisestiHakukohteenHakemusOidit =
@@ -189,7 +194,7 @@ public class OsoitetarratService {
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
             posti(laskuri, postiRef, poikkeuskasittelija);
             valintaperusteetValintakoeResource.haeValintakokeet(valintakoeOid, valintakokeet -> {
-                boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
+                boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> valintakoeOid.contains(vk.getOid()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
                 if (kutsutaankoJossainKokeessaKaikki) {
                     applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid, hakemukset -> {
                         haetutHakemuksetRef.set(hakemukset);
@@ -199,11 +204,9 @@ public class OsoitetarratService {
                     haetutHakemuksetRef.set(Collections.emptyList());
                     laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                 }
-                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);
             valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid, osallistumiset -> {
                 osallistumistiedotRef.set(osallistumiset);
-                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                 laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);
         } catch(Throwable t) {
@@ -216,6 +219,7 @@ public class OsoitetarratService {
             List<String> hakemusOids) {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
+            LOG.error("Luodaan osoitetarrat hakemuksille (size={})", hakemusOids.size());
             prosessi.setKokonaistyo(
                     3
                             // luonti
@@ -256,16 +260,15 @@ public class OsoitetarratService {
                             haetutHakemukset.stream().map(h ->
                                     osoiteKomponentti.haeOsoite(maatJaValtiot1, posti, h))
                                     .collect(Collectors.toList()));
-            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(osoitteet));
+            //LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(osoitteet));
             viestintapalveluAsyncResource.haeOsoitetarrat(osoitteet, response -> {
                 prosessi.inkrementoiTehtyjaToita();
                 String id = UUID.randomUUID().toString();
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 try {
-                    IOUtils.copy((InputStream) response.getEntity(), outputStream);
+                    InputStream inputStream = pipeInputStreams((InputStream)response.getEntity());
                     dokumenttiAsyncResource.tallenna(id, "osoitetarrat.pdf",
                             defaultExpirationDate().getTime(), prosessi.getTags(), "application/pdf",
-                            new ByteArrayInputStream(outputStream.toByteArray())
+                            inputStream
                             , ok -> {
                                 prosessi.inkrementoiTehtyjaToita();
                                 prosessi.setDokumenttiId(id);
@@ -310,5 +313,16 @@ public class OsoitetarratService {
             postiRef.set(posti);
             laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
         }, poikkeuskasittelija);
+    }
+    private InputStream pipeInputStreams(InputStream incoming)
+            throws IOException {
+        byte[] dokumentti = IOUtils.toByteArray(incoming);
+        if (dokumentti == null || dokumentti.length == 0) {
+            throw new RuntimeException(
+                    "Viestintäpalvelu palautti tyhjän dokumentin!");
+        }
+        InputStream p = new ByteArrayInputStream(dokumentti);
+        incoming.close();
+        return p;
     }
 }

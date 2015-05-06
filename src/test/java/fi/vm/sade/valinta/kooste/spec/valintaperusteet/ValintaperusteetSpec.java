@@ -47,7 +47,10 @@ public class ValintaperusteetSpec {
             valintaperusteDTO.setOid(oid);
             return this;
         }
-
+        public ValintakoeDTOBuilder setKaikkiKutsutaan() {
+            valintaperusteDTO.setKutsutaankoKaikki(true);
+            return this;
+        }
         public ValintakoeDTO build() {
             return valintaperusteDTO;
         }

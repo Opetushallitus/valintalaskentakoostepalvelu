@@ -77,7 +77,7 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
 					getWebClient()
 							.path(url)
 							.async()
-							.put(Entity.json(osoitteet), new ResponseCallback(
+							.post(Entity.json(osoitteet), new ResponseCallback(
 									callback,
 									failureCallback)));
 		} catch (Exception e) {
