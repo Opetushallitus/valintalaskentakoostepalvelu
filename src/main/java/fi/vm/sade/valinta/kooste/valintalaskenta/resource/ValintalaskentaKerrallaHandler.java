@@ -75,6 +75,29 @@ public class ValintalaskentaKerrallaHandler {
                 callbackResponce);
     }
 
+    public void kasitteleKaynnistaLaskentaUudelleen(
+            final LaskentaDto laskenta,
+            final Consumer<Response> callbackResponce) {
+        try {
+            kaynnistaLaskenta(
+                    laskenta.getTyyppi(),
+                    laskenta.getHakuOid(),
+                    luoMaskiLaskennanPohjalta(laskenta),
+                    (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> {
+                        laskennanAloitus.accept(laskenta.getUuid());
+                    },
+                    Boolean.TRUE.equals(laskenta.isErillishaku()),
+                    LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
+                    laskenta.getValinnanvaihe(),
+                    laskenta.getValintakoelaskenta(),
+                    callbackResponce);
+        } catch (Throwable e) {
+            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
+            callbackResponce.accept(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
+            throw e;
+        }
+    }
+
     private void kaynnistaLaskenta(
             final LaskentaTyyppi tyyppi,
             final String hakuOid,
@@ -277,29 +300,6 @@ public class ValintalaskentaKerrallaHandler {
                     LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen: {}", poikkeus.getMessage());
                     callbackResponce.accept(errorResponce(poikkeus.getMessage()));
                 });
-    }
-
-    public void kasitteleKaynnistaLaskentaUudelleen(
-            final LaskentaDto laskenta,
-            final Consumer<Response> callbackResponce) {
-        try {
-            kaynnistaLaskenta(
-                    laskenta.getTyyppi(),
-                    laskenta.getHakuOid(),
-                    luoMaskiLaskennanPohjalta(laskenta),
-                    (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> {
-                        laskennanAloitus.accept(laskenta.getUuid());
-                    },
-                    Boolean.TRUE.equals(laskenta.isErillishaku()),
-                    LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
-                    laskenta.getValinnanvaihe(),
-                    laskenta.getValintakoelaskenta(),
-                    callbackResponce);
-        } catch (Throwable e) {
-            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
-            callbackResponce.accept(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
-            throw e;
-        }
     }
 
     private Response redirectResponce(final String target) {
