@@ -71,7 +71,7 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
 
 	@Override
 	public Peruutettava haeOsoitetarrat(Osoitteet osoitteet, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
-		String url = "/addresslabel/sync/pdf";
+		String url = "/api/v1/addresslabel/sync/pdf";
 		try {
 			return new PeruutettavaImpl(
 					getWebClient()

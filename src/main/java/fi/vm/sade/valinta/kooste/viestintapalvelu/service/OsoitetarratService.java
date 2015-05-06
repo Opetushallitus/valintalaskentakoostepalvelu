@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.service;
 
 import com.google.common.collect.Sets;
+import com.google.gson.GsonBuilder;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -21,12 +22,15 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponent
 import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakija;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -252,16 +256,34 @@ public class OsoitetarratService {
                             haetutHakemukset.stream().map(h ->
                                     osoiteKomponentti.haeOsoite(maatJaValtiot1, posti, h))
                                     .collect(Collectors.toList()));
+            LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(osoitteet));
             viestintapalveluAsyncResource.haeOsoitetarrat(osoitteet, response -> {
                 prosessi.inkrementoiTehtyjaToita();
                 String id = UUID.randomUUID().toString();
-                dokumenttiAsyncResource.tallenna(id, "osoitetarrat.pdf",
-                        defaultExpirationDate().getTime(), prosessi.getTags(), "application/pdf",
-                        (InputStream) response.getEntity(), ok -> {
-                            prosessi.inkrementoiTehtyjaToita();
-                            prosessi.setDokumenttiId(id);
-                        }, poikkeuskasittelija);
-            }, poikkeuskasittelija);
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                try {
+                    IOUtils.copy((InputStream) response.getEntity(), outputStream);
+                    dokumenttiAsyncResource.tallenna(id, "osoitetarrat.pdf",
+                            defaultExpirationDate().getTime(), prosessi.getTags(), "application/pdf",
+                            new ByteArrayInputStream(outputStream.toByteArray())
+                            , ok -> {
+                                prosessi.inkrementoiTehtyjaToita();
+                                prosessi.setDokumenttiId(id);
+                            }, poikkeus -> {
+                                LOG.error("Osoitetarrojen luonti epäonnistui dokumentin tallennukseen:", poikkeus);
+                                prosessi.getPoikkeukset().add(
+                                        new Poikkeus(Poikkeus.KOOSTEPALVELU,
+                                                "Osoitetarrojen tallennus epäonnistui:", poikkeus.getMessage()));
+                            });
+                } catch(Throwable t) {
+                    poikkeuskasittelija.accept(t);
+                }
+            }, poikkeus -> {
+                LOG.error("Osoitetarrojen luonti epäonnistui viestintäpalvelukutsuun:", poikkeus);
+                prosessi.getPoikkeukset().add(
+                        new Poikkeus(Poikkeus.KOOSTEPALVELU,
+                                "Osoitetarrojen luonti viestintäpalvelussa epäonnistui:", poikkeus.getMessage()));
+            });
         } catch (Throwable t) {
             poikkeuskasittelija.accept(t);
         }
