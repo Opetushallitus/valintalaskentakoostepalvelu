@@ -82,7 +82,7 @@ public class ValintalaskentaKerrallaService {
         LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
         haunHakukohteet(
                 hakuOid,
-                haunHakukohteetOids -> {
+                (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> {
                     kasitteleHaunkohteetOids(
                             haunHakukohteetOids,
                             tyyppi,
@@ -95,12 +95,7 @@ public class ValintalaskentaKerrallaService {
                             valintakoelaskenta,
                             asyncResponse);
                 },
-                poikkeus -> {
-                    asyncResponse.resume(Response
-                            .serverError()
-                            .entity(poikkeus.getMessage())
-                            .build());
-                });
+                (Throwable poikkeus) -> asyncResponse.resume(errorResponce(poikkeus.getMessage())));
     }
 
 
@@ -112,15 +107,10 @@ public class ValintalaskentaKerrallaService {
             LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
             throw new RuntimeException("Yritettiin hakea hakukohteita ilman hakuOidia!");
         }
-        valintaperusteetAsyncResource
-                .haunHakukohteet(
-                        hakuOid,
-                        hakukohdeViitteet -> {
-                            kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, hakukohdeJaOrganisaatioKasittelijaCallback, failureCallback);
-                        },
-                        poikkeus -> {
-                            failureCallback.accept(poikkeus);
-                        });
+        valintaperusteetAsyncResource.haunHakukohteet(
+                hakuOid,
+                (List<HakukohdeViiteDTO> hakukohdeViitteet) -> kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, hakukohdeJaOrganisaatioKasittelijaCallback, failureCallback),
+                (Throwable poikkeus) -> failureCallback.accept(poikkeus));
     }
 
     void kasitteleHakukohdeViitteet(
@@ -190,7 +180,7 @@ public class ValintalaskentaKerrallaService {
         ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametrit -> {
                     seurantaTunnus.accept(
                             oids,
-                            uuid -> {
+                            (String uuid) -> {
                                 valintalaskentaRoute.suoritaValintalaskentaKerralla(
                                         parametrit,
                                         new LaskentaAloitus(
@@ -211,10 +201,7 @@ public class ValintalaskentaKerrallaService {
                 poikkeus -> {
                     LOG.error("Ohjausparametrien luku epäonnistui: {} {}",
                             poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
-                    asyncResponse.resume(Response
-                            .serverError()
-                            .entity(poikkeus.getMessage())
-                            .build());
+                    asyncResponse.resume(errorResponce(poikkeus.getMessage()));
                 });
     }
 
@@ -224,20 +211,14 @@ public class ValintalaskentaKerrallaService {
             final Consumer<String> laskennanAloitus) {
         if (uuid == null) {
             LOG.error("Laskentaa ei saatu luotua!");
-            asyncResponse.resume(Response
-                    .serverError()
-                    .entity("Laskentaa ei saatu luotua!")
-                    .build());
+            asyncResponse.resume(errorResponce("Laskentaa ei saatu luotua!"));
             throw new RuntimeException("Laskentaa ei saatu luotua!");
         }
         try {
             laskennanAloitus.accept(uuid);
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
-            asyncResponse.resume(Response
-                    .serverError()
-                    .entity("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage())
-                    .build());
+            asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
             throw e;
         }
     }
@@ -274,10 +255,7 @@ public class ValintalaskentaKerrallaService {
                 .collect(Collectors.toList());
         if (hakukohdeDtos.isEmpty() || hakukohdeDtos.size() == 0) {
             LOG.error("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
-            asyncResponse.resume(Response
-                    .serverError()
-                    .entity("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!")
-                    .build());
+            asyncResponse.resume(errorResponce("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!"));
             throw new RuntimeException("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
         } else {
             if (hakukohdeDtos.size() < hakukohdeOids.size()) {
@@ -293,15 +271,10 @@ public class ValintalaskentaKerrallaService {
                 valinnanvaihe,
                 valintakoelaskenta,
                 hakukohdeDtos,
-                uuid -> {
-                    kasitteleLaskennanAloitus(uuid, asyncResponse, laskennanAloitus);
-                },
-                poikkeus -> {
+                (String uuid) -> kasitteleLaskennanAloitus(uuid, asyncResponse, laskennanAloitus),
+                (Throwable poikkeus) -> {
                     LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen: {}", poikkeus.getMessage());
-                    asyncResponse.resume(Response
-                            .serverError()
-                            .entity(poikkeus.getMessage())
-                            .build());
+                    asyncResponse.resume(errorResponce(poikkeus.getMessage()));
                 });
     }
 
@@ -323,7 +296,7 @@ public class ValintalaskentaKerrallaService {
                             maski.stream()
                                     .map(hk -> hk.getHakukohdeOid())
                                     .collect(Collectors.toList())),
-                    (hakuJaHakukohteet, laskennanAloitus) -> {
+                    (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> {
                         laskennanAloitus.accept(laskenta.getUuid());
                     },
                     Boolean.TRUE.equals(laskenta.isErillishaku()),
@@ -333,11 +306,12 @@ public class ValintalaskentaKerrallaService {
                     asyncResponse);
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
-            asyncResponse.resume(Response
-                    .serverError()
-                    .entity("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage())
-                    .build());
+            asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
             throw e;
         }
+    }
+
+    private Response errorResponce(final String errorMessage){
+        return Response.serverError().entity(errorMessage).build();
     }
 }
