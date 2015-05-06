@@ -133,7 +133,7 @@ public class OsoitetarratService {
         try {
             LOG.error("Luodaan osoitetarrat valintakokeeseen osallistujille (haku={}, hakukohde={})", hakuOid, hakukohdeOid);
             prosessi.setKokonaistyo(
-                7
+                5
                         // luonti
                         + 1
                         // dokumenttipalveluun vienti
