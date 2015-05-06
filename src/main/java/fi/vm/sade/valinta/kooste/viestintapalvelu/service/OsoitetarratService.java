@@ -260,6 +260,17 @@ public class OsoitetarratService {
                             haetutHakemukset.stream().map(h ->
                                     osoiteKomponentti.haeOsoite(maatJaValtiot1, posti, h))
                                     .collect(Collectors.toList()));
+            // Aakkosjarjestykseen
+            osoitteet.getAddressLabels().sort(
+                    (o1, o2) -> {
+                        int i = Optional.ofNullable(o1.getFirstName()).orElse("").compareTo(Optional.ofNullable(o2.getFirstName()).orElse(""));
+                        if(i == 0) {
+                            return Optional.ofNullable(o1.getLastName()).orElse("").compareTo(Optional.ofNullable(o2.getLastName()).orElse(""));
+                        } else {
+                            return i;
+                        }
+                    }
+            );
             //LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(osoitteet));
             viestintapalveluAsyncResource.haeOsoitetarrat(osoitteet, response -> {
                 prosessi.inkrementoiTehtyjaToita();
