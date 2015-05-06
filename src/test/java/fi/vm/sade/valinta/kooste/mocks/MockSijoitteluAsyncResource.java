@@ -10,6 +10,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 
@@ -54,6 +55,11 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
         valintatulos.setHakuOid(hakuOid);
         valintatulos.setValintatapajonoOid(valintatapajonoOid);
         return Futures.immediateFuture(Arrays.asList(valintatulos));
+    }
+
+    @Override
+    public Peruutettava getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid, Consumer<HakijaPaginationObject> callback, Consumer<Throwable> failureCallback) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

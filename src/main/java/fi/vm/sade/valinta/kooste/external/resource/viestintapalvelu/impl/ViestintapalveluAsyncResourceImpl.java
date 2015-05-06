@@ -2,10 +2,18 @@ package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.external.resource.*;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,11 +22,13 @@ import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 
 /**
  * 
@@ -57,5 +67,22 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
 				.post(Entity.entity(GSON.toJson(letterBatch), MediaType.APPLICATION_JSON_TYPE), LetterResponse.class);
+	}
+
+	@Override
+	public Peruutettava haeOsoitetarrat(Osoitteet osoitteet, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
+		String url = "/addresslabel/sync/pdf";
+		try {
+			return new PeruutettavaImpl(
+					getWebClient()
+							.path(url)
+							.async()
+							.put(Entity.json(osoitteet), new ResponseCallback(
+									callback,
+									failureCallback)));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
+		}
 	}
 }

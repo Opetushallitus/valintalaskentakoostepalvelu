@@ -43,8 +43,6 @@ import java.util.stream.Collectors;
 public class ValintakoekutsutExcelService {
     private static final Logger LOG = LoggerFactory
             .getLogger(ValintakoekutsutExcelService.class);
-    public static final String MAAT_JA_VALTIOT_1 = "maatjavaltiot1";
-    public static final String POSTI = "posti";
 
     private final ValintalaskentaValintakoeAsyncResource valintalaskentaAsyncResource;
     //private final ValintatietoResource valintatietoService;
@@ -79,7 +77,7 @@ public class ValintakoekutsutExcelService {
             LOG.error("Valintakoekutsut excelin luonnissa tapahtui poikkeus:", poikkeus);
             prosessi.getPoikkeukset().add(
                     new Poikkeus(Poikkeus.KOOSTEPALVELU,
-                            "Valintakoekutsut Excelin luonnissa tapahtui poikkeus:", poikkeus.getMessage()));
+                            "Valintakoekutsut excelin luonnissa tapahtui poikkeus:", poikkeus.getMessage()));
         };
         try {
             prosessi.setKokonaistyo(
@@ -131,11 +129,11 @@ public class ValintakoekutsutExcelService {
                             poikkeuskasittelija.accept(t);
                         }
                     }).build();
-            koodistoCachedAsyncResource.haeKoodisto(MAAT_JA_VALTIOT_1, maatJaValtiot1 -> {
+            koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1, maatJaValtiot1 -> {
                 maatJaValtiot1Ref.set(maatJaValtiot1);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);
-            koodistoCachedAsyncResource.haeKoodisto(POSTI, posti -> {
+            koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI, posti -> {
                 postiRef.set(posti);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);

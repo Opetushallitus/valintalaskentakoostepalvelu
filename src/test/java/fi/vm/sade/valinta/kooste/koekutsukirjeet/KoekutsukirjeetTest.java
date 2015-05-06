@@ -39,6 +39,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +67,7 @@ public class KoekutsukirjeetTest {
         final String HAKEMUS2 = "HAKEMUS2";
         HakukohdeDTO HAKUKOHDEDTO1 = new HakukohdeDTO();
         HAKUKOHDEDTO1.setOpetuskielet(Arrays.asList("FI","SV"));
+        Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Futures.immediateFuture(Collections.emptyList()));
         ViestintapalveluAsyncResource viestintapalveluAsyncResource =
                 Mocks.getViestintapalveluAsyncResource();
         ArgumentCaptor<LetterBatch> letterBatchArgumentCaptor = ArgumentCaptor.forClass(LetterBatch.class);

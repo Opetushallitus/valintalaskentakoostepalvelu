@@ -466,6 +466,8 @@
 		base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti" />
 	<ctx:component-scan
 		base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl" />
+	<ctx:component-scan
+			base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.service" />
 	<bean id="ViestintapalveluAktivointiResource"
 		class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluAktivointiResource" />
 	<bean id="DokumenttiProsessiResource"

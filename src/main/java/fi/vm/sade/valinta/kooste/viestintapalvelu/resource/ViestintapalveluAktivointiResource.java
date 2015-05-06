@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -9,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +33,9 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessiImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
 
 /**
  * 
@@ -55,7 +56,7 @@ public class ViestintapalveluAktivointiResource {
 			.getLogger(ViestintapalveluAktivointiResource.class);
 
 	@Autowired
-	private OsoitetarratRoute osoitetarratRoute;
+	private OsoitetarratService osoitetarratService;
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 	@Autowired
@@ -72,6 +73,7 @@ public class ViestintapalveluAktivointiResource {
 	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin hakukohteelle", response = Response.class)
 	public ProsessiId aktivoiOsoitetarrojenLuonti(
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
+			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintakoeOid") List<String> valintakoeOids) {
 		try {
@@ -82,11 +84,15 @@ public class ViestintapalveluAktivointiResource {
 					"Osoitetarrat", "Luo osoitetarrat", null, tags(
 							"osoitetarrat", hakemuksillaRajaus.getTag()));
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
-			osoitetarratRoute.osoitetarratAktivointi(
-					DokumenttiTyyppi.VALINTAKOKEESEEN_OSALLISTUJAT,
-					osoiteProsessi, hakemuksillaRajaus.getHakemusOids(),
-					hakukohdeOid, valintakoeOids, SecurityContextHolder
-							.getContext().getAuthentication());
+
+			if(hakemuksillaRajaus.getHakemusOids() != null) {
+				osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
+			} else {
+				osoitetarratService.osoitetarratValintakokeeseenOsallistujille(
+						osoiteProsessi,
+						hakuOid,
+						hakukohdeOid, valintakoeOids);
+			}
 			return new ProsessiId(osoiteProsessi.getId());
 		} catch (Exception e) {
 			LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
@@ -127,12 +133,11 @@ public class ViestintapalveluAktivointiResource {
 					"Osoitetarrat", "Sijoittelussa hyväksytyille", hakuOid,
 					tags("osoitetarrat", hakemuksillaRajaus.getTag()));
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
-			osoitetarratRoute.osoitetarratAktivointi(
-					DokumenttiTyyppi.SIJOITTELUSSA_HYVAKSYTYT, osoiteProsessi,
-					hakemuksillaRajaus.getHakemusOids(), hakukohdeOid, hakuOid,
-					sijoitteluajoId,
-					//
-					SecurityContextHolder.getContext().getAuthentication());
+			if(hakemuksillaRajaus.getHakemusOids() != null) {
+				osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
+			} else {
+				osoitetarratService.osoitetarratSijoittelussaHyvaksytyille(osoiteProsessi,hakukohdeOid, hakuOid);
+			}
 			return osoiteProsessi.toProsessiId();
 		} catch (Exception e) {
 			LOG.error("Hyväksyttyjen osoitetarrojen luonnissa virhe! {}",
@@ -167,11 +172,8 @@ public class ViestintapalveluAktivointiResource {
 					"Osoitetarrat", "Luo osoitetarrat", null, tags(
 							"osoitetarrat", hakemuksillaRajaus.getTag()));
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
-			osoitetarratRoute.osoitetarratAktivointi(
-					DokumenttiTyyppi.HAKEMUKSILLE, osoiteProsessi,
-					hakemuksillaRajaus.getHakemusOids(),
-					//
-					SecurityContextHolder.getContext().getAuthentication());
+			osoitetarratService.osoitetarratHakemuksille(osoiteProsessi,
+					hakemuksillaRajaus.getHakemusOids());
 
 			return new ProsessiId(osoiteProsessi.getId());
 			/*
@@ -319,7 +321,6 @@ public class ViestintapalveluAktivointiResource {
 	 * 
 	 * @param hakukohdeOid
 	 * @param hakuOid
-	 * @param sijoitteluajoId
 	 * @return 200 OK
 	 */
 	@POST

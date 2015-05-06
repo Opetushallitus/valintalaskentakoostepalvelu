@@ -45,6 +45,8 @@
         class="fi.vm.sade.valinta.kooste.valintalaskentatulos.service.ValintakoekutsutExcelService" />
   <bean id="KoodistoCachedAsyncResource"
         class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource"/>
+  <bean id="OsoitetarratService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService"/>
+
 
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"
@@ -52,7 +54,6 @@
     <mockito:mock id="valintatapajononVientiRoute" class="fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute" />
     <mockito:mock id="jalkiohjauskirjeService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService" />
     <mockito:mock id="hyvaksymiskirjeetService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService" />
-    <mockito:mock id="osoitetarratRoute" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute" />
     <mockito:mock id="authorizer" class="fi.vm.sade.authentication.business.service.Authorizer" />
     <mockito:mock id="applicationResource" class="fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource" />
     <mockito:mock id="hakuV1Resource" class="fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource" />

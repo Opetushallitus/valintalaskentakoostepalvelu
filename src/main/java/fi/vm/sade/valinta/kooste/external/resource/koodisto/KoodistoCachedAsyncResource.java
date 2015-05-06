@@ -6,6 +6,7 @@ import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Jussi Jartamo
@@ -26,6 +28,8 @@ import java.util.stream.Collectors;
 @Service
 public class KoodistoCachedAsyncResource {
 
+    public static final String MAAT_JA_VALTIOT_1 = "maatjavaltiot1";
+    public static final String POSTI = "posti";
     private final Logger LOG = LoggerFactory.getLogger(KoodistoCachedAsyncResource.class);
     private final KoodistoAsyncResource koodistoAsyncResource;
     private final Cache<String, Map<String,Koodi>> koodistoCache =
@@ -72,7 +76,7 @@ public class KoodistoCachedAsyncResource {
                     }
                 });
             } catch(Exception e) {
-                LOG.error("Koodistosta luku epäonnistui: {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+                LOG.error("Koodistosta luku epäonnistui:", e);
                 throw new RuntimeException(e);
             }
         } else {
@@ -88,5 +92,21 @@ public class KoodistoCachedAsyncResource {
                     }
                     return b;
                 }));
+    }
+
+    public static String haeKoodistaArvo(Koodi koodi, final String preferoituKieli, String defaultArvo) {
+        if(koodi == null || koodi.getMetadata() == null) { // || koodi.getMetadata().isEmpty()
+            return defaultArvo;
+        } else {
+            return Stream.of(
+                    // Nimi halutulla kielellä
+                    koodi.getMetadata().stream().filter(m -> preferoituKieli.equals(m.getKieli())),
+                    // tai suomenkielellä
+                    koodi.getMetadata().stream().filter(m -> KieliUtil.SUOMI.equals(m.getKieli())),
+                    // tai millä vaan kielellä
+                    koodi.getMetadata().stream()).flatMap(a -> a).findFirst().map(m -> m.getNimi())
+                    // tai tyhjä merkkijono
+                    .orElse(defaultArvo);
+        }
     }
 }
