@@ -17,6 +17,8 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import com.wordnik.swagger.annotations.Api;
 import fi.vm.sade.valinta.kooste.external.resource.Callback;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,5 +132,18 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async().get(new GenericType<HakijaPaginationObject>() { });
 	}
-
+	@Override
+	public Peruutettava getKoulutuspaikkallisetHakijat(
+			String hakuOid, String hakukohdeOid, Consumer<HakijaPaginationObject> callback, Consumer<Throwable> failureCallback) {
+		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakemukset";
+		LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}", address, url, hakukohdeOid);
+		return new PeruutettavaImpl(getWebClient()
+				.path(url)
+				.query("hyvaksytyt", true)
+				.query("hakukohdeOid", hakukohdeOid)
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				.async().get(new Callback<HakijaPaginationObject>(GSON,
+				address,url, callback,failureCallback,
+				new TypeToken<HakijaPaginationObject>() { }.getType())));
+	}
 }

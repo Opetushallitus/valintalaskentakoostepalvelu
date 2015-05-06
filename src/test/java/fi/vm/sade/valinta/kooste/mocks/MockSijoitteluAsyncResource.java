@@ -10,6 +10,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 
@@ -27,6 +29,10 @@ import org.springframework.stereotype.Service;
 public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
 
     private static final AtomicReference<HakukohdeDTO> resultReference = new AtomicReference<>();
+    private static final AtomicReference<HakijaPaginationObject> paginationResultReference = new AtomicReference<>();
+    public static void setPaginationResult(HakijaPaginationObject result) {
+        paginationResultReference.set(result);
+    }
     private static final Map<Long, HakukohdeDTO> resultMap = new ConcurrentHashMap<>();
     public static void setResult(HakukohdeDTO result) {
         resultReference.set(result);
@@ -54,6 +60,12 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
         valintatulos.setHakuOid(hakuOid);
         valintatulos.setValintatapajonoOid(valintatapajonoOid);
         return Futures.immediateFuture(Arrays.asList(valintatulos));
+    }
+
+    @Override
+    public Peruutettava getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid, Consumer<HakijaPaginationObject> callback, Consumer<Throwable> failureCallback) {
+        callback.accept(paginationResultReference.get());
+        return new PeruutettavaImpl(Futures.immediateFuture(paginationResultReference.get()));
     }
 
     @Override

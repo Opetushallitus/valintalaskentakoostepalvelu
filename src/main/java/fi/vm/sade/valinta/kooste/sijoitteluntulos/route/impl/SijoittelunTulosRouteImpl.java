@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
 
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -116,6 +118,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final String osoitetarrat;
 	private final String dokumenttipalveluUrl;
 	private final String muodostaDokumentit;
+	private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
 	@Autowired
 	public SijoittelunTulosRouteImpl(
@@ -124,6 +127,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 			@Value(SijoittelunTulosTaulukkolaskentaRoute.SEDA_SIJOITTELUNTULOS_TAULUKKOLASKENTA_HAULLE) String taulukkolaskenta,
 			@Value(SijoittelunTulosHyvaksymiskirjeetRoute.SEDA_SIJOITTELUNTULOS_HYVAKSYMISKIRJEET_HAULLE) String hyvaksymiskirjeet,
 			@Value(SijoittelunTulosOsoitetarratRoute.SEDA_SIJOITTELUNTULOS_OSOITETARRAT_HAULLE) String osoitetarrat,
+			KoodistoCachedAsyncResource koodistoCachedAsyncResource,
 			HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta,
 			SijoittelunTulosExcelKomponentti sijoittelunTulosExcel,
 			HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta,
@@ -134,6 +138,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 			ApplicationResource applicationResource, TilaResource tilaResource,
 			DokumenttiResource dokumenttiResource,
 			HakukohdeResource tarjontaResource) {
+		this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
 		this.tarjontaResource = tarjontaResource;
 		this.tilaResource = tilaResource;
 		this.pakkaaTiedostotTarriin = pakkaaTiedostotTarriin;
@@ -388,6 +393,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 						}
 						List<String> o;
 						try {
+							Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+							Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
 							List<HakijaDTO> l = Lists.newArrayList();
 							for (HakijaDTO hakija : sijoitteluProxy
 									.koulutuspaikalliset(hakuOid(exchange),
@@ -420,7 +427,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 							for (Hakemus h : hakemukset) {
 								addressLabels.add(osoiteKomponentti
-										.haeOsoite(h));
+										.haeOsoite(maajavaltio, posti, h));
 							}
 							Osoitteet osoitteet = new Osoitteet(addressLabels);
 							if (pakkaaTiedostotTarriin) {

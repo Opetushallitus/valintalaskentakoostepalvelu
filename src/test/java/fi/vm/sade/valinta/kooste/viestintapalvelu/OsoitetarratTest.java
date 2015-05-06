@@ -1,5 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
-
+/*
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -31,11 +31,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 @Configuration
 @Import({ OsoitetarratRouteImpl.class })
 @ContextConfiguration(classes = { OsoitetarratTest.class,
@@ -121,4 +116,6 @@ public class OsoitetarratTest {
 	public HaeOsoiteKomponentti getHaeOsoiteKomponentti() {
 		return Mockito.mock(HaeOsoiteKomponentti.class);
 	}
+
 }
+*/

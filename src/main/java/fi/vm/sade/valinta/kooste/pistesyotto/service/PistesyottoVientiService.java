@@ -71,7 +71,7 @@ public class PistesyottoVientiService {
                      HakuV1RDTO hakuV1RDTO,
                      HakukohdeDTO hakukohdeDTO) {
         Consumer<Throwable> poikkeuskasittelija = poikkeus -> {
-            LOG.error("Pistesyötön viennissä tapatui poikkeus:", poikkeus);
+            LOG.error("Pistesyötön viennissä tapahtui poikkeus:", poikkeus);
             prosessi.getPoikkeukset().add(
                     new Poikkeus(Poikkeus.KOOSTEPALVELU,
                             "Pistesyötön vienti", poikkeus.getMessage()));
@@ -117,7 +117,7 @@ public class PistesyottoVientiService {
 
     public void vie(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi) {
         Consumer<Throwable> poikkeuskasittelija = poikkeus -> {
-            LOG.error("Pistesyötön viennissä tapatui poikkeus:", poikkeus);
+            LOG.error("Pistesyötön viennissä tapahtui poikkeus:", poikkeus);
             prosessi.getPoikkeukset().add(
                     new Poikkeus(Poikkeus.KOOSTEPALVELU,
                             "Pistesyötön vienti", poikkeus.getMessage()));

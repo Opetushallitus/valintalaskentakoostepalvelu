@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -9,6 +11,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.Sets;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +34,9 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessiImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.DokumenttiTyyppi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.OsoitetarratRoute;
 
 /**
  * 
@@ -55,7 +57,7 @@ public class ViestintapalveluAktivointiResource {
 			.getLogger(ViestintapalveluAktivointiResource.class);
 
 	@Autowired
-	private OsoitetarratRoute osoitetarratRoute;
+	private OsoitetarratService osoitetarratService;
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 	@Autowired
@@ -68,10 +70,12 @@ public class ViestintapalveluAktivointiResource {
 	@POST
 	@Path("/osoitetarrat/aktivoi")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin hakukohteelle", response = Response.class)
 	public ProsessiId aktivoiOsoitetarrojenLuonti(
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
+			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintakoeOid") List<String> valintakoeOids) {
 		try {
@@ -82,11 +86,15 @@ public class ViestintapalveluAktivointiResource {
 					"Osoitetarrat", "Luo osoitetarrat", null, tags(
 							"osoitetarrat", hakemuksillaRajaus.getTag()));
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
-			osoitetarratRoute.osoitetarratAktivointi(
-					DokumenttiTyyppi.VALINTAKOKEESEEN_OSALLISTUJAT,
-					osoiteProsessi, hakemuksillaRajaus.getHakemusOids(),
-					hakukohdeOid, valintakoeOids, SecurityContextHolder
-							.getContext().getAuthentication());
+
+			if(hakemuksillaRajaus.getHakemusOids() != null) {
+				osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
+			} else {
+				osoitetarratService.osoitetarratValintakokeeseenOsallistujille(
+						osoiteProsessi,
+						hakuOid,
+						hakukohdeOid, Sets.newHashSet(valintakoeOids));
+			}
 			return new ProsessiId(osoiteProsessi.getId());
 		} catch (Exception e) {
 			LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
@@ -112,6 +120,7 @@ public class ViestintapalveluAktivointiResource {
 	@POST
 	@Path("/osoitetarrat/sijoittelussahyvaksytyille/aktivoi")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi hyväksyttyjen osoitteiden luonnin hakukohteelle haussa", response = Response.class)
 	public ProsessiId aktivoiHyvaksyttyjenOsoitetarrojenLuonti(
@@ -127,12 +136,11 @@ public class ViestintapalveluAktivointiResource {
 					"Osoitetarrat", "Sijoittelussa hyväksytyille", hakuOid,
 					tags("osoitetarrat", hakemuksillaRajaus.getTag()));
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
-			osoitetarratRoute.osoitetarratAktivointi(
-					DokumenttiTyyppi.SIJOITTELUSSA_HYVAKSYTYT, osoiteProsessi,
-					hakemuksillaRajaus.getHakemusOids(), hakukohdeOid, hakuOid,
-					sijoitteluajoId,
-					//
-					SecurityContextHolder.getContext().getAuthentication());
+			if(hakemuksillaRajaus.getHakemusOids() != null) {
+				osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
+			} else {
+				osoitetarratService.osoitetarratSijoittelussaHyvaksytyille(osoiteProsessi,hakuOid,hakukohdeOid);
+			}
 			return osoiteProsessi.toProsessiId();
 		} catch (Exception e) {
 			LOG.error("Hyväksyttyjen osoitetarrojen luonnissa virhe! {}",
@@ -155,6 +163,7 @@ public class ViestintapalveluAktivointiResource {
 	@POST
 	@Path("/osoitetarrat/hakemuksille/aktivoi")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
 	public ProsessiId aktivoiOsoitetarrojenLuontiHakemuksille(
@@ -167,11 +176,8 @@ public class ViestintapalveluAktivointiResource {
 					"Osoitetarrat", "Luo osoitetarrat", null, tags(
 							"osoitetarrat", hakemuksillaRajaus.getTag()));
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
-			osoitetarratRoute.osoitetarratAktivointi(
-					DokumenttiTyyppi.HAKEMUKSILLE, osoiteProsessi,
-					hakemuksillaRajaus.getHakemusOids(),
-					//
-					SecurityContextHolder.getContext().getAuthentication());
+			osoitetarratService.osoitetarratHakemuksille(osoiteProsessi,
+					hakemuksillaRajaus.getHakemusOids());
 
 			return new ProsessiId(osoiteProsessi.getId());
 			/*
@@ -192,6 +198,7 @@ public class ViestintapalveluAktivointiResource {
 	@POST
 	@Path("/jalkiohjauskirjeet/aktivoi")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi jälkiohjauskirjeiden luonnin valitsemattomille", response = Response.class)
 	public ProsessiId aktivoiJalkiohjauskirjeidenLuonti(
@@ -234,6 +241,7 @@ public class ViestintapalveluAktivointiResource {
 	@POST
 	@Path("/hakukohteessahylatyt/aktivoi")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi hakukohteessa hylatyille kirjeiden luonnin", response = Response.class)
 	public ProsessiId aktivoiHakukohteessahylatyilleLuonti(
@@ -272,6 +280,7 @@ public class ViestintapalveluAktivointiResource {
 	@POST
 	@Path("/hyvaksymiskirjeet/aktivoi")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi hyväksymiskirjeiden luonnin hakukohteelle haussa", response = Response.class)
 	public ProsessiId aktivoiHyvaksymiskirjeidenLuonti(
@@ -319,11 +328,11 @@ public class ViestintapalveluAktivointiResource {
 	 * 
 	 * @param hakukohdeOid
 	 * @param hakuOid
-	 * @param sijoitteluajoId
 	 * @return 200 OK
 	 */
 	@POST
 	@Path("/koekutsukirjeet/aktivoi")
+	@Consumes("application/json")
 	@Produces("application/json")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa", response = Response.class)

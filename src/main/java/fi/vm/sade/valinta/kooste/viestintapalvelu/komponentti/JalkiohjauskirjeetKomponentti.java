@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
@@ -55,10 +57,13 @@ public class JalkiohjauskirjeetKomponentti {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(JalkiohjauskirjeetKomponentti.class);
 
-	private HaeOsoiteKomponentti osoiteKomponentti;
-
+	private final HaeOsoiteKomponentti osoiteKomponentti;
+	private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 	@Autowired
-	public JalkiohjauskirjeetKomponentti(HaeOsoiteKomponentti osoiteKomponentti) {
+	public JalkiohjauskirjeetKomponentti(
+			KoodistoCachedAsyncResource koodistoCachedAsyncResource,
+			HaeOsoiteKomponentti osoiteKomponentti) {
+		this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
 		this.osoiteKomponentti = osoiteKomponentti;
 	}
 
@@ -125,13 +130,16 @@ public class JalkiohjauskirjeetKomponentti {
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUTETTU, 6);
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUNTUNUT, 7);
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY, 8);
+
+		Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+		Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
 		for (HakijaDTO hakija : hyvaksymattomatHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
 			if (!hakemusOidHakemukset.containsKey(hakemusOid)) {
 				continue;
 			}
 			final Hakemus hakemus = hakemusOidHakemukset.get(hakemusOid); // hakemusProxy.haeHakemus(hakemusOid);
-			final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
+			final Osoite osoite = osoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
 			final List<Map<String, Object>> tulosList = new ArrayList<Map<String, Object>>();
 			if (!kaytetaanYlikirjoitettuKielikoodia) {
 				preferoituKielikoodi = new HakemusWrapper(hakemus)

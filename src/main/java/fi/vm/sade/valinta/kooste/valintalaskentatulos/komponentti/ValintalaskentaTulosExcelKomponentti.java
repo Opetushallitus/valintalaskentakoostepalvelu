@@ -155,8 +155,8 @@ public class ValintalaskentaTulosExcelKomponentti {
 
 						ValintakoeRivi v = new ValintakoeRivi(
 								wrapper.getSukunimi(), wrapper.getEtunimi(),
-								haeKoodistaArvo(posti.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero()),
-								haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa()),
+								KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero()),
+								KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa()),
 								wrapper,
 								hakemus.getOid(), null, nivelvaiheenKoekutsut,
 								osoite,
@@ -222,21 +222,6 @@ public class ValintalaskentaTulosExcelKomponentti {
 			throw e;
 		}
 	}
-	private String haeKoodistaArvo(Koodi koodi, final String preferoituKieli, String defaultArvo) {
-		if(koodi == null || koodi.getMetadata() == null) { // || koodi.getMetadata().isEmpty()
-			return defaultArvo;
-		} else {
-			return Stream.of(
-					// Nimi halutulla kielellä
-					koodi.getMetadata().stream().filter(m -> preferoituKieli.equals(m.getKieli())),
-					// tai suomenkielellä
-					koodi.getMetadata().stream().filter(m -> KieliUtil.SUOMI.equals(m.getKieli())),
-					// tai millä vaan kielellä
-					koodi.getMetadata().stream()).flatMap(a -> a).findFirst().map(m -> m.getNimi())
-					// tai tyhjä merkkijono
-					.orElse(defaultArvo);
-		}
-	}
 
 	private String suomenna(OsallistuminenDTO osallistuminen) {
 		if (osallistuminen != null) {
@@ -289,8 +274,8 @@ public class ValintalaskentaTulosExcelKomponentti {
 				.osoiteHakemuksesta(h, null, null);
 		HakemusWrapper wrapper = new HakemusWrapper(h);
 		return new ValintakoeRivi(o.getSukunimi(), o.getEtunimi(),
-				haeKoodistaArvo(posti.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero()),
-				haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa()),
+				KoodistoCachedAsyncResource.haeKoodistaArvo(posti.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero()),
+				KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa()),
 				wrapper,
 				o.getHakemusOid(), date, osallistumistiedot, osoite,
 				Yhteystiedot.yhteystiedotHakemukselta(h), osallistuuEdesYhteen);

@@ -17,6 +17,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Map.Entry;
 
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,14 +69,17 @@ public class HyvaksymiskirjeetKomponentti {
 	private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
 	private KirjeetHakukohdeCache kirjeetHakukohdeCache;
+	private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 	private HaeOsoiteKomponentti osoiteKomponentti;
 	private ApplicationResource applicationResource;
 
 	@Autowired
 	public HyvaksymiskirjeetKomponentti(
+			KoodistoCachedAsyncResource koodistoCachedAsyncResource,
 			KirjeetHakukohdeCache kirjeetHakukohdeCache,
 			HaeOsoiteKomponentti osoiteKomponentti,
 			ApplicationResource applicationResource) {
+		this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
 		this.osoiteKomponentti = osoiteKomponentti;
 		this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
 		this.applicationResource = applicationResource;
@@ -142,13 +147,14 @@ public class HyvaksymiskirjeetKomponentti {
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUTETTU, 6);
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUNTUNUT, 7);
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY, 8);
-		
+		Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+		Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
 		for (HakijaDTO hakija : hakukohteenHakijat) {
 			final String hakemusOid = hakija.getHakemusOid();
 			final Hakemus hakemus = hakukohteenHakemukset.get(hakemusOid);
 			// hakemus = hakemusWithRetryTwice(hakemusOid);
 
-			final Osoite osoite = osoiteKomponentti.haeOsoite(hakemus);
+			final Osoite osoite = osoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
 			final List<Map<String, Object>> tulosList = new ArrayList<Map<String, Object>>();
 
 			// Hyvaksymiskirjeilla preferoitukieli tulee hakukohteen kielesta
