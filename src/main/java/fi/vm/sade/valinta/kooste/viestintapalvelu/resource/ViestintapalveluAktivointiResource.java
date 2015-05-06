@@ -139,7 +139,7 @@ public class ViestintapalveluAktivointiResource {
 			if(hakemuksillaRajaus.getHakemusOids() != null) {
 				osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
 			} else {
-				osoitetarratService.osoitetarratSijoittelussaHyvaksytyille(osoiteProsessi,hakukohdeOid, hakuOid);
+				osoitetarratService.osoitetarratSijoittelussaHyvaksytyille(osoiteProsessi,hakuOid,hakukohdeOid);
 			}
 			return osoiteProsessi.toProsessiId();
 		} catch (Exception e) {

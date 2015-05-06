@@ -78,8 +78,8 @@ public class OsoitetarratService {
 
     public void osoitetarratSijoittelussaHyvaksytyille(
             DokumenttiProsessi prosessi,
-            String hakukohdeOid,
-            String hakuOid) {
+            String hakuOid,
+            String hakukohdeOid) {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
             LOG.error("Luodaan osoitetarrat sijoittelussa hyväksytyille (haku={}, hakukohde={})", hakuOid, hakukohdeOid);
@@ -106,7 +106,7 @@ public class OsoitetarratService {
                     hakijat.getResults().stream().filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
                             .map(h -> h.getHakemusOid())
                         .collect(Collectors.toList());
-                boolean onkoHyvaksyttyjaHakijoita = hyvaksytytHakijat.isEmpty();
+                boolean onkoHyvaksyttyjaHakijoita = !hyvaksytytHakijat.isEmpty();
                 if(onkoHyvaksyttyjaHakijoita) {
                     applicationAsyncResource.getApplicationsByOids(hyvaksytytHakijat, hakemukset -> {
                         haetutHakemuksetRef.set(hakemukset);
