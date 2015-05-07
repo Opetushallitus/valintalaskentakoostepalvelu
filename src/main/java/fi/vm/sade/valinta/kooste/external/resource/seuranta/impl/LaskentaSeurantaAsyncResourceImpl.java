@@ -41,6 +41,19 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 		super(address, TimeUnit.HOURS.toMillis(1));
 	}
 
+	@Override
+	public void otaSeuraavaLaskentaTyonAlle(Consumer<String> uuidCallback, Consumer<Throwable> failureCallback) {
+		try {
+			String url = "/seuranta-service/resources/seuranta/laskenta/otaSeuraavaLaskentaTyonAlle";
+			getWebClient()
+					.path(url)
+					.async()
+					.get(new Callback<>(address, url, uuidCallback, failureCallback, new TypeToken<LaskentaDto>() {}.getType()));
+		} catch (Exception e) {
+			failureCallback.accept(e);
+		}
+	}
+
 	public void laskenta(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback) {
 		try {
 			String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + uuid;

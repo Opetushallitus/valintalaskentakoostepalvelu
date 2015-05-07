@@ -17,6 +17,8 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
  */
 public interface LaskentaSeurantaAsyncResource {
 
+	void otaSeuraavaLaskentaTyonAlle(Consumer<String> uuidCallback, Consumer<Throwable> failureCallback);
+
 	void laskenta(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback);
 
 	void resetoiTilat(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback);
