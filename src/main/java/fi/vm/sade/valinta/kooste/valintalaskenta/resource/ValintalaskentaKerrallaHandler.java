@@ -80,7 +80,7 @@ public class ValintalaskentaKerrallaHandler {
             final Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
             if (l != null && !l.isValmis()) {
                 LOG.warn("Laskenta {} on viela ajossa, joten palautetaan linkki siihen.", uuid);
-                callbackResponse.accept(redirectResponce(uuid));
+                callbackResponse.accept(redirectResponse(uuid));
             }
             seurantaAsyncResource.resetoiTilat(
                     uuid,
@@ -99,11 +99,11 @@ public class ValintalaskentaKerrallaHandler {
                     (Throwable t) -> {
                         LOG.error("Uudelleen ajo laskennalle heitti poikkeuksen {}:\r\n{}",
                                 t.getMessage(), Arrays.toString(t.getStackTrace()));
-                        callbackResponse.accept(errorResponce("Uudelleen ajo laskennalle heitti poikkeuksen!"));
+                        callbackResponse.accept(errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
                     });
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
-            callbackResponse.accept(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
+            callbackResponse.accept(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
             throw e;
         }
     }
@@ -131,7 +131,7 @@ public class ValintalaskentaKerrallaHandler {
                 // palautetaan seurattavaksi ajossa olevan hakukohteen seurantatunnus
                 final String uuid = ajossaOlevaLaskentaHaulle.get().getUuid();
                 LOG.warn("Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun", hakuOid, uuid);
-                callbackResponse.accept(redirectResponce(uuid));
+                callbackResponse.accept(redirectResponse(uuid));
                 return;
             }
         }
@@ -151,7 +151,7 @@ public class ValintalaskentaKerrallaHandler {
                             valintakoelaskenta,
                             callbackResponse);
                 },
-                (Throwable poikkeus) -> callbackResponse.accept(errorResponce(poikkeus.getMessage())));
+                (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage())));
     }
 
     private Optional<Laskenta> haeAjossaOlevaLaskentaHaulle(final String hakuOid) {
@@ -257,39 +257,39 @@ public class ValintalaskentaKerrallaHandler {
                                                 valintakoelaskenta,
                                                 oids,
                                                 tyyppi));
-                                callbackResponse.accept(redirectResponce(uuid));
+                                callbackResponse.accept(redirectResponse(uuid));
                             });
                 },
                 poikkeus -> {
                     LOG.error("Ohjausparametrien luku epäonnistui: {} {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
-                    callbackResponse.accept(errorResponce(poikkeus.getMessage()));
+                    callbackResponse.accept(errorResponse(poikkeus.getMessage()));
                 });
     }
 
     private void kasitteleLaskennanAloitus(
             final String uuid,
             final Consumer<String> laskennanAloitus,
-            final Consumer<Response> callbackResponce) {
+            final Consumer<Response> callbackResponse) {
         if (uuid == null) {
             LOG.error("Laskentaa ei saatu luotua!");
-            callbackResponce.accept(errorResponce("Laskentaa ei saatu luotua!"));
+            callbackResponse.accept(errorResponse("Laskentaa ei saatu luotua!"));
             throw new RuntimeException("Laskentaa ei saatu luotua!");
         }
         try {
             laskennanAloitus.accept(uuid);
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
-            callbackResponce.accept(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
+            callbackResponse.accept(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
             throw e;
         }
     }
 
-    private void kasitteleKokoPaska(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, String hakuOid, LaskentaTyyppi laskentatyyppi, boolean isErillishaku, Integer valinnanvaihe, Boolean isValintakoelaskenta, Consumer<Response> callbackResponce) {
+    private void kasitteleKokoPaska(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, String hakuOid, LaskentaTyyppi laskentatyyppi, boolean isErillishaku, Integer valinnanvaihe, Boolean isValintakoelaskenta, Consumer<Response> callbackResponse) {
         final List<HakukohdeDto> hakukohdeDtos = filterAndMapTohakukohdeDto(hakukohdeData);
 
         if (hakukohdeDtos.isEmpty() || hakukohdeDtos.size() == 0) {
             LOG.error("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
-            callbackResponce.accept(errorResponce("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!"));
+            callbackResponse.accept(errorResponse("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!"));
             throw new RuntimeException("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
         } else {
             if (hakukohdeDtos.size() < hakukohdeData.size()) {
@@ -305,18 +305,18 @@ public class ValintalaskentaKerrallaHandler {
                 valinnanvaihe,
                 isValintakoelaskenta,
                 hakukohdeDtos,
-                (String uuid) -> kasitteleLaskennanAloitus(uuid, laskennanAloitus, callbackResponce),
+                (String uuid) -> kasitteleLaskennanAloitus(uuid, laskennanAloitus, callbackResponse),
                 (Throwable poikkeus) -> {
                     LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen: {}", poikkeus.getMessage());
-                    callbackResponce.accept(errorResponce(poikkeus.getMessage()));
+                    callbackResponse.accept(errorResponse(poikkeus.getMessage()));
                 });
     }
 
-    private Response redirectResponce(final String target) {
+    private Response redirectResponse(final String target) {
         return Response.ok(Vastaus.uudelleenOhjaus(target)).build();
     }
 
-    private Response errorResponce(final String errorMessage){
+    private Response errorResponse(final String errorMessage){
         return Response.serverError().entity(errorMessage).build();
     }
 
