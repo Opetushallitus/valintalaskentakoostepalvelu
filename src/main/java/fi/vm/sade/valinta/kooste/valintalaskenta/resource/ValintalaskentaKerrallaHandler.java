@@ -75,9 +75,7 @@ public class ValintalaskentaKerrallaHandler {
                 callbackResponce);
     }
 
-    public void kaynnistaLaskentaUudelleen(
-            final String uuid,
-            final Consumer<Response> callbackResponce) {
+    public void kaynnistaLaskentaUudelleen(final String uuid, final Consumer<Response> callbackResponce) {
         try {
             final Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
             if (l != null && !l.isValmis()) {
