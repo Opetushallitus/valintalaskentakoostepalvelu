@@ -10,10 +10,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
  * 
  */
 public interface LaskentaSupervisor extends ValintalaskentaKerrallaRouteValvomo {
-
+	void workAvailable();
 	void valmis(String uuid);
-
-	void luoJaKaynnistaLaskenta(String uuid, String hakuOid,
-			boolean osittainen,
-			Function<LaskentaSupervisor, LaskentaActor> laskentaProducer);
+	void luoJaKaynnistaLaskenta(String uuid, String hakuOid, boolean osittainen, LaskentaActor laskentaActor);
 }

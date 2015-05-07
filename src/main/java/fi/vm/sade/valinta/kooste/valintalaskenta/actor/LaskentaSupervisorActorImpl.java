@@ -19,16 +19,22 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
  * 
  * @author jussija
  *
- *         osittainenlaskenta?
+ * osittainenlaskenta?
  */
 public class LaskentaSupervisorActorImpl implements LaskentaSupervisor {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(LaskentaSupervisorActorImpl.class);
+	private final static Logger LOG = LoggerFactory.getLogger(LaskentaSupervisorActorImpl.class);
+
 	private final Map<String,LaskentaActorWrapper> ajossaOlevatLaskennat;
 	private final ActorSystem actorSystem;
+
 	public LaskentaSupervisorActorImpl(ActorSystem actorSystem) {
 		this.ajossaOlevatLaskennat = Maps.newConcurrentMap();
 		this.actorSystem = actorSystem;
+	}
+
+	@Override
+	public void workAvailable() {
+
 	}
 
 	@Override
@@ -37,38 +43,29 @@ public class LaskentaSupervisorActorImpl implements LaskentaSupervisor {
 	}
 	
 	private void lopeta(String uuid, LaskentaActorWrapper l) {
-		if(l != null) {
+		if (l != null) {
 			try {
-				TypedActor.get(actorSystem).poisonPill(
-						l.laskentaActor());
-				LOG.info(
-						"PoisonPill lahetetty onnistuneesti Actorille {}",
-						uuid);
+				TypedActor.get(actorSystem).poisonPill(l.laskentaActor());
+				LOG.info("PoisonPill lahetetty onnistuneesti Actorille {}", uuid);
 			} catch (Exception e) {
-				LOG.error(
-						"PoisonPill lahetys epaonnistui Actorille {}: {}",
-						uuid, e.getMessage());
+				LOG.error("PoisonPill lahetys epaonnistui Actorille {}: {}", uuid, e.getMessage());
 			}
 		} else {
 			LOG.warn("Yritettiin valmistaa laskentaa {} mutta laskenta ei ollut enaa ajossa!", uuid);
 		}
 	}
 	
-	public void luoJaKaynnistaLaskenta(String uuid, String hakuOid,
-			boolean osittainen,
-			Function<LaskentaSupervisor, LaskentaActor> laskentaProducer) {
-		LaskentaActor laskentaActor = laskentaProducer.apply(this);
+	public void luoJaKaynnistaLaskenta(String uuid, String hakuOid, boolean osittainen, LaskentaActor laskentaActor) {
 		try {
 			laskentaActor.aloita();
 		} catch(Exception e) {
 			LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid);
 		}
-		ajossaOlevatLaskennat.merge(uuid, new LaskentaActorWrapper(uuid, hakuOid,
-				osittainen, laskentaActor), (oldValue, value) -> {
-					LOG.warn("\r\n###\r\n### Laskenta uuid:lle {} haulle {} oli jo kaynnissa! Lopetataan vanha laskenta!\r\n###", uuid, hakuOid);
-					lopeta(uuid, oldValue);
-					return value;
-				});
+		ajossaOlevatLaskennat.merge(uuid, new LaskentaActorWrapper(uuid, hakuOid, osittainen, laskentaActor), (oldValue, value) -> {
+			LOG.warn("\r\n###\r\n### Laskenta uuid:lle {} haulle {} oli jo kaynnissa! Lopetataan vanha laskenta!\r\n###", uuid, hakuOid);
+			lopeta(uuid, oldValue);
+			return value;
+		});
 		
 	}
 

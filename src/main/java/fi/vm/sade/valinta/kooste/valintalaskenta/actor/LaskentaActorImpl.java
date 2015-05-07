@@ -23,8 +23,8 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
  * 
  */
 public class LaskentaActorImpl implements LaskentaActor {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(LaskentaActorImpl.class);
+	private final static Logger LOG = LoggerFactory.getLogger(LaskentaActorImpl.class);
+
 	private final String uuid;
 	private final String hakuOid;
 	private final Collection<PalvelukutsuStrategia> strategiat;
@@ -47,9 +47,7 @@ public class LaskentaActorImpl implements LaskentaActor {
 		this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
 		this.laskentaStrategia = laskentaStrategia;
 		palvelukutsut.forEach(pk -> pk.laitaTyojonoon(pkk -> {
-			LOG.info("Hakukohteen {} tila muuttunut statukseen {}. {}",
-					pkk.getHakukohdeOid(), pkk.getHakukohdeTila(),
-					tulkinta(pkk.getHakukohdeTila()));
+			LOG.info("Hakukohteen {} tila muuttunut statukseen {}. {}", pkk.getHakukohdeOid(), pkk.getHakukohdeTila(), tulkinta(pkk.getHakukohdeTila()));
 			if (pkk.onkoPeruutettu()) {
 				try {
 					laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid,
@@ -64,9 +62,7 @@ public class LaskentaActorImpl implements LaskentaActor {
 			} else {
 				laskentaStrategia.laitaPalvelukutsuJonoon(pkk, p -> {
 					try {
-						laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(
-								uuid, pkk.getHakukohdeOid(),
-								pkk.getHakukohdeTila());
+						laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
 					} catch (Exception e) {
 						LOG.error("Virhe {}", e.getMessage());
 					}
@@ -82,11 +78,10 @@ public class LaskentaActorImpl implements LaskentaActor {
 	}
 	@Override
 	public void postStop() {
-		if(!hakukohdeLaskuri.isDone()) {
+		if (!hakukohdeLaskuri.isDone()) {
 			try {
 				LOG.warn("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
-				laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
-						LaskentaTila.PERUUTETTU);
+				laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
 			} catch (Exception e) {
 				LOG.error("Virhe {}", e.getMessage());
 			}
@@ -111,22 +106,15 @@ public class LaskentaActorImpl implements LaskentaActor {
 
 	private void viimeisteleLaskenta() {
 		try {
-			laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
-					LaskentaTila.VALMIS);
+			laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS);
 		} catch (Exception e) {
-			LOG.error(
-					"\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta kayttoliittymaa ei saatu paivitettya!\r\n####",
-					hakukohdeLaskuri.getYhteensa(), hakuOid);
+			LOG.error( "\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta kayttoliittymaa ei saatu paivitettya!\r\n####", hakukohdeLaskuri.getYhteensa(), hakuOid);
 		}
 		try {
 			laskentaSupervisor.valmis(uuid);
-			LOG.info(
-					"\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} uuid:lle {}!\r\n####",
-					hakukohdeLaskuri.getYhteensa(), hakuOid, uuid);
+			LOG.info("\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} uuid:lle {}!\r\n####", hakukohdeLaskuri.getYhteensa(), hakuOid, uuid);
 		} catch (Exception e) {
-			LOG.error(
-					"\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta Actoria ei saatu pysaytettya {}!\r\n####",
-					hakukohdeLaskuri.getYhteensa(), hakuOid, uuid);
+			LOG.error("\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta Actoria ei saatu pysaytettya {}!\r\n####", hakukohdeLaskuri.getYhteensa(), hakuOid, uuid);
 		}
 	}
 
@@ -135,7 +123,7 @@ public class LaskentaActorImpl implements LaskentaActor {
 	}
 
 	private void uudetPalvelukutsutKayntiin() {
-		strategiat.forEach(s -> s.aloitaUusiPalvelukutsu());
+		strategiat.forEach(PalvelukutsuStrategia::aloitaUusiPalvelukutsu);
 		laskentaStrategia.aloitaUusiPalvelukutsu();
 	}
 
@@ -145,9 +133,7 @@ public class LaskentaActorImpl implements LaskentaActor {
 				try {
 					s.peruutaKaikki();
 				} catch (Exception e) {
-					LOG.error(
-							"Palvelukutsu Strategian peruutus epaonnistui! {}",
-							e.getMessage());
+					LOG.error("Palvelukutsu Strategian peruutus epaonnistui! {}", e.getMessage());
 				}
 			});
 			laskentaStrategia.peruutaKaikki();
@@ -155,8 +141,7 @@ public class LaskentaActorImpl implements LaskentaActor {
 			LOG.error("Virhe {}", e.getMessage());
 		}
 		try {
-			laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
-					LaskentaTila.PERUUTETTU);
+			laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
 		} catch (Exception e) {
 			LOG.error("Virhe {}", e.getMessage());
 		}
