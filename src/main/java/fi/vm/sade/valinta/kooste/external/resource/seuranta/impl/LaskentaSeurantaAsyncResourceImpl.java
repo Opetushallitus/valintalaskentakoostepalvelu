@@ -41,16 +41,13 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 		super(address, TimeUnit.HOURS.toMillis(1));
 	}
 
-	public void laskenta(String uuid, Consumer<LaskentaDto> callback,
-			Consumer<Throwable> failureCallback) {
+	public void laskenta(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback) {
 		try {
 			String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + uuid;
 			getWebClient()
 					.path(url)
 					.async()
-					.get(new Callback<LaskentaDto>(address, url, callback,
-							failureCallback, new TypeToken<LaskentaDto>() {
-							}.getType()));
+					.get(new Callback<>(address, url, callback, failureCallback, new TypeToken<LaskentaDto>() {}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
@@ -62,21 +59,22 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 			getWebClient()
 					.path(url)
 					.async()
-					.put(Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE),
-							new Callback<LaskentaDto>(address, url, callback,
-									failureCallback,
-									new TypeToken<LaskentaDto>() {
-									}.getType()));
+					.put(Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE), new Callback<>(address, url, callback, failureCallback, new TypeToken<LaskentaDto>() {}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
 	}
 
-	public void luoLaskenta(String hakuOid, LaskentaTyyppi tyyppi,
+	public void luoLaskenta(
+			String hakuOid,
+			LaskentaTyyppi tyyppi,
 			Boolean erillishaku,
-			Integer valinnanvaihe, Boolean valintakoelaskenta,
-			List<HakukohdeDto> hakukohdeOids, Consumer<String> callback,
-			Consumer<Throwable> failureCallback) {
+			Integer valinnanvaihe,
+			Boolean valintakoelaskenta,
+			List<HakukohdeDto> hakukohdeOids,
+			Consumer<String> callback,
+			Consumer<Throwable> failureCallback
+	) {
 		try {
 			String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+hakuOid+"/tyyppi/"+tyyppi;
 			WebClient wc = getWebClient().path(url);
@@ -90,8 +88,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 				wc.query("valintakoelaskenta", valintakoelaskenta);
 			}
 			wc.async()
-					.post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new Callback<String>(address, url, callback, failureCallback, new TypeToken<String>() {
-						}.getType()));
+					.post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new Callback<String>(address, url, callback, failureCallback, new TypeToken<String>() {}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
@@ -103,11 +100,9 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 			getWebClient()
 					.path(url)
 					.async()
-					.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE),
-							responseCallback);
+					.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
 		} catch (Exception e) {
-			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
-					e.getMessage());
+			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url, e.getMessage());
 		}
 	}
 
@@ -118,42 +113,34 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 			getWebClient()
 					.path(url)
 					.async()
-					.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE),
-							responseCallback);
+					.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
 		} catch (Exception e) {
-			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
-					e.getMessage());
+			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url, e.getMessage());
 		}
 	}
 
 	@Override
-	public void merkkaaHakukohteenTila(String uuid, String hakukohdeOid,
-			HakukohdeTila tila) {
+	public void merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila) {
 		String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+uuid+"/hakukohde/"+hakukohdeOid+"/tila/"+tila;
 		try {
 			getWebClient()
 					.path(url)
 					.async()
-					.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE),
-							responseCallback);
+					.put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
 		} catch (Exception e) {
-			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
-					e.getMessage());
+			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url, e.getMessage());
 		}
 	}
 
-	public void lisaaIlmoitusHakukohteelle(String uuid, String hakukohdeOid,
-			IlmoitusDto ilmoitus) {
+	public void lisaaIlmoitusHakukohteelle(String uuid, String hakukohdeOid, IlmoitusDto ilmoitus) {
 		String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+uuid+"/hakukohde/"+hakukohdeOid;
 		try {
 			getWebClient()
 					.path(url)
 					.async()
-					.post(Entity.entity(gson.toJson(ilmoitus),
-							MediaType.APPLICATION_JSON_TYPE), responseCallback);
+					.post(Entity.entity(gson.toJson(ilmoitus), MediaType.APPLICATION_JSON_TYPE), responseCallback);
 		} catch (Exception e) {
-			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
-					e.getMessage());
+			LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url, e.getMessage());
 		}
 	}
 
