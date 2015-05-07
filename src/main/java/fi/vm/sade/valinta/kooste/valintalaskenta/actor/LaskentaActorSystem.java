@@ -35,13 +35,10 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
  * 
  */
 @Service
-public class LaskentaActorSystem implements
-		ValintalaskentaKerrallaRouteValvomo, ValintalaskentaKerrallaRoute {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(LaskentaActorSystem.class);
+public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo, ValintalaskentaKerrallaRoute {
+	private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorSystem.class);
 	private final TypedActorExtension typed;
-	private final ActorSystem actorSystem;
-	private static final Integer HAE_KAIKKI_VALINNANVAIHEET = new Integer(-1);
+	private static final Integer HAE_KAIKKI_VALINNANVAIHEET = -1;
 
 	private final LaskentaActorFactory laskentaActorFactory;
 	private final LaskentaSupervisor laskentaSupervisor;
@@ -52,92 +49,84 @@ public class LaskentaActorSystem implements
 			ValintaperusteetAsyncResource valintaperusteetAsyncResource,
 			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
 			ApplicationAsyncResource applicationAsyncResource,
-			SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
-		this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem",
-				ConfigFactory.defaultOverrides());
-		
+			SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource
+	) {
+		ActorSystem actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
 		this.typed = TypedActor.get(actorSystem);
 		this.laskentaSupervisor = new LaskentaSupervisorActorImpl(actorSystem);
 		this.laskentaActorFactory = new LaskentaActorFactory(
-				valintalaskentaAsyncResource, applicationAsyncResource,
-				valintaperusteetAsyncResource, seurantaAsyncResource,
-				suoritusrekisteriAsyncResource, laskentaSupervisor);
+				valintalaskentaAsyncResource,
+				applicationAsyncResource,
+				valintaperusteetAsyncResource,
+				seurantaAsyncResource,
+				suoritusrekisteriAsyncResource,
+				laskentaSupervisor
+		);
 	}
 
 	@Override
-	public void suoritaValintalaskentaKerralla(
-			final ParametritDTO parametritDTO,
-			final LaskentaAloitus laskentaAloitus) {
+	public void suoritaValintalaskentaKerralla(final ParametritDTO parametritDTO, final LaskentaAloitus laskentaAloitus) {
 		final LaskentaTyyppi laskentaTyyppi = asLaskentaTyyppi(laskentaAloitus);
-		final Integer valinnanvaiheet = asValinnanvaihe(laskentaAloitus
-				.getValinnanvaihe());
+		final Integer valinnanvaiheet = asValinnanvaihe(laskentaAloitus.getValinnanvaihe());
 		final String uuid = laskentaAloitus.getUuid();
 		final String hakuOid = laskentaAloitus.getHakuOid();
 		final boolean erillishaku = laskentaAloitus.isErillishaku();
-		final Collection<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatio = laskentaAloitus
-				.getHakukohdeDtos()
-				.stream()
-				.map(hk -> new HakukohdeJaOrganisaatio(hk.getHakukohdeOid(), hk
-						.getOrganisaatioOid())).collect(Collectors.toList());
-		laskentaSupervisor.luoJaKaynnistaLaskenta(uuid, hakuOid,
-				laskentaAloitus.isOsittainenLaskenta(), lsup -> {
-					return typed.typedActorOf(new TypedProps<LaskentaActor>(
-							LaskentaActor.class, new Creator<LaskentaActor>() {
-								private static final long serialVersionUID = 8521766139538840217L;
+		final Collection<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatio = laskentaAloitus.getHakukohdeDtos().stream()
+				.map(hk -> new HakukohdeJaOrganisaatio(hk.getHakukohdeOid(), hk.getOrganisaatioOid()))
+				.collect(Collectors.toList());
+		laskentaSupervisor.luoJaKaynnistaLaskenta(uuid, hakuOid, laskentaAloitus.isOsittainenLaskenta(), (LaskentaSupervisor lsup) -> {
+			return typed.typedActorOf(new TypedProps<>(LaskentaActor.class, new Creator<LaskentaActor>() {
+					private static final long serialVersionUID = 8521766139538840217L;
 
-								public LaskentaActor create() throws Exception {
-									if (fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi.VALINTARYHMA
-											.equals(laskentaAloitus.getTyyppi())) {
-										LOG.info("Muodostetaan VALINTARYHMALASKENTA");
-										return laskentaActorFactory
-												.createValintaryhmaActor(uuid,
-														hakuOid,
-														parametritDTO,
-														erillishaku,
-														valinnanvaiheet,
-														hakukohdeJaOrganisaatio);
-									} else {
-										if (LaskentaTyyppi.VALINTAKOELASKENTA
-												.equals(laskentaTyyppi)) {
-											LOG.info("Muodostetaan VALINTAKOELASKENTA");
-											return laskentaActorFactory
-													.createValintakoelaskentaActor(
-															uuid, hakuOid,
-															parametritDTO,
-															erillishaku,
-															valinnanvaiheet,
-															hakukohdeJaOrganisaatio);
-										}
-										if (LaskentaTyyppi.VALINTALASKENTA
-												.equals(laskentaTyyppi)) {
-											LOG.info("Muodostetaan VALINTALASKENTA");
-											return laskentaActorFactory
-													.createValintalaskentaActor(
-															uuid, hakuOid,
-															parametritDTO,
-															erillishaku,
-															valinnanvaiheet,
-															hakukohdeJaOrganisaatio);
-										} else {
-											LOG.info(
-													"Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}",
-													laskentaAloitus
-															.getValinnanvaihe(),
-													laskentaAloitus
-															.getValintakoelaskenta());
-											return laskentaActorFactory
-													.createValintalaskentaJaValintakoelaskentaActor(
-															uuid, hakuOid,
-															parametritDTO,
-															erillishaku,
-															valinnanvaiheet,
-															hakukohdeJaOrganisaatio);
-										}
-									}
-								}
-							}));
-				});
-
+					public LaskentaActor create() throws Exception {
+						if (fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi.VALINTARYHMA
+								.equals(laskentaAloitus.getTyyppi())) {
+							LOG.info("Muodostetaan VALINTARYHMALASKENTA");
+							return laskentaActorFactory.createValintaryhmaActor(
+									uuid,
+									hakuOid,
+									parametritDTO,
+									erillishaku,
+									valinnanvaiheet,
+									hakukohdeJaOrganisaatio
+							);
+						} else {
+							if (LaskentaTyyppi.VALINTAKOELASKENTA.equals(laskentaTyyppi)) {
+								LOG.info("Muodostetaan VALINTAKOELASKENTA");
+								return laskentaActorFactory.createValintakoelaskentaActor(
+										uuid,
+										hakuOid,
+										parametritDTO,
+										erillishaku,
+										valinnanvaiheet,
+										hakukohdeJaOrganisaatio
+								);
+							}
+							if (LaskentaTyyppi.VALINTALASKENTA.equals(laskentaTyyppi)) {
+								LOG.info("Muodostetaan VALINTALASKENTA");
+								return laskentaActorFactory.createValintalaskentaActor(
+										uuid,
+										hakuOid,
+										parametritDTO,
+										erillishaku,
+										valinnanvaiheet,
+										hakukohdeJaOrganisaatio
+								);
+							} else {
+								LOG.info("Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}", laskentaAloitus.getValinnanvaihe(), laskentaAloitus.getValintakoelaskenta());
+								return laskentaActorFactory.createValintalaskentaJaValintakoelaskentaActor(
+										uuid,
+										hakuOid,
+										parametritDTO,
+										erillishaku,
+										valinnanvaiheet,
+										hakukohdeJaOrganisaatio
+								);
+							}
+						}
+					}
+			}));
+		});
 	}
 
 	@Override
@@ -154,11 +143,7 @@ public class LaskentaActorSystem implements
 	 * Tilapainen workaround resurssin valinnanvaiheen normalisointiin.
 	 */
 	private Integer asValinnanvaihe(Integer valinnanvaihe) {
-		if (HAE_KAIKKI_VALINNANVAIHEET.equals(valinnanvaihe)) {
-			return null;
-		} else {
-			return valinnanvaihe;
-		}
+		return HAE_KAIKKI_VALINNANVAIHEET.equals(valinnanvaihe) ? null : valinnanvaihe;
 	}
 
 	/**
