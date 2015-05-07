@@ -8,6 +8,6 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
  */
 public interface ValintalaskentaKerrallaRoute {
 
-	void suoritaValintalaskentaKerralla(
-			final ParametritDTO parametritDTO,LaskentaAloitus laskentaAloitus);
+	void suoritaValintalaskentaKerralla(final ParametritDTO parametritDTO,LaskentaAloitus laskentaAloitus);
+	void workAvailable();
 }

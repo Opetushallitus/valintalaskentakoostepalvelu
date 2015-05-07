@@ -65,6 +65,9 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 	}
 
 	@Override
+	public void workAvailable() {}
+
+	@Override
 	public void suoritaValintalaskentaKerralla(final ParametritDTO parametritDTO, final LaskentaAloitus laskentaAloitus) {
 		final LaskentaTyyppi laskentaTyyppi = asLaskentaTyyppi(laskentaAloitus);
 		final Integer valinnanvaiheet = asValinnanvaihe(laskentaAloitus.getValinnanvaihe());
