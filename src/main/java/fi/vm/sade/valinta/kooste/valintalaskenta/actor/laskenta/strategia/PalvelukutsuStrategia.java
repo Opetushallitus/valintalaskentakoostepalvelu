@@ -12,8 +12,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Pal
  */
 public interface PalvelukutsuStrategia {
 
-	void laitaPalvelukutsuJonoon(Palvelukutsu palvelukutsu,
-			Consumer<Palvelukutsu> takaisinkutsu);
+	void laitaPalvelukutsuJonoon(Palvelukutsu palvelukutsu, Consumer<Palvelukutsu> takaisinkutsu);
 
 	void aloitaUusiPalvelukutsu();
 

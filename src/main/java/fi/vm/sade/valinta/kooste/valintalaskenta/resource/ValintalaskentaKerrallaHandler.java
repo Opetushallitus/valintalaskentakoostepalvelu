@@ -97,8 +97,7 @@ public class ValintalaskentaKerrallaHandler {
                             laskenta.getValintakoelaskenta(),
                             callbackResponse),
                     (Throwable t) -> {
-                        LOG.error("Uudelleen ajo laskennalle heitti poikkeuksen {}:\r\n{}",
-                                t.getMessage(), Arrays.toString(t.getStackTrace()));
+                        LOG.error("Uudelleen ajo laskennalle heitti poikkeuksen {}:\r\n{}", t.getMessage(), Arrays.toString(t.getStackTrace()));
                         callbackResponse.accept(errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
                     });
         } catch (Throwable e) {
@@ -213,8 +212,7 @@ public class ValintalaskentaKerrallaHandler {
                 .collect(Collectors.toList());
         if (haunHakukohdeOidit.isEmpty()) {
             LOG.error("Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", hakuOid);
-            failureCallback.accept(
-                    new RuntimeException("Haulla " + hakuOid + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?"));
+            failureCallback.accept(new RuntimeException("Haulla " + hakuOid + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?"));
         } else {
             hakukohdeJaOrganisaatioKasittelijaCallback.accept(haunHakukohdeOidit);
         }
@@ -235,8 +233,7 @@ public class ValintalaskentaKerrallaHandler {
         if (maski.isMask()) {
             oids = maski.maskaa(haunHakukohteetOids);
             if (oids.isEmpty()) {
-                throw new RuntimeException(
-                        "Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa hakukohteettomasti.");
+                throw new RuntimeException("Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa hakukohteettomasti.");
             }
         } else {
             oids = haunHakukohteetOids;
