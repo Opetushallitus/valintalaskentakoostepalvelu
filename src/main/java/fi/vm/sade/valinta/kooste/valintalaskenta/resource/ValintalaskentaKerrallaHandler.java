@@ -75,12 +75,12 @@ public class ValintalaskentaKerrallaHandler {
                 callbackResponse);
     }
 
-    public void kaynnistaLaskentaUudelleen(final String uuid, final Consumer<Response> callbackResponce) {
+    public void kaynnistaLaskentaUudelleen(final String uuid, final Consumer<Response> callbackResponse) {
         try {
             final Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
             if (l != null && !l.isValmis()) {
                 LOG.warn("Laskenta {} on viela ajossa, joten palautetaan linkki siihen.", uuid);
-                callbackResponce.accept(redirectResponce(uuid));
+                callbackResponse.accept(redirectResponce(uuid));
             }
             seurantaAsyncResource.resetoiTilat(
                     uuid,
@@ -95,15 +95,15 @@ public class ValintalaskentaKerrallaHandler {
                             LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
                             laskenta.getValinnanvaihe(),
                             laskenta.getValintakoelaskenta(),
-                            callbackResponce),
+                            callbackResponse),
                     (Throwable t) -> {
                         LOG.error("Uudelleen ajo laskennalle heitti poikkeuksen {}:\r\n{}",
                                 t.getMessage(), Arrays.toString(t.getStackTrace()));
-                        callbackResponce.accept(errorResponce("Uudelleen ajo laskennalle heitti poikkeuksen!"));
+                        callbackResponse.accept(errorResponce("Uudelleen ajo laskennalle heitti poikkeuksen!"));
                     });
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
-            callbackResponce.accept(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
+            callbackResponse.accept(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
             throw e;
         }
     }
