@@ -112,12 +112,13 @@ public class ValintalaskentaKerrallaHandler {
             final LaskentaTyyppi tyyppi,
             final String hakuOid,
             final Maski maski,
-            final BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
+            final BiConsumer<Collection<HakukohdeJaOrganisaatio>,
+            Consumer<String>> seurantaTunnus,
             final boolean erillishaku,
             final boolean valintaryhmalaskenta,
             final Integer valinnanvaihe,
             final Boolean valintakoelaskenta,
-            final Consumer<Response> callbackResponce) {
+            final Consumer<Response> callbackResponse) {
         if (StringUtils.isBlank(hakuOid)) {
             LOG.error("HakuOid on pakollinen");
             throw new RuntimeException("HakuOid on pakollinen");
@@ -129,9 +130,8 @@ public class ValintalaskentaKerrallaHandler {
             if (ajossaOlevaLaskentaHaulle.isPresent()) {
                 // palautetaan seurattavaksi ajossa olevan hakukohteen seurantatunnus
                 final String uuid = ajossaOlevaLaskentaHaulle.get().getUuid();
-                LOG.warn("Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun",
-                        hakuOid, uuid);
-                callbackResponce.accept(redirectResponce(uuid));
+                LOG.warn("Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun", hakuOid, uuid);
+                callbackResponse.accept(redirectResponce(uuid));
                 return;
             }
         }
@@ -149,9 +149,9 @@ public class ValintalaskentaKerrallaHandler {
                             valintaryhmalaskenta,
                             valinnanvaihe,
                             valintakoelaskenta,
-                            callbackResponce);
+                            callbackResponse);
                 },
-                (Throwable poikkeus) -> callbackResponce.accept(errorResponce(poikkeus.getMessage())));
+                (Throwable poikkeus) -> callbackResponse.accept(errorResponce(poikkeus.getMessage())));
     }
 
     private Optional<Laskenta> haeAjossaOlevaLaskentaHaulle(final String hakuOid) {
