@@ -67,8 +67,7 @@ public class ValintalaskentaKerrallaResource {
             asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
             asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
                 final String hakukohdeOids = hakukohdeOidsFromMaskiToString(stringMaski);
-                LOG.error("Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}\r\n{}",
-                        hakuOid, laskentatyyppi, whitelist, valinnanvaihe, valintakoelaskenta, hakukohdeOids);
+                LOG.error("Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}\r\n{}", hakuOid, laskentatyyppi, whitelist, valinnanvaihe, valintakoelaskenta, hakukohdeOids);
                 asyncResponse.resume(errorResponce("Uudelleen ajo laskennalle aikakatkaistu!"));
             });
 
@@ -89,9 +88,7 @@ public class ValintalaskentaKerrallaResource {
     @Path("/uudelleenyrita/{uuid}")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    public void uudelleenajoLaskennalle(
-            @PathParam("uuid") String uuid,
-            @Suspended AsyncResponse asyncResponse) {
+    public void uudelleenajoLaskennalle(@PathParam("uuid") String uuid, @Suspended AsyncResponse asyncResponse) {
         try {
             asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
             asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
@@ -105,7 +102,6 @@ public class ValintalaskentaKerrallaResource {
             throw e;
         }
     }
-
 
     @GET
     @Path("/status")
@@ -132,9 +128,7 @@ public class ValintalaskentaKerrallaResource {
     @Path("/status/{uuid}/xls")
     @Produces("application/vnd.ms-excel")
     @ApiOperation(value = "Valintalaskennan tila", response = LaskentaAloitus.class)
-    public void statusXls(
-            @PathParam("uuid") final String uuid,
-            @Suspended final AsyncResponse asyncResponse) {
+    public void statusXls(@PathParam("uuid") final String uuid, @Suspended final AsyncResponse asyncResponse) {
         asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> asyncResponseTimeout.resume(valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid)));
         valintalaskentaStatusExcelHandler.getStatusXls(uuid, (Response response) -> asyncResponse.resume(response));
@@ -154,8 +148,7 @@ public class ValintalaskentaKerrallaResource {
         }
         final Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
         if (l != null) {
-            l.lopeta();// getLopetusehto().set(true); // aktivoidaan
-            // lopetuskasky
+            l.lopeta();
             seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
         }
         return Response.ok().build();
