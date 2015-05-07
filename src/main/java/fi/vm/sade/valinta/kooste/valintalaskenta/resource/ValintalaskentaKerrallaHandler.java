@@ -52,7 +52,7 @@ public class ValintalaskentaKerrallaHandler {
             final String hakuOid,
             final Maski maski,
             final boolean isErillishaku,
-            final Consumer<Response> callbackResponce) {
+            final Consumer<Response> callbackResponse) {
         kaynnistaLaskenta(
                 laskentatyyppi,
                 hakuOid,
@@ -66,13 +66,13 @@ public class ValintalaskentaKerrallaHandler {
                             isErillishaku,
                             valinnanvaihe,
                             isValintakoelaskenta,
-                            callbackResponce);
+                            callbackResponse);
                 },
                 isErillishaku,
                 LaskentaTyyppi.VALINTARYHMA.equals(laskentatyyppi),
                 valinnanvaihe,
                 isValintakoelaskenta,
-                callbackResponce);
+                callbackResponse);
     }
 
     public void kaynnistaLaskentaUudelleen(final String uuid, final Consumer<Response> callbackResponce) {
