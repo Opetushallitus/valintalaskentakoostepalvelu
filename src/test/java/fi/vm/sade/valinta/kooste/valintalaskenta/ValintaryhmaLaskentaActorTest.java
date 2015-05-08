@@ -7,19 +7,21 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisor;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
-import static fi.vm.sade.valinta.kooste.valintalaskenta.spec.ValintalaskentaSpec.*;
 
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.ValintalaskentaSpec;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import junit.framework.Assert;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -35,48 +37,29 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String ORGANISAATIO1 = "ORGANISAATIO1";
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
-                (haku, hakukohde) -> {
-                    return true;
-                },
-                (hakemukset, poikkeus) -> {
-                    hakemukset.accept(Collections.emptyList());
-                }
+                (haku, hakukohde) -> true,
+                (hakemukset, poikkeus) -> hakemukset.accept(Collections.emptyList())
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
-                (hakukohde, referenssiPvm) -> {
-                    return true;
-                },
-                (oppijat, poikkeus) -> {
-                    oppijat.accept(Collections.emptyList());
-                }
+                (hakukohde, referenssiPvm) -> true,
+                (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())
         ).build();
 
         ValintaperusteetAsyncResource valintaperusteetAsyncResource = Mockito.mock(ValintaperusteetAsyncResource.class);
         new HakijaryhmaMock().addFilter(
-                hakukohdeOid -> {
-                    return true;
-                },
-                (hakijaryhmat, poikkeus) -> {
-                    hakijaryhmat.accept(Collections.emptyList());
-                }
+                hakukohdeOid -> true,
+                (hakijaryhmat, poikkeus) -> hakijaryhmat.accept(Collections.emptyList())
         ).build(valintaperusteetAsyncResource);
         new ValintaperusteetMock().addFilter(
-                (hakukohdeOid,valinnanvaihe) -> {
-                    return true;
-                },
-                (valintaperusteet, poikkeus) -> {
-                    valintaperusteet.accept(Collections.emptyList());
-                }
+                (hakukohdeOid,valinnanvaihe) -> true,
+                (valintaperusteet, poikkeus) -> valintaperusteet.accept(Collections.emptyList())
         ).build(valintaperusteetAsyncResource);
 
-        LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource =
-                new LaskentaSeurantaMock().build();
+        LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource = new LaskentaSeurantaMock().build();
 
         LaskentaActorFactory actorFactory = new LaskentaActorFactory(
                 new ValintalaskentaMock()
-                        .addFilter(l -> true, (c,t) -> {
-                            c.accept("VALMIS");
-                        })
+                        .addFilter(l -> true, (c,t) -> c.accept("VALMIS"))
                         .build(),
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
@@ -84,8 +67,17 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 suoritusrekisteriAsyncResource,
                 Mockito.mock(LaskentaSupervisor.class)
         );
-
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false,null, Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1)));
+        List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1));
+        LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
+                UUID1,
+                HAKUOID1,
+                false,
+                null,
+                false,
+                hakukohdeJaOrganisaatios,
+                null // tyyppi
+        );
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(new LaskentaActorParams(laskentaAloitus, null));
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
@@ -101,38 +93,22 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String ORGANISAATIO1 = "ORGANISAATIO1";
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
-                (haku, hakukohde) -> {
-                    return true;
-                },
-                (hakemukset, poikkeus) -> {
-                    hakemukset.accept(Collections.emptyList());
-                }
+                (haku, hakukohde) -> true,
+                (hakemukset, poikkeus) -> hakemukset.accept(Collections.emptyList())
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
-                (hakukohde, referenssiPvm) -> {
-                    return true;
-                },
-                (oppijat, poikkeus) -> {
-                    oppijat.accept(Collections.emptyList());
-                }
+                (hakukohde, referenssiPvm) -> true,
+                (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())
         ).build();
 
         ValintaperusteetAsyncResource valintaperusteetAsyncResource = Mockito.mock(ValintaperusteetAsyncResource.class);
         new HakijaryhmaMock().addFilter(
-                hakukohdeOid -> {
-                    return true;
-                },
-                (hakijaryhmat, poikkeus) -> {
-                    poikkeus.accept(new RuntimeException("Hakijaryhmien haku ei onnistu!"));
-                }
+                hakukohdeOid -> true,
+                (hakijaryhmat, poikkeus) -> poikkeus.accept(new RuntimeException("Hakijaryhmien haku ei onnistu!"))
         ).build(valintaperusteetAsyncResource);
         new ValintaperusteetMock().addFilter(
-                (hakukohdeOid,valinnanvaihe) -> {
-                    return true;
-                },
-                (valintaperusteet, poikkeus) -> {
-                    valintaperusteet.accept(Collections.emptyList());
-                }
+                (hakukohdeOid,valinnanvaihe) -> true,
+                (valintaperusteet, poikkeus) -> valintaperusteet.accept(Collections.emptyList())
         ).build(valintaperusteetAsyncResource);
 
         LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource =
@@ -140,9 +116,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         LaskentaActorFactory actorFactory = new LaskentaActorFactory(
                 new ValintalaskentaMock()
-                        .addFilter(l -> true, (c,t) -> {
-                            c.accept("VALMIS");
-                        })
+                        .addFilter(l -> true, (c,t) -> c.accept("VALMIS"))
                         .build(),
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
@@ -151,7 +125,17 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Mockito.mock(LaskentaSupervisor.class)
         );
 
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false,null, Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1)));
+        List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1));
+        LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
+                UUID1,
+                HAKUOID1,
+                false,
+                null,
+                false,
+                hakukohdeJaOrganisaatios,
+                null // tyyppi
+        );
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(new LaskentaActorParams(laskentaAloitus, null));
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
@@ -167,39 +151,22 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String ORGANISAATIO1 = "ORGANISAATIO1";
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
-                (haku, hakukohde) -> {
-                    return true;
-                },
-                (hakemukset, poikkeus) -> {
-                    hakemukset.accept(Collections.emptyList());
-                }
+                (haku, hakukohde) -> true,
+                (hakemukset, poikkeus) -> hakemukset.accept(Collections.emptyList())
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
-                (hakukohde, referenssiPvm) -> {
-                    return true;
-                },
-                (oppijat, poikkeus) -> {
-                    oppijat.accept(Collections.emptyList());
-                }
+                (hakukohde, referenssiPvm) -> true,
+                (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())
         ).build();
 
         ValintaperusteetAsyncResource valintaperusteetAsyncResource = Mockito.mock(ValintaperusteetAsyncResource.class);
         new HakijaryhmaMock().addFilter(
-                hakukohdeOid -> {
-                    return true;
-                },
-                (hakijaryhmat, poikkeus) -> {
-                    hakijaryhmat.accept(Collections.emptyList());
-                    //poikkeus.accept(new RuntimeException("Hakijaryhmien haku ei onnistu!"));
-                }
+                hakukohdeOid -> true,
+                (hakijaryhmat, poikkeus) -> hakijaryhmat.accept(Collections.emptyList())
         ).build(valintaperusteetAsyncResource);
         new ValintaperusteetMock().addFilter(
-                (hakukohdeOid,valinnanvaihe) -> {
-                    return true;
-                },
-                (valintaperusteet, poikkeus) -> {
-                    valintaperusteet.accept(Collections.emptyList());
-                }
+                (hakukohdeOid,valinnanvaihe) -> true,
+                (valintaperusteet, poikkeus) -> valintaperusteet.accept(Collections.emptyList())
         ).build(valintaperusteetAsyncResource);
 
         LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource =
@@ -207,9 +174,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         LaskentaActorFactory actorFactory = new LaskentaActorFactory(
                 new ValintalaskentaMock()
-                        .addFilter(l -> true, (c,t) -> {
-                           t.accept(new RuntimeException("Epaonnistuminen!"));
-                        })
+                        .addFilter(l -> true, (c,t) -> t.accept(new RuntimeException("Epaonnistuminen!")))
                         .build(),
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
@@ -218,12 +183,21 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Mockito.mock(LaskentaSupervisor.class)
         );
 
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false,null, Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1)));
+        List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1));
+        LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
+                UUID1,
+                HAKUOID1,
+                false,
+                null,
+                false,
+                hakukohdeJaOrganisaatios,
+                null // tyyppi
+        );
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(new LaskentaActorParams(laskentaAloitus, null));
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
-                //Mockito.eq(LaskentaTila.VALMIS), Mockito.eq(HakukohdeTila.KESKEYTETTY));
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any());
     }
 
@@ -236,38 +210,22 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String ORGANISAATIO1 = "ORGANISAATIO1";
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
-                (haku, hakukohde) -> {
-                    return true;
-                },
-                (hakemukset, poikkeus) -> {
-                    hakemukset.accept(Collections.emptyList());
-                }
+                (haku, hakukohde) -> true,
+                (hakemukset, poikkeus) -> hakemukset.accept(Collections.emptyList())
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
-                (hakukohde, referenssiPvm) -> {
-                    return true;
-                },
-                (oppijat, poikkeus) -> {
-                    oppijat.accept(Collections.emptyList());
-                }
+                (hakukohde, referenssiPvm) -> true,
+                (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())
         ).build();
 
         ValintaperusteetAsyncResource valintaperusteetAsyncResource = Mockito.mock(ValintaperusteetAsyncResource.class);
         new HakijaryhmaMock().addFilter(
-                hakukohdeOid -> {
-                    return true;
-                },
-                (hakijaryhmat, poikkeus) -> {
-                    hakijaryhmat.accept(Collections.emptyList());
-                }
+                hakukohdeOid -> true,
+                (hakijaryhmat, poikkeus) -> hakijaryhmat.accept(Collections.emptyList())
         ).build(valintaperusteetAsyncResource);
         new ValintaperusteetMock().addFilter(
-                (hakukohdeOid,valinnanvaihe) -> {
-                    return true;
-                },
-                (valintaperusteet, poikkeus) -> {
-                    valintaperusteet.accept(Collections.emptyList());
-                }
+                (hakukohdeOid,valinnanvaihe) -> true,
+                (valintaperusteet, poikkeus) -> valintaperusteet.accept(Collections.emptyList())
         ).build(valintaperusteetAsyncResource);
 
         LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource =
@@ -275,10 +233,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         LaskentaActorFactory actorFactory = new LaskentaActorFactory(
                 new ValintalaskentaMock()
-                        .addFilter(l -> true, (c,t) -> {
-                            c.accept("VALMIS");
-                            //t.accept(new RuntimeException("Epaonnistuminen!"));
-                        })
+                        .addFilter(l -> true, (c,t) -> c.accept("VALMIS"))
                         .build(),
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
@@ -287,15 +242,22 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Mockito.mock(LaskentaSupervisor.class)
         );
 
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false,null, Arrays.asList(
-                new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1),
-                new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1)));
+        List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1), new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1));
+        LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
+                UUID1,
+                HAKUOID1,
+                false,
+                null,
+                false,
+                hakukohdeJaOrganisaatios,
+                null // tyyppi
+        );
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(new LaskentaActorParams(laskentaAloitus, null));
 
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.VALMIS));
-        //Mockito.eq(LaskentaTila.VALMIS), Mockito.eq(HakukohdeTila.KESKEYTETTY));
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any());
     }
 
@@ -308,38 +270,22 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String ORGANISAATIO1 = "ORGANISAATIO1";
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
-                (haku, hakukohde) -> {
-                    return true;
-                },
-                (hakemukset, poikkeus) -> {
-                    hakemukset.accept(Collections.emptyList());
-                }
+                (haku, hakukohde) -> true,
+                (hakemukset, poikkeus) -> hakemukset.accept(Collections.emptyList())
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
-                (hakukohde, referenssiPvm) -> {
-                    return true;
-                },
-                (oppijat, poikkeus) -> {
-                    oppijat.accept(Collections.emptyList());
-                }
+                (hakukohde, referenssiPvm) -> true,
+                (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())
         ).build();
 
         ValintaperusteetAsyncResource valintaperusteetAsyncResource = Mockito.mock(ValintaperusteetAsyncResource.class);
         new HakijaryhmaMock().addFilter(
-                hakukohdeOid -> {
-                    return true;
-                },
-                (hakijaryhmat, poikkeus) -> {
-                    hakijaryhmat.accept(Collections.emptyList());
-                }
+                hakukohdeOid -> true,
+                (hakijaryhmat, poikkeus) -> hakijaryhmat.accept(Collections.emptyList())
         ).build(valintaperusteetAsyncResource);
         new ValintaperusteetMock().addFilter(
-                (hakukohdeOid,valinnanvaihe) -> {
-                    return true;
-                },
-                (valintaperusteet, poikkeus) -> {
-                    valintaperusteet.accept(Collections.emptyList());
-                }
+                (hakukohdeOid,valinnanvaihe) -> true,
+                (valintaperusteet, poikkeus) -> valintaperusteet.accept(Collections.emptyList())
         ).build(valintaperusteetAsyncResource);
 
         LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource =
@@ -347,9 +293,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         LaskentaActorFactory actorFactory = new LaskentaActorFactory(
                 new ValintalaskentaMock()
-                        .addFilter(l -> true, (c, t) -> {
-                            t.accept(new RuntimeException("Epaonnistuminen!"));
-                        })
+                        .addFilter(l -> true, (c, t) -> t.accept(new RuntimeException("Epaonnistuminen!")))
                         .build(),
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
@@ -358,15 +302,22 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Mockito.mock(LaskentaSupervisor.class)
         );
 
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false, null, Arrays.asList(
-                new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1),
-                new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1)));
+        List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1), new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1));
+        LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
+                UUID1,
+                HAKUOID1,
+                false,
+                null,
+                false,
+                hakukohdeJaOrganisaatios,
+                null // tyyppi
+        );
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(new LaskentaActorParams(laskentaAloitus, null));
 
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
-        //Mockito.eq(LaskentaTila.VALMIS), Mockito.eq(HakukohdeTila.KESKEYTETTY));
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any());
     }
 
@@ -379,27 +330,17 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String ORGANISAATIO1 = "ORGANISAATIO1";
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
-                (haku, hakukohde) -> {
-                    return true;
-                },
-                (hakemukset, poikkeus) -> {
-                    hakemukset.accept(Collections.emptyList());
-                }
+                (haku, hakukohde) -> true,
+                (hakemukset, poikkeus) -> hakemukset.accept(Collections.emptyList())
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
-                (hakukohde, referenssiPvm) -> {
-                    return true;
-                },
-                (oppijat, poikkeus) -> {
-                    oppijat.accept(Collections.emptyList());
-                }
+                (hakukohde, referenssiPvm) -> true,
+                (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())
         ).build();
         final AtomicInteger ekaOnnistuu = new AtomicInteger(0);
         ValintaperusteetAsyncResource valintaperusteetAsyncResource = Mockito.mock(ValintaperusteetAsyncResource.class);
         new HakijaryhmaMock().addFilter(
-                hakukohdeOid -> {
-                    return true;
-                },
+                hakukohdeOid -> true,
                 (hakijaryhmat, poikkeus) -> {
                     if(ekaOnnistuu.getAndIncrement() == 0) {
                         hakijaryhmat.accept(Collections.emptyList());
@@ -409,12 +350,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 }
         ).build(valintaperusteetAsyncResource);
         new ValintaperusteetMock().addFilter(
-                (hakukohdeOid,valinnanvaihe) -> {
-                    return true;
-                },
-                (valintaperusteet, poikkeus) -> {
-                    valintaperusteet.accept(Collections.emptyList());
-                }
+                (hakukohdeOid,valinnanvaihe) -> true,
+                (valintaperusteet, poikkeus) -> valintaperusteet.accept(Collections.emptyList())
         ).build(valintaperusteetAsyncResource);
 
         LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource =
@@ -433,16 +370,23 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Mockito.mock(LaskentaSupervisor.class)
         );
 
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false, null, Arrays.asList(
-                new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1),
-                new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1)));
+        List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1), new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1));
+        LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
+                UUID1,
+                HAKUOID1,
+                false,
+                null,
+                false,
+                hakukohdeJaOrganisaatios,
+                null // tyyppi
+        );
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(new LaskentaActorParams(laskentaAloitus, null));
 
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.atMost(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.atLeast(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
-        //Mockito.eq(LaskentaTila.VALMIS), Mockito.eq(HakukohdeTila.KESKEYTETTY));
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any());
     }
 }

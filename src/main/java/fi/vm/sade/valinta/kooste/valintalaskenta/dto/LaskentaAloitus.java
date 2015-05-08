@@ -18,8 +18,6 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
  * 
  */
 public class LaskentaAloitus implements LaskentaInfo {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(LaskentaAloitus.class);
 	private final static String NIMI_FORMAT = "Laskenta hakuOid(%s) uuid(%s) hakukohteita(%s/%s)";
 	private final String uuid;
 	private final String hakuOid;
@@ -33,10 +31,15 @@ public class LaskentaAloitus implements LaskentaInfo {
 	private final Collection<HakukohdeJaOrganisaatio> hakukohdeDtos;
 	private final LaskentaTyyppi tyyppi;
 
-	public LaskentaAloitus(String uuid, String hakuOid, boolean erillishaku,
-			Integer valinnanvaihe, Boolean valintakoelaskenta,
+	public LaskentaAloitus(
+			String uuid,
+			String hakuOid,
+			boolean erillishaku,
+			Integer valinnanvaihe,
+			Boolean valintakoelaskenta,
 			Collection<HakukohdeJaOrganisaatio> hakukohdeDtos,
-			LaskentaTyyppi tyyppi) {
+			LaskentaTyyppi tyyppi
+	) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
 		this.osittainenLaskenta = false;
@@ -48,11 +51,17 @@ public class LaskentaAloitus implements LaskentaInfo {
 		this.erillishaku = erillishaku;
 	}
 
-	public LaskentaAloitus(String uuid, String hakuOid, boolean erillishaku,
-			boolean osittainenLaskenta, boolean valintaryhmalaskenta,
-			Integer valinnanvaihe, Boolean valintakoelaskenta,
+	public LaskentaAloitus(
+			String uuid,
+			String hakuOid,
+			boolean erillishaku,
+			boolean osittainenLaskenta,
+			boolean valintaryhmalaskenta,
+			Integer valinnanvaihe,
+			Boolean valintakoelaskenta,
 			Collection<HakukohdeJaOrganisaatio> hakukohdeDtos,
-			LaskentaTyyppi tyyppi) {
+			LaskentaTyyppi tyyppi
+	) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
 		this.osittainenLaskenta = osittainenLaskenta;
