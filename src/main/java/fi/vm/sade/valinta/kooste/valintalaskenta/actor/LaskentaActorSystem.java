@@ -35,7 +35,6 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 @Service
 public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo, ValintalaskentaKerrallaRoute {
 	private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorSystem.class);
-	private final TypedActorExtension typed;
 	private static final Integer HAE_KAIKKI_VALINNANVAIHEET = -1;
 
 	private final LaskentaActorFactory laskentaActorFactory;
@@ -50,7 +49,6 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 			SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource
 	) {
 		ActorSystem actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
-		this.typed = TypedActor.get(actorSystem);
 		this.laskentaSupervisor = new LaskentaSupervisorImpl(actorSystem);
 		this.laskentaActorFactory = new LaskentaActorFactory(
 				valintalaskentaAsyncResource,
