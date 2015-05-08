@@ -5,29 +5,20 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.TypedActor;
-import akka.actor.TypedActorExtension;
-import akka.actor.TypedProps;
-import akka.japi.Creator;
 
 import com.typesafe.config.ConfigFactory;
 
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisor;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisorActorImpl;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisorImpl;
 
 /**
  * 
@@ -44,7 +35,7 @@ public class LaskentaActorSystemTest {
 
 	@Test
 	public void testaaActorSupervisor() throws InterruptedException {
-		LaskentaSupervisorActorImpl laskentaSupervisor = new LaskentaSupervisorActorImpl(actorSystem);
+		LaskentaSupervisorImpl laskentaSupervisor = new LaskentaSupervisorImpl(actorSystem);
 
 		LOG.info("Ajossa olevat laskennat nyt {}", laskentaSupervisor.ajossaOlevatLaskennat());
 

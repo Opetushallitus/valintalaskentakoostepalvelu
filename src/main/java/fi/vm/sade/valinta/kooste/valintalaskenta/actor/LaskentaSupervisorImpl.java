@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +20,13 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
  *
  * osittainenlaskenta?
  */
-public class LaskentaSupervisorActorImpl implements LaskentaSupervisor {
-	private final static Logger LOG = LoggerFactory.getLogger(LaskentaSupervisorActorImpl.class);
+public class LaskentaSupervisorImpl implements LaskentaSupervisor {
+	private final static Logger LOG = LoggerFactory.getLogger(LaskentaSupervisorImpl.class);
 
 	private final Map<String,LaskentaActorWrapper> ajossaOlevatLaskennat;
 	private final ActorSystem actorSystem;
 
-	public LaskentaSupervisorActorImpl(ActorSystem actorSystem) {
+	public LaskentaSupervisorImpl(ActorSystem actorSystem) {
 		this.ajossaOlevatLaskennat = Maps.newConcurrentMap();
 		this.actorSystem = actorSystem;
 	}

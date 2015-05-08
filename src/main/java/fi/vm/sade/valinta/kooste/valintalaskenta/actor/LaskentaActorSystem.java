@@ -51,7 +51,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 	) {
 		ActorSystem actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
 		this.typed = TypedActor.get(actorSystem);
-		this.laskentaSupervisor = new LaskentaSupervisorActorImpl(actorSystem);
+		this.laskentaSupervisor = new LaskentaSupervisorImpl(actorSystem);
 		this.laskentaActorFactory = new LaskentaActorFactory(
 				valintalaskentaAsyncResource,
 				applicationAsyncResource,
