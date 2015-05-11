@@ -14,8 +14,7 @@ public class LaskentaActorWrapper implements Laskenta {
 	private final boolean osittainen;
 	private final LaskentaActor laskentaActor;
 
-	public LaskentaActorWrapper(String uuid, String hakuOid,
-			boolean osittainen, LaskentaActor laskentaActor) {
+	public LaskentaActorWrapper(String uuid, String hakuOid, boolean osittainen, LaskentaActor laskentaActor) {
 		this.uuid = uuid;
 		this.hakuOid = hakuOid;
 		this.osittainen = osittainen;

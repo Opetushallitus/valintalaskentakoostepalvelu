@@ -54,29 +54,25 @@ public class Maski {
 		return whiteList && isMask();
 	}
 
-	public Collection<HakukohdeJaOrganisaatio> maskaa(
-			Collection<HakukohdeJaOrganisaatio> originalHjaO) {
+	public Collection<HakukohdeJaOrganisaatio> maskaa(Collection<HakukohdeJaOrganisaatio> originalHjaO) {
 		Set<String> lopulliset = Collections.emptySet();
 		Set<String> original = originalHjaO.stream()
-				.map(hk -> hk.getHakukohdeOid()).collect(Collectors.toSet());
+				.map(hk -> hk.getHakukohdeOid())
+				.collect(Collectors.toSet());
 		Set<String> hakukohdeOidsMask = Sets.newHashSet(hakukohteet);
 		if (isMask()) {
 			if (isWhitelist()) {
-				lopulliset = Util
-						.whitelist(
-								hakukohdeOidsMask,
-								original,
-								(s -> LOG
-										.error("Haku ei taysin vastaa syotetyn whitelistin hakukohteita! Puuttuvat hakukohteet \r\n{}",
-												Arrays.toString(s.toArray()))));
+				lopulliset = Util.whitelist(
+						hakukohdeOidsMask,
+						original,
+						(s -> LOG.error("Haku ei taysin vastaa syotetyn whitelistin hakukohteita! Puuttuvat hakukohteet \r\n{}", Arrays.toString(s.toArray())))
+				);
 			} else if (isBlacklist()) {
-				lopulliset = Util
-						.blacklist(
-								hakukohdeOidsMask,
-								original,
-								(s -> LOG
-										.error("Haku ei taysin vastaa syotetyn blacklistin hakukohteita! Ylimaaraiset hakukohteet \r\n{}",
-												Arrays.toString(s.toArray()))));
+				lopulliset = Util.blacklist(
+						hakukohdeOidsMask,
+						original,
+						(s -> LOG.error("Haku ei taysin vastaa syotetyn blacklistin hakukohteita! Ylimaaraiset hakukohteet \r\n{}", Arrays.toString(s.toArray())))
+				);
 			}
 		}
 		final Set<String> lopullisetFilter = lopulliset;
@@ -89,7 +85,6 @@ public class Maski {
 		if (hakukohteet == null) {
 			return String.format(NIMI_FORMAT, isWhitelist(), StringUtils.EMPTY);
 		}
-		return String.format(NIMI_FORMAT, isWhitelist(), isBlacklist(),
-				Arrays.toString(hakukohteet.toArray()));
+		return String.format(NIMI_FORMAT, isWhitelist(), isBlacklist(),Arrays.toString(hakukohteet.toArray()));
 	}
 }
