@@ -100,7 +100,9 @@ public class ValintalaskentaTulosExcelTest {
                 Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString(), Mockito.any(), Mockito.any())).then(
                 answer -> {
                     Consumer<List<Koodi>> callback = (Consumer<List<Koodi>>) answer.getArguments()[1];
-                    callback.accept(Collections.emptyList());
+                    if (callback != null) {
+                        callback.accept(Collections.emptyList());
+                    }
                     return new PeruutettavaImpl(Futures.immediateFuture(null));
                 });
         MockValintalaskentaValintakoeAsyncResource.setHakemusOsallistuminenResult(

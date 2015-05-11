@@ -66,6 +66,7 @@ public class OsoitetarratServiceTest {
 
     @Test
     public void testaaOsoitetarratSijoittelussaHyvaksytyille() throws Throwable {
+        Mocks.reset();
         String HAKU2 = "1.2.246.562.5.2013080813081926341927";
         String HAKUKOHDE2 = "1.2.246.562.5.39836447563";
         MockSijoitteluAsyncResource.setPaginationResult(
@@ -139,10 +140,13 @@ public class OsoitetarratServiceTest {
 
     @Test
     public void testaaOsoitetarratValintakokeeseenOsallistujilleKunKaikkiKutsutaan() {
+        Mocks.reset();
         Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString(), Mockito.any(), Mockito.any())).thenAnswer(
                 answer -> {
                     Consumer<List<Koodi>> c = (Consumer<List<Koodi>>)answer.getArguments()[1];
-                    c.accept(Collections.emptyList());
+                    if(c != null) {
+                        c.accept(Collections.emptyList());
+                    }
                     return null;
                 }
         );
@@ -187,7 +191,7 @@ public class OsoitetarratServiceTest {
         Assert.assertEquals(200, r.getStatus());
         // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti mutta muutosten varalta
         // annetaan pieni odotus aika ellei kutsut ole jo perillä.
-        Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1));
+        Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1)).haeOsoitetarrat(Mockito.any(), Mockito.any(), Mockito.any());
         List<Osoitteet> osoitteet = osoitteetArgumentCaptor.getAllValues();
         Assert.assertEquals(1, osoitteet.size());
         Assert.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
@@ -195,9 +199,10 @@ public class OsoitetarratServiceTest {
 
     @Test
     public void testaaOsoitetarratValintakokeeseenOsallistujilleKunYksittainenHakijaKutsutaan() {
+        Mocks.reset();
         Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString(), Mockito.any(), Mockito.any())).thenAnswer(
                 answer -> {
-                    Consumer<List<Koodi>> c = (Consumer<List<Koodi>>)answer.getArguments()[1];
+                    Consumer<List<Koodi>> c = (Consumer<List<Koodi>>) answer.getArguments()[1];
                     c.accept(Collections.emptyList());
                     return null;
                 }
