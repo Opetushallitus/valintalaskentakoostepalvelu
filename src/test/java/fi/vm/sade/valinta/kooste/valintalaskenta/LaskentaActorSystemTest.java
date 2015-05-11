@@ -35,7 +35,7 @@ public class LaskentaActorSystemTest {
 
 	@Test
 	public void testaaActorSupervisor() throws InterruptedException {
-		LaskentaSupervisorImpl laskentaSupervisor = new LaskentaSupervisorImpl(actorSystem);
+		LaskentaSupervisorImpl laskentaSupervisor = new LaskentaSupervisorImpl(actorSystem, (x) -> {});
 
 		LOG.info("Ajossa olevat laskennat nyt {}", laskentaSupervisor.ajossaOlevatLaskennat());
 
