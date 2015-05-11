@@ -2,7 +2,10 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
+import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,20 +28,18 @@ public class LaskentaSupervisorImpl implements LaskentaSupervisor {
 
 	private final Map<String,LaskentaActorWrapper> ajossaOlevatLaskennat;
 	private final ActorSystem actorSystem;
+    private final Consumer signalFunction;
 
-	public LaskentaSupervisorImpl(ActorSystem actorSystem) {
+	public LaskentaSupervisorImpl(ActorSystem actorSystem, Consumer signalFunction) {
+        this.actorSystem = actorSystem;
 		this.ajossaOlevatLaskennat = Maps.newConcurrentMap();
-		this.actorSystem = actorSystem;
-	}
-
-	@Override
-	public void workAvailable() {
-
+        this.signalFunction = signalFunction;
 	}
 
 	@Override
 	public void valmis(String uuid) {
 		lopeta(uuid, ajossaOlevatLaskennat.remove(uuid));
+        signalFunction.accept(null);
 	}
 	
 	private void lopeta(String uuid, LaskentaActorWrapper l) {
@@ -60,7 +61,7 @@ public class LaskentaSupervisorImpl implements LaskentaSupervisor {
 		} catch(Exception e) {
 			LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid);
 		}
-		ajossaOlevatLaskennat.merge(uuid, new LaskentaActorWrapper(uuid, hakuOid, osittainen, laskentaActor), (oldValue, value) -> {
+		ajossaOlevatLaskennat.merge(uuid, new LaskentaActorWrapper(uuid, hakuOid, osittainen, laskentaActor), (LaskentaActorWrapper oldValue, LaskentaActorWrapper value) -> {
 			LOG.warn("\r\n###\r\n### Laskenta uuid:lle {} haulle {} oli jo kaynnissa! Lopetataan vanha laskenta!\r\n###", uuid, hakuOid);
 			lopeta(uuid, oldValue);
 			return value;
