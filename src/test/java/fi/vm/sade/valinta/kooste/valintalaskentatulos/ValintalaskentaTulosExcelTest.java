@@ -61,103 +61,108 @@ public class ValintalaskentaTulosExcelTest {
 
     @Test
     public void testaaExcelinLuontiHakukohteenUlkopuolisillaHakijoilla() throws Throwable {
-        List< ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
-                osallistuminen()
-                        .setHakemusOid(HAKEMUS1)
-                        .hakutoive()
-                        .valinnanvaihe()
-                        .valintakoe()
-                        .setValintakoeOid(VALINTAKOE1)
-                        .setTunniste(TUNNISTE1)
-                        .setOsallistuu()
-                        .build()
-                        .build()
-                        .build()
-                        .build(),
-                osallistuminen()
-                        .setHakemusOid(HAKEMUS2)
-                        .hakutoive()
-                        .valinnanvaihe()
-                        .valintakoe()
-                        .setValintakoeOid(VALINTAKOE1)
-                        .setTunniste(TUNNISTE1)
-                        .setOsallistuu()
-                        .build()
-                        .build()
-                        .build()
-                        .build());
-        List<ValintaperusteDTO> valintaperusteet = Arrays.asList(
-                valintaperusteet()
-                        .setKuvaus(TUNNISTE1)
-                        .setTunniste(TUNNISTE1)
-                        .setOsallistumisenTunniste(TUNNISTE1)
-                        .setLukuarvofunktio()
-                        .setArvot("1", "2", "3")
-                        .build()
-        );
-        //ArgumentCaptor<Consumer<List<Koodi>>> koodistoArgumentCaptor = ArgumentCaptor.forClass(Consumer.class);
-        Mockito.when(
-                Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString(), Mockito.any(), Mockito.any())).then(
-                answer -> {
-                    Consumer<List<Koodi>> callback = (Consumer<List<Koodi>>) answer.getArguments()[1];
-                    if (callback != null) {
-                        callback.accept(Collections.emptyList());
-                    }
-                    return new PeruutettavaImpl(Futures.immediateFuture(null));
-                });
-        MockValintalaskentaValintakoeAsyncResource.setHakemusOsallistuminenResult(
-                Arrays.asList(
-                        hakemusOsallistuminen()
-                                .setHakemusOid(HAKEMUS1)
-                                .addOsallistuminen(VALINTAKOE1)
-                                .build(),
-                        hakemusOsallistuminen()
-                                .setHakemusOid(HAKEMUS2)
-                                .addOsallistuminen(VALINTAKOE1)
-                                .build()
-                ) // Osallistumiset
-        );
-        MockValintaperusteetAsyncResource.setValintakokeetResult(
-                Arrays.asList(valintakoe()
-                        .setOid(VALINTAKOE1)
-                        .build())
-        );
+        Mocks.reset();
+        try {
+            List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
+                    osallistuminen()
+                            .setHakemusOid(HAKEMUS1)
+                            .hakutoive()
+                            .valinnanvaihe()
+                            .valintakoe()
+                            .setValintakoeOid(VALINTAKOE1)
+                            .setTunniste(TUNNISTE1)
+                            .setOsallistuu()
+                            .build()
+                            .build()
+                            .build()
+                            .build(),
+                    osallistuminen()
+                            .setHakemusOid(HAKEMUS2)
+                            .hakutoive()
+                            .valinnanvaihe()
+                            .valintakoe()
+                            .setValintakoeOid(VALINTAKOE1)
+                            .setTunniste(TUNNISTE1)
+                            .setOsallistuu()
+                            .build()
+                            .build()
+                            .build()
+                            .build());
+            List<ValintaperusteDTO> valintaperusteet = Arrays.asList(
+                    valintaperusteet()
+                            .setKuvaus(TUNNISTE1)
+                            .setTunniste(TUNNISTE1)
+                            .setOsallistumisenTunniste(TUNNISTE1)
+                            .setLukuarvofunktio()
+                            .setArvot("1", "2", "3")
+                            .build()
+            );
+            //ArgumentCaptor<Consumer<List<Koodi>>> koodistoArgumentCaptor = ArgumentCaptor.forClass(Consumer.class);
+            Mockito.when(
+                    Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString(), Mockito.any(), Mockito.any())).then(
+                    answer -> {
+                        Consumer<List<Koodi>> callback = (Consumer<List<Koodi>>) answer.getArguments()[1];
+                        if (callback != null) {
+                            callback.accept(Collections.emptyList());
+                        }
+                        return new PeruutettavaImpl(Futures.immediateFuture(null));
+                    });
+            MockValintalaskentaValintakoeAsyncResource.setHakemusOsallistuminenResult(
+                    Arrays.asList(
+                            hakemusOsallistuminen()
+                                    .setHakemusOid(HAKEMUS1)
+                                    .addOsallistuminen(VALINTAKOE1)
+                                    .build(),
+                            hakemusOsallistuminen()
+                                    .setHakemusOid(HAKEMUS2)
+                                    .addOsallistuminen(VALINTAKOE1)
+                                    .build()
+                    ) // Osallistumiset
+            );
+            MockValintaperusteetAsyncResource.setValintakokeetResult(
+                    Arrays.asList(valintakoe()
+                            .setOid(VALINTAKOE1)
+                            .build())
+            );
 
-        MockApplicationAsyncResource.setResultByOid(Arrays.asList(
-                hakemus()
-                        .setOid(HAKEMUS1)
-                        .build(),
-                hakemus()
-                        .setOid(HAKEMUS2)
-                        .build()
-        ));
+            MockApplicationAsyncResource.setResultByOid(Arrays.asList(
+                    hakemus()
+                            .setOid(HAKEMUS1)
+                            .build(),
+                    hakemus()
+                            .setOid(HAKEMUS2)
+                            .build()
+            ));
 
-        MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
+            MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
 
-        ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
-        Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyLong(), Mockito.anyList(), Mockito.anyString(),
-                inputStreamArgumentCaptor.capture(), Mockito.any(Consumer.class), Mockito.any(Consumer.class))).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
+            ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
+            Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
+                    Mockito.anyString(), Mockito.anyString(), Mockito.anyLong(), Mockito.anyList(), Mockito.anyString(),
+                    inputStreamArgumentCaptor.capture(), Mockito.any(Consumer.class), Mockito.any(Consumer.class))).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
 
 
-        DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
-        lisatiedot.setValintakoeOids(Arrays.asList(VALINTAKOE1));
-        Response r =
-                valintakoekutsutResource.getWebClient()
-                        .query("hakuOid", HAKU1)
-                        .query("hakukohdeOid",HAKUKOHDE1)
-                        .post(Entity.entity(lisatiedot,
-                                "application/json"));
-        Assert.assertEquals(200, r.getStatus());
-        InputStream excelData = inputStreamArgumentCaptor.getValue();
-        Assert.assertTrue(excelData != null);
-        Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(excelData);
+            DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
+            lisatiedot.setValintakoeOids(Arrays.asList(VALINTAKOE1));
+            Response r =
+                    valintakoekutsutResource.getWebClient()
+                            .query("hakuOid", HAKU1)
+                            .query("hakukohdeOid", HAKUKOHDE1)
+                            .post(Entity.entity(lisatiedot,
+                                    "application/json"));
+            Assert.assertEquals(200, r.getStatus());
+            InputStream excelData = inputStreamArgumentCaptor.getValue();
+            Assert.assertTrue(excelData != null);
+            Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(excelData);
         /*
         rivit.forEach(r0 -> {
             System.err.println(r0);
         });
         */
-        Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS1.equals(r0.toTeksti().getTeksti()))));
-        Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS2.equals(r0.toTeksti().getTeksti()))));
+            Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS1.equals(r0.toTeksti().getTeksti()))));
+            Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS2.equals(r0.toTeksti().getTeksti()))));
+        } finally {
+            Mocks.reset();
+        }
     }
 }
