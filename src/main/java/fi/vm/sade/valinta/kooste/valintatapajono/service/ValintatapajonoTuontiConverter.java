@@ -154,7 +154,7 @@ public class ValintatapajonoTuontiConverter {
         vx.setNimi(jono.getNimi());
         vx.setOid(jonoOid);
         vx.setPoissaOlevaTaytto(jono.getPoissaOlevaTaytto());
-        vx.setPrioriteetti(0);
+        vx.setPrioriteetti(jono.getPrioriteetti());
         vx.setSiirretaanSijoitteluun(jono.getSiirretaanSijoitteluun());
         vx.setTasasijasaanto(EnumConverter.convert(Tasasijasaanto.class,
                 jono.getTasapistesaanto()));
