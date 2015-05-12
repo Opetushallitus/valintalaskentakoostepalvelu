@@ -33,26 +33,11 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     private final ActorRef laskennanKaynnistajaActor;
 
 	@Autowired
-	public LaskentaActorSystem(
-			LaskentaSeurantaAsyncResource seurantaAsyncResource,
-			ValintaperusteetAsyncResource valintaperusteetAsyncResource,
-			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
-			ApplicationAsyncResource applicationAsyncResource,
-			SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource
-	) {
+	public LaskentaActorSystem(LaskentaActorFactory laskentaActorFactory) {
         ActorSystem actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
 		this.laskentaSupervisor = new LaskentaSupervisorImpl(actorSystem, this::workerAvailable);
-
-		this.laskentaActorFactory = new LaskentaActorFactory(
-				valintalaskentaAsyncResource,
-				applicationAsyncResource,
-				valintaperusteetAsyncResource,
-				seurantaAsyncResource,
-				suoritusrekisteriAsyncResource,
-				laskentaSupervisor
-		);
-
-        laskennanKaynnistajaActor = actorSystem.actorOf(LaskennanKaynnistajaActor.props(laskentaSupervisor));
+		this.laskentaActorFactory = laskentaActorFactory;
+        this.laskennanKaynnistajaActor = actorSystem.actorOf(LaskennanKaynnistajaActor.props(laskentaSupervisor));
     }
 
     public void workerAvailable(Object evvk){
@@ -66,7 +51,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
 	@Override
 	public void suoritaValintalaskentaKerralla(final ParametritDTO parametritDTO, final LaskentaAloitus laskentaAloitus) {
-		LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(new LaskentaActorParams(laskentaAloitus, parametritDTO));
+		LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, parametritDTO));
 		laskentaSupervisor.luoJaKaynnistaLaskenta(laskentaAloitus.getUuid(), laskentaAloitus.getHakuOid(), laskentaAloitus.isOsittainenLaskenta(), laskentaActor);
 	}
 

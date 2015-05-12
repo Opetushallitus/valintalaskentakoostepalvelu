@@ -29,6 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
+    private final LaskentaSupervisor laskentaSupervisor = Mockito.mock(LaskentaSupervisor.class);
+
     @Test
     public void testaaValintaryhmaActorYhdellaHakukohteellaKunKaikkiMeneeHyvin() {
         final String UUID1 = "UUID1";
@@ -64,8 +66,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
                 laskentaSeurantaAsyncResource,
-                suoritusrekisteriAsyncResource,
-                Mockito.mock(LaskentaSupervisor.class)
+                suoritusrekisteriAsyncResource
         );
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1));
         LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
@@ -77,7 +78,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(new LaskentaActorParams(laskentaAloitus, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
@@ -121,8 +122,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
                 laskentaSeurantaAsyncResource,
-                suoritusrekisteriAsyncResource,
-                Mockito.mock(LaskentaSupervisor.class)
+                suoritusrekisteriAsyncResource
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1));
@@ -135,7 +135,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(new LaskentaActorParams(laskentaAloitus, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
@@ -179,8 +179,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
                 laskentaSeurantaAsyncResource,
-                suoritusrekisteriAsyncResource,
-                Mockito.mock(LaskentaSupervisor.class)
+                suoritusrekisteriAsyncResource
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1));
@@ -193,7 +192,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(new LaskentaActorParams(laskentaAloitus, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
@@ -238,8 +237,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
                 laskentaSeurantaAsyncResource,
-                suoritusrekisteriAsyncResource,
-                Mockito.mock(LaskentaSupervisor.class)
+                suoritusrekisteriAsyncResource
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1), new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1));
@@ -252,7 +250,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(new LaskentaActorParams(laskentaAloitus, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
 
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
@@ -298,8 +296,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
                 laskentaSeurantaAsyncResource,
-                suoritusrekisteriAsyncResource,
-                Mockito.mock(LaskentaSupervisor.class)
+                suoritusrekisteriAsyncResource
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1), new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1));
@@ -312,7 +309,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(new LaskentaActorParams(laskentaAloitus, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
 
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
@@ -366,8 +363,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 applicationAsyncResource,
                 valintaperusteetAsyncResource,
                 laskentaSeurantaAsyncResource,
-                suoritusrekisteriAsyncResource,
-                Mockito.mock(LaskentaSupervisor.class)
+                suoritusrekisteriAsyncResource
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1), new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1));
@@ -380,7 +376,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(new LaskentaActorParams(laskentaAloitus, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
 
         actor.aloita();
         Assert.assertTrue(actor.isValmis());

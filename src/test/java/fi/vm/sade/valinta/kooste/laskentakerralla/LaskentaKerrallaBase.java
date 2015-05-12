@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyn
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaHandler;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource;
@@ -93,11 +94,13 @@ public class LaskentaKerrallaBase {
         }
         @Bean
         public ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute() {
-            return new LaskentaActorSystem(laskentaSeurantaAsyncResource,
-                    valintaperusteetAsyncResource,
+            return new LaskentaActorSystem(new LaskentaActorFactory(
                     valintalaskentaAsyncResource,
                     applicationAsyncResource,
-                    suoritusrekisteriAsyncResource);
+                    valintaperusteetAsyncResource,
+                    laskentaSeurantaAsyncResource,
+                    suoritusrekisteriAsyncResource
+            ));
         }
     }
 }

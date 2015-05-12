@@ -29,10 +29,13 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.Palvel
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.YksiPalvelukutsuKerrallaPalvelukutsuStrategia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Jussi Jartamo
  */
+@Service
 public class LaskentaActorFactory {
     private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorFactory.class);
 
@@ -41,17 +44,15 @@ public class LaskentaActorFactory {
     private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
     private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
-    private final LaskentaSupervisor laskentaSupervisor;
 
+    @Autowired
     public LaskentaActorFactory(
             ValintalaskentaAsyncResource valintalaskentaAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
             ValintaperusteetAsyncResource valintaperusteetAsyncResource,
             LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource,
-            SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
-            LaskentaSupervisor laskentaSupervisor
+            SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource
     ) {
-        this.laskentaSupervisor = laskentaSupervisor;
         this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
         this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
@@ -59,7 +60,7 @@ public class LaskentaActorFactory {
         this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
     }
 
-    public LaskentaActor createValintaryhmaActor(LaskentaActorParams actorParams) {
+    public LaskentaActor createValintaryhmaActor(LaskentaSupervisor laskentaSupervisor, LaskentaActorParams actorParams) {
         final PalvelukutsuStrategia laskentaStrategia = createStrategia();
         final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
         final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
@@ -122,7 +123,7 @@ public class LaskentaActorFactory {
         return v;
     }
 
-    public LaskentaActor createValintakoelaskentaActor(LaskentaActorParams actorParams) {
+    public LaskentaActor createValintakoelaskentaActor(LaskentaSupervisor laskentaSupervisor, LaskentaActorParams actorParams) {
         final PalvelukutsuStrategia laskentaStrategia = createStrategia();
         final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
         final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
@@ -148,7 +149,7 @@ public class LaskentaActorFactory {
         return new LaskentaActorImpl(laskentaSupervisor, actorParams.getUuid(), actorParams.getHakuOid(), palvelukutsut, strategiat, laskentaStrategia, laskentaSeurantaAsyncResource);
     }
 
-    public LaskentaActor createValintalaskentaActor(LaskentaActorParams actorParams) {
+    public LaskentaActor createValintalaskentaActor(LaskentaSupervisor laskentaSupervisor, LaskentaActorParams actorParams) {
         final PalvelukutsuStrategia laskentaStrategia = createStrategia();
         final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
         final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
@@ -184,7 +185,7 @@ public class LaskentaActorFactory {
         return new LaskentaActorImpl(laskentaSupervisor, actorParams.getUuid(), actorParams.getHakuOid(), palvelukutsut, strategiat, laskentaStrategia, laskentaSeurantaAsyncResource);
     }
 
-    public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(LaskentaActorParams actorParams) {
+    public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(LaskentaSupervisor laskentaSupervisor, LaskentaActorParams actorParams) {
         final PalvelukutsuStrategia laskentaStrategia = createStrategia();
         final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
         final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
@@ -225,21 +226,21 @@ public class LaskentaActorFactory {
         return new YksiPalvelukutsuKerrallaPalvelukutsuStrategia();
     }
 
-    public LaskentaActor createLaskentaActor(LaskentaActorParams actorParams) {
+    public LaskentaActor createLaskentaActor(LaskentaSupervisor laskentaSupervisor, LaskentaActorParams actorParams) {
         if (LaskentaTyyppi.VALINTARYHMALASKENTA.equals(actorParams.getLaskentaTyyppi())) {
             LOG.info("Muodostetaan VALINTARYHMALASKENTA");
-            return createValintaryhmaActor(actorParams);
+            return createValintaryhmaActor(laskentaSupervisor, actorParams);
         } else {
             if (LaskentaTyyppi.VALINTAKOELASKENTA.equals(actorParams.getLaskentaTyyppi())) {
                 LOG.info("Muodostetaan VALINTAKOELASKENTA");
-                return createValintakoelaskentaActor(actorParams);
+                return createValintakoelaskentaActor(laskentaSupervisor, actorParams);
             }
             if (LaskentaTyyppi.VALINTALASKENTA.equals(actorParams.getLaskentaTyyppi())) {
                 LOG.info("Muodostetaan VALINTALASKENTA");
-                return createValintalaskentaActor(actorParams);
+                return createValintalaskentaActor(laskentaSupervisor, actorParams);
             } else {
                 LOG.info("Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}", actorParams.getValinnanvaihe(), actorParams.isValintakoelaskenta());
-                return createValintalaskentaJaValintakoelaskentaActor(actorParams);
+                return createValintalaskentaJaValintakoelaskentaActor(laskentaSupervisor, actorParams);
             }
         }
     }

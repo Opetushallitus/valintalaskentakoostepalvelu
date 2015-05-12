@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -60,10 +61,13 @@ public class ValintalaskentaTest {
 		ValintalaskentaAsyncResource valintalaskentaAsyncResource = createMockValintalaskentaAsyncResource();
 		ApplicationAsyncResource applicationAsyncResource = createMockApplicationAsyncResource();
 		SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = createMockSuoritusrekisteriAsyncResource();
-		LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(
-				seurantaAsyncResource, valintaperusteetAsyncResource,
-				valintalaskentaAsyncResource, applicationAsyncResource,
-				suoritusrekisteriAsyncResource);
+		LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(new LaskentaActorFactory(
+				valintalaskentaAsyncResource,
+				applicationAsyncResource,
+				valintaperusteetAsyncResource,
+				seurantaAsyncResource,
+				suoritusrekisteriAsyncResource
+		));
 
 		ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute = laskentaActorSystem;
 		LaskentaAloitus laskentaJaHaku = new LaskentaAloitus(uuid, hakuOid,false,
