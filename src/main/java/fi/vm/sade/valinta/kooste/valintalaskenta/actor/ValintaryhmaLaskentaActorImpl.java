@@ -19,8 +19,8 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
  * 
  */
 public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(ValintaryhmaLaskentaActorImpl.class);
+	private final static Logger LOG = LoggerFactory.getLogger(ValintaryhmaLaskentaActorImpl.class);
+
 	private final String uuid;
 	private final String hakuOid;
 	private final Collection<PalvelukutsuStrategia> strategiat;
@@ -29,11 +29,15 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 	private final LaskentaSupervisor laskentaSupervisor;
 	private final AtomicBoolean valmis = new AtomicBoolean(false);
 
-	public ValintaryhmaLaskentaActorImpl(LaskentaSupervisor laskentaSupervisor,
-			String uuid, String hakuOid, LaskentaPalvelukutsu laskenta,
+	public ValintaryhmaLaskentaActorImpl(
+			LaskentaSupervisor laskentaSupervisor,
+			String uuid,
+			String hakuOid,
+			LaskentaPalvelukutsu laskenta,
 			Collection<PalvelukutsuStrategia> strategiat,
 			PalvelukutsuStrategia laskentaStrategia,
-			LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource) {
+			LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource
+	) {
 		this.laskentaSupervisor = laskentaSupervisor;
 		this.hakuOid = hakuOid;
 		this.uuid = uuid;
@@ -41,53 +45,44 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 		this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
 		this.laskentaStrategia = laskentaStrategia;
 		laskenta.laitaTyojonoon(pkk -> {
-			LOG.error("Hakukohteen {} tila muuttunut statukseen {}. {}",
-					pkk.getHakukohdeOid(), pkk.getHakukohdeTila(),
-					tulkinta(pkk.getHakukohdeTila()));
+			LOG.error("Hakukohteen {} tila muuttunut statukseen {}. {}", pkk.getHakukohdeOid(), pkk.getHakukohdeTila(), tulkinta(pkk.getHakukohdeTila()));
 
 			if (pkk.onkoPeruutettu()) {
-				try {
-					if(!viimeisteleLaskentaJaPalautaOlikoJoViimeistelty()) {
-						try {
-							laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
-									LaskentaTila.VALMIS, HakukohdeTila.VALMIS.equals(pkk.getHakukohdeTila()) ? HakukohdeTila.VALMIS : HakukohdeTila.KESKEYTETTY);
-						} finally {
-							viimeistele();
-						}
-					}
-				} catch (Exception e) {
-					LOG.error("Virhe {}", e.getMessage());
-				}
-
+				merkkaaLaskennanTila(uuid, laskentaSeurantaAsyncResource, pkk);
 			} else {
 				LOG.error("Aloitetaan valintaryhman laskenta!");
 				laskentaStrategia.laitaPalvelukutsuJonoon(pkk, p -> {
-					try {
-						if(!viimeisteleLaskentaJaPalautaOlikoJoViimeistelty()) {
-							try {
-								laskentaSeurantaAsyncResource.merkkaaLaskennanTila(
-										uuid, LaskentaTila.VALMIS,
-										HakukohdeTila.VALMIS.equals(pkk.getHakukohdeTila()) ? HakukohdeTila.VALMIS : HakukohdeTila.KESKEYTETTY);
-							} finally {
-								viimeistele();
-							}
-						}
-					} catch (Exception e) {
-						LOG.error("Virhe {}", e.getMessage());
-					} finally {
-					}
+					merkkaaLaskennanTila(uuid, laskentaSeurantaAsyncResource, pkk);
 				});
 				laskentaStrategia.aloitaUusiPalvelukutsu();
 			}
 		});
 	}
+
+	private void merkkaaLaskennanTila(String uuid, LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource, LaskentaPalvelukutsu pkk) {
+		try {
+			if(!viimeisteleLaskentaJaPalautaOlikoJoViimeistelty()) {
+				try {
+					laskentaSeurantaAsyncResource.merkkaaLaskennanTila(
+							uuid,
+							LaskentaTila.VALMIS,
+							HakukohdeTila.VALMIS.equals(pkk.getHakukohdeTila()) ? HakukohdeTila.VALMIS : HakukohdeTila.KESKEYTETTY
+					);
+				} finally {
+					viimeistele();
+				}
+			}
+		} catch (Exception e) {
+			LOG.error("Virhe {}", e.getMessage());
+		}
+	}
+
 	@Override
 	public void postStop() {
 		if(!valmis.get()) {
 			try {
 				LOG.error("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
-				laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
-						LaskentaTila.PERUUTETTU);
+				laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
 			} catch (Exception e) {
 				LOG.error("Virhe {}", e.getMessage());
 			}
