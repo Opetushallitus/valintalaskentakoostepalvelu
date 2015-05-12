@@ -12,15 +12,12 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Pal
  * @author Jussi Jartamo
  * 
  */
-public class PalvelukutsuJaPalvelukutsuStrategiaImpl<T extends Palvelukutsu>
-		implements PalvelukutsuJaPalvelukutsuStrategia {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(PalvelukutsuJaPalvelukutsuStrategiaImpl.class);
+public class PalvelukutsuJaPalvelukutsuStrategiaImpl<T extends Palvelukutsu> implements PalvelukutsuJaPalvelukutsuStrategia {
+	private final static Logger LOG = LoggerFactory.getLogger(PalvelukutsuJaPalvelukutsuStrategiaImpl.class);
 	private final PalvelukutsuStrategia palvelukutsuStrategia;
 	private final T palvelukutsu;
 
-	public PalvelukutsuJaPalvelukutsuStrategiaImpl(T palvelukutsu,
-			PalvelukutsuStrategia palvelukutsuStrategia) {
+	public PalvelukutsuJaPalvelukutsuStrategiaImpl(T palvelukutsu, PalvelukutsuStrategia palvelukutsuStrategia) {
 		this.palvelukutsuStrategia = palvelukutsuStrategia;
 		this.palvelukutsu = palvelukutsu;
 	}
@@ -30,8 +27,7 @@ public class PalvelukutsuJaPalvelukutsuStrategiaImpl<T extends Palvelukutsu>
 	}
 
 	public void laitaPalvelukutsuTyojonoon(Consumer<Palvelukutsu> takaisinkutsu) {
-		palvelukutsuStrategia.laitaPalvelukutsuJonoon(palvelukutsu,
-				takaisinkutsu);
+		palvelukutsuStrategia.laitaPalvelukutsuJonoon(palvelukutsu, takaisinkutsu);
 	}
 
 	public void peruuta() {
@@ -39,12 +35,8 @@ public class PalvelukutsuJaPalvelukutsuStrategiaImpl<T extends Palvelukutsu>
 			try {
 				palvelukutsu.peruuta();
 			} catch (Exception e) {
-				LOG.error(
-						"Laskennanpalvelukutsustakasin aloitettu alipalvelukutsujen peruutu epaonnistui palvelukutsulle {} syysta {}",
-						palvelukutsu.getClass().getSimpleName(), e.getMessage());
+				LOG.error("Laskennanpalvelukutsustakasin aloitettu alipalvelukutsujen peruutu epaonnistui palvelukutsulle {} syysta {}", palvelukutsu.getClass().getSimpleName(), e.getMessage());
 			}
 		}
-
 	}
-
 }
