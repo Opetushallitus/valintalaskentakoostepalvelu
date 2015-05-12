@@ -15,7 +15,7 @@ public class LaskennanKaynnistajaActor extends UntypedActor {
     }
 
     public static Props props(final LaskentaSupervisor laskentaSupervisor) {
-        return Props.create(() -> {
+        return Props.create(LaskennanKaynnistajaActor.class, () -> {
             return new LaskennanKaynnistajaActor(laskentaSupervisor);
         });
     }
