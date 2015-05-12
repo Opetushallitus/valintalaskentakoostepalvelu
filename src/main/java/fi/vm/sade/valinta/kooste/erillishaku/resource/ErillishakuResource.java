@@ -6,10 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 
 import com.google.common.hash.HashCode;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
@@ -76,6 +73,7 @@ public class ErillishakuResource {
 	@POST
 	@Path("/vienti")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen vienti taulukkolaskentaan", response = ProsessiId.class)
 	public ProsessiId vienti(
 			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
@@ -97,6 +95,7 @@ public class ErillishakuResource {
 	@POST
 	@Path("/tuonti")
 	@Consumes("application/octet-stream")
+	@Produces("application/json")
 	@ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen tuonti taulukkolaskennalla", response = ProsessiId.class)
 	public ProsessiId tuonti(
 			@QueryParam("hakutyyppi") Hakutyyppi tyyppi,
@@ -122,6 +121,7 @@ public class ErillishakuResource {
 	@POST
 	@Path("/tuonti/json")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen tuonti JSON-tietueella", response = ProsessiId.class)
 	public ProsessiId tuontiJson(
 			@ApiParam(allowableValues = "TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU")

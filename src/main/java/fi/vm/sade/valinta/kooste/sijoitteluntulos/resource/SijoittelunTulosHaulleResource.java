@@ -2,10 +2,7 @@ package fi.vm.sade.valinta.kooste.sijoitteluntulos.resource;
 
 import java.util.Arrays;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -51,6 +48,7 @@ public class SijoittelunTulosHaulleResource {
 	@POST
 	@Path("/osoitetarrat")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
 	public ProsessiId osoitetarratKokoHaulle(
@@ -77,6 +75,7 @@ public class SijoittelunTulosHaulleResource {
 	@POST
 	@Path("/hyvaksymiskirjeet")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
 	public ProsessiId hyvaksymiskirjeetKokoHaulle(
@@ -104,6 +103,7 @@ public class SijoittelunTulosHaulleResource {
 	@POST
 	@Path("/taulukkolaskennat")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
 	public ProsessiId taulukkolaskennatKokoHaulle(

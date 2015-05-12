@@ -2,11 +2,7 @@ package fi.vm.sade.valinta.kooste.kela.resource;
 
 import java.util.Date;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -55,6 +51,7 @@ public class KelaResource {
 	@POST
 	@Path("/aktivoi")
 	@Consumes("application/json")
+	@Produces("application/json")
 	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
 	@ApiOperation(value = "Kela-reitin aktivointi", response = ProsessiId.class)
 	public ProsessiId aktivoiKelaTiedostonluonti(KelaHakuFiltteri hakuTietue) {

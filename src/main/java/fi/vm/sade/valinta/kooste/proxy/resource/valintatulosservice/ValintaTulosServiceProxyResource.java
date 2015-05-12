@@ -39,6 +39,7 @@ public class ValintaTulosServiceProxyResource {
     @GET
     @Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
     @Consumes("application/json")
+    @Produces("application/json")
     @ApiOperation(consumes = "application/json", value = "Hakukohteen valintatulokset", response = ProsessiId.class)
     public void vienti(
             @PathParam("hakuOid") String hakuOid,
