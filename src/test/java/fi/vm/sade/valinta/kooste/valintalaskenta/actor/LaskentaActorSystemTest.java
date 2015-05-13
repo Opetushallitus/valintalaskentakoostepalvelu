@@ -1,4 +1,4 @@
-package fi.vm.sade.valinta.kooste.valintalaskenta;
+package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import akka.actor.*;
 import com.typesafe.config.ConfigFactory;
@@ -7,10 +7,6 @@ import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyn
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActor;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisor;
 import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
