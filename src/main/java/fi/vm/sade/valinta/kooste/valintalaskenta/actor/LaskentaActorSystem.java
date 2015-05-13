@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * @author Jussi Jartamo
@@ -34,13 +35,17 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
     private final LaskentaActorFactory laskentaActorFactory;
 
+    private final LaskentaSeurantaAsyncResource seurantaAsyncResource;
     private final ActorSystem actorSystem;
     private final ActorRef laskennanKaynnistajaActor;
     private final Map<String, LaskentaActorWrapper> ajossaOlevatLaskennat = Maps.newConcurrentMap();
+    private final LaskentaKaynnistin laskentaKaynnistin;
 
 	@Autowired
-	public LaskentaActorSystem(LaskentaActorFactory laskentaActorFactory) {
+	public LaskentaActorSystem(LaskentaSeurantaAsyncResource seurantaAsyncResource, LaskentaKaynnistin laskentaKaynnistin, LaskentaActorFactory laskentaActorFactory) {
 		this.laskentaActorFactory = laskentaActorFactory;
+        this.laskentaKaynnistin = laskentaKaynnistin;
+        this.seurantaAsyncResource = seurantaAsyncResource;
         this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
         laskennanKaynnistajaActor = actorSystem.actorOf(LaskennanKaynnistajaActor.props(this));
     }
@@ -54,7 +59,11 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     @Override
     public void suoritaValintalaskentaKerralla(final ParametritDTO parametritDTO, final LaskentaAloitus laskentaAloitus) {
         LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this,new LaskentaActorParams(laskentaAloitus, parametritDTO));
-        luoJaKaynnistaLaskenta(laskentaAloitus.getUuid(), laskentaAloitus.getHakuOid(), laskentaAloitus.isOsittainenLaskenta(), laskentaActor);
+        try {
+            luoJaKaynnistaLaskenta(laskentaAloitus.getUuid(), laskentaAloitus.getHakuOid(), laskentaAloitus.isOsittainenLaskenta(), laskentaActor);
+        }catch (Exception e){
+            //temp nop
+        }
     }
 
     @Override
@@ -69,16 +78,37 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
     @Override
     public void valmis(String uuid) {
-        lopeta(uuid, ajossaOlevatLaskennat.remove(uuid));
         laskennanKaynnistajaActor.tell(new WorkerAvailable(), ActorRef.noSender());
+        lopeta(uuid, ajossaOlevatLaskennat.remove(uuid));
     }
 
-    public void luoJaKaynnistaLaskenta(String uuid, String hakuOid, boolean osittainen, LaskentaActor laskentaActor) {
+    public String haeJaKaynnistaLaskenta() {
+        final ValueConsumer<String> consumer = new ValueConsumer<>();
+        seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle(consumer, (Throwable t) -> {
+        });
+
+        final String uuid = consumer.getValue();
+        if (null == uuid)
+            return null;
+
+        ValueConsumer<LaskentaActorParams> laskentaActorParamsConsumer = new ValueConsumer<>();
+        laskentaKaynnistin.haeLaskentaParams(uuid, params-> {
+            laskentaActorParamsConsumer.accept(params);
+        });
+        final LaskentaActorParams laskentaActorParams = laskentaActorParamsConsumer.getValue();
+        if (null == laskentaActorParams)
+            return null;
+        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this, laskentaActorParams);
+
+        return luoJaKaynnistaLaskenta(uuid, laskentaActorParams.getHakuOid(), laskentaActorParams.isOsittainen(), laskentaActor);
+    }
+
+    String luoJaKaynnistaLaskenta(String uuid, String hakuOid, boolean osittainen, LaskentaActor laskentaActor) {
         try {
             laskentaActor.aloita();
         } catch (Exception e) {
-            LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, null);
-            return;
+            LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid);
+            return null;
         }
 
         ajossaOlevatLaskennat.merge(uuid, new LaskentaActorWrapper(uuid, hakuOid, osittainen, laskentaActor), (LaskentaActorWrapper oldValue, LaskentaActorWrapper value) -> {
@@ -86,6 +116,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
             lopeta(uuid, oldValue);
             return value;
         });
+        return uuid;
     }
 
     private void lopeta(String uuid, LaskentaActorWrapper l) {
@@ -98,6 +129,19 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
             }
         } else {
             LOG.warn("Yritettiin valmistaa laskentaa {} mutta laskenta ei ollut enaa ajossa!", uuid);
+        }
+    }
+
+    private class ValueConsumer<T> implements Consumer<T>{
+        private T value;
+
+        @Override
+        public void accept(T value) {
+            this.value = value;
+        }
+
+        public T getValue(){
+            return value;
         }
     }
 }

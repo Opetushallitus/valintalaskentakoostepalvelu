@@ -5,17 +5,25 @@ import akka.actor.UntypedActor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisor;
 
 final public class LaskennanKaynnistajaActor extends UntypedActor {
-    LaskentaSupervisor laskentaSupervisor;
-    int workerCount = 0;
-    int maxWorkers = 8;
 
-    public LaskennanKaynnistajaActor(final LaskentaSupervisor laskentaSupervisor){
+    final LaskentaSupervisor laskentaSupervisor;
+    final int maxWorkers;
+    int workerCount = 0;
+
+    private LaskennanKaynnistajaActor(final LaskentaSupervisor laskentaSupervisor, final int maxWorkers){
         this.laskentaSupervisor = laskentaSupervisor;
+        this.maxWorkers = maxWorkers;
     }
 
     public static Props props(final LaskentaSupervisor laskentaSupervisor) {
         return Props.create(LaskennanKaynnistajaActor.class, () -> {
-            return new LaskennanKaynnistajaActor(laskentaSupervisor);
+            return new LaskennanKaynnistajaActor(laskentaSupervisor, 8);
+        });
+    }
+
+    public static Props props(final LaskentaSupervisor laskentaSupervisor, final int maxWorkers) {
+        return Props.create(LaskennanKaynnistajaActor.class, () -> {
+            return new LaskennanKaynnistajaActor(laskentaSupervisor, maxWorkers);
         });
     }
 
@@ -30,14 +38,11 @@ final public class LaskennanKaynnistajaActor extends UntypedActor {
     }
 
     void process() {
-        if (workerCount > maxWorkers)
-            return;
-        String uuid = null;
-
-        if (null == uuid)
-            return;
-
-        //laskentaSupervisor.luoJaKaynnistaLaskenta();
-        workerCount++;
+        while(workerCount < maxWorkers) {
+            String uuid = laskentaSupervisor.haeJaKaynnistaLaskenta();
+            if (null == uuid)
+                return;
+            workerCount++;
+        }
     }
 }

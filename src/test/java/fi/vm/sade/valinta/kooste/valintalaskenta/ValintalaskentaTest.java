@@ -10,7 +10,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaKaynnistin;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -61,7 +63,8 @@ public class ValintalaskentaTest {
 		ValintalaskentaAsyncResource valintalaskentaAsyncResource = createMockValintalaskentaAsyncResource();
 		ApplicationAsyncResource applicationAsyncResource = createMockApplicationAsyncResource();
 		SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = createMockSuoritusrekisteriAsyncResource();
-		LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(new LaskentaActorFactory(
+        OhjausparametritAsyncResource ohjausparametritAsyncResource = mock(OhjausparametritAsyncResource.class);
+		LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(seurantaAsyncResource, new LaskentaKaynnistin(ohjausparametritAsyncResource, valintaperusteetAsyncResource,seurantaAsyncResource), new LaskentaActorFactory(
 				valintalaskentaAsyncResource,
 				applicationAsyncResource,
 				valintaperusteetAsyncResource,

@@ -9,4 +9,5 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
  */
 public interface LaskentaSupervisor extends ValintalaskentaKerrallaRouteValvomo {
 	void valmis(String uuid);
+	String haeJaKaynnistaLaskenta();
 }

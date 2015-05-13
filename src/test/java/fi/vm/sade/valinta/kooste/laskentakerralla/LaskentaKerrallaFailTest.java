@@ -49,9 +49,10 @@ public class LaskentaKerrallaFailTest extends LaskentaKerrallaBase {
                     asyncResponse);
         } catch (Throwable t) { }
 
+        verify(laskentaSeurantaAsyncResource, times(1)).otaSeuraavaLaskentaTyonAlle(any(), any());
+        verifyNoMoreInteractions(laskentaSeurantaAsyncResource);
         verifyZeroInteractions(applicationAsyncResource);
         verifyZeroInteractions(ohjausparametritAsyncResource);
-        verifyZeroInteractions(laskentaSeurantaAsyncResource);
         verifyZeroInteractions(valintalaskentaAsyncResource);
         verifyZeroInteractions(suoritusrekisteriAsyncResource);
 
