@@ -1,24 +1,27 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
+import akka.actor.*;
+import com.typesafe.config.ConfigFactory;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActor;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisor;
+import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import akka.actor.ActorContext;
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.PoisonPill;
-import akka.actor.TypedActor;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
-import com.typesafe.config.ConfigFactory;
-
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActor;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisor;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisorImpl;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 
 /**
  * 
@@ -31,28 +34,50 @@ public class LaskentaActorSystemTest {
 
 	private final String UUID = "uuid";
 	private final String HAKUOID = "hakuOid";
-	private final ActorSystem actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
+
+    private final LaskentaActorSystem laskentaActorSystem;
+    private final LaskentaSeurantaAsyncResource seurantaAsyncResource;
+    private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
+    private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
+    private final ApplicationAsyncResource applicationAsyncResource;
+    private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
+
+    private final ActorSystem actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
+
+
+    public LaskentaActorSystemTest(){
+        this.seurantaAsyncResource = mock(LaskentaSeurantaAsyncResource.class);
+        this.valintaperusteetAsyncResource= mock(ValintaperusteetAsyncResource.class);
+        this.valintalaskentaAsyncResource = mock(ValintalaskentaAsyncResource.class);
+        this.applicationAsyncResource = mock(ApplicationAsyncResource.class);
+        this.suoritusrekisteriAsyncResource = mock(SuoritusrekisteriAsyncResource.class);
+        LaskentaActorFactory laskentaActorFactory = new LaskentaActorFactory(valintalaskentaAsyncResource,applicationAsyncResource,valintaperusteetAsyncResource,seurantaAsyncResource,suoritusrekisteriAsyncResource);
+        laskentaActorSystem = new LaskentaActorSystem(laskentaActorFactory);
+    }
+
+    @After
+    public void resetMocks(){
+        reset(seurantaAsyncResource, valintaperusteetAsyncResource, valintalaskentaAsyncResource, applicationAsyncResource, suoritusrekisteriAsyncResource);
+    }
 
 	@Test
-	public void testaaActorSupervisor() throws InterruptedException {
-		LaskentaSupervisorImpl laskentaSupervisor = new LaskentaSupervisorImpl(actorSystem, (x) -> {});
+	public void testaaActorSupervisor() throws Exception {
+		LOG.info("Ajossa olevat laskennat nyt {}", laskentaActorSystem.ajossaOlevatLaskennat());
+        laskentaActorSystem.luoJaKaynnistaLaskenta(UUID, HAKUOID, false, create(laskentaActorSystem));
 
-		LOG.info("Ajossa olevat laskennat nyt {}", laskentaSupervisor.ajossaOlevatLaskennat());
-
-		laskentaSupervisor.luoJaKaynnistaLaskenta(UUID, HAKUOID, false, create(laskentaSupervisor));
-
-		LOG.info("Ajossa olevat laskennat nyt {}", laskentaSupervisor.ajossaOlevatLaskennat());
-		laskentaSupervisor.valmis(UUID);
-		
+		LOG.info("Ajossa olevat laskennat nyt {}", laskentaActorSystem.ajossaOlevatLaskennat());
+        laskentaActorSystem.valmis(UUID);
 	}
 
-	private LaskentaActor create(final LaskentaSupervisor laskentaSupervisor) {
+	private LaskentaActor create(final LaskentaSupervisor supervisor) {
 		return new LaskentaActor() {
+
 			@Override
 			public void postStop() {}
 			private Thread t;
 			private volatile boolean valmis = false;
 			private AtomicReference<ActorRef> refinery = new AtomicReference<>();
+            private LaskentaSupervisor laskentaSupervisor = supervisor;
 
 			public void aloita() {
 				{

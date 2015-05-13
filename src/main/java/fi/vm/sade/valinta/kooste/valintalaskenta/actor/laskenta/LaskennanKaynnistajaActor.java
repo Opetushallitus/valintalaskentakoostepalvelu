@@ -4,8 +4,7 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisor;
 
-public class LaskennanKaynnistajaActor extends UntypedActor {
-
+final public class LaskennanKaynnistajaActor extends UntypedActor {
     LaskentaSupervisor laskentaSupervisor;
     int workerCount = 0;
     int maxWorkers = 8;
