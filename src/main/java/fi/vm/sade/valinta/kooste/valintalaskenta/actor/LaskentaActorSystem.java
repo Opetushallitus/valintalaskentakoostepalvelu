@@ -59,11 +59,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     @Override
     public void suoritaValintalaskentaKerralla(final ParametritDTO parametritDTO, final LaskentaAloitus laskentaAloitus) {
         LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this,new LaskentaActorParams(laskentaAloitus, parametritDTO));
-        try {
-            luoJaKaynnistaLaskenta(laskentaAloitus.getUuid(), laskentaAloitus.getHakuOid(), laskentaAloitus.isOsittainenLaskenta(), laskentaActor);
-        }catch (Exception e){
-            //temp nop
-        }
+        luoJaKaynnistaLaskenta(laskentaAloitus.getUuid(), laskentaAloitus.getHakuOid(), laskentaAloitus.isOsittainenLaskenta(), laskentaActor);
     }
 
     @Override

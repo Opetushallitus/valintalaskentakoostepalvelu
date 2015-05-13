@@ -24,7 +24,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.withSettings;
+import static org.mockito.Mockito.spy;
 
 @ContextConfiguration(loader=AnnotationConfigContextLoader.class)
 public class LaskentaKerrallaBase {
@@ -36,6 +36,13 @@ public class LaskentaKerrallaBase {
     static ValintalaskentaAsyncResource valintalaskentaAsyncResource = mock(ValintalaskentaAsyncResource.class);
     static SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = mock(SuoritusrekisteriAsyncResource.class);
     static ValintalaskentaStatusExcelHandler valintalaskentaStatusExcelHandler = mock(ValintalaskentaStatusExcelHandler.class);
+    static LaskentaActorSystem laskentaActorSystem = spy(new LaskentaActorSystem(laskentaSeurantaAsyncResource, new LaskentaKaynnistin(ohjausparametritAsyncResource,valintaperusteetAsyncResource,laskentaSeurantaAsyncResource),new LaskentaActorFactory(
+            valintalaskentaAsyncResource,
+            applicationAsyncResource,
+            valintaperusteetAsyncResource,
+            laskentaSeurantaAsyncResource,
+            suoritusrekisteriAsyncResource
+            )));
 
     @Autowired
     ValintalaskentaKerrallaResource valintalaskentaKerralla;
@@ -95,13 +102,7 @@ public class LaskentaKerrallaBase {
         }
         @Bean
         public ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute() {
-            return new LaskentaActorSystem(laskentaSeurantaAsyncResource, new LaskentaKaynnistin(ohjausparametritAsyncResource,valintaperusteetAsyncResource,laskentaSeurantaAsyncResource),new LaskentaActorFactory(
-                    valintalaskentaAsyncResource,
-                    applicationAsyncResource,
-                    valintaperusteetAsyncResource,
-                    laskentaSeurantaAsyncResource,
-                    suoritusrekisteriAsyncResource
-            ));
+            return laskentaActorSystem;
         }
     }
 }

@@ -7,7 +7,6 @@ import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyn
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
@@ -42,7 +41,7 @@ public class ValintalaskentaKerrallaHandler {
     @Autowired
     private LaskentaSeurantaAsyncResource seurantaAsyncResource;
 
-    public ValintalaskentaKerrallaHandler() {
+    public ValintalaskentaKerrallaHandler(){
     }
 
     public void kaynnistaLaskentaHaulle(
@@ -54,11 +53,10 @@ public class ValintalaskentaKerrallaHandler {
             final boolean isErillishaku,
             final Consumer<Response> callbackResponse) {
         kaynnistaLaskenta(
-                laskentatyyppi,
                 hakuOid,
                 maski,
                 (Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus) -> {
-                    kasitteleKokoPaska(
+                    luoLaskenta(
                             hakukohdeOids,
                             laskennanAloitus,
                             hakuOid,
@@ -68,10 +66,6 @@ public class ValintalaskentaKerrallaHandler {
                             isValintakoelaskenta,
                             callbackResponse);
                 },
-                isErillishaku,
-                LaskentaTyyppi.VALINTARYHMA.equals(laskentatyyppi),
-                valinnanvaihe,
-                isValintakoelaskenta,
                 callbackResponse);
     }
 
@@ -85,16 +79,11 @@ public class ValintalaskentaKerrallaHandler {
             seurantaAsyncResource.resetoiTilat(
                     uuid,
                     (LaskentaDto laskenta) -> kaynnistaLaskenta(
-                            laskenta.getTyyppi(),
                             laskenta.getHakuOid(),
                             luoMaskiLaskennanPohjalta(laskenta),
                             (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> {
                                 laskennanAloitus.accept(laskenta.getUuid());
                             },
-                            Boolean.TRUE.equals(laskenta.isErillishaku()),
-                            LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
-                            laskenta.getValinnanvaihe(),
-                            laskenta.getValintakoelaskenta(),
                             callbackResponse),
                     (Throwable t) -> {
                         LOG.error("Uudelleen ajo laskennalle heitti poikkeuksen {}:\r\n{}", t.getMessage(), Arrays.toString(t.getStackTrace()));
@@ -108,15 +97,9 @@ public class ValintalaskentaKerrallaHandler {
     }
 
     private void kaynnistaLaskenta(
-            final LaskentaTyyppi tyyppi,
             final String hakuOid,
             final Maski maski,
-            final BiConsumer<Collection<HakukohdeJaOrganisaatio>,
-            Consumer<String>> seurantaTunnus,
-            final boolean erillishaku,
-            final boolean valintaryhmalaskenta,
-            final Integer valinnanvaihe,
-            final Boolean valintakoelaskenta,
+            final BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
             final Consumer<Response> callbackResponse) {
         if (StringUtils.isBlank(hakuOid)) {
             LOG.error("HakuOid on pakollinen");
@@ -140,14 +123,8 @@ public class ValintalaskentaKerrallaHandler {
                 (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> {
                     kasitteleHaunkohteetOids(
                             haunHakukohteetOids,
-                            tyyppi,
-                            hakuOid,
                             maski,
                             seurantaTunnus,
-                            erillishaku,
-                            valintaryhmalaskenta,
-                            valinnanvaihe,
-                            valintakoelaskenta,
                             callbackResponse);
                 },
                 (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage())));
@@ -220,15 +197,10 @@ public class ValintalaskentaKerrallaHandler {
 
     private void kasitteleHaunkohteetOids(
             final Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids,
-            final LaskentaTyyppi tyyppi,
-            final String hakuOid,
             final Maski maski,
             final BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
-            final boolean erillishaku,
-            final boolean valintaryhmalaskenta,
-            final Integer valinnanvaihe,
-            final Boolean valintakoelaskenta,
-            final Consumer<Response> callbackResponse) {
+            final Consumer<Response> callbackResponse
+    ) {
         Collection<HakukohdeJaOrganisaatio> oids;
         if (maski.isMask()) {
             oids = maski.maskaa(haunHakukohteetOids);
@@ -238,29 +210,10 @@ public class ValintalaskentaKerrallaHandler {
         } else {
             oids = haunHakukohteetOids;
         }
-        ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametrit -> {
-                    seurantaTunnus.accept(
-                            oids,
-                            (String uuid) -> {
-                                valintalaskentaRoute.suoritaValintalaskentaKerralla(
-                                        parametrit,
-                                        new LaskentaAloitus(
-                                                uuid,
-                                                hakuOid,
-                                                erillishaku,
-                                                maski.isMask(),
-                                                valintaryhmalaskenta,
-                                                valinnanvaihe,
-                                                valintakoelaskenta,
-                                                oids,
-                                                tyyppi));
-                                callbackResponse.accept(redirectResponse(uuid));
-                            });
-                },
-                poikkeus -> {
-                    LOG.error("Ohjausparametrien luku epäonnistui: {} {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
-                    callbackResponse.accept(errorResponse(poikkeus.getMessage()));
-                });
+        seurantaTunnus.accept(oids, (String uuid) -> {
+            valintalaskentaRoute.workAvailable();
+            callbackResponse.accept(redirectResponse(uuid));
+        });
     }
 
     private void kasitteleLaskennanAloitus(
@@ -281,7 +234,7 @@ public class ValintalaskentaKerrallaHandler {
         }
     }
 
-    private void kasitteleKokoPaska(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, String hakuOid, LaskentaTyyppi laskentatyyppi, boolean isErillishaku, Integer valinnanvaihe, Boolean isValintakoelaskenta, Consumer<Response> callbackResponse) {
+    private void luoLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, String hakuOid, LaskentaTyyppi laskentatyyppi, boolean isErillishaku, Integer valinnanvaihe, Boolean isValintakoelaskenta, Consumer<Response> callbackResponse) {
         final List<HakukohdeDto> hakukohdeDtos = filterAndMapTohakukohdeDto(hakukohdeData);
 
         if (hakukohdeDtos.isEmpty() || hakukohdeDtos.size() == 0) {
