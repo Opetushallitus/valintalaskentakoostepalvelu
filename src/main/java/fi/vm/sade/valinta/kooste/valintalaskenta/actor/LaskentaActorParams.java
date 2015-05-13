@@ -43,6 +43,10 @@ public class LaskentaActorParams {
         return laskentaAloitus.getValintakoelaskenta();
     }
 
+    public boolean isOsittainen(){
+        return laskentaAloitus.isOsittainenLaskenta();
+    }
+
     /**
      * Tilapainen workaround resurssin valinnanvaiheen normalisointiin.
      */
