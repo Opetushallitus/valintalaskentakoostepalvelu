@@ -48,7 +48,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 			getWebClient()
 					.path(url)
 					.async()
-					.get(new Callback<>(address, url, uuidCallback, failureCallback, new TypeToken<LaskentaDto>() {}.getType()));
+					.get(new Callback<>(address, url, uuidCallback, failureCallback, new TypeToken<String>() {}.getType()));
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}
