@@ -35,8 +35,6 @@ public class ValintalaskentaKerrallaHandler {
     @Autowired
     private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     @Autowired
-    private OhjausparametritAsyncResource ohjausparametritAsyncResource;
-    @Autowired
     private ValintalaskentaKerrallaRoute valintalaskentaRoute;
     @Autowired
     private LaskentaSeurantaAsyncResource seurantaAsyncResource;

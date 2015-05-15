@@ -459,6 +459,7 @@
 	<bean id="ValintalaskentaKerrallaResource"
 		class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.actor" />
+	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.resource" />
 	<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
 
 	<!-- Viestintapalvelu -->
