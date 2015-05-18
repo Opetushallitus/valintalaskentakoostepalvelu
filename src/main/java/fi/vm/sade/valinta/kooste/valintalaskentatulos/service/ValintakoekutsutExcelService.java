@@ -72,7 +72,7 @@ public class ValintakoekutsutExcelService {
     }
 
     public void luoExcel(DokumenttiProsessi prosessi, String hakuOid, String hakukohdeOid, List<String> valintakoeTunnisteet,
-                         List<String> hakemusOids) {
+                         Set<String> hakemusOids) {
         Consumer<Throwable> poikkeuskasittelija = poikkeus -> {
             LOG.error("Valintakoekutsut excelin luonnissa tapahtui poikkeus:", poikkeus);
             prosessi.getPoikkeukset().add(
@@ -86,7 +86,7 @@ public class ValintakoekutsutExcelService {
                             + 1
                             // dokumenttipalveluun vienti
                             + 1);
-            final boolean useWhitelist = !Optional.ofNullable(hakemusOids).orElse(Collections.emptyList()).isEmpty();
+            final boolean useWhitelist = !Optional.ofNullable(hakemusOids).orElse(Collections.emptySet()).isEmpty();
             final AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
             final AtomicReference<HakukohdeDTO> hakukohdeRef = new AtomicReference<>();
             final AtomicReference<List<HakemusOsallistuminenDTO>> tiedotHakukohteelleRef = new AtomicReference<>();
@@ -112,7 +112,7 @@ public class ValintakoekutsutExcelService {
                                     tiedotHakukohteelleRef.get(),
                                     valintakokeetRef.get(),
                                     haetutHakemuksetRef.get(),
-                                    Sets.newHashSet(Optional.ofNullable(hakemusOids).orElse(Collections.emptyList()))
+                                    Optional.ofNullable(hakemusOids).orElse(Collections.emptySet())
                             );
                             prosessi.inkrementoiTehtyjaToita();
                             String id = UUID.randomUUID().toString();
@@ -155,7 +155,7 @@ public class ValintakoekutsutExcelService {
                                 kiinnostavatValintakokeet.stream().map(v -> v.getSelvitettyTunniste()).collect(Collectors.toList()), osallistuminen -> {
                             if (!useWhitelist) {
                                 // haetaan osallistujille hakemukset
-                                List<String> osallistujienHakemusOids = osallistuminen.stream().map(o -> o.getHakemusOid()).collect(Collectors.toList());
+                                Set<String> osallistujienHakemusOids = osallistuminen.stream().map(o -> o.getHakemusOid()).collect(Collectors.toSet());
                                 applicationResource.getApplicationsByOids(osallistujienHakemusOids, hakemukset -> {
                                     haetutHakemuksetRef.set(hakemukset);
                                     laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

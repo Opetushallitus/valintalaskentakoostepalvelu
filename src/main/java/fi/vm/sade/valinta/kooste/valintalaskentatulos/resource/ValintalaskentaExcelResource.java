@@ -12,6 +12,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.service.ValintakoekutsutExcelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,7 +111,7 @@ public class ValintalaskentaExcelResource {
 					Arrays.asList("valintakoekutsut", "taulukkolaskenta"));
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(p);
 			valintakoekutsutExcelService.luoExcel(p, hakuOid, hakukohdeOid, lisatiedot
-					.getValintakoeTunnisteet(), lisatiedot.getHakemusOids());
+					.getValintakoeTunnisteet(), Sets.newHashSet(lisatiedot.getHakemusOids()));
 			return p.toProsessiId();
 		} catch (Exception e) {
 			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
