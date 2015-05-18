@@ -335,7 +335,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 	@Override
 	public Future<List<ValintakoeDTO>> haeValintakokeetTunnisteilla(Collection<String> tunnisteet) {
 		StringBuilder urlBuilder = new StringBuilder()
-				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintakoe/tunnisteet/");
+				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/tunniste/");
 		String url = urlBuilder.toString();
 		return WebClient
 				.fromClient(webClient)
@@ -365,7 +365,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 	@Override
 	public Peruutettava haeValintakokeetTunnisteilla(Collection<String> tunnisteet, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
 		StringBuilder urlBuilder = new StringBuilder()
-				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintakoe/tunnisteet/");
+				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/tunniste/");
 		String url = urlBuilder.toString();
 		return new PeruutettavaImpl(WebClient
 				.fromClient(webClient)
