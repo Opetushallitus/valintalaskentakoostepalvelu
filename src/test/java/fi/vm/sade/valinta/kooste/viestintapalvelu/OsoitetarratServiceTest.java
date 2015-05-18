@@ -58,6 +58,7 @@ public class OsoitetarratServiceTest {
     final String HAKEMUS1 = "HAKEMUS1";
     final String HAKEMUS2 = "HAKEMUS2";
     final String TUNNISTE1 = "TUNNISTE1";
+    final String SELVITETTY_TUNNISTE1 = "SELVITETTY_TUNNISTE1";
 
     @Before
     public void startServer() {
@@ -105,6 +106,7 @@ public class OsoitetarratServiceTest {
             MockValintaperusteetAsyncResource.setValintakokeetResult(Arrays.asList(
                             valintakoe()
                                     .setTunniste(VALINTAKOE1)
+                                    .setSelvitettyTunniste(SELVITETTY_TUNNISTE1)
                                     .setKaikkiKutsutaan()
                                     .build())
             );
@@ -116,7 +118,7 @@ public class OsoitetarratServiceTest {
                             .valinnanvaihe()
                             .valintakoe()
                             .setOsallistuu()
-                            .setValintakoeTunniste(VALINTAKOE1)
+                            .setValintakoeTunniste(SELVITETTY_TUNNISTE1)
                             .setKutsutaankoKaikki(true)
                             .build()
                             .build()
@@ -136,7 +138,7 @@ public class OsoitetarratServiceTest {
                     osoitetarratResource.getWebClient()
                             .query("hakuOid", HAKU1)
                             .query("hakukohdeOid",HAKUKOHDE1)
-                            .query("valintakoeTunnisteet", VALINTAKOE1)
+                            .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
                             .post(Entity.entity(new DokumentinLisatiedot(),
                                     "application/json"));
             Assert.assertEquals(200, r.getStatus());

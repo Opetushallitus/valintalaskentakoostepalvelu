@@ -128,7 +128,7 @@ public class OsoitetarratService {
             DokumenttiProsessi prosessi,
             String hakuOid,
             String hakukohdeOid,
-            Set<String> valintakoeTunnisteet) {
+            Set<String> selvitetytTunnisteet) {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
             LOG.error("Luodaan osoitetarrat valintakokeeseen osallistujille (haku={}, hakukohde={})", hakuOid, hakukohdeOid);
@@ -174,7 +174,7 @@ public class OsoitetarratService {
                                                                 .anyMatch(v ->
                                                                         v.getValintakokeet().stream()
                                                                                 .anyMatch(vk ->
-                                                                                        valintakoeTunnisteet.contains(vk.getValintakoeTunniste()) &&
+                                                                                        selvitetytTunnisteet.contains(vk.getValintakoeTunniste()) &&
                                                                                                 Osallistuminen.OSALLISTUU.equals(vk.getOsallistuminenTulos().getOsallistuminen())))))
                                         .map(o -> o.getHakemusOid()).collect(Collectors.toSet());
 
@@ -195,7 +195,7 @@ public class OsoitetarratService {
             posti(laskuri, postiRef, poikkeuskasittelija);
 
             valintaperusteetValintakoeResource.haeValintakokeetHakukohteelle(hakukohdeOid, valintakokeet -> {
-                boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> valintakoeTunnisteet.contains(vk.getSelvitettyTunniste()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
+                boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> selvitetytTunnisteet.contains(vk.getSelvitettyTunniste()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
                 if (kutsutaankoJossainKokeessaKaikki) {
                     applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid, hakemukset -> {
                         haetutHakemuksetRef.set(hakemukset);
