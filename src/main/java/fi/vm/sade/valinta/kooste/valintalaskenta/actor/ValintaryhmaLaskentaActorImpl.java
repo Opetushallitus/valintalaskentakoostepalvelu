@@ -48,8 +48,12 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 			if (pkk.onkoPeruutettu()) {
 				try {
 					if(!viimeisteleLaskentaJaPalautaOlikoJoViimeistelty()) {
-						laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
-								LaskentaTila.VALMIS, HakukohdeTila.VALMIS.equals(pkk.getHakukohdeTila()) ? HakukohdeTila.VALMIS : HakukohdeTila.KESKEYTETTY);
+						try {
+							laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
+									LaskentaTila.VALMIS, HakukohdeTila.VALMIS.equals(pkk.getHakukohdeTila()) ? HakukohdeTila.VALMIS : HakukohdeTila.KESKEYTETTY);
+						} finally {
+							viimeistele();
+						}
 					}
 				} catch (Exception e) {
 					LOG.error("Virhe {}", e.getMessage());
@@ -60,12 +64,17 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 				laskentaStrategia.laitaPalvelukutsuJonoon(pkk, p -> {
 					try {
 						if(!viimeisteleLaskentaJaPalautaOlikoJoViimeistelty()) {
-							laskentaSeurantaAsyncResource.merkkaaLaskennanTila(
-									uuid, LaskentaTila.VALMIS,
-									HakukohdeTila.VALMIS.equals(pkk.getHakukohdeTila()) ? HakukohdeTila.VALMIS : HakukohdeTila.KESKEYTETTY);
+							try {
+								laskentaSeurantaAsyncResource.merkkaaLaskennanTila(
+										uuid, LaskentaTila.VALMIS,
+										HakukohdeTila.VALMIS.equals(pkk.getHakukohdeTila()) ? HakukohdeTila.VALMIS : HakukohdeTila.KESKEYTETTY);
+							} finally {
+								viimeistele();
+							}
 						}
 					} catch (Exception e) {
 						LOG.error("Virhe {}", e.getMessage());
+					} finally {
 					}
 				});
 				laskentaStrategia.aloitaUusiPalvelukutsu();
@@ -117,7 +126,12 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 		strategiat.forEach(s -> s.aloitaUusiPalvelukutsu());
 		laskentaStrategia.aloitaUusiPalvelukutsu();
 	}
-
+	public void viimeistele() {
+		LOG.info(
+				"\r\n####\r\n#### Valintaryhmälaskenta on paattynyt haussa {} uuid:lle {}!\r\n####",
+				hakuOid, uuid);
+		laskentaSupervisor.valmis(uuid);
+	}
 	public void lopeta() {
 		try {
 			strategiat.forEach(s -> {
@@ -139,10 +153,6 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 		} catch (Exception e) {
 			LOG.error("Virhe {}", e.getMessage());
 		}
-		try {
-			laskentaSupervisor.valmis(uuid);
-		} catch (Exception e) {
-			LOG.error("Virhe {}", e.getMessage());
-		}
+		viimeistele();
 	}
 }
