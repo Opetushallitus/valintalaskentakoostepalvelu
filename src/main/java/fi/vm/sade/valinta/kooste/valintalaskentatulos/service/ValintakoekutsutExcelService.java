@@ -109,7 +109,6 @@ public class ValintakoekutsutExcelService {
                                     hakukohdeOid,
                                     maatJaValtiot1Ref.get(),
                                     postiRef.get(),
-                                    valintakoeTunnisteet,
                                     tiedotHakukohteelleRef.get(),
                                     valintakokeetRef.get(),
                                     haetutHakemuksetRef.get(),
@@ -146,26 +145,30 @@ public class ValintakoekutsutExcelService {
             } else {
                 // vaihtoehtoisesti haetaan hakemukset kun tiedetaan osallistujat laskennan tuloksista
             }
-            valintaperusteetValintakoeResource.haeValintakokeet(
-                    valintakoeTunnisteet,
+            valintaperusteetValintakoeResource.haeValintakokeetHakukohteelle(
+                    hakukohdeOid,
                     valintakokeet -> {
-                        valintakokeetRef.set(valintakokeet.stream().collect(Collectors.toMap(v -> v.getTunniste(), v -> v)));
+                        List<ValintakoeDTO> kiinnostavatValintakokeet = valintakokeet.stream().filter(v -> valintakoeTunnisteet.contains(v.getTunniste()))
+                                .collect(Collectors.toList());
+                        valintakokeetRef.set(kiinnostavatValintakokeet.stream().collect(Collectors.toMap(v -> v.getTunniste(), v -> v)));
+                        valintalaskentaAsyncResource.haeValintatiedotHakukohteelle(hakukohdeOid,
+                                kiinnostavatValintakokeet.stream().map(v -> v.getSelvitettyTunniste()).collect(Collectors.toList()), osallistuminen -> {
+                            if (!useWhitelist) {
+                                // haetaan osallistujille hakemukset
+                                List<String> osallistujienHakemusOids = osallistuminen.stream().map(o -> o.getHakemusOid()).collect(Collectors.toList());
+                                applicationResource.getApplicationsByOids(osallistujienHakemusOids, hakemukset -> {
+                                    haetutHakemuksetRef.set(hakemukset);
+                                    laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                                }, poikkeuskasittelija);
+                            }
+                            tiedotHakukohteelleRef.set(osallistuminen);
+                            laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                        }, poikkeuskasittelija);
                         laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                     },
                     poikkeuskasittelija
             );
-            valintalaskentaAsyncResource.haeValintatiedotHakukohteelle(hakukohdeOid, valintakoeTunnisteet, osallistuminen -> {
-                if (!useWhitelist) {
-                    // haetaan osallistujille hakemukset
-                    List<String> osallistujienHakemusOids = osallistuminen.stream().map(o -> o.getHakemusOid()).collect(Collectors.toList());
-                    applicationResource.getApplicationsByOids(osallistujienHakemusOids, hakemukset -> {
-                        haetutHakemuksetRef.set(hakemukset);
-                        laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                    }, poikkeuskasittelija);
-                }
-                tiedotHakukohteelleRef.set(osallistuminen);
-                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-            }, poikkeuskasittelija);
+
             tarjontaAsyncResource.haeHakukohde(hakuOid, hakukohdeOid, hakukohde -> {
                 hakukohdeRef.set(hakukohde);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

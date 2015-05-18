@@ -67,17 +67,11 @@ public class ValintalaskentaTulosExcelKomponentti {
 			String hakukohdeOid,
 			final Map<String, Koodi> maatJaValtiot1,
 			final Map<String, Koodi> posti,
-			List<String> valintakoeTunnisteet,
 			List<HakemusOsallistuminenDTO> tiedotHakukohteelle,
 			Map<String, ValintakoeDTO> valintakokeet,
 			List<Hakemus> haetutHakemukset,
 			Set<String> whiteList
 	) throws Exception {
-		if (valintakoeTunnisteet == null || valintakoeTunnisteet.isEmpty()) {
-			LOG.error("Ei voida luoda exceliä ilman valintakoetunnisteita!");
-			throw new RuntimeException(
-					"Ei voida luoda exceliä ilman että syötetään vähintään yksi valintakoetunniste!");
-		}
 		final Map<String, String> nivelvaiheenKoekutsut = Maps.newHashMap();
 		List<ValintakoeNimi> tunnisteet = Lists.newArrayList();
 		for (Map.Entry<String, ValintakoeDTO> valintakoeEntry : valintakokeet.entrySet()) {
@@ -86,14 +80,6 @@ public class ValintalaskentaTulosExcelKomponentti {
 			if (Boolean.TRUE.equals(koe.getKutsutaankoKaikki())) {
 				nivelvaiheenKoekutsut.put(valintakoeEntry.getKey(), "Kutsutaan");
 			}
-		}
-		if (tunnisteet.isEmpty()) {
-			return ExcelExportUtil
-					.exportGridAsXls(new Object[][] {
-							new Object[] { "Hakukohteelle ei löytynyt tuloksia annetuilla syötteillä!" },
-							new Object[] { "Hakukohde OID", hakukohdeOid },
-							new Object[] { "Valintakokeiden tunnisteet",
-									Arrays.toString(valintakoeTunnisteet.toArray()) } });
 		}
 		try {
 			Collections.sort(tunnisteet, new Comparator<ValintakoeNimi>() {
@@ -107,16 +93,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 					return o1.getNimi().compareTo(o2.getNimi());
 				}
 			});
-			/*
-			boolean useWhitelist = hakemusOids != null
-					&& !hakemusOids.isEmpty();
-			Set<String> whiteList = Collections.emptySet();
-			if (useWhitelist) {
-				whiteList = Sets.newHashSet(hakemusOids);
-			}
-			*/
 			boolean useWhitelist = !whiteList.isEmpty();
-			//List<Hakemus> haetutHakemukset = hakemukset.get();
 			Map<String, Hakemus> mapping = haetutHakemukset.stream().collect(Collectors.toMap(a -> a.getOid(), a -> a));
 			Map<String, ValintakoeRivi> hakemusJaRivi = Maps.newHashMap();
 			{

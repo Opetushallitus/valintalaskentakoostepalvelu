@@ -53,6 +53,9 @@ public class ValintalaskentaTulosExcelTest {
     final String HAKEMUS1 = "HAKEMUS1";
     final String HAKEMUS2 = "HAKEMUS2";
     final String TUNNISTE1 = "TUNNISTE1";
+    final String SELVITETTY_TUNNISTE1 = "SELVITETTY_TUNNISTE1";
+    final String TUNNISTE2 = "TUNNISTE2";
+    final String SELVITETTY_TUNNISTE2 = "SELVITETTY_TUNNISTE2";
 
     @Before
     public void startServer() {
@@ -70,7 +73,7 @@ public class ValintalaskentaTulosExcelTest {
                             .valinnanvaihe()
                             .valintakoe()
                                     //.setValintakoeOid(VALINTAKOE1)
-                            .setTunniste(TUNNISTE1)
+                            .setTunniste(SELVITETTY_TUNNISTE1)
                             .setOsallistuu()
                             .build()
                             .build()
@@ -82,7 +85,7 @@ public class ValintalaskentaTulosExcelTest {
                             .valinnanvaihe()
                             .valintakoe()
                                     //.setValintakoeOid(VALINTAKOE1)
-                            .setTunniste(TUNNISTE1)
+                            .setTunniste(SELVITETTY_TUNNISTE1)
                             .setOsallistuu()
                             .build()
                             .build()
@@ -111,18 +114,23 @@ public class ValintalaskentaTulosExcelTest {
                     Arrays.asList(
                             hakemusOsallistuminen()
                                     .setHakemusOid(HAKEMUS1)
-                                    .addOsallistuminen(TUNNISTE1)
+                                    .addOsallistuminen(SELVITETTY_TUNNISTE1)
                                     .build(),
                             hakemusOsallistuminen()
                                     .setHakemusOid(HAKEMUS2)
-                                    .addOsallistuminen(TUNNISTE1)
+                                    .addOsallistuminen(SELVITETTY_TUNNISTE1)
                                     .build()
                     ) // Osallistumiset
             );
             MockValintaperusteetAsyncResource.setValintakokeetResult(
                     Arrays.asList(valintakoe()
                             .setTunniste(TUNNISTE1)
-                            .build())
+                            .setSelvitettyTunniste(SELVITETTY_TUNNISTE1)
+                            .build(),
+                            valintakoe()
+                                    .setTunniste(TUNNISTE2)
+                                    .setSelvitettyTunniste(SELVITETTY_TUNNISTE2)
+                                    .build())
             );
 
             MockApplicationAsyncResource.setResultByOid(Arrays.asList(
