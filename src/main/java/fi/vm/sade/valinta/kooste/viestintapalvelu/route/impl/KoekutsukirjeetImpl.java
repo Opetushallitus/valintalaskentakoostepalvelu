@@ -272,7 +272,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 								.filter(v -> Boolean.TRUE.equals(v
 										.getAktiivinen()))
 								//
-								.map(v -> v.getTunniste())
+								.map(v -> v.getSelvitettyTunniste())
 								//
 								.collect(Collectors.toSet());
 						LOG.error("Mapataan muut hakukohteet");
@@ -313,12 +313,12 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 																				.getAktiivinen()))
 																//
 																.filter(v -> null != v
-																		.getTunniste())
+																		.getSelvitettyTunniste())
 																//
 																.anyMatch(
 																		v -> kohdeHakukohteenTunnisteet
 																				.contains(v
-																						.getTunniste())))
+																						.getSelvitettyTunniste())))
 														//
 														.collect(
 																Collectors

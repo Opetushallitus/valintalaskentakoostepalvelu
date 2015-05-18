@@ -5,6 +5,7 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
 
@@ -71,9 +72,12 @@ public class ValintaperusteetSpec {
             return this;
         }
         public HakukohdeJaValintakoeBuilder addValintakoe(String valintakoeOid) {
-            ValintakoeDTO vk = new ValintakoeDTO();
+            ValintakoeDTO vk = Mockito.spy(new ValintakoeDTO());
             vk.setOid(valintakoeOid);
             vk.setTunniste(valintakoeOid);
+            Mockito.when(vk.getSelvitettyTunniste()).thenAnswer(a -> {
+               throw new UnsupportedOperationException("Selvitettyä tunnistetta ei ole laitettu hakukohde ja valintakoe resurssin läpi!");
+            });
             hakukohdeJaValintakoe.getValintakoeDTO().add(vk);
             return this;
         }

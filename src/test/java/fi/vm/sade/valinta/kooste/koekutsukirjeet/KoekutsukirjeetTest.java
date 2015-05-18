@@ -62,7 +62,8 @@ public class KoekutsukirjeetTest {
     public void kaikkiKutsutaanHakijanValinta() throws Throwable {
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String HAKUKOHDE2 = "HAKUKOHDE2";
-        final String VALINTAKOE1 = "VALINTAKOE1";
+        final String TUNNISTE1 = "TUNNISTE1";
+        final String SELVITETTY_TUNNISTE1 = "SELVITETTY_TUNNISTE1";
         final String HAKEMUS1 = "HAKEMUS1";
         final String HAKEMUS2 = "HAKEMUS2";
         HakukohdeDTO HAKUKOHDEDTO1 = new HakukohdeDTO();
@@ -77,13 +78,13 @@ public class KoekutsukirjeetTest {
                 Arrays.asList(
                         hakukohdeJaValintakoe()
                                 .setHakukohdeOid(HAKUKOHDE1)
-                                .addValintakoe(VALINTAKOE1)
+                                .addValintakoe(TUNNISTE1)
                                 .build()
                 )
         );
         MockValintaperusteetAsyncResource.setValintakokeetResult(
                 Arrays.asList(
-                        valintakoe().setTunniste(VALINTAKOE1).build()));
+                        valintakoe().setTunniste(TUNNISTE1).setSelvitettyTunniste(SELVITETTY_TUNNISTE1).build()));
         MockValintalaskentaValintakoeAsyncResource.setResult(
                 Arrays.asList(
                         osallistuminen()
@@ -93,7 +94,7 @@ public class KoekutsukirjeetTest {
                                 .valinnanvaihe()
                                 .valintakoe()
                                 .setOsallistuu()
-                                .setValintakoeTunniste(VALINTAKOE1)
+                                .setValintakoeTunniste(SELVITETTY_TUNNISTE1)
                                 .build()
                                 .build()
                                 .build()
@@ -105,7 +106,7 @@ public class KoekutsukirjeetTest {
                                 .valinnanvaihe()
                                 .valintakoe()
                                 .setOsallistuu()
-                                .setValintakoeTunniste(VALINTAKOE1)
+                                .setValintakoeTunniste(SELVITETTY_TUNNISTE1)
                                 .build()
                                 .build()
                                 .build()
@@ -134,7 +135,7 @@ public class KoekutsukirjeetTest {
                 .query("hakukohdeOid",HAKUKOHDE1)
                 .query("tarjoajaOid", "T0")
                 .query("templateName", "tmpl")
-                .query("valintakoeTunnisteet",VALINTAKOE1)
+                .query("valintakoeTunnisteet",SELVITETTY_TUNNISTE1)
         .post(Entity.json(new DokumentinLisatiedot(Collections.<String>emptyList(), "tag", "Letterbodytext", "FI", Collections.<String>emptyList())));
         Assert.assertEquals(200, r.getStatus());
 
