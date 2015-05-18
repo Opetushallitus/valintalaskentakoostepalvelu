@@ -83,7 +83,7 @@ public class KoekutsukirjeetTest {
         );
         MockValintaperusteetAsyncResource.setValintakokeetResult(
                 Arrays.asList(
-                        valintakoe().setOid(VALINTAKOE1).build()));
+                        valintakoe().setTunniste(VALINTAKOE1).build()));
         MockValintalaskentaValintakoeAsyncResource.setResult(
                 Arrays.asList(
                         osallistuminen()
@@ -93,7 +93,7 @@ public class KoekutsukirjeetTest {
                                 .valinnanvaihe()
                                 .valintakoe()
                                 .setOsallistuu()
-                                .setValintakoeOid(VALINTAKOE1)
+                                .setValintakoeTunniste(VALINTAKOE1)
                                 .build()
                                 .build()
                                 .build()
@@ -105,7 +105,7 @@ public class KoekutsukirjeetTest {
                                 .valinnanvaihe()
                                 .valintakoe()
                                 .setOsallistuu()
-                                .setValintakoeOid(VALINTAKOE1)
+                                .setValintakoeTunniste(VALINTAKOE1)
                                 .build()
                                 .build()
                                 .build()
@@ -134,7 +134,7 @@ public class KoekutsukirjeetTest {
                 .query("hakukohdeOid",HAKUKOHDE1)
                 .query("tarjoajaOid", "T0")
                 .query("templateName", "tmpl")
-                .query("valintakoeOids",VALINTAKOE1)
+                .query("valintakoeTunnisteet",VALINTAKOE1)
         .post(Entity.json(new DokumentinLisatiedot("tag", "Letterbodytext", "FI", Arrays.asList(), Arrays.asList())));
         Assert.assertEquals(200, r.getStatus());
 

@@ -47,6 +47,10 @@ public class ValintaperusteetSpec {
             valintaperusteDTO.setOid(oid);
             return this;
         }
+        public ValintakoeDTOBuilder setTunniste(String tunniste) {
+            valintaperusteDTO.setTunniste(tunniste);
+            return this;
+        }
         public ValintakoeDTOBuilder setKaikkiKutsutaan() {
             valintaperusteDTO.setKutsutaankoKaikki(true);
             return this;
@@ -65,6 +69,7 @@ public class ValintaperusteetSpec {
         public HakukohdeJaValintakoeBuilder addValintakoe(String valintakoeOid) {
             ValintakoeDTO vk = new ValintakoeDTO();
             vk.setOid(valintakoeOid);
+            vk.setTunniste(valintakoeOid);
             hakukohdeJaValintakoe.getValintakoeDTO().add(vk);
             return this;
         }

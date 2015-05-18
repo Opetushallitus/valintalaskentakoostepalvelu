@@ -332,7 +332,20 @@ public class ValintaperusteetAsyncResourceImpl implements
 						new GenericType<List<ValintakoeDTO>>() {
 						});
 	}
-
+	@Override
+	public Future<List<ValintakoeDTO>> haeValintakokeetTunnisteilla(Collection<String> tunnisteet) {
+		StringBuilder urlBuilder = new StringBuilder()
+				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintakoe/tunnisteet/");
+		String url = urlBuilder.toString();
+		return WebClient
+				.fromClient(webClient)
+				.path(url)
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				.async()
+				.post(Entity.entity(tunnisteet, MediaType.APPLICATION_JSON_TYPE),
+						new GenericType<List<ValintakoeDTO>>() {
+						});
+	}
 	@Override
 	public Peruutettava haeValintakokeet(Collection<String> oids, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
 		StringBuilder urlBuilder = new StringBuilder()
@@ -349,5 +362,20 @@ public class ValintaperusteetAsyncResourceImpl implements
 								new TypeToken<List<ValintakoeDTO>>() {
 								}.getType())));
 	}
-
+	@Override
+	public Peruutettava haeValintakokeetTunnisteilla(Collection<String> tunnisteet, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
+		StringBuilder urlBuilder = new StringBuilder()
+				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintakoe/tunnisteet/");
+		String url = urlBuilder.toString();
+		return new PeruutettavaImpl(WebClient
+				.fromClient(webClient)
+				.path(url)
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				.async()
+				.post(Entity.entity(tunnisteet, MediaType.APPLICATION_JSON_TYPE),
+						new Callback<List<ValintakoeDTO>>(address, url,
+								callback, failureCallback,
+								new TypeToken<List<ValintakoeDTO>>() {
+								}.getType())));
+	}
 }

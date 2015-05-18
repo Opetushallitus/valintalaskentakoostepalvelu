@@ -67,6 +67,10 @@ public class ValintalaskentaSpec {
                         valintakoe.setValintakoeOid(valintakoeOid);
                         return this;
                     }
+                    public ValintakoeBuilder setValintakoeTunniste(String valintakoeTunniste) {
+                        valintakoe.setValintakoeTunniste(valintakoeTunniste);
+                        return this;
+                    }
                     public ValintakoeBuilder setKutsutaankoKaikki(Boolean kutsutaankoKaikki) {
                         valintakoe.setKutsutaankoKaikki(kutsutaankoKaikki);
                         return this;

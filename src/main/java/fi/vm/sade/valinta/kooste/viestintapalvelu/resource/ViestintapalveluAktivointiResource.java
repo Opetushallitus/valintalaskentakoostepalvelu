@@ -77,7 +77,7 @@ public class ViestintapalveluAktivointiResource {
 	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
 			@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("valintakoeOid") List<String> valintakoeOids) {
+			@QueryParam("valintakoeTunnisteet") List<String> valintakoeTunnisteet) {
 		try {
 			if (hakemuksillaRajaus == null) {
 				hakemuksillaRajaus = new DokumentinLisatiedot();
@@ -93,7 +93,7 @@ public class ViestintapalveluAktivointiResource {
 				osoitetarratService.osoitetarratValintakokeeseenOsallistujille(
 						osoiteProsessi,
 						hakuOid,
-						hakukohdeOid, Sets.newHashSet(valintakoeOids));
+						hakukohdeOid, Sets.newHashSet(valintakoeTunnisteet));
 			}
 			return new ProsessiId(osoiteProsessi.getId());
 		} catch (Exception e) {
@@ -341,18 +341,18 @@ public class ViestintapalveluAktivointiResource {
 			@QueryParam(OPH.HAKUKOHDEOID) String hakukohdeOid,
 			@QueryParam(OPH.TARJOAJAOID) String tarjoajaOid,
 			@QueryParam("templateName") String templateName,
-			@QueryParam("valintakoeOids") List<String> valintakoeOids,
+			@QueryParam("valintakoeTunnisteet") List<String> valintakoeTunnisteet,
 			DokumentinLisatiedot hakemuksillaRajaus) {
 		if (hakemuksillaRajaus != null
 				&& hakemuksillaRajaus.getHakemusOids() != null
 				&& !hakemuksillaRajaus.getHakemusOids().isEmpty()) {
 			// luodaan koekutsukirjeet rajauksella
 		} else {
-			if (hakukohdeOid == null || valintakoeOids == null
-					|| valintakoeOids.isEmpty()) {
-				LOG.error("Valintakoe ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
+			if (hakukohdeOid == null || valintakoeTunnisteet == null
+					|| valintakoeTunnisteet.isEmpty()) {
+				LOG.error("Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
 				throw new RuntimeException(
-						"Valintakoe ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
+						"Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
 			}
 		}
 		String tag = null;
@@ -380,7 +380,7 @@ public class ViestintapalveluAktivointiResource {
 				koekutsukirjeetService.koekutsukirjeetOsallistujille(prosessi,
 						new KoekutsuDTO(hakemuksillaRajaus.getLetterBodyText(),
 								tarjoajaOid, tag, hakukohdeOid, hakuOid,
-								templateName), valintakoeOids);
+								templateName), valintakoeTunnisteet);
 			}
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 		} catch (Exception e) {

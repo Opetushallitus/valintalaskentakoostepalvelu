@@ -44,8 +44,8 @@ public class OsallistujatPredicate implements
 	}
 
 	public static java.util.function.Predicate<ValintakoeOsallistuminenDTO> osallistujat(
-			String hakukohdeOid, Collection<String> vkOids) {
-		final Set<String> valintakoeOids = Sets.newHashSet(vkOids);
+			Collection<String> tunnisteet, String hakukohdeOid) {
+		final Set<String> valintakoeTunnisteet = Sets.newHashSet(tunnisteet);
 		return vk -> {
 			for (HakutoiveDTO hakutoive : vk.getHakutoiveet()) {
 				if (!hakukohdeOid.equals(hakutoive.getHakukohdeOid())) {
@@ -57,8 +57,8 @@ public class OsallistujatPredicate implements
 						.getValinnanVaiheet()) {
 					for (ValintakoeDTO valintakoe : valinnanvaihe
 							.getValintakokeet()) {
-						if (!valintakoeOids.contains(valintakoe
-								.getValintakoeOid())) {
+						if (!valintakoeTunnisteet.contains(valintakoe
+								.getValintakoeTunniste())) {
 							// vain tarkasteltavista
 							// valintakokeista ollaan
 							// kiinnostuneita

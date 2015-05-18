@@ -128,7 +128,7 @@ public class OsoitetarratService {
             DokumenttiProsessi prosessi,
             String hakuOid,
             String hakukohdeOid,
-            Set<String> valintakoeOid) {
+            Set<String> valintakoeTunnisteet) {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
             LOG.error("Luodaan osoitetarrat valintakokeeseen osallistujille (haku={}, hakukohde={})", hakuOid, hakukohdeOid);
@@ -174,7 +174,7 @@ public class OsoitetarratService {
                                                                 .anyMatch(v ->
                                                                         v.getValintakokeet().stream()
                                                                                 .anyMatch(vk ->
-                                                                                        valintakoeOid.contains(vk.getValintakoeOid()) &&
+                                                                                        valintakoeTunnisteet.contains(vk.getValintakoeTunniste()) &&
                                                                                                 Osallistuminen.OSALLISTUU.equals(vk.getOsallistuminenTulos().getOsallistuminen())))))
                                         .map(o -> o.getHakemusOid()).collect(Collectors.toSet());
 
@@ -193,8 +193,8 @@ public class OsoitetarratService {
                     }).build();
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
             posti(laskuri, postiRef, poikkeuskasittelija);
-            valintaperusteetValintakoeResource.haeValintakokeet(valintakoeOid, valintakokeet -> {
-                boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> valintakoeOid.contains(vk.getOid()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
+            valintaperusteetValintakoeResource.haeValintakokeetTunnisteilla(valintakoeTunnisteet, valintakokeet -> {
+                boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> valintakoeTunnisteet.contains(vk.getTunniste()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
                 if (kutsutaankoJossainKokeessaKaikki) {
                     applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid, hakemukset -> {
                         haetutHakemuksetRef.set(hakemukset);

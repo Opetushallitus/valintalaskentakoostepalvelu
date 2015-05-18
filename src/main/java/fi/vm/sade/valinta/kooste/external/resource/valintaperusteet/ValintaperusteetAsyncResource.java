@@ -84,7 +84,11 @@ public interface ValintaperusteetAsyncResource {
 	///valintaperusteet-service/resources/valintakoe/
 	Future<List<ValintakoeDTO>> haeValintakokeet(Collection<String> oids);
 
+	Future<List<ValintakoeDTO>> haeValintakokeetTunnisteilla(Collection<String> tunnisteet);
+
 	Peruutettava haeValintakokeet(Collection<String> oids, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback);
+
+	Peruutettava haeValintakokeetTunnisteilla(Collection<String> tunnisteet, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback);
 
 	// @POST
 	///valintaperusteet-service/resources/hakukohde/valintakoe

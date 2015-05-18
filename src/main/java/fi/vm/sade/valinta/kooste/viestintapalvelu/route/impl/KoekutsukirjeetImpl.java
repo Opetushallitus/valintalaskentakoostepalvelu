@@ -98,12 +98,12 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 
 	@Override
 	public void koekutsukirjeetOsallistujille(KirjeProsessi prosessi,
-			KoekutsuDTO koekutsu, List<String> valintakoeOids) {
+			KoekutsuDTO koekutsu, List<String> valintakoeTunnisteet) {
 		// ehka tarvitaan
 		final Future<List<ValintakoeOsallistuminenDTO>> osallistumiset = osallistumisetResource
 				.haeHakutoiveelle(koekutsu.getHakukohdeOid());
 		final Future<List<ValintakoeDTO>> valintakokeetFuture = valintakoeResource
-				.haeValintakokeet(valintakoeOids);
+				.haeValintakokeetTunnisteilla(valintakoeTunnisteet);
 		final Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource
 				.getApplicationsByOid(koekutsu.getHakuOid(),
 						koekutsu.getHakukohdeOid());
@@ -140,7 +140,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 								.filter(Objects::nonNull)
 								.filter(vk -> !Boolean.TRUE.equals(vk
 										.getKutsutaankoKaikki()))
-								.map(vk -> vk.getOid())
+								.map(vk -> vk.getTunniste())
 								.collect(Collectors.toList());
 						try {
 							Set<String> osallistujienHakemusOidit = osallistumiset
@@ -149,8 +149,9 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 									.filter(Objects::nonNull)
 									//
 									.filter(OsallistujatPredicate.osallistujat(
-											koekutsu.getHakukohdeOid(),
-											haettavatValintakoeOids))
+											haettavatValintakoeOids,
+											koekutsu.getHakukohdeOid()
+											))
 									.map(vk -> vk.getHakemusOid())
 									.collect(Collectors.toSet());
 							Stream<Hakemus> hakukohteenUlkopuolisetHakemukset;

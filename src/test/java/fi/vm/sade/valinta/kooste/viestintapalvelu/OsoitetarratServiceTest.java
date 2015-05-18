@@ -104,7 +104,7 @@ public class OsoitetarratServiceTest {
             Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Futures.immediateFuture(Collections.emptyList()));
             MockValintaperusteetAsyncResource.setValintakokeetResult(Arrays.asList(
                             valintakoe()
-                                    .setOid(VALINTAKOE1)
+                                    .setTunniste(VALINTAKOE1)
                                     .setKaikkiKutsutaan()
                                     .build())
             );
@@ -116,7 +116,7 @@ public class OsoitetarratServiceTest {
                             .valinnanvaihe()
                             .valintakoe()
                             .setOsallistuu()
-                            .setValintakoeOid(VALINTAKOE1)
+                            .setValintakoeTunniste(VALINTAKOE1)
                             .setKutsutaankoKaikki(true)
                             .build()
                             .build()
@@ -136,7 +136,7 @@ public class OsoitetarratServiceTest {
                     osoitetarratResource.getWebClient()
                             .query("hakuOid", HAKU1)
                             .query("hakukohdeOid",HAKUKOHDE1)
-                            .query("valintakoeOid", VALINTAKOE1)
+                            .query("valintakoeTunnisteet", VALINTAKOE1)
                             .post(Entity.entity(new DokumentinLisatiedot(),
                                     "application/json"));
             Assert.assertEquals(200, r.getStatus());
@@ -165,7 +165,7 @@ public class OsoitetarratServiceTest {
             Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString())).thenReturn(Futures.immediateFuture(Collections.emptyList()));
             MockValintaperusteetAsyncResource.setValintakokeetResult(Arrays.asList(
                             valintakoe()
-                                    .setOid(VALINTAKOE1)
+                                    .setTunniste(VALINTAKOE1)
                                     .build())
             );
             List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList(
@@ -176,7 +176,7 @@ public class OsoitetarratServiceTest {
                             .valinnanvaihe()
                             .valintakoe()
                             .setOsallistuu()
-                            .setValintakoeOid(VALINTAKOE1)
+                            .setValintakoeTunniste(VALINTAKOE1)
                             .setKutsutaankoKaikki(true)
                             .build()
                             .build()
@@ -203,7 +203,7 @@ public class OsoitetarratServiceTest {
                     osoitetarratResource.getWebClient()
                             .query("hakuOid", HAKU1)
                             .query("hakukohdeOid",HAKUKOHDE1)
-                            .query("valintakoeOid", VALINTAKOE1)
+                            .query("valintakoeTunnisteet", VALINTAKOE1)
                             .post(Entity.entity(new DokumentinLisatiedot(),
                                     "application/json"));
             Assert.assertEquals(200, r.getStatus());
