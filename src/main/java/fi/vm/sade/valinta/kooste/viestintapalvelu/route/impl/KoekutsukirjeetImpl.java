@@ -103,7 +103,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 		final Future<List<ValintakoeOsallistuminenDTO>> osallistumiset = osallistumisetResource
 				.haeHakutoiveelle(koekutsu.getHakukohdeOid());
 		final Future<List<ValintakoeDTO>> valintakokeetFuture = valintakoeResource
-				.haeValintakokeetTunnisteilla(valintakoeTunnisteet);
+				.haeValintakokeetHakukohteelle(koekutsu.getHakukohdeOid());
 		final Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource
 				.getApplicationsByOid(koekutsu.getHakuOid(),
 						koekutsu.getHakukohdeOid());
@@ -119,6 +119,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 							boolean haetaankoKaikkiHakutoiveenHakijatValintakokeeseen = valintakoes
 									.stream()
 									.filter(Objects::nonNull)
+									.filter(v -> valintakoeTunnisteet.contains(v.getSelvitettyTunniste()))
 									.anyMatch(
 											vk -> Boolean.TRUE.equals(vk
 													.getKutsutaankoKaikki()));
@@ -135,13 +136,6 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 									e.getMessage());
 							throw e;
 						}
-						List<String> haettavatValintakoeOids = valintakoes
-								.stream()
-								.filter(Objects::nonNull)
-								.filter(vk -> !Boolean.TRUE.equals(vk
-										.getKutsutaankoKaikki()))
-								.map(vk -> vk.getTunniste())
-								.collect(Collectors.toList());
 						try {
 							Set<String> osallistujienHakemusOidit = osallistumiset
 									.get()
@@ -149,7 +143,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 									.filter(Objects::nonNull)
 									//
 									.filter(OsallistujatPredicate.osallistujat(
-											haettavatValintakoeOids,
+											valintakoeTunnisteet,
 											koekutsu.getHakukohdeOid()
 											))
 									.map(vk -> vk.getHakemusOid())
@@ -177,10 +171,10 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 							return lopullinenHakemusJoukko;
 						} catch (Exception e) {
 							LOG.error("Osallistumisia ei saatu valintalaskennasta! Valintakokeita oli "
-									+ haettavatValintakoeOids.size());
+									+ valintakoeTunnisteet.size());
 							throw new RuntimeException(
 									"Osallistumisia ei saatu valintalaskennasta! Valintakokeita oli "
-											+ haettavatValintakoeOids.size()
+											+ valintakoeTunnisteet.size()
 											+ ". Syy " + e.getMessage());
 						}
 

@@ -193,8 +193,9 @@ public class OsoitetarratService {
                     }).build();
             maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
             posti(laskuri, postiRef, poikkeuskasittelija);
-            valintaperusteetValintakoeResource.haeValintakokeetTunnisteilla(valintakoeTunnisteet, valintakokeet -> {
-                boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> valintakoeTunnisteet.contains(vk.getTunniste()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
+
+            valintaperusteetValintakoeResource.haeValintakokeetHakukohteelle(hakukohdeOid, valintakokeet -> {
+                boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> valintakoeTunnisteet.contains(vk.getSelvitettyTunniste()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
                 if (kutsutaankoJossainKokeessaKaikki) {
                     applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid, hakemukset -> {
                         haetutHakemuksetRef.set(hakemukset);

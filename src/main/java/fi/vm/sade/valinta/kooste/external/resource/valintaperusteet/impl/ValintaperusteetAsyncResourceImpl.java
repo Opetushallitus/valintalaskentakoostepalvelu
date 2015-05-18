@@ -333,17 +333,16 @@ public class ValintaperusteetAsyncResourceImpl implements
 						});
 	}
 	@Override
-	public Future<List<ValintakoeDTO>> haeValintakokeetTunnisteilla(Collection<String> tunnisteet) {
+	public Future<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid) {
 		StringBuilder urlBuilder = new StringBuilder()
-				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/tunniste/");
+				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/").append(hakukohdeOid).append("/valintakoe/");
 		String url = urlBuilder.toString();
 		return WebClient
 				.fromClient(webClient)
 				.path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
-				.post(Entity.entity(tunnisteet, MediaType.APPLICATION_JSON_TYPE),
-						new GenericType<List<ValintakoeDTO>>() {
+				.get(new GenericType<List<ValintakoeDTO>>() {
 						});
 	}
 	@Override
@@ -357,24 +356,8 @@ public class ValintaperusteetAsyncResourceImpl implements
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
 				.get(new Callback<List<ValintakoeDTO>>(address, url,
-								callback, failureCallback,
-								new TypeToken<List<ValintakoeDTO>>() {
-								}.getType())));
-	}
-	@Override
-	public Peruutettava haeValintakokeetTunnisteilla(Collection<String> tunnisteet, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
-		StringBuilder urlBuilder = new StringBuilder()
-				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/tunniste/");
-		String url = urlBuilder.toString();
-		return new PeruutettavaImpl(WebClient
-				.fromClient(webClient)
-				.path(url)
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async()
-				.post(Entity.entity(tunnisteet, MediaType.APPLICATION_JSON_TYPE),
-						new Callback<List<ValintakoeDTO>>(address, url,
-								callback, failureCallback,
-								new TypeToken<List<ValintakoeDTO>>() {
-								}.getType())));
+						callback, failureCallback,
+						new TypeToken<List<ValintakoeDTO>>() {
+						}.getType())));
 	}
 }

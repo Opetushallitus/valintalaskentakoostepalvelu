@@ -3,19 +3,18 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.dto;
 public class ValintakoeNimi {
 
 	private final String nimi;
-	private final String oid;
+	private final String selvitettyTunniste;
 
-	public ValintakoeNimi(String nimi, String oid) {
+	public ValintakoeNimi(String nimi, String selvitettyTunniste) {
 		this.nimi = nimi;
-		this.oid = oid;
+		this.selvitettyTunniste = selvitettyTunniste;
 	}
 
 	public String getNimi() {
 		return nimi;
 	}
 
-	public String getOid() {
-		return oid;
+	public String getSelvitettyTunniste() {
+		return selvitettyTunniste;
 	}
-
 }

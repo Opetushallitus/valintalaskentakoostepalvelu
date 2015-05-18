@@ -151,7 +151,7 @@ public class ValintalaskentaTulosExcelTest {
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
-            lisatiedot.setValintakoeTunnisteet(Arrays.asList(TUNNISTE1));
+            lisatiedot.setValintakoeTunnisteet(Arrays.asList(SELVITETTY_TUNNISTE1));
             Response r =
                     valintakoekutsutResource.getWebClient()
                             .query("hakuOid", HAKU1)

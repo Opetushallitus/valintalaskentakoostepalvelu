@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.resource;
 
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -111,7 +113,7 @@ public class ValintalaskentaExcelResource {
 					Arrays.asList("valintakoekutsut", "taulukkolaskenta"));
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(p);
 			valintakoekutsutExcelService.luoExcel(p, hakuOid, hakukohdeOid, lisatiedot
-					.getValintakoeTunnisteet(), Sets.newHashSet(lisatiedot.getHakemusOids()));
+					.getValintakoeTunnisteet(), Sets.newHashSet(Optional.ofNullable(lisatiedot.getHakemusOids()).orElse(Collections.emptyList())));
 			return p.toProsessiId();
 		} catch (Exception e) {
 			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!

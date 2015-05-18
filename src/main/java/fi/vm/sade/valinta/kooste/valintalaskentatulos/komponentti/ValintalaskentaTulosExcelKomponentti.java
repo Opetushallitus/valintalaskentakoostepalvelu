@@ -76,7 +76,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 		List<ValintakoeNimi> tunnisteet = Lists.newArrayList();
 		for (Map.Entry<String, ValintakoeDTO> valintakoeEntry : valintakokeet.entrySet()) {
 			ValintakoeDTO koe = valintakoeEntry.getValue();
-			tunnisteet.add(new ValintakoeNimi(koe.getNimi(), koe.getOid()));
+			tunnisteet.add(new ValintakoeNimi(koe.getNimi(), koe.getSelvitettyTunniste()));
 			if (Boolean.TRUE.equals(koe.getKutsutaankoKaikki())) {
 				nivelvaiheenKoekutsut.put(valintakoeEntry.getKey(), "Kutsutaan");
 			}
@@ -180,7 +180,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 			List<String> oids = Lists.newArrayList();
 			for (ValintakoeNimi n : tunnisteet) {
 				otsikot.add(n.getNimi());
-				oids.add(n.getOid());
+				oids.add(n.getSelvitettyTunniste());
 			}
 			rows.add(otsikot.toArray());
 			for (ValintakoeRivi rivi : rivit) {
@@ -222,7 +222,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 		Date date = o.getLuontiPvm();
 		Map<String, ValintakoeOsallistuminenDTO> osallistumiset = new HashMap<>();
 		for (ValintakoeOsallistuminenDTO v : o.getOsallistumiset()) {
-			osallistumiset.put(v.getValintakoeOid(), v);
+			osallistumiset.put(v.getValintakoeTunniste(), v);
 		}
 		ArrayList<String> rivi = new ArrayList<>();
 		StringBuilder b = new StringBuilder();
@@ -232,18 +232,18 @@ public class ValintalaskentaTulosExcelKomponentti {
 		boolean osallistuuEdesYhteen = false;
 		Map<String, String> osallistumistiedot = Maps.newHashMap();
 		for (ValintakoeNimi tunniste : tunnisteet) {
-			if (osallistumiset.containsKey(tunniste.getOid())) {
+			if (osallistumiset.containsKey(tunniste.getSelvitettyTunniste())) {
                 OsallistuminenDTO osallistuminen = osallistumiset.get(
-						tunniste.getOid()).getOsallistuminen();
+						tunniste.getSelvitettyTunniste()).getOsallistuminen();
 				if (OsallistuminenDTO.OSALLISTUU.equals(osallistuminen)) {
 					osallistuuEdesYhteen = true;
 				}
-				osallistumistiedot.put(tunniste.getOid(),
-						suomenna(osallistumiset.get(tunniste.getOid())
+				osallistumistiedot.put(tunniste.getSelvitettyTunniste(),
+						suomenna(osallistumiset.get(tunniste.getSelvitettyTunniste())
 								.getOsallistuminen()));
 
 			} else {
-				osallistumistiedot.put(tunniste.getOid(), "----");
+				osallistumistiedot.put(tunniste.getSelvitettyTunniste(), "----");
 			}
 		}
 		//Hakemus h = applicationResource.getApplicationByOid(o.getHakemusOid());
