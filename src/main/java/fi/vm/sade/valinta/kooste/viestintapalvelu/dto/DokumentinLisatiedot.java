@@ -18,22 +18,22 @@ public class DokumentinLisatiedot {
 	private String letterBodyText;
 	private String languageCode;
 	private List<String> hakemusOids;
-	private List<String> valintakoeOids;
+	private List<String> valintakoeTunnisteet;
 
 	public DokumentinLisatiedot() {}
-	public DokumentinLisatiedot(String tag, String letterBodyText, String languageCode, List<String> hakemusOids, List<String> valintakoeOids) {
+	public DokumentinLisatiedot(List<String> valintakoeTunnisteet, String tag, String letterBodyText, String languageCode, List<String> hakemusOids) {
 		this.tag = tag;
 		this.letterBodyText = letterBodyText;
 		this.languageCode = languageCode;
 		this.hakemusOids = hakemusOids;
-		this.valintakoeOids = valintakoeOids;
+		this.valintakoeTunnisteet = valintakoeTunnisteet;
 	}
 	public String getTag() {
 		return tag;
 	}
 
-	public void setValintakoeOids(List<String> valintakoeOids) {
-		this.valintakoeOids = valintakoeOids;
+	public void setValintakoeTunnisteet(List<String> valintakoeTunnisteet) {
+		this.valintakoeTunnisteet = valintakoeTunnisteet;
 	}
 
 	public String getLanguageCode() {
@@ -43,8 +43,8 @@ public class DokumentinLisatiedot {
 		return KieliUtil.normalisoiKielikoodi(languageCode);
 	}
 
-	public List<String> getValintakoeOids() {
-		return valintakoeOids;
+	public List<String> getValintakoeTunnisteet() {
+		return valintakoeTunnisteet;
 	}
 
 	public void setTag(String tag) {

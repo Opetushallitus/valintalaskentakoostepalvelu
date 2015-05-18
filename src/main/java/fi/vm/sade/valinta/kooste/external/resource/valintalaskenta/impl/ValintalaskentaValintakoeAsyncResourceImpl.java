@@ -136,7 +136,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends AsyncResourceWit
 
 	@Override
 	public Peruutettava haeValintatiedotHakukohteelle(String hakukohdeOid,
-													  List<String> valintakoeOid,
+													  List<String> valintakoeTunnisteet,
 													  Consumer<List<HakemusOsallistuminenDTO>> callback, Consumer<Throwable> failureCallback) {
 		try {
 			// valintatieto/hakukohde/{hakukohdeOid}
@@ -144,7 +144,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends AsyncResourceWit
 			return new PeruutettavaImpl(getWebClient()
 					.path(url)
 					.async()
-					.post(Entity.entity(valintakoeOid,
+					.post(Entity.entity(valintakoeTunnisteet,
 							MediaType.APPLICATION_JSON_TYPE), new Callback<List<HakemusOsallistuminenDTO>>(GSON, address, url, callback,
 							failureCallback, new TypeToken<List<HakemusOsallistuminenDTO>>() {
 					}.getType())));

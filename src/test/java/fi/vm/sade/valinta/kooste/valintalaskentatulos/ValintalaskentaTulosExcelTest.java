@@ -69,7 +69,7 @@ public class ValintalaskentaTulosExcelTest {
                             .hakutoive()
                             .valinnanvaihe()
                             .valintakoe()
-                            .setValintakoeOid(VALINTAKOE1)
+                                    //.setValintakoeOid(VALINTAKOE1)
                             .setTunniste(TUNNISTE1)
                             .setOsallistuu()
                             .build()
@@ -81,7 +81,7 @@ public class ValintalaskentaTulosExcelTest {
                             .hakutoive()
                             .valinnanvaihe()
                             .valintakoe()
-                            .setValintakoeOid(VALINTAKOE1)
+                                    //.setValintakoeOid(VALINTAKOE1)
                             .setTunniste(TUNNISTE1)
                             .setOsallistuu()
                             .build()
@@ -111,17 +111,17 @@ public class ValintalaskentaTulosExcelTest {
                     Arrays.asList(
                             hakemusOsallistuminen()
                                     .setHakemusOid(HAKEMUS1)
-                                    .addOsallistuminen(VALINTAKOE1)
+                                    .addOsallistuminen(TUNNISTE1)
                                     .build(),
                             hakemusOsallistuminen()
                                     .setHakemusOid(HAKEMUS2)
-                                    .addOsallistuminen(VALINTAKOE1)
+                                    .addOsallistuminen(TUNNISTE1)
                                     .build()
                     ) // Osallistumiset
             );
             MockValintaperusteetAsyncResource.setValintakokeetResult(
                     Arrays.asList(valintakoe()
-                            .setOid(VALINTAKOE1)
+                            .setTunniste(TUNNISTE1)
                             .build())
             );
 
@@ -143,7 +143,7 @@ public class ValintalaskentaTulosExcelTest {
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
-            lisatiedot.setValintakoeOids(Arrays.asList(VALINTAKOE1));
+            lisatiedot.setValintakoeTunnisteet(Arrays.asList(TUNNISTE1));
             Response r =
                     valintakoekutsutResource.getWebClient()
                             .query("hakuOid", HAKU1)

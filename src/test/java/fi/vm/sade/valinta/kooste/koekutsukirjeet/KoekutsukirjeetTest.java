@@ -135,7 +135,7 @@ public class KoekutsukirjeetTest {
                 .query("tarjoajaOid", "T0")
                 .query("templateName", "tmpl")
                 .query("valintakoeTunnisteet",VALINTAKOE1)
-        .post(Entity.json(new DokumentinLisatiedot("tag", "Letterbodytext", "FI", Arrays.asList(), Arrays.asList())));
+        .post(Entity.json(new DokumentinLisatiedot(Collections.<String>emptyList(), "tag", "Letterbodytext", "FI", Collections.<String>emptyList())));
         Assert.assertEquals(200, r.getStatus());
 
 

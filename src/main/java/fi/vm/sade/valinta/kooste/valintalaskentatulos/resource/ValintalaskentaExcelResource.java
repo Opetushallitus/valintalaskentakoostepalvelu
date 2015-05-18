@@ -110,7 +110,7 @@ public class ValintalaskentaExcelResource {
 					Arrays.asList("valintakoekutsut", "taulukkolaskenta"));
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(p);
 			valintakoekutsutExcelService.luoExcel(p, hakuOid, hakukohdeOid, lisatiedot
-					.getValintakoeOids(), lisatiedot.getHakemusOids());
+					.getValintakoeTunnisteet(), lisatiedot.getHakemusOids());
 			return p.toProsessiId();
 		} catch (Exception e) {
 			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
@@ -120,7 +120,7 @@ public class ValintalaskentaExcelResource {
 					"Valintakoekutsut excelin luonti epäonnistui hakukohteelle {}, valintakoeoideille {}: {}",
 					new Object[] {
 							hakukohdeOid,
-							Arrays.toString(lisatiedot.getValintakoeOids()
+							Arrays.toString(lisatiedot.getValintakoeTunnisteet()
 									.toArray()), e.getMessage() });
 			throw new RuntimeException(
 					"Valintakoekutsut excelin luonti epäonnistui!", e);

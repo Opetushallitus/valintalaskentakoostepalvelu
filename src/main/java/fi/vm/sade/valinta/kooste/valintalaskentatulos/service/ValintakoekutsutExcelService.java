@@ -71,7 +71,7 @@ public class ValintakoekutsutExcelService {
         this.dokumenttiAsyncResource = dokumenttiAsyncResource;
     }
 
-    public void luoExcel(DokumenttiProsessi prosessi, String hakuOid, String hakukohdeOid, List<String> valintakoeOids,
+    public void luoExcel(DokumenttiProsessi prosessi, String hakuOid, String hakukohdeOid, List<String> valintakoeTunnisteet,
                          List<String> hakemusOids) {
         Consumer<Throwable> poikkeuskasittelija = poikkeus -> {
             LOG.error("Valintakoekutsut excelin luonnissa tapahtui poikkeus:", poikkeus);
@@ -109,7 +109,7 @@ public class ValintakoekutsutExcelService {
                                     hakukohdeOid,
                                     maatJaValtiot1Ref.get(),
                                     postiRef.get(),
-                                    valintakoeOids,
+                                    valintakoeTunnisteet,
                                     tiedotHakukohteelleRef.get(),
                                     valintakokeetRef.get(),
                                     haetutHakemuksetRef.get(),
@@ -147,14 +147,14 @@ public class ValintakoekutsutExcelService {
                 // vaihtoehtoisesti haetaan hakemukset kun tiedetaan osallistujat laskennan tuloksista
             }
             valintaperusteetValintakoeResource.haeValintakokeet(
-                    valintakoeOids,
+                    valintakoeTunnisteet,
                     valintakokeet -> {
-                        valintakokeetRef.set(valintakokeet.stream().collect(Collectors.toMap(v -> v.getOid(), v -> v)));
+                        valintakokeetRef.set(valintakokeet.stream().collect(Collectors.toMap(v -> v.getTunniste(), v -> v)));
                         laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                     },
                     poikkeuskasittelija
             );
-            valintalaskentaAsyncResource.haeValintatiedotHakukohteelle(hakukohdeOid, valintakoeOids, osallistuminen -> {
+            valintalaskentaAsyncResource.haeValintatiedotHakukohteelle(hakukohdeOid, valintakoeTunnisteet, osallistuminen -> {
                 if (!useWhitelist) {
                     // haetaan osallistujille hakemukset
                     List<String> osallistujienHakemusOids = osallistuminen.stream().map(o -> o.getHakemusOid()).collect(Collectors.toList());

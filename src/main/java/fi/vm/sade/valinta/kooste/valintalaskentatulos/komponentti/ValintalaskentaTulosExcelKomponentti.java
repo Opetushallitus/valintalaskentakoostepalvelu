@@ -67,16 +67,16 @@ public class ValintalaskentaTulosExcelKomponentti {
 			String hakukohdeOid,
 			final Map<String, Koodi> maatJaValtiot1,
 			final Map<String, Koodi> posti,
-			List<String> valintakoeOids,
+			List<String> valintakoeTunnisteet,
 			List<HakemusOsallistuminenDTO> tiedotHakukohteelle,
 			Map<String, ValintakoeDTO> valintakokeet,
 			List<Hakemus> haetutHakemukset,
 			Set<String> whiteList
 	) throws Exception {
-		if (valintakoeOids == null || valintakoeOids.isEmpty()) {
-			LOG.error("Ei voida luoda exceliä ilman valintakoeoideja!");
+		if (valintakoeTunnisteet == null || valintakoeTunnisteet.isEmpty()) {
+			LOG.error("Ei voida luoda exceliä ilman valintakoetunnisteita!");
 			throw new RuntimeException(
-					"Ei voida luoda valintakokeista exceliä ilman että syötetään vähintään yksi valintakoeOid!");
+					"Ei voida luoda exceliä ilman että syötetään vähintään yksi valintakoetunniste!");
 		}
 		final Map<String, String> nivelvaiheenKoekutsut = Maps.newHashMap();
 		List<ValintakoeNimi> tunnisteet = Lists.newArrayList();
@@ -92,8 +92,8 @@ public class ValintalaskentaTulosExcelKomponentti {
 					.exportGridAsXls(new Object[][] {
 							new Object[] { "Hakukohteelle ei löytynyt tuloksia annetuilla syötteillä!" },
 							new Object[] { "Hakukohde OID", hakukohdeOid },
-							new Object[] { "Valintakoe OID:it",
-									Arrays.toString(valintakoeOids.toArray()) } });
+							new Object[] { "Valintakokeiden tunnisteet",
+									Arrays.toString(valintakoeTunnisteet.toArray()) } });
 		}
 		try {
 			Collections.sort(tunnisteet, new Comparator<ValintakoeNimi>() {

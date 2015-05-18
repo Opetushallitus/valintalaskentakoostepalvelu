@@ -28,7 +28,7 @@ public interface ValintalaskentaValintakoeAsyncResource {
 			Consumer<Throwable> failureCallback);
 
 	Peruutettava haeValintatiedotHakukohteelle(String hakukohdeOid,
-											   List<String> valintakoeOid,
+											   List<String> valintakoeTunnisteet,
 											   Consumer<List<HakemusOsallistuminenDTO>> callback, Consumer<Throwable> failureCallback);
 
 }
