@@ -148,7 +148,7 @@ public class ValintakoekutsutExcelService {
             valintaperusteetValintakoeResource.haeValintakokeetHakukohteelle(
                     hakukohdeOid,
                     valintakokeet -> {
-                        List<ValintakoeDTO> kiinnostavatValintakokeet = valintakokeet.stream().filter(v -> valintakoeTunnisteet.contains(v.getTunniste()))
+                        List<ValintakoeDTO> kiinnostavatValintakokeet = valintakokeet.stream().filter(v -> valintakoeTunnisteet.contains(v.getSelvitettyTunniste()))
                                 .collect(Collectors.toList());
                         valintakokeetRef.set(kiinnostavatValintakokeet.stream().collect(Collectors.toMap(v -> v.getTunniste(), v -> v)));
                         valintalaskentaAsyncResource.haeValintatiedotHakukohteelle(hakukohdeOid,
