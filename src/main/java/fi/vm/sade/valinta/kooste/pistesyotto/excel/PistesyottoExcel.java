@@ -392,11 +392,9 @@ public class PistesyottoExcel {
 		}
 		rivit.add(new PistesyottoDataRivi(sx, kuuntelijat, dataArvot));
 
-		this.excel = new Excel("Pistesyöttö", rivit, new int[] { 0 } // piilottaa
-				// ensimmaisen
-				// pysty
-				// sarakkeen
-				, new int[] { 4 });
+        // Piilotettavat sarakkeet:
+        // Piilotettavat rivit: 0=hakuoid, 1=hakukohdeoid, 4=valintakoetunnisteet
+		this.excel = new Excel("Pistesyöttö", rivit, new int[] { }, new int[] { 0, 1, 4 });
 	}
 
 	private Double asNumber(String value) {
