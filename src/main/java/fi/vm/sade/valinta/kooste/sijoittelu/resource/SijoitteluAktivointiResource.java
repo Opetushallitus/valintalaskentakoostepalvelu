@@ -98,6 +98,7 @@ public class SijoitteluAktivointiResource {
 
 	@GET
 	@Path("/jatkuva/aktivoi")
+	@Produces(MediaType.TEXT_PLAIN)
 	@PreAuthorize(OPH_CRUD)
 	@ApiOperation(value = "Ajastetun sijoittelun aktivointi", response = String.class)
 	public String aktivoiJatkuvassaSijoittelussa(
@@ -118,6 +119,7 @@ public class SijoitteluAktivointiResource {
 
 	@GET
 	@Path("/jatkuva/poista")
+	@Produces(MediaType.TEXT_PLAIN)
 	@PreAuthorize(OPH_CRUD)
 	@ApiOperation(value = "Ajastetun sijoittelun deaktivointi", response = String.class)
 	public String poistaJatkuvastaSijoittelusta(
@@ -161,6 +163,7 @@ public class SijoitteluAktivointiResource {
 
 	@GET
 	@Path("/jatkuva/paivita")
+	@Produces(MediaType.TEXT_PLAIN)
 	@PreAuthorize(OPH_CRUD)
 	@ApiOperation(value = "Ajastetun sijoittelun aloituksen päivitys", response = String.class)
 	public String paivitaJatkuvanSijoittelunAloitus(
