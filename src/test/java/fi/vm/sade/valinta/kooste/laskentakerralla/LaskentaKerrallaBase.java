@@ -42,7 +42,7 @@ public class LaskentaKerrallaBase {
             valintaperusteetAsyncResource,
             laskentaSeurantaAsyncResource,
             suoritusrekisteriAsyncResource
-            )));
+            ), 8));
 
     @Autowired
     ValintalaskentaKerrallaResource valintalaskentaKerralla;

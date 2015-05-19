@@ -1,6 +1,9 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import akka.actor.ActorContext;
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
+import akka.actor.TypedActor;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
@@ -52,7 +55,7 @@ public class LaskentaActorSystemTest {
         this.ohjausparametritAsyncResource = mock(OhjausparametritAsyncResource.class);
         this.laskentaActorFactory = spy(new LaskentaActorFactory(valintalaskentaAsyncResource, applicationAsyncResource, valintaperusteetAsyncResource, seurantaAsyncResource, suoritusrekisteriAsyncResource));
         this.LaskentaKaynnistin = spy(new LaskentaKaynnistin(ohjausparametritAsyncResource, valintaperusteetAsyncResource, seurantaAsyncResource));
-        laskentaActorSystem = spy(new LaskentaActorSystem(seurantaAsyncResource, LaskentaKaynnistin, laskentaActorFactory));
+        laskentaActorSystem = spy(new LaskentaActorSystem(seurantaAsyncResource, LaskentaKaynnistin, laskentaActorFactory, 8));
     }
 
     @After

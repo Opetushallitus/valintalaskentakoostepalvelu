@@ -21,8 +21,8 @@ final public class LaskennanKaynnistajaActor extends UntypedActor {
         LOG.info("Creating LaskennanKaynnistajaActor with maxWorkerCount {}", maxWorkers);
     }
 
-    public static Props props(final LaskentaSupervisor laskentaSupervisor) {
-        return Props.create(LaskennanKaynnistajaActor.class, () -> new LaskennanKaynnistajaActor(laskentaSupervisor, 8));
+    public static Props props(final LaskentaSupervisor laskentaSupervisor, final int maxWorkers) {
+        return Props.create(LaskennanKaynnistajaActor.class, () -> new LaskennanKaynnistajaActor(laskentaSupervisor, maxWorkers));
     }
 
     @Override

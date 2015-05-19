@@ -20,6 +20,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -42,12 +43,13 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     private final LaskentaKaynnistin laskentaKaynnistin;
 
     @Autowired
-    public LaskentaActorSystem(LaskentaSeurantaAsyncResource seurantaAsyncResource, LaskentaKaynnistin laskentaKaynnistin, LaskentaActorFactory laskentaActorFactory) {
+    public LaskentaActorSystem(LaskentaSeurantaAsyncResource seurantaAsyncResource, LaskentaKaynnistin laskentaKaynnistin, LaskentaActorFactory laskentaActorFactory,
+                               @Value("${valintalaskentakoostepalvelu.maxWorkerCount:8}") int maxWorkers) {
         this.laskentaActorFactory = laskentaActorFactory;
         this.laskentaKaynnistin = laskentaKaynnistin;
         this.seurantaAsyncResource = seurantaAsyncResource;
         this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
-        laskennanKaynnistajaActor = actorSystem.actorOf(LaskennanKaynnistajaActor.props(this));
+        laskennanKaynnistajaActor = actorSystem.actorOf(LaskennanKaynnistajaActor.props(this, maxWorkers));
     }
 
     @PostConstruct

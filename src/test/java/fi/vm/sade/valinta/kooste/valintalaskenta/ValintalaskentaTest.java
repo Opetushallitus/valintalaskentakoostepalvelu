@@ -70,7 +70,7 @@ public class ValintalaskentaTest {
 				valintaperusteetAsyncResource,
 				seurantaAsyncResource,
 				suoritusrekisteriAsyncResource
-		));
+		), 8);
 
 		ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute = laskentaActorSystem;
 		LaskentaAloitus laskentaJaHaku = new LaskentaAloitus(uuid, hakuOid,false,
