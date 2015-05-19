@@ -82,7 +82,7 @@ public class ValintakoekutsutExcelService {
         };
         try {
             prosessi.setKokonaistyo(
-                    7
+                    8
                             // luonti
                             + 1
                             // dokumenttipalveluun vienti
