@@ -91,10 +91,7 @@ public class LaskentaKaynnistin {
                 });
     }
 
-    private void haunHakukohteet(
-            final LaskentaDto laskenta,
-            final Consumer<LaskentaActorParams> actorParamsCallback
-    ) {
+    private void haunHakukohteet(final LaskentaDto laskenta, final Consumer<LaskentaActorParams> actorParamsCallback) {
         String hakuOid = laskenta.getHakuOid();
         if (StringUtils.isBlank(hakuOid)) {
             LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
