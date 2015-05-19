@@ -1,20 +1,25 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
+import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
+import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 import junit.framework.Assert;
-import org.apache.poi.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -24,14 +29,13 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
 import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.lisatiedot;
@@ -68,6 +72,64 @@ public class ValintalaskentaTulosExcelTest {
     @Before
     public void startServer() {
         ValintaKoosteJetty.startShared();
+    }
+
+    @Ignore // Tällä voi kokeilla tuotannon jsoneilla luontia
+    @Test
+    public void testaaExcelinLuontiJsonLahteesta() throws Throwable {
+        String listFull = IOUtils.toString(new FileInputStream("listfull.json"));
+        String osallistumiset = IOUtils.toString(new FileInputStream("osallistumiset.json"));
+        String valintakoe = IOUtils.toString(new FileInputStream("valintakoe.json"));
+        List<Hakemus> hakemuses = HttpResource.GSON.fromJson(listFull,
+                new TypeToken<List<Hakemus>>() {
+                }.getType());
+
+        List<HakemusOsallistuminenDTO> osallistuminenDTOs = HttpResource.GSON.fromJson(osallistumiset,
+                new TypeToken<List<HakemusOsallistuminenDTO>>() { }.getType());
+
+        List<ValintakoeDTO> valintakoeDTOs = HttpResource.GSON.fromJson(valintakoe,
+                new TypeToken<List<ValintakoeDTO>>() { }.getType());
+        Set<String> h = hakemuses.stream().map(h0 -> h0.getOid()).collect(Collectors.toSet());
+        Set<String> o = osallistuminenDTOs.stream().map(h0 -> h0.getHakemusOid()).collect(Collectors.toSet());
+        System.err.println(h.containsAll(o));
+        System.err.println(o.containsAll(h));
+        Mocks.reset();
+        try {
+            List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList();
+            Mockito.when(
+                    Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString(), Mockito.any(), Mockito.any())).then(
+                    answer -> {
+                        Consumer<List<Koodi>> callback = (Consumer<List<Koodi>>) answer.getArguments()[1];
+                        if (callback != null) {
+                            callback.accept(Collections.emptyList());
+                        }
+                        return new PeruutettavaImpl(Futures.immediateFuture(null));
+                    });
+            MockValintalaskentaValintakoeAsyncResource.setHakemusOsallistuminenResult(osallistuminenDTOs);
+            MockValintaperusteetAsyncResource.setValintakokeetResult(valintakoeDTOs);
+            MockApplicationAsyncResource.setResult(hakemuses);
+            MockApplicationAsyncResource.setResultByOid(hakemuses);
+            MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
+            ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
+            Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
+                    Mockito.anyString(), Mockito.anyString(), Mockito.anyLong(), Mockito.anyList(), Mockito.anyString(),
+                    inputStreamArgumentCaptor.capture(), Mockito.any(Consumer.class), Mockito.any(Consumer.class))).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
+
+
+            DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
+            lisatiedot.setValintakoeTunnisteet(Arrays.asList("7c0c20aa-c9a1-53eb-5e46-ca689b3625c0", "d579283e-ab61-e140-306c-7582a666fd85"));
+            Response r =
+                    valintakoekutsutResource.getWebClient()
+                            .query("hakuOid", "1.2.246.562.29.95390561488")
+                            .query("hakukohdeOid", "1.2.246.562.20.40041089257")
+                            .post(Entity.entity(lisatiedot,
+                                    "application/json"));
+            Assert.assertEquals(200, r.getStatus());
+            byte[] excelBytes = IOUtils.toByteArray(inputStreamArgumentCaptor.getValue());
+            IOUtils.copy(new ByteArrayInputStream(excelBytes), new FileOutputStream("e.xls"));
+        } finally {
+            Mocks.reset();
+        }
     }
 
     @Test

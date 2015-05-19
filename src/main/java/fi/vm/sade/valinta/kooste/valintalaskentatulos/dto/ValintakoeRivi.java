@@ -136,10 +136,8 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 	}
 
 	public ValintakoeRivi merge(ValintakoeRivi v) {
-		Map<String, String> m = Maps.newHashMap(v.getOsallistumistiedot());
-		for (Entry<String, String> e : osallistumistiedot.entrySet()) {
-			m.put(e.getKey(), e.getValue());
-		}
+		Map<String, String> m = Maps.newHashMap(osallistumistiedot);
+		m.putAll(v.getOsallistumistiedot());
 		return new ValintakoeRivi(sukunimi, etunimet, postitoimipaikka, asuinmaaEnglanniksi, wrapper, hakemusOid, v.paivamaara,
 				m, osoite, yhteystiedot, osallistuuEdesYhteen
 						|| v.osallistuuEdesYhteen);

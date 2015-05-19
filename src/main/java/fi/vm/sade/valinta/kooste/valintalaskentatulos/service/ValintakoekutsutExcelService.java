@@ -169,17 +169,20 @@ public class ValintakoekutsutExcelService {
                         }
                         valintalaskentaAsyncResource.haeValintatiedotHakukohteelle(hakukohdeOid,
                                 kiinnostavatValintakokeet.stream().map(v -> v.getSelvitettyTunniste()).collect(Collectors.toList()), osallistuminen -> {
+                            List<HakemusOsallistuminenDTO> hakukohteeseenOsallistujat = osallistuminen.stream()
+                                    .filter(o -> hakukohdeOid.equals(o.getHakukohdeOid()))
+                                    .collect(Collectors.toList());
+                            tiedotHakukohteelleRef.set(hakukohteeseenOsallistujat);
                             if (!useWhitelist) {
-                                // haetaan osallistujille hakemukset
-                                Set<String> osallistujienHakemusOids = osallistuminen.stream()
+                                Set<String> osallistujienHakemusOids = hakukohteeseenOsallistujat.stream()
                                         .filter(o -> hakukohdeOid.equals(o.getHakukohdeOid()))
                                         .map(o -> o.getHakemusOid()).collect(Collectors.toSet());
+                                // haetaan osallistujille hakemukset
                                 applicationResource.getApplicationsByOids(osallistujienHakemusOids, hakemukset -> {
                                     lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
                                     laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                                 }, poikkeuskasittelija);
                             }
-                            tiedotHakukohteelleRef.set(osallistuminen);
                             laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                         }, poikkeuskasittelija);
                         laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

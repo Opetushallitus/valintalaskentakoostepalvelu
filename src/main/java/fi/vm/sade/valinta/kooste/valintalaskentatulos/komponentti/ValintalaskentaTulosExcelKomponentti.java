@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.Future;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -93,38 +95,36 @@ public class ValintalaskentaTulosExcelKomponentti {
 					return o1.getNimi().compareTo(o2.getNimi());
 				}
 			});
-			boolean useWhitelist = !whiteList.isEmpty();
+			final boolean useWhitelist = !whiteList.isEmpty();
+			Function<String,Boolean> onkoHakemusWhiteListilla = hakemusOid -> {
+				return !useWhitelist || whiteList.contains(hakemusOid);
+			};
 			Map<String, Hakemus> mapping = haetutHakemukset.stream().collect(Collectors.toMap(a -> a.getOid(), a -> a));
 			Map<String, ValintakoeRivi> hakemusJaRivi = Maps.newHashMap();
+			BiFunction<ValintakoeRivi, ValintakoeRivi, ValintakoeRivi> remappingFunction = (v1,v2) -> {
+				return v1.merge(v2);
+			};
 			{
 
 				for (HakemusOsallistuminenDTO tieto : tiedotHakukohteelle) {
-					if (useWhitelist) {
+					if (!onkoHakemusWhiteListilla.apply(tieto.getHakemusOid())) {
 						// If whitelist in use then skip every hakemus that is
 						// not
 						// in whitelist
-						if (!whiteList.contains(tieto.getHakemusOid())) {
-							continue;
-						}
+						continue;
 					}
 					if(mapping.containsKey(tieto.getHakemusOid())) {
-						hakemusJaRivi.put(tieto.getHakemusOid(),
-								muodostaValintakoeRivi(
-										posti,maatJaValtiot1,
-										mapping.get(tieto.getHakemusOid()), tieto, tunnisteet));
+						final ValintakoeRivi v0 = muodostaValintakoeRivi(
+								posti, maatJaValtiot1,
+								mapping.get(tieto.getHakemusOid()), tieto, tunnisteet);
+						hakemusJaRivi.merge(tieto.getHakemusOid(), v0, remappingFunction);
 					}
 					//
 				}
 				if (!nivelvaiheenKoekutsut.isEmpty()) {
 					for (Hakemus hakemus : haetutHakemukset) {
-						if (useWhitelist) {
-							// If whitelist in use then skip every hakemus that
-							// is
-							// not
-							// in whitelist
-							if (!whiteList.contains(hakemus.getOid())) {
-								continue;
-							}
+						if (!onkoHakemusWhiteListilla.apply(hakemus.getOid())) {
+							continue;
 						}
 						HakemusWrapper wrapper = new HakemusWrapper(hakemus);
 						Osoite osoite = OsoiteHakemukseltaUtil
@@ -138,14 +138,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 								hakemus.getOid(), null, nivelvaiheenKoekutsut,
 								osoite,
 								Yhteystiedot.yhteystiedotHakemukselta(hakemus), true);
-
-						ValintakoeRivi v2 = hakemusJaRivi.get(hakemus.getOid());
-						if (v2 == null) {
-							hakemusJaRivi.put(hakemus.getOid(), v);
-						} else {
-							hakemusJaRivi.put(hakemus.getOid(), v.merge(v2));
-						}
-
+						hakemusJaRivi.merge(hakemus.getOid(), v, remappingFunction);
 					}
 				}
 			}
@@ -218,7 +211,6 @@ public class ValintalaskentaTulosExcelKomponentti {
 			Map<String, Koodi> maatJaValtiot1,
 			Hakemus h,
 			HakemusOsallistuminenDTO o, List<ValintakoeNimi> tunnisteet) {
-
 		Date date = o.getLuontiPvm();
 		Map<String, ValintakoeOsallistuminenDTO> osallistumiset = new HashMap<>();
 		for (ValintakoeOsallistuminenDTO v : o.getOsallistumiset()) {
@@ -241,7 +233,6 @@ public class ValintalaskentaTulosExcelKomponentti {
 				}
 				osallistumistiedot.put(tunniste.getSelvitettyTunniste(),
 						suomenna(vodto.getOsallistuminen()));
-
 			} else {
 				osallistumistiedot.put(tunniste.getSelvitettyTunniste(), "Määrittelemätön");
 			}
