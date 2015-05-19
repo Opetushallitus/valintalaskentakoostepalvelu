@@ -12,6 +12,7 @@ import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import junit.framework.Assert;
+import org.apache.poi.util.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -21,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
@@ -49,7 +52,8 @@ public class ValintalaskentaTulosExcelTest {
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
     final String TARJOAJA1 = "TARJOAJA1";
-    final String VALINTAKOE1 = "VALINTAKOE1";
+    final String VALINTAKOENIMI1 = "VALINTAKOENIMI1";
+    final String VALINTAKOENIMI2 = "VALINTAKOENIMI2";
     final String HAKEMUS1 = "HAKEMUS1";
     final String HAKEMUS2 = "HAKEMUS2";
     final String TUNNISTE1 = "TUNNISTE1";
@@ -126,11 +130,13 @@ public class ValintalaskentaTulosExcelTest {
             );
             MockValintaperusteetAsyncResource.setValintakokeetResult(
                     Arrays.asList(valintakoe()
-                            .setTunniste(TUNNISTE1)
-                            .setSelvitettyTunniste(SELVITETTY_TUNNISTE1)
-                            .build(),
+                                    .setTunniste(TUNNISTE1)
+                                    .setNimi(VALINTAKOENIMI1)
+                                    .setSelvitettyTunniste(SELVITETTY_TUNNISTE1)
+                                    .build(),
                             valintakoe()
                                     .setTunniste(TUNNISTE2)
+                                    .setNimi(VALINTAKOENIMI2)
                                     .setSelvitettyTunniste(SELVITETTY_TUNNISTE2)
                                     .build())
             );
@@ -161,7 +167,9 @@ public class ValintalaskentaTulosExcelTest {
                             .post(Entity.entity(lisatiedot,
                                     "application/json"));
             Assert.assertEquals(200, r.getStatus());
-            InputStream excelData = inputStreamArgumentCaptor.getValue();
+            byte[] excelBytes = IOUtils.toByteArray(inputStreamArgumentCaptor.getValue());
+            //IOUtils.copy(new ByteArrayInputStream(excelBytes), new FileOutputStream("e.xls"));//new File("")));
+            InputStream excelData = new ByteArrayInputStream(excelBytes);
             Assert.assertTrue(excelData != null);
             Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(excelData);
         /*

@@ -202,11 +202,11 @@ public class ValintalaskentaTulosExcelKomponentti {
 
 	private String suomenna(OsallistuminenDTO osallistuminen) {
 		if (osallistuminen != null) {
-			if (Osallistuminen.EI_OSALLISTU.equals(osallistuminen)) {
+			if (OsallistuminenDTO.EI_OSALLISTU.equals(osallistuminen)) {
 				return "Ei kutsuta";
-			} else if (Osallistuminen.OSALLISTUU.equals(osallistuminen)) {
+			} else if (OsallistuminenDTO.OSALLISTUU.equals(osallistuminen)) {
 				return "Kutsutaan";
-			} else if (Osallistuminen.VIRHE.equals(osallistuminen)) {
+			} else if (OsallistuminenDTO.VIRHE.equals(osallistuminen)) {
 				return "Virheellinen";
 			}
 		}
@@ -233,14 +233,14 @@ public class ValintalaskentaTulosExcelKomponentti {
 		Map<String, String> osallistumistiedot = Maps.newHashMap();
 		for (ValintakoeNimi tunniste : tunnisteet) {
 			if (osallistumiset.containsKey(tunniste.getSelvitettyTunniste())) {
-                OsallistuminenDTO osallistuminen = osallistumiset.get(
-						tunniste.getSelvitettyTunniste()).getOsallistuminen();
+				ValintakoeOsallistuminenDTO vodto = osallistumiset.get(
+						tunniste.getSelvitettyTunniste());
+                OsallistuminenDTO osallistuminen = vodto.getOsallistuminen();
 				if (OsallistuminenDTO.OSALLISTUU.equals(osallistuminen)) {
 					osallistuuEdesYhteen = true;
 				}
 				osallistumistiedot.put(tunniste.getSelvitettyTunniste(),
-						suomenna(osallistumiset.get(tunniste.getSelvitettyTunniste())
-								.getOsallistuminen()));
+						suomenna(vodto.getOsallistuminen()));
 
 			} else {
 				osallistumistiedot.put(tunniste.getSelvitettyTunniste(), "----");

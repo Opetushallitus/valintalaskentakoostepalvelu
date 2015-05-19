@@ -52,6 +52,10 @@ public class ValintaperusteetSpec {
             valintaperusteDTO.setTunniste(tunniste);
             return this;
         }
+        public ValintakoeDTOBuilder setNimi(String nimi) {
+            valintaperusteDTO.setNimi(nimi);
+            return this;
+        }
         public ValintakoeDTOBuilder setSelvitettyTunniste(String tunniste) {
             valintaperusteDTO.setSelvitettyTunniste(tunniste);
             return this;
