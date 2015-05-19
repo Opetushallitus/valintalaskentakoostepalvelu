@@ -111,7 +111,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
     }
 
     private void uudetPalvelukutsutKayntiin() {
-        strategiat.forEach(s -> s.aloitaUusiPalvelukutsu());
+        strategiat.forEach(PalvelukutsuStrategia::aloitaUusiPalvelukutsu);
         laskentaStrategia.aloitaUusiPalvelukutsu();
     }
 
