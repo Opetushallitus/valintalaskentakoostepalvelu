@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Jussi Jartamo
@@ -91,11 +92,16 @@ public class ValintakoekutsutExcelService {
             final AtomicReference<HakukohdeDTO> hakukohdeRef = new AtomicReference<>();
             final AtomicReference<List<HakemusOsallistuminenDTO>> tiedotHakukohteelleRef = new AtomicReference<>();
             final AtomicReference<Map<String, ValintakoeDTO>> valintakokeetRef = new AtomicReference<>();
-            final AtomicReference<List<Hakemus>> haetutHakemuksetRef = new AtomicReference<>();
+            final AtomicReference<List<Hakemus>> haetutHakemuksetRef = new AtomicReference<>(Collections.emptyList());
+            final Consumer<List<Hakemus>> lisaaHakemuksiaAtomisestiHakemuksetReferenssiin = hakemuksia -> {
+                haetutHakemuksetRef.getAndUpdate(vanhatHakemukset -> {
+                    return Stream.concat(vanhatHakemukset.stream(), hakemuksia.stream()).distinct().collect(Collectors.toList());
+                });
+            };
             final AtomicReference<Map<String,Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
             final AtomicReference<Map<String,Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
-                    .setLaskurinAlkuarvo(7)
+                    .setLaskurinAlkuarvo(8)
                     .setSuoritaJokaKerta(() -> {
                         prosessi.inkrementoiTehtyjaToita();
                     })
@@ -139,7 +145,7 @@ public class ValintakoekutsutExcelService {
             if (useWhitelist) {
                 // haetaan whitelistin hakemukset
                 applicationResource.getApplicationsByOids(hakemusOids, hakemukset -> {
-                    haetutHakemuksetRef.set(hakemukset);
+                    lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
                     laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                 }, poikkeuskasittelija);
             } else {
@@ -151,6 +157,16 @@ public class ValintakoekutsutExcelService {
                         List<ValintakoeDTO> kiinnostavatValintakokeet = valintakokeet.stream().filter(v -> valintakoeTunnisteet.contains(v.getSelvitettyTunniste()))
                                 .collect(Collectors.toList());
                         valintakokeetRef.set(kiinnostavatValintakokeet.stream().collect(Collectors.toMap(v -> v.getSelvitettyTunniste(), v -> v)));
+                        boolean onkoJossainValintakokeessaKaikkiHaetaan =
+                                kiinnostavatValintakokeet.stream().anyMatch(vk -> Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
+                        if(onkoJossainValintakokeessaKaikkiHaetaan && !useWhitelist) {
+                            applicationResource.getApplicationsByOid(hakuOid,hakukohdeOid,hakemukset -> {
+                                lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
+                                laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                            },poikkeuskasittelija);
+                        } else {
+                            laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                        }
                         valintalaskentaAsyncResource.haeValintatiedotHakukohteelle(hakukohdeOid,
                                 kiinnostavatValintakokeet.stream().map(v -> v.getSelvitettyTunniste()).collect(Collectors.toList()), osallistuminen -> {
                             if (!useWhitelist) {
@@ -159,7 +175,7 @@ public class ValintakoekutsutExcelService {
                                         .filter(o -> hakukohdeOid.equals(o.getHakukohdeOid()))
                                         .map(o -> o.getHakemusOid()).collect(Collectors.toSet());
                                 applicationResource.getApplicationsByOids(osallistujienHakemusOids, hakemukset -> {
-                                    haetutHakemuksetRef.set(hakemukset);
+                                    lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
                                     laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                                 }, poikkeuskasittelija);
                             }

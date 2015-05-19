@@ -82,4 +82,17 @@ public class Hakemus {
 	public void setAdditionalInfo(Map<String, String> additionalInfo) {
 		this.additionalInfo = additionalInfo;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null) {
+			return false;
+		} else if(this == obj) {
+			return true;
+		} else if(obj instanceof Hakemus) {
+			return this.oid.equals(((Hakemus)obj).oid);
+		} else {
+			return false;
+		}
+	}
 }
