@@ -21,12 +21,6 @@ final public class LaskennanKaynnistajaActor extends UntypedActor {
         });
     }
 
-    public static Props props(final LaskentaSupervisor laskentaSupervisor, final int maxWorkers) {
-        return Props.create(LaskennanKaynnistajaActor.class, () -> {
-            return new LaskennanKaynnistajaActor(laskentaSupervisor, maxWorkers);
-        });
-    }
-
     @Override
     public void onReceive(Object message){
         if (WorkAvailable.class.isInstance(message)) {
