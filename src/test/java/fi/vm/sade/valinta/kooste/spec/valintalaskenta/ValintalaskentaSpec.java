@@ -35,6 +35,14 @@ public class ValintalaskentaSpec {
             this.hakemusOsallistuminen.getOsallistumiset().add(v);
             return this;
         }
+        public HakemusOsallistuminenBuilder addOsallistuminen(String tunniste, OsallistuminenDTO o) {
+            fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO v = new fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO();
+            //v.setValintakoeOid(valintakoeOid);
+            v.setValintakoeTunniste(tunniste);
+            v.setOsallistuminen(o);
+            this.hakemusOsallistuminen.getOsallistumiset().add(v);
+            return this;
+        }
 
         public HakemusOsallistuminenDTO build() {
             return hakemusOsallistuminen;

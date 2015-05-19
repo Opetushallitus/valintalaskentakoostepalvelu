@@ -10,6 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
+import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import junit.framework.Assert;
 import org.apache.poi.util.IOUtils;
@@ -56,6 +57,9 @@ public class ValintalaskentaTulosExcelTest {
     final String VALINTAKOENIMI2 = "VALINTAKOENIMI2";
     final String HAKEMUS1 = "HAKEMUS1";
     final String HAKEMUS2 = "HAKEMUS2";
+    final String HAKEMUS3 = "HAKEMUS3";
+    final String HAKEMUS4 = "HAKEMUS4";
+    final String HAKEMUS5 = "HAKEMUS5";
     final String TUNNISTE1 = "TUNNISTE1";
     final String SELVITETTY_TUNNISTE1 = "SELVITETTY_TUNNISTE1";
     final String TUNNISTE2 = "TUNNISTE2";
@@ -125,6 +129,21 @@ public class ValintalaskentaTulosExcelTest {
                                     .setHakemusOid(HAKEMUS2)
                                     .setHakutoive(HAKUKOHDE1)
                                     .addOsallistuminen(SELVITETTY_TUNNISTE1)
+                                    .build(),
+                            hakemusOsallistuminen()
+                                    .setHakemusOid(HAKEMUS3)
+                                    .setHakutoive(HAKUKOHDE1)
+                                    .addOsallistuminen(SELVITETTY_TUNNISTE1, OsallistuminenDTO.EI_OSALLISTU)
+                                    .build(),
+                            hakemusOsallistuminen()
+                                    .setHakemusOid(HAKEMUS4)
+                                    .setHakutoive(HAKUKOHDE1)
+                                    .addOsallistuminen(SELVITETTY_TUNNISTE1, OsallistuminenDTO.EI_VAADITA)
+                                    .build(),
+                            hakemusOsallistuminen()
+                                    .setHakemusOid(HAKEMUS5)
+                                    .setHakutoive(HAKUKOHDE1)
+                                    .addOsallistuminen(SELVITETTY_TUNNISTE1, OsallistuminenDTO.VIRHE)
                                     .build()
                     ) // Osallistumiset
             );
@@ -147,6 +166,15 @@ public class ValintalaskentaTulosExcelTest {
                             .build(),
                     hakemus()
                             .setOid(HAKEMUS2)
+                            .build(),
+                    hakemus()
+                            .setOid(HAKEMUS3)
+                            .build(),
+                    hakemus()
+                            .setOid(HAKEMUS4)
+                            .build(),
+                    hakemus()
+                            .setOid(HAKEMUS5)
                             .build()
             ));
 
@@ -179,6 +207,11 @@ public class ValintalaskentaTulosExcelTest {
         */
             Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS1.equals(r0.toTeksti().getTeksti()))));
             Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS2.equals(r0.toTeksti().getTeksti()))));
+            // Ei osallistujat ei tule mukaan
+            Assert.assertTrue(!rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS3.equals(r0.toTeksti().getTeksti()))));
+            Assert.assertTrue(!rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS4.equals(r0.toTeksti().getTeksti()))));
+            Assert.assertTrue(!rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS5.equals(r0.toTeksti().getTeksti()))));
+
         } finally {
             Mocks.reset();
         }
