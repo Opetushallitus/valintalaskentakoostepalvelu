@@ -155,7 +155,9 @@ public class ValintakoekutsutExcelService {
                                 kiinnostavatValintakokeet.stream().map(v -> v.getSelvitettyTunniste()).collect(Collectors.toList()), osallistuminen -> {
                             if (!useWhitelist) {
                                 // haetaan osallistujille hakemukset
-                                Set<String> osallistujienHakemusOids = osallistuminen.stream().map(o -> o.getHakemusOid()).collect(Collectors.toSet());
+                                Set<String> osallistujienHakemusOids = osallistuminen.stream()
+                                        .filter(o -> hakukohdeOid.equals(o.getHakukohdeOid()))
+                                        .map(o -> o.getHakemusOid()).collect(Collectors.toSet());
                                 applicationResource.getApplicationsByOids(osallistujienHakemusOids, hakemukset -> {
                                     haetutHakemuksetRef.set(hakemukset);
                                     laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
