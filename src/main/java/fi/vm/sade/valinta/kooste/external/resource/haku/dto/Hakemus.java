@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource.haku.dto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -81,6 +82,11 @@ public class Hakemus {
 
 	public void setAdditionalInfo(Map<String, String> additionalInfo) {
 		this.additionalInfo = additionalInfo;
+	}
+
+	@Override
+	public int hashCode() {
+		return Optional.ofNullable(oid).orElse("").hashCode();
 	}
 
 	@Override

@@ -95,7 +95,7 @@ public class ValintakoekutsutExcelService {
             final AtomicReference<List<Hakemus>> haetutHakemuksetRef = new AtomicReference<>(Collections.emptyList());
             final Consumer<List<Hakemus>> lisaaHakemuksiaAtomisestiHakemuksetReferenssiin = hakemuksia -> {
                 haetutHakemuksetRef.getAndUpdate(vanhatHakemukset -> {
-                    return Stream.concat(vanhatHakemukset.stream(), hakemuksia.stream()).distinct().collect(Collectors.toList());
+                    return Stream.concat(vanhatHakemukset.stream(), hakemuksia.stream()).collect(Collectors.toList());
                 });
             };
             final AtomicReference<Map<String,Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
@@ -117,7 +117,7 @@ public class ValintakoekutsutExcelService {
                                     postiRef.get(),
                                     tiedotHakukohteelleRef.get(),
                                     valintakokeetRef.get(),
-                                    haetutHakemuksetRef.get(),
+                                    haetutHakemuksetRef.get().stream().distinct().collect(Collectors.toList()),
                                     Optional.ofNullable(hakemusOids).orElse(Collections.emptySet())
                             );
                             prosessi.inkrementoiTehtyjaToita();

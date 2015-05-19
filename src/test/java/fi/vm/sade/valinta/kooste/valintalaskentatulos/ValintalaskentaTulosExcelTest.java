@@ -110,6 +110,17 @@ public class ValintalaskentaTulosExcelTest {
                                     .setHakemusOid(HAKEMUS5)
                                     .setHakutoive(HAKUKOHDE1)
                                     .addOsallistuminen(SELVITETTY_TUNNISTE1, OsallistuminenDTO.VIRHE)
+                                    .build(),
+                            //
+                            hakemusOsallistuminen()
+                                    .setHakemusOid(HAKEMUS1)
+                                    .setHakutoive(HAKUKOHDE1)
+                                    .addOsallistuminen(SELVITETTY_TUNNISTE2)
+                                    .build(),
+                            hakemusOsallistuminen()
+                                    .setHakemusOid(HAKEMUS2)
+                                    .setHakutoive(HAKUKOHDE1)
+                                    .addOsallistuminen(SELVITETTY_TUNNISTE2)
                                     .build()
                     ) // Osallistumiset
             );
@@ -130,6 +141,9 @@ public class ValintalaskentaTulosExcelTest {
             MockApplicationAsyncResource.setResultByOid(Arrays.asList(
                     hakemus()
                             .setOid(HAKEMUS1)
+                            .build(),
+                    hakemus()
+                            .setOid(HAKEMUS2)
                             .build()
             ));
             MockApplicationAsyncResource.setResult(Arrays.asList(

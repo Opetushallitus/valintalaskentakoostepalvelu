@@ -243,7 +243,7 @@ public class ValintalaskentaTulosExcelKomponentti {
 						suomenna(vodto.getOsallistuminen()));
 
 			} else {
-				osallistumistiedot.put(tunniste.getSelvitettyTunniste(), "----");
+				osallistumistiedot.put(tunniste.getSelvitettyTunniste(), "Määrittelemätön");
 			}
 		}
 		//Hakemus h = applicationResource.getApplicationByOid(o.getHakemusOid());
