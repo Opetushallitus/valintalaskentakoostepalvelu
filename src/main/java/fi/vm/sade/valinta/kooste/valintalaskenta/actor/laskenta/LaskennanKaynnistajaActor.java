@@ -3,11 +3,14 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 final public class LaskennanKaynnistajaActor extends UntypedActor {
 
+    private final Logger LOG = LoggerFactory.getLogger(LaskennanKaynnistajaActor.class);
     private final LaskentaSupervisor laskentaSupervisor;
     private final int maxWorkers;
     private AtomicInteger workerCount = new AtomicInteger(0);
@@ -15,6 +18,7 @@ final public class LaskennanKaynnistajaActor extends UntypedActor {
     private LaskennanKaynnistajaActor(final LaskentaSupervisor laskentaSupervisor, final int maxWorkers) {
         this.laskentaSupervisor = laskentaSupervisor;
         this.maxWorkers = maxWorkers;
+        LOG.info("Creating LaskennanKaynnistajaActor with maxWorkerCount {}", maxWorkers);
     }
 
     public static Props props(final LaskentaSupervisor laskentaSupervisor) {
@@ -34,6 +38,7 @@ final public class LaskennanKaynnistajaActor extends UntypedActor {
     }
 
     void process() {
+        LOG.info("Process; maxWorkers: {}, workerCount: {}", maxWorkers, workerCount.get());
         if (workerCount.getAndIncrement() < maxWorkers) {
             laskentaSupervisor.haeJaKaynnistaLaskenta();
         }
