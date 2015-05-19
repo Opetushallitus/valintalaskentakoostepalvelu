@@ -116,9 +116,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
     }
 
     public void viimeistele() {
-        LOG.info(
-                "\r\n####\r\n#### Valintaryhmälaskenta on paattynyt haussa {} uuid:lle {}!\r\n####",
-                hakuOid, uuid);
+        LOG.info("\r\n####\r\n#### Valintaryhmälaskenta on paattynyt haussa {} uuid:lle {}!\r\n####", hakuOid, uuid);
         laskentaSupervisor.valmis(uuid);
     }
 
@@ -136,8 +134,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
             LOG.error("Virhe {}", e.getMessage());
         }
         try {
-            laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid,
-                    LaskentaTila.PERUUTETTU, HakukohdeTila.KESKEYTETTY);
+            laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, HakukohdeTila.KESKEYTETTY);
         } catch (Exception e) {
             LOG.error("Virhe {}", e.getMessage());
         }
