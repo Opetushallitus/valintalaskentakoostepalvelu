@@ -114,10 +114,12 @@ public class ValintalaskentaTulosExcelTest {
                     Arrays.asList(
                             hakemusOsallistuminen()
                                     .setHakemusOid(HAKEMUS1)
+                                    .setHakutoive(HAKUKOHDE1)
                                     .addOsallistuminen(SELVITETTY_TUNNISTE1)
                                     .build(),
                             hakemusOsallistuminen()
                                     .setHakemusOid(HAKEMUS2)
+                                    .setHakutoive(HAKUKOHDE1)
                                     .addOsallistuminen(SELVITETTY_TUNNISTE1)
                                     .build()
                     ) // Osallistumiset

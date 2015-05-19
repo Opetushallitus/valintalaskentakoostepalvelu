@@ -23,6 +23,10 @@ public class ValintalaskentaSpec {
             this.hakemusOsallistuminen.setHakemusOid(hakemusOid);
             return this;
         }
+        public HakemusOsallistuminenBuilder setHakutoive(String hakutoiveOid) {
+            this.hakemusOsallistuminen.setHakukohdeOid(hakutoiveOid);
+            return this;
+        }
         public HakemusOsallistuminenBuilder addOsallistuminen(String tunniste) {
             fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO v = new fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintakoeOsallistuminenDTO();
             //v.setValintakoeOid(valintakoeOid);
