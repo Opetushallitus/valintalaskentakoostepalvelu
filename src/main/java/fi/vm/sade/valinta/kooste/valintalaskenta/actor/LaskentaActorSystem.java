@@ -41,9 +41,9 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     private final Map<String, LaskentaActorWrapper> ajossaOlevatLaskennat = Maps.newConcurrentMap();
     private final LaskentaKaynnistin laskentaKaynnistin;
 
-	@Autowired
-	public LaskentaActorSystem(LaskentaSeurantaAsyncResource seurantaAsyncResource, LaskentaKaynnistin laskentaKaynnistin, LaskentaActorFactory laskentaActorFactory) {
-		this.laskentaActorFactory = laskentaActorFactory;
+    @Autowired
+    public LaskentaActorSystem(LaskentaSeurantaAsyncResource seurantaAsyncResource, LaskentaKaynnistin laskentaKaynnistin, LaskentaActorFactory laskentaActorFactory) {
+        this.laskentaActorFactory = laskentaActorFactory;
         this.laskentaKaynnistin = laskentaKaynnistin;
         this.seurantaAsyncResource = seurantaAsyncResource;
         this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
@@ -58,7 +58,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
     @Override
     public void suoritaValintalaskentaKerralla(final ParametritDTO parametritDTO, final LaskentaAloitus laskentaAloitus) {
-        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this,new LaskentaActorParams(laskentaAloitus, parametritDTO));
+        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this, new LaskentaActorParams(laskentaAloitus, parametritDTO));
         luoJaKaynnistaLaskenta(laskentaAloitus.getUuid(), laskentaAloitus.getHakuOid(), laskentaAloitus.isOsittainenLaskenta(), laskentaActor);
     }
 
