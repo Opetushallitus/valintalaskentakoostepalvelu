@@ -10,6 +10,7 @@ import com.typesafe.config.ConfigFactory;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskennanKaynnistajaActor;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.NoWorkAvailable;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.WorkAvailable;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.WorkerAvailable;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
@@ -24,7 +25,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * @author Jussi Jartamo
@@ -78,33 +78,24 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         lopeta(uuid, ajossaOlevatLaskennat.remove(uuid));
     }
 
-    public String haeJaKaynnistaLaskenta() {
-        final ValueConsumer<String> consumer = new ValueConsumer<>();
-        seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle(consumer, (Throwable t) -> {
+    public void haeJaKaynnistaLaskenta() {
+        seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle((String uuid) -> kaynnistaLaskentaJosLaskettavaa(uuid), (Throwable t) -> {
         });
-
-        final String uuid = consumer.getValue();
-        if (null == uuid)
-            return null;
-
-        ValueConsumer<LaskentaActorParams> laskentaActorParamsConsumer = new ValueConsumer<>();
-        laskentaKaynnistin.haeLaskentaParams(uuid, params-> {
-            laskentaActorParamsConsumer.accept(params);
-        });
-        final LaskentaActorParams laskentaActorParams = laskentaActorParamsConsumer.getValue();
-        if (null == laskentaActorParams)
-            return null;
-        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this, laskentaActorParams);
-
-        return luoJaKaynnistaLaskenta(uuid, laskentaActorParams.getHakuOid(), laskentaActorParams.isOsittainen(), laskentaActor);
     }
 
-    String luoJaKaynnistaLaskenta(String uuid, String hakuOid, boolean osittainen, LaskentaActor laskentaActor) {
+    private void kaynnistaLaskentaJosLaskettavaa(String uuid) {
+        if (uuid == null) {
+            laskennanKaynnistajaActor.tell(new NoWorkAvailable(), ActorRef.noSender());
+        } else {
+            laskentaKaynnistin.haeLaskentaParams(uuid, params -> luoJaKaynnistaLaskenta(uuid, params.getHakuOid(), params.isOsittainen(), laskentaActorFactory.createLaskentaActor(this, params)));
+        }
+    }
+
+    protected void luoJaKaynnistaLaskenta(String uuid, String hakuOid, boolean osittainen, LaskentaActor laskentaActor) {
         try {
             laskentaActor.aloita();
         } catch (Exception e) {
             LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid);
-            return null;
         }
 
         ajossaOlevatLaskennat.merge(uuid, new LaskentaActorWrapper(uuid, hakuOid, osittainen, laskentaActor), (LaskentaActorWrapper oldValue, LaskentaActorWrapper value) -> {
@@ -112,7 +103,6 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
             lopeta(uuid, oldValue);
             return value;
         });
-        return uuid;
     }
 
     private void lopeta(String uuid, LaskentaActorWrapper l) {
@@ -125,19 +115,6 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
             }
         } else {
             LOG.warn("Yritettiin valmistaa laskentaa {} mutta laskenta ei ollut enaa ajossa!", uuid);
-        }
-    }
-
-    private class ValueConsumer<T> implements Consumer<T>{
-        private T value;
-
-        @Override
-        public void accept(T value) {
-            this.value = value;
-        }
-
-        public T getValue(){
-            return value;
         }
     }
 }

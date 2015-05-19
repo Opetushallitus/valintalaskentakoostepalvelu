@@ -29,20 +29,20 @@ final public class LaskennanKaynnistajaActor extends UntypedActor {
 
     @Override
     public void onReceive(Object message){
-        if (WorkAvailable.class.isInstance(message))
+        if (WorkAvailable.class.isInstance(message)) {
             process();
-        else if (WorkerAvailable.class.isInstance(message)){
+        } else if (WorkerAvailable.class.isInstance(message)){
             workerCount--;
             process();
+        } else if (NoWorkAvailable.class.isInstance(message)) {
+            workerCount--;
         }
     }
 
     void process() {
-        while(workerCount < maxWorkers) {
-            String uuid = laskentaSupervisor.haeJaKaynnistaLaskenta();
-            if (null == uuid)
-                return;
+        if (workerCount < maxWorkers) {
             workerCount++;
+            laskentaSupervisor.haeJaKaynnistaLaskenta();
         }
     }
 }
