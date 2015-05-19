@@ -27,11 +27,13 @@ public class LaskentaActorImpl implements LaskentaActor {
     private final HakukohdeLaskuri hakukohdeLaskuri;
 
     public LaskentaActorImpl(LaskentaSupervisor laskentaSupervisor,
-                             String uuid, String hakuOid,
+                             String uuid,
+                             String hakuOid,
                              Collection<LaskentaPalvelukutsu> palvelukutsut,
                              Collection<PalvelukutsuStrategia> strategiat,
                              PalvelukutsuStrategia laskentaStrategia,
-                             LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource) {
+                             LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource
+    ) {
         this.hakukohdeLaskuri = new HakukohdeLaskuri(palvelukutsut.size());
         this.laskentaSupervisor = laskentaSupervisor;
         this.hakuOid = hakuOid;
@@ -43,8 +45,7 @@ public class LaskentaActorImpl implements LaskentaActor {
             LOG.info("Hakukohteen {} tila muuttunut statukseen {}. {}", pkk.getHakukohdeOid(), pkk.getHakukohdeTila(), tulkinta(pkk.getHakukohdeTila()));
             if (pkk.onkoPeruutettu()) {
                 try {
-                    laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid,
-                            pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
+                    laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
                 } catch (Exception e) {
                     LOG.error("Virhe {}", e.getMessage());
                 }
