@@ -14,16 +14,16 @@ import java.util.stream.IntStream;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-public class LaskennanKaynnistajaActorTest {
+public class LaskentaStarterActorTest {
 
     private static final int MAX_WORKER_COUNT = 10;
     private final LaskentaSupervisor laskentaSupervisor = mock(LaskentaSupervisor.class);
-    private LaskennanKaynnistajaActor actor;
-    private TestActorRef<LaskennanKaynnistajaActor> ref;
+    private LaskentaStarterActor actor;
+    private TestActorRef<LaskentaStarterActor> ref;
 
     @Before
     public void setUp() {
-        Props props = LaskennanKaynnistajaActor.props(laskentaSupervisor, MAX_WORKER_COUNT);
+        Props props = LaskentaStarterActor.props(laskentaSupervisor, MAX_WORKER_COUNT);
         ActorSystem actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
         this.ref = TestActorRef.create(actorSystem, props, "testA");
         this.actor = ref.underlyingActor();

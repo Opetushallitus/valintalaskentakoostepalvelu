@@ -9,7 +9,7 @@ import com.google.common.collect.Maps;
 import com.typesafe.config.ConfigFactory;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskennanKaynnistajaActor;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.NoWorkAvailable;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.WorkAvailable;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.WorkerAvailable;
@@ -49,7 +49,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         this.laskentaKaynnistin = laskentaKaynnistin;
         this.seurantaAsyncResource = seurantaAsyncResource;
         this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
-        laskennanKaynnistajaActor = actorSystem.actorOf(LaskennanKaynnistajaActor.props(this, maxWorkers));
+        laskennanKaynnistajaActor = actorSystem.actorOf(LaskentaStarterActor.props(this, maxWorkers));
     }
 
     @PostConstruct

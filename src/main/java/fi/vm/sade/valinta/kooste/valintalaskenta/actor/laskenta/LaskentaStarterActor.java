@@ -8,21 +8,21 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-final public class LaskennanKaynnistajaActor extends UntypedActor {
-    private final Logger LOG = LoggerFactory.getLogger(LaskennanKaynnistajaActor.class);
+final public class LaskentaStarterActor extends UntypedActor {
+    private final Logger LOG = LoggerFactory.getLogger(LaskentaStarterActor.class);
 
     private final LaskentaSupervisor laskentaSupervisor;
     private final int maxWorkers;
     private AtomicInteger workerCount = new AtomicInteger(0);
 
-    private LaskennanKaynnistajaActor(final LaskentaSupervisor laskentaSupervisor, final int maxWorkers) {
+    private LaskentaStarterActor(final LaskentaSupervisor laskentaSupervisor, final int maxWorkers) {
         this.laskentaSupervisor = laskentaSupervisor;
         this.maxWorkers = maxWorkers;
-        LOG.info("Creating LaskennanKaynnistajaActor with maxWorkerCount {}", maxWorkers);
+        LOG.info("Creating LaskentaStarterActor with maxWorkerCount {}", maxWorkers);
     }
 
     public static Props props(final LaskentaSupervisor laskentaSupervisor, final int maxWorkers) {
-        return Props.create(LaskennanKaynnistajaActor.class, () -> new LaskennanKaynnistajaActor(laskentaSupervisor, maxWorkers));
+        return Props.create(LaskentaStarterActor.class, () -> new LaskentaStarterActor(laskentaSupervisor, maxWorkers));
     }
 
     @Override
