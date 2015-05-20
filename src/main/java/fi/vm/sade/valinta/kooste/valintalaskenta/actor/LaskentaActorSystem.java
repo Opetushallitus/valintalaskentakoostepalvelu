@@ -9,7 +9,6 @@ import com.google.common.collect.Maps;
 import com.typesafe.config.ConfigFactory;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
@@ -39,13 +38,13 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     private final ActorSystem actorSystem;
     private final ActorRef laskennanKaynnistajaActor;
     private final Map<String, LaskentaActorWrapper> ajossaOlevatLaskennat = Maps.newConcurrentMap();
-    private final LaskentaKaynnistin laskentaKaynnistin;
+    private final LaskentaStarter laskentaStarter;
 
     @Autowired
-    public LaskentaActorSystem(LaskentaSeurantaAsyncResource seurantaAsyncResource, LaskentaKaynnistin laskentaKaynnistin, LaskentaActorFactory laskentaActorFactory,
+    public LaskentaActorSystem(LaskentaSeurantaAsyncResource seurantaAsyncResource, LaskentaStarter laskentaStarter, LaskentaActorFactory laskentaActorFactory,
                                @Value("${valintalaskentakoostepalvelu.maxWorkerCount:8}") int maxWorkers) {
         this.laskentaActorFactory = laskentaActorFactory;
-        this.laskentaKaynnistin = laskentaKaynnistin;
+        this.laskentaStarter = laskentaStarter;
         this.seurantaAsyncResource = seurantaAsyncResource;
         this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
         laskennanKaynnistajaActor = actorSystem.actorOf(props(this, maxWorkers));
@@ -89,7 +88,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
             laskennanKaynnistajaActor.tell(new NoWorkAvailable(), ActorRef.noSender());
         } else {
             LOG.info("Luodaan ja aloitetaan Laskenta uuid:lle {}", uuid);
-            laskentaKaynnistin.haeLaskentaParams(uuid, params -> luoJaKaynnistaLaskenta(uuid, params.getHakuOid(), params.isOsittainen(), laskentaActorFactory.createLaskentaActor(this, params)));
+            laskentaStarter.haeLaskentaParams(uuid, params -> luoJaKaynnistaLaskenta(uuid, params.getHakuOid(), params.isOsittainen(), laskentaActorFactory.createLaskentaActor(this, params)));
         }
     }
 

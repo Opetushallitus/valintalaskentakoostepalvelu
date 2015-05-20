@@ -1,9 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
-import akka.actor.ActorContext;
 import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.TypedActor;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
@@ -42,7 +39,7 @@ public class LaskentaActorSystemTest {
     private final ApplicationAsyncResource applicationAsyncResource;
     private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
     private final LaskentaActorFactory laskentaActorFactory;
-    private final LaskentaKaynnistin LaskentaKaynnistin;
+    private final LaskentaStarter LaskentaStarter;
 
     private final OhjausparametritAsyncResource ohjausparametritAsyncResource;
 
@@ -54,8 +51,8 @@ public class LaskentaActorSystemTest {
         this.suoritusrekisteriAsyncResource = mock(SuoritusrekisteriAsyncResource.class);
         this.ohjausparametritAsyncResource = mock(OhjausparametritAsyncResource.class);
         this.laskentaActorFactory = spy(new LaskentaActorFactory(valintalaskentaAsyncResource, applicationAsyncResource, valintaperusteetAsyncResource, seurantaAsyncResource, suoritusrekisteriAsyncResource));
-        this.LaskentaKaynnistin = spy(new LaskentaKaynnistin(ohjausparametritAsyncResource, valintaperusteetAsyncResource, seurantaAsyncResource));
-        laskentaActorSystem = spy(new LaskentaActorSystem(seurantaAsyncResource, LaskentaKaynnistin, laskentaActorFactory, 8));
+        this.LaskentaStarter = spy(new LaskentaStarter(ohjausparametritAsyncResource, valintaperusteetAsyncResource, seurantaAsyncResource));
+        laskentaActorSystem = spy(new LaskentaActorSystem(seurantaAsyncResource, LaskentaStarter, laskentaActorFactory, 8));
     }
 
     @After
@@ -83,7 +80,7 @@ public class LaskentaActorSystemTest {
             String uuid = (String) invocation.getArguments()[0];
             ((Consumer<LaskentaActorParams>) invocation.getArguments()[1]).accept(new LaskentaActorParams(new LaskentaAloitus(uuid, HAKUOID, false, 0, false, new ArrayList<HakukohdeJaOrganisaatio>(), LaskentaTyyppi.HAKUKOHDE), null));
             return null;
-        }).when(LaskentaKaynnistin).haeLaskentaParams(any(), any());
+        }).when(LaskentaStarter).haeLaskentaParams(any(), any());
 
         final Object signal = new Object();
 

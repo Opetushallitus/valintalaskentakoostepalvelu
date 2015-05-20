@@ -25,15 +25,15 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class LaskentaKaynnistin {
-    private static final Logger LOG = LoggerFactory.getLogger(LaskentaKaynnistin.class);
+public class LaskentaStarter {
+    private static final Logger LOG = LoggerFactory.getLogger(LaskentaStarter.class);
 
     private final OhjausparametritAsyncResource ohjausparametritAsyncResource;
     private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     private final LaskentaSeurantaAsyncResource seurantaAsyncResource;
 
     @Autowired
-    public LaskentaKaynnistin(
+    public LaskentaStarter(
             OhjausparametritAsyncResource ohjausparametritAsyncResource,
             ValintaperusteetAsyncResource valintaperusteetAsyncResource,
             LaskentaSeurantaAsyncResource seurantaAsyncResource) {
