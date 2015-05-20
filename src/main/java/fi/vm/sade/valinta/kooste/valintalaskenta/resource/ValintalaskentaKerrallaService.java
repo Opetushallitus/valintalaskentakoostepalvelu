@@ -223,7 +223,7 @@ public class ValintalaskentaKerrallaService {
     private void luoLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
         final List<HakukohdeDto> hakukohdeDtos = filterAndMapTohakukohdeDto(hakukohdeData);
 
-        if (hakukohdeDtos.isEmpty() || hakukohdeDtos.size() == 0) {
+        if (hakukohdeDtos.isEmpty()) {
             LOG.error("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
             callbackResponse.accept(errorResponse("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!"));
             throw new RuntimeException("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
