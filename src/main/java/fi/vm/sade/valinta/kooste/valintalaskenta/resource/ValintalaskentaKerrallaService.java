@@ -178,21 +178,20 @@ public class ValintalaskentaKerrallaService {
         });
     }
 
-    private void kasitteleLaskennanAloitus(
-            final String uuid,
-            final Consumer<String> laskennanAloitus,
-            final Consumer<Response> callbackResponse) {
+    private void kasitteleLaskennanAloitus(final String uuid, final Consumer<String> laskennanAloitus, final Consumer<Response> callbackResponse) {
         if (uuid == null) {
-            LOG.error("Laskentaa ei saatu luotua!");
-            callbackResponse.accept(errorResponse("Laskentaa ei saatu luotua!"));
-            throw new RuntimeException("Laskentaa ei saatu luotua!");
+            String msg = "Laskentaa ei saatu luotua!";
+            LOG.error(msg);
+            callbackResponse.accept(errorResponse(msg));
+            throw new RuntimeException(msg);
         }
         try {
             laskennanAloitus.accept(uuid);
-        } catch (Throwable e) {
-            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe", e);
-            callbackResponse.accept(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
-            throw e;
+        } catch (Throwable t) {
+            String msg = "Laskennan kaynnistamisessa tapahtui odottamaton virhe";
+            LOG.error(msg, t);
+            callbackResponse.accept(errorResponse(msg + " " + t.getMessage()));
+            throw t;
         }
     }
 
@@ -212,15 +211,15 @@ public class ValintalaskentaKerrallaService {
 
     private void validateHakukohdeDtos(Collection<HakukohdeJaOrganisaatio> hakukohdeData, List<HakukohdeDto> hakukohdeDtos, Consumer<Response> callbackResponse) {
         if (hakukohdeDtos.isEmpty()) {
-            LOG.error("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
-            callbackResponse.accept(errorResponse("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!"));
-            throw new RuntimeException("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
+            String msg = "Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!";
+            LOG.error(msg);
+            callbackResponse.accept(errorResponse(msg));
+            throw new RuntimeException(msg);
+        }
+        if (hakukohdeDtos.size() < hakukohdeData.size()) {
+            LOG.warn("Hakukohteita puuttuvien organisaatio-oidien vuoksi filtteroinnin jalkeen {}/{}!", hakukohdeDtos.size(), hakukohdeData.size());
         } else {
-            if (hakukohdeDtos.size() < hakukohdeData.size()) {
-                LOG.warn("Hakukohteita puuttuvien organisaatio-oidien vuoksi filtteroinnin jalkeen {}/{}!", hakukohdeDtos.size(), hakukohdeData.size());
-            } else {
-                LOG.info("Hakukohteita filtteroinnin jalkeen {}/{}!", hakukohdeDtos.size(), hakukohdeData.size());
-            }
+            LOG.info("Hakukohteita filtteroinnin jalkeen {}/{}!", hakukohdeDtos.size(), hakukohdeData.size());
         }
     }
 
