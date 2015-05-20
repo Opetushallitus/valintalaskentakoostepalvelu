@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 final public class LaskennanKaynnistajaActor extends UntypedActor {
-
     private final Logger LOG = LoggerFactory.getLogger(LaskennanKaynnistajaActor.class);
+
     private final LaskentaSupervisor laskentaSupervisor;
     private final int maxWorkers;
     private AtomicInteger workerCount = new AtomicInteger(0);
@@ -26,10 +26,10 @@ final public class LaskennanKaynnistajaActor extends UntypedActor {
     }
 
     @Override
-    public void onReceive(Object message){
+    public void onReceive(Object message) {
         if (WorkAvailable.class.isInstance(message)) {
             process();
-        } else if (WorkerAvailable.class.isInstance(message)){
+        } else if (WorkerAvailable.class.isInstance(message)) {
             workerCount.decrementAndGet();
             process();
         } else if (NoWorkAvailable.class.isInstance(message)) {
