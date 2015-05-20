@@ -39,7 +39,9 @@ final public class LaskennanKaynnistajaActor extends UntypedActor {
 
     void process() {
         LOG.info("Process; maxWorkers: {}, workerCount: {}", maxWorkers, workerCount.get());
-        if (workerCount.getAndIncrement() < maxWorkers) {
+        if (workerCount.get() < maxWorkers) {
+            int numberOfWorkers = workerCount.incrementAndGet();
+            LOG.info("Reserving a new worker, workerCount: {}", numberOfWorkers);
             laskentaSupervisor.haeJaKaynnistaLaskenta();
         }
     }
