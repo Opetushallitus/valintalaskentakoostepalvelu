@@ -30,8 +30,6 @@ public interface LaskentaSeurantaAsyncResource {
 			Consumer<String> callback,
 			Consumer<Throwable> failureCallback);
 
-	void lisaaIlmoitusHakukohteelle(String uuid, String hakukohdeOid, IlmoitusDto ilmoitus);
-
 	void merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila);
 
 	void merkkaaLaskennanTila(String uuid, LaskentaTila tila, HakukohdeTila hakukohdetila);
