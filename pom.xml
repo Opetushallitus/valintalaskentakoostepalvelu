@@ -86,6 +86,12 @@
 			<version>2.3.6</version>
 		</dependency>
 		<dependency>
+			<groupId>com.typesafe.akka</groupId>
+			<artifactId>akka-testkit_2.11</artifactId>
+			<version>2.3.6</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>net.sourceforge.htmlcleaner</groupId>
 			<artifactId>htmlcleaner</artifactId>
 			<version>2.9</version>
