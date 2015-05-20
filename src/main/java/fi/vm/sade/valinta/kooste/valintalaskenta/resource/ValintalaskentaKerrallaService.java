@@ -43,7 +43,7 @@ public class ValintalaskentaKerrallaService {
         kaynnistaLaskenta(
                 laskentaParams.getHakuOid(),
                 laskentaParams.getMaski(),
-                (Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus) -> luoLaskenta(
+                (Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus) -> createLaskenta(
                         hakukohdeOids,
                         laskennanAloitus,
                         laskentaParams,
@@ -64,7 +64,7 @@ public class ValintalaskentaKerrallaService {
                     uuid,
                     (LaskentaDto laskenta) -> kaynnistaLaskenta(
                             laskenta.getHakuOid(),
-                            luoMaskiLaskennanPohjalta(laskenta),
+                            createMaskiFrom(laskenta),
                             (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> laskennanAloitus.accept(laskenta.getUuid()),
                             callbackResponse),
                     (Throwable t) -> {
@@ -102,11 +102,11 @@ public class ValintalaskentaKerrallaService {
         LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
         haunHakukohteet(
                 hakuOid,
-                (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> kasitteleHaunkohteetOids(
-                            haunHakukohteetOids,
-                            maski,
-                            seurantaTunnus,
-                            callbackResponse),
+                (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> notifyWorkIfHakukohdeOidsAvailable(
+                        haunHakukohteetOids,
+                        maski,
+                        seurantaTunnus,
+                        callbackResponse),
                 (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage())));
     }
 
@@ -157,7 +157,7 @@ public class ValintalaskentaKerrallaService {
         }
     }
 
-    private void kasitteleHaunkohteetOids(
+    private void notifyWorkIfHakukohdeOidsAvailable(
             final Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids,
             final Maski maski,
             final BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
@@ -178,7 +178,7 @@ public class ValintalaskentaKerrallaService {
         });
     }
 
-    private void kasitteleLaskennanAloitus(final String uuid, final Consumer<String> laskennanAloitus, final Consumer<Response> callbackResponse) {
+    private void startLaskenta(final String uuid, final Consumer<String> laskentaStarter, final Consumer<Response> callbackResponse) {
         if (uuid == null) {
             String msg = "Laskentaa ei saatu luotua!";
             LOG.error(msg);
@@ -186,7 +186,7 @@ public class ValintalaskentaKerrallaService {
             throw new RuntimeException(msg);
         }
         try {
-            laskennanAloitus.accept(uuid);
+            laskentaStarter.accept(uuid);
         } catch (Throwable t) {
             String msg = "Laskennan kaynnistamisessa tapahtui odottamaton virhe";
             LOG.error(msg, t);
@@ -195,14 +195,14 @@ public class ValintalaskentaKerrallaService {
         }
     }
 
-    private void luoLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
+    private void createLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
         final List<HakukohdeDto> hakukohdeDtos = toHakukohdeDto(hakukohdeData);
         validateHakukohdeDtos(hakukohdeData, hakukohdeDtos, callbackResponse);
 
         seurantaAsyncResource.luoLaskenta(
                 laskentaParams,
                 hakukohdeDtos,
-                (String uuid) -> kasitteleLaskennanAloitus(uuid, laskennanAloitus, callbackResponse),
+                (String uuid) -> startLaskenta(uuid, laskennanAloitus, callbackResponse),
                 (Throwable t) -> {
                     LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen", t);
                     callbackResponse.accept(errorResponse(t.getMessage()));
@@ -231,7 +231,7 @@ public class ValintalaskentaKerrallaService {
         return Response.serverError().entity(errorMessage).build();
     }
 
-    private Maski luoMaskiLaskennanPohjalta(final LaskentaDto laskenta) {
+    private Maski createMaskiFrom(final LaskentaDto laskenta) {
         final List<String> hakukohdeOids = laskenta.getHakukohteet().stream()
                 .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
                 .map(HakukohdeDto::getHakukohdeOid)
