@@ -10,7 +10,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
-import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaHandler;
+import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaStatusExcelHandler;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
@@ -97,8 +97,8 @@ public class LaskentaKerrallaBase {
             return new ValintalaskentaKerrallaResource();
         }
         @Bean
-        public ValintalaskentaKerrallaHandler valintalaskentaKerrallaService() {
-            return new ValintalaskentaKerrallaHandler();
+        public ValintalaskentaKerrallaService valintalaskentaKerrallaService() {
+            return new ValintalaskentaKerrallaService();
         }
         @Bean
         public ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute() {

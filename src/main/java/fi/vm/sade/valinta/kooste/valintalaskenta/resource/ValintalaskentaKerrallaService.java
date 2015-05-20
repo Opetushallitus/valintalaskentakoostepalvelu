@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.valinta.kooste.dto.Vastaus;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
@@ -27,8 +26,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
-public class ValintalaskentaKerrallaHandler {
-    private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaKerrallaHandler.class);
+public class ValintalaskentaKerrallaService {
+    private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaKerrallaService.class);
 
     @Autowired
     private ValintalaskentaKerrallaRouteValvomo valintalaskentaValvomo;
@@ -39,7 +38,7 @@ public class ValintalaskentaKerrallaHandler {
     @Autowired
     private LaskentaSeurantaAsyncResource seurantaAsyncResource;
 
-    public ValintalaskentaKerrallaHandler(){
+    public ValintalaskentaKerrallaService(){
     }
 
     public void kaynnistaLaskentaHaulle(
