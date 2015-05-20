@@ -86,8 +86,10 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
     private void kaynnistaLaskentaJosLaskettavaa(String uuid) {
         if (uuid == null) {
+            LOG.info("Ei laskettavaa");
             laskennanKaynnistajaActor.tell(new NoWorkAvailable(), ActorRef.noSender());
         } else {
+            LOG.info("Luodaan ja aloitetaan Laskenta uuid:lle {}", uuid);
             laskentaKaynnistin.haeLaskentaParams(uuid, params -> luoJaKaynnistaLaskenta(uuid, params.getHakuOid(), params.isOsittainen(), laskentaActorFactory.createLaskentaActor(this, params)));
         }
     }
