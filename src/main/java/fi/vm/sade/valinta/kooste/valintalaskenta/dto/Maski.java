@@ -42,10 +42,6 @@ public class Maski {
 		return hakukohteet != null && !hakukohteet.isEmpty();
 	}
 
-	public Collection<String> getHakukohdeOidsMask() {
-		return hakukohteet;
-	}
-
 	public boolean isBlacklist() {
 		return !whiteList && isMask();
 	}
