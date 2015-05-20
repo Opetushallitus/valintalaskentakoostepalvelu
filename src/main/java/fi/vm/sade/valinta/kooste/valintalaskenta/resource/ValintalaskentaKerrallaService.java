@@ -163,19 +163,15 @@ public class ValintalaskentaKerrallaService {
             final BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
             final Consumer<Response> callbackResponse
     ) {
-        Collection<HakukohdeJaOrganisaatio> oids;
-        if (maski.isMask()) {
-            oids = maski.maskaa(haunHakukohteetOids);
-            if (oids.isEmpty()) {
-                throw new RuntimeException("Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa hakukohteettomasti.");
-            }
+        Collection<HakukohdeJaOrganisaatio> oids = maski.isMask() ? maski.maskaa(haunHakukohteetOids) : haunHakukohteetOids;
+        if (!oids.isEmpty()) {
+            seurantaTunnus.accept(oids, (String uuid) -> {
+                valintalaskentaRoute.workAvailable();
+                callbackResponse.accept(redirectResponse(uuid));
+            });
         } else {
-            oids = haunHakukohteetOids;
+            throw new RuntimeException("Haulla ei ole " + (maski.isMask() ? "maskin jalkeen " : "") + "hakukohteita. Laskentaa ei voida aloittaa. ");
         }
-        seurantaTunnus.accept(oids, (String uuid) -> {
-            valintalaskentaRoute.workAvailable();
-            callbackResponse.accept(redirectResponse(uuid));
-        });
     }
 
     private void startLaskenta(final String uuid, final Consumer<String> laskentaStarter, final Consumer<Response> callbackResponse) {
