@@ -243,8 +243,7 @@ public class ValintalaskentaKerrallaService {
     }
 
     private List<HakukohdeDto> filterAndMapTohakukohdeDto(Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
-        return hakukohdeData
-                .stream()
+        return hakukohdeData.stream()
                 .filter(hk -> {
                     if (hk == null) {
                         LOG.error("Null referenssi hakukohdeOidsien joukossa laskentaa luotaessa!");
