@@ -43,21 +43,21 @@ public class LaskennanKaynnistajaActorTest {
 
     @Test
     public void maxWorkersCanBeInitialized() throws Exception {
-        IntStream.rangeClosed(1, MAX_WORKER_COUNT).forEach(i -> ref.tell(new WorkAvailable(), ActorRef.noSender()));
+        signalWorkAvailableTimes(MAX_WORKER_COUNT);
         assertEquals(MAX_WORKER_COUNT, actor.getWorkerCount());
         verify(laskentaSupervisor, times(MAX_WORKER_COUNT)).haeJaKaynnistaLaskenta();
     }
 
     @Test
     public void maxWorkersCanNotBeExceeded() throws Exception {
-        IntStream.rangeClosed(1, MAX_WORKER_COUNT + 1).forEach(i -> ref.tell(new WorkAvailable(), ActorRef.noSender()));
+        signalWorkAvailableTimes(MAX_WORKER_COUNT + 1);
         assertEquals(MAX_WORKER_COUNT, actor.getWorkerCount());
         verify(laskentaSupervisor, times(MAX_WORKER_COUNT)).haeJaKaynnistaLaskenta();
     }
 
     @Test
     public void startLaskentaWhenWorkerAvailable() {
-        IntStream.rangeClosed(1, MAX_WORKER_COUNT + 1).forEach(i -> ref.tell(new WorkAvailable(), ActorRef.noSender()));
+        signalWorkAvailableTimes(MAX_WORKER_COUNT + 1);
         ref.tell(new WorkerAvailable(), ActorRef.noSender());
         assertEquals(10, actor.getWorkerCount());
         verify(laskentaSupervisor, times(MAX_WORKER_COUNT + 1)).haeJaKaynnistaLaskenta();
@@ -76,5 +76,9 @@ public class LaskennanKaynnistajaActorTest {
         ref.tell(new NoWorkAvailable(), ActorRef.noSender());
         assertEquals(0, actor.getWorkerCount());
         verify(laskentaSupervisor, never()).haeJaKaynnistaLaskenta();
+    }
+
+    private void signalWorkAvailableTimes(int count) {
+        IntStream.rangeClosed(1, count).forEach(i -> ref.tell(new WorkAvailable(), ActorRef.noSender()));
     }
 }
