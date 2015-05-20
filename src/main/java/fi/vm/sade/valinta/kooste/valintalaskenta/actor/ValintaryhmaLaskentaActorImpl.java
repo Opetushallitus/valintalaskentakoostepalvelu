@@ -102,7 +102,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
         return valmis.getAndSet(true);
     }
 
-    public void aloita() {
+    public void start() {
         uudetPalvelukutsutKayntiin();
     }
 

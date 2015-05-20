@@ -80,7 +80,7 @@ public class LaskentaActorSystemTest {
             String uuid = (String) invocation.getArguments()[0];
             ((Consumer<LaskentaActorParams>) invocation.getArguments()[1]).accept(new LaskentaActorParams(new LaskentaAloitus(uuid, HAKUOID, false, 0, false, new ArrayList<HakukohdeJaOrganisaatio>(), LaskentaTyyppi.HAKUKOHDE), null));
             return null;
-        }).when(LaskentaStarter).haeLaskentaParams(any(), any());
+        }).when(LaskentaStarter).fetchLaskentaParams(any(), any());
 
         final Object signal = new Object();
 
@@ -104,7 +104,7 @@ public class LaskentaActorSystemTest {
     @Test
     public void testaaActorSupervisor() throws Exception {
         LOG.info("Ajossa olevat laskennat nyt {}", laskentaActorSystem.ajossaOlevatLaskennat());
-        laskentaActorSystem.luoJaKaynnistaLaskenta(UUID, HAKUOID, false, create(UUID, laskentaActorSystem));
+        laskentaActorSystem.createAndStartLaskenta(UUID, HAKUOID, false, create(UUID, laskentaActorSystem));
 
         LOG.info("Ajossa olevat laskennat nyt {}", laskentaActorSystem.ajossaOlevatLaskennat());
         laskentaActorSystem.valmis(UUID);
@@ -124,7 +124,7 @@ public class LaskentaActorSystemTest {
             private AtomicReference<ActorRef> refinery = new AtomicReference<>();
             private LaskentaSupervisor laskentaSupervisor = supervisor;
 
-            public void aloita() {
+            public void start() {
                 AtomicInteger c = new AtomicInteger(3);
                 final Consumer<Void> takaisinkutsu = k -> {
                     if (0 == c.decrementAndGet()) {

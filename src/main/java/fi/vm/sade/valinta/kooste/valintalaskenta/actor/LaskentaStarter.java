@@ -42,7 +42,7 @@ public class LaskentaStarter {
         this.seurantaAsyncResource = seurantaAsyncResource;
     }
 
-    public void haeLaskentaParams(final String uuid, final Consumer<LaskentaActorParams> actorParamsCallback) {
+    public void fetchLaskentaParams(final String uuid, final Consumer<LaskentaActorParams> actorParamsCallback) {
         seurantaAsyncResource.laskenta(
                 uuid,
                 (LaskentaDto laskenta) -> haunHakukohteet(laskenta, actorParamsCallback),

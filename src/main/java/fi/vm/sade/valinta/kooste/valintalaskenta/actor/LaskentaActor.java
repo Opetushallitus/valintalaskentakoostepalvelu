@@ -13,7 +13,7 @@ public interface LaskentaActor extends TypedActor.PostStop {
 
 	boolean isValmis();
 
-	void aloita();
+	void start();
 
 	void lopeta();
 

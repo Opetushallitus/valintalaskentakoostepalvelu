@@ -37,7 +37,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     private final LaskentaSeurantaAsyncResource seurantaAsyncResource;
     private final ActorSystem actorSystem;
     private final ActorRef laskennanKaynnistajaActor;
-    private final Map<String, LaskentaActorWrapper> ajossaOlevatLaskennat = Maps.newConcurrentMap();
+    private final Map<String, LaskentaActorWrapper> runningLaskentas = Maps.newConcurrentMap();
     private final LaskentaStarter laskentaStarter;
 
     @Autowired
@@ -59,65 +59,65 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     @Override
     public void suoritaValintalaskentaKerralla(final ParametritDTO parametritDTO, final LaskentaAloitus laskentaAloitus) {
         LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this, new LaskentaActorParams(laskentaAloitus, parametritDTO));
-        luoJaKaynnistaLaskenta(laskentaAloitus.getUuid(), laskentaAloitus.getHakuOid(), laskentaAloitus.isOsittainenLaskenta(), laskentaActor);
+        createAndStartLaskenta(laskentaAloitus.getUuid(), laskentaAloitus.getHakuOid(), laskentaAloitus.isOsittainenLaskenta(), laskentaActor);
     }
 
     @Override
     public List<Laskenta> ajossaOlevatLaskennat() {
-        return Lists.newArrayList(ajossaOlevatLaskennat.values());
+        return Lists.newArrayList(runningLaskentas.values());
     }
 
     @Override
     public Laskenta haeLaskenta(String uuid) {
-        return ajossaOlevatLaskennat.get(uuid);
+        return runningLaskentas.get(uuid);
     }
 
     @Override
     public void valmis(String uuid) {
         laskennanKaynnistajaActor.tell(new WorkerAvailable(), ActorRef.noSender());
-        lopeta(uuid, ajossaOlevatLaskennat.remove(uuid));
+        stopActor(runningLaskentas.remove(uuid));
     }
 
     public void haeJaKaynnistaLaskenta() {
         seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle(
-                this::kaynnistaLaskentaJosLaskettavaa,
+                this::startLaskentaIfWorkAvailable,
                 (Throwable t) -> { throw new RuntimeException("Laskennan käynnistys epäonnistui", t); });
     }
 
-    private void kaynnistaLaskentaJosLaskettavaa(String uuid) {
+    private void startLaskentaIfWorkAvailable(String uuid) {
         if (uuid == null) {
             LOG.info("Ei laskettavaa");
             laskennanKaynnistajaActor.tell(new NoWorkAvailable(), ActorRef.noSender());
         } else {
             LOG.info("Luodaan ja aloitetaan Laskenta uuid:lle {}", uuid);
-            laskentaStarter.haeLaskentaParams(uuid, params -> luoJaKaynnistaLaskenta(uuid, params.getHakuOid(), params.isOsittainen(), laskentaActorFactory.createLaskentaActor(this, params)));
+            laskentaStarter.fetchLaskentaParams(uuid, params -> createAndStartLaskenta(uuid, params.getHakuOid(), params.isOsittainen(), laskentaActorFactory.createLaskentaActor(this, params)));
         }
     }
 
-    protected void luoJaKaynnistaLaskenta(String uuid, String hakuOid, boolean osittainen, LaskentaActor laskentaActor) {
+    protected void createAndStartLaskenta(String uuid, String hakuOid, boolean osittainen, LaskentaActor laskentaActor) {
         try {
-            laskentaActor.aloita();
+            laskentaActor.start();
         } catch (Exception e) {
             LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid, e);
         }
 
-        ajossaOlevatLaskennat.merge(uuid, new LaskentaActorWrapper(uuid, hakuOid, osittainen, laskentaActor), (LaskentaActorWrapper oldValue, LaskentaActorWrapper value) -> {
+        runningLaskentas.merge(uuid, new LaskentaActorWrapper(uuid, hakuOid, osittainen, laskentaActor), (LaskentaActorWrapper oldValue, LaskentaActorWrapper value) -> {
             LOG.warn("\r\n###\r\n### Laskenta uuid:lle {} haulle {} oli jo kaynnissa! Lopetataan vanha laskenta!\r\n###", uuid, hakuOid);
-            lopeta(uuid, oldValue);
+            stopActor(oldValue);
             return value;
         });
     }
 
-    private void lopeta(String uuid, LaskentaActorWrapper l) {
+    private void stopActor(LaskentaActorWrapper l) {
         if (l != null) {
             try {
                 TypedActor.get(actorSystem).poisonPill(l.laskentaActor());
-                LOG.info("PoisonPill lahetetty onnistuneesti Actorille {}", uuid);
+                LOG.info("PoisonPill lahetetty onnistuneesti Actorille " + l.getUuid());
             } catch (Exception e) {
-                LOG.error("PoisonPill lahetys epaonnistui Actorille {}: {}", uuid, e);
+                LOG.error("PoisonPill lahetys epaonnistui Actorille " + l.getUuid(), e);
             }
         } else {
-            LOG.warn("Yritettiin valmistaa laskentaa {} mutta laskenta ei ollut enaa ajossa!", uuid);
+            LOG.warn("Yritettiin sammuttaa laskenta " + l.getUuid() + ", mutta laskenta ei ollut enaa ajossa!");
         }
     }
 }

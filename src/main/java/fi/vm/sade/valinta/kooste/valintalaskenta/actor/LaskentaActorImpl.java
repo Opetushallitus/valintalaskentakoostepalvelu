@@ -64,10 +64,10 @@ public class LaskentaActorImpl implements LaskentaActor {
                         viimeisteleLaskenta();
                         return;
                     }
-                    aloita();
+                    start();
                 });
             }
-            aloita();
+            start();
         }));
     }
 
@@ -114,7 +114,7 @@ public class LaskentaActorImpl implements LaskentaActor {
         }
     }
 
-    public void aloita() {
+    public void start() {
         strategiat.forEach(PalvelukutsuStrategia::aloitaUusiPalvelukutsu);
         laskentaStrategia.aloitaUusiPalvelukutsu();
     }

@@ -13,13 +13,11 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaat
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.ValintalaskentaSpec;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -79,7 +77,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 null // tyyppi
         );
         LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
-        actor.aloita();
+        actor.start();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.VALMIS));
@@ -136,7 +134,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 null // tyyppi
         );
         LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
-        actor.aloita();
+        actor.start();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
@@ -193,7 +191,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 null // tyyppi
         );
         LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
-        actor.aloita();
+        actor.start();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
@@ -252,7 +250,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         );
         LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
 
-        actor.aloita();
+        actor.start();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.VALMIS));
@@ -311,7 +309,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         );
         LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
 
-        actor.aloita();
+        actor.start();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
@@ -378,7 +376,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         );
         LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
 
-        actor.aloita();
+        actor.start();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.atMost(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
