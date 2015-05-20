@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -144,28 +145,10 @@ public class ValintalaskentaKerrallaService {
             LOG.error("Valintaperusteet palautti tyhjat hakukohdeviitteet haulle {}!", hakuOid);
             throw new NullPointerException("Valintaperusteet palautti tyhjat hakukohdeviitteet!");
         }
-        final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet
-                .stream()
+        final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet.stream()
                 .filter(Objects::nonNull)
-                .filter(h -> {
-                    if (h == null) {
-                        LOG.error("nonNull filteri ei toimi!");
-                        return false;
-                    }
-                    if (h.getOid() == null) {
-                        LOG.error("Hakukohdeviitteen oid oli null haussa {}", hakuOid);
-                        return false;
-                    }
-                    if (h.getTila() == null) {
-                        LOG.error("Hakukohdeviitteen tila oli null hakukohteelle {}", h.getOid());
-                        return false;
-                    }
-                    if (!"JULKAISTU".equals(h.getTila())) {
-                        LOG.warn("Ohitetaan hakukohde {} koska sen tila on {}.", h.getOid(), h.getTila());
-                        return false;
-                    }
-                    return true;
-                })
+                .filter(hakukohdeOid -> hakukohdeOid.getOid() != null)
+                .filter(hakukohdeOid -> hakukohdeOid.getTila().equals("JULKAISTU"))
                 .map(u -> new HakukohdeJaOrganisaatio(u.getOid(), u.getTarjoajaOid()))
                 .collect(Collectors.toList());
         if (haunHakukohdeOidit.isEmpty()) {
@@ -264,7 +247,6 @@ public class ValintalaskentaKerrallaService {
                         .map(hk -> hk.getHakukohdeOid())
                         .collect(Collectors.toList())
         );
-
     }
 
     private List<HakukohdeDto> filterAndMapTohakukohdeDto(Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
