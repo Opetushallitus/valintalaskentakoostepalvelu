@@ -12,7 +12,6 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,6 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -244,23 +242,9 @@ public class ValintalaskentaKerrallaService {
 
     private List<HakukohdeDto> filterAndMapTohakukohdeDto(Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
         return hakukohdeData.stream()
-                .filter(hk -> {
-                    if (hk == null) {
-                        LOG.error("Null referenssi hakukohdeOidsien joukossa laskentaa luotaessa!");
-                        return false;
-                    }
-                    if (hk.getHakukohdeOid() == null) {
-                        LOG.error("HakukohdeOid oli null laskentaa luotaessa! OrganisaatioOid == {}, joten hakukohde ohitetaan!",
-                                hk.getOrganisaatioOid());
-                        return false;
-                    }
-                    if (hk.getOrganisaatioOid() == null) {
-                        LOG.error("OrganisaatioOid oli null laskentaa luotaessa! HakukohdeOid == {}, joten hakukohde ohitetaan!",
-                                hk.getHakukohdeOid());
-                        return false;
-                    }
-                    return true;
-                })
+                .filter(Objects::nonNull)
+                .filter(hk -> hk.getHakukohdeOid() != null)
+                .filter(hk -> hk.getOrganisaatioOid() != null)
                 .map(hk -> new HakukohdeDto(hk.getHakukohdeOid(), hk.getOrganisaatioOid()))
                 .collect(Collectors.toList());
     }
