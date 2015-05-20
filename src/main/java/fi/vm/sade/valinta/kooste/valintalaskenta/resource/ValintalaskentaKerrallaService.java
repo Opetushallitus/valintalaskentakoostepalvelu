@@ -222,7 +222,19 @@ public class ValintalaskentaKerrallaService {
 
     private void luoLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
         final List<HakukohdeDto> hakukohdeDtos = filterAndMapTohakukohdeDto(hakukohdeData);
+        validateHakukohdeDtos(hakukohdeData, hakukohdeDtos, callbackResponse);
 
+        seurantaAsyncResource.luoLaskenta(
+                laskentaParams,
+                hakukohdeDtos,
+                (String uuid) -> kasitteleLaskennanAloitus(uuid, laskennanAloitus, callbackResponse),
+                (Throwable poikkeus) -> {
+                    LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen: {}", poikkeus.getMessage());
+                    callbackResponse.accept(errorResponse(poikkeus.getMessage()));
+                });
+    }
+
+    private void validateHakukohdeDtos(Collection<HakukohdeJaOrganisaatio> hakukohdeData, List<HakukohdeDto> hakukohdeDtos, Consumer<Response> callbackResponse) {
         if (hakukohdeDtos.isEmpty()) {
             LOG.error("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!");
             callbackResponse.accept(errorResponse("Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!"));
@@ -234,14 +246,6 @@ public class ValintalaskentaKerrallaService {
                 LOG.info("Hakukohteita filtteroinnin jalkeen {}/{}!", hakukohdeDtos.size(), hakukohdeData.size());
             }
         }
-        seurantaAsyncResource.luoLaskenta(
-                laskentaParams,
-                hakukohdeDtos,
-                (String uuid) -> kasitteleLaskennanAloitus(uuid, laskennanAloitus, callbackResponse),
-                (Throwable poikkeus) -> {
-                    LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen: {}", poikkeus.getMessage());
-                    callbackResponse.accept(errorResponse(poikkeus.getMessage()));
-                });
     }
 
     private Response redirectResponse(final String target) {
