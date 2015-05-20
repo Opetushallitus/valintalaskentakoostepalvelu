@@ -28,21 +28,29 @@ final public class LaskennanKaynnistajaActor extends UntypedActor {
     @Override
     public void onReceive(Object message) {
         if (WorkAvailable.class.isInstance(message)) {
-            process();
+            startLaskentaIfWorkersAvailable();
         } else if (WorkerAvailable.class.isInstance(message)) {
-            workerCount.decrementAndGet();
-            process();
+            decrementWorkerCount();
+            startLaskentaIfWorkersAvailable();
         } else if (NoWorkAvailable.class.isInstance(message)) {
-            workerCount.decrementAndGet();
+            decrementWorkerCount();
         }
     }
 
-    void process() {
+    private void startLaskentaIfWorkersAvailable() {
         LOG.info("Process; maxWorkers: {}, workerCount: {}", maxWorkers, workerCount.get());
         if (workerCount.get() < maxWorkers) {
             int numberOfWorkers = workerCount.incrementAndGet();
             LOG.info("Reserving a new worker, workerCount: {}", numberOfWorkers);
             laskentaSupervisor.haeJaKaynnistaLaskenta();
         }
+    }
+
+    public int getWorkerCount() {
+        return workerCount.get();
+    }
+
+    private void decrementWorkerCount() {
+        workerCount.updateAndGet(i -> i > 0 ? i - 1 : i);
     }
 }
