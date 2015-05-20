@@ -38,8 +38,7 @@ public class ValintalaskentaKerrallaService {
     @Autowired
     private LaskentaSeurantaAsyncResource seurantaAsyncResource;
 
-    public ValintalaskentaKerrallaService(){
-    }
+    public ValintalaskentaKerrallaService() {}
 
     public void kaynnistaLaskentaHaulle(LaskentaParams laskentaParams, Consumer<Response> callback) {
         kaynnistaLaskenta(
@@ -67,9 +66,7 @@ public class ValintalaskentaKerrallaService {
                     (LaskentaDto laskenta) -> kaynnistaLaskenta(
                             laskenta.getHakuOid(),
                             luoMaskiLaskennanPohjalta(laskenta),
-                            (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> {
-                                laskennanAloitus.accept(laskenta.getUuid());
-                            },
+                            (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> laskennanAloitus.accept(laskenta.getUuid()),
                             callbackResponse),
                     (Throwable t) -> {
                         LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid , t);
@@ -106,13 +103,11 @@ public class ValintalaskentaKerrallaService {
         LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
         haunHakukohteet(
                 hakuOid,
-                (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> {
-                    kasitteleHaunkohteetOids(
+                (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> kasitteleHaunkohteetOids(
                             haunHakukohteetOids,
                             maski,
                             seurantaTunnus,
-                            callbackResponse);
-                },
+                            callbackResponse),
                 (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage())));
     }
 
@@ -267,7 +262,8 @@ public class ValintalaskentaKerrallaService {
                 true,
                 hakukohdeMaski.stream()
                         .map(hk -> hk.getHakukohdeOid())
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList())
+        );
 
     }
 
