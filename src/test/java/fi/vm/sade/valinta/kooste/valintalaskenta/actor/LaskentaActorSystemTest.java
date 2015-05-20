@@ -104,7 +104,10 @@ public class LaskentaActorSystemTest {
     @Test
     public void testaaActorSupervisor() throws Exception {
         LOG.info("Ajossa olevat laskennat nyt {}", laskentaActorSystem.runningLaskentas());
-        laskentaActorSystem.createAndStartLaskenta(UUID, HAKUOID, false, create(UUID, laskentaActorSystem));
+        laskentaActorSystem.createAndStartLaskenta(
+                new LaskentaStartParams(UUID, HAKUOID, false, null, false, null, null),
+                create(UUID, laskentaActorSystem)
+        );
 
         LOG.info("Ajossa olevat laskennat nyt {}", laskentaActorSystem.runningLaskentas());
         laskentaActorSystem.ready(UUID);

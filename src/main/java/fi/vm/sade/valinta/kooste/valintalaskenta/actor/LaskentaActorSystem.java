@@ -59,7 +59,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     @Override
     public void suoritaValintalaskentaKerralla(final ParametritDTO parametritDTO, final LaskentaStartParams laskentaStartParams) {
         LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this, new LaskentaActorParams(laskentaStartParams, parametritDTO));
-        createAndStartLaskenta(laskentaStartParams.getUuid(), laskentaStartParams.getHakuOid(), laskentaStartParams.isOsittainenLaskenta(), laskentaActor);
+        createAndStartLaskenta(laskentaStartParams, laskentaActor);
     }
 
     @Override
@@ -90,18 +90,24 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
             laskennanKaynnistajaActor.tell(new NoWorkAvailable(), ActorRef.noSender());
         } else {
             LOG.info("Luodaan ja aloitetaan Laskenta uuid:lle {}", uuid);
-            laskentaStarter.fetchLaskentaParams(uuid, params -> createAndStartLaskenta(uuid, params.getHakuOid(), params.isOsittainen(), laskentaActorFactory.createLaskentaActor(this, params)));
+            laskentaStarter.fetchLaskentaParams(
+                    uuid,
+                    params -> createAndStartLaskenta(params.getLaskentaStartParams(), laskentaActorFactory.createLaskentaActor(this, params))
+            );
         }
     }
 
-    protected void createAndStartLaskenta(String uuid, String hakuOid, boolean osittainen, LaskentaActor laskentaActor) {
+    protected void createAndStartLaskenta(LaskentaStartParams params, LaskentaActor laskentaActor) {
+        String uuid = params.getUuid();
+        String hakuOid = params.getHakuOid();
+
         try {
             laskentaActor.start();
         } catch (Exception e) {
             LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid, e);
         }
 
-        runningLaskentas.merge(uuid, new LaskentaActorWrapper(uuid, hakuOid, osittainen, laskentaActor), (LaskentaActorWrapper oldValue, LaskentaActorWrapper value) -> {
+        runningLaskentas.merge(uuid, new LaskentaActorWrapper(params, laskentaActor), (LaskentaActorWrapper oldValue, LaskentaActorWrapper value) -> {
             LOG.warn("\r\n###\r\n### Laskenta uuid:lle {} haulle {} oli jo kaynnissa! Lopetataan vanha laskenta!\r\n###", uuid, hakuOid);
             stopActor(oldValue);
             return value;

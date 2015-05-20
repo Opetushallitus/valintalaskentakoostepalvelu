@@ -30,6 +30,10 @@ public class LaskentaActorParams {
         return laskentaStartParams.getHakuOid();
     }
 
+    public LaskentaStartParams getLaskentaStartParams() {
+        return laskentaStartParams;
+    }
+
     public ParametritDTO getParametritDTO() {
         return parametritDTO;
     }

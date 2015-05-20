@@ -2,10 +2,7 @@ package fi.vm.sade.valinta.kooste.laskentakerralla;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.seuranta.dto.*;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import junit.framework.Assert;
@@ -19,8 +16,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.ws.rs.container.AsyncResponse;
