@@ -6,19 +6,18 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaHakijaRivi;
 
+import java.util.Optional;
+
 @Component
 public class KelaHakijaRiviKomponenttiImpl {
 
         private static final Integer KESAKUU = 6;
 
         public TKUVAYHVA luo(KelaHakijaRivi hakija)
-        // @Body HakijaDTO hakija,
-        // @Property("lukuvuosi") Date lukuvuosi,
-        // @Property("poimintapaivamaara") Date poimintapaivamaara)
         {
                 TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
-        builder.setSiirtotunnus(hakija.getSiirtotunnus());
-        builder.setTutkinnontaso1(hakija.getTutkinnontaso());
+                builder.setSiirtotunnus(hakija.getSiirtotunnus());
+                builder.setTutkinnontaso1(hakija.getTutkinnontaso());
                 builder.setOppilaitosnumero(hakija.getOppilaitosnumero());
                 builder.setOrganisaatio(hakija.getOrganisaatio());
                 builder.setHakukohde(hakija.getHakukohde());

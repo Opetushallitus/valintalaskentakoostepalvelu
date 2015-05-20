@@ -112,10 +112,10 @@ public class KelaHaku extends KelaAbstraktiHaku {
 								final String tutkinnontaso = tutkinnontasoSource.getTutkinnontaso(hakukohdeOid);
 								final String siirtotunnus = tutkinnontasoSource.getKoulutusaste(hakukohdeOid);
 
-								valitut.add(new KelaHakijaRivi(siirtotunnus, etunimi, sukunimi,
+								valitut.add(new KelaHakijaRivi(hakemus.getOid(), siirtotunnus, etunimi, sukunimi,
 										henkilotunnus, lukuvuosi, poimintapaivamaara,
 										valintapaivamaara, oppilaitosnumero,
-										organisaatioOid, hakukohdeOid, syntymaaika, tutkinnontaso));
+										organisaatioOid, hakuOid, hakukohdeOid, syntymaaika, tutkinnontaso));
 							});
 		}
 		return valitut;

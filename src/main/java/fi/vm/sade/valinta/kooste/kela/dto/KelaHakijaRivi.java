@@ -9,6 +9,8 @@ import java.util.Date;
  */
 public class KelaHakijaRivi {
 
+	private final String hakemusOid;
+	private final String hakuOid;
 	private final String siirtotunnus;
 	private final String henkilotunnus;
 	private final String etunimi;
@@ -22,10 +24,14 @@ public class KelaHakijaRivi {
 	private final String hakukohde;
 	private final String syntymaaika; // 04.05.1965
 
-	public KelaHakijaRivi(String siirtotunnus, String etunimi, String sukunimi,
+	public KelaHakijaRivi(String hakemusOid, // <- seurattavuuden vuoksi hakemusOid mukaan
+						  String siirtotunnus, String etunimi, String sukunimi,
 			String henkilotunnus, Date lukuvuosi, Date poimintapaivamaara,
-			Date valintapaivamaara, String oppilaitosnumero, String organisaatio, String  hakukohde,
+			Date valintapaivamaara, String oppilaitosnumero, String organisaatio, String haku, // seurattavuuden vuoksi
+						  String  hakukohde,
 			String syntymaaika, String tutkinnontaso) {
+		this.hakemusOid = hakemusOid;
+		this.hakuOid = haku;
 		this.siirtotunnus = siirtotunnus;
 		this.etunimi = etunimi;
 		this.sukunimi = sukunimi;
@@ -38,6 +44,14 @@ public class KelaHakijaRivi {
 		this.hakukohde = hakukohde;
 		this.syntymaaika = syntymaaika;
 		this.tutkinnontaso = tutkinnontaso;
+	}
+
+	public String getHakuOid() {
+		return hakuOid;
+	}
+
+	public String getHakemusOid() {
+		return hakemusOid;
 	}
 
 	public String getSiirtotunnus() {
