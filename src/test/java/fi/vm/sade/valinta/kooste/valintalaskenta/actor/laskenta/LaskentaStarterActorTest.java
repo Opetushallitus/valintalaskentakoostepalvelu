@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import java.util.stream.IntStream;
 
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -23,7 +24,7 @@ public class LaskentaStarterActorTest {
 
     @Before
     public void setUp() {
-        Props props = LaskentaStarterActor.props(laskentaSupervisor, MAX_WORKER_COUNT);
+        Props props = props(laskentaSupervisor, MAX_WORKER_COUNT);
         ActorSystem actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
         this.ref = TestActorRef.create(actorSystem, props, "testA");
         this.actor = ref.underlyingActor();

@@ -10,9 +10,6 @@ import com.typesafe.config.ConfigFactory;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.NoWorkAvailable;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.WorkAvailable;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.WorkerAvailable;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
@@ -26,6 +23,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.*;
 
 /**
  * @author Jussi Jartamo
@@ -49,7 +48,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         this.laskentaKaynnistin = laskentaKaynnistin;
         this.seurantaAsyncResource = seurantaAsyncResource;
         this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
-        laskennanKaynnistajaActor = actorSystem.actorOf(LaskentaStarterActor.props(this, maxWorkers));
+        laskennanKaynnistajaActor = actorSystem.actorOf(props(this, maxWorkers));
     }
 
     @PostConstruct
