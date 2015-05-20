@@ -24,11 +24,7 @@ public interface LaskentaSeurantaAsyncResource {
 
 	void resetoiTilat(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback);
 
-	void luoLaskenta(
-			LaskentaParams laskentaParams,
-			List<HakukohdeDto> hakukohdeOids,
-			Consumer<String> callback,
-			Consumer<Throwable> failureCallback);
+	void luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids, Consumer<String> callback, Consumer<Throwable> failureCallback);
 
 	void merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila);
 
