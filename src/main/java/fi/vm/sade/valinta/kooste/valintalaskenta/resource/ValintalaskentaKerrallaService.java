@@ -197,7 +197,7 @@ public class ValintalaskentaKerrallaService {
     }
 
     private void luoLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
-        final List<HakukohdeDto> hakukohdeDtos = filterAndMapTohakukohdeDto(hakukohdeData);
+        final List<HakukohdeDto> hakukohdeDtos = toHakukohdeDto(hakukohdeData);
         validateHakukohdeDtos(hakukohdeData, hakukohdeDtos, callbackResponse);
 
         seurantaAsyncResource.luoLaskenta(
@@ -240,7 +240,7 @@ public class ValintalaskentaKerrallaService {
         return new Maski(true, hakukohdeOids);
     }
 
-    private List<HakukohdeDto> filterAndMapTohakukohdeDto(Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
+    private List<HakukohdeDto> toHakukohdeDto(Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
         return hakukohdeData.stream()
                 .filter(Objects::nonNull)
                 .filter(hk -> hk.getHakukohdeOid() != null)
