@@ -10,7 +10,7 @@ import com.typesafe.config.ConfigFactory;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 import org.slf4j.Logger;
@@ -57,28 +57,28 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     }
 
     @Override
-    public void suoritaValintalaskentaKerralla(final ParametritDTO parametritDTO, final LaskentaAloitus laskentaAloitus) {
-        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this, new LaskentaActorParams(laskentaAloitus, parametritDTO));
-        createAndStartLaskenta(laskentaAloitus.getUuid(), laskentaAloitus.getHakuOid(), laskentaAloitus.isOsittainenLaskenta(), laskentaActor);
+    public void suoritaValintalaskentaKerralla(final ParametritDTO parametritDTO, final LaskentaStartParams laskentaStartParams) {
+        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this, new LaskentaActorParams(laskentaStartParams, parametritDTO));
+        createAndStartLaskenta(laskentaStartParams.getUuid(), laskentaStartParams.getHakuOid(), laskentaStartParams.isOsittainenLaskenta(), laskentaActor);
     }
 
     @Override
-    public List<Laskenta> ajossaOlevatLaskennat() {
+    public List<Laskenta> runningLaskentas() {
         return Lists.newArrayList(runningLaskentas.values());
     }
 
     @Override
-    public Laskenta haeLaskenta(String uuid) {
+    public Laskenta fetchLaskenta(String uuid) {
         return runningLaskentas.get(uuid);
     }
 
     @Override
-    public void valmis(String uuid) {
+    public void ready(String uuid) {
         laskennanKaynnistajaActor.tell(new WorkerAvailable(), ActorRef.noSender());
         stopActor(runningLaskentas.remove(uuid));
     }
 
-    public void haeJaKaynnistaLaskenta() {
+    public void fetchAndStartLaskenta() {
         seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle(
                 this::startLaskentaIfWorkAvailable,
                 (Throwable t) -> { throw new RuntimeException("Laskennan käynnistys epäonnistui", t); });

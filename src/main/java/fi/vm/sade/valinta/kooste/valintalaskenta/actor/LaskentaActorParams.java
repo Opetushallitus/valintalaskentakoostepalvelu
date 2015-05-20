@@ -2,33 +2,32 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class LaskentaActorParams {
     private static final Integer HAE_KAIKKI_VALINNANVAIHEET = -1;
 
-    private final LaskentaAloitus laskentaAloitus;
+    private final LaskentaStartParams laskentaStartParams;
     private final ParametritDTO parametritDTO;
     private final Collection<HakukohdeJaOrganisaatio> hakukohdeOids;
 
-    public LaskentaActorParams(LaskentaAloitus laskentaAloitus, ParametritDTO parametritDTO) {
-        this.laskentaAloitus = laskentaAloitus;
+    public LaskentaActorParams(LaskentaStartParams laskentaStartParams, ParametritDTO parametritDTO) {
+        this.laskentaStartParams = laskentaStartParams;
         this.parametritDTO = parametritDTO;
-        this.hakukohdeOids = laskentaAloitus.getHakukohdeDtos().stream()
+        this.hakukohdeOids = laskentaStartParams.getHakukohdeDtos().stream()
                 .map(hk -> new HakukohdeJaOrganisaatio(hk.getHakukohdeOid(), hk.getOrganisaatioOid()))
                 .collect(Collectors.toList());
     }
 
     public String getUuid() {
-        return laskentaAloitus.getUuid();
+        return laskentaStartParams.getUuid();
     }
 
     public String getHakuOid() {
-        return laskentaAloitus.getHakuOid();
+        return laskentaStartParams.getHakuOid();
     }
 
     public ParametritDTO getParametritDTO() {
@@ -36,22 +35,22 @@ public class LaskentaActorParams {
     }
 
     public boolean isErillishaku() {
-        return laskentaAloitus.isErillishaku();
+        return laskentaStartParams.isErillishaku();
     }
 
     public Boolean isValintakoelaskenta() {
-        return laskentaAloitus.getValintakoelaskenta();
+        return laskentaStartParams.getValintakoelaskenta();
     }
 
     public boolean isOsittainen(){
-        return laskentaAloitus.isOsittainenLaskenta();
+        return laskentaStartParams.isOsittainenLaskenta();
     }
 
     /**
      * Tilapainen workaround resurssin valinnanvaiheen normalisointiin.
      */
     public Integer getValinnanvaihe() {
-        return HAE_KAIKKI_VALINNANVAIHEET.equals(laskentaAloitus.getValinnanvaihe()) ? null : laskentaAloitus.getValinnanvaihe();
+        return HAE_KAIKKI_VALINNANVAIHEET.equals(laskentaStartParams.getValinnanvaihe()) ? null : laskentaStartParams.getValinnanvaihe();
     }
 
     public Collection<HakukohdeJaOrganisaatio> getHakukohdeOids() {
@@ -62,13 +61,13 @@ public class LaskentaActorParams {
      * Tilapainen workaround resurssin valinnanvaiheen normalisointiin.
      */
     public LaskentaTyyppi getLaskentaTyyppi() {
-        if (fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi.VALINTARYHMA.equals(laskentaAloitus.getTyyppi())) {
+        if (fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi.VALINTARYHMA.equals(laskentaStartParams.getTyyppi())) {
             return LaskentaTyyppi.VALINTARYHMALASKENTA;
         }
-        if (Boolean.TRUE.equals(laskentaAloitus.getValintakoelaskenta())) {
+        if (Boolean.TRUE.equals(laskentaStartParams.getValintakoelaskenta())) {
             return LaskentaTyyppi.VALINTAKOELASKENTA;
         } else {
-            if (laskentaAloitus.getValinnanvaihe() == null) {
+            if (laskentaStartParams.getValinnanvaihe() == null) {
                 return LaskentaTyyppi.KAIKKI;
             } else {
                 return LaskentaTyyppi.VALINTALASKENTA;

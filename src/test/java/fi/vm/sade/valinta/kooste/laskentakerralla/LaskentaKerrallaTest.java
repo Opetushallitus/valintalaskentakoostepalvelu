@@ -47,7 +47,7 @@ public class LaskentaKerrallaTest extends LaskentaKerrallaBase {
                 signal.notify();
             }
             return null;
-        }).when(laskentaActorSystem).valmis(any());
+        }).when(laskentaActorSystem).ready(any());
 
         valintalaskentaKerralla.valintalaskentaHaulle(
             HAKU_OID,

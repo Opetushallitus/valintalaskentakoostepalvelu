@@ -17,7 +17,7 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
  * @author Jussi Jartamo
  * 
  */
-public class LaskentaAloitus implements LaskentaInfo {
+public class LaskentaStartParams implements LaskentaInfo {
 	private final static String NIMI_FORMAT = "Laskenta hakuOid(%s) uuid(%s) hakukohteita(%s/%s)";
 	private final String uuid;
 	private final String hakuOid;
@@ -31,7 +31,7 @@ public class LaskentaAloitus implements LaskentaInfo {
 	private final Collection<HakukohdeJaOrganisaatio> hakukohdeDtos;
 	private final LaskentaTyyppi tyyppi;
 
-	public LaskentaAloitus(
+	public LaskentaStartParams(
 			String uuid,
 			String hakuOid,
 			boolean erillishaku,
@@ -51,7 +51,7 @@ public class LaskentaAloitus implements LaskentaInfo {
 		this.erillishaku = erillishaku;
 	}
 
-	public LaskentaAloitus(
+	public LaskentaStartParams(
 			String uuid,
 			String hakuOid,
 			boolean erillishaku,

@@ -107,7 +107,7 @@ public class LaskentaActorImpl implements LaskentaActor {
             LOG.error("\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta kayttoliittymaa ei saatu paivitettya!\r\n####", hakukohdeLaskuri.getYhteensa(), hakuOid);
         }
         try {
-            laskentaSupervisor.valmis(uuid);
+            laskentaSupervisor.ready(uuid);
             LOG.info("\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} uuid:lle {}!\r\n####", hakukohdeLaskuri.getYhteensa(), hakuOid, uuid);
         } catch (Exception e) {
             LOG.error("\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta Actoria ei saatu pysaytettya {}!\r\n####", hakukohdeLaskuri.getYhteensa(), hakuOid, uuid);
@@ -138,7 +138,7 @@ public class LaskentaActorImpl implements LaskentaActor {
             LOG.error("Virhe {}", e.getMessage());
         }
         try {
-            laskentaSupervisor.valmis(uuid);
+            laskentaSupervisor.ready(uuid);
         } catch (Exception e) {
             LOG.error("Virhe {}", e.getMessage());
         }

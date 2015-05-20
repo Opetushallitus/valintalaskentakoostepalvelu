@@ -117,7 +117,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 
     public void viimeistele() {
         LOG.info("\r\n####\r\n#### Valintaryhmälaskenta on paattynyt haussa {} uuid:lle {}!\r\n####", hakuOid, uuid);
-        laskentaSupervisor.valmis(uuid);
+        laskentaSupervisor.ready(uuid);
     }
 
     public void lopeta() {

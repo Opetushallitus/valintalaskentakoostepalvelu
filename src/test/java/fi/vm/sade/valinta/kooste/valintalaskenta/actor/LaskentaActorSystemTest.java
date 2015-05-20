@@ -8,7 +8,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.Suoritusrek
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import org.junit.After;
 import org.junit.Test;
@@ -78,7 +78,7 @@ public class LaskentaActorSystemTest {
         ).when(laskentaActorFactory).createLaskentaActor(any(), any());
         doAnswer(invocation -> {
             String uuid = (String) invocation.getArguments()[0];
-            ((Consumer<LaskentaActorParams>) invocation.getArguments()[1]).accept(new LaskentaActorParams(new LaskentaAloitus(uuid, HAKUOID, false, 0, false, new ArrayList<HakukohdeJaOrganisaatio>(), LaskentaTyyppi.HAKUKOHDE), null));
+            ((Consumer<LaskentaActorParams>) invocation.getArguments()[1]).accept(new LaskentaActorParams(new LaskentaStartParams(uuid, HAKUOID, false, 0, false, new ArrayList<HakukohdeJaOrganisaatio>(), LaskentaTyyppi.HAKUKOHDE), null));
             return null;
         }).when(LaskentaStarter).fetchLaskentaParams(any(), any());
 
@@ -89,25 +89,25 @@ public class LaskentaActorSystemTest {
                 signal.notify();
             }
             return null;
-        }).when(laskentaActorSystem).valmis("1.2.3");
+        }).when(laskentaActorSystem).ready("1.2.3");
 
         
         laskentaActorSystem.workAvailable();
         synchronized (signal) {
             signal.wait(10000);
         }
-        verify(laskentaActorSystem).valmis("1.2.1");
-        verify(laskentaActorSystem).valmis("1.2.2");
-        verify(laskentaActorSystem).valmis("1.2.3");
+        verify(laskentaActorSystem).ready("1.2.1");
+        verify(laskentaActorSystem).ready("1.2.2");
+        verify(laskentaActorSystem).ready("1.2.3");
     }
 
     @Test
     public void testaaActorSupervisor() throws Exception {
-        LOG.info("Ajossa olevat laskennat nyt {}", laskentaActorSystem.ajossaOlevatLaskennat());
+        LOG.info("Ajossa olevat laskennat nyt {}", laskentaActorSystem.runningLaskentas());
         laskentaActorSystem.createAndStartLaskenta(UUID, HAKUOID, false, create(UUID, laskentaActorSystem));
 
-        LOG.info("Ajossa olevat laskennat nyt {}", laskentaActorSystem.ajossaOlevatLaskennat());
-        laskentaActorSystem.valmis(UUID);
+        LOG.info("Ajossa olevat laskennat nyt {}", laskentaActorSystem.runningLaskentas());
+        laskentaActorSystem.ready(UUID);
     }
 
     private LaskentaActor create(final String laskentaUuid, final LaskentaSupervisor supervisor) {
@@ -131,7 +131,7 @@ public class LaskentaActorSystemTest {
                         valmis = true;
                         LOG.error("Actor: Valmis!");
                         LOG.error("Actor: Self! {}", refinery.get());
-                        laskentaSupervisor.valmis(getUuid());
+                        laskentaSupervisor.ready(getUuid());
 
                         try {
                             t.stop();
@@ -154,7 +154,7 @@ public class LaskentaActorSystemTest {
 
             public void lopeta() {
                 LOG.error("Actor: Lopeta!");
-                supervisor.valmis(getUuid());
+                supervisor.ready(getUuid());
             }
 
             public boolean isValmis() {

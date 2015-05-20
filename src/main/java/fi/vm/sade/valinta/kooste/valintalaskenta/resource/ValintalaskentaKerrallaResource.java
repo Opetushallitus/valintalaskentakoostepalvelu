@@ -4,7 +4,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
@@ -108,7 +108,7 @@ public class ValintalaskentaKerrallaResource {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
     public List<Laskenta> status() {
-        return valintalaskentaValvomo.ajossaOlevatLaskennat();
+        return valintalaskentaValvomo.runningLaskentas();
     }
 
     @GET
@@ -117,7 +117,7 @@ public class ValintalaskentaKerrallaResource {
     @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
     public Laskenta status(@PathParam("uuid") String uuid) {
         try {
-            return valintalaskentaValvomo.haeLaskenta(uuid);
+            return valintalaskentaValvomo.fetchLaskenta(uuid);
         } catch (Exception e) {
             LOG.error("Valintalaskennan statuksen luku heitti poikkeuksen! {}", e.getMessage());
             return null;
@@ -127,7 +127,7 @@ public class ValintalaskentaKerrallaResource {
     @GET
     @Path("/status/{uuid}/xls")
     @Produces("application/vnd.ms-excel")
-    @ApiOperation(value = "Valintalaskennan tila", response = LaskentaAloitus.class)
+    @ApiOperation(value = "Valintalaskennan tila", response = LaskentaStartParams.class)
     public void statusXls(@PathParam("uuid") final String uuid, @Suspended final AsyncResponse asyncResponse) {
         asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> asyncResponseTimeout.resume(valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid)));
@@ -146,7 +146,7 @@ public class ValintalaskentaKerrallaResource {
         if (uuid == null) {
             return errorResponce("Uuid on pakollinen");
         }
-        final Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
+        final Laskenta l = valintalaskentaValvomo.fetchLaskenta(uuid);
         if (l != null) {
             l.lopeta();
             seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);

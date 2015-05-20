@@ -9,7 +9,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 public class LaskentaJaHakukohde {
 
 	private final static String NIMI_FORMAT = "hakukohdeOid(%s) %s";
-	private final LaskentaAloitus laskenta;
+	private final LaskentaStartParams laskenta;
 	private final String hakukohdeOid;
 	private volatile boolean luovutus = false;
 	private volatile boolean valmistui = false; // jos tyo esim valmistuu koska
@@ -17,7 +17,7 @@ public class LaskentaJaHakukohde {
 												// valintaperusteita ei haeta
 												// suotta
 
-	public LaskentaJaHakukohde(LaskentaAloitus laskenta, String hakukohdeOid) {
+	public LaskentaJaHakukohde(LaskentaStartParams laskenta, String hakukohdeOid) {
 		this.laskenta = laskenta;
 		this.hakukohdeOid = hakukohdeOid;
 	}
@@ -42,7 +42,7 @@ public class LaskentaJaHakukohde {
 		return hakukohdeOid;
 	}
 
-	public LaskentaAloitus getLaskenta() {
+	public LaskentaStartParams getLaskenta() {
 		return laskenta;
 	}
 

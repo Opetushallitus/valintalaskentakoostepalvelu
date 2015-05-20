@@ -10,7 +10,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.ValintalaskentaSpec;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import junit.framework.Assert;
@@ -67,7 +67,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 suoritusrekisteriAsyncResource
         );
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1));
-        LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
+        LaskentaStartParams laskentaStartParams = new LaskentaStartParams(
                 UUID1,
                 HAKUOID1,
                 false,
@@ -76,7 +76,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaStartParams, null));
         actor.start();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
@@ -124,7 +124,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1));
-        LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
+        LaskentaStartParams laskentaStartParams = new LaskentaStartParams(
                 UUID1,
                 HAKUOID1,
                 false,
@@ -133,7 +133,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaStartParams, null));
         actor.start();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
@@ -181,7 +181,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1));
-        LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
+        LaskentaStartParams laskentaStartParams = new LaskentaStartParams(
                 UUID1,
                 HAKUOID1,
                 false,
@@ -190,7 +190,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaStartParams, null));
         actor.start();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
@@ -239,7 +239,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1), new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1));
-        LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
+        LaskentaStartParams laskentaStartParams = new LaskentaStartParams(
                 UUID1,
                 HAKUOID1,
                 false,
@@ -248,7 +248,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaStartParams, null));
 
         actor.start();
         Assert.assertTrue(actor.isValmis());
@@ -298,7 +298,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1), new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1));
-        LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
+        LaskentaStartParams laskentaStartParams = new LaskentaStartParams(
                 UUID1,
                 HAKUOID1,
                 false,
@@ -307,7 +307,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaStartParams, null));
 
         actor.start();
         Assert.assertTrue(actor.isValmis());
@@ -365,7 +365,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         );
 
         List<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatios = Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1), new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1));
-        LaskentaAloitus laskentaAloitus = new LaskentaAloitus(
+        LaskentaStartParams laskentaStartParams = new LaskentaStartParams(
                 UUID1,
                 HAKUOID1,
                 false,
@@ -374,7 +374,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaAloitus, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaStartParams, null));
 
         actor.start();
         Assert.assertTrue(actor.isValmis());

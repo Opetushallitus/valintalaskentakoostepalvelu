@@ -55,7 +55,7 @@ public class ValintalaskentaKerrallaService {
 
     public void kaynnistaLaskentaUudelleen(final String uuid, final Consumer<Response> callbackResponse) {
         try {
-            final Laskenta l = valintalaskentaValvomo.haeLaskenta(uuid);
+            final Laskenta l = valintalaskentaValvomo.fetchLaskenta(uuid);
             if (l != null && !l.isValmis()) {
                 LOG.warn("Laskenta {} on viela ajossa, joten palautetaan linkki siihen.", uuid);
                 callbackResponse.accept(redirectResponse(uuid));
@@ -112,7 +112,7 @@ public class ValintalaskentaKerrallaService {
 
     private Optional<Laskenta> haeAjossaOlevaLaskentaHaulle(final String hakuOid) {
         return valintalaskentaValvomo
-                .ajossaOlevatLaskennat()
+                .runningLaskentas()
                 .stream()
                         // Tama haku ... ja koko haun laskennasta on kyse
                 .filter(l -> hakuOid.equals(l.getHakuOid()) && !l.isOsittainenLaskenta())

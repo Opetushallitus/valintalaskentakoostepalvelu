@@ -5,7 +5,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.Ohjausparame
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
@@ -71,7 +71,7 @@ public class LaskentaStarter {
         ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametrit -> {
                         actorParamsCallback.accept(
                                 new LaskentaActorParams(
-                                        new LaskentaAloitus(
+                                        new LaskentaStartParams(
                                                 laskenta.getUuid(),
                                                 hakuOid,
                                                 laskenta.isErillishaku(),

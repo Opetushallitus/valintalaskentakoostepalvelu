@@ -34,7 +34,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
@@ -73,7 +73,7 @@ public class ValintalaskentaTest {
 		), 8);
 
 		ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute = laskentaActorSystem;
-		LaskentaAloitus laskentaJaHaku = new LaskentaAloitus(uuid, hakuOid,false,
+		LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(uuid, hakuOid,false,
 				null, null, hakukohdeOids, LaskentaTyyppi.HAKUKOHDE);
 		valintalaskentaKerrallaRoute
 				.suoritaValintalaskentaKerralla(null, laskentaJaHaku);
