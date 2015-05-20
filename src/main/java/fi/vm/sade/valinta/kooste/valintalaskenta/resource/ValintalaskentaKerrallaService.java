@@ -235,18 +235,11 @@ public class ValintalaskentaKerrallaService {
     }
 
     private Maski luoMaskiLaskennanPohjalta(final LaskentaDto laskenta) {
-        final List<HakukohdeJaOrganisaatio> hakukohdeMaski = laskenta
-                .getHakukohteet()
-                .stream()
+        final List<String> hakukohdeOids = laskenta.getHakukohteet().stream()
                 .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
-                .map(h -> new HakukohdeJaOrganisaatio(h.getHakukohdeOid(), h.getOrganisaatioOid()))
+                .map(HakukohdeDto::getHakukohdeOid)
                 .collect(Collectors.toList());
-        return new Maski(
-                true,
-                hakukohdeMaski.stream()
-                        .map(hk -> hk.getHakukohdeOid())
-                        .collect(Collectors.toList())
-        );
+        return new Maski(true, hakukohdeOids);
     }
 
     private List<HakukohdeDto> filterAndMapTohakukohdeDto(Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
