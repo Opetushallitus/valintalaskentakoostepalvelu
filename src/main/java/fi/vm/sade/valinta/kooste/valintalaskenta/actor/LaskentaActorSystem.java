@@ -79,7 +79,9 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     }
 
     public void haeJaKaynnistaLaskenta() {
-        seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle(this::kaynnistaLaskentaJosLaskettavaa, (Throwable t) -> {});
+        seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle(
+                this::kaynnistaLaskentaJosLaskettavaa,
+                (Throwable t) -> { throw new RuntimeException("Laskennan käynnistys epäonnistui", t); });
     }
 
     private void kaynnistaLaskentaJosLaskettavaa(String uuid) {
