@@ -145,17 +145,17 @@ public class ValintalaskentaKerrallaService {
             LOG.error("Valintaperusteet palautti tyhjat hakukohdeviitteet haulle {}!", hakuOid);
             throw new NullPointerException("Valintaperusteet palautti tyhjat hakukohdeviitteet!");
         }
-        final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet.stream()
+        final List<HakukohdeJaOrganisaatio> haunHakukohdeOids = hakukohdeViitteet.stream()
                 .filter(Objects::nonNull)
                 .filter(hakukohdeOid -> hakukohdeOid.getOid() != null)
                 .filter(hakukohdeOid -> hakukohdeOid.getTila().equals("JULKAISTU"))
                 .map(u -> new HakukohdeJaOrganisaatio(u.getOid(), u.getTarjoajaOid()))
                 .collect(Collectors.toList());
-        if (haunHakukohdeOidit.isEmpty()) {
+        if (haunHakukohdeOids.isEmpty()) {
             LOG.error("Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", hakuOid);
             failureCallback.accept(new RuntimeException("Haulla " + hakuOid + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?"));
         } else {
-            hakukohdeJaOrganisaatioKasittelijaCallback.accept(haunHakukohdeOidit);
+            hakukohdeJaOrganisaatioKasittelijaCallback.accept(haunHakukohdeOids);
         }
     }
 
