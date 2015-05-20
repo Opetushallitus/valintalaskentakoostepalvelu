@@ -98,7 +98,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         try {
             laskentaActor.aloita();
         } catch (Exception e) {
-            LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid);
+            LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid, e);
         }
 
         ajossaOlevatLaskennat.merge(uuid, new LaskentaActorWrapper(uuid, hakuOid, osittainen, laskentaActor), (LaskentaActorWrapper oldValue, LaskentaActorWrapper value) -> {
@@ -114,7 +114,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
                 TypedActor.get(actorSystem).poisonPill(l.laskentaActor());
                 LOG.info("PoisonPill lahetetty onnistuneesti Actorille {}", uuid);
             } catch (Exception e) {
-                LOG.error("PoisonPill lahetys epaonnistui Actorille {}: {}", uuid, e.getMessage());
+                LOG.error("PoisonPill lahetys epaonnistui Actorille {}: {}", uuid, e);
             }
         } else {
             LOG.warn("Yritettiin valmistaa laskentaa {} mutta laskenta ei ollut enaa ajossa!", uuid);
