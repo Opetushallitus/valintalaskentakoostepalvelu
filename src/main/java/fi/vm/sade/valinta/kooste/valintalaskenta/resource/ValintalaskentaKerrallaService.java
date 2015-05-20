@@ -72,13 +72,13 @@ public class ValintalaskentaKerrallaService {
                             },
                             callbackResponse),
                     (Throwable t) -> {
-                        LOG.error("Uudelleen ajo laskennalle heitti poikkeuksen {}:\r\n{}", t.getMessage(), Arrays.toString(t.getStackTrace()));
+                        LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid , t);
                         callbackResponse.accept(errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
                     });
-        } catch (Throwable e) {
-            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
-            callbackResponse.accept(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
-            throw e;
+        } catch (Throwable t) {
+            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe", t);
+            callbackResponse.accept(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + t.getMessage()));
+            throw t;
         }
     }
 
@@ -214,7 +214,7 @@ public class ValintalaskentaKerrallaService {
         try {
             laskennanAloitus.accept(uuid);
         } catch (Throwable e) {
-            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
+            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe", e);
             callbackResponse.accept(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
             throw e;
         }
@@ -228,9 +228,9 @@ public class ValintalaskentaKerrallaService {
                 laskentaParams,
                 hakukohdeDtos,
                 (String uuid) -> kasitteleLaskennanAloitus(uuid, laskennanAloitus, callbackResponse),
-                (Throwable poikkeus) -> {
-                    LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen: {}", poikkeus.getMessage());
-                    callbackResponse.accept(errorResponse(poikkeus.getMessage()));
+                (Throwable t) -> {
+                    LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen", t);
+                    callbackResponse.accept(errorResponse(t.getMessage()));
                 });
     }
 
