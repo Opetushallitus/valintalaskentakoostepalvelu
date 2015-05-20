@@ -41,29 +41,18 @@ public class ValintalaskentaKerrallaService {
     public ValintalaskentaKerrallaService(){
     }
 
-    public void kaynnistaLaskentaHaulle(
-            final LaskentaTyyppi laskentatyyppi,
-            final Boolean isValintakoelaskenta,
-            final Integer valinnanvaihe,
-            final String hakuOid,
-            final Maski maski,
-            final boolean isErillishaku,
-            final Consumer<Response> callbackResponse) {
+    public void kaynnistaLaskentaHaulle(LaskentaParams laskentaParams, Consumer<Response> callback) {
         kaynnistaLaskenta(
-                hakuOid,
-                maski,
-                (Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus) -> {
-                    luoLaskenta(
-                            hakukohdeOids,
-                            laskennanAloitus,
-                            hakuOid,
-                            laskentatyyppi,
-                            isErillishaku,
-                            valinnanvaihe,
-                            isValintakoelaskenta,
-                            callbackResponse);
-                },
-                callbackResponse);
+                laskentaParams.getHakuOid(),
+                laskentaParams.getMaski(),
+                (Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus) -> luoLaskenta(
+                        hakukohdeOids,
+                        laskennanAloitus,
+                        laskentaParams,
+                        callback
+                ),
+                callback
+        );
     }
 
     public void kaynnistaLaskentaUudelleen(final String uuid, final Consumer<Response> callbackResponse) {
@@ -231,7 +220,7 @@ public class ValintalaskentaKerrallaService {
         }
     }
 
-    private void luoLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, String hakuOid, LaskentaTyyppi laskentatyyppi, boolean isErillishaku, Integer valinnanvaihe, Boolean isValintakoelaskenta, Consumer<Response> callbackResponse) {
+    private void luoLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
         final List<HakukohdeDto> hakukohdeDtos = filterAndMapTohakukohdeDto(hakukohdeData);
 
         if (hakukohdeDtos.isEmpty() || hakukohdeDtos.size() == 0) {
@@ -246,11 +235,7 @@ public class ValintalaskentaKerrallaService {
             }
         }
         seurantaAsyncResource.luoLaskenta(
-                hakuOid,
-                laskentatyyppi,
-                isErillishaku,
-                valinnanvaihe,
-                isValintakoelaskenta,
+                laskentaParams,
                 hakukohdeDtos,
                 (String uuid) -> kasitteleLaskennanAloitus(uuid, laskennanAloitus, callbackResponse),
                 (Throwable poikkeus) -> {

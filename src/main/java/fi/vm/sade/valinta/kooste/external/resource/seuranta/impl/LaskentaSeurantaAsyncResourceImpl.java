@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
+import fi.vm.sade.valinta.kooste.valintalaskenta.resource.LaskentaParams;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -79,29 +80,28 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 	}
 
 	public void luoLaskenta(
-			String hakuOid,
-			LaskentaTyyppi tyyppi,
-			Boolean erillishaku,
-			Integer valinnanvaihe,
-			Boolean valintakoelaskenta,
+			LaskentaParams laskentaParams,
 			List<HakukohdeDto> hakukohdeOids,
 			Consumer<String> callback,
 			Consumer<Throwable> failureCallback
 	) {
 		try {
-			String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+hakuOid+"/tyyppi/"+tyyppi;
+			Boolean isErillishaku = laskentaParams.isErillishaku();
+			String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/"+ laskentaParams.getHakuOid() +"/tyyppi/"+ laskentaParams.getLaskentatyyppi();
 			WebClient wc = getWebClient().path(url);
-			if (erillishaku != null) {
-				wc.query("erillishaku", erillishaku);
+			if (isErillishaku != null) {
+				wc.query("erillishaku", isErillishaku);
 			}
-			if (valinnanvaihe != null) {
-				wc.query("valinnanvaihe", valinnanvaihe);
+			if (laskentaParams.getValinnanvaihe() != null) {
+				wc.query("valinnanvaihe", laskentaParams.getValinnanvaihe());
 			}
-			if (valintakoelaskenta != null) {
-				wc.query("valintakoelaskenta", valintakoelaskenta);
+			if (laskentaParams.getIsValintakoelaskenta() != null) {
+				wc.query("valintakoelaskenta", laskentaParams.getIsValintakoelaskenta());
 			}
-			wc.async()
-					.post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new Callback<String>(address, url, callback, failureCallback, new TypeToken<String>() {}.getType()));
+			wc.async().post(
+					Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE),
+					new Callback<String>(address, url, callback, failureCallback, new TypeToken<String>() {}.getType())
+			);
 		} catch (Exception e) {
 			failureCallback.accept(e);
 		}

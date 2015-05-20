@@ -117,9 +117,9 @@ public class LaskentaKerrallaTest extends LaskentaKerrallaBase {
 
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
-            ((Consumer)args[6]).accept(LASKENTASEURANTA_ID);
+            ((Consumer)args[2]).accept(LASKENTASEURANTA_ID);
             return new PeruutettavaImpl(Futures.immediateFuture(LASKENTASEURANTA_ID));
-        }).when(laskentaSeurantaAsyncResource).luoLaskenta(any(), any(), any(), any(), any(), any(), argument.capture(), any());
+        }).when(laskentaSeurantaAsyncResource).luoLaskenta(any(), any(), argument.capture(), any());
 
         AtomicInteger seurantaCount = new AtomicInteger(0);
         doAnswer(invocation -> {
