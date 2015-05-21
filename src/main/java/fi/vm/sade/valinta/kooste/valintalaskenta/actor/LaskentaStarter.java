@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -127,6 +128,7 @@ public class LaskentaStarter {
         final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = filteroiHakukohteet(hakuOid, hakukohdeViitteet);
         if (haunHakukohdeOidit.isEmpty()) {
             LOG.error("Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", hakuOid);
+            seurantaAsyncResource.merkkaaLaskennanTila(laskenta.getUuid(), LaskentaTila.PERUUTETTU);
             actorParamsCallback.accept(null);
         } else {
             kasitteleHaunkohteetOids(laskenta, haunHakukohdeOidit, actorParamsCallback);
