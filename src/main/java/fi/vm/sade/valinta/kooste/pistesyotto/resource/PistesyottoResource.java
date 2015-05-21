@@ -68,6 +68,9 @@ public class PistesyottoResource {
 	public ProsessiId tuonti(@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid, InputStream file)
 			throws IOException {
+		try {
+			LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}", SecurityContextHolder.getContext().getAuthentication().getName(), hakuOid, hakukohdeOid);
+		} catch(Throwable t) {}
 		ByteArrayOutputStream b;
 		IOUtils.copy(file, b = new ByteArrayOutputStream());
 		IOUtils.closeQuietly(file);
