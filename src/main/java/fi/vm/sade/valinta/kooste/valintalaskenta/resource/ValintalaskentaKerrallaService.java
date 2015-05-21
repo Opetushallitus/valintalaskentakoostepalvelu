@@ -106,7 +106,8 @@ public class ValintalaskentaKerrallaService {
                         haunHakukohteetOids,
                         maski,
                         seurantaTunnus,
-                        callbackResponse),
+                        callbackResponse
+                ),
                 (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage())));
     }
 
@@ -129,14 +130,20 @@ public class ValintalaskentaKerrallaService {
         }
         valintaperusteetAsyncResource.haunHakukohteet(
                 hakuOid,
-                (List<HakukohdeViiteDTO> hakukohdeViitteet) -> kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, hakukohdeJaOrganisaatioKasittelijaCallback, failureCallback),
+                (List<HakukohdeViiteDTO> hakukohdeViitteet) -> kasitteleHakukohdeViitteet(
+                        hakukohdeViitteet,
+                        hakuOid,
+                        hakukohdeJaOrganisaatioKasittelijaCallback,
+                        failureCallback),
                 (Throwable poikkeus) -> failureCallback.accept(poikkeus));
     }
 
     private void kasitteleHakukohdeViitteet(
             final List<HakukohdeViiteDTO> hakukohdeViitteet,
-            final String hakuOid, Consumer<List<HakukohdeJaOrganisaatio>> hakukohdeJaOrganisaatioKasittelijaCallback,
-            final Consumer<Throwable> failureCallback) {
+            final String hakuOid,
+            Consumer<List<HakukohdeJaOrganisaatio>> hakukohdeJaOrganisaatioKasittelijaCallback,
+            final Consumer<Throwable> failureCallback
+    ) {
         LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
 
         if (hakukohdeViitteet == null || hakukohdeViitteet.isEmpty()) {
