@@ -172,27 +172,12 @@ public class PistesyottoExcel {
 				hakukohdeOid, Sets.newHashSet(valintakoeTunnisteet),
 				osallistumistiedot);
 
-		Set<String> osallistujat =
-		//
-		FluentIterable.from(osallistumistiedot)
-				//
-				.filter(OsallistujatPredicate.vainOsallistujatTunnisteella(
-						hakukohdeOid, valintakoeTunnisteet))
-				//
-				.transform(ValintakoeOsallistuminenDTOFunction.TO_HAKEMUS_OIDS)
-				//
-				.toSet();
-		// LOG.error("{}", Arrays.toString(osallistujat.toArray()));
-		Collection<String> tunnisteet =
-		//
-		FluentIterable.from(valintaperusteet)
-		//
-				.transform(new Function<ValintaperusteDTO, String>() {
-					@Override
-					public String apply(ValintaperusteDTO valintaperuste) {
-						return valintaperuste.getTunniste();
-					}
-				}).toList();
+		final Set<String> osallistujat = osallistumistiedot.stream()
+				.filter(o -> OsallistujatPredicate.vainOsallistujatTunnisteella(hakukohdeOid, valintakoeTunnisteet).apply(o))
+				.map(o -> o.getHakemusOid())
+				.collect(Collectors.toSet());
+
+		final List<String> tunnisteet = valintaperusteet.stream().map(vp -> vp.getTunniste()).collect(Collectors.toList());
 
 		Collection<Rivi> rivit = Lists.newArrayList();
 		rivit.add(new RiviBuilder().addOid(hakuOid).addTeksti(hakuNimi, 4)
