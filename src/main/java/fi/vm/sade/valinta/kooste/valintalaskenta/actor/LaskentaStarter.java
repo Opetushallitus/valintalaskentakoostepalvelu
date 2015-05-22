@@ -56,11 +56,9 @@ public class LaskentaStarter {
             final Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids,
             final Consumer<LaskentaActorParams> actorParamsCallback
     ) {
-        final Maski maski = luoMaskiLaskennanPohjalta(laskenta);
         final String hakuOid = laskenta.getHakuOid();
 
-        Collection<HakukohdeJaOrganisaatio> oids = maski.isMask() ? maski.maskaa(haunHakukohteetOids) : haunHakukohteetOids;
-        if (oids.isEmpty()) {
+        if (haunHakukohteetOids.isEmpty()) {
             LOG.error("Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa ilman hakukohteita.");
             seurantaAsyncResource.merkkaaLaskennanTila(laskenta.getUuid(), LaskentaTila.PERUUTETTU);
             actorParamsCallback.accept(null);
@@ -72,11 +70,11 @@ public class LaskentaStarter {
                                                 laskenta.getUuid(),
                                                 hakuOid,
                                                 laskenta.isErillishaku(),
-                                                maski.isMask(),
+                                                true,
                                                 LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
                                                 laskenta.getValinnanvaihe(),
                                                 laskenta.getValintakoelaskenta(),
-                                                oids,
+                                                haunHakukohteetOids,
                                                 laskenta.getTyyppi()
                                         ),
                                         parametrit)
@@ -134,18 +132,5 @@ public class LaskentaStarter {
                 .filter(hakukohdeOid -> hakukohdeOid.getTila().equals("JULKAISTU"))
                 .map(u -> new HakukohdeJaOrganisaatio(u.getOid(), u.getTarjoajaOid()))
                 .collect(Collectors.toList());
-    }
-
-    private Maski luoMaskiLaskennanPohjalta(final LaskentaDto laskenta) {
-        final List<HakukohdeJaOrganisaatio> hakukohdeMaski = laskenta.getHakukohteet().stream()
-                .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
-                .map(h -> new HakukohdeJaOrganisaatio(h.getHakukohdeOid(), h.getOrganisaatioOid()))
-                .collect(Collectors.toList());
-        return new Maski(
-                true,
-                hakukohdeMaski.stream()
-                        .map(HakukohdeJaOrganisaatio::getHakukohdeOid)
-                        .collect(Collectors.toList())
-        );
     }
 }
