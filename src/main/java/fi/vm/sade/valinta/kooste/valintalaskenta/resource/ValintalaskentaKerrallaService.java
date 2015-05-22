@@ -84,11 +84,16 @@ public class ValintalaskentaKerrallaService {
             }
             seurantaAsyncResource.resetoiTilat(
                     uuid,
-                    (LaskentaDto laskenta) -> kaynnistaLaskenta(
+                    (LaskentaDto laskenta) -> haunHakukohteet(
                             laskenta.getHakuOid(),
-                            createMaskiFrom(laskenta),
-                            (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> laskennanAloitus.accept(laskenta.getUuid()),
-                            callbackResponse),
+                            (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> notifyWorkIfHakukohdeOidsAvailable(
+                                    haunHakukohteetOids,
+                                    createMaskiFrom(laskenta),
+                                    (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> laskennanAloitus.accept(laskenta.getUuid()),
+                                    callbackResponse
+                            ),
+                            (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage()))
+                    ),
                     (Throwable t) -> {
                         LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid , t);
                         callbackResponse.accept(errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
@@ -98,27 +103,6 @@ public class ValintalaskentaKerrallaService {
             callbackResponse.accept(errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + t.getMessage()));
             throw t;
         }
-    }
-
-    private void kaynnistaLaskenta(
-            final String hakuOid,
-            final Maski maski,
-            final BiConsumer<Collection<HakukohdeJaOrganisaatio>, Consumer<String>> seurantaTunnus,
-            final Consumer<Response> callbackResponse) {
-        if (StringUtils.isBlank(hakuOid)) {
-            LOG.error("HakuOid on pakollinen");
-            throw new RuntimeException("HakuOid on pakollinen");
-        }
-        LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
-        haunHakukohteet(
-                hakuOid,
-                (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> notifyWorkIfHakukohdeOidsAvailable(
-                        haunHakukohteetOids,
-                        maski,
-                        seurantaTunnus,
-                        callbackResponse
-                ),
-                (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage())));
     }
 
     private Optional<Laskenta> haeAjossaOlevaLaskentaHaulle(final String hakuOid) {
