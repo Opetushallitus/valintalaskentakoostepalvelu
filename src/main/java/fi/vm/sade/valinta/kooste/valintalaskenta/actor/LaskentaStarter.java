@@ -70,21 +70,21 @@ public class LaskentaStarter {
         }
 
         ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametrit -> {
-                        actorParamsCallback.accept(
-                                new LaskentaActorParams(
-                                        new LaskentaStartParams(
-                                                laskenta.getUuid(),
-                                                hakuOid,
-                                                laskenta.isErillishaku(),
-                                                maski.isMask(),
-                                                LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
-                                                laskenta.getValinnanvaihe(),
-                                                laskenta.getValintakoelaskenta(),
-                                                oids,
-                                                laskenta.getTyyppi()
-                                        ),
-                                        parametrit)
-                        );
+                    actorParamsCallback.accept(
+                            new LaskentaActorParams(
+                                    new LaskentaStartParams(
+                                            laskenta.getUuid(),
+                                            hakuOid,
+                                            laskenta.isErillishaku(),
+                                            maski.isMask(),
+                                            LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
+                                            laskenta.getValinnanvaihe(),
+                                            laskenta.getValintakoelaskenta(),
+                                            oids,
+                                            laskenta.getTyyppi()
+                                    ),
+                                    parametrit)
+                    );
                 },
                 poikkeus -> {
                     LOG.error("Ohjausparametrien luku epäonnistui: {} {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
@@ -125,7 +125,7 @@ public class LaskentaStarter {
             actorParamsCallback.accept(null);
             return;
         }
-        final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = filteroiHakukohteet(hakuOid, hakukohdeViitteet);
+        final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = filteroiHakukohteet(hakukohdeViitteet);
         if (haunHakukohdeOidit.isEmpty()) {
             LOG.error("Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", hakuOid);
             seurantaAsyncResource.merkkaaLaskennanTila(laskenta.getUuid(), LaskentaTila.PERUUTETTU);
@@ -135,28 +135,11 @@ public class LaskentaStarter {
         }
     }
 
-    private List<HakukohdeJaOrganisaatio> filteroiHakukohteet(final String hakuOid, final List<HakukohdeViiteDTO> hakukohdeViitteet) {
+    private List<HakukohdeJaOrganisaatio> filteroiHakukohteet(final List<HakukohdeViiteDTO> hakukohdeViitteet) {
         return hakukohdeViitteet.stream()
                 .filter(Objects::nonNull)
-                .filter(h -> {
-                    if (h == null) {
-                        LOG.error("nonNull filteri ei toimi!");
-                        return false;
-                    }
-                    if (h.getOid() == null) {
-                        LOG.error("Hakukohdeviitteen oid oli null haussa {}", hakuOid);
-                        return false;
-                    }
-                    if (h.getTila() == null) {
-                        LOG.error("Hakukohdeviitteen tila oli null hakukohteelle {}", h.getOid());
-                        return false;
-                    }
-                    if (!"JULKAISTU".equals(h.getTila())) {
-                        LOG.warn("Ohitetaan hakukohde {} koska sen tila on {}.", h.getOid(), h.getTila());
-                        return false;
-                    }
-                    return true;
-                })
+                .filter(hakukohdeOid -> hakukohdeOid.getOid() != null)
+                .filter(hakukohdeOid -> hakukohdeOid.getTila().equals("JULKAISTU"))
                 .map(u -> new HakukohdeJaOrganisaatio(u.getOid(), u.getTarjoajaOid()))
                 .collect(Collectors.toList());
     }
