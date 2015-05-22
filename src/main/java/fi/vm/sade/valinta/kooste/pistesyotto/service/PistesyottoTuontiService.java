@@ -100,39 +100,8 @@ public class PistesyottoTuontiService {
             pistesyottoExcel.getExcel().tuoXlsx(stream);
             Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = asMap(pistetiedot);
 
-
             // TARKISTETAAN VIRHEET
-            List<String> virheet = pistesyottoTuontiAdapteri
-                    .getRivit().stream()
-                    .filter(rivi -> !rivi.isValidi()).flatMap(
-                            rivi -> {
-                                LOG.warn("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
-
-                                for (PistesyottoArvo arvo : rivi.getArvot()) {
-                                    if (!arvo.isValidi()) {
-                                        String virheIlmoitus = new StringBuffer()
-                                                .append("Henkilöllä ")
-                                                .append(rivi.getNimi())
-                                                        //
-                                                .append(" (")
-                                                .append(rivi.getOid())
-                                                .append(")")
-                                                        //
-                                                .append(" oli virheellinen arvo '")
-                                                .append(arvo.getArvo())
-                                                .append("'")
-                                                .append(" kohdassa ")
-                                                .append(arvo.getTunniste())
-                                                .toString();
-                                        return Stream.of(virheIlmoitus);
-													 /*
-
-													 */
-                                    }
-                                }
-                                return Stream.empty();
-                            }
-                    ).collect(Collectors.toList());
+            List<String> virheet = getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri);
             if (!virheet.isEmpty()) {
                 String v = virheet.stream().collect(Collectors.joining(", "));
                 LOG.error("Virheitä pistesyöttöriveissä {}", v);
@@ -179,6 +148,34 @@ public class PistesyottoTuontiService {
         }
     }
 
+    private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri) {
+        return (List<String>) pistesyottoTuontiAdapteri
+                .getRivit().stream()
+                .filter(rivi -> !rivi.isValidi()).flatMap(
+                        rivi -> {
+                            LOG.warn("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
+
+                            for (PistesyottoArvo arvo : rivi.getArvot()) {
+                                if (!arvo.isValidi()) {
+                                    String virheIlmoitus = new StringBuffer()
+                                            .append("Henkilöllä ")
+                                            .append(rivi.getNimi())
+                                            .append(" (")
+                                            .append(rivi.getOid())
+                                            .append(")")
+                                            .append(" oli virheellinen arvo '")
+                                            .append(arvo.getArvo())
+                                            .append("'")
+                                            .append(" kohdassa ")
+                                            .append(arvo.getTunniste())
+                                            .toString();
+                                    return Stream.of(virheIlmoitus);
+                                }
+                            }
+                            return Stream.empty();
+                        }
+                ).collect(Collectors.toList());
+    }
 
 
     public void tuo(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi,InputStream stream){
