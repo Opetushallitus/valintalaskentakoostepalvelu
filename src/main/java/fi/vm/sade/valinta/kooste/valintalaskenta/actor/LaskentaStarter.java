@@ -6,8 +6,6 @@ import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyn
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
@@ -43,7 +41,26 @@ public class LaskentaStarter {
     public void fetchLaskentaParams(final String uuid, final Consumer<LaskentaActorParams> actorParamsCallback) {
         seurantaAsyncResource.laskenta(
                 uuid,
-                (LaskentaDto laskenta) -> haunHakukohteet(laskenta, actorParamsCallback),
+                (LaskentaDto laskenta) -> {
+                    String hakuOid = laskenta.getHakuOid();
+                    if (StringUtils.isBlank(hakuOid)) {
+                        LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
+                        throw new RuntimeException("Yritettiin hakea hakukohteita ilman hakuOidia!");
+                    }
+                    valintaperusteetAsyncResource.haunHakukohteet(
+                            hakuOid,
+                            (List<HakukohdeViiteDTO> hakukohdeViitteet) -> haunOhjausParametrit(
+                                    hakuOid,
+                                    hakukohdeViitteet,
+                                    laskenta,
+                                    actorParamsCallback
+                            ),
+                            (Throwable t) -> {
+                                LOG.error("Haun kohteiden haku epäonnistui haulle: {}", hakuOid);
+                                actorParamsCallback.accept(null);
+                            }
+                    );
+                },
                 (Throwable t) -> {
                     LOG.error("Laskennan haku epäonnistui {}:\r\n{}", t.getMessage(), Arrays.toString(t.getStackTrace()));
                     actorParamsCallback.accept(null);
@@ -51,18 +68,15 @@ public class LaskentaStarter {
         );
     }
 
-    private void kasitteleHaunkohteetOids(
-            final LaskentaDto laskenta,
-            final Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids,
-            final Consumer<LaskentaActorParams> actorParamsCallback
-    ) {
-        final String hakuOid = laskenta.getHakuOid();
+    private void haunOhjausParametrit(String hakuOid, List<HakukohdeViiteDTO> hakukohdeViitteet, LaskentaDto laskenta, Consumer<LaskentaActorParams> actorParamsCallback) {
+        LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
 
-        if (haunHakukohteetOids.isEmpty()) {
-            LOG.error("Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa ilman hakukohteita.");
+        final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet != null ? publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet) : new ArrayList<>();
+        if (haunHakukohdeOidit.isEmpty()) {
+            LOG.error("Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", hakuOid);
             seurantaAsyncResource.merkkaaLaskennanTila(laskenta.getUuid(), LaskentaTila.PERUUTETTU);
             actorParamsCallback.accept(null);
-        } else {
+        }  else {
             ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametrit -> {
                         actorParamsCallback.accept(
                                 new LaskentaActorParams(
@@ -74,7 +88,7 @@ public class LaskentaStarter {
                                                 LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
                                                 laskenta.getValinnanvaihe(),
                                                 laskenta.getValintakoelaskenta(),
-                                                haunHakukohteetOids,
+                                                haunHakukohdeOidit,
                                                 laskenta.getTyyppi()
                                         ),
                                         parametrit)
@@ -84,44 +98,6 @@ public class LaskentaStarter {
                         LOG.error("Ohjausparametrien luku epäonnistui: {} {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
                         actorParamsCallback.accept(null);
                     });
-        }
-    }
-
-    private void haunHakukohteet(final LaskentaDto laskenta, final Consumer<LaskentaActorParams> actorParamsCallback) {
-        String hakuOid = laskenta.getHakuOid();
-        if (StringUtils.isBlank(hakuOid)) {
-            LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
-            throw new RuntimeException("Yritettiin hakea hakukohteita ilman hakuOidia!");
-        }
-        valintaperusteetAsyncResource.haunHakukohteet(
-                hakuOid,
-                (List<HakukohdeViiteDTO> hakukohdeViitteet) -> kasitteleHakukohdeViitteet(
-                        laskenta,
-                        hakukohdeViitteet,
-                        actorParamsCallback
-                ),
-                (Throwable t) -> {
-                    LOG.error("Haun kohteiden haku epäonnistui haulle: {}", hakuOid);
-                    actorParamsCallback.accept(null);
-                }
-        );
-    }
-
-    private void kasitteleHakukohdeViitteet(
-            final LaskentaDto laskenta,
-            final List<HakukohdeViiteDTO> hakukohdeViitteet,
-            final Consumer<LaskentaActorParams> actorParamsCallback
-    ) {
-        final String hakuOid = laskenta.getHakuOid();
-        LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
-
-        final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet != null ? publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet) : new ArrayList<>();
-        if (haunHakukohdeOidit.isEmpty()) {
-            LOG.error("Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", hakuOid);
-            seurantaAsyncResource.merkkaaLaskennanTila(laskenta.getUuid(), LaskentaTila.PERUUTETTU);
-            actorParamsCallback.accept(null);
-        } else {
-            kasitteleHaunkohteetOids(laskenta, haunHakukohdeOidit, actorParamsCallback);
         }
     }
 
