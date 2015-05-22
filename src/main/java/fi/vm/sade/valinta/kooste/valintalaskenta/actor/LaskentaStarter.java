@@ -65,6 +65,7 @@ public class LaskentaStarter {
         Collection<HakukohdeJaOrganisaatio> oids = maski.isMask() ? maski.maskaa(haunHakukohteetOids) : haunHakukohteetOids;
         if (oids.isEmpty()) {
             LOG.error("Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa ilman hakukohteita.");
+            seurantaAsyncResource.merkkaaLaskennanTila(laskenta.getUuid(), LaskentaTila.PERUUTETTU);
             actorParamsCallback.accept(null);
         } else {
             ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametrit -> {
