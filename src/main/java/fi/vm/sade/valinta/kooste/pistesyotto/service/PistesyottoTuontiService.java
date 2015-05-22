@@ -35,6 +35,18 @@ import java.util.stream.Stream;
 
 /**
  * @author Jussi Jartamo
+ *
+ * GET
+ * /valintalaskenta-laskenta-service/resources/valintakoe/hakutoive/{hakukohdeOid}
+ * GET
+ * /valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/{hakukohdeOid}
+ * GET
+ * /applications/additionalData/{hakuOid}/{hakukohdeOid}
+ *
+ * POST [hakemusOids]
+ * /applications/additionalData
+ * PUT [additionalDataDTO]
+ * /applications/additionalData/{hakuOid}/{hakukohdeOid}
  */
 public class PistesyottoTuontiService {
 

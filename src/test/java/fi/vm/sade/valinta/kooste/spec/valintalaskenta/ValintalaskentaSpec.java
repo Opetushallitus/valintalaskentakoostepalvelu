@@ -66,6 +66,12 @@ public class ValintalaskentaSpec {
                     public ValintakoeBuilder(ValinnanvaiheBuilder vbuilder) {
                         this.vbuilder = vbuilder;
                     }
+                    public ValintakoeBuilder setEiOsallistu() {
+                        OsallistuminenTulosDTO o = new OsallistuminenTulosDTO();
+                        o.setOsallistuminen(Osallistuminen.EI_OSALLISTU);
+                        valintakoe.setOsallistuminenTulos(o);
+                        return this;
+                    }
                     public ValintakoeBuilder setOsallistuu() {
                         OsallistuminenTulosDTO o = new OsallistuminenTulosDTO();
                         o.setOsallistuminen(Osallistuminen.OSALLISTUU);

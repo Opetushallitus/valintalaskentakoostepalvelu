@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
+import com.google.gson.GsonBuilder;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
@@ -60,7 +61,9 @@ public class PistesyottoResourceTest {
     final String VALINTAKOE1 = "VALINTAKOE1";
     final String HAKEMUS1 = "HAKEMUS1";
     final String HAKEMUS2 = "HAKEMUS2";
+    final String HAKEMUS3 = "HAKEMUS3";
     final String TUNNISTE1 = "TUNNISTE1";
+    final String OSALLISTUMISENTUNNISTE1 = TUNNISTE1 + "-OSALLISTUMINEN";
 
     @Before
     public void startServer() {
@@ -180,26 +183,43 @@ public class PistesyottoResourceTest {
                         .build()
                         .build()
                         .build()
+                        .build(),
+                osallistuminen()
+                        .setHakemusOid(HAKEMUS3)
+                        .hakutoive()
+                        .valinnanvaihe()
+                        .valintakoe()
+                        .setValintakoeOid(VALINTAKOE1)
+                        .setTunniste(TUNNISTE1)
+                        .setEiOsallistu()
+                        .build()
+                        .build()
+                        .build()
                         .build()
         );
         List<ValintaperusteDTO> valintaperusteet = Arrays.asList(
                 valintaperusteet()
                         .setKuvaus(TUNNISTE1)
                         .setTunniste(TUNNISTE1)
-                        .setOsallistumisenTunniste(TUNNISTE1)
+                        .setOsallistumisenTunniste(OSALLISTUMISENTUNNISTE1)
                         .setLukuarvofunktio()
                         .setArvot("1", "2", "3")
                         .build()
         );
 
         MockValintaperusteetAsyncResource.setValintaperusteetResultReference(valintaperusteet);
-        MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(lisatiedot()
-                .setOid(HAKEMUS1).build()));
+        MockApplicationAsyncResource.setAdditionalDataResult(Arrays.asList(
+                lisatiedot()
+                    .setOid(HAKEMUS1).build(),
+                lisatiedot()
+                        .setOid(HAKEMUS3).build()));
         MockApplicationAsyncResource.setAdditionalDataResultByOid(
                 Arrays.asList(
                         lisatiedot()
                                 .setOid(HAKEMUS2)
-                                .build()
+                                .build(),
+                        lisatiedot()
+                                .setOid(HAKEMUS3).build()
                 )
         );
         MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
@@ -211,6 +231,9 @@ public class PistesyottoResourceTest {
                                 .build(),
                         hakemus()
                                 .setOid(HAKEMUS2)
+                                .build(),
+                        hakemus()
+                                .setOid(HAKEMUS3)
                                 .build()
                 ),
                 Sets.newHashSet(Arrays.asList(VALINTAKOE1)), // KAIKKI KUTSUTAAN TUNNISTEET
@@ -225,6 +248,10 @@ public class PistesyottoResourceTest {
                         lisatiedot()
                                 .setOid(HAKEMUS2)
                                 .addLisatieto(TUNNISTE1, "2")
+                                .build(),
+                        lisatiedot()
+                                .setOid(HAKEMUS3)
+                                .addLisatieto(TUNNISTE1, "")
                                 .build()
                 ));
 
@@ -238,6 +265,7 @@ public class PistesyottoResourceTest {
         List<ApplicationAdditionalDataDTO> tuodutLisatiedot =
         MockApplicationAsyncResource.
         getAdditionalDataInput();
+        LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(tuodutLisatiedot));
         Assert.assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!",2, tuodutLisatiedot.size());
     }
 }
