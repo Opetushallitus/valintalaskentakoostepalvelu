@@ -66,30 +66,29 @@ public class LaskentaStarter {
         if (oids.isEmpty()) {
             LOG.error("Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa ilman hakukohteita.");
             actorParamsCallback.accept(null);
-            return;
+        } else {
+            ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametrit -> {
+                        actorParamsCallback.accept(
+                                new LaskentaActorParams(
+                                        new LaskentaStartParams(
+                                                laskenta.getUuid(),
+                                                hakuOid,
+                                                laskenta.isErillishaku(),
+                                                maski.isMask(),
+                                                LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
+                                                laskenta.getValinnanvaihe(),
+                                                laskenta.getValintakoelaskenta(),
+                                                oids,
+                                                laskenta.getTyyppi()
+                                        ),
+                                        parametrit)
+                        );
+                    },
+                    poikkeus -> {
+                        LOG.error("Ohjausparametrien luku epäonnistui: {} {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
+                        actorParamsCallback.accept(null);
+                    });
         }
-
-        ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametrit -> {
-                    actorParamsCallback.accept(
-                            new LaskentaActorParams(
-                                    new LaskentaStartParams(
-                                            laskenta.getUuid(),
-                                            hakuOid,
-                                            laskenta.isErillishaku(),
-                                            maski.isMask(),
-                                            LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
-                                            laskenta.getValinnanvaihe(),
-                                            laskenta.getValintakoelaskenta(),
-                                            oids,
-                                            laskenta.getTyyppi()
-                                    ),
-                                    parametrit)
-                    );
-                },
-                poikkeus -> {
-                    LOG.error("Ohjausparametrien luku epäonnistui: {} {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
-                    actorParamsCallback.accept(null);
-                });
     }
 
     private void haunHakukohteet(final LaskentaDto laskenta, final Consumer<LaskentaActorParams> actorParamsCallback) {
