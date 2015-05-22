@@ -73,16 +73,7 @@ public class PistesyottoTuontiService {
         };
         try {
 
-            Collection<String> valintakoeTunnisteet = FluentIterable
-                    .from(valintaperusteet)
-                    .transform(
-                            new Function<ValintaperusteDTO, String>() {
-                                @Override
-                                public String apply(
-                                        ValintaperusteDTO input) {
-                                    return input.getTunniste();
-                                }
-                            }).toList();
+            final List<String> valintakoeTunnisteet = valintaperusteet.stream().map(vp -> vp.getTunniste()).collect(Collectors.toList());
 
             List<Hakemus> hakemukset = Collections.emptyList();
             // LOG.error("Excelin luonti");
