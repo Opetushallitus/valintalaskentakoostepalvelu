@@ -42,7 +42,7 @@ public class ValintalaskentaKerrallaService {
     public void kaynnistaLaskentaHaulle(LaskentaParams laskentaParams, Consumer<Response> callback) {
         String hakuOid = laskentaParams.getHakuOid();
         Maski maski = laskentaParams.getMaski();
-        
+
         Optional<String> uuidForExistingNonMaskedLaskenta = uuidForExistingNonMaskedLaskenta(laskentaParams.getMaski(), hakuOid);
         if (uuidForExistingNonMaskedLaskenta.isPresent()) {
             returnExistingLaskenta(uuidForExistingNonMaskedLaskenta.get(), callback);
@@ -98,18 +98,6 @@ public class ValintalaskentaKerrallaService {
         if (StringUtils.isBlank(hakuOid)) {
             LOG.error("HakuOid on pakollinen");
             throw new RuntimeException("HakuOid on pakollinen");
-        }
-        // maskilla kaynnistettaessa luodaan aina uusi laskenta
-        if (!maski.isMask()) { // muuten tarkistetaan onko laskenta jo olemassa
-            // Kaynnissa oleva laskenta koko haulle
-            final Optional<Laskenta> ajossaOlevaLaskentaHaulle = haeAjossaOlevaLaskentaHaulle(hakuOid);
-            if (ajossaOlevaLaskentaHaulle.isPresent()) {
-                // palautetaan seurattavaksi ajossa olevan hakukohteen seurantatunnus
-                final String uuid = ajossaOlevaLaskentaHaulle.get().getUuid();
-                LOG.warn("Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun", hakuOid, uuid);
-                callbackResponse.accept(redirectResponse(uuid));
-                return;
-            }
         }
         LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
         haunHakukohteet(
