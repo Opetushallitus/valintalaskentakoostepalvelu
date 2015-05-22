@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 
 /**
  * @author Jussi Jartamo
@@ -17,6 +18,11 @@ public class HakemusSpec {
         }
         public AdditionalDataBuilder setOid(String oid) {
             applicationAdditionalDataDTO.setOid(oid);
+            return this;
+        }
+        public AdditionalDataBuilder setEtunimiJaSukunimi(String etunimi, String sukunimi) {
+            applicationAdditionalDataDTO.setLastName(sukunimi);
+            applicationAdditionalDataDTO.setFirstNames(etunimi);
             return this;
         }
         public AdditionalDataBuilder addLisatieto(String avain, String arvo) {
@@ -36,6 +42,19 @@ public class HakemusSpec {
             this.hakemus.setAnswers(new Answers());
             this.hakemus.getAnswers().setHakutoiveet(Maps.newHashMap());
             this.hakemus.getAnswers().setHenkilotiedot(Maps.newHashMap());
+        }
+        public HakemusBuilder setEtunimiJaSukunimi(String etunimi, String sukunimi) {
+            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.ETUNIMET, etunimi);
+            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.SUKUNIMI, sukunimi);
+            return this;
+        }
+        public HakemusBuilder setHenkilotunnus(String henkilotunnus) {
+            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.HETU, henkilotunnus);
+            return this;
+        }
+        public HakemusBuilder setSyntymaaika(String syntymaaika) {
+            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.SYNTYMAAIKA, syntymaaika);
+            return this;
         }
         public HakemusBuilder setOid(String oid) {
             hakemus.setOid(oid);

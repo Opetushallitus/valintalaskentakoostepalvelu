@@ -98,10 +98,8 @@ public class PistesyottoTuontiService {
                     valintaperusteet, pistetiedot,
                     pistesyottoTuontiAdapteri);
             pistesyottoExcel.getExcel().tuoXlsx(stream);
-            Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = asMap(pistetiedot);
-
             // TARKISTETAAN VIRHEET
-            List<String> virheet = getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri);
+            List<String> virheet = getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, pistetiedot);
             if (!virheet.isEmpty()) {
                 String v = virheet.stream().collect(Collectors.joining(", "));
                 LOG.error("Virheitä pistesyöttöriveissä {}", v);
@@ -112,6 +110,7 @@ public class PistesyottoTuontiService {
                                 "", v));
                 return;
             }
+            Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = asMap(pistetiedot);
             List<ApplicationAdditionalDataDTO> uudetPistetiedot =
                     pistesyottoTuontiAdapteri
                             .getRivit().stream()
@@ -147,29 +146,46 @@ public class PistesyottoTuontiService {
             poikkeusilmoitus.accept(t);
         }
     }
-
-    private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri) {
+    private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, List<ApplicationAdditionalDataDTO> hakemukset) {
+        return getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, hakemukset.stream().collect(Collectors.toMap(h -> h.getOid(), h -> h, (h1,h2) -> {return h2;})));
+    }
+    private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, Map<String,ApplicationAdditionalDataDTO> oidToAdditionalMapping) {
         return (List<String>) pistesyottoTuontiAdapteri
                 .getRivit().stream()
-                .filter(rivi -> !rivi.isValidi()).flatMap(
+                //.filter(rivi -> !rivi.isValidi())
+                .flatMap(
                         rivi -> {
-                            LOG.warn("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
+                            String nimi = PistesyottoExcel.additionalDataToNimi(oidToAdditionalMapping.get(rivi.getOid()));
+                            if (!Optional.ofNullable(rivi.getNimi()).orElse("").equals(nimi)) {
+                                String virheIlmoitus = new StringBuffer()
+                                        .append("Hakemuksella (OID = ")
+                                        .append(rivi.getOid())
+                                        .append(") nimet ei täsmää: ")
+                                        .append(rivi.getNimi())
+                                        .append(" != ")
+                                        .append(nimi)
+                                        .toString();
+                                return Stream.of(virheIlmoitus);
+                            }
+                            if (!rivi.isValidi()) {
+                                LOG.warn("Rivi on muuttunut mutta viallinen joten ilmoitetaan virheestä!");
 
-                            for (PistesyottoArvo arvo : rivi.getArvot()) {
-                                if (!arvo.isValidi()) {
-                                    String virheIlmoitus = new StringBuffer()
-                                            .append("Henkilöllä ")
-                                            .append(rivi.getNimi())
-                                            .append(" (")
-                                            .append(rivi.getOid())
-                                            .append(")")
-                                            .append(" oli virheellinen arvo '")
-                                            .append(arvo.getArvo())
-                                            .append("'")
-                                            .append(" kohdassa ")
-                                            .append(arvo.getTunniste())
-                                            .toString();
-                                    return Stream.of(virheIlmoitus);
+                                for (PistesyottoArvo arvo : rivi.getArvot()) {
+                                    if (!arvo.isValidi()) {
+                                        String virheIlmoitus = new StringBuffer()
+                                                .append("Henkilöllä ")
+                                                .append(rivi.getNimi())
+                                                .append(" (")
+                                                .append(rivi.getOid())
+                                                .append(")")
+                                                .append(" oli virheellinen arvo '")
+                                                .append(arvo.getArvo())
+                                                .append("'")
+                                                .append(" kohdassa ")
+                                                .append(arvo.getTunniste())
+                                                .toString();
+                                        return Stream.of(virheIlmoitus);
+                                    }
                                 }
                             }
                             return Stream.empty();

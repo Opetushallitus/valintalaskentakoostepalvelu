@@ -71,6 +71,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         resultByOidReference.set(result);
     }
     public static void clear() {
+        additionalDataPutReference.set(null);
         resultReference.set(null);
     }
 

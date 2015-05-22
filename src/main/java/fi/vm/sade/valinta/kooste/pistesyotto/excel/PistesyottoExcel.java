@@ -144,7 +144,13 @@ public class PistesyottoExcel {
 				valintakoeTunnisteet, osallistumistiedot, valintaperusteet,
 				pistetiedot, Arrays.asList(kuuntelija));
 	}
-
+	public static String additionalDataToNimi(ApplicationAdditionalDataDTO data) {
+		if(data == null) {
+			return "'Hakemuksella ei ole nimeä'";
+		}
+		return new StringBuilder().append(data.getLastName())
+				.append(", ").append(data.getFirstNames()).toString();
+	}
 	public PistesyottoExcel(String hakuOid, String hakukohdeOid,
 			String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
 			String tarjoajaNimi, Collection<Hakemus> hakemukset,
@@ -217,8 +223,7 @@ public class PistesyottoExcel {
 					.get(data.getOid())).orElse(Collections.emptyMap());
 			Collection<Arvo> s = Lists.newArrayList();
 			s.add(new TekstiArvo(data.getOid()));
-			s.add(new TekstiArvo(new StringBuilder().append(data.getLastName())
-					.append(", ").append(data.getFirstNames()).toString()));
+			s.add(new TekstiArvo(additionalDataToNimi(data)));
 			s.add(new TekstiArvo(Optional.ofNullable(
 					oidToHetu.get(data.getOid())).orElse(StringUtils.EMPTY)));
 			boolean syote = false;
