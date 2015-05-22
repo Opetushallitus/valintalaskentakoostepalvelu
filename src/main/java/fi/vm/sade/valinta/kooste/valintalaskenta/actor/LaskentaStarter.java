@@ -125,7 +125,7 @@ public class LaskentaStarter {
             actorParamsCallback.accept(null);
             return;
         }
-        final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = filteroiHakukohteet(hakukohdeViitteet);
+        final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet);
         if (haunHakukohdeOidit.isEmpty()) {
             LOG.error("Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", hakuOid);
             seurantaAsyncResource.merkkaaLaskennanTila(laskenta.getUuid(), LaskentaTila.PERUUTETTU);
@@ -135,7 +135,7 @@ public class LaskentaStarter {
         }
     }
 
-    private List<HakukohdeJaOrganisaatio> filteroiHakukohteet(final List<HakukohdeViiteDTO> hakukohdeViitteet) {
+    private List<HakukohdeJaOrganisaatio> publishedNonNulltoHakukohdeJaOrganisaatio(final List<HakukohdeViiteDTO> hakukohdeViitteet) {
         return hakukohdeViitteet.stream()
                 .filter(Objects::nonNull)
                 .filter(hakukohdeOid -> hakukohdeOid.getOid() != null)
