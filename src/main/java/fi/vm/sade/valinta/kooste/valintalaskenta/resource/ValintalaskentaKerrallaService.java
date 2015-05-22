@@ -84,13 +84,18 @@ public class ValintalaskentaKerrallaService {
             }
             seurantaAsyncResource.resetoiTilat(
                     uuid,
-                    (LaskentaDto laskenta) -> haunHakukohteet(
+                    (LaskentaDto laskenta) -> valintaperusteetAsyncResource.haunHakukohteet(
                             laskenta.getHakuOid(),
-                            (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> notifyWorkIfHakukohdeOidsAvailable(
-                                    haunHakukohteetOids,
-                                    createMaskiFrom(laskenta),
-                                    (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> laskennanAloitus.accept(laskenta.getUuid()),
-                                    callbackResponse
+                            (List<HakukohdeViiteDTO> hakukohdeViitteet) -> kasitteleHakukohdeViitteet(
+                                    hakukohdeViitteet,
+                                    laskenta.getHakuOid(),
+                                    (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> notifyWorkIfHakukohdeOidsAvailable(
+                                            haunHakukohteetOids,
+                                            createMaskiFrom(laskenta),
+                                            (Collection<HakukohdeJaOrganisaatio> hakuJaHakukohteet, Consumer<String> laskennanAloitus) -> laskennanAloitus.accept(laskenta.getUuid()),
+                                            callbackResponse
+                                    ),
+                                    (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage()))
                             ),
                             (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage()))
                     ),
@@ -112,24 +117,6 @@ public class ValintalaskentaKerrallaService {
                         // Tama haku ... ja koko haun laskennasta on kyse
                 .filter(l -> hakuOid.equals(l.getHakuOid()) && !l.isOsittainenLaskenta())
                 .findFirst();
-    }
-
-    private void haunHakukohteet(
-            final String hakuOid,
-            final Consumer<List<HakukohdeJaOrganisaatio>> hakukohdeJaOrganisaatioKasittelijaCallback,
-            final Consumer<Throwable> failureCallback) {
-        if (StringUtils.isBlank(hakuOid)) {
-            LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
-            throw new RuntimeException("Yritettiin hakea hakukohteita ilman hakuOidia!");
-        }
-        valintaperusteetAsyncResource.haunHakukohteet(
-                hakuOid,
-                (List<HakukohdeViiteDTO> hakukohdeViitteet) -> kasitteleHakukohdeViitteet(
-                        hakukohdeViitteet,
-                        hakuOid,
-                        hakukohdeJaOrganisaatioKasittelijaCallback,
-                        failureCallback),
-                (Throwable poikkeus) -> failureCallback.accept(poikkeus));
     }
 
     private void kasitteleHakukohdeViitteet(
