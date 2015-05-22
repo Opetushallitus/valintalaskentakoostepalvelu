@@ -54,23 +54,26 @@ public class ValintalaskentaKerrallaService {
             LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
             valintaperusteetAsyncResource.haunHakukohteet(
                     hakuOid,
-                    (List<HakukohdeViiteDTO> hakukohdeViitteet) -> kasitteleHakukohdeViitteet(
-                            hakukohdeViitteet,
-                            hakuOid,
-                            (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> createLaskenta(
-                                    haunHakukohteetOids,
-                                    (String uuid) -> notifyWorkAvailable(
-                                            haunHakukohteetOids,
-                                            maski,
-                                            uuid,
-                                            callback
-                                    ),
-                                    laskentaParams,
-                                    callback
-                            ),
-                            callback
-                    ),
-                    (Throwable poikkeus) -> callback.accept(errorResponse(poikkeus.getMessage())));
+                    (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
+                        List<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(
+                                hakukohdeViitteet,
+                                hakuOid,
+                                callback
+                        );
+                        createLaskenta(
+                                haunHakukohteetOids,
+                                (String uuid) -> notifyWorkAvailable(
+                                        haunHakukohteetOids,
+                                        maski,
+                                        uuid,
+                                        callback
+                                ),
+                                laskentaParams,
+                                callback
+                        );
+                    },
+                    (Throwable poikkeus) -> callback.accept(errorResponse(poikkeus.getMessage()))
+            );
         }
     }
 
@@ -85,17 +88,19 @@ public class ValintalaskentaKerrallaService {
                     uuid,
                     (LaskentaDto laskenta) -> valintaperusteetAsyncResource.haunHakukohteet(
                             laskenta.getHakuOid(),
-                            (List<HakukohdeViiteDTO> hakukohdeViitteet) -> kasitteleHakukohdeViitteet(
-                                    hakukohdeViitteet,
-                                    laskenta.getHakuOid(),
-                                    (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> notifyWorkAvailable(
-                                            haunHakukohteetOids,
-                                            createMaskiFrom(laskenta),
-                                            laskenta.getUuid(),
-                                            callbackResponse
-                                    ),
-                                    callbackResponse
-                            ),
+                            (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
+                                List<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(
+                                        hakukohdeViitteet,
+                                        laskenta.getHakuOid(),
+                                        callbackResponse
+                                );
+                                notifyWorkAvailable(
+                                        haunHakukohteetOids,
+                                        createMaskiFrom(laskenta),
+                                        laskenta.getUuid(),
+                                        callbackResponse
+                                );
+                            },
                             (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage()))
                     ),
                     (Throwable t) -> {
@@ -117,10 +122,9 @@ public class ValintalaskentaKerrallaService {
                 .findFirst();
     }
 
-    private void kasitteleHakukohdeViitteet(
+    private List<HakukohdeJaOrganisaatio> kasitteleHakukohdeViitteet(
             final List<HakukohdeViiteDTO> hakukohdeViitteet,
             final String hakuOid,
-            Consumer<List<HakukohdeJaOrganisaatio>> hakukohdeJaOrganisaatioKasittelijaCallback,
             final Consumer<Response> callback
     ) {
         LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
@@ -141,7 +145,7 @@ public class ValintalaskentaKerrallaService {
             callback.accept(errorResponse(msg));
             throw new RuntimeException(msg);
         } else {
-            hakukohdeJaOrganisaatioKasittelijaCallback.accept(haunHakukohdeOids);
+            return haunHakukohdeOids;
         }
     }
 
