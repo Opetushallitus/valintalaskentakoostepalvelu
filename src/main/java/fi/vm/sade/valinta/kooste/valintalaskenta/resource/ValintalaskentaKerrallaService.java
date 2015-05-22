@@ -53,10 +53,6 @@ public class ValintalaskentaKerrallaService {
             returnExistingLaskenta(uuidForExistingNonMaskedLaskenta.get(), callback);
         } else {
             LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
-            if (StringUtils.isBlank(hakuOid)) {
-                LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
-                throw new RuntimeException("Yritettiin hakea hakukohteita ilman hakuOidia!");
-            }
             valintaperusteetAsyncResource.haunHakukohteet(
                     hakuOid,
                     (List<HakukohdeViiteDTO> hakukohdeViitteet) -> kasitteleHakukohdeViitteet(
