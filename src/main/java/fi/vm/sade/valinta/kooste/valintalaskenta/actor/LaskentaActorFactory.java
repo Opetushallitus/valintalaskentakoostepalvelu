@@ -128,7 +128,12 @@ public class LaskentaActorFactory {
         final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
         final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
         final PalvelukutsuStrategia suoritusrekisteriStrategia = createStrategia();
-        final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(laskentaStrategia, valintaperusteetStrategia, hakemuksetStrategia, suoritusrekisteriStrategia);
+        final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
+                laskentaStrategia,
+                valintaperusteetStrategia,
+                hakemuksetStrategia,
+                suoritusrekisteriStrategia
+        );
         final Collection<LaskentaPalvelukutsu> palvelukutsut = actorParams.getHakukohdeOids()
                 .parallelStream()
                 .map(hakukohdeOid -> {
