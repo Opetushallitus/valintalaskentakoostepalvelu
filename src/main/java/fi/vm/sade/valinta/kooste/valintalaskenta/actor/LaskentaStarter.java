@@ -74,9 +74,7 @@ public class LaskentaStarter {
 
         final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet != null ? publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet) : new ArrayList<>();
         if (haunHakukohdeOidit.isEmpty()) {
-            LOG.error("Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", hakuOid);
-            seurantaAsyncResource.merkkaaLaskennanTila(laskenta.getUuid(), LaskentaTila.PERUUTETTU);
-            actorParamsCallback.accept(null);
+            cancelLaskenta("Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", laskenta, actorParamsCallback);
         }  else {
             ohjausparametritAsyncResource.haeHaunOhjausparametrit(
                     hakuOid,
@@ -111,5 +109,11 @@ public class LaskentaStarter {
                 .filter(hakukohdeOid -> hakukohdeOid.getTila().equals("JULKAISTU"))
                 .map(u -> new HakukohdeJaOrganisaatio(u.getOid(), u.getTarjoajaOid()))
                 .collect(Collectors.toList());
+    }
+
+    private void cancelLaskenta(String msg, LaskentaDto laskenta, Consumer<LaskentaActorParams> actorParamsCallback) {
+        LOG.error(msg, laskenta.getHakuOid());
+        seurantaAsyncResource.merkkaaLaskennanTila(laskenta.getUuid(), LaskentaTila.PERUUTETTU);
+        actorParamsCallback.accept(null);
     }
 }
