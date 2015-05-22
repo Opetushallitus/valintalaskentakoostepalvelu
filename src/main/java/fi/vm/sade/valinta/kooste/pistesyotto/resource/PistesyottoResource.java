@@ -5,13 +5,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import org.apache.camel.Produce;
 import org.apache.poi.util.IOUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +43,8 @@ public class PistesyottoResource {
 	// private ValintakoeResource valintakoeResource;
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiKomponentti;
+	@Autowired
+	private DokumenttiAsyncResource dokumenttiAsyncResource;
 	@Autowired
 	private PistesyottoVientiService vientiService;
 	@Autowired
@@ -68,18 +75,28 @@ public class PistesyottoResource {
 	public ProsessiId tuonti(@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid, InputStream file)
 			throws IOException {
-		try {
-			LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}", SecurityContextHolder.getContext().getAuthentication().getName(), hakuOid, hakukohdeOid);
-		} catch(Throwable t) {}
-		ByteArrayOutputStream b;
-		IOUtils.copy(file, b = new ByteArrayOutputStream());
+		ByteArrayOutputStream xlsx;
+		IOUtils.copy(file, xlsx = new ByteArrayOutputStream());
 		IOUtils.closeQuietly(file);
+		try {
+			// TALLENNETAAN TUODUT EXCELIT 7 PÄIVÄKSI
+			final String uuid = UUID.randomUUID().toString();
+			Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();// .getTime();
+			List<String> tags = Arrays.asList();
+			dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx",
+					expirationTime, tags,
+					"application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray()), response -> {
+						LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.", SecurityContextHolder.getContext().getAuthentication().getName(), hakuOid, hakukohdeOid, uuid);
+					}, poikkeus -> {
+						LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Exceliä ei voitu tallentaa dokumenttipalveluun.", SecurityContextHolder.getContext().getAuthentication().getName(), hakuOid, hakukohdeOid, poikkeus);
+					});
+		} catch(Throwable t) {}
 		DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö",
 				"tuonti", hakuOid, Arrays.asList(hakukohdeOid));
 		dokumenttiKomponentti.tuoUusiProsessi(prosessi);
 
 		tuontiService.tuo(
-				hakuOid,hakukohdeOid, prosessi, new ByteArrayInputStream(b.toByteArray()));
+				hakuOid,hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
 		return prosessi.toProsessiId();
 	}
 }
