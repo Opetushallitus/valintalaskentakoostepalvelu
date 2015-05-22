@@ -17,10 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -120,12 +117,7 @@ public class LaskentaStarter {
         final String hakuOid = laskenta.getHakuOid();
         LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
 
-        if (hakukohdeViitteet == null || hakukohdeViitteet.isEmpty()) {
-            LOG.error("Valintaperusteet palautti tyhjat hakukohdeviitteet haulle {}!", hakuOid);
-            actorParamsCallback.accept(null);
-            return;
-        }
-        final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet);
+        final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet != null ? publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet) : new ArrayList<>();
         if (haunHakukohdeOidit.isEmpty()) {
             LOG.error("Haulla {} ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", hakuOid);
             seurantaAsyncResource.merkkaaLaskennanTila(laskenta.getUuid(), LaskentaTila.PERUUTETTU);
