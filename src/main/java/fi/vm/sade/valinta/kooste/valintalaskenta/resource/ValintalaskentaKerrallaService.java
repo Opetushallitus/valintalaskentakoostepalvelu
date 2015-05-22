@@ -43,6 +43,11 @@ public class ValintalaskentaKerrallaService {
         String hakuOid = laskentaParams.getHakuOid();
         Maski maski = laskentaParams.getMaski();
 
+        if (StringUtils.isBlank(hakuOid)) {
+            LOG.error("HakuOid on pakollinen");
+            throw new RuntimeException("HakuOid on pakollinen");
+        }
+
         Optional<String> uuidForExistingNonMaskedLaskenta = uuidForExistingNonMaskedLaskenta(laskentaParams.getMaski(), hakuOid);
         if (uuidForExistingNonMaskedLaskenta.isPresent()) {
             returnExistingLaskenta(uuidForExistingNonMaskedLaskenta.get(), callback);
