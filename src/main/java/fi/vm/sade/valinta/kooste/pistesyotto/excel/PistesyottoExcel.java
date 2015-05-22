@@ -206,52 +206,7 @@ public class PistesyottoExcel {
 				ApplicationAdditionalDataComparator.ASCENDING);
 
 		// Asennetaan konvertterit
-		Collection<PistesyottoDataArvo> dataArvot = Lists.newArrayList();
-		for (ValintaperusteDTO valintaperuste : valintaperusteet) {
-			LOG.info("Tunniste=={}, osallistumisentunniste={}", valintaperuste.getTunniste(), valintaperuste.getOsallistuminenTunniste());
-			if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
-					.getFunktiotyyppi())) {
-				Double max = asNumber(valintaperuste.getMax());
-				Double min = asNumber(valintaperuste.getMin());
-				if (min != null && max != null) {
-					dataArvot.add(new NumeroDataArvo(min, max,
-							VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, StringUtils
-									.trimToEmpty(valintaperuste.getTunniste())
-									.replace(".", ","), VAKIO_OSALLISTUI,
-							StringUtils.trimToEmpty(valintaperuste
-									.getOsallistuminenTunniste())));
-				} else if (valintaperuste.getArvot() != null
-						&& !valintaperuste.getArvot().isEmpty()) {
-					dataArvot.add(new DiskreettiDataArvo(valintaperuste
-							.getArvot(), VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO,
-							StringUtils.trimToEmpty(
-									valintaperuste.getTunniste()).replace(".",
-									","), VAKIO_OSALLISTUI, StringUtils
-									.trimToEmpty(valintaperuste
-											.getOsallistuminenTunniste())));
-				} else {
-                    dataArvot.add(new NumeroDataArvo(0, 0,
-                            VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, StringUtils
-                            .trimToEmpty(valintaperuste.getTunniste())
-                            .replace(".", ","), VAKIO_OSALLISTUI,
-                            StringUtils.trimToEmpty(valintaperuste
-                                    .getOsallistuminenTunniste())));
-
-				}
-			} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(valintaperuste
-					.getFunktiotyyppi())) {
-				dataArvot.add(new BooleanDataArvo(TOTUUSARVO_KONVERSIO,
-						VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO, StringUtils
-								.trimToEmpty(valintaperuste.getTunniste()),
-						VAKIO_OSALLISTUI, StringUtils
-								.trimToEmpty(valintaperuste
-										.getOsallistuminenTunniste())));
-			} else {
-				LOG.error("Tunnistamaton funktiotyyppi! Peruutetaan pistesyoton luonti!");
-				throw new RuntimeException(
-						"Tunnistamaton syote! Peruutetaan pistesyoton luonti!");
-			}
-		}
+		Collection<PistesyottoDataArvo> dataArvot = getPistesyotonDataArvot(valintaperusteet);
 		Map<String, String> oidToHetu = hakemukset.stream().collect(
 				Collectors.toMap(Hakemus::getOid, h -> new HakemusWrapper(h)
 						.getHenkilotunnusTaiSyntymaaika()));
@@ -346,6 +301,46 @@ public class PistesyottoExcel {
         // Piilotettavat sarakkeet:
         // Piilotettavat rivit: 4=valintakoetunnisteet
 		this.excel = new Excel("Pistesyöttö", rivit, new int[] { }, new int[] { 4 });
+	}
+
+	private Collection<PistesyottoDataArvo> getPistesyotonDataArvot(List<ValintaperusteDTO> valintaperusteet) {
+		Collection<PistesyottoDataArvo> dataArvot = Lists.newArrayList();
+		for (ValintaperusteDTO valintaperuste : valintaperusteet) {
+			LOG.info("Tunniste=={}, osallistumisentunniste={}", valintaperuste.getTunniste(), valintaperuste.getOsallistuminenTunniste());
+			if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste.getFunktiotyyppi())) {
+				Double max = asNumber(valintaperuste.getMax());
+				Double min = asNumber(valintaperuste.getMin());
+				if (min != null && max != null) {
+					dataArvot.add(new NumeroDataArvo(min, max,
+							VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO,
+							StringUtils.trimToEmpty(valintaperuste.getTunniste()).replace(".", ","),
+							VAKIO_OSALLISTUI,
+							StringUtils.trimToEmpty(valintaperuste.getOsallistuminenTunniste())));
+				} else if (valintaperuste.getArvot() != null && !valintaperuste.getArvot().isEmpty()) {
+					dataArvot.add(new DiskreettiDataArvo(valintaperuste.getArvot(),
+							VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO,
+							StringUtils.trimToEmpty(valintaperuste.getTunniste()).replace(".", ","),
+							VAKIO_OSALLISTUI,
+							StringUtils.trimToEmpty(valintaperuste.getOsallistuminenTunniste())));
+				} else {
+					dataArvot.add(new NumeroDataArvo(0, 0,
+							VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO,
+							StringUtils.trimToEmpty(valintaperuste.getTunniste()).replace(".", ","),
+							VAKIO_OSALLISTUI,
+							StringUtils.trimToEmpty(valintaperuste.getOsallistuminenTunniste())));
+				}
+			} else if (Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(valintaperuste.getFunktiotyyppi())) {
+				dataArvot.add(new BooleanDataArvo(TOTUUSARVO_KONVERSIO,
+						VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO,
+						StringUtils.trimToEmpty(valintaperuste.getTunniste()),
+						VAKIO_OSALLISTUI,
+						StringUtils.trimToEmpty(valintaperuste.getOsallistuminenTunniste())));
+			} else {
+				LOG.error("Tunnistamaton funktiotyyppi! Peruutetaan pistesyoton luonti!");
+				throw new RuntimeException("Tunnistamaton syote! Peruutetaan pistesyoton luonti!");
+			}
+		}
+		return dataArvot;
 	}
 
 	private List<String> createValintakokeet(List<ValintaperusteDTO> valintaperusteet) {
