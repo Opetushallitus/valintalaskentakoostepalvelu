@@ -235,18 +235,16 @@ public class LaskentaActorFactory {
         if (LaskentaTyyppi.VALINTARYHMALASKENTA.equals(actorParams.getLaskentaTyyppi())) {
             LOG.info("Muodostetaan VALINTARYHMALASKENTA");
             return createValintaryhmaActor(laskentaSupervisor, actorParams);
-        } else {
-            if (LaskentaTyyppi.VALINTAKOELASKENTA.equals(actorParams.getLaskentaTyyppi())) {
-                LOG.info("Muodostetaan VALINTAKOELASKENTA");
-                return createValintakoelaskentaActor(laskentaSupervisor, actorParams);
-            }
-            if (LaskentaTyyppi.VALINTALASKENTA.equals(actorParams.getLaskentaTyyppi())) {
-                LOG.info("Muodostetaan VALINTALASKENTA");
-                return createValintalaskentaActor(laskentaSupervisor, actorParams);
-            } else {
-                LOG.info("Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}", actorParams.getValinnanvaihe(), actorParams.isValintakoelaskenta());
-                return createValintalaskentaJaValintakoelaskentaActor(laskentaSupervisor, actorParams);
-            }
         }
+        if (LaskentaTyyppi.VALINTAKOELASKENTA.equals(actorParams.getLaskentaTyyppi())) {
+            LOG.info("Muodostetaan VALINTAKOELASKENTA");
+            return createValintakoelaskentaActor(laskentaSupervisor, actorParams);
+        }
+        if (LaskentaTyyppi.VALINTALASKENTA.equals(actorParams.getLaskentaTyyppi())) {
+            LOG.info("Muodostetaan VALINTALASKENTA");
+            return createValintalaskentaActor(laskentaSupervisor, actorParams);
+        }
+        LOG.info("Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}", actorParams.getValinnanvaihe(), actorParams.isValintakoelaskenta());
+        return createValintalaskentaJaValintakoelaskentaActor(laskentaSupervisor, actorParams);
     }
 }
