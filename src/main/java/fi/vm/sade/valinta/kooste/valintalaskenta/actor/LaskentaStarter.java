@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
@@ -77,28 +78,30 @@ public class LaskentaStarter {
             seurantaAsyncResource.merkkaaLaskennanTila(laskenta.getUuid(), LaskentaTila.PERUUTETTU);
             actorParamsCallback.accept(null);
         }  else {
-            ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametrit -> {
-                        actorParamsCallback.accept(
-                                new LaskentaActorParams(
-                                        new LaskentaStartParams(
-                                                laskenta.getUuid(),
-                                                hakuOid,
-                                                laskenta.isErillishaku(),
-                                                true,
-                                                LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
-                                                laskenta.getValinnanvaihe(),
-                                                laskenta.getValintakoelaskenta(),
-                                                haunHakukohdeOidit,
-                                                laskenta.getTyyppi()
-                                        ),
-                                        parametrit)
-                        );
-                    },
+            ohjausparametritAsyncResource.haeHaunOhjausparametrit(
+                    hakuOid,
+                    parametrit -> actorParamsCallback.accept(laskentaActorParams(hakuOid, laskenta, haunHakukohdeOidit, parametrit)),
                     poikkeus -> {
                         LOG.error("Ohjausparametrien luku epäonnistui: {} {}", poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
                         actorParamsCallback.accept(null);
                     });
         }
+    }
+
+    private LaskentaActorParams laskentaActorParams(String hakuOid, LaskentaDto laskenta, List<HakukohdeJaOrganisaatio> haunHakukohdeOidit, ParametritDTO parametrit) {
+        return new LaskentaActorParams(
+                new LaskentaStartParams(
+                        laskenta.getUuid(),
+                        hakuOid,
+                        laskenta.isErillishaku(),
+                        true,
+                        LaskentaTyyppi.VALINTARYHMA.equals(laskenta.getTyyppi()),
+                        laskenta.getValinnanvaihe(),
+                        laskenta.getValintakoelaskenta(),
+                        haunHakukohdeOidit,
+                        laskenta.getTyyppi()
+                ),
+                parametrit);
     }
 
     private List<HakukohdeJaOrganisaatio> publishedNonNulltoHakukohdeJaOrganisaatio(final List<HakukohdeViiteDTO> hakukohdeViitteet) {
