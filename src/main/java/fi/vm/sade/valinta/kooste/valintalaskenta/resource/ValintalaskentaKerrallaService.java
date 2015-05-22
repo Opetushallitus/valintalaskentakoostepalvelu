@@ -42,37 +42,27 @@ public class ValintalaskentaKerrallaService {
     public void kaynnistaLaskentaHaulle(LaskentaParams laskentaParams, Consumer<Response> callback) {
         String hakuOid = laskentaParams.getHakuOid();
         Maski maski = laskentaParams.getMaski();
-        if (StringUtils.isBlank(hakuOid)) {
-            LOG.error("HakuOid on pakollinen");
-            throw new RuntimeException("HakuOid on pakollinen");
+        
+        Optional<String> uuidForExistingNonMaskedLaskenta = uuidForExistingNonMaskedLaskenta(laskentaParams.getMaski(), hakuOid);
+        if (uuidForExistingNonMaskedLaskenta.isPresent()) {
+            returnExistingLaskenta(uuidForExistingNonMaskedLaskenta.get(), callback);
+        } else {
+            LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
+            haunHakukohteet(
+                    hakuOid,
+                    (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> notifyWorkIfHakukohdeOidsAvailable(
+                            haunHakukohteetOids,
+                            maski,
+                            (Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus) -> createLaskenta(
+                                    hakukohdeOids,
+                                    laskennanAloitus,
+                                    laskentaParams,
+                                    callback
+                            ),
+                            callback
+                    ),
+                    (Throwable poikkeus) -> callback.accept(errorResponse(poikkeus.getMessage())));
         }
-        // maskilla kaynnistettaessa luodaan aina uusi laskenta
-        if (!maski.isMask()) { // muuten tarkistetaan onko laskenta jo olemassa
-            // Kaynnissa oleva laskenta koko haulle
-            final Optional<Laskenta> ajossaOlevaLaskentaHaulle = haeAjossaOlevaLaskentaHaulle(hakuOid);
-            if (ajossaOlevaLaskentaHaulle.isPresent()) {
-                // palautetaan seurattavaksi ajossa olevan hakukohteen seurantatunnus
-                final String uuid = ajossaOlevaLaskentaHaulle.get().getUuid();
-                LOG.warn("Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun", hakuOid, uuid);
-                callback.accept(redirectResponse(uuid));
-                return;
-            }
-        }
-        LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
-        haunHakukohteet(
-                hakuOid,
-                (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> notifyWorkIfHakukohdeOidsAvailable(
-                        haunHakukohteetOids,
-                        maski,
-                        (Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus) -> createLaskenta(
-                                hakukohdeOids,
-                                laskennanAloitus,
-                                laskentaParams,
-                                callback
-                        ),
-                        callback
-                ),
-                (Throwable poikkeus) -> callback.accept(errorResponse(poikkeus.getMessage())));
     }
 
     public void kaynnistaLaskentaUudelleen(final String uuid, final Consumer<Response> callbackResponse) {
@@ -271,5 +261,15 @@ public class ValintalaskentaKerrallaService {
                 .filter(hk -> hk.getOrganisaatioOid() != null)
                 .map(hk -> new HakukohdeDto(hk.getHakukohdeOid(), hk.getOrganisaatioOid()))
                 .collect(Collectors.toList());
+    }
+
+    private Optional<String> uuidForExistingNonMaskedLaskenta(Maski maski, String hakuOid) {
+        final Optional<Laskenta> ajossaOlevaLaskentaHaulle = !maski.isMask() ? haeAjossaOlevaLaskentaHaulle(hakuOid) : Optional.<Laskenta>empty();
+        return ajossaOlevaLaskentaHaulle.isPresent() ? Optional.of(ajossaOlevaLaskentaHaulle.get().getUuid()) : Optional.<String>empty();
+    }
+
+    private void returnExistingLaskenta(String uuid, Consumer<Response> callback) {
+        LOG.warn("Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun", uuid, uuid);
+        callback.accept(redirectResponse(uuid));
     }
 }
