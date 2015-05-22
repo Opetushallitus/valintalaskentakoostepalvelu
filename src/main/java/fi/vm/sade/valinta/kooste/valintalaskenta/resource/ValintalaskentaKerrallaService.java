@@ -48,18 +48,27 @@ public class ValintalaskentaKerrallaService {
             returnExistingLaskenta(uuidForExistingNonMaskedLaskenta.get(), callback);
         } else {
             LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
-            haunHakukohteet(
+            if (StringUtils.isBlank(hakuOid)) {
+                LOG.error("Yritettiin hakea hakukohteita ilman hakuOidia!");
+                throw new RuntimeException("Yritettiin hakea hakukohteita ilman hakuOidia!");
+            }
+            valintaperusteetAsyncResource.haunHakukohteet(
                     hakuOid,
-                    (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> notifyWorkIfHakukohdeOidsAvailable(
-                            haunHakukohteetOids,
-                            maski,
-                            (Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus) -> createLaskenta(
-                                    hakukohdeOids,
-                                    laskennanAloitus,
-                                    laskentaParams,
+                    (List<HakukohdeViiteDTO> hakukohdeViitteet) -> kasitteleHakukohdeViitteet(
+                            hakukohdeViitteet,
+                            hakuOid,
+                            (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> notifyWorkIfHakukohdeOidsAvailable(
+                                    haunHakukohteetOids,
+                                    maski,
+                                    (Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus) -> createLaskenta(
+                                            hakukohdeOids,
+                                            laskennanAloitus,
+                                            laskentaParams,
+                                            callback
+                                    ),
                                     callback
                             ),
-                            callback
+                            (Throwable poikkeus) -> callback.accept(errorResponse(poikkeus.getMessage()))
                     ),
                     (Throwable poikkeus) -> callback.accept(errorResponse(poikkeus.getMessage())));
         }
