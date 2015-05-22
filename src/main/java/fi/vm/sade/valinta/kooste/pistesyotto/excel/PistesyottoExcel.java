@@ -4,23 +4,16 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
@@ -40,7 +33,6 @@ import fi.vm.sade.valinta.kooste.util.ApplicationAdditionalDataComparator;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
-import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.function.ValintakoeOsallistuminenDTOFunction;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
@@ -199,34 +191,8 @@ public class PistesyottoExcel {
 				.addKeskitettyTeksti("Tiedot")
 				.addKeskitettyTeksti("Henkilötunnus");
 		valintakoeOtsikkoRiviBuilder.addTyhja().addTyhja().addTyhja();
-		for (String valintakoe : FluentIterable.from(valintaperusteet)
-		//
-				.transform(new Function<ValintaperusteDTO, String>() {
-					@Override
-					public String apply(ValintaperusteDTO valintaperuste) {
-						if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
-								.getFunktiotyyppi())
-								&& !StringUtils.isBlank(valintaperuste.getMin())
-								&& !StringUtils.isBlank(valintaperuste.getMax())) {
-							// create value constraint
 
-							return new StringBuilder()
-									.append(valintaperuste.getKuvaus())
-									.append(" (")
-									.append(Formatter
-											.suomennaNumero(new BigDecimal(
-													valintaperuste.getMin())))
-									.append(" - ")
-									.append(Formatter
-											.suomennaNumero(new BigDecimal(
-													valintaperuste.getMax())))
-									.append(")").toString();
-						} else {
-							return valintaperuste.getKuvaus();
-						}
-
-					}
-				}).toList()) {
+		for (String valintakoe : createValintakokeet(valintaperusteet)) {
 			otsikkoRiviBuilder.addTyhja().addKeskitettyTeksti("Osallistuminen");
 			valintakoeOtsikkoRiviBuilder.addSolu(new Teksti(valintakoe, true,
 					true, false, 0, 2, false));
@@ -380,6 +346,25 @@ public class PistesyottoExcel {
         // Piilotettavat sarakkeet:
         // Piilotettavat rivit: 4=valintakoetunnisteet
 		this.excel = new Excel("Pistesyöttö", rivit, new int[] { }, new int[] { 4 });
+	}
+
+	private List<String> createValintakokeet(List<ValintaperusteDTO> valintaperusteet) {
+		return (List<String>) valintaperusteet.stream().map(valintaperuste -> {
+			if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste.getFunktiotyyppi())
+					&& !StringUtils.isBlank(valintaperuste.getMin())
+					&& !StringUtils.isBlank(valintaperuste.getMax())) {
+				// create value constraint
+				return new StringBuilder()
+						.append(valintaperuste.getKuvaus())
+						.append(" (")
+						.append(Formatter.suomennaNumero(new BigDecimal(valintaperuste.getMin())))
+						.append(" - ")
+						.append(Formatter.suomennaNumero(new BigDecimal(valintaperuste.getMax())))
+						.append(")").toString();
+			} else {
+				return valintaperuste.getKuvaus();
+			}
+		}).collect(Collectors.toList());
 	}
 
 	private Double asNumber(String value) {
