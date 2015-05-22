@@ -113,7 +113,6 @@ public class ValintalaskentaKerrallaService {
         return valintalaskentaValvomo
                 .runningLaskentas()
                 .stream()
-                        // Tama haku ... ja koko haun laskennasta on kyse
                 .filter(l -> hakuOid.equals(l.getHakuOid()) && !l.isOsittainenLaskenta())
                 .findFirst();
     }
