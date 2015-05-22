@@ -40,17 +40,39 @@ public class ValintalaskentaKerrallaService {
     public ValintalaskentaKerrallaService() {}
 
     public void kaynnistaLaskentaHaulle(LaskentaParams laskentaParams, Consumer<Response> callback) {
-        kaynnistaLaskenta(
-                laskentaParams.getHakuOid(),
-                laskentaParams.getMaski(),
-                (Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus) -> createLaskenta(
-                        hakukohdeOids,
-                        laskennanAloitus,
-                        laskentaParams,
+        String hakuOid = laskentaParams.getHakuOid();
+        Maski maski = laskentaParams.getMaski();
+        if (StringUtils.isBlank(hakuOid)) {
+            LOG.error("HakuOid on pakollinen");
+            throw new RuntimeException("HakuOid on pakollinen");
+        }
+        // maskilla kaynnistettaessa luodaan aina uusi laskenta
+        if (!maski.isMask()) { // muuten tarkistetaan onko laskenta jo olemassa
+            // Kaynnissa oleva laskenta koko haulle
+            final Optional<Laskenta> ajossaOlevaLaskentaHaulle = haeAjossaOlevaLaskentaHaulle(hakuOid);
+            if (ajossaOlevaLaskentaHaulle.isPresent()) {
+                // palautetaan seurattavaksi ajossa olevan hakukohteen seurantatunnus
+                final String uuid = ajossaOlevaLaskentaHaulle.get().getUuid();
+                LOG.warn("Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun", hakuOid, uuid);
+                callback.accept(redirectResponse(uuid));
+                return;
+            }
+        }
+        LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
+        haunHakukohteet(
+                hakuOid,
+                (List<HakukohdeJaOrganisaatio> haunHakukohteetOids) -> notifyWorkIfHakukohdeOidsAvailable(
+                        haunHakukohteetOids,
+                        maski,
+                        (Collection<HakukohdeJaOrganisaatio> hakukohdeOids, Consumer<String> laskennanAloitus) -> createLaskenta(
+                                hakukohdeOids,
+                                laskennanAloitus,
+                                laskentaParams,
+                                callback
+                        ),
                         callback
                 ),
-                callback
-        );
+                (Throwable poikkeus) -> callback.accept(errorResponse(poikkeus.getMessage())));
     }
 
     public void kaynnistaLaskentaUudelleen(final String uuid, final Consumer<Response> callbackResponse) {
