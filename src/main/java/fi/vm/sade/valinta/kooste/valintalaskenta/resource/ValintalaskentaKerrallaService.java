@@ -58,16 +58,12 @@ public class ValintalaskentaKerrallaService {
                         List<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(
                                 hakukohdeViitteet,
                                 hakuOid,
+                                laskentaParams.getMaski(),
                                 callback
                         );
                         createLaskenta(
                                 haunHakukohteetOids,
-                                (String uuid) -> notifyWorkAvailable(
-                                        haunHakukohteetOids,
-                                        maski,
-                                        uuid,
-                                        callback
-                                ),
+                                (String uuid) -> notifyWorkAvailable(uuid, callback),
                                 laskentaParams,
                                 callback
                         );
@@ -89,17 +85,14 @@ public class ValintalaskentaKerrallaService {
                     (LaskentaDto laskenta) -> valintaperusteetAsyncResource.haunHakukohteet(
                             laskenta.getHakuOid(),
                             (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
-                                List<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(
+                                Maski maski = createMaskiFrom(laskenta);
+                                kasitteleHakukohdeViitteet(
                                         hakukohdeViitteet,
                                         laskenta.getHakuOid(),
+                                        maski,
                                         callbackResponse
                                 );
-                                notifyWorkAvailable(
-                                        haunHakukohteetOids,
-                                        createMaskiFrom(laskenta),
-                                        laskenta.getUuid(),
-                                        callbackResponse
-                                );
+                                notifyWorkAvailable(laskenta.getUuid(), callbackResponse);
                             },
                             (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage()))
                     ),
@@ -125,6 +118,7 @@ public class ValintalaskentaKerrallaService {
     private List<HakukohdeJaOrganisaatio> kasitteleHakukohdeViitteet(
             final List<HakukohdeViiteDTO> hakukohdeViitteet,
             final String hakuOid,
+            final Maski maski,
             final Consumer<Response> callback
     ) {
         LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
@@ -139,30 +133,24 @@ public class ValintalaskentaKerrallaService {
                 .filter(hakukohdeOid -> hakukohdeOid.getTila().equals("JULKAISTU"))
                 .map(u -> new HakukohdeJaOrganisaatio(u.getOid(), u.getTarjoajaOid()))
                 .collect(Collectors.toList());
-        if (haunHakukohdeOids.isEmpty()) {
+
+        Collection<HakukohdeJaOrganisaatio> oids = maski.isMask() ? maski.maskaa(haunHakukohdeOids) : haunHakukohdeOids;
+        if (oids.isEmpty()) {
             String msg = "Haulla " + hakuOid + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?";
             LOG.error(msg);
             callback.accept(errorResponse(msg));
             throw new RuntimeException(msg);
         } else {
-            return haunHakukohdeOids;
+            return (List<HakukohdeJaOrganisaatio>) oids;
         }
     }
 
     private void notifyWorkAvailable(
-            final Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids,
-            final Maski maski,
             final String uuid,
             final Consumer<Response> callbackResponse
     ) {
-        Collection<HakukohdeJaOrganisaatio> oids = maski.isMask() ? maski.maskaa(haunHakukohteetOids) : haunHakukohteetOids;
-        if (!oids.isEmpty() && uuid != null) {
-            valintalaskentaRoute.workAvailable();
-            callbackResponse.accept(redirectResponse(uuid));
-        } else {
-            String cause = oids.isEmpty() ? "Haulla ei ole " + (maski.isMask() ? "maskin jalkeen " : "") + "hakukohteita." : "Uuid:ta ei ole";
-            throw new RuntimeException("Laskentaa ei voida aloittaa: " + cause);
-        }
+        valintalaskentaRoute.workAvailable();
+        callbackResponse.accept(redirectResponse(uuid));
     }
 
     private void createLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
