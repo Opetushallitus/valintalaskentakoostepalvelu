@@ -180,14 +180,6 @@ public class ValintalaskentaKerrallaService {
         return Response.serverError().entity(errorMessage).build();
     }
 
-    private Maski createMaskiFrom(final LaskentaDto laskenta) {
-        final List<String> hakukohdeOids = laskenta.getHakukohteet().stream()
-                .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
-                .map(HakukohdeDto::getHakukohdeOid)
-                .collect(Collectors.toList());
-        return new Maski(true, hakukohdeOids);
-    }
-
     private List<HakukohdeDto> toHakukohdeDto(Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
         return hakukohdeData.stream()
                 .filter(Objects::nonNull)
