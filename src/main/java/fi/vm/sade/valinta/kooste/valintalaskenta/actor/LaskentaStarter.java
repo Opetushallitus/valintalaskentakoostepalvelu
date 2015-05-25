@@ -8,9 +8,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
+import fi.vm.sade.valinta.seuranta.dto.*;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -117,8 +115,7 @@ public class LaskentaStarter {
     private Maski luoMaskiLaskennanPohjalta(final LaskentaDto laskenta) {
         final List<String> hakukohdeOids = laskenta.getHakukohteet().stream()
                 .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
-                .map(h -> new HakukohdeJaOrganisaatio(h.getHakukohdeOid(), h.getOrganisaatioOid()))
-                .map(HakukohdeJaOrganisaatio::getHakukohdeOid)
+                .map(HakukohdeDto::getHakukohdeOid)
                 .collect(Collectors.toList());
 
         return new Maski(true, hakukohdeOids);
