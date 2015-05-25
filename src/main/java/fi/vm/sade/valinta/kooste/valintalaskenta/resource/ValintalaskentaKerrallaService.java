@@ -84,16 +84,7 @@ public class ValintalaskentaKerrallaService {
                     uuid,
                     (LaskentaDto laskenta) -> valintaperusteetAsyncResource.haunHakukohteet(
                             laskenta.getHakuOid(),
-                            (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
-                                Maski maski = createMaskiFrom(laskenta);
-                                kasitteleHakukohdeViitteet(
-                                        hakukohdeViitteet,
-                                        laskenta.getHakuOid(),
-                                        maski,
-                                        callbackResponse
-                                );
-                                notifyWorkAvailable(laskenta.getUuid(), callbackResponse);
-                            },
+                            (List<HakukohdeViiteDTO> hakukohdeViitteet) -> notifyWorkAvailable(laskenta.getUuid(), callbackResponse),
                             (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage()))
                     ),
                     (Throwable t) -> {
