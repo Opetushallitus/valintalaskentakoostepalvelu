@@ -74,7 +74,7 @@ public class LaskentaStarter {
         Collection<HakukohdeJaOrganisaatio> oids = maski.isMask() ? maski.maskaa(haunHakukohdeOidit) : haunHakukohdeOidit;
         if (oids.isEmpty()) {
             cancelLaskenta("Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", laskenta.getUuid(), actorParamsCallback);
-        }  else {
+        } else {
             ohjausparametritAsyncResource.haeHaunOhjausparametrit(
                     hakuOid,
                     parametrit -> actorParamsCallback.accept(laskentaActorParams(hakuOid, laskenta, oids, parametrit)),
