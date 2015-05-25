@@ -115,12 +115,9 @@ public class LaskentaStarter {
     }
 
     private Maski luoMaskiLaskennanPohjalta(final LaskentaDto laskenta) {
-        final List<HakukohdeJaOrganisaatio> hakukohdeMaski = laskenta.getHakukohteet().stream()
+        final List<String> hakukohdeOids = laskenta.getHakukohteet().stream()
                 .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
                 .map(h -> new HakukohdeJaOrganisaatio(h.getHakukohdeOid(), h.getOrganisaatioOid()))
-                .collect(Collectors.toList());
-
-        List<String> hakukohdeOids = hakukohdeMaski.stream()
                 .map(HakukohdeJaOrganisaatio::getHakukohdeOid)
                 .collect(Collectors.toList());
 
