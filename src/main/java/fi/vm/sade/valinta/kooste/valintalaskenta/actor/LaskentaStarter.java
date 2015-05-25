@@ -119,11 +119,11 @@ public class LaskentaStarter {
                 .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
                 .map(h -> new HakukohdeJaOrganisaatio(h.getHakukohdeOid(), h.getOrganisaatioOid()))
                 .collect(Collectors.toList());
-        return new Maski(
-                true,
-                hakukohdeMaski.stream()
-                        .map(HakukohdeJaOrganisaatio::getHakukohdeOid)
-                        .collect(Collectors.toList())
-        );
+
+        List<String> hakukohdeOids = hakukohdeMaski.stream()
+                .map(HakukohdeJaOrganisaatio::getHakukohdeOid)
+                .collect(Collectors.toList());
+
+        return new Maski(true, hakukohdeOids);
     }
 }
