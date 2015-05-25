@@ -102,9 +102,9 @@ public class LaskentaStarter {
     private List<HakukohdeJaOrganisaatio> publishedNonNulltoHakukohdeJaOrganisaatio(final List<HakukohdeViiteDTO> hakukohdeViitteet) {
         return hakukohdeViitteet.stream()
                 .filter(Objects::nonNull)
-                .filter(hakukohdeOid -> hakukohdeOid.getOid() != null)
-                .filter(hakukohdeOid -> hakukohdeOid.getTila().equals("JULKAISTU"))
-                .map(u -> new HakukohdeJaOrganisaatio(u.getOid(), u.getTarjoajaOid()))
+                .filter(h -> h.getOid() != null)
+                .filter(h -> h.getTila().equals("JULKAISTU"))
+                .map(h -> new HakukohdeJaOrganisaatio(h.getOid(), h.getTarjoajaOid()))
                 .collect(Collectors.toList());
     }
 
