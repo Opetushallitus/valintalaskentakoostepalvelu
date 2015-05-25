@@ -77,13 +77,13 @@ public class LaskentaStarter {
         }  else {
             ohjausparametritAsyncResource.haeHaunOhjausparametrit(
                     hakuOid,
-                    parametrit -> actorParamsCallback.accept(laskentaActorParams(hakuOid, laskenta, haunHakukohdeOidit, parametrit)),
+                    parametrit -> actorParamsCallback.accept(laskentaActorParams(hakuOid, laskenta, oids, parametrit)),
                     poikkeus -> cancelLaskenta("Ohjausparametrien luku epäonnistui: " + poikkeus.getMessage() + " " + Arrays.toString(poikkeus.getStackTrace()), laskenta.getUuid(), actorParamsCallback)
             );
         }
     }
 
-    private LaskentaActorParams laskentaActorParams(String hakuOid, LaskentaDto laskenta, List<HakukohdeJaOrganisaatio> haunHakukohdeOidit, ParametritDTO parametrit) {
+    private LaskentaActorParams laskentaActorParams(String hakuOid, LaskentaDto laskenta, Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, ParametritDTO parametrit) {
         return new LaskentaActorParams(
                 new LaskentaStartParams(
                         laskenta.getUuid(),
