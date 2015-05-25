@@ -47,7 +47,7 @@ public class ValintalaskentaKerrallaService {
             throw new RuntimeException("HakuOid on pakollinen");
         }
 
-        Optional<String> uuidForExistingNonMaskedLaskenta = uuidForExistingNonMaskedLaskenta(laskentaParams.getMaski(), hakuOid);
+        Optional<String> uuidForExistingNonMaskedLaskenta = uuidForExistingNonMaskedLaskenta(maski, hakuOid);
         if (uuidForExistingNonMaskedLaskenta.isPresent()) {
             returnExistingLaskenta(uuidForExistingNonMaskedLaskenta.get(), callback);
         } else {
@@ -58,7 +58,7 @@ public class ValintalaskentaKerrallaService {
                         Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(
                                 hakukohdeViitteet,
                                 hakuOid,
-                                laskentaParams.getMaski(),
+                                maski,
                                 callback
                         );
                         createLaskenta(
