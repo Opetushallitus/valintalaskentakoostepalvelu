@@ -55,7 +55,7 @@ public class ValintalaskentaKerrallaService {
             valintaperusteetAsyncResource.haunHakukohteet(
                     hakuOid,
                     (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
-                        List<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(
+                        Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(
                                 hakukohdeViitteet,
                                 hakuOid,
                                 laskentaParams.getMaski(),
@@ -106,7 +106,7 @@ public class ValintalaskentaKerrallaService {
                 .findFirst();
     }
 
-    private List<HakukohdeJaOrganisaatio> kasitteleHakukohdeViitteet(
+    private Collection<HakukohdeJaOrganisaatio> kasitteleHakukohdeViitteet(
             final List<HakukohdeViiteDTO> hakukohdeViitteet,
             final String hakuOid,
             final Maski maski,
@@ -132,7 +132,7 @@ public class ValintalaskentaKerrallaService {
             callback.accept(errorResponse(msg));
             throw new RuntimeException(msg);
         } else {
-            return (List<HakukohdeJaOrganisaatio>) oids;
+            return oids;
         }
     }
 
