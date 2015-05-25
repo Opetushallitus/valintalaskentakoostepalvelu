@@ -7,6 +7,8 @@ import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyn
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
@@ -67,7 +69,10 @@ public class LaskentaStarter {
         LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
 
         final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet != null ? publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet) : new ArrayList<>();
-        if (haunHakukohdeOidit.isEmpty()) {
+        final Maski maski = luoMaskiLaskennanPohjalta(laskenta);
+
+        Collection<HakukohdeJaOrganisaatio> oids = maski.isMask() ? maski.maskaa(haunHakukohdeOidit) : haunHakukohdeOidit;
+        if (oids.isEmpty()) {
             cancelLaskenta("Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", laskenta.getUuid(), actorParamsCallback);
         }  else {
             ohjausparametritAsyncResource.haeHaunOhjausparametrit(
@@ -107,5 +112,18 @@ public class LaskentaStarter {
         LOG.error(msg);
         seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
         actorParamsCallback.accept(null);
+    }
+
+    private Maski luoMaskiLaskennanPohjalta(final LaskentaDto laskenta) {
+        final List<HakukohdeJaOrganisaatio> hakukohdeMaski = laskenta.getHakukohteet().stream()
+                .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
+                .map(h -> new HakukohdeJaOrganisaatio(h.getHakukohdeOid(), h.getOrganisaatioOid()))
+                .collect(Collectors.toList());
+        return new Maski(
+                true,
+                hakukohdeMaski.stream()
+                        .map(HakukohdeJaOrganisaatio::getHakukohdeOid)
+                        .collect(Collectors.toList())
+        );
     }
 }
