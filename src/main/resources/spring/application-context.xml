@@ -501,7 +501,7 @@
 	<!-- Seuranta Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.DokumentinSeurantaAsyncResourceImpl" />
-	<bean
+	<bean id="LaskentaSeurantaAsyncResource"
 			class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.LaskentaSeurantaAsyncResourceImpl" />
 	<!-- Dokumenttipalvelu Async -->
 	<bean class="fi.vm.sade.valinta.kooste.external.resource.dokumentti.impl.DokumenttiAsyncResourceImpl" />
