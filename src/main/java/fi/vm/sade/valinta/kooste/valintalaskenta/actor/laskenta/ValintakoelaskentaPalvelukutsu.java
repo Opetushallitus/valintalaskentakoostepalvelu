@@ -33,6 +33,7 @@ public class ValintakoelaskentaPalvelukutsu extends
 		AbstraktiLaskentaPalvelukutsu implements LaskentaPalvelukutsu {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintakoelaskentaPalvelukutsu.class);
+	private final String uuid;
 	private final ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu;
 	private final HakemuksetPalvelukutsu hakemuksetPalvelukutsu;
 	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
@@ -59,6 +60,7 @@ public class ValintakoelaskentaPalvelukutsu extends
 						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								suoritusrekisteriPalvelukutsu,
 								suoritusrekisteriStrategia)));
+		this.uuid = hakukohdeOid.getUuid();
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
 		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
 		this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
@@ -83,7 +85,8 @@ public class ValintakoelaskentaPalvelukutsu extends
 		if (valintaperusteet == null) {
 			throw new NullPointerException("Valintaperusteet oli null dataa!");
 		}
-		return new LaskeDTO(erillishaku,getHakukohdeOid(), muodostaHakemuksetDTO(
+		return new LaskeDTO(
+				uuid, erillishaku,getHakukohdeOid(), muodostaHakemuksetDTO(
 				getHakukohdeOid(), hakemukset,
 				suoritusrekisteriPalvelukutsu.getOppijat()), valintaperusteet);
 	}

@@ -30,6 +30,7 @@ public class ValintalaskentaJaValintakoelaskentaPalvelukutsu extends
 		AbstraktiLaskentaPalvelukutsu implements LaskentaPalvelukutsu {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintalaskentaJaValintakoelaskentaPalvelukutsu.class);
+	private final String uuid;
 	private final ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu;
 	private final HakemuksetPalvelukutsu hakemuksetPalvelukutsu;
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
@@ -70,6 +71,7 @@ public class ValintalaskentaJaValintakoelaskentaPalvelukutsu extends
 						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								suoritusrekisteriPalvelukutsu,
 								suoritusrekisteriStrategia)));
+		this.uuid = hakukohdeOid.getUuid();
 		this.hakijaryhmatPalvelukutsu = hakijaryhmatPalvelukutsu;
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
 		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
@@ -80,7 +82,7 @@ public class ValintalaskentaJaValintakoelaskentaPalvelukutsu extends
 
 	private LaskeDTO muodostaLaskeDTO() {
 		try {
-			LaskeDTO l = new LaskeDTO(erillishaku, getHakukohdeOid(), muodostaHakemuksetDTO(
+			LaskeDTO l = new LaskeDTO(uuid, erillishaku, getHakukohdeOid(), muodostaHakemuksetDTO(
 					getHakukohdeOid(), hakemuksetPalvelukutsu.getHakemukset(),
 					suoritusrekisteriPalvelukutsu.getOppijat()),
 					valintaperusteetPalvelukutsu.getValintaperusteet(),

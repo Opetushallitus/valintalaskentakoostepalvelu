@@ -34,6 +34,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 		AbstraktiLaskentaPalvelukutsu implements LaskentaPalvelukutsu {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(ValintakoelaskentaPalvelukutsu.class);
+	private final String uuid;
 	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 	private final List<ValintaryhmaPalvelukutsuYhdiste> valintaryhmaPalvelukutsuYhdiste;
 	private final AtomicReference<Runnable> callback = new AtomicReference<>();
@@ -55,6 +56,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 				.concat(hakemuksetPalvelukutsut, valintaperusteetPalvelukutsut,
 						hakijaryhmatPalvelukutsut,
 						suoritusrekisteriPalvelukutsut)));
+		this.uuid = hakukohdeOid.getUuid();
 		this.erillishaku = erillishaku;
 		this.valintaryhmaPalvelukutsuYhdiste = valintaryhmaPalvelukutsuYhdiste;
 		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
@@ -78,7 +80,9 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 				.stream()
 				.map(y -> {
 					try {
-						LaskeDTO l = new LaskeDTO(erillishaku,y.getHakukohdeOid(),
+						LaskeDTO l = new LaskeDTO(
+								uuid,
+								erillishaku,y.getHakukohdeOid(),
 								muodostaHakemuksetDTO(y.getHakukohdeOid(), y
 										.getHakemuksetPalvelukutsu()
 										.getHakemukset(), y
