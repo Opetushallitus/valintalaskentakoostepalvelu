@@ -134,10 +134,7 @@ public class ValintalaskentaKerrallaService {
         }
     }
 
-    private void notifyWorkAvailable(
-            final String uuid,
-            final Consumer<Response> callbackResponse
-    ) {
+    private void notifyWorkAvailable(final String uuid, final Consumer<Response> callbackResponse) {
         valintalaskentaRoute.workAvailable();
         callbackResponse.accept(redirectResponse(uuid));
     }
