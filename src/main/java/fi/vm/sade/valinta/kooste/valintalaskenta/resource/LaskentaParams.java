@@ -3,8 +3,6 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 
-import javax.ws.rs.core.Response;
-import java.util.function.Consumer;
 
 public class LaskentaParams {
     private final LaskentaTyyppi laskentatyyppi;
