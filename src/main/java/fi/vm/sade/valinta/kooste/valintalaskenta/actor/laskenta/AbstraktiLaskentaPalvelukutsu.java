@@ -31,132 +31,130 @@ import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
+ *         <p/>
  *         Abstrakti laskenta tekee tilapaivitykset ja palvelukutsut.
  *         Varsinainen laskennan toteuttaja tekee laskennan ja laskentaDTO:n
  *         luonnin.
- * 
  */
 public abstract class AbstraktiLaskentaPalvelukutsu extends
-		AbstraktiPalvelukutsu implements LaskentaPalvelukutsu {
-	private final Logger LOG = LoggerFactory
-			.getLogger(AbstraktiLaskentaPalvelukutsu.class);
-	private final Collection<PalvelukutsuJaPalvelukutsuStrategia> palvelukutsut;
-	private final Consumer<Palvelukutsu> laskuri;
-	private final ParametritDTO parametritDTO;
-	private volatile HakukohdeTila tila = HakukohdeTila.TEKEMATTA;
-	private final AtomicReference<Consumer<LaskentaPalvelukutsu>> takaisinkutsu;
+        AbstraktiPalvelukutsu implements LaskentaPalvelukutsu {
+    private final Logger LOG = LoggerFactory
+            .getLogger(AbstraktiLaskentaPalvelukutsu.class);
+    private final Collection<PalvelukutsuJaPalvelukutsuStrategia> palvelukutsut;
+    private final Consumer<Palvelukutsu> laskuri;
+    private final ParametritDTO parametritDTO;
+    private volatile HakukohdeTila tila = HakukohdeTila.TEKEMATTA;
+    private final AtomicReference<Consumer<LaskentaPalvelukutsu>> takaisinkutsu;
 
-	public AbstraktiLaskentaPalvelukutsu(
-			ParametritDTO parametritDTO,
-			UuidHakukohdeJaOrganisaatio kuvaus,
-			Collection<PalvelukutsuJaPalvelukutsuStrategia> palvelukutsut) {
-		super(kuvaus);
-		this.parametritDTO = parametritDTO;
-		this.palvelukutsut = palvelukutsut;
-		this.takaisinkutsu = new AtomicReference<>();
-		final PalvelukutsuLaskuri palvelukutsulaskuri = new PalvelukutsuLaskuri(
-				palvelukutsut.size());
-		this.laskuri = pk -> {
-			yksiVaiheValmistui();
-			if (takaisinkutsu.get() == null) {
-				return;
-			}
-			if (pk.onkoPeruutettu()) { // peruutetaan laskenta talle
-										// hakukohteelle
-				try {
-					peruuta();
-				} catch(Exception e) {
+    public AbstraktiLaskentaPalvelukutsu(
+            ParametritDTO parametritDTO,
+            UuidHakukohdeJaOrganisaatio kuvaus,
+            Collection<PalvelukutsuJaPalvelukutsuStrategia> palvelukutsut) {
+        super(kuvaus);
+        this.parametritDTO = parametritDTO;
+        this.palvelukutsut = palvelukutsut;
+        this.takaisinkutsu = new AtomicReference<>();
+        final PalvelukutsuLaskuri palvelukutsulaskuri = new PalvelukutsuLaskuri(
+                palvelukutsut.size());
+        this.laskuri = pk -> {
+            yksiVaiheValmistui();
+            if (takaisinkutsu.get() == null) {
+                return;
+            }
+            if (pk.onkoPeruutettu()) { // peruutetaan laskenta talle
+                // hakukohteelle
+                try {
+                    peruuta();
+                } catch (Exception e) {
 
-				}
-				try {
-					takaisinkutsu.getAndUpdate(tk -> {
-						if (tk != null) {
-							tk.accept(AbstraktiLaskentaPalvelukutsu.this);
-						}
-						return null;
-					});
-				} catch (Exception e) {
-					LOG.error(
-							"Laskentapalvelukutsun takaisinkutsu epaonnistui {}",
-							e.getMessage());
-					throw e;
-				}
+                }
+                try {
+                    takaisinkutsu.getAndUpdate(tk -> {
+                        if (tk != null) {
+                            tk.accept(AbstraktiLaskentaPalvelukutsu.this);
+                        }
+                        return null;
+                    });
+                } catch (Exception e) {
+                    LOG.error(
+                            "Laskentapalvelukutsun takaisinkutsu epaonnistui {}",
+                            e.getMessage());
+                    throw e;
+                }
 
-			} else {
-				int yhteensa = palvelukutsulaskuri.getYhteensa();
-				int laskuriNyt = palvelukutsulaskuri.palvelukutsuSaapui();
+            } else {
+                int yhteensa = palvelukutsulaskuri.getYhteensa();
+                int laskuriNyt = palvelukutsulaskuri.palvelukutsuSaapui();
 
-				LOG.info("Saatiin {} (uuid={},hakukohde/tunniste={}): {}/{}",
-						StringUtils.rightPad(pk.getClass()
-						.getSimpleName(),38),getUuid(), getHakukohdeOid(), (-laskuriNyt)
-						+ yhteensa, yhteensa);
-				if (laskuriNyt == 0) {
-					tila = HakukohdeTila.VALMIS;
-					try {
-						takaisinkutsu.getAndUpdate(tk -> {
-							if (tk != null) {
-								tk.accept(AbstraktiLaskentaPalvelukutsu.this);
-							}
-							return null;
-						});
-					} catch (Exception e) {
-						LOG.error(
-								"Laskentapalvelukutsun takaisinkutsu epaonnistui {}",
-								e.getMessage());
-						throw e;
-					}
-				} else if (laskuriNyt < 0) {
-					LOG.error("Laskenta sai enemman paluuarvoja palvelukutsuista kuin kutsuja tehtiin!");
-					throw new RuntimeException(
-							"Laskenta sai enemman paluuarvoja palvelukutsuista kuin kutsuja tehtiin!");
-				}
-			}
-		};
-	}
+                LOG.info("Saatiin {} (uuid={},hakukohde/tunniste={}): {}/{}",
+                        StringUtils.rightPad(pk.getClass()
+                                .getSimpleName(), 38), getUuid(), getHakukohdeOid(), (-laskuriNyt)
+                                + yhteensa, yhteensa);
+                if (laskuriNyt == 0) {
+                    tila = HakukohdeTila.VALMIS;
+                    try {
+                        takaisinkutsu.getAndUpdate(tk -> {
+                            if (tk != null) {
+                                tk.accept(AbstraktiLaskentaPalvelukutsu.this);
+                            }
+                            return null;
+                        });
+                    } catch (Exception e) {
+                        LOG.error(
+                                "Laskentapalvelukutsun takaisinkutsu epaonnistui {}",
+                                e.getMessage());
+                        throw e;
+                    }
+                } else if (laskuriNyt < 0) {
+                    LOG.error("Laskenta sai enemman paluuarvoja palvelukutsuista kuin kutsuja tehtiin!");
+                    throw new RuntimeException(
+                            "Laskenta sai enemman paluuarvoja palvelukutsuista kuin kutsuja tehtiin!");
+                }
+            }
+        };
+    }
 
-	/**
-	 * Ylikirjoita callbackiksi
-	 */
-	protected void yksiVaiheValmistui() {
+    /**
+     * Ylikirjoita callbackiksi
+     */
+    protected void yksiVaiheValmistui() {
 
-	}
+    }
 
-	/**
-	 * Peruuttaa kaikki palvelukutsut esitoina talle palvelukutsulle.
-	 */
-	@Override
-	public void peruuta() {
-		try {
-			super.peruuta();
-			palvelukutsut.forEach(pk -> pk.peruuta());
-		} catch (Exception e) {
-			LOG.error(
-					"AbstraktiLaskentaPalvelukutsun peruutus epaonnistui! {}",
-					e.getMessage());
-		}
-	}
+    /**
+     * Peruuttaa kaikki palvelukutsut esitoina talle palvelukutsulle.
+     */
+    @Override
+    public void peruuta() {
+        try {
+            super.peruuta();
+            palvelukutsut.forEach(pk -> pk.peruuta());
+        } catch (Exception e) {
+            LOG.error(
+                    "AbstraktiLaskentaPalvelukutsun peruutus epaonnistui! {}",
+                    e.getMessage());
+        }
+    }
 
-	@Override
-	public HakukohdeTila getHakukohdeTila() {
-		if (onkoPeruutettu()) {
-			return HakukohdeTila.KESKEYTETTY;
-		}
-		return tila;
-	}
+    @Override
+    public HakukohdeTila getHakukohdeTila() {
+        if (onkoPeruutettu()) {
+            return HakukohdeTila.KESKEYTETTY;
+        }
+        return tila;
+    }
 
-	public void laitaTyojonoon(Consumer<LaskentaPalvelukutsu> takaisinkutsu) {
-		LOG.info("Laitetaan tyot tyojonoon hakukohteelle {}", getHakukohdeOid());
-		this.takaisinkutsu.set(takaisinkutsu);
-		palvelukutsut.forEach(tyojono -> tyojono
-				.laitaPalvelukutsuTyojonoon(laskuri));
-	}
+    public void laitaTyojonoon(Consumer<LaskentaPalvelukutsu> takaisinkutsu) {
+        LOG.info("Laitetaan tyot tyojonoon hakukohteelle {}", getHakukohdeOid());
+        this.takaisinkutsu.set(takaisinkutsu);
+        palvelukutsut.forEach(tyojono -> tyojono
+                .laitaPalvelukutsuTyojonoon(laskuri));
+    }
 
-	protected List<HakemusDTO> muodostaHakemuksetDTO(String hakukohdeOid,
-			List<Hakemus> hakemukset, List<Oppija> oppijat) {
-		return HakemuksetConverterUtil.muodostaHakemuksetDTO(hakukohdeOid,
-				hakemukset, oppijat, parametritDTO);
-	}
+    protected List<HakemusDTO> muodostaHakemuksetDTO(String hakukohdeOid,
+                                                     List<Hakemus> hakemukset, List<Oppija> oppijat) {
+        return HakemuksetConverterUtil.muodostaHakemuksetDTO(hakukohdeOid,
+                hakemukset, oppijat, parametritDTO);
+    }
 }
