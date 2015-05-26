@@ -83,7 +83,7 @@ public class Callback<T> implements InvocationCallback<Response> {
 			InputStream stream = (InputStream) response.getEntity();
 			json = StringUtils.trimToEmpty(IOUtils.toString(stream));
 			IOUtils.closeQuietly(stream);
-			if (json.length() == 0) {
+			if (json.length() == 0 && response.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
 				LOG.error(
 						"Paluuarvona saadun viestin pituus oli nolla merkkia palvelukutsulle {}{} (Response {} {})",
 						url, palvelukutsu, response.getStatus(), response
