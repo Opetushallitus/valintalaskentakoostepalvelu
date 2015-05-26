@@ -67,7 +67,7 @@ public class LaskentaStarter {
         LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
 
         final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet != null ? publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet) : new ArrayList<>();
-        final Maski maski = luoMaskiLaskennanPohjalta(laskenta);
+        final Maski maski = createMaskiFromLaskenta(laskenta);
 
         Collection<HakukohdeJaOrganisaatio> oids = maski.isMask() ? maski.maskaa(haunHakukohdeOidit) : haunHakukohdeOidit;
         if (oids.isEmpty()) {
@@ -112,7 +112,7 @@ public class LaskentaStarter {
         actorParamsCallback.accept(null);
     }
 
-    private Maski luoMaskiLaskennanPohjalta(final LaskentaDto laskenta) {
+    private Maski createMaskiFromLaskenta(final LaskentaDto laskenta) {
         final List<String> hakukohdeOids = laskenta.getHakukohteet().stream()
                 .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
                 .map(HakukohdeDto::getHakukohdeOid)
