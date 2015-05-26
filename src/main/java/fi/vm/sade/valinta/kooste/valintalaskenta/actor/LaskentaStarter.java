@@ -61,10 +61,10 @@ public class LaskentaStarter {
                                     laskenta,
                                     actorParamsCallback
                             ),
-                            (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Haun kohteiden haku epäonnistui haulle: " + uuid, uuid, actorParamsCallback)
+                            (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Haun kohteiden haku epäonnistui haulle: " + uuid, uuid)
                     );
                 },
-                (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Laskennan haku epäonnistui " + t.getMessage() + ": \r\n" + Arrays.toString(t.getStackTrace()), uuid, actorParamsCallback)
+                (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Laskennan haku epäonnistui " + t.getMessage() + ": \r\n" + Arrays.toString(t.getStackTrace()), uuid)
         );
     }
 
@@ -76,12 +76,12 @@ public class LaskentaStarter {
 
         Collection<HakukohdeJaOrganisaatio> oids = maski.isMask() ? maski.maskaa(haunHakukohdeOidit) : haunHakukohdeOidit;
         if (oids.isEmpty()) {
-            cancelLaskenta(laskennankaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", laskenta.getUuid(), actorParamsCallback);
+            cancelLaskenta(laskennankaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", laskenta.getUuid());
         } else {
             ohjausparametritAsyncResource.haeHaunOhjausparametrit(
                     hakuOid,
                     parametrit -> actorParamsCallback.accept(laskentaActorParams(hakuOid, laskenta, oids, parametrit)),
-                    (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Ohjausparametrien luku epäonnistui: " + t.getMessage() + " " + Arrays.toString(t.getStackTrace()), laskenta.getUuid(), actorParamsCallback)
+                    (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Ohjausparametrien luku epäonnistui: " + t.getMessage() + " " + Arrays.toString(t.getStackTrace()), laskenta.getUuid())
             );
         }
     }
@@ -111,11 +111,10 @@ public class LaskentaStarter {
                 .collect(Collectors.toList());
     }
 
-    private void cancelLaskenta(ActorRef laskennanKaynnistajaActor, String msg, String uuid, Consumer<LaskentaActorParams> actorParamsCallback) {
+    private void cancelLaskenta(ActorRef laskennanKaynnistajaActor, String msg, String uuid) {
         LOG.error(msg);
         seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, HakukohdeTila.KESKEYTETTY);
         laskennanKaynnistajaActor.tell(LaskentaStarterActor.WorkerAvailable.class, ActorRef.noSender());
-        actorParamsCallback.accept(null);
     }
 
     private Maski createMaskiFromLaskenta(final LaskentaDto laskenta) {
