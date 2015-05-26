@@ -1,30 +1,24 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+
 
 /**
  * @author Jussi Jartamo
  */
 public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
+    private final static Logger LOG = LoggerFactory.getLogger(AbstraktiPalvelukutsu.class);
 
-    private final static Logger LOG = LoggerFactory
-            .getLogger(AbstraktiPalvelukutsu.class);
     private final AtomicReference<Peruutettava> peruutettava = new AtomicReference<>();
     private final UuidHakukohdeJaOrganisaatio kuvaus;
 
@@ -43,26 +37,20 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
 
     public abstract void vapautaResurssit();
 
-    protected Consumer<Throwable> failureCallback(
-            final Consumer<Palvelukutsu> takaisinkutsu) {
+    protected Consumer<Throwable> failureCallback(final Consumer<Palvelukutsu> takaisinkutsu) {
         AbstraktiPalvelukutsu self = this;
         final AtomicBoolean K = new AtomicBoolean(false);
         return poikkeus -> {
             if (!K.compareAndSet(false, true)) {
-                LOG.debug("Silmukka havaittu {}", self.getClass()
-                        .getSimpleName());
+                LOG.debug("Silmukka havaittu {}", self.getClass().getSimpleName());
                 return;
             }
-            LOG.error("{} epaonnistui (uuid={}, hakukohde={})! {} {}", self.getClass().getSimpleName(),
-                    getUuid(), getHakukohdeOid(),
-                    poikkeus.getMessage()
-            );//, Arrays.asList(poikkeus.getStackTrace()).stream().map(a -> a.toString()).collect(Collectors.joining(",\r\n")));
+            LOG.error("{} epaonnistui (uuid={}, hakukohde={})! {} {}", self.getClass().getSimpleName(), getUuid(), getHakukohdeOid(), poikkeus.getMessage());
             try {
                 self.peruuta();
                 takaisinkutsu.accept(self);
             } catch (Exception e) {
-                LOG.error("Takaisinkutsun teko epaonnistui {}! {}", self
-                        .getClass().getSimpleName(), e.getMessage());
+                LOG.error("Takaisinkutsun teko epaonnistui {}! {}", self.getClass().getSimpleName(), e.getMessage());
             }
         };
     }
@@ -79,8 +67,7 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
                 try {
                     aiempi.peruuta();
                 } catch (Exception e) {
-                    LOG.error("Palvelukutsun peruutus epaonnistui {}",
-                            e.getMessage());
+                    LOG.error("Palvelukutsun peruutus epaonnistui {}", e.getMessage());
                 }
             }
             // palautetaan tyhjareferenssi koska ei tarvita enaa referenssia
@@ -92,8 +79,7 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
     /**
      * @return true jos palvelukutsu aloitettiin
      */
-    protected boolean aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(
-            Supplier<Peruutettava> palvelukutsunAloittavaFunktio) {
+    protected boolean aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(Supplier<Peruutettava> palvelukutsunAloittavaFunktio) {
         if (peruutettava.getAndUpdate(aikaisempiArvo -> {
             if (aikaisempiArvo == null) {
                 return palvelukutsunAloittavaFunktio.get();
@@ -101,7 +87,6 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
                 return aikaisempiArvo;
             }
         }) != null) {
-            //LOG.error("Palvelukutsun uudelleen aktivointi poikkeus!");
             throw new PalvelukutsunUudelleenAktivointiPoikkeus();
         }
         return true;
