@@ -80,7 +80,7 @@ public class LaskentaActorSystemTest {
             String uuid = (String) invocation.getArguments()[0];
             ((Consumer<LaskentaActorParams>) invocation.getArguments()[1]).accept(new LaskentaActorParams(new LaskentaStartParams(uuid, HAKUOID, false, 0, false, new ArrayList<HakukohdeJaOrganisaatio>(), LaskentaTyyppi.HAKUKOHDE), null));
             return null;
-        }).when(LaskentaStarter).fetchLaskentaParams(any(), any());
+        }).when(LaskentaStarter).fetchLaskentaParams(any(), any(), any());
 
         final Object signal = new Object();
 
