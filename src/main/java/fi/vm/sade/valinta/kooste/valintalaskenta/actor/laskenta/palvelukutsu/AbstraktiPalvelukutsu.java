@@ -19,99 +19,99 @@ import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
  */
 public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
 
-	private final static Logger LOG = LoggerFactory
-			.getLogger(AbstraktiPalvelukutsu.class);
-	private final AtomicReference<Peruutettava> peruutettava = new AtomicReference<>();
-	private final UuidHakukohdeJaOrganisaatio kuvaus;
+    private final static Logger LOG = LoggerFactory
+            .getLogger(AbstraktiPalvelukutsu.class);
+    private final AtomicReference<Peruutettava> peruutettava = new AtomicReference<>();
+    private final UuidHakukohdeJaOrganisaatio kuvaus;
 
-	public AbstraktiPalvelukutsu(UuidHakukohdeJaOrganisaatio kuvaus) {
-		this.kuvaus = kuvaus;
-	}
+    public AbstraktiPalvelukutsu(UuidHakukohdeJaOrganisaatio kuvaus) {
+        this.kuvaus = kuvaus;
+    }
 
-	@Override
-	public int compareTo(Palvelukutsu o) {
-		return getHakukohdeOid().compareTo(o.getHakukohdeOid());
-	}
+    @Override
+    public int compareTo(Palvelukutsu o) {
+        return getHakukohdeOid().compareTo(o.getHakukohdeOid());
+    }
 
-	public boolean onkoPeruutettu() {
-		return TyhjaPeruutettava.tyhjaPeruutettava().equals(peruutettava.get());
-	}
+    public boolean onkoPeruutettu() {
+        return TyhjaPeruutettava.tyhjaPeruutettava().equals(peruutettava.get());
+    }
 
-	public abstract void vapautaResurssit();
+    public abstract void vapautaResurssit();
 
-	protected Consumer<Throwable> failureCallback(
-			final Consumer<Palvelukutsu> takaisinkutsu) {
-		AbstraktiPalvelukutsu self = this;
-		final AtomicBoolean K = new AtomicBoolean(false);
-		return poikkeus -> {
-			if (!K.compareAndSet(false, true)) {
-				LOG.debug("Silmukka havaittu {}", self.getClass()
-						.getSimpleName());
-				return;
-			}
-			LOG.error("{} epaonnistui (uuid={}, hakukohde={})! {} {}", self.getClass().getSimpleName(),
-					getUuid(), getHakukohdeOid(),
-					poikkeus.getMessage()
-			);//, Arrays.asList(poikkeus.getStackTrace()).stream().map(a -> a.toString()).collect(Collectors.joining(",\r\n")));
-			try {
-				self.peruuta();
-				takaisinkutsu.accept(self);
-			} catch (Exception e) {
-				LOG.error("Takaisinkutsun teko epaonnistui {}! {}", self
-						.getClass().getSimpleName(), e.getMessage());
-			}
-		};
-	}
+    protected Consumer<Throwable> failureCallback(
+            final Consumer<Palvelukutsu> takaisinkutsu) {
+        AbstraktiPalvelukutsu self = this;
+        final AtomicBoolean K = new AtomicBoolean(false);
+        return poikkeus -> {
+            if (!K.compareAndSet(false, true)) {
+                LOG.debug("Silmukka havaittu {}", self.getClass()
+                        .getSimpleName());
+                return;
+            }
+            LOG.error("{} epaonnistui (uuid={}, hakukohde={})! {} {}", self.getClass().getSimpleName(),
+                    getUuid(), getHakukohdeOid(),
+                    poikkeus.getMessage()
+            );//, Arrays.asList(poikkeus.getStackTrace()).stream().map(a -> a.toString()).collect(Collectors.joining(",\r\n")));
+            try {
+                self.peruuta();
+                takaisinkutsu.accept(self);
+            } catch (Exception e) {
+                LOG.error("Takaisinkutsun teko epaonnistui {}! {}", self
+                        .getClass().getSimpleName(), e.getMessage());
+            }
+        };
+    }
 
-	/**
-	 * Toimii niin kauan oikein kun peruutus tehdaan talla mekanismilla. Jos
-	 * alkuperaista cancellablea kutsutaan muualta peruutetuksi niin se jaa
-	 * huomaamatta
-	 */
-	public void peruuta() {
-		peruutettava.updateAndGet(aiempi -> {
-			if (aiempi != null) {
-				// peruutetaan jos aito palvelukutsu meneillaan
-				try {
-					aiempi.peruuta();
-				} catch (Exception e) {
-					LOG.error("Palvelukutsun peruutus epaonnistui {}",
-							e.getMessage());
-				}
-			}
-			// palautetaan tyhjareferenssi koska ei tarvita enaa referenssia
-			// palvelukutsuun ja peruutuksen tarkastus suoraviivaisempaa
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		});
-	}
+    /**
+     * Toimii niin kauan oikein kun peruutus tehdaan talla mekanismilla. Jos
+     * alkuperaista cancellablea kutsutaan muualta peruutetuksi niin se jaa
+     * huomaamatta
+     */
+    public void peruuta() {
+        peruutettava.updateAndGet(aiempi -> {
+            if (aiempi != null) {
+                // peruutetaan jos aito palvelukutsu meneillaan
+                try {
+                    aiempi.peruuta();
+                } catch (Exception e) {
+                    LOG.error("Palvelukutsun peruutus epaonnistui {}",
+                            e.getMessage());
+                }
+            }
+            // palautetaan tyhjareferenssi koska ei tarvita enaa referenssia
+            // palvelukutsuun ja peruutuksen tarkastus suoraviivaisempaa
+            return TyhjaPeruutettava.tyhjaPeruutettava();
+        });
+    }
 
-	/**
-	 * @return true jos palvelukutsu aloitettiin
-	 */
-	protected boolean aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(
-			Supplier<Peruutettava> palvelukutsunAloittavaFunktio) {
-		if (peruutettava.getAndUpdate(aikaisempiArvo -> {
-			if (aikaisempiArvo == null) {
-				return palvelukutsunAloittavaFunktio.get();
-			} else {
-				return aikaisempiArvo;
-			}
-		}) != null) {
-			//LOG.error("Palvelukutsun uudelleen aktivointi poikkeus!");
-			throw new PalvelukutsunUudelleenAktivointiPoikkeus();
-		}
-		return true;
-	}
-	public String getUuid() {
-		return kuvaus.getUuid();
-	}
-	public String getHakukohdeOid() {
-		return kuvaus.getHakukohdeJaOrganisaatio().getHakukohdeOid();
-	}
+    /**
+     * @return true jos palvelukutsu aloitettiin
+     */
+    protected boolean aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(
+            Supplier<Peruutettava> palvelukutsunAloittavaFunktio) {
+        if (peruutettava.getAndUpdate(aikaisempiArvo -> {
+            if (aikaisempiArvo == null) {
+                return palvelukutsunAloittavaFunktio.get();
+            } else {
+                return aikaisempiArvo;
+            }
+        }) != null) {
+            //LOG.error("Palvelukutsun uudelleen aktivointi poikkeus!");
+            throw new PalvelukutsunUudelleenAktivointiPoikkeus();
+        }
+        return true;
+    }
+
+    public String getUuid() {
+        return kuvaus.getUuid();
+    }
+
+    public String getHakukohdeOid() {
+        return kuvaus.getHakukohdeJaOrganisaatio().getHakukohdeOid();
+    }
 }
