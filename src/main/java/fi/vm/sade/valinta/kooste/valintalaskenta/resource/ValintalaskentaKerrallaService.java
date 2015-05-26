@@ -99,9 +99,7 @@ public class ValintalaskentaKerrallaService {
     }
 
     private Optional<Laskenta> haeAjossaOlevaLaskentaHaulle(final String hakuOid) {
-        return valintalaskentaValvomo
-                .runningLaskentas()
-                .stream()
+        return valintalaskentaValvomo.runningLaskentas().stream()
                 .filter(l -> hakuOid.equals(l.getHakuOid()) && !l.isOsittainenLaskenta())
                 .findFirst();
     }

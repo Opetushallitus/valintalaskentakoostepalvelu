@@ -25,9 +25,7 @@ public class ValintalaskentaStatusExcelHandler {
 
     public Response createTimeoutErrorXls(final String uuid) {
         final List<Object[]> grid = Lists.newArrayList();
-        grid.add(new Object[]{"Kysely seuranapalveluun (kohteelle /laksenta/"
-                + uuid
-                + ") aikakatkaistiin. Palvelu saattaa olla ylikuormittunut!"});
+        grid.add(new Object[]{"Kysely seuranapalveluun (kohteelle /laksenta/" + uuid + ") aikakatkaistiin. Palvelu saattaa olla ylikuormittunut!"});
 
         final byte[] bytes = getExcelSheetAndGridBytes("Aikakatkaistu", grid);
         LOG.error("Aikakatkaisu Excelin luonnille (kohde /laskenta/{})", uuid);
@@ -48,8 +46,7 @@ public class ValintalaskentaStatusExcelHandler {
                     }
                 },
                 poikkeus -> {
-                    LOG.error("Excelin tietojen haussa seurantapalvelusta(/laskenta/{}) tapahtui virhe: {}",
-                            uuid, poikkeus.getMessage());
+                    LOG.error("Excelin tietojen haussa seurantapalvelusta(/laskenta/{}) tapahtui virhe: {}", uuid, poikkeus.getMessage());
                     excelResponce.accept(luoVirheExcelVastaus("yhteenveto_seurantavirhe.xls", "Virhe seurantapavelun kutsumisessa!", poikkeus));
                 });
     }
