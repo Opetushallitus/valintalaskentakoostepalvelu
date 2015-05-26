@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -12,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
-import fi.vm.sade.valinta.kooste.Util;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
+
 
 /**
  * @author Jussi Jartamo
@@ -63,13 +64,13 @@ public class Maski {
         Set<String> hakukohdeOidsMask = Sets.newHashSet(hakukohteet);
         if (isMask()) {
             if (isWhitelist()) {
-                lopulliset = Util.whitelist(
+                lopulliset = applyWhitelist(
                         hakukohdeOidsMask,
                         original,
                         (s -> LOG.error("Haku ei taysin vastaa syotetyn whitelistin hakukohteita! Puuttuvat hakukohteet \r\n{}", Arrays.toString(s.toArray())))
                 );
             } else if (isBlacklist()) {
-                lopulliset = Util.blacklist(
+                lopulliset = applyBlacklist(
                         hakukohdeOidsMask,
                         original,
                         (s -> LOG.error("Haku ei taysin vastaa syotetyn blacklistin hakukohteita! Ylimaaraiset hakukohteet \r\n{}", Arrays.toString(s.toArray())))
@@ -86,5 +87,31 @@ public class Maski {
         String maskTypeAsString = isWhitelist() ? "Whitelist" : "Blacklist";
         String hakukohteetAsString = hakukohteet != null ? Arrays.toString(hakukohteet.toArray()) : StringUtils.EMPTY;
         return String.format(maskTypeAsString + " Maski {}", hakukohteetAsString);
+    }
+
+    private <T> Set<T> applyWhitelist(Set<T> w, Set<T> t, Consumer<Set<T>> ylimaaraiset) {
+        if (t.containsAll(w)) {
+            return w;
+        } else {
+            Set<T> s = Sets.newHashSet(w);
+            s.removeAll(t);
+            ylimaaraiset.accept(s);
+            Set<T> copy = Sets.newHashSet(w);
+            copy.removeAll(s);
+            return copy;
+        }
+    }
+
+    private <T> Set<T> applyBlacklist(Set<T> b, Set<T> t, Consumer<Collection<T>> ylimaaraiset) {
+        Set<T> copy = Sets.newHashSet(t);
+        copy.removeAll(b);
+        if (t.containsAll(b)) {
+            return copy;
+        } else {
+            Set<T> s = Sets.newHashSet(b);
+            s.removeAll(t);
+            ylimaaraiset.accept(s);
+            return copy;
+        }
     }
 }
