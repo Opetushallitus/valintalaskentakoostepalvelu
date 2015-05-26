@@ -25,101 +25,96 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.Palvel
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
  */
 public class ValintakoelaskentaPalvelukutsu extends
-		AbstraktiLaskentaPalvelukutsu implements LaskentaPalvelukutsu {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ValintakoelaskentaPalvelukutsu.class);
-	private final String uuid;
-	private final ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu;
-	private final HakemuksetPalvelukutsu hakemuksetPalvelukutsu;
-	private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
-	private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
-	private final boolean erillishaku;
-	
-	public ValintakoelaskentaPalvelukutsu(
-			ParametritDTO parametritDTO,
-			boolean erillishaku,
-			UuidHakukohdeJaOrganisaatio hakukohdeOid,
-			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
-			HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
-			ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
-			SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu,
-			PalvelukutsuStrategia hakemuksetStrategia,
-			PalvelukutsuStrategia valintaperusteetStrategia,
-			PalvelukutsuStrategia suoritusrekisteriStrategia) {
-		super(parametritDTO, hakukohdeOid, Arrays
-				.asList(new PalvelukutsuJaPalvelukutsuStrategiaImpl(
-						hakemuksetPalvelukutsu, hakemuksetStrategia),
-						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
-								valintaperusteetPalvelukutsu,
-								valintaperusteetStrategia),
-						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
-								suoritusrekisteriPalvelukutsu,
-								suoritusrekisteriStrategia)));
-		this.uuid = hakukohdeOid.getUuid();
-		this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
-		this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
-		this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
-		this.suoritusrekisteriPalvelukutsu = suoritusrekisteriPalvelukutsu;
-		this.erillishaku = erillishaku;
-	}
+        AbstraktiLaskentaPalvelukutsu implements LaskentaPalvelukutsu {
+    private static final Logger LOG = LoggerFactory
+            .getLogger(ValintakoelaskentaPalvelukutsu.class);
+    private final ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu;
+    private final HakemuksetPalvelukutsu hakemuksetPalvelukutsu;
+    private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
+    private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
+    private final boolean erillishaku;
 
-	@Override
-	public void vapautaResurssit() {
-		valintaperusteetPalvelukutsu.vapautaResurssit();
-		hakemuksetPalvelukutsu.vapautaResurssit();
-		suoritusrekisteriPalvelukutsu.vapautaResurssit();
-	}
+    public ValintakoelaskentaPalvelukutsu(
+            ParametritDTO parametritDTO,
+            boolean erillishaku,
+            UuidHakukohdeJaOrganisaatio hakukohdeOid,
+            ValintalaskentaAsyncResource valintalaskentaAsyncResource,
+            HakemuksetPalvelukutsu hakemuksetPalvelukutsu,
+            ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu,
+            SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu,
+            PalvelukutsuStrategia hakemuksetStrategia,
+            PalvelukutsuStrategia valintaperusteetStrategia,
+            PalvelukutsuStrategia suoritusrekisteriStrategia) {
+        super(parametritDTO, hakukohdeOid, Arrays
+                .asList(new PalvelukutsuJaPalvelukutsuStrategiaImpl(
+                                hakemuksetPalvelukutsu, hakemuksetStrategia),
+                        new PalvelukutsuJaPalvelukutsuStrategiaImpl(
+                                valintaperusteetPalvelukutsu,
+                                valintaperusteetStrategia),
+                        new PalvelukutsuJaPalvelukutsuStrategiaImpl(
+                                suoritusrekisteriPalvelukutsu,
+                                suoritusrekisteriStrategia)));
+        this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
+        this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
+        this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
+        this.suoritusrekisteriPalvelukutsu = suoritusrekisteriPalvelukutsu;
+        this.erillishaku = erillishaku;
+    }
 
-	private LaskeDTO muodostaLaskeDTO() {
-		List<Hakemus> hakemukset = hakemuksetPalvelukutsu.getHakemukset();
-		List<ValintaperusteetDTO> valintaperusteet = valintaperusteetPalvelukutsu
-				.getValintaperusteet();
-		if (hakemukset == null) {
-			throw new NullPointerException("Hakemukset oli null dataa!");
-		}
-		if (valintaperusteet == null) {
-			throw new NullPointerException("Valintaperusteet oli null dataa!");
-		}
-		return new LaskeDTO(
-				uuid, erillishaku,getHakukohdeOid(), muodostaHakemuksetDTO(
-				getHakukohdeOid(), hakemukset,
-				suoritusrekisteriPalvelukutsu.getOppijat()), valintaperusteet);
-	}
+    @Override
+    public void vapautaResurssit() {
+        valintaperusteetPalvelukutsu.vapautaResurssit();
+        hakemuksetPalvelukutsu.vapautaResurssit();
+        suoritusrekisteriPalvelukutsu.vapautaResurssit();
+    }
 
-	@Override
-	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
-		try {
-			final LaskeDTO laskeDTO = muodostaLaskeDTO();
-			try {
-				aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
-					public Peruutettava get() {
-						return valintalaskentaAsyncResource
-								.valintakokeet(
-										laskeDTO,
-										laskentaCallback -> {
-											takaisinkutsu
-													.accept(ValintakoelaskentaPalvelukutsu.this);
-										}, failureCallback(takaisinkutsu));
-					}
-				});
-			} catch (Exception e) {
-				LOG.error(
-						"Valintakoelaskennan palvelukutsun muodostus epaonnistui virheeseen {}",
-						e.getMessage());
-				failureCallback(takaisinkutsu).accept(e);
-			}
-		} catch (Exception e) {
-			LOG.error(
-					"LaskeDTO:n muodostus epaonnistui ValintakoelaskentaPalvelukutsulle: {}",
-					e.getMessage());
-			failureCallback(takaisinkutsu).accept(e);
-		}
-		return this;
-	}
+    private LaskeDTO muodostaLaskeDTO() {
+        List<Hakemus> hakemukset = hakemuksetPalvelukutsu.getHakemukset();
+        List<ValintaperusteetDTO> valintaperusteet = valintaperusteetPalvelukutsu
+                .getValintaperusteet();
+        if (hakemukset == null) {
+            throw new NullPointerException("Hakemukset oli null dataa!");
+        }
+        if (valintaperusteet == null) {
+            throw new NullPointerException("Valintaperusteet oli null dataa!");
+        }
+        return new LaskeDTO(erillishaku, getHakukohdeOid(), muodostaHakemuksetDTO(
+                getHakukohdeOid(), hakemukset,
+                suoritusrekisteriPalvelukutsu.getOppijat()), valintaperusteet);
+    }
+
+    @Override
+    public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
+        try {
+            final LaskeDTO laskeDTO = muodostaLaskeDTO();
+            try {
+                aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
+                    public Peruutettava get() {
+                        return valintalaskentaAsyncResource
+                                .valintakokeet(
+                                        laskeDTO,
+                                        laskentaCallback -> {
+                                            takaisinkutsu
+                                                    .accept(ValintakoelaskentaPalvelukutsu.this);
+                                        }, failureCallback(takaisinkutsu));
+                    }
+                });
+            } catch (Exception e) {
+                LOG.error(
+                        "Valintakoelaskennan palvelukutsun muodostus epaonnistui virheeseen {}",
+                        e.getMessage());
+                failureCallback(takaisinkutsu).accept(e);
+            }
+        } catch (Exception e) {
+            LOG.error(
+                    "LaskeDTO:n muodostus epaonnistui ValintakoelaskentaPalvelukutsulle: {}",
+                    e.getMessage());
+            failureCallback(takaisinkutsu).accept(e);
+        }
+        return this;
+    }
 
 }
