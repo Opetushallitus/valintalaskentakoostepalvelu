@@ -77,8 +77,9 @@ public class LaskentaActorSystemTest {
                 }
         ).when(laskentaActorFactory).createLaskentaActor(any(), any());
         doAnswer(invocation -> {
-            String uuid = (String) invocation.getArguments()[0];
-            ((Consumer<LaskentaActorParams>) invocation.getArguments()[1]).accept(new LaskentaActorParams(new LaskentaStartParams(uuid, HAKUOID, false, 0, false, new ArrayList<HakukohdeJaOrganisaatio>(), LaskentaTyyppi.HAKUKOHDE), null));
+            String uuid = (String) invocation.getArguments()[1];
+            LaskentaStartParams laskentaStartParams = new LaskentaStartParams(uuid, HAKUOID, false, 0, false, new ArrayList<HakukohdeJaOrganisaatio>(), LaskentaTyyppi.HAKUKOHDE);
+            ((Consumer<LaskentaActorParams>) invocation.getArguments()[2]).accept(new LaskentaActorParams(laskentaStartParams, null));
             return null;
         }).when(LaskentaStarter).fetchLaskentaParams(any(), any(), any());
 
