@@ -50,7 +50,7 @@ public class Maski {
     public Collection<HakukohdeJaOrganisaatio> maskaa(Collection<HakukohdeJaOrganisaatio> originalHjaO) {
         Set<String> lopulliset = Collections.emptySet();
         Set<String> original = originalHjaO.stream()
-                .map(hk -> hk.getHakukohdeOid())
+                .map(HakukohdeJaOrganisaatio::getHakukohdeOid)
                 .collect(Collectors.toSet());
         Set<String> hakukohdeOidsMask = Sets.newHashSet(hakukohteet);
         if (isMask()) {
