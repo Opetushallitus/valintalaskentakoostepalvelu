@@ -93,8 +93,8 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         } else {
             LOG.info("Luodaan ja aloitetaan Laskenta uuid:lle {}", uuid);
             laskentaStarter.fetchLaskentaParams(
-                    uuid,
                     laskennanKaynnistajaActor,
+                    uuid,
                     params -> createAndStartLaskenta(params.getLaskentaStartParams(), laskentaActorFactory.createLaskentaActor(this, params))
             );
         }
