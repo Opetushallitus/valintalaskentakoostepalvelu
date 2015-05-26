@@ -22,7 +22,6 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaat
  */
 public class Maski {
     private final static Logger LOG = LoggerFactory.getLogger(Maski.class);
-    private final static String NIMI_FORMAT = "Maski whitelist(%s) blacklist(%s) \r\nMask(%s)";
     private final Collection<String> hakukohteet;
     private final boolean whiteList;
 
@@ -76,9 +75,8 @@ public class Maski {
     }
 
     public String toString() {
-        if (hakukohteet == null) {
-            return String.format(NIMI_FORMAT, isWhitelist(), StringUtils.EMPTY);
-        }
-        return String.format(NIMI_FORMAT, isWhitelist(), isBlacklist(), Arrays.toString(hakukohteet.toArray()));
+        String maskTypeAsString = isWhitelist() ? "Whitelist" : "Blacklist";
+        String hakukohteetAsString = hakukohteet != null ? Arrays.toString(hakukohteet.toArray()) : StringUtils.EMPTY;
+        return String.format(maskTypeAsString + " Maski {}", hakukohteetAsString);
     }
 }
