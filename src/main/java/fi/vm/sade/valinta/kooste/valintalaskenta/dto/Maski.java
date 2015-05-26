@@ -30,13 +30,21 @@ public class Maski {
         this.hakukohteet = null;
     }
 
-    public Maski(boolean whitelist, Collection<String> hakukohteet) {
+    private Maski(boolean whitelist, Collection<String> hakukohteet) {
         this.whiteList = whitelist;
         this.hakukohteet = hakukohteet;
     }
 
     public boolean isMask() {
         return hakukohteet != null && !hakukohteet.isEmpty();
+    }
+
+    public static Maski whitelist(Collection<String> hakukohteet) {
+        return new Maski(true, hakukohteet);
+    }
+
+    public static Maski blacklist(Collection<String> hakukohteet) {
+        return new Maski(false, hakukohteet);
     }
 
     public boolean isBlacklist() {

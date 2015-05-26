@@ -71,7 +71,8 @@ public class ValintalaskentaKerrallaResource {
                 asyncResponse.resume(errorResponce("Uudelleen ajo laskennalle aikakatkaistu!"));
             });
 
-            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, new Maski(whitelist, stringMaski), Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
+            Maski maski = whitelist ? Maski.whitelist(stringMaski) : Maski.blacklist(stringMaski);
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, maski, Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
             asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
