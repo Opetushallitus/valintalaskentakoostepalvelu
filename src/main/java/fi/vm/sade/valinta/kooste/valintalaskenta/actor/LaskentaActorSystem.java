@@ -55,7 +55,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     @PostConstruct
     @Override
     public void workAvailable() {
-        laskennanKaynnistajaActor.tell(new WorkAvailable(), null);
+        laskennanKaynnistajaActor.tell(new WorkAvailable(), ActorRef.noSender());
     }
 
     @Override
