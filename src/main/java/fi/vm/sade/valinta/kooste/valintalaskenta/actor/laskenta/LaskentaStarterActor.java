@@ -42,7 +42,7 @@ final public class LaskentaStarterActor extends UntypedActor {
         if (workerCount.get() < maxWorkers) {
             int numberOfWorkers = workerCount.incrementAndGet();
             LOG.info("Reserving a new worker, workerCount: {}", numberOfWorkers);
-            laskentaSupervisor.fetchAndStartLaskenta();
+            laskentaSupervisor.fetchAndStartLaskenta(this.getSelf());
         }
     }
 

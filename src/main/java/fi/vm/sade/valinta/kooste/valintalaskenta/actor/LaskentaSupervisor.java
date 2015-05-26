@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import akka.actor.ActorRef;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 
 /**
@@ -9,5 +10,5 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
  */
 public interface LaskentaSupervisor extends ValintalaskentaKerrallaRouteValvomo {
 	void ready(String uuid);
-	void fetchAndStartLaskenta();
+	void fetchAndStartLaskenta(ActorRef starterActor);
 }
