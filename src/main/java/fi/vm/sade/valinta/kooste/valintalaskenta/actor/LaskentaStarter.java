@@ -113,7 +113,7 @@ public class LaskentaStarter {
 
     private void cancelLaskenta(ActorRef laskennanKaynnistajaActor, String msg, String uuid, Consumer<LaskentaActorParams> actorParamsCallback) {
         LOG.error(msg);
-        seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
+        seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, HakukohdeTila.KESKEYTETTY);
         laskennanKaynnistajaActor.tell(LaskentaStarterActor.WorkerAvailable.class, ActorRef.noSender());
         actorParamsCallback.accept(null);
     }
