@@ -77,7 +77,8 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     @Override
     public void ready(String uuid) {
         laskennanKaynnistajaActor.tell(new WorkerAvailable(), ActorRef.noSender());
-        stopActor(runningLaskentas.remove(uuid));
+        LaskentaActorWrapper actorWrapper = runningLaskentas.remove(uuid);
+        stopActor(uuid, actorWrapper.laskentaActor());
     }
 
     public void fetchAndStartLaskenta(ActorRef starterActor) {
@@ -115,21 +116,21 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
         runningLaskentas.merge(uuid, new LaskentaActorWrapper(params, laskentaActor), (LaskentaActorWrapper oldValue, LaskentaActorWrapper value) -> {
             LOG.warn("\r\n###\r\n### Laskenta uuid:lle {} haulle {} oli jo kaynnissa! Lopetataan vanha laskenta!\r\n###", uuid, hakuOid);
-            stopActor(oldValue);
+            stopActor(uuid, oldValue.laskentaActor());
             return value;
         });
     }
 
-    private void stopActor(LaskentaActorWrapper l) {
-        if (l != null) {
+    private void stopActor(String uuid, LaskentaActor actor) {
+        if (actor != null) {
             try {
-                TypedActor.get(actorSystem).poisonPill(l.laskentaActor());
-                LOG.info("PoisonPill lahetetty onnistuneesti Actorille " + l.getUuid());
+                TypedActor.get(actorSystem).poisonPill(actor);
+                LOG.info("PoisonPill lahetetty onnistuneesti Actorille " + uuid);
             } catch (Exception e) {
-                LOG.error("PoisonPill lahetys epaonnistui Actorille " + l.getUuid(), e);
+                LOG.error("PoisonPill lahetys epaonnistui Actorille " + uuid, e);
             }
         } else {
-            LOG.warn("Yritettiin sammuttaa laskenta " + l.getUuid() + ", mutta laskenta ei ollut enaa ajossa!");
+            LOG.warn("Yritettiin sammuttaa laskenta " + uuid + ", mutta laskenta ei ollut enaa ajossa!");
         }
     }
 }
