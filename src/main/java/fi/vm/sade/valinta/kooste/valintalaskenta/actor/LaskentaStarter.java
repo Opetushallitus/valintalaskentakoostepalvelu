@@ -76,7 +76,7 @@ public class LaskentaStarter {
             ohjausparametritAsyncResource.haeHaunOhjausparametrit(
                     hakuOid,
                     parametrit -> actorParamsCallback.accept(laskentaActorParams(hakuOid, laskenta, oids, parametrit)),
-                    poikkeus -> cancelLaskenta("Ohjausparametrien luku epäonnistui: " + poikkeus.getMessage() + " " + Arrays.toString(poikkeus.getStackTrace()), laskenta.getUuid(), actorParamsCallback)
+                    (Throwable t) -> cancelLaskenta("Ohjausparametrien luku epäonnistui: " + t.getMessage() + " " + Arrays.toString(t.getStackTrace()), laskenta.getUuid(), actorParamsCallback)
             );
         }
     }
