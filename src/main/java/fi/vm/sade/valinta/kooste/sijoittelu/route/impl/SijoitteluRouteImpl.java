@@ -79,7 +79,7 @@ public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu> i
             .routeId("Sijoittelureitti")
             .threads()
             .process(Reititys.<Sijoittelu>kuluttaja((s -> {
-                    LOG.error("Aloitetaan sijoittelu haulle {}", s.getHakuOid());
+                    LOG.info("Aloitetaan sijoittelu haulle {}", s.getHakuOid());
                     sijoitteluResource.sijoittele(s.getHakuOid(), success -> {
                             s.setValmis();
                         }, e -> {
