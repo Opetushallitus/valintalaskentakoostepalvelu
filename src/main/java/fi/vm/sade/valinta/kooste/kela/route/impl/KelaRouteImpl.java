@@ -541,7 +541,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 										String tarjoajaOid) {
 									try {
 										return koodiCache.get(tarjoajaOid, () -> oppilaitosKomponentti
-															.haeOppilaitosKoodi(tarjoajaOid));
+												.haeOppilaitosKoodi(tarjoajaOid));
 									} catch (Throwable t) {
 										throw new RuntimeException(t);
 									}
@@ -735,13 +735,13 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.process(
 						Reititys.<KelaLuontiJaDokumentti> kuluttaja(luontiJaDokumentti -> {
+							String id = generateId();
 							LOG.info(
-									"Aloitetaan keladokumentin(uuid {}) siirtovaihe dokumenttipalveluun.",
-									luontiJaDokumentti.getLuonti().getUuid());
+									"Aloitetaan keladokumentin(uuid {} ja dokumenttiId) siirtovaihe dokumenttipalveluun.",
+									luontiJaDokumentti.getLuonti().getUuid(), id);
 							try {
 								InputStream filedata = new ByteArrayInputStream(
 										luontiJaDokumentti.getDokumentti());
-								String id = generateId();
 								Long expirationTime = defaultExpirationDate()
 										.getTime();
 								List<String> tags = luontiJaDokumentti
