@@ -99,12 +99,11 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
     @Override
     public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
         try {
-            aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() -> valintalaskentaAsyncResource
-                    .laskeJaSijoittele(
-                            muodostaLaskeDTOs(),
-                            laskentaCallback -> takaisinkutsu.accept(ValintaryhmatKatenoivaValintalaskentaPalvelukutsu.this),
-                            failureCallback(takaisinkutsu))
-            );
+            aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() -> valintalaskentaAsyncResource.laskeJaSijoittele(
+                    muodostaLaskeDTOs(),
+                    laskentaCallback -> takaisinkutsu.accept(ValintaryhmatKatenoivaValintalaskentaPalvelukutsu.this),
+                    failureCallback(takaisinkutsu)
+            ));
         } catch (Exception e) {
             LOG.error("ValintalaskentaPalvelukutsu palvelukutsun muodostus epaonnistui virheeseen {}", e.getMessage());
             failureCallback(takaisinkutsu).accept(e);
