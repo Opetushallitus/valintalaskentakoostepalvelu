@@ -10,5 +10,5 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
  */
 public interface LaskentaSupervisor extends ValintalaskentaKerrallaRouteValvomo {
 	void ready(String uuid);
-	void fetchAndStartLaskenta(ActorRef starterActor);
+	void fetchAndStartLaskenta();
 }

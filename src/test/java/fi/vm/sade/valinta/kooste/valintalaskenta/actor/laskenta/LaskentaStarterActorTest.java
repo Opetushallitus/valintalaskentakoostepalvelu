@@ -39,21 +39,21 @@ public class LaskentaStarterActorTest {
     public void workerProvidedOnWorkAvailableMessage() throws Exception {
         ref.tell(new WorkAvailable(), ActorRef.noSender());
         assertEquals(1, actor.getWorkerCount());
-        verify(laskentaSupervisor, times(1)).fetchAndStartLaskenta(ref);
+        verify(laskentaSupervisor, times(1)).fetchAndStartLaskenta();
     }
 
     @Test
     public void maxWorkersCanBeInitialized() throws Exception {
         signalWorkAvailableTimes(MAX_WORKER_COUNT);
         assertEquals(MAX_WORKER_COUNT, actor.getWorkerCount());
-        verify(laskentaSupervisor, times(MAX_WORKER_COUNT)).fetchAndStartLaskenta(ref);
+        verify(laskentaSupervisor, times(MAX_WORKER_COUNT)).fetchAndStartLaskenta();
     }
 
     @Test
     public void maxWorkersCanNotBeExceeded() throws Exception {
         signalWorkAvailableTimes(MAX_WORKER_COUNT + 1);
         assertEquals(MAX_WORKER_COUNT, actor.getWorkerCount());
-        verify(laskentaSupervisor, times(MAX_WORKER_COUNT)).fetchAndStartLaskenta(ref);
+        verify(laskentaSupervisor, times(MAX_WORKER_COUNT)).fetchAndStartLaskenta();
     }
 
     @Test
@@ -61,7 +61,7 @@ public class LaskentaStarterActorTest {
         signalWorkAvailableTimes(MAX_WORKER_COUNT + 1);
         ref.tell(new WorkerAvailable(), ActorRef.noSender());
         assertEquals(10, actor.getWorkerCount());
-        verify(laskentaSupervisor, times(MAX_WORKER_COUNT + 1)).fetchAndStartLaskenta(ref);
+        verify(laskentaSupervisor, times(MAX_WORKER_COUNT + 1)).fetchAndStartLaskenta();
     }
 
     @Test
@@ -69,14 +69,14 @@ public class LaskentaStarterActorTest {
         ref.tell(new WorkAvailable(), ActorRef.noSender());
         ref.tell(new NoWorkAvailable(), ActorRef.noSender());
         assertEquals(0, actor.getWorkerCount());
-        verify(laskentaSupervisor, times(1)).fetchAndStartLaskenta(ref);
+        verify(laskentaSupervisor, times(1)).fetchAndStartLaskenta();
     }
 
     @Test
     public void workerCountCanNotBeNegative() {
         ref.tell(new NoWorkAvailable(), ActorRef.noSender());
         assertEquals(0, actor.getWorkerCount());
-        verify(laskentaSupervisor, never()).fetchAndStartLaskenta(ref);
+        verify(laskentaSupervisor, never()).fetchAndStartLaskenta();
     }
 
     private void signalWorkAvailableTimes(int count) {

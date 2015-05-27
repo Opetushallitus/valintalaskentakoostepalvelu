@@ -80,11 +80,11 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         stopActor(uuid, actorWrapper.laskentaActor());
     }
 
-    public void fetchAndStartLaskenta(ActorRef starterActor) {
+    public void fetchAndStartLaskenta() {
         seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle(
                 this::startLaskentaIfWorkAvailable,
                 (Throwable t) -> {
-                    starterActor.tell(WorkerAvailable.class, ActorRef.noSender());
+                    laskennanKaynnistajaActor.tell(WorkerAvailable.class, ActorRef.noSender());
                     throw new RuntimeException("Laskennan käynnistys epäonnistui", t);
                 });
     }
