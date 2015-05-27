@@ -2,18 +2,16 @@ package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
 import static fi.vm.sade.valinta.kooste.sijoittelu.komponentti.ModuloiPaivamaaraJaTunnit.moduloiSeuraava;
 import static fi.vm.sade.valinta.kooste.sijoittelu.komponentti.ModuloiPaivamaaraJaTunnit.seuraavaAskel;
+import static org.junit.Assert.assertEquals;
 
 import java.text.ParseException;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.ModuloiPaivamaaraJaTunnit;
 import fi.vm.sade.valinta.kooste.util.Formatter;
 
 public class ModuloiPaivamaaraJaTunnitTest {
@@ -21,69 +19,68 @@ public class ModuloiPaivamaaraJaTunnitTest {
 
     @Test
     public void testaaTuntienModulointi() {
-        Assert.assertTrue(seuraavaAskel(14, 14, 1) == 14);
-        Assert.assertEquals(13, seuraavaAskel(14, 13, 1));
-        Assert.assertTrue(seuraavaAskel(14, 15, 1) == 15);
-        Assert.assertTrue(seuraavaAskel(14, 14, 2) == 14);
-        Assert.assertTrue(seuraavaAskel(14, 15, 2) == 16);
-        Assert.assertTrue(seuraavaAskel(14, 16, 2) == 16);
-        Assert.assertTrue(seuraavaAskel(14, 14, 6) == 14);
-        Assert.assertTrue(seuraavaAskel(14, 15, 6) == 20);
-        Assert.assertTrue(seuraavaAskel(14, 20, 6) == 20);
-        Assert.assertTrue(seuraavaAskel(14, 21, 6) == 26);
-        Assert.assertEquals(8, seuraavaAskel(14, 7, 6));
-        Assert.assertTrue(seuraavaAskel(14, 9, 6) == 14);
-        Assert.assertTrue(seuraavaAskel(14, 7, 6) == 8);
-        Assert.assertTrue(seuraavaAskel(14, 7, 2) == 8);
+        assertEquals(14, seuraavaAskel(14, 14, 1));
+        assertEquals(13, seuraavaAskel(14, 13, 1));
+        assertEquals(15, seuraavaAskel(14, 15, 1));
+        assertEquals(14, seuraavaAskel(14, 14, 2));
+        assertEquals(16, seuraavaAskel(14, 15, 2));
+        assertEquals(16, seuraavaAskel(14, 16, 2));
+        assertEquals(14, seuraavaAskel(14, 14, 6));
+        assertEquals(20, seuraavaAskel(14, 15, 6));
+        assertEquals(20, seuraavaAskel(14, 20, 6));
+        assertEquals(26, seuraavaAskel(14, 21, 6));
+        assertEquals(8, seuraavaAskel(14, 7, 6));
+        assertEquals(14, seuraavaAskel(14, 9, 6));
+        assertEquals(8, seuraavaAskel(14, 7, 6));
+        assertEquals(8, seuraavaAskel(14, 7, 2));
     }
 
     @Test
     public void testaaModulointiaVahaEnnen() throws ParseException {
         {
-            DateTime start = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").parseDateTime("02.10.2014 14:05");
-            DateTime now = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").parseDateTime("05.10.2015 14:03");
-            LOG.info("Aloituspvm {}", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
-            LOG.info("Aloituspvm {}", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
-            Assert.assertEquals("05.10.2015 14:05", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
-            Assert.assertEquals("05.10.2015 14:05", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
+            DateTime start = dateTime("02.10.2014 14:05");
+            DateTime now = dateTime("05.10.2015 14:03");
+
+            assertEquals("05.10.2015 14:05", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
+            assertEquals("05.10.2015 14:05", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
         }
     }
 
     @Test
     public void testaaModulointiaVahanJalkeen() throws ParseException {
         {
-            DateTime start = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").parseDateTime("02.10.2014 14:05");
-            DateTime now = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").parseDateTime("05.10.2015 14:07");
-            LOG.info("Aloituspvm {}", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
-            LOG.info("Aloituspvm {}", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
-            LOG.info("Aloituspvm {}", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
-            Assert.assertTrue("05.10.2015 15:05".equals(Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate())));
-            Assert.assertEquals("05.10.2015 16:05", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
-            Assert.assertTrue("05.10.2015 20:05".equals(Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate())));
+            DateTime start = dateTime("02.10.2014 14:05");
+            DateTime now = dateTime("05.10.2015 14:07");
+
+            assertEquals("05.10.2015 15:05", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
+            assertEquals("05.10.2015 16:05", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
+            assertEquals("05.10.2015 20:05", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
         }
     }
 
     @Test
     public void testaaModulointiaPaljonJalkeen() throws ParseException {
         {
-            DateTime start = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").parseDateTime("02.10.2014 14:05");
-            DateTime now = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").parseDateTime("05.10.2015 18:03");
-            LOG.info("Aloituspvm {}", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
-            LOG.info("Aloituspvm {}", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
-            LOG.info("Aloituspvm {}", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
-            Assert.assertTrue("05.10.2015 18:05".equals(Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate())));
-            Assert.assertTrue("05.10.2015 18:05".equals(Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate())));
-            Assert.assertTrue("05.10.2015 20:05".equals(Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate())));
+            DateTime start = dateTime("02.10.2014 14:05");
+            DateTime now = dateTime("05.10.2015 18:03");
+
+            assertEquals("05.10.2015 18:05", Formatter.paivamaara(moduloiSeuraava(start, now, 1).toDate()));
+            assertEquals("05.10.2015 18:05", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
+            assertEquals("05.10.2015 20:05", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
         }
     }
 
     @Test
     public void testaaModulointiaYlipaivan() throws ParseException {
         {
-            DateTime start = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").parseDateTime("02.10.2014 14:05");
-            DateTime now = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").parseDateTime("05.10.2015 22:03");
-            LOG.info("Aloituspvm {}", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
-            Assert.assertEquals("06.10.2015 02:05", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
+            DateTime start = dateTime("02.10.2014 14:05");
+            DateTime now = dateTime("05.10.2015 22:03");
+
+            assertEquals("06.10.2015 02:05", Formatter.paivamaara(moduloiSeuraava(start, now, 6).toDate()));
         }
+    }
+
+    private static DateTime dateTime(final String time) {
+        return DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").parseDateTime(time);
     }
 }
