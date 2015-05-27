@@ -51,7 +51,8 @@ final public class LaskentaStarterActor extends UntypedActor {
     }
 
     private void decrementWorkerCount() {
-        workerCount.updateAndGet(i -> i > 0 ? i - 1 : i);
+        int workerCount = this.workerCount.updateAndGet(i -> i > 0 ? i - 1 : i);
+        LOG.info("Releasing worker, workerCount: {}", workerCount);
     }
 
     public static class WorkAvailable {}
