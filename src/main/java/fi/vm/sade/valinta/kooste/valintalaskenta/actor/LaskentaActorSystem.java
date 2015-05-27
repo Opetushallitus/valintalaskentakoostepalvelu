@@ -76,7 +76,6 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
     @Override
     public void ready(String uuid) {
-        laskennanKaynnistajaActor.tell(new WorkerAvailable(), ActorRef.noSender());
         LaskentaActorWrapper actorWrapper = runningLaskentas.remove(uuid);
         stopActor(uuid, actorWrapper.laskentaActor());
     }
@@ -122,6 +121,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     }
 
     private void stopActor(String uuid, LaskentaActor actor) {
+        laskennanKaynnistajaActor.tell(new WorkerAvailable(), ActorRef.noSender());
         if (actor != null) {
             try {
                 TypedActor.get(actorSystem).poisonPill(actor);
