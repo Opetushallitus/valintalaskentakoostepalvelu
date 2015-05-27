@@ -32,6 +32,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
     private final List<ValintaryhmaPalvelukutsuYhdiste> valintaryhmaPalvelukutsuYhdiste;
     private final AtomicReference<Runnable> callback = new AtomicReference<>();
     private final boolean erillishaku;
+    private final String uuid;
 
     @SuppressWarnings("unchecked")
     public ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
@@ -50,6 +51,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
                 hakukohdeOid,
                 Lists.newArrayList(Iterables.concat(hakemuksetPalvelukutsut, valintaperusteetPalvelukutsut, hakijaryhmatPalvelukutsut, suoritusrekisteriPalvelukutsut))
         );
+        this.uuid = hakukohdeOid.getUuid();
         this.erillishaku = erillishaku;
         this.valintaryhmaPalvelukutsuYhdiste = valintaryhmaPalvelukutsuYhdiste;
         this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
@@ -73,6 +75,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
                 .map(y -> {
                     try {
                         LaskeDTO l = new LaskeDTO(
+                                uuid,
                                 erillishaku,
                                 y.getHakukohdeOid(),
                                 muodostaHakemuksetDTO(

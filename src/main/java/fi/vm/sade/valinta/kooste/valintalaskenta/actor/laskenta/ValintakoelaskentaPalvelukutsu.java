@@ -32,6 +32,7 @@ public class ValintakoelaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukuts
     private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
     private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
     private final boolean erillishaku;
+    private final String uuid;
 
     public ValintakoelaskentaPalvelukutsu(
             ParametritDTO parametritDTO,
@@ -54,6 +55,7 @@ public class ValintakoelaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukuts
                         new PalvelukutsuJaPalvelukutsuStrategiaImpl<>(suoritusrekisteriPalvelukutsu, suoritusrekisteriStrategia)
                 )
         );
+        this.uuid = hakukohdeOid.getUuid();
         this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
         this.valintaperusteetPalvelukutsu = valintaperusteetPalvelukutsu;
         this.hakemuksetPalvelukutsu = hakemuksetPalvelukutsu;
@@ -77,7 +79,7 @@ public class ValintakoelaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukuts
         if (valintaperusteet == null) {
             throw new NullPointerException("Valintaperusteet oli null dataa!");
         }
-        return new LaskeDTO(erillishaku, getHakukohdeOid(), muodostaHakemuksetDTO(getHakukohdeOid(), hakemukset, suoritusrekisteriPalvelukutsu.getOppijat()), valintaperusteet);
+        return new LaskeDTO(uuid, erillishaku, getHakukohdeOid(), muodostaHakemuksetDTO(getHakukohdeOid(), hakemukset, suoritusrekisteriPalvelukutsu.getOppijat()), valintaperusteet);
     }
 
     @Override

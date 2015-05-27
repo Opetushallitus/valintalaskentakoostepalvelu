@@ -30,6 +30,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu i
     private final HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu;
     private final SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu;
     private final boolean erillishaku;
+    private final String uuid;
 
     @Override
     public void vapautaResurssit() {
@@ -63,6 +64,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu i
                         new PalvelukutsuJaPalvelukutsuStrategiaImpl<>(suoritusrekisteriPalvelukutsu, suoritusrekisteriStrategia)
                 )
         );
+        this.uuid = hakukohdeOid.getUuid();
         this.erillishaku = erillishaku;
         this.hakijaryhmatPalvelukutsu = hakijaryhmatPalvelukutsu;
         this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
@@ -73,6 +75,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu i
 
     private LaskeDTO muodostaLaskeDTO() {
         LaskeDTO l = new LaskeDTO(
+                uuid,
                 erillishaku,
                 getHakukohdeOid(),
                 muodostaHakemuksetDTO(
