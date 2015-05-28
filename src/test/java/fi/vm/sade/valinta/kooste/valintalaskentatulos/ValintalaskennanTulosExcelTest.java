@@ -1,9 +1,12 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
+
+import org.apache.commons.collections.MapUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -11,6 +14,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -18,17 +22,37 @@ import java.util.stream.IntStream;
 import static org.junit.Assert.assertEquals;
 
 public class ValintalaskennanTulosExcelTest {
+    HakukohdeDTO hakukohdeDTO = new HakukohdeDTO();
+    {
+        hakukohdeDTO.setHakukohdeNimi(map("fi", "Hakukohde1"));
+        hakukohdeDTO.setTarjoajaNimi(map("fi", "Tarjoaja1"));
+
+
+    }
+
+    private HashMap<String, String> map(final String key, final String value) {
+        return new HashMap<String, String>() {{
+            put(key, value);
+        }};
+    }
+
+    XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(hakukohdeDTO, Arrays.asList(
+        valinnanvaihe(1, 2),
+        valinnanvaihe(2, 1)
+    ));
 
     @Test
-    public void test() {
-        XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(Arrays.asList(
-                valinnanvaihe(1, 2),
-                valinnanvaihe(2, 1)
-        ));
+    public void sheetNames() {
         assertEquals(3, workbook.getNumberOfSheets());
         assertEquals("Vaihe 1 - Jono 1", workbook.getSheetName(0));
         assertEquals("Vaihe 1 - Jono 2", workbook.getSheetName(1));
         assertEquals("Vaihe 2 - Jono 1", workbook.getSheetName(2));
+    }
+
+    @Test
+    public void headerDataOnEachSheet() {
+        assertEquals("Tarjoaja1", workbook.getSheetAt(0).getRow(0).getCell(0).getStringCellValue());
+        assertEquals("Hakukohde1", workbook.getSheetAt(0).getRow(1).getCell(0).getStringCellValue());
     }
 
     private ValintatietoValinnanvaiheDTO valinnanvaihe(int jarjestysnumero, int jonoja) {
