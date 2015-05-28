@@ -3,14 +3,22 @@ package fi.vm.sade.valinta.kooste.laskentakerralla;
 
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import junit.framework.Assert;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
@@ -20,12 +28,26 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-public class LaskentaKerrallaFailTest extends LaskentaKerrallaBase {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@ContextConfiguration(classes = LaskentaKerrallaContext.class)
+@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class,
+        DirtiesContextTestExecutionListener.class })
+public class LaskentaKerrallaFailTest {
+
+    @Autowired
+    ValintalaskentaKerrallaResource valintalaskentaKerralla;
+
+
+    @BeforeClass
+    public static void resetMocks() {
+        Mocks.resetMocks();
+    }
+
     @Before
     public void build() {
 
         ArgumentCaptor<Consumer> argument = ArgumentCaptor.forClass(Consumer.class);
-        when(valintaperusteetAsyncResource.haunHakukohteet(any(), any(), argument.capture()))
+        when(Mocks.valintaperusteetAsyncResource.haunHakukohteet(any(), any(), argument.capture()))
             .thenAnswer(
                 invocation -> {
                     argument.getValue().accept(new RuntimeException());
@@ -36,6 +58,7 @@ public class LaskentaKerrallaFailTest extends LaskentaKerrallaBase {
 
     @Test
     public void testValintaperusteetHaunHakukohteetFail() throws InterruptedException {
+        System.out.println(valintalaskentaKerralla);
         AsyncResponse asyncResponse = mock(AsyncResponse.class);
         try {
             valintalaskentaKerralla.valintalaskentaHaulle(
@@ -49,12 +72,12 @@ public class LaskentaKerrallaFailTest extends LaskentaKerrallaBase {
                     asyncResponse);
         } catch (Throwable t) { }
 
-        verify(laskentaSeurantaAsyncResource, times(1)).otaSeuraavaLaskentaTyonAlle(any(), any());
-        verifyNoMoreInteractions(laskentaSeurantaAsyncResource);
-        verifyZeroInteractions(applicationAsyncResource);
-        verifyZeroInteractions(ohjausparametritAsyncResource);
-        verifyZeroInteractions(valintalaskentaAsyncResource);
-        verifyZeroInteractions(suoritusrekisteriAsyncResource);
+        verify(Mocks.laskentaSeurantaAsyncResource, times(1)).otaSeuraavaLaskentaTyonAlle(any(), any());
+        verifyNoMoreInteractions(Mocks.laskentaSeurantaAsyncResource);
+        verifyZeroInteractions(Mocks.applicationAsyncResource);
+        verifyZeroInteractions(Mocks.ohjausparametritAsyncResource);
+        verifyZeroInteractions(Mocks.valintalaskentaAsyncResource);
+        verifyZeroInteractions(Mocks.suoritusrekisteriAsyncResource);
 
         verify(asyncResponse, times(1)).resume(isA(ResponseImpl.class));
         ArgumentCaptor<ResponseImpl> responseCaptor = ArgumentCaptor.forClass(ResponseImpl.class);
