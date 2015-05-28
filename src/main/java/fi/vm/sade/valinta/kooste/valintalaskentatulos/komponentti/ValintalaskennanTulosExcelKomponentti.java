@@ -39,7 +39,7 @@ public class ValintalaskennanTulosExcelKomponentti {
     @Value("${valintalaskentakoostepalvelu.valintaperusteet.rest.url}")
     private String valintaperusteetUrl;
 
-    public InputStream luoXls(@Header("haunNimi") String haunNimi,
+    public InputStream luoXls(@Header("tarjoajanNimi") String tarjoajanNimi,
                               @Header("hakukohteenNimi") String hakukohteenNimi,
                               @Property(OPH.HAKUKOHDEOID) String hakukohdeOid) throws Exception {
         LOG.debug("Yhteys {} HakukohdeResource.hakukohde({})", new Object[]{
@@ -55,7 +55,7 @@ public class ValintalaskennanTulosExcelKomponentti {
         // -tuloksen tila
         List<Object[]> rivit = new ArrayList<>();
 
-        rivit.add(new Object[]{haunNimi});
+        rivit.add(new Object[]{tarjoajanNimi});
         rivit.add(new Object[]{hakukohteenNimi});
         rivit.add(new Object[]{});
 

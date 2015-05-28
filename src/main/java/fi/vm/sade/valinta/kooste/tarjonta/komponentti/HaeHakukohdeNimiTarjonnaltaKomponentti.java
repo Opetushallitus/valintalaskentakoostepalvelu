@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+
 import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,34 +15,28 @@ import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.exception.TarjontaException;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
+ *         <p>
  *         Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti!
  *         Proxy provides retries!
  */
 @Component("hakukohdeNimiTarjonnaltaKomponentti")
 public class HaeHakukohdeNimiTarjonnaltaKomponentti {
-
     private static final Logger LOG = LoggerFactory.getLogger(HaeHakukohdeNimiTarjonnaltaKomponentti.class);
-
     private HakukohdeResource tarjontaResource;
     private String tarjontaResourceUrl;
 
     @Autowired
-    public HaeHakukohdeNimiTarjonnaltaKomponentti(HakukohdeResource tarjontaResource,
-            @Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}") String tarjontaResourceUrl) {
+    public HaeHakukohdeNimiTarjonnaltaKomponentti(HakukohdeResource tarjontaResource, @Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}") String tarjontaResourceUrl) {
         this.tarjontaResource = tarjontaResource;
         this.tarjontaResourceUrl = tarjontaResourceUrl;
     }
 
     public HakukohdeDTO haeHakukohdeNimi(@Property("hakukohdeOid") String hakukohdeOid) {
         if (hakukohdeOid == null) {
-            throw new SijoittelupalveluException(
-                    "Sijoittelu palautti puutteellisesti luodun hakutoiveen! Hakukohteen tunniste puuttuu!");
+            throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun hakutoiveen! Hakukohteen tunniste puuttuu!");
         } else {
-            LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[] { tarjontaResourceUrl,
-                    hakukohdeOid });
+            LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[] {tarjontaResourceUrl, hakukohdeOid});
             try {
                 // Palauttaa jotain täysin mystistä
                 //HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);

@@ -271,8 +271,19 @@ public class Excel {
 				sheet.setColumnWidth(i, preferenssi);
 			}
 		}
-		
-		
+		return export(workbook);
+	}
+
+	private void asetaPreferenssi(int column, int preferenssi,
+			List<Integer> leveysPreferenssit) {
+
+		while (leveysPreferenssit.size() <= column) {
+			leveysPreferenssit.add(0);
+		}
+		leveysPreferenssit.set(column, preferenssi);
+	}
+
+	public static InputStream export(final XSSFWorkbook workbook) {
 		ByteArrayOutputStream b;
 		try {
 			workbook.write(b = new ByteArrayOutputStream());
@@ -283,14 +294,5 @@ public class Excel {
 			// huomaamatta
 			throw new RuntimeException(e);
 		}
-	}
-
-	private void asetaPreferenssi(int column, int preferenssi,
-			List<Integer> leveysPreferenssit) {
-
-		while (leveysPreferenssit.size() <= column) {
-			leveysPreferenssit.add(0);
-		}
-		leveysPreferenssit.set(column, preferenssi);
 	}
 }

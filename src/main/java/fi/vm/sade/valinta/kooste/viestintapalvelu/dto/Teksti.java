@@ -121,4 +121,8 @@ public class Teksti {
 		m.put(key, value);
 		return m;
 	}
+
+	public static String getTeksti(final Map<String, String> n) {
+		return new Teksti(n).getTeksti();
+	}
 }

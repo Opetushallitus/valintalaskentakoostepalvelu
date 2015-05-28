@@ -23,7 +23,6 @@ import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.JalkiohjaustulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.ValintalaskennanTulosExcelKomponentti;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.ValintakoeKutsuExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute;
@@ -37,10 +36,10 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiR
 public class ValintalaskentaTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaTulosRouteImpl.class);
     private final static String VAKIO_HAKUKOHTEEN_NIMI = "Hakukohteelle ei saatu haettua nimeä";
-    private final static String VAKIO_HAUN_NIMI = "Haulle ei saatu haettua nimeä";
+    private final static String VAKIO_TARJOAJAN_NIMI = "Tarjoajalle ei saatu haettua nimeä";
     private final static String HAKUKOHTEEN_NIMI = "hakukohteenNimi";
     private final static String PREFEROITUKIELIKOODI = "preferoitukielikoodi";
-    private final static String TARJOAJA_NIMI = "haunNimi";
+    private final static String TARJOAJA_NIMI = "tarjoajanNimi";
     private JalkiohjaustulosExcelKomponentti jalkiohjaustulosExcelKomponentti;
     private SijoittelunTulosExcelKomponentti sijoittelunTulosExcelKomponentti;
     private ValintalaskennanTulosExcelKomponentti valintalaskennanTulosExcelKomponentti;
@@ -62,18 +61,18 @@ public class ValintalaskentaTulosRouteImpl extends AbstractDokumenttiRouteBuilde
         return new Processor() {
             public void process(Exchange exchange) throws Exception {
                 String hakukohteenNimi = VAKIO_HAKUKOHTEEN_NIMI;
-                String haunNimi = VAKIO_HAUN_NIMI;
+                String tarjoajanNimi = VAKIO_TARJOAJAN_NIMI;
                 String preferoitukielikoodi = KieliUtil.SUOMI;
                 try {
                     HakukohdeDTO dto = haeHakukohdeNimiTarjonnaltaKomponentti.haeHakukohdeNimi(hakukohdeOid(exchange));
                     fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti hakukohdeTeksti = new fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti(dto.getHakukohdeNimi());
                     hakukohteenNimi = hakukohdeTeksti.getTeksti();
                     preferoitukielikoodi = hakukohdeTeksti.getKieli();
-                    haunNimi = new fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti(dto.getTarjoajaNimi()).getTeksti();
+                    tarjoajanNimi = new fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti(dto.getTarjoajaNimi()).getTeksti();
                 } catch (Exception e) {
                 }
                 exchange.getOut().setHeader(HAKUKOHTEEN_NIMI, hakukohteenNimi);
-                exchange.getOut().setHeader(TARJOAJA_NIMI, haunNimi);
+                exchange.getOut().setHeader(TARJOAJA_NIMI, tarjoajanNimi);
                 exchange.getOut().setHeader(PREFEROITUKIELIKOODI, preferoitukielikoodi);
             }
         };
