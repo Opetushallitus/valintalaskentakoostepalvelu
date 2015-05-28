@@ -11,6 +11,8 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaPalveluk
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
+import org.slf4j.helpers.FormattingTuple;
+import org.slf4j.helpers.MessageFormatter;
 
 /**
  * @author Jussi Jartamo
@@ -96,14 +98,18 @@ public class LaskentaActorImpl implements LaskentaActor {
         try {
             laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS);
         } catch (Exception e) {
-            LOG.error("\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta kayttoliittymaa ei saatu paivitettya!\r\n####", hakukohdeLaskuri.getYhteensa(), hakuOid);
+            LOG.error(formatError("\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta kayttoliittymaa ei saatu paivitettya! {} \r\n####", hakukohdeLaskuri.getYhteensa(), hakuOid), e);
         }
         try {
             laskentaSupervisor.ready(uuid);
             LOG.info("\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} uuid:lle {}!\r\n####", hakukohdeLaskuri.getYhteensa(), hakuOid, uuid);
         } catch (Exception e) {
-            LOG.error("\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta Actoria ei saatu pysaytettya {}!\r\n####", hakukohdeLaskuri.getYhteensa(), hakuOid, uuid);
+            LOG.error(formatError("\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta Actoria ei saatu pysaytettya {}! {}\r\n####", hakukohdeLaskuri.getYhteensa(), hakuOid, uuid), e);
         }
+    }
+
+    public String formatError(String message, Object ... args) {
+        return MessageFormatter.format(message, args).getMessage();
     }
 
     public void start() {
@@ -117,22 +123,22 @@ public class LaskentaActorImpl implements LaskentaActor {
                 try {
                     s.peruutaKaikki();
                 } catch (Exception e) {
-                    LOG.error("Palvelukutsu Strategian peruutus epaonnistui! {}", e.getMessage());
+                    LOG.error("Palvelukutsu Strategian peruutus epaonnistui!", e);
                 }
             });
             laskentaStrategia.peruutaKaikki();
         } catch (Exception e) {
-            LOG.error("Virhe {}", e.getMessage());
+            LOG.error("Virhe", e);
         }
         try {
             laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
         } catch (Exception e) {
-            LOG.error("Virhe {}", e.getMessage());
+            LOG.error("Virhe", e);
         }
         try {
             laskentaSupervisor.ready(uuid);
         } catch (Exception e) {
-            LOG.error("Virhe {}", e.getMessage());
+            LOG.error("Virhe", e);
         }
     }
 }
