@@ -5,9 +5,12 @@ import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
 import fi.vm.sade.valintalaskenta.domain.dto.HakijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteerituloksenTilaDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
+import fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila;
 import jdk.nashorn.internal.ir.annotations.Ignore;
 
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -62,8 +65,8 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Päivämäärä", "01.01.1970 02.00"),
                 asList("Jono", "Jono 1"),
                 asList(),
-                asList("Jonosija", "Sukunimi", "Etunimi", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Kokonaispisteet"),
-                asList("1",        "Suku 1",   "Etu 1",   "Hakemus 1",   "1",         "HYVAKSYTTAVISSA", "10")
+                asList("Jonosija", "Sukunimi", "Etunimi", "Hakemus OID", "Hakutoive", "Laskennan tulos"),
+                asList("1", "Suku 1", "Etu 1", "Hakemus 1", "1", "HYVAKSYTTAVISSA")
             ), getWorksheetData(workbook.getSheetAt(0)));
     }
 
@@ -135,9 +138,9 @@ public class ValintalaskennanTulosExcelTest {
                 true,
                 true,
                 true,
-                Collections.EMPTY_LIST, // TODO populoi
+                jonosijat(),
                 true,
-                hakijat(), // TODO populoi
+                Collections.EMPTY_LIST,
                 2,
                 10,
                 new DateTime().plusDays(1).toDate(),
@@ -146,24 +149,23 @@ public class ValintalaskennanTulosExcelTest {
         );
     }
 
-    private List<HakijaDTO> hakijat() {
+    private List<JonosijaDTO> jonosijat() {
         int i = 1;
         return Arrays.asList(
-          new HakijaDTO(
-              1,
-              "Hakija " + i,
-              "Hakemus " + i,
-              JarjestyskriteerituloksenTilaDTO.HYVAKSYTTAVISSA,
-              1,
-              "Etu " + i,
-              "Suku " + i,
-              1,
-              new BigDecimal(10),
-              Collections.EMPTY_LIST,
-              Collections.EMPTY_LIST,
-              false,
-              false
-          )
+            new JonosijaDTO(1,
+                "Hakemus 1",
+                "Hakija 1",
+                Collections.<JarjestyskriteeritulosDTO>emptySortedSet(),
+                1,
+                "Suku " + i,
+                "Etu " + i,
+                false,
+                JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA,
+                Collections.EMPTY_LIST,
+                Collections.EMPTY_LIST,
+                Collections.EMPTY_LIST,
+                false,
+                false)
         );
     }
 }

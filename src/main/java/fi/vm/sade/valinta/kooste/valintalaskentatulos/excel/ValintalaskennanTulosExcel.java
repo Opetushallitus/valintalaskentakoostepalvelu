@@ -15,17 +15,17 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.HakijaDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 
 public class ValintalaskennanTulosExcel {
     public static List<Column> columns = Arrays.asList(
         new Column("Jonosija",        14, hakija -> String.valueOf(hakija.getJonosija())),
-        new Column("Sukunimi",        20, HakijaDTO :: getSukunimi),
-        new Column("Etunimi",         20, HakijaDTO :: getEtunimi),
-        new Column("Hakemus OID",     20, HakijaDTO :: getHakemusOid),
+        new Column("Sukunimi",        20, JonosijaDTO :: getSukunimi),
+        new Column("Etunimi",         20, JonosijaDTO :: getEtunimi),
+        new Column("Hakemus OID",     20, JonosijaDTO :: getHakemusOid),
         new Column("Hakutoive",       14, hakija -> String.valueOf(hakija.getPrioriteetti())),
-        new Column("Laskennan tulos", 20, hakija -> hakija.getTila().toString()),
-        new Column("Kokonaispisteet", 20, hakija -> nullSafeToString(hakija.getPisteet()))
+        new Column("Laskennan tulos", 20, hakija -> hakija.getTuloksenTila().toString())
     );
 
     private final static List<String> columnHeaders = columns.stream().map(column -> column.name).collect(Collectors.toList());
@@ -44,7 +44,7 @@ public class ValintalaskennanTulosExcel {
                 addRow(sheet, asList("Jono", jono.getNimi()));
                 addRow(sheet, asList());
                 addRow(sheet, columnHeaders);
-                for (HakijaDTO hakija : jono.getHakija()) {
+                for (JonosijaDTO hakija : jono.getJonosijat()) {
                     addRow(sheet, columns.stream().map(column -> column.extractor.apply(hakija)).collect(Collectors.toList()));
                 }
             });
@@ -73,9 +73,9 @@ public class ValintalaskennanTulosExcel {
     static class Column {
         public final String name;
         public final int widthInCharacters;
-        public final Function<HakijaDTO, String> extractor;
+        public final Function<JonosijaDTO, String> extractor;
 
-        public Column(final String name, final int widthInCharacters, final Function<HakijaDTO, String> extractor) {
+        public Column(final String name, final int widthInCharacters, final Function<JonosijaDTO, String> extractor) {
             this.name = name;
             this.widthInCharacters = widthInCharacters;
             this.extractor = extractor;
