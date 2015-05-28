@@ -85,7 +85,9 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
                 this::startLaskentaIfWorkAvailable,
                 (Throwable t) -> {
                     laskennanKaynnistajaActor.tell(WorkerAvailable.class, ActorRef.noSender());
-                    throw new RuntimeException("Laskennan käynnistys epäonnistui", t);
+                    String message = "Laskennan käynnistys epäonnistui";
+                    LOG.error(message, t);
+                    throw new RuntimeException(message, t);
                 });
     }
 

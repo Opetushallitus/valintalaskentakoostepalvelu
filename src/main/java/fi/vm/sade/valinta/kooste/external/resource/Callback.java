@@ -82,6 +82,7 @@ public class Callback<T> implements InvocationCallback<Response> {
 		try {
 			InputStream stream = (InputStream) response.getEntity();
 			json = StringUtils.trimToEmpty(IOUtils.toString(stream));
+			LOG.info("Seuraava tyo json: " + json);
 			IOUtils.closeQuietly(stream);
 			if (json.length() == 0 && response.getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
 				LOG.error(
@@ -90,6 +91,7 @@ public class Callback<T> implements InvocationCallback<Response> {
 								.getMetadata().getFirst("Content-Type"));
 			}
 			T t = gson.fromJson(json, type);
+			LOG.info("Seuraava tyo uuid: " + t);
 			try {
 				callback.accept(t);
 			} catch (Exception e) {

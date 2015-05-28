@@ -46,11 +46,13 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 	public void otaSeuraavaLaskentaTyonAlle(Consumer<String> uuidCallback, Consumer<Throwable> failureCallback) {
 		try {
 			String url = "/seuranta-service/resources/seuranta/laskenta/otaSeuraavaLaskentaTyonAlle";
+			LOG.info("Haetaan seuraava laskenta tyon alle");
 			getWebClient()
 					.path(url)
 					.async()
 					.get(new Callback<>(address, url, uuidCallback, failureCallback, new TypeToken<String>() {}.getType()));
 		} catch (Exception e) {
+			LOG.error("Uuden tyon hakeminen epaonnistui", e);
 			failureCallback.accept(e);
 		}
 	}
