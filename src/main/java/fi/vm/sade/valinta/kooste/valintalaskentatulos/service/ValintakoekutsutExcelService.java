@@ -1,13 +1,11 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.service;
 
 import com.google.common.collect.Sets;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
+
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
@@ -16,12 +14,10 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
-import fi.vm.sade.valinta.kooste.function.SynkronoituToiminto;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.ValintalaskentaTulosExcelKomponentti;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.ValintakoeKutsuExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -29,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,14 +41,13 @@ public class ValintakoekutsutExcelService {
             .getLogger(ValintakoekutsutExcelService.class);
 
     private final ValintalaskentaValintakoeAsyncResource valintalaskentaAsyncResource;
-    //private final ValintatietoResource valintatietoService;
     private final ValintaperusteetAsyncResource valintaperusteetValintakoeResource;
     private final ApplicationAsyncResource applicationResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final TarjontaAsyncResource tarjontaAsyncResource;
     private final DokumenttiAsyncResource dokumenttiAsyncResource;
-    private final ValintalaskentaTulosExcelKomponentti valintalaskentaTulosExcelKomponentti
-            = new ValintalaskentaTulosExcelKomponentti();
+    private final ValintakoeKutsuExcelKomponentti valintakoeKutsuExcelKomponentti
+            = new ValintakoeKutsuExcelKomponentti();
 
     @Autowired
     public ValintakoekutsutExcelService(
@@ -109,7 +103,7 @@ public class ValintakoekutsutExcelService {
                         String hakuNimi = new Teksti(hakuRef.get().getNimi()).getTeksti();
                         String hakukohdeNimi = new Teksti(hakukohdeRef.get().getHakukohdeNimi()).getTeksti();
                         try {
-                            InputStream filedata = valintalaskentaTulosExcelKomponentti.luoTuloksetXlsMuodossa(
+                            InputStream filedata = valintakoeKutsuExcelKomponentti.luoTuloksetXlsMuodossa(
                                     hakuNimi,
                                     hakukohdeNimi,
                                     hakukohdeOid,
