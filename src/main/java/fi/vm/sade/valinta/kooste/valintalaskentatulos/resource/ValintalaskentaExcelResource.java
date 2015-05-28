@@ -14,10 +14,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.google.common.collect.Sets;
-
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.service.ValintakoekutsutExcelService;
-
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +22,18 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
+import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
+import fi.vm.sade.valinta.kooste.excel.Excel;
+import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute;
+import fi.vm.sade.valinta.kooste.valintalaskentatulos.service.ValintakoekutsutExcelService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
@@ -49,6 +51,7 @@ public class ValintalaskentaExcelResource {
     @Autowired private SijoittelunTulosExcelRoute sijoittelunTulosExcelProxy;
     @Autowired private JalkiohjaustulosExcelRoute jalkiohjaustulos;
     @Autowired private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+    @Autowired private HakukohdeResource hakukohdeResource;
 
     @GET
     @Path("/jalkiohjaustulos/aktivoi")
@@ -112,8 +115,9 @@ public class ValintalaskentaExcelResource {
     @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
     public Response haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid) {
         try {
-            InputStream input = valintalaskentaTulosProxy.luoXls(hakukohdeOid);
-            return Response.ok(input, APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=valintalaskennantulos.xls").build();
+
+            final XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(hakukohdeResource.hakukohde(hakukohdeOid));
+            return Response.ok(Excel.export(workbook), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").header("content-disposition", "inline; filename=valintalaskennantulos.xlsx").build();
         } catch (Exception e) {
             LOG.error("Valintakoekutsut excelin luonti epäonnistui hakukohteelle {}: {}", new Object[] {hakukohdeOid, e.getMessage()});
             return Response.ok(ExcelExportUtil.exportGridAsXls(new Object[][] {new Object[] {"Tarvittavien tietojen hakeminen epäonnistui!", "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!"}}), APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=yritauudelleen.xls").build();
