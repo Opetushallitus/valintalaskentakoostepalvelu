@@ -62,8 +62,8 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Päivämäärä", "01.01.1970 02.00"),
                 asList("Jono", "Jono 1"),
                 asList(),
-                asList("Jonosija", "Sukunimi", "Etunimi", "Hakemus OID", "Laskennan tulos", "Kokonaispisteet"),
-                asList("1",        "Suku 1",   "Etu 1",   "Hakemus 1",   "HYVAKSYTTAVISSA", "10")
+                asList("Jonosija", "Sukunimi", "Etunimi", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Kokonaispisteet"),
+                asList("1",        "Suku 1",   "Etu 1",   "Hakemus 1",   "1",         "HYVAKSYTTAVISSA", "10")
             ), getWorksheetData(workbook.getSheetAt(0)));
     }
 
@@ -153,7 +153,7 @@ public class ValintalaskennanTulosExcelTest {
               "Hakija " + i,
               "Hakemus " + i,
               JarjestyskriteerituloksenTilaDTO.HYVAKSYTTAVISSA,
-              0,
+              1,
               "Etu " + i,
               "Suku " + i,
               1,
