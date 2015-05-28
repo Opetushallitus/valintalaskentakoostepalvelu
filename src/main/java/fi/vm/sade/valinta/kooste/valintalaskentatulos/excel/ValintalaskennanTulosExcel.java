@@ -13,6 +13,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.HakijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 
@@ -36,9 +37,11 @@ public class ValintalaskennanTulosExcel {
             vaihe.getValintatapajonot().forEach(jono -> {
                 final XSSFSheet sheet = workbook.createSheet(vaihe.getNimi() + " - " + jono.getNimi());
                 setColumnWidths(sheet);
+
                 addRow(sheet, asList("Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimi())));
                 addRow(sheet, asList("Hakukohde", getTeksti(hakukohdeDTO.getHakukohdeNimi())));
                 addRow(sheet, asList("Vaihe", vaihe.getNimi()));
+                addRow(sheet, asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(vaihe.getCreatedAt())));
                 addRow(sheet, asList("Jono", jono.getNimi()));
                 addRow(sheet, asList());
                 addRow(sheet, columnHeaders);

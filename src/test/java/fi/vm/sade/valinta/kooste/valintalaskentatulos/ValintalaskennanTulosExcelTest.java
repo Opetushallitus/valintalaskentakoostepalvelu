@@ -59,6 +59,7 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Tarjoaja", "Tarjoaja 1"),
                 asList("Hakukohde", "Hakukohde 1"),
                 asList("Vaihe", "Vaihe 1"),
+                asList("Päivämäärä", "01.01.1970 02.00"),
                 asList("Jono", "Jono 1"),
                 asList(),
                 asList("Jonosija", "Sukunimi", "Etunimi", "Hakemus OID", "Laskennan tulos", "Kokonaispisteet"),
@@ -110,7 +111,7 @@ public class ValintalaskennanTulosExcelTest {
                 "vaiheOid" + jarjestysnumero,
                 "hakuOid",
                 "Vaihe " + jarjestysnumero,
-                new Date(),
+                new Date(0),
                 valintatapajonot(jonoja),
                 Collections.EMPTY_LIST
         );
