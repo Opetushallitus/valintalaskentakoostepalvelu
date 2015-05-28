@@ -68,6 +68,7 @@ public class ValintalaskennanTulosExcelTest {
     }
 
     @Test
+    @Ignore
     public void generoiTiedosto() throws IOException {
         StreamUtils.copy(Excel.export(workbook), new FileOutputStream("valintatulokset.xlsx"));
     }
