@@ -6,18 +6,23 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 public class ValintalaskennanTulosExcelTest {
@@ -25,20 +30,9 @@ public class ValintalaskennanTulosExcelTest {
     {
         hakukohdeDTO.setHakukohdeNimi(map("fi", "Hakukohde 1"));
         hakukohdeDTO.setTarjoajaNimi(map("fi", "Tarjoaja 1"));
-
-
     }
 
-    private HashMap<String, String> map(final String key, final String value) {
-        return new HashMap<String, String>() {{
-            put(key, value);
-        }};
-    }
-
-    XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(hakukohdeDTO, Arrays.asList(
-        valinnanvaihe(1, 2),
-        valinnanvaihe(2, 1)
-    ));
+    XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(hakukohdeDTO, asList(valinnanvaihe(1, 2), valinnanvaihe(2, 1)));
 
     @Test
     public void sheetNames() {
@@ -49,11 +43,45 @@ public class ValintalaskennanTulosExcelTest {
     }
 
     @Test
-    public void headerDataOnEachSheet() {
-        assertEquals("Tarjoaja 1", getStringCellValue(0, 0, 0));
-        assertEquals("Hakukohde 1", getStringCellValue(0, 1, 0));
-        assertEquals("Vaihe 1", getStringCellValue(0, 2, 0));
-        assertEquals("Jono 1", getStringCellValue(0, 3, 0));
+    public void sheetContents() {
+        assertEquals(
+            asList(
+                asList("Tarjoaja 1"),
+                asList("Hakukohde 1"),
+                asList("Vaihe 1"),
+                asList("Jono 1")
+            ), getWorksheetData(workbook.getSheetAt(0)));
+    }
+
+
+    private <T> HashMap<String, T> map(final String key, final T value) {
+        return new HashMap<String, T>() {{
+            put(key, value);
+        }};
+    }
+
+    private Map<String, List<List<String>>> getWorkbookData(XSSFWorkbook workbook) {
+        Map<String, List<List<String>>> data = new HashMap<>();
+        for (int sheetNum = 0; sheetNum < workbook.getNumberOfSheets(); sheetNum++) {
+            data.put(workbook.getSheetName(sheetNum), getWorksheetData(workbook.getSheetAt(sheetNum)));
+        }
+        return data;
+    }
+
+    private List<List<String>> getWorksheetData(final XSSFSheet sheet) {
+        List<List<String>> sheetData = new ArrayList<>();
+        for (int rowNum = 0; rowNum <= sheet.getLastRowNum(); rowNum++) {
+            sheetData.add(getRowData(sheet.getRow(rowNum)));
+        }
+        return sheetData;
+    }
+
+    private List<String> getRowData(final XSSFRow row) {
+        final ArrayList<String> rowData = new ArrayList<>();
+        for (int col = 0; col < row.getLastCellNum(); col++) {
+            rowData.add(row.getCell(col).getStringCellValue());
+        }
+        return rowData;
     }
 
     private String getStringCellValue(final int sheet, final int row, final int col) {
