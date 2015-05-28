@@ -32,10 +32,13 @@ public class PistesyottoRivi {
             if(!StringUtils.isBlank(arvo.getArvo()) && !StringUtils.isBlank(arvo.getTila())) {
                 if(!arvo.getTila().equals(PistesyottoExcel.VAKIO_EI_OSALLISTUNUT)) {
 			        data.put(arvo.getTunniste(), arvo.getArvo());
-                }
+                } else {
+					data.put(arvo.getTunniste(), "");
+				}
 			    data.put(arvo.getOsallistuminenTunniste(), arvo.getTila());
             } else if(StringUtils.isBlank(arvo.getArvo()) && arvo.getTila().equals(PistesyottoExcel.VAKIO_EI_OSALLISTUNUT)) {
                 data.put(arvo.getOsallistuminenTunniste(), arvo.getTila());
+				data.put(arvo.getTunniste(), "");
             } else if(StringUtils.isBlank(arvo.getArvo()) && arvo.getTila().equals(PistesyottoExcel.VAKIO_OSALLISTUI)) {
                 data.put(arvo.getTunniste(), "");
                 data.put(arvo.getOsallistuminenTunniste(), PistesyottoExcel.VAKIO_MERKITSEMATTA);
