@@ -6,7 +6,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 
-import org.apache.commons.collections.MapUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -24,8 +23,8 @@ import static org.junit.Assert.assertEquals;
 public class ValintalaskennanTulosExcelTest {
     HakukohdeDTO hakukohdeDTO = new HakukohdeDTO();
     {
-        hakukohdeDTO.setHakukohdeNimi(map("fi", "Hakukohde1"));
-        hakukohdeDTO.setTarjoajaNimi(map("fi", "Tarjoaja1"));
+        hakukohdeDTO.setHakukohdeNimi(map("fi", "Hakukohde 1"));
+        hakukohdeDTO.setTarjoajaNimi(map("fi", "Tarjoaja 1"));
 
 
     }
@@ -51,8 +50,14 @@ public class ValintalaskennanTulosExcelTest {
 
     @Test
     public void headerDataOnEachSheet() {
-        assertEquals("Tarjoaja1", workbook.getSheetAt(0).getRow(0).getCell(0).getStringCellValue());
-        assertEquals("Hakukohde1", workbook.getSheetAt(0).getRow(1).getCell(0).getStringCellValue());
+        assertEquals("Tarjoaja 1", getStringCellValue(0, 0, 0));
+        assertEquals("Hakukohde 1", getStringCellValue(0, 1, 0));
+        assertEquals("Vaihe 1", getStringCellValue(0, 2, 0));
+        assertEquals("Jono 1", getStringCellValue(0, 3, 0));
+    }
+
+    private String getStringCellValue(final int sheet, final int row, final int col) {
+        return workbook.getSheetAt(sheet).getRow(row).getCell(col).getStringCellValue();
     }
 
     private ValintatietoValinnanvaiheDTO valinnanvaihe(int jarjestysnumero, int jonoja) {

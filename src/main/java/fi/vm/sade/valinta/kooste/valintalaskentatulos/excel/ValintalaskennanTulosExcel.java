@@ -18,10 +18,16 @@ public class ValintalaskennanTulosExcel {
         valinnanVaiheet.stream().forEach(vaihe -> {
             vaihe.getValintatapajonot().forEach(jono -> {
                 final XSSFSheet sheet = workbook.createSheet(vaihe.getNimi() + " - " + jono.getNimi());
-                sheet.createRow(0).createCell(0).setCellValue(getTeksti(hakukohdeDTO.getTarjoajaNimi()));
-                sheet.createRow(1).createCell(0).setCellValue(getTeksti(hakukohdeDTO.getHakukohdeNimi()));
+                addHeaderRow(sheet, 0, getTeksti(hakukohdeDTO.getTarjoajaNimi()));
+                addHeaderRow(sheet, 1, getTeksti(hakukohdeDTO.getHakukohdeNimi()));
+                addHeaderRow(sheet, 2, vaihe.getNimi());
+                addHeaderRow(sheet, 3, jono.getNimi());
             });
         });
         return workbook;
+    }
+
+    private static void addHeaderRow(final XSSFSheet sheet, final int row, final String text) {
+        sheet.createRow(row).createCell(0).setCellValue(text);
     }
 }
