@@ -134,6 +134,7 @@ public class PistesyottoTuontiService {
 
             if (uudetPistetiedot.isEmpty()) {
                 LOG.info("Ei tallennettavaa");
+
             } else {
                 //applicationAsyncResource.
                 applicationAsyncResource.putApplicationAdditionalData(
@@ -141,7 +142,11 @@ public class PistesyottoTuontiService {
                             prosessi.setDokumenttiId("valmis");
                             prosessi.inkrementoiTehtyjaToita();
                         }, poikkeusilmoitus);
+
             }
+            prosessi
+                    .inkrementoiTehtyjaToita();
+            prosessi.setDokumenttiId("valmis");
         } catch(Throwable t) {
             poikkeusilmoitus.accept(t);
         }
