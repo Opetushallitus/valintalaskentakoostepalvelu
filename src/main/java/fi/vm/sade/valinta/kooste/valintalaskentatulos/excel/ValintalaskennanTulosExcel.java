@@ -22,10 +22,8 @@ public class ValintalaskennanTulosExcel {
         new Column("Jonosija",        14, hakija -> String.valueOf(hakija.getJonosija())),
         new Column("Sukunimi",        20, HakijaDTO :: getSukunimi),
         new Column("Etunimi",         20, HakijaDTO :: getEtunimi),
-        /*new Column("Henkilötunnus", hakija -> ""), // TODO: hetu ei saatavilla*/
         new Column("Hakemus OID",     20, HakijaDTO :: getHakemusOid),
         new Column("Laskennan tulos", 20, hakija -> hakija.getTila().toString()),
-        /*new Column("Selite", hakija -> ""), // TODO: mites tähän?*/
         new Column("Kokonaispisteet", 20, hakija -> nullSafeToString(hakija.getPisteet()))
     );
 
