@@ -49,7 +49,9 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Tarjoaja 1"),
                 asList("Hakukohde 1"),
                 asList("Vaihe 1"),
-                asList("Jono 1")
+                asList("Jono 1"),
+                asList(),
+                asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Hakemus OID", "Laskennan tulos", "Selite", "Kokonaispisteet")
             ), getWorksheetData(workbook.getSheetAt(0)));
     }
 
@@ -78,14 +80,12 @@ public class ValintalaskennanTulosExcelTest {
 
     private List<String> getRowData(final XSSFRow row) {
         final ArrayList<String> rowData = new ArrayList<>();
-        for (int col = 0; col < row.getLastCellNum(); col++) {
-            rowData.add(row.getCell(col).getStringCellValue());
+        if (row != null) {
+            for (int col = 0; col < row.getLastCellNum(); col++) {
+                rowData.add(row.getCell(col).getStringCellValue());
+            }
         }
         return rowData;
-    }
-
-    private String getStringCellValue(final int sheet, final int row, final int col) {
-        return workbook.getSheetAt(sheet).getRow(row).getCell(col).getStringCellValue();
     }
 
     private ValintatietoValinnanvaiheDTO valinnanvaihe(int jarjestysnumero, int jonoja) {
