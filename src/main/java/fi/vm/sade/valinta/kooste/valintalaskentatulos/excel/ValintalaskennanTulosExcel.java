@@ -18,24 +18,24 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanva
 
 public class ValintalaskennanTulosExcel {
     public static List<Column> columns = Arrays.asList(
-        new Column("Jonosija", hakija -> String.valueOf(hakija.getJonosija())),
-        new Column("Sukunimi", HakijaDTO :: getSukunimi),
-        new Column("Etunimi", HakijaDTO :: getEtunimi),
-        new Column("Henkilötunnus", hakija -> ""), // TODO: hetu ei saatavilla
-        new Column("Hakemus OID", HakijaDTO :: getHakemusOid),
-        new Column("Laskennan tulos", hakija -> hakija.getTila().toString()),
-        new Column("Selite", hakija -> ""), // TODO: mites tähän?
-        new Column("Kokonaispisteet", hakija -> nullSafeToString(hakija.getPisteet()))
+        new Column("Jonosija",        8, hakija -> String.valueOf(hakija.getJonosija())),
+        new Column("Sukunimi",        20, HakijaDTO :: getSukunimi),
+        new Column("Etunimi",         20, HakijaDTO :: getEtunimi),
+        /*new Column("Henkilötunnus", hakija -> ""), // TODO: hetu ei saatavilla*/
+        new Column("Hakemus OID",     20, HakijaDTO :: getHakemusOid),
+        new Column("Laskennan tulos", 20, hakija -> hakija.getTila().toString()),
+        /*new Column("Selite", hakija -> ""), // TODO: mites tähän?*/
+        new Column("Kokonaispisteet", 20, hakija -> nullSafeToString(hakija.getPisteet()))
     );
 
     private final static List<String> columnHeaders = columns.stream().map(column -> column.name).collect(Collectors.toList());
 
     public static XSSFWorkbook luoExcel(final HakukohdeDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet) {
-
         XSSFWorkbook workbook = new XSSFWorkbook();
         valinnanVaiheet.stream().forEach(vaihe -> {
             vaihe.getValintatapajonot().forEach(jono -> {
                 final XSSFSheet sheet = workbook.createSheet(vaihe.getNimi() + " - " + jono.getNimi());
+                setColumnWidths(sheet);
                 addRow(sheet, asList(getTeksti(hakukohdeDTO.getTarjoajaNimi())));
                 addRow(sheet, asList(getTeksti(hakukohdeDTO.getHakukohdeNimi())));
                 addRow(sheet, asList(vaihe.getNimi()));
@@ -48,6 +48,12 @@ public class ValintalaskennanTulosExcel {
             });
         });
         return workbook;
+    }
+
+    private static void setColumnWidths(final XSSFSheet sheet) {
+        for (int i = 0; i < columns.size(); i++) {
+            sheet.setColumnWidth(i, columns.get(i).widthInCharacters * 256);
+        }
     }
 
     private static String nullSafeToString(Object o) {
@@ -64,10 +70,12 @@ public class ValintalaskennanTulosExcel {
 
     static class Column {
         public final String name;
+        public final int widthInCharacters;
         public final Function<HakijaDTO, String> extractor;
 
-        public Column(final String name, final Function<HakijaDTO, String> extractor) {
+        public Column(final String name, final int widthInCharacters, final Function<HakijaDTO, String> extractor) {
             this.name = name;
+            this.widthInCharacters = widthInCharacters;
             this.extractor = extractor;
         }
     }

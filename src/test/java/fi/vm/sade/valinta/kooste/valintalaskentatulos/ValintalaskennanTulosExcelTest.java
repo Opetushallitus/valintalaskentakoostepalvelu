@@ -1,19 +1,25 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
 import fi.vm.sade.valintalaskenta.domain.dto.HakijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteerituloksenTilaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.junit.Test;
+import org.springframework.util.StreamUtils;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -54,9 +61,14 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Vaihe 1"),
                 asList("Jono 1"),
                 asList(),
-                asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Hakemus OID", "Laskennan tulos", "Selite", "Kokonaispisteet"),
-                asList("1",        "Suku 1",   "Etu 1",   "",              "Hakemus 1",   "HYVAKSYTTAVISSA", "",       "10")
+                asList("Jonosija", "Sukunimi", "Etunimi", "Hakemus OID", "Laskennan tulos", "Kokonaispisteet"),
+                asList("1",        "Suku 1",   "Etu 1",   "Hakemus 1",   "HYVAKSYTTAVISSA", "10")
             ), getWorksheetData(workbook.getSheetAt(0)));
+    }
+
+    @Test
+    public void generoiTiedosto() throws IOException {
+        StreamUtils.copy(Excel.export(workbook), new FileOutputStream("valintatulokset.xlsx"));
     }
 
 
