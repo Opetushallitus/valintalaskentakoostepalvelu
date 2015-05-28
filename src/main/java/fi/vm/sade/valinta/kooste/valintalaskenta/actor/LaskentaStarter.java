@@ -114,7 +114,7 @@ public class LaskentaStarter {
     private void cancelLaskenta(ActorRef laskennanKaynnistajaActor, String msg, String uuid) {
         LOG.error(msg);
         seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, HakukohdeTila.KESKEYTETTY);
-        laskennanKaynnistajaActor.tell(LaskentaStarterActor.WorkerAvailable.class, ActorRef.noSender());
+        laskennanKaynnistajaActor.tell(new LaskentaStarterActor.WorkerAvailable(), ActorRef.noSender());
     }
 
     private Maski createMaskiFromLaskenta(final LaskentaDto laskenta) {
