@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
+import fi.vm.sade.valintalaskenta.domain.dto.HakijaDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteerituloksenTilaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
@@ -12,6 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,7 +54,8 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Vaihe 1"),
                 asList("Jono 1"),
                 asList(),
-                asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Hakemus OID", "Laskennan tulos", "Selite", "Kokonaispisteet")
+                asList("Jonosija", "Sukunimi", "Etunimi", "Henkilötunnus", "Hakemus OID", "Laskennan tulos", "Selite", "Kokonaispisteet"),
+                asList("1",        "Suku 1",   "Etu 1",   "",              "Hakemus 1",   "HYVAKSYTTAVISSA", "",       "10")
             ), getWorksheetData(workbook.getSheetAt(0)));
     }
 
@@ -119,12 +123,33 @@ public class ValintalaskennanTulosExcelTest {
                 true,
                 Collections.EMPTY_LIST, // TODO populoi
                 true,
-                Collections.EMPTY_LIST, // TODO populoi
+                hakijat(), // TODO populoi
                 2,
                 10,
                 new DateTime().plusDays(1).toDate(),
                 new DateTime().plusDays(2).toDate(),
                 "tayttojono", 100L
+        );
+    }
+
+    private List<HakijaDTO> hakijat() {
+        int i = 1;
+        return Arrays.asList(
+          new HakijaDTO(
+              1,
+              "Hakija " + i,
+              "Hakemus " + i,
+              JarjestyskriteerituloksenTilaDTO.HYVAKSYTTAVISSA,
+              0,
+              "Etu " + i,
+              "Suku " + i,
+              1,
+              new BigDecimal(10),
+              Collections.EMPTY_LIST,
+              Collections.EMPTY_LIST,
+              false,
+              false
+          )
         );
     }
 }
