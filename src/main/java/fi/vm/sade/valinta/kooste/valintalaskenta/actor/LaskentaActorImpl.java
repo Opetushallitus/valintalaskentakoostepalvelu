@@ -44,22 +44,14 @@ public class LaskentaActorImpl implements LaskentaActor {
         palvelukutsut.forEach(pk -> pk.laitaTyojonoon(pkk -> {
             LOG.info("Hakukohteen {} tila muuttunut statukseen {}. {}", pkk.getHakukohdeOid(), pkk.getHakukohdeTila(), tulkinta(pkk.getHakukohdeTila()));
             if (pkk.onkoPeruutettu()) {
-                try {
-                    laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
-                } catch (Exception e) {
-                    LOG.error("Virhe {}", e.getMessage());
-                }
+                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
                 if (hakukohdeLaskuri.done(pkk.getHakukohdeOid())) {
                     viimeisteleLaskenta();
                     return;
                 }
             } else {
                 laskentaStrategia.laitaPalvelukutsuJonoon(pkk, p -> {
-                    try {
-                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
-                    } catch (Exception e) {
-                        LOG.error("Virhe {}", e.getMessage());
-                    }
+                    laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
                     if (hakukohdeLaskuri.done(pkk.getHakukohdeOid())) {
                         viimeisteleLaskenta();
                         return;
