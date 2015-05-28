@@ -56,10 +56,10 @@ public class ValintalaskennanTulosExcelTest {
     public void sheetContents() {
         assertEquals(
             asList(
-                asList("Tarjoaja 1"),
-                asList("Hakukohde 1"),
-                asList("Vaihe 1"),
-                asList("Jono 1"),
+                asList("Tarjoaja", "Tarjoaja 1"),
+                asList("Hakukohde", "Hakukohde 1"),
+                asList("Vaihe", "Vaihe 1"),
+                asList("Jono", "Jono 1"),
                 asList(),
                 asList("Jonosija", "Sukunimi", "Etunimi", "Hakemus OID", "Laskennan tulos", "Kokonaispisteet"),
                 asList("1",        "Suku 1",   "Etu 1",   "Hakemus 1",   "HYVAKSYTTAVISSA", "10")

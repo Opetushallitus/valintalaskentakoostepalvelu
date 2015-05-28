@@ -18,7 +18,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanva
 
 public class ValintalaskennanTulosExcel {
     public static List<Column> columns = Arrays.asList(
-        new Column("Jonosija",        8, hakija -> String.valueOf(hakija.getJonosija())),
+        new Column("Jonosija",        14, hakija -> String.valueOf(hakija.getJonosija())),
         new Column("Sukunimi",        20, HakijaDTO :: getSukunimi),
         new Column("Etunimi",         20, HakijaDTO :: getEtunimi),
         /*new Column("Henkilötunnus", hakija -> ""), // TODO: hetu ei saatavilla*/
@@ -36,10 +36,10 @@ public class ValintalaskennanTulosExcel {
             vaihe.getValintatapajonot().forEach(jono -> {
                 final XSSFSheet sheet = workbook.createSheet(vaihe.getNimi() + " - " + jono.getNimi());
                 setColumnWidths(sheet);
-                addRow(sheet, asList(getTeksti(hakukohdeDTO.getTarjoajaNimi())));
-                addRow(sheet, asList(getTeksti(hakukohdeDTO.getHakukohdeNimi())));
-                addRow(sheet, asList(vaihe.getNimi()));
-                addRow(sheet, asList(jono.getNimi()));
+                addRow(sheet, asList("Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimi())));
+                addRow(sheet, asList("Hakukohde", getTeksti(hakukohdeDTO.getHakukohdeNimi())));
+                addRow(sheet, asList("Vaihe", vaihe.getNimi()));
+                addRow(sheet, asList("Jono", jono.getNimi()));
                 addRow(sheet, asList());
                 addRow(sheet, columnHeaders);
                 for (HakijaDTO hakija : jono.getHakija()) {
