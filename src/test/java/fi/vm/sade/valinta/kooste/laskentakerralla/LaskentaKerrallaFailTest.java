@@ -58,7 +58,6 @@ public class LaskentaKerrallaFailTest {
 
     @Test
     public void testValintaperusteetHaunHakukohteetFail() throws InterruptedException {
-        System.out.println(valintalaskentaKerralla);
         AsyncResponse asyncResponse = mock(AsyncResponse.class);
         try {
             valintalaskentaKerralla.valintalaskentaHaulle(
