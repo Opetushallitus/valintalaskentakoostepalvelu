@@ -177,26 +177,16 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 
 		aktiivisetSijoittelut
 				.forEach((hakuOid, sijoitteluDto) -> {
-					DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
-					DateTime ajastusHetki = ModuloiPaivamaaraJaTunnit
-							.moduloiSeuraava(aloitusajankohtaTaiNyt, DateTime
-									.now(), ajotiheysTaiVakio(sijoitteluDto
-									.getAjotiheys()));
-					LOG.info(
-							"Laitettiin tyojonoon jatkuvaa sijoittelua varten sijoittelutyo aktivoitumaan {} (tyo aktivoitui jatkuvaan sijoitteluun hetkella {}). Ylimaaraiset tyot tyojonossa ei haittaa. Ne siivotaan pois. Ainoastaan yksi tyo ajetaan per intervalli.",
-							Formatter.paivamaara(aloitusajankohtaTaiNyt
-									.toDate()), Formatter
-									.paivamaara(ajastusHetki.toDate()));
-					if (!ajossaHakuOids.containsKey(hakuOid)
-							&& jatkuvaSijoitteluDelayedQueue
-									.stream()
-									.filter(j -> hakuOid.equals(j.getHakuOid()))
-									.distinct().count() == 0L) {
-						jatkuvaSijoitteluDelayedQueue
-								.add(new DelayedSijoitteluExchange(
-										new DelayedSijoittelu(hakuOid,
-												ajastusHetki),
-										new DefaultExchange(getContext())));
+					boolean hakuEiJonossa = jatkuvaSijoitteluDelayedQueue.stream().filter(j -> hakuOid.equals(j.getHakuOid())).distinct().count() == 0L;
+					if (!ajossaHakuOids.containsKey(hakuOid) && hakuEiJonossa) {
+						DateTime asetusAjankohta = aloitusajankohtaTaiNyt(sijoitteluDto);
+						Integer intervalli = ajotiheysTaiVakio(sijoitteluDto.getAjotiheys());
+						DateTime suoritusAjankohta = ModuloiPaivamaaraJaTunnit.moduloiSeuraava(asetusAjankohta, DateTime.now(), intervalli);
+						LOG.info("Jatkuva sijoittelu haulle {} joka on asetettu {} intervallilla {} laitetaan suoritettavaksi seuraavan kerran {}",
+								hakuOid, Formatter.paivamaara(asetusAjankohta.toDate()), intervalli, Formatter.paivamaara(suoritusAjankohta.toDate()));
+						jatkuvaSijoitteluDelayedQueue.add(new DelayedSijoitteluExchange(
+								new DelayedSijoittelu(hakuOid, suoritusAjankohta),
+								new DefaultExchange(getContext())));
 					}
 				});
 	}
