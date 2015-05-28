@@ -66,6 +66,8 @@
     <mockito:mock id="valintakoeResource" class="fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource" />
     <mockito:mock id="sijoitteluResource" class="fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource" />
     <mockito:mock id="dokumenttiResource" class="fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource" />
+    <mockito:mock id="hakukohdeResource" class="fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource" />
+    <mockito:mock id="haeHakukohdeNimiTarjonnaltaKomponentti" class="fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti" />
     <mockito:mock id="KoodistoAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource"/>
     <mockito:mock id="JalkiohjaustulosExcelRoute" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExcelRoute" />
     <mockito:mock id="SijoittelunTulosExcelRoute" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute" />
