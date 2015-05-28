@@ -34,6 +34,8 @@ final public class LaskentaStarterActor extends UntypedActor {
             startLaskentaIfWorkersAvailable();
         } else if (NoWorkAvailable.class.isInstance(message)) {
             decrementWorkerCount();
+        } else {
+            LOG.error("Unknown message: " + message);
         }
     }
 
