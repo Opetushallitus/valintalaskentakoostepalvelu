@@ -17,7 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -30,8 +32,7 @@ import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaS
  * @author Jussi Jartamo
  */
 @Service
-@DependsOn("LaskentaSeurantaAsyncResource")
-public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo, ValintalaskentaKerrallaRoute, LaskentaSupervisor {
+public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo, ValintalaskentaKerrallaRoute, LaskentaSupervisor, ApplicationListener<ContextRefreshedEvent> {
     private final static Logger LOG = LoggerFactory.getLogger(LaskentaActorSystem.class);
 
     private final LaskentaActorFactory laskentaActorFactory;
@@ -52,10 +53,14 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         laskennanKaynnistajaActor = actorSystem.actorOf(props(this, maxWorkers));
     }
 
-    @PostConstruct
     @Override
     public void workAvailable() {
         laskennanKaynnistajaActor.tell(new WorkAvailable(), ActorRef.noSender());
+    }
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        workAvailable();
     }
 
     @Override
