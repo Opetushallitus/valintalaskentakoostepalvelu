@@ -25,8 +25,6 @@ public class TarjontaRouteImpl extends SpringRouteBuilder {
 	private HaeHakukohdeNimiTarjonnaltaKomponentti hakukohdeNimiTarjonnaltaKomponentti;
 	private HaeHakuTarjonnaltaKomponentti hakuTarjonnaltaKomponentti;
 
-	// Autowire-rakentaja yksikkotestausta helpottamaan, eli mock suoraan
-	// rakentajaan tarvittaessa.
 	@Autowired
 	public TarjontaRouteImpl(
 			HaeHakuTarjonnaltaKomponentti hakuTarjonnaltaKomponentti,
@@ -39,12 +37,8 @@ public class TarjontaRouteImpl extends SpringRouteBuilder {
 
 	@Override
 	public void configure() throws Exception {
-
 		from("direct:tarjontaHakuReitti").bean(hakuTarjonnaltaKomponentti);
-		from("direct:tarjontaNimiReitti").bean(
-				hakukohdeNimiTarjonnaltaKomponentti);
-
+		from("direct:tarjontaNimiReitti").bean(hakukohdeNimiTarjonnaltaKomponentti);
 		from("direct:linjakoodiReitti").bean(linjakoodiKomponentti);
-
 	}
 }
