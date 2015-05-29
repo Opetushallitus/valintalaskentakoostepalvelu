@@ -17,12 +17,26 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Hakemus {
 	private String type;
 	private String applicationSystemId;
-	private Answers answers;
+	private Answers answers = new Answers();
 	private Map<String, String> additionalInfo = new HashMap<String, String>();
 	private List<Eligibility> preferenceEligibilities;
 	private String oid;
 	private String state;
 	private String personOid;
+
+	public Hakemus() {
+	}
+
+	public Hakemus(final String type, final String applicationSystemId, final Answers answers, final Map<String, String> additionalInfo, final List<Eligibility> preferenceEligibilities, final String oid, final String state, final String personOid) {
+		this.type = type;
+		this.applicationSystemId = applicationSystemId;
+		this.answers = answers;
+		this.additionalInfo = additionalInfo;
+		this.preferenceEligibilities = preferenceEligibilities;
+		this.oid = oid;
+		this.state = state;
+		this.personOid = personOid;
+	}
 
 	public String getType() {
 		return type;

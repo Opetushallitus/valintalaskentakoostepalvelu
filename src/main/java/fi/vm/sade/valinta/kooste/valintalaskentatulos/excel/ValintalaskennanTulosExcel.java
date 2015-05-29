@@ -2,11 +2,14 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.excel;
 
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti.getTeksti;
 import static java.util.Arrays.asList;
+import static org.apache.commons.lang.StringUtils.trimToEmpty;
 import static org.apache.commons.lang.StringUtils.trimToNull;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,6 +18,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
@@ -24,23 +28,53 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanva
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 
 public class ValintalaskennanTulosExcel {
+    private static Hakemus emptyHakemus = new Hakemus();
+
     static class Column {
         public final String name;
         public final int widthInCharacters;
-        public final Function<JonosijaDTO, String> extractor;
+        public final Function<HakemusRivi, String> extractor;
 
-        public Column(final String name, final int widthInCharacters, final Function<JonosijaDTO, String> extractor) {
+        public Column(final String name, final int widthInCharacters, final Function<HakemusRivi, String> extractor) {
             this.name = name;
             this.widthInCharacters = widthInCharacters;
             this.extractor = extractor;
         }
     }
 
-    public static List<Column> columns = Arrays.asList(new Column("Jonosija", 14, hakija -> String.valueOf(hakija.getJonosija())), new Column("Sukunimi", 20, JonosijaDTO::getSukunimi), new Column("Etunimi", 20, JonosijaDTO::getEtunimi), new Column("Hakemus OID", 20, JonosijaDTO::getHakemusOid), new Column("Hakutoive", 14, hakija -> String.valueOf(hakija.getPrioriteetti())), new Column("Laskennan tulos", 20, hakija -> hakija.getTuloksenTila().toString()), new Column("Selite", 30, hakija -> getTeksti(getJarjestyskriteeri(hakija).getKuvaus())), new Column("Kokonaispisteet", 14, hakija -> nullSafeToString(getJarjestyskriteeri(hakija).getArvo())));
+    static class HakemusRivi {
+        public final JonosijaDTO hakija;
+        public final Hakemus hakemus;
+
+        public HakemusRivi(final JonosijaDTO hakija, final Hakemus hakemus) {
+            this.hakija = hakija;
+            this.hakemus = hakemus;
+        }
+
+        public String getHetu() {
+            return trimToEmpty(hakemus.getAnswers().getHenkilotiedot().get("Henkilotunnus"));
+        }
+    }
+
+    public static List<Column> columns = Arrays.asList(
+        new Column("Jonosija", 14, rivi -> String.valueOf(rivi.hakija.getJonosija())),
+        new Column("Sukunimi", 20, rivi -> rivi.hakija.getSukunimi()),
+        new Column("Etunimi", 20, rivi -> rivi.hakija.getEtunimi()),
+        new Column("Henkilötunnus", 20, rivi -> rivi.getHetu()),
+        new Column("Hakemus OID", 20, rivi -> rivi.hakija.getHakemusOid()),
+        new Column("Hakutoive", 14, rivi -> String.valueOf(rivi.hakija.getPrioriteetti())),
+        new Column("Laskennan tulos", 20, rivi -> rivi.hakija.getTuloksenTila().toString()),
+        new Column("Selite", 30, rivi -> getTeksti(getJarjestyskriteeri(rivi.hakija).getKuvaus())),
+        new Column("Kokonaispisteet", 14, rivi -> nullSafeToString(getJarjestyskriteeri(rivi.hakija).getArvo())));
 
     private final static List<String> columnHeaders = columns.stream().map(column -> column.name).collect(Collectors.toList());
 
     public static XSSFWorkbook luoExcel(final HakukohdeDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet, final List<Hakemus> hakemukset) {
+        final HashMap<String, Hakemus> hakemusByOid = new HashMap<>();
+        for (Hakemus h: hakemukset) {
+            hakemusByOid.put(h.getOid(), h);
+        }
+
         XSSFWorkbook workbook = new XSSFWorkbook();
         valinnanVaiheet.stream()
             .sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()))
@@ -58,7 +92,7 @@ public class ValintalaskennanTulosExcel {
                 } else {
                     addRow(sheet, columnHeaders);
                     sortedJonosijat(jono).forEach(hakija ->
-                            addRow(sheet, columns.stream().map(column -> column.extractor.apply(hakija)).collect(Collectors.toList()))
+                            addRow(sheet, columns.stream().map(column -> column.extractor.apply(new HakemusRivi(hakija, hakemusByOid.getOrDefault(hakija.getHakemusOid(), emptyHakemus)))).collect(Collectors.toList()))
                     );
                 }
             }));

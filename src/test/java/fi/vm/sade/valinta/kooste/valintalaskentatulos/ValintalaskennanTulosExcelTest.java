@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
@@ -70,9 +71,9 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Päivämäärä", "01.01.1970 02.00"),
                 asList("Jono", "Jono 1"),
                 asList(),
-                asList("Jonosija", "Sukunimi",  "Etunimi",  "Hakemus OID",  "Hakutoive",    "Laskennan tulos",  "Selite",   "Kokonaispisteet"),
-                asList("1", "Suku 2", "Etu 2", "Hakemus 2", "2", "VIRHE", "Puuttuu", ""),
-                asList("2", "Suku 1", "Etu 1", "Hakemus 1", "1", "HYVAKSYTTAVISSA", "", "666")
+                asList("Jonosija", "Sukunimi",  "Etunimi", "Henkilötunnus",  "Hakemus OID",  "Hakutoive",    "Laskennan tulos",  "Selite",   "Kokonaispisteet"),
+                asList("1",        "Suku 2",    "Etu 2",   "",               "Hakemus 2",    "2",            "VIRHE",            "Puuttuu",  ""),
+                asList("2",        "Suku 1",    "Etu 1",   "010101-123N",    "Hakemus 1",    "1",            "HYVAKSYTTAVISSA",  "",         "666")
             ), getWorksheetData(workbook.getSheetAt(0)));
     }
 
@@ -170,7 +171,11 @@ public class ValintalaskennanTulosExcelTest {
     }
 
     private List<Hakemus> hakemukset() {
-        return Arrays.asList(new Hakemus());
+        final Answers answersWithHetu = new Answers();
+        answersWithHetu.getHenkilotiedot().put("Henkilotunnus", "010101-123N");
+        return Arrays.asList(
+            new Hakemus("", "", answersWithHetu, EMPTY_MAP, EMPTY_LIST, "Hakemus 1", "", "Hakija 1")
+        );
     }
 
 
