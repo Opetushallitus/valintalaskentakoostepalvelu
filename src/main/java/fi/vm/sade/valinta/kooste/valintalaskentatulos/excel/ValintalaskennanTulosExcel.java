@@ -40,7 +40,7 @@ public class ValintalaskennanTulosExcel {
 
     private final static List<String> columnHeaders = columns.stream().map(column -> column.name).collect(Collectors.toList());
 
-    public static XSSFWorkbook luoExcel(final HakukohdeDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet) {
+    public static XSSFWorkbook luoExcel(final HakukohdeDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet, final List<Hakemus> hakemukset) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         valinnanVaiheet.stream()
             .sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()))

@@ -1,18 +1,10 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.resource;
 
-import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti.getTeksti;
-
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.BiFunction;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -25,7 +17,6 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +30,10 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExcelRoute;
@@ -52,10 +43,13 @@ import fi.vm.sade.valinta.kooste.valintalaskentatulos.service.ValintakoekutsutEx
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import rx.Observable;
+import rx.Scheduler;
+import rx.observables.ConnectableObservable;
+import rx.schedulers.NewThreadScheduler;
+import rx.schedulers.Schedulers;
 
 @Controller("ValintalaskentaExcelResource")
 @Path("valintalaskentaexcel")
@@ -69,8 +63,9 @@ public class ValintalaskentaExcelResource {
     @Autowired private SijoittelunTulosExcelRoute sijoittelunTulosExcelProxy;
     @Autowired private JalkiohjaustulosExcelRoute jalkiohjaustulos;
     @Autowired private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
-    @Autowired private ValintalaskentaAsyncResource hakukohdeResource;
-    @Autowired private TarjontaAsyncResource haeHakukohdeNimiTarjonnaltaKomponentti;
+    @Autowired private ValintalaskentaAsyncResource valintalaskentaResource;
+    @Autowired private TarjontaAsyncResource tarjontaResource;
+    @Autowired private ApplicationAsyncResource applicationResource;
 
     @GET
     @Path("/jalkiohjaustulos/aktivoi")
@@ -133,9 +128,14 @@ public class ValintalaskentaExcelResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
     @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
     public void haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
-        final Observable<HakukohdeDTO> hakukohdeObservable = haeHakukohdeNimiTarjonnaltaKomponentti.haeHakukohde(hakukohdeOid);
-        final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = hakukohdeResource.laskennantulokset(hakukohdeOid);
-        final Observable<InputStream> workbookObservable = Observable.combineLatest(hakukohdeObservable, valinnanVaiheetObservable, (hakukohde, valinnanVaiheet) -> Excel.export(ValintalaskennanTulosExcel.luoExcel(hakukohde, valinnanVaiheet)));
+        final Observable<HakukohdeDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid).publish().refCount();
+        final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
+        final Observable<List<Hakemus>> hakemuksetObservable = hakukohdeObservable.flatMap(hakukohde -> applicationResource.getApplicationsByOid(hakukohde.getHakuOid(), hakukohdeOid));
+
+        final Observable<InputStream> workbookObservable = Observable.combineLatest(hakukohdeObservable, valinnanVaiheetObservable, hakemuksetObservable, (hakukohde, valinnanVaiheet, hakemukset) ->
+            Excel.export(ValintalaskennanTulosExcel.luoExcel(hakukohde, valinnanVaiheet, hakemukset))
+        ).subscribeOn(Schedulers.newThread());
+
         workbookObservable.subscribe(
             (excelStream) -> {
                 asyncResponse.resume(Response.ok(excelStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").header("content-disposition", "inline; filename=valintalaskennantulos.xlsx").build());

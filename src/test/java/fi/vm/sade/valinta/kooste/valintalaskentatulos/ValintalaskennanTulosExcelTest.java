@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
@@ -23,20 +24,16 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
 import static java.util.Arrays.asList;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.EMPTY_MAP;
-import static java.util.Collections.asLifoQueue;
 import static org.junit.Assert.assertEquals;
 
 public class ValintalaskennanTulosExcelTest {
@@ -53,8 +50,7 @@ public class ValintalaskennanTulosExcelTest {
         )),
         valinnanvaihe(2, asList(
             valintatapajono(1, EMPTY_LIST))
-        ))
-    );
+        )), hakemukset());
 
     @Test
     public void sheetNames() {
@@ -172,6 +168,11 @@ public class ValintalaskennanTulosExcelTest {
                 2, "Suku 2", "Etu 2", false, JarjestyskriteerituloksenTila.VIRHE, EMPTY_LIST, EMPTY_LIST, EMPTY_LIST, false, false)
         );
     }
+
+    private List<Hakemus> hakemukset() {
+        return Arrays.asList(new Hakemus());
+    }
+
 
     private TreeSet<JarjestyskriteeritulosDTO> jarjestyskriteerit(final JarjestyskriteerituloksenTila tila, final Map<String, String> kuvaus, final BigDecimal arvo) {
         final TreeSet<JarjestyskriteeritulosDTO> kriteerit = new TreeSet<>();
