@@ -25,7 +25,7 @@ import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
+
 
 /**
  * @author Jussi Jartamo
@@ -48,8 +48,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
             getWebClient()
                     .path(url)
                     .async()
-                    .get(new Callback<>(address, url, uuidCallback, failureCallback, new TypeToken<String>() {
-                    }.getType()));
+                    .get(new Callback<>(address, url, uuidCallback, failureCallback, new TypeToken<String>() {}.getType()));
         } catch (Exception e) {
             LOG.error("Uuden tyon hakeminen epaonnistui", e);
             failureCallback.accept(e);
@@ -62,8 +61,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
             getWebClient()
                     .path(url)
                     .async()
-                    .get(new Callback<>(address, url, callback, failureCallback, new TypeToken<LaskentaDto>() {
-                    }.getType()));
+                    .get(new Callback<>(address, url, callback, failureCallback, new TypeToken<LaskentaDto>() {}.getType()));
         } catch (Exception e) {
             failureCallback.accept(e);
         }
@@ -75,19 +73,13 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
             getWebClient()
                     .path(url)
                     .async()
-                    .put(Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE), new Callback<>(address, url, callback, failureCallback, new TypeToken<LaskentaDto>() {
-                    }.getType()));
+                    .put(Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE), new Callback<>(address, url, callback, failureCallback, new TypeToken<LaskentaDto>() {}.getType()));
         } catch (Exception e) {
             failureCallback.accept(e);
         }
     }
 
-    public void luoLaskenta(
-            LaskentaParams laskentaParams,
-            List<HakukohdeDto> hakukohdeOids,
-            Consumer<String> callback,
-            Consumer<Throwable> failureCallback
-    ) {
+    public void luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids, Consumer<String> callback, Consumer<Throwable> failureCallback) {
         try {
             Boolean isErillishaku = laskentaParams.isErillishaku();
             String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + laskentaParams.getHakuOid() + "/tyyppi/" + laskentaParams.getLaskentatyyppi();
@@ -101,11 +93,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
             if (laskentaParams.getIsValintakoelaskenta() != null) {
                 wc.query("valintakoelaskenta", laskentaParams.getIsValintakoelaskenta());
             }
-            wc.async().post(
-                    Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE),
-                    new Callback<String>(address, url, callback, failureCallback, new TypeToken<String>() {
-                    }.getType())
-            );
+            wc.async().post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new Callback<>(address, url, callback, failureCallback, new TypeToken<String>() {}.getType()));
         } catch (Exception e) {
             failureCallback.accept(e);
         }
@@ -123,8 +111,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
         }
     }
 
-    public void merkkaaLaskennanTila(String uuid, LaskentaTila tila,
-                                     HakukohdeTila hakukohdetila) {
+    public void merkkaaLaskennanTila(String uuid, LaskentaTila tila, HakukohdeTila hakukohdetila) {
         String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + uuid + "/tila/" + tila + "/hakukohde/" + hakukohdetila;
         try {
             getWebClient()
@@ -132,7 +119,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
                     .async()
                     .put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
         } catch (Exception e) {
-            LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url, e.getMessage());
+            LOG.error("Seurantapalvelun kutsu {} laskennalle {} paatyi virheeseen: {}", url, uuid, e.getMessage());
         }
     }
 
@@ -145,7 +132,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
                     .async()
                     .put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
         } catch (Exception e) {
-            LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url, e.getMessage());
+            LOG.error("Seurantapalvelun kutsu {} laskennalle {} ja hakukohteelle {} paatyi virheeseen: {}", url, uuid, hakukohdeOid, e.getMessage());
         }
     }
 
