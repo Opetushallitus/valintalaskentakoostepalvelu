@@ -43,10 +43,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 
 	@Override
 	public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
-		String url = new StringBuilder("/valintalaskentakoostepalvelu/hakukohde/").append(hakukohdeOid).append("/valinnanvaihe").toString();
-		final Future<List<ValintatietoValinnanvaiheDTO>> future = getWebClient().path(url).async().get(new GenericType<List<ValintatietoValinnanvaiheDTO>>() {
-		});
-		return Observable.from(future);
+		return Observable.from(getWebClient().path("/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe").async().get(new GenericType<List<ValintatietoValinnanvaiheDTO>>() {}));
 	}
 
 	@Override
