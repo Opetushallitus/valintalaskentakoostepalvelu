@@ -54,17 +54,6 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 				.put(Entity.entity(new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit), MediaType.APPLICATION_JSON),new GenericType<List<Hakemus>>() { });
 	}
 
-	@Override
-	public Future<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(String hakuOid, String hakukohdeOid) {
-		String url = new StringBuilder()
-				.append("/applications/additionalData/").append(hakuOid)
-				.append("/").append(hakukohdeOid).toString();
-		return getWebClient().path(url)
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async()
-				.get(new GenericType<List<ApplicationAdditionalDataDTO>>() { });
-	}
-
 	/**
 	 * /haku-app/applications/listfull?appState=ACTIVE&appState=INCOMPLETE&rows=100000&asId={hakuOid}&aoOid={hakukohdeOid}
 	 */

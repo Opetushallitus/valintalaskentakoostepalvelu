@@ -5,14 +5,12 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
+import javax.ws.rs.core.Response;
+
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  * 
@@ -20,10 +18,6 @@ import javax.ws.rs.core.Response;
  * 
  */
 public interface ApplicationAsyncResource {
-
-	Future<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(
-			String hakuOid, String hakukohdeOid);
-
 	Future<List<Hakemus>> getApplicationsByOid(String hakuOid,
 			String hakukohdeOid);
 

@@ -106,10 +106,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         hakemus.setPersonOid(prototyyppi.hakijaOid);
         return hakemus;
     }
-    @Override
-    public Future<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(final String hakuOid, final String hakukohdeOid) {
-        throw new UnsupportedOperationException();
-    }
+
     @Override
     public Future<List<Hakemus>> getApplicationsByOid(final String hakuOid, final String hakukohdeOid) {
         return Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(
