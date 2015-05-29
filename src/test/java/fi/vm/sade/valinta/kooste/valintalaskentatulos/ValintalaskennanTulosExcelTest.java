@@ -64,9 +64,9 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Päivämäärä", "01.01.1970 02.00"),
                 asList("Jono", "Jono 1"),
                 asList(),
-                asList("Jonosija", "Sukunimi", "Etunimi", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Kokonaispisteet"),
-                asList("1", "Suku 2", "Etu 2", "Hakemus 2", "2", "VIRHE", ""),
-                asList("2", "Suku 1", "Etu 1", "Hakemus 1", "1", "HYVAKSYTTAVISSA", "666")
+                asList("Jonosija", "Sukunimi",  "Etunimi",  "Hakemus OID",  "Hakutoive",    "Laskennan tulos",  "Selite",   "Kokonaispisteet"),
+                asList("1", "Suku 2", "Etu 2", "Hakemus 2", "2", "VIRHE", "Puuttuu", ""),
+                asList("2", "Suku 1", "Etu 1", "Hakemus 1", "1", "HYVAKSYTTAVISSA", "", "666")
             ), getWorksheetData(workbook.getSheetAt(0)));
     }
 
@@ -155,7 +155,7 @@ public class ValintalaskennanTulosExcelTest {
                 jarjestyskriteerit(HYVAKSYTTAVISSA, EMPTY_MAP, new BigDecimal(666)),
                 1, "Suku 1", "Etu 1", false, HYVAKSYTTAVISSA, EMPTY_LIST, EMPTY_LIST, EMPTY_LIST, false, false),
             new JonosijaDTO(1, "Hakemus 2", "Hakija 2",
-                jarjestyskriteerit(JarjestyskriteerituloksenTila.VIRHE, map("fi", "Pakollisen syötettävän kentän arvo on merkitsemättä"), null),
+                jarjestyskriteerit(JarjestyskriteerituloksenTila.VIRHE, map("fi", "Puuttuu"), null),
                 2, "Suku 2", "Etu 2", false, JarjestyskriteerituloksenTila.VIRHE, EMPTY_LIST, EMPTY_LIST, EMPTY_LIST, false, false)
         );
     }
