@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.camel.Property;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.HakijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
@@ -32,23 +34,22 @@ public class ValintalaskennanTulosExcel {
 
     public static XSSFWorkbook luoExcel(final HakukohdeDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet) {
         XSSFWorkbook workbook = new XSSFWorkbook();
-        valinnanVaiheet.stream().forEach(vaihe -> {
-            vaihe.getValintatapajonot().forEach(jono -> {
-                final XSSFSheet sheet = workbook.createSheet(vaihe.getNimi() + " - " + jono.getNimi());
-                setColumnWidths(sheet);
-
-                addRow(sheet, asList("Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimi())));
-                addRow(sheet, asList("Hakukohde", getTeksti(hakukohdeDTO.getHakukohdeNimi())));
-                addRow(sheet, asList("Vaihe", vaihe.getNimi()));
-                addRow(sheet, asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(vaihe.getCreatedAt())));
-                addRow(sheet, asList("Jono", jono.getNimi()));
-                addRow(sheet, asList());
-                addRow(sheet, columnHeaders);
-                for (JonosijaDTO hakija : jono.getJonosijat()) {
-                    addRow(sheet, columns.stream().map(column -> column.extractor.apply(hakija)).collect(Collectors.toList()));
-                }
-            });
-        });
+        valinnanVaiheet.stream()
+            .sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()))
+            .forEach(vaihe -> vaihe.getValintatapajonot().forEach(jono -> {
+                    final XSSFSheet sheet = workbook.createSheet(vaihe.getNimi() + " - " + jono.getNimi());
+                    setColumnWidths(sheet);
+                    addRow(sheet, asList("Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimi())));
+                    addRow(sheet, asList("Hakukohde", getTeksti(hakukohdeDTO.getHakukohdeNimi())));
+                    addRow(sheet, asList("Vaihe", vaihe.getNimi()));
+                    addRow(sheet, asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(vaihe.getCreatedAt())));
+                    addRow(sheet, asList("Jono", jono.getNimi()));
+                    addRow(sheet, asList());
+                    addRow(sheet, columnHeaders);
+                    for (JonosijaDTO hakija : jono.getJonosijat()) {
+                        addRow(sheet, columns.stream().map(column -> column.extractor.apply(hakija)).collect(Collectors.toList()));
+                    }
+            }));
         return workbook;
     }
 
