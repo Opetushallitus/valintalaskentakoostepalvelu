@@ -36,7 +36,7 @@ public class ValintalaskennanTulosExcel {
             this.extractor = extractor;
         }
     }
-    
+
     public static List<Column> columns = Arrays.asList(
         new Column("Jonosija",        14, hakija -> String.valueOf(hakija.getJonosija())),
         new Column("Sukunimi",        20, JonosijaDTO :: getSukunimi),
@@ -57,16 +57,20 @@ public class ValintalaskennanTulosExcel {
             .forEach(vaihe -> vaihe.getValintatapajonot().forEach(jono -> {
                 final XSSFSheet sheet = workbook.createSheet(vaihe.getNimi() + " - " + jono.getNimi());
                 setColumnWidths(sheet);
-                addRow(sheet, asList("Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimi())));
-                addRow(sheet, asList("Hakukohde", getTeksti(hakukohdeDTO.getHakukohdeNimi())));
-                addRow(sheet, asList("Vaihe", vaihe.getNimi()));
-                addRow(sheet, asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(vaihe.getCreatedAt())));
-                addRow(sheet, asList("Jono", jono.getNimi()));
-                addRow(sheet, asList());
-                addRow(sheet, columnHeaders);
-                sortedJonosijat(jono).forEach(hakija ->
-                    addRow(sheet, columns.stream().map(column -> column.extractor.apply(hakija)).collect(Collectors.toList()))
-                );
+                addRow(sheet, "Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimi()));
+                addRow(sheet, "Hakukohde", getTeksti(hakukohdeDTO.getHakukohdeNimi()));
+                addRow(sheet, "Vaihe", vaihe.getNimi());
+                addRow(sheet, "Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(vaihe.getCreatedAt()));
+                addRow(sheet, "Jono", jono.getNimi());
+                addRow(sheet);
+                if (jono.getJonosijat().isEmpty()) {
+                    addRow(sheet, "Jonolle ei ole valintalaskennan tuloksia");
+                } else {
+                    addRow(sheet, columnHeaders);
+                    sortedJonosijat(jono).forEach(hakija ->
+                            addRow(sheet, columns.stream().map(column -> column.extractor.apply(hakija)).collect(Collectors.toList()))
+                    );
+                }
             }));
         return workbook;
     }
@@ -94,6 +98,10 @@ public class ValintalaskennanTulosExcel {
         for (int i = 0; i < columns.size(); i++) {
             sheet.setColumnWidth(i, columns.get(i).widthInCharacters * 256);
         }
+    }
+
+    private static void addRow(final XSSFSheet sheet, String... values) {
+        addRow(sheet, asList(values));
     }
 
     private static void addRow(final XSSFSheet sheet, List<String> values) {

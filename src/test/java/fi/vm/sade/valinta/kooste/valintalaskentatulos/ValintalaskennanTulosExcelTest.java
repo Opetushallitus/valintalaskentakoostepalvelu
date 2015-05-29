@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,7 @@ import static fi.vm.sade.valintalaskenta.domain.valinta.Jarjestyskriteeritulokse
 import static java.util.Arrays.asList;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.EMPTY_MAP;
+import static java.util.Collections.asLifoQueue;
 import static org.junit.Assert.assertEquals;
 
 public class ValintalaskennanTulosExcelTest {
@@ -44,7 +46,15 @@ public class ValintalaskennanTulosExcelTest {
         hakukohdeDTO.setTarjoajaNimi(map("fi", "Tarjoaja 1"));
     }
 
-    XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(hakukohdeDTO, asList(valinnanvaihe(1, 2), valinnanvaihe(2, 1)));
+    XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(hakukohdeDTO, asList(
+        valinnanvaihe(1, asList(
+            valintatapajono(1, jonosijat()),
+            valintatapajono(2, EMPTY_LIST)
+        )),
+        valinnanvaihe(2, asList(
+            valintatapajono(1, EMPTY_LIST))
+        ))
+    );
 
     @Test
     public void sheetNames() {
@@ -71,6 +81,21 @@ public class ValintalaskennanTulosExcelTest {
     }
 
     @Test
+    public void emptySheet() {
+        assertEquals(
+            asList(
+                asList("Tarjoaja", "Tarjoaja 1"),
+                asList("Hakukohde", "Hakukohde 1"),
+                asList("Vaihe", "Vaihe 1"),
+                asList("Päivämäärä", "01.01.1970 02.00"),
+                asList("Jono", "Jono 2"),
+                asList(),
+                asList("Jonolle ei ole valintalaskennan tuloksia")
+            ), getWorksheetData(workbook.getSheetAt(1))
+        );
+    }
+
+    @Test
     @Ignore
     public void generoiTiedosto() throws IOException {
         StreamUtils.copy(Excel.export(workbook), new FileOutputStream("valintatulokset.xlsx"));
@@ -81,14 +106,6 @@ public class ValintalaskennanTulosExcelTest {
         return new HashMap<String, T>() {{
             put(key, value);
         }};
-    }
-
-    private Map<String, List<List<String>>> getWorkbookData(XSSFWorkbook workbook) {
-        Map<String, List<List<String>>> data = new HashMap<>();
-        for (int sheetNum = 0; sheetNum < workbook.getNumberOfSheets(); sheetNum++) {
-            data.put(workbook.getSheetName(sheetNum), getWorksheetData(workbook.getSheetAt(sheetNum)));
-        }
-        return data;
     }
 
     private List<List<String>> getWorksheetData(final XSSFSheet sheet) {
@@ -109,23 +126,19 @@ public class ValintalaskennanTulosExcelTest {
         return rowData;
     }
 
-    private ValintatietoValinnanvaiheDTO valinnanvaihe(int jarjestysnumero, int jonoja) {
+    private ValintatietoValinnanvaiheDTO valinnanvaihe(int jarjestysnumero, List<ValintatietoValintatapajonoDTO> jonot) {
         return new ValintatietoValinnanvaiheDTO(
                 jarjestysnumero,
                 "vaiheOid" + jarjestysnumero,
                 "hakuOid",
                 "Vaihe " + jarjestysnumero,
                 new Date(0),
-                valintatapajonot(jonoja),
+                jonot,
                 EMPTY_LIST
         );
     }
 
-    private List<ValintatietoValintatapajonoDTO> valintatapajonot(int jonoja) {
-        return IntStream.rangeClosed(1, jonoja).boxed().map(this::valintatapajono).collect(Collectors.toList());
-    }
-
-    private ValintatietoValintatapajonoDTO valintatapajono(int jonoNumero) {
+    private ValintatietoValintatapajonoDTO valintatapajono(int jonoNumero, final List<JonosijaDTO> jonosijat) {
         return new ValintatietoValintatapajonoDTO(
                 "jonoOid" + jonoNumero,
                 "Jono " + jonoNumero,
@@ -138,7 +151,7 @@ public class ValintalaskennanTulosExcelTest {
                 true,
                 true,
                 true,
-                jonosijat(),
+                jonosijat,
                 true,
                 EMPTY_LIST,
                 2,
