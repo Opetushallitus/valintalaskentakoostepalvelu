@@ -1,13 +1,10 @@
 package fi.vm.sade.valinta.kooste;
 
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.webapp.WebAppContext;
+
 import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.integrationtest.util.ProjectRootFinder;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.DefaultHandler;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  * @author Jussi Jartamo
