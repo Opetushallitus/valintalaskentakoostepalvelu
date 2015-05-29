@@ -26,6 +26,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import rx.Observable;
+import rx.schedulers.Schedulers;
 
 /**
  * 
@@ -43,7 +44,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 
 	@Override
 	public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
-		return Observable.from(getWebClient().path("/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe").async().get(new GenericType<List<ValintatietoValinnanvaiheDTO>>() {}));
+		return toObservable(getWebClient().path("/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe").async().get(new GenericType<List<ValintatietoValinnanvaiheDTO>>() {}));
 	}
 
 	@Override

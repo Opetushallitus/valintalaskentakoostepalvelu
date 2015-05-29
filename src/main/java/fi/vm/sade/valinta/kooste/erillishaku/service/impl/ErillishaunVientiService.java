@@ -58,13 +58,13 @@ public class ErillishaunVientiService {
     }
 
     public void vie(KirjeProsessi prosessi, ErillishakuDTO erillishaku) {
-        Future<List<Hakemus>> hakemusFuture = applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
+        Observable<List<Hakemus>> hakemusObservable = applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
         Future<HakukohdeDTO> hakukohdeFuture = sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
         Future<List<Valintatulos>> valintatulosFuture = sijoitteluAsyncResource.getValintatuloksetHakukohteelle(erillishaku.getHakukohdeOid(), erillishaku.getValintatapajonoOid());
         Future<HakuV1RDTO> hakuFuture = hakuV1AsyncResource.haeHaku(erillishaku.getHakuOid());
         Observable<fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO> tarjontaHakukohdeObservable = hakuV1AsyncResource.haeHakukohde(erillishaku.getHakukohdeOid());
 
-        zip(from(hakemusFuture), from(hakuFuture), tarjontaHakukohdeObservable, from(valintatulosFuture), from(hakukohdeFuture),
+        zip(hakemusObservable, from(hakuFuture), tarjontaHakukohdeObservable, from(valintatulosFuture), from(hakukohdeFuture),
                 (hakemukset, haku, tarjontaHakukohde, valintatulos, hakukohde) -> {
                     Map<String, Valintatulos> valintatulokset = getValintatulokset(erillishaku, valintatulos);
                     if (MapUtils.isEmpty(valintatulokset)) {

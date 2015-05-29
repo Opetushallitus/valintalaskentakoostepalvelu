@@ -19,9 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.reflect.TypeToken;
+
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.external.resource.Callback;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import rx.Observable;
 
@@ -39,20 +44,15 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
 
 	@Override
 	public Future<HakuV1RDTO> haeHaku(String hakuOid) {
-		String url = "/v1/haku/"+hakuOid+"/";
 		return getWebClient()
-				.path(url)
+				.path("/v1/haku/"+hakuOid+"/")
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async().get(HakuV1RDTO.class);
 	}
 
 	@Override
 	public Observable<HakukohdeDTO> haeHakukohde(String hakukohdeOid) {
-		String url = "/hakukohde/"+hakukohdeOid+"/";
-		return Observable.from(getWebClient()
-				.path(url)
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async().get(HakukohdeDTO.class));
+		return toObservable(getWebClient().path("/hakukohde/" + hakukohdeOid + "/").accept(MediaType.APPLICATION_JSON_TYPE).async().get(HakukohdeDTO.class));
 	}
 	@Override
 	public Peruutettava haeHaku(String hakuOid, Consumer<HakuV1RDTO> callback, Consumer<Throwable> failureCallback) {
