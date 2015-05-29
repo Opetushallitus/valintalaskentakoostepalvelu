@@ -17,6 +17,8 @@ import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.cxf.jaxrs.client.WebClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
  */
 @Service
 public class ValintalaskentaAsyncResourceImpl extends HttpResource implements ValintalaskentaAsyncResource {
+	private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaAsyncResourceImpl.class);
 	@Autowired
 	public ValintalaskentaAsyncResourceImpl(
 			@Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}") String address
@@ -53,6 +56,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 							failureCallback, new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {
 					}.getType())));
 		} catch (Exception e) {
+			LOG.error("Virhe laskennan tulosten haussa",e);
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
@@ -92,6 +96,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 									failureCallback, new TypeToken<String>() {
 									}.getType())));
 		} catch (Exception e) {
+			LOG.error("Virhe laskennan kutsussa",e);
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
@@ -112,6 +117,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 									failureCallback, new TypeToken<String>() {
 							}.getType())));
 		} catch (Exception e) {
+			LOG.error("Virhe laske kaikki kutsussa",e);
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
@@ -133,6 +139,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 											new TypeToken<String>() {
 											}.getType())));
 		} catch (Exception e) {
+			LOG.error("Virhe laske ja sijoittele kutsussa",e);
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
@@ -153,6 +160,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 									failureCallback, new TypeToken<String>() {
 									}.getType())));
 		} catch (Exception e) {
+			LOG.error("Virhe valintakoe kutsussa",e);
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
