@@ -2,12 +2,16 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.excel;
 
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti.getTeksti;
 import static java.util.Arrays.asList;
+import static org.apache.commons.lang.StringUtils.trimToEmpty;
+import static org.apache.commons.lang.StringUtils.trimToNull;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -16,6 +20,7 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 
 public class ValintalaskennanTulosExcel {
     public static List<Column> columns = Arrays.asList(
@@ -44,11 +49,19 @@ public class ValintalaskennanTulosExcel {
                 addRow(sheet, asList("Jono", jono.getNimi()));
                 addRow(sheet, asList());
                 addRow(sheet, columnHeaders);
-                for (JonosijaDTO hakija : jono.getJonosijat()) {
-                    addRow(sheet, columns.stream().map(column -> column.extractor.apply(hakija)).collect(Collectors.toList()));
-                }
+                sortedJonosijat(jono).forEach(hakija ->
+                    addRow(sheet, columns.stream().map(column -> column.extractor.apply(hakija)).collect(Collectors.toList()))
+                );
             }));
         return workbook;
+    }
+
+    private static Stream<JonosijaDTO> sortedJonosijat(final ValintatietoValintatapajonoDTO jono) {
+        return jono.getJonosijat().stream().sorted((o1, o2) ->
+            (o1.getJonosija() - o2.getJonosija()) * 100 +
+                (trimToNull(o1.getSukunimi()).compareTo(trimToNull(o2.getSukunimi()))) * 10 +
+                (trimToNull(o1.getEtunimi()).compareTo(trimToNull(o2.getEtunimi())))
+        );
     }
 
     private static void setColumnWidths(final XSSFSheet sheet) {
