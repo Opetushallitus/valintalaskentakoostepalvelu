@@ -87,6 +87,7 @@ public class ResponseCallback implements InvocationCallback<Response> {
             try {
                 return IOUtils.toString((InputStream) entity);
             } catch (Exception e) {
+                LOG.error("Palvelinvirheen luku epaonnistui", e);
                 return "Palvelinvirhettä ei pystytty lukemaan";
             }
         } else {
