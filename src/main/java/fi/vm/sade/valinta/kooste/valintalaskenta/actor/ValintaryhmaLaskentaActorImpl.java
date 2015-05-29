@@ -43,11 +43,11 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
         this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
         this.laskentaStrategia = laskentaStrategia;
         laskenta.laitaTyojonoon(pkk -> {
-            LOG.error("Hakukohteen {} tila muuttunut statukseen {}. {}", pkk.getHakukohdeOid(), pkk.getHakukohdeTila(), tulkinta(pkk.getHakukohdeTila()));
+            LOG.info("Hakukohteen {} tila muuttunut statukseen {}. {}", pkk.getHakukohdeOid(), pkk.getHakukohdeTila(), tulkinta(pkk.getHakukohdeTila()));
             if (pkk.onkoPeruutettu()) {
                 merkkaaLaskennanTila(uuid, laskentaSeurantaAsyncResource, pkk);
             } else {
-                LOG.error("Aloitetaan valintaryhman laskenta!");
+                LOG.info("Aloitetaan valintaryhman laskenta!");
                 laskentaStrategia.laitaPalvelukutsuJonoon(pkk, p -> merkkaaLaskennanTila(uuid, laskentaSeurantaAsyncResource, pkk));
                 laskentaStrategia.aloitaUusiPalvelukutsu();
             }
@@ -65,7 +65,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Laskennan tilan merkkaaminen epäonnistui {}", e.getMessage());
+            LOG.error("Laskennan ("+uuid+") tilan merkkaaminen valmiiksi epaonnistui", e);
         }
     }
 
@@ -73,10 +73,10 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
     public void postStop() {
         if (!valmis.get()) {
             try {
-                LOG.error("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
+                LOG.info("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
                 laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
             } catch (Exception e) {
-                LOG.error("Virhe {}", e.getMessage());
+                LOG.error("Laskennan ("+uuid+") tilan merkkaaminen peruutetuksi epaonnistui", e);
             }
         }
     }
@@ -126,17 +126,17 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
                 try {
                     s.peruutaKaikki();
                 } catch (Exception e) {
-                    LOG.error("Palvelukutsu Strategian peruutus epaonnistui! {}", e.getMessage());
+                    LOG.error("Palvelukutsu Strategian peruutus epaonnistui laskennalle ("+uuid+")", e);
                 }
             });
             laskentaStrategia.peruutaKaikki();
         } catch (Exception e) {
-            LOG.error("Strategioiden peruuttaminen epaonnistui", e);
+            LOG.error("Strategioiden peruuttaminen epaonnistui laskennalle ("+uuid+") ", e);
         }
         try {
             laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, HakukohdeTila.KESKEYTETTY);
         } catch (Exception e) {
-            LOG.error("Laskennan tilan merkkaaminen peruutetuksi ja hakukohteet keskeytetyksi epaonnistui", e);
+            LOG.error("Laskennan tilan merkkaaminen peruutetuksi ja hakukohteet keskeytetyksi epaonnistui laskennalle ("+uuid+")", e);
         }
         viimeistele();
     }
