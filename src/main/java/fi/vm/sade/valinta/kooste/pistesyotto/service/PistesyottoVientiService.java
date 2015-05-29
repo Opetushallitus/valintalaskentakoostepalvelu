@@ -15,6 +15,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
+import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -116,12 +117,12 @@ public class PistesyottoVientiService {
     }
 
     public void vie(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi) {
-        Consumer<Throwable> poikkeuskasittelija = poikkeus -> {
+        PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
             LOG.error("Pistesyötön viennissä tapahtui poikkeus:", poikkeus);
             prosessi.getPoikkeukset().add(
                     new Poikkeus(Poikkeus.KOOSTEPALVELU,
                             "Pistesyötön vienti", poikkeus.getMessage()));
-        };
+        });
         try {
             prosessi.setKokonaistyo(
                     7
@@ -213,7 +214,7 @@ public class PistesyottoVientiService {
                 hakukohdeJaValintakoeRef.set(hakukohdeJaValintakoe);
                 viimeisteleTuonti.get();
             }, poikkeuskasittelija);
-            tarjontaAsyncResource.haeHakukohde(hakuOid, hakukohdeOid, hakukohde -> {
+            tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
                 prosessi.inkrementoiTehtyjaToita();
                 hakukohdeRef.set(hakukohde);
                 viimeisteleTuonti.get();

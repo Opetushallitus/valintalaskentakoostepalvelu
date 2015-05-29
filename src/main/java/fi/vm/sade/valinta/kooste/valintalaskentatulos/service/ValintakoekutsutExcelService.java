@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
+import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.ValintakoeKutsuExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -68,12 +69,12 @@ public class ValintakoekutsutExcelService {
 
     public void luoExcel(DokumenttiProsessi prosessi, String hakuOid, String hakukohdeOid, List<String> valintakoeTunnisteet,
                          Set<String> hakemusOids) {
-        Consumer<Throwable> poikkeuskasittelija = poikkeus -> {
+        PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
             LOG.error("Valintakoekutsut excelin luonnissa tapahtui poikkeus:", poikkeus);
             prosessi.getPoikkeukset().add(
                     new Poikkeus(Poikkeus.KOOSTEPALVELU,
                             "Valintakoekutsut excelin luonnissa tapahtui poikkeus:", poikkeus.getMessage()));
-        };
+        });
         try {
             prosessi.setKokonaistyo(
                     8
@@ -197,7 +198,7 @@ public class ValintakoekutsutExcelService {
                     poikkeuskasittelija
             );
 
-            tarjontaAsyncResource.haeHakukohde(hakuOid, hakukohdeOid, hakukohde -> {
+            tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
                 hakukohdeRef.set(hakukohde);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);

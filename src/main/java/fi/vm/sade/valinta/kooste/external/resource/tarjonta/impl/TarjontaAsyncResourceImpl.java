@@ -23,6 +23,7 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import rx.Observable;
 
 /**
  * 
@@ -46,12 +47,12 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
 	}
 
 	@Override
-	public Future<HakukohdeDTO> haeHakukohde(String hakukohdeOid) {
+	public Observable<HakukohdeDTO> haeHakukohde(String hakukohdeOid) {
 		String url = "/hakukohde/"+hakukohdeOid+"/";
-		return getWebClient()
+		return Observable.from(getWebClient()
 				.path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async().get(HakukohdeDTO.class);
+				.async().get(HakukohdeDTO.class));
 	}
 	@Override
 	public Peruutettava haeHaku(String hakuOid, Consumer<HakuV1RDTO> callback, Consumer<Throwable> failureCallback) {
@@ -63,20 +64,5 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
 				.get(new Callback<ResultV1RDTO<HakuV1RDTO>>(GSON, address, url,
 						result -> callback.accept(result.getResult()),
 						failureCallback, new TypeToken<ResultV1RDTO<HakuV1RDTO>>() {}.getType())));
-	}
-	public Peruutettava haeHakukohde(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> callback, Consumer<Throwable> failureCallback) {
-		try {
-			String url = new StringBuilder("/hakukohde/").append(hakukohdeOid).append("/").toString();
-			return new PeruutettavaImpl(getWebClient()
-					.path(url)
-					.accept(MediaType.APPLICATION_JSON_TYPE)
-					.async()
-					.get(new Callback<HakukohdeDTO>(GSON,address, url, callback,
-							failureCallback, new TypeToken<HakukohdeDTO>() {
-					}.getType())));
-		} catch (Exception e) {
-			failureCallback.accept(e);
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		}
 	}
 }

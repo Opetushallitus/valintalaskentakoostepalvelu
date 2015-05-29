@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.resource;
 
+import static rx.observables.BlockingObservable.from;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,6 +40,7 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
+import rx.observables.BlockingObservable;
 
 /**
  * 
@@ -78,7 +81,8 @@ public class ValintatapajonoResource {
 	public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid) throws Exception{
-		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
+		String tarjoajaOid = from(tarjontaResource.haeHakukohde(hakukohdeOid)).first().getTarjoajaOid();
+
 		authorizer.checkOrganisationAccess(tarjoajaOid,
 				ValintatapajonoResource.ROLE_TULOSTENTUONTI
 		);
@@ -112,7 +116,7 @@ public class ValintatapajonoResource {
 						.build());
 			}
 		});
-		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
+		String tarjoajaOid = from(tarjontaResource.haeHakukohde(hakukohdeOid)).first().getTarjoajaOid();
 		authorizer.checkOrganisationAccess(tarjoajaOid,
 				ValintatapajonoResource.ROLE_TULOSTENTUONTI
 		);
@@ -169,7 +173,7 @@ public class ValintatapajonoResource {
 						.build());
 			}
 		});
-		String tarjoajaOid = tarjontaResource.haeHakukohde(hakukohdeOid).get().getTarjoajaOid();
+		String tarjoajaOid = from(tarjontaResource.haeHakukohde(hakukohdeOid)).first().getTarjoajaOid();
 		authorizer.checkOrganisationAccess(tarjoajaOid,
 				ValintatapajonoResource.ROLE_TULOSTENTUONTI
 		);

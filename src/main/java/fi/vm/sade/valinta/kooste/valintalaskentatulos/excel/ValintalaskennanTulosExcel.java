@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.excel;
 
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti.getTeksti;
 import static java.util.Arrays.asList;
-import static org.apache.commons.lang.StringUtils.trimToEmpty;
 import static org.apache.commons.lang.StringUtils.trimToNull;
 
 import java.util.Arrays;
@@ -12,7 +11,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -37,16 +35,7 @@ public class ValintalaskennanTulosExcel {
         }
     }
 
-    public static List<Column> columns = Arrays.asList(
-        new Column("Jonosija",        14, hakija -> String.valueOf(hakija.getJonosija())),
-        new Column("Sukunimi",        20, JonosijaDTO :: getSukunimi),
-        new Column("Etunimi",         20, JonosijaDTO :: getEtunimi),
-        new Column("Hakemus OID",     20, JonosijaDTO :: getHakemusOid),
-        new Column("Hakutoive",       14, hakija -> String.valueOf(hakija.getPrioriteetti())),
-        new Column("Laskennan tulos", 20, hakija -> hakija.getTuloksenTila().toString()),
-        new Column("Selite",          30, hakija -> getTeksti(getJarjestyskriteeri(hakija).getKuvaus())),
-        new Column("Kokonaispisteet", 14, hakija -> nullSafeToString(getJarjestyskriteeri(hakija).getArvo()))
-    );
+    public static List<Column> columns = Arrays.asList(new Column("Jonosija", 14, hakija -> String.valueOf(hakija.getJonosija())), new Column("Sukunimi", 20, JonosijaDTO::getSukunimi), new Column("Etunimi", 20, JonosijaDTO::getEtunimi), new Column("Hakemus OID", 20, JonosijaDTO::getHakemusOid), new Column("Hakutoive", 14, hakija -> String.valueOf(hakija.getPrioriteetti())), new Column("Laskennan tulos", 20, hakija -> hakija.getTuloksenTila().toString()), new Column("Selite", 30, hakija -> getTeksti(getJarjestyskriteeri(hakija).getKuvaus())), new Column("Kokonaispisteet", 14, hakija -> nullSafeToString(getJarjestyskriteeri(hakija).getArvo())));
 
     private final static List<String> columnHeaders = columns.stream().map(column -> column.name).collect(Collectors.toList());
 
@@ -76,11 +65,9 @@ public class ValintalaskennanTulosExcel {
     }
 
     private static Stream<JonosijaDTO> sortedJonosijat(final ValintatietoValintatapajonoDTO jono) {
-        return jono.getJonosijat().stream().sorted((o1, o2) ->
-            (o1.getJonosija() - o2.getJonosija()) * 100 +
+        return jono.getJonosijat().stream().sorted((o1, o2) -> (o1.getJonosija() - o2.getJonosija()) * 100 +
                 (trimToNull(o1.getSukunimi()).compareTo(trimToNull(o2.getSukunimi()))) * 10 +
-                (trimToNull(o1.getEtunimi()).compareTo(trimToNull(o2.getEtunimi())))
-        );
+                (trimToNull(o1.getEtunimi()).compareTo(trimToNull(o2.getEtunimi()))));
     }
 
     private static JarjestyskriteeritulosDTO getJarjestyskriteeri(final JonosijaDTO hakija) {

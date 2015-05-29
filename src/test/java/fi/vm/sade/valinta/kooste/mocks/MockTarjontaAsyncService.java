@@ -6,6 +6,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import rx.Observable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,11 +27,11 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     }
 
     @Override
-    public Future<HakukohdeDTO> haeHakukohde(String hakukohdeOid) {
+    public Observable<HakukohdeDTO> haeHakukohde(String hakukohdeOid) {
         HakukohdeDTO hakukohdeDTO = new HakukohdeDTO();
         hakukohdeDTO.setHakuOid(MockData.hakuOid);
         hakukohdeDTO.setOid(hakukohdeOid);
-        return Futures.immediateFuture(hakukohdeDTO);
+        return Observable.just(hakukohdeDTO);
     }
 
     @Override
@@ -52,5 +53,7 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
 
     public static void setMockHaku(HakuV1RDTO mockHaku) {
         MockTarjontaAsyncService.mockHaku.put(mockHaku.getOid(), mockHaku);
+        callback.accept(hakuV1RDTO);
+        return new PeruutettavaImpl(Futures.immediateFuture(hakuV1RDTO));
     }
 }

@@ -3,15 +3,11 @@ package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import rx.Observable;
 
 /**
  * 
@@ -38,8 +34,5 @@ public interface ValintalaskentaAsyncResource {
 	Peruutettava laskeJaSijoittele(List<LaskeDTO> lista,
 			Consumer<String> callback, Consumer<Throwable> failureCallback);
 
-	Peruutettava laskennantulokset(String hakuOid, String hakukohdeOid,
-								   Consumer<List<ValintatietoValinnanvaiheDTO>> callback, Consumer<Throwable> failureCallback);
-
-
+	Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid);
 }
