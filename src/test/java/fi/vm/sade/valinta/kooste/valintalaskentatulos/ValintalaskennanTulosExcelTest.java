@@ -3,8 +3,6 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
-import fi.vm.sade.valintalaskenta.domain.dto.HakijaDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteerituloksenTilaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
@@ -20,7 +18,6 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 import org.springframework.util.StreamUtils;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -31,9 +28,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -65,8 +62,8 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Päivämäärä", "01.01.1970 02.00"),
                 asList("Jono", "Jono 1"),
                 asList(),
-                asList("Jonosija", "Sukunimi", "Etunimi", "Hakemus OID", "Hakutoive", "Laskennan tulos"),
-                asList("1", "Suku 1", "Etu 1", "Hakemus 1", "1", "HYVAKSYTTAVISSA")
+                asList("Jonosija", "Sukunimi", "Etunimi", "Hakemus OID", "Hakutoive", "Laskennan tulos", "Kokonaispisteet"),
+                asList("1", "Suku 1", "Etu 1", "Hakemus 1", "1", "HYVAKSYTTAVISSA", "666")
             ), getWorksheetData(workbook.getSheetAt(0)));
     }
 
@@ -154,8 +151,7 @@ public class ValintalaskennanTulosExcelTest {
         return Arrays.asList(
             new JonosijaDTO(1,
                 "Hakemus 1",
-                "Hakija 1",
-                Collections.<JarjestyskriteeritulosDTO>emptySortedSet(),
+                "Hakija 1", jarjestyskriteerit(),
                 1,
                 "Suku " + i,
                 "Etu " + i,
@@ -167,5 +163,11 @@ public class ValintalaskennanTulosExcelTest {
                 false,
                 false)
         );
+    }
+
+    private TreeSet<JarjestyskriteeritulosDTO> jarjestyskriteerit() {
+        final TreeSet<JarjestyskriteeritulosDTO> kriteerit = new TreeSet<>();
+        kriteerit.add(new JarjestyskriteeritulosDTO(new BigDecimal(666), JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA, Collections.EMPTY_MAP, 1, "Yhteispisteet"));
+        return kriteerit;
     }
 }
