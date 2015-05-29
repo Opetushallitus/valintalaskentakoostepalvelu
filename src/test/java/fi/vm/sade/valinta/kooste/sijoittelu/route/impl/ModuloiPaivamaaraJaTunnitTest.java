@@ -47,6 +47,13 @@ public class ModuloiPaivamaaraJaTunnitTest {
     }
 
     @Test
+    public void pelkkaSuurempiMinuuttiEiAiheutaLisaintervallia() throws ParseException {
+        DateTime start = dateTime("02.10.2014 14:00");
+        DateTime now = dateTime("02.10.2015 15:01");
+        assertEquals("02.10.2015 16:00", Formatter.paivamaara(moduloiSeuraava(start, now, 2).toDate()));
+    }
+
+    @Test
     public void testaaModulointiaVahanJalkeen() throws ParseException {
         {
             DateTime start = dateTime("02.10.2014 14:05");

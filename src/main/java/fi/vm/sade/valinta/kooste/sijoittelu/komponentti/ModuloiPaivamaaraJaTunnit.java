@@ -22,8 +22,7 @@ public class ModuloiPaivamaaraJaTunnit {
 		}
 		int tavoiteTunti = seuraavaAskel(start.getHourOfDay(),
 				now.getHourOfDay(), moduloitavaTuntiMaara);
-		if (now.getMinuteOfHour() > start.getMinuteOfHour()) {
-			LOG.info("Lisataan tavoite tuntia yhdella koska alku");
+		if (now.getHourOfDay() == tavoiteTunti && now.getMinuteOfHour() > start.getMinuteOfHour()) {
 			tavoiteTunti += moduloitavaTuntiMaara;
 		}
 		return new DateTime(now.getYear(), now.getMonthOfYear(),
