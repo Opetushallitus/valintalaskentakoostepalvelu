@@ -131,12 +131,12 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
             });
             laskentaStrategia.peruutaKaikki();
         } catch (Exception e) {
-            LOG.error("Virhe {}", e.getMessage());
+            LOG.error("Strategioiden peruuttaminen epaonnistui", e);
         }
         try {
             laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, HakukohdeTila.KESKEYTETTY);
         } catch (Exception e) {
-            LOG.error("Virhe {}", e.getMessage());
+            LOG.error("Laskennan tilan merkkaaminen peruutetuksi ja hakukohteet keskeytetyksi epaonnistui", e);
         }
         viimeistele();
     }
