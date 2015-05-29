@@ -44,7 +44,7 @@ public class LaskentaActorImpl implements LaskentaActor {
         this.laskentaSeurantaAsyncResource = laskentaSeurantaAsyncResource;
         this.laskentaStrategia = laskentaStrategia;
         palvelukutsut.forEach(pk -> pk.laitaTyojonoon(pkk -> {
-            LOG.info("Hakukohteen {} tila muuttunut statukseen {}. {}", pkk.getHakukohdeOid(), pkk.getHakukohdeTila(), tulkinta(pkk.getHakukohdeTila()));
+            LOG.info("Laskennassa {} Hakukohteen {} tila muuttunut statukseen {}. {}", uuid, pkk.getHakukohdeOid(), pkk.getHakukohdeTila(), tulkinta(pkk.getHakukohdeTila()));
             if (pkk.onkoPeruutettu()) {
                 laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
                 if (hakukohdeLaskuri.done(pkk.getHakukohdeOid())) {
