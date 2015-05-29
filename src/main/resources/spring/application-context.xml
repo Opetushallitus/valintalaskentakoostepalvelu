@@ -549,8 +549,6 @@
 
 	<bean id="ErillishakuProxyResource"
 		  class="fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.ErillishakuProxyResource"/>
-	<bean id="ValintaTulosServiceProxyResource"
-		  class="fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.ValintaTulosServiceProxyResource"/>
 	<!-- Swagger -->
 	<!-- Swagger API listing resource -->
 	<bean id="swaggerResourceJSON"
@@ -589,7 +587,6 @@
 			<ref bean="ParametritResource"/>
 			<ref bean="PistesyottoResource"/>
 			<ref bean="ErillishakuProxyResource"/>
-			<ref bean="ValintaTulosServiceProxyResource"/>
 			<ref bean="SijoitteluAktivointiResource"/>
 			<ref bean="SijoittelunTulosHaulleResource"/>
 			<ref bean="ValintalaskentaKerrallaResource"/>
