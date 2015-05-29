@@ -46,15 +46,18 @@ public class LaskentaActorImpl implements LaskentaActor {
         palvelukutsut.forEach(pk -> pk.laitaTyojonoon(pkk -> {
             LOG.info("Laskennassa {} Hakukohteen {} tila muuttunut statukseen {}. {}", uuid, pkk.getHakukohdeOid(), pkk.getHakukohdeTila(), tulkinta(pkk.getHakukohdeTila()));
             if (pkk.onkoPeruutettu()) {
+                LOG.info("Palvelukutsu merkattu peruutetuksi. Laskenta: " + uuid);
                 laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
-                if (hakukohdeLaskuri.done(pkk.getHakukohdeOid())) {
+                if (hakukohdeLaskuri.done(pkk.getHakukohdeOid(), uuid)) {
                     viimeisteleLaskenta();
                     return;
                 }
             } else {
+                LOG.info("Laitetaan palvelukutsu jonoon laskennalle " + uuid);
                 laskentaStrategia.laitaPalvelukutsuJonoon(pkk, p -> {
+                    LOG.info("Merkataan hakukohteen {} tila {} laskennalle {}.", pkk.getHakukohdeOid(), pkk.getHakukohdeTila(), uuid);
                     laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, pkk.getHakukohdeOid(), pkk.getHakukohdeTila());
-                    if (hakukohdeLaskuri.done(pkk.getHakukohdeOid())) {
+                    if (hakukohdeLaskuri.done(pkk.getHakukohdeOid(), uuid)) {
                         viimeisteleLaskenta();
                         return;
                     }
@@ -96,6 +99,7 @@ public class LaskentaActorImpl implements LaskentaActor {
 
     private void viimeisteleLaskenta() {
         try {
+            LOG.info("Viimeistellaan laskenta " + uuid);
             laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS);
         } catch (Exception e) {
             LOG.error(formatError("\r\n####\r\n#### Laskenta paattynyt {} hakukohteelle haussa {} mutta kayttoliittymaa ei saatu paivitettya! {} \r\n####", hakukohdeLaskuri.getYhteensa(), hakuOid), e);
