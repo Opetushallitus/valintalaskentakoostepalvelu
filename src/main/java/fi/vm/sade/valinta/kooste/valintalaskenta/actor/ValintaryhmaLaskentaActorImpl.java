@@ -45,6 +45,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
         laskenta.laitaTyojonoon(pkk -> {
             LOG.info("Hakukohteen {} tila muuttunut statukseen {}. {}", pkk.getHakukohdeOid(), pkk.getHakukohdeTila(), tulkinta(pkk.getHakukohdeTila()));
             if (pkk.onkoPeruutettu()) {
+                LOG.info("Hakukohteen {} laskentapalvelukutsu oli peruutettu", pkk.getHakukohdeOid());
                 merkkaaLaskennanTila(uuid, laskentaSeurantaAsyncResource, pkk);
             } else {
                 LOG.info("Aloitetaan valintaryhman laskenta!");
@@ -55,6 +56,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
     }
 
     private void merkkaaLaskennanTila(String uuid, LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource, LaskentaPalvelukutsu pkk) {
+        LOG.info("Merkkaa hakukohteen {} laskennan tila {}", uuid, pkk.getHakukohdeTila());
         try {
             if (!viimeisteleLaskentaJaPalautaOlikoJoViimeistelty()) {
                 try {
@@ -71,6 +73,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 
     @Override
     public void postStop() {
+        LOG.info("PostStop kutsuttu actorille {}", uuid);
         if (!valmis.get()) {
             try {
                 LOG.info("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
@@ -99,7 +102,9 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
     }
 
     private boolean viimeisteleLaskentaJaPalautaOlikoJoViimeistelty() {
-        return valmis.getAndSet(true);
+        boolean edellinenTila = valmis.getAndSet(true);
+        LOG.info("Laskennan viimeistely, edellinen tila oli + edellinenTila");
+        return edellinenTila;
     }
 
     public void start() {
@@ -121,6 +126,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
     }
 
     public void lopeta() {
+        LOG.info("Lopeta kutsuttu actorille {}", uuid);
         try {
             strategiat.forEach(s -> {
                 try {
