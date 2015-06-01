@@ -78,7 +78,7 @@ public class ValintalaskentaExcelResource {
             return Response.ok(input, APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=jalkiohjaustulos.xls").build();
         } catch (Exception e) {
             LOG.error("Jälkiohjaustulosexcelin luonti epäonnistui haulle {}: {}", new Object[] {hakuOid, e.getMessage()});
-            return Response.ok(ExcelExportUtil.exportGridAsXls(new Object[][] {new Object[] {"Tarvittavien tietojen hakeminen epäonnistui!", "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!"}}), APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=yritauudelleen.xls").build();
+            return Response.ok(ExcelExportUtil.exportGridAsXls(new Object[][]{new Object[]{"Tarvittavien tietojen hakeminen epäonnistui!", "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!"}}), APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=yritauudelleen.xls").build();
         }
     }
 
@@ -128,7 +128,8 @@ public class ValintalaskentaExcelResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
     @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
     public void haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
-        final Observable<HakukohdeDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid).publish().refCount();
+        ConnectableObservable<HakukohdeDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid).replay(1);
+        hakukohdeObservable.connect();
         final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
         final Observable<List<Hakemus>> hakemuksetObservable = hakukohdeObservable.flatMap(hakukohde -> applicationResource.getApplicationsByOid(hakukohde.getHakuOid(), hakukohdeOid));
 
