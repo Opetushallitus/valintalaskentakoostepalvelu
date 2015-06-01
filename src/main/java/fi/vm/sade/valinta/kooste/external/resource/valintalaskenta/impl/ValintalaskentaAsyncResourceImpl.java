@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.external.resource.Callback;
+import fi.vm.sade.valinta.http.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
@@ -26,7 +25,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import rx.Observable;
-import rx.schedulers.Schedulers;
 
 /**
  * 
@@ -44,7 +42,8 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 
 	@Override
 	public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
-		return toObservable(getWebClient().path("/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe").async().get(new GenericType<List<ValintatietoValinnanvaiheDTO>>() {}));
+		return toObservable(getWebClient().path("/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe").async().get(new GenericType<List<ValintatietoValinnanvaiheDTO>>() {
+		}));
 	}
 
 	@Override

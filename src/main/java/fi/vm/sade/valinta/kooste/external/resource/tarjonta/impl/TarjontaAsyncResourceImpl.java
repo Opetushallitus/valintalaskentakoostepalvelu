@@ -24,7 +24,7 @@ import com.google.common.reflect.TypeToken;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.external.resource.Callback;
+import fi.vm.sade.valinta.http.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -52,8 +52,9 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
 
 	@Override
 	public Observable<HakukohdeDTO> haeHakukohde(String hakukohdeOid) {
-		return toObservable(getWebClient().path("/hakukohde/" + hakukohdeOid + "/").accept(MediaType.APPLICATION_JSON_TYPE).async().get(HakukohdeDTO.class));
+		return getAsObservable("/hakukohde/" + hakukohdeOid + "/", HakukohdeDTO.class);
 	}
+
 	@Override
 	public Peruutettava haeHaku(String hakuOid, Consumer<HakuV1RDTO> callback, Consumer<Throwable> failureCallback) {
 		String url = "/v1/haku/"+hakuOid+"/";

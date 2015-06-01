@@ -1,14 +1,12 @@
 package fi.vm.sade.valinta.kooste.external.resource.seuranta.impl;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
+
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.external.resource.Callback;
-import fi.vm.sade.valinta.kooste.external.resource.ResponseCallback;
+import fi.vm.sade.valinta.http.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.seuranta.dto.*;
-import org.apache.cxf.jaxrs.client.WebClient;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.authentication;
 
-import fi.vm.sade.authentication.business.service.Authorizer;
-import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import org.springframework.security.core.Authentication;
 
 import javax.ws.rs.core.Response;
