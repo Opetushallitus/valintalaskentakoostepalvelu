@@ -34,6 +34,9 @@ final public class LaskentaStarterActor extends UntypedActor {
             startLaskentaIfWorkersAvailable();
         } else if (NoWorkAvailable.class.isInstance(message)) {
             decrementWorkerCount();
+        } else if (ResetWorkerCount.class.isInstance(message)) {
+            workerCount.set(0);
+            LOG.info("Worker count reset: " + workerCount.get());
         } else {
             LOG.error("Unknown message: " + message);
         }
@@ -62,4 +65,6 @@ final public class LaskentaStarterActor extends UntypedActor {
     public static class NoWorkAvailable {}
 
     public static class WorkerAvailable {}
+
+    public static class ResetWorkerCount {}
 }

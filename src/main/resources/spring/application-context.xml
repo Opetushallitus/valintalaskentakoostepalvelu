@@ -605,4 +605,5 @@
 		</jaxrs:providers>
 	</jaxrs:server>
 
+	<ctx:mbean-export/>
 </beans>

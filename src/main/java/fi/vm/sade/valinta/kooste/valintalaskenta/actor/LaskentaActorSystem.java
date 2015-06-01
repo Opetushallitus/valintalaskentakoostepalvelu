@@ -18,11 +18,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +32,10 @@ import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaS
  * @author Jussi Jartamo
  */
 @Service
+@ManagedResource(
+        objectName="bean:name=OPH",
+        description="OPH"
+)
 public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo, ValintalaskentaKerrallaRoute, LaskentaSupervisor, ApplicationListener<ContextRefreshedEvent> {
     private final static Logger LOG = LoggerFactory.getLogger(LaskentaActorSystem.class);
 
@@ -51,6 +55,11 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         this.seurantaAsyncResource = seurantaAsyncResource;
         this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
         laskennanKaynnistajaActor = actorSystem.actorOf(props(this, maxWorkers));
+    }
+
+    @ManagedOperation
+    public void resetActorCounter() {
+        laskennanKaynnistajaActor.tell(new ResetWorkerCount(), ActorRef.noSender());
     }
 
     @Override
