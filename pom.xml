@@ -18,7 +18,6 @@
 	</parent>
 	<properties>
 		<jersey.version>2.10.3</jersey.version>
-		<cxf.version>3.0.1</cxf.version>
 		<organisaatio.api.version>13.2</organisaatio.api.version>
 	</properties>
 
