@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Optional;
@@ -15,14 +13,12 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.htmlcleaner.CleanerProperties;
-import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.PrettyXmlSerializer;
-import org.htmlcleaner.TagNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+
 
 /**
  * @author Jussi Jartamo
@@ -34,15 +30,8 @@ public class Callback<T> implements InvocationCallback<Response> {
     private final Consumer<Throwable> failureCallback;
     private final String palvelukutsu;
     private final String url;
-    // private final Class<T> clazz;
     private final Type type;
 
-    // public Callback(String url, String palvelukutsu, Consumer<T> callback,
-    // Class<T> clazz) {
-    // this(url, palvelukutsu, callback, (t -> LOG.error(
-    // "Asynkroninen palvelukutsu epaonnistui: {}", t.getMessage())),
-    // clazz,null);
-    // }
     public Callback(String url, String palvelukutsu, Consumer<T> callback,
                     Type type) {
         this(url, palvelukutsu, callback, (t -> LOG.error(
@@ -61,7 +50,6 @@ public class Callback<T> implements InvocationCallback<Response> {
         this.failureCallback = failureCallback;
         this.palvelukutsu = palvelukutsu;
         this.url = url;
-        // this.clazz = clazz;
         this.type = type;
         this.gson = gson;
     }
