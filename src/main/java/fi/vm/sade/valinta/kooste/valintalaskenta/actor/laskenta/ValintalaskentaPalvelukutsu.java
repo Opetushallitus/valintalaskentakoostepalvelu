@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
@@ -47,6 +48,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 	}
 
 	public ValintalaskentaPalvelukutsu(
+			HakuV1RDTO haku,
 			ParametritDTO parametriDTO,
 			boolean erillishaku,
 			UuidHakukohdeJaOrganisaatio hakukohdeOid,
@@ -59,8 +61,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 			PalvelukutsuStrategia valintaperusteetStrategia,
 			PalvelukutsuStrategia hakijaryhmatStrategia,
 			PalvelukutsuStrategia suoritusrekisteriStrategia) {
-		super(parametriDTO,
-				hakukohdeOid,
+		super(haku, parametriDTO, hakukohdeOid,
 				Arrays.asList(
 						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 								hakemuksetPalvelukutsu, hakemuksetStrategia),
@@ -84,9 +85,12 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu
 	private LaskeDTO muodostaLaskeDTO() {
 		LaskeDTO l = new LaskeDTO(
 				uuid,
-				erillishaku,getHakukohdeOid(), muodostaHakemuksetDTO(
-				getHakukohdeOid(), hakemuksetPalvelukutsu.getHakemukset(),
-				suoritusrekisteriPalvelukutsu.getOppijat()),
+				erillishaku,
+				getHakukohdeOid(),
+				muodostaHakemuksetDTO(
+						getHakukohdeOid(),
+						hakemuksetPalvelukutsu.getHakemukset(),
+						suoritusrekisteriPalvelukutsu.getOppijat()),
 				valintaperusteetPalvelukutsu.getValintaperusteet(),
 				hakijaryhmatPalvelukutsu.getHakijaryhmat());
 		vapautaResurssit();

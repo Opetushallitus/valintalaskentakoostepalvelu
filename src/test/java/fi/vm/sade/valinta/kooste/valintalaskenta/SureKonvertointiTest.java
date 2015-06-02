@@ -63,14 +63,11 @@ public class SureKonvertointiTest {
 			LOG.info("{}\t\t{}", a.getAvain(), a.getArvo());
 		});
 
-		Assert.assertTrue("Ensikertalaisuus on datalla tosi",
-				aa.stream().filter(a -> "ensikertalainen".equals(a.getAvain()) && "true".equals(a.getArvo())).count() == 1L);
-
 		Assert.assertTrue("Peruskoulutuksen A12 oppiaine on ES",
 				aa.stream().filter(a -> "PK_A12_OPPIAINE".equals(a.getAvain()) && "ES".equals(a.getArvo())).count() == 1L);
 
-		Assert.assertTrue("HI:lla on lisäksi kaksi valinnaista",
-				aa.stream().filter(a -> a.getAvain().startsWith("PK_HI")).count() ==3L);
+		Assert.assertEquals("HI:lla on lisäksi kaksi valinnaista", 3L,
+				aa.stream().filter(a -> a.getAvain().startsWith("PK_HI")).count());
 
 		Assert.assertTrue("PK_A12_VAL1 löytyy",
 				aa.stream().filter(a -> a.getAvain().equals("PK_A12_VAL1")).count() == 1L);

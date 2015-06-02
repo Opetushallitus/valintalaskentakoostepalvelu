@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ public class ValintakoelaskentaPalvelukutsu extends
 	private final boolean erillishaku;
 	
 	public ValintakoelaskentaPalvelukutsu(
+			HakuV1RDTO haku,
 			ParametritDTO parametritDTO,
 			boolean erillishaku,
 			UuidHakukohdeJaOrganisaatio hakukohdeOid,
@@ -51,7 +53,7 @@ public class ValintakoelaskentaPalvelukutsu extends
 			PalvelukutsuStrategia hakemuksetStrategia,
 			PalvelukutsuStrategia valintaperusteetStrategia,
 			PalvelukutsuStrategia suoritusrekisteriStrategia) {
-		super(parametritDTO, hakukohdeOid, Arrays
+		super(haku, parametritDTO, hakukohdeOid, Arrays
 				.asList(new PalvelukutsuJaPalvelukutsuStrategiaImpl(
 						hakemuksetPalvelukutsu, hakemuksetStrategia),
 						new PalvelukutsuJaPalvelukutsuStrategiaImpl(
@@ -86,9 +88,11 @@ public class ValintakoelaskentaPalvelukutsu extends
 			throw new NullPointerException("Valintaperusteet oli null dataa!");
 		}
 		return new LaskeDTO(
-				uuid, erillishaku,getHakukohdeOid(), muodostaHakemuksetDTO(
-				getHakukohdeOid(), hakemukset,
-				suoritusrekisteriPalvelukutsu.getOppijat()), valintaperusteet);
+				uuid,
+				erillishaku,
+				getHakukohdeOid(),
+				muodostaHakemuksetDTO(getHakukohdeOid(), hakemukset, suoritusrekisteriPalvelukutsu.getOppijat()),
+				valintaperusteet);
 	}
 
 	@Override

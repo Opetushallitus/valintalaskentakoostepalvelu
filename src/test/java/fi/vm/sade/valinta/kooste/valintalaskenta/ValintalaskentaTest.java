@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -55,6 +56,8 @@ public class ValintalaskentaTest {
 				new HakukohdeJaOrganisaatio("h3", "o3"));
 		String uuid = "uuid";
 		String hakuOid = "hakuOid";
+		final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+		hakuDTO.setOid(hakuOid);
 		LaskentaSeurantaAsyncResource seurantaAsyncResource = createMockLaskentaSeurantaAsyncResource();
 		ValintaperusteetAsyncResource valintaperusteetAsyncResource = createMockValintaperusteetAsyncResource();
 		ValintalaskentaAsyncResource valintalaskentaAsyncResource = createMockValintalaskentaAsyncResource();
@@ -69,7 +72,7 @@ public class ValintalaskentaTest {
 		LaskentaAloitus laskentaJaHaku = new LaskentaAloitus(uuid, hakuOid,false,
 				null, null, hakukohdeOids, LaskentaTyyppi.HAKUKOHDE);
 		valintalaskentaKerrallaRoute
-				.suoritaValintalaskentaKerralla(null, laskentaJaHaku);
+				.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
 	}
 
 	public static LaskentaSeurantaAsyncResource createMockLaskentaSeurantaAsyncResource() {

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,7 @@ public class LaskentaActorSystem implements
 
 	@Override
 	public void suoritaValintalaskentaKerralla(
+			final HakuV1RDTO haku,
 			final ParametritDTO parametritDTO,
 			final LaskentaAloitus laskentaAloitus) {
 		final LaskentaTyyppi laskentaTyyppi = asLaskentaTyyppi(laskentaAloitus);
@@ -91,7 +93,7 @@ public class LaskentaActorSystem implements
 										LOG.info("Muodostetaan VALINTARYHMALASKENTA");
 										return laskentaActorFactory
 												.createValintaryhmaActor(uuid,
-														hakuOid,
+														haku,
 														parametritDTO,
 														erillishaku,
 														valinnanvaiheet,
@@ -102,7 +104,7 @@ public class LaskentaActorSystem implements
 											LOG.info("Muodostetaan VALINTAKOELASKENTA");
 											return laskentaActorFactory
 													.createValintakoelaskentaActor(
-															uuid, hakuOid,
+															uuid, haku,
 															parametritDTO,
 															erillishaku,
 															valinnanvaiheet,
@@ -113,7 +115,7 @@ public class LaskentaActorSystem implements
 											LOG.info("Muodostetaan VALINTALASKENTA");
 											return laskentaActorFactory
 													.createValintalaskentaActor(
-															uuid, hakuOid,
+															uuid, haku,
 															parametritDTO,
 															erillishaku,
 															valinnanvaiheet,
@@ -127,7 +129,7 @@ public class LaskentaActorSystem implements
 															.getValintakoelaskenta());
 											return laskentaActorFactory
 													.createValintalaskentaJaValintakoelaskentaActor(
-															uuid, hakuOid,
+															uuid, haku,
 															parametritDTO,
 															erillishaku,
 															valinnanvaiheet,

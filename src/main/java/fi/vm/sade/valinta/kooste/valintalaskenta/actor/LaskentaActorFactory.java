@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
@@ -59,7 +60,7 @@ public class LaskentaActorFactory {
 	}
 
 	public LaskentaActor createValintaryhmaActor(final String uuid,
-			final String hakuOid,
+			final HakuV1RDTO haku,
 			ParametritDTO parametritDTO,
 			boolean erillishaku,
 			final Integer valinnanvaihe,
@@ -90,7 +91,7 @@ public class LaskentaActorFactory {
 					ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu = new ValintaperusteetPalvelukutsu(
 							uudiHk, valinnanvaihe, valintaperusteetAsyncResource);
 					HakemuksetPalvelukutsu hakemuksetPalvelukutsu = new HakemuksetPalvelukutsu(
-							hakuOid, uudiHk, applicationAsyncResource);
+							haku.getOid(), uudiHk, applicationAsyncResource);
 					SuoritusrekisteriPalvelukutsu suoritusrekisteriPalvelukutsu = new SuoritusrekisteriPalvelukutsu(
 							uudiHk, suoritusrekisteriAsyncResource);
 					HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu = new HakijaryhmatPalvelukutsu(
@@ -125,6 +126,7 @@ public class LaskentaActorFactory {
 				});
 
 		ValintaryhmatKatenoivaValintalaskentaPalvelukutsu laskentaPk = new ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
+				haku,
 				parametritDTO,
 				erillishaku,
 				new UuidHakukohdeJaOrganisaatio(uuid, new HakukohdeJaOrganisaatio("Valintaryhmalaskenta("+hakukohdeOids.size()+"kohdetta)",
@@ -134,14 +136,14 @@ public class LaskentaActorFactory {
 				suoritusrekisteriPalvelukutsut);
 
 		ValintaryhmaLaskentaActorImpl v = new ValintaryhmaLaskentaActorImpl(
-				laskentaSupervisor, uuid, hakuOid, laskentaPk, strategiat,
+				laskentaSupervisor, uuid, haku.getOid(), laskentaPk, strategiat,
 				laskentaStrategia, laskentaSeurantaAsyncResource);
 		laskentaPk.setCallback(v);
 		return v;
 	}
 
 	public LaskentaActor createValintakoelaskentaActor(final String uuid,
-			final String hakuOid,
+			final HakuV1RDTO haku,
 			ParametritDTO parametritDTO,
 			boolean erillishaku,
 			final Integer valinnanvaihe,
@@ -159,10 +161,11 @@ public class LaskentaActorFactory {
 
 					UuidHakukohdeJaOrganisaatio uudiHk = new UuidHakukohdeJaOrganisaatio(uuid, hakukohdeOid);
 					return new ValintakoelaskentaPalvelukutsu(
+							haku,
 							parametritDTO,
 							erillishaku,
 							uudiHk, valintalaskentaAsyncResource,
-							new HakemuksetPalvelukutsu(hakuOid, uudiHk,
+							new HakemuksetPalvelukutsu(haku.getOid(), uudiHk,
 									applicationAsyncResource),
 							new ValintaperusteetPalvelukutsu(uudiHk,
 									valinnanvaihe, valintaperusteetAsyncResource),
@@ -172,13 +175,13 @@ public class LaskentaActorFactory {
 							suoritusrekisteriStrategia);
 				})
 		.collect(Collectors.toList());
-		return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
+		return new LaskentaActorImpl(laskentaSupervisor, uuid, haku.getOid(),
 				palvelukutsut, strategiat, laskentaStrategia,
 				laskentaSeurantaAsyncResource);
 	}
 
 	public LaskentaActor createValintalaskentaActor(final String uuid,
-			final String hakuOid,
+			final HakuV1RDTO haku,
 			ParametritDTO parametritDTO,
 			boolean erillishaku,
 			final Integer valinnanvaihe,
@@ -198,10 +201,11 @@ public class LaskentaActorFactory {
 
 					UuidHakukohdeJaOrganisaatio uudiHk = new UuidHakukohdeJaOrganisaatio(uuid, hakukohdeOid);
 					return new ValintalaskentaPalvelukutsu(
+							haku,
 							parametritDTO,
 							erillishaku,
 							uudiHk, valintalaskentaAsyncResource,
-							new HakemuksetPalvelukutsu(hakuOid, uudiHk,
+							new HakemuksetPalvelukutsu(haku.getOid(), uudiHk,
 									applicationAsyncResource),
 							new ValintaperusteetPalvelukutsu(uudiHk,
 									valinnanvaihe, valintaperusteetAsyncResource),
@@ -213,13 +217,14 @@ public class LaskentaActorFactory {
 							hakijaryhmatStrategia, suoritusrekisteriStrategia);
 				})
 				.collect(Collectors.toList());
-		return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
+		return new LaskentaActorImpl(laskentaSupervisor, uuid, haku.getOid(),
 				palvelukutsut, strategiat, laskentaStrategia,
 				laskentaSeurantaAsyncResource);
 	}
 
 	public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(
-			final String uuid, final String hakuOid,
+			final String uuid,
+			final HakuV1RDTO haku,
 			ParametritDTO parametritDTO,
 			boolean erillishaku,
 			final Integer valinnanvaihe,
@@ -239,10 +244,11 @@ public class LaskentaActorFactory {
 
 							UuidHakukohdeJaOrganisaatio uudiHk = new UuidHakukohdeJaOrganisaatio(uuid, hakukohdeOid);
 							return new ValintalaskentaJaValintakoelaskentaPalvelukutsu(
+									haku,
 									parametritDTO,
 									erillishaku,
 									uudiHk, valintalaskentaAsyncResource,
-									new HakemuksetPalvelukutsu(hakuOid, uudiHk,
+									new HakemuksetPalvelukutsu(haku.getOid(), uudiHk,
 											applicationAsyncResource),
 									new ValintaperusteetPalvelukutsu(uudiHk,
 											valinnanvaihe, valintaperusteetAsyncResource),
@@ -255,7 +261,7 @@ public class LaskentaActorFactory {
 						}
 				)
 				.collect(Collectors.toList());
-		return new LaskentaActorImpl(laskentaSupervisor, uuid, hakuOid,
+		return new LaskentaActorImpl(laskentaSupervisor, uuid, haku.getOid(),
 				palvelukutsut, strategiat, laskentaStrategia,
 				laskentaSeurantaAsyncResource);
 	}

@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -27,7 +28,11 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.container.TimeoutHandler;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +86,8 @@ public class ValintalaskentaKerrallaResource {
 	private ValintalaskentaKerrallaRouteValvomo valintalaskentaValvomo;
 	@Autowired
 	private OhjausparametritAsyncResource ohjausparametritAsyncResource;
+	@Autowired
+	private TarjontaAsyncResource tarjontaAsyncResource;
 
 	/**
 	 * Koko haun laskenta
@@ -378,45 +385,57 @@ public class ValintalaskentaKerrallaResource {
 		haunHakukohteet(
 				hakuOid,
 				haunHakukohteetOids -> {
-					Collection<HakukohdeJaOrganisaatio> oids;
-					if (maski.isMask()) {
-						oids = maski.maskaa(haunHakukohteetOids);
-						if (oids.isEmpty()) {
-							throw new RuntimeException(
-									"Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita! Ei voida aloittaa laskentaa hakukohteettomasti.");
-						}
-					} else {
-						oids = haunHakukohteetOids;
+					final Collection<HakukohdeJaOrganisaatio> oids =
+							maski.isMask() ? maski.maskaa(haunHakukohteetOids) : haunHakukohteetOids;
+					if (maski.isMask() && oids.isEmpty()) {
+						throw new RuntimeException(
+								"Hakukohdemaskauksen jalkeen haulla ei ole hakukohteita!" +
+										" Ei voida aloittaa laskentaa hakukohteettomasti.");
 					}
-					final Collection<HakukohdeJaOrganisaatio> finalOids = oids;
-					ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid, parametrit -> {
-								seurantaTunnus.accept(
-										finalOids,
-										uuid -> {
-											valintalaskentaRoute
-													.suoritaValintalaskentaKerralla(
-															parametrit,
-															new LaskentaAloitus(
-															uuid, hakuOid, erillishaku,
-															maski.isMask(),
-															valintaryhmalaskenta,
-															valinnanvaihe,
-															valintakoelaskenta, finalOids,
-															tyyppi));
-											asyncResponse.resume(Response.ok(
-													Vastaus.uudelleenOhjaus(uuid)).build());
-										});
-					},
-							poikkeus -> {
-								LOG.error("Ohjausparametrien luku epäonnistui: {} {}", poikkeus.getMessage(),
-										Arrays.toString(poikkeus.getStackTrace()));
-								asyncResponse.resume(Response.serverError()
-										.entity(poikkeus.getMessage()).build());
+					AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
+					AtomicReference<ParametritDTO> parametritRef = new AtomicReference<>();
+					SynkronoituLaskuri counter = SynkronoituLaskuri.builder()
+							.setLaskurinAlkuarvo(2)
+							.setSynkronoituToiminto(
+									() -> seurantaTunnus.accept(
+                                            oids,
+                                            uuid -> {
+                                                valintalaskentaRoute
+                                                        .suoritaValintalaskentaKerralla(
+                                                                hakuRef.get(),
+                                                                parametritRef.get(),
+                                                                new LaskentaAloitus(
+                                                                        uuid, hakuOid, erillishaku,
+                                                                        maski.isMask(),
+                                                                        valintaryhmalaskenta,
+                                                                        valinnanvaihe,
+                                                                        valintakoelaskenta, oids,
+                                                                        tyyppi));
+                                                asyncResponse.resume(Response.ok(
+                                                        Vastaus.uudelleenOhjaus(uuid)).build());
+                                            }
+                                    )
+							).build();
+					tarjontaAsyncResource.haeHaku(hakuOid,
+							haku -> {
+								hakuRef.set(haku);
+								counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+							},
+							e -> {
+								LOG.error("Tarjontatietojen haku epäonnistui.", e);
+								asyncResponse.resume(Response.serverError().entity(e.getMessage()).build());
 							});
-				}, poikkeus -> {
-					asyncResponse.resume(Response.serverError()
-							.entity(poikkeus.getMessage()).build());
-				});
+					ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid,
+							parametrit -> {
+								parametritRef.set(parametrit);
+								counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+							},
+							e -> {
+								LOG.error("Ohjausparametrien luku epäonnistui: {} {}", e.getMessage(),
+										Arrays.toString(e.getStackTrace()));
+								asyncResponse.resume(Response.serverError().entity(e.getMessage()).build());
+							});
+				}, poikkeus -> asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build()));
 	}
 
 	private void haunHakukohteet(String hakuOid,

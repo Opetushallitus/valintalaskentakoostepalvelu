@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 	private final boolean erillishaku;
 	@SuppressWarnings("unchecked")
 	public ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
+			HakuV1RDTO haku,
 			ParametritDTO parametritDTO,
 			boolean erillishaku,
 			UuidHakukohdeJaOrganisaatio hakukohdeOid,
@@ -50,10 +52,10 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<ValintaperusteetPalvelukutsu>> valintaperusteetPalvelukutsut,
 			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<HakijaryhmatPalvelukutsu>> hakijaryhmatPalvelukutsut,
 			List<PalvelukutsuJaPalvelukutsuStrategiaImpl<SuoritusrekisteriPalvelukutsu>> suoritusrekisteriPalvelukutsut) {
-		super(
-				parametritDTO,
-				hakukohdeOid, Lists.newArrayList(Iterables
-				.concat(hakemuksetPalvelukutsut, valintaperusteetPalvelukutsut,
+		super(haku, parametritDTO, hakukohdeOid,
+				Lists.newArrayList(Iterables.concat(
+						hakemuksetPalvelukutsut,
+						valintaperusteetPalvelukutsut,
 						hakijaryhmatPalvelukutsut,
 						suoritusrekisteriPalvelukutsut)));
 		this.uuid = hakukohdeOid.getUuid();
@@ -82,16 +84,14 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends
 					try {
 						LaskeDTO l = new LaskeDTO(
 								uuid,
-								erillishaku,y.getHakukohdeOid(),
-								muodostaHakemuksetDTO(y.getHakukohdeOid(), y
-										.getHakemuksetPalvelukutsu()
-										.getHakemukset(), y
-										.getSuoritusrekisteriPalvelukutsut()
-										.getOppijat()), y
-										.getValintaperusteetPalvelukutsu()
-										.getValintaperusteet(), y
-										.getHakijaryhmatPalvelukutsu()
-										.getHakijaryhmat());
+								erillishaku,
+								y.getHakukohdeOid(),
+								muodostaHakemuksetDTO(
+										y.getHakukohdeOid(),
+										y.getHakemuksetPalvelukutsu().getHakemukset(),
+										y.getSuoritusrekisteriPalvelukutsut().getOppijat()),
+								y.getValintaperusteetPalvelukutsu().getValintaperusteet(),
+								y.getHakijaryhmatPalvelukutsu().getHakijaryhmat());
 						y.vapautaResurssit();
 						return l;
 					} catch (Exception e) {

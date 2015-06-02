@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
@@ -33,6 +34,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String HAKUOID1 = "HAKUOID1";
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String ORGANISAATIO1 = "ORGANISAATIO1";
+        final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+        hakuDTO.setOid(HAKUOID1);
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> {
@@ -85,7 +88,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Mockito.mock(LaskentaSupervisor.class)
         );
 
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false,null, Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1)));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, hakuDTO, null, false,null, Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1)));
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
@@ -99,6 +102,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String HAKUOID1 = "HAKUOID1";
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String ORGANISAATIO1 = "ORGANISAATIO1";
+        final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+        hakuDTO.setOid(HAKUOID1);
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> {
@@ -151,7 +156,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Mockito.mock(LaskentaSupervisor.class)
         );
 
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false,null, Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1)));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, hakuDTO, null, false,null, Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1)));
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
@@ -165,6 +170,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String HAKUOID1 = "HAKUOID1";
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String ORGANISAATIO1 = "ORGANISAATIO1";
+        final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+        hakuDTO.setOid(HAKUOID1);
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> {
@@ -218,7 +225,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Mockito.mock(LaskentaSupervisor.class)
         );
 
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false,null, Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1)));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, hakuDTO, null, false,null, Arrays.asList(new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1)));
         actor.aloita();
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
@@ -234,6 +241,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String HAKUKOHDE2 = "HAKUKOHDE2";
         final String ORGANISAATIO1 = "ORGANISAATIO1";
+        final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+        hakuDTO.setOid(HAKUOID1);
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> {
@@ -287,7 +296,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Mockito.mock(LaskentaSupervisor.class)
         );
 
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false,null, Arrays.asList(
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, hakuDTO, null, false,null, Arrays.asList(
                 new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1),
                 new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1)));
 
@@ -306,6 +315,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String HAKUKOHDE2 = "HAKUKOHDE2";
         final String ORGANISAATIO1 = "ORGANISAATIO1";
+        final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+        hakuDTO.setOid(HAKUOID1);
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> {
@@ -358,7 +369,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Mockito.mock(LaskentaSupervisor.class)
         );
 
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false, null, Arrays.asList(
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, hakuDTO, null, false, null, Arrays.asList(
                 new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1),
                 new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1)));
 
@@ -377,6 +388,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String HAKUKOHDE2 = "HAKUKOHDE2";
         final String ORGANISAATIO1 = "ORGANISAATIO1";
+        final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+        hakuDTO.setOid(HAKUOID1);
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> {
@@ -433,7 +446,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 Mockito.mock(LaskentaSupervisor.class)
         );
 
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, HAKUOID1, null, false, null, Arrays.asList(
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(UUID1, hakuDTO, null, false, null, Arrays.asList(
                 new HakukohdeJaOrganisaatio(HAKUKOHDE1, ORGANISAATIO1),
                 new HakukohdeJaOrganisaatio(HAKUKOHDE2, ORGANISAATIO1)));
 
