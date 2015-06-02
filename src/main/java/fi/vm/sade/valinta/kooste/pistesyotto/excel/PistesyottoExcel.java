@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.*;
+import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +35,6 @@ import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KonversioBuilder;
 import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPredicate;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 
 public class PistesyottoExcel {
@@ -238,7 +235,11 @@ public class PistesyottoExcel {
 					s.add(TekstiArvo.tyhja(false));
 					continue;
 				}
-				if (syotettavissaKaikille || (valintakoe != null && Osallistuminen.OSALLISTUU.equals(valintakoe.getOsallistuminenTulos().getOsallistuminen()))) {
+				if (syotettavissaKaikille || (valintakoe != null &&
+						Osallistuminen.OSALLISTUU.equals(
+								Optional.ofNullable(
+										valintakoe.getOsallistuminenTulos()).orElse(
+										new OsallistuminenTulosDTO()).getOsallistuminen()))) {
 					syote = true;
 					if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste
 							.getFunktiotyyppi())) {
