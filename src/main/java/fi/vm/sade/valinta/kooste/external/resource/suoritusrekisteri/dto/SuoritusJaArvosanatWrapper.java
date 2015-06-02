@@ -2,15 +2,18 @@ package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import fi.vm.sade.valintalaskenta.domain.dto.Lisapistekoulutus;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @author Jussi Jartamo
@@ -22,6 +25,12 @@ public class SuoritusJaArvosanatWrapper {
     public static final String PK_10_KOMO = "1.2.246.562.5.2013112814572435044876";
     public static final String LK_KOMO = "TODO lukio komo oid";
     public static final String AM_KOMO = "TODO ammatillinen komo oid";
+    public static final String PK_LISAOPETUSTALOUS_KOMO = "1.2.246.562.5.2013061010184614853416";
+    public static final String PK_AMMATTISTARTTI_KOMO = "1.2.246.562.5.2013112814572438136372";
+    public static final String PK_VALMENTAVA = "1.2.246.562.5.2013112814572435755085";
+    public static final String PK_AMMATILLISEENVALMISTAVA = "1.2.246.562.5.2013112814572441001730";
+    public static final String ULKOMAINENKORVAAVA = "1.2.246.562.13.86722481404";
+    public static final String PK_LUKIOON_VALMISTAVA = "1.2.246.562.5.2013112814572429142840";
     private static final Map<String, String> KOMO_TO_STRING_MAPPER = createKomoToStringMapper();
     private static Map<String, String> createKomoToStringMapper() {
         Map<String, String> tmp = Maps.newHashMap();
@@ -30,8 +39,14 @@ public class SuoritusJaArvosanatWrapper {
         tmp.put(PK_10_KOMO, "lisäopetussuoritus");
         tmp.put(LK_KOMO, "lukiosuoritus");
         tmp.put(AM_KOMO, "ammatillinen suoritus");
+        tmp.put(PK_AMMATILLISEENVALMISTAVA, "ammatilliseen valmistava");
+        tmp.put(ULKOMAINENKORVAAVA, "ulkomainen korvaava");
+        tmp.put(PK_VALMENTAVA, "valmentava");
+        tmp.put(PK_AMMATTISTARTTI_KOMO, "ammattistartti");
+        tmp.put(PK_LISAOPETUSTALOUS_KOMO, "lisäopetus(talous)");
         return Collections.unmodifiableMap(tmp);
     }
+
     private final SuoritusJaArvosanat suoritusJaArvosanat;
     public static final org.joda.time.format.DateTimeFormatter VALMISTUMIS_DTF = DateTimeFormat.forPattern("dd.MM.yyyy");
 
@@ -46,6 +61,10 @@ public class SuoritusJaArvosanatWrapper {
         return new SuoritusJaArvosanatWrapper(s);
     }
 
+    public boolean isVahvistettu() {
+        return suoritusJaArvosanat.getSuoritus().isVahvistettu();
+    }
+
     public boolean isItseIlmoitettu() {
         if(suoritusJaArvosanat.getSuoritus().getHenkiloOid() != null) {
             return suoritusJaArvosanat.getSuoritus().getHenkiloOid().equals(suoritusJaArvosanat.getSuoritus().getSource());
@@ -55,6 +74,9 @@ public class SuoritusJaArvosanatWrapper {
     }
     public boolean isValmis() {
         return "VALMIS".equals(suoritusJaArvosanat.getSuoritus().getTila());
+    }
+    public boolean isKesken() {
+        return "KESKEN".equals(suoritusJaArvosanat.getSuoritus().getTila());
     }
     public boolean isKeskeytynyt() {
         return "KESKEYTYNYT".equals(suoritusJaArvosanat.getSuoritus().getTila());
@@ -70,35 +92,48 @@ public class SuoritusJaArvosanatWrapper {
         return suoritusJaArvosanat;
     }
 
-    public boolean isYoTutkinto() {
-        return YO_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
-    }
     public boolean isPerusopetus() {
         return PK_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
-    }
-    public boolean isLisaopetus() { // KYMPPILUOKKA
-        return PK_10_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
-    }
-    public boolean isAmmattistartti() {
-        return "1.2.246.562.5.2013112814572438136372".equals(suoritusJaArvosanat.getSuoritus().getKomo());
-    }
-    public boolean isValmentava() {
-        return "1.2.246.562.5.2013112814572435755085".equals(suoritusJaArvosanat.getSuoritus().getKomo());
-    }
-    public boolean isAmmatilliseenValmistava() {
-        return "1.2.246.562.5.2013112814572441001730".equals(suoritusJaArvosanat.getSuoritus().getKomo());
-    }
-    public boolean isUlkomainenKorvaava() {
-        return "1.2.246.562.13.86722481404".equals(suoritusJaArvosanat.getSuoritus().getKomo());
-    }
-    public boolean isLukio() {
-        return LK_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
     }
     public boolean isAmmatillinen() {
         return AM_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
     }
-    public boolean isLukioonValmistava() {
-        return "1.2.246.562.5.2013112814572429142840".equals(suoritusJaArvosanat.getSuoritus().getKomo());
+    public boolean isLukio() {
+        return LK_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
     }
-
+    public boolean isYoTutkinto() {
+        return YO_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
+    }
+    public boolean isLisaopetus() {
+        return PK_10_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
+    }
+    public boolean isLisaopetusTalous() {
+        return PK_LISAOPETUSTALOUS_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
+    }
+    public boolean isAmmattistartti() {
+        return PK_AMMATTISTARTTI_KOMO.equals(suoritusJaArvosanat.getSuoritus().getKomo());
+    }
+    public boolean isValmentava() {
+        return PK_VALMENTAVA.equals(suoritusJaArvosanat.getSuoritus().getKomo());
+    }
+    public boolean isAmmatilliseenValmistava() {
+        return PK_AMMATILLISEENVALMISTAVA.equals(suoritusJaArvosanat.getSuoritus().getKomo());
+    }
+    public boolean isLukioonValmistava() {
+        return PK_LUKIOON_VALMISTAVA.equals(suoritusJaArvosanat.getSuoritus().getKomo());
+    }
+    public boolean isUlkomainenKorvaava() {
+        return ULKOMAINENKORVAAVA.equals(suoritusJaArvosanat.getSuoritus().getKomo());
+    }
+    public boolean isSuoritusMistaSyntyyPeruskoulunArvosanoja() {
+        return isLisapistekoulutus() || isPerusopetus();
+    }
+    public boolean isLisapistekoulutus() {
+        return isLisaopetus() ||
+                isLisaopetusTalous() ||
+                isAmmattistartti() ||
+                isValmentava() ||
+                isAmmatilliseenValmistava() ||
+                isLukioonValmistava();
+    }
 }
