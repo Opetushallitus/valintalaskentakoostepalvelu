@@ -34,6 +34,27 @@
 			<version>9.2.10.v20150310</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>fi.vm.sade</groupId>
+			<artifactId>hakemuseditori_2.11</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>fi.vm.sade</groupId>
+			<artifactId>scala-utils_2.11</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+			<version>2.11.4</version>
+		</dependency>
 	    	<dependency>
 	                 <groupId>fi.vm.sade.rajapinnat</groupId>
 	                 <artifactId>kela-api</artifactId>

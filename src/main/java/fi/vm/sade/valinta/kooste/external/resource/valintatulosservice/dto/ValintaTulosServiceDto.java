@@ -9,6 +9,7 @@ import java.util.Collection;
 public class ValintaTulosServiceDto {
 	private String hakemusOid;
 	private String hakijaOid;
+	private Collection<HakutoiveenValintatulos> hakutoiveenValintatulosekset;
 	private Collection<HakutoiveDto> hakutoiveet;
 
 	public Collection<HakutoiveDto> getHakutoiveet() {
@@ -18,6 +19,16 @@ public class ValintaTulosServiceDto {
 	public void setHakutoiveet(Collection<HakutoiveDto> hakutoiveet) {
 		this.hakutoiveet = hakutoiveet;
 	}
+
+	public Collection<HakutoiveenValintatulos> getHakutoiveenValintatulosekset() {
+		return hakutoiveenValintatulosekset;
+	}
+
+	public void setHakutoiveenValintatulosekset(Collection<HakutoiveenValintatulos> hakutoiveenValintatulosekset) {
+		this.hakutoiveenValintatulosekset = hakutoiveenValintatulosekset;
+	}
+
+
 	public void setHakemusOid(String hakemusOid) {
 		this.hakemusOid = hakemusOid;
 	}

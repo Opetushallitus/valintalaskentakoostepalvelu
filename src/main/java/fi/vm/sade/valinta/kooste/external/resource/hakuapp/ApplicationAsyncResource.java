@@ -1,17 +1,16 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
-
-import javax.ws.rs.core.Response;
-
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import rx.Observable;
+
+import javax.ws.rs.core.Response;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 /**
  * 
@@ -23,7 +22,7 @@ public interface ApplicationAsyncResource {
 
     Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit);
 
-	Peruutettava getApplication(String hakemusOid, Consumer<Hakemus> callback, Consumer<Throwable> failureCallback);
+	Observable<Hakemus> getApplication(String hakemusOid);
 
     Future<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids);
 

@@ -1,23 +1,6 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.core.Response;
-
-import org.springframework.stereotype.Service;
-
 import com.google.common.util.concurrent.Futures;
-
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
@@ -25,7 +8,16 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditiona
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import org.springframework.stereotype.Service;
 import rx.Observable;
+
+import javax.ws.rs.core.Response;
+import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Service
 public class MockApplicationAsyncResource implements ApplicationAsyncResource {
@@ -136,9 +128,8 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Peruutettava getApplication(String hakuOid, Consumer<Hakemus> callback, Consumer<Throwable> failureCallback) {
-        callback.accept(resultByOidReference.get().iterator().next());
-        return new PeruutettavaImpl(Futures.immediateFuture(resultByOidReference.get().iterator().next()));
+    public Observable<Hakemus> getApplication(String hakuOid) {
+        return Observable.just(resultByOidReference.get().iterator().next());
     }
 
     @Override

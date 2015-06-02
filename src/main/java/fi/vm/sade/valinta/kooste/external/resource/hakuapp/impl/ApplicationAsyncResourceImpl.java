@@ -1,35 +1,29 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
-
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
-
 import fi.vm.sade.valinta.http.GsonResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppiBatch;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
 import rx.Observable;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  *
@@ -80,14 +74,8 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     }
 
 	@Override
-	public Peruutettava getApplication(String hakemusOid, Consumer<Hakemus> callback, Consumer<Throwable> failureCallback) {
-		String url = "/applications/" + hakemusOid;
-		return new PeruutettavaImpl(getWebClient()
-				.path(url)
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async()
-				.get(new GsonResponseCallback<>(
-						address, url, callback, failureCallback, TypeToken.of(Hakemus.class).getType())));
+	public Observable<Hakemus> getApplication(String hakemusOid) {
+		return getAsObservable("/applications/" + hakemusOid, Hakemus.class);
 	}
 
 	@Override

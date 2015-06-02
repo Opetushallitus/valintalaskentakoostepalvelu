@@ -1,36 +1,13 @@
 package fi.vm.sade.valinta.kooste.kela.route.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import org.apache.camel.Endpoint;
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
-import org.apache.camel.builder.DefaultErrorHandlerBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-
-import fi.vm.sade.organisaatio.resource.api.KelaResource;
 import fi.vm.sade.koodisto.service.KoodiService;
+import fi.vm.sade.organisaatio.resource.api.KelaResource;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
@@ -44,35 +21,33 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
-import fi.vm.sade.valinta.kooste.kela.dto.Haku;
-import fi.vm.sade.valinta.kooste.kela.dto.KelaAbstraktiHaku;
-import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
-import fi.vm.sade.valinta.kooste.kela.dto.KelaHakijaRivi;
-import fi.vm.sade.valinta.kooste.kela.dto.KelaHaku;
-import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
-import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaAbstraktitHaut;
-import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaDokumentti;
-import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaHaut;
-import fi.vm.sade.valinta.kooste.kela.dto.KelaLuontiJaRivit;
-import fi.vm.sade.valinta.kooste.kela.dto.TunnistamatonHaku;
-import fi.vm.sade.valinta.kooste.kela.dto.TunnistettuHaku;
-import fi.vm.sade.valinta.kooste.kela.komponentti.HakukohdeSource;
-import fi.vm.sade.valinta.kooste.kela.komponentti.LinjakoodiSource;
-import fi.vm.sade.valinta.kooste.kela.komponentti.OppilaitosSource;
-import fi.vm.sade.valinta.kooste.kela.komponentti.TilaSource;
-import fi.vm.sade.valinta.kooste.kela.komponentti.TutkinnontasoSource;
-import fi.vm.sade.valinta.kooste.kela.komponentti.impl.HaunTyyppiKomponentti;
-import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaDokumentinLuontiKomponenttiImpl;
-import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaHakijaRiviKomponenttiImpl;
-import fi.vm.sade.valinta.kooste.kela.komponentti.impl.LinjakoodiKomponentti;
-import fi.vm.sade.valinta.kooste.kela.komponentti.impl.OppilaitosKomponentti;
+import fi.vm.sade.valinta.kooste.kela.dto.*;
+import fi.vm.sade.valinta.kooste.kela.komponentti.*;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.*;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.LogEntry;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
-//import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
+import org.apache.camel.Endpoint;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
+import org.apache.camel.builder.DefaultErrorHandlerBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import rx.observables.BlockingObservable;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+//import fi.vm.sade.valinta.kooste.valvomo.dto.Oid;
 
 /**
  * @author Jussi Jartamo
@@ -381,22 +356,21 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 								try {
 							
 									Collection<ValintaTulosServiceDto> hakijat = null;
-									hakijat = valintaTulosServiceAsyncResource
-											.getValintatulokset(haku.getOid())
-											.get()
+									hakijat = BlockingObservable.from(valintaTulosServiceAsyncResource
+											.getHaunValintatulokset(haku.getOid()))
+											.first()
 											.stream()
 											.filter(vts -> vts
-													.getHakutoiveet()
-													.stream()
-													// non nulls
-													.filter(h -> h != null && h.getValintatila() != null && h.getVastaanottotila() != null)
-													.anyMatch(
-															hakutoive ->
-
-															hakutoive
-																	.getVastaanottotila()
-																	.isVastaanottanut()
-																	&& hakutoive
+															.getHakutoiveet()
+															.stream()
+																	// non nulls
+															.filter(h -> h != null && h.getValintatila() != null && h.getVastaanottotila() != null)
+															.anyMatch(
+																	hakutoive ->
+																			hakutoive
+																					.getVastaanottotila()
+																					.isVastaanottanut()
+																					&& hakutoive
 																			.getValintatila()
 																			.isHyvaksytty())
 											).collect(Collectors.toList());

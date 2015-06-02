@@ -1,12 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice;
 
-import java.util.List;
-import java.util.concurrent.Future;
-
-import javax.ws.rs.core.Response;
-
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
-import java.util.function.Consumer;
+import rx.Observable;
+
+import java.util.List;
 
 /**
  * 
@@ -15,10 +12,9 @@ import java.util.function.Consumer;
  */
 public interface ValintaTulosServiceAsyncResource {
 
-	Future<List<ValintaTulosServiceDto>> getValintatulokset(String hakuOid);
+	Observable<List<ValintaTulosServiceDto>> getHaunValintatulokset(String hakuOid);
 
+	Observable<ValintaTulosServiceDto> getHakemuksenValintatulos(String hakuOid, String hakemusOid);
 
-	void getValintatulokset(String hakuOid, String hakukohdeOid,
-							Consumer<List<ValintaTulosServiceDto>> vts,
-							Consumer<Throwable> poikkeus);
+	Observable<String> getHakemuksenValintatulosAsString(String hakuOid, String hakemusOid);
 }

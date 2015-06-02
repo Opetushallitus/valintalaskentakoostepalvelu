@@ -1,35 +1,8 @@
 package fi.vm.sade.valinta.kooste.kela;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
-
-import com.google.common.util.concurrent.Futures;
-import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteImpl;
-
-import org.apache.camel.Produce;
-import org.apache.camel.ProducerTemplate;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.test.junit4.CamelTestSupport;
-import org.apache.commons.lang.StringUtils;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import fi.vm.sade.koodisto.service.KoodiService;
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
@@ -46,13 +19,26 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valin
 import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
-import fi.vm.sade.valinta.kooste.kela.komponentti.impl.HaunTyyppiKomponentti;
-import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaDokumentinLuontiKomponenttiImpl;
-import fi.vm.sade.valinta.kooste.kela.komponentti.impl.KelaHakijaRiviKomponenttiImpl;
-import fi.vm.sade.valinta.kooste.kela.komponentti.impl.LinjakoodiKomponentti;
-import fi.vm.sade.valinta.kooste.kela.komponentti.impl.OppilaitosKomponentti;
-import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKaikkiPaikanVastaanottaneet;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.*;
+import fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteImpl;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
+import org.apache.camel.Produce;
+import org.apache.camel.ProducerTemplate;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.commons.lang.StringUtils;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import rx.Observable;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -121,8 +107,8 @@ public class KelaRouteTest extends CamelTestSupport {
 	@Test
 	public void kelaLuonninTestaus() {
 		Mockito.when(
-				valintaTulosServiceAsyncResource.getValintatulokset(Mockito
-						.anyString())).thenReturn(Futures.immediateFuture(createHakijat()));
+				valintaTulosServiceAsyncResource.getHaunValintatulokset(Mockito
+						.anyString())).thenReturn(Observable.just(createHakijat()));
 		Mockito.when(hakukohdeResource.getByOID(Mockito.anyString()))
 				.thenReturn(createHakukohdeDTO());
 		Mockito.when(hakuResource.findByOid(Mockito.anyString())).then(
