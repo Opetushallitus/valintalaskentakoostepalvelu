@@ -544,6 +544,9 @@
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl" />
 
+	<bean id="OppijanSuorituksetProxyResource"
+		  class="fi.vm.sade.valinta.kooste.proxy.resource.suoritukset.OppijanSuorituksetProxyResource"/>
+
 	<bean id="ErillishakuProxyResource"
 		  class="fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.ErillishakuProxyResource"/>
 	<bean id="ValintaTulosServiceProxyResource"
@@ -582,6 +585,7 @@
 			<ref bean="ErillishakuResource"/>
 			<ref bean="HakuImportResource"/>
 			<ref bean="KelaResource"/>
+			<ref bean="OppijanSuorituksetProxyResource"/>
 			<ref bean="ParametritResource"/>
 			<ref bean="PistesyottoResource"/>
 			<ref bean="ErillishakuProxyResource"/>

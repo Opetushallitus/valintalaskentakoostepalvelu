@@ -7,6 +7,8 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -14,12 +16,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MockTarjontaAsyncService implements TarjontaAsyncResource {
+    private static Map<String, HakuV1RDTO> mockHaku= new HashMap<>();
 
     @Override
     public Future<HakuV1RDTO> haeHaku(String hakuOid) {
         HakuV1RDTO hakuV1RDTO = new HakuV1RDTO();
         hakuV1RDTO.setOid(hakuOid);
-        return Futures.immediateFuture(hakuV1RDTO);
+        return Futures.immediateFuture(mockHaku.getOrDefault(hakuOid, hakuV1RDTO));
     }
 
     @Override
@@ -34,8 +37,8 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     public Peruutettava haeHaku(String hakuOid, Consumer<HakuV1RDTO> callback, Consumer<Throwable> failureCallback) {
         HakuV1RDTO hakuV1RDTO = new HakuV1RDTO();
         hakuV1RDTO.setOid(hakuOid);
-        callback.accept(hakuV1RDTO);
-        return new PeruutettavaImpl(Futures.immediateFuture(hakuV1RDTO));
+        callback.accept(mockHaku.getOrDefault(hakuOid, hakuV1RDTO));
+        return new PeruutettavaImpl(Futures.immediateFuture(mockHaku.getOrDefault(hakuOid, hakuV1RDTO)));
     }
 
     @Override
@@ -45,5 +48,9 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
         hakukohdeDTO.setOid(hakukohdeOid);
         callback.accept(hakukohdeDTO);
         return new PeruutettavaImpl(Futures.immediateFuture(hakukohdeDTO));
+    }
+
+    public static void setMockHaku(HakuV1RDTO mockHaku) {
+        MockTarjontaAsyncService.mockHaku.put(mockHaku.getOid(), mockHaku);
     }
 }

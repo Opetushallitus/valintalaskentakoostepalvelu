@@ -94,6 +94,18 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 				.async()
 				.post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new GenericType<List<Hakemus>>() { });
     }
+
+	@Override
+	public Peruutettava getApplication(String hakemusOid, Consumer<Hakemus> callback, Consumer<Throwable> failureCallback) {
+		String url = "/applications/" + hakemusOid;
+		return new PeruutettavaImpl(getWebClient()
+				.path(url)
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				.async()
+				.get(new Callback<>(
+						address, url, callback, failureCallback, TypeToken.of(Hakemus.class).getType())));
+	}
+
 	@Override
 	public Peruutettava getApplicationsByOids(Collection<String> hakemusOids,
 									   Consumer<List<Hakemus>> callback,

@@ -1,0 +1,256 @@
+{
+  "applicationSystemId": "1.2.246.562.29.90697286251",
+  "answers": {
+    "henkilotiedot": {
+      "huoltajannimi": "",
+      "onkosinullakaksoiskansallisuus": "false",
+      "kansalaisuus": "FIN",
+      "asuinmaa": "FIN",
+      "Sukunimi": "Apo",
+      "matkapuhelinnumero1": "",
+      "Henkilotunnus": "170595-961H",
+      "Henkilotunnus_digest": "622dff8b1e6f9be740271e7f09c5fd4a6683b583cd24b9409d1a4fee57ff5af9",
+      "huoltajansahkoposti": "",
+      "Postinumero": "00550",
+      "sukupuoli": "1",
+      "lahiosoite": "Vegankatu 12 b 18",
+      "turvakielto": "false",
+      "Kutsumanimi": "LukioOlNelja",
+      "Sähköposti": "",
+      "Etunimet": "LukioOlNelja",
+      "kotikunta": "020",
+      "onkoSinullaSuomalainenHetu": "false",
+      "aidinkieli": "FI",
+      "huoltajanpuhelinnumero": "",
+      "syntymaaika": "17.05.1995"
+    },
+    "lisatiedot": {
+      "asiointikieli": "suomi",
+      "TYOKOKEMUSKUUKAUDET": "5"
+    },
+    "hakutoiveet": {
+      "preference4-Koulutus-id-aoIdentifier": "",
+      "preference3-Koulutus-id-ao-groups": "",
+      "preference1-Koulutus-id-ao-groups": "",
+      "preference4-Koulutus-id-educationcode": "",
+      "preference4-Opetuspiste-id": "",
+      "preference1-Opetuspiste": "Ahlmanin ammattiopisto",
+      "preference3-Koulutus-id-athlete": "",
+      "preference5-Opetuspiste-id": "",
+      "preference2-Koulutus-id-attachmentgroups": "",
+      "preference4-Koulutus-id-athlete": "",
+      "preference2-Koulutus-id-aoIdentifier": "",
+      "preference2-Koulutus-id-attachments": "",
+      "preference3-Opetuspiste-id": "",
+      "preference4-Koulutus-id-attachmentgroups": "",
+      "preference2-Koulutus-id-ao-groups": "",
+      "preference1-Koulutus-educationDegree": "32",
+      "preference5-Koulutus-educationDegree": "",
+      "preference2-Koulutus-id-sora": "",
+      "preference4-Koulutus-id-vocational": "",
+      "preference3-Koulutus-id": "",
+      "preference1-Opetuspiste-id": "1.2.246.562.10.60222091211",
+      "preference5-Koulutus-id-lang": "",
+      "preference1-Koulutus-id-sora": "false",
+      "preference2-Koulutus-educationDegree": "",
+      "preference5-Koulutus-id-sora": "",
+      "preference1-Koulutus-id-aoIdentifier": "474",
+      "preference1-Koulutus-id-educationcode": "koulutus_381112",
+      "preference5-Koulutus-id-ao-groups": "",
+      "preference3-Koulutus-id-attachmentgroups": "",
+      "preference5-Koulutus-id-athlete": "",
+      "preference2-Koulutus-id": "",
+      "preference5-Koulutus-id-attachments": "",
+      "preference3-Koulutus-id-vocational": "",
+      "preference1-Koulutus-id-vocational": "true",
+      "preference4-Koulutus-educationDegree": "",
+      "preference1-Koulutus-id-athlete": "false",
+      "preference4-Koulutus-id-kaksoistutkinto": "",
+      "preference5-Koulutus-id-kaksoistutkinto": "",
+      "preference5-Koulutus-id": "",
+      "preference2-Opetuspiste": "",
+      "preference2-Koulutus-id-athlete": "",
+      "preference1-Koulutus-id-attachments": "false",
+      "preference3-Koulutus-educationDegree": "",
+      "preference2-Koulutus-id-kaksoistutkinto": "",
+      "preference5-Opetuspiste": "",
+      "preference3-Koulutus-id-kaksoistutkinto": "",
+      "preference5-Koulutus-id-educationcode": "",
+      "preference1-discretionary": "false",
+      "preference1-Koulutus-id-attachmentgroups": "",
+      "preference4-Koulutus-id-sora": "",
+      "preference5-Koulutus-id-vocational": "",
+      "preference3-Koulutus-id-lang": "",
+      "preference2-Opetuspiste-id": "",
+      "preference3-Opetuspiste": "",
+      "preference4-Koulutus-id-lang": "",
+      "preference5-Koulutus-id-attachmentgroups": "",
+      "preference2-Koulutus-id-vocational": "",
+      "preferencesVisible": "5",
+      "preference1-Koulutus-id": "1.2.246.562.20.25463238029",
+      "preference3-Koulutus-id-attachments": "",
+      "preference3-Koulutus-id-sora": "",
+      "preference4-Koulutus-id": "",
+      "preference2-Koulutus-id-lang": "",
+      "preference4-Koulutus-id-attachments": "",
+      "preference4-Opetuspiste": "",
+      "preference3-Koulutus-id-educationcode": "",
+      "preference1-Koulutus": "Hotelli-, ravintola- ja catering-alan perustutkinto, yo",
+      "preference1-Koulutus-id-kaksoistutkinto": "false",
+      "preference3-Koulutus-id-aoIdentifier": "",
+      "preference5-Koulutus-id-aoIdentifier": "",
+      "preference1-Koulutus-id-lang": "FI",
+      "preference4-Koulutus-id-ao-groups": "",
+      "preference2-Koulutus-id-educationcode": ""
+    },
+    "koulutustausta": {
+      "lukion_kieli": "FI",
+      "ylioppilastutkinto": "fi",
+      "ammatillinenTutkintoSuoritettu": "false",
+      "POHJAKOULUTUS": "9",
+      "lukioPaattotodistusVuosi": "2014"
+    },
+    "osaaminen": {
+      "LK_MA": "6",
+      "LK_YH": "6",
+      "LK_B1": "7",
+      "LK_AI_OPPIAINE": "FI",
+      "LK_AI": "9",
+      "LK_GE": "10",
+      "LK_KE": "10",
+      "LK_FY": "5",
+      "LK_A1_OPPIAINE": "EN",
+      "LK_LI": "6",
+      "LK_TE": "10",
+      "LK_BI": "8",
+      "LK_KU": "10",
+      "LK_FI": "7",
+      "LK_KT": "5",
+      "LK_HI": "9",
+      "LK_B1_OPPIAINE": "IT",
+      "LK_A1": "7",
+      "LK_PS": "9",
+      "LK_MU": "9"
+    }
+  },
+  "oid": "1.2.246.562.11.00000000576",
+  "state": "PASSIVE",
+  "studentIdentificationDone": false,
+  "personOid": "1.2.246.562.24.62222128355",
+  "lastAutomatedProcessingTime": 1431968421013,
+  "received": 1431963280810,
+  "updated": 1431968421301,
+  "redoPostProcess": "DONE",
+  "fullName": "apo lukioolnelja",
+  "searchNames": [
+    "apo",
+    "lukioolnelja"
+  ],
+  "meta": {
+    "filingLanguage": "fi",
+    "sessionId": "anonymousUser"
+  },
+  "authorizationMeta": {
+    "opoAllowed": true,
+    "aoOrganizations": {
+      "1": [
+        "1.2.246.562.10.98873174761",
+        "1.2.246.562.10.47941294986",
+        "1.2.246.562.10.00000000001",
+        "1.2.246.562.10.60222091211"
+      ]
+    },
+    "allAoOrganizations": [
+      "1.2.246.562.10.98873174761",
+      "1.2.246.562.10.00000000001",
+      "1.2.246.562.10.47941294986",
+      "1.2.246.562.10.60222091211"
+    ],
+    "applicationPreferences": [
+      {
+        "ordinal": 1,
+        "preferenceData": {
+          "Koulutus-id-vocational": "true",
+          "Koulutus-id-aoIdentifier": "474",
+          "Opetuspiste": "Ahlmanin ammattiopisto",
+          "Koulutus-id-athlete": "false",
+          "Koulutus-id": "1.2.246.562.20.25463238029",
+          "Koulutus-id-sora": "false",
+          "Koulutus-id-attachments": "false",
+          "Koulutus-id-kaksoistutkinto": "false",
+          "Koulutus-educationDegree": "32",
+          "Opetuspiste-id": "1.2.246.562.10.60222091211",
+          "Koulutus-id-educationcode": "koulutus_381112",
+          "Koulutus": "Hotelli-, ravintola- ja catering-alan perustutkinto, yo",
+          "Koulutus-id-lang": "FI",
+          "discretionary": "false"
+        }
+      }
+    ]
+  },
+  "overriddenAnswers": {
+    "sukupuoli": "1",
+    "turvakielto": "(null)",
+    "Kutsumanimi": "LukioOlNelja",
+    "Etunimet": "LukioOlNelja",
+    "Sukunimi": "Apo",
+    "onkoSinullaSuomalainenHetu": "(null)",
+    "Henkilotunnus": "(hidden)",
+    "aidinkieli": "FI",
+    "syntymaaika": "17.05.1995"
+  },
+  "notes": [
+    {
+      "type": "ApplicationNote",
+      "noteText": "Hakemus passivoitu: ",
+      "added": 1431968421279,
+      "user": "officer"
+    },
+    {
+      "type": "ApplicationNote",
+      "noteText": "Hakemus vastaanotettu",
+      "added": 1431963280810,
+      "user": "anonymousUser"
+    }
+  ],
+  "history": [
+    {
+      "type": "Change",
+      "modified": 1431963282126,
+      "modifier": "järjestelmä",
+      "reason": "Post Processing",
+      "changes": [
+        {
+          "field": "turvakielto",
+          "new value": "false"
+        },
+        {
+          "field": "onkoSinullaSuomalainenHetu",
+          "new value": "false"
+        }
+      ]
+    }
+  ],
+  "version": 1,
+  "modelVersion": 7,
+  "preferenceEligibilities": [
+    {
+      "aoId": "1.2.246.562.20.25463238029",
+      "status": "NOT_CHECKED",
+      "source": "UNKNOWN"
+    }
+  ],
+  "preferencesChecked": [
+    {
+      "preferenceAoOid": "1.2.246.562.20.25463238029",
+      "checked": false
+    }
+  ],
+  "_id": {
+    "inc": 1875784957,
+    "timeSecond": 1431963280,
+    "machine": 56920847,
+    "time": 1431963280000,
+    "new": false
+  }
+}
