@@ -234,9 +234,9 @@ public class HakemuksetConverterUtil {
                     break;
             }
             if (!yksilollistaminen.equals(pohjakoulutusHakemukselta)) {
-                LOG.error("Hakijan ilmoittama perusopetus {} ei vastaa vahvistettua suoritusta {}. " +
+                LOG.error("Hakijan {} ilmoittama perusopetus {} ei vastaa vahvistettua suoritusta {}. " +
                                 "Käytetään hakemuksen pohjakoulutusta {}.",
-                        pohjakoulutusHakemukselta, yksilollistaminen, pohjakoulutusHakemukselta);
+                        h.getHakijaOid(), pohjakoulutusHakemukselta, yksilollistaminen, pohjakoulutusHakemukselta);
                 return Optional.of(pohjakoulutusHakemukselta);
             } else {
                 return Optional.of(yksilollistaminen);
