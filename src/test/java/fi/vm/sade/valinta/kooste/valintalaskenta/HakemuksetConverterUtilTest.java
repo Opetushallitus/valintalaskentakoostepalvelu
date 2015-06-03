@@ -1365,6 +1365,8 @@ public class HakemuksetConverterUtilTest {
     @Test
     public void testaaEnsikertalaisuusOppijaTiedoista() {
         {
+            HakuV1RDTO haku = new HakuV1RDTO();
+            haku.setKohdejoukkoUri("haunkohdejoukko_12#1");
             HakemusDTO hakemus = new HakemusDTO();
             Oppija oppija = new Oppija();
             oppija.setEnsikertalainen(true);
@@ -1375,6 +1377,8 @@ public class HakemuksetConverterUtilTest {
         }
 
         {
+            HakuV1RDTO haku = new HakuV1RDTO();
+            haku.setKohdejoukkoUri("haunkohdejoukko_12#1");
             HakemusDTO hakemus = new HakemusDTO();
             Oppija oppija = new Oppija();
             oppija.setEnsikertalainen(false);

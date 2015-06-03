@@ -96,16 +96,23 @@ public class HakemuksetConverterUtil {
 
         Map<String, AvainArvoDTO> merge = Maps.newHashMap();
         merge.putAll(hakemuksenArvot);
-        if(oppija.isEnsikertalainen()==null){
-            LOG.error("Hakijalta {} (hakemusOid={}) puuttui ensikertalaisuustieto hakukohteen {} laskennassa.", hakemusDTO.getHakijaOid(), hakemusDTO.getHakemusoid(), hakukohdeOid);
-            throw new RuntimeException("Hakijalta " + hakemusDTO.getHakijaOid() + " (hakemusOid="+hakemusDTO.getHakemusoid() + ") puuttui ensikertalaisuustieto hakukohteen " + hakukohdeOid + " laskennassa.");
-        }
-        merge.put(ENSIKERTALAINEN, new AvainArvoDTO(ENSIKERTALAINEN, String.valueOf(oppija.isEnsikertalainen())));
+        ensikertalaisuus(haku, hakukohdeOid, oppija, hakemusDTO, merge);
         pohjakoulutus.ifPresent(pk -> merge.put(POHJAKOULUTUS, new AvainArvoDTO(POHJAKOULUTUS, pk)));
         merge.putAll(suoritustenTiedot(pohjakoulutus, hakemusDTO, suoritukset).entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue()))));
         merge.putAll(surenArvot);
         hakemusDTO.setAvaimet(merge.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));
+    }
+
+    private static void ensikertalaisuus(HakuV1RDTO haku, String hakukohdeOid, Oppija oppija, HakemusDTO hakemusDTO, Map<String, AvainArvoDTO> merge) {
+        // Vain korkeakouluhauille
+        if (Optional.ofNullable(haku.getKohdejoukkoUri()).orElse("").startsWith("haunkohdejoukko_12")) {
+            if (oppija.isEnsikertalainen() == null) {
+                LOG.error("Hakijalta {} (hakemusOid={}) puuttui ensikertalaisuustieto hakukohteen {} laskennassa.", hakemusDTO.getHakijaOid(), hakemusDTO.getHakemusoid(), hakukohdeOid);
+                throw new RuntimeException("Hakijalta " + hakemusDTO.getHakijaOid() + " (hakemusOid=" + hakemusDTO.getHakemusoid() + ") puuttui ensikertalaisuustieto hakukohteen " + hakukohdeOid + " laskennassa.");
+            }
+            merge.put(ENSIKERTALAINEN, new AvainArvoDTO(ENSIKERTALAINEN, String.valueOf(oppija.isEnsikertalainen())));
+        }
     }
 
     private static List<HakemusDTO> hakemuksetToHakemusDTOs(String hakukohdeOid, List<Hakemus> hakemukset) {
