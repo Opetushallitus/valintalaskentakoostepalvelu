@@ -133,7 +133,7 @@ public class ValintalaskentaExcelResource {
         final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
         final Observable<List<Hakemus>> hakemuksetObservable = valinnanVaiheetObservable.flatMap(vaiheet -> vaiheet.isEmpty() ? Observable.just((List<Hakemus>)Collections.EMPTY_LIST) : applicationResource.getApplicationsByOid(vaiheet.get(0).getHakuOid(), hakukohdeOid));
 
-        final Observable<XSSFWorkbook> workbookObservable = Observable.combineLatest(hakukohdeObservable, valinnanVaiheetObservable, hakemuksetObservable, ValintalaskennanTulosExcel :: luoExcel).subscribeOn(Schedulers.newThread());
+        final Observable<XSSFWorkbook> workbookObservable = Observable.combineLatest(hakukohdeObservable, valinnanVaiheetObservable, hakemuksetObservable, ValintalaskennanTulosExcel :: luoExcel);
 
         workbookObservable.subscribe(
             (workbook) -> {
