@@ -140,7 +140,7 @@ public class ValintalaskentaExcelResource {
                 asyncResponse.resume(Response.ok(Excel.export(workbook), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").header("content-disposition", "inline; filename=valintalaskennantulos.xlsx").build());
             },
             (e) -> {
-                LOG.error("Valintakoekutsut excelin luonti epäonnistui hakukohteelle {}: {}", new Object[] {hakukohdeOid, e.getMessage()});
+                LOG.error("Valintalaskennan tulokset -excelin luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
                 asyncResponse.resume(Response.ok(ExcelExportUtil.exportGridAsXls(new Object[][] {new Object[] {"Tarvittavien tietojen hakeminen epäonnistui!", "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!"}}), APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=yritauudelleen.xls").build());
             }
         );
