@@ -99,7 +99,6 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle(
                 this::startLaskentaIfWorkAvailable,
                 (Throwable t) -> {
-                    laskennanKaynnistajaActor.tell(new WorkerAvailable(), ActorRef.noSender());
                     String message = "Laskennan käynnistys epäonnistui";
                     LOG.error(message, t);
                     throw new RuntimeException(message, t);
