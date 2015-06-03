@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
@@ -45,7 +46,11 @@ public class ValintalaskennanTulosExcelTest {
         hakukohdeDTO.setTarjoajaNimet(map("fi", "Tarjoaja 1"));
     }
 
-    XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(hakukohdeDTO, asList(
+    private HakuV1RDTO haku = new HakuV1RDTO();
+    {
+        haku.setNimi(map("fi", "Haku 1"));
+    }
+    XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(haku, hakukohdeDTO, asList(
         valinnanvaihe(1, asList(
             valintatapajono(1, jonosijat()),
             valintatapajono(2, EMPTY_LIST)
@@ -66,6 +71,7 @@ public class ValintalaskennanTulosExcelTest {
     public void sheetContents() {
         assertEquals(
             asList(
+                asList("Haku", "Haku 1"),
                 asList("Tarjoaja", "Tarjoaja 1"),
                 asList("Hakukohde", "Hakukohde 1"),
                 asList("Vaihe", "Vaihe 1"),
@@ -82,6 +88,7 @@ public class ValintalaskennanTulosExcelTest {
     public void emptySheet() {
         assertEquals(
             asList(
+                asList("Haku", "Haku 1"),
                 asList("Tarjoaja", "Tarjoaja 1"),
                 asList("Hakukohde", "Hakukohde 1"),
                 asList("Vaihe", "Vaihe 1"),

@@ -20,6 +20,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
@@ -70,7 +71,7 @@ public class ValintalaskennanTulosExcel {
 
     private final static List<String> columnHeaders = columns.stream().map(column -> column.name).collect(Collectors.toList());
 
-    public static XSSFWorkbook luoExcel(final HakukohdeV1RDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet, final List<Hakemus> hakemukset) {
+    public static XSSFWorkbook luoExcel(HakuV1RDTO haku, final HakukohdeV1RDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet, final List<Hakemus> hakemukset) {
         final HashMap<String, Hakemus> hakemusByOid = new HashMap<>();
         for (Hakemus h: hakemukset) {
             hakemusByOid.put(h.getOid(), h);
@@ -82,6 +83,7 @@ public class ValintalaskennanTulosExcel {
             .forEach(vaihe -> vaihe.getValintatapajonot().forEach(jono -> {
                 final XSSFSheet sheet = workbook.createSheet(vaihe.getNimi() + " - " + jono.getNimi());
                 setColumnWidths(sheet);
+                addRow(sheet, "Haku", getTeksti(haku.getNimi()));
                 addRow(sheet, "Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimet()));
                 addRow(sheet, "Hakukohde", getTeksti(hakukohdeDTO.getHakukohteenNimet()));
                 addRow(sheet, "Vaihe", vaihe.getNimi());
