@@ -78,6 +78,11 @@ public class Callback<T> implements InvocationCallback<Response> {
 
 	@Override
 	public void completed(Response response) {
+		if (response.getStatus() >= 300) {
+			String msg = String.format("%s%s HTTP %d", url, palvelukutsu, response.getStatus());
+			failureCallback.accept(new RuntimeException(msg));
+			return;
+		}
 		String json = StringUtils.EMPTY;
 		try {
 			InputStream stream = (InputStream) response.getEntity();
