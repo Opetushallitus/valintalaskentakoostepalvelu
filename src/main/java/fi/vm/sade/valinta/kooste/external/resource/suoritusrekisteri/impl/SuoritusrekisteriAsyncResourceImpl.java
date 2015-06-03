@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl;
 
 import com.google.common.reflect.TypeToken;
+import fi.vm.sade.valinta.http.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;

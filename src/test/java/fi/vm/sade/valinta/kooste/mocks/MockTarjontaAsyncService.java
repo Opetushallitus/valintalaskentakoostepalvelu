@@ -42,18 +42,7 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
         return new PeruutettavaImpl(Futures.immediateFuture(mockHaku.getOrDefault(hakuOid, hakuV1RDTO)));
     }
 
-    @Override
-    public Peruutettava haeHakukohde(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> callback, Consumer<Throwable> failureCallback) {
-        HakukohdeDTO hakukohdeDTO = new HakukohdeDTO();
-        hakukohdeDTO.setHakuOid(MockData.hakuOid);
-        hakukohdeDTO.setOid(hakukohdeOid);
-        callback.accept(hakukohdeDTO);
-        return new PeruutettavaImpl(Futures.immediateFuture(hakukohdeDTO));
-    }
-
     public static void setMockHaku(HakuV1RDTO mockHaku) {
         MockTarjontaAsyncService.mockHaku.put(mockHaku.getOid(), mockHaku);
-        callback.accept(hakuV1RDTO);
-        return new PeruutettavaImpl(Futures.immediateFuture(hakuV1RDTO));
     }
 }

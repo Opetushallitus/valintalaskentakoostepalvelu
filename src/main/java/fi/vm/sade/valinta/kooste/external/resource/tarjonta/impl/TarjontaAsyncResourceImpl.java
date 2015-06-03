@@ -9,7 +9,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
