@@ -9,7 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import rx.Observable;
 
 public interface TarjontaAsyncResource {
-	Future<HakuV1RDTO> haeHaku(String hakuOid);
+	Observable<HakuV1RDTO> haeHaku(String hakuOid);
 	
 	Observable<HakukohdeDTO> haeHakukohde(String hakukohdeOid);
 

@@ -43,11 +43,8 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
 	}
 
 	@Override
-	public Future<HakuV1RDTO> haeHaku(String hakuOid) {
-		return getWebClient()
-				.path("/v1/haku/"+hakuOid+"/")
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async().get(HakuV1RDTO.class);
+	public Observable<HakuV1RDTO> haeHaku(String hakuOid) {
+		return getAsObservable("/v1/haku/"+hakuOid+"/", HakuV1RDTO.class);
 	}
 
 	@Override
