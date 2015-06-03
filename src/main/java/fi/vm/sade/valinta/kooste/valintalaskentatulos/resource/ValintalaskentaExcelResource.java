@@ -17,6 +17,7 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,18 +129,15 @@ public class ValintalaskentaExcelResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
     @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
     public void haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
-        ConnectableObservable<HakukohdeDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid).replay(1);
-        hakukohdeObservable.connect();
+        Observable<HakukohdeDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid);
         final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
         final Observable<List<Hakemus>> hakemuksetObservable = hakukohdeObservable.flatMap(hakukohde -> applicationResource.getApplicationsByOid(hakukohde.getHakuOid(), hakukohdeOid));
 
-        final Observable<InputStream> workbookObservable = Observable.combineLatest(hakukohdeObservable, valinnanVaiheetObservable, hakemuksetObservable, (hakukohde, valinnanVaiheet, hakemukset) ->
-            Excel.export(ValintalaskennanTulosExcel.luoExcel(hakukohde, valinnanVaiheet, hakemukset))
-        ).subscribeOn(Schedulers.newThread());
+        final Observable<XSSFWorkbook> workbookObservable = Observable.combineLatest(hakukohdeObservable, valinnanVaiheetObservable, hakemuksetObservable, ValintalaskennanTulosExcel :: luoExcel).subscribeOn(Schedulers.newThread());
 
         workbookObservable.subscribe(
-            (excelStream) -> {
-                asyncResponse.resume(Response.ok(excelStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").header("content-disposition", "inline; filename=valintalaskennantulos.xlsx").build());
+            (workbook) -> {
+                asyncResponse.resume(Response.ok(Excel.export(workbook), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").header("content-disposition", "inline; filename=valintalaskennantulos.xlsx").build());
             },
             (e) -> {
                 LOG.error("Valintakoekutsut excelin luonti epäonnistui hakukohteelle {}: {}", new Object[] {hakukohdeOid, e.getMessage()});
