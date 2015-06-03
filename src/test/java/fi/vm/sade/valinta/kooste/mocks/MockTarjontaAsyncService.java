@@ -1,19 +1,20 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import org.springframework.stereotype.Service;
+
 import com.google.common.util.concurrent.Futures;
+
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import rx.Observable;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
-
-import org.springframework.stereotype.Service;
 
 @Service
 public class MockTarjontaAsyncService implements TarjontaAsyncResource {
@@ -27,19 +28,11 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     }
 
     @Override
-    public Observable<HakukohdeDTO> haeHakukohde(String hakukohdeOid) {
-        HakukohdeDTO hakukohdeDTO = new HakukohdeDTO();
+    public Observable<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid) {
+        HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
         hakukohdeDTO.setHakuOid(MockData.hakuOid);
         hakukohdeDTO.setOid(hakukohdeOid);
         return Observable.just(hakukohdeDTO);
-    }
-
-    @Override
-    public Peruutettava haeHaku(String hakuOid, Consumer<HakuV1RDTO> callback, Consumer<Throwable> failureCallback) {
-        HakuV1RDTO hakuV1RDTO = new HakuV1RDTO();
-        hakuV1RDTO.setOid(hakuOid);
-        callback.accept(mockHaku.getOrDefault(hakuOid, hakuV1RDTO));
-        return new PeruutettavaImpl(Futures.immediateFuture(mockHaku.getOrDefault(hakuOid, hakuV1RDTO)));
     }
 
     public static void setMockHaku(HakuV1RDTO mockHaku) {

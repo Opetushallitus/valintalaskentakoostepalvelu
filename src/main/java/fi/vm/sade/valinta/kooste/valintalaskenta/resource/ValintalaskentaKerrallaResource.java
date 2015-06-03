@@ -416,7 +416,7 @@ public class ValintalaskentaKerrallaResource {
                                             }
                                     )
 							).build();
-					tarjontaAsyncResource.haeHaku(hakuOid,
+					tarjontaAsyncResource.haeHaku(hakuOid).subscribe(
 							haku -> {
 								hakuRef.set(haku);
 								counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

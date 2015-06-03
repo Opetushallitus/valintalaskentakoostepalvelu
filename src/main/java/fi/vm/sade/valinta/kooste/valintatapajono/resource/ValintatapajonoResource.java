@@ -21,6 +21,7 @@ import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1Resource;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoRivit;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviListAdapter;
@@ -81,7 +82,7 @@ public class ValintatapajonoResource {
 	public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid,
 			@QueryParam("hakukohdeOid") String hakukohdeOid,
 			@QueryParam("valintatapajonoOid") String valintatapajonoOid) throws Exception{
-		String tarjoajaOid = from(tarjontaResource.haeHakukohde(hakukohdeOid)).first().getTarjoajaOid();
+		String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
 
 		authorizer.checkOrganisationAccess(tarjoajaOid,
 				ValintatapajonoResource.ROLE_TULOSTENTUONTI
@@ -116,7 +117,7 @@ public class ValintatapajonoResource {
 						.build());
 			}
 		});
-		String tarjoajaOid = from(tarjontaResource.haeHakukohde(hakukohdeOid)).first().getTarjoajaOid();
+		String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
 		authorizer.checkOrganisationAccess(tarjoajaOid,
 				ValintatapajonoResource.ROLE_TULOSTENTUONTI
 		);
@@ -173,7 +174,7 @@ public class ValintatapajonoResource {
 						.build());
 			}
 		});
-		String tarjoajaOid = from(tarjontaResource.haeHakukohde(hakukohdeOid)).first().getTarjoajaOid();
+		String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
 		authorizer.checkOrganisationAccess(tarjoajaOid,
 				ValintatapajonoResource.ROLE_TULOSTENTUONTI
 		);

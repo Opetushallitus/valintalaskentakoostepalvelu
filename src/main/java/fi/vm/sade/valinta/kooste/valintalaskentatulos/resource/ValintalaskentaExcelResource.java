@@ -30,6 +30,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -129,7 +130,7 @@ public class ValintalaskentaExcelResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
     @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
     public void haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
-        Observable<HakukohdeDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid);
+        Observable<HakukohdeV1RDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid);
         final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
         final Observable<List<Hakemus>> hakemuksetObservable = valinnanVaiheetObservable.flatMap(vaiheet -> vaiheet.isEmpty() ? Observable.just((List<Hakemus>)Collections.EMPTY_LIST) : applicationResource.getApplicationsByOid(vaiheet.get(0).getHakuOid(), hakukohdeOid));
 

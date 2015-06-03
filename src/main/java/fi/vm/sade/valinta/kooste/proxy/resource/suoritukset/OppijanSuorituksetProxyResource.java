@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
 import fi.vm.sade.valinta.kooste.util.Converter;
+import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -69,10 +70,10 @@ public class OppijanSuorituksetProxyResource {
         });
 
         try {
-            Consumer<Throwable> poikkeuskasittelija = poikkeus -> {
+            PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
                 LOG.error("", poikkeus);
                 asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
-            };
+            });
 
             AtomicReference<Oppija> oppijaRef = new AtomicReference<>();
             AtomicReference<ParametritDTO> parametriRef = new AtomicReference<>();
@@ -96,7 +97,7 @@ public class OppijanSuorituksetProxyResource {
                             }
                     ).build();
 
-            tarjontaAsyncResource.haeHaku(hakuOid,
+            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(
                     tarjonta -> {
                         tarjontaRef.set(tarjonta);
                         laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

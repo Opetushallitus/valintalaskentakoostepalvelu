@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -38,10 +39,10 @@ import static java.util.Collections.EMPTY_MAP;
 import static org.junit.Assert.assertEquals;
 
 public class ValintalaskennanTulosExcelTest {
-    HakukohdeDTO hakukohdeDTO = new HakukohdeDTO();
+    HakukohdeV1RDTO hakukohdeDTO = new HakukohdeV1RDTO();
     {
-        hakukohdeDTO.setHakukohdeNimi(map("fi", "Hakukohde 1"));
-        hakukohdeDTO.setTarjoajaNimi(map("fi", "Tarjoaja 1"));
+        hakukohdeDTO.setHakukohteenNimet(map("fi", "Hakukohde 1"));
+        hakukohdeDTO.setTarjoajaNimet(map("fi", "Tarjoaja 1"));
     }
 
     XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(hakukohdeDTO, asList(
