@@ -131,7 +131,7 @@ public class ValintalaskentaExcelResource {
     public void haeValintalaskentaTuloksetExcelMuodossa(@QueryParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
         Observable<HakukohdeDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid);
         final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
-        final Observable<List<Hakemus>> hakemuksetObservable = hakukohdeObservable.flatMap(hakukohde -> applicationResource.getApplicationsByOid(hakukohde.getHakuOid(), hakukohdeOid));
+        final Observable<List<Hakemus>> hakemuksetObservable = valinnanVaiheetObservable.flatMap(vaiheet -> vaiheet.isEmpty() ? Observable.just((List<Hakemus>)Collections.EMPTY_LIST) : applicationResource.getApplicationsByOid(vaiheet.get(0).getHakuOid(), hakukohdeOid));
 
         final Observable<XSSFWorkbook> workbookObservable = Observable.combineLatest(hakukohdeObservable, valinnanVaiheetObservable, hakemuksetObservable, ValintalaskennanTulosExcel :: luoExcel).subscribeOn(Schedulers.newThread());
 
