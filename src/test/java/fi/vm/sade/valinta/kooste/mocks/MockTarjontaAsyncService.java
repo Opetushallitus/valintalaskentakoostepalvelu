@@ -20,10 +20,10 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
     private static Map<String, HakuV1RDTO> mockHaku= new HashMap<>();
 
     @Override
-    public Future<HakuV1RDTO> haeHaku(String hakuOid) {
+    public Observable<HakuV1RDTO> haeHaku(String hakuOid) {
         HakuV1RDTO hakuV1RDTO = new HakuV1RDTO();
         hakuV1RDTO.setOid(hakuOid);
-        return Futures.immediateFuture(mockHaku.getOrDefault(hakuOid, hakuV1RDTO));
+        return Observable.just(hakuV1RDTO);
     }
 
     @Override
