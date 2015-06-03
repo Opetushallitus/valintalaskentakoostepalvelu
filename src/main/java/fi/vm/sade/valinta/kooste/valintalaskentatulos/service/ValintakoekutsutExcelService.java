@@ -202,7 +202,7 @@ public class ValintakoekutsutExcelService {
                 hakukohdeRef.set(hakukohde);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);
-            tarjontaAsyncResource.haeHaku(hakuOid, haku -> {
+            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
                 hakuRef.set(haku);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);

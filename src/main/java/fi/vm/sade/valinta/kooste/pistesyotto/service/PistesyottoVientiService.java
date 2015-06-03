@@ -219,7 +219,7 @@ public class PistesyottoVientiService {
                 hakukohdeRef.set(hakukohde);
                 viimeisteleTuonti.get();
             }, poikkeuskasittelija);
-            tarjontaAsyncResource.haeHaku(hakuOid, haku -> {
+            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
                 prosessi.inkrementoiTehtyjaToita();
                 hakuRef.set(haku);
                 viimeisteleTuonti.get();
