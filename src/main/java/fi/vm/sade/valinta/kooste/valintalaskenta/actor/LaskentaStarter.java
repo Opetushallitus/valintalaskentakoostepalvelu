@@ -65,7 +65,7 @@ public class LaskentaStarter {
                             (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
                                 Collection<HakukohdeJaOrganisaatio> hakukohdeOids = maskHakukohteet(hakuOid, hakukohdeViitteet, laskenta);
                                 if (!hakukohdeOids.isEmpty()) {
-                                    haunOhjausParametrit(laskennanKaynnistajaActor, hakuOid, hakukohdeOids, laskenta, actorParamsCallback);
+                                    fetchHakuInformation(laskennanKaynnistajaActor, hakuOid, hakukohdeOids, laskenta, actorParamsCallback);
                                 } else {
                                     cancelLaskenta(laskennanKaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", uuid);
                                 }
@@ -86,7 +86,7 @@ public class LaskentaStarter {
         return maski.isMask() ? maski.maskaa(haunHakukohdeOidit) : haunHakukohdeOidit;
     }
 
-    private void haunOhjausParametrit(ActorRef laskennankaynnistajaActor, String hakuOid, Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, LaskentaDto laskenta, BiConsumer<HakuV1RDTO, LaskentaActorParams> actorParamsCallback) {
+    private void fetchHakuInformation(ActorRef laskennankaynnistajaActor, String hakuOid, Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, LaskentaDto laskenta, BiConsumer<HakuV1RDTO, LaskentaActorParams> actorParamsCallback) {
         AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
         AtomicReference<LaskentaActorParams> parametritRef = new AtomicReference<>();
         SynkronoituLaskuri counter = SynkronoituLaskuri.builder()
