@@ -50,16 +50,17 @@ public class HakemuksetConverterUtil {
             if (oppijat != null) {
                 Map<String, Oppija> personOidToOppija = oppijat.stream()
                         .collect(toMap(Oppija::getOppijanumero, Function.<Oppija>identity()));
-                hakemukset.stream().forEach(h -> {
+                Map<String, Boolean> hasHetu = hakemukset.stream()
+                        .collect(toMap(Hakemus::getOid, h -> new HakemusWrapper(h).hasHenkilotunnus()));
+                hakemusDtot.stream().forEach(h -> {
                     try {
-                        HakemusDTO hakemusDTO = Converter.hakemusToHakemusDTO(h);
-                        String personOid = hakemusDTO.getHakijaOid();
+                        String personOid = h.getHakijaOid();
                         if (personOidToOppija.containsKey(personOid)) {
                             Oppija oppija = personOidToOppija.get(personOid);
-                            mergeKeysOfOppijaAndHakemus(new HakemusWrapper(h).hasHenkilotunnus(), haku, hakukohdeOid, parametritDTO, errors, oppija, hakemusDTO);
+                            mergeKeysOfOppijaAndHakemus(hasHetu.get(h.getHakemusoid()), haku, hakukohdeOid, parametritDTO, errors, oppija, h);
                         }
                     } catch (Exception e) {
-                        errors.put(h.getOid(), e);
+                        errors.put(h.getHakemusoid(), e);
                     }
                 });
             }
