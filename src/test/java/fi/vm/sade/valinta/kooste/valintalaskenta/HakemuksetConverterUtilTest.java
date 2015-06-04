@@ -13,7 +13,9 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.*;
 import org.joda.time.DateTime;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,6 +25,10 @@ import static fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSp
 import static org.junit.Assert.*;
 
 public class HakemuksetConverterUtilTest {
+
+    @Rule
+    public ExpectedException expected = ExpectedException.none();
+
     private static final HakuV1RDTO haku = new HakuV1RDTO();
     private static final String HAKUKAUDELLA = "1.1.2015";
     private static final String HAKUKAUDEN_ULKOPUOLELLA = "1.1.2014";
@@ -1096,11 +1102,13 @@ public class HakemuksetConverterUtilTest {
     /**
      * Eri asteikot yhdistettavilla arvosanoilla. Yhdistaminen ei mahdollista.
      */
-    @Test(expected = RuntimeException.class)
+    @Test
     public void pkSamaArvoMuttaAsteikotEiTasmaa() {
         HakemusDTO hakemus = new HakemusDTO();
         Oppija samaArvoMuttaAsteikotEiTasmaa = new SuoritusrekisteriSpec.OppijaBuilder()
                 .suoritus()
+                .setValmistuminen(HAKUKAUDELLA)
+                .setVahvistettu(true)
                 .setPerusopetus()
                 .setValmis()
                 .arvosana()
@@ -1115,6 +1123,7 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build()
                 .build();
+        expected.expectMessage("Asteikot ei täsmää: 1-5 4-10");
         HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), samaArvoMuttaAsteikotEiTasmaa, hakemus);
     }
 
@@ -1148,12 +1157,14 @@ public class HakemuksetConverterUtilTest {
     /**
      * Poikkeus koska yhdistaminen ei mahdollista
      */
-    @Test(expected = RuntimeException.class)
+    @Test
     public void pkTunnistamatonArvosana() {
         HakemusDTO hakemus = new HakemusDTO();
         Oppija tunnistamatonArvosana = new SuoritusrekisteriSpec.OppijaBuilder()
                 .suoritus()
                 .setPerusopetus()
+                .setVahvistettu(true)
+                .setValmistuminen(HAKUKAUDELLA)
                 .setValmis()
                 .arvosana()
                 .setAine("AI")
@@ -1167,7 +1178,30 @@ public class HakemuksetConverterUtilTest {
                 .build()
                 .build()
                 .build();
+        expected.expect(NumberFormatException.class);
         HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tunnistamatonArvosana, hakemus);
+    }
+
+    @Test
+    public void pkVahvistamatonSuoritus() {
+        HakemusDTO hakemus = new HakemusDTO();
+        hakemus.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+            add(new AvainArvoDTO("PK_PAATTOTODISTUSVUOSI", "2015"));
+        }});
+        Oppija tunnistamatonArvosana = new SuoritusrekisteriSpec
+                .OppijaBuilder()
+                    .suoritus()
+                        .setPerusopetus()
+                        .setVahvistettu(false)
+                        .setValmistuminen(HAKUKAUDELLA)
+                        .setValmis()
+                        .build()
+                    .build();
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tunnistamatonArvosana, hakemus);
+        assertEquals(13, hakemus.getAvaimet().size());
+        assertEquals(PohjakoulutusToinenAste.PERUSKOULU, getFirstHakemusArvo(hakemus, "POHJAKOULUTUS"));
+        assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
     }
 
     @Test

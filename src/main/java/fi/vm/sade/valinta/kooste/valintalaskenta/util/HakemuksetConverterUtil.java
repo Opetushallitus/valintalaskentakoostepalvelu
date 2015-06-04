@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.wrap;
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.*;
 
 /**
@@ -186,6 +185,7 @@ public class HakemuksetConverterUtil {
     public static List<SuoritusJaArvosanat> filterUnrelevantSuoritukset(HakuV1RDTO haku, List<SuoritusJaArvosanat> suoritukset) {
         return suoritukset.stream()
                 .map(SuoritusJaArvosanatWrapper::wrap)
+                .filter(s -> !(s.isPerusopetus() && !s.isVahvistettu()))
                 .filter(s -> !(s.isPerusopetus() && s.isVahvistettu() && s.isKesken()))
                 .filter(s -> !(s.isLisapistekoulutus() && !s.isVahvistettu()))
                 .filter(s -> !(s.isPerusopetus() && s.isKeskeytynyt() && !hakukaudella(haku, s)))
