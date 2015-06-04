@@ -1,20 +1,20 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.ArvosanaWrapper;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
+import fi.vm.sade.valinta.kooste.util.sure.ArvosanaToAvainArvoDTOConverter;
+import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
+import org.joda.time.DateTime;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Stream.*;
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.wrap;
 import static java.util.Optional.ofNullable;
-
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
-
-import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.*;
-
-import fi.vm.sade.valinta.kooste.util.sure.ArvosanaToAvainArvoDTOConverter;
-import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
-import org.joda.time.DateTime;
+import static java.util.stream.Stream.concat;
 
 /**
  * @author jussi jartamo
@@ -42,10 +42,10 @@ public class OppijaToAvainArvoDTOConverter {
                 .filter(s -> wrap(s).isAmmatillinen() && wrap(s).isValmis());
 
         final Stream<SuoritusJaArvosanat> peruskoulu = oppijanSuoritukset.stream()
-                .filter(s -> wrap(s).isPerusopetus() && wrap(s).isValmis() && wrap(s).isVahvistettu());
+                .filter(s -> wrap(s).isPerusopetus() && wrap(s).isValmis());
 
         final Stream<SuoritusJaArvosanat> lisaopetus = oppijanSuoritukset.stream()
-                .filter(s -> wrap(s).isLisapistekoulutus() && wrap(s).isVahvistettu());
+                .filter(s -> wrap(s).isLisapistekoulutus());
 
         final Stream<SuoritusJaArvosanat> yo = oppijanSuoritukset.stream()
                 .filter(s -> wrap(s).isYoTutkinto() && wrap(s).isValmis() && wrap(s).isVahvistettu());
