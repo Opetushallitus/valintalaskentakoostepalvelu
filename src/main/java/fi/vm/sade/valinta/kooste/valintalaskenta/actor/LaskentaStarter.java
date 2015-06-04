@@ -23,11 +23,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 
@@ -64,13 +62,14 @@ public class LaskentaStarter {
                     }
                     valintaperusteetAsyncResource.haunHakukohteet(
                             hakuOid,
-                            (List<HakukohdeViiteDTO> hakukohdeViitteet) -> haunOhjausParametrit(
-                                    laskennanKaynnistajaActor,
-                                    hakuOid,
-                                    hakukohdeViitteet,
-                                    laskenta,
-                                    actorParamsCallback
-                            ),
+                            (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
+                                Collection<HakukohdeJaOrganisaatio> hakukohdeOids = maskHakukohteet(hakuOid, hakukohdeViitteet, laskenta);
+                                if (!hakukohdeOids.isEmpty()) {
+                                    haunOhjausParametrit(laskennanKaynnistajaActor, hakuOid, hakukohdeOids, laskenta, actorParamsCallback);
+                                } else {
+                                    cancelLaskenta(laskennanKaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", uuid);
+                                }
+                            },
                             (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Haun kohteiden haku epäonnistui haulle: " + uuid, uuid)
                     );
                 },
@@ -78,40 +77,39 @@ public class LaskentaStarter {
         );
     }
 
-    private void haunOhjausParametrit(ActorRef laskennankaynnistajaActor, String hakuOid, List<HakukohdeViiteDTO> hakukohdeViitteet, LaskentaDto laskenta, BiConsumer<HakuV1RDTO, LaskentaActorParams> actorParamsCallback) {
+    private Collection<HakukohdeJaOrganisaatio> maskHakukohteet(String hakuOid, List<HakukohdeViiteDTO> hakukohdeViitteet, LaskentaDto laskenta) {
         LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
 
         final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet != null ? publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet) : new ArrayList<>();
         final Maski maski = createMaskiFromLaskenta(laskenta);
 
-        Collection<HakukohdeJaOrganisaatio> oids = maski.isMask() ? maski.maskaa(haunHakukohdeOidit) : haunHakukohdeOidit;
-        if (oids.isEmpty()) {
-            cancelLaskenta(laskennankaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", laskenta.getUuid());
-        } else {
-            AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
-            AtomicReference<LaskentaActorParams> parametritRef = new AtomicReference<>();
-            SynkronoituLaskuri counter = SynkronoituLaskuri.builder()
-                    .setLaskurinAlkuarvo(2)
-                    .setSynkronoituToiminto(
-                            () -> actorParamsCallback.accept(hakuRef.get(), parametritRef.get()))
-                    .build();
-            tarjontaAsyncResource.haeHaku(hakuOid,
-                    haku -> {
-                        hakuRef.set(haku);
-                        counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                    },
-                    (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Tarjontatietojen haku epäonnistui: " + t.getMessage() + " " + Arrays.toString(t.getStackTrace()), laskenta.getUuid())
-            );
+        return maski.isMask() ? maski.maskaa(haunHakukohdeOidit) : haunHakukohdeOidit;
+    }
 
-            ohjausparametritAsyncResource.haeHaunOhjausparametrit(
-                    hakuOid,
-                    parametrit -> {
-                        parametritRef.set(laskentaActorParams(hakuOid, laskenta, haunHakukohdeOidit, parametrit));
-                        counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                    },
-                    (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Ohjausparametrien luku epäonnistui: " + t.getMessage() + " " + Arrays.toString(t.getStackTrace()), laskenta.getUuid())
-            );
-        }
+    private void haunOhjausParametrit(ActorRef laskennankaynnistajaActor, String hakuOid, Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, LaskentaDto laskenta, BiConsumer<HakuV1RDTO, LaskentaActorParams> actorParamsCallback) {
+        AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
+        AtomicReference<LaskentaActorParams> parametritRef = new AtomicReference<>();
+        SynkronoituLaskuri counter = SynkronoituLaskuri.builder()
+                .setLaskurinAlkuarvo(2)
+                .setSynkronoituToiminto(
+                        () -> actorParamsCallback.accept(hakuRef.get(), parametritRef.get()))
+                .build();
+        tarjontaAsyncResource.haeHaku(hakuOid,
+                haku -> {
+                    hakuRef.set(haku);
+                    counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                },
+                (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Tarjontatietojen haku epäonnistui: " + t.getMessage() + " " + Arrays.toString(t.getStackTrace()), laskenta.getUuid())
+        );
+
+        ohjausparametritAsyncResource.haeHaunOhjausparametrit(
+                hakuOid,
+                parametrit -> {
+                    parametritRef.set(laskentaActorParams(hakuOid, laskenta, haunHakukohdeOidit, parametrit));
+                    counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                },
+                (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Ohjausparametrien luku epäonnistui: " + t.getMessage() + " " + Arrays.toString(t.getStackTrace()), laskenta.getUuid())
+        );
     }
 
     private LaskentaActorParams laskentaActorParams(String hakuOid, LaskentaDto laskenta, Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, ParametritDTO parametrit) {
