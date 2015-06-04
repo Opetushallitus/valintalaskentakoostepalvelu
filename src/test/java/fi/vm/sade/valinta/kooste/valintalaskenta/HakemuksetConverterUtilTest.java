@@ -1205,21 +1205,36 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
-    public void pkTunnistamatonArvosanaMuttaEiTarviYhdistaanNiinEiValia() {
+    public void pkParempiArvosanaVaikkaVahvistamatonSuoritus() {
         HakemusDTO hakemus = new HakemusDTO();
-        Oppija tunnistamatonArvosana = new SuoritusrekisteriSpec.OppijaBuilder()
-                .suoritus()
-                .setPerusopetus()
-                .setValmistuminen("1.1.2015")
-                .setValmis()
-                .arvosana()
-                .setAine("AI")
-                .setAsteikko("")
-                .setArvosana("KUUS")
-                .build()
-                .build()
-                .build();
+        Oppija tunnistamatonArvosana = new SuoritusrekisteriSpec
+                .OppijaBuilder()
+                    .suoritus()
+                        .setPerusopetus()
+                        .setValmistuminen("1.1.2015")
+                        .setValmis()
+                        .setVahvistettu(false)
+                        .arvosana()
+                            .setAine("AI")
+                            .setAsteikko("")
+                            .setArvosana("6")
+                            .build()
+                        .build()
+                    .suoritus()
+                        .setPerusopetus()
+                        .setValmistuminen("1.1.2015")
+                        .setValmis()
+                        .setVahvistettu(true)
+                        .arvosana()
+                            .setAine("AI")
+                            .setAsteikko("")
+                            .setArvosana("5")
+                            .build()
+                        .build()
+                    .build();
         HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tunnistamatonArvosana, hakemus);
+        assertEquals(8, hakemus.getAvaimet().size());
+        assertEquals("6", getFirstHakemusArvo(hakemus, "PK_AI"));
     }
 
     // LUKIO:
