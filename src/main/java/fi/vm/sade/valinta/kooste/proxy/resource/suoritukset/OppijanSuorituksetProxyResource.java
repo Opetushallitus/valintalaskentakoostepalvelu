@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
 import fi.vm.sade.valinta.kooste.util.Converter;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -76,20 +77,27 @@ public class OppijanSuorituksetProxyResource {
 
             AtomicReference<Oppija> oppijaRef = new AtomicReference<>();
             AtomicReference<ParametritDTO> parametriRef = new AtomicReference<>();
-            AtomicReference<fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO> hakemusRef = new AtomicReference<>();
+            AtomicReference<Hakemus> hakemusRef = new AtomicReference<>();
             AtomicReference<HakuV1RDTO> tarjontaRef = new AtomicReference<>();
 
             SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
                     .setLaskurinAlkuarvo(4)
                     .setSynkronoituToiminto(
                             () -> {
-                                HakemusDTO hakemus = hakemusRef.get();
+                                HakemusDTO hakemusDTO;
+                                boolean hakilallaOnHenkilotunnus;
+                                {
+                                    Hakemus hakemus = hakemusRef.get();
+                                    hakilallaOnHenkilotunnus = new HakemusWrapper(hakemus).hasHenkilotunnus();
+                                    hakemusDTO = Converter.hakemusToHakemusDTO(hakemus);
+                                }
                                 HakuV1RDTO haku = tarjontaRef.get();
-                                HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(haku, "", parametriRef.get(), Maps.newHashMap(), oppijaRef.get(), hakemus);
+                                HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
+                                        hakilallaOnHenkilotunnus, haku, "", parametriRef.get(), Maps.newHashMap(), oppijaRef.get(), hakemusDTO);
                                 asyncResponse.resume(Response
                                         .ok()
                                         .header("Content-Type", "application/json")
-                                        .entity(hakemus.getAvaimet().stream()
+                                        .entity(hakemusDTO.getAvaimet().stream()
                                                 .map(a -> a.getAvain().endsWith("_SUORITETTU") ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S") : a)
                                                 .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo)))
                                         .build());
@@ -104,7 +112,7 @@ public class OppijanSuorituksetProxyResource {
                     poikkeuskasittelija);
 
             applicationAsyncResource.getApplication(hakemusOid, hakemus -> {
-                hakemusRef.set(Converter.hakemusToHakemusDTO(hakemus));
+                hakemusRef.set(hakemus);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);
 

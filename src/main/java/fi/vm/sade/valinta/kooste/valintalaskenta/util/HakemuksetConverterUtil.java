@@ -8,6 +8,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.util.Converter;
+import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.YoToAvainSuoritustietoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
@@ -50,15 +51,16 @@ public class HakemuksetConverterUtil {
             if (oppijat != null) {
                 Map<String, Oppija> personOidToOppija = oppijat.stream()
                         .collect(toMap(Oppija::getOppijanumero, Function.<Oppija>identity()));
-                hakemusDtot.stream().forEach(h -> {
+                hakemukset.stream().forEach(h -> {
                     try {
-                        String personOid = h.getHakijaOid();
+                        HakemusDTO hakemusDTO = Converter.hakemusToHakemusDTO(h);
+                        String personOid = hakemusDTO.getHakijaOid();
                         if (personOidToOppija.containsKey(personOid)) {
                             Oppija oppija = personOidToOppija.get(personOid);
-                            mergeKeysOfOppijaAndHakemus(haku, hakukohdeOid, parametritDTO, errors, oppija, h);
+                            mergeKeysOfOppijaAndHakemus(new HakemusWrapper(h).hasHenkilotunnus(), haku, hakukohdeOid, parametritDTO, errors, oppija, hakemusDTO);
                         }
                     } catch (Exception e) {
-                        errors.put(h.getHakemusoid(), e);
+                        errors.put(h.getOid(), e);
                     }
                 });
             }
@@ -77,7 +79,8 @@ public class HakemuksetConverterUtil {
         return hakemusDtot;
     }
 
-    public static void mergeKeysOfOppijaAndHakemus(HakuV1RDTO haku,
+    public static void mergeKeysOfOppijaAndHakemus(boolean hakijallaOnHenkilotunnus,
+                                                   HakuV1RDTO haku,
                                                    String hakukohdeOid,
                                                    ParametritDTO parametritDTO,
                                                    Map<String, Exception> errors,
@@ -96,7 +99,7 @@ public class HakemuksetConverterUtil {
 
         Map<String, AvainArvoDTO> merge = Maps.newHashMap();
         merge.putAll(hakemuksenArvot);
-        ensikertalaisuus(haku, hakukohdeOid, oppija, hakemusDTO, merge);
+        ensikertalaisuus(hakijallaOnHenkilotunnus, haku, hakukohdeOid, oppija, hakemusDTO, merge);
         pohjakoulutus.ifPresent(pk -> merge.put(POHJAKOULUTUS, new AvainArvoDTO(POHJAKOULUTUS, pk)));
         merge.putAll(suoritustenTiedot(pohjakoulutus, hakemusDTO, suoritukset).entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue()))));
@@ -104,10 +107,13 @@ public class HakemuksetConverterUtil {
         hakemusDTO.setAvaimet(merge.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));
     }
 
-    private static void ensikertalaisuus(HakuV1RDTO haku, String hakukohdeOid, Oppija oppija, HakemusDTO hakemusDTO, Map<String, AvainArvoDTO> merge) {
+    private static void ensikertalaisuus(boolean hakijallaOnHenkilotunnus, HakuV1RDTO haku, String hakukohdeOid, Oppija oppija, HakemusDTO hakemusDTO, Map<String, AvainArvoDTO> merge) {
         // Vain korkeakouluhauille
         if (Optional.ofNullable(haku.getKohdejoukkoUri()).orElse("").startsWith("haunkohdejoukko_12")) {
             if (oppija.isEnsikertalainen() == null) {
+                if(!hakijallaOnHenkilotunnus) {
+                    return; // Henkilötunnuksettomilla hakijoilla ensikertalaisuuden tiedon puuttuminen on laillinen tila
+                }
                 LOG.error("Hakijalta {} (hakemusOid={}) puuttui ensikertalaisuustieto hakukohteen {} laskennassa.", hakemusDTO.getHakijaOid(), hakemusDTO.getHakemusoid(), hakukohdeOid);
                 throw new RuntimeException("Hakijalta " + hakemusDTO.getHakijaOid() + " (hakemusOid=" + hakemusDTO.getHakemusoid() + ") puuttui ensikertalaisuustieto hakukohteen " + hakukohdeOid + " laskennassa.");
             }

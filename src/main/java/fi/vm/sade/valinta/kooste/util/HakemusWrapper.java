@@ -165,6 +165,11 @@ public class HakemusWrapper {
                 StringUtils.EMPTY);
     }
 
+    public boolean hasHenkilotunnus() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(HETU)).isPresent();
+    }
+
     public String getPersonOid() {
         if(hakemus == null) {
             return null;
