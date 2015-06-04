@@ -153,10 +153,8 @@ public class ArvosanaToAvainArvoDTOConverter {
             }
             Integer i0 = 0;
             Integer i1 = 0;
-            try {
-                i0 = Integer.parseInt(c0.getArvio().getArvosana());
-                i1 = Integer.parseInt(c1.getArvio().getArvosana());
-            } catch (NumberFormatException ignored) {}
+            i0 = Integer.parseInt(c0.getArvio().getArvosana());
+            i1 = Integer.parseInt(c1.getArvio().getArvosana());
             return i1.compareTo(i0);
         });
         arvosanaSet.addAll(arvosanat);
