@@ -16,7 +16,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.external.resource.Callback;
+import fi.vm.sade.valinta.http.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.ResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;

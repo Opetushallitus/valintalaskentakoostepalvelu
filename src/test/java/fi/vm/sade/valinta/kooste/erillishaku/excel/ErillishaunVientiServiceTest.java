@@ -14,6 +14,8 @@ import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunVientiService;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import rx.Observable;
+
 import org.junit.Test;
 
 import java.io.IOException;
@@ -22,8 +24,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class ErillishaunVientiServiceTest {
-
-
     final MockApplicationAsyncResource mockApplicationAsyncResource = new MockApplicationAsyncResource();
     final MockSijoitteluAsyncResource mockSijoitteluAsyncResource = new MockSijoitteluAsyncResource();
     final MockTarjontaAsyncService mockTarjontaAsyncService = new MockTarjontaAsyncService();
@@ -58,7 +58,7 @@ public class ErillishaunVientiServiceTest {
         final ErillishakuProsessiDTO prosessi = spy(new ErillishakuProsessiDTO(1));
 
         ApplicationAsyncResource applicationMock = mock(ApplicationAsyncResource.class);
-        when(applicationMock.getApplicationsByOid(anyString(), anyString())).thenReturn(Futures.immediateFuture(ImmutableList.of()));
+        when(applicationMock.getApplicationsByOid(anyString(), anyString())).thenReturn(Observable.just(ImmutableList.of()));
 
         SijoitteluAsyncResource sijoitteluMock = mock(SijoitteluAsyncResource.class);
         when(sijoitteluMock.getValintatuloksetHakukohteelle(anyString(), anyString())).thenReturn(Futures.immediateFuture(ImmutableList.of()));

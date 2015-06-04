@@ -104,11 +104,11 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 				.haeHakutoiveelle(koekutsu.getHakukohdeOid());
 		final Future<List<ValintakoeDTO>> valintakokeetFuture = valintakoeResource
 				.haeValintakokeetHakukohteelle(koekutsu.getHakukohdeOid());
-		final Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource
+		final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource
 				.getApplicationsByOid(koekutsu.getHakuOid(),
 						koekutsu.getHakukohdeOid());
 
-		zip(from(valintakokeetFuture), from(hakemuksetFuture),
+		zip(from(valintakokeetFuture), hakemuksetObservable,
 				(valintakoes, hakemukset) -> {
 					//valintakoes.stream().filter(vk -> HAKIJAN_VALINTA.equals(vk.getKutsunKohde())).findAny().isPresent();
 						// Haetaan valintaperusteista valintakokeet

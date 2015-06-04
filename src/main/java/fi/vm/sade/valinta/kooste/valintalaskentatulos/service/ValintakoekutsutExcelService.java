@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -14,6 +15,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
+import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.ValintakoeKutsuExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -68,12 +70,12 @@ public class ValintakoekutsutExcelService {
 
     public void luoExcel(DokumenttiProsessi prosessi, String hakuOid, String hakukohdeOid, List<String> valintakoeTunnisteet,
                          Set<String> hakemusOids) {
-        Consumer<Throwable> poikkeuskasittelija = poikkeus -> {
+        PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
             LOG.error("Valintakoekutsut excelin luonnissa tapahtui poikkeus:", poikkeus);
             prosessi.getPoikkeukset().add(
                     new Poikkeus(Poikkeus.KOOSTEPALVELU,
                             "Valintakoekutsut excelin luonnissa tapahtui poikkeus:", poikkeus.getMessage()));
-        };
+        });
         try {
             prosessi.setKokonaistyo(
                     8
@@ -83,7 +85,7 @@ public class ValintakoekutsutExcelService {
                             + 1);
             final boolean useWhitelist = !Optional.ofNullable(hakemusOids).orElse(Collections.emptySet()).isEmpty();
             final AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
-            final AtomicReference<HakukohdeDTO> hakukohdeRef = new AtomicReference<>();
+            final AtomicReference<HakukohdeV1RDTO> hakukohdeRef = new AtomicReference<>();
             final AtomicReference<List<HakemusOsallistuminenDTO>> tiedotHakukohteelleRef = new AtomicReference<>();
             final AtomicReference<Map<String, ValintakoeDTO>> valintakokeetRef = new AtomicReference<>();
             final AtomicReference<List<Hakemus>> haetutHakemuksetRef = new AtomicReference<>(Collections.emptyList());
@@ -101,7 +103,7 @@ public class ValintakoekutsutExcelService {
                     })
                     .setSynkronoituToiminto(() -> {
                         String hakuNimi = new Teksti(hakuRef.get().getNimi()).getTeksti();
-                        String hakukohdeNimi = new Teksti(hakukohdeRef.get().getHakukohdeNimi()).getTeksti();
+                        String hakukohdeNimi = new Teksti(hakukohdeRef.get().getHakukohteenNimi()).getTeksti();
                         try {
                             InputStream filedata = valintakoeKutsuExcelKomponentti.luoTuloksetXlsMuodossa(
                                     hakuNimi,
@@ -197,11 +199,11 @@ public class ValintakoekutsutExcelService {
                     poikkeuskasittelija
             );
 
-            tarjontaAsyncResource.haeHakukohde(hakuOid, hakukohdeOid, hakukohde -> {
+            tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
                 hakukohdeRef.set(hakukohde);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);
-            tarjontaAsyncResource.haeHaku(hakuOid, haku -> {
+            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
                 hakuRef.set(haku);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);
