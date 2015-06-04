@@ -263,7 +263,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 	@Override
 	public void jalkiohjauskirjeHakukohteelle(final KirjeProsessi prosessi,
 			final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
-		Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource
+		Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource
 				.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(),
 						hyvaksymiskirjeDTO.getHakukohdeOid());
 		Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource
@@ -275,7 +275,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 		final String hakukohdeOid = hyvaksymiskirjeDTO
 				.getHakukohdeOid();
 		zip(
-				from(hakemuksetFuture),
+				hakemuksetObservable,
 				from(hakijatFuture),
 				from(organisaatioFuture),
 				(hakemukset, hakijat, organisaatioResponse) -> {
@@ -336,7 +336,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 	@Override
 	public void hyvaksymiskirjeetHakukohteelle(KirjeProsessi prosessi,
 			final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
-		Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource
+		Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource
 				.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(),
 						hyvaksymiskirjeDTO.getHakukohdeOid());
 		Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource
@@ -348,7 +348,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 		final String hakukohdeOid = hyvaksymiskirjeDTO
 				.getHakukohdeOid();
 		zip(
-				from(hakemuksetFuture),
+				hakemuksetObservable,
 				from(hakijatFuture),
 				from(organisaatioFuture),
 				(hakemukset, hakijat, organisaatioResponse) -> {

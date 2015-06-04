@@ -204,7 +204,6 @@ public class ErillishaunTuontiServiceTest {
         public void hakemustenLuontiEpaonnistuu() {
             final ApplicationAsyncResource failingResource = Mockito.mock(ApplicationAsyncResource.class);
             Mockito.when(failingResource.putApplicationPrototypes(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(Futures.immediateFailedFuture(new RuntimeException("simulated HTTP fail")));
-            Mockito.when(failingResource.getApplicationsByOid(Mockito.anyString(), Mockito.anyString())).thenReturn(applicationAsyncResource.getApplicationsByOid("haku1", "kohde1"));
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, failingResource, henkiloAsyncResource, Schedulers.immediate());
             assertEquals(0, tilaAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);

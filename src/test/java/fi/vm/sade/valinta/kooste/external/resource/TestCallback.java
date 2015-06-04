@@ -10,7 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
+import fi.vm.sade.valinta.http.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 

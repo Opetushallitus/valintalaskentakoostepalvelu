@@ -1,6 +1,23 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.core.Response;
+
+import org.springframework.stereotype.Service;
+
 import com.google.common.util.concurrent.Futures;
+
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
@@ -8,17 +25,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditiona
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-
-import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
-import javax.ws.rs.core.Response;
+import rx.Observable;
 
 @Service
 public class MockApplicationAsyncResource implements ApplicationAsyncResource {
@@ -106,31 +113,26 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         hakemus.setPersonOid(prototyyppi.hakijaOid);
         return hakemus;
     }
+
     @Override
-    public Future<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(final String hakuOid, final String hakukohdeOid) {
-        throw new UnsupportedOperationException();
-    }
-    @Override
-    public Future<List<Hakemus>> getApplicationsByOid(final String hakuOid, final String hakukohdeOid) {
-        return Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(
-                () -> {
-                    if(resultReference.get() != null) {
-                        return Futures.immediateFuture(resultReference.get());
-                    } else {
-                        Hakemus hakemus = new Hakemus();
-                        hakemus.setOid(MockData.hakemusOid);
-                        hakemus.setPersonOid(MockData.hakijaOid);
-                        Answers answers = new Answers();
-                        answers.getHenkilotiedot().put("Henkilotunnus", MockData.hetu);
-                        answers.getHenkilotiedot().put("Etunimet", MockData.etunimi);
-                        answers.getHenkilotiedot().put("Kutsumanimi", MockData.etunimi);
-                        answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
-                        answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
-                        hakemus.setAnswers(answers);
-                        return Futures.immediateFuture(Arrays.asList(hakemus));
-                    }
-                }
-        );
+    public Observable<List<Hakemus>> getApplicationsByOid(final String hakuOid, final String hakukohdeOid) {
+        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(() -> {
+            if (resultReference.get() != null) {
+                return Futures.immediateFuture(resultReference.get());
+            } else {
+                Hakemus hakemus = new Hakemus();
+                hakemus.setOid(MockData.hakemusOid);
+                hakemus.setPersonOid(MockData.hakijaOid);
+                Answers answers = new Answers();
+                answers.getHenkilotiedot().put("Henkilotunnus", MockData.hetu);
+                answers.getHenkilotiedot().put("Etunimet", MockData.etunimi);
+                answers.getHenkilotiedot().put("Kutsumanimi", MockData.etunimi);
+                answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
+                answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
+                hakemus.setAnswers(answers);
+                return Futures.immediateFuture(Arrays.asList(hakemus));
+            }
+        }));
     }
 
     @Override

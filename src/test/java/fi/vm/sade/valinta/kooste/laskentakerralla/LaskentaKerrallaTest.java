@@ -30,6 +30,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Observable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -175,13 +176,8 @@ public class LaskentaKerrallaTest {
                     return new PeruutettavaImpl(Futures.immediateCancelledFuture());
                 }
             );
-        when(Mocks.tarjontaAsyncResource.haeHaku(any(), argument.capture(), any()))
-                .thenAnswer(
-                        invocation -> {
-                            argument.getValue().accept(buildHakuDto());
-                            return new PeruutettavaImpl(Futures.immediateCancelledFuture());
-                        }
-                );
+        when(Mocks.tarjontaAsyncResource.haeHaku(any()))
+                .thenAnswer(invocation -> rx.Observable.just(buildHakuDto()));
     }
 
     private HakuV1RDTO buildHakuDto() {

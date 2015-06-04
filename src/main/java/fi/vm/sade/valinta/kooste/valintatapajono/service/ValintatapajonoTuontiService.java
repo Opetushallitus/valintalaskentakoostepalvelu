@@ -1,52 +1,35 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.service;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.gson.GsonBuilder;
-import fi.vm.sade.authentication.business.service.Authorizer;
-import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
-import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakuTarjonnaltaKomponentti;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti;
-import fi.vm.sade.valinta.kooste.util.EnumConverter;
-import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviListAdapter;
-import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
-import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
-import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRiviAsJonosijaConverter;
-import fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResource;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
-import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
-import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
+
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.core.Response;
-import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import com.google.gson.GsonBuilder;
 
-import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.HakemusSijoitteluntulosMergeUtil.merge;
+import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
+import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
+import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
+import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 
 /**
  * @author Jussi Jartamo
@@ -154,8 +137,7 @@ public class ValintatapajonoTuontiService {
                 }, poikkeusKasittelija("Organisaatiooikeuksien tarkistus epäonnistui",asyncResponse,dokumenttiIdRef)
         );
         */
-        valintalaskentaAsyncResource.laskennantulokset(
-                hakuOid, hakukohdeOid,
+        valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid).subscribe(
                 valinnanvaiheet -> {
                     valinnanvaiheetRef.set(valinnanvaiheet);
                     mergeSuplier.get();
@@ -196,35 +178,35 @@ public class ValintatapajonoTuontiService {
 
     }
 
-    private Consumer<Throwable> poikkeusKasittelija(String viesti, AsyncResponse asyncResponse, AtomicReference<String> dokumenttiIdRef) {
-        return poikkeus -> {
-            if(poikkeus == null) {
-                LOG.error("###\r\n###Poikkeus tuonnissa {}\r\n###", viesti);
-            } else {
-                LOG.error("###\r\n###Poikkeus tuonnissa {}: {} {}\r\n###", viesti, poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
-            }
-            try {
-                asyncResponse.resume(Response.serverError()
-                        .entity(viesti)
-                        .build());
-            } catch (Throwable t) {
-                // ei väliä vaikka response jos tehty
-            }
-            try {
-                String dokumenttiId = dokumenttiIdRef.get();
-                if (dokumenttiId != null) {
-                    dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId,
-                            Arrays.asList(new VirheilmoitusDto("", viesti)),
-                            dontcare -> {
-                            },
-                            dontcare -> {
-                                LOG.error("Virheen ilmoittamisessa virhe! {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
-                            });
-                }
-            } catch(Throwable t) {
-                LOG.error("Odottamaton virhe: {} {}", t.getMessage(), Arrays.toString(t.getStackTrace()));
-            }
-        };
+    private PoikkeusKasittelijaSovitin poikkeusKasittelija(String viesti, AsyncResponse asyncResponse, AtomicReference<String> dokumenttiIdRef) {
+       return new PoikkeusKasittelijaSovitin(poikkeus -> {
+           if(poikkeus == null) {
+               LOG.error("###\r\n###Poikkeus tuonnissa {}\r\n###", viesti);
+           } else {
+               LOG.error("###\r\n###Poikkeus tuonnissa {}: {} {}\r\n###", viesti, poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
+           }
+           try {
+               asyncResponse.resume(Response.serverError()
+                   .entity(viesti)
+                   .build());
+           } catch (Throwable t) {
+               // ei väliä vaikka response jos tehty
+           }
+           try {
+               String dokumenttiId = dokumenttiIdRef.get();
+               if (dokumenttiId != null) {
+                   dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId,
+                       Arrays.asList(new VirheilmoitusDto("", viesti)),
+                       dontcare -> {
+                       },
+                       dontcare -> {
+                           LOG.error("Virheen ilmoittamisessa virhe! {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
+                       });
+               }
+           } catch(Throwable t) {
+               LOG.error("Odottamaton virhe: {} {}", t.getMessage(), Arrays.toString(t.getStackTrace()));
+           }
+       });
     }
-
 }
+

@@ -94,7 +94,7 @@ public class LaskentaStarter {
                 .setSynkronoituToiminto(
                         () -> startActor.accept(hakuRef.get(), parametritRef.get()))
                 .build();
-        tarjontaAsyncResource.haeHaku(hakuOid,
+        tarjontaAsyncResource.haeHaku(hakuOid).subscribe(
                 haku -> {
                     hakuRef.set(haku);
                     counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

@@ -11,8 +11,9 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.http.Callback;
 import fi.vm.sade.valinta.kooste.external.resource.*;
-import org.apache.cxf.jaxrs.client.WebClient;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -26,6 +27,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppiBatch;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import rx.Observable;
 
 /**
  *
@@ -51,36 +53,16 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 		return getWebClient().path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
-				.put(Entity.entity(new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit), MediaType.APPLICATION_JSON),new GenericType<List<Hakemus>>() { });
-	}
-
-	@Override
-	public Future<List<ApplicationAdditionalDataDTO>> getApplicationAdditionalData(String hakuOid, String hakukohdeOid) {
-		String url = new StringBuilder()
-				.append("/applications/additionalData/").append(hakuOid)
-				.append("/").append(hakukohdeOid).toString();
-		return getWebClient().path(url)
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async()
-				.get(new GenericType<List<ApplicationAdditionalDataDTO>>() { });
+				.put(Entity.entity(new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit), MediaType.APPLICATION_JSON), new GenericType<List<Hakemus>>() {
+				});
 	}
 
 	/**
 	 * /haku-app/applications/listfull?appState=ACTIVE&appState=INCOMPLETE&rows=100000&asId={hakuOid}&aoOid={hakukohdeOid}
 	 */
 	@Override
-	public Future<List<Hakemus>> getApplicationsByOid(String hakuOid,
-			String hakukohdeOid) {
-		String url = new StringBuilder().append("/applications/listfull")
-				.toString();
-		return getWebClient().path(url)
-				.query("appState", "ACTIVE", "INCOMPLETE")
-				.query("rows", 100000)
-				.query("asId", hakuOid)
-				.query("aoOid", hakukohdeOid)
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async()
-				.get(new GenericType<List<Hakemus>>() { });
+	public Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
+		return getAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(), client -> client.query("rows", 100000).query("asId", hakuOid).query("aoOid", hakukohdeOid));
 	}
 
 	@Override

@@ -501,7 +501,7 @@
 	<!-- Seuranta Async -->
 	<bean
 		class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.DokumentinSeurantaAsyncResourceImpl" />
-	<bean id="LaskentaSeurantaAsyncResource"
+	<bean
 			class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.LaskentaSeurantaAsyncResourceImpl" />
 	<!-- Dokumenttipalvelu Async -->
 	<bean class="fi.vm.sade.valinta.kooste.external.resource.dokumentti.impl.DokumenttiAsyncResourceImpl" />
@@ -608,6 +608,5 @@
 			<ref bean="apiWriter" />
 		</jaxrs:providers>
 	</jaxrs:server>
-
 	<ctx:mbean-export/>
 </beans>

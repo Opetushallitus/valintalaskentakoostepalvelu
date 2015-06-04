@@ -1,33 +1,29 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import com.google.gson.*;
-import fi.vm.sade.valinta.kooste.external.resource.*;
+import com.google.common.reflect.TypeToken;
+import fi.vm.sade.valinta.http.Callback;
+import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
-import org.apache.cxf.jaxrs.client.WebClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import rx.Observable;
 
-import com.google.common.reflect.TypeToken;
-
-import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
-import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * 
@@ -45,21 +41,8 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	}
 
 	@Override
-	public Peruutettava laskennantulokset(String hakuOid, String hakukohdeOid, Consumer<List<ValintatietoValinnanvaiheDTO>> callback, Consumer<Throwable> failureCallback) {
-		try {
-			///valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
-			String url = new StringBuilder("/valintalaskentakoostepalvelu/hakukohde/").append(hakukohdeOid).append("/valinnanvaihe").toString();
-			return new PeruutettavaImpl(getWebClient()
-					.path(url)
-					.async()
-					.get(new Callback<List<ValintatietoValinnanvaiheDTO>>(GSON,address, url, callback,
-							failureCallback, new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {
-					}.getType())));
-		} catch (Exception e) {
-			LOG.error("Virhe laskennan tulosten haussa",e);
-			failureCallback.accept(e);
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		}
+	public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
+		return getAsObservable("/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe", new GenericType<List<ValintatietoValinnanvaiheDTO>>() { }.getType());
 	}
 
 	@Override

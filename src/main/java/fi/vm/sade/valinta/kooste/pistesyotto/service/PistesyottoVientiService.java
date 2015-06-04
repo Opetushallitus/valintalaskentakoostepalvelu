@@ -7,14 +7,17 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
+import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -69,7 +72,7 @@ public class PistesyottoVientiService {
                      List<ApplicationAdditionalDataDTO> pistetiedot,
                      List<HakukohdeJaValintakoeDTO> hakukohdeJaValintakoe,
                      HakuV1RDTO hakuV1RDTO,
-                     HakukohdeDTO hakukohdeDTO) {
+                     HakukohdeV1RDTO hakukohdeDTO) {
         Consumer<Throwable> poikkeuskasittelija = poikkeus -> {
             LOG.error("Pistesyötön viennissä tapahtui poikkeus:", poikkeus);
             prosessi.getPoikkeukset().add(
@@ -78,9 +81,9 @@ public class PistesyottoVientiService {
         };
         try {
             String hakuNimi = new Teksti(hakuV1RDTO.getNimi()).getTeksti();
-            String tarjoajaOid = hakukohdeDTO.getTarjoajaOid();
-            String hakukohdeNimi = new Teksti(hakukohdeDTO.getHakukohdeNimi()).getTeksti();
-            String tarjoajaNimi = new Teksti(hakukohdeDTO.getTarjoajaNimi()).getTeksti();
+            String tarjoajaOid = HakukohdeHelper.tarjoajaOid(hakukohdeDTO);
+            String hakukohdeNimi = new Teksti(hakukohdeDTO.getHakukohteenNimet()).getTeksti();
+            String tarjoajaNimi = new Teksti(hakukohdeDTO.getTarjoajaNimet()).getTeksti();
             Collection<String> valintakoeTunnisteet =
                     valintaperusteet.stream().map(v -> v.getTunniste()).collect(Collectors.toList());
 
@@ -116,12 +119,12 @@ public class PistesyottoVientiService {
     }
 
     public void vie(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi) {
-        Consumer<Throwable> poikkeuskasittelija = poikkeus -> {
+        PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
             LOG.error("Pistesyötön viennissä tapahtui poikkeus:", poikkeus);
             prosessi.getPoikkeukset().add(
                     new Poikkeus(Poikkeus.KOOSTEPALVELU,
                             "Pistesyötön vienti", poikkeus.getMessage()));
-        };
+        });
         try {
             prosessi.setKokonaistyo(
                     7
@@ -135,7 +138,7 @@ public class PistesyottoVientiService {
             AtomicReference<List<ApplicationAdditionalDataDTO>> lisatiedotRef = new AtomicReference<>();
             AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeJaValintakoeRef = new AtomicReference<>();
             AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
-            AtomicReference<HakukohdeDTO> hakukohdeRef = new AtomicReference<>();
+            AtomicReference<HakukohdeV1RDTO> hakukohdeRef = new AtomicReference<>();
             Supplier<Void> viimeisteleTuonti;
             {
                 AtomicInteger laskuri = new AtomicInteger(7 + 2 // <- ylimaaraisten osallistujen hakemukset ja lisatiedot
@@ -213,12 +216,12 @@ public class PistesyottoVientiService {
                 hakukohdeJaValintakoeRef.set(hakukohdeJaValintakoe);
                 viimeisteleTuonti.get();
             }, poikkeuskasittelija);
-            tarjontaAsyncResource.haeHakukohde(hakuOid, hakukohdeOid, hakukohde -> {
+            tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
                 prosessi.inkrementoiTehtyjaToita();
                 hakukohdeRef.set(hakukohde);
                 viimeisteleTuonti.get();
             }, poikkeuskasittelija);
-            tarjontaAsyncResource.haeHaku(hakuOid, haku -> {
+            tarjontaAsyncResource.haeHaku(hakuOid).subscribe(haku -> {
                 prosessi.inkrementoiTehtyjaToita();
                 hakuRef.set(haku);
                 viimeisteleTuonti.get();

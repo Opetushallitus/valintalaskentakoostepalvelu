@@ -10,12 +10,13 @@ import fi.vm.sade.integrationtest.util.ProjectRootFinder;
  * @author Jussi Jartamo
  */
 public class ValintaKoosteJetty {
-    public final static int port = PortChecker.findFreeLocalPort();
+    public final static int port = Integer.parseInt(System.getProperty("valintakooste.port", String.valueOf(PortChecker.findFreeLocalPort())));
     private static Server server = new Server(port);
 
     public static void main(String[] args) throws Exception{
         startShared();
     }
+
     public static void startShared() {
         try {
             if (server.isStopped()) {
