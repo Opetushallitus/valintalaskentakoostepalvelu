@@ -2,10 +2,13 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import akka.actor.ActorRef;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
@@ -20,7 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.core.Response;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -32,18 +38,22 @@ public class LaskentaStarter {
     private final OhjausparametritAsyncResource ohjausparametritAsyncResource;
     private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     private final LaskentaSeurantaAsyncResource seurantaAsyncResource;
+    private final TarjontaAsyncResource tarjontaAsyncResource;
 
     @Autowired
     public LaskentaStarter(
             OhjausparametritAsyncResource ohjausparametritAsyncResource,
             ValintaperusteetAsyncResource valintaperusteetAsyncResource,
-            LaskentaSeurantaAsyncResource seurantaAsyncResource) {
+            LaskentaSeurantaAsyncResource seurantaAsyncResource,
+            TarjontaAsyncResource tarjontaAsyncResource
+    ) {
         this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
         this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
         this.seurantaAsyncResource = seurantaAsyncResource;
+        this.tarjontaAsyncResource = tarjontaAsyncResource;
     }
 
-    public void fetchLaskentaParams(ActorRef laskennanKaynnistajaActor, final String uuid, final Consumer<LaskentaActorParams> actorParamsCallback) {
+    public void fetchLaskentaParams(ActorRef laskennanKaynnistajaActor, final String uuid, final BiConsumer<HakuV1RDTO, LaskentaActorParams> actorParamsCallback) {
         seurantaAsyncResource.laskenta(
                 uuid,
                 (LaskentaDto laskenta) -> {
@@ -68,7 +78,7 @@ public class LaskentaStarter {
         );
     }
 
-    private void haunOhjausParametrit(ActorRef laskennankaynnistajaActor, String hakuOid, List<HakukohdeViiteDTO> hakukohdeViitteet, LaskentaDto laskenta, Consumer<LaskentaActorParams> actorParamsCallback) {
+    private void haunOhjausParametrit(ActorRef laskennankaynnistajaActor, String hakuOid, List<HakukohdeViiteDTO> hakukohdeViitteet, LaskentaDto laskenta, BiConsumer<HakuV1RDTO, LaskentaActorParams> actorParamsCallback) {
         LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
 
         final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet != null ? publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet) : new ArrayList<>();
@@ -78,9 +88,27 @@ public class LaskentaStarter {
         if (oids.isEmpty()) {
             cancelLaskenta(laskennankaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", laskenta.getUuid());
         } else {
+            AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
+            AtomicReference<LaskentaActorParams> parametritRef = new AtomicReference<>();
+            SynkronoituLaskuri counter = SynkronoituLaskuri.builder()
+                    .setLaskurinAlkuarvo(2)
+                    .setSynkronoituToiminto(
+                            () -> actorParamsCallback.accept(hakuRef.get(), parametritRef.get()))
+                    .build();
+            tarjontaAsyncResource.haeHaku(hakuOid,
+                    haku -> {
+                        hakuRef.set(haku);
+                        counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                    },
+                    (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Tarjontatietojen haku epäonnistui: " + t.getMessage() + " " + Arrays.toString(t.getStackTrace()), laskenta.getUuid())
+            );
+
             ohjausparametritAsyncResource.haeHaunOhjausparametrit(
                     hakuOid,
-                    parametrit -> actorParamsCallback.accept(laskentaActorParams(hakuOid, laskenta, oids, parametrit)),
+                    parametrit -> {
+                        parametritRef.set(laskentaActorParams(hakuOid, laskenta, haunHakukohdeOidit, parametrit));
+                        counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                    },
                     (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Ohjausparametrien luku epäonnistui: " + t.getMessage() + " " + Arrays.toString(t.getStackTrace()), laskenta.getUuid())
             );
         }

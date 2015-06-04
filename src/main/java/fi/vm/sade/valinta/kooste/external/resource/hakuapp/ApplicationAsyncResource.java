@@ -31,6 +31,8 @@ public interface ApplicationAsyncResource {
 	
 	Future<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids);
 
+	Peruutettava getApplication(String hakemusOid, Consumer<Hakemus> callback, Consumer<Throwable> failureCallback);
+
 	Peruutettava getApplicationsByOids(Collection<String> hakemusOids,
 									   Consumer<List<Hakemus>> callback,
 									   Consumer<Throwable> failureCallback);

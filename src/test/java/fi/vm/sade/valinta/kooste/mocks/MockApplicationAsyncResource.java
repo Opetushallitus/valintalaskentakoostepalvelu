@@ -134,6 +134,12 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
+    public Peruutettava getApplication(String hakuOid, Consumer<Hakemus> callback, Consumer<Throwable> failureCallback) {
+        callback.accept(resultByOidReference.get().iterator().next());
+        return new PeruutettavaImpl(Futures.immediateFuture(resultByOidReference.get().iterator().next()));
+    }
+
+    @Override
     public Peruutettava getApplicationAdditionalData(Collection<String> hakemusOids, Consumer<List<ApplicationAdditionalDataDTO>> callback, Consumer<Throwable> failureCallback) {
         callback.accept(additionalDataResultByOidReference.get());
         return new PeruutettavaImpl(Futures.immediateFuture(additionalDataResultByOidReference.get()));

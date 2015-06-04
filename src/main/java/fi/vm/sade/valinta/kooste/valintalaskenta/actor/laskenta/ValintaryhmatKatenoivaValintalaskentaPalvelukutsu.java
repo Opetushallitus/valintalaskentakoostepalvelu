@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
 
     @SuppressWarnings("unchecked")
     public ValintaryhmatKatenoivaValintalaskentaPalvelukutsu(
+            HakuV1RDTO haku,
             ParametritDTO parametritDTO,
             boolean erillishaku,
             UuidHakukohdeJaOrganisaatio hakukohdeOid,
@@ -47,6 +49,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
             List<PalvelukutsuJaPalvelukutsuStrategiaImpl<SuoritusrekisteriPalvelukutsu>> suoritusrekisteriPalvelukutsut
     ) {
         super(
+                haku,
                 parametritDTO,
                 hakukohdeOid,
                 Lists.newArrayList(Iterables.concat(hakemuksetPalvelukutsut, valintaperusteetPalvelukutsut, hakijaryhmatPalvelukutsut, suoritusrekisteriPalvelukutsut))

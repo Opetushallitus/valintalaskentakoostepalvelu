@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
@@ -41,6 +43,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu i
     }
 
     public ValintalaskentaPalvelukutsu(
+            HakuV1RDTO haku,
             ParametritDTO parametriDTO,
             boolean erillishaku,
             UuidHakukohdeJaOrganisaatio hakukohdeOid,
@@ -55,6 +58,7 @@ public class ValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu i
             PalvelukutsuStrategia suoritusrekisteriStrategia
     ) {
         super(
+                haku,
                 parametriDTO,
                 hakukohdeOid,
                 Arrays.asList(

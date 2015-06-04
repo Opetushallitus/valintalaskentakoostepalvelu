@@ -59,10 +59,10 @@ public class SuoritusrekisteriSpec {
             return as.iterator().next();
         }
     }
-    public AvainSuoritusBuilder avainsuoritustieto() {
+    public static AvainSuoritusBuilder avainsuoritustieto() {
         return new AvainSuoritusBuilder();
     }
-    public AvainBuilder avainsuoritustieto(String avain) {
+    public static AvainBuilder avainsuoritustieto(String avain) {
         return new AvainSuoritusBuilder().avain(avain);
     }
     public static class ArvosanaBuilder {
@@ -131,7 +131,22 @@ public class SuoritusrekisteriSpec {
             return ArvosanaBuilder.this;
         }
 
+        public ArvosanaBuilder setJarjestys(int jarjestys) {
+            arvosana.setJarjestys(jarjestys);
+            return ArvosanaBuilder.this;
+        }
+
         public SuoritusBuilder build() {
+            if(arvosana.isValinnainen()) {// lisataan indeksi jos valinnainen
+                arvosana.setJarjestys(
+                        (int)
+                                suoritus.suoritusJaArvosanat.getArvosanat().stream().filter(
+                                        a -> {
+                                            return a.isValinnainen() && arvosana.getAine().equals(a.getAine());
+                                        }
+                                ).count());
+            }
+
             suoritus.suoritusJaArvosanat.getArvosanat().add(arvosana);
             return suoritus;
         }
@@ -141,6 +156,10 @@ public class SuoritusrekisteriSpec {
         private final OppijaBuilder oppija;
         private final SuoritusJaArvosanat suoritusJaArvosanat = new SuoritusJaArvosanat();
         private final Suoritus suoritus = new Suoritus();
+        public SuoritusBuilder() {
+            this.oppija = null;
+            this.suoritusJaArvosanat.setSuoritus(suoritus);
+        }
         public SuoritusBuilder(OppijaBuilder oppija) {
             this.oppija = oppija;
             this.suoritusJaArvosanat.setSuoritus(suoritus);
@@ -174,6 +193,10 @@ public class SuoritusrekisteriSpec {
             suoritus.setValmistuminen(valmistuminen);
             return SuoritusBuilder.this;
         }
+        public SuoritusBuilder setYksilollistaminen(String y) {
+            suoritus.setYksilollistaminen(y);
+            return SuoritusBuilder.this;
+        }
         public SuoritusBuilder setPerusopetus() {
             suoritus.setKomo(SuoritusJaArvosanatWrapper.PK_KOMO);
             return SuoritusBuilder.this;
@@ -194,8 +217,36 @@ public class SuoritusrekisteriSpec {
             suoritus.setKomo(SuoritusJaArvosanatWrapper.PK_10_KOMO);
             return SuoritusBuilder.this;
         }
+        public SuoritusBuilder setUlkomainenKorvaava() {
+            suoritus.setKomo(SuoritusJaArvosanatWrapper.ULKOMAINENKORVAAVA);
+            return SuoritusBuilder.this;
+        }
+        public SuoritusBuilder setValmentava() {
+            suoritus.setKomo(SuoritusJaArvosanatWrapper.PK_VALMENTAVA);
+            return SuoritusBuilder.this;
+        }
+        public SuoritusBuilder setAmmatilliseenValmistava() {
+            suoritus.setKomo(SuoritusJaArvosanatWrapper.PK_AMMATILLISEENVALMISTAVA);
+            return SuoritusBuilder.this;
+        }
+        public SuoritusBuilder setLukioonValmistava() {
+            suoritus.setKomo(SuoritusJaArvosanatWrapper.PK_LUKIOON_VALMISTAVA);
+            return SuoritusBuilder.this;
+        }
+        public SuoritusBuilder setLisaopetusTalous() {
+            suoritus.setKomo(SuoritusJaArvosanatWrapper.PK_LISAOPETUSTALOUS_KOMO);
+            return SuoritusBuilder.this;
+        }
+        public SuoritusBuilder setAmmattistartti() {
+            suoritus.setKomo(SuoritusJaArvosanatWrapper.PK_AMMATTISTARTTI_KOMO);
+            return SuoritusBuilder.this;
+        }
         public ArvosanaBuilder arvosana() {
             return new ArvosanaBuilder(SuoritusBuilder.this);
+        }
+
+        public SuoritusJaArvosanat done() {
+            return suoritusJaArvosanat;
         }
 
         public OppijaBuilder build() {
@@ -212,6 +263,7 @@ public class SuoritusrekisteriSpec {
         }
 
         public Oppija build() {
+            oppija.setEnsikertalainen(true);
             return oppija;
         }
     }
@@ -220,7 +272,7 @@ public class SuoritusrekisteriSpec {
         return new OppijaBuilder();
     }
 
-    protected static ParametritDTO laskennanalkamisparametri(DateTime alkamisaika) {
+    public static ParametritDTO laskennanalkamisparametri(DateTime alkamisaika) {
         ParametritDTO p = new ParametritDTO();
         ParametriDTO p0 = new ParametriDTO();
         p0.setDateStart(alkamisaika.toDate());

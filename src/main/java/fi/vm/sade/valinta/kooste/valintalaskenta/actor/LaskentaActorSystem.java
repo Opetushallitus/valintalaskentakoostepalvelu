@@ -1,5 +1,15 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -48,7 +58,9 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     private final LaskentaStarter laskentaStarter;
 
     @Autowired
-    public LaskentaActorSystem(LaskentaSeurantaAsyncResource seurantaAsyncResource, LaskentaStarter laskentaStarter, LaskentaActorFactory laskentaActorFactory,
+    public LaskentaActorSystem(LaskentaSeurantaAsyncResource seurantaAsyncResource,
+							   LaskentaStarter laskentaStarter,
+							   LaskentaActorFactory laskentaActorFactory,
                                @Value("${valintalaskentakoostepalvelu.maxWorkerCount:8}") int maxWorkers) {
         this.laskentaActorFactory = laskentaActorFactory;
         this.laskentaStarter = laskentaStarter;
@@ -73,8 +85,8 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     }
 
     @Override
-    public void suoritaValintalaskentaKerralla(final ParametritDTO parametritDTO, final LaskentaStartParams laskentaStartParams) {
-        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this, new LaskentaActorParams(laskentaStartParams, parametritDTO));
+    public void suoritaValintalaskentaKerralla(final HakuV1RDTO haku, final ParametritDTO parametritDTO, final LaskentaStartParams laskentaStartParams) {
+        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this, haku, new LaskentaActorParams(laskentaStartParams, parametritDTO));
         createAndStartLaskenta(laskentaStartParams, laskentaActor);
     }
 
@@ -114,7 +126,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
             laskentaStarter.fetchLaskentaParams(
                     laskennanKaynnistajaActor,
                     uuid,
-                    params -> createAndStartLaskenta(params.getLaskentaStartParams(), laskentaActorFactory.createLaskentaActor(this, params))
+					(haku, params) -> createAndStartLaskenta(params.getLaskentaStartParams(), laskentaActorFactory.createLaskentaActor(this, haku, params))
             );
         }
     }

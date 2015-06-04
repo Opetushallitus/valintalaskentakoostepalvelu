@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,8 +42,14 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.YksiPa
 public class LaskentaPalvelukutsunTest {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(LaskentaPalvelukutsunTest.class);
+	private static final String HAKU_OID = "hakuOid";
 	private static final UuidHakukohdeJaOrganisaatio HAKUKOHDE_OID = new UuidHakukohdeJaOrganisaatio("uuid",new HakukohdeJaOrganisaatio(
 			"hk.oid", "org.oid"));
+	private static final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+
+	static {
+		hakuDTO.setOid(HAKU_OID);
+	}
 
 	@Test
 	public void testaaLaskentaPalvelukutsunSuoritusta() {
@@ -75,6 +82,7 @@ public class LaskentaPalvelukutsunTest {
 								p4));
 
 		LaskentaPalvelukutsu laskentaPalvelukutsu = new AbstraktiLaskentaPalvelukutsu(
+				hakuDTO,
 				null,
 				HAKUKOHDE_OID, palvelukutsut) {
 			@Override

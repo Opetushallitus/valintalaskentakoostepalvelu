@@ -30,7 +30,11 @@ public class SuoritusJaArvosanat implements Comparable<SuoritusJaArvosanat> {
 		return arvosanat;
 	}
 
-	public Suoritus getSuoritus() {
+    public void setArvosanat(List<Arvosana> arvosanat) {
+        this.arvosanat = arvosanat;
+    }
+
+    public Suoritus getSuoritus() {
 		return suoritus;
 	}
 

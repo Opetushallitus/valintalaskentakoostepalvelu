@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.mocks;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class Mocks {
     private DokumenttiAsyncResource dokumenttiAsyncResource;
     @Autowired
     private KoodistoAsyncResource koodistoAsyncResource;
+    @Autowired
+    private OhjausparametritAsyncResource ohjausparametritAsyncResource;
+
     @PostConstruct
     public void init() {
         MOCKS = this;
@@ -33,6 +37,9 @@ public class Mocks {
 
     public static ViestintapalveluAsyncResource getViestintapalveluAsyncResource() {
         return MOCKS.viestintapalveluAsyncResource;
+    }
+    public static OhjausparametritAsyncResource getOhjausparametritAsyncResource() {
+        return MOCKS.ohjausparametritAsyncResource;
     }
     public static KoodistoAsyncResource getKoodistoAsyncResource() {
         return MOCKS.koodistoAsyncResource;

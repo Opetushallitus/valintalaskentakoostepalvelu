@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.laskentakerralla;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource;
 import fi.vm.sade.valinta.seuranta.dto.*;
@@ -174,6 +175,20 @@ public class LaskentaKerrallaTest {
                     return new PeruutettavaImpl(Futures.immediateCancelledFuture());
                 }
             );
+        when(Mocks.tarjontaAsyncResource.haeHaku(any(), argument.capture(), any()))
+                .thenAnswer(
+                        invocation -> {
+                            argument.getValue().accept(buildHakuDto());
+                            return new PeruutettavaImpl(Futures.immediateCancelledFuture());
+                        }
+                );
+    }
+
+    private HakuV1RDTO buildHakuDto() {
+        HakuV1RDTO dto = new HakuV1RDTO();
+        dto.setOid(HAKU_OID);
+        dto.setHakukohdeOids(Arrays.asList(HAKUKOHDE_OID));
+        return dto;
     }
 }
 

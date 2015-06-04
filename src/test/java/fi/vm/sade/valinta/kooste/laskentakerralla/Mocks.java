@@ -4,6 +4,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
@@ -25,8 +26,9 @@ public class Mocks {
     static LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource = mock(LaskentaSeurantaAsyncResource.class);
     static ValintalaskentaAsyncResource valintalaskentaAsyncResource = mock(ValintalaskentaAsyncResource.class);
     static SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = mock(SuoritusrekisteriAsyncResource.class);
+    static TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
     static ValintalaskentaStatusExcelHandler valintalaskentaStatusExcelHandler = mock(ValintalaskentaStatusExcelHandler.class);
-    static LaskentaActorSystem laskentaActorSystem = spy(new LaskentaActorSystem(laskentaSeurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource,valintaperusteetAsyncResource,laskentaSeurantaAsyncResource),new LaskentaActorFactory(
+    static LaskentaActorSystem laskentaActorSystem = spy(new LaskentaActorSystem(laskentaSeurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource,valintaperusteetAsyncResource,laskentaSeurantaAsyncResource, tarjontaAsyncResource),new LaskentaActorFactory(
             valintalaskentaAsyncResource,
             applicationAsyncResource,
             valintaperusteetAsyncResource,
@@ -42,6 +44,7 @@ public class Mocks {
         reset(laskentaSeurantaAsyncResource);
         reset(valintalaskentaAsyncResource);
         reset(suoritusrekisteriAsyncResource);
+        reset(tarjontaAsyncResource);
         reset(valintalaskentaStatusExcelHandler);
         reset(laskentaActorSystem);
     }

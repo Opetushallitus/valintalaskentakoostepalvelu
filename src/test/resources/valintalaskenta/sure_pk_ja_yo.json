@@ -53,6 +53,7 @@
           "aine": "AINEREAALI",
           "lisatieto": "HI",
           "valinnainen": true,
+          "jarjestys": 1,
           "myonnetty": "01.06.2008",
           "source": "1.2.246.562.10.43628088406",
           "core": {
@@ -65,6 +66,7 @@
             "aine": "AINEREAALI",
             "lisatieto": "HI",
             "valinnainen": true,
+            "jarjestys": 1,
             "myonnetty": "01.06.2008"
           }
         },
@@ -206,6 +208,7 @@
           },
           "aine": "LI",
           "valinnainen": true,
+          "jarjestys": 1,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -216,6 +219,7 @@
             },
             "aine": "LI",
             "valinnainen": true,
+            "jarjestys": 1,
             "myonnetty": "01.01.2015"
           }
         },
@@ -228,6 +232,7 @@
           },
           "aine": "KS",
           "valinnainen": true,
+          "jarjestys": 1,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -238,6 +243,7 @@
             },
             "aine": "KS",
             "valinnainen": true,
+            "jarjestys": 1,
             "myonnetty": "01.01.2015"
           }
         },
@@ -250,6 +256,7 @@
           },
           "aine": "KS",
           "valinnainen": true,
+          "jarjestys": 2,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -260,6 +267,7 @@
             },
             "aine": "KS",
             "valinnainen": true,
+            "jarjestys": 2,
             "myonnetty": "01.01.2015"
           }
         },
@@ -294,6 +302,7 @@
           },
           "aine": "KU",
           "valinnainen": true,
+          "jarjestys": 1,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -304,6 +313,7 @@
             },
             "aine": "KU",
             "valinnainen": true,
+            "jarjestys": 1,
             "myonnetty": "01.01.2015"
           }
         },
@@ -360,6 +370,7 @@
           },
           "aine": "HI",
           "valinnainen": true,
+          "jarjestys": 2,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -370,6 +381,7 @@
             },
             "aine": "HI",
             "valinnainen": true,
+            "jarjestys": 2,
             "myonnetty": "01.01.2015"
           }
         },
@@ -382,6 +394,7 @@
           },
           "aine": "KT",
           "valinnainen": true,
+          "jarjestys": 1,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -392,6 +405,7 @@
             },
             "aine": "KT",
             "valinnainen": true,
+            "jarjestys": 1,
             "myonnetty": "01.01.2015"
           }
         },
@@ -404,6 +418,7 @@
           },
           "aine": "HI",
           "valinnainen": true,
+          "jarjestys": 3,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -414,6 +429,7 @@
             },
             "aine": "HI",
             "valinnainen": true,
+            "jarjestys": 3,
             "myonnetty": "01.01.2015"
           }
         },
@@ -426,6 +442,7 @@
           },
           "aine": "KT",
           "valinnainen": true,
+          "jarjestys": 2,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -436,6 +453,7 @@
             },
             "aine": "KT",
             "valinnainen": true,
+            "jarjestys": 2,
             "myonnetty": "01.01.2015"
           }
         },
@@ -470,6 +488,7 @@
           },
           "aine": "TE",
           "valinnainen": true,
+          "jarjestys": 1,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -480,6 +499,7 @@
             },
             "aine": "TE",
             "valinnainen": true,
+            "jarjestys": 1,
             "myonnetty": "01.01.2015"
           }
         },
@@ -536,6 +556,7 @@
           },
           "aine": "KE",
           "valinnainen": true,
+          "jarjestys": 1,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -546,6 +567,7 @@
             },
             "aine": "KE",
             "valinnainen": true,
+            "jarjestys": 1,
             "myonnetty": "01.01.2015"
           }
         },
@@ -558,6 +580,7 @@
           },
           "aine": "KE",
           "valinnainen": true,
+          "jarjestys": 2,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -568,6 +591,7 @@
             },
             "aine": "KE",
             "valinnainen": true,
+            "jarjestys": 2,
             "myonnetty": "01.01.2015"
           }
         },
@@ -675,6 +699,7 @@
           "aine": "B1",
           "lisatieto": "IT",
           "valinnainen": true,
+          "jarjestys": 1,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -686,6 +711,7 @@
             "aine": "B1",
             "lisatieto": "IT",
             "valinnainen": true,
+            "jarjestys": 1,
             "myonnetty": "01.01.2015"
           }
         },
@@ -699,6 +725,7 @@
           "aine": "B1",
           "lisatieto": "IT",
           "valinnainen": true,
+          "jarjestys": 2,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -710,6 +737,7 @@
             "aine": "B1",
             "lisatieto": "IT",
             "valinnainen": true,
+            "jarjestys": 2,
             "myonnetty": "01.01.2015"
           }
         },
@@ -747,6 +775,7 @@
           "aine": "A12",
           "lisatieto": "ES",
           "valinnainen": true,
+          "jarjestys": 0,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -758,6 +787,7 @@
             "aine": "A12",
             "lisatieto": "ES",
             "valinnainen": true,
+            "jarjestys": 0,
             "myonnetty": "01.01.2015"
           }
         },
@@ -843,6 +873,7 @@
           "aine": "A1",
           "lisatieto": "ZH",
           "valinnainen": true,
+          "jarjestys": 1,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -854,6 +885,7 @@
             "aine": "A1",
             "lisatieto": "ZH",
             "valinnainen": true,
+            "jarjestys": 1,
             "myonnetty": "01.01.2015"
           }
         },
@@ -867,6 +899,7 @@
           "aine": "AI",
           "lisatieto": "FI",
           "valinnainen": true,
+          "jarjestys": 1,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -878,6 +911,7 @@
             "aine": "AI",
             "lisatieto": "FI",
             "valinnainen": true,
+            "jarjestys": 1,
             "myonnetty": "01.01.2015"
           }
         },
@@ -891,6 +925,7 @@
           "aine": "A1",
           "lisatieto": "ZH",
           "valinnainen": true,
+          "jarjestys": 1,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -902,6 +937,7 @@
             "aine": "A1",
             "lisatieto": "ZH",
             "valinnainen": true,
+            "jarjestys": 1,
             "myonnetty": "01.01.2015"
           }
         },
@@ -963,6 +999,7 @@
           "aine": "AI",
           "lisatieto": "FI",
           "valinnainen": true,
+          "jarjestys": 2,
           "myonnetty": "01.01.2015",
           "source": "1.2.246.562.24.41327169638",
           "core": {
@@ -974,6 +1011,7 @@
             "aine": "AI",
             "lisatieto": "FI",
             "valinnainen": true,
+            "jarjestys": 2,
             "myonnetty": "01.01.2015"
           }
         }

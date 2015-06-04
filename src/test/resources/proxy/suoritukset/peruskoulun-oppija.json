@@ -1,0 +1,234 @@
+{
+  "oppijanumero": "1.2.246.562.24.71943835646",
+  "opiskelu": [],
+  "suoritukset": [
+    {
+      "suoritus": {
+        "henkiloOid": "1.2.246.562.24.71943835646",
+        "source": "1.2.246.562.24.71943835646",
+        "vahvistettu": true,
+        "komo": "1.2.246.562.13.62959769647",
+        "myontaja": "1.2.246.562.11.00000000615",
+        "tila": "VALMIS",
+        "valmistuminen": "31.05.2015",
+        "yksilollistaminen": "Ei",
+        "suoritusKieli": "FI",
+        "id": "2c3d5556-2380-4271-9689-aa46b0f7ef49"
+      },
+      "arvosanat": [
+        {
+          "id": "24c18a6a-30b0-4d0f-b08c-a3e2f13319ff",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "7",
+            "asteikko": "4-10"
+          },
+          "aine": "GE",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "4b676514-2128-4161-9a40-c402aa824998",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "KO",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "692ac703-c9eb-4708-a393-c869c01cbc88",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "8",
+            "asteikko": "4-10"
+          },
+          "aine": "B1",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false,
+          "lisatieto": "EL"
+        },
+        {
+          "id": "37f23a8d-0e43-46d4-ab85-d27a8384cc0a",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "9",
+            "asteikko": "4-10"
+          },
+          "aine": "KE",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "29eb3dda-f640-4296-ba0a-10ece168e1d2",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "4",
+            "asteikko": "4-10"
+          },
+          "aine": "HI",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "58d82fc5-63eb-4153-9fc5-5498fb275b6f",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "9",
+            "asteikko": "4-10"
+          },
+          "aine": "AI",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false,
+          "lisatieto": "FI"
+        },
+        {
+          "id": "6553e77e-90f3-4f8c-a7c8-d1c4111f2e0d",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "S",
+            "asteikko": "4-10"
+          },
+          "aine": "LI",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "05bd9bdf-11db-4ddb-8435-8c3c5dcc0953",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "8",
+            "asteikko": "4-10"
+          },
+          "aine": "YH",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "8560e1d7-8ad6-4380-ba6c-d17a2062a1cc",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "10",
+            "asteikko": "4-10"
+          },
+          "aine": "A1",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false,
+          "lisatieto": "EN"
+        },
+        {
+          "id": "972acfd3-72ed-4945-98da-1fa30ace1d08",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "7",
+            "asteikko": "4-10"
+          },
+          "aine": "KU",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "31944035-5a38-4571-9571-e7e0717aeeb0",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "7",
+            "asteikko": "4-10"
+          },
+          "aine": "BI",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "0d40f882-4aa9-4a86-8e75-f75c0117494e",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "10",
+            "asteikko": "4-10"
+          },
+          "aine": "KS",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "04ede317-f557-4a10-9fd6-838ee0588679",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "8",
+            "asteikko": "4-10"
+          },
+          "aine": "MU",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "483ff6b6-4a1b-4604-a75f-d60e57b48349",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "7",
+            "asteikko": "4-10"
+          },
+          "aine": "KT",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "79d000e9-ea8b-4a89-912e-029d313cde1c",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "8",
+            "asteikko": "4-10"
+          },
+          "aine": "TE",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "2955d04e-a30a-430f-96ec-d69d18fc3f69",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "6",
+            "asteikko": "4-10"
+          },
+          "aine": "FY",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        },
+        {
+          "id": "ad39c438-d5b1-4558-9407-04f5761d4817",
+          "suoritus": "2c3d5556-2380-4271-9689-aa46b0f7ef49",
+          "arvio": {
+            "arvosana": "8",
+            "asteikko": "4-10"
+          },
+          "aine": "MA",
+          "source": "1.2.246.562.24.71943835646",
+          "lahdeArvot": {},
+          "valinnainen": false
+        }
+      ]
+    }
+  ],
+  "opiskeluoikeudet": [],
+  "ensikertalainen": true,
+  "id": "1.2.246.562.24.71943835646",
+  "source": "1.2.246.562.10.00000000001",
+  "core": "1.2.246.562.24.71943835646"
+}

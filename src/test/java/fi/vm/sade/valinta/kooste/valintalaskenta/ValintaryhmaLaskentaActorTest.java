@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
@@ -35,6 +36,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String HAKUOID1 = "HAKUOID1";
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String ORGANISAATIO1 = "ORGANISAATIO1";
+        final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+        hakuDTO.setOid(HAKUOID1);
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> true,
@@ -76,8 +79,9 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaStartParams, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, hakuDTO, new LaskentaActorParams(laskentaStartParams, null));
         actor.start();
+
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.VALMIS));
@@ -90,6 +94,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String HAKUOID1 = "HAKUOID1";
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String ORGANISAATIO1 = "ORGANISAATIO1";
+        final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+        hakuDTO.setOid(HAKUOID1);
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> true,
@@ -133,8 +139,9 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaStartParams, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, hakuDTO, new LaskentaActorParams(laskentaStartParams, null));
         actor.start();
+
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
@@ -147,6 +154,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String HAKUOID1 = "HAKUOID1";
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String ORGANISAATIO1 = "ORGANISAATIO1";
+        final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+        hakuDTO.setOid(HAKUOID1);
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> true,
@@ -190,8 +199,9 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaStartParams, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, hakuDTO, new LaskentaActorParams(laskentaStartParams, null));
         actor.start();
+
         Assert.assertTrue(actor.isValmis());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(0)).merkkaaHakukohteenTila(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verify(laskentaSeurantaAsyncResource, Mockito.times(1)).merkkaaLaskennanTila(Mockito.anyString(), Mockito.any(), Mockito.eq(HakukohdeTila.KESKEYTETTY));
@@ -205,6 +215,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String HAKUKOHDE2 = "HAKUKOHDE2";
         final String ORGANISAATIO1 = "ORGANISAATIO1";
+        final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+        hakuDTO.setOid(HAKUOID1);
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> true,
@@ -248,7 +260,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaStartParams, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, hakuDTO, new LaskentaActorParams(laskentaStartParams, null));
 
         actor.start();
         Assert.assertTrue(actor.isValmis());
@@ -264,6 +276,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String HAKUKOHDE2 = "HAKUKOHDE2";
         final String ORGANISAATIO1 = "ORGANISAATIO1";
+        final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+        hakuDTO.setOid(HAKUOID1);
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> true,
@@ -307,7 +321,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaStartParams, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, hakuDTO, new LaskentaActorParams(laskentaStartParams, null));
 
         actor.start();
         Assert.assertTrue(actor.isValmis());
@@ -323,6 +337,8 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final String HAKUKOHDE1 = "HAKUKOHDE1";
         final String HAKUKOHDE2 = "HAKUKOHDE2";
         final String ORGANISAATIO1 = "ORGANISAATIO1";
+        final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+        hakuDTO.setOid(HAKUOID1);
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> true,
@@ -374,7 +390,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 hakukohdeJaOrganisaatios,
                 null // tyyppi
         );
-        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, new LaskentaActorParams(laskentaStartParams, null));
+        LaskentaActor actor = actorFactory.createValintaryhmaActor(laskentaSupervisor, hakuDTO, new LaskentaActorParams(laskentaStartParams, null));
 
         actor.start();
         Assert.assertTrue(actor.isValmis());

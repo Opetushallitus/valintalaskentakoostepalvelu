@@ -1,18 +1,17 @@
 package fi.vm.sade.valinta.kooste.util.sure;
 
 import com.codepoetics.protonpack.StreamUtils;
-import com.google.gson.Gson;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
-import org.joda.time.DateTime;
+import org.apache.commons.lang.math.Fraction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * @author Jussi Jartamo
@@ -21,148 +20,146 @@ import java.util.stream.StreamSupport;
  *
  */
 public class ArvosanaToAvainArvoDTOConverter {
-    private static final String SUORITUSMERKINTA = "S";
     private static final Logger LOG = LoggerFactory.getLogger(ArvosanaToAvainArvoDTOConverter.class);
-    private final String prefiksi;
-    private final String suffiksi;
+    private static final String SUORITUSMERKINTA = "S";
+    private static final String OPPIAINE = "_OPPIAINE";
+    private static final String SUORITETTU = "_SUORITETTU";
+    private static final String VALINNAINEN = "_VAL";
 
-    public ArvosanaToAvainArvoDTOConverter(String prefiksi) {
-        this.prefiksi = prefiksi;
-        this.suffiksi = "";
+    public static List<AvainArvoDTO> convert(List<SuoritusJaArvosanat> suoritukset, String prefix, String suffix, String oppijaOid) {
+        tarkistaOppiaineetSuorituksissa(suoritukset, prefix, suffix, oppijaOid);
+        return Stream.concat(
+                arvosanaToAvainArvo(
+                        bestArvosanaInValinnaisetArvosanat(
+                                valinnaisetAineittain(suoritukset)), prefix, suffix)
+                ,
+                ryhmitaSamatArvosanatKeskenaan(arvosanatIlmanValinnaisiaArvosanoja(suoritukset))
+                        .flatMap(arvosanat -> arvosanaToAvainArvo(bestArvosana(arvosanat), prefix, suffix)))
+                .collect(Collectors.toList());
     }
 
-    public ArvosanaToAvainArvoDTOConverter(String prefiksi, String suffiksi) {
-        this.prefiksi = prefiksi;
-        this.suffiksi = Optional.ofNullable(suffiksi).orElse("");
-    }
-    private Stream<AvainArvoDTO> suorituksenTila(SuoritusJaArvosanat suoritus) {
-        AvainArvoDTO a = new AvainArvoDTO();
-        a.setAvain(new StringBuilder(prefiksi).append("TILA").append(suffiksi).toString());
-        if(new SuoritusJaArvosanatWrapper(suoritus).isValmis()) {
-            a.setArvo("true");
-        } else {
-            a.setArvo("false");
-        }
-        if(suoritus.getSuoritus().getValmistuminen() != null) {
-            DateTime valmistumisPvm = new SuoritusJaArvosanatWrapper(suoritus).getValmistuminenAsDateTime();
-
-            AvainArvoDTO as = new AvainArvoDTO();
-            as.setAvain(new StringBuilder(prefiksi).append("SUORITUSVUOSI").append(suffiksi).toString());
-            as.setArvo(""+valmistumisPvm.getYear());
-
-            AvainArvoDTO asl = new AvainArvoDTO();
-            asl.setAvain(new StringBuilder(prefiksi).append("SUORITUSLUKUKAUSI").append(suffiksi).toString());
-            if(valmistumisPvm.isBefore(SuoritusJaArvosanatWrapper.VALMISTUMIS_DTF.parseDateTime("01.08." + valmistumisPvm.getYear()))) {
-                asl.setArvo("2");
-            } else {
-                asl.setArvo("1");
-            }
-            return Stream.of(a,as,asl);
-        }
-        return Stream.of(a);
-    }
-    public Stream<AvainArvoDTO> convert(
-            Optional<SuoritusJaArvosanat> suoritusOption, DateTime pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan) {
-        SuoritusJaArvosanat suoritus = suoritusOption.orElse(null);
-        if(suoritus == null) {
-            return Stream.empty();
-        }
-        return Stream.concat(suorituksenTila(suoritus), suoritus.getArvosanat().stream()
-                //
-                //.filter(s -> new SuoritusJaArvosanatWrapper(s).isPerusopetus())
-                //
-                //.flatMap(s -> s.getArvosanat().stream())
-                //
-                .filter(a -> a != null && new ArvosanaWrapper(a).onkoMyonnettyEnnen(pvmMistaAlkaenUusiaSuorituksiaEiOtetaEnaaMukaan))
-                        //
-                .collect(Collectors.groupingBy(a -> ((Arvosana) a).getAine(),
-                        Collectors.mapping(a -> a, Collectors.<Arvosana>toList()))).entrySet().stream()
-                        //
-                .flatMap(e -> {
-                    return Stream.concat(
-                            arvosanaToAvainArvo(prefiksi, suffiksi).apply(e.getValue()
-                    ), Stream.of(e.getValue().stream().filter(a -> a.isValinnainen()).collect(Collectors.toList())).flatMap(
-                            a -> StreamUtils.zipWithIndex(a.stream()).flatMap(ax -> {
-                                String sfx = new StringBuilder("_VAL").append(
-                                        ax.getIndex() + 1 // valinnaiset esitetaan yksi alkuisella jarjestysnumerolla (ei nolla alkuisella)
-                                ).append(suffiksi).toString();
-                                return valinnainenToAvainArvo(prefiksi, sfx).apply(ax.getValue());
-                            })));
-                }));
-
-                        /*
-                        Stream.concat(e.getValue().stream().filter(a -> !a.isValinnainen()).flatMap(
-                                    arvosanaToAvainArvo(prefiksi)
-                            ), Stream.of(e.getValue().stream().filter(a -> a.isValinnainen()).collect(Collectors.toList())).flatMap(
-                                a ->  StreamUtils.zipWithIndex(a.stream()).flatMap(ax -> {
-                                    String suffiksi = new StringBuilder("_VAL").append(
-                                            ax.getIndex() + 1 // valinnaiset esitetaan yksi alkuisella jarjestysnumerolla (ei nolla alkuisella)
-                                    ).toString();
-                                    return valinnainenToAvainArvo(prefiksi, suffiksi).apply(ax.getValue());
-                                }))
-                  ));*/
-    }
-
-    private static Function<List<Arvosana>, Stream<AvainArvoDTO>> arvosanaToAvainArvo(String p, String s) {
-        return a -> {
-            List<Arvosana> eiValinnaisetArvosanat = a.stream().filter(ax -> !ax.isValinnainen()).collect(Collectors.toList());
-            if(eiValinnaisetArvosanat.isEmpty()) {
-                LOG.error("Valinnainen arvosana löytyy mutta arvosanaa ei löydy");
-                //throw new RuntimeException("Valinnainen arvosana löytyy mutta arvosanaa ei löydy");
-                return Stream.empty();
-            }
-            Arvosana paras;
-            Map<String, List<Arvosana>> byArvosanat =
-            eiValinnaisetArvosanat.stream().collect(Collectors.groupingBy(d -> ((Arvosana) d).getArvio().getArvosana(),
-                    Collectors.mapping(d -> d, Collectors.<Arvosana>toList())));
-            if(byArvosanat.size() == 1) {
-                // ihan sama mika otetaan kun vain samoja suorituksia loytyy, eli esim kolme kpl 8:ja
-                paras = byArvosanat.entrySet().iterator().next().getValue().iterator().next();
-            } else {
-                if (eiValinnaisetArvosanat.size() > 1) {
-                    TreeSet<Arvosana> arvosanaSet = new TreeSet<Arvosana>((c0, c1) -> {
-
-                        String asteikko = ((String) (((Arvosana) c0).getArvio()).getAsteikko());
-                        if (!asteikko.equals(c1.getArvio().getAsteikko())) {
-                            LOG.error("Asteikot ei täsmää: {} {}", new Gson().toJson(c0), new Gson().toJson(c1));
-                            throw new RuntimeException("Asteikot ei täsmää: " + c0.getArvio().getAsteikko() + " " + c1.getArvio().getAsteikko());
-                        }
-                        Integer i0 = Integer.parseInt((String) c0.getArvio().getArvosana());
-                        Integer i1 = Integer.parseInt((String) c1.getArvio().getArvosana());
-                        int comp = i1.compareTo(i0);
-                        return comp;
-                    });
-                    arvosanaSet.addAll(eiValinnaisetArvosanat);
-                    paras = arvosanaSet.first();
-                } else {
-                    paras = eiValinnaisetArvosanat.iterator().next();
+    private static void tarkistaOppiaineetSuorituksissa(List<SuoritusJaArvosanat> suoritukset, String prefix, String suffix, String oppijaOid) {
+        ryhmitaSamatArvosanatKeskenaan(arvosanatIlmanValinnaisiaArvosanoja(suoritukset)).forEach(
+                arvosanaJoukko -> {
+                    Set<String> oppiaineet =
+                    arvosanaJoukko.stream().map(a -> Optional.ofNullable(a.getLisatieto()).orElse("")).collect(Collectors.toSet());
+                    // Onko oppiaineita enemmän kuin yksi
+                    if(oppiaineet.size() > 1) {
+                        LOG.warn("Oppijalla {} oli aineelle {}{}{} useita oppiaineita {}",
+                                oppijaOid,
+                                prefix, arvosanaJoukko.iterator().next().getAine(), suffix,
+                                Arrays.toString(oppiaineet.toArray()));
+                    }
                 }
-            }
-
-            AvainArvoDTO a0 = new AvainArvoDTO();
-            if(SUORITUSMERKINTA.equalsIgnoreCase(paras.getArvio().getArvosana())) {
-                a0.setArvo("true");
-                a0.setAvain(new StringBuilder(p).append(paras.getAine()).append("_SUORITETTU").append(Optional.ofNullable(s).orElse("")).toString());
-            } else {
-                a0.setArvo(paras.getArvio().getArvosana());
-                a0.setAvain(new StringBuilder(p).append(paras.getAine()).append(Optional.ofNullable(s).orElse("")).toString());
-            }
-            if (paras.getLisatieto() != null) {
-                AvainArvoDTO a1 = new AvainArvoDTO();
-                a1.setArvo(paras.getLisatieto());
-                a1.setAvain(new StringBuilder(a0.getAvain()).append("_OPPIAINE").append(Optional.ofNullable(s).orElse("")).toString());
-                return Stream.of(a0, a1);
-            }
-            return Stream.of(a0);
-        };
+        );
     }
-    // Ei oppiainetta valinnaiselle
-    private static Function<Arvosana, Stream<AvainArvoDTO>> valinnainenToAvainArvo(String p, String s) {
-        return a -> {
-            AvainArvoDTO a0 = new AvainArvoDTO();
-            a0.setArvo(a.getArvio().getArvosana());
-            a0.setAvain(new StringBuilder(p).append(a.getAine()).append(Optional.ofNullable(s).orElse("")).toString());
+
+    private static Optional<Fraction> keskiarvo(List<Arvosana> arvosanat) {
+        List<Arvosana> numeeriset = filtteroiVainNumeerisetArvot(arvosanat);
+        if (numeeriset.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(Fraction.getFraction(
+                numeeriset.stream().mapToInt(a -> Integer.parseInt(a.getArvio().getArvosana())).sum(),
+                numeeriset.size()));
+    }
+
+    private static Stream<Arvosana> valinnaistenArvosanojenParasArvosanaSekvenssi(List<List<Arvosana>> vaihtoehdot) {
+        return vaihtoehdot.stream()
+                .sorted((v, w) -> {
+                    Fraction minusOne = Fraction.ONE.negate();
+                    int r = keskiarvo(w).orElse(minusOne).compareTo(keskiarvo(v).orElse(minusOne));
+                    // jos keskiarvot samat, tai kumpaakaan ei voitu laskea, valitse enemmän suorituksia
+                    return r == 0 ? Integer.compare(w.size(), v.size()) : r;
+                })
+                .findFirst().get().stream();
+    }
+
+    private static List<Arvosana> filtteroiVainNumeerisetArvot(List<Arvosana> l) {
+        return l.stream()
+                .filter(a -> !SUORITUSMERKINTA.equalsIgnoreCase(a.getArvio().getArvosana()))
+                .collect(Collectors.toList());
+    }
+
+    private static Stream<Arvosana> bestArvosanaInValinnaisetArvosanat(
+            Stream<List<List<Arvosana>>> valinnaisetArvosanat) {
+        return valinnaisetArvosanat.flatMap(ArvosanaToAvainArvoDTOConverter::valinnaistenArvosanojenParasArvosanaSekvenssi);
+    }
+
+    private static Stream<List<List<Arvosana>>> valinnaisetAineittain(List<SuoritusJaArvosanat> suoritukset) {
+        return suoritukset.stream()
+                .flatMap(s -> s.getArvosanat().stream()
+                        .filter(Arvosana::isValinnainen)
+                        .collect(Collectors.groupingBy(Arvosana::getAine))
+                        .values().stream().map(a -> {
+                            // Normalisoi indeksin
+                            StreamUtils.zipWithIndex(a.stream()
+                            .sorted((a0,a1) -> a0.getJarjestys().compareTo(a1.getJarjestys())))
+                            .forEach(zip -> zip.getValue().setJarjestys((int)zip.getIndex() + 1));
+                            return a;
+                        }))
+                .collect(Collectors.groupingBy(l -> l.iterator().next().getAine()))
+                .values().stream();
+    }
+
+    private static Stream<List<Arvosana>> ryhmitaSamatArvosanatKeskenaan(Stream<Arvosana> suoritukset) {
+        return suoritukset
+                .collect(Collectors.groupingBy(Arvosana::getAine)).values().stream();
+    }
+    private static Stream<Arvosana> arvosanat(Stream<SuoritusJaArvosanat> suoritukset) {
+        return suoritukset
+                .flatMap(s -> s.getArvosanat().stream());
+    }
+    private static Stream<Arvosana> arvosanatIlmanValinnaisiaArvosanoja(List<SuoritusJaArvosanat> suoritukset) {
+        return arvosanat(suoritukset.stream()).filter(a -> !a.isValinnainen());
+    }
+
+    private static Stream<AvainArvoDTO> arvosanaToAvainArvo(Stream<Arvosana> arvosanat, String prefix, String suffix) {
+        return arvosanat.flatMap(arvosana -> {
+            AvainArvoDTO a0;
+            if (arvosana.isValinnainen()) {
+                a0 = new AvainArvoDTO(prefix + arvosana.getAine() + VALINNAINEN + arvosana.getJarjestys() + suffix,
+                        arvosana.getArvio().getArvosana());
+            } else {
+                a0 = new AvainArvoDTO(prefix + arvosana.getAine() + suffix,
+                        arvosana.getArvio().getArvosana());
+            }
+            if (SUORITUSMERKINTA.equals(a0.getArvo())) {
+                a0.setAvain(a0.getAvain() + SUORITETTU);
+                a0.setArvo("true");
+            }
+            if (arvosana.getLisatieto() != null) {
+                return Stream.of(a0, new AvainArvoDTO(a0.getAvain() + OPPIAINE, arvosana.getLisatieto()));
+            }
             return Stream.of(a0);
-        };
+        });
+    }
+
+    private static Stream<Arvosana> bestArvosana(List<Arvosana> arvosanat) {
+        TreeSet<Arvosana> arvosanaSet = new TreeSet<>((c0, c1) -> {
+            if (!ofNullable(c0.getArvio().getAsteikko()).equals(ofNullable(c1.getArvio().getAsteikko()))) {
+                RuntimeException asteikotEiTasmaa =
+                        new RuntimeException(String.format("Asteikot ei täsmää: %s %s",
+                                c0.getArvio().getAsteikko(),
+                                c1.getArvio().getAsteikko()));
+                LOG.error("", asteikotEiTasmaa);
+                throw asteikotEiTasmaa;
+            }
+            if (SUORITUSMERKINTA.equals(c0.getArvio().getArvosana())) {
+                return 1;
+            }
+            if (SUORITUSMERKINTA.equals(c1.getArvio().getArvosana())) {
+                return -1;
+            }
+            Integer i0 = 0;
+            Integer i1 = 0;
+            try {
+                i0 = Integer.parseInt(c0.getArvio().getArvosana());
+                i1 = Integer.parseInt(c1.getArvio().getArvosana());
+            } catch (NumberFormatException ignored) {}
+            return i1.compareTo(i0);
+        });
+        arvosanaSet.addAll(arvosanat);
+        return Stream.of(arvosanaSet.first());
     }
 }

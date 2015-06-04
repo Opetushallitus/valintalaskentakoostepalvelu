@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -58,13 +60,16 @@ public class ValintalaskentaTest {
 				new HakukohdeJaOrganisaatio("h3", "o3"));
 		String uuid = "uuid";
 		String hakuOid = "hakuOid";
+		final HakuV1RDTO hakuDTO = new HakuV1RDTO();
+		hakuDTO.setOid(hakuOid);
 		LaskentaSeurantaAsyncResource seurantaAsyncResource = createMockLaskentaSeurantaAsyncResource();
 		ValintaperusteetAsyncResource valintaperusteetAsyncResource = createMockValintaperusteetAsyncResource();
 		ValintalaskentaAsyncResource valintalaskentaAsyncResource = createMockValintalaskentaAsyncResource();
 		ApplicationAsyncResource applicationAsyncResource = createMockApplicationAsyncResource();
 		SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = createMockSuoritusrekisteriAsyncResource();
+		TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
         OhjausparametritAsyncResource ohjausparametritAsyncResource = mock(OhjausparametritAsyncResource.class);
-		LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(seurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource, valintaperusteetAsyncResource,seurantaAsyncResource), new LaskentaActorFactory(
+		LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(seurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource, valintaperusteetAsyncResource,seurantaAsyncResource, tarjontaAsyncResource), new LaskentaActorFactory(
 				valintalaskentaAsyncResource,
 				applicationAsyncResource,
 				valintaperusteetAsyncResource,
@@ -76,7 +81,7 @@ public class ValintalaskentaTest {
 		LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(uuid, hakuOid,false,
 				null, null, hakukohdeOids, LaskentaTyyppi.HAKUKOHDE);
 		valintalaskentaKerrallaRoute
-				.suoritaValintalaskentaKerralla(null, laskentaJaHaku);
+				.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);
 	}
 
 	public static LaskentaSeurantaAsyncResource createMockLaskentaSeurantaAsyncResource() {

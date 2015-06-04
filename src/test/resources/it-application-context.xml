@@ -46,7 +46,9 @@
   <bean id="KoodistoCachedAsyncResource"
         class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource"/>
   <bean id="OsoitetarratService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService"/>
-
+  <!--Suorituksen arvosanat-->
+  <bean id="SuorituksenArvosanatProxyResource"
+        class="fi.vm.sade.valinta.kooste.proxy.resource.suoritukset.OppijanSuorituksetProxyResource"/>
 
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"
@@ -106,6 +108,7 @@
         <ref bean="ErillishakuResource"/>
         <ref bean="ErillishakuProxyResource"/>
         <ref bean="PistesyottoResource"/>
+        <ref bean="SuorituksenArvosanatProxyResource"/>
         <ref bean="DokumenttiProsessiResource"/>
         <ref bean="ViestintapalveluAktivointiResource"/>
         <ref bean="ValintalaskentaExcelResource"/>
