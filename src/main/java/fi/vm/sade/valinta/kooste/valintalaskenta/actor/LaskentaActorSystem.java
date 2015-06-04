@@ -79,7 +79,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     @Override
     public void suoritaValintalaskentaKerralla(final HakuV1RDTO haku, final ParametritDTO parametritDTO, final LaskentaStartParams laskentaStartParams) {
         LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this, haku, new LaskentaActorParams(laskentaStartParams, parametritDTO));
-        createAndStartLaskenta(laskentaStartParams, laskentaActor);
+        startLaskentaActor(laskentaStartParams, laskentaActor);
     }
 
     @Override
@@ -118,12 +118,12 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
             laskentaStarter.fetchLaskentaParams(
                     laskennanKaynnistajaActor,
                     uuid,
-					(haku, params) -> createAndStartLaskenta(params.getLaskentaStartParams(), laskentaActorFactory.createLaskentaActor(this, haku, params))
+					(haku, params) -> startLaskentaActor(params.getLaskentaStartParams(), laskentaActorFactory.createLaskentaActor(this, haku, params))
             );
         }
     }
 
-    protected void createAndStartLaskenta(LaskentaStartParams params, LaskentaActor laskentaActor) {
+    protected void startLaskentaActor(LaskentaStartParams params, LaskentaActor laskentaActor) {
         String uuid = params.getUuid();
         String hakuOid = params.getHakuOid();
 

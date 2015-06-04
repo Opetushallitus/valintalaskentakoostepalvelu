@@ -51,7 +51,7 @@ public class LaskentaStarter {
         this.tarjontaAsyncResource = tarjontaAsyncResource;
     }
 
-    public void fetchLaskentaParams(ActorRef laskennanKaynnistajaActor, final String uuid, final BiConsumer<HakuV1RDTO, LaskentaActorParams> actorParamsCallback) {
+    public void fetchLaskentaParams(ActorRef laskennanKaynnistajaActor, final String uuid, final BiConsumer<HakuV1RDTO, LaskentaActorParams> startActor) {
         seurantaAsyncResource.laskenta(
                 uuid,
                 (LaskentaDto laskenta) -> {
@@ -65,7 +65,7 @@ public class LaskentaStarter {
                             (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
                                 Collection<HakukohdeJaOrganisaatio> hakukohdeOids = maskHakukohteet(hakuOid, hakukohdeViitteet, laskenta);
                                 if (!hakukohdeOids.isEmpty()) {
-                                    fetchHakuInformation(laskennanKaynnistajaActor, hakuOid, hakukohdeOids, laskenta, actorParamsCallback);
+                                    fetchHakuInformation(laskennanKaynnistajaActor, hakuOid, hakukohdeOids, laskenta, startActor);
                                 } else {
                                     cancelLaskenta(laskennanKaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", uuid);
                                 }
@@ -86,13 +86,13 @@ public class LaskentaStarter {
         return maski.isMask() ? maski.maskaa(haunHakukohdeOidit) : haunHakukohdeOidit;
     }
 
-    private void fetchHakuInformation(ActorRef laskennankaynnistajaActor, String hakuOid, Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, LaskentaDto laskenta, BiConsumer<HakuV1RDTO, LaskentaActorParams> actorParamsCallback) {
+    private void fetchHakuInformation(ActorRef laskennankaynnistajaActor, String hakuOid, Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, LaskentaDto laskenta, BiConsumer<HakuV1RDTO, LaskentaActorParams> startActor) {
         AtomicReference<HakuV1RDTO> hakuRef = new AtomicReference<>();
         AtomicReference<LaskentaActorParams> parametritRef = new AtomicReference<>();
         SynkronoituLaskuri counter = SynkronoituLaskuri.builder()
                 .setLaskurinAlkuarvo(2)
                 .setSynkronoituToiminto(
-                        () -> actorParamsCallback.accept(hakuRef.get(), parametritRef.get()))
+                        () -> startActor.accept(hakuRef.get(), parametritRef.get()))
                 .build();
         tarjontaAsyncResource.haeHaku(hakuOid,
                 haku -> {

@@ -110,7 +110,7 @@ public class LaskentaActorSystemTest {
     @Test
     public void testaaActorSupervisor() throws Exception {
         LOG.info("Ajossa olevat laskennat nyt {}", laskentaActorSystem.runningLaskentas());
-        laskentaActorSystem.createAndStartLaskenta(
+        laskentaActorSystem.startLaskentaActor(
                 new LaskentaStartParams(UUID, HAKUOID, false, null, false, null, null),
                 create(UUID, laskentaActorSystem)
         );
