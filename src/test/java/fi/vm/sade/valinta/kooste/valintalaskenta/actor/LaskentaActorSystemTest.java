@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import akka.actor.ActorRef;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
