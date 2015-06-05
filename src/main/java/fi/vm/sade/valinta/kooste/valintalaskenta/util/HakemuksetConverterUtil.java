@@ -191,6 +191,7 @@ public class HakemuksetConverterUtil {
                 .filter(s -> !(s.isLisapistekoulutus() && !s.isVahvistettu()))
                 .filter(s -> !(s.isPerusopetus() && s.isKeskeytynyt() && !hakukaudella(haku, s)))
                 .filter(s -> !(s.isLukio() && s.isKeskeytynyt() && !hakukaudella(haku, s)))
+                .filter(s -> !(s.isYoTutkinto() && (s.isKesken() || s.isKeskeytynyt())))
                 .filter(s -> !(s.isLisapistekoulutus() && s.isVahvistettu() && !hakukaudella(haku, s)))
                 .map(SuoritusJaArvosanatWrapper::getSuoritusJaArvosanat)
                 .collect(toList());
