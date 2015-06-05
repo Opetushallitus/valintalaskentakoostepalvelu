@@ -29,6 +29,11 @@ final public class LaskentaStarterActor extends UntypedActor {
     public void onReceive(Object message) {
         if (WorkAvailable.class.isInstance(message)) {
             startLaskentaIfWorkersAvailable();
+        } else if (StartAllWorkers.class.isInstance(message)) {
+            LOG.info("Starting all workers. Current workerCount: " + workerCount.get());
+            while (workerCount.get() < maxWorkers) {
+                startLaskentaIfWorkersAvailable();
+            }
         } else if (WorkerAvailable.class.isInstance(message)) {
             decrementWorkerCount();
             startLaskentaIfWorkersAvailable();
@@ -67,4 +72,6 @@ final public class LaskentaStarterActor extends UntypedActor {
     public static class WorkerAvailable {}
 
     public static class ResetWorkerCount {}
+
+    public static class StartAllWorkers {}
 }

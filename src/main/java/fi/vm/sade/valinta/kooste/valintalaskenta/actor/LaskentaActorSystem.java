@@ -73,7 +73,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        workAvailable();
+        laskennanKaynnistajaActor.tell(new StartAllWorkers(), ActorRef.noSender());
     }
 
     @Override
