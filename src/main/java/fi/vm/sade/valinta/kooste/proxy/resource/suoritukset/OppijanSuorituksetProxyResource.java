@@ -30,6 +30,7 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -85,16 +86,12 @@ public class OppijanSuorituksetProxyResource {
                     .setLaskurinAlkuarvo(4)
                     .setSynkronoituToiminto(
                             () -> {
-                                HakemusDTO hakemusDTO;
-                                boolean hakilallaOnHenkilotunnus;
-                                {
-                                    Hakemus hakemus = hakemusRef.get();
-                                    hakilallaOnHenkilotunnus = new HakemusWrapper(hakemus).hasHenkilotunnus();
-                                    hakemusDTO = Converter.hakemusToHakemusDTO(hakemus);
-                                }
-                                HakuV1RDTO haku = tarjontaRef.get();
-                                HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
-                                        hakilallaOnHenkilotunnus, haku, "", parametriRef.get(), Maps.newHashMap(), oppijaRef.get(), hakemusDTO);
+                                HakemusDTO hakemusDTO = HakemuksetConverterUtil.muodostaHakemuksetDTO(
+                                        tarjontaRef.get(),
+                                        "",
+                                        Collections.singletonList(hakemusRef.get()),
+                                        Collections.singletonList(oppijaRef.get()),
+                                        parametriRef.get()).get(0);
                                 asyncResponse.resume(Response
                                         .ok()
                                         .header("Content-Type", "application/json")

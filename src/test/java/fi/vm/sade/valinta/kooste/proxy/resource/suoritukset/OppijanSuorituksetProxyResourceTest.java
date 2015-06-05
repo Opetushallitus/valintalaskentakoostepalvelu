@@ -56,11 +56,6 @@ public class OppijanSuorituksetProxyResourceTest {
         initOhjausParametritMock();
     }
 
-    /**
-     *
-     * @Ignore hakemukselta ei kerätä arvosanoja
-     */
-    @Ignore
     @Test
     public void peruskoulunSuoritusProxyResourceTest() throws Exception {
         Mocks.reset();
@@ -73,16 +68,14 @@ public class OppijanSuorituksetProxyResourceTest {
             Map<String, String> oppijanSuoritukset = GSON.
                     fromJson(getJsonFromResponse(response), new TypeToken<Map<String, String>>() {
                     }.getType());
-            assertEquals("10", oppijanSuoritukset.get("PK_GE"));
-            assertEquals("10", oppijanSuoritukset.get("PK_AI"));
-            assertEquals("10", oppijanSuoritukset.get("PK_AI"));
+            assertEquals("7", oppijanSuoritukset.get("PK_GE"));
+            assertEquals("9", oppijanSuoritukset.get("PK_AI"));
+            assertEquals("10", oppijanSuoritukset.get("PK_A1"));
             assertEquals("FI", oppijanSuoritukset.get("PK_AI_OPPIAINE"));
             assertEquals("EN", oppijanSuoritukset.get("PK_A1_OPPIAINE"));
             assertEquals("EL", oppijanSuoritukset.get("PK_B1_OPPIAINE"));
-            assertFalse(oppijanSuoritukset.containsKey("PK_LI"));
-            assertEquals("true", oppijanSuoritukset.get("PK_LI_SUORITETTU"));
-            assertFalse(oppijanSuoritukset.containsKey("PK_XX"));
-            assertEquals("true", oppijanSuoritukset.get("PK_XX_SUORITETTU"));
+            assertEquals("S", oppijanSuoritukset.get("PK_LI"));
+            assertFalse(oppijanSuoritukset.containsKey("PK_LI_SUORITETTU"));
             assertEquals("1", oppijanSuoritukset.get("POHJAKOULUTUS"));
             assertEquals("2015", oppijanSuoritukset.get("PK_PAATTOTODISTUSVUOSI"));
             assertEquals("false", oppijanSuoritukset.get("YO_TILA"));
@@ -93,11 +86,6 @@ public class OppijanSuorituksetProxyResourceTest {
         }
     }
 
-    /**
-     *
-     * @Ignore hakemukselta ei kerätä arvosanoja
-     */
-    @Ignore
     @Test
     public void lukionSuoritusProxyResourceTest() throws Exception {
         Mocks.reset();
@@ -111,11 +99,11 @@ public class OppijanSuorituksetProxyResourceTest {
                     fromJson(getJsonFromResponse(response), new TypeToken<Map<String, String>>() {
                     }.getType());
             assertEquals("8", oppijanSuoritukset.get("LK_MA"));
-            assertEquals("9", oppijanSuoritukset.get("LK_PS"));
-            assertEquals("6", oppijanSuoritukset.get("LK_LI"));
+            assertEquals("8", oppijanSuoritukset.get("LK_PS"));
+            assertEquals("S", oppijanSuoritukset.get("LK_LI"));
             assertEquals("EN", oppijanSuoritukset.get("LK_A1_OPPIAINE"));
             assertEquals("FI", oppijanSuoritukset.get("LK_AI_OPPIAINE"));
-            assertEquals("IT", oppijanSuoritukset.get("LK_B1_OPPIAINE"));
+            assertEquals("ZH", oppijanSuoritukset.get("LK_B1_OPPIAINE"));
             assertEquals("9", oppijanSuoritukset.get("POHJAKOULUTUS"));
             assertEquals(null, oppijanSuoritukset.get("PK_PAATTOTODISTUSVUOSI"));
             assertEquals("false", oppijanSuoritukset.get("YO_TILA"));
