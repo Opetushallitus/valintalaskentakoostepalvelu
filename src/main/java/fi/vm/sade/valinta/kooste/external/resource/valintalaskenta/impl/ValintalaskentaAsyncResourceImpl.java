@@ -37,7 +37,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	public ValintalaskentaAsyncResourceImpl(
 			@Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}") String address
 	) {
-		super(address, TimeUnit.HOURS.toMillis(20));
+		super(address, TimeUnit.HOURS.toMillis(8));
 	}
 
 	@Override
