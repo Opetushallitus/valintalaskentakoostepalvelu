@@ -1,19 +1,29 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import com.google.common.util.concurrent.Futures;
-import fi.vm.sade.service.valintaperusteet.dto.*;
-import fi.vm.sade.sijoittelu.domain.Valintatulos;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import org.springframework.stereotype.Service;
-
-import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+
+import javax.ws.rs.core.Response;
+
+import org.springframework.stereotype.Service;
+
+import com.google.common.util.concurrent.Futures;
+
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import rx.Observable;
 
 /**
  * @author Jussi Jartamo
@@ -73,9 +83,8 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
-    public Peruutettava findAvaimet(String hakukohdeOid, Consumer<List<ValintaperusteDTO>> callback, Consumer<Throwable> failureCallback) {
-        callback.accept(valintaperusteetResultReference.get());
-        return new PeruutettavaImpl(Futures.immediateFuture(valintaperusteetResultReference.get()));
+    public Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
+        return Observable.just(valintaperusteetResultReference.get());
     }
 
     @Override
@@ -90,11 +99,6 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
 
     @Override
     public Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Future<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
         throw new UnsupportedOperationException();
     }
 

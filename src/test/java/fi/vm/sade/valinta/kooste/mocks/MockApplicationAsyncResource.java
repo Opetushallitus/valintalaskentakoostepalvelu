@@ -148,10 +148,9 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
-    public Peruutettava putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
+    public Observable<Response> putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData) {
         additionalDataPutReference.set(additionalData);
-        callback.accept(Response.ok().build());
-        return new PeruutettavaImpl(Futures.immediateFuture(Response.ok().build()));
+        return Observable.just(Response.ok().build());
     }
 
     @Override

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func2;
+import rx.observables.BlockingObservable;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
@@ -100,7 +101,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 	public void koekutsukirjeetOsallistujille(KirjeProsessi prosessi,
 			KoekutsuDTO koekutsu, List<String> valintakoeTunnisteet) {
 		// ehka tarvitaan
-		final Future<List<ValintakoeOsallistuminenDTO>> osallistumiset = osallistumisetResource
+		final Observable<List<ValintakoeOsallistuminenDTO>> osallistumiset = osallistumisetResource
 				.haeHakutoiveelle(koekutsu.getHakukohdeOid());
 		final Future<List<ValintakoeDTO>> valintakokeetFuture = valintakoeResource
 				.haeValintakokeetHakukohteelle(koekutsu.getHakukohdeOid());
@@ -137,8 +138,8 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 							throw e;
 						}
 						try {
-							Set<String> osallistujienHakemusOidit = osallistumiset
-									.get()
+							Set<String> osallistujienHakemusOidit = BlockingObservable.from(osallistumiset)
+									.first()
 									.stream()
 									.filter(Objects::nonNull)
 									//
@@ -278,11 +279,8 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
 						LOG.error("Mapataan muut hakukohteet");
 						hakemusOidJaHakijanMuutHakutoiveOids = hakemukset
 								.stream()
-								//
 								.filter(Objects::nonNull)
-								//
 								.filter(h -> h.getOid() != null)
-								//
 								.collect(
 										Collectors.toMap(
 												h -> h.getOid(),

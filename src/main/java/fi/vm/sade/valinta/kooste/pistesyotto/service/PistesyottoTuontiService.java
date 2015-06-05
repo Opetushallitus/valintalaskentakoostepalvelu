@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoArvo;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel;
 import fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoRivi;
+import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.Laskuri;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -77,12 +78,12 @@ public class PistesyottoTuontiService {
         String hakuNimi = StringUtils.EMPTY;
         String hakukohdeNimi = StringUtils.EMPTY;
         String tarjoajaNimi = StringUtils.EMPTY;
-        Consumer<Throwable> poikkeusilmoitus = t -> {
+        PoikkeusKasittelijaSovitin poikkeusilmoitus = new PoikkeusKasittelijaSovitin(t -> {
             LOG.error("Pistesyötön tuonti epäonnistui", t);
             prosessi.getPoikkeukset().add(
                     new Poikkeus(Poikkeus.KOOSTEPALVELU,
                             "Pistesyötön tuonti:", t.getMessage()));
-        };
+        });
         try {
 
             final List<String> valintakoeTunnisteet = valintaperusteet.stream().map(vp -> vp.getTunniste()).collect(Collectors.toList());
@@ -138,7 +139,7 @@ public class PistesyottoTuontiService {
             } else {
                 //applicationAsyncResource.
                 applicationAsyncResource.putApplicationAdditionalData(
-                        hakuOid, hakukohdeOid, uudetPistetiedot, response -> {
+                        hakuOid, hakukohdeOid, uudetPistetiedot).subscribe(response -> {
                             prosessi.setDokumenttiId("valmis");
                             prosessi.inkrementoiTehtyjaToita();
                         }, poikkeusilmoitus);
@@ -204,12 +205,12 @@ public class PistesyottoTuontiService {
                 4
                         // luonti
                         + 1);
-        Consumer<Throwable> poikkeusilmoitus = t -> {
+        PoikkeusKasittelijaSovitin poikkeusilmoitus = new PoikkeusKasittelijaSovitin(t -> {
             LOG.error("Pistesyötön tuonti epäonnistui", t);
             prosessi.getPoikkeukset().add(
                     new Poikkeus(Poikkeus.KOOSTEPALVELU,
                             "Pistesyötön tuonti:", t.getMessage()));
-        };
+        });
         AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedot = new AtomicReference<>();
         AtomicReference<List<ApplicationAdditionalDataDTO>> additionaldata = new AtomicReference<>();
         AtomicReference<List<ValintaperusteDTO>> valintaperusteet = new AtomicReference<>();
@@ -238,7 +239,7 @@ public class PistesyottoTuontiService {
             }
             return null;
         };
-        valintakoeResource.haeHakutoiveelle(hakukohdeOid,
+        valintakoeResource.haeHakutoiveelle(hakukohdeOid).subscribe(
                 o -> {
                     prosessi
                     .inkrementoiTehtyjaToita();
@@ -248,7 +249,7 @@ public class PistesyottoTuontiService {
         }, poikkeusilmoitus);
 
         valintaperusteetResource
-                .findAvaimet(hakukohdeOid,
+                .findAvaimet(hakukohdeOid).subscribe(
                         v -> {
                             valintaperusteet.set(v);
                             prosessi

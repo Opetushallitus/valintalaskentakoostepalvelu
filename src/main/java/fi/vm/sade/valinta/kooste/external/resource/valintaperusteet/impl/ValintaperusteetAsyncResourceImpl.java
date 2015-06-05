@@ -34,10 +34,12 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.http.Callback;
+import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import rx.Observable;
 
 /**
  * 
@@ -45,38 +47,15 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
  * 
  */
 @Service
-public class ValintaperusteetAsyncResourceImpl implements
-		ValintaperusteetAsyncResource {
-	protected static final Gson GSON= new GsonBuilder()
-			.registerTypeAdapter(Date.class, new JsonDeserializer() {
-				@Override
-				public Object deserialize(JsonElement json, Type typeOfT,
-										  JsonDeserializationContext context)
-						throws JsonParseException {
-					return new Date(json.getAsJsonPrimitive().getAsLong());
-				}
-			})
-			.create();
-	private final WebClient webClient;
-	private final String address;
-	private final static Logger LOG = LoggerFactory
-			.getLogger(ValintaperusteetAsyncResourceImpl.class);
+public class ValintaperusteetAsyncResourceImpl extends HttpResource implements ValintaperusteetAsyncResource {
+	private final static Logger LOG = LoggerFactory.getLogger(ValintaperusteetAsyncResourceImpl.class);
 
 	@Autowired
 	public ValintaperusteetAsyncResourceImpl(
 			@Value("${host.ilb}") String address
 	//
 	) {
-		this.address = address;
-		JAXRSClientFactoryBean bean = new JAXRSClientFactoryBean();
-		bean.setAddress(address);
-		bean.setThreadSafe(true);
-		List<Object> providers = Lists.newArrayList();
-		providers
-				.add(new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider());
-		providers.add(new fi.vm.sade.valinta.kooste.ObjectMapperProvider());
-		bean.setProviders(providers);
-		this.webClient = bean.createWebClient();
+		super(address);
 	}
 
 
@@ -92,12 +71,9 @@ public class ValintaperusteetAsyncResourceImpl implements
 					hakukohdeOid);
 			String url = urlBuilder.toString();
 			return new PeruutettavaImpl(
-					WebClient.fromClient(webClient)
+					getWebClient()
 							.path(url)
-							//
-
 							.accept(MediaType.APPLICATION_JSON_TYPE)
-							//
 							.async()
 							.get(new Callback<List<ValintaperusteetHakijaryhmaDTO>>(
 									address,
@@ -121,7 +97,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 					.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/")
 					.append(hakukohdeOid).append("/valinnanvaihe").toString();
 
-			WebClient wc = WebClient.fromClient(webClient).path(url);
+			WebClient wc = getWebClient();
 			return new PeruutettavaImpl(wc
 					//
 					.accept(MediaType.APPLICATION_JSON_TYPE)
@@ -146,7 +122,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 					.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/")
 					.append(hakukohdeOid).append("/ilmanlaskentaa").toString();
 
-			WebClient wc = WebClient.fromClient(webClient).path(url);
+			WebClient wc = getWebClient().path(url);
 			return new PeruutettavaImpl(wc
 					//
 					.accept(MediaType.APPLICATION_JSON_TYPE)
@@ -170,7 +146,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 					.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/")
 					.append(hakukohdeOid).toString();
 
-			WebClient wc = WebClient.fromClient(webClient).path(url);
+			WebClient wc = getWebClient().path(url);
 			if (valinnanVaiheJarjestysluku != null) {
 				wc.query("vaihe", valinnanVaiheJarjestysluku);
 			}
@@ -197,8 +173,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 			String url = new StringBuilder()
 					.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/haku/")
 					.append(hakuOid).toString();
-			return new PeruutettavaImpl(WebClient
-					.fromClient(webClient)
+			return new PeruutettavaImpl(getWebClient()
 					.path(url)
 					//
 					.accept(MediaType.APPLICATION_JSON_TYPE)
@@ -221,8 +196,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 				"/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/").append(oid).append("/ilmanlaskentaa/");
 		String url = urlBuilder.toString();
 		
-		return WebClient
-				.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				//
 				.accept(MediaType.APPLICATION_JSON_TYPE)
@@ -238,8 +212,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 		StringBuilder urlBuilder = new StringBuilder().append(
 				"/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/tuoHakukohde/");
 		String url = urlBuilder.toString();
-		return WebClient
-				.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				//
 				.accept(MediaType.APPLICATION_JSON_TYPE)
@@ -250,32 +223,8 @@ public class ValintaperusteetAsyncResourceImpl implements
 	}
 	
 	@Override
-	public Future<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
-		String url = new StringBuilder()
-				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/")
-				.append(hakukohdeOid).append("/").toString();
-		return WebClient.fromClient(webClient).path(url)
-		//
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				//
-				.async().get(new GenericType<List<ValintaperusteDTO>>() {
-				});
-	}
-
-	@Override
-	public Peruutettava findAvaimet(String hakukohdeOid, Consumer<List<ValintaperusteDTO>> callback, Consumer<Throwable> failureCallback) {
-		String url = new StringBuilder()
-				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/")
-				.append(hakukohdeOid).append("/").toString();
-		return new PeruutettavaImpl(WebClient.fromClient(webClient).path(url)
-				//
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-						//
-				.async()
-				.get(new Callback<List<ValintaperusteDTO>>(address, url,
-						callback, failureCallback,
-						new TypeToken<List<ValintaperusteDTO>>() {
-						}.getType())));
+	public Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
+		return getAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/"+hakukohdeOid+"/", new TypeToken<List<ValintaperusteDTO>>() { }.getType());
 	}
 
 	@Override
@@ -286,8 +235,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 		String url = urlBuilder.toString();
 		// LOG.error("POST {}\r\n{}", url,
 		// Arrays.toString(hakukohdeOids.toArray()));
-		return WebClient
-				.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
@@ -304,8 +252,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 		String url = urlBuilder.toString();
 		// LOG.error("POST {}\r\n{}", url,
 		// Arrays.toString(hakukohdeOids.toArray()));
-		return new PeruutettavaImpl(WebClient
-				.fromClient(webClient)
+		return new PeruutettavaImpl(getWebClient()
 				.path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
@@ -321,8 +268,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 		StringBuilder urlBuilder = new StringBuilder()
 				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintakoe/");
 		String url = urlBuilder.toString();
-		return WebClient
-				.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
@@ -335,8 +281,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 		StringBuilder urlBuilder = new StringBuilder()
 				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/").append(hakukohdeOid).append("/valintakoe/");
 		String url = urlBuilder.toString();
-		return WebClient
-				.fromClient(webClient)
+		return getWebClient()
 				.path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
@@ -348,8 +293,7 @@ public class ValintaperusteetAsyncResourceImpl implements
 		StringBuilder urlBuilder = new StringBuilder()
 				.append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/").append(hakukohdeOid).append("/valintakoe/");
 		String url = urlBuilder.toString();
-		return new PeruutettavaImpl(WebClient
-				.fromClient(webClient)
+		return new PeruutettavaImpl(getWebClient()
 				.path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()

@@ -1,18 +1,14 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import com.google.common.util.concurrent.Futures;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.springframework.stereotype.Service;
+
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
-import org.springframework.stereotype.Service;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
+import rx.Observable;
 
 /**
  * @author Jussi Jartamo
@@ -31,24 +27,12 @@ public class MockValintalaskentaValintakoeAsyncResource implements Valintalasken
     }
 
     @Override
-    public Future<List<ValintakoeOsallistuminenDTO>> haeOsallistumiset(Collection<String> hakemusOid) {
-        return Futures.immediateFuture(osallistumistiedot.get());
+    public Observable<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(String hakukohdeOid, List<String> valintakoeOid) {
+        return Observable.just(hakemusOsallistuminen.get());
     }
 
     @Override
-    public Peruutettava haeValintatiedotHakukohteelle(String hakukohdeOid, List<String> valintakoeOid, Consumer<List<HakemusOsallistuminenDTO>> callback, Consumer<Throwable> failureCallback) {
-        callback.accept(hakemusOsallistuminen.get());
-        return new PeruutettavaImpl(Futures.immediateCancelledFuture());
-    }
-
-    @Override
-    public Future<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid) {
-        return Futures.immediateFuture(osallistumistiedot.get());
-    }
-
-    @Override
-    public Peruutettava haeHakutoiveelle(String hakukohdeOid, Consumer<List<ValintakoeOsallistuminenDTO>> callback, Consumer<Throwable> failureCallback) {
-        callback.accept(osallistumistiedot.get());
-        return new PeruutettavaImpl(Futures.immediateCancelledFuture());
+    public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid) {
+        return Observable.just(osallistumistiedot.get());
     }
 }

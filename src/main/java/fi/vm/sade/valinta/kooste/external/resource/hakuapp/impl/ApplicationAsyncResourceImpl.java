@@ -166,28 +166,9 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
-	/*
-	@PUT
-	@Path("additionalData/{asId}/{aoId}")
-	@Produces(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
-	@Consumes(MediaType.APPLICATION_JSON + CHARSET_UTF_8)
-	*/
 
 	@Override
-	public Peruutettava putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData,
-													 Consumer<Response> callback, Consumer<Throwable> failureCallback) {
-		String url = "/applications/additionalData/" + hakuOid + "/" + hakukohdeOid;
-		try {
-			return new PeruutettavaImpl(
-					getWebClient()
-							.path(url)
-							.async()
-							.put(Entity.json(additionalData), new ResponseCallback(
-									callback,
-									failureCallback)));
-		} catch (Exception e) {
-			failureCallback.accept(e);
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		}
+	public Observable<Response> putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData) {
+		return putAsObservable("/applications/additionalData/" + hakuOid + "/" + hakukohdeOid, Entity.json(additionalData));
 	}
 }

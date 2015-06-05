@@ -184,7 +184,7 @@ public class PistesyottoVientiService {
                     return null;
                 };
             }
-            valintakoeResource.haeHakutoiveelle(hakukohdeOid, osallistumistiedot -> {
+            valintakoeResource.haeHakutoiveelle(hakukohdeOid).subscribe(osallistumistiedot -> {
                 osallistumistiedotRef.set(osallistumistiedot);
                 prosessi.inkrementoiTehtyjaToita();
                 viimeisteleTuonti.get();
@@ -198,7 +198,7 @@ public class PistesyottoVientiService {
                         tarkistaYlimaaraisetOsallistujat.get();
                     }, poikkeuskasittelija);
             valintaperusteetResource
-                    .findAvaimet(hakukohdeOid, avaimet -> {
+                    .findAvaimet(hakukohdeOid).subscribe(avaimet -> {
                         prosessi.inkrementoiTehtyjaToita();
                         valintaperusteRef.set(avaimet);
                         viimeisteleTuonti.get();

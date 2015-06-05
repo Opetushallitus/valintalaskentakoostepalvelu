@@ -187,7 +187,7 @@ public class ValintakoekutsutExcelService {
                             voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                         }
                         valintalaskentaAsyncResource.haeValintatiedotHakukohteelle(hakukohdeOid,
-                                kiinnostavatValintakokeet.stream().map(v -> v.getSelvitettyTunniste()).collect(Collectors.toList()), osallistuminen -> {
+                                kiinnostavatValintakokeet.stream().map(v -> v.getSelvitettyTunniste()).collect(Collectors.toList())).subscribe(osallistuminen -> {
                                     List<HakemusOsallistuminenDTO> hakukohteeseenOsallistujat = osallistuminen.stream()
                                             .filter(o -> hakukohdeOid.equals(o.getHakukohdeOid()))
                                             .collect(Collectors.toList());

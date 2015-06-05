@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
+import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
@@ -129,7 +130,7 @@ public class OsoitetarratService {
             String hakuOid,
             String hakukohdeOid,
             Set<String> selvitetytTunnisteet) {
-        Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
+        PoikkeusKasittelijaSovitin poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
             LOG.error("Luodaan osoitetarrat valintakokeeseen osallistujille (haku={}, hakukohde={})", hakuOid, hakukohdeOid);
             prosessi.setKokonaistyo(
@@ -206,7 +207,7 @@ public class OsoitetarratService {
                     laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                 }
             }, poikkeuskasittelija);
-            valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid, osallistumiset -> {
+            valintalaskentaValintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid).subscribe(osallistumiset -> {
                 osallistumistiedotRef.set(osallistumiset);
                 laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);
@@ -306,13 +307,13 @@ public class OsoitetarratService {
     private Date defaultExpirationDate() {
         return DateTime.now().plusHours(168).toDate(); // almost a day
     }
-    private Consumer<Throwable> poikkeuskasittelija(DokumenttiProsessi prosessi) {
-        return poikkeus -> {
+    private PoikkeusKasittelijaSovitin poikkeuskasittelija(DokumenttiProsessi prosessi) {
+        return new PoikkeusKasittelijaSovitin(poikkeus -> {
             LOG.error("Osoitetarrojen luonti epäonnistui:", poikkeus);
             prosessi.getPoikkeukset().add(
                     new Poikkeus(Poikkeus.KOOSTEPALVELU,
                             "Osoitetarrojen luonti epäonnistui:", poikkeus.getMessage()));
-        };
+        });
     }
     private void maatJaValtiot1(final SynkronoituLaskuri laskuri, AtomicReference<Map<String,Koodi>> maatJaValtiot1Ref, Consumer<Throwable> poikkeuskasittelija) {
         koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1, maatJaValtiot1 -> {

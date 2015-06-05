@@ -16,6 +16,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import rx.Observable;
 
 /**
  * 
@@ -63,13 +64,7 @@ public interface ValintaperusteetAsyncResource {
 	///valintaperusteet-service/resources/valintaperusteet/tuoHakukohde/
 	Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde);
 	
-	// @GET
-	///valintaperusteet-service/resources/hakukohde/avaimet/{}
-	Future<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
-
-	Peruutettava findAvaimet(String hakukohdeOid,
-							 Consumer<List<ValintaperusteDTO>> callback,
-							 Consumer<Throwable> failureCallback);
+	Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
 
 	// @POST
 	///valintaperusteet-service/resources/valintakoe/
