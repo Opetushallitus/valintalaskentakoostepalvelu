@@ -129,6 +129,7 @@ public class ValintalaskentaTulosExcelTest {
             IOUtils.copy(new ByteArrayInputStream(excelBytes), new FileOutputStream("e.xls"));
         } finally {
             Mocks.reset();
+            MockApplicationAsyncResource.clear();
         }
     }
 
@@ -254,6 +255,7 @@ public class ValintalaskentaTulosExcelTest {
 
         } finally {
             Mocks.reset();
+            MockApplicationAsyncResource.clear();
         }
     }
 

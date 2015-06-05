@@ -150,6 +150,7 @@ public class OsoitetarratServiceTest {
             Assert.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
         } finally {
             Mocks.reset();
+            MockApplicationAsyncResource.clear();
         }
     }
 
@@ -219,6 +220,7 @@ public class OsoitetarratServiceTest {
             Assert.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
         } finally {
             Mocks.reset();
+            MockApplicationAsyncResource.clear();
         }
     }
 }
