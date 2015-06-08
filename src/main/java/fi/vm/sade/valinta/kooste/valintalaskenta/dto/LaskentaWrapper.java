@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -32,7 +31,7 @@ public class LaskentaWrapper {
 	private final List<ApplicationAdditionalDataDTO> lisatiedot;
 	private final List<ValintaperusteetHakijaryhmaDTO> hakijaryhmat;
 	private final String hakukohdeOid;
-	private final LaskentaAloitus laskenta;
+	private final LaskentaStartParams laskenta;
 
 	public LaskentaWrapper(List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
 		if (tyot == null || tyot.size() != 4) {
@@ -66,7 +65,7 @@ public class LaskentaWrapper {
 		return hakijaryhmat;
 	}
 
-	public LaskentaAloitus getLaskenta() {
+	public LaskentaStartParams getLaskenta() {
 		return laskenta;
 	}
 
@@ -117,7 +116,7 @@ public class LaskentaWrapper {
 		return tyot.iterator().next().getHakukohdeOid();
 	}
 
-	private LaskentaAloitus extractLaskenta(
+	private LaskentaStartParams extractLaskenta(
 			List<LaskentaJaValintaperusteetJaHakemukset> tyot) {
 		return tyot.iterator().next().getLaskenta();
 	}

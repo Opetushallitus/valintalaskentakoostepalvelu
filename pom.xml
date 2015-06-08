@@ -18,7 +18,6 @@
 	</parent>
 	<properties>
 		<jersey.version>2.10.3</jersey.version>
-		<cxf.version>3.0.1</cxf.version>
 		<organisaatio.api.version>13.2</organisaatio.api.version>
 	</properties>
 
@@ -80,6 +79,12 @@
 			<groupId>com.typesafe.akka</groupId>
 			<artifactId>akka-slf4j_2.11</artifactId>
 			<version>2.3.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.typesafe.akka</groupId>
+			<artifactId>akka-testkit_2.11</artifactId>
+			<version>2.3.6</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.htmlcleaner</groupId>

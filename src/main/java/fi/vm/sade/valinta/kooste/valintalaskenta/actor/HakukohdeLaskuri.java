@@ -24,7 +24,7 @@ public class HakukohdeLaskuri extends Laskuri {
 				Funnels.stringFunnel(Charset.forName("UTF-8")), hakukohteita);
 	}
 
-	public boolean done(String hakukohdeOid) {
+	public boolean done(String hakukohdeOid, String laskentaUuid) {
 		try {
 			if (!duplicateChecker.put(hakukohdeOid)) {
 				LOG.error(
@@ -42,7 +42,9 @@ public class HakukohdeLaskuri extends Laskuri {
 					(-l) + yhteensa, yhteensa, -l);
 			return false;
 		}
-		return l == 0;
+		boolean ready = l == 0;
+		LOG.info("Hakukohde {} laskennalle {} done: {}", hakukohdeOid, laskentaUuid, ready);
+		return ready;
 	}
 
 }

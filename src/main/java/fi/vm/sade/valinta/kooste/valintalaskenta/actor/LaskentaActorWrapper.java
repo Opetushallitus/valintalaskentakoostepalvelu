@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 
 /**
  * 
@@ -14,11 +15,10 @@ public class LaskentaActorWrapper implements Laskenta {
 	private final boolean osittainen;
 	private final LaskentaActor laskentaActor;
 
-	public LaskentaActorWrapper(String uuid, String hakuOid,
-			boolean osittainen, LaskentaActor laskentaActor) {
-		this.uuid = uuid;
-		this.hakuOid = hakuOid;
-		this.osittainen = osittainen;
+	public LaskentaActorWrapper(LaskentaStartParams params, LaskentaActor laskentaActor) {
+		this.uuid = params.getUuid();
+		this.hakuOid = params.getHakuOid();
+		this.osittainen = params.isOsittainenLaskenta();
 		this.laskentaActor = laskentaActor;
 	}
 

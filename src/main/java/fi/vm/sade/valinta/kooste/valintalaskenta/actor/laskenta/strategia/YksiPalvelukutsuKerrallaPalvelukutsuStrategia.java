@@ -10,11 +10,9 @@ import org.slf4j.LoggerFactory;
  *
  *         Yksi palvelukutsukerrallaan palvelukutsujonoa tyhjentava strategia
  */
-public class YksiPalvelukutsuKerrallaPalvelukutsuStrategia extends
-		AbstraktiPalvelukutsuStrategia {
+public class YksiPalvelukutsuKerrallaPalvelukutsuStrategia extends AbstraktiPalvelukutsuStrategia {
 
-	private final static Logger LOG = LoggerFactory
-			.getLogger(YksiPalvelukutsuKerrallaPalvelukutsuStrategia.class);
+	private final static Logger LOG = LoggerFactory.getLogger(YksiPalvelukutsuKerrallaPalvelukutsuStrategia.class);
 
 	public void aloitaUusiPalvelukutsu() {
 		try {

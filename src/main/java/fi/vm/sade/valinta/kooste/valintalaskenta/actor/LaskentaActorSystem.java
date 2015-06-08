@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
@@ -11,171 +9,149 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.TypedActor;
-import akka.actor.TypedActorExtension;
-import akka.actor.TypedProps;
-import akka.japi.Creator;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.typesafe.config.ConfigFactory;
-
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
+
+import java.util.Map;
+
+import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.*;
 
 /**
- * 
  * @author Jussi Jartamo
- * 
  */
 @Service
-public class LaskentaActorSystem implements
-		ValintalaskentaKerrallaRouteValvomo, ValintalaskentaKerrallaRoute {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(LaskentaActorSystem.class);
-	private final TypedActorExtension typed;
-	private final ActorSystem actorSystem;
-	private static final Integer HAE_KAIKKI_VALINNANVAIHEET = new Integer(-1);
+@ManagedResource(
+        objectName = "bean:name=OPH",
+        description = "OPH"
+)
+public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo, ValintalaskentaKerrallaRoute, LaskentaSupervisor, ApplicationListener<ContextRefreshedEvent> {
+    private final static Logger LOG = LoggerFactory.getLogger(LaskentaActorSystem.class);
 
-	private final LaskentaActorFactory laskentaActorFactory;
-	private final LaskentaSupervisor laskentaSupervisor;
+    private final LaskentaActorFactory laskentaActorFactory;
 
-	@Autowired
-	public LaskentaActorSystem(
-			LaskentaSeurantaAsyncResource seurantaAsyncResource,
-			ValintaperusteetAsyncResource valintaperusteetAsyncResource,
-			ValintalaskentaAsyncResource valintalaskentaAsyncResource,
-			ApplicationAsyncResource applicationAsyncResource,
-			SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
-		this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem",
-				ConfigFactory.defaultOverrides());
-		
-		this.typed = TypedActor.get(actorSystem);
-		this.laskentaSupervisor = new LaskentaSupervisorActorImpl(actorSystem);
-		this.laskentaActorFactory = new LaskentaActorFactory(
-				valintalaskentaAsyncResource, applicationAsyncResource,
-				valintaperusteetAsyncResource, seurantaAsyncResource,
-				suoritusrekisteriAsyncResource, laskentaSupervisor);
-	}
+    private final LaskentaSeurantaAsyncResource seurantaAsyncResource;
+    private final ActorSystem actorSystem;
+    private final ActorRef laskennanKaynnistajaActor;
+    private final Map<String, LaskentaActorWrapper> runningLaskentas = Maps.newConcurrentMap();
+    private final LaskentaStarter laskentaStarter;
 
-	@Override
-	public void suoritaValintalaskentaKerralla(
-			final HakuV1RDTO haku,
-			final ParametritDTO parametritDTO,
-			final LaskentaAloitus laskentaAloitus) {
-		final LaskentaTyyppi laskentaTyyppi = asLaskentaTyyppi(laskentaAloitus);
-		final Integer valinnanvaiheet = asValinnanvaihe(laskentaAloitus
-				.getValinnanvaihe());
-		final String uuid = laskentaAloitus.getUuid();
-		final String hakuOid = laskentaAloitus.getHakuOid();
-		final boolean erillishaku = laskentaAloitus.isErillishaku();
-		final Collection<HakukohdeJaOrganisaatio> hakukohdeJaOrganisaatio = laskentaAloitus
-				.getHakukohdeDtos()
-				.stream()
-				.map(hk -> new HakukohdeJaOrganisaatio(hk.getHakukohdeOid(), hk
-						.getOrganisaatioOid())).collect(Collectors.toList());
-		laskentaSupervisor.luoJaKaynnistaLaskenta(uuid, hakuOid,
-				laskentaAloitus.isOsittainenLaskenta(), lsup -> {
-					return typed.typedActorOf(new TypedProps<LaskentaActor>(
-							LaskentaActor.class, new Creator<LaskentaActor>() {
-								private static final long serialVersionUID = 8521766139538840217L;
+    @Autowired
+    public LaskentaActorSystem(LaskentaSeurantaAsyncResource seurantaAsyncResource,
+                               LaskentaStarter laskentaStarter,
+                               LaskentaActorFactory laskentaActorFactory,
+                               @Value("${valintalaskentakoostepalvelu.maxWorkerCount:8}") int maxWorkers) {
+        this.laskentaActorFactory = laskentaActorFactory;
+        this.laskentaStarter = laskentaStarter;
+        this.seurantaAsyncResource = seurantaAsyncResource;
+        this.actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
+        laskennanKaynnistajaActor = actorSystem.actorOf(props(this, maxWorkers));
+    }
 
-								public LaskentaActor create() throws Exception {
-									if (fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi.VALINTARYHMA
-											.equals(laskentaAloitus.getTyyppi())) {
-										LOG.info("Muodostetaan VALINTARYHMALASKENTA");
-										return laskentaActorFactory
-												.createValintaryhmaActor(uuid,
-														haku,
-														parametritDTO,
-														erillishaku,
-														valinnanvaiheet,
-														hakukohdeJaOrganisaatio);
-									} else {
-										if (LaskentaTyyppi.VALINTAKOELASKENTA
-												.equals(laskentaTyyppi)) {
-											LOG.info("Muodostetaan VALINTAKOELASKENTA");
-											return laskentaActorFactory
-													.createValintakoelaskentaActor(
-															uuid, haku,
-															parametritDTO,
-															erillishaku,
-															valinnanvaiheet,
-															hakukohdeJaOrganisaatio);
-										}
-										if (LaskentaTyyppi.VALINTALASKENTA
-												.equals(laskentaTyyppi)) {
-											LOG.info("Muodostetaan VALINTALASKENTA");
-											return laskentaActorFactory
-													.createValintalaskentaActor(
-															uuid, haku,
-															parametritDTO,
-															erillishaku,
-															valinnanvaiheet,
-															hakukohdeJaOrganisaatio);
-										} else {
-											LOG.info(
-													"Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}",
-													laskentaAloitus
-															.getValinnanvaihe(),
-													laskentaAloitus
-															.getValintakoelaskenta());
-											return laskentaActorFactory
-													.createValintalaskentaJaValintakoelaskentaActor(
-															uuid, haku,
-															parametritDTO,
-															erillishaku,
-															valinnanvaiheet,
-															hakukohdeJaOrganisaatio);
-										}
-									}
-								}
-							}));
-				});
+    @ManagedOperation
+    public void resetActorCounter() {
+        laskennanKaynnistajaActor.tell(new ResetWorkerCount(), ActorRef.noSender());
+    }
 
-	}
+    @Override
+    public void workAvailable() {
+        laskennanKaynnistajaActor.tell(new WorkAvailable(), ActorRef.noSender());
+    }
 
-	@Override
-	public List<Laskenta> ajossaOlevatLaskennat() {
-		return laskentaSupervisor.ajossaOlevatLaskennat();
-	}
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        laskennanKaynnistajaActor.tell(new StartAllWorkers(), ActorRef.noSender());
+    }
 
-	@Override
-	public Laskenta haeLaskenta(String uuid) {
-		return laskentaSupervisor.haeLaskenta(uuid);
-	}
+    @Override
+    public void suoritaValintalaskentaKerralla(final HakuV1RDTO haku, final ParametritDTO parametritDTO, final LaskentaStartParams laskentaStartParams) {
+        LaskentaActor laskentaActor = laskentaActorFactory.createLaskentaActor(this, haku, new LaskentaActorParams(laskentaStartParams, parametritDTO));
+        startLaskentaActor(laskentaStartParams, laskentaActor);
+    }
 
-	/**
-	 * Tilapainen workaround resurssin valinnanvaiheen normalisointiin.
-	 */
-	private Integer asValinnanvaihe(Integer valinnanvaihe) {
-		if (HAE_KAIKKI_VALINNANVAIHEET.equals(valinnanvaihe)) {
-			return null;
-		} else {
-			return valinnanvaihe;
-		}
-	}
+    @Override
+    public List<Laskenta> runningLaskentas() {
+        return Lists.newArrayList(runningLaskentas.values());
+    }
 
-	/**
-	 * Tilapainen workaround resurssin syotteiden normalisointiin
-	 */
-	private LaskentaTyyppi asLaskentaTyyppi(LaskentaAloitus l) {
-		if (Boolean.TRUE.equals(l.getValintakoelaskenta())) {
-			return LaskentaTyyppi.VALINTAKOELASKENTA;
-		} else {
-			if (l.getValinnanvaihe() == null) {
-				return LaskentaTyyppi.KAIKKI;
-			} else {
-				return LaskentaTyyppi.VALINTALASKENTA;
-			}
-		}
-	}
+    @Override
+    public Laskenta fetchLaskenta(String uuid) {
+        return runningLaskentas.get(uuid);
+    }
 
+    @Override
+    public void ready(String uuid) {
+        LOG.info("Ilmoitettu actor valmiiksi laskennalle (" + uuid + ")");
+        LaskentaActorWrapper actorWrapper = runningLaskentas.remove(uuid);
+        stopActor(uuid, actorWrapper.laskentaActor());
+    }
+
+    public void fetchAndStartLaskenta() {
+        seurantaAsyncResource.otaSeuraavaLaskentaTyonAlle(
+                this::startLaskentaIfWorkAvailable,
+                (Throwable t) -> {
+                    String message = "Uutta laskentaa ei saatu tyon alle seurannasta.";
+                    LOG.error(message, t);
+                    throw new RuntimeException(message, t);
+                });
+    }
+
+    private void startLaskentaIfWorkAvailable(String uuid) {
+        if (uuid == null) {
+            LOG.info("Ei laskettavaa");
+            laskennanKaynnistajaActor.tell(new NoWorkAvailable(), ActorRef.noSender());
+        } else {
+            LOG.info("Luodaan ja aloitetaan Laskenta uuid:lle {}", uuid);
+            laskentaStarter.fetchLaskentaParams(
+                    laskennanKaynnistajaActor,
+                    uuid,
+                    (haku, params) -> startLaskentaActor(params.getLaskentaStartParams(), laskentaActorFactory.createLaskentaActor(this, haku, params))
+            );
+        }
+    }
+
+    protected void startLaskentaActor(LaskentaStartParams params, LaskentaActor laskentaActor) {
+        String uuid = params.getUuid();
+        String hakuOid = params.getHakuOid();
+
+        try {
+            laskentaActor.start();
+        } catch (Exception e) {
+            LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid, e);
+        }
+
+        runningLaskentas.merge(uuid, new LaskentaActorWrapper(params, laskentaActor), (LaskentaActorWrapper oldValue, LaskentaActorWrapper value) -> {
+            LOG.warn("\r\n###\r\n### Laskenta uuid:lle {} haulle {} oli jo kaynnissa! Lopetataan vanha laskenta!\r\n###", uuid, hakuOid);
+            stopActor(uuid, oldValue.laskentaActor());
+            return value;
+        });
+    }
+
+    private void stopActor(String uuid, LaskentaActor actor) {
+        LOG.info("Pysaytetaan actor laskennalle (" + uuid + ")");
+        laskennanKaynnistajaActor.tell(new WorkerAvailable(), ActorRef.noSender());
+        if (actor != null) {
+            try {
+                TypedActor.get(actorSystem).poisonPill(actor);
+                LOG.info("PoisonPill lahetetty onnistuneesti Actorille " + uuid);
+            } catch (Exception e) {
+                LOG.error("PoisonPill lahetys epaonnistui Actorille " + uuid, e);
+            }
+        } else {
+            LOG.warn("Yritettiin sammuttaa laskenta " + uuid + ", mutta laskenta ei ollut enaa ajossa!");
+        }
+    }
 }

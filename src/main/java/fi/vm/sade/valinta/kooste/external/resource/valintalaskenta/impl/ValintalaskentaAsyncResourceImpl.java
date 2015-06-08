@@ -1,22 +1,8 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.google.common.reflect.TypeToken;
-
-import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.Callback;
+import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
@@ -24,7 +10,20 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import rx.Observable;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * 
@@ -33,11 +32,12 @@ import rx.Observable;
  */
 @Service
 public class ValintalaskentaAsyncResourceImpl extends HttpResource implements ValintalaskentaAsyncResource {
+	private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaAsyncResourceImpl.class);
 	@Autowired
 	public ValintalaskentaAsyncResourceImpl(
 			@Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}") String address
 	) {
-		super(address, TimeUnit.HOURS.toMillis(20));
+		super(address, TimeUnit.HOURS.toMillis(8));
 	}
 
 	@Override
@@ -79,6 +79,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 									failureCallback, new TypeToken<String>() {
 									}.getType())));
 		} catch (Exception e) {
+			LOG.error("Virhe laskennan kutsussa",e);
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
@@ -99,6 +100,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 									failureCallback, new TypeToken<String>() {
 							}.getType())));
 		} catch (Exception e) {
+			LOG.error("Virhe laske kaikki kutsussa",e);
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
@@ -120,6 +122,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 											new TypeToken<String>() {
 											}.getType())));
 		} catch (Exception e) {
+			LOG.error("Virhe laske ja sijoittele kutsussa",e);
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
@@ -140,6 +143,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 									failureCallback, new TypeToken<String>() {
 									}.getType())));
 		} catch (Exception e) {
+			LOG.error("Virhe valintakoe kutsussa",e);
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}

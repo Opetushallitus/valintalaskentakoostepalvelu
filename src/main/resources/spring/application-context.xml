@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
-	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:jaxws="http://cxf.apache.org/jaxws"
-	xmlns:jaxrs-client="http://cxf.apache.org/jaxrs-client" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
-	xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
-	xmlns:http="http://cxf.apache.org/transports/http/configuration"
-	xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
+	   xmlns:beans="http://www.springframework.org/schema/beans" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	   xmlns:jaxrs-client="http://cxf.apache.org/jaxrs-client" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+	   xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
+	   xmlns:http="http://cxf.apache.org/transports/http/configuration"
+	   xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
            http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
@@ -16,17 +16,18 @@
            http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd">
 
 	<ctx:annotation-config />
+	<ctx:mbean-export/>
 
 	<import resource="classpath:META-INF/cxf/cxf.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
 
 	<beans  profile="default">
 		<ctx:property-placeholder
-			location="classpath:META-INF/kela.properties, classpath:META-INF/valintalaskentakoostepalvelu.properties, classpath:META-INF/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valinta.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/override.properties"
-			ignore-resource-not-found="true" properties-ref="defaultProps" />
+				location="classpath:META-INF/kela.properties, classpath:META-INF/valintalaskentakoostepalvelu.properties, classpath:META-INF/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valinta.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/override.properties"
+				ignore-resource-not-found="true" properties-ref="defaultProps" />
 
 		<bean id="defaultProps"
-			class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			  class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 			<property name="properties">
 				<util:properties local-override="true">
 					<prop key="cas_mode">front</prop>
@@ -190,9 +191,9 @@
 
 		<!-- CAS:ittomat palvelukutsut -->
 		<jaxrs-client:client id="KelaServiceRestClient"
-			address="${valintalaskentakoostepalvelu.rajapinnat.kela-service.rest.url:not_defined}"
-			serviceClass="fi.vm.sade.organisaatio.resource.api.KelaResource"
-			inheritHeaders="true">
+							 address="${valintalaskentakoostepalvelu.rajapinnat.kela-service.rest.url:not_defined}"
+							 serviceClass="fi.vm.sade.organisaatio.resource.api.KelaResource"
+							 inheritHeaders="true">
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
@@ -226,26 +227,26 @@
 			</jaxrs-client:providers>
 		</jaxrs-client:client>
 		<jaxrs-client:client id="KoodistoServiceRestClient"
-			address="${valintalaskentakoostepalvelu.koodisto.rest.url}"
-			serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.KoodistoJsonRESTResource"
-			inheritHeaders="true">
+							 address="${valintalaskentakoostepalvelu.koodisto.rest.url}"
+							 serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.KoodistoJsonRESTResource"
+							 inheritHeaders="true">
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
 		</jaxrs-client:client>
 		<jaxrs-client:client id="HakukohdeV1ResourceClient"
-			address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
-			serviceClass="fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper"
-			inheritHeaders="true">
+							 address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
+							 serviceClass="fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1ResourceWrapper"
+							 inheritHeaders="true">
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
 		</jaxrs-client:client>
 		<jaxws:client id="tarjontaServiceClient"
-			serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
-			address="${valintalaskentakoostepalvelu.tarjontaService.url}">
+					  serviceClass="fi.vm.sade.tarjonta.service.TarjontaPublicService"
+					  address="${valintalaskentakoostepalvelu.tarjontaService.url}">
 		</jaxws:client>
 
 		<bean id="redeliveryPolicy" class="org.apache.camel.processor.RedeliveryPolicy">
@@ -262,17 +263,17 @@
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.komponentti" />
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.sijoittelu.route.impl" />
 		<bean id="SijoitteluAktivointiResource"
-			class="fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluAktivointiResource" />
+			  class="fi.vm.sade.valinta.kooste.sijoittelu.resource.SijoitteluAktivointiResource" />
 
 		<!-- Valintalaskennan tulokset (Excel) -->
 		<ctx:component-scan
-			base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti" />
+				base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti" />
 		<ctx:component-scan
-			base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.impl" />
+				base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.impl" />
 		<ctx:component-scan
 				base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.service" />
 		<ctx:component-scan
-			base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.resource" />
+				base-package="fi.vm.sade.valinta.kooste.valintalaskentatulos.resource" />
 
 		<!-- Tarjonta reitit -->
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
@@ -280,13 +281,13 @@
 
 		<!-- Valintatieto -->
 		<ctx:component-scan
-			base-package="fi.vm.sade.valinta.kooste.valintatieto.komponentti" />
+				base-package="fi.vm.sade.valinta.kooste.valintatieto.komponentti" />
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintatieto.route.impl" />
 
 		<!-- Parametrit -->
 		<bean id="ParametritResource" class="fi.vm.sade.valinta.kooste.parametrit.resource.ParametritResource" />
 		<bean
-			class="fi.vm.sade.valinta.kooste.parametrit.service.impl.ParametriServiceImpl" />
+				class="fi.vm.sade.valinta.kooste.parametrit.service.impl.ParametriServiceImpl" />
 		<bean id="parametrit" class="fi.vm.sade.valinta.kooste.parametrit.Parametrit">
 			<property name="koetuloksetAlkupvm" value="${koetulokset.alkupvm}" />
 			<property name="koetuloksetLoppupvm" value="${koetulokset.loppupvm}" />
@@ -296,38 +297,39 @@
 		</bean>
 		<!-- Sijoitteluntulokset haulle -->
 		<bean id="SijoittelunTulosHaulleResource"
-			class="fi.vm.sade.valinta.kooste.sijoitteluntulos.resource.SijoittelunTulosHaulleResource" />
+			  class="fi.vm.sade.valinta.kooste.sijoitteluntulos.resource.SijoittelunTulosHaulleResource" />
 		<ctx:component-scan
-			base-package="fi.vm.sade.valinta.kooste.sijoitteluntulos.route.impl" />
+				base-package="fi.vm.sade.valinta.kooste.sijoitteluntulos.route.impl" />
 		<!-- Valintatapajono -->
 		<bean id="ValintatapajonoResource"
-			class="fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResource" />
+			  class="fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResource" />
 		<ctx:component-scan
-			base-package="fi.vm.sade.valinta.kooste.valintatapajono" />
+				base-package="fi.vm.sade.valinta.kooste.valintatapajono" />
 		<!-- Pistesyotto -->
 		<bean id="PistesyottoResource"
-			class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
+			  class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
 		<bean id="PistesyottoTuontiService"
 			  class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService" />
 		<bean id="PistesyottoVientiService"
 			  class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService" />
 		<!-- Valintalaskenta -->
 		<bean id="ValintalaskentaKerrallaResource"
-			class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource" />
+			  class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource" />
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.actor" />
+		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.resource" />
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
 
 		<!-- Viestintapalvelu -->
 		<ctx:component-scan
-			base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti" />
+				base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti" />
 		<ctx:component-scan
-			base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl" />
+				base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl" />
 		<ctx:component-scan
 				base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.service" />
 		<bean id="ViestintapalveluAktivointiResource"
-			class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluAktivointiResource" />
+			  class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluAktivointiResource" />
 		<bean id="DokumenttiProsessiResource"
-			class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.DokumenttiProsessiResource" />
+			  class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.DokumenttiProsessiResource" />
 
 		<!-- Kela Export -->
 		<bean class="fi.vm.sade.valinta.kooste.kela.route.impl.KelaRouteConfig" />
@@ -338,39 +340,39 @@
 
 		<!-- Haku Import -->
 		<bean
-			class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti" />
+				class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti" />
 		<bean
-			class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti" />
+				class="fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti" />
 		<bean id="HakuImportResource" class="fi.vm.sade.valinta.kooste.hakuimport.resource.HakuImportResource" />
 		<bean
-			class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteConfig" />
+				class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteConfig" />
 		<bean
-			class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteImpl" />
+				class="fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteImpl" />
 
 		<!--Koodisto -->
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.koodisto.impl.KoodistoAsyncResourceImpl" />
 		<bean id="KoodistoCachedAsyncResource"
-				class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource" />
+			  class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource" />
 		<!-- Seuranta Async -->
 		<bean
-			class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.DokumentinSeurantaAsyncResourceImpl" />
+				class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.DokumentinSeurantaAsyncResourceImpl" />
 		<bean
 				class="fi.vm.sade.valinta.kooste.external.resource.seuranta.impl.LaskentaSeurantaAsyncResourceImpl" />
 		<!-- Dokumenttipalvelu Async -->
 		<bean class="fi.vm.sade.valinta.kooste.external.resource.dokumentti.impl.DokumenttiAsyncResourceImpl" />
 		<!-- Valintaperusteet Async -->
 		<bean
-			class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl" />
+				class="fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl" />
 		<!-- HakuApp Async -->
 		<bean
-			class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl" />
+				class="fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl" />
 		<!-- Tarjonta Async -->
 		<bean
-			class="fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl" />
+				class="fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl" />
 		<!-- Valintalaskenta Async -->
 		<bean
-			class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaAsyncResourceImpl" />
+				class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaAsyncResourceImpl" />
 
 		<!-- Suoritusrekisteri (SURE) Async -->
 		<bean
@@ -381,38 +383,38 @@
 				class="fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.impl.OhjausparametritAsyncResourceImpl" />
 		<!-- Sijoittelu Async -->
 		<bean
-			class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteleAsyncResourceImpl" />
+				class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteleAsyncResourceImpl" />
 		<bean
-			class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteluAsyncResourceImpl" />
+				class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteluAsyncResourceImpl" />
 		<bean
-			class="fi.vm.sade.valinta.kooste.external.resource.authentication.impl.HenkiloAsyncResourceImpl" />
+				class="fi.vm.sade.valinta.kooste.external.resource.authentication.impl.HenkiloAsyncResourceImpl" />
 		<bean
-			class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.TilaAsyncResourceImpl" />
+				class="fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.TilaAsyncResourceImpl" />
 		<!-- Vipa Async -->
 		<bean
-			class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.ViestintapalveluAsyncResourceImpl" />
+				class="fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.ViestintapalveluAsyncResourceImpl" />
 		<bean
-			class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaValintakoeAsyncResourceImpl" />
+				class="fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaValintakoeAsyncResourceImpl" />
 
 		<bean class="fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl.OrganisaatioAsyncResourceImpl" />
 		<!-- Valinta Tulos Service Async -->
 		<bean
-			class="fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl" />
+				class="fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl" />
 
 		<bean id="ErillishakuProxyResource"
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.ErillishakuProxyResource"/>
 		<!-- Swagger -->
 		<!-- Swagger API listing resource -->
 		<bean id="swaggerResourceJSON"
-			class="com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON" />
+			  class="com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON" />
 
 		<!-- Swagger writers -->
 		<bean id="resourceWriter"
-			class="com.wordnik.swagger.jaxrs.listing.ResourceListingProvider"
-			scope="singleton" />
+			  class="com.wordnik.swagger.jaxrs.listing.ResourceListingProvider"
+			  scope="singleton" />
 		<bean id="apiWriter"
-			class="com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider"
-			scope="singleton" />
+			  class="com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider"
+			  scope="singleton" />
 
 		<!-- Swagger configuration -->
 		<bean id="swaggerConfig" class="com.wordnik.swagger.jaxrs.config.BeanConfig">

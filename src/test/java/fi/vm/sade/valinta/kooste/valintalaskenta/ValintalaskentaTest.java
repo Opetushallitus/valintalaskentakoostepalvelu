@@ -10,6 +10,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaStarter;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -32,7 +36,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaAloitus;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
@@ -63,13 +67,18 @@ public class ValintalaskentaTest {
 		ValintalaskentaAsyncResource valintalaskentaAsyncResource = createMockValintalaskentaAsyncResource();
 		ApplicationAsyncResource applicationAsyncResource = createMockApplicationAsyncResource();
 		SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = createMockSuoritusrekisteriAsyncResource();
-		LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(
-				seurantaAsyncResource, valintaperusteetAsyncResource,
-				valintalaskentaAsyncResource, applicationAsyncResource,
-				suoritusrekisteriAsyncResource);
+		TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
+        OhjausparametritAsyncResource ohjausparametritAsyncResource = mock(OhjausparametritAsyncResource.class);
+		LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(seurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource, valintaperusteetAsyncResource,seurantaAsyncResource, tarjontaAsyncResource), new LaskentaActorFactory(
+				valintalaskentaAsyncResource,
+				applicationAsyncResource,
+				valintaperusteetAsyncResource,
+				seurantaAsyncResource,
+				suoritusrekisteriAsyncResource
+		), 8);
 
 		ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute = laskentaActorSystem;
-		LaskentaAloitus laskentaJaHaku = new LaskentaAloitus(uuid, hakuOid,false,
+		LaskentaStartParams laskentaJaHaku = new LaskentaStartParams(uuid, hakuOid,false,
 				null, null, hakukohdeOids, LaskentaTyyppi.HAKUKOHDE);
 		valintalaskentaKerrallaRoute
 				.suoritaValintalaskentaKerralla(hakuDTO, null, laskentaJaHaku);

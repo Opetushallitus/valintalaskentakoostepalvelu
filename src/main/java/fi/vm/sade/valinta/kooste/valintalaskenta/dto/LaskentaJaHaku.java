@@ -8,10 +8,10 @@ import java.util.List;
  * 
  */
 public class LaskentaJaHaku {
-	private final LaskentaAloitus laskenta;
+	private final LaskentaStartParams laskenta;
 	private final List<String> hakukohdeOids;
 
-	public LaskentaJaHaku(LaskentaAloitus laskenta, List<String> hakukohdeOids) {
+	public LaskentaJaHaku(LaskentaStartParams laskenta, List<String> hakukohdeOids) {
 		this.laskenta = laskenta;
 		this.hakukohdeOids = hakukohdeOids;
 	}
@@ -20,7 +20,7 @@ public class LaskentaJaHaku {
 		return hakukohdeOids;
 	}
 
-	public LaskentaAloitus getLaskenta() {
+	public LaskentaStartParams getLaskenta() {
 		return laskenta;
 	}
 }
