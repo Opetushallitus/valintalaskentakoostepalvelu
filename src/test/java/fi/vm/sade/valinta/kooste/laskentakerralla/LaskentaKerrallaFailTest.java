@@ -5,7 +5,6 @@ import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
-import junit.framework.Assert;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -25,6 +24,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -38,7 +38,6 @@ public class LaskentaKerrallaFailTest {
 
     @Autowired
     ValintalaskentaKerrallaResource valintalaskentaKerralla;
-
 
     @BeforeClass
     public static void resetMocks() {
@@ -91,6 +90,6 @@ public class LaskentaKerrallaFailTest {
         ArgumentCaptor<ResponseImpl> responseCaptor = ArgumentCaptor.forClass(ResponseImpl.class);
         verify(asyncResponse).resume(responseCaptor.capture());
 
-        Assert.assertEquals(500, responseCaptor.getValue().getStatus());
+        assertEquals(500, responseCaptor.getValue().getStatus());
     }
 }

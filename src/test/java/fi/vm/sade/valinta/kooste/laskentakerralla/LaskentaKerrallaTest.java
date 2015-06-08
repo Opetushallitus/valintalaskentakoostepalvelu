@@ -7,7 +7,6 @@ import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource;
 import fi.vm.sade.valinta.seuranta.dto.*;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
-import junit.framework.Assert;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -15,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -81,7 +81,7 @@ public class LaskentaKerrallaTest {
         verify(asyncResponse, times(1)).resume(isA(ResponseImpl.class));
         ArgumentCaptor<ResponseImpl> responseCaptor = ArgumentCaptor.forClass(ResponseImpl.class);
         verify(asyncResponse).resume(responseCaptor.capture());
-        Assert.assertEquals(200, responseCaptor.getValue().getStatus());
+        assertEquals(200, responseCaptor.getValue().getStatus());
 
         verify(Mocks.applicationAsyncResource, times(1)).getApplicationsByOid(eq(HAKU_OID), eq(HAKUKOHDE_OID), any(), any());
         verify(Mocks.suoritusrekisteriAsyncResource, times(1)).getOppijatByHakukohde(eq(HAKUKOHDE_OID), any(), any(), any());
@@ -90,9 +90,9 @@ public class LaskentaKerrallaTest {
         verify(Mocks.valintalaskentaAsyncResource, times(1)).laske(laskentaInputCaptor.capture(), any(), any());
 
         LaskeDTO laskeDTO = laskentaInputCaptor.getValue();
-        Assert.assertEquals(1, laskeDTO.getHakemus().size());
-        Assert.assertEquals(PERSON_OID, laskeDTO.getHakemus().get(0).getHakijaOid());
-        Assert.assertEquals(HAKUKOHDE_OID, laskeDTO.getHakukohdeOid());
+        assertEquals(1, laskeDTO.getHakemus().size());
+        assertEquals(PERSON_OID, laskeDTO.getHakemus().get(0).getHakijaOid());
+        assertEquals(HAKUKOHDE_OID, laskeDTO.getHakukohdeOid());
 
         verify(Mocks.laskentaSeurantaAsyncResource, times(1)).merkkaaHakukohteenTila(LASKENTASEURANTA_ID, HAKUKOHDE_OID, HakukohdeTila.VALMIS);
     }
