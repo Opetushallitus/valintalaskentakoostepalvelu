@@ -136,7 +136,8 @@ public class HyvaksymiskirjeetKomponentti {
 					.get(hakukohdeOid);
 			koulu = metakohde.getTarjoajaNimi();
 			koulutus = metakohde.getHakukohdeNimi();
-			preferoituKielikoodi = metakohde.getHakukohteenNonEmptyKieli();// KieliUtil.SUOMI;
+			//preferoituKielikoodi = metakohde.getHakukohteenNonEmptyKieli();// KieliUtil.SUOMI;
+            preferoituKielikoodi = metakohde.getOpetuskieli();
 		}
 		final Map<fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
 		tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HARKINNANVARAISESTI_HYVAKSYTTY, 1);
