@@ -59,13 +59,6 @@ public class LaskentaKerrallaTest {
     @Test
     public void testOnnistunutLaskenta() throws InterruptedException {
         AsyncResponse asyncResponse = mock(AsyncResponse.class);
-        final Object signal = new Object();
-        doAnswer(invocation -> {
-            synchronized (signal) {
-                signal.notify();
-            }
-            return null;
-        }).when(Mocks.laskentaActorSystem).ready(any());
         releaseWorkerAfterStartupReservesThemAll();
         valintalaskentaKerralla.valintalaskentaHaulle(
             HAKU_OID,
@@ -76,9 +69,7 @@ public class LaskentaKerrallaTest {
             false,
             new ArrayList(),
             asyncResponse);
-        synchronized (signal) {
-            signal.wait(10000);
-        }
+
         verify(asyncResponse, times(1)).resume(isA(ResponseImpl.class));
         ArgumentCaptor<ResponseImpl> responseCaptor = ArgumentCaptor.forClass(ResponseImpl.class);
         verify(asyncResponse).resume(responseCaptor.capture());

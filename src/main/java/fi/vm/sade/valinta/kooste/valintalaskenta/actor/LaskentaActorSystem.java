@@ -127,17 +127,18 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         String uuid = params.getUuid();
         String hakuOid = params.getHakuOid();
 
-        try {
-            laskentaActor.start();
-        } catch (Exception e) {
-            LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid, e);
-        }
-
         runningLaskentas.merge(uuid, new LaskentaActorWrapper(params, laskentaActor), (LaskentaActorWrapper oldValue, LaskentaActorWrapper value) -> {
             LOG.warn("\r\n###\r\n### Laskenta uuid:lle {} haulle {} oli jo kaynnissa! Lopetataan vanha laskenta!\r\n###", uuid, hakuOid);
             stopActor(uuid, oldValue.laskentaActor());
             return value;
         });
+
+        try {
+            laskentaActor.start();
+        } catch (Exception e) {
+            runningLaskentas.remove(uuid);
+            LOG.error("\r\n###\r\n### Laskenta uuid:lle {} haulle {} ei kaynnistynyt!\r\n###", uuid, hakuOid, e);
+        }
     }
 
     private void stopActor(String uuid, LaskentaActor actor) {
