@@ -35,8 +35,8 @@ import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaS
  */
 @Service
 @ManagedResource(
-        objectName="bean:name=OPH",
-        description="OPH"
+        objectName = "bean:name=OPH",
+        description = "OPH"
 )
 public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo, ValintalaskentaKerrallaRoute, LaskentaSupervisor, ApplicationListener<ContextRefreshedEvent> {
     private final static Logger LOG = LoggerFactory.getLogger(LaskentaActorSystem.class);
@@ -51,8 +51,8 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
     @Autowired
     public LaskentaActorSystem(LaskentaSeurantaAsyncResource seurantaAsyncResource,
-							   LaskentaStarter laskentaStarter,
-							   LaskentaActorFactory laskentaActorFactory,
+                               LaskentaStarter laskentaStarter,
+                               LaskentaActorFactory laskentaActorFactory,
                                @Value("${valintalaskentakoostepalvelu.maxWorkerCount:8}") int maxWorkers) {
         this.laskentaActorFactory = laskentaActorFactory;
         this.laskentaStarter = laskentaStarter;
@@ -94,7 +94,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
     @Override
     public void ready(String uuid) {
-        LOG.info("Ilmoitettu actor valmiiksi laskennalle ("+uuid+")");
+        LOG.info("Ilmoitettu actor valmiiksi laskennalle (" + uuid + ")");
         LaskentaActorWrapper actorWrapper = runningLaskentas.remove(uuid);
         stopActor(uuid, actorWrapper.laskentaActor());
     }
@@ -118,7 +118,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
             laskentaStarter.fetchLaskentaParams(
                     laskennanKaynnistajaActor,
                     uuid,
-					(haku, params) -> startLaskentaActor(params.getLaskentaStartParams(), laskentaActorFactory.createLaskentaActor(this, haku, params))
+                    (haku, params) -> startLaskentaActor(params.getLaskentaStartParams(), laskentaActorFactory.createLaskentaActor(this, haku, params))
             );
         }
     }
@@ -141,7 +141,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     }
 
     private void stopActor(String uuid, LaskentaActor actor) {
-        LOG.info("Pysaytetaan actor laskennalle ("+uuid+")");
+        LOG.info("Pysaytetaan actor laskennalle (" + uuid + ")");
         laskennanKaynnistajaActor.tell(new WorkerAvailable(), ActorRef.noSender());
         if (actor != null) {
             try {
