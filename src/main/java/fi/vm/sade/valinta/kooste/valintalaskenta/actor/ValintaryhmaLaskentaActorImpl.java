@@ -48,7 +48,6 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
                 LOG.info("Hakukohteen {} laskentapalvelukutsu oli peruutettu", pkk.getHakukohdeOid());
                 merkkaaLaskennanTila(uuid, laskentaSeurantaAsyncResource, pkk);
             } else {
-                LOG.info("Aloitetaan valintaryhman laskenta!");
                 laskentaStrategia.laitaPalvelukutsuJonoon(pkk, p -> merkkaaLaskennanTila(uuid, laskentaSeurantaAsyncResource, pkk));
                 laskentaStrategia.aloitaUusiPalvelukutsu();
             }
@@ -73,7 +72,6 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
 
     @Override
     public void postStop() {
-        LOG.info("PostStop kutsuttu actorille {}", uuid);
         if (!valmis.get()) {
             try {
                 LOG.info("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
@@ -102,9 +100,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
     }
 
     private boolean viimeisteleLaskentaJaPalautaOlikoJoViimeistelty() {
-        boolean edellinenTila = valmis.getAndSet(true);
-        LOG.info("Laskennan viimeistely, edellinen tila oli + edellinenTila");
-        return edellinenTila;
+        return valmis.getAndSet(true);
     }
 
     public void start() {
