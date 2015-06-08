@@ -71,7 +71,7 @@ public class LaskentaKerrallaFailTest {
                     asyncResponse);
         } catch (Throwable t) { }
 
-        verify(Mocks.laskentaSeurantaAsyncResource, times(1)).otaSeuraavaLaskentaTyonAlle(any(), any());
+        verify(Mocks.laskentaSeurantaAsyncResource, times(8)).otaSeuraavaLaskentaTyonAlle(any(), any());
         verifyNoMoreInteractions(Mocks.laskentaSeurantaAsyncResource);
         verifyZeroInteractions(Mocks.applicationAsyncResource);
         verifyZeroInteractions(Mocks.ohjausparametritAsyncResource);

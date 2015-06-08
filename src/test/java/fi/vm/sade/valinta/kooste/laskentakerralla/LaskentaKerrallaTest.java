@@ -66,6 +66,7 @@ public class LaskentaKerrallaTest {
             }
             return null;
         }).when(Mocks.laskentaActorSystem).ready(any());
+        releaseWorkerAfterStartupReservesThemAll();
         valintalaskentaKerralla.valintalaskentaHaulle(
             HAKU_OID,
             false,
@@ -95,6 +96,10 @@ public class LaskentaKerrallaTest {
         Assert.assertEquals(HAKUKOHDE_OID, laskeDTO.getHakukohdeOid());
 
         verify(Mocks.laskentaSeurantaAsyncResource, times(1)).merkkaaHakukohteenTila(LASKENTASEURANTA_ID, HAKUKOHDE_OID, HakukohdeTila.VALMIS);
+    }
+
+    private void releaseWorkerAfterStartupReservesThemAll() {
+        Mocks.laskentaActorSystem.resetActorCounter();
     }
 
     @Before
