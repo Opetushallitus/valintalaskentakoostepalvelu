@@ -100,7 +100,8 @@ public class KelaHaku extends KelaAbstraktiHaku {
 										|| 	valintapaivamaara.compareTo(loppuPvm)>=0){
 									return;
 								}
-								String organisaatioOid = hakutoive.getTarjoajaOid();
+								
+								String organisaatioOid = hakukohdeSource.getHakukohdeByOid(hakukohdeOid).getTarjoajaOid();
 								String oppilaitosnumero = "XXXXX";
 								
 								if (organisaatioOid==null || organisaatioOid.equalsIgnoreCase("undefined")) {
