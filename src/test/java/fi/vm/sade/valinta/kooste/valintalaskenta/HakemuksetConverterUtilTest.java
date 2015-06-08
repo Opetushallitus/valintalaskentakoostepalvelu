@@ -44,6 +44,12 @@ public class HakemuksetConverterUtilTest {
                     .setYksilollistaminen("Ei")
                     .setValmistuminen(HAKUKAUDELLA).setValmis()
                     .done();
+    private static final SuoritusJaArvosanat vahvistamatonPerusopetusValmisEiHakukaudella =
+            new SuoritusrekisteriSpec.SuoritusBuilder()
+                    .setPerusopetus().setVahvistettu(false)
+                    .setYksilollistaminen("Ei")
+                    .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA).setValmis()
+                    .done();
     private static final SuoritusJaArvosanat vahvistamatonYksilollistettuPerusopetusValmisHakukaudella =
             new SuoritusrekisteriSpec.SuoritusBuilder()
                     .setPerusopetus().setVahvistettu(false)
@@ -660,6 +666,26 @@ public class HakemuksetConverterUtilTest {
         HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), o, h);
         Assert.assertEquals(PohjakoulutusToinenAste.YKSILOLLISTETTY, getFirstHakemusArvo(h, "POHJAKOULUTUS"));
         Assert.assertEquals("2015", getFirstHakemusArvo(h, "PK_PAATTOTODISTUSVUOSI"));
+    }
+
+    @Test
+    public void pohjakoulutusHakemukseltaJosVainLisapistekoulutusVahvistettuValmis() {
+        HakemusDTO h = new HakemusDTO();
+        h.setHakijaOid("1.2.3.4.5.6");
+        h.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+            this.add(new AvainArvoDTO("PK_PAATTOTODISTUSVUOSI", "2012"));
+            this.add(new AvainArvoDTO(Lisapistekoulutus.LISAKOULUTUS_AMMATTISTARTTI.name(), "true"));
+        }});
+        Oppija o = new Oppija();
+        o.setSuoritukset(new ArrayList<SuoritusJaArvosanat>() {{
+            add(vahvistettuAmmattistarttiValmisHakukaudella);
+            add(vahvistamatonPerusopetusValmisEiHakukaudella);
+        }});
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), o, h);
+        Assert.assertEquals(PohjakoulutusToinenAste.PERUSKOULU, getFirstHakemusArvo(h, "POHJAKOULUTUS"));
+        Assert.assertEquals("2012", getFirstHakemusArvo(h, "PK_PAATTOTODISTUSVUOSI"));
+        Assert.assertEquals("true", getFirstHakemusArvo(h, Lisapistekoulutus.LISAKOULUTUS_AMMATTISTARTTI.name()));
     }
 
     @Test

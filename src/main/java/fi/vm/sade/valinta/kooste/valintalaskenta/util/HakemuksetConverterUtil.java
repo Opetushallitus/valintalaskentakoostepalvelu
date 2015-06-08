@@ -210,9 +210,6 @@ public class HakemuksetConverterUtil {
                 .map(SuoritusJaArvosanatWrapper::wrap)
                 .collect(toList());
 
-        if (suorituksetRekisterista.isEmpty()) {
-            return Optional.of(pohjakoulutusHakemukselta);
-        }
         if (suorituksetRekisterista.stream()
                 .anyMatch(s -> s.isLukio() && s.isKeskeytynyt() && hakukaudella(haku, s))) {
             LOG.error("Hakijan {} lukio keskeytynyt hakukaudella. Käytetään hakemuksen pohjakoulutusta {}.",
@@ -270,7 +267,7 @@ public class HakemuksetConverterUtil {
                         .anyMatch(s -> s.isUlkomainenKorvaava() && s.isVahvistettu() && s.isValmis())) {
             return Optional.of(PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO);
         }
-        return Optional.of(PohjakoulutusToinenAste.KESKEYTYNYT);
+        return Optional.of(pohjakoulutusHakemukselta);
     }
 
     public static List<SuoritusJaArvosanat> pohjakoulutuksenSuoritukset(String pohjakoulutus,
