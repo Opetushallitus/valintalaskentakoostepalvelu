@@ -44,7 +44,7 @@ public class LaskuriTest {
 		HakukohdeLaskuri hakukohdeLaskuri = new HakukohdeLaskuri(oids.size());
 		final AtomicBoolean valmis = new AtomicBoolean(false);
 		oids.forEach(o -> {
-			if (hakukohdeLaskuri.done(o, "")) {
+			if (hakukohdeLaskuri.done(o)) {
 				if (!valmis.compareAndSet(false, true)) {
 					Assert.fail("Laskuri vaitti tyon valmistuneen kahdesti!");
 				}

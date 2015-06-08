@@ -14,8 +14,7 @@ import com.google.common.hash.Funnels;
  * 
  */
 public class HakukohdeLaskuri extends Laskuri {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(HakukohdeLaskuri.class);
+	private static final Logger LOG = LoggerFactory.getLogger(HakukohdeLaskuri.class);
 	private final BloomFilter<CharSequence> duplicateChecker;
 
 	public HakukohdeLaskuri(int hakukohteita) {
@@ -24,7 +23,7 @@ public class HakukohdeLaskuri extends Laskuri {
 				Funnels.stringFunnel(Charset.forName("UTF-8")), hakukohteita);
 	}
 
-	public boolean done(String hakukohdeOid, String laskentaUuid) {
+	public boolean done(String hakukohdeOid) {
 		try {
 			if (!duplicateChecker.put(hakukohdeOid)) {
 				LOG.error(
@@ -43,7 +42,6 @@ public class HakukohdeLaskuri extends Laskuri {
 			return false;
 		}
 		boolean ready = l == 0;
-		LOG.info("Hakukohde {} laskennalle {} done: {}", hakukohdeOid, laskentaUuid, ready);
 		return ready;
 	}
 
