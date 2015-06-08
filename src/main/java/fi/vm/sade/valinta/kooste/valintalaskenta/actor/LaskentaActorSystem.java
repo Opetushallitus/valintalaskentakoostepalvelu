@@ -94,7 +94,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
     @Override
     public void ready(String uuid) {
-        LOG.info("Ilmoitettu actor valmiiksi laskennalle (" + uuid + ")");
+        LOG.trace("Ilmoitettu actor valmiiksi laskennalle (" + uuid + ")");
         LaskentaActorWrapper actorWrapper = runningLaskentas.remove(uuid);
         stopActor(uuid, actorWrapper.laskentaActor());
     }
@@ -111,7 +111,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
 
     private void startLaskentaIfWorkAvailable(String uuid) {
         if (uuid == null) {
-            LOG.info("Ei laskettavaa");
+            LOG.trace("Ei laskettavaa");
             laskennanKaynnistajaActor.tell(new NoWorkAvailable(), ActorRef.noSender());
         } else {
             LOG.info("Luodaan ja aloitetaan Laskenta uuid:lle {}", uuid);
@@ -142,12 +142,12 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
     }
 
     private void stopActor(String uuid, LaskentaActor actor) {
-        LOG.info("Pysaytetaan actor laskennalle (" + uuid + ")");
+        LOG.trace("Pysaytetaan actor laskennalle (" + uuid + ")");
         laskennanKaynnistajaActor.tell(new WorkerAvailable(), ActorRef.noSender());
         if (actor != null) {
             try {
                 TypedActor.get(actorSystem).poisonPill(actor);
-                LOG.info("PoisonPill lahetetty onnistuneesti Actorille " + uuid);
+                LOG.trace("PoisonPill lahetetty onnistuneesti Actorille " + uuid);
             } catch (Exception e) {
                 LOG.error("PoisonPill lahetys epaonnistui Actorille " + uuid, e);
             }
