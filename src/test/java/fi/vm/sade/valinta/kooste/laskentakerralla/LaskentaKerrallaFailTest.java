@@ -22,6 +22,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static org.mockito.Matchers.any;
@@ -33,6 +34,7 @@ import static org.mockito.Mockito.*;
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class,
         DirtiesContextTestExecutionListener.class })
 public class LaskentaKerrallaFailTest {
+    private static final String LASKENTASEURANTA_ID = "laskentaseuranta.id";
 
     @Autowired
     ValintalaskentaKerrallaResource valintalaskentaKerralla;
@@ -44,8 +46,7 @@ public class LaskentaKerrallaFailTest {
     }
 
     @Before
-    public void build() {
-
+    public void yksiLaskentaTyonAlleJokaEpaonnistuu() {
         ArgumentCaptor<Consumer> argument = ArgumentCaptor.forClass(Consumer.class);
         when(Mocks.valintaperusteetAsyncResource.haunHakukohteet(any(), any(), argument.capture()))
             .thenAnswer(
@@ -54,6 +55,16 @@ public class LaskentaKerrallaFailTest {
                     return new PeruutettavaImpl(Futures.immediateFailedFuture(new Throwable("FAIL")));
                 }
             );
+
+        AtomicInteger seurantaCount = new AtomicInteger(0);
+        doAnswer(invocation -> {
+            if (seurantaCount.getAndIncrement() < 1)
+                ((Consumer<String>) invocation.getArguments()[0]).accept(LASKENTASEURANTA_ID);
+            else {
+                ((Consumer<String>) invocation.getArguments()[0]).accept(null);
+            }
+            return null;
+        }).when(Mocks.laskentaSeurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
     }
 
     @Test
@@ -71,8 +82,6 @@ public class LaskentaKerrallaFailTest {
                     asyncResponse);
         } catch (Throwable t) { }
 
-        verify(Mocks.laskentaSeurantaAsyncResource, times(8)).otaSeuraavaLaskentaTyonAlle(any(), any());
-        verifyNoMoreInteractions(Mocks.laskentaSeurantaAsyncResource);
         verifyZeroInteractions(Mocks.applicationAsyncResource);
         verifyZeroInteractions(Mocks.ohjausparametritAsyncResource);
         verifyZeroInteractions(Mocks.valintalaskentaAsyncResource);
