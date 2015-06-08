@@ -44,11 +44,6 @@ public class LaskentaKerrallaContext {
     }
 
     @Bean
-    public ValintalaskentaKerrallaRouteValvomo valintalaskentaKerrallaRouteValvomo() {
-        return Mocks.valintalaskentaKerrallaRouteValvomo;
-    }
-
-    @Bean
     public ValintaperusteetAsyncResource valintaperusteetAsyncResource() {
         return Mocks.valintaperusteetAsyncResource;
     }
@@ -89,7 +84,7 @@ public class LaskentaKerrallaContext {
     }
 
     @Bean
-    public ValintalaskentaKerrallaRoute valintalaskentaKerrallaRoute() {
+    public LaskentaActorSystem valintalaskentaKerrallaRoute() {
         return Mocks.laskentaActorSystem;
     }
 }
