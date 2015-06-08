@@ -30,7 +30,6 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Observable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
