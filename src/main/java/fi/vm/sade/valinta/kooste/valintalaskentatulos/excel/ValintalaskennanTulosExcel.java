@@ -5,10 +5,7 @@ import static java.util.Arrays.asList;
 import static org.apache.commons.lang.StringUtils.trimToEmpty;
 import static org.apache.commons.lang.StringUtils.trimToNull;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,10 +25,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatap
 
 public class ValintalaskennanTulosExcel {
     public static XSSFWorkbook luoExcel(HakuV1RDTO haku, final HakukohdeV1RDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet, final List<Hakemus> hakemukset) {
-        final HashMap<String, Hakemus> hakemusByOid = new HashMap<>();
-        for (Hakemus h: hakemukset) {
-            hakemusByOid.put(h.getOid(), h);
-        }
+        final Map<String, Hakemus> hakemusByOid = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
 
         XSSFWorkbook workbook = new XSSFWorkbook();
         valinnanVaiheet.stream()
@@ -50,9 +44,13 @@ public class ValintalaskennanTulosExcel {
                         addRow(sheet, "Jonolle ei ole valintalaskennan tuloksia");
                     } else {
                         addRow(sheet, columnHeaders);
-                        sortedJonosijat(jono).forEach(hakija ->
-                                        addRow(sheet, columns.stream().map(column -> column.extractor.apply(new HakemusRivi(hakija, hakemusByOid.getOrDefault(hakija.getHakemusOid(), emptyHakemus)))).collect(Collectors.toList()))
-                        );
+                        sortedJonosijat(jono).forEach(hakija -> {
+                            final HakemusRivi rivi = new HakemusRivi(hakija, hakemusByOid.getOrDefault(hakija.getHakemusOid(), emptyHakemus));
+                            final List<String> columnValues = columns.stream()
+                                    .map(column -> column.extractor.apply(rivi))
+                                    .collect(Collectors.toList());
+                            addRow(sheet, columnValues);
+                        });
                     }
                 }));
         return workbook;
