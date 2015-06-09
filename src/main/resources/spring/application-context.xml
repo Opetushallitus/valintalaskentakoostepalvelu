@@ -408,6 +408,9 @@
 
 		<bean id="ErillishakuProxyResource"
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.ErillishakuProxyResource"/>
+
+		<bean id="OppijanSuorituksetProxyResource"
+			  class="fi.vm.sade.valinta.kooste.proxy.resource.suoritukset.OppijanSuorituksetProxyResource"/>
 		<!-- Swagger -->
 		<!-- Swagger API listing resource -->
 		<bean id="swaggerResourceJSON"
@@ -442,6 +445,7 @@
 				<ref bean="ErillishakuResource"/>
 				<ref bean="HakuImportResource"/>
 				<ref bean="KelaResource"/>
+				<ref bean="OppijanSuorituksetProxyResource"/>
 				<ref bean="ParametritResource"/>
 				<ref bean="PistesyottoResource"/>
 				<ref bean="ErillishakuProxyResource"/>
