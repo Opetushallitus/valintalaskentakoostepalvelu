@@ -28,7 +28,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
             @Value("https://${host.virkailija}/suoritusrekisteri/j_spring_cas_security_check") String targetService,
             @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
             @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
-            @Value("${host.scheme}://${host.virkailija}") String address,
+            @Value("${host.scheme:https}://${host.virkailija}") String address,
             ApplicationContext context
     ) {
         super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(10));
