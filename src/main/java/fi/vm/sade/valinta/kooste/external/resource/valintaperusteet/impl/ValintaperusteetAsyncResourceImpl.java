@@ -142,6 +142,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 				"/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/" + hakukohdeOid,
 				new TypeToken<List<ValintaperusteetDTO>>() {
 				}.getType(), client -> {
+					client.accept(MediaType.APPLICATION_JSON_TYPE);
 					if (valinnanVaiheJarjestysluku != null) {
 						client.query("vaihe", valinnanVaiheJarjestysluku);
 					}

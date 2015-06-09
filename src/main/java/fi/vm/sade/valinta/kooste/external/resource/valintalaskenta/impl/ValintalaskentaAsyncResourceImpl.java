@@ -51,7 +51,10 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 				new TypeToken<String>() {
 				}.getType(),
 				Entity.entity(laskeDTO,
-						MediaType.APPLICATION_JSON_TYPE));
+						MediaType.APPLICATION_JSON_TYPE), client -> {
+					client.accept(MediaType.TEXT_PLAIN_TYPE);
+					return client;
+				});
 	}
 
 	@Override
