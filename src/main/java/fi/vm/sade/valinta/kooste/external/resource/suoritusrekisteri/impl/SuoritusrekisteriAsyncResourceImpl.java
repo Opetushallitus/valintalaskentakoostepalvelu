@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import rx.Observable;
 
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
@@ -32,6 +33,21 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
             ApplicationContext context
     ) {
         super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(10));
+    }
+
+    public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm) {
+        return getAsObservable(
+                "/suoritusrekisteri/rest/v1/oppijat",
+                new TypeToken<List<Oppija>>() {
+                }.getType(),
+                client -> {
+                    client.query("hakukohde", hakukohdeOid);
+                    if (referenssiPvm != null) {
+                        client.query("ensikertalaisuudenReferenssiPvm", referenssiPvm);
+                    }
+                    return client;
+                }
+        );
     }
 
     public Peruutettava getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {

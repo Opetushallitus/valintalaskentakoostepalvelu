@@ -30,6 +30,11 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
     }
 
     @Override
+    public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
+        return null;
+    }
+
+    @Override
     public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<ValinnanvaiheDTO> callback, Consumer<Throwable> failureCallback) {
         throw new UnsupportedOperationException();
     }

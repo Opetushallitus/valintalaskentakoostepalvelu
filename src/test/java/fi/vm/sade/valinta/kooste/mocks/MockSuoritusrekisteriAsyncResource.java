@@ -5,6 +5,7 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import org.springframework.stereotype.Service;
+import rx.Observable;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -26,6 +27,11 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
 
     @Override
     public Peruutettava getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
+        return null;
+    }
+
+    @Override
+    public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm) {
         return null;
     }
 

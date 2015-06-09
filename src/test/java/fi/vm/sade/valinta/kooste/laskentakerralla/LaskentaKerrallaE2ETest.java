@@ -1,9 +1,5 @@
 package fi.vm.sade.valinta.kooste.laskentakerralla;
 
-import com.google.gson.Gson;
-import com.sun.net.httpserver.HttpServer;
-import fi.vm.sade.integrationtest.util.PortChecker;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
 
@@ -14,35 +10,21 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
 
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.*;
 
-import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.server.SeurantaServerMock;
-import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.mockserver.model.HttpRequest;
-import org.mockserver.verify.VerificationTimes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rx.functions.Action0;
 
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Response;
-import java.io.InputStream;
-import java.net.InetSocketAddress;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static javax.ws.rs.HttpMethod.*;
 
@@ -73,13 +55,6 @@ public class LaskentaKerrallaE2ETest {
                                     .build()
                     )
             );
-            mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/.*",
-                    new ParametriDTO()
-            );
-            mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/.*",
-                    new HakuV1RDTO()
-            );
-
             mockToReturnJson(GET,
                     "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/.*",
                     Arrays.asList(
@@ -87,24 +62,23 @@ public class LaskentaKerrallaE2ETest {
                                     .build()
                     )
             );
-            mockToReturnJson(GET, "/suoritusrekisteri/rest/v1/oppijat.*",
-                    Arrays.asList()
-            );
-            mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/hakijaryhma/.*",
-                    Arrays.asList()
-            );
-            mockToReturnJson(GET, "/haku-app/applications/listfull.*",
-                    Arrays.asList()
-            );
-            mockToReturnString(POST,
-                    "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + UUID1 + "/hakukohde/" + HAKUKOHDE1 + "/tila/.*",
-                    "OK!");
+            mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/.*",new ParametriDTO());
+            mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/.*",new HakuV1RDTO());
+            mockToReturnJson(GET, "/suoritusrekisteri/rest/v1/oppijat.*", Arrays.asList());
+            mockToReturnJson(GET, "/haku-app/applications/listfull.*", Arrays.asList());
             MockServer fakeValintalaskenta = new MockServer();
             CyclicBarrier barrier = new CyclicBarrier(2);
+            Action0 waitRequestForMax3Seconds = () ->{
+                try {
+                    barrier.await(3L, TimeUnit.SECONDS);
+                } catch (Throwable t) {
+                    throw new RuntimeException(t);
+                }
+            };
             mockForward(
-                    fakeValintalaskenta.addHandler("/valintalaskenta-laskenta-service/resources/valintalaskenta/laskekaikki", exchange -> {
+                    fakeValintalaskenta.addHandler("/valintalaskenta-laskenta-service/resources/valintalaskenta/valintakokeet", exchange -> {
                         try {
-                            barrier.await(3L, TimeUnit.SECONDS);
+                            waitRequestForMax3Seconds.call();
                             String resp = "OK!";
                             exchange.sendResponseHeaders(200, resp.length());
                             exchange.getResponseBody().write(resp.getBytes());
@@ -113,10 +87,17 @@ public class LaskentaKerrallaE2ETest {
                             throw new RuntimeException(t);
                         }
                     }));
-            Assert.assertEquals(200, http.getWebClient().post(Entity.json(Arrays.asList(HAKUKOHDE1))).getStatus());
-            barrier.await(3L, TimeUnit.SECONDS);
+            Assert.assertEquals(200, http.getWebClient()
+                    .query("valintakoelaskenta", "true")
+                    .post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2))).getStatus());
+            waitRequestForMax3Seconds.call();
         } finally {
             mockServer.reset();
         }
     }
+    /*
+        mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/hakijaryhma/.*",Arrays.asList());
+        mockToReturnString(POST,
+                "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + UUID1 + "/hakukohde/" + HAKUKOHDE1 + "/tila/.*",
+                "OK!");*/
 }

@@ -46,6 +46,35 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	}
 
 	@Override
+	public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
+		return postAsObservable("/valintalaskenta/valintakokeet",
+				new TypeToken<String>() {
+				}.getType(),
+				Entity.entity(laskeDTO,
+						MediaType.APPLICATION_JSON_TYPE));
+	}
+
+	@Override
+	public Peruutettava valintakokeet(LaskeDTO laskeDTO,
+									  Consumer<String> callback, Consumer<Throwable> failureCallback) {
+		try {
+			String url = "/valintalaskenta/valintakokeet";
+			return new PeruutettavaImpl(getWebClient()
+					.path(url)
+					.async()
+					.post(Entity.entity(laskeDTO,
+									MediaType.APPLICATION_JSON_TYPE),
+							new Callback<String>(address, url, callback,
+									failureCallback, new TypeToken<String>() {
+							}.getType())));
+		} catch (Exception e) {
+			LOG.error("Virhe valintakoe kutsussa",e);
+			failureCallback.accept(e);
+			return TyhjaPeruutettava.tyhjaPeruutettava();
+		}
+	}
+
+	@Override
 	public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<ValinnanvaiheDTO> callback, Consumer<Throwable> failureCallback) {
 		try {
 			///valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
@@ -129,24 +158,6 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	}
 
 
-	@Override
-	public Peruutettava valintakokeet(LaskeDTO laskeDTO,
-			Consumer<String> callback, Consumer<Throwable> failureCallback) {
-		try {
-			String url = "/valintalaskenta/valintakokeet";
-			return new PeruutettavaImpl(getWebClient()
-					.path(url)
-					.async()
-					.post(Entity.entity(laskeDTO,
-							MediaType.APPLICATION_JSON_TYPE),
-							new Callback<String>(address, url, callback,
-									failureCallback, new TypeToken<String>() {
-									}.getType())));
-		} catch (Exception e) {
-			LOG.error("Virhe valintakoe kutsussa",e);
-			failureCallback.accept(e);
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		}
-	}
+
 
 }

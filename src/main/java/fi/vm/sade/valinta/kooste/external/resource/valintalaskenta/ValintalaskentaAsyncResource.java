@@ -19,6 +19,7 @@ public interface ValintalaskentaAsyncResource {
 	Peruutettava laske(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback);
 
+	@Deprecated
 	Peruutettava valintakokeet(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback);
 
@@ -35,4 +36,6 @@ public interface ValintalaskentaAsyncResource {
 			Consumer<String> callback, Consumer<Throwable> failureCallback);
 
 	Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid);
+
+	Observable<String> valintakokeet(LaskeDTO laskeDTO);
 }

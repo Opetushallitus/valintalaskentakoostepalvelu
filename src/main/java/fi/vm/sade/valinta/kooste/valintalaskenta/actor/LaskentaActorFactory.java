@@ -3,14 +3,20 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
@@ -28,10 +34,20 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Val
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategiaImpl;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuStrategia;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.YksiPalvelukutsuKerrallaPalvelukutsuStrategia;
+import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
+import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
+import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
+import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rx.Observable;
+import rx.Subscriber;
+import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.subjects.PublishSubject;
 
 /**
  * @author Jussi Jartamo
@@ -125,36 +141,39 @@ public class LaskentaActorFactory {
         return v;
     }
 
+
+
     public LaskentaActor createValintakoelaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
-        final PalvelukutsuStrategia laskentaStrategia = createStrategia();
-        final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
-        final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
-        final PalvelukutsuStrategia suoritusrekisteriStrategia = createStrategia();
-        final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
-                laskentaStrategia,
-                valintaperusteetStrategia,
-                hakemuksetStrategia,
-                suoritusrekisteriStrategia
-        );
-        final Collection<LaskentaPalvelukutsu> palvelukutsut = actorParams.getHakukohdeOids()
-                .parallelStream()
-                .map(hakukohdeOid -> {
-                    UuidHakukohdeJaOrganisaatio uudiHk = new UuidHakukohdeJaOrganisaatio(actorParams.getUuid(), hakukohdeOid);
-                    return new ValintakoelaskentaPalvelukutsu(
-							haku,
-                            actorParams.getParametritDTO(),
-                            actorParams.isErillishaku(),
-                            uudiHk,
-                            valintalaskentaAsyncResource,
-                            new HakemuksetPalvelukutsu(actorParams.getHakuOid(), uudiHk, applicationAsyncResource),
-                            new ValintaperusteetPalvelukutsu(uudiHk, actorParams.getValinnanvaihe(), valintaperusteetAsyncResource),
-                            new SuoritusrekisteriPalvelukutsu(uudiHk, suoritusrekisteriAsyncResource),
-                            hakemuksetStrategia, valintaperusteetStrategia,
-                            suoritusrekisteriStrategia
-                    );
-                })
-                .collect(Collectors.toList());
-        return new LaskentaActorImpl(laskentaSupervisor, actorParams.getUuid(), actorParams.getHakuOid(), palvelukutsut, strategiat, laskentaStrategia, laskentaSeurantaAsyncResource);
+        final String uuid = actorParams.getUuid();
+        return laskentaHakukohteittainActor(laskentaSupervisor, actorParams,
+                        hakukohdeJaOrganisaatio -> {
+                            String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
+                            LOG.info("(Uuid={}) Haetaan resursseja hakukohteelle {}", uuid, hakukohdeOid);
+                            Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
+                            Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
+                            Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
+
+
+                            return Observable.combineLatest(
+                                    valintaperusteet,
+                                    hakemukset,
+                                    oppijat,
+                                    (v, h, o) ->
+                                            valintalaskentaAsyncResource.valintakokeet(new LaskeDTO(
+                                                    actorParams.getUuid(),
+                                                    actorParams.isErillishaku(),
+                                                    hakukohdeOid,
+                                                    HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v))
+                            ).flatMap(o -> o).doOnNext(ok -> {
+                                LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
+                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
+                            }).doOnError(virhe -> {
+                                LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
+                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
+                            });
+
+                        }
+                );
     }
 
     public LaskentaActor createValintalaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
@@ -251,5 +270,85 @@ public class LaskentaActorFactory {
         }
         LOG.info("Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}", actorParams.getValinnanvaihe(), actorParams.isValintakoelaskenta());
         return createValintalaskentaJaValintakoelaskentaActor(laskentaSupervisor, haku, actorParams);
+    }
+    private <R> LaskentaActor laskentaHakukohteittainActor(LaskentaSupervisor laskentaSupervisor, LaskentaActorParams actorParams, Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<? extends R>> r) {
+        return new LaskentaActor() {
+            final PublishSubject<HakukohdeJaOrganisaatio> subject = PublishSubject.create();
+            final AtomicBoolean active = new AtomicBoolean(true);
+            final AtomicBoolean done = new AtomicBoolean(false);
+            final String uuid = actorParams.getUuid();
+
+            public String getHakuOid() {return actorParams.getHakuOid();}
+            public boolean isValmis() {return false;}
+            public void start() {
+                final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> concQueue = new ConcurrentLinkedQueue<>(actorParams.getHakukohdeOids());
+                subject.asObservable().flatMap(r).subscribe(
+                        subscribeWithFinally(
+                                () -> { // finally
+                                    if (concQueue.isEmpty()) {
+                                        done.set(true);
+                                        lopeta();
+                                    } else {
+                                        if (active.get()) {
+                                            Optional.ofNullable(concQueue.poll()).ifPresent(seuraava -> subject.onNext(seuraava));
+                                        }
+                                    }
+                                }
+                        )
+
+                );
+                subject.onNext(concQueue.poll());
+            }
+            public void lopeta() {
+                active.set(false);
+                if(!done.get()) {
+                    laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
+                } else {
+                    laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS);
+                }
+                laskentaSupervisor.ready(uuid);
+            }
+            public void postStop() {
+                lopeta();
+            }
+        };
+    }
+    private static <T> Subscriber<T> subscribeWithFinally(Action1<T> doNext, Action1<Throwable> doError, Action0 doFinally) {
+        return subscribeWithFinally(doNext, doError, ()->{},doFinally);
+    }
+
+    private static <T> Subscriber<T> subscribeWithFinally(Action0 doFinally) {
+        return subscribeWithFinally(f -> {}, f-> {}, ()->{},doFinally);
+    }
+
+    private static <T> Subscriber<T> subscribeWithFinally(Action1<T> doNext, Action1<Throwable> doError, Action0 doComplete, Action0 doFinally) {
+        return new Subscriber<T>() {
+            @Override
+            public void onCompleted() {
+                try {
+                    doComplete.call();
+                }finally {
+                    doFinally.call();
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                try {
+                    doError.call(e);
+                }finally {
+                    doFinally.call();
+                }
+            }
+
+            @Override
+            public void onNext(T t) {
+                try {
+                    doNext.call(t);
+                }finally {
+                    doFinally.call();
+                }
+            }
+        };
     }
 }

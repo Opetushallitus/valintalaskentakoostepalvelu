@@ -37,6 +37,12 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     public static void setValintaperusteetResultReference(List<ValintaperusteDTO> result) {
         valintaperusteetResultReference.set(result);
     }
+
+    @Override
+    public Observable<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
+        return null;
+    }
+
     public static void setValintakokeetResult(List<ValintakoeDTO> result) {
         valintakokeetResultReference.set(result);
     }
