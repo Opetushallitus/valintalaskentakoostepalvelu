@@ -27,9 +27,40 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanva
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 
 public class ValintalaskennanTulosExcel {
+    public static XSSFWorkbook luoExcel(HakuV1RDTO haku, final HakukohdeV1RDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet, final List<Hakemus> hakemukset) {
+        final HashMap<String, Hakemus> hakemusByOid = new HashMap<>();
+        for (Hakemus h: hakemukset) {
+            hakemusByOid.put(h.getOid(), h);
+        }
+
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        valinnanVaiheet.stream()
+                .sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()))
+                .forEach(vaihe -> vaihe.getValintatapajonot().forEach(jono -> {
+                    final XSSFSheet sheet = workbook.createSheet(vaihe.getNimi() + " - " + jono.getNimi());
+                    setColumnWidths(sheet);
+                    addRow(sheet, "Haku", getTeksti(haku.getNimi()));
+                    addRow(sheet, "Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimet()));
+                    addRow(sheet, "Hakukohde", getTeksti(hakukohdeDTO.getHakukohteenNimet()));
+                    addRow(sheet, "Vaihe", vaihe.getNimi());
+                    addRow(sheet, "Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(vaihe.getCreatedAt()));
+                    addRow(sheet, "Jono", jono.getNimi());
+                    addRow(sheet);
+                    if (jono.getJonosijat().isEmpty()) {
+                        addRow(sheet, "Jonolle ei ole valintalaskennan tuloksia");
+                    } else {
+                        addRow(sheet, columnHeaders);
+                        sortedJonosijat(jono).forEach(hakija ->
+                                        addRow(sheet, columns.stream().map(column -> column.extractor.apply(new HakemusRivi(hakija, hakemusByOid.getOrDefault(hakija.getHakemusOid(), emptyHakemus)))).collect(Collectors.toList()))
+                        );
+                    }
+                }));
+        return workbook;
+    }
+
     private static Hakemus emptyHakemus = new Hakemus();
 
-    static class Column {
+    private static class Column {
         public final String name;
         public final int widthInCharacters;
         public final Function<HakemusRivi, String> extractor;
@@ -41,7 +72,7 @@ public class ValintalaskennanTulosExcel {
         }
     }
 
-    static class HakemusRivi {
+    private static class HakemusRivi {
         public final JonosijaDTO hakija;
         public final Hakemus hakemus;
 
@@ -55,7 +86,7 @@ public class ValintalaskennanTulosExcel {
         }
     }
 
-    public static List<Column> columns = Arrays.asList(
+    private static List<Column> columns = Arrays.asList(
         new Column("Jonosija", 14, rivi -> String.valueOf(rivi.hakija.getJonosija())),
         new Column("Sukunimi", 20, rivi -> rivi.hakija.getSukunimi()),
         new Column("Etunimi", 20, rivi -> rivi.hakija.getEtunimi()),
@@ -67,37 +98,6 @@ public class ValintalaskennanTulosExcel {
         new Column("Kokonaispisteet", 14, rivi -> nullSafeToString(getJarjestyskriteeri(rivi.hakija).getArvo())));
 
     private final static List<String> columnHeaders = columns.stream().map(column -> column.name).collect(Collectors.toList());
-
-    public static XSSFWorkbook luoExcel(HakuV1RDTO haku, final HakukohdeV1RDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet, final List<Hakemus> hakemukset) {
-        final HashMap<String, Hakemus> hakemusByOid = new HashMap<>();
-        for (Hakemus h: hakemukset) {
-            hakemusByOid.put(h.getOid(), h);
-        }
-
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        valinnanVaiheet.stream()
-            .sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()))
-            .forEach(vaihe -> vaihe.getValintatapajonot().forEach(jono -> {
-                final XSSFSheet sheet = workbook.createSheet(vaihe.getNimi() + " - " + jono.getNimi());
-                setColumnWidths(sheet);
-                addRow(sheet, "Haku", getTeksti(haku.getNimi()));
-                addRow(sheet, "Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimet()));
-                addRow(sheet, "Hakukohde", getTeksti(hakukohdeDTO.getHakukohteenNimet()));
-                addRow(sheet, "Vaihe", vaihe.getNimi());
-                addRow(sheet, "Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(vaihe.getCreatedAt()));
-                addRow(sheet, "Jono", jono.getNimi());
-                addRow(sheet);
-                if (jono.getJonosijat().isEmpty()) {
-                    addRow(sheet, "Jonolle ei ole valintalaskennan tuloksia");
-                } else {
-                    addRow(sheet, columnHeaders);
-                    sortedJonosijat(jono).forEach(hakija ->
-                            addRow(sheet, columns.stream().map(column -> column.extractor.apply(new HakemusRivi(hakija, hakemusByOid.getOrDefault(hakija.getHakemusOid(), emptyHakemus)))).collect(Collectors.toList()))
-                    );
-                }
-            }));
-        return workbook;
-    }
 
     private static Stream<JonosijaDTO> sortedJonosijat(final ValintatietoValintatapajonoDTO jono) {
         return jono.getJonosijat().stream().sorted((o1, o2) -> (o1.getJonosija() - o2.getJonosija()) * 100 +
