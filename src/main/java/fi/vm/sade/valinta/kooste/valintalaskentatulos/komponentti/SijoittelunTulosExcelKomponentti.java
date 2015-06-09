@@ -165,7 +165,7 @@ public class SijoittelunTulosExcelKomponentti {
 				"","","","","","","","","",
 				"","","","","","","","")); // alun tyhjat pystyrivit
 		List<Object> otsikkoRivi = Lists.newArrayList();
-		otsikkoRivi.addAll(Arrays.asList("Hakemus", "Hakija","Henkilötunnus", "Syntymäaika", "Sukupuoli",
+		otsikkoRivi.addAll(Arrays.asList("Hakemus", "Hakija","Henkilötunnus", "Syntymäaika", "Sukupuoli","Äidinkieli",
 				"Lähiosoite", "Postinumero", "Osoite (ulkomaa)", "Postinumero (ulkomaa)", "Kaupunki (ulkomaa)",
 				"Asuinmaa",
 				"Kansallinen ID",
