@@ -8,12 +8,14 @@ import org.springframework.context.annotation.Configuration;
 
 import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute;
+import org.springframework.context.annotation.Profile;
 
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
+@Profile("default")
 @Configuration
 public class ValintatapajonoConfig {
 

@@ -32,7 +32,7 @@ import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
 
 /**
- *
+ * @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa.
  */
 @Controller("SijoitteluAktivointiResource")
 @Path("koostesijoittelu")
@@ -44,8 +44,11 @@ public class SijoitteluAktivointiResource {
 			.getLogger(SijoitteluAktivointiResource.class);
 	public static final String OPH_CRUD = "hasAnyRole('ROLE_APP_SIJOITTELU_CRUD_1.2.246.562.10.00000000001')";
 
-	@Autowired
+	@Autowired(required = false)
 	private SijoitteluAktivointiRoute sijoitteluAktivointiProxy;
+
+	@Autowired(required = false)
+	private JatkuvaSijoittelu jatkuvaSijoittelu;
 
 	@Autowired
 	private ParametriService parametriService;
@@ -55,9 +58,6 @@ public class SijoitteluAktivointiResource {
 
 	@Autowired
 	private SijoittelunValvonta sijoittelunValvonta;
-
-	@Autowired
-	private JatkuvaSijoittelu jatkuvaSijoittelu;
 
 	@GET
 	@Path("/status/{hakuoid}")

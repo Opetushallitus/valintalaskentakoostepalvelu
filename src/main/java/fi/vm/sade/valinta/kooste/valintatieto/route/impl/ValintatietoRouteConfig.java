@@ -10,12 +10,14 @@ import fi.vm.sade.valinta.kooste.valintatieto.route.ValintatietoHakukohteelleRou
 import fi.vm.sade.valinta.kooste.valintatieto.route.ValintatietoRoute;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
+import org.springframework.context.annotation.Profile;
 
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
+@Profile("default")
 @Configuration
 public class ValintatietoRouteConfig {
 

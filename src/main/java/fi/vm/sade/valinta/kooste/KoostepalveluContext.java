@@ -69,6 +69,7 @@ public class KoostepalveluContext {
 	/**
 	 * Camel only Context (helps unit testing).
 	 */
+	@Profile("default")
 	@Configuration
 	public static class CamelConfig {
 

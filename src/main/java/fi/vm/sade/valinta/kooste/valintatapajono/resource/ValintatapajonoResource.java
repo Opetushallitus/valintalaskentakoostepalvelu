@@ -46,7 +46,8 @@ import rx.observables.BlockingObservable;
 /**
  * 
  * @author Jussi Jartamo
- * 
+ *
+ * @Autowired(required = false) Camelin pois refaktorointi
  */
 ///valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
 ///haku-app/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid={hakukohdeOid}&asId={hakuOid}
@@ -67,7 +68,7 @@ public class ValintatapajonoResource {
 	@Autowired
 	private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
 
-	@Autowired
+	@Autowired(required = false)
 	private ValintatapajonoVientiRoute valintatapajonoVienti;
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;

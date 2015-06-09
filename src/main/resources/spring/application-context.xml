@@ -21,6 +21,9 @@
 	<import resource="classpath:META-INF/cxf/cxf.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
 
+	<beans  profile="test">
+		<bean class="fi.vm.sade.valinta.kooste.KoosteTestProfileConfiguration"/>
+	</beans>
 	<beans  profile="default">
 		<ctx:property-placeholder
 				location="classpath:META-INF/kela.properties, classpath:META-INF/valintalaskentakoostepalvelu.properties, classpath:META-INF/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valinta.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/override.properties"
@@ -38,6 +41,7 @@
 				</util:properties>
 			</property>
 		</bean>
+
 		<import resource="file:///${user.home:''}/oph-configuration/security-context-backend.xml" />
 
 		<!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
@@ -63,7 +67,8 @@
 		<bean class="fi.vm.sade.valinta.kooste.KoostepalveluContext" />
 		<!-- CAS-palvelukutsut -->
 		<jaxws:client id="koodiService"
-					  serviceClass="fi.vm.sade.koodisto.service.KoodiService" address="${valintalaskentakoostepalvelu.koodiService.url}">
+					  serviceClass="fi.vm.sade.koodisto.service.KoodiService"
+					  address="${valintalaskentakoostepalvelu.koodiService.url}">
 			<jaxws:outInterceptors>
 				<ref bean="koodiServiceCasInterceptor"/>
 			</jaxws:outInterceptors>

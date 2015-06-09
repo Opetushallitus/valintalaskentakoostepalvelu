@@ -10,12 +10,14 @@ import fi.vm.sade.valinta.kooste.tarjonta.route.LinjakoodiRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.route.OrganisaatioRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaHakuRoute;
 import fi.vm.sade.valinta.kooste.tarjonta.route.TarjontaNimiRoute;
+import org.springframework.context.annotation.Profile;
 
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
+@Profile("default")
 @Configuration
 public class TarjontaRouteConfig {
 

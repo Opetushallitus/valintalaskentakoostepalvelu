@@ -722,6 +722,19 @@
 			<groupId>org.jgroups</groupId>
 			<artifactId>jgroups</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.mock-server</groupId>
+			<artifactId>mockserver-netty</artifactId>
+			<version>3.9.15</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>logback-classic</artifactId>
+					<groupId>ch.qos.logback</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>${project.artifactId}</finalName>
@@ -730,12 +743,15 @@
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>9.2.10.v20150310</version>
-
 				<configuration>
 					<systemProperties>
 						<systemProperty>
 							<name>log4j.configuration</name>
 							<value>file:///${basedir}/src/test/resources/log4j.properties</value>
+						</systemProperty>
+						<systemProperty>
+							<name>spring.profiles.active</name>
+							<value>test</value>
 						</systemProperty>
 					</systemProperties>
 					<webAppConfig>

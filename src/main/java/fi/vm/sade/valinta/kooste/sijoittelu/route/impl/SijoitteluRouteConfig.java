@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
 import java.util.concurrent.DelayQueue;
 
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
+import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import org.apache.camel.CamelContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,14 +14,35 @@ import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoitteluExchange;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
+import org.springframework.context.annotation.Profile;
 
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
+@Profile("default")
 @Configuration
 public class SijoitteluRouteConfig {
+
+	@Bean
+	public JatkuvaSijoitteluRouteImpl getJatkuvaSijoitteluRouteImpl(
+
+			// tarkistetaan viidentoista minuutin valein tilanne
+			@Value("timer://jatkuvaSijoitteluTimer?${valintalaskentakoostepalvelu.jatkuvasijoittelu.timer:fixedRate=true&period=5minutes}") String jatkuvaSijoitteluTimer,
+			@Value("seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue") String jatkuvaSijoitteluQueue,
+			SijoitteleAsyncResource sijoitteluAsyncResource,
+			SijoittelunSeurantaResource sijoittelunSeurantaResource,
+			@Qualifier("jatkuvaSijoitteluDelayedQueue") DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue
+	) {
+		return new JatkuvaSijoitteluRouteImpl(
+				jatkuvaSijoitteluTimer,
+				jatkuvaSijoitteluQueue,
+				sijoitteluAsyncResource,
+				sijoittelunSeurantaResource,
+				jatkuvaSijoitteluDelayedQueue
+		);
+	}
 
 	@Bean(name = "jatkuvaSijoitteluDelayedQueue")
 	public DelayQueue<DelayedSijoitteluExchange> createDelayQueue() {

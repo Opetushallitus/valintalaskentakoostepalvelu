@@ -24,16 +24,17 @@ public class AsennaCasFilter {
 			String appClientPassword,
 			JAXRSClientFactoryBean bean,
 			ApplicationContext context) {
-		List<Interceptor<? extends Message>> interceptors = Lists
-				.newArrayList();
-
-		CasApplicationAsAUserInterceptor cas = new CasApplicationAsAUserInterceptor();
-		cas.setWebCasUrl(webCasUrl);
-		cas.setTargetService(targetService);
-		cas.setAppClientUsername(appClientUsername);
-		cas.setAppClientPassword(appClientPassword);
-		interceptors.add(cas);
-		bean.setOutInterceptors(interceptors);
+		if("default".equalsIgnoreCase(System.getProperty("spring.profiles.active", "default"))) {
+			List<Interceptor<? extends Message>> interceptors = Lists
+					.newArrayList();
+			CasApplicationAsAUserInterceptor cas = new CasApplicationAsAUserInterceptor();
+			cas.setWebCasUrl(webCasUrl);
+			cas.setTargetService(targetService);
+			cas.setAppClientUsername(appClientUsername);
+			cas.setAppClientPassword(appClientPassword);
+			interceptors.add(cas);
+			bean.setOutInterceptors(interceptors);
+		}
 		return bean;
 	}
 }

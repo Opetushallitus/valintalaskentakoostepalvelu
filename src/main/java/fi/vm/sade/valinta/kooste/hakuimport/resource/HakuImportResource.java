@@ -40,14 +40,14 @@ public class HakuImportResource {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(HakuImportResource.class);
 
-	@Autowired
+	@Autowired(required = false)
 	private HakuImportRoute hakuImportAktivointiRoute;
-	@Autowired
+	@Autowired(required = false)
 	private HakukohdeImportRoute hakukohdeImportRoute;
-	@Autowired
+	@Autowired(required = false)
 	private ParametriService parametriService;
 
-	@Autowired(required = true)
+	@Autowired(required = false)
 	@Qualifier("hakuImportValvomo")
 	private ValvomoService<HakuImportProsessi> hakuImportValvomo;
 

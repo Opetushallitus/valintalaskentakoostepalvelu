@@ -26,11 +26,8 @@ public class KelaGenerator {
 	@Autowired
 	private KoodiService koodiService;
 
-	@Autowired
+	@Autowired(required = false)
 	private KelaRoute kelaRoute;
-
-	@Autowired
-	private KelaFtpRoute kelaFtpRoute;
 
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;

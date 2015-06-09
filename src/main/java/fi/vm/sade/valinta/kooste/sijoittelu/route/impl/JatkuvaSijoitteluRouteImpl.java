@@ -37,7 +37,6 @@ import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
  * @author Jussi Jartamo
  * 
  */
-@Component
 public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 		JatkuvaSijoittelu {
 	private static final Logger LOG = LoggerFactory
@@ -61,7 +60,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements
 	@Autowired
 	public JatkuvaSijoitteluRouteImpl(
 			// tarkistetaan viidentoista minuutin valein tilanne
-			@Value("timer://jatkuvaSijoitteluTimer?fixedRate=true&period=5minutes") String jatkuvaSijoitteluTimer,
+			@Value("timer://jatkuvaSijoitteluTimer?${valintalaskentakoostepalvelu.jatkuvasijoittelu.timer:fixedRate=true&period=5minutes}") String jatkuvaSijoitteluTimer,
 			@Value("seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue") String jatkuvaSijoitteluQueue,
 			SijoitteleAsyncResource sijoitteluAsyncResource,
 			SijoittelunSeurantaResource sijoittelunSeurantaResource,

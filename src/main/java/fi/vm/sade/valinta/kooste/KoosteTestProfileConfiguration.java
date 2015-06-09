@@ -1,0 +1,160 @@
+package fi.vm.sade.valinta.kooste;
+
+import org.apache.cxf.interceptor.Fault;
+import org.apache.cxf.message.Message;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import org.apache.cxf.phase.Phase;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+
+import javax.servlet.*;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
+/**
+ * @author Jussi Jartamo
+ */
+@Profile("test")
+@Configuration
+public class KoosteTestProfileConfiguration {
+
+    public static AtomicReference<String> PROXY_SERVER = new AtomicReference<>();
+
+    @Bean(name="testProps")
+    public static org.springframework.context.support.PropertySourcesPlaceholderConfigurer getPropertyPlaceholderConfigurer() {
+        final String proxyServer = PROXY_SERVER.get();
+        Properties p0 = new Properties();
+        p0.setProperty("valintalaskentakoostepalvelu.jatkuvasijoittelu.timer", "time=2018-12-12 10:12:12&delay=10000000");
+        p0.setProperty("valintalaskentakoostepalvelu.valintalaskenta.rest.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.viestintapalvelu.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.hakemus.rest.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.koodiService.url", "http://localhost");
+        p0.setProperty("cas.callback.valintalaskentakoostepalvelu", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.sijoittelu.rest.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.seuranta.rest.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.organisaatioService.rest.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.tarjonta.rest.url", "http://" + proxyServer + "/tarjonta-service/rest");
+        p0.setProperty("valintalaskentakoostepalvelu.koodisto.rest.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.tarjontaService.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.valintaperusteet.rest.url", "http://localhost");
+        p0.setProperty("koetulokset.alkupvm", "");
+        p0.setProperty("koetulokset.loppupvm", "");
+        p0.setProperty("valintaesitys.pvm", "");
+        p0.setProperty("haku.alkupvm", "");
+        p0.setProperty("haku.loppupvm", "");
+        p0.setProperty("root.organisaatio.oid", "");
+        p0.setProperty("kela.ftp.protocol", "ftp");
+        p0.setProperty("kela.ftp.username", "username");
+        p0.setProperty("kela.ftp.password", "password");
+        p0.setProperty("kela.ftp.host", "host");
+        p0.setProperty("kela.ftp.port", "22");
+        p0.setProperty("kela.ftp.path", "/");
+
+        p0.setProperty("host.ilb", "http://" + proxyServer);
+
+        p0.setProperty("web.url.cas", "http://localhost");
+        p0.setProperty("cas.service.viestintapalvelu","");
+        p0.setProperty("cas.service.sijoittelu-service", "");
+        p0.setProperty("cas.service.organisaatio-service", "");
+        p0.setProperty("cas.service.valintalaskenta-service", "");
+        p0.setProperty("cas.service.dokumenttipalvelu", "");
+        p0.setProperty("valintalaskentakoostepalvelu.swagger.basepath", "");
+        p0.setProperty("host.scheme", "http");
+        p0.setProperty("host.virkailija", proxyServer);
+        p0.setProperty("cas.service.valintalaskentakoostepalvelu", "");
+        p0.setProperty("cas.service.haku-service","");
+        p0.setProperty("cas.service.authentication-service","");
+        p0.setProperty("valintalaskentakoostepalvelu.authentication.rest.url", "");
+        p0.setProperty("valintalaskentakoostepalvelu.app.username.to.sijoittelu", "");
+        p0.setProperty("valintalaskentakoostepalvelu.app.password.to.sijoittelu", "");
+        p0.setProperty("valintalaskentakoostepalvelu.app.username.to.valintatieto", "");
+        p0.setProperty("valintalaskentakoostepalvelu.app.password.to.valintatieto", "");
+        p0.setProperty("valintalaskentakoostepalvelu.app.username.to.haku", "");
+        p0.setProperty("valintalaskentakoostepalvelu.app.password.to.haku", "");
+        p0.setProperty("valintalaskentakoostepalvelu.app.username.to.valintaperusteet", "");
+        p0.setProperty("valintalaskentakoostepalvelu.app.password.to.valintaperusteet", "");
+
+        org.springframework.context.support.PropertySourcesPlaceholderConfigurer defaultProps = new org.springframework.context.support.PropertySourcesPlaceholderConfigurer();
+        defaultProps.setProperties(p0);
+        defaultProps.setOrder(0);
+        defaultProps.setLocalOverride(true);
+        return  defaultProps;
+    }
+
+    private static final AbstractPhaseInterceptor<Message> INTERCEPTOR = new AbstractPhaseInterceptor<Message>(Phase.PRE_PROTOCOL) {
+        @Override
+        public void handleMessage(Message message) throws Fault {
+        }
+
+    };
+    @Bean(name="springSecurityFilterChain")
+    public static Filter getFilter() {
+        return new Filter() {
+            @Override
+            public void init(FilterConfig filterConfig) throws ServletException {
+
+            }
+
+            @Override
+            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+                filterChain.doFilter(servletRequest, servletResponse);
+            }
+
+            @Override
+            public void destroy() {
+
+            }
+        };
+    }
+
+    @Bean(name="viestintapalveluClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getViestintapalveluClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+    @Bean(name="ValintakoeRestClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getValintakoeRestClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+    @Bean(name="HakemusServiceRestClientAsAdminCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getHakemusServiceRestClientAsAdminCasInterceptor() {
+        return INTERCEPTOR;
+    }
+    @Bean(name="adminDokumenttipalveluRestClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getAdminDokumenttipalveluRestClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+    @Bean(name="sijoitteluTilaServiceRestClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getSijoitteluTilaServiceRestClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+    @Bean(name="SijoitteluServiceRestClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getSijoitteluServiceRestClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+    @Bean(name="ValintalaskentaHakukohdeRestClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getValintalaskentaHakukohdeRestClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+    @Bean(name="SijoittelunSeurantaRestClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getSijoittelunSeurantaRestClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+    @Bean(name="ValintatietoRestClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getValintatietoRestClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+    @Bean(name="koodiServiceCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getKoodiServiceCasInterceptor() {
+        return INTERCEPTOR;
+    }
+    @Bean(name="OrganisaatioResourceClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getOrganisaatioResourceClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+}

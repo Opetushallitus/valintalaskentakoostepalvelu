@@ -11,13 +11,13 @@ import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
 import fi.vm.sade.valinta.kooste.kela.route.KelaFtpRoute;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
+import org.springframework.context.annotation.Profile;
 
 /**
  * @author Jussi Jartamo.
  */
+@Profile("default")
 @Configuration
-//
-// @ComponentScan(basePackageClasses = KelaRouteConfig.class)
 public class KelaRouteConfig {
 
 	@Bean(name = "kelaValvomo")

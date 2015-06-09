@@ -10,12 +10,14 @@ import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute;
+import org.springframework.context.annotation.Profile;
 
 /**
  * 
  * @author Jussi Jartamo
  * 
  */
+@Profile("default")
 @Configuration
 public class ValintalaskentaTulosConfig {
 	@Bean

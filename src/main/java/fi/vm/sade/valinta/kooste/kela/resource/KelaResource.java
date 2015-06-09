@@ -37,10 +37,10 @@ public class KelaResource {
 	@Autowired
 	private KoodiService koodiService;
 
-	@Autowired 
+	@Autowired (required = false)
 	private KelaRoute kelaRoute;
 
-	@Autowired
+	@Autowired (required = false)
 	private KelaFtpRoute kelaFtpRoute;
 
 	@Autowired

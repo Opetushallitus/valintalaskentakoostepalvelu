@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl;
 
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import rx.Observable;
  */
 @Service
 public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaAsyncResource {
+	private final static Logger LOG = LoggerFactory.getLogger(TarjontaAsyncResourceImpl.class);
 	@Autowired
 	public TarjontaAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}") String address) {
 		super(address, TimeUnit.MINUTES.toMillis(5));
@@ -29,7 +32,8 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
 
 	@Override
 	public Observable<HakuV1RDTO> haeHaku(String hakuOid) {
-		return this.<ResultV1RDTO<HakuV1RDTO>>getAsObservable("/v1/haku/" + hakuOid + "/", new TypeToken<ResultV1RDTO<HakuV1RDTO>>() {}.getType())
+		return this.<ResultV1RDTO<HakuV1RDTO>>getAsObservable("/v1/haku/" + hakuOid + "/", new TypeToken<ResultV1RDTO<HakuV1RDTO>>() {
+		}.getType())
 			.map(result -> result.getResult());
 	}
 

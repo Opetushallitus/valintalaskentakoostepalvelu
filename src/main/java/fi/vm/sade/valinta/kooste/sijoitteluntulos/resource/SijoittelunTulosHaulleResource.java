@@ -26,7 +26,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
 /**
  * 
  * @author Jussi Jartamo
- * 
+ *
+ * @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa.
  */
 @Controller("SijoittelunTulosHaulleResource")
 @Path("sijoitteluntuloshaulle")
@@ -38,11 +39,11 @@ public class SijoittelunTulosHaulleResource {
 
 	@Autowired
 	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
-	@Autowired
+	@Autowired(required = false)
 	private SijoittelunTulosTaulukkolaskentaRoute sijoittelunTulosTaulukkolaskentaRoute;
-	@Autowired
+	@Autowired(required = false)
 	private SijoittelunTulosHyvaksymiskirjeetRoute sijoittelunTulosHyvaksymiskirjeetRoute;
-	@Autowired
+	@Autowired(required = false)
 	private SijoittelunTulosOsoitetarratRoute sijoittelunTulosOsoitetarratRoute;
 
 	@POST

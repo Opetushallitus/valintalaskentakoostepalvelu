@@ -41,7 +41,6 @@ import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute;
-import fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.service.ValintakoekutsutExcelService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -54,6 +53,9 @@ import rx.observables.ConnectableObservable;
 import rx.schedulers.NewThreadScheduler;
 import rx.schedulers.Schedulers;
 
+/**
+ * @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa.
+ */
 @Controller("ValintalaskentaExcelResource")
 @Path("valintalaskentaexcel")
 @PreAuthorize("isAuthenticated()")
@@ -61,10 +63,10 @@ import rx.schedulers.Schedulers;
 public class ValintalaskentaExcelResource {
     private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaExcelResource.class);
     public final static MediaType APPLICATION_VND_MS_EXCEL = new MediaType("application", "vnd.ms-excel");
-    @Autowired private ValintalaskentaTulosExcelRoute valintalaskentaTulosProxy;
+
+    @Autowired(required = false) private SijoittelunTulosExcelRoute sijoittelunTulosExcelProxy;
+    @Autowired(required = false) private JalkiohjaustulosExcelRoute jalkiohjaustulos;
     @Autowired private ValintakoekutsutExcelService valintakoekutsutExcelService;
-    @Autowired private SijoittelunTulosExcelRoute sijoittelunTulosExcelProxy;
-    @Autowired private JalkiohjaustulosExcelRoute jalkiohjaustulos;
     @Autowired private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
     @Autowired private ValintalaskentaAsyncResource valintalaskentaResource;
     @Autowired private TarjontaAsyncResource tarjontaResource;

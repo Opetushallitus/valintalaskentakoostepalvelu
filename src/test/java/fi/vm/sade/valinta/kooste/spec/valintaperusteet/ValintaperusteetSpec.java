@@ -2,9 +2,11 @@ package fi.vm.sade.valinta.kooste.spec.valintaperusteet;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
+import fi.vm.sade.valinta.kooste.spec.ConstantsSpec;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
@@ -12,7 +14,7 @@ import java.util.Arrays;
 /**
  * @author Jussi Jartamo
  */
-public class ValintaperusteetSpec {
+public class ValintaperusteetSpec extends ConstantsSpec {
 
     public static class ValintaperusteBuilder {
         private final ValintaperusteDTO valintaperusteDTO = new ValintaperusteDTO();
@@ -90,7 +92,23 @@ public class ValintaperusteetSpec {
         }
     }
 
+    public static class HakukohdeViiteBuilder {
+        private HakukohdeViiteDTO hakukohdeViiteDTO = new HakukohdeViiteDTO();
 
+        public HakukohdeViiteBuilder setHakukohdeOid(String hakukohdeOid) {
+            hakukohdeViiteDTO.setOid(hakukohdeOid);
+            return this;
+        }
+
+        public HakukohdeViiteDTO build() {
+            hakukohdeViiteDTO.setTarjoajaOid(TARJOAJA1);
+            hakukohdeViiteDTO.setTila("JULKAISTU");
+            return hakukohdeViiteDTO;
+        }
+    }
+    public static HakukohdeViiteBuilder hakukohdeviite() {
+        return new HakukohdeViiteBuilder();
+    }
     public static ValintaperusteBuilder valintaperusteet() {
         return new ValintaperusteBuilder();
     }

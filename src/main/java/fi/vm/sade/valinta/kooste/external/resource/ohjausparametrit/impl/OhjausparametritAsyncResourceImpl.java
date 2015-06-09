@@ -28,7 +28,7 @@ public class OhjausparametritAsyncResourceImpl extends AsyncResourceWithCas impl
             @Value("https://${host.virkailija}/ohjausparametrit-service/j_spring_cas_security_check") String targetService,
             @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
             @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
-            @Value("https://${host.virkailija}") String address,
+            @Value("${host.scheme:https}://${host.virkailija}") String address,
             ApplicationContext context
     ) {
         super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(10));
