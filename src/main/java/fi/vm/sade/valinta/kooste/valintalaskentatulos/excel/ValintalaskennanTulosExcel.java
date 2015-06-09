@@ -85,24 +85,27 @@ public class ValintalaskennanTulosExcel {
     }
 
     private static List<Column> columns = Arrays.asList(
-        new Column("Jonosija", 14, rivi -> String.valueOf(rivi.hakija.getJonosija())),
-        new Column("Sukunimi", 20, rivi -> rivi.hakija.getSukunimi()),
-        new Column("Etunimi", 20, rivi -> rivi.hakija.getEtunimi()),
-        new Column("Henkilötunnus", 20, rivi -> rivi.getHetu()),
-        new Column("Hakemus OID", 20, rivi -> rivi.hakija.getHakemusOid()),
-        new Column("Hakutoive", 14, rivi -> String.valueOf(rivi.hakija.getPrioriteetti())),
-        new Column("Laskennan tulos", 20, rivi -> rivi.hakija.getTuloksenTila().toString()),
-        new Column("Selite", 30, rivi -> getTeksti(getJarjestyskriteeri(rivi.hakija).getKuvaus())),
-        new Column("Kokonaispisteet", 14, rivi -> nullSafeToString(getJarjestyskriteeri(rivi.hakija).getArvo())));
+            new Column("Jonosija", 14, rivi -> String.valueOf(rivi.hakija.getJonosija())),
+            new Column("Sukunimi", 20, rivi -> rivi.hakija.getSukunimi()),
+            new Column("Etunimi", 20, rivi -> rivi.hakija.getEtunimi()),
+            new Column("Henkilötunnus", 20, rivi -> rivi.getHetu()),
+            new Column("Hakemus OID", 20, rivi -> rivi.hakija.getHakemusOid()),
+            new Column("Hakutoive", 14, rivi -> String.valueOf(rivi.hakija.getPrioriteetti())),
+            new Column("Laskennan tulos", 20, rivi -> rivi.hakija.getTuloksenTila().toString()),
+            new Column("Selite", 30, rivi -> getTeksti(getJarjestyskriteeri(rivi.hakija).getKuvaus())),
+            new Column("Kokonaispisteet", 14, rivi -> nullSafeToString(getJarjestyskriteeri(rivi.hakija).getArvo())));
 
     private final static List<String> columnHeaders = columns.stream().map(column -> column.name).collect(Collectors.toList());
 
     private static Stream<JonosijaDTO> sortedJonosijat(final ValintatietoValintatapajonoDTO jono) {
         return jono.getJonosijat().stream().sorted((o1, o2) -> (o1.getJonosija() - o2.getJonosija()) * 100 +
-                (trimToNull(o1.getSukunimi()).compareTo(trimToNull(o2.getSukunimi()))) * 10 +
-                (trimToNull(o1.getEtunimi()).compareTo(trimToNull(o2.getEtunimi()))));
+                        normalizeCompareTo(trimToNull(o1.getSukunimi()).compareTo(trimToNull(o2.getSukunimi()))) * 10 +
+                        normalizeCompareTo(trimToNull(o1.getEtunimi()).compareTo(trimToNull(o2.getEtunimi())))
+        );
     }
-
+    public static int normalizeCompareTo(int value) { // because String.compareTo can return anything
+        return value == 0 ? 0 : (value < 0 ? -1 : 1);
+    }
     private static JarjestyskriteeritulosDTO getJarjestyskriteeri(final JonosijaDTO hakija) {
         return hakija.getJarjestyskriteerit().isEmpty()
             ? new JarjestyskriteeritulosDTO(null, hakija.getTuloksenTila(), Collections.EMPTY_MAP, 1, "")
