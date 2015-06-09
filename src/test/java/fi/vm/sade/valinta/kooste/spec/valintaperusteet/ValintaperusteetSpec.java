@@ -1,10 +1,7 @@
 package fi.vm.sade.valinta.kooste.spec.valintaperusteet;
 
 import com.google.common.collect.Lists;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.*;
 import fi.vm.sade.service.valintaperusteet.dto.model.Funktiotyyppi;
 import fi.vm.sade.valinta.kooste.spec.ConstantsSpec;
 import org.mockito.Mockito;
@@ -15,6 +12,17 @@ import java.util.Arrays;
  * @author Jussi Jartamo
  */
 public class ValintaperusteetSpec extends ConstantsSpec {
+
+    // ValintaperusteetDTO
+    public static class ValintaperusteetBuilder {
+        private final ValintaperusteetDTO valintaperusteetDTO = new ValintaperusteetDTO();
+        private final ValintaperusteetValinnanVaiheDTO vv = new ValintaperusteetValinnanVaiheDTO();
+
+        public ValintaperusteetDTO build() {
+            valintaperusteetDTO.setValinnanVaihe(vv);
+            return valintaperusteetDTO;
+        }
+    }
 
     public static class ValintaperusteBuilder {
         private final ValintaperusteDTO valintaperusteDTO = new ValintaperusteDTO();
@@ -109,8 +117,11 @@ public class ValintaperusteetSpec extends ConstantsSpec {
     public static HakukohdeViiteBuilder hakukohdeviite() {
         return new HakukohdeViiteBuilder();
     }
-    public static ValintaperusteBuilder valintaperusteet() {
+    public static ValintaperusteBuilder valintaperuste() {
         return new ValintaperusteBuilder();
+    }
+    public static ValintaperusteetBuilder valintaperusteet() {
+        return new ValintaperusteetBuilder();
     }
     public static ValintakoeDTOBuilder valintakoe() {
         return new ValintakoeDTOBuilder();

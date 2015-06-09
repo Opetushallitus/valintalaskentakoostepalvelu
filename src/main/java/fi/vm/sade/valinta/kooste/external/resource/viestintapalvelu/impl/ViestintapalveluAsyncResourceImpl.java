@@ -78,6 +78,7 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
 							.path(url)
 							.async()
 							.post(Entity.json(osoitteet), new ResponseCallback(
+									address + url,
 									callback,
 									failureCallback)));
 		} catch (Exception e) {

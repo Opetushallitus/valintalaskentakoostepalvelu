@@ -8,30 +8,27 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 
+import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
+import static javax.ws.rs.HttpMethod.*;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockGetForward;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockPostForward;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.*;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.UUID1;
 
 /**
  * @author Jussi Jartamo
  */
-public class SeurantaServerMock {
+public class SeurantaServerMock extends MockServer {
 
     private static final int mockSeurantaPort = PortChecker.findFreeLocalPort();
     private static final ConcurrentLinkedQueue<LaskentaDto> laskentaQueue = new ConcurrentLinkedQueue<>();
 
-    public static void startServer() throws Throwable {
-        mockGetForward("/seuranta-service/resources/seuranta/laskenta/otaSeuraavaLaskentaTyonAlle", mockSeurantaPort);
-        mockPostForward("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/HAKUOID1/tyyppi/HAKU", mockSeurantaPort);
-        mockGetForward("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/facecafe-testbeef", mockSeurantaPort);
-
-        HttpServer server = HttpServer.create(new InetSocketAddress(mockSeurantaPort), 0);
-        server.createContext("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/facecafe-testbeef", httpExchange -> {
+    public SeurantaServerMock() {
+        super();
+        addHandler("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/facecafe-testbeef",
+                 httpExchange -> {
             if(laskentaQueue.isEmpty()) {
                 httpExchange.sendResponseHeaders(204, -1);
                 httpExchange.getResponseBody().close();
@@ -42,7 +39,7 @@ public class SeurantaServerMock {
                 httpExchange.getResponseBody().close();
             }
         });
-        server.createContext("/seuranta-service/resources/seuranta/laskenta/otaSeuraavaLaskentaTyonAlle", httpExchange -> {
+        addHandler("/seuranta-service/resources/seuranta/laskenta/otaSeuraavaLaskentaTyonAlle", httpExchange -> {
             if(laskentaQueue.isEmpty()) {
                 httpExchange.sendResponseHeaders(204, -1);
                 httpExchange.getResponseBody().close();
@@ -51,15 +48,9 @@ public class SeurantaServerMock {
                 httpExchange.sendResponseHeaders(200, resp.length());
                 httpExchange.getResponseBody().write(resp.getBytes());
                 httpExchange.getResponseBody().close();
-                /*
-                String resp = new Gson().toJson(laskentaQueue.poll());
-                httpExchange.sendResponseHeaders(200, resp.length());
-                httpExchange.getResponseBody().write(resp.getBytes());
-                httpExchange.getResponseBody().close();
-                */
             }
         });
-        server.createContext("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/HAKUOID1/tyyppi/HAKU", httpExchange -> {
+        addHandler("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/HAKUOID1/tyyppi/HAKU", httpExchange -> {
             HakukohdeDto h = new HakukohdeDto(HAKUKOHDE1, TARJOAJA1);
             LaskentaDto l = new LaskentaDto(UUID1, HAKU1, 0,
                     LaskentaTila.ALOITTAMATTA, LaskentaTyyppi.HAKU,
@@ -73,8 +64,6 @@ public class SeurantaServerMock {
             httpExchange.getResponseBody().close();
 
         });
-        server.setExecutor(null);
-        server.start();
     }
 
 }

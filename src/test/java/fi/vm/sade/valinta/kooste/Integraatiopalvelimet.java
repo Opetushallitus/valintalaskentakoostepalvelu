@@ -3,24 +3,13 @@ package fi.vm.sade.valinta.kooste;
 
 import com.google.gson.Gson;
 import fi.vm.sade.integrationtest.util.PortChecker;
-import org.mockserver.client.server.MockServerClient;
+import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.ConnectionOptions;
-import org.mockserver.model.Header;
-import org.mockserver.model.Parameter;
-
 import static javax.ws.rs.HttpMethod.*;
 
-import static org.mockserver.model.Body.*;
-import static org.mockserver.matchers.Times.*;
 import static org.mockserver.model.HttpRequest.*;
 import static org.mockserver.model.HttpForward.*;
 import static org.mockserver.model.HttpResponse.*;
-import static org.mockserver.model.ConnectionOptions.*;
-import static org.mockserver.integration.ClientAndProxy.startClientAndProxy;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import java.net.InetAddress;
-import java.net.URL;
 
 /**
  * @author Jussi Jartamo
@@ -32,55 +21,31 @@ public class Integraatiopalvelimet {
     public static ClientAndServerWithHost mockServer =
             new ClientAndServerWithHost(PortChecker.findFreeLocalPort());
 
-    public static void mockGetForward(String path, int port) {
+    public static void mockForward(MockServer server) {
+        server.getPaths().forEach(
+                p -> {
+                    mockForward(GET, p, server.getPort());
+                    mockForward(POST, p, server.getPort());
+                }
+        );
+    }
+    public static void mockForward(String method, String path, int port) {
         mockServer
                 .when(
                         request()
-                                .withMethod(GET)
+                                .withMethod(method)
                                 .withPath(path)
                 )
                 .forward(
                         forward()
                                 .withHost(mockServer.getHost())
                                 .withPort(port));
-
     }
-    public static void mockPostForward(String path, int port) {
+    private static void mockToReturnValue(String method, String p, String r) {
         mockServer
                 .when(
                         request()
-                                .withMethod(POST)
-                                .withPath(path)
-                )
-                .forward(
-                        forward()
-                                .withHost(mockServer.getHost())
-                                .withPort(port));
-
-    }
-    public static void mockGetToReturnJson(String p, Object r) {
-        mockServer
-                .when(
-                        request()
-                                .withMethod(GET)
-                                .withPath(p)
-                )
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withHeaders(
-                                        new Header("Content-Type", "application/json; charset=utf-8")
-                                )
-                                .withBody(new Gson().toJson(r))
-
-                );
-
-    }
-    public static void mockPostToReturnString(String p, String r) {
-        mockServer
-                .when(
-                        request()
-                                .withMethod(POST)
+                                .withMethod(method)
                                 .withPath(p)
                 )
                 .respond(
@@ -89,8 +54,14 @@ public class Integraatiopalvelimet {
                                 .withBody(r)
 
                 );
-
     }
+    public static void mockToReturnJson(String method, String p, Object r) {
+        mockToReturnValue(method, p, new Gson().toJson(r));
+    }
+    public static void mockToReturnString(String method, String p, String r) {
+        mockToReturnValue(method, p, r);
+    }
+
     public static class ClientAndServerWithHost extends ClientAndServer {
         public ClientAndServerWithHost(int port){
             super(port);

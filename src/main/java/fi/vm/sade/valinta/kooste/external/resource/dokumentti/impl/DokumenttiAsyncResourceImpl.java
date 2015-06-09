@@ -60,7 +60,7 @@ public class DokumenttiAsyncResourceImpl extends HttpResource implements Dokumen
                             .query("tags", tags.toArray())
                             .query("mimeType", mimeType)
                             .async()
-                            .put(Entity.entity(filedata, MediaType.APPLICATION_OCTET_STREAM),new ResponseCallback(responseCallback, failureCallback)));
+                            .put(Entity.entity(filedata, MediaType.APPLICATION_OCTET_STREAM),new ResponseCallback(address + url, responseCallback, failureCallback)));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();

@@ -105,7 +105,7 @@ public class PistesyottoResourceTest {
                             .build()
                             .build());
             List<ValintaperusteDTO> valintaperusteet = Arrays.asList(
-                    valintaperusteet()
+                    valintaperuste()
                             .setKuvaus(TUNNISTE1)
                             .setTunniste(TUNNISTE1)
                             .setOsallistumisenTunniste(TUNNISTE1)
@@ -210,14 +210,14 @@ public class PistesyottoResourceTest {
                         .build()
         );
         List<ValintaperusteDTO> valintaperusteet = Arrays.asList(
-                valintaperusteet()
+                valintaperuste()
                         .setKuvaus(TUNNISTE1)
                         .setTunniste(TUNNISTE1)
                         .setOsallistumisenTunniste(OSALLISTUMISENTUNNISTE1)
                         .setLukuarvofunktio()
                         .setArvot("1", "2", "3")
                         .build(),
-                valintaperusteet()
+                valintaperuste()
                         .setKuvaus(TUNNISTE2)
                         .setTunniste(TUNNISTE2)
                         .setOsallistumisenTunniste(OSALLISTUMISENTUNNISTE2)
@@ -337,14 +337,14 @@ public class PistesyottoResourceTest {
                         .build()
         );
         List<ValintaperusteDTO> valintaperusteet = Arrays.asList(
-                valintaperusteet()
+                valintaperuste()
                         .setKuvaus(TUNNISTE1)
                         .setTunniste(TUNNISTE1)
                         .setOsallistumisenTunniste(OSALLISTUMISENTUNNISTE1)
                         .setLukuarvofunktio()
                         .setArvot("1", "2", "3")
                         .build(),
-                valintaperusteet()
+                valintaperuste()
                         .setKuvaus(TUNNISTE2)
                         .setTunniste(TUNNISTE2)
                         .setOsallistumisenTunniste(OSALLISTUMISENTUNNISTE2)
