@@ -74,7 +74,6 @@ public class LaskentaKerrallaE2ETest {
                 "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/HAKUKOHDE1",
                 Arrays.asList(
                         valintaperusteet()
-
                                 .build()
                 )
         );
