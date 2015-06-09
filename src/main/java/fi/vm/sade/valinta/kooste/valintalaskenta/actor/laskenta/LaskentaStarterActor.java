@@ -12,7 +12,7 @@ final public class LaskentaStarterActor extends UntypedActor {
     private final Logger LOG = LoggerFactory.getLogger(LaskentaStarterActor.class);
 
     private final LaskentaSupervisor laskentaSupervisor;
-    private final int maxWorkers;
+    private int maxWorkers;
     private AtomicInteger workerCount = new AtomicInteger(0);
 
     private LaskentaStarterActor(final LaskentaSupervisor laskentaSupervisor, final int maxWorkers) {
@@ -42,6 +42,10 @@ final public class LaskentaStarterActor extends UntypedActor {
         } else if (ResetWorkerCount.class.isInstance(message)) {
             workerCount.set(0);
             LOG.info("Worker count reset: " + workerCount.get());
+        } else if (MaxWorkerCount.class.isInstance(message)) {
+            MaxWorkerCount count = (MaxWorkerCount)message;
+            LOG.info("Set maxworker count to " + count.maxWorkerCount);
+            maxWorkers = count.maxWorkerCount;
         } else {
             LOG.error("Unknown message: " + message);
         }
@@ -74,4 +78,11 @@ final public class LaskentaStarterActor extends UntypedActor {
     public static class ResetWorkerCount {}
 
     public static class StartAllWorkers {}
+
+    public static class MaxWorkerCount {
+        public final int maxWorkerCount;
+        public MaxWorkerCount(int count) {
+            this.maxWorkerCount = count;
+        }
+    }
 }
