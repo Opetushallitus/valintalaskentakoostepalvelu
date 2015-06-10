@@ -4,9 +4,6 @@ import java.util.Date;
 
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 
-/**
- * @author Jussi Jartamo
- */
 public class HakemusPrototyyppi {
 
     public final String hakijaOid;
