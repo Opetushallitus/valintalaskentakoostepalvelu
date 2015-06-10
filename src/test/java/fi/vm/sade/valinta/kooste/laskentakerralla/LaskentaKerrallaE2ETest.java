@@ -75,9 +75,18 @@ public class LaskentaKerrallaE2ETest {
                     throw new RuntimeException(t);
                 }
             };
+            AtomicBoolean first = new AtomicBoolean(true);
             mockForward(
                     fakeValintalaskenta.addHandler("/valintalaskenta-laskenta-service/resources/valintalaskenta/valintakokeet", exchange -> {
                         try {
+                            // failataan tarkoituksella ensimmainen laskenta
+                            if (first.getAndSet(false)) {
+                                String resp = "ERR!";
+                                exchange.sendResponseHeaders(505, resp.length());
+                                exchange.getResponseBody().write(resp.getBytes());
+                                exchange.getResponseBody().close();
+                                return;
+                            }
                             waitRequestForMax7Seconds.call();
                             String resp = "OK!";
                             exchange.sendResponseHeaders(200, resp.length());
