@@ -8,42 +8,39 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
- * @author Jussi Jartamo
- * 
  *         XSSFCell -> Solu
  */
 public class XSSFSolu {
 
-	private static final Logger LOG = LoggerFactory.getLogger(XSSFSolu.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XSSFSolu.class);
 
-	private XSSFSolu() {
-	}
+    private XSSFSolu() {
+    }
 
-	public static Solu asSolu(XSSFCell cell) {
-		if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
-			if (DateUtil.isCellDateFormatted(cell)) {
-				return new Paivamaara(cell.getDateCellValue());
-			} else {
-				// LOG.error("{}", cell.getNumericCellValue());
-				return new Numero(cell.getNumericCellValue());
-			}
-		} else {
-			String rawValue;
-			if (Cell.CELL_TYPE_STRING == cell.getCellType()) {
-				rawValue = cell.getStringCellValue();
-			} else {
-				rawValue = StringUtils.EMPTY;
-			}
+    public static Solu asSolu(XSSFCell cell) {
+        if (Cell.CELL_TYPE_NUMERIC == cell.getCellType()) {
+            if (DateUtil.isCellDateFormatted(cell)) {
+                return new Paivamaara(cell.getDateCellValue());
+            } else {
+                // LOG.error("{}", cell.getNumericCellValue());
+                return new Numero(cell.getNumericCellValue());
+            }
+        } else {
+            String rawValue;
+            if (Cell.CELL_TYPE_STRING == cell.getCellType()) {
+                rawValue = cell.getStringCellValue();
+            } else {
+                rawValue = StringUtils.EMPTY;
+            }
 
-			// String rawValue = StringUtils.trimToEmpty(cell.getRawValue());
-			try {
-				String maybeNumber = rawValue.replace(",", ".");
-				double d = Double.parseDouble(maybeNumber);
-				return new Numero(d);
-			} catch (Exception e) {
-			}
-			return new Teksti(rawValue);
-		}
-	}
+            // String rawValue = StringUtils.trimToEmpty(cell.getRawValue());
+            try {
+                String maybeNumber = rawValue.replace(",", ".");
+                double d = Double.parseDouble(maybeNumber);
+                return new Numero(d);
+            } catch (Exception e) {
+            }
+            return new Teksti(rawValue);
+        }
+    }
 }
