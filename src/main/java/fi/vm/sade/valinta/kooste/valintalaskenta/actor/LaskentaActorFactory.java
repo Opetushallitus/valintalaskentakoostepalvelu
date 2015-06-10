@@ -159,17 +159,19 @@ public class LaskentaActorFactory {
                             Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
                             Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
                             Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
-                            Observable<Observable<String>> laskentaObs = wrapAsRunOnlyOnceObservable(Observable.combineLatest(
+                            Observable<String> laskentaObs = wrapAsRunOnlyOnceObservable(Observable.combineLatest(
                                     valintaperusteet,
                                     hakemukset,
                                     oppijat,
-                                    (v, h, o) -> valintalaskentaAsyncResource.valintakokeet(new LaskeDTO(
+                                    (v, h, o) -> {
+                                        return valintalaskentaAsyncResource.valintakokeet(new LaskeDTO(
                                                 actorParams.getUuid(),
                                                 actorParams.isErillishaku(),
                                                 hakukohdeOid,
-                                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v))
-                            ));
-                            laskentaObs.flatMap(o -> o).subscribe(
+                                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v));
+                                    }
+                            ).flatMap(o -> o));
+                            laskentaObs.subscribe(
                                     ok -> {
                                         LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
                                         laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
@@ -192,7 +194,7 @@ public class LaskentaActorFactory {
                     Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
                     Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
                     Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
-                    Observable<Observable<String>> laskentaObs = wrapAsRunOnlyOnceObservable(Observable.combineLatest(
+                    Observable<String> laskentaObs = wrapAsRunOnlyOnceObservable(Observable.combineLatest(
                             hakijaryhmat,
                             valintaperusteet,
                             hakemukset,
@@ -203,12 +205,12 @@ public class LaskentaActorFactory {
                                             actorParams.isErillishaku(),
                                             hakukohdeOid,
                                             HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr))
-                    ));
-                    laskentaObs.flatMap(o -> o).subscribe(
+                    ).flatMap(o -> o));
+                    laskentaObs.subscribe(
                             ok -> {
                                 LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
                                 laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
-                            },virhe -> {
+                            }, virhe -> {
                                 LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
                                 laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
                             });
@@ -229,7 +231,7 @@ public class LaskentaActorFactory {
                     Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
 
 
-                    Observable<Observable<String>> laskentaObs = wrapAsRunOnlyOnceObservable(Observable.combineLatest(
+                    Observable<String> laskentaObs = wrapAsRunOnlyOnceObservable(Observable.combineLatest(
                             hakijaryhmat,
                             valintaperusteet,
                             hakemukset,
@@ -240,12 +242,12 @@ public class LaskentaActorFactory {
                                             actorParams.isErillishaku(),
                                             hakukohdeOid,
                                             HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr))
-                    ));
-                    laskentaObs.flatMap(o -> o).subscribe(
+                    ).flatMap(o -> o));
+                    laskentaObs.subscribe(
                             ok -> {
                                 LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
                                 laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
-                            },virhe -> {
+                            }, virhe -> {
                                 LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
                                 laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
                             });
