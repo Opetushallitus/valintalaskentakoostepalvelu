@@ -9,9 +9,6 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 
 import java.util.Collection;
 
-/**
- * @author Jussi Jartamo
- */
 public class HSSFRivi {
 
     private HSSFRivi() {

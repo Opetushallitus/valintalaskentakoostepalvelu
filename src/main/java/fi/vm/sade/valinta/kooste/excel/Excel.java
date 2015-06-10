@@ -128,8 +128,7 @@ public class Excel {
         lockedStyle.setDataFormat(fmt.getFormat("@"));
         XSSFCellStyle editableStyle = workbook.createCellStyle();
         editableStyle.setDataFormat(fmt.getFormat("@"));
-        editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204,
-                153)));
+        editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204, 153)));
         editableStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
         editableStyle.setAlignment(CellStyle.ALIGN_LEFT);
         editableStyle.setLocked(false);
@@ -138,10 +137,8 @@ public class Excel {
         List<Integer> leveysPreferenssit = Lists.newArrayList();
         int rowIndex = 0;
         int maxCellNum = 0;
-        Map<Collection<String>, MonivalintaJoukko> constraintSets = Maps
-                .newHashMap();
-        Map<Collection<Number>, ArvovaliJoukko> numberConstraintSets = Maps
-                .newHashMap();
+        Map<Collection<String>, MonivalintaJoukko> constraintSets = Maps.newHashMap();
+        Map<Collection<Number>, ArvovaliJoukko> numberConstraintSets = Maps.newHashMap();
 
         for (Rivi toisteinenrivi : rivit) {
             for (Rivi rivi : toisteinenrivi.getToisteisetRivit()) {
@@ -184,18 +181,10 @@ public class Excel {
 
                         Monivalinta monivalinta = solu.toMonivalinta();
                         MonivalintaJoukko joukko;
-                        if (!constraintSets.containsKey(monivalinta
-                                .getVaihtoehdot())) {
-                            constraintSets
-                                    .put(monivalinta.getVaihtoehdot(),
-                                            joukko = new MonivalintaJoukko(
-                                                    monivalinta
-                                                            .getVaihtoehdot(),
-                                                    sheet, dvHelper));
+                        if (!constraintSets.containsKey(monivalinta.getVaihtoehdot())) {
+                            constraintSets.put(monivalinta.getVaihtoehdot(), joukko = new MonivalintaJoukko(monivalinta.getVaihtoehdot(), sheet, dvHelper));
                         } else {
-                            joukko = constraintSets.get(monivalinta
-                                    .getVaihtoehdot());
-
+                            joukko = constraintSets.get(monivalinta.getVaihtoehdot());
                         }
                         joukko.addAddress(rowIndex, cellNum);
                     }
@@ -209,12 +198,9 @@ public class Excel {
                     if (cell != null && solu.isLukittu()) {
                         cell.setCellStyle(lockedStyle); // lockedStyle
                     } else if (cell != null && solu.isMuokattava()) {
-
                         cell.setCellStyle(editableStyle); // lockedStyle
-
                     }
-                    asetaPreferenssi(cellNum, solu.preferoituLeveys(),
-                            leveysPreferenssit);
+                    asetaPreferenssi(cellNum, solu.preferoituLeveys(), leveysPreferenssit);
                     if (solu.ulottuvuus() != 1) {
                         sheet.addMergedRegion(new CellRangeAddress(rowIndex, // first
                                 // row

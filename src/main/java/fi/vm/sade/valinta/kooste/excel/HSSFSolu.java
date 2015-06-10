@@ -8,11 +8,7 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Jussi Jartamo
- */
 public class HSSFSolu {
-
     private static final Logger LOG = LoggerFactory.getLogger(HSSFSolu.class);
 
     private HSSFSolu() {
