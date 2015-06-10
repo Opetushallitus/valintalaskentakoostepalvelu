@@ -1,13 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public interface Peruutettava {
+    void peruuta();
 
-	void peruuta();
-
-	boolean onTehty();
+    boolean onTehty();
 }

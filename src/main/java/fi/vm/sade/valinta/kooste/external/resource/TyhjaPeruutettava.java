@@ -1,29 +1,24 @@
 package fi.vm.sade.valinta.kooste.external.resource;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public class TyhjaPeruutettava implements Peruutettava {
-	private final static TyhjaPeruutettava INSTANSSI = new TyhjaPeruutettava();
+    private final static TyhjaPeruutettava INSTANSSI = new TyhjaPeruutettava();
 
-	private TyhjaPeruutettava() {
-	}
+    private TyhjaPeruutettava() {
+    }
 
-	public boolean onTehty() {
-		return true;
-	}
+    public boolean onTehty() {
+        return true;
+    }
 
-	public void peruuta() {
+    public void peruuta() {
 
-	}
+    }
 
-	public boolean equals(Object obj) {
-		return INSTANSSI == obj;
-	}
+    public boolean equals(Object obj) {
+        return INSTANSSI == obj;
+    }
 
-	public static Peruutettava tyhjaPeruutettava() {
-		return INSTANSSI;
-	}
+    public static Peruutettava tyhjaPeruutettava() {
+        return INSTANSSI;
+    }
 }
