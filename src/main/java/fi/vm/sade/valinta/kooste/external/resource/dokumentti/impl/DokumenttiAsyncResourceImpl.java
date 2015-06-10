@@ -37,26 +37,15 @@ public class DokumenttiAsyncResourceImpl extends HttpResource implements Dokumen
         super(address, TimeUnit.HOURS.toMillis(1));
         //super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.HOURS.toMillis(1));
     }
-    /*
-        @PUT
-        @Path("/tallenna")
-        @Consumes("application/octet-stream")
-        void tallenna(@QueryParam("id") String id,
-                  @QueryParam("filename") String filename,
-                  @QueryParam("expirationDate") Long expirationDate,
-                  @QueryParam("tags") List<String> tags,
-                  @QueryParam("mimeType") String mimeType, InputStream filedata);
-        */
 
     @Override
     public Observable<String> uudelleenNimea(String dokumenttiId, String filename) {
-        putAsObservable(
+        return putAsObservable(
                 "/dokumentit/uudelleennimea" + dokumenttiId,
                 new TypeToken<String>() {
                 }.getType(),
                 Entity.text(filename)
         );
-        return null;
     }
 
     @Override
