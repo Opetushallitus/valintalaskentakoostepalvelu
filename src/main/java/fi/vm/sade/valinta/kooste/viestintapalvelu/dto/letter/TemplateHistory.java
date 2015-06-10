@@ -7,8 +7,16 @@ public class TemplateHistory {
 	private String name;
 	private List<TemplateDetail> templateReplacements;
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public String getName() {
 		return name;
+	}
+
+	public void setTemplateReplacements(List<TemplateDetail> templateReplacements) {
+		this.templateReplacements = templateReplacements;
 	}
 
 	public List<TemplateDetail> getTemplateReplacements() {

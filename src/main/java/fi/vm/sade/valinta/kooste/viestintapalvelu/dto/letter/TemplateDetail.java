@@ -11,8 +11,12 @@ public class TemplateDetail {
 	private long id;
 	private String name;
 	private String defaultValue;
-	private long timestamp;
+	private String timestamp;
 	private boolean mandatory;
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public String getDefaultValue() {
 		return defaultValue;
@@ -26,7 +30,7 @@ public class TemplateDetail {
 		return name;
 	}
 
-	public long getTimestamp() {
+	public String getTimestamp() {
 		return timestamp;
 	}
 

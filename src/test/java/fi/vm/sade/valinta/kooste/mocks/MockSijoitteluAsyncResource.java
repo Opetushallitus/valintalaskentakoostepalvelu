@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.springframework.stereotype.Service;
+import rx.Observable;
 
 @Service
 public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
@@ -40,6 +41,11 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
     public static void clear() {
         resultReference.set(null);
         resultMap.clear();
+    }
+
+    @Override
+    public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid, String hakukohdeOid) {
+        return null;
     }
 
     public static Map<Long, HakukohdeDTO> getResultMap() {

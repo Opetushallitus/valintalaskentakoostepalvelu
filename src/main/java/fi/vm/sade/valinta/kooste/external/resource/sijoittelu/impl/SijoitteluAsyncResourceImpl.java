@@ -28,6 +28,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
+import rx.Observable;
 
 @Service
 public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements SijoitteluAsyncResource {
@@ -125,6 +126,23 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 				.query("hakukohdeOid", hakukohdeOid)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async().get(new GenericType<HakijaPaginationObject>() { });
+	}
+
+	@Override
+	public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(
+			String hakuOid, String hakukohdeOid) {
+		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakemukset";
+		return getAsObservable(
+				url,
+				new TypeToken<HakijaPaginationObject>() {
+				}.getType(),
+				client -> {
+					client.query("hyvaksytyt", true);
+					client.query("hakukohdeOid", hakukohdeOid);
+					client.accept(MediaType.APPLICATION_JSON_TYPE);
+					return client;
+				}
+		);
 	}
 	@Override
 	public Peruutettava getKoulutuspaikkallisetHakijat(

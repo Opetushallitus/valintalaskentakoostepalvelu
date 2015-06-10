@@ -8,6 +8,7 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import rx.Observable;
 
 public interface SijoitteluAsyncResource {
 
@@ -29,4 +30,7 @@ public interface SijoitteluAsyncResource {
 
 	void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId
 			, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus);
+
+	Observable<HakijaPaginationObject> getKoulutuspaikkalliset(
+			String hakuOid, String hakukohdeOid);
 }

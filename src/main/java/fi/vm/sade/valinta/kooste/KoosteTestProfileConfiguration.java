@@ -31,12 +31,12 @@ public class KoosteTestProfileConfiguration {
         Properties p0 = new Properties();
         p0.setProperty("valintalaskentakoostepalvelu.jatkuvasijoittelu.timer", "time=2018-12-12 10:12:12&delay=10000000");
         p0.setProperty("valintalaskentakoostepalvelu.valintalaskenta.rest.url", "http://" + proxyServer + "/valintalaskenta-laskenta-service/resources");
-        p0.setProperty("valintalaskentakoostepalvelu.viestintapalvelu.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.viestintapalvelu.url",  "http://" + proxyServer + "/viestintapalvelu");
         p0.setProperty("valintalaskentakoostepalvelu.hakemus.rest.url", "http://" + proxyServer + "/haku-app");
         p0.setProperty("valintalaskentakoostepalvelu.koodiService.url", "http://localhost");
         p0.setProperty("cas.callback.valintalaskentakoostepalvelu", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url", "http://localhost");
-        p0.setProperty("valintalaskentakoostepalvelu.sijoittelu.rest.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.sijoittelu.rest.url", "http://" + proxyServer + "/sijoittelu-service/resources");
         p0.setProperty("valintalaskentakoostepalvelu.seuranta.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.organisaatioService.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.tarjonta.rest.url", "http://" + proxyServer + "/tarjonta-service/rest");

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetKokoHaulleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +43,9 @@ public class SijoittelunTulosHaulleResource {
 	@Autowired(required = false)
 	private SijoittelunTulosTaulukkolaskentaRoute sijoittelunTulosTaulukkolaskentaRoute;
 	@Autowired(required = false)
-	private SijoittelunTulosHyvaksymiskirjeetRoute sijoittelunTulosHyvaksymiskirjeetRoute;
-	@Autowired(required = false)
 	private SijoittelunTulosOsoitetarratRoute sijoittelunTulosOsoitetarratRoute;
-
+	@Autowired
+	private HyvaksymiskirjeetKokoHaulleService hyvaksymiskirjeetKokoHaulleService;
 	@POST
 	@Path("/osoitetarrat")
 	@Consumes("application/json")
@@ -85,9 +85,7 @@ public class SijoittelunTulosHaulleResource {
 			SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(
 					"hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", null,
 					Arrays.asList("hyvaksymiskirjeet", "haulle"));
-			sijoittelunTulosHyvaksymiskirjeetRoute.hyvaksymiskirjeetHaulle(
-					prosessi, hakuOid, SijoitteluResource.LATEST,
-					SecurityContextHolder.getContext().getAuthentication());
+			hyvaksymiskirjeetKokoHaulleService.muodostaHyvaksymiskirjeetKokoHaulle(hakuOid, prosessi);
 			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
 			return prosessi.toProsessiId();
 		} catch (Exception e) {

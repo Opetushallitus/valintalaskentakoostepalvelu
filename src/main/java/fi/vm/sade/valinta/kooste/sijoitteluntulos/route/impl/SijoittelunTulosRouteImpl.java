@@ -509,6 +509,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 				.to(yksittainenHyvaksymiskirjeTyo)
 				//
 				.end();
+		/*
 		from(yksittainenHyvaksymiskirjeTyo)
 		//
 				.routeId(
@@ -701,8 +702,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 				//
 				.to(muodostaDokumentit);
 
+*/
 	}
-
 	private void configureDeadLetterChannel() {
 		from(luontiEpaonnistui)
 		//

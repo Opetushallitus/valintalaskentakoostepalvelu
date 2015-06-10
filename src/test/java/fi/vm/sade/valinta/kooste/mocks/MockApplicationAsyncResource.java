@@ -38,6 +38,11 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     public final List<Result> results = new ArrayList<>();
 
     @Override
+    public Observable<List<Hakemus>> getApplicationsByHakemusOids(Collection<String> hakemusOids) {
+        return null;
+    }
+
+    @Override
     public Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
         callback.accept(resultByOidReference.get());
         return new PeruutettavaImpl(Futures.immediateFuture(resultByOidReference.get()));

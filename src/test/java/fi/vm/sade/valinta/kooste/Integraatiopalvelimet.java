@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste;
 
 import com.google.gson.Gson;
 import fi.vm.sade.integrationtest.util.PortChecker;
+import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import org.mockserver.integration.ClientAndServer;
 import static javax.ws.rs.HttpMethod.*;
@@ -55,8 +56,23 @@ public class Integraatiopalvelimet {
 
                 );
     }
+    public static void mockToNoContent(String method, String p) {
+        mockServer
+                .when(
+                        request()
+                                .withMethod(method)
+                                .withPath(p)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(204)
+
+                );
+    }
     public static void mockToReturnJson(String method, String p, Object r) {
-        mockToReturnValue(method, p, new Gson().toJson(r));
+        String s;
+        mockToReturnValue(method, p, s = HttpResource.GSON.toJson(r));
+        System.err.println(s);
     }
     public static void mockToReturnString(String method, String p, String r) {
         mockToReturnValue(method, p, r);

@@ -97,13 +97,19 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 		this.haeOsoiteKomponentti = haeOsoiteKomponentti;
 	}
 	
-	private Organisaatio responseToOrganisaatio(Response organisaatioResponse) throws IOException {
+	private static Organisaatio responseToOrganisaatio(
+			HaeOsoiteKomponentti haeOsoiteKomponentti,
+			OrganisaatioAsyncResource organisaatioAsyncResource,
+			Response organisaatioResponse) throws IOException {
 		InputStream stream = (InputStream) organisaatioResponse.getEntity();
 		String json = StringUtils.trimToEmpty(IOUtils.toString(stream));
 		IOUtils.closeQuietly(stream);
 		return new Gson().fromJson(json,Organisaatio.class);
 	}
-	private Osoite haeOsoiteHierarkisesti(String kieli, List<String> oids, Organisaatio rdto, Teksti organisaationimi) {
+	private static Osoite haeOsoiteHierarkisesti(
+			HaeOsoiteKomponentti haeOsoiteKomponentti,
+			OrganisaatioAsyncResource organisaatioAsyncResource,
+			String kieli, List<String> oids, Organisaatio rdto, Teksti organisaationimi) {
 		Osoite hakijapalveluidenOsoite = null;
 		try {
 			if(organisaationimi.isArvoton()) {
@@ -132,7 +138,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 			}
 			if(hakijapalveluidenOsoite==null && rdto.getParentOid() != null) {
 				LOG.error("Ei saatu hakijapalveluiden osoitetta talta organisaatiolta. Tutkitaan seuraava {}", Arrays.toString(oids.toArray()));
-				return haeOsoiteHierarkisesti(kieli, oids, responseToOrganisaatio(organisaatioAsyncResource
+				return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource, kieli, oids, responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioAsyncResource
 				.haeOrganisaatio(rdto.getParentOid()).get()), organisaationimi);
 			} else {
 				LOG.error("Ei saatu hakijapalveluiden osoitetta! Kaytiin lapi organisaatiot {}!", Arrays.toString(oids.toArray()));
@@ -146,21 +152,24 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 		}
 		return null;
 	}
-	private Osoite organisaatioResponseToHakijapalveluidenOsoite(List<String> oids, String kieli, Response organisaatioResponse){
+	public static Osoite organisaatioResponseToHakijapalveluidenOsoite(
+			HaeOsoiteKomponentti haeOsoiteKomponentti,
+			OrganisaatioAsyncResource organisaatioAsyncResource,
+			List<String> oids, String kieli, Response organisaatioResponse){
 		Organisaatio org;
 		Teksti organisaationimi;
 		try {
-			 org = responseToOrganisaatio(organisaatioResponse);
+			 org = responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioResponse);
 			 organisaationimi = new Teksti(org.getNimi());
 		}catch(Exception e) {
 			LOG.error("Ei saatu organisaatiota! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
 			throw new RuntimeException(e);
 		}
-		return haeOsoiteHierarkisesti(
+		return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource,
 				kieli,oids, org, organisaationimi);
 	}
 	
-	private Map<String, TreeMultiset<Integer>> todellisenJonosijanRatkaisin(Collection<HakijaDTO> hakukohteenHakijat) {
+	public static Map<String, TreeMultiset<Integer>> todellisenJonosijanRatkaisin(Collection<HakijaDTO> hakukohteenHakijat) {
 		Map<String,  TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija = Maps.newHashMap();
 		for (HakijaDTO hakija : hakukohteenHakijat) {
 			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
@@ -232,7 +241,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
 							todellisenJonosijanRatkaisin(hakijat
 							.getResults()),
-							organisaatioResponseToHakijapalveluidenOsoite(newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())), 
+							organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
 									kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
 							hyvaksymiskirjeessaKaytetytHakukohteet,
 							kohdeHakukohteessaHyvaksytyt, hakemukset,
@@ -301,7 +310,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 					MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet
 							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
 					List<String> tarjoajaOidList = newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid()));
-					Osoite hakijapalveluidenOsoite = organisaatioResponseToHakijapalveluidenOsoite(tarjoajaOidList, 
+					Osoite hakijapalveluidenOsoite = organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, tarjoajaOidList,
 							kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
 							todellisenJonosijanRatkaisin(hakijat
@@ -370,7 +379,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
 							todellisenJonosijanRatkaisin(hakijat
 									.getResults()),
-							organisaatioResponseToHakijapalveluidenOsoite(newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())), 
+							organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
 									kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
 							hyvaksymiskirjeessaKaytetytHakukohteet,
 							kohdeHakukohteessaHyvaksytyt, hakemukset,

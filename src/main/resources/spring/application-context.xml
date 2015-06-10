@@ -303,8 +303,10 @@
 		<!-- Sijoitteluntulokset haulle -->
 		<bean id="SijoittelunTulosHaulleResource"
 			  class="fi.vm.sade.valinta.kooste.sijoitteluntulos.resource.SijoittelunTulosHaulleResource" />
+		<bean class="fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetKokoHaulleService" />
 		<ctx:component-scan
 				base-package="fi.vm.sade.valinta.kooste.sijoitteluntulos.route.impl" />
+
 		<!-- Valintatapajono -->
 		<bean id="ValintatapajonoResource"
 			  class="fi.vm.sade.valinta.kooste.valintatapajono.resource.ValintatapajonoResource" />

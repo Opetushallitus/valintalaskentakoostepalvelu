@@ -1,13 +1,16 @@
 package fi.vm.sade.valinta.kooste.external.resource.dokumentti.impl;
 
+import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.ResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import rx.Observable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -44,6 +47,18 @@ public class DokumenttiAsyncResourceImpl extends HttpResource implements Dokumen
                   @QueryParam("tags") List<String> tags,
                   @QueryParam("mimeType") String mimeType, InputStream filedata);
         */
+
+    @Override
+    public Observable<String> uudelleenNimea(String dokumenttiId, String filename) {
+        putAsObservable(
+                "/dokumentit/uudelleennimea" + dokumenttiId,
+                new TypeToken<String>() {
+                }.getType(),
+                Entity.text(filename)
+        );
+        return null;
+    }
+
     @Override
     public Peruutettava tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata, Consumer<Response> responseCallback, Consumer<Throwable> failureCallback) {
         String url = "/dokumentit/tallenna";
