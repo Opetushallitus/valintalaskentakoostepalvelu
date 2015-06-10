@@ -65,7 +65,7 @@ public class KirjeetHakukohdeCache {
 				});
 	}
 	
-	private static String getOpetuskieli(Collection<String> opetuskielet) {
+	public static String getOpetuskieli(Collection<String> opetuskielet) {
 		TreeSet<String> preferoitukieli = Sets.newTreeSet();
 		for (String opetuskieli :opetuskielet) {
 			preferoitukieli.add(KieliUtil

@@ -103,7 +103,8 @@ public class HyvaksymiskirjeetKomponentti {
 			Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
 			Collection<HakijaDTO> hakukohteenHakijat, List<Hakemus> hakemukset,
 			String hakukohdeOid, String hakuOid, String tarjoajaOid,
-			String sisalto, String tag, String templateName,
+			String sisalto, String tag,
+			String templateName,
 			String palautusPvm,
 			String palautusAika) {
 

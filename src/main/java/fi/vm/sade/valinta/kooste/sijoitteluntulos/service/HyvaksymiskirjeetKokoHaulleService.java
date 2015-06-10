@@ -23,6 +23,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponent
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakijaBiPredicate;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,10 +99,11 @@ public class HyvaksymiskirjeetKokoHaulleService {
                         //LOG.error("Saatiin hakukohde {}", hakukohde);
                         Teksti hakukohdeNimi = new Teksti(h.getHakukohteenNimet());
                         String tarjoaja = h.getTarjoajaOids().iterator().next();
+                        String kieli = KirjeetHakukohdeCache.getOpetuskieli(h.getOpetusKielet());
                         return wrapAsRunOnlyOnceObservable(Observable.combineLatest(
                                 sijoitteluAsyncResource.getKoulutuspaikkalliset(haku, hakukohde),
                                 viestintapalveluAsyncResource.haeKirjepohja(haku, tarjoaja, "hyvaksymiskirje",
-                                        hakukohdeNimi.getKieli(), hakukohde),
+                                        kieli, hakukohde),
 
                                 (s, t) -> {
                                     //LOG.info("Saatiin sijoittelun tulokset ja templatet hakukohteelle {}", hakukohde);
