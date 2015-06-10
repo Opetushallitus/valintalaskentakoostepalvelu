@@ -18,6 +18,11 @@ public class MockDokumenttiResource implements DokumenttiResource {
     private static Map<String, InputStream> docs = new HashMap<>();
 
     @Override
+    public String uudelleennimea(String documentId, String filename) {
+        return null;
+    }
+
+    @Override
     public Collection<MetaData> hae(List<String> tags) {
         throw new UnsupportedOperationException();
     }
