@@ -171,15 +171,15 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                                                                                                     .subscribe(
                                                                                                                             b -> {
                                                                                                                                 if (VALMIS_STATUS.equals(b.getStatus())) {
-                                                                                                                                    LOG.error("##### Dokumentti {} valmistui joten uudelleen nimetään se", batchId);
+                                                                                                                                    LOG.error("##### Dokumentti {} valmistui hakukohteelle {} joten uudelleen nimetään se", batchId, hakukohde);
                                                                                                                                     try {
                                                                                                                                         dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohde + ".pdf")
                                                                                                                                                 .subscribe(
                                                                                                                                                         success -> {
-                                                                                                                                                            LOG.error("Uudelleen nimeäminen onnistui");
+                                                                                                                                                            LOG.error("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohde);
                                                                                                                                                         },
                                                                                                                                                         error -> {
-                                                                                                                                                            LOG.error("Uudelleen nimeäminen epäonnistui", error);
+                                                                                                                                                            LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohde, error);
                                                                                                                                                         }
                                                                                                                                                 );
                                                                                                                                     } catch (Throwable ttt) {
@@ -209,7 +209,10 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                                                 }
                                                         ));
                                             } else {
-                                                return Observable.error(new RuntimeException("Ei " + VAKIOTEMPLATE + " tai " + VAKIODETAIL + " templateDetailia hakukohteelle " + hakukohde));
+                                                return wrapAsRunOnlyOnceObservable(Observable.error(
+                                                        new RuntimeException("Ei " +
+                                                                VAKIOTEMPLATE + " tai " +
+                                                                VAKIODETAIL + " templateDetailia hakukohteelle " + hakukohde)));
                                             }
                                         } catch (Throwable error) {
                                             LOG.error("Muodostus epäonnistui hakukohteelle {}", hakukohde, error);
@@ -218,6 +221,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                         }
                                     }));
                         } catch (Throwable tttt) {
+                            LOG.error("Muodostus epäonnistui hakukohteelle {}", hakukohde, tttt);
                             return wrapAsRunOnlyOnceObservable(Observable.error(tttt));
                         }
                     }
@@ -268,6 +272,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
     }
 
     private void hakukohdeKerralla(String hakuOid, ConcurrentLinkedQueue<String> hakukohdeQueue, PublishSubject<String> subject, SijoittelunTulosProsessi prosessi) {
+        final int kokotyo = hakukohdeQueue.size();
+        AtomicInteger counter = new AtomicInteger(0);
         subject.asObservable().map(hakukohde -> {
             //LOG.error("############ käsitellään {}", hakukohde);
             return hakukohdeHandler.call(hakuOid, hakukohde, prosessi);
@@ -280,6 +286,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
                             //LOG.error("###### Error {}", error);
                         },
                         () -> { // finally
+                            LOG.error("########### Hakukohde {}/{} aloitetaan hyväksymiskirjeen luonti", counter.incrementAndGet(), kokotyo);
+
                             //LOG.error("############ Seuraavaa");
                             if (hakukohdeQueue.isEmpty()) {
                                 LOG.error("############ Oli tyhjä");
