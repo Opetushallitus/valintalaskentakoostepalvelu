@@ -152,7 +152,7 @@ public class LaskentaActorFactory {
                             Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
                             Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
                             Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
-                            return Observable.combineLatest(
+                            Observable<Observable<String>> laskentaObs = Observable.combineLatest(
                                     valintaperusteet,
                                     hakemukset,
                                     oppijat,
@@ -162,14 +162,16 @@ public class LaskentaActorFactory {
                                                     actorParams.isErillishaku(),
                                                     hakukohdeOid,
                                                     HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v))
-                            ).flatMap(o -> o).doOnNext(ok -> {
-                                LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
-                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
-                            }).doOnError(virhe -> {
-                                LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
-                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
-                            });
-
+                            );
+                            laskentaObs.flatMap(o -> o).subscribe(
+                                    ok -> {
+                                        LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
+                                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
+                                    }, virhe -> {
+                                        LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
+                                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
+                                    });
+                            return laskentaObs;
                         }
                 );
     }
@@ -184,7 +186,7 @@ public class LaskentaActorFactory {
                     Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
                     Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
                     Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
-                    return Observable.combineLatest(
+                    Observable<Observable<String>> laskentaObs = Observable.combineLatest(
                             hakijaryhmat,
                             valintaperusteet,
                             hakemukset,
@@ -195,14 +197,16 @@ public class LaskentaActorFactory {
                                             actorParams.isErillishaku(),
                                             hakukohdeOid,
                                             HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr))
-                    ).flatMap(o -> o).doOnNext(ok -> {
-                        LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
-                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
-                    }).doOnError(virhe -> {
-                        LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
-                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
-                    });
-
+                    );
+                    laskentaObs.flatMap(o -> o).subscribe(
+                            ok -> {
+                                LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
+                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
+                            },virhe -> {
+                                LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
+                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
+                            });
+                    return laskentaObs;
                 }
         );
     }
@@ -219,7 +223,7 @@ public class LaskentaActorFactory {
                     Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
 
 
-                    return Observable.combineLatest(
+                    Observable<Observable<String>> laskentaObs = Observable.combineLatest(
                             hakijaryhmat,
                             valintaperusteet,
                             hakemukset,
@@ -230,13 +234,16 @@ public class LaskentaActorFactory {
                                             actorParams.isErillishaku(),
                                             hakukohdeOid,
                                             HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr))
-                    ).flatMap(o -> o).doOnNext(ok -> {
-                        LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
-                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
-                    }).doOnError(virhe -> {
-                        LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
-                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
-                    });
+                    );
+                    laskentaObs.flatMap(o -> o).subscribe(
+                            ok -> {
+                                LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
+                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
+                            },virhe -> {
+                                LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
+                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
+                            });
+                    return laskentaObs;
 
                 }
         );
