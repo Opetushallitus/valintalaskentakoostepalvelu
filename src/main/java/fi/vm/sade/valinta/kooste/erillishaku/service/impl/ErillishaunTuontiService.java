@@ -52,14 +52,9 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import rx.Observable;
 import rx.Scheduler;
 
-/**
- * @author Jussi Jartamo
- */
 @Service
 public class ErillishaunTuontiService {
-
-    private static final Logger LOG = LoggerFactory
-            .getLogger(ErillishaunTuontiService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ErillishaunTuontiService.class);
     private final TilaAsyncResource tilaAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final HenkiloAsyncResource henkiloAsyncResource;
@@ -90,12 +85,6 @@ public class ErillishaunTuontiService {
             final ImportedErillisHakuExcel erillishakuExcel;
             try {
                 erillishakuExcel = importer.apply(haku);
-                /*
-                LOG.error("\n{}\nERILLISHAKU\n{}\n{}\n{}", new GsonBuilder().setPrettyPrinting().create().toJson(erillishakuExcel.rivit),
-                        new GsonBuilder().setPrettyPrinting().create().toJson(erillishaku),
-                        new GsonBuilder().setPrettyPrinting().create().toJson(erillishakuExcel.hetuToRivi),
-                new GsonBuilder().setPrettyPrinting().create().toJson(erillishakuExcel.henkiloPrototyypit));
-                */
                 tuoHakijatJaLuoHakemukset(prosessi, erillishakuExcel, haku);
             } catch(Exception e) {
                 LOG.error("Poikkeus {} {}: {}",  e.getMessage(),

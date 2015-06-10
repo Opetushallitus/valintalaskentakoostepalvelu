@@ -24,8 +24,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 
 public class ImportedErillisHakuExcel {
-    private static final Logger LOG = LoggerFactory
-        .getLogger(ImportedErillisHakuExcel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportedErillisHakuExcel.class);
     private final static org.joda.time.format.DateTimeFormatter dtf = DateTimeFormat.forPattern("dd.MM.yyyy");
     public final List<HenkiloCreateDTO> henkiloPrototyypit;
     public final List<ErillishakuRivi> rivit;

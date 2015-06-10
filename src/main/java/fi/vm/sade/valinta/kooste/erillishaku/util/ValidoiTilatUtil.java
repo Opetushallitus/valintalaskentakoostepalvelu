@@ -11,9 +11,6 @@ import java.util.Set;
 
 import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.*;
 
-/**
- * Created by jussija on 26/01/15.
- */
 public class ValidoiTilatUtil {
 
     private static final Set<ValintatuloksenTila> VIALLISET_VALINTATULOKSENTILAT =

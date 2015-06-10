@@ -35,9 +35,6 @@ import java.util.stream.Collectors;
 import static rx.Observable.from;
 import static rx.Observable.zip;
 
-/**
- * @author Jussi Jartamo
- */
 @Service
 public class ErillishaunVientiService {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishaunVientiService.class);
