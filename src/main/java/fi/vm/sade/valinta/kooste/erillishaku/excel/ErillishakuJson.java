@@ -7,7 +7,6 @@ import java.util.List;
 
 @ApiModel
 public class ErillishakuJson {
-
     private final List<ErillishakuRivi> rivit;
 
     public ErillishakuJson() {

@@ -16,182 +16,176 @@ import java.util.Date;
 
 import static org.apache.commons.lang.StringUtils.*;
 
-/**
- *
- * @author Jussi Jartamo
- *
- */
 @ApiModel
 public class ErillishakuRivi {
+    private static final Logger LOG = LoggerFactory.getLogger(ErillishakuRivi.class);
+    public final static DateTimeFormatter SYNTYMAAIKAFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy");
 
-	private static final Logger LOG = LoggerFactory.getLogger(ErillishakuRivi.class);
-	public final static DateTimeFormatter SYNTYMAAIKAFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy");
+    private final String etunimi;
+    private final String sukunimi;
+    private final String hakemusOid;
 
-	private final String etunimi;
-	private final String sukunimi;
-	private final String hakemusOid;
-
-	private final String henkilotunnus;
-	private final String sahkoposti;
-	private final String syntymaAika;
-	@JsonDeserialize(using = SukupuoliDeserializer.class)
-	private final Sukupuoli sukupuoli;
-	@ApiModelProperty(required = true)
-	private final String aidinkieli;
-	private final String personOid;
-	@ApiModelProperty(required = true)
-	private final String hakemuksenTila;
-	private final String vastaanottoTila;
-	private final String ilmoittautumisTila;
-	@ApiModelProperty(required = true)
-	private final boolean julkaistaankoTiedot;
+    private final String henkilotunnus;
+    private final String sahkoposti;
+    private final String syntymaAika;
+    @JsonDeserialize(using = SukupuoliDeserializer.class)
+    private final Sukupuoli sukupuoli;
+    @ApiModelProperty(required = true)
+    private final String aidinkieli;
+    private final String personOid;
+    @ApiModelProperty(required = true)
+    private final String hakemuksenTila;
+    private final String vastaanottoTila;
+    private final String ilmoittautumisTila;
+    @ApiModelProperty(required = true)
+    private final boolean julkaistaankoTiedot;
     private final boolean poistetaankoRivi;
 
-	public static ErillishakuRivi emptyErillishakuRivi() {
-		return new ErillishakuRivi(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, null, null, false, false);
-	}
+    public static ErillishakuRivi emptyErillishakuRivi() {
+        return new ErillishakuRivi(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, null, null, false, false);
+    }
 
-	public ErillishakuRivi() {
-		this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, null, null, false, false);
-	}
+    public ErillishakuRivi() {
+        this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, null, null, false, false);
+    }
 
-	public ErillishakuRivi(String hakemusOid, String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika, String sukupuoli, String personOid, String aidinkieli, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, boolean poistetaankoRivi) {
-		this(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
-				Sukupuoli.fromString(sukupuoli), personOid, aidinkieli,
-				hakemuksenTila, vastaanottoTila, ilmoittautumisTila,
-				julkaistaankoTiedot, poistetaankoRivi);
-	}
+    public ErillishakuRivi(String hakemusOid, String sukunimi, String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika, String sukupuoli, String personOid, String aidinkieli, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, boolean poistetaankoRivi) {
+        this(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
+                Sukupuoli.fromString(sukupuoli), personOid, aidinkieli,
+                hakemuksenTila, vastaanottoTila, ilmoittautumisTila,
+                julkaistaankoTiedot, poistetaankoRivi);
+    }
 
-	public ErillishakuRivi(String hakemusOid, String sukunimi,String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika, Sukupuoli sukupuoli, String personOid, String aidinkieli, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, boolean poistetaankoRivi) {
-		this.hakemusOid = hakemusOid;
-		this.etunimi = etunimi;
-		this.sukunimi = sukunimi;
-		this.henkilotunnus = henkilotunnus;
-		this.sahkoposti = sahkoposti;
-		this.syntymaAika = syntymaAika;
-		this.sukupuoli = sukupuoli;
-		this.aidinkieli = aidinkieli;
-		this.personOid = personOid;
-		this.hakemuksenTila = hakemuksenTila;
-		this.vastaanottoTila = vastaanottoTila;
-		this.ilmoittautumisTila = ilmoittautumisTila;
-		this.julkaistaankoTiedot = julkaistaankoTiedot;
+    public ErillishakuRivi(String hakemusOid, String sukunimi, String etunimi, String henkilotunnus, String sahkoposti, String syntymaAika, Sukupuoli sukupuoli, String personOid, String aidinkieli, String hakemuksenTila, String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, boolean poistetaankoRivi) {
+        this.hakemusOid = hakemusOid;
+        this.etunimi = etunimi;
+        this.sukunimi = sukunimi;
+        this.henkilotunnus = henkilotunnus;
+        this.sahkoposti = sahkoposti;
+        this.syntymaAika = syntymaAika;
+        this.sukupuoli = sukupuoli;
+        this.aidinkieli = aidinkieli;
+        this.personOid = personOid;
+        this.hakemuksenTila = hakemuksenTila;
+        this.vastaanottoTila = vastaanottoTila;
+        this.ilmoittautumisTila = ilmoittautumisTila;
+        this.julkaistaankoTiedot = julkaistaankoTiedot;
         this.poistetaankoRivi = poistetaankoRivi;
-	}
+    }
 
-	public String getHakemusOid() {
-		return hakemusOid;
-	}
+    public String getHakemusOid() {
+        return hakemusOid;
+    }
 
-	public boolean isJulkaistaankoTiedot() {
-		return julkaistaankoTiedot;
-	}
+    public boolean isJulkaistaankoTiedot() {
+        return julkaistaankoTiedot;
+    }
 
-	public String getEtunimi() {
-		return trimToEmpty(etunimi);
-	}
+    public String getEtunimi() {
+        return trimToEmpty(etunimi);
+    }
 
-	public String getPersonOid() {
-		return trimToEmpty(personOid);
-	}
+    public String getPersonOid() {
+        return trimToEmpty(personOid);
+    }
 
-	public String getHenkilotunnus() {
-		return trimToEmpty(henkilotunnus);
-	}
+    public String getHenkilotunnus() {
+        return trimToEmpty(henkilotunnus);
+    }
 
-	public String getSahkoposti() {
-		return trimToEmpty(sahkoposti);
-	}
+    public String getSahkoposti() {
+        return trimToEmpty(sahkoposti);
+    }
 
-	public String getSukunimi() {
-		return trimToEmpty(sukunimi);
-	}
+    public String getSukunimi() {
+        return trimToEmpty(sukunimi);
+    }
 
-	public String getSyntymaAika() {
-		return trimToEmpty(syntymaAika);
-	}
+    public String getSyntymaAika() {
+        return trimToEmpty(syntymaAika);
+    }
 
-	public Sukupuoli getSukupuoli() {
-		if(!StringUtils.isBlank(henkilotunnus)) {
-			// palauta hetun sukupuoli
-			return HenkilotunnusTarkistusUtil.palautaSukupuoli(henkilotunnus);
-		}
-		return sukupuoli;
-	}
+    public Sukupuoli getSukupuoli() {
+        if (!StringUtils.isBlank(henkilotunnus)) {
+            // palauta hetun sukupuoli
+            return HenkilotunnusTarkistusUtil.palautaSukupuoli(henkilotunnus);
+        }
+        return sukupuoli;
+    }
 
-	public String getAidinkieli() {
-		return aidinkieli;
-	}
+    public String getAidinkieli() {
+        return aidinkieli;
+    }
 
-	public String getHakemuksenTila() {
-		return trimToEmpty(hakemuksenTila);
-	}
+    public String getHakemuksenTila() {
+        return trimToEmpty(hakemuksenTila);
+    }
 
-	public String getIlmoittautumisTila() {
-		return trimToEmpty(ilmoittautumisTila);
-	}
+    public String getIlmoittautumisTila() {
+        return trimToEmpty(ilmoittautumisTila);
+    }
 
-	public String getVastaanottoTila() {
-		return trimToEmpty(vastaanottoTila);
-	}
+    public String getVastaanottoTila() {
+        return trimToEmpty(vastaanottoTila);
+    }
 
-	private String suojaaHenkilotunnusLogeilta(String hetu) {
-		if(trimToNull(hetu) == null) {
-			return "***HENKILOTUNNUS***";
-		} else {
-			return EMPTY;
-		}
-	}
+    private String suojaaHenkilotunnusLogeilta(String hetu) {
+        if (trimToNull(hetu) == null) {
+            return "***HENKILOTUNNUS***";
+        } else {
+            return EMPTY;
+        }
+    }
 
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append(etunimi)
-		.append(", ")
-		.append(sukunimi)
-		.append(", ")
-		.append(sahkoposti)
-		.append(", ")
-		.append(hakemuksenTila)
-		.append(", ")
-		.append(suojaaHenkilotunnusLogeilta(henkilotunnus))
-		.append(", ")
-		.append(syntymaAika)
-		.append(", ")
-		.append(sukupuoli)
-		.append(", ")
-		.append(aidinkieli)
-		.append(", ")
-		.append(ilmoittautumisTila)
-		.append(", ")
-		.append(vastaanottoTila)
-		.append(", ")
-		.append(julkaistaankoTiedot).toString();
-	}
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append(etunimi)
+                .append(", ")
+                .append(sukunimi)
+                .append(", ")
+                .append(sahkoposti)
+                .append(", ")
+                .append(hakemuksenTila)
+                .append(", ")
+                .append(suojaaHenkilotunnusLogeilta(henkilotunnus))
+                .append(", ")
+                .append(syntymaAika)
+                .append(", ")
+                .append(sukupuoli)
+                .append(", ")
+                .append(aidinkieli)
+                .append(", ")
+                .append(ilmoittautumisTila)
+                .append(", ")
+                .append(vastaanottoTila)
+                .append(", ")
+                .append(julkaistaankoTiedot).toString();
+    }
 
-	public HenkiloCreateDTO toHenkiloCreateDTO() {
-		return new HenkiloCreateDTO(getAidinkieli(), getSukupuoli().toString(), getEtunimi(), getSukunimi(), getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA);
-	}
+    public HenkiloCreateDTO toHenkiloCreateDTO() {
+        return new HenkiloCreateDTO(getAidinkieli(), getSukupuoli().toString(), getEtunimi(), getSukunimi(), getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA);
+    }
 
-	public Date parseSyntymaAika() {
-		try {
-			String s = trimToNull(getSyntymaAika());
-			if(s == null) {
-				return null;
-			} else {
-				return SYNTYMAAIKAFORMAT.parseDateTime(s).toDate();
-			}
-		} catch (Exception e) {
-			LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", getSyntymaAika());
-			return null;
-		}
-	}
+    public Date parseSyntymaAika() {
+        try {
+            String s = trimToNull(getSyntymaAika());
+            if (s == null) {
+                return null;
+            } else {
+                return SYNTYMAAIKAFORMAT.parseDateTime(s).toDate();
+            }
+        } catch (Exception e) {
+            LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", getSyntymaAika());
+            return null;
+        }
+    }
 
-	public boolean isKesken() {
-		return "KESKEN".equalsIgnoreCase(hakemuksenTila);
-	}
+    public boolean isKesken() {
+        return "KESKEN".equalsIgnoreCase(hakemuksenTila);
+    }
 
     public boolean isPoistetaankoRivi() {
-		return poistetaankoRivi;
-	}
+        return poistetaankoRivi;
+    }
 }

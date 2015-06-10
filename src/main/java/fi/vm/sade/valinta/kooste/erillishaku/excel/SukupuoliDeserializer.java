@@ -8,8 +8,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import java.io.IOException;
 
 /**
- * @author Jussi Jartamo
- *
  * Koska SUKUPUOLI ottaa vastaan myös arvot 1 ja 2
  */
 public class SukupuoliDeserializer extends JsonDeserializer<Sukupuoli> {
