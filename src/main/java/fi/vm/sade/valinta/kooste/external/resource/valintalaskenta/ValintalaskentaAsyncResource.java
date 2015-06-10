@@ -16,6 +16,7 @@ import rx.Observable;
  */
 public interface ValintalaskentaAsyncResource {
 
+	@Deprecated
 	Peruutettava laske(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback);
 
@@ -23,6 +24,7 @@ public interface ValintalaskentaAsyncResource {
 	Peruutettava valintakokeet(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback);
 
+	@Deprecated
 	Peruutettava laskeKaikki(LaskeDTO laskeDTO, Consumer<String> callback,
 			Consumer<Throwable> failureCallback);
 
@@ -38,4 +40,8 @@ public interface ValintalaskentaAsyncResource {
 	Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid);
 
 	Observable<String> valintakokeet(LaskeDTO laskeDTO);
+
+	Observable<String> laske(LaskeDTO laskeDTO);
+
+	Observable<String> laskeKaikki(LaskeDTO laskeDTO);
 }

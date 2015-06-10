@@ -30,6 +30,16 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
     }
 
     @Override
+    public Observable<String> laske(LaskeDTO laskeDTO) {
+        return null;
+    }
+
+    @Override
+    public Observable<String> laskeKaikki(LaskeDTO laskeDTO) {
+        return null;
+    }
+
+    @Override
     public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
         return null;
     }

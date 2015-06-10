@@ -137,6 +137,15 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
+	public Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {
+		return getAsObservable(
+				"/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/hakijaryhma/" + hakukohdeOid,
+				new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {
+				}.getType(), client -> {
+					client.accept(MediaType.APPLICATION_JSON_TYPE);
+					return client;
+				});
+	}
 	public Observable<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
 		return getAsObservable(
 				"/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/" + hakukohdeOid,

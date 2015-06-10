@@ -13,6 +13,7 @@ public interface SuoritusrekisteriAsyncResource {
 
     Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm);
 
+    @Deprecated
     Peruutettava getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm,
                                        Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback);
 

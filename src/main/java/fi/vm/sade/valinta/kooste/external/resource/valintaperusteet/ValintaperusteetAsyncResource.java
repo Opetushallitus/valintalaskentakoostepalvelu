@@ -27,10 +27,12 @@ public interface ValintaperusteetAsyncResource {
 
 	// @GET
 	///valintaperusteet-service/resources/valintaperusteet/hakijaryhma/{}
+	@Deprecated
 	Peruutettava haeHakijaryhmat(String hakukohdeOid,
 			Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback,
 			Consumer<Throwable> failureCallback);
 
+	Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid);
 	// @GET
 	///valintaperusteet-service/resources/hakukohde/haku/{}
 	Peruutettava haunHakukohteet(String hakuOid,

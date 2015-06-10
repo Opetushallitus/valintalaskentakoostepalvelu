@@ -44,7 +44,16 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
 		return getAsObservable("/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe", new GenericType<List<ValintatietoValinnanvaiheDTO>>() { }.getType());
 	}
-
+	public Observable<String> laske(LaskeDTO laskeDTO) {
+		return postAsObservable("/valintalaskenta/laske",
+				new TypeToken<String>() {
+				}.getType(),
+				Entity.entity(laskeDTO,
+						MediaType.APPLICATION_JSON_TYPE), client -> {
+					client.accept(MediaType.TEXT_PLAIN_TYPE);
+					return client;
+				});
+	}
 	@Override
 	public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
 		return postAsObservable("/valintalaskenta/valintakokeet",
@@ -117,7 +126,17 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 		}
 
 	}
-
+	@Override
+	public Observable<String> laskeKaikki(LaskeDTO laskeDTO) {
+		return postAsObservable("/valintalaskenta/laskekaikki",
+				new TypeToken<String>() {
+				}.getType(),
+				Entity.entity(laskeDTO,
+						MediaType.APPLICATION_JSON_TYPE), client -> {
+					client.accept(MediaType.TEXT_PLAIN_TYPE);
+					return client;
+				});
+	}
 	@Override
 	public Peruutettava laskeKaikki(LaskeDTO laskeDTO,
 			Consumer<String> callback, Consumer<Throwable> failureCallback) {

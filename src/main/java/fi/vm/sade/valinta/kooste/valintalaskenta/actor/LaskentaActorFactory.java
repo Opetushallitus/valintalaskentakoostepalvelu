@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -141,19 +142,15 @@ public class LaskentaActorFactory {
         return v;
     }
 
-
-
     public LaskentaActor createValintakoelaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
         return laskentaHakukohteittainActor(laskentaSupervisor, actorParams,
                         hakukohdeJaOrganisaatio -> {
                             String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
-                            LOG.info("(Uuid={}) Haetaan resursseja hakukohteelle {}", uuid, hakukohdeOid);
+                            LOG.info("(Uuid={}) Haetaan valintakoelaskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
                             Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
                             Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
                             Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
-
-
                             return Observable.combineLatest(
                                     valintaperusteet,
                                     hakemukset,
@@ -177,78 +174,71 @@ public class LaskentaActorFactory {
     }
 
     public LaskentaActor createValintalaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
-        final PalvelukutsuStrategia laskentaStrategia = createStrategia();
-        final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
-        final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
-        final PalvelukutsuStrategia hakijaryhmatStrategia = createStrategia();
-        final PalvelukutsuStrategia suoritusrekisteriStrategia = createStrategia();
-        final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
-                laskentaStrategia,
-                valintaperusteetStrategia,
-                hakemuksetStrategia,
-                hakijaryhmatStrategia,
-                suoritusrekisteriStrategia
+        final String uuid = actorParams.getUuid();
+        return laskentaHakukohteittainActor(laskentaSupervisor, actorParams,
+                hakukohdeJaOrganisaatio -> {
+                    String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
+                    LOG.info("(Uuid={}) Haetaan laskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
+                    Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
+                    Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
+                    Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
+                    Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
+                    return Observable.combineLatest(
+                            hakijaryhmat,
+                            valintaperusteet,
+                            hakemukset,
+                            oppijat,
+                            (hr, v, h, o) ->
+                                    valintalaskentaAsyncResource.laske(new LaskeDTO(
+                                            actorParams.getUuid(),
+                                            actorParams.isErillishaku(),
+                                            hakukohdeOid,
+                                            HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr))
+                    ).flatMap(o -> o).doOnNext(ok -> {
+                        LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
+                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
+                    }).doOnError(virhe -> {
+                        LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
+                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
+                    });
+
+                }
         );
-        final Collection<LaskentaPalvelukutsu> palvelukutsut = actorParams.getHakukohdeOids()
-                .parallelStream()
-                .map(hakukohdeOid -> {
-                    UuidHakukohdeJaOrganisaatio uudiHk = new UuidHakukohdeJaOrganisaatio(actorParams.getUuid(), hakukohdeOid);
-                    return new ValintalaskentaPalvelukutsu(
-                            haku,
-                            actorParams.getParametritDTO(),
-                            actorParams.isErillishaku(),
-                            uudiHk,
-                            valintalaskentaAsyncResource,
-                            new HakemuksetPalvelukutsu(actorParams.getHakuOid(), uudiHk, applicationAsyncResource),
-                            new ValintaperusteetPalvelukutsu(uudiHk, actorParams.getValinnanvaihe(), valintaperusteetAsyncResource),
-                            new HakijaryhmatPalvelukutsu(uudiHk, valintaperusteetAsyncResource),
-                            new SuoritusrekisteriPalvelukutsu(uudiHk, suoritusrekisteriAsyncResource),
-                            hakemuksetStrategia,
-                            valintaperusteetStrategia,
-                            hakijaryhmatStrategia,
-                            suoritusrekisteriStrategia
-                    );
-                })
-                .collect(Collectors.toList());
-        return new LaskentaActorImpl(laskentaSupervisor, actorParams.getUuid(), actorParams.getHakuOid(), palvelukutsut, strategiat, laskentaStrategia, laskentaSeurantaAsyncResource);
     }
 
     public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
-        final PalvelukutsuStrategia laskentaStrategia = createStrategia();
-        final PalvelukutsuStrategia valintaperusteetStrategia = createStrategia();
-        final PalvelukutsuStrategia hakemuksetStrategia = createStrategia();
-        final PalvelukutsuStrategia hakijaryhmatStrategia = createStrategia();
-        final PalvelukutsuStrategia suoritusrekisteriStrategia = createStrategia();
-        final Collection<PalvelukutsuStrategia> strategiat = Arrays.asList(
-                laskentaStrategia,
-                valintaperusteetStrategia,
-                hakemuksetStrategia,
-                hakijaryhmatStrategia,
-                suoritusrekisteriStrategia
+        final String uuid = actorParams.getUuid();
+        return laskentaHakukohteittainActor(laskentaSupervisor, actorParams,
+                hakukohdeJaOrganisaatio -> {
+                    String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
+                    LOG.info("(Uuid={}) Haetaan laskennan + valintakoelaskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
+                    Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
+                    Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
+                    Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
+                    Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
+
+
+                    return Observable.combineLatest(
+                            hakijaryhmat,
+                            valintaperusteet,
+                            hakemukset,
+                            oppijat,
+                            (hr, v, h, o) ->
+                                    valintalaskentaAsyncResource.laskeKaikki(new LaskeDTO(
+                                            actorParams.getUuid(),
+                                            actorParams.isErillishaku(),
+                                            hakukohdeOid,
+                                            HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr))
+                    ).flatMap(o -> o).doOnNext(ok -> {
+                        LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
+                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
+                    }).doOnError(virhe -> {
+                        LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
+                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
+                    });
+
+                }
         );
-        final Collection<LaskentaPalvelukutsu> palvelukutsut = actorParams.getHakukohdeOids()
-                .parallelStream()
-                .map(hakukohdeOid -> {
-                            UuidHakukohdeJaOrganisaatio uudiHk = new UuidHakukohdeJaOrganisaatio(actorParams.getUuid(), hakukohdeOid);
-                            return new ValintalaskentaJaValintakoelaskentaPalvelukutsu(
-                                    haku,
-                                    actorParams.getParametritDTO(),
-                                    actorParams.isErillishaku(),
-                                    uudiHk,
-                                    valintalaskentaAsyncResource,
-                                    new HakemuksetPalvelukutsu(actorParams.getHakuOid(), uudiHk, applicationAsyncResource),
-                                    new ValintaperusteetPalvelukutsu(uudiHk, actorParams.getValinnanvaihe(), valintaperusteetAsyncResource),
-                                    new HakijaryhmatPalvelukutsu(uudiHk, valintaperusteetAsyncResource),
-                                    new SuoritusrekisteriPalvelukutsu(uudiHk, suoritusrekisteriAsyncResource),
-                                    hakemuksetStrategia,
-                                    valintaperusteetStrategia,
-                                    hakijaryhmatStrategia,
-                                    suoritusrekisteriStrategia
-                            );
-                        }
-                )
-                .collect(Collectors.toList());
-        return new LaskentaActorImpl(laskentaSupervisor, actorParams.getUuid(), actorParams.getHakuOid(), palvelukutsut, strategiat, laskentaStrategia, laskentaSeurantaAsyncResource);
     }
 
     private PalvelukutsuStrategia createStrategia() {

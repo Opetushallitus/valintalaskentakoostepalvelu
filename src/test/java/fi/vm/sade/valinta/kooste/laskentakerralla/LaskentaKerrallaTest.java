@@ -26,6 +26,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import rx.Observable;
 
 import javax.ws.rs.container.AsyncResponse;
 import java.util.ArrayList;
@@ -83,11 +84,11 @@ public class LaskentaKerrallaTest {
         verify(asyncResponse).resume(responseCaptor.capture());
         assertEquals(200, responseCaptor.getValue().getStatus());
 
-        verify(Mocks.applicationAsyncResource, times(1)).getApplicationsByOid(eq(HAKU_OID), eq(HAKUKOHDE_OID), any(), any());
-        verify(Mocks.suoritusrekisteriAsyncResource, times(1)).getOppijatByHakukohde(eq(HAKUKOHDE_OID), any(), any(), any());
+        verify(Mocks.applicationAsyncResource, times(1)).getApplicationsByOid(eq(HAKU_OID), eq(HAKUKOHDE_OID));
+        verify(Mocks.suoritusrekisteriAsyncResource, times(1)).getOppijatByHakukohde(eq(HAKUKOHDE_OID), any());
 
         ArgumentCaptor<LaskeDTO> laskentaInputCaptor = ArgumentCaptor.forClass(LaskeDTO.class);
-        verify(Mocks.valintalaskentaAsyncResource, times(1)).laske(laskentaInputCaptor.capture(), any(), any());
+        verify(Mocks.valintalaskentaAsyncResource, times(1)).laske(laskentaInputCaptor.capture());
 
         LaskeDTO laskeDTO = laskentaInputCaptor.getValue();
         assertEquals(1, laskeDTO.getHakemus().size());
@@ -111,21 +112,17 @@ public class LaskentaKerrallaTest {
                             return new PeruutettavaImpl(Futures.immediateCancelledFuture());
                         }
                 );
-        when(Mocks.valintaperusteetAsyncResource.haeValintaperusteet(any(), any(), argument.capture(), any()))
+        when(Mocks.valintaperusteetAsyncResource.haeValintaperusteet(any(), any()))
                 .thenAnswer(
-                        invocation -> {
-                            argument.getValue().accept(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID)));
-                            return new PeruutettavaImpl(Futures.immediateCancelledFuture());
-                        }
+                        invocation -> Observable
+                            .from(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID))))
                 );
 
-        when(Mocks.valintaperusteetAsyncResource.haeHakijaryhmat(any(), argument.capture(), any()))
+        when(Mocks.valintaperusteetAsyncResource.haeHakijaryhmat(any()))
                 .thenAnswer(
-                        invocation -> {
-                            argument.getValue().accept(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID)));
-                            return new PeruutettavaImpl(Futures.immediateCancelledFuture());
-                        }
-                );
+                        invocation -> Observable
+                                .from(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.valintaperusteet(HAKU_OID, TARJOAJA_OID, HAKUKOHDE_OID)))
+                                ));
 
         when(Mocks.ohjausparametritAsyncResource.haeHaunOhjausparametrit(any(), argument.capture(), any()))
                 .thenAnswer(
@@ -135,11 +132,38 @@ public class LaskentaKerrallaTest {
                         }
                 );
 
+        when(Mocks.applicationAsyncResource.getApplicationsByOid(eq(HAKU_OID), eq(HAKUKOHDE_OID)))
+                .thenAnswer(
+                        invocation -> Observable
+                                .from(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.hakemus(HAKEMUS_OID, PERSON_OID)))
+                                ));
+
+        when(Mocks.suoritusrekisteriAsyncResource.getOppijatByHakukohde(eq(HAKUKOHDE_OID), any()))
+                .thenAnswer(
+                        invocation ->
+                            Observable
+                                    .from(Arrays.asList(Arrays.asList(LaskentaKerrallaTestData.oppija()))
+                ));
+        when(Mocks.valintalaskentaAsyncResource.laske(any()))
+                .thenAnswer(
+                        invocation -> Observable
+                                .from(Arrays.asList("string"))
+                );
+        when(Mocks.tarjontaAsyncResource.haeHaku(any()))
+                .thenAnswer(invocation -> rx.Observable.just(buildHakuDto()));
+
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             ((Consumer)args[2]).accept(LASKENTASEURANTA_ID);
             return new PeruutettavaImpl(Futures.immediateFuture(LASKENTASEURANTA_ID));
         }).when(Mocks.laskentaSeurantaAsyncResource).luoLaskenta(any(), any(), argument.capture(), any());
+
+        doAnswer(invocation -> {
+                    Consumer<LaskentaDto> laskentaDtoConsumer = (Consumer<LaskentaDto>) invocation.getArguments()[1];
+                    laskentaDtoConsumer.accept(new LaskentaDto(LASKENTASEURANTA_ID, HAKU_OID, System.currentTimeMillis(), LaskentaTila.MENEILLAAN, LaskentaTyyppi.HAKUKOHDE, Lists.newArrayList(new HakukohdeDto(HAKUKOHDE_OID, "org_oid")), false, 0, false));
+                    return null;
+                }
+        ).when(Mocks.laskentaSeurantaAsyncResource).laskenta(eq(LASKENTASEURANTA_ID), any(), any());
 
         AtomicInteger seurantaCount = new AtomicInteger(0);
         doAnswer(invocation -> {
@@ -151,37 +175,6 @@ public class LaskentaKerrallaTest {
             return null;
         }).when(Mocks.laskentaSeurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
 
-        doAnswer(invocation -> {
-                    Consumer<LaskentaDto> laskentaDtoConsumer = (Consumer<LaskentaDto>) invocation.getArguments()[1];
-                    laskentaDtoConsumer.accept(new LaskentaDto(LASKENTASEURANTA_ID, HAKU_OID, System.currentTimeMillis(), LaskentaTila.MENEILLAAN, LaskentaTyyppi.HAKUKOHDE, Lists.newArrayList(new HakukohdeDto(HAKUKOHDE_OID, "org_oid")), false, 0, false));
-                    return null;
-                }
-        ).when(Mocks.laskentaSeurantaAsyncResource).laskenta(eq(LASKENTASEURANTA_ID), any(), any());
-
-        when(Mocks.applicationAsyncResource.getApplicationsByOid(eq(HAKU_OID), eq(HAKUKOHDE_OID), argument.capture(), any()))
-                .thenAnswer(
-                        invocation -> {
-                            argument.getValue().accept(Arrays.asList(LaskentaKerrallaTestData.hakemus(HAKEMUS_OID, PERSON_OID)));
-                            return new PeruutettavaImpl(Futures.immediateCancelledFuture());
-                        }
-                );
-
-        when(Mocks.suoritusrekisteriAsyncResource.getOppijatByHakukohde(eq(HAKUKOHDE_OID), any(), argument.capture(), any()))
-                .thenAnswer(
-                        invocation -> {
-                            argument.getValue().accept(Arrays.asList(LaskentaKerrallaTestData.oppija()));
-                            return new PeruutettavaImpl(Futures.immediateCancelledFuture());
-                        }
-                );
-        when(Mocks.valintalaskentaAsyncResource.laske(any(), argument.capture(), any()))
-                .thenAnswer(
-                        invocation -> {
-                            argument.getValue().accept("string");
-                            return new PeruutettavaImpl(Futures.immediateCancelledFuture());
-                        }
-                );
-        when(Mocks.tarjontaAsyncResource.haeHaku(any()))
-                .thenAnswer(invocation -> rx.Observable.just(buildHakuDto()));
     }
 
     private HakuV1RDTO buildHakuDto() {
