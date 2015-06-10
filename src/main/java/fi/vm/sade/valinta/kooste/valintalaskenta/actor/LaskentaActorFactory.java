@@ -316,8 +316,10 @@ public class LaskentaActorFactory {
             public void lopeta() {
                 active.set(false);
                 if(!done.get()) {
+                    LOG.warn("#### (Uuid={}) Laskenta lopetettu", uuid);
                     laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
                 } else {
+                    LOG.info("#### (Uuid={}) Laskenta valmis koska ei enää hakukohteita käsiteltävänä", uuid);
                     laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS);
                 }
                 laskentaSupervisor.ready(uuid);
