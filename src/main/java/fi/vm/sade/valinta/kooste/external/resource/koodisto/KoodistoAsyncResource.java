@@ -8,14 +8,8 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
-/**
- * @author Jussi Jartamo
- */
 public interface KoodistoAsyncResource {
-
-    Peruutettava haeKoodisto(String koodistoUri,
-                                   Consumer<List<Koodi>> callback, Consumer<Throwable> failureCallback);
+    Peruutettava haeKoodisto(String koodistoUri, Consumer<List<Koodi>> callback, Consumer<Throwable> failureCallback);
 
     Future<List<Koodi>> haeKoodisto(String koodistoUri);
-
 }

@@ -15,9 +15,6 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-/**
- * @author Jussi Jartamo
- */
 @Service
 public class OhjausparametritAsyncResourceImpl extends AsyncResourceWithCas implements OhjausparametritAsyncResource {
 
@@ -29,14 +26,11 @@ public class OhjausparametritAsyncResourceImpl extends AsyncResourceWithCas impl
             @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
             @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
             @Value("${host.scheme:https}://${host.virkailija}") String address,
-            ApplicationContext context
-    ) {
+            ApplicationContext context) {
         super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(10));
     }
 
-    public Peruutettava haeHaunOhjausparametrit(String hakuOid,
-                                         Consumer<ParametritDTO> callback,
-                                         Consumer<Throwable> failureCallback) {
+    public Peruutettava haeHaunOhjausparametrit(String hakuOid, Consumer<ParametritDTO> callback, Consumer<Throwable> failureCallback) {
         String url = new StringBuilder("/ohjausparametrit-service/api/v1/rest/parametri/").append(hakuOid).toString();
         try {
             return new PeruutettavaImpl(getWebClient()

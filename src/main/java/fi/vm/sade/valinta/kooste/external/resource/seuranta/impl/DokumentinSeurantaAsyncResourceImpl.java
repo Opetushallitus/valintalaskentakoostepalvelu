@@ -17,9 +17,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-/**
- * @author Jussi Jartamo
- */
 @Service
 public class DokumentinSeurantaAsyncResourceImpl extends HttpResource implements DokumentinSeurantaAsyncResource {
 
@@ -29,68 +26,58 @@ public class DokumentinSeurantaAsyncResourceImpl extends HttpResource implements
     }
 
     public void paivitaDokumenttiId(String uuid, String dokumenttiId, Consumer<DokumenttiDto> callback, Consumer<Throwable> failureCallback) {
-        String url = "/seuranta-service/resources/dokumentinseuranta/"+uuid+"/paivita_dokumenttiId";
+        String url = "/seuranta-service/resources/dokumentinseuranta/" + uuid + "/paivita_dokumenttiId";
         try {
             getWebClient()
                     .path(url)
                     .async()
                     .post(Entity.entity(dokumenttiId, MediaType.TEXT_PLAIN),
-                            new GsonResponseCallback<DokumenttiDto>(address,url,callback,failureCallback, new TypeToken<DokumenttiDto>() {
+                            new GsonResponseCallback<DokumenttiDto>(address, url, callback, failureCallback, new TypeToken<DokumenttiDto>() {
                             }.getType()));
         } catch (Exception e) {
-            LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
-                    e.getMessage());
+            LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url, e.getMessage());
         }
     }
 
-    public void luoDokumentti(String kuvaus,
-                       Consumer<String> callback,
-                       Consumer<Throwable> failureCallback) {
+    public void luoDokumentti(String kuvaus, Consumer<String> callback, Consumer<Throwable> failureCallback) {
         String url = "/seuranta-service/resources/dokumentinseuranta/";
         try {
             getWebClient()
                     .path(url)
                     .async()
                     .post(Entity.entity(kuvaus, MediaType.TEXT_PLAIN),
-                            new GsonResponseCallback<String>(address,url,callback,failureCallback, new TypeToken<String>() {
+                            new GsonResponseCallback<String>(address, url, callback, failureCallback, new TypeToken<String>() {
                             }.getType()));
         } catch (Exception e) {
-            LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
-                    e.getMessage());
+            LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url, e.getMessage());
         }
     }
 
-    public void paivitaKuvaus(String uuid, String kuvaus,
-                       Consumer<DokumenttiDto> callback,
-                       Consumer<Throwable> failureCallback) {
-        String url = "/seuranta-service/resources/dokumentinseuranta/"+uuid+"/paivita_kuvaus";
+    public void paivitaKuvaus(String uuid, String kuvaus, Consumer<DokumenttiDto> callback, Consumer<Throwable> failureCallback) {
+        String url = "/seuranta-service/resources/dokumentinseuranta/" + uuid + "/paivita_kuvaus";
         try {
             getWebClient()
                     .path(url)
                     .async()
                     .post(Entity.entity(kuvaus, MediaType.TEXT_PLAIN),
-                            new GsonResponseCallback<DokumenttiDto>(address,url,callback,failureCallback, new TypeToken<DokumenttiDto>() {
+                            new GsonResponseCallback<DokumenttiDto>(address, url, callback, failureCallback, new TypeToken<DokumenttiDto>() {
                             }.getType()));
         } catch (Exception e) {
-            LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
-                    e.getMessage());
+            LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url, e.getMessage());
         }
     }
 
-    public void lisaaVirheilmoituksia(String uuid, List<VirheilmoitusDto> virheilmoitukset,
-                               Consumer<DokumenttiDto> callback,
-                               Consumer<Throwable> failureCallback) {
-        String url = "/seuranta-service/resources/dokumentinseuranta/"+uuid+"/lisaa_virheita";
+    public void lisaaVirheilmoituksia(String uuid, List<VirheilmoitusDto> virheilmoitukset, Consumer<DokumenttiDto> callback, Consumer<Throwable> failureCallback) {
+        String url = "/seuranta-service/resources/dokumentinseuranta/" + uuid + "/lisaa_virheita";
         try {
             getWebClient()
                     .path(url)
                     .async()
                     .post(Entity.json(virheilmoitukset),
-                            new GsonResponseCallback<DokumenttiDto>(address,url,callback,failureCallback, new TypeToken<DokumenttiDto>() {
+                            new GsonResponseCallback<DokumenttiDto>(address, url, callback, failureCallback, new TypeToken<DokumenttiDto>() {
                             }.getType()));
         } catch (Exception e) {
-            LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
-                    e.getMessage());
+            LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url, e.getMessage());
         }
     }
 }

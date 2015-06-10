@@ -1,8 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto;
 
-/**
- * @author Jussi Jartamo
- */
 public class ParametritDTO {
 
     private String target;

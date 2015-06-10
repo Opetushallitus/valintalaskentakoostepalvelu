@@ -2,9 +2,6 @@ package fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto;
 
 import java.util.Date;
 
-/**
- * @author Jussi Jartamo
- */
 public class ParametriDTO {
     private Date date;
     private Date dateStart;

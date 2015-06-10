@@ -4,9 +4,6 @@ import fi.vm.sade.service.valintaperusteet.dto.KoodiDTO;
 
 import java.util.List;
 
-/**
- * @author Jussi Jartamo
- */
 public class Koodi {
 
     private String koodiArvo;

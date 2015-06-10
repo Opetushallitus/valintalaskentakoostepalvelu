@@ -17,16 +17,14 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanva
 @Path("/valintalaskenta-laskenta-service/resources/hakukohde")
 public interface HakukohdeResource {
 
-	@GET
-	@Path("{hakukohdeoid}/valinnanvaihe")
-	@Produces(MediaType.APPLICATION_JSON)
-	List<ValintatietoValinnanvaiheDTO> hakukohde(
-			@PathParam("hakukohdeoid") String hakukohdeoid);
+    @GET
+    @Path("{hakukohdeoid}/valinnanvaihe")
+    @Produces(MediaType.APPLICATION_JSON)
+    List<ValintatietoValinnanvaiheDTO> hakukohde(@PathParam("hakukohdeoid") String hakukohdeoid);
 
-	@POST
-	@Path("{hakukohdeoid}/valinnanvaihe")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
-	Response lisaaTuloksia(@PathParam("hakukohdeoid") String hakukohdeoid,
-			ValinnanvaiheDTO vaihe);
+    @POST
+    @Path("{hakukohdeoid}/valinnanvaihe")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    Response lisaaTuloksia(@PathParam("hakukohdeoid") String hakukohdeoid, ValinnanvaiheDTO vaihe);
 }

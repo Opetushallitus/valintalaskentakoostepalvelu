@@ -21,16 +21,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-/**
- * @author Jussi Jartamo
- */
 @Service
 public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoAsyncResource {
 
     @Autowired
-    public KoodistoAsyncResourceImpl(
-            @Value("https://${host.virkailija}") String address
-    ) {
+    public KoodistoAsyncResourceImpl(@Value("https://${host.virkailija}") String address) {
         super(address, TimeUnit.HOURS.toMillis(20));
     }
 
@@ -41,7 +36,7 @@ public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoA
             return new PeruutettavaImpl(getWebClient()
                     .path(url)
                     .query("onlyValidKoodis", true)
-                    //.query("koodistoVersio", 1)
+                            //.query("koodistoVersio", 1)
                     .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
                     .get(new GsonResponseCallback<List<Koodi>>(address, url, callback, failureCallback, new TypeToken<List<Koodi>>() {

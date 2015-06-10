@@ -7,13 +7,6 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.Parametr
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * @author Jussi Jartamo
- */
 public interface OhjausparametritAsyncResource {
-
-    Peruutettava haeHaunOhjausparametrit(String hakuOid,
-                                              Consumer<ParametritDTO> callback,
-                                              Consumer<Throwable> failureCallback);
-
+    Peruutettava haeHaunOhjausparametrit(String hakuOid, Consumer<ParametritDTO> callback, Consumer<Throwable> failureCallback);
 }

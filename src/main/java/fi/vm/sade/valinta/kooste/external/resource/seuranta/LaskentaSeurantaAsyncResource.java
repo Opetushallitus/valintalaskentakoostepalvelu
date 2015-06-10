@@ -11,24 +11,19 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public interface LaskentaSeurantaAsyncResource {
 
-	void otaSeuraavaLaskentaTyonAlle(Consumer<String> uuidCallback, Consumer<Throwable> failureCallback);
+    void otaSeuraavaLaskentaTyonAlle(Consumer<String> uuidCallback, Consumer<Throwable> failureCallback);
 
-	void laskenta(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback);
+    void laskenta(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback);
 
-	void resetoiTilat(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback);
+    void resetoiTilat(String uuid, Consumer<LaskentaDto> callback, Consumer<Throwable> failureCallback);
 
-	void luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids, Consumer<String> callback, Consumer<Throwable> failureCallback);
+    void luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids, Consumer<String> callback, Consumer<Throwable> failureCallback);
 
-	void merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila);
+    void merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila);
 
-	void merkkaaLaskennanTila(String uuid, LaskentaTila tila, HakukohdeTila hakukohdetila);
+    void merkkaaLaskennanTila(String uuid, LaskentaTila tila, HakukohdeTila hakukohdetila);
 
-	void merkkaaLaskennanTila(String uuid, LaskentaTila tila);
+    void merkkaaLaskennanTila(String uuid, LaskentaTila tila);
 }

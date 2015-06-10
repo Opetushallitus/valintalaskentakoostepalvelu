@@ -12,11 +12,6 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public interface ApplicationAsyncResource {
     Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid);
 
@@ -24,7 +19,7 @@ public interface ApplicationAsyncResource {
 
     Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit);
 
-	Observable<Hakemus> getApplication(String hakemusOid);
+    Observable<Hakemus> getApplication(String hakemusOid);
 
     Future<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids);
 

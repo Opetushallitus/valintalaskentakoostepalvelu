@@ -27,9 +27,6 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 
 
-/**
- * @author Jussi Jartamo
- */
 @Service
 public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements LaskentaSeurantaAsyncResource {
     private final Gson gson = new Gson();

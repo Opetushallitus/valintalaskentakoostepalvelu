@@ -6,9 +6,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakuDTO;
 import javax.ws.rs.*;
 import java.util.List;
 
-/**
- * Created by jukais on 24.3.2014.
- */
 @Path("valintatieto")
 public interface ValintatietoResource {
 
@@ -16,8 +13,7 @@ public interface ValintatietoResource {
     @Path("hakukohde/{hakukohdeOid}")
     @Consumes("application/json")
     @Produces("application/json")
-    List<HakemusOsallistuminenDTO> haeValintatiedotHakukohteelle(@PathParam("hakukohdeOid") String hakukohdeOid,
-                                                                 List<String> valintakoeOid);
+    List<HakemusOsallistuminenDTO> haeValintatiedotHakukohteelle(@PathParam("hakukohdeOid") String hakukohdeOid, List<String> valintakoeOid);
 
     @GET
     @Path("haku/{hakuOid}")
