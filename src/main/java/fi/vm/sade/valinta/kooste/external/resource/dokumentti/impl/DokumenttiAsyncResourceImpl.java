@@ -41,7 +41,7 @@ public class DokumenttiAsyncResourceImpl extends HttpResource implements Dokumen
     @Override
     public Observable<String> uudelleenNimea(String dokumenttiId, String filename) {
         return putAsObservable(
-                "/dokumentit/uudelleennimea" + dokumenttiId,
+                "/dokumentit/uudelleennimea/" + dokumenttiId,
                 new TypeToken<String>() {
                 }.getType(),
                 Entity.text(filename)
