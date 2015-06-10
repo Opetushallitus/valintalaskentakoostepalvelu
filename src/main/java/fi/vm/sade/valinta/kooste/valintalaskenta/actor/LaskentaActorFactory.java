@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.google.common.collect.Lists;
 
@@ -22,10 +24,6 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaPalvelukutsu;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintakoelaskentaPalvelukutsu;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintalaskentaJaValintakoelaskentaPalvelukutsu;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintalaskentaPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintaryhmaPalvelukutsuYhdiste;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.ValintaryhmatKatenoivaValintalaskentaPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.HakemuksetPalvelukutsu;
@@ -42,6 +40,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.Subscriber;
@@ -62,15 +61,17 @@ public class LaskentaActorFactory {
     private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
     private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
-
+    private final int splittaus;
     @Autowired
     public LaskentaActorFactory(
+            @Value("${valintalaskentakoostepalvelu.laskennan.splittaus:5}") int splittaus,
             ValintalaskentaAsyncResource valintalaskentaAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
             ValintaperusteetAsyncResource valintaperusteetAsyncResource,
             LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource,
             SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource
     ) {
+        this.splittaus = splittaus;
         this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
         this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
@@ -263,7 +264,6 @@ public class LaskentaActorFactory {
     }
     private <R> LaskentaActor laskentaHakukohteittainActor(LaskentaSupervisor laskentaSupervisor, LaskentaActorParams actorParams, Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<? extends R>> r) {
         return new LaskentaActor() {
-            final PublishSubject<HakukohdeJaOrganisaatio> subject = PublishSubject.create();
             final AtomicBoolean active = new AtomicBoolean(true);
             final AtomicBoolean done = new AtomicBoolean(false);
             final String uuid = actorParams.getUuid();
@@ -271,24 +271,35 @@ public class LaskentaActorFactory {
             public String getHakuOid() {return actorParams.getHakuOid();}
             public boolean isValmis() {return false;}
             public void start() {
-                final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> concQueue = new ConcurrentLinkedQueue<>(actorParams.getHakukohdeOids());
+                final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue = new ConcurrentLinkedQueue<>(actorParams.getHakukohdeOids());
+                Action0 aloitaAsynkroninenSuoritusHakukohdeJonolle =
+                        () -> {
+                            final PublishSubject<HakukohdeJaOrganisaatio> subject = PublishSubject.create();
+                            hakukohdeKerralla(hakukohdeQueue, subject);
+                            subject.onNext(hakukohdeQueue.poll());
+                        };
+
+                final boolean onkoTarveSplitata = actorParams.getHakukohdeOids().size() > 20;
+                IntStream.range(0, onkoTarveSplitata ? splittaus : 1).forEach(i -> aloitaAsynkroninenSuoritusHakukohdeJonolle.call());
+            }
+
+            private void hakukohdeKerralla(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue, PublishSubject<HakukohdeJaOrganisaatio> subject) {
                 subject.asObservable().flatMap(r).subscribe(
                         subscribeWithFinally(
                                 () -> { // finally
-                                    if (concQueue.isEmpty()) {
+                                    if (hakukohdeQueue.isEmpty()) {
                                         done.set(true);
                                         lopeta();
                                     } else {
                                         if (active.get()) {
-                                            Optional.ofNullable(concQueue.poll()).ifPresent(seuraava -> subject.onNext(seuraava));
+                                            Optional.ofNullable(hakukohdeQueue.poll()).ifPresent(seuraava -> subject.onNext(seuraava));
                                         }
                                     }
                                 }
                         )
-
                 );
-                subject.onNext(concQueue.poll());
             }
+
             public void lopeta() {
                 active.set(false);
                 if(!done.get()) {
@@ -341,4 +352,5 @@ public class LaskentaActorFactory {
             }
         };
     }
+
 }

@@ -70,6 +70,7 @@ public class ValintalaskentaTest {
 		TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
         OhjausparametritAsyncResource ohjausparametritAsyncResource = mock(OhjausparametritAsyncResource.class);
 		LaskentaActorSystem laskentaActorSystem = new LaskentaActorSystem(seurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource, valintaperusteetAsyncResource,seurantaAsyncResource, tarjontaAsyncResource), new LaskentaActorFactory(
+				5,
 				valintalaskentaAsyncResource,
 				applicationAsyncResource,
 				valintaperusteetAsyncResource,

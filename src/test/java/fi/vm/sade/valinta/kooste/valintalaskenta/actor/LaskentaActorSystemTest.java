@@ -55,7 +55,7 @@ public class LaskentaActorSystemTest {
         this.suoritusrekisteriAsyncResource = mock(SuoritusrekisteriAsyncResource.class);
         this.ohjausparametritAsyncResource = mock(OhjausparametritAsyncResource.class);
         this.tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
-        this.laskentaActorFactory = spy(new LaskentaActorFactory(valintalaskentaAsyncResource, applicationAsyncResource, valintaperusteetAsyncResource, seurantaAsyncResource, suoritusrekisteriAsyncResource));
+        this.laskentaActorFactory = spy(new LaskentaActorFactory(5, valintalaskentaAsyncResource, applicationAsyncResource, valintaperusteetAsyncResource, seurantaAsyncResource, suoritusrekisteriAsyncResource));
         this.LaskentaStarter = spy(new LaskentaStarter(ohjausparametritAsyncResource, valintaperusteetAsyncResource, seurantaAsyncResource, tarjontaAsyncResource));
         laskentaActorSystem = spy(new LaskentaActorSystem(seurantaAsyncResource, LaskentaStarter, laskentaActorFactory, 8));
     }

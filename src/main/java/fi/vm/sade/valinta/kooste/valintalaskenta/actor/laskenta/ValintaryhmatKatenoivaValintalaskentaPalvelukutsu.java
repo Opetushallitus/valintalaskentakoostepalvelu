@@ -27,7 +27,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
  * @author Jussi Jartamo
  */
 public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu implements LaskentaPalvelukutsu {
-    private static final Logger LOG = LoggerFactory.getLogger(ValintakoelaskentaPalvelukutsu.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ValintaryhmatKatenoivaValintalaskentaPalvelukutsu.class);
 
     private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
     private final List<ValintaryhmaPalvelukutsuYhdiste> valintaryhmaPalvelukutsuYhdiste;

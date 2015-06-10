@@ -68,9 +68,9 @@ public class LaskentaKerrallaE2ETest {
             mockToReturnJson(GET, "/haku-app/applications/listfull.*", Arrays.asList());
             MockServer fakeValintalaskenta = new MockServer();
             CyclicBarrier barrier = new CyclicBarrier(2);
-            Action0 waitRequestForMax3Seconds = () ->{
+            Action0 waitRequestForMax7Seconds = () ->{
                 try {
-                    barrier.await(3L, TimeUnit.SECONDS);
+                    barrier.await(7L, TimeUnit.SECONDS);
                 } catch (Throwable t) {
                     throw new RuntimeException(t);
                 }
@@ -78,7 +78,7 @@ public class LaskentaKerrallaE2ETest {
             mockForward(
                     fakeValintalaskenta.addHandler("/valintalaskenta-laskenta-service/resources/valintalaskenta/valintakokeet", exchange -> {
                         try {
-                            waitRequestForMax3Seconds.call();
+                            waitRequestForMax7Seconds.call();
                             String resp = "OK!";
                             exchange.sendResponseHeaders(200, resp.length());
                             exchange.getResponseBody().write(resp.getBytes());
@@ -90,7 +90,7 @@ public class LaskentaKerrallaE2ETest {
             Assert.assertEquals(200, http.getWebClient()
                     .query("valintakoelaskenta", "true")
                     .post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2))).getStatus());
-            waitRequestForMax3Seconds.call();
+            waitRequestForMax7Seconds.call();
         } finally {
             mockServer.reset();
         }

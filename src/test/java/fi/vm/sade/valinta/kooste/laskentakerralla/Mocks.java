@@ -28,6 +28,7 @@ public class Mocks {
     static TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
     static ValintalaskentaStatusExcelHandler valintalaskentaStatusExcelHandler = mock(ValintalaskentaStatusExcelHandler.class);
     static LaskentaActorSystem laskentaActorSystem = spy(new LaskentaActorSystem(laskentaSeurantaAsyncResource, new LaskentaStarter(ohjausparametritAsyncResource,valintaperusteetAsyncResource,laskentaSeurantaAsyncResource, tarjontaAsyncResource),new LaskentaActorFactory(
+            5,
             valintalaskentaAsyncResource,
             applicationAsyncResource,
             valintaperusteetAsyncResource,

@@ -61,6 +61,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource = new LaskentaSeurantaMock().build();
 
         LaskentaActorFactory actorFactory = new LaskentaActorFactory(
+                5,
                 new ValintalaskentaMock()
                         .addFilter(l -> true, (c,t) -> c.accept("VALMIS"))
                         .build(),
@@ -120,6 +121,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 new LaskentaSeurantaMock().build();
 
         LaskentaActorFactory actorFactory = new LaskentaActorFactory(
+                5,
                 new ValintalaskentaMock()
                         .addFilter(l -> true, (c,t) -> c.accept("VALMIS"))
                         .build(),
@@ -180,6 +182,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 new LaskentaSeurantaMock().build();
 
         LaskentaActorFactory actorFactory = new LaskentaActorFactory(
+                5,
                 new ValintalaskentaMock()
                         .addFilter(l -> true, (c,t) -> t.accept(new RuntimeException("Epaonnistuminen!")))
                         .build(),
@@ -241,6 +244,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 new LaskentaSeurantaMock().build();
 
         LaskentaActorFactory actorFactory = new LaskentaActorFactory(
+                5,
                 new ValintalaskentaMock()
                         .addFilter(l -> true, (c,t) -> c.accept("VALMIS"))
                         .build(),
@@ -302,6 +306,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 new LaskentaSeurantaMock().build();
 
         LaskentaActorFactory actorFactory = new LaskentaActorFactory(
+                5,
                 new ValintalaskentaMock()
                         .addFilter(l -> true, (c, t) -> t.accept(new RuntimeException("Epaonnistuminen!")))
                         .build(),
@@ -369,6 +374,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
                 new LaskentaSeurantaMock().build();
 
         LaskentaActorFactory actorFactory = new LaskentaActorFactory(
+                5,
                 new ValintalaskentaMock()
                         .addFilter(l -> true, (c, t) -> {
                             Assert.fail("Laskentaa ei pitäisi koskaan kutsua kun datoja ei saatu haettua!");
