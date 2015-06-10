@@ -47,19 +47,13 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	public Observable<String> laske(LaskeDTO laskeDTO) {
 		return postAsObservable("/valintalaskenta/laske",
 				String.class,
-				Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> {
-					client.accept(MediaType.TEXT_PLAIN_TYPE);
-					return client;
-				});
+				Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> client.accept(MediaType.TEXT_PLAIN_TYPE));
 	}
 	@Override
 	public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
 		return postAsObservable("/valintalaskenta/valintakokeet",
 				String.class,
-				Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> {
-					client.accept(MediaType.TEXT_PLAIN_TYPE);
-					return client;
-				});
+				Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> client.accept(MediaType.TEXT_PLAIN_TYPE));
 	}
 
 	@Override
@@ -72,7 +66,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 					.query("tarjoajaOid", tarjoajaOid)
 					.async()
 					.post(Entity.entity(vaihe,
-							MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<ValinnanvaiheDTO>(GSON, address, url, callback,
+							MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<ValinnanvaiheDTO>(address, url, callback,
 							failureCallback, new TypeToken<ValinnanvaiheDTO>() {
 					}.getType())));
 		} catch (Throwable e) {

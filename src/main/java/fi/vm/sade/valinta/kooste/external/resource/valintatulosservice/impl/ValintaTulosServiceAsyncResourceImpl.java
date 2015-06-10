@@ -1,19 +1,17 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
-import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import java.util.List;
+
+import javax.ws.rs.core.GenericType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import rx.Observable;
 
-import javax.ws.rs.core.GenericType;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
+import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
+import rx.Observable;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implements ValintaTulosServiceAsyncResource {
@@ -36,13 +34,6 @@ public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implement
 
     @Override
     public Observable<String> getHakemuksenValintatulosAsString(String hakuOid, String hakemusOid) {
-        return getAsObservable("/valinta-tulos-service/haku/" + hakuOid + "/hakemus/" + hakemusOid)
-                .flatMap(response -> {
-                    try {
-                        return Observable.just(StringUtils.trimToEmpty(IOUtils.toString((InputStream) response.getEntity())));
-                    } catch (IOException e) {
-                        return Observable.error(e);
-                    }
-                });
+        return getStringAsObservable("/valinta-tulos-service/haku/" + hakuOid + "/hakemus/" + hakemusOid);
     }
 }

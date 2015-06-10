@@ -122,7 +122,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 					.accept(MediaType.APPLICATION_JSON_TYPE)
 							//
 					.async()
-					.get(new GsonResponseCallback<List<ValinnanVaiheJonoillaDTO>>(GSON, address, url, callback,
+					.get(new GsonResponseCallback<List<ValinnanVaiheJonoillaDTO>>(address, url, callback,
 							failureCallback,
 							new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {
 							}.getType())));

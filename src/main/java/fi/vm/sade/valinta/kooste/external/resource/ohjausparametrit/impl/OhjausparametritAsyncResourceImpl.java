@@ -42,7 +42,7 @@ public class OhjausparametritAsyncResourceImpl extends AsyncResourceWithCas impl
             return new PeruutettavaImpl(getWebClient()
                     .path(url)
                     .async()
-                    .get(new GsonResponseCallback<ParametritDTO>(GSON, address, url, callback, failureCallback, new TypeToken<ParametritDTO>() {
+                    .get(new GsonResponseCallback<ParametritDTO>(address, url, callback, failureCallback, new TypeToken<ParametritDTO>() {
                     }.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
