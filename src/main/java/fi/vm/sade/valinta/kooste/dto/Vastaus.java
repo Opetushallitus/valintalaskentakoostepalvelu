@@ -1,9 +1,6 @@
 package fi.vm.sade.valinta.kooste.dto;
 
 /**
- * 
- * @author Jussi Jartamo
- * 
  *         Geneerinen vastaus viesti koostepalvelulta. Modaalisen dialogin
  *         esittämiseen erinäisistä onnistumis/virhe skenaarioista!
  */

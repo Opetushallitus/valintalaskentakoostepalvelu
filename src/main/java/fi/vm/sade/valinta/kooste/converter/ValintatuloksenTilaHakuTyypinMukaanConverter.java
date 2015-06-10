@@ -8,9 +8,6 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 
 import java.util.Map;
 
-/**
- * @author Jussi Jartamo
- */
 public class ValintatuloksenTilaHakuTyypinMukaanConverter {
 
     private static final Map<Hakutyyppi,Map<ValintatuloksenTila, ValintatuloksenTila>> tyyppiTilaMappaus = createTyyppiTilaMappaus();

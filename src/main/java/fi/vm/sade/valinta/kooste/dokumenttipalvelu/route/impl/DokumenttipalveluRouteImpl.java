@@ -29,9 +29,7 @@ public class DokumenttipalveluRouteImpl extends SpringRouteBuilder {
     @Override
     public void configure() throws Exception {
         from(quartzDocumentServiceFlush)
-        //
                 .process(new Processor() {
-
                     @Override
                     public void process(Exchange exchange) throws Exception {
                         try {
@@ -41,8 +39,6 @@ public class DokumenttipalveluRouteImpl extends SpringRouteBuilder {
                             e.printStackTrace();
                         }
                     }
-
                 });
     }
-
 }
