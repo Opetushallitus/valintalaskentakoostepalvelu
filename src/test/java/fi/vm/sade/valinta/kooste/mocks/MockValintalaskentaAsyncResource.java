@@ -31,17 +31,17 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
 
     @Override
     public Observable<String> laske(LaskeDTO laskeDTO) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Observable<String> laskeKaikki(LaskeDTO laskeDTO) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -52,21 +52,6 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
     @Override
     public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
         return Observable.just(Collections.EMPTY_LIST);
-    }
-
-    @Override
-    public Peruutettava laske(LaskeDTO laskeDTO, Consumer<String> callback, Consumer<Throwable> failureCallback) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Peruutettava valintakokeet(LaskeDTO laskeDTO, Consumer<String> callback, Consumer<Throwable> failureCallback) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Peruutettava laskeKaikki(LaskeDTO laskeDTO, Consumer<String> callback, Consumer<Throwable> failureCallback) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

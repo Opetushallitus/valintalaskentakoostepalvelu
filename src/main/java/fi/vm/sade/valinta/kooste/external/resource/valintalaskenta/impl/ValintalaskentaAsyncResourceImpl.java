@@ -46,10 +46,8 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	}
 	public Observable<String> laske(LaskeDTO laskeDTO) {
 		return postAsObservable("/valintalaskenta/laske",
-				new TypeToken<String>() {
-				}.getType(),
-				Entity.entity(laskeDTO,
-						MediaType.APPLICATION_JSON_TYPE), client -> {
+				String.class,
+				Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> {
 					client.accept(MediaType.TEXT_PLAIN_TYPE);
 					return client;
 				});
@@ -57,33 +55,11 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	@Override
 	public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
 		return postAsObservable("/valintalaskenta/valintakokeet",
-				new TypeToken<String>() {
-				}.getType(),
-				Entity.entity(laskeDTO,
-						MediaType.APPLICATION_JSON_TYPE), client -> {
+				String.class,
+				Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> {
 					client.accept(MediaType.TEXT_PLAIN_TYPE);
 					return client;
 				});
-	}
-
-	@Override
-	public Peruutettava valintakokeet(LaskeDTO laskeDTO,
-									  Consumer<String> callback, Consumer<Throwable> failureCallback) {
-		try {
-			String url = "/valintalaskenta/valintakokeet";
-			return new PeruutettavaImpl(getWebClient()
-					.path(url)
-					.async()
-					.post(Entity.entity(laskeDTO,
-									MediaType.APPLICATION_JSON_TYPE),
-							new Callback<String>(address, url, callback,
-									failureCallback, new TypeToken<String>() {
-							}.getType())));
-		} catch (Exception e) {
-			LOG.error("Virhe valintakoe kutsussa",e);
-			failureCallback.accept(e);
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		}
 	}
 
 	@Override
@@ -107,55 +83,15 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 	}
 
 	@Override
-	public Peruutettava laske(LaskeDTO laskeDTO, Consumer<String> callback,
-			Consumer<Throwable> failureCallback) {
-		try {
-			String url = "/valintalaskenta/laske";
-			return new PeruutettavaImpl(getWebClient()
-					.path(url)
-					.async()
-					.post(Entity.entity(laskeDTO,
-							MediaType.APPLICATION_JSON_TYPE),
-							new Callback<String>(address, url, callback,
-									failureCallback, new TypeToken<String>() {
-									}.getType())));
-		} catch (Exception e) {
-			LOG.error("Virhe laskennan kutsussa",e);
-			failureCallback.accept(e);
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		}
-
-	}
-	@Override
 	public Observable<String> laskeKaikki(LaskeDTO laskeDTO) {
 		return postAsObservable("/valintalaskenta/laskekaikki",
-				new TypeToken<String>() {
-				}.getType(),
-				Entity.entity(laskeDTO,
-						MediaType.APPLICATION_JSON_TYPE), client -> {
+				String.class,
+				Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> {
 					client.accept(MediaType.TEXT_PLAIN_TYPE);
 					return client;
 				});
 	}
-	@Override
-	public Peruutettava laskeKaikki(LaskeDTO laskeDTO,
-			Consumer<String> callback, Consumer<Throwable> failureCallback) {
-		try {
-			String url = "/valintalaskenta/laskekaikki";
-			return new PeruutettavaImpl(getWebClient()
-					.path(url)
-					.async()
-					.post(Entity.entity(laskeDTO,
-									MediaType.APPLICATION_JSON_TYPE),
-							new Callback<String>(address, url, callback,
-									failureCallback, new TypeToken<String>() {
-							}.getType())));
-		} catch (Exception e) {
-			LOG.error("Virhe laske kaikki kutsussa",e);
-			failureCallback.accept(e);
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		}
-	}
+
 
 	@Override
 	public Peruutettava laskeJaSijoittele(List<LaskeDTO> lista,
@@ -166,20 +102,12 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 					getWebClient()
 							.path(url)
 							.async()
-							.post(Entity.entity(lista,
-									MediaType.APPLICATION_JSON_TYPE),
-									new Callback<String>(address, url,
-											callback, failureCallback,
-											new TypeToken<String>() {
-											}.getType())));
+							.post(Entity.entity(lista, MediaType.APPLICATION_JSON_TYPE), new Callback<String>(address, url, callback, failureCallback, new TypeToken<String>() {
+								}.getType())));
 		} catch (Exception e) {
 			LOG.error("Virhe laske ja sijoittele kutsussa",e);
 			failureCallback.accept(e);
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
-
-
-
-
 }
