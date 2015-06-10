@@ -1,10 +1,5 @@
 package fi.vm.sade.valinta.kooste.exception;
 
-/**
- * User: wuoti
- * Date: 29.8.2013
- * Time: 14.11
- */
 public class HakemuspalveluException extends RuntimeException {
 
     public HakemuspalveluException() {

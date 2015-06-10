@@ -4,9 +4,6 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 
 import java.util.Collection;
 
-/**
- * @author Jussi Jartamo
- */
 public class ErillishaunDataException extends RuntimeException {
     private final Collection<PoikkeusRivi> poikkeusRivit;
 
