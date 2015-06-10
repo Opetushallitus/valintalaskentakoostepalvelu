@@ -34,6 +34,7 @@ public class HakutoiveenValintatulos {
         this.varasijanumero = varasijanumero;
         this.tilanKuvaukset = tilanKuvaukset;
     }
+
     public String getHakukohdeOid() {
         return hakukohdeOid;
     }

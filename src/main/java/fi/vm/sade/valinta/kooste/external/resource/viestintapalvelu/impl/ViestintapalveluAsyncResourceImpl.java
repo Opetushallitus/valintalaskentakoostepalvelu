@@ -34,105 +34,101 @@ import rx.Observable;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 @Service
 public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas implements ViestintapalveluAsyncResource {
 
-	private final Gson GSON = new Gson();
+    private final Gson GSON = new Gson();
 
-	@Autowired
-	public ViestintapalveluAsyncResourceImpl(
-			@Value("${web.url.cas}") String webCasUrl,
-			@Value("${cas.service.viestintapalvelu}/j_spring_cas_security_check") String targetService,
-			@Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
-			@Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
-			@Value("${valintalaskentakoostepalvelu.viestintapalvelu.url}") String address,
-			ApplicationContext context
-	) {
-		super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.HOURS.toMillis(20));
-	}
+    @Autowired
+    public ViestintapalveluAsyncResourceImpl(
+            @Value("${web.url.cas}") String webCasUrl,
+            @Value("${cas.service.viestintapalvelu}/j_spring_cas_security_check") String targetService,
+            @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
+            @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
+            @Value("${valintalaskentakoostepalvelu.viestintapalvelu.url}") String address,
+            ApplicationContext context
+    ) {
+        super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.HOURS.toMillis(20));
+    }
 
-	@Override
-	public Observable<LetterResponse> viePdfJaOdotaReferenssiObservable(LetterBatch letterBatch) {
-		return postAsObservable(
-				"/api/v1/letter/async/letter",
-				new TypeToken<LetterResponse>() {
-				}.getType(),
-				Entity.entity(GSON.toJson(letterBatch), MediaType.APPLICATION_JSON_TYPE),
-				client -> {
-					client.accept(MediaType.APPLICATION_JSON_TYPE);
-					return client;
-				}
-		);
-	}
+    @Override
+    public Observable<LetterResponse> viePdfJaOdotaReferenssiObservable(LetterBatch letterBatch) {
+        return postAsObservable(
+                "/api/v1/letter/async/letter",
+                new TypeToken<LetterResponse>() {
+                }.getType(),
+                Entity.entity(GSON.toJson(letterBatch), MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
 
-	@Override
-	public Observable<LetterBatchStatusDto> haeStatusObservable(String letterBatchId) {
-		return getAsObservable(
-				"/api/v1/letter/async/letter/status/"+letterBatchId,
-				new TypeToken<LetterBatchStatusDto>() {
-				}.getType(),
-				client -> {
-					client.accept(MediaType.APPLICATION_JSON_TYPE);
-					return client;
-				}
-		);
-	}
+    @Override
+    public Observable<LetterBatchStatusDto> haeStatusObservable(String letterBatchId) {
+        return getAsObservable(
+                "/api/v1/letter/async/letter/status/" + letterBatchId,
+                new TypeToken<LetterBatchStatusDto>() {
+                }.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
 
-	@Override
-	public Future<LetterBatchStatusDto> haeStatus(String letterBatchId) {
-		String url = "/api/v1/letter/async/letter/status/"+letterBatchId;
-		return getWebClient().path(url)
-				.accept(MediaType.APPLICATION_JSON_TYPE).async()
-				.get(LetterBatchStatusDto.class);
-	}
+    @Override
+    public Future<LetterBatchStatusDto> haeStatus(String letterBatchId) {
+        String url = "/api/v1/letter/async/letter/status/" + letterBatchId;
+        return getWebClient().path(url)
+                .accept(MediaType.APPLICATION_JSON_TYPE).async()
+                .get(LetterBatchStatusDto.class);
+    }
 
-	public Future<LetterResponse> viePdfJaOdotaReferenssi(LetterBatch letterBatch) {
-		String url = "/api/v1/letter/async/letter";
-		return getWebClient()
-				.path(url)
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async()
-				.post(Entity.entity(GSON.toJson(letterBatch), MediaType.APPLICATION_JSON_TYPE), LetterResponse.class);
-	}
+    public Future<LetterResponse> viePdfJaOdotaReferenssi(LetterBatch letterBatch) {
+        String url = "/api/v1/letter/async/letter";
+        return getWebClient()
+                .path(url)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .async()
+                .post(Entity.entity(GSON.toJson(letterBatch), MediaType.APPLICATION_JSON_TYPE), LetterResponse.class);
+    }
 
-	@Override
-	public Observable<List<TemplateHistory>> haeKirjepohja(String hakuOid, String tarjoajaOid, String templateName, String languageCode, String hakukohdeOid) {
-		LOG.error("######## TemplateHistory {}/api/v1/template/getHistory?applicationPeriod={}&oid={}&templateName={}&languageCode={}&tag={}",address, hakuOid,tarjoajaOid,templateName,languageCode,hakukohdeOid);
-		return getAsObservable(
-				"/api/v1/template/getHistory",
-				new TypeToken<List<TemplateHistory>>() {}.getType(),
-				client -> {
-					client.accept(MediaType.APPLICATION_JSON_TYPE);
-					client.query("applicationPeriod", hakuOid);
-					client.query("oid", tarjoajaOid);
-					client.query("templateName", templateName);
-					client.query("languageCode", languageCode);
-					client.query("tag", hakukohdeOid);
-					return client;
-				}
-		);
-	}
+    @Override
+    public Observable<List<TemplateHistory>> haeKirjepohja(String hakuOid, String tarjoajaOid, String templateName, String languageCode, String hakukohdeOid) {
+        LOG.error("######## TemplateHistory {}/api/v1/template/getHistory?applicationPeriod={}&oid={}&templateName={}&languageCode={}&tag={}", address, hakuOid, tarjoajaOid, templateName, languageCode, hakukohdeOid);
+        return getAsObservable(
+                "/api/v1/template/getHistory",
+                new TypeToken<List<TemplateHistory>>() {
+                }.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    client.query("applicationPeriod", hakuOid);
+                    client.query("oid", tarjoajaOid);
+                    client.query("templateName", templateName);
+                    client.query("languageCode", languageCode);
+                    client.query("tag", hakukohdeOid);
+                    return client;
+                }
+        );
+    }
 
-	@Override
-	public Peruutettava haeOsoitetarrat(Osoitteet osoitteet, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
-		String url = "/api/v1/addresslabel/sync/pdf";
-		try {
-			return new PeruutettavaImpl(
-					getWebClient()
-							.path(url)
-							.async()
-							.post(Entity.json(osoitteet), new ResponseCallback(
-									address + url,
-									callback,
-									failureCallback)));
-		} catch (Exception e) {
-			failureCallback.accept(e);
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		}
-	}
+    @Override
+    public Peruutettava haeOsoitetarrat(Osoitteet osoitteet, Consumer<Response> callback, Consumer<Throwable> failureCallback) {
+        String url = "/api/v1/addresslabel/sync/pdf";
+        try {
+            return new PeruutettavaImpl(
+                    getWebClient()
+                            .path(url)
+                            .async()
+                            .post(Entity.json(osoitteet), new ResponseCallback(
+                                    address + url,
+                                    callback,
+                                    failureCallback)));
+        } catch (Exception e) {
+            failureCallback.accept(e);
+            return TyhjaPeruutettava.tyhjaPeruutettava();
+        }
+    }
 }

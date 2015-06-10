@@ -14,5 +14,4 @@ public class HakutoiveenIlmoittautumistila {
         this.ilmoittautumistila = ilmoittautumistila;
         this.ilmoittauduttavissa = ilmoittauduttavissa;
     }
-
 }

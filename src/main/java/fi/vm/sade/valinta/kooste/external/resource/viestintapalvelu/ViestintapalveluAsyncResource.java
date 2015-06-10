@@ -23,27 +23,23 @@ import javax.ws.rs.core.Response;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public interface ViestintapalveluAsyncResource {
 
-	int VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA = (int) TimeUnit.MINUTES
-			.toMillis(60L);
+    int VIESTINTAPALVELUN_MAKSIMI_POLLAUS_SEKUNTIA = (int) TimeUnit.MINUTES.toMillis(60L);
 
-	@Deprecated // ks viePdfJaOdotaReferenssiObservable
-	Future<LetterResponse> viePdfJaOdotaReferenssi(LetterBatch letterBatch);
-	@Deprecated // ks haeStatusObservable
-	Future<LetterBatchStatusDto> haeStatus(String batchId);
+    @Deprecated
+        // ks viePdfJaOdotaReferenssiObservable
+    Future<LetterResponse> viePdfJaOdotaReferenssi(LetterBatch letterBatch);
 
-	Observable<LetterResponse> viePdfJaOdotaReferenssiObservable(LetterBatch letterBatch);
-	Observable<LetterBatchStatusDto> haeStatusObservable(String batchId);
+    @Deprecated
+        // ks haeStatusObservable
+    Future<LetterBatchStatusDto> haeStatus(String batchId);
 
+    Observable<LetterResponse> viePdfJaOdotaReferenssiObservable(LetterBatch letterBatch);
 
-	Peruutettava haeOsoitetarrat(Osoitteet osoitteet, Consumer<Response> callback, Consumer<Throwable> failureCallback);
+    Observable<LetterBatchStatusDto> haeStatusObservable(String batchId);
 
-	Observable<List<TemplateHistory>> haeKirjepohja(String hakuOid, String tarjoajaOid, String templateName, String languageCode, String hakukohdeOid);
+    Peruutettava haeOsoitetarrat(Osoitteet osoitteet, Consumer<Response> callback, Consumer<Throwable> failureCallback);
 
+    Observable<List<TemplateHistory>> haeKirjepohja(String hakuOid, String tarjoajaOid, String templateName, String languageCode, String hakukohdeOid);
 }

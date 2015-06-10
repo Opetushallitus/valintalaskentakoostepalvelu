@@ -5,9 +5,6 @@ import scala.Option;
 import java.util.Date;
 import java.util.Map;
 
-/**
- * @author Jussi Jartamo
- */
 public class IlmoittautumistilaDto {
     private String hakukohdeOid;
     private String tarjoajaOid;

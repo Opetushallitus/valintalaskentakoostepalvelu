@@ -23,8 +23,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implement
 
     @Override
     public Observable<List<ValintaTulosServiceDto>> getHaunValintatulokset(String hakuOid) {
-        return getAsObservable("/valinta-tulos-service/haku/" + hakuOid, new GenericType<List<ValintaTulosServiceDto>>() {
-        }.getType());
+        return getAsObservable("/valinta-tulos-service/haku/" + hakuOid, new GenericType<List<ValintaTulosServiceDto>>() {}.getType());
     }
 
     @Override
