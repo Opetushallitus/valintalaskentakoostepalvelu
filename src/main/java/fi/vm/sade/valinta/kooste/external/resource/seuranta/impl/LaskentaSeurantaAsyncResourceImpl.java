@@ -48,7 +48,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
             getWebClient()
                     .path(url)
                     .async()
-                    .get(new GsonResponseCallback<>(address, url, uuidCallback, failureCallback, new TypeToken<String>() {}.getType()));
+                    .get(new GsonResponseCallback<>(address, url, uuidCallback, failureCallback, String.class));
         } catch (Exception e) {
             LOG.error("Uuden tyon hakeminen epaonnistui", e);
             failureCallback.accept(e);
@@ -61,7 +61,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
             getWebClient()
                     .path(url)
                     .async()
-                    .get(new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<LaskentaDto>() {}.getType()));
+                    .get(new GsonResponseCallback<>(address, url, callback, failureCallback, LaskentaDto.class));
         } catch (Exception e) {
             failureCallback.accept(e);
         }
@@ -73,7 +73,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
             getWebClient()
                     .path(url)
                     .async()
-                    .put(Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<LaskentaDto>() {}.getType()));
+                    .put(Entity.entity(uuid, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<>(address, url, callback, failureCallback, LaskentaDto.class));
         } catch (Exception e) {
             failureCallback.accept(e);
         }
@@ -93,7 +93,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
             if (laskentaParams.getIsValintakoelaskenta() != null) {
                 wc.query("valintakoelaskenta", laskentaParams.getIsValintakoelaskenta());
             }
-            wc.async().post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<String>() {}.getType()));
+            wc.async().post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<>(address, url, callback, failureCallback, String.class));
         } catch (Exception e) {
             failureCallback.accept(e);
         }
