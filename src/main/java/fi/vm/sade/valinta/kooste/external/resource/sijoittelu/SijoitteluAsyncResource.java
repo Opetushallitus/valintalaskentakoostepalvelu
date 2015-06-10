@@ -12,25 +12,21 @@ import rx.Observable;
 
 public interface SijoitteluAsyncResource {
 
-	Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid);
-	Future<HakijaPaginationObject> getKaikkiHakijat(
-			String hakuOid, String hakukohdeOid);
-	Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(
-			String hakuOid, String hakukohdeOid);
+    Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid);
 
-	Peruutettava getKoulutuspaikkallisetHakijat(
-			String hakuOid, String hakukohdeOid, Consumer<HakijaPaginationObject> callback, Consumer<Throwable> failureCallback);
+    Future<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid);
 
-	Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
-	
-	Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid);
+    Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid);
 
-	void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid,
-										Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus);
+    Peruutettava getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid, Consumer<HakijaPaginationObject> callback, Consumer<Throwable> failureCallback);
 
-	void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId
-			, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus);
+    Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid);
 
-	Observable<HakijaPaginationObject> getKoulutuspaikkalliset(
-			String hakuOid, String hakukohdeOid);
+    Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid);
+
+    void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus);
+
+    void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus);
+
+    Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid, String hakukohdeOid);
 }

@@ -15,31 +15,26 @@ import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
 
-/**
- * 
- * @author jussija
- *
- */
 @Service
 public class SijoitteleAsyncResourceImpl extends HttpResource implements SijoitteleAsyncResource {
-	@Autowired
-	public SijoitteleAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String address) {
-		super(address, TimeUnit.MINUTES.toMillis(50));
-	}
+    @Autowired
+    public SijoitteleAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String address) {
+        super(address, TimeUnit.MINUTES.toMillis(50));
+    }
 
-	@Override
-	public void sijoittele(String hakuOid, Consumer<String> callback, Consumer<Throwable> failureCallback) {
-		String url = "/sijoittele/" + hakuOid+ "/";
-		try {
-			getWebClient()
-					.path(url)
-					.accept(MediaType.WILDCARD_TYPE)
-					.async()
-					.get(new GsonResponseCallback<String>(address, url, callback,
-							failureCallback, new TypeToken<String>() {
-							}.getType()));
-		} catch (Exception e) {
-			failureCallback.accept(e);
-		}
-	}
+    @Override
+    public void sijoittele(String hakuOid, Consumer<String> callback, Consumer<Throwable> failureCallback) {
+        String url = "/sijoittele/" + hakuOid + "/";
+        try {
+            getWebClient()
+                    .path(url)
+                    .accept(MediaType.WILDCARD_TYPE)
+                    .async()
+                    .get(new GsonResponseCallback<String>(address, url, callback,
+                            failureCallback, new TypeToken<String>() {
+                    }.getType()));
+        } catch (Exception e) {
+            failureCallback.accept(e);
+        }
+    }
 }

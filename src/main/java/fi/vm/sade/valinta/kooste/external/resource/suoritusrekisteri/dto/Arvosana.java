@@ -5,9 +5,6 @@ import com.google.common.base.Objects;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author Jussi Jartamo
- */
 public class Arvosana {
     private String id;
     private String suoritus;

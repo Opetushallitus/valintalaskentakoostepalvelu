@@ -33,7 +33,7 @@ import rx.Observable;
 @Service
 public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements SijoitteluAsyncResource {
 
-    private static final Gson GSON= new GsonBuilder()
+    private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Date.class, new JsonDeserializer() {
                 @Override
                 public Object deserialize(JsonElement json, Type typeOfT,
@@ -45,117 +45,127 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
             .create();
 
     @Autowired
-	public SijoitteluAsyncResourceImpl(
-			@Value("${web.url.cas}") String webCasUrl,
-			@Value("${cas.service.sijoittelu-service}/j_spring_cas_security_check") String targetService,
-			@Value("${valintalaskentakoostepalvelu.app.username.to.sijoittelu}") String appClientUsername,
-			@Value("${valintalaskentakoostepalvelu.app.password.to.sijoittelu}") String appClientPassword,
-			@Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String address,
-			ApplicationContext context
-	) {
-		super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(50));
-	}
-	public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId
-			, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
-		///erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
-		String url = "/erillissijoittelu/"+hakuOid+"/sijoitteluajo/"+sijoitteluAjoId+"/hakukohde/"+hakukohdeOid;
-		getWebClient()
-				.path(url)
-				.accept(MediaType.WILDCARD)
-				.async().get(new GsonResponseCallback<HakukohdeDTO>(GSON,
-				address,url, hakukohde,poikkeus,
-				new TypeToken<HakukohdeDTO>() { }.getType()));
-	}
-	public void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid
-			, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
-		///sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
-		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakukohde/"+hakukohdeOid;
-		getWebClient()
-				.path(url)
-				.accept(MediaType.WILDCARD)
-				.async().get(new GsonResponseCallback<HakukohdeDTO>(GSON,
-				address,url, hakukohde,poikkeus,
-				new TypeToken<HakukohdeDTO>() { }.getType()));
-	}
+    public SijoitteluAsyncResourceImpl(
+            @Value("${web.url.cas}") String webCasUrl,
+            @Value("${cas.service.sijoittelu-service}/j_spring_cas_security_check") String targetService,
+            @Value("${valintalaskentakoostepalvelu.app.username.to.sijoittelu}") String appClientUsername,
+            @Value("${valintalaskentakoostepalvelu.app.password.to.sijoittelu}") String appClientPassword,
+            @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String address,
+            ApplicationContext context) {
+        super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(50));
+    }
 
-	@Override
-	public Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
-		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakemukset";
-		LOG.info("Asynkroninen kutsu: {}{}?ilmanHyvaksyntaa=true", address, url);
-		return getWebClient()
-				.path(url)
-				.query("ilmanHyvaksyntaa", true)
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async().get(new GenericType<HakijaPaginationObject>() { });
-	}
+    public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId
+            , Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
+        ///erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
+        String url = "/erillissijoittelu/" + hakuOid + "/sijoitteluajo/" + sijoitteluAjoId + "/hakukohde/" + hakukohdeOid;
+        getWebClient()
+                .path(url)
+                .accept(MediaType.WILDCARD)
+                .async().get(new GsonResponseCallback<HakukohdeDTO>(GSON,
+                address, url, hakukohde, poikkeus,
+                new TypeToken<HakukohdeDTO>() {
+                }.getType()));
+    }
 
-	public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
-		String url = "/tila/hakukohde/"+hakukohdeOid+"/"+valintatapajonoOid;
-		return getWebClient()
-				.path(url)
-				.accept(MediaType.WILDCARD)
-				.async().get(new GenericType<List<Valintatulos>>() { });
-	}
+    public void getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid
+            , Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
+        ///sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
+        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + SijoitteluResource.LATEST + "/hakukohde/" + hakukohdeOid;
+        getWebClient()
+                .path(url)
+                .accept(MediaType.WILDCARD)
+                .async().get(new GsonResponseCallback<HakukohdeDTO>(GSON,
+                address, url, hakukohde, poikkeus,
+                new TypeToken<HakukohdeDTO>() {
+                }.getType()));
+    }
 
-	public Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid) {
-		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakukohde/"+hakukohdeOid;
-		return getWebClient()
-				.path(url)
-				.accept(MediaType.WILDCARD)
-				.async().get(new GenericType<HakukohdeDTO>() { });
-	}
+    @Override
+    public Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
+        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + SijoitteluResource.LATEST + "/hakemukset";
+        LOG.info("Asynkroninen kutsu: {}{}?ilmanHyvaksyntaa=true", address, url);
+        return getWebClient()
+                .path(url)
+                .query("ilmanHyvaksyntaa", true)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .async().get(new GenericType<HakijaPaginationObject>() {
+                });
+    }
 
-	@Override
-	public Future<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
-		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakemukset";
-		LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}", address, url, hakukohdeOid);
-		return getWebClient()
-				.path(url)
-				.query("hakukohdeOid", hakukohdeOid)
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async().get(new GenericType<HakijaPaginationObject>() { });
-	}
+    public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
+        String url = "/tila/hakukohde/" + hakukohdeOid + "/" + valintatapajonoOid;
+        return getWebClient()
+                .path(url)
+                .accept(MediaType.WILDCARD)
+                .async().get(new GenericType<List<Valintatulos>>() {
+                });
+    }
 
-	@Override
-	public Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid) {
-		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakemukset";
-		LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}", address, url, hakukohdeOid);
-		return getWebClient()
-				.path(url)
-				.query("hyvaksytyt", true)
-				.query("hakukohdeOid", hakukohdeOid)
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async().get(new GenericType<HakijaPaginationObject>() { });
-	}
+    public Future<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String hakukohdeOid) {
+        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + SijoitteluResource.LATEST + "/hakukohde/" + hakukohdeOid;
+        return getWebClient()
+                .path(url)
+                .accept(MediaType.WILDCARD)
+                .async().get(new GenericType<HakukohdeDTO>() {
+                });
+    }
 
-	@Override
-	public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(
-			String hakuOid, String hakukohdeOid) {
-		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakemukset";
-		return getAsObservable(
-				url,
-				new TypeToken<HakijaPaginationObject>() {
-				}.getType(),
-				client -> {
-					client.query("hyvaksytyt", true);
-					client.query("hakukohdeOid", hakukohdeOid);
-					client.accept(MediaType.APPLICATION_JSON_TYPE);
-					return client;
-				}
-		);
-	}
-	@Override
-	public Peruutettava getKoulutuspaikkallisetHakijat(
-			String hakuOid, String hakukohdeOid, Consumer<HakijaPaginationObject> callback, Consumer<Throwable> failureCallback) {
-		String url = "/sijoittelu/"+hakuOid+"/sijoitteluajo/"+SijoitteluResource.LATEST+"/hakemukset";
-		LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}", address, url, hakukohdeOid);
-		return new PeruutettavaImpl(getWebClient()
-				.path(url)
-				.query("hyvaksytyt", true)
-				.query("hakukohdeOid", hakukohdeOid)
-				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async().get(new GsonResponseCallback<HakijaPaginationObject>(GSON,
-				address,url, callback,failureCallback,
-				new TypeToken<HakijaPaginationObject>() { }.getType())));
-	}
+    @Override
+    public Future<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
+        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + SijoitteluResource.LATEST + "/hakemukset";
+        LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}", address, url, hakukohdeOid);
+        return getWebClient()
+                .path(url)
+                .query("hakukohdeOid", hakukohdeOid)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .async().get(new GenericType<HakijaPaginationObject>() {
+                });
+    }
+
+    @Override
+    public Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid) {
+        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + SijoitteluResource.LATEST + "/hakemukset";
+        LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}", address, url, hakukohdeOid);
+        return getWebClient()
+                .path(url)
+                .query("hyvaksytyt", true)
+                .query("hakukohdeOid", hakukohdeOid)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .async().get(new GenericType<HakijaPaginationObject>() {
+                });
+    }
+
+    @Override
+    public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(
+            String hakuOid, String hakukohdeOid) {
+        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + SijoitteluResource.LATEST + "/hakemukset";
+        return getAsObservable(
+                url,
+                new TypeToken<HakijaPaginationObject>() {
+                }.getType(),
+                client -> {
+                    client.query("hyvaksytyt", true);
+                    client.query("hakukohdeOid", hakukohdeOid);
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
+
+    @Override
+    public Peruutettava getKoulutuspaikkallisetHakijat(
+            String hakuOid, String hakukohdeOid, Consumer<HakijaPaginationObject> callback, Consumer<Throwable> failureCallback) {
+        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + SijoitteluResource.LATEST + "/hakemukset";
+        LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}", address, url, hakukohdeOid);
+        return new PeruutettavaImpl(getWebClient()
+                .path(url)
+                .query("hyvaksytyt", true)
+                .query("hakukohdeOid", hakukohdeOid)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .async().get(new GsonResponseCallback<HakijaPaginationObject>(GSON,
+                        address, url, callback, failureCallback,
+                        new TypeToken<HakijaPaginationObject>() {
+                        }.getType())));
+    }
 }

@@ -4,11 +4,7 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
-/**
- * @author Jussi Jartamo
- */
 public class Oppija {
-
     private String oppijanumero;
     private List<Opiskelu> opiskelu;
     private List<SuoritusJaArvosanat> suoritukset = Lists.newArrayList();

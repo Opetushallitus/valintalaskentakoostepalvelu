@@ -1,8 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
-/**
- * @author Jussi Jartamo
- */
 public class Suoritus {
     private String id;
     private String komo;
