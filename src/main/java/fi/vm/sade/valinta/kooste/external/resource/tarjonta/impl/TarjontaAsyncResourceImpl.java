@@ -17,29 +17,24 @@ import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import rx.Observable;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 @Service
 public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaAsyncResource {
-	private final static Logger LOG = LoggerFactory.getLogger(TarjontaAsyncResourceImpl.class);
-	@Autowired
-	public TarjontaAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}") String address) {
-		super(address, TimeUnit.MINUTES.toMillis(5));
-	}
+    private final static Logger LOG = LoggerFactory.getLogger(TarjontaAsyncResourceImpl.class);
 
-	@Override
-	public Observable<HakuV1RDTO> haeHaku(String hakuOid) {
-		return this.<ResultV1RDTO<HakuV1RDTO>>getAsObservable("/v1/haku/" + hakuOid + "/", new TypeToken<ResultV1RDTO<HakuV1RDTO>>() {
-		}.getType())
-			.map(result -> result.getResult());
-	}
+    @Autowired
+    public TarjontaAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}") String address) {
+        super(address, TimeUnit.MINUTES.toMillis(5));
+    }
 
-	@Override
-	public Observable<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid) {
-		return this.<ResultV1RDTO<HakukohdeV1RDTO>>getAsObservable("/v1/hakukohde/" + hakukohdeOid + "/", new TypeToken<ResultV1RDTO<HakukohdeV1RDTO>>() {
-		}.getType()).map(result -> result.getResult());
-	}
+    @Override
+    public Observable<HakuV1RDTO> haeHaku(String hakuOid) {
+        return this.<ResultV1RDTO<HakuV1RDTO>>getAsObservable("/v1/haku/" + hakuOid + "/", new TypeToken<ResultV1RDTO<HakuV1RDTO>>() {
+        }.getType()).map(result -> result.getResult());
+    }
+
+    @Override
+    public Observable<HakukohdeV1RDTO> haeHakukohde(String hakukohdeOid) {
+        return this.<ResultV1RDTO<HakukohdeV1RDTO>>getAsObservable("/v1/hakukohde/" + hakukohdeOid + "/", new TypeToken<ResultV1RDTO<HakukohdeV1RDTO>>() {
+        }.getType()).map(result -> result.getResult());
+    }
 }

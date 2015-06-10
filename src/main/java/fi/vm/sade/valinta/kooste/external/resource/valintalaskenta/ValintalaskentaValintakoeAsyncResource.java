@@ -7,7 +7,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenD
 import rx.Observable;
 
 public interface ValintalaskentaValintakoeAsyncResource {
-	Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid);
+    Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid);
 
-	Observable<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(String hakukohdeOid, List<String> valintakoeTunnisteet);
+    Observable<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(String hakukohdeOid, List<String> valintakoeTunnisteet);
 }

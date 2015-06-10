@@ -18,75 +18,57 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import rx.Observable;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public interface ValintaperusteetAsyncResource {
 
-	// @GET
-	///valintaperusteet-service/resources/valintaperusteet/hakijaryhma/{}
-	@Deprecated
-	Peruutettava haeHakijaryhmat(String hakukohdeOid,
-			Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback,
-			Consumer<Throwable> failureCallback);
+    // @GET
+    ///valintaperusteet-service/resources/valintaperusteet/hakijaryhma/{}
+    @Deprecated
+    Peruutettava haeHakijaryhmat(String hakukohdeOid, Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback, Consumer<Throwable> failureCallback);
 
-	Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid);
-	// @GET
-	///valintaperusteet-service/resources/hakukohde/haku/{}
-	Peruutettava haunHakukohteet(String hakuOid,
-			Consumer<List<HakukohdeViiteDTO>> callback,
-			Consumer<Throwable> failureCallback);
+    Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid);
 
-	// @GET
-	///valintaperusteet-service/resources/valintaperusteet/{}
-	@Deprecated
-	Peruutettava haeValintaperusteet(
-			String hakukohdeOid,
-			//
-			Integer valinnanVaiheJarjestysluku,
-			Consumer<List<ValintaperusteetDTO>> callback,
-			Consumer<Throwable> failureCallback);
+    // @GET
+    ///valintaperusteet-service/resources/hakukohde/haku/{}
+    Peruutettava haunHakukohteet(String hakuOid, Consumer<List<HakukohdeViiteDTO>> callback, Consumer<Throwable> failureCallback);
 
-	Observable<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku);
+    // @GET
+    ///valintaperusteet-service/resources/valintaperusteet/{}
+    @Deprecated
+    Peruutettava haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku, Consumer<List<ValintaperusteetDTO>> callback, Consumer<Throwable> failureCallback);
 
-	// @GET
-	///valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
-	Peruutettava haeIlmanlaskentaa(String hakukohdeOid,
-								   Consumer<List<ValinnanVaiheJonoillaDTO>> callback,
-								   Consumer<Throwable> failureCallback);
+    Observable<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku);
 
-	// @GET
-	///valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
-	Future<List<ValinnanVaiheJonoillaDTO>> ilmanLaskentaa(String hakukohdeOid);
+    // @GET
+    ///valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
+    Peruutettava haeIlmanlaskentaa(String hakukohdeOid, Consumer<List<ValinnanVaiheJonoillaDTO>> callback, Consumer<Throwable> failureCallback);
 
-	// @GET
-	///valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
-	//Future<List<ValinnanVaiheJonoillaDTO>> ilmanLaskentaa(String hakukohdeOid);
+    // @GET
+    ///valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
+    Future<List<ValinnanVaiheJonoillaDTO>> ilmanLaskentaa(String hakukohdeOid);
 
-	// @POST
-	///valintaperusteet-service/resources/valintaperusteet/tuoHakukohde/
-	Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde);
-	
-	Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
+    // @GET
+    ///valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
+    //Future<List<ValinnanVaiheJonoillaDTO>> ilmanLaskentaa(String hakukohdeOid);
 
-	// @POST
-	///valintaperusteet-service/resources/valintakoe/
-	Future<List<ValintakoeDTO>> haeValintakokeet(Collection<String> oids);
+    // @POST
+    ///valintaperusteet-service/resources/valintaperusteet/tuoHakukohde/
+    Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde);
 
-	Future<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid);
+    Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
 
-	Peruutettava haeValintakokeetHakukohteelle(String hakukohdeOid, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback);
+    // @POST
+    ///valintaperusteet-service/resources/valintakoe/
+    Future<List<ValintakoeDTO>> haeValintakokeet(Collection<String> oids);
 
-	// @POST
-	///valintaperusteet-service/resources/hakukohde/valintakoe
-	Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
-			Collection<String> hakukohdeOids);
-	Peruutettava haeValintakokeetHakukohteille(
-			Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback);
+    Future<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid);
 
-	Peruutettava haeValinnanvaiheetHakukohteelle(String hakukohdeOid,
-												 Consumer<List<ValinnanVaiheJonoillaDTO>> callback,
-												 Consumer<Throwable> failureCallback);
+    Peruutettava haeValintakokeetHakukohteelle(String hakukohdeOid, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback);
+
+    // @POST
+    ///valintaperusteet-service/resources/hakukohde/valintakoe
+    Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids);
+
+    Peruutettava haeValintakokeetHakukohteille(Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback);
+
+    Peruutettava haeValinnanvaiheetHakukohteelle(String hakukohdeOid, Consumer<List<ValinnanVaiheJonoillaDTO>> callback, Consumer<Throwable> failureCallback);
 }

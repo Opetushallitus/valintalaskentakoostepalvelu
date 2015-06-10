@@ -25,84 +25,78 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 @Service
 public class ValintalaskentaAsyncResourceImpl extends HttpResource implements ValintalaskentaAsyncResource {
-	private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaAsyncResourceImpl.class);
-	@Autowired
-	public ValintalaskentaAsyncResourceImpl(
-			@Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}") String address
-	) {
-		super(address, TimeUnit.HOURS.toMillis(8));
-	}
+    private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaAsyncResourceImpl.class);
 
-	@Override
-	public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
-		return getAsObservable("/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe", new GenericType<List<ValintatietoValinnanvaiheDTO>>() { }.getType());
-	}
-	public Observable<String> laske(LaskeDTO laskeDTO) {
-		return postAsObservable("/valintalaskenta/laske",
-				String.class,
-				Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> client.accept(MediaType.TEXT_PLAIN_TYPE));
-	}
-	@Override
-	public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
-		return postAsObservable("/valintalaskenta/valintakokeet",
-				String.class,
-				Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> client.accept(MediaType.TEXT_PLAIN_TYPE));
-	}
+    @Autowired
+    public ValintalaskentaAsyncResourceImpl(
+            @Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}") String address
+    ) {
+        super(address, TimeUnit.HOURS.toMillis(8));
+    }
 
-	@Override
-	public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<ValinnanvaiheDTO> callback, Consumer<Throwable> failureCallback) {
-		try {
-			///valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
-			String url = new StringBuilder("/valintalaskentakoostepalvelu/hakukohde/").append(hakukohdeOid).append("/valinnanvaihe").toString();
-			return new PeruutettavaImpl(getWebClient()
-					.path(url)
-					.query("tarjoajaOid", tarjoajaOid)
-					.async()
-					.post(Entity.entity(vaihe,
-							MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<ValinnanvaiheDTO>(address, url, callback,
-							failureCallback, new TypeToken<ValinnanvaiheDTO>() {
-					}.getType())));
-		} catch (Throwable e) {
-			LOG.error("Valintalaskentaan tulosten tuonti epäonnistui: {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
-			failureCallback.accept(e);
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		}
-	}
+    @Override
+    public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
+        return getAsObservable("/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe", new GenericType<List<ValintatietoValinnanvaiheDTO>>() {
+        }.getType());
+    }
 
-	@Override
-	public Observable<String> laskeKaikki(LaskeDTO laskeDTO) {
-		return postAsObservable("/valintalaskenta/laskekaikki",
-				String.class,
-				Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> {
-					client.accept(MediaType.TEXT_PLAIN_TYPE);
-					return client;
-				});
-	}
+    public Observable<String> laske(LaskeDTO laskeDTO) {
+        return postAsObservable("/valintalaskenta/laske", String.class, Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> client.accept(MediaType.TEXT_PLAIN_TYPE));
+    }
+
+    @Override
+    public Observable<String> valintakokeet(LaskeDTO laskeDTO) {
+        return postAsObservable("/valintalaskenta/valintakokeet", String.class, Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> client.accept(MediaType.TEXT_PLAIN_TYPE));
+    }
+
+    @Override
+    public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<ValinnanvaiheDTO> callback, Consumer<Throwable> failureCallback) {
+        try {
+            ///valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
+            String url = new StringBuilder("/valintalaskentakoostepalvelu/hakukohde/").append(hakukohdeOid).append("/valinnanvaihe").toString();
+            return new PeruutettavaImpl(getWebClient()
+                    .path(url)
+                    .query("tarjoajaOid", tarjoajaOid)
+                    .async()
+                    .post(Entity.entity(vaihe,
+                            MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<ValinnanvaiheDTO>(address, url, callback,
+                            failureCallback, new TypeToken<ValinnanvaiheDTO>() {
+                    }.getType())));
+        } catch (Throwable e) {
+            LOG.error("Valintalaskentaan tulosten tuonti epäonnistui: {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+            failureCallback.accept(e);
+            return TyhjaPeruutettava.tyhjaPeruutettava();
+        }
+    }
+
+    @Override
+    public Observable<String> laskeKaikki(LaskeDTO laskeDTO) {
+        return postAsObservable("/valintalaskenta/laskekaikki",
+                String.class,
+                Entity.entity(laskeDTO, MediaType.APPLICATION_JSON_TYPE), client -> {
+                    client.accept(MediaType.TEXT_PLAIN_TYPE);
+                    return client;
+                });
+    }
 
 
-	@Override
-	public Peruutettava laskeJaSijoittele(List<LaskeDTO> lista,
-			Consumer<String> callback, Consumer<Throwable> failureCallback) {
-		try {
-			String url = "/valintalaskenta/laskejasijoittele";
-			return new PeruutettavaImpl(
-					getWebClient()
-							.path(url)
-							.async()
-							.post(Entity.entity(lista, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<String>(address, url, callback, failureCallback, new TypeToken<String>() {
-								}.getType())));
-		} catch (Exception e) {
-			LOG.error("Virhe laske ja sijoittele kutsussa",e);
-			failureCallback.accept(e);
-			return TyhjaPeruutettava.tyhjaPeruutettava();
-		}
-	}
+    @Override
+    public Peruutettava laskeJaSijoittele(List<LaskeDTO> lista, Consumer<String> callback, Consumer<Throwable> failureCallback) {
+        try {
+            String url = "/valintalaskenta/laskejasijoittele";
+            return new PeruutettavaImpl(
+                    getWebClient()
+                            .path(url)
+                            .async()
+                            .post(Entity.entity(lista, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<String>(address, url, callback, failureCallback, new TypeToken<String>() {
+                            }.getType())));
+        } catch (Exception e) {
+            LOG.error("Virhe laske ja sijoittele kutsussa", e);
+            failureCallback.accept(e);
+            return TyhjaPeruutettava.tyhjaPeruutettava();
+        }
+    }
 
 }
