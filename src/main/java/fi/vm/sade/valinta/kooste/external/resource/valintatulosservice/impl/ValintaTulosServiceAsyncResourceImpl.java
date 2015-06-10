@@ -8,9 +8,6 @@ import java.util.function.Consumer;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
-import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.http.Callback;
-
 import org.apache.cxf.jaxrs.client.ClientConfiguration;
 import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -21,7 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
 
+import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 
@@ -76,7 +75,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 						//
 				.async()
-				.get(new Callback<List<ValintaTulosServiceDto>>(address, url, vts, poikkeus,
+				.get(new GsonResponseCallback<List<ValintaTulosServiceDto>>(address, url, vts, poikkeus,
 						new TypeToken<List<ValintaTulosServiceDto>>() { }.getType()));
 	}
 

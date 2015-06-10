@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource.koodisto.impl;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.http.Callback;
+import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
@@ -44,7 +44,7 @@ public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoA
                     //.query("koodistoVersio", 1)
                     .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
-                    .get(new Callback<List<Koodi>>(GSON, address, url, callback, failureCallback, new TypeToken<List<Koodi>>() {
+                    .get(new GsonResponseCallback<List<Koodi>>(GSON, address, url, callback, failureCallback, new TypeToken<List<Koodi>>() {
                     }.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);

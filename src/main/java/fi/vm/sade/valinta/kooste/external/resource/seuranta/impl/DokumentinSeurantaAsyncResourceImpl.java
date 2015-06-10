@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource.seuranta.impl;
 import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.http.Callback;
+import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
 import fi.vm.sade.valinta.seuranta.dto.*;
 
@@ -35,7 +35,7 @@ public class DokumentinSeurantaAsyncResourceImpl extends HttpResource implements
                     .path(url)
                     .async()
                     .post(Entity.entity(dokumenttiId, MediaType.TEXT_PLAIN),
-                            new Callback<DokumenttiDto>(address,url,callback,failureCallback, new TypeToken<DokumenttiDto>() {
+                            new GsonResponseCallback<DokumenttiDto>(address,url,callback,failureCallback, new TypeToken<DokumenttiDto>() {
                             }.getType()));
         } catch (Exception e) {
             LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
@@ -52,7 +52,7 @@ public class DokumentinSeurantaAsyncResourceImpl extends HttpResource implements
                     .path(url)
                     .async()
                     .post(Entity.entity(kuvaus, MediaType.TEXT_PLAIN),
-                            new Callback<String>(address,url,callback,failureCallback, new TypeToken<String>() {
+                            new GsonResponseCallback<String>(address,url,callback,failureCallback, new TypeToken<String>() {
                             }.getType()));
         } catch (Exception e) {
             LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
@@ -69,7 +69,7 @@ public class DokumentinSeurantaAsyncResourceImpl extends HttpResource implements
                     .path(url)
                     .async()
                     .post(Entity.entity(kuvaus, MediaType.TEXT_PLAIN),
-                            new Callback<DokumenttiDto>(address,url,callback,failureCallback, new TypeToken<DokumenttiDto>() {
+                            new GsonResponseCallback<DokumenttiDto>(address,url,callback,failureCallback, new TypeToken<DokumenttiDto>() {
                             }.getType()));
         } catch (Exception e) {
             LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,
@@ -86,7 +86,7 @@ public class DokumentinSeurantaAsyncResourceImpl extends HttpResource implements
                     .path(url)
                     .async()
                     .post(Entity.json(virheilmoitukset),
-                            new Callback<DokumenttiDto>(address,url,callback,failureCallback, new TypeToken<DokumenttiDto>() {
+                            new GsonResponseCallback<DokumenttiDto>(address,url,callback,failureCallback, new TypeToken<DokumenttiDto>() {
                             }.getType()));
         } catch (Exception e) {
             LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url,

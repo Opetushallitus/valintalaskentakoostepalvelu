@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl;
 
-import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -12,9 +10,6 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.google.gson.*;
-
-import org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
@@ -33,7 +27,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
-import fi.vm.sade.valinta.http.Callback;
+import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
@@ -75,7 +69,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 							.path(url)
 							.accept(MediaType.APPLICATION_JSON_TYPE)
 							.async()
-							.get(new Callback<List<ValintaperusteetHakijaryhmaDTO>>(
+							.get(new GsonResponseCallback<List<ValintaperusteetHakijaryhmaDTO>>(
 									address,
 									url,
 									callback,
@@ -103,7 +97,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 					.accept(MediaType.APPLICATION_JSON_TYPE)
 							//
 					.async()
-					.get(new Callback<List<ValinnanVaiheJonoillaDTO>>(address, url, callback,
+					.get(new GsonResponseCallback<List<ValinnanVaiheJonoillaDTO>>(address, url, callback,
 							failureCallback,
 							new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {
 							}.getType())));
@@ -128,7 +122,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 					.accept(MediaType.APPLICATION_JSON_TYPE)
 							//
 					.async()
-					.get(new Callback<List<ValinnanVaiheJonoillaDTO>>(GSON, address, url, callback,
+					.get(new GsonResponseCallback<List<ValinnanVaiheJonoillaDTO>>(GSON, address, url, callback,
 							failureCallback,
 							new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {
 							}.getType())));
@@ -177,7 +171,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 					.accept(MediaType.APPLICATION_JSON_TYPE)
 					//
 					.async()
-					.get(new Callback<List<ValintaperusteetDTO>>(address, url
+					.get(new GsonResponseCallback<List<ValintaperusteetDTO>>(address, url
 							+ "?vaihe=" + valinnanVaiheJarjestysluku, callback,
 							failureCallback,
 							new TypeToken<List<ValintaperusteetDTO>>() {
@@ -201,7 +195,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 					.accept(MediaType.APPLICATION_JSON_TYPE)
 					//
 					.async()
-					.get(new Callback<List<HakukohdeViiteDTO>>(address, url,
+					.get(new GsonResponseCallback<List<HakukohdeViiteDTO>>(address, url,
 							callback, failureCallback,
 							new TypeToken<List<HakukohdeViiteDTO>>() {
 							}.getType())));
@@ -280,7 +274,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 				.async()
 				.post(Entity.entity(hakukohdeOids,
 								MediaType.APPLICATION_JSON_TYPE),
-						new Callback<List<HakukohdeJaValintakoeDTO>>(address, url,
+						new GsonResponseCallback<List<HakukohdeJaValintakoeDTO>>(address, url,
 								callback, failureCallback,
 								new TypeToken<List<HakukohdeJaValintakoeDTO>>() {
 								}.getType())));
@@ -319,7 +313,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 				.path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
-				.get(new Callback<List<ValintakoeDTO>>(address, url,
+				.get(new GsonResponseCallback<List<ValintakoeDTO>>(address, url,
 						callback, failureCallback,
 						new TypeToken<List<ValintakoeDTO>>() {
 						}.getType())));

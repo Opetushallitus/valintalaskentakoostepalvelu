@@ -10,7 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.valinta.http.Callback;
+import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 
@@ -26,7 +26,7 @@ public class TestCallback {
 
 	@Test
 	public void testListOfHakemuksetCallback() throws IOException {
-		Callback<List<Hakemus>> cb = new Callback<List<Hakemus>>("", "",
+		GsonResponseCallback<List<Hakemus>> cb = new GsonResponseCallback<List<Hakemus>>("", "",
 				obj -> {
 					LOG.error("SUCCESS {}", obj);
 				}, poikkeus -> {
@@ -42,7 +42,7 @@ public class TestCallback {
 	@Test
 	public void testLaskentaDtoCallback() throws IOException {
 
-		Callback<LaskentaDto> cb2 = new Callback<LaskentaDto>("", "", obj -> {
+		GsonResponseCallback<LaskentaDto> cb2 = new GsonResponseCallback<LaskentaDto>("", "", obj -> {
 			LOG.error("SUCCESS {}", obj);
 		}, poikkeus -> {
 			LOG.error("POIKKEUS {}", poikkeus);

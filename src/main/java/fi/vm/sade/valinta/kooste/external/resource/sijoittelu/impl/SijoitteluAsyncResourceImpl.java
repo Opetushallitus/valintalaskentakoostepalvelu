@@ -13,7 +13,7 @@ import javax.ws.rs.core.MediaType;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 
-import fi.vm.sade.valinta.http.Callback;
+import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 
@@ -61,7 +61,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 		getWebClient()
 				.path(url)
 				.accept(MediaType.WILDCARD)
-				.async().get(new Callback<HakukohdeDTO>(GSON,
+				.async().get(new GsonResponseCallback<HakukohdeDTO>(GSON,
 				address,url, hakukohde,poikkeus,
 				new TypeToken<HakukohdeDTO>() { }.getType()));
 	}
@@ -72,7 +72,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 		getWebClient()
 				.path(url)
 				.accept(MediaType.WILDCARD)
-				.async().get(new Callback<HakukohdeDTO>(GSON,
+				.async().get(new GsonResponseCallback<HakukohdeDTO>(GSON,
 				address,url, hakukohde,poikkeus,
 				new TypeToken<HakukohdeDTO>() { }.getType()));
 	}
@@ -136,7 +136,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 				.query("hyvaksytyt", true)
 				.query("hakukohdeOid", hakukohdeOid)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
-				.async().get(new Callback<HakijaPaginationObject>(GSON,
+				.async().get(new GsonResponseCallback<HakijaPaginationObject>(GSON,
 				address,url, callback,failureCallback,
 				new TypeToken<HakijaPaginationObject>() { }.getType())));
 	}

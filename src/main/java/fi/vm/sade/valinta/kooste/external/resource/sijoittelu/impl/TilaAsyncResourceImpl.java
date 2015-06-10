@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
-import fi.vm.sade.valinta.http.Callback;
+import fi.vm.sade.valinta.http.GsonResponseCallback;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,7 +64,7 @@ public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaA
 		getWebClient()
 				.path(url)
 				.accept(MediaType.WILDCARD)
-				.async().get(new Callback<List<Valintatulos> >(GSON,
+				.async().get(new GsonResponseCallback<List<Valintatulos> >(GSON,
 				address,url, valintatulokset,poikkeus,
 				new TypeToken<List<Valintatulos>>() { }.getType()));
 	}

@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
 import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.http.Callback;
+import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
@@ -72,7 +72,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 					.query("tarjoajaOid", tarjoajaOid)
 					.async()
 					.post(Entity.entity(vaihe,
-							MediaType.APPLICATION_JSON_TYPE), new Callback<ValinnanvaiheDTO>(GSON, address, url, callback,
+							MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<ValinnanvaiheDTO>(GSON, address, url, callback,
 							failureCallback, new TypeToken<ValinnanvaiheDTO>() {
 					}.getType())));
 		} catch (Throwable e) {
@@ -102,7 +102,7 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 					getWebClient()
 							.path(url)
 							.async()
-							.post(Entity.entity(lista, MediaType.APPLICATION_JSON_TYPE), new Callback<String>(address, url, callback, failureCallback, new TypeToken<String>() {
+							.post(Entity.entity(lista, MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<String>(address, url, callback, failureCallback, new TypeToken<String>() {
 								}.getType())));
 		} catch (Exception e) {
 			LOG.error("Virhe laske ja sijoittele kutsussa",e);
@@ -110,4 +110,5 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
 			return TyhjaPeruutettava.tyhjaPeruutettava();
 		}
 	}
+
 }

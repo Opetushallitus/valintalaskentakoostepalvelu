@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.http.Callback;
+import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
 
 /**
@@ -35,7 +35,7 @@ public class SijoitteleAsyncResourceImpl extends HttpResource implements Sijoitt
 					.path(url)
 					.accept(MediaType.WILDCARD_TYPE)
 					.async()
-					.get(new Callback<String>(address, url, callback,
+					.get(new GsonResponseCallback<String>(address, url, callback,
 							failureCallback, new TypeToken<String>() {
 							}.getType()));
 		} catch (Exception e) {

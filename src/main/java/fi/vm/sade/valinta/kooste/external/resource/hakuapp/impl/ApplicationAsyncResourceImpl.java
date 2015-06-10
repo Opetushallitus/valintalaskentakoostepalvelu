@@ -11,9 +11,6 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import fi.vm.sade.valinta.http.Callback;
-import fi.vm.sade.valinta.kooste.external.resource.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -22,6 +19,11 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
+import fi.vm.sade.valinta.http.GsonResponseCallback;
+import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
@@ -84,7 +86,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 				.path(url)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
-				.get(new Callback<>(
+				.get(new GsonResponseCallback<>(
 						address, url, callback, failureCallback, TypeToken.of(Hakemus.class).getType())));
 	}
 
@@ -99,7 +101,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 				.query("rows", 100000)
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.async()
-				.post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new Callback<List<Hakemus>>(
+				.post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<List<Hakemus>>(
 						address,
 						url+"?rows=100000",
 						callback,
@@ -118,7 +120,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 							.query("asId", hakuOid)
 							.query("aoOid", hakukohdeOid)
 							.async()
-							.get(new Callback<List<Hakemus>>(
+							.get(new GsonResponseCallback<List<Hakemus>>(
 									address,
 									url+"?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid="+hakukohdeOid+"&asId="+hakuOid,
                                     callback,
@@ -137,7 +139,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 					getWebClient()
 							.path(url)
 							.async()
-							.get(new Callback<List<ApplicationAdditionalDataDTO>>(
+							.get(new GsonResponseCallback<List<ApplicationAdditionalDataDTO>>(
 									address,
 									url,
 									callback,
@@ -155,7 +157,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 					getWebClient()
 							.path(url)
 							.async()
-							.post(Entity.json(hakemusOids),new Callback<List<ApplicationAdditionalDataDTO>>(
+							.post(Entity.json(hakemusOids),new GsonResponseCallback<List<ApplicationAdditionalDataDTO>>(
 									address,
 									url,
 									callback,

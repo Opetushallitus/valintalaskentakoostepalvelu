@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.impl;
 
 import com.google.common.reflect.TypeToken;
 
-import fi.vm.sade.valinta.http.Callback;
+import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
@@ -42,7 +42,7 @@ public class OhjausparametritAsyncResourceImpl extends AsyncResourceWithCas impl
             return new PeruutettavaImpl(getWebClient()
                     .path(url)
                     .async()
-                    .get(new Callback<ParametritDTO>(GSON, address, url, callback, failureCallback, new TypeToken<ParametritDTO>() {
+                    .get(new GsonResponseCallback<ParametritDTO>(GSON, address, url, callback, failureCallback, new TypeToken<ParametritDTO>() {
                     }.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);

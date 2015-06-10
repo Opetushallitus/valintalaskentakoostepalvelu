@@ -1,17 +1,15 @@
 package fi.vm.sade.valinta.kooste.external.resource.dokumentti.impl;
 
-import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.http.ResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import org.apache.http.protocol.HTTP;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
