@@ -8,14 +8,9 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * @author Jussi Jartamo
- */
 public interface DokumenttiAsyncResource {
-
     Peruutettava tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata,
-                  Consumer<Response> responseCallback, Consumer<Throwable> failureCallback);
+                          Consumer<Response> responseCallback, Consumer<Throwable> failureCallback);
 
     Observable<String> uudelleenNimea(String dokumenttiId, String filename);
-
 }

@@ -20,32 +20,22 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-/**
- * @author Jussi Jartamo
- */
 public class DokumenttiAsyncResourceImpl extends HttpResource implements DokumenttiAsyncResource {
 
     @Autowired
     public DokumenttiAsyncResourceImpl(
             @Value("${web.url.cas}") String webCasUrl,
-                                       @Value("${cas.service.dokumenttipalvelu}/j_spring_cas_security_check") String targetService,
-                                       @Value("${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}") String appClientUsername,
-                                       @Value("${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}") String appClientPassword,
+            @Value("${cas.service.dokumenttipalvelu}/j_spring_cas_security_check") String targetService,
+            @Value("${valintalaskentakoostepalvelu.app.username.to.valintaperusteet}") String appClientUsername,
+            @Value("${valintalaskentakoostepalvelu.app.password.to.valintaperusteet}") String appClientPassword,
             @Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}") String address,
-                                       ApplicationContext context
-    ) {
+            ApplicationContext context) {
         super(address, TimeUnit.HOURS.toMillis(1));
-        //super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.HOURS.toMillis(1));
     }
 
     @Override
     public Observable<String> uudelleenNimea(String dokumenttiId, String filename) {
-        return putAsObservable(
-                "/dokumentit/uudelleennimea/" + dokumenttiId,
-                new TypeToken<String>() {
-                }.getType(),
-                Entity.text(filename)
-        );
+        return putAsObservable("/dokumentit/uudelleennimea/" + dokumenttiId, new TypeToken<String>() {}.getType(), Entity.text(filename));
     }
 
     @Override
@@ -62,7 +52,7 @@ public class DokumenttiAsyncResourceImpl extends HttpResource implements Dokumen
                             .query("tags", tags.toArray())
                             .query("mimeType", mimeType)
                             .async()
-                            .put(Entity.entity(filedata, MediaType.APPLICATION_OCTET_STREAM),new ResponseCallback(address + url, responseCallback, failureCallback)));
+                            .put(Entity.entity(filedata, MediaType.APPLICATION_OCTET_STREAM), new ResponseCallback(address + url, responseCallback, failureCallback)));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();

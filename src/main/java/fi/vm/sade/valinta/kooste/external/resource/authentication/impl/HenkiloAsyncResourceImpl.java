@@ -19,9 +19,6 @@ import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncRe
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 
-/**
- * @author Jussi Jartamo
- */
 @Service
 public class HenkiloAsyncResourceImpl extends AsyncResourceWithCas implements HenkiloAsyncResource {
     @Autowired

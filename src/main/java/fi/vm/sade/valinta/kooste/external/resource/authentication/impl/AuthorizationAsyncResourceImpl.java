@@ -25,12 +25,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-/**
- * @author Jussi Jartamo
- */
 @Service
 public class AuthorizationAsyncResourceImpl extends AsyncResourceWithCas implements AuthorizationAsyncResource {
-
     private final TarjontaAsyncResource tarjontaAsyncResource;
 
     @Autowired
