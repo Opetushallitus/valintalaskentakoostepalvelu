@@ -7,11 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * User: wuoti
- * Date: 9.9.2013
- * Time: 14.09
- */
 @Component("hakemusOidSplitter")
 public class HakemusOidSplitter {
 
@@ -20,7 +15,6 @@ public class HakemusOidSplitter {
         for (SuppeaHakemus h : hakemukset) {
             oids.add(h.getOid());
         }
-
         return oids;
     }
 }
