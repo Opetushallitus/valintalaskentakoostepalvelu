@@ -15,63 +15,54 @@ import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.TilaSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.TutkinnontasoSource;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- *         Base class for haku and lisahaku
- */
 public abstract class KelaAbstraktiHaku {
 
-	public static final String SUKUNIMI = "sukunimi";
-	public static final String ETUNIMET = "Etunimet";
+    public static final String SUKUNIMI = "sukunimi";
+    public static final String ETUNIMET = "Etunimet";
 
-	private final HakuV1RDTO haku;
-	private final PaivamaaraSource paivamaaraSource;
+    private final HakuV1RDTO haku;
+    private final PaivamaaraSource paivamaaraSource;
 
-	public KelaAbstraktiHaku(HakuV1RDTO haku, PaivamaaraSource paivamaaraSource) {
-		this.haku = haku;
-		this.paivamaaraSource = paivamaaraSource;
-	}
+    public KelaAbstraktiHaku(HakuV1RDTO haku, PaivamaaraSource paivamaaraSource) {
+        this.haku = haku;
+        this.paivamaaraSource = paivamaaraSource;
+    }
 
-	public HakuV1RDTO getHaku() {
-		return haku;
-	}
+    public HakuV1RDTO getHaku() {
+        return haku;
+    }
 
-	protected PaivamaaraSource getPaivamaaraSource() {
-		return paivamaaraSource;
-	}
+    protected PaivamaaraSource getPaivamaaraSource() {
+        return paivamaaraSource;
+    }
 
-	/**
-	 * 
-	 * @return kela hakuun liittyvat hakemus oidit
-	 */
-	public abstract Collection<String> getHakemusOids();
+    /**
+     * @return kela hakuun liittyvat hakemus oidit
+     */
+    public abstract Collection<String> getHakemusOids();
 
-	// public Collection<String> hakemusOids();
-	public abstract Collection<KelaHakijaRivi> createHakijaRivit(
-			Date alkuPvm,
-			Date loppuPvm,			
-			String hakuOid,
-			KelaProsessi prosessi,
-			HakemusSource hakemusSource, HakukohdeSource hakukohdeSource,
-			LinjakoodiSource linjakoodiSource, OppilaitosSource oppilaitosSource, TutkinnontasoSource tutkinnontasoSource, TilaSource tilaSource);
+    // public Collection<String> hakemusOids();
+    public abstract Collection<KelaHakijaRivi> createHakijaRivit(
+            Date alkuPvm,
+            Date loppuPvm,
+            String hakuOid,
+            KelaProsessi prosessi,
+            HakemusSource hakemusSource, HakukohdeSource hakukohdeSource,
+            LinjakoodiSource linjakoodiSource, OppilaitosSource oppilaitosSource, TutkinnontasoSource tutkinnontasoSource, TilaSource tilaSource);
 
-	/**
-	 * @return case insensitive map
-	 */
-	protected Map<String, String> additionalInfo(Hakemus hakemus) {
-		Map<String, String> additionalInfo = new TreeMap<String, String>(
-				String.CASE_INSENSITIVE_ORDER);
-		additionalInfo.putAll(hakemus.getAdditionalInfo());
-		return additionalInfo;
-	}
+    /**
+     * @return case insensitive map
+     */
+    protected Map<String, String> additionalInfo(Hakemus hakemus) {
+        Map<String, String> additionalInfo = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+        additionalInfo.putAll(hakemus.getAdditionalInfo());
+        return additionalInfo;
+    }
 
-	protected Map<String, String> henkilotiedot(Hakemus hakemus) {
-		Map<String, String> henkilotiedot = new TreeMap<String, String>(
-				String.CASE_INSENSITIVE_ORDER);
-		henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
-		return henkilotiedot;
-	}
+    protected Map<String, String> henkilotiedot(Hakemus hakemus) {
+        Map<String, String> henkilotiedot = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+        henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
+        return henkilotiedot;
+    }
 
 }

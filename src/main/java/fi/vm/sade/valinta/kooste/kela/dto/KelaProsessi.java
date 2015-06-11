@@ -5,15 +5,8 @@ import java.util.Collection;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public class KelaProsessi extends DokumenttiProsessi {
-
-	public KelaProsessi(String toiminto, Collection<String> hakuOids) {
-		super("Kela", toiminto, "", Arrays.asList("kela"));
-	}
-
+    public KelaProsessi(String toiminto, Collection<String> hakuOids) {
+        super("Kela", toiminto, "", Arrays.asList("kela"));
+    }
 }

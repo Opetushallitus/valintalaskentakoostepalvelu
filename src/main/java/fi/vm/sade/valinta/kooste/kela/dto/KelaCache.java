@@ -20,133 +20,123 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakemusSource;
 import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public class KelaCache implements HakemusSource, PaivamaaraSource {
+    private static final Logger LOG = LoggerFactory.getLogger(KelaCache.class);
+    private final ConcurrentHashMap<String, HakuDTO> haut = new ConcurrentHashMap<String, HakuDTO>();
+    private final ConcurrentHashMap<String, HakukohdeDTO> hakukohteet = new ConcurrentHashMap<String, HakukohdeDTO>();
+    private final ConcurrentHashMap<String, Hakemus> hakemukset = new ConcurrentHashMap<String, Hakemus>();
+    private final ConcurrentHashMap<String, String> hakutyyppiArvo = new ConcurrentHashMap<String, String>();
+    private final ConcurrentHashMap<String, String> haunKohdejoukkoArvo = new ConcurrentHashMap<String, String>();
+    private final ConcurrentHashMap<String, Date> lukuvuosi = new ConcurrentHashMap<String, Date>();
+    private final Date now;
+    private final KoodiService koodiService;
 
-	private static final Logger LOG = LoggerFactory.getLogger(KelaCache.class);
-	private final ConcurrentHashMap<String, HakuDTO> haut = new ConcurrentHashMap<String, HakuDTO>();
-	private final ConcurrentHashMap<String, HakukohdeDTO> hakukohteet = new ConcurrentHashMap<String, HakukohdeDTO>();
-	private final ConcurrentHashMap<String, Hakemus> hakemukset = new ConcurrentHashMap<String, Hakemus>();
-	private final ConcurrentHashMap<String, String> hakutyyppiArvo = new ConcurrentHashMap<String, String>();
-	private final ConcurrentHashMap<String, String> haunKohdejoukkoArvo = new ConcurrentHashMap<String, String>();
-	private final ConcurrentHashMap<String, Date> lukuvuosi = new ConcurrentHashMap<String, Date>();
-	private final Date now;
-	private final KoodiService koodiService;
-	
-	
-	public KelaCache(KoodiService koodiService) {
-		now = new Date();
-		this.koodiService = koodiService;
-	}
 
-	@Override
-	public Date lukuvuosi(HakuV1RDTO hakuDTO) {
-		String uri = hakuDTO.getKoulutuksenAlkamiskausiUri();
-		if (uri == null) {
-			LOG.error("Koulutuksen alkamiskausi URI oli null!");
-			throw new RuntimeException("Koulutuksen alkamiskausi URI oli null!");
-		}
-		if (!lukuvuosi.contains(uri)) {
-			int vuosi = hakuDTO.getKoulutuksenAlkamisVuosi();
-			int kuukausi = 1;
-			List<KoodiType> koodis = null;
-			// haku.get
-			
-			int tries=0;
-			
-			while(true) {
-				try {
-					koodis =koodiService.searchKoodis(toSearchCriteria(hakuDTO.getKoulutuksenAlkamiskausiUri()));
-					if (tries>0) {
-						LOG.error("retry ok");
-					}
-					break;
-				} catch (Exception e) {
-					if (tries==30) {
-						LOG.error("give up");
-						throw e;
-					}	
-					tries++;
-					LOG.error("koodiService ei jaksa palvella {}. Yritetään vielä uudestaan. "+tries+"/30...", e.getMessage());
-					try {
-						Thread.sleep(15000L);
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}
-				}
-			}
-			
-			
-							try {
-								for (KoodiType koodi : koodis) {
-									if ("S".equals(StringUtils.upperCase(koodi.getKoodiArvo()))) {
-				
-										kuukausi = 8;
-									} else if ("K".equals(StringUtils.upperCase(koodi
-											.getKoodiArvo()))) {
-										kuukausi = 1;
-									} else {
-										LOG.error(
-												"Viallinen arvo {}, koodilla {} ",
-												new Object[] { koodi.getKoodiArvo(),
-														hakuDTO.getKoulutuksenAlkamiskausiUri() });
-									}
-								}
-							} catch (Exception e) {
-								e.printStackTrace();
-								LOG.error("Ei voitu hakea lukuvuotta tarjonnalta syystä {}",
-										e.getMessage());
-								throw new RuntimeException(e);
-							}
-			lukuvuosi.put(uri, new DateTime(vuosi, kuukausi, 1, 1, 1).toDate());
-		}
-		return lukuvuosi.get(uri);
-	}
+    public KelaCache(KoodiService koodiService) {
+        now = new Date();
+        this.koodiService = koodiService;
+    }
 
-	@Override
-	public Date poimintapaivamaara(HakuV1RDTO haku) {
-		return now;
-	}
+    @Override
+    public Date lukuvuosi(HakuV1RDTO hakuDTO) {
+        String uri = hakuDTO.getKoulutuksenAlkamiskausiUri();
+        if (uri == null) {
+            LOG.error("Koulutuksen alkamiskausi URI oli null!");
+            throw new RuntimeException("Koulutuksen alkamiskausi URI oli null!");
+        }
+        if (!lukuvuosi.contains(uri)) {
+            int vuosi = hakuDTO.getKoulutuksenAlkamisVuosi();
+            int kuukausi = 1;
+            List<KoodiType> koodis = null;
+            // haku.get
 
-	@Override
-	public Date valintapaivamaara(HakuV1RDTO haku) {
-		return now;
-	}
+            int tries = 0;
 
-	@Override
-	public Hakemus getHakemusByOid(String oid) {
-		return hakemukset.get(oid);
-	}
+            while (true) {
+                try {
+                    koodis = koodiService.searchKoodis(toSearchCriteria(hakuDTO.getKoulutuksenAlkamiskausiUri()));
+                    if (tries > 0) {
+                        LOG.error("retry ok");
+                    }
+                    break;
+                } catch (Exception e) {
+                    if (tries == 30) {
+                        LOG.error("give up");
+                        throw e;
+                    }
+                    tries++;
+                    LOG.error("koodiService ei jaksa palvella {}. Yritetään vielä uudestaan. " + tries + "/30...", e.getMessage());
+                    try {
+                        Thread.sleep(15000L);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            }
 
-	public void put(HakuDTO haku) {
-		haut.put(haku.getOid(), haku);
-	}
 
-	public void put(Hakemus hakemus) {
-		hakemukset.put(hakemus.getOid(), hakemus);
-	}
+            try {
+                for (KoodiType koodi : koodis) {
+                    if ("S".equals(StringUtils.upperCase(koodi.getKoodiArvo()))) {
 
-	public void put(HakukohdeDTO hakukohde) {
-		hakukohteet.put(hakukohde.getOid(), hakukohde);
-	}
+                        kuukausi = 8;
+                    } else if ("K".equals(StringUtils.upperCase(koodi
+                            .getKoodiArvo()))) {
+                        kuukausi = 1;
+                    } else {
+                        LOG.error("Viallinen arvo {}, koodilla {} ", new Object[]{koodi.getKoodiArvo(), hakuDTO.getKoulutuksenAlkamiskausiUri()});
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                LOG.error("Ei voitu hakea lukuvuotta tarjonnalta syystä {}", e.getMessage());
+                throw new RuntimeException(e);
+            }
+            lukuvuosi.put(uri, new DateTime(vuosi, kuukausi, 1, 1, 1).toDate());
+        }
+        return lukuvuosi.get(uri);
+    }
 
-	public void putHakutyyppi(String hakutyyppi, String arvo) {
-		hakutyyppiArvo.put(hakutyyppi, arvo);
-	}
+    @Override
+    public Date poimintapaivamaara(HakuV1RDTO haku) {
+        return now;
+    }
 
-	public String getHakutyyppi(String hakutyyppi) {
-		return hakutyyppiArvo.get(hakutyyppi);
-	}
-	
-	public void putHaunKohdejoukko(String kohdejoukko, String arvo) {
-		haunKohdejoukkoArvo.put(kohdejoukko, arvo);
-	}
+    @Override
+    public Date valintapaivamaara(HakuV1RDTO haku) {
+        return now;
+    }
 
-	public String getHaunKohdejoukko(String kohdejoukko) {
-		return haunKohdejoukkoArvo.get(kohdejoukko);
-	}
+    @Override
+    public Hakemus getHakemusByOid(String oid) {
+        return hakemukset.get(oid);
+    }
+
+    public void put(HakuDTO haku) {
+        haut.put(haku.getOid(), haku);
+    }
+
+    public void put(Hakemus hakemus) {
+        hakemukset.put(hakemus.getOid(), hakemus);
+    }
+
+    public void put(HakukohdeDTO hakukohde) {
+        hakukohteet.put(hakukohde.getOid(), hakukohde);
+    }
+
+    public void putHakutyyppi(String hakutyyppi, String arvo) {
+        hakutyyppiArvo.put(hakutyyppi, arvo);
+    }
+
+    public String getHakutyyppi(String hakutyyppi) {
+        return hakutyyppiArvo.get(hakutyyppi);
+    }
+
+    public void putHaunKohdejoukko(String kohdejoukko, String arvo) {
+        haunKohdejoukkoArvo.put(kohdejoukko, arvo);
+    }
+
+    public String getHaunKohdejoukko(String kohdejoukko) {
+        return haunKohdejoukkoArvo.get(kohdejoukko);
+    }
 }

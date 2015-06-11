@@ -4,25 +4,20 @@ import java.util.Collection;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public class KelaLuontiJaHaut {
-	private final KelaLuonti luonti;
-	private final Collection<Haku> haut;
+    private final KelaLuonti luonti;
+    private final Collection<Haku> haut;
 
-	public KelaLuontiJaHaut(KelaLuonti kelaLuonti, Collection<Haku> haut) {
-		this.luonti = kelaLuonti;
-		this.haut = haut;
-	}
+    public KelaLuontiJaHaut(KelaLuonti kelaLuonti, Collection<Haku> haut) {
+        this.luonti = kelaLuonti;
+        this.haut = haut;
+    }
 
-	public Collection<Haku> getHaut() {
-		return haut;
-	}
+    public Collection<Haku> getHaut() {
+        return haut;
+    }
 
-	public KelaLuonti getLuonti() {
-		return luonti;
-	}
+    public KelaLuonti getLuonti() {
+        return luonti;
+    }
 }
