@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToNoContent;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockServer;
@@ -66,17 +68,20 @@ public Result(T result){
         try {
             HttpResource http = new HttpResource(resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet");
             HakuV1RDTO h = new HakuV1RDTO();
-            h.setHakukohdeOids(Arrays.asList(HAKUKOHDE1,HAKUKOHDE2));
+            h.setHakukohdeOids(IntStream.range(1, 100).mapToObj(i -> "HAKUKOHDE"+ i).collect(Collectors.toList()));
             mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/HAKU1/", new Result(h));
             {
             HakukohdeV1RDTO hk = new HakukohdeV1RDTO();
+                hk.setOpetusKielet(Sets.newHashSet("FI"));
             hk.setTarjoajaOids(Sets.newHashSet("T1","T2"));
-            mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE1/", new Result(hk));
+            mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/.*", new Result(hk));
             }
             {
+                /*
                 HakukohdeV1RDTO hk = new HakukohdeV1RDTO();
                 hk.setTarjoajaOids(Sets.newHashSet("T1","T2"));
                 mockToReturnJson(GET, "/tarjonta-service/rest/v1/hakukohde/HAKUKOHDE2/", new Result(hk));
+                */
             }
             HakijaDTO hakija1 = new HakijaDTO();
             HakutoiveDTO hakutoiveDTO = new HakutoiveDTO();
@@ -87,7 +92,7 @@ public Result(T result){
             hakija1.setHakutoiveet(Sets.newTreeSet(Arrays.asList(hakutoiveDTO)));
             HakijaPaginationObject hp = new HakijaPaginationObject();
             hp.setResults(Arrays.asList(hakija1));
-            mockToReturnJson(GET, "/sijoittelu-service/resources/sijoittelu/HAKU1/sijoitteluajo/latest/hakemukset.*", hp);
+            mockToReturnJson(GET, "/sijoittelu-service/resources/sijoittelu/HAKU1/hyvaksytyt/hakukohde/.*", hp);
 
             TemplateHistory templateHistory = new TemplateHistory();
             templateHistory.setName("default");
@@ -102,7 +107,7 @@ public Result(T result){
             CyclicBarrier barrier = new CyclicBarrier(2);
             Action0 waitRequestForMax7Seconds = () ->{
                 try {
-                    barrier.await(17L, TimeUnit.SECONDS);
+                    barrier.await(10007L, TimeUnit.SECONDS);
                 } catch (Throwable t) {
                     throw new RuntimeException(t);
                 }
