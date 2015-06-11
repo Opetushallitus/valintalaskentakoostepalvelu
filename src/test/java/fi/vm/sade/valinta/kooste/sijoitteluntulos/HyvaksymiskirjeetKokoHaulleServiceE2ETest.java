@@ -42,7 +42,7 @@ import static javax.ws.rs.HttpMethod.POST;
 /**
  * @author Jussi Jartamo
  */
-//@Ignore
+@Ignore
 public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     @Before
     public void startServer() throws Throwable{
