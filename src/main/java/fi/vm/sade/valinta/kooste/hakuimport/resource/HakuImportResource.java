@@ -29,69 +29,62 @@ import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 
-/**
- * User: wuoti Date: 20.5.2013 Time: 10.34
- */
 @Controller("HakuImportResource")
 @Path("hakuimport")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/hakuimport", description = "Haun tuontiin tarjonnalta")
 public class HakuImportResource {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(HakuImportResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HakuImportResource.class);
 
-	@Autowired(required = false)
-	private HakuImportRoute hakuImportAktivointiRoute;
-	@Autowired(required = false)
-	private HakukohdeImportRoute hakukohdeImportRoute;
-	@Autowired(required = false)
-	private ParametriService parametriService;
+    @Autowired(required = false)
+    private HakuImportRoute hakuImportAktivointiRoute;
+    @Autowired(required = false)
+    private HakukohdeImportRoute hakukohdeImportRoute;
+    @Autowired(required = false)
+    private ParametriService parametriService;
 
-	@Autowired(required = false)
-	@Qualifier("hakuImportValvomo")
-	private ValvomoService<HakuImportProsessi> hakuImportValvomo;
+    @Autowired(required = false)
+    @Qualifier("hakuImportValvomo")
+    private ValvomoService<HakuImportProsessi> hakuImportValvomo;
 
-	@GET
-	@Path("/status")
-	@Produces(APPLICATION_JSON)
-	@ApiOperation(value = "Hauntuontireitin tila", response = Collection.class)
-	public Collection<ProsessiJaStatus<HakuImportProsessi>> status() {
-		return hakuImportValvomo.getUusimmatProsessitJaStatukset();
-	}
+    @GET
+    @Path("/status")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Hauntuontireitin tila", response = Collection.class)
+    public Collection<ProsessiJaStatus<HakuImportProsessi>> status() {
+        return hakuImportValvomo.getUusimmatProsessitJaStatukset();
+    }
 
-	@GET
-	@Path("/aktivoi")
-	@ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
-	public String aktivoiHakuImport(@QueryParam("hakuOid") String hakuOid) {
-		if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
-			return "no privileges.";
-		}
+    @GET
+    @Path("/aktivoi")
+    @ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
+    public String aktivoiHakuImport(@QueryParam("hakuOid") String hakuOid) {
+        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+            return "no privileges.";
+        }
 
-		if (StringUtils.isBlank(hakuOid)) {
-			return "get parameter 'hakuOid' required";
-		} else {
-			LOG.info("Haku import haulle {}", hakuOid);
-			hakuImportAktivointiRoute.asyncAktivoiHakuImport(hakuOid,
-					SecurityContextHolder.getContext().getAuthentication());
-			return "in progress";
-		}
-	}
+        if (StringUtils.isBlank(hakuOid)) {
+            return "get parameter 'hakuOid' required";
+        } else {
+            LOG.info("Haku import haulle {}", hakuOid);
+            hakuImportAktivointiRoute.asyncAktivoiHakuImport(hakuOid, SecurityContextHolder.getContext().getAuthentication());
+            return "in progress";
+        }
+    }
 
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@GET
-	@Path("/hakukohde")
-	@ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
-	public String aktivoiHakukohdeImport(
-			@QueryParam("hakukohdeOid") String hakukohdeOid) {
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @GET
+    @Path("/hakukohde")
+    @ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
+    public String aktivoiHakukohdeImport(
+            @QueryParam("hakukohdeOid") String hakukohdeOid) {
 
-		if (StringUtils.isBlank(hakukohdeOid)) {
-			return "get parameter 'hakukohde' required";
-		} else {
-			LOG.info("Hakukohde import hakukohteelle {}", hakukohdeOid);
-			hakukohdeImportRoute.asyncAktivoiHakukohdeImport(hakukohdeOid,
-					new HakuImportProsessi("Hakukohde", "Hakukhode"),
-					SecurityContextHolder.getContext().getAuthentication());
-			return "in progress";
-		}
-	}
+        if (StringUtils.isBlank(hakukohdeOid)) {
+            return "get parameter 'hakukohde' required";
+        } else {
+            LOG.info("Hakukohde import hakukohteelle {}", hakukohdeOid);
+            hakukohdeImportRoute.asyncAktivoiHakukohdeImport(hakukohdeOid, new HakuImportProsessi("Hakukohde", "Hakukhode"), SecurityContextHolder.getContext().getAuthentication());
+            return "in progress";
+        }
+    }
 }

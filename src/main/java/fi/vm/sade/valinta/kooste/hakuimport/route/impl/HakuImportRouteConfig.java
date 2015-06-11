@@ -16,26 +16,20 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 public class HakuImportRouteConfig {
 
-	@Bean(name = "hakuImportValvomo")
-	public ValvomoServiceImpl<HakuImportProsessi> getValvomoServiceImpl() {
-		return new ValvomoServiceImpl<HakuImportProsessi>();
-	}
+    @Bean(name = "hakuImportValvomo")
+    public ValvomoServiceImpl<HakuImportProsessi> getValvomoServiceImpl() {
+        return new ValvomoServiceImpl<>();
+    }
 
-	@Bean
-	public HakuImportRoute getHakuImportAktivointiRoute(
-			@Qualifier("javaDslCamelContext") CamelContext context)
-			throws Exception {
-		return ProxyWithAnnotationHelper.createProxy(
-				context.getEndpoint(HakuImportRoute.DIRECT_HAKU_IMPORT),
-				HakuImportRoute.class);
-	}
+    @Bean
+    public HakuImportRoute getHakuImportAktivointiRoute(@Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
+        return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(HakuImportRoute.DIRECT_HAKU_IMPORT),
+                HakuImportRoute.class);
+    }
 
-	@Bean
-	public HakukohdeImportRoute getHakukohdeImportAktivointiRoute(
-			@Qualifier("javaDslCamelContext") CamelContext context)
-			throws Exception {
-		return ProxyWithAnnotationHelper.createProxy(context
-				.getEndpoint(HakukohdeImportRoute.DIRECT_HAKUKOHDE_IMPORT),
-				HakukohdeImportRoute.class);
-	}
+    @Bean
+    public HakukohdeImportRoute getHakukohdeImportAktivointiRoute(@Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
+        return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(HakukohdeImportRoute.DIRECT_HAKUKOHDE_IMPORT),
+                HakukohdeImportRoute.class);
+    }
 }

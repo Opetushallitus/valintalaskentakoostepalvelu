@@ -12,15 +12,11 @@ import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.security.SecurityPreprocessor;
 
-/**
- * User: wuoti Date: 20.5.2013 Time: 10.24
- */
 public interface HakukohdeImportRoute {
+    final String DIRECT_HAKUKOHDE_IMPORT = "direct:hakuimport_tarjonnasta_koostepalvelulle";
 
-	final String DIRECT_HAKUKOHDE_IMPORT = "direct:hakuimport_tarjonnasta_koostepalvelulle";
-
-	Future<Void> asyncAktivoiHakukohdeImport(
-			@Body String hakukohdeOid,
-			@Property(PROPERTY_VALVOMO_PROSESSI) HakuImportProsessi prosessi,
-			@Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
+    Future<Void> asyncAktivoiHakukohdeImport(
+            @Body String hakukohdeOid,
+            @Property(PROPERTY_VALVOMO_PROSESSI) HakuImportProsessi prosessi,
+            @Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
 }

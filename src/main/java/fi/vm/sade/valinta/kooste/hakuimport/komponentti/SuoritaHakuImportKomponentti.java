@@ -20,35 +20,35 @@ import fi.vm.sade.valinta.kooste.OPH;
 @PreAuthorize("isAuthenticated()")
 public class SuoritaHakuImportKomponentti {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(SuoritaHakuImportKomponentti.class);
+    private static final Logger LOG = LoggerFactory
+            .getLogger(SuoritaHakuImportKomponentti.class);
 
-	@Autowired
-	private fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource hakuResource;
+    @Autowired
+    private fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource hakuResource;
 
-	private static final int MAX_COUNT = -1;
+    private static final int MAX_COUNT = -1;
 
-	public Collection<String> suoritaHakukohdeImport(
-			@Property(OPH.HAKUOID) String hakuOid) {
-		ResultV1RDTO<HakuV1RDTO> a = hakuResource.findByOid(hakuOid);// getByOIDHakukohde(hakuOid,
-																		// null,
-																		// MAX_COUNT,
-																		// 0,
-																		// null,
-																		// null,
-																		// null,
-																		// null);
-		LOG.info("Importoidaan hakukohteita yhteensä kpl");
+    public Collection<String> suoritaHakukohdeImport(
+            @Property(OPH.HAKUOID) String hakuOid) {
+        ResultV1RDTO<HakuV1RDTO> a = hakuResource.findByOid(hakuOid);// getByOIDHakukohde(hakuOid,
+        // null,
+        // MAX_COUNT,
+        // 0,
+        // null,
+        // null,
+        // null,
+        // null);
+        LOG.info("Importoidaan hakukohteita yhteensä kpl");
 
-		Collection<String> hakukohdeOids = a.getResult().getHakukohdeOids();
+        Collection<String> hakukohdeOids = a.getResult().getHakukohdeOids();
 
-		// Collection<String> hakukohdeOids =
-		// Sets.newHashSet(Collections2.filter(
-		// Collections2.transform(a, new Function<OidRDTO, String>() {
-		// public String apply(OidRDTO input) {
-		// }
-		// }), Predicates.notNull()));
+        // Collection<String> hakukohdeOids =
+        // Sets.newHashSet(Collections2.filter(
+        // Collections2.transform(a, new Function<OidRDTO, String>() {
+        // public String apply(OidRDTO input) {
+        // }
+        // }), Predicates.notNull()));
 
-		return hakukohdeOids;
-	}
+        return hakukohdeOids;
+    }
 }
