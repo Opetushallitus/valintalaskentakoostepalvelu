@@ -13,28 +13,24 @@ import fi.vm.sade.koodisto.service.types.common.KoodiType;
 
 @Component
 public class KoulutuksenAlkamiskausiKomponentti {
+    private static final Logger LOG = LoggerFactory.getLogger(KoulutuksenAlkamiskausiKomponentti.class);
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(KoulutuksenAlkamiskausiKomponentti.class);
+    @Autowired
+    private KoodiService koodiService;
 
-	@Autowired
-	private KoodiService koodiService;
-
-	public int koulutuksenAlkamiskausiUri(String koulutuksenAlkamiskausiUri) {
-		for (KoodiType koodi : koodiService
-				.searchKoodis(toSearchCriteria(koulutuksenAlkamiskausiUri))) {
-			if ("S".equals(StringUtils.upperCase(koodi.getKoodiArvo()))) { // syksy
-				return 8;
-			} else if ("K".equals(StringUtils.upperCase(koodi.getKoodiArvo()))) { // kevat
-				return 1;
-			} else {
-				LOG.error("Viallinen arvo {}, koodilla {} ", new Object[] {
-						koodi.getKoodiArvo(), koulutuksenAlkamiskausiUri });
-				break;
-			}
-		}
-		throw new RuntimeException(
-				"Koodistosta ei saatu alkamiskautta URI:lle "
-						+ koulutuksenAlkamiskausiUri);
-	}
+    public int koulutuksenAlkamiskausiUri(String koulutuksenAlkamiskausiUri) {
+        for (KoodiType koodi : koodiService
+                .searchKoodis(toSearchCriteria(koulutuksenAlkamiskausiUri))) {
+            if ("S".equals(StringUtils.upperCase(koodi.getKoodiArvo()))) { // syksy
+                return 8;
+            } else if ("K".equals(StringUtils.upperCase(koodi.getKoodiArvo()))) { // kevat
+                return 1;
+            } else {
+                LOG.error("Viallinen arvo {}, koodilla {} ", new Object[]{
+                        koodi.getKoodiArvo(), koulutuksenAlkamiskausiUri});
+                break;
+            }
+        }
+        throw new RuntimeException("Koodistosta ei saatu alkamiskautta URI:lle " + koulutuksenAlkamiskausiUri);
+    }
 }

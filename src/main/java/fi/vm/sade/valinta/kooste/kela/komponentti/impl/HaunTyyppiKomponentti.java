@@ -14,84 +14,60 @@ import fi.vm.sade.valinta.kooste.exception.KoodistoException;
 import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 
 /**
- * 
- * @author Jussi Jartamo
- * 
  *         Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti!
  *         Proxy provides retries!
  */
 @Component
 public class HaunTyyppiKomponentti {
+    private static final Logger LOG = LoggerFactory.getLogger(HaunTyyppiKomponentti.class);
+    private final KoodiService koodiService;
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(HaunTyyppiKomponentti.class);
+    @Autowired
+    public HaunTyyppiKomponentti(KoodiService koodiService) {
+        this.koodiService = koodiService;
+    }
 
-	// private final HakukohdeResource tarjontaResource;
-	private final KoodiService koodiService;
+    public String haunTyyppi(String haunTyyppiUri) {
+        LOG.error("Tehdään koodistokutsu tuntemattomalle haunTyyppiUri:lle {}",
+                haunTyyppiUri);
+        String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(haunTyyppiUri);
+        Integer koodiVersio = TarjontaUriToKoodistoUtil.stripVersion(haunTyyppiUri);
+        SearchKoodisCriteriaType koodistoHaku = TarjontaUriToKoodistoUtil.toSearchCriteria(koodiUri, koodiVersio);
 
-	@Autowired
-	public HaunTyyppiKomponentti(KoodiService koodiService) {
-		this.koodiService = koodiService;
-	}
+        List<KoodiType> koodiTypes = koodiService.searchKoodis(koodistoHaku);
+        if (koodiTypes.isEmpty()) {
+            throw new KoodistoException("Koodisto palautti tyhjän koodijoukon urille " + koodiUri + " ja käytetylle versiolle " + koodiVersio);
+        }
+        for (KoodiType koodi : koodiTypes) {
+            String arvo = koodi.getKoodiArvo();
+            if (arvo != null) {
+                LOG.error("HaunTyyppiUri {} == {}", haunTyyppiUri, arvo);
+                return arvo;
+            } else {
+                LOG.error("Koodistosta palautui null arvo uri:lle {}, versio {}", new Object[]{koodiUri, koodiVersio});
+            }
+        }
+        throw new KoodistoException("Koodistosta ei saatu arvoa urille " + koodiUri + " ja käytetylle versiolle " + koodiVersio);
+    }
 
-	public String haunTyyppi(String haunTyyppiUri) {
-		LOG.error("Tehdään koodistokutsu tuntemattomalle haunTyyppiUri:lle {}",
-				haunTyyppiUri);
-		String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(haunTyyppiUri);
-		Integer koodiVersio = TarjontaUriToKoodistoUtil
-				.stripVersion(haunTyyppiUri);
-		SearchKoodisCriteriaType koodistoHaku = TarjontaUriToKoodistoUtil
-				.toSearchCriteria(koodiUri, koodiVersio);
-
-		List<KoodiType> koodiTypes = koodiService.searchKoodis(koodistoHaku);
-		if (koodiTypes.isEmpty()) {
-			throw new KoodistoException(
-					"Koodisto palautti tyhjän koodijoukon urille " + koodiUri
-							+ " ja käytetylle versiolle " + koodiVersio);
-		}
-		for (KoodiType koodi : koodiTypes) {
-			String arvo = koodi.getKoodiArvo();
-			if (arvo != null) {
-				LOG.error("HaunTyyppiUri {} == {}", haunTyyppiUri, arvo);
-				return arvo;
-			} else {
-				LOG.error(
-						"Koodistosta palautui null arvo uri:lle {}, versio {}",
-						new Object[] { koodiUri, koodiVersio });
-			}
-		}
-		throw new KoodistoException("Koodistosta ei saatu arvoa urille "
-				+ koodiUri + " ja käytetylle versiolle " + koodiVersio);
-
-	}
-	
-	public String haunKohdejoukko(String haunKohdejoukkoUri) {
-		LOG.error("Tehdään koodistokutsu tuntemattomalle haunKohdejoukkoUri:lle {}",
-				haunKohdejoukkoUri);
-		String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(haunKohdejoukkoUri);
-		Integer koodiVersio = TarjontaUriToKoodistoUtil
-				.stripVersion(haunKohdejoukkoUri);
-		SearchKoodisCriteriaType koodistoHaku = TarjontaUriToKoodistoUtil
-				.toSearchCriteria(koodiUri, koodiVersio);
-		List<KoodiType> koodiTypes = koodiService.searchKoodis(koodistoHaku);
-		if (koodiTypes.isEmpty()) {
-			throw new KoodistoException(
-					"Koodisto palautti tyhjän koodijoukon urille " + koodiUri
-							+ " ja käytetylle versiolle " + koodiVersio);
-		}
-		for (KoodiType koodi : koodiTypes) {
-			String arvo = koodi.getKoodiArvo();
-			if (arvo != null) {
-				LOG.error("HaunTyyppiUri {} == {}", haunKohdejoukkoUri, arvo);
-				return arvo;
-			} else {
-				LOG.error(
-						"Koodistosta palautui null arvo uri:lle {}, versio {}",
-						new Object[] { koodiUri, koodiVersio });
-			}
-		}
-		throw new KoodistoException("Koodistosta ei saatu arvoa urille "
-				+ koodiUri + " ja käytetylle versiolle " + koodiVersio);
-
-	}
+    public String haunKohdejoukko(String haunKohdejoukkoUri) {
+        LOG.error("Tehdään koodistokutsu tuntemattomalle haunKohdejoukkoUri:lle {}", haunKohdejoukkoUri);
+        String koodiUri = TarjontaUriToKoodistoUtil.cleanUri(haunKohdejoukkoUri);
+        Integer koodiVersio = TarjontaUriToKoodistoUtil.stripVersion(haunKohdejoukkoUri);
+        SearchKoodisCriteriaType koodistoHaku = TarjontaUriToKoodistoUtil.toSearchCriteria(koodiUri, koodiVersio);
+        List<KoodiType> koodiTypes = koodiService.searchKoodis(koodistoHaku);
+        if (koodiTypes.isEmpty()) {
+            throw new KoodistoException("Koodisto palautti tyhjän koodijoukon urille " + koodiUri + " ja käytetylle versiolle " + koodiVersio);
+        }
+        for (KoodiType koodi : koodiTypes) {
+            String arvo = koodi.getKoodiArvo();
+            if (arvo != null) {
+                LOG.error("HaunTyyppiUri {} == {}", haunKohdejoukkoUri, arvo);
+                return arvo;
+            } else {
+                LOG.error("Koodistosta palautui null arvo uri:lle {}, versio {}", new Object[]{koodiUri, koodiVersio});
+            }
+        }
+        throw new KoodistoException("Koodistosta ei saatu arvoa urille " + koodiUri + " ja käytetylle versiolle " + koodiVersio);
+    }
 }

@@ -4,5 +4,5 @@ import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 
 public interface HakukohdeSource {
 
-	HakukohdeDTO getHakukohdeByOid(String oid);
+    HakukohdeDTO getHakukohdeByOid(String oid);
 }
