@@ -16,7 +16,7 @@ public interface JalkiohjauskirjeService {
 	void jalkiohjauskirjeetHakemuksille(KirjeProsessi prosessi,
 			JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids);
 
-	void jalkiohjauskirjeetHakukohteelle(KirjeProsessi prosessi,
+	void jalkiohjauskirjeetHaulle(KirjeProsessi prosessi,
 			JalkiohjauskirjeDTO jalkiohjauskirjeDTO);
 
 }

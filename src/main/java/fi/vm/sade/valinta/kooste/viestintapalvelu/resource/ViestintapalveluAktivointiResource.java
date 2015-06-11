@@ -222,7 +222,7 @@ public class ViestintapalveluAktivointiResource {
 					templateName, tag, hakuOid,
 					hakemuksillaRajaus.getLanguageCode());
 			if (hakemuksillaRajaus.getHakemusOids() == null) {
-				jalkiohjauskirjeService.jalkiohjauskirjeetHakukohteelle(
+				jalkiohjauskirjeService.jalkiohjauskirjeetHaulle(
 						prosessi, jalkiohjauskirjeDTO);
 			} else {
 				jalkiohjauskirjeService.jalkiohjauskirjeetHakemuksille(

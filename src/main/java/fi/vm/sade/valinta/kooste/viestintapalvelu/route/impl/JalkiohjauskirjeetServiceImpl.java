@@ -118,8 +118,8 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 	}
 
 	@Override
-	public void jalkiohjauskirjeetHakukohteelle(KirjeProsessi prosessi,
-			JalkiohjauskirjeDTO jalkiohjauskirjeDTO) {
+	public void jalkiohjauskirjeetHaulle(KirjeProsessi prosessi,
+										 JalkiohjauskirjeDTO jalkiohjauskirjeDTO) {
 		from(
 				sijoitteluAsyncResource
 						.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO
@@ -139,9 +139,9 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 						},
 						throwable -> {
 							LOG.error(
-									"Koulutuspaikattomien haku haulle {} epaonnistui! {}",
+									"Koulutuspaikattomien haku haulle {} epaonnistui!",
 									jalkiohjauskirjeDTO.getHakuOid(),
-									throwable.getMessage());
+									throwable);
 							prosessi.keskeyta();
 						});
 	}
@@ -162,12 +162,12 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 				try {
 					LOG.info("Haetaan hakemukset!");
 					hakemukset = applicationAsyncResource
-							.getApplicationsByOids(hakemusOids).get(1L,
+							.getApplicationsByOids(hakemusOids).get(240L,
 									TimeUnit.MINUTES);
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					LOG.error(
-							"Hakemusten haussa oideilla tapahtui virhe! Oidit={}",
-							Arrays.toString(hakemusOids.toArray()));
+							"Hakemusten haussa oideilla tapahtui virhe!",
+							e);
 					throw new RuntimeException(
 							"Hakemusten haussa oideilla tapahtui virhe!");
 				}
@@ -242,7 +242,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 						"Aloitetaan jalkiohjauskirjeiden vienti! Kirjeita {}kpl",
 						letterBatch.getLetters().size());
 				LetterResponse batchId = viestintapalveluAsyncResource
-						.viePdfJaOdotaReferenssi(letterBatch).get(30L,
+						.viePdfJaOdotaReferenssi(letterBatch).get(240L,
 								TimeUnit.MINUTES);
 				LOG.error(
 						"Saatiin jalkiohjauskirjeen seurantaId {} ja aloitetaan valmistumisen pollaus! (Timeout 60min)",
@@ -262,7 +262,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                                     "Tehdaan status kutsu seurantaId:lle {}",
                                                     batchId);
                                             LetterBatchStatusDto status = viestintapalveluAsyncResource
-                                                    .haeStatus(batchId.getBatchId()).get(900L,
+                                                    .haeStatus(batchId.getBatchId()).get(10000L,
                                                             TimeUnit.MILLISECONDS);
                                             if (prosessi.isKeskeytetty()) {
                                                 LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta!");
@@ -280,10 +280,10 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                                 prosessi.valmistui(batchId.getBatchId());
                                                 stop.onNext(null);
                                             }
-                                        } catch (Exception e) {
+                                        } catch (Throwable e) {
                                             LOG.error(
-                                                    "Statuksen haku epaonnistui {}",
-                                                    e.getMessage());
+                                                    "Statuksen haku epaonnistui",
+                                                    e);
                                         }
                                  }, throwable -> {
                                 prosessi.keskeyta();
@@ -293,9 +293,9 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                 } else {
                     prosessi.keskeyta("Hakemuksissa oli virheitä", batchId.getErrors());
                 }
-			} catch (Exception e) {
-				LOG.error("Virhe haulle {}: {}", kirje.getHakuOid(),
-						e.getMessage());
+			} catch (Throwable e) {
+				LOG.error("Virhe haulle {}", kirje.getHakuOid(),
+						e);
 				prosessi.keskeyta();
 			}
 		};
