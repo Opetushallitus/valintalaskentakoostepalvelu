@@ -20,9 +20,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.kooste.parametrit.Parametrit;
 import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 
-/**
- * User: tommiha Date: 8/20/13 Time: 2:51 PM
- */
 @Component("ParametritResource")
 @Path("/parametrit")
 @PreAuthorize("isAuthenticated()")

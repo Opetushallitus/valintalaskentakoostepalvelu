@@ -1,19 +1,7 @@
 package fi.vm.sade.valinta.kooste.parametrit;
 
-/**
- * User: tommiha
- * Date: 8/20/13
- * Time: 2:35 PM
- */
 public class Parametrit {
-    /*private long valintakoekutsutAlkupvm;
-    private long valintakoekutsutLoppupvm;
-    private long valintakoekutsutkouluillePvm;
-    private long valintakoeAlkupvm;
-    private long valintakoeLoppupvm;*/
     private String koetuloksetPvm;
-    /*private long valintajasijoitteluAlkupvm;
-    private long valintajasijoitteluLoppupvm;*/
     private String valintaesitysPvm;
     private String hakuAlkupvm;
     private String hakuLoppupvm;
