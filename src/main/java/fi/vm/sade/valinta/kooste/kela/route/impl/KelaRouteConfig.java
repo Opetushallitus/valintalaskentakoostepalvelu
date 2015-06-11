@@ -13,35 +13,26 @@ import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 import org.springframework.context.annotation.Profile;
 
-/**
- * @author Jussi Jartamo.
- */
 @Profile("default")
 @Configuration
 public class KelaRouteConfig {
 
-	@Bean(name = "kelaValvomo")
-	public ValvomoServiceImpl<KelaProsessi> getValvomoServiceImpl() {
-		return new ValvomoServiceImpl<KelaProsessi>();
-	}
+    @Bean(name = "kelaValvomo")
+    public ValvomoServiceImpl<KelaProsessi> getValvomoServiceImpl() {
+        return new ValvomoServiceImpl<KelaProsessi>();
+    }
 
-	@Bean
-	public KelaRoute getKelaRoute(
-			@Value(KelaRoute.SEDA_KELA_LUONTI) String kelaluonti,
-			@Qualifier("javaDslCamelContext") CamelContext context)
-			throws Exception {
-		// return new
-		// ProxyBuilder(context).endpoint(KelaRoute.DIRECT_KELA_LUONTI).build(KelaRoute.class);
-		return ProxyWithAnnotationHelper.createProxy(
-				context.getEndpoint(kelaluonti), KelaRoute.class);
-	}
+    @Bean
+    public KelaRoute getKelaRoute(
+            @Value(KelaRoute.SEDA_KELA_LUONTI) String kelaluonti,
+            @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
+        return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(kelaluonti), KelaRoute.class);
+    }
 
-	@Bean
-	public KelaFtpRoute getKelaFtpRoute(
-			@Value(KelaRoute.KELA_SIIRTO) String kelasiirto,
-			@Qualifier("javaDslCamelContext") CamelContext context)
-			throws Exception {
-		return ProxyWithAnnotationHelper.createProxy(
-				context.getEndpoint(kelasiirto), KelaFtpRoute.class);
-	}
+    @Bean
+    public KelaFtpRoute getKelaFtpRoute(
+            @Value(KelaRoute.KELA_SIIRTO) String kelasiirto,
+            @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
+        return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(kelasiirto), KelaFtpRoute.class);
+    }
 }

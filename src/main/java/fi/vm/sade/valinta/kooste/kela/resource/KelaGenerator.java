@@ -23,52 +23,46 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
 @Configurable
 public class KelaGenerator {
 
-	@Autowired
-	private KoodiService koodiService;
+    @Autowired
+    private KoodiService koodiService;
 
-	@Autowired(required = false)
-	private KelaRoute kelaRoute;
+    @Autowired(required = false)
+    private KelaRoute kelaRoute;
 
-	@Autowired
-	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+    @Autowired
+    private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 
-	public ProsessiId aktivoiKelaTiedostonluonti(KelaHakuFiltteri hakuTietue) {
-		// tietoe ei ole viela saatavilla
-		if (hakuTietue == null || hakuTietue.getHakuOids() == null
-				|| hakuTietue.getHakuOids().isEmpty()) {
-			throw new RuntimeException(
-					"Vähintään yksi hakuOid on annettava Kela-dokumentin luontia varten.");
-		}
-		String aineistonNimi = hakuTietue.getAineisto();// "Toisen asteen vastaanottotiedot";
-		String organisaationNimi = "OPH";
-		KelaProsessi kelaProsessi = new KelaProsessi("Kela-dokumentin luonti",
-				hakuTietue.getHakuOids());
-		kelaRoute.aloitaKelaLuonti(kelaProsessi,
-				new KelaLuonti(kelaProsessi.getId(), hakuTietue.getHakuOids(),
-						aineistonNimi, organisaationNimi, new KelaCache(
-								koodiService), kelaProsessi));
-		dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
-		return kelaProsessi.toProsessiId();
-	}
+    public ProsessiId aktivoiKelaTiedostonluonti(KelaHakuFiltteri hakuTietue) {
+        // tietoe ei ole viela saatavilla
+        if (hakuTietue == null || hakuTietue.getHakuOids() == null || hakuTietue.getHakuOids().isEmpty()) {
+            throw new RuntimeException("Vähintään yksi hakuOid on annettava Kela-dokumentin luontia varten.");
+        }
+        String aineistonNimi = hakuTietue.getAineisto();// "Toisen asteen vastaanottotiedot";
+        String organisaationNimi = "OPH";
+        KelaProsessi kelaProsessi = new KelaProsessi("Kela-dokumentin luonti", hakuTietue.getHakuOids());
+        kelaRoute.aloitaKelaLuonti(kelaProsessi, new KelaLuonti(kelaProsessi.getId(), hakuTietue.getHakuOids(),
+                        aineistonNimi, organisaationNimi, new KelaCache(koodiService), kelaProsessi));
+        dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
+        return kelaProsessi.toProsessiId();
+    }
 
-	public String aktivoiKelaTiedostonluonti(String[] args) {
-		KelaHakuFiltteri kelaHakuFiltteri = new KelaHakuFiltteri();
-		kelaHakuFiltteri.setAineisto("");
-		kelaHakuFiltteri.setHakuOids(Arrays.asList(args));
-		aktivoiKelaTiedostonluonti(kelaHakuFiltteri);
-		System.out.println("STARTED");
-		return "STARTED";
-	}
+    public String aktivoiKelaTiedostonluonti(String[] args) {
+        KelaHakuFiltteri kelaHakuFiltteri = new KelaHakuFiltteri();
+        kelaHakuFiltteri.setAineisto("");
+        kelaHakuFiltteri.setHakuOids(Arrays.asList(args));
+        aktivoiKelaTiedostonluonti(kelaHakuFiltteri);
+        System.out.println("STARTED");
+        return "STARTED";
+    }
 
-	public static void main(String[] args) {
-		if (args.length == 0) {
-			System.err.println("No hakuOids given.");
-			return;
-		}
-		final ApplicationContext context = new ClassPathXmlApplicationContext(
-				"/spring/application-context.xml");
-		KelaGenerator kelaGenerator = context.getBean(KelaGenerator.class);
-		kelaGenerator.aktivoiKelaTiedostonluonti(args);
-		return;
-	}
+    public static void main(String[] args) {
+        if (args.length == 0) {
+            System.err.println("No hakuOids given.");
+            return;
+        }
+        final ApplicationContext context = new ClassPathXmlApplicationContext("/spring/application-context.xml");
+        KelaGenerator kelaGenerator = context.getBean(KelaGenerator.class);
+        kelaGenerator.aktivoiKelaTiedostonluonti(args);
+        return;
+    }
 }

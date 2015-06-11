@@ -30,58 +30,53 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/kela", description = "Kela-dokumentin luontiin ja FTP-siirtoon")
 public class KelaResource {
+    private static final Logger LOG = LoggerFactory.getLogger(KelaResource.class);
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(KelaResource.class);
+    @Autowired
+    private KoodiService koodiService;
 
-	@Autowired
-	private KoodiService koodiService;
+    @Autowired(required = false)
+    private KelaRoute kelaRoute;
 
-	@Autowired (required = false)
-	private KelaRoute kelaRoute;
+    @Autowired(required = false)
+    private KelaFtpRoute kelaFtpRoute;
 
-	@Autowired (required = false)
-	private KelaFtpRoute kelaFtpRoute;
+    @Autowired
+    private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
 
-	@Autowired
-	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+    @Autowired
+    private TilaResource tilaResource;
 
-	@Autowired
-	private  TilaResource tilaResource;
-	@POST
-	@Path("/aktivoi")
-	@Consumes("application/json")
-	@Produces("application/json")
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@ApiOperation(value = "Kela-reitin aktivointi", response = ProsessiId.class)
-	public ProsessiId aktivoiKelaTiedostonluonti(KelaHakuFiltteri hakuTietue) {
-		if (hakuTietue == null || hakuTietue.getHakuOids() == null || hakuTietue.getAlkupvm() == null || hakuTietue.getLoppupvm() == null  
-				|| hakuTietue.getHakuOids().isEmpty()) {
-			throw new RuntimeException(
-					"Vähintään yksi hakuOid ja alku- ja loppupvm on annettava Kela-dokumentin luontia varten.");
-		}
-		String aineistonNimi = hakuTietue.getAineisto();
-		Date alkuPvm = hakuTietue.getAlkupvm();
-		Date loppuPvm = hakuTietue.getLoppupvm();
-		String organisaationNimi = "OPH";
-		KelaProsessi kelaProsessi = new KelaProsessi("Kela-dokumentin luonti",
-				hakuTietue.getHakuOids());
-		kelaRoute.aloitaKelaLuonti(kelaProsessi,
-				new KelaLuonti(kelaProsessi.getId(), hakuTietue.getHakuOids(),
-						aineistonNimi, organisaationNimi, new KelaCache(
-								koodiService), kelaProsessi, alkuPvm, loppuPvm));
-		// SecurityContextHolder.getContext().getAuthentication()
-		dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
-		return kelaProsessi.toProsessiId();
-	}
-    
-	@POST
-	@Path("/laheta")
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@ApiOperation(value = "FTP-siirto", response = Response.class)
-	public Response laheta(String documentId) {
-		LOG.warn("Kela-ftp siirto aloitettu {}", documentId);
-		kelaFtpRoute.aloitaKelaSiirto(documentId);
-		return Response.ok().build();
-	}
+    @POST
+    @Path("/aktivoi")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Kela-reitin aktivointi", response = ProsessiId.class)
+    public ProsessiId aktivoiKelaTiedostonluonti(KelaHakuFiltteri hakuTietue) {
+        if (hakuTietue == null || hakuTietue.getHakuOids() == null || hakuTietue.getAlkupvm() == null || hakuTietue.getLoppupvm() == null
+                || hakuTietue.getHakuOids().isEmpty()) {
+            throw new RuntimeException("Vähintään yksi hakuOid ja alku- ja loppupvm on annettava Kela-dokumentin luontia varten.");
+        }
+        String aineistonNimi = hakuTietue.getAineisto();
+        Date alkuPvm = hakuTietue.getAlkupvm();
+        Date loppuPvm = hakuTietue.getLoppupvm();
+        String organisaationNimi = "OPH";
+        KelaProsessi kelaProsessi = new KelaProsessi("Kela-dokumentin luonti", hakuTietue.getHakuOids());
+        kelaRoute.aloitaKelaLuonti(kelaProsessi, new KelaLuonti(kelaProsessi.getId(), hakuTietue.getHakuOids(),
+                        aineistonNimi, organisaationNimi, new KelaCache(koodiService), kelaProsessi, alkuPvm, loppuPvm));
+        // SecurityContextHolder.getContext().getAuthentication()
+        dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
+        return kelaProsessi.toProsessiId();
+    }
+
+    @POST
+    @Path("/laheta")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "FTP-siirto", response = Response.class)
+    public Response laheta(String documentId) {
+        LOG.warn("Kela-ftp siirto aloitettu {}", documentId);
+        kelaFtpRoute.aloitaKelaSiirto(documentId);
+        return Response.ok().build();
+    }
 }

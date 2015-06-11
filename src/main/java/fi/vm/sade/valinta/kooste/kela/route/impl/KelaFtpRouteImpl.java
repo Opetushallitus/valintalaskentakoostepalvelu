@@ -10,28 +10,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import javax.ws.rs.core.Response;
 
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 
-/**
- *
- * @author Jussi Jartamo
- *
- */
 @Component
 public class KelaFtpRouteImpl extends SpringRouteBuilder {
-
-    private static final Logger LOG = LoggerFactory
-            .getLogger(KelaFtpRouteImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KelaFtpRouteImpl.class);
 
     private final String ftpKelaSiirto;
     private final String kelaSiirto;
     private DokumenttiResource dokumenttiResource;
 
     /**
-     * @param host esim ftp://user@host:port
+     * @param host   esim ftp://user@host:port
      * @param params esim passiveMode=true&password=...
      */
     @Autowired
@@ -60,8 +54,7 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
                 // Hae dokumentti
                 .process(new Processor() {
                     public void process(Exchange exchange) throws Exception {
-                        Response response = dokumenttiResource
-                        .lataa(dokumenttiId(exchange));
+                        Response response = dokumenttiResource.lataa(dokumenttiId(exchange));
                         // Koitetaan parsia tiedostonimi, jolla tallennetaan Kelalle
                         String headerValue = response.getHeaderString("Content-Disposition");
                         if (headerValue != null && !headerValue.isEmpty()) {
@@ -72,7 +65,7 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
                         exchange.getOut().setBody(response.getEntity());
                     }
                 })
-                // FTP-SIIRTO
+                        // FTP-SIIRTO
                 .to(ftpKelaSiirto());
     }
 
