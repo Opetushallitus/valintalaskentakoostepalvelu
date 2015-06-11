@@ -267,8 +267,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
                     hakukohdeKerralla(hakuOid, hakukohdeQueue, subject, prosessi);
                     subject.onNext(hakukohdeQueue.poll());
                 };
-        final boolean onkoTarveSplitata = hakukohdeOids.size() > 20000;
-        IntStream.range(0, onkoTarveSplitata ? 5 : 1).forEach(i -> aloitaAsynkroninenSuoritusHakukohdeJonolle.call());
+        final boolean onkoTarveSplitata = hakukohdeOids.size() > 20;
+        IntStream.range(0, onkoTarveSplitata ? 30 : 1).forEach(i -> aloitaAsynkroninenSuoritusHakukohdeJonolle.call());
     }
 
     private void hakukohdeKerralla(String hakuOid, ConcurrentLinkedQueue<String> hakukohdeQueue, PublishSubject<String> subject, SijoittelunTulosProsessi prosessi) {
