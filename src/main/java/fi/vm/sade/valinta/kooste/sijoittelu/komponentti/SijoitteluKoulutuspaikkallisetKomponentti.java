@@ -14,38 +14,27 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 @Component("sijoitteluKoulutuspaikkallisetKomponentti")
 public class SijoitteluKoulutuspaikkallisetKomponentti {
+    private SijoitteluResource sijoitteluResource;
+    private String sijoitteluResourceUrl;
 
-	private SijoitteluResource sijoitteluResource;
-	private String sijoitteluResourceUrl;
+    @Autowired
+    public SijoitteluKoulutuspaikkallisetKomponentti(SijoitteluResource sijoitteluResource,
+            @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String sijoitteluResourceUrl) {
+        this.sijoitteluResource = sijoitteluResource;
+        this.sijoitteluResourceUrl = sijoitteluResourceUrl;
+    }
 
-	@Autowired
-	public SijoitteluKoulutuspaikkallisetKomponentti(
-			SijoitteluResource sijoitteluResource,
-			@Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String sijoitteluResourceUrl) {
-		this.sijoitteluResource = sijoitteluResource;
-		this.sijoitteluResourceUrl = sijoitteluResourceUrl;
-	}
-
-	public Collection<HakijaDTO> koulutuspaikalliset(
-			@Property("hakuOid") String hakuOid,
-			@Property("hakukohdeOid") String hakukohdeOid,
-			@Property("sijoitteluajoId") String sijoitteluajoId) {
-		List<String> hakukohteet = new ArrayList<String>();
-		hakukohteet.add(hakukohdeOid);
-		final HakijaPaginationObject result = sijoitteluResource.hakemukset(
-				hakuOid, SijoitteluResource.LATEST, true, null, null,
-				hakukohteet, null, null);
-		if (result == null) {
-			return Collections.emptyList();
-		}
-		return result.getResults();
-	}
+    public Collection<HakijaDTO> koulutuspaikalliset(@Property("hakuOid") String hakuOid, @Property("hakukohdeOid") String hakukohdeOid,
+                                                     @Property("sijoitteluajoId") String sijoitteluajoId) {
+        List<String> hakukohteet = new ArrayList<String>();
+        hakukohteet.add(hakukohdeOid);
+        final HakijaPaginationObject result = sijoitteluResource.hakemukset(hakuOid, SijoitteluResource.LATEST, true, null, null, hakukohteet, null, null);
+        if (result == null) {
+            return Collections.emptyList();
+        }
+        return result.getResults();
+    }
 
 }
