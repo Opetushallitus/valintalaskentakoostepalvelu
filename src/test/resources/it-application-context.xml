@@ -33,6 +33,7 @@
   <bean id="koekutsukirjeetImpl"
         class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KoekutsukirjeetImpl"/>
   <!-- Pistesyotto -->
+    <bean id="sijoittelunTulosXlsKomponentti" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti"/>
   <bean id="PistesyottoResource"
         class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
   <bean id="PistesyottoTuontiService"

@@ -5,10 +5,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -25,8 +27,10 @@ import org.springframework.stereotype.Service;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
+import rx.Observable;
+
 /**
- * 
+ *
  * @author jussija
  *
  *         fi.vm.sade.sijoittelu.laskenta.resource.TilaResource <br>
@@ -67,6 +71,28 @@ public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaA
 				.async().get(new GsonResponseCallback<List<Valintatulos> >(GSON,
 				address,url, valintatulokset,poikkeus,
 				new TypeToken<List<Valintatulos>>() { }.getType()));
+	}
+
+	public Observable<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid) {
+		String url = "/tila/hakukohde/" + hakukohdeOid;
+		return getAsObservable(
+				url,
+				new TypeToken<List<Valintatulos>>() {
+				}.getType(),
+				client -> {
+					client.accept(MediaType.WILDCARD);
+					return client;
+				}
+		);
+	}
+
+	public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
+		String url = "/tila/hakukohde/" + hakukohdeOid + "/" + valintatapajonoOid;
+		return getWebClient()
+				.path(url)
+				.accept(MediaType.WILDCARD)
+				.async().get(new GenericType<List<Valintatulos>>() {
+				});
 	}
 
 	@Override

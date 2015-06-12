@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import rx.Observable;
+import scala.reflect.internal.Trees;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -37,7 +38,25 @@ public class DokumenttiAsyncResourceImpl extends HttpResource implements Dokumen
     public Observable<String> uudelleenNimea(String dokumenttiId, String filename) {
         return putAsObservable("/dokumentit/uudelleennimea/" + dokumenttiId, new TypeToken<String>() {}.getType(), Entity.text(filename));
     }
+    @Override
+    public Observable<Response> tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata) {
+        String url = "/dokumentit/tallenna";
 
+
+        return putAsObservable(
+                url,
+                Entity.entity(filedata, MediaType.APPLICATION_OCTET_STREAM),
+                client -> {
+                    client.query("id", id);
+                    client.query("filename", filename);
+                    client.query("expirationDate", expirationDate);
+                    client.query("tags", tags.toArray());
+                    client.query("mimeType", mimeType);
+                    client.accept(MediaType.WILDCARD_TYPE);
+                    return client;
+                }
+        );
+    }
     @Override
     public Peruutettava tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType, InputStream filedata, Consumer<Response> responseCallback, Consumer<Throwable> failureCallback) {
         String url = "/dokumentit/tallenna";
@@ -51,7 +70,7 @@ public class DokumenttiAsyncResourceImpl extends HttpResource implements Dokumen
                             .query("expirationDate", expirationDate)
                             .query("tags", tags.toArray())
                             .query("mimeType", mimeType)
-                            .async()
+                           .async()
                             .put(Entity.entity(filedata, MediaType.APPLICATION_OCTET_STREAM), new ResponseCallback(address + url, responseCallback, failureCallback)));
         } catch (Exception e) {
             failureCallback.accept(e);

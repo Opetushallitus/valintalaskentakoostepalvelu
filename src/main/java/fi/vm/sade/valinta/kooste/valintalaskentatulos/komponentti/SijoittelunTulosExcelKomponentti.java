@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
+import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
@@ -24,14 +26,12 @@ import com.google.common.collect.Maps;
 
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.tulos.dto.TilaHistoriaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.hakemus.dto.Yhteystiedot;
-import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
@@ -43,9 +43,9 @@ import fi.vm.sade.valinta.kooste.util.excel.Highlight;
 import fi.vm.sade.valinta.kooste.util.excel.Span;
 
 /**
- * 
+ *
  * @author Jussi Jartamo
- * 
+ *
  *         Komponentti luo sijoittelun tulokset excel tiedostoksi!
  */
 @Component("sijoittelunTulosXlsKomponentti")
@@ -54,37 +54,17 @@ public class SijoittelunTulosExcelKomponentti {
 	private static final Logger LOG = LoggerFactory
 			.getLogger(SijoittelunTulosExcelKomponentti.class);
 
-	private SijoitteluResource sijoitteluajoResource;
-	private TilaResource tilaResource;
-	private ApplicationResource applicationResource;
-	
-	@Autowired
-	public SijoittelunTulosExcelKomponentti(SijoitteluResource sijoitteluajoResource,TilaResource tilaResource,ApplicationResource applicationResource){
-		this.sijoitteluajoResource = sijoitteluajoResource;
-		this.tilaResource = tilaResource;
-		this.applicationResource = applicationResource;
-	}
-
-	public InputStream luoXls(List<Valintatulos> tilat,
-			@Simple("${property.sijoitteluajoId}") String sijoitteluajoId,
-			@Property("preferoitukielikoodi") String preferoitukielikoodi,
-			@Property("hakukohdeNimi") String hakukohdeNimi,
-			@Property("tarjoajaNimi") String tarjoajaNimi,
-			@Simple("${property.hakukohdeOid}") String hakukohdeOid,
-			@Simple("${property.hakuOid}") String hakuOid) {
-		Map<String, List<Valintatulos>> valintatulosCache = new HashMap<String, List<Valintatulos>>();
-		HakukohdeDTO hakukohde;
-		try {
-			hakukohde = sijoitteluajoResource
-					.getHakukohdeBySijoitteluajoPlainDTO(hakuOid,
-							sijoitteluajoId, hakukohdeOid);
-		} catch (Exception e) {
-			LOG.error(
-					"Sijoittelulta ei saa tuloksia. Tarkista että sijoittelu on ajettu. {} {}",
-					e.getMessage(), e.getCause());
-			throw new RuntimeException(
-					"Sijoittelulta ei saa tuloksia. Tarkista että sijoittelu on ajettu.");
-		}
+	public InputStream luoXls(
+			List<Valintatulos> tilat,
+			String preferoitukielikoodi,
+			String hakukohdeNimi,
+			String tarjoajaNimi,
+			String hakukohdeOid,
+			List<Hakemus> hakemuksetList,
+			HakukohdeDTO hakukohde) {
+		Map<String, Hakemus> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(
+			h -> h.getOid(), h -> h
+		));
 		if (hakukohde == null) {
 			LOG.error("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
 			throw new SijoittelultaEiSisaltoaPoikkeus(
@@ -111,14 +91,12 @@ public class SijoittelunTulosExcelKomponentti {
 					}
 				});
 		final ValintatapajonoDTO tarkeimmanPrioriteetinValintatapajono = valintatapajonot.iterator().next();
-		
-		Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat = valintatapajononTilat(tilat);
 
-		Map<String, Hakemus> hakemukset = haeHakemukset(hakuOid, hakukohdeOid);
+		Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat = valintatapajononTilat(tilat);
 		rivit.add(new Object[] { tarjoajaNimi });
 		rivit.add(new Object[] { hakukohdeNimi });
 		rivit.add(new Object[] {});
-		
+
 		Collections.sort(tarkeimmanPrioriteetinValintatapajono.getHakemukset(),
 					new Comparator<HakemusDTO>() {
 						private int ordinal(HakemusDTO h) {
@@ -188,20 +166,20 @@ public class SijoittelunTulosExcelKomponentti {
 		}
 		rivit.add(valintatapajonoOtsikkoRivi.toArray());
 				//
-		
-		rivit.add(otsikkoRivi.toArray());	
-		
-		Map<String, Map<String,HakemusDTO>> jonoOidHakemusOidHakemusDto = 
-		valintatapajonot.stream().collect(Collectors.toMap(v -> v.getOid(), v -> v.getHakemukset().stream().collect(Collectors.toMap(h -> ((HakemusDTO)h).getHakemusOid(), h -> h))));
-		
+
+		rivit.add(otsikkoRivi.toArray());
+
+		Map<String, Map<String,HakemusDTO>> jonoOidHakemusOidHakemusDto =
+		valintatapajonot.stream().collect(Collectors.toMap(v -> ((ValintatapajonoDTO) v).getOid(), v -> v.getHakemukset().stream().collect(Collectors.toMap(h -> ((HakemusDTO) h).getHakemusOid(), h -> h))));
+
 		for (HakemusDTO hDto : tarkeimmanPrioriteetinValintatapajono.getHakemukset()) {
 			HakemusWrapper wrapper = new HakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
 			String nimi = new StringBuilder().append(wrapper.getSukunimi()).append(", ")
 			.append(wrapper.getEtunimi()).toString();
 			//"Hakemus", "Hakija","Henkilotunnus", "Osoite", "Sähköposti", "Puhelinnumero", "Lupa julkaisuun", "Hakutoive"
 			List<Object> hakemusRivi = Lists.newArrayList();
-			
-			hakemusRivi.addAll(Arrays.asList(hDto.getHakemusOid(),nimi, 
+
+			hakemusRivi.addAll(Arrays.asList(hDto.getHakemusOid(),nimi,
 					wrapper.getHenkilotunnus(),
 					wrapper.getSyntymaaika(),
 					wrapper.getSukupuoli(),
@@ -215,7 +193,7 @@ public class SijoittelunTulosExcelKomponentti {
 					wrapper.getKansallinenId(),
 					wrapper.getPassinnumero(),
 					wrapper.getSahkopostiOsoite(),
-					
+
 					wrapper.getPuhelinnumero(),
 					HakemusUtil.lupaJulkaisuun(wrapper.getLupaJulkaisuun()),wrapper.getHakutoiveenPrioriteetti(hakukohdeOid)
 					));
@@ -238,31 +216,9 @@ public class SijoittelunTulosExcelKomponentti {
 							hakemusTilat.get(hakemusDto.getHakemusOid()), preferoitukielikoodi);
 				} catch (Exception e) {
 				}
-				List<Valintatulos> valintaTulos = Collections
-						.<Valintatulos> emptyList();
-				if (valintatulosCache.containsKey(hakemusOid)) {
-					valintaTulos = valintatulosCache.get(hakemusOid);
-				} else {
-					try {
-						valintaTulos = tilaResource.hakemus(hakemusOid);
-						if (valintaTulos == null) {
-							LOG.error(
-									"Hakemukselle {} ei saatu valintatuloksia sijoittelusta!",
-									new Object[] { hakemusOid });
-							valintatulosCache.put(hakemusOid,
-									Collections.<Valintatulos> emptyList());
-						} else {
-							valintatulosCache.put(hakemusOid, valintaTulos);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-						LOG.error(
-								"Hakemukselle {} ei saatu valintatuloksia sijoittelusta! {}",
-								new Object[] { hakemusOid, e.getMessage() });
-						valintatulosCache.put(hakemusOid,
-								Collections.<Valintatulos> emptyList());
-					}
-				}
+				List<Valintatulos> valintaTulos = tilat.stream().filter(
+						t -> hakemusOid.equals(t.getHakemusOid())
+				).collect(Collectors.toList());
 				String valintaTieto = StringUtils.EMPTY; // "--"
 				for (Valintatulos valinta : valintaTulos) {
 					if (jono.getOid().equals(valinta.getValintatapajonoOid())) {
@@ -273,7 +229,7 @@ public class SijoittelunTulosExcelKomponentti {
 						break;
 					}
 				}
-				
+
 				//"Jonosija",  "Pisteet", "Sijoittelun tila",
 				//"Vastaanottotieto", "Ilmoittautumistieto", "Muokattu" ));
 				List<Object> jonoHakemusSarakkeet = Arrays.asList(
@@ -285,29 +241,18 @@ public class SijoittelunTulosExcelKomponentti {
 								true, hakemusDto.getVarasijanNumero()),
 								valintaTieto, ilmoittautumistieto,
 								muokattu(hakemusDto.getTilaHistoria()));
-				
+
 				if(index % 2 == 1) {
 					jonoHakemusSarakkeet = jonoHakemusSarakkeet.stream().map(o -> new Highlight(o)).collect(Collectors.toList());
 				}
 				hakemusRivi.addAll(jonoHakemusSarakkeet);
-				
+
 			}
 			rivit.add(hakemusRivi.toArray());
 		}
-		
+
 		return ExcelExportUtil
 				.exportGridAsXls(rivit.toArray(new Object[][] {}));
-	}
-
-	private Map<String, Hakemus> haeHakemukset(String hakuOid,
-			String hakukohdeOid) {
-		Map<String, Hakemus> tmp = Maps.newHashMap();
-		for (Hakemus h : applicationResource.getApplicationsByOid(hakuOid,
-				hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE,
-				ApplicationResource.MAX)) {
-			tmp.put(h.getOid(), h);
-		}
-		return tmp;
 	}
 
 	private String muokattu(List<TilaHistoriaDTO> h) {
@@ -342,6 +287,7 @@ public class SijoittelunTulosExcelKomponentti {
 				} else {
 					jono = t.get(tulos.getValintatapajonoOid());
 				}
+
 				jono.put(tulos.getHakemusOid(), tulos.getIlmoittautumisTila());
 			}
 		} catch (Exception e) {

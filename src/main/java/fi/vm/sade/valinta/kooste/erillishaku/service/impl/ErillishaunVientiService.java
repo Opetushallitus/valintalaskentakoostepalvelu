@@ -13,6 +13,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
@@ -39,13 +40,17 @@ import static rx.Observable.zip;
 public class ErillishaunVientiService {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishaunVientiService.class);
     private final SijoitteluAsyncResource sijoitteluAsyncResource;
+    private final TilaAsyncResource tilaAsyncResource;
     private final TarjontaAsyncResource hakuV1AsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final DokumenttiResource dokumenttiResource;
 
     @Autowired
-    public ErillishaunVientiService(ApplicationAsyncResource applicationAsyncResource, SijoitteluAsyncResource sijoitteluAsyncResource, TarjontaAsyncResource hakuV1AsyncResource, DokumenttiResource dokumenttiResource) {
+    public ErillishaunVientiService(
+            TilaAsyncResource tilaAsyncResource,
+            ApplicationAsyncResource applicationAsyncResource, SijoitteluAsyncResource sijoitteluAsyncResource, TarjontaAsyncResource hakuV1AsyncResource, DokumenttiResource dokumenttiResource) {
         this.sijoitteluAsyncResource = sijoitteluAsyncResource;
+        this.tilaAsyncResource = tilaAsyncResource;
         this.hakuV1AsyncResource = hakuV1AsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
         this.dokumenttiResource = dokumenttiResource;
@@ -58,7 +63,7 @@ public class ErillishaunVientiService {
     public void vie(KirjeProsessi prosessi, ErillishakuDTO erillishaku) {
         Observable<List<Hakemus>> hakemusObservable = applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
         Future<HakukohdeDTO> hakukohdeFuture = sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
-        Future<List<Valintatulos>> valintatulosFuture = sijoitteluAsyncResource.getValintatuloksetHakukohteelle(erillishaku.getHakukohdeOid(), erillishaku.getValintatapajonoOid());
+        Future<List<Valintatulos>> valintatulosFuture = tilaAsyncResource.getValintatuloksetHakukohteelle(erillishaku.getHakukohdeOid(), erillishaku.getValintatapajonoOid());
         Observable<HakuV1RDTO> hakuFuture = hakuV1AsyncResource.haeHaku(erillishaku.getHakuOid());
         Observable<HakukohdeV1RDTO> tarjontaHakukohdeObservable = hakuV1AsyncResource.haeHakukohde(erillishaku.getHakukohdeOid());
 

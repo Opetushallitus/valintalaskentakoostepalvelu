@@ -44,6 +44,11 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
     }
 
     @Override
+    public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid) {
+        return null;
+    }
+
+    @Override
     public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid, String hakukohdeOid) {
         return null;
     }
@@ -57,16 +62,7 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
         hakukohde.accept(resultReference.get());
     }
 
-    @Override
-    public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
-        Valintatulos valintatulos = new Valintatulos();
-        valintatulos.setHakemusOid(hakemusOid);
-        valintatulos.setHakijaOid(hakijaOid);
-        valintatulos.setHakukohdeOid(hakukohdeOid);
-        valintatulos.setHakuOid(hakuOid);
-        valintatulos.setValintatapajonoOid(valintatapajonoOid);
-        return Futures.immediateFuture(Arrays.asList(valintatulos));
-    }
+
 
     @Override
     public Peruutettava getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid, Consumer<HakijaPaginationObject> callback, Consumer<Throwable> failureCallback) {

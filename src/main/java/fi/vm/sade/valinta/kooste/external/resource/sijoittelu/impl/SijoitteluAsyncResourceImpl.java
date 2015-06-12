@@ -44,6 +44,29 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
             })
             .create();
 
+    @Override
+    public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid) {
+        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + SijoitteluResource.LATEST + "/hakukohde/" + hakukohdeOid;
+        /*
+        getWebClient()
+                .path(url)
+                .accept(MediaType.WILDCARD)
+                .async().get(new GsonResponseCallback<HakukohdeDTO>(GSON,
+                address, url, hakukohde, poikkeus,
+                new TypeToken<HakukohdeDTO>() {
+                }.getType()));
+        */
+        return getAsObservable(
+                url,
+                new TypeToken<HakukohdeDTO>() {
+                }.getType(),
+                client -> {
+                    client.accept(MediaType.WILDCARD_TYPE);
+                    return client;
+                }
+        );
+    }
+
     @Autowired
     public SijoitteluAsyncResourceImpl(
             @Value("${web.url.cas}") String webCasUrl,

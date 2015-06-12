@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
 
+import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import org.apache.camel.Exchange;
@@ -49,7 +50,6 @@ import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.dokumenttipalvelu.resource.DokumenttiResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.ApplicationResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluKoulutuspaikkallisetKomponentti;
 import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
@@ -107,6 +107,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 	private final HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta;
 	private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
 	private final TilaResource tilaResource;
+	private final SijoitteluResource sijoitteluResource;
 	private final DokumenttiResource dokumenttiResource;
 	private final ViestintapalveluResource viestintapalveluResource;
 	private final HaeOsoiteKomponentti osoiteKomponentti;
@@ -137,7 +138,9 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 			HaeOsoiteKomponentti osoiteKomponentti,
 			ApplicationResource applicationResource, TilaResource tilaResource,
 			DokumenttiResource dokumenttiResource,
-			HakukohdeResource tarjontaResource) {
+			HakukohdeResource tarjontaResource,
+			SijoitteluResource sijoitteluResource) {
+		this.sijoitteluResource = sijoitteluResource;
 		this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
 		this.tarjontaResource = tarjontaResource;
 		this.tilaResource = tilaResource;
@@ -250,32 +253,43 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 											"Hakukohteelle ei saatu tarjoajaOidia!"));
 						}
 						List<Valintatulos> tilat = Collections.emptyList();
+						List<Hakemus> hakemukset = Collections.emptyList();
+						fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hk = null;
 						try {
 							tilat = tilaResource.hakukohteelle(hakukohdeOid);
+							hakemukset = applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX);
+							hk = sijoitteluResource.getHakukohdeBySijoitteluajoPlainDTO(hakuOid, SijoitteluResource.LATEST, hakukohdeOid);
 						} catch (Exception e) {
 
 						}
+
+
 						try {
 							if (pakkaaTiedostotTarriin) {
 								Tiedosto tiedosto = new Tiedosto(
 										"sijoitteluntulos_" + hakukohdeOid
 												+ ".xls",
 										IOUtils.toByteArray(sijoittelunTulosExcel
-												.luoXls(tilat, sijoitteluajoId,
+												.luoXls(tilat,
 														preferoitukielikoodi,
 														hakukohdeNimi,
 														tarjoajaNimi,
-														hakukohdeOid, hakuOid)));
+														hakukohdeOid,
+												hakemukset,
+														hk)));
 								prosessi.getValmiit().add(
 										new Valmis(tiedosto, hakukohdeOid,
 												tarjoajaOid));
 								return;
 							} else {
 								InputStream input = sijoittelunTulosExcel
-										.luoXls(tilat, sijoitteluajoId,
+										.luoXls(tilat,
 												preferoitukielikoodi,
-												hakukohdeNimi, tarjoajaNimi,
-												hakukohdeOid, hakuOid);
+												hakukohdeNimi,
+												tarjoajaNimi,
+												hakukohdeOid,
+												hakemukset,
+												hk);
 								try {
 
 									String id = generateId();
@@ -299,7 +313,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 															+ e.getMessage()
 															+ "\r\n"
 															+ Arrays.toString(e
-																	.getStackTrace())));
+															.getStackTrace())));
 									prosessi.getValmiit().add(
 											new Valmis(hakukohdeOid,
 													tarjoajaOid, null));

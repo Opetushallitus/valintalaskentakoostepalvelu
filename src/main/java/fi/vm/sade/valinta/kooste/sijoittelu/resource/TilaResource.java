@@ -46,5 +46,5 @@ public interface TilaResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/hakukohde/{hakukohdeOid}")
-    List<Valintatulos> hakukohteelle(@PathParam("hakukohdeOid") String hakukohdeOid);
+    List<fi.vm.sade.sijoittelu.domain.Valintatulos> hakukohteelle(@PathParam("hakukohdeOid") String hakukohdeOid);
 }

@@ -12,8 +12,6 @@ import rx.Observable;
 
 public interface SijoitteluAsyncResource {
 
-    Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid);
-
     Future<HakijaPaginationObject> getKaikkiHakijat(String hakuOid, String hakukohdeOid);
 
     Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid);
@@ -29,4 +27,7 @@ public interface SijoitteluAsyncResource {
     void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus);
 
     Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid, String hakukohdeOid);
+
+    Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid);
+
 }

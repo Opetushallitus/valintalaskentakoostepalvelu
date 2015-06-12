@@ -7,27 +7,27 @@ import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARASIJALTA_HYVAKSY
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUNUT;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUNTUNUT;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
-import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.EHDOLLISESTI_VASTAANOTTANUT;
-import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA;
-import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.ILMOITETTU;
-import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.PERUUTETTU;
-import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.VASTAANOTTANUT;
-import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.VASTAANOTTANUT_LASNA;
-import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.VASTAANOTTANUT_POISSAOLEVA;
+import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.EHDOLLISESTI_VASTAANOTTANUT;
+import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA;
+import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.ILMOITETTU;
+import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.PERUUTETTU;
+import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.VASTAANOTTANUT;
+import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.VASTAANOTTANUT_LASNA;
+import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.VASTAANOTTANUT_POISSAOLEVA;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila;
-import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
+import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 
 /**
  * 

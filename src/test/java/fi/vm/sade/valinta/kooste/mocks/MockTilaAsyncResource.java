@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -7,12 +8,19 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.springframework.stereotype.Service;
+import rx.Observable;
+
+import static fi.vm.sade.valinta.kooste.mocks.MockData.hakemusOid;
+import static fi.vm.sade.valinta.kooste.mocks.MockData.hakijaOid;
+import static fi.vm.sade.valinta.kooste.mocks.MockData.hakuOid;
 
 @Service
 public class MockTilaAsyncResource implements TilaAsyncResource {
@@ -30,6 +38,22 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
         }
     }
     private static AtomicReference<List<Valintatulos>> resultReference = new AtomicReference<>();
+
+    @Override
+    public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
+        Valintatulos valintatulos = new Valintatulos();
+        valintatulos.setHakemusOid(hakemusOid);
+        valintatulos.setHakijaOid(hakijaOid);
+        valintatulos.setHakukohdeOid(hakukohdeOid);
+        valintatulos.setHakuOid(hakuOid);
+        valintatulos.setValintatapajonoOid(valintatapajonoOid);
+        return Futures.immediateFuture(Arrays.asList(valintatulos));
+    }
+
+    @Override
+    public Observable<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid) {
+        return null;
+    }
 
     public static void setResult(List<Valintatulos> result) {
         resultReference.set(result);

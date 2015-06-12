@@ -7,10 +7,8 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ImportedErillisHakuExcel;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockDokumenttiResource;
-import fi.vm.sade.valinta.kooste.mocks.MockSijoitteluAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunVientiService;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
@@ -28,13 +26,13 @@ public class ErillishaunVientiServiceTest {
     final MockSijoitteluAsyncResource mockSijoitteluAsyncResource = new MockSijoitteluAsyncResource();
     final MockTarjontaAsyncService mockTarjontaAsyncService = new MockTarjontaAsyncService();
     final MockDokumenttiResource mockDokumenttiResource = new MockDokumenttiResource();
-
+    final MockTilaAsyncResource mockTilaAsyncResource = new MockTilaAsyncResource();
     @Test
     public void suoritaVientiTest() {
         final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1", "varsinainen jono");
         final KirjeProsessi prosessi = mock(KirjeProsessi.class);
         final ErillishaunVientiService erillishaunVientiService =
-                new ErillishaunVientiService(mockApplicationAsyncResource, mockSijoitteluAsyncResource, mockTarjontaAsyncService, mockDokumenttiResource);
+                new ErillishaunVientiService(mockTilaAsyncResource, mockApplicationAsyncResource, mockSijoitteluAsyncResource, mockTarjontaAsyncService, mockDokumenttiResource);
 
         erillishaunVientiService.vie(prosessi, erillishaku);
         verify(prosessi, timeout(10000).times(1)).valmistui(anyString());
@@ -46,7 +44,7 @@ public class ErillishaunVientiServiceTest {
         final KirjeProsessi prosessi = mock(KirjeProsessi.class);
         final ApplicationAsyncResource failingResource = mock(ApplicationAsyncResource.class);
         final ErillishaunVientiService erillishaunVientiService =
-                new ErillishaunVientiService(failingResource, mockSijoitteluAsyncResource, mockTarjontaAsyncService, mockDokumenttiResource);
+                new ErillishaunVientiService(mockTilaAsyncResource, failingResource, mockSijoitteluAsyncResource, mockTarjontaAsyncService, mockDokumenttiResource);
 
         erillishaunVientiService.vie(prosessi, erillishaku);
         verify(prosessi, timeout(10000).times(1)).keskeyta();
@@ -61,11 +59,12 @@ public class ErillishaunVientiServiceTest {
         when(applicationMock.getApplicationsByOid(anyString(), anyString())).thenReturn(Observable.just(ImmutableList.of()));
 
         SijoitteluAsyncResource sijoitteluMock = mock(SijoitteluAsyncResource.class);
-        when(sijoitteluMock.getValintatuloksetHakukohteelle(anyString(), anyString())).thenReturn(Futures.immediateFuture(ImmutableList.of()));
+        TilaAsyncResource tilaMock = mock(TilaAsyncResource.class);
+        when(tilaMock.getValintatuloksetHakukohteelle(anyString(), anyString())).thenReturn(Futures.immediateFuture(ImmutableList.of()));
         when(sijoitteluMock.getLatestHakukohdeBySijoittelu(anyString(), anyString())).thenReturn(mockSijoitteluAsyncResource.getLatestHakukohdeBySijoittelu("1", "2"));
 
         final ErillishaunVientiService erillishaunVientiService =
-                new ErillishaunVientiService(applicationMock, sijoitteluMock, mockTarjontaAsyncService, mockDokumenttiResource);
+                new ErillishaunVientiService(tilaMock, applicationMock, sijoitteluMock, mockTarjontaAsyncService, mockDokumenttiResource);
         erillishaunVientiService.vie(prosessi, erillishaku);
 
         verify(prosessi, timeout(10000).times(1)).valmistui(anyString());
