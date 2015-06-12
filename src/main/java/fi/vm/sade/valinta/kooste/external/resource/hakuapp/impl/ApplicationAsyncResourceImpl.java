@@ -57,6 +57,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
         }.getType(), client -> {
             client.query("appState", "ACTIVE", "INCOMPLETE");
             client.query("rows", 100000).query("asId", hakuOid).query("aoOid", hakukohdeOid);
+            return client;
         });
     }
 
