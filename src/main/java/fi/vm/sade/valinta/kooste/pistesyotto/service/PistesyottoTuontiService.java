@@ -35,54 +35,40 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * @author Jussi Jartamo
- *
- * GET
- * /valintalaskenta-laskenta-service/resources/valintakoe/hakutoive/{hakukohdeOid}
- * GET
- * /valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/{hakukohdeOid}
- * GET
- * /applications/additionalData/{hakuOid}/{hakukohdeOid}
- *
- * POST [hakemusOids]
- * /applications/additionalData
- * PUT [additionalDataDTO]
- * /applications/additionalData/{hakuOid}/{hakukohdeOid}
+ *         GET
+ *         /valintalaskenta-laskenta-service/resources/valintakoe/hakutoive/{hakukohdeOid}
+ *         GET
+ *         /valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/{hakukohdeOid}
+ *         GET
+ *         /applications/additionalData/{hakuOid}/{hakukohdeOid}
+ *         POST [hakemusOids]
+ *         /applications/additionalData
+ *         PUT [additionalDataDTO]
+ *         /applications/additionalData/{hakuOid}/{hakukohdeOid}
  */
 public class PistesyottoTuontiService {
-
     private static final Logger LOG = LoggerFactory.getLogger(PistesyottoTuontiService.class);
     private final ValintalaskentaValintakoeAsyncResource valintakoeResource;
     private final ValintaperusteetAsyncResource valintaperusteetResource;
     private final ApplicationAsyncResource applicationAsyncResource;
 
     @Autowired
-    public PistesyottoTuontiService(
-            ValintalaskentaValintakoeAsyncResource valintakoeResource,
-            ValintaperusteetAsyncResource valintaperusteetResource,
-            ApplicationAsyncResource applicationAsyncResource
-    ) {
+    public PistesyottoTuontiService(ValintalaskentaValintakoeAsyncResource valintakoeResource,
+            ValintaperusteetAsyncResource valintaperusteetResource, ApplicationAsyncResource applicationAsyncResource) {
         this.valintakoeResource = valintakoeResource;
         this.valintaperusteetResource = valintaperusteetResource;
         this.applicationAsyncResource = applicationAsyncResource;
     }
 
-    private void tuo(
-            String hakuOid, String hakukohdeOid,
-            DokumenttiProsessi prosessi,
-            List<ValintakoeOsallistuminenDTO> osallistumistiedot,
-            List<ApplicationAdditionalDataDTO> pistetiedot,
-            List<ValintaperusteDTO> valintaperusteet,
-            InputStream stream) {
-
+    private void tuo(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi,
+                     List<ValintakoeOsallistuminenDTO> osallistumistiedot, List<ApplicationAdditionalDataDTO> pistetiedot,
+                     List<ValintaperusteDTO> valintaperusteet, InputStream stream) {
         String hakuNimi = StringUtils.EMPTY;
         String hakukohdeNimi = StringUtils.EMPTY;
         String tarjoajaNimi = StringUtils.EMPTY;
         PoikkeusKasittelijaSovitin poikkeusilmoitus = new PoikkeusKasittelijaSovitin(t -> {
             LOG.error("Pistesyötön tuonti epäonnistui", t);
-            prosessi.getPoikkeukset().add(
-                    new Poikkeus(Poikkeus.KOOSTEPALVELU,
-                            "Pistesyötön tuonti:", t.getMessage()));
+            prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", t.getMessage()));
         });
         try {
 
@@ -91,74 +77,61 @@ public class PistesyottoTuontiService {
             List<Hakemus> hakemukset = Collections.emptyList();
             // LOG.error("Excelin luonti");
             PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
-            PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
-                    hakuOid, hakukohdeOid, null, hakuNimi,
-                    hakukohdeNimi, tarjoajaNimi, hakemukset,
-                    Collections.emptySet(),
-                    valintakoeTunnisteet, osallistumistiedot,
-                    valintaperusteet, pistetiedot,
-                    pistesyottoTuontiAdapteri);
+            PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(hakuOid, hakukohdeOid, null, hakuNimi, hakukohdeNimi, tarjoajaNimi, hakemukset,
+                    Collections.emptySet(), valintakoeTunnisteet, osallistumistiedot, valintaperusteet, pistetiedot, pistesyottoTuontiAdapteri);
             pistesyottoExcel.getExcel().tuoXlsx(stream);
             // TARKISTETAAN VIRHEET
             List<String> virheet = getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, pistetiedot);
             if (!virheet.isEmpty()) {
                 String v = virheet.stream().collect(Collectors.joining(", "));
                 LOG.error("Virheitä pistesyöttöriveissä {}", v);
-                prosessi
-                        .getPoikkeukset()
-                        .add(new Poikkeus(
-                                "Pistesyötön tuonti",
-                                "", v));
+                prosessi.getPoikkeukset().add(new Poikkeus("Pistesyötön tuonti", "", v));
                 return;
             }
             Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = asMap(pistetiedot);
             List<ApplicationAdditionalDataDTO> uudetPistetiedot =
                     pistesyottoTuontiAdapteri
                             .getRivit().stream()
-                            //
                             .filter(PistesyottoRivi::isValidi)
-                                    //
                             .flatMap(rivi -> {
-                                ApplicationAdditionalDataDTO additionalData = pistetiedotMapping
-                                        .get(rivi.getOid());
-                                Map<String, String> newPistetiedot = rivi
-                                        .asAdditionalData();
+                                ApplicationAdditionalDataDTO additionalData = pistetiedotMapping.get(rivi.getOid());
+                                Map<String, String> newPistetiedot = rivi.asAdditionalData();
                                 if (newPistetiedot == null || newPistetiedot.isEmpty()) {
                                     LOG.info("Rivi on muuttunut ja eheä mutta pistetiedot on tyhjäjoukko. Hakemuspalvelu tallentaa vain muutokset joten ohitetaan rivi.");
                                     return Stream.empty();
                                 }
                                 LOG.debug("Rivi on muuttunut ja eheä. Tehdään päivitys hakupalveluun");
-                                additionalData
-                                        .setAdditionalData(newPistetiedot);
+                                additionalData.setAdditionalData(newPistetiedot);
                                 return Stream.of(additionalData);
                             }).filter(Objects::nonNull).collect(Collectors.toList());
 
             if (uudetPistetiedot.isEmpty()) {
                 LOG.info("Ei tallennettavaa");
-
             } else {
                 //applicationAsyncResource.
                 applicationAsyncResource.putApplicationAdditionalData(
                         hakuOid, hakukohdeOid, uudetPistetiedot).subscribe(response -> {
-                            prosessi.setDokumenttiId("valmis");
-                            prosessi.inkrementoiTehtyjaToita();
-                        }, poikkeusilmoitus);
-
+                    prosessi.setDokumenttiId("valmis");
+                    prosessi.inkrementoiTehtyjaToita();
+                }, poikkeusilmoitus);
             }
-            prosessi
-                    .inkrementoiTehtyjaToita();
+            prosessi.inkrementoiTehtyjaToita();
             prosessi.setDokumenttiId("valmis");
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             poikkeusilmoitus.accept(t);
         }
     }
+
     private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, List<ApplicationAdditionalDataDTO> hakemukset) {
-        return getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, hakemukset.stream().collect(Collectors.toMap(h -> h.getOid(), h -> h, (h1,h2) -> {return h2;})));
+        return getPistesyottoExcelVirheet(pistesyottoTuontiAdapteri, hakemukset.stream().collect(Collectors.toMap(h -> h.getOid(), h -> h, (h1, h2) -> {
+            return h2;
+        })));
     }
-    private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, Map<String,ApplicationAdditionalDataDTO> oidToAdditionalMapping) {
+
+    private List<String> getPistesyottoExcelVirheet(PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, Map<String, ApplicationAdditionalDataDTO> oidToAdditionalMapping) {
         return (List<String>) pistesyottoTuontiAdapteri
                 .getRivit().stream()
-                //.filter(rivi -> !rivi.isValidi())
+                        //.filter(rivi -> !rivi.isValidi())
                 .flatMap(
                         rivi -> {
                             String nimi = PistesyottoExcel.additionalDataToNimi(oidToAdditionalMapping.get(rivi.getOid()));
@@ -200,16 +173,13 @@ public class PistesyottoTuontiService {
     }
 
 
-    public void tuo(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi,InputStream stream){
-        prosessi.setKokonaistyo(
-                4
+    public void tuo(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi, InputStream stream) {
+        prosessi.setKokonaistyo(4
                         // luonti
                         + 1);
         PoikkeusKasittelijaSovitin poikkeusilmoitus = new PoikkeusKasittelijaSovitin(t -> {
             LOG.error("Pistesyötön tuonti epäonnistui", t);
-            prosessi.getPoikkeukset().add(
-                    new Poikkeus(Poikkeus.KOOSTEPALVELU,
-                            "Pistesyötön tuonti:", t.getMessage()));
+            prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön tuonti:", t.getMessage()));
         });
         AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedot = new AtomicReference<>();
         AtomicReference<List<ApplicationAdditionalDataDTO>> additionaldata = new AtomicReference<>();
@@ -217,22 +187,21 @@ public class PistesyottoTuontiService {
         AtomicInteger laskuri = new AtomicInteger(4);
         AtomicInteger laskuriYlimaaraisilleOsallistujille = new AtomicInteger(2);
         Supplier<Void> viimeisteleTuonti = () -> {
-            if(laskuri.decrementAndGet() <= 0) {
-                tuo(hakuOid,hakukohdeOid,prosessi,osallistumistiedot.get(),additionaldata.get(),valintaperusteet.get(),stream);
+            if (laskuri.decrementAndGet() <= 0) {
+                tuo(hakuOid, hakukohdeOid, prosessi, osallistumistiedot.get(), additionaldata.get(), valintaperusteet.get(), stream);
             }
             return null;
         };
         Supplier<Void> tarkistaYlimaaraisetOsallistujat = () -> {
-            if(laskuriYlimaaraisilleOsallistujille.decrementAndGet() <= 0) {
+            if (laskuriYlimaaraisilleOsallistujille.decrementAndGet() <= 0) {
                 //osallistumistiedot.get().stream().filter(o -> o.getHakutoiveet().stream().anyMatch(o2 -> hakukohdeOid.equals(o2.getHakukohdeOid())));
                 Set<String> osallistujienHakemusOids = Sets.newHashSet(osallistumistiedot.get().stream().map(o -> o.getHakemusOid()).collect(Collectors.toSet()));
                 osallistujienHakemusOids.removeAll(additionaldata.get().stream().map(a -> a.getOid()).collect(Collectors.toSet()));
-                if(!osallistujienHakemusOids.isEmpty()) {
+                if (!osallistujienHakemusOids.isEmpty()) {
                     // haetaan puuttuvat
                     applicationAsyncResource.getApplicationAdditionalData(osallistujienHakemusOids, a -> {
-                        additionaldata.set(Stream.concat(additionaldata.get().stream(), a.stream()).collect(Collectors.toList()));
-                        viimeisteleTuonti.get();
-                    },poikkeusilmoitus);
+                        additionaldata.set(Stream.concat(additionaldata.get().stream(), a.stream()).collect(Collectors.toList()));viimeisteleTuonti.get();
+                    }, poikkeusilmoitus);
                 } else {
                     viimeisteleTuonti.get();
                 }
@@ -241,36 +210,33 @@ public class PistesyottoTuontiService {
         };
         valintakoeResource.haeHakutoiveelle(hakukohdeOid).subscribe(
                 o -> {
-                    prosessi
-                    .inkrementoiTehtyjaToita();
+                    prosessi.inkrementoiTehtyjaToita();
                     osallistumistiedot.set(o);
                     tarkistaYlimaaraisetOsallistujat.get();
                     viimeisteleTuonti.get();
-        }, poikkeusilmoitus);
+                }, poikkeusilmoitus);
 
         valintaperusteetResource
                 .findAvaimet(hakukohdeOid).subscribe(
-                        v -> {
-                            valintaperusteet.set(v);
-                            prosessi
-                                    .inkrementoiTehtyjaToita();
-                            viimeisteleTuonti.get();
-                        },
-                        poikkeusilmoitus);
+                v -> {
+                    valintaperusteet.set(v);
+                    prosessi.inkrementoiTehtyjaToita();
+                    viimeisteleTuonti.get();
+                },
+                poikkeusilmoitus);
 
         applicationAsyncResource.getApplicationAdditionalData(hakuOid, hakukohdeOid,
                 a -> {
                     additionaldata.set(a);
-                    prosessi
-                            .inkrementoiTehtyjaToita();
+                    prosessi.inkrementoiTehtyjaToita();
                     tarkistaYlimaaraisetOsallistujat.get();
                     viimeisteleTuonti.get();
                 },
                 poikkeusilmoitus);
 
     }
-    private Map<String, ApplicationAdditionalDataDTO> asMap(
-            Collection<ApplicationAdditionalDataDTO> datas) {
+
+    private Map<String, ApplicationAdditionalDataDTO> asMap(Collection<ApplicationAdditionalDataDTO> datas) {
         Map<String, ApplicationAdditionalDataDTO> mapping = Maps.newHashMap();
         for (ApplicationAdditionalDataDTO data : datas) {
             mapping.put(data.getOid(), data);
