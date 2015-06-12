@@ -5,89 +5,83 @@ import java.util.List;
 import fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public class Valintatulos {
+    private String valintatapajonoOid;
+    private String hakemusOid;
+    private String hakukohdeOid;
+    private String hakijaOid;
+    private String hakuOid;
+    private int hakutoive;
+    private ValintatuloksenTila tila = ValintatuloksenTila.KESKEN;
+    private IlmoittautumisTila ilmoittautumisTila = IlmoittautumisTila.EI_TEHTY;
 
-	private String valintatapajonoOid;
-	private String hakemusOid;
-	private String hakukohdeOid;
-	private String hakijaOid;
-	private String hakuOid;
-	private int hakutoive;
-	private ValintatuloksenTila tila = ValintatuloksenTila.KESKEN;
-	private IlmoittautumisTila ilmoittautumisTila = IlmoittautumisTila.EI_TEHTY;
+    private List<LogEntry> logEntries;
 
-	private List<LogEntry> logEntries;
-	
-	public IlmoittautumisTila getIlmoittautumisTila() {
-		return ilmoittautumisTila;
-	}
+    public IlmoittautumisTila getIlmoittautumisTila() {
+        return ilmoittautumisTila;
+    }
 
-	public int getHakutoive() {
-		return hakutoive;
-	}
+    public int getHakutoive() {
+        return hakutoive;
+    }
 
-	public void setHakutoive(int hakutoive) {
-		this.hakutoive = hakutoive;
-	}
+    public void setHakutoive(int hakutoive) {
+        this.hakutoive = hakutoive;
+    }
 
-	public String getHakukohdeOid() {
-		return hakukohdeOid;
-	}
+    public String getHakukohdeOid() {
+        return hakukohdeOid;
+    }
 
-	public void setHakukohdeOid(String hakukohdeOid) {
-		this.hakukohdeOid = hakukohdeOid;
-	}
+    public void setHakukohdeOid(String hakukohdeOid) {
+        this.hakukohdeOid = hakukohdeOid;
+    }
 
-	public String getHakemusOid() {
-		return hakemusOid;
-	}
+    public String getHakemusOid() {
+        return hakemusOid;
+    }
 
-	public void setHakemusOid(String hakemusOid) {
-		this.hakemusOid = hakemusOid;
-	}
+    public void setHakemusOid(String hakemusOid) {
+        this.hakemusOid = hakemusOid;
+    }
 
-	public String getHakijaOid() {
-		return hakijaOid;
-	}
+    public String getHakijaOid() {
+        return hakijaOid;
+    }
 
-	public void setHakijaOid(String hakijaOid) {
-		this.hakijaOid = hakijaOid;
-	}
+    public void setHakijaOid(String hakijaOid) {
+        this.hakijaOid = hakijaOid;
+    }
 
-	public ValintatuloksenTila getTila() {
-		return tila;
-	}
+    public ValintatuloksenTila getTila() {
+        return tila;
+    }
 
-	public void setTila(ValintatuloksenTila tila) {
-		this.tila = tila;
-	}
+    public void setTila(ValintatuloksenTila tila) {
+        this.tila = tila;
+    }
 
-	public String getValintatapajonoOid() {
-		return valintatapajonoOid;
-	}
+    public String getValintatapajonoOid() {
+        return valintatapajonoOid;
+    }
 
-	public void setValintatapajonoOid(String valintatapajonoOid) {
-		this.valintatapajonoOid = valintatapajonoOid;
-	}
+    public void setValintatapajonoOid(String valintatapajonoOid) {
+        this.valintatapajonoOid = valintatapajonoOid;
+    }
 
-	public String getHakuOid() {
-		return hakuOid;
-	}
+    public String getHakuOid() {
+        return hakuOid;
+    }
 
-	public void setHakuOid(String hakuOid) {
-		this.hakuOid = hakuOid;
-	}
+    public void setHakuOid(String hakuOid) {
+        this.hakuOid = hakuOid;
+    }
 
-	public List<LogEntry> getLogEntries() {
-		return logEntries;
-	}
+    public List<LogEntry> getLogEntries() {
+        return logEntries;
+    }
 
-	public void setLogEntries(List<LogEntry> logEntries) {
-		this.logEntries = logEntries;
-	}
+    public void setLogEntries(List<LogEntry> logEntries) {
+        this.logEntries = logEntries;
+    }
 }
