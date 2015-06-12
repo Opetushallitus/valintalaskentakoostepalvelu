@@ -22,32 +22,29 @@ import fi.vm.sade.valinta.kooste.sijoittelu.dto.Valintatulos;
 @Api(value = "/tila", description = "Valintatulokset")
 public interface TilaResource {
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("{hakemusOid}")
-	@ApiOperation(value = "Listaus hakemuksen valintatuloksista", response = List.class)
-	public List<Valintatulos> hakemus(@PathParam("hakemusOid") String hakemusOid);
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{hakemusOid}")
+    @ApiOperation(value = "Listaus hakemuksen valintatuloksista", response = List.class)
+    public List<Valintatulos> hakemus(@PathParam("hakemusOid") String hakemusOid);
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("{hakemusOid}/{hakuOid}/{hakukohdeOid}/{valintatapajonoOid}/")
-	@ApiOperation(value = "Yksittäinen valintatulos", response = Valintatulos.class)
-	public Valintatulos hakemus(@PathParam("hakuOid") String hakuOid,
-			@PathParam("hakukohdeOid") String hakukohdeOid,
-			@PathParam("valintatapajonoOid") String valintatapajonoOid,
-			@PathParam("hakemusOid") String hakemusOid);
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{hakemusOid}/{hakuOid}/{hakukohdeOid}/{valintatapajonoOid}/")
+    @ApiOperation(value = "Yksittäinen valintatulos", response = Valintatulos.class)
+    public Valintatulos hakemus(@PathParam("hakuOid") String hakuOid,
+                                @PathParam("hakukohdeOid") String hakukohdeOid,
+                                @PathParam("valintatapajonoOid") String valintatapajonoOid,
+                                @PathParam("hakemusOid") String hakemusOid);
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/hakukohde/{hakukohdeOid}/{valintatapajonoOid}/")
-	@ApiOperation(value = "Listaus valintatuloksista hakukohteelle", response = List.class)
-	public List<Valintatulos> haku(
-			@PathParam("hakukohdeOid") String hakukohdeOid,
-			@PathParam("valintatapajonoOid") String valintatapajonoOid);
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/hakukohde/{hakukohdeOid}/{valintatapajonoOid}/")
+    @ApiOperation(value = "Listaus valintatuloksista hakukohteelle", response = List.class)
+    public List<Valintatulos> haku(@PathParam("hakukohdeOid") String hakukohdeOid, @PathParam("valintatapajonoOid") String valintatapajonoOid);
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/hakukohde/{hakukohdeOid}")
-	List<Valintatulos> hakukohteelle(
-			@PathParam("hakukohdeOid") String hakukohdeOid);
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/hakukohde/{hakukohdeOid}")
+    List<Valintatulos> hakukohteelle(@PathParam("hakukohdeOid") String hakukohdeOid);
 }

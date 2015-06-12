@@ -39,147 +39,139 @@ import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/koostesijoittelu", description = "Ohjausparametrit palveluiden aktiviteettipäivämäärille")
 public class SijoitteluAktivointiResource {
+    private static final Logger LOG = LoggerFactory.getLogger(SijoitteluAktivointiResource.class);
+    public static final String OPH_CRUD = "hasAnyRole('ROLE_APP_SIJOITTELU_CRUD_1.2.246.562.10.00000000001')";
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(SijoitteluAktivointiResource.class);
-	public static final String OPH_CRUD = "hasAnyRole('ROLE_APP_SIJOITTELU_CRUD_1.2.246.562.10.00000000001')";
+    @Autowired(required = false)
+    private SijoitteluAktivointiRoute sijoitteluAktivointiProxy;
 
-	@Autowired(required = false)
-	private SijoitteluAktivointiRoute sijoitteluAktivointiProxy;
+    @Autowired(required = false)
+    private JatkuvaSijoittelu jatkuvaSijoittelu;
 
-	@Autowired(required = false)
-	private JatkuvaSijoittelu jatkuvaSijoittelu;
+    @Autowired
+    private ParametriService parametriService;
 
-	@Autowired
-	private ParametriService parametriService;
+    @Autowired
+    private SijoittelunSeurantaResource sijoittelunSeurantaResource;
 
-	@Autowired
-	private SijoittelunSeurantaResource sijoittelunSeurantaResource;
+    @Autowired
+    private SijoittelunValvonta sijoittelunValvonta;
 
-	@Autowired
-	private SijoittelunValvonta sijoittelunValvonta;
+    @GET
+    @Path("/status/{hakuoid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Sijoittelun status", response = String.class)
+    public Sijoittelu status(@PathParam("hakuoid") String hakuOid) {
+        return sijoittelunValvonta.haeAktiivinenSijoitteluHaulle(hakuOid);
+    }
 
-	@GET
-	@Path("/status/{hakuoid}")
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Sijoittelun status", response = String.class)
-	public Sijoittelu status(@PathParam("hakuoid") String hakuOid) {
-		return sijoittelunValvonta.haeAktiivinenSijoitteluHaulle(hakuOid);
-	}
+    @GET
+    @Path("/status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Jatkuvan sijoittelun jonossa olevat sijoittelut", response = String.class)
+    public Collection<DelayedSijoittelu> status() {
+        return jatkuvaSijoittelu.haeJonossaOlevatSijoittelut();
+    }
 
-	@GET
-	@Path("/status")
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Jatkuvan sijoittelun jonossa olevat sijoittelut", response = String.class)
-	public Collection<DelayedSijoittelu> status() {
-		return jatkuvaSijoittelu.haeJonossaOlevatSijoittelut();
-	}
+    @POST
+    @Path("/aktivoi")
+    @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_CRUD')")
+    @ApiOperation(value = "Sijoittelun aktivointi", response = String.class)
+    public void aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
+        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+            LOG.error("Sijoittelua yritettiin käynnistää haulle({}) ilman käyttöoikeuksia!", hakuOid);
+            throw new RuntimeException("Ei käyttöoikeuksia!");
+        }
 
-	@POST
-	@Path("/aktivoi")
-	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_CRUD')")
-	@ApiOperation(value = "Sijoittelun aktivointi", response = String.class)
-	public void aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
-		if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
-			LOG.error(
-					"Sijoittelua yritettiin käynnistää haulle({}) ilman käyttöoikeuksia!",
-					hakuOid);
-			throw new RuntimeException("Ei käyttöoikeuksia!");
-		}
+        if (StringUtils.isBlank(hakuOid)) {
+            LOG.error("Sijoittelua yritettiin käynnistää ilman hakuOidia!");
+            throw new RuntimeException("Parametri hakuOid on pakollinen!");
+        } else {
+            sijoitteluAktivointiProxy
+                    .aktivoiSijoittelu(new Sijoittelu(hakuOid));
+        }
+    }
 
-		if (StringUtils.isBlank(hakuOid)) {
-			LOG.error("Sijoittelua yritettiin käynnistää ilman hakuOidia!");
-			throw new RuntimeException("Parametri hakuOid on pakollinen!");
-		} else {
-			sijoitteluAktivointiProxy
-					.aktivoiSijoittelu(new Sijoittelu(hakuOid));
-		}
-	}
+    @GET
+    @Path("/jatkuva/aktivoi")
+    @Produces(MediaType.TEXT_PLAIN)
+    @PreAuthorize(OPH_CRUD)
+    @ApiOperation(value = "Ajastetun sijoittelun aktivointi", response = String.class)
+    public String aktivoiJatkuvassaSijoittelussa(
+            @QueryParam("hakuOid") String hakuOid) {
+        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+            return "no privileges.";
+        }
 
-	@GET
-	@Path("/jatkuva/aktivoi")
-	@Produces(MediaType.TEXT_PLAIN)
-	@PreAuthorize(OPH_CRUD)
-	@ApiOperation(value = "Ajastetun sijoittelun aktivointi", response = String.class)
-	public String aktivoiJatkuvassaSijoittelussa(
-			@QueryParam("hakuOid") String hakuOid) {
-		if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
-			return "no privileges.";
-		}
+        if (StringUtils.isBlank(hakuOid)) {
+            return "get parameter 'hakuOid' required";
+        } else {
+            LOG.info("jatkuva sijoittelu aktivoitu haulle {}", hakuOid);
+            sijoittelunSeurantaResource.merkkaaSijoittelunAjossaTila(hakuOid, true);
+            return "aktivoitu";
+        }
+    }
 
-		if (StringUtils.isBlank(hakuOid)) {
-			return "get parameter 'hakuOid' required";
-		} else {
-			LOG.info("jatkuva sijoittelu aktivoitu haulle {}", hakuOid);
-			sijoittelunSeurantaResource.merkkaaSijoittelunAjossaTila(hakuOid,
-					true);
-			return "aktivoitu";
-		}
-	}
+    @GET
+    @Path("/jatkuva/poista")
+    @Produces(MediaType.TEXT_PLAIN)
+    @PreAuthorize(OPH_CRUD)
+    @ApiOperation(value = "Ajastetun sijoittelun deaktivointi", response = String.class)
+    public String poistaJatkuvastaSijoittelusta(
+            @QueryParam("hakuOid") String hakuOid) {
+        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+            return "no privileges.";
+        }
 
-	@GET
-	@Path("/jatkuva/poista")
-	@Produces(MediaType.TEXT_PLAIN)
-	@PreAuthorize(OPH_CRUD)
-	@ApiOperation(value = "Ajastetun sijoittelun deaktivointi", response = String.class)
-	public String poistaJatkuvastaSijoittelusta(
-			@QueryParam("hakuOid") String hakuOid) {
-		if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
-			return "no privileges.";
-		}
+        if (StringUtils.isBlank(hakuOid)) {
+            return "get parameter 'hakuOid' required";
+        } else {
+            LOG.info("jatkuva sijoittelu poistettu haulta {}", hakuOid);
+            sijoittelunSeurantaResource.poistaSijoittelu(hakuOid);
+            return "poistettu";
+        }
+    }
 
-		if (StringUtils.isBlank(hakuOid)) {
-			return "get parameter 'hakuOid' required";
-		} else {
-			LOG.info("jatkuva sijoittelu poistettu haulta {}", hakuOid);
-			sijoittelunSeurantaResource.poistaSijoittelu(hakuOid);
-			return "poistettu";
-		}
-	}
+    @GET
+    @Path("/jatkuva/kaikki")
+    @Produces(MediaType.APPLICATION_JSON)
+    @PreAuthorize(OPH_CRUD)
+    @ApiOperation(value = "Kaikki aktiiviset sijoittelut", response = Map.class)
+    public Collection<SijoitteluDto> aktiivisetSijoittelut() {
+        return sijoittelunSeurantaResource.hae();
+    }
 
-	@GET
-	@Path("/jatkuva/kaikki")
-	@Produces(MediaType.APPLICATION_JSON)
-	@PreAuthorize(OPH_CRUD)
-	@ApiOperation(value = "Kaikki aktiiviset sijoittelut", response = Map.class)
-	public Collection<SijoitteluDto> aktiivisetSijoittelut() {
-		return sijoittelunSeurantaResource.hae();
-	}
+    @GET
+    @Path("/jatkuva")
+    @Produces(MediaType.APPLICATION_JSON)
+    @PreAuthorize(OPH_CRUD)
+    @ApiOperation(value = "Haun aktiiviset sijoittelut", response = SijoitteluDto.class)
+    public String jatkuvaTila(@QueryParam("hakuOid") String hakuOid) {
+        if (StringUtils.isBlank(hakuOid)) {
+            return null;
+        } else {
+            SijoitteluDto sijoitteluDto = sijoittelunSeurantaResource.hae(hakuOid);
+            return new Gson().toJson(sijoitteluDto);
+        }
+    }
 
-	@GET
-	@Path("/jatkuva")
-	@Produces(MediaType.APPLICATION_JSON)
-	@PreAuthorize(OPH_CRUD)
-	@ApiOperation(value = "Haun aktiiviset sijoittelut", response = SijoitteluDto.class)
-	public String jatkuvaTila(@QueryParam("hakuOid") String hakuOid) {
-		if (StringUtils.isBlank(hakuOid)) {
-			return null;
-		} else {
-			SijoitteluDto sijoitteluDto = sijoittelunSeurantaResource
-					.hae(hakuOid);
-			return new Gson().toJson(sijoitteluDto);
-		}
-	}
-
-	@GET
-	@Path("/jatkuva/paivita")
-	@Produces(MediaType.TEXT_PLAIN)
-	@PreAuthorize(OPH_CRUD)
-	@ApiOperation(value = "Ajastetun sijoittelun aloituksen päivitys", response = String.class)
-	public String paivitaJatkuvanSijoittelunAloitus(
-			@QueryParam("hakuOid") String hakuOid,
-			@QueryParam("aloitusajankohta") Long aloitusajankohta,
-			@QueryParam("ajotiheys") Integer ajotiheys) {
-		if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
-			return "no privileges.";
-		}
-
-		if (StringUtils.isBlank(hakuOid)) {
-			return "get parameter 'hakuOid' required";
-		} else {
-			sijoittelunSeurantaResource.paivitaSijoittelunAloitusajankohta(
-					hakuOid, aloitusajankohta, ajotiheys);
-			return "paivitetty";
-		}
-	}
+    @GET
+    @Path("/jatkuva/paivita")
+    @Produces(MediaType.TEXT_PLAIN)
+    @PreAuthorize(OPH_CRUD)
+    @ApiOperation(value = "Ajastetun sijoittelun aloituksen päivitys", response = String.class)
+    public String paivitaJatkuvanSijoittelunAloitus(
+            @QueryParam("hakuOid") String hakuOid,
+            @QueryParam("aloitusajankohta") Long aloitusajankohta,
+            @QueryParam("ajotiheys") Integer ajotiheys) {
+        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+            return "no privileges.";
+        }
+        if (StringUtils.isBlank(hakuOid)) {
+            return "get parameter 'hakuOid' required";
+        } else {
+            sijoittelunSeurantaResource.paivitaSijoittelunAloitusajankohta(hakuOid, aloitusajankohta, ajotiheys);
+            return "paivitetty";
+        }
+    }
 }
