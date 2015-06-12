@@ -41,9 +41,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-/**
- * @author Jussi Jartamo
- */
 ///valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
 ///haku-app/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid={hakukohdeOid}&asId={hakuOid}
 ///sijoittelu-service/resources/sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
@@ -80,22 +77,18 @@ public class ErillishakuProxyResource {
         asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(new TimeoutHandler() {
             public void handleTimeout(AsyncResponse asyncResponse) {
-                LOG.error(
-                        "Erillishakuproxy -palvelukutsu on aikakatkaistu: /haku/{}/hakukohde/{}",
-                        hakuOid, hakukohdeOid);
-                asyncResponse.resume(Response.serverError()
-                        .entity("Erillishakuproxy -palvelukutsu on aikakatkaistu")
-                        .build());
+                LOG.error("Erillishakuproxy -palvelukutsu on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
+                asyncResponse.resume(Response.serverError().entity("Erillishakuproxy -palvelukutsu on aikakatkaistu").build());
             }
         });
         final AtomicReference<List<Hakemus>> hakemukset = new AtomicReference<>();
         final AtomicReference<List<ValinnanVaiheJonoillaDTO>> valinnanvaiheet = new AtomicReference<>();
         final AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset = new AtomicReference<>();
         final AtomicReference<HakukohdeDTO> hakukohde = new AtomicReference<>();
-        final AtomicReference<Map<Long,HakukohdeDTO>> hakukohteetBySijoitteluAjoId = new AtomicReference<>();
+        final AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId = new AtomicReference<>();
         final AtomicReference<List<Valintatulos>> vtsValintatulokset = new AtomicReference<>();
         AtomicInteger counter = new AtomicInteger(
-                        1 +
+                1 +
                         //
                         1 +
                         //
@@ -105,13 +98,13 @@ public class ErillishakuProxyResource {
                         //
                         1 +
                         //
-                1 // <- erillissijoittelu
+                        1 // <- erillissijoittelu
         );
 
         Supplier<Void> mergeSuplier = () -> {
-            if(counter.decrementAndGet() == 0) {
+            if (counter.decrementAndGet() == 0) {
                 LOG.info("Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.", hakukohdeOid, hakuOid);
-                r(asyncResponse,merge(hakuOid,hakukohdeOid, hakemukset.get(),hakukohde.get(),valinnanvaiheet.get(),valintatulokset.get(),hakukohteetBySijoitteluAjoId.get(),vtsValintatulokset.get()));
+                r(asyncResponse, merge(hakuOid, hakukohdeOid, hakemukset.get(), hakukohde.get(), valinnanvaiheet.get(), valintatulokset.get(), hakukohteetBySijoitteluAjoId.get(), vtsValintatulokset.get()));
             }
             return null;
         };
@@ -192,15 +185,15 @@ public class ErillishakuProxyResource {
                     valintatulokset.set(v);
 
                     Set<Long> sijoitteluAjoIdSetti =
-                    v.stream().flatMap(v0 -> v0.getValintatapajonot().stream()).filter(v0 ->
-                        v0.getSijoitteluajoId() != null
-                    ).map(v0 -> v0.getSijoitteluajoId()).collect(Collectors.toSet());
+                            v.stream().flatMap(v0 -> v0.getValintatapajonot().stream()).filter(v0 ->
+                                            v0.getSijoitteluajoId() != null
+                            ).map(v0 -> v0.getSijoitteluajoId()).collect(Collectors.toSet());
                     //
                     // erillinen vaihe missä haetaan vielä n-kappaletta hakukohteen tietoja eri sijoitteluajoid:eillä
                     //
-                    if(!sijoitteluAjoIdSetti.isEmpty()) {
+                    if (!sijoitteluAjoIdSetti.isEmpty()) {
                         LOG.error("Saatiin sijoitteluajoid:eitä: {} ja haetaan ne erikseen.", Arrays.toString(sijoitteluAjoIdSetti.toArray()));
-                        final Map<Long,HakukohdeDTO> erillissijoittelutmp = Maps.newConcurrentMap();
+                        final Map<Long, HakukohdeDTO> erillissijoittelutmp = Maps.newConcurrentMap();
                         final AtomicInteger erillissijoitteluCounter = new AtomicInteger(sijoitteluAjoIdSetti.size());
                         ///sijoittelu-service/resources/erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
                         sijoitteluAjoIdSetti.forEach(id -> {
@@ -208,7 +201,7 @@ public class ErillishakuProxyResource {
                                     s0 -> {
                                         LOG.error("Haettiin laskenta sijoitteluajoid:llä {}.", id);
                                         erillissijoittelutmp.put(id, s0);
-                                        if(erillissijoitteluCounter.decrementAndGet() == 0) {
+                                        if (erillissijoitteluCounter.decrementAndGet() == 0) {
                                             hakukohteetBySijoitteluAjoId.set(erillissijoittelutmp);
                                             mergeSuplier.get();
                                         }
@@ -244,13 +237,12 @@ public class ErillishakuProxyResource {
                 }
         );
     }
+
     private void r(AsyncResponse asyncResponse, List<MergeValinnanvaiheDTO> msg) {
         try {
-            asyncResponse.resume(Response.ok().header("Content-Type","application/json").entity(msg).build());
-        } catch(Throwable e){
+            asyncResponse.resume(Response.ok().header("Content-Type", "application/json").entity(msg).build());
+        } catch (Throwable e) {
             LOG.error("Paluuarvon muodostos epäonnistui! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
         }
     }
-
-
 }
