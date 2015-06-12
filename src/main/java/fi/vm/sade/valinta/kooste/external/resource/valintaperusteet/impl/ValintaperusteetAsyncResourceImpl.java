@@ -76,11 +76,10 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                     .append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/")
                     .append(hakukohdeOid).append("/valinnanvaihe").toString();
 
-            WebClient wc = getWebClient();
-            return new PeruutettavaImpl(wc
-                    //
+            return new PeruutettavaImpl(
+                    getWebClient()
+                    .path(url)
                     .accept(MediaType.APPLICATION_JSON_TYPE)
-                            //
                     .async()
                     .get(new GsonResponseCallback<List<ValinnanVaiheJonoillaDTO>>(address, url, callback,
                             failureCallback,
