@@ -4,28 +4,19 @@ import java.util.Collection;
 
 import com.google.common.collect.Lists;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
-public class PistesyottoDataRiviListAdapter implements
-		PistesyottoDataRiviKuuntelija {
+public class PistesyottoDataRiviListAdapter implements PistesyottoDataRiviKuuntelija {
+    private final Collection<PistesyottoRivi> rivit;
 
-	private final Collection<PistesyottoRivi> rivit;
+    public PistesyottoDataRiviListAdapter() {
+        this.rivit = Lists.newArrayList();
+    }
 
-	// private final Collection<PistesyottoRivi> vialliset;
+    @Override
+    public void pistesyottoDataRiviTapahtuma(PistesyottoRivi pistesyottoRivi) {
+        rivit.add(pistesyottoRivi);
+    }
 
-	public PistesyottoDataRiviListAdapter() {
-		this.rivit = Lists.newArrayList();
-	}
-
-	@Override
-	public void pistesyottoDataRiviTapahtuma(PistesyottoRivi pistesyottoRivi) {
-		rivit.add(pistesyottoRivi);
-	}
-
-	public Collection<PistesyottoRivi> getRivit() {
-		return rivit;
-	}
+    public Collection<PistesyottoRivi> getRivit() {
+        return rivit;
+    }
 }
