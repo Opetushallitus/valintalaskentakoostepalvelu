@@ -1,0 +1,62 @@
+[
+  {
+    "source" : "1.2.246.562.10.00000000001",
+    "id" : "1.2.246.562.24.35696136007",
+    "core" : "1.2.246.562.24.35696136007",
+    "oppijanumero" : "1.2.246.562.24.35696136007",
+    "ensikertalainen" : false,
+    "suoritukset" : [
+      {
+        "suoritus" : {
+          "source" : "1.2.246.562.10.43628088406",
+          "tila" : "VALMIS",
+          "valmistuminen" : "01.06.2001",
+          "id" : "7ffc6dab-f9d5-4b8b-ba1a-ac7fa43467fa",
+          "yksilollistaminen" : "Ei",
+          "myontaja" : "1.2.246.562.10.43628088406",
+          "komo" : "1.2.246.562.5.2013061010184237348007",
+          "suoritusKieli" : "FI",
+          "henkiloOid" : "1.2.246.562.24.35696136007",
+          "vahvistettu" : true
+        },
+        "arvosanat" : [
+          {
+            "source" : "1.2.246.562.10.43628088406",
+            "aine" : "A",
+            "id" : "bedfddea-d5e0-4e10-adc4-675549374b52",
+            "lahdeArvot" : {
+              "koetunnus" : "V1",
+              "aineyhdistelmarooli" : "21"
+            },
+            "suoritus" : "7ffc6dab-f9d5-4b8b-ba1a-ac7fa43467fa",
+            "valinnainen" : false,
+            "lisatieto" : "VE",
+            "myonnetty" : "01.06.2002",
+            "arvio" : {
+              "pisteet" : 275,
+              "asteikko" : "YO",
+              "arvosana" : "L"
+            }
+          },
+          {
+            "source" : "1.2.246.562.10.43628088406",
+            "aine" : "A_TT5",
+            "id" : "e79f4081-7201-4f48-8b51-3ec7b11014cd",
+            "lahdeArvot" : {
+              "koetunnus" : "V1",
+              "aineyhdistelmarooli" : "21"
+            },
+            "suoritus" : "7ffc6dab-f9d5-4b8b-ba1a-ac7fa43467fa",
+            "valinnainen" : false,
+            "lisatieto" : "VE",
+            "myonnetty" : "01.06.2002",
+            "arvio" : {
+              "asteikko" : "OSAKOE",
+              "arvosana" : "21"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

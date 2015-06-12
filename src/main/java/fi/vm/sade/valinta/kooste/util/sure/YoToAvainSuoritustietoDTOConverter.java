@@ -143,11 +143,51 @@ public class YoToAvainSuoritustietoDTOConverter {
     }
     private static String aineMapper(Arvosana a) {
         if (StringUtils.isNotEmpty(a.getLahdeArvot().get("koetunnus"))) {
-            return a.getLahdeArvot().get("koetunnus");
+            //return a.getLahdeArvot().get("koetunnus");
+            return koetunnusMapper(a.getLahdeArvot().get("koetunnus"));
         }
         String aine = aineMapper(a.getAine(), a.getLisatieto());
         LOG.warn("No koetunnus in YO arvosana: mapped aine '" + a.getAine() + "' and lisatieto '" + a.getLisatieto() + "' to aine " + aine);
         return aine;
+    }
+
+    private static String koetunnusMapper(String koetunnus) {
+        switch (koetunnus) {
+            case "E1":
+                return "EA";
+            case "E2":
+                return "EB";
+            case "F1":
+                return "FA";
+            case "F2":
+                return "FB";
+            case "G1":
+                return "GA";
+            case "G2":
+                return "GB";
+            case "H1":
+                return "HA";
+            case "H2":
+                return "HB";
+            case "P1":
+                return "PA";
+            case "P2":
+                return "PB";
+            case "S1":
+                return "SA";
+            case "S2":
+                return "SB";
+            case "T1":
+                return "TA";
+            case "T2":
+                return "TB";
+            case "V1":
+                return "VA";
+            case "V2":
+                return "VB";
+            default:
+                return koetunnus;
+        }
     }
 
     private static String aineMapper(String aine, String lisatieto) {

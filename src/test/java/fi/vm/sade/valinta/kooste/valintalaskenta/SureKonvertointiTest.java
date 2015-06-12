@@ -31,6 +31,7 @@ import com.google.gson.JsonSyntaxException;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * 
@@ -167,6 +168,25 @@ public class SureKonvertointiTest {
 
         final List<Map<String,String>>  aidinkieli = konvertoitu.stream().filter(k -> k.getAvain().equals("AIDINKIELI")).findFirst().get().getMetatiedot();
         assertEquals(7, aidinkieli.size());
+
+    }
+
+    @Test
+    public void testaaSureKonvertointiKoetunnus() throws JsonSyntaxException,
+            IOException {
+        List<Oppija> oppijat = new Gson().fromJson(IOUtils
+                .toString(new ClassPathResource("valintalaskenta/sure_yo_koetunnus.json")
+                        .getInputStream()), new TypeToken<List<Oppija>>() {
+        }.getType());
+
+        Oppija oppija = oppijat.get(0);
+
+        final List<AvainMetatiedotDTO> konvertoitu = YoToAvainSuoritustietoDTOConverter.convert(oppija);
+
+        AvainMetatiedotDTO va = konvertoitu.stream().filter(k -> k.getAvain().equals("VA")).findFirst().get();
+        assertNotNull(va);
+
+        assertEquals("21", va.getMetatiedot().stream().filter(m -> m.containsKey("ROOLI")).findFirst().get().get("ROOLI"));
 
     }
 
