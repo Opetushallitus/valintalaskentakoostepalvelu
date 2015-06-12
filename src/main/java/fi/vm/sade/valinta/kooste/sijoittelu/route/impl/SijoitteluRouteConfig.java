@@ -16,47 +16,33 @@ import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoitteluExchange;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 import org.springframework.context.annotation.Profile;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 @Profile("default")
 @Configuration
 public class SijoitteluRouteConfig {
 
-	@Bean
-	public JatkuvaSijoitteluRouteImpl getJatkuvaSijoitteluRouteImpl(
+    @Bean
+    public JatkuvaSijoitteluRouteImpl getJatkuvaSijoitteluRouteImpl(
+            // tarkistetaan viidentoista minuutin valein tilanne
+            @Value("timer://jatkuvaSijoitteluTimer?${valintalaskentakoostepalvelu.jatkuvasijoittelu.timer:fixedRate=true&period=5minutes}") String jatkuvaSijoitteluTimer,
+            @Value("seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue") String jatkuvaSijoitteluQueue,
+            SijoitteleAsyncResource sijoitteluAsyncResource,
+            SijoittelunSeurantaResource sijoittelunSeurantaResource,
+            @Qualifier("jatkuvaSijoitteluDelayedQueue") DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue
+    ) {
+        return new JatkuvaSijoitteluRouteImpl(jatkuvaSijoitteluTimer, jatkuvaSijoitteluQueue, sijoitteluAsyncResource,
+                sijoittelunSeurantaResource, jatkuvaSijoitteluDelayedQueue);
+    }
 
-			// tarkistetaan viidentoista minuutin valein tilanne
-			@Value("timer://jatkuvaSijoitteluTimer?${valintalaskentakoostepalvelu.jatkuvasijoittelu.timer:fixedRate=true&period=5minutes}") String jatkuvaSijoitteluTimer,
-			@Value("seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue") String jatkuvaSijoitteluQueue,
-			SijoitteleAsyncResource sijoitteluAsyncResource,
-			SijoittelunSeurantaResource sijoittelunSeurantaResource,
-			@Qualifier("jatkuvaSijoitteluDelayedQueue") DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue
-	) {
-		return new JatkuvaSijoitteluRouteImpl(
-				jatkuvaSijoitteluTimer,
-				jatkuvaSijoitteluQueue,
-				sijoitteluAsyncResource,
-				sijoittelunSeurantaResource,
-				jatkuvaSijoitteluDelayedQueue
-		);
-	}
+    @Bean(name = "jatkuvaSijoitteluDelayedQueue")
+    public DelayQueue<DelayedSijoitteluExchange> createDelayQueue() {
+        return new DelayQueue<DelayedSijoitteluExchange>();
+    }
 
-	@Bean(name = "jatkuvaSijoitteluDelayedQueue")
-	public DelayQueue<DelayedSijoitteluExchange> createDelayQueue() {
-		return new DelayQueue<DelayedSijoitteluExchange>();
-	}
-
-	@Bean
-	public SijoitteluAktivointiRoute getSijoitteluAktivointiRoute(
-			@Qualifier("javaDslCamelContext") CamelContext context,
-			@Value(SijoitteluAktivointiRoute.SIJOITTELU_REITTI) String sijoitteluAktivoi)
-			throws Exception {
-		return ProxyWithAnnotationHelper.createProxy(
-				context.getEndpoint(sijoitteluAktivoi),
-				SijoitteluAktivointiRoute.class);
-	}
-
+    @Bean
+    public SijoitteluAktivointiRoute getSijoitteluAktivointiRoute(
+            @Qualifier("javaDslCamelContext") CamelContext context,
+            @Value(SijoitteluAktivointiRoute.SIJOITTELU_REITTI) String sijoitteluAktivoi)
+            throws Exception {
+        return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(sijoitteluAktivoi), SijoitteluAktivointiRoute.class);
+    }
 }
