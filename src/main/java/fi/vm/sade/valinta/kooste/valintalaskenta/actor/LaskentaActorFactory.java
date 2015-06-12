@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -159,7 +161,8 @@ public class LaskentaActorFactory {
                             Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
                             Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
                             Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
-                            Observable<String> laskentaObs = wrapAsRunOnlyOnceObservable(Observable.combineLatest(
+
+                            return wrapAsRunOnlyOnceObservable(Observable.combineLatest(
                                     valintaperusteet,
                                     hakemukset,
                                     oppijat,
@@ -171,15 +174,6 @@ public class LaskentaActorFactory {
                                                 HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v));
                                     }
                             ).flatMap(o -> o));
-                            laskentaObs.subscribe(
-                                    ok -> {
-                                        LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
-                                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
-                                    }, virhe -> {
-                                        LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
-                                        laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
-                                    });
-                            return laskentaObs;
                         }
                 );
     }
@@ -194,7 +188,8 @@ public class LaskentaActorFactory {
                     Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
                     Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
                     Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
-                    Observable<String> laskentaObs = wrapAsRunOnlyOnceObservable(Observable.combineLatest(
+
+                    return wrapAsRunOnlyOnceObservable(Observable.combineLatest(
                             hakijaryhmat,
                             valintaperusteet,
                             hakemukset,
@@ -206,15 +201,6 @@ public class LaskentaActorFactory {
                                             hakukohdeOid,
                                             HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr))
                     ).flatMap(o -> o));
-                    laskentaObs.subscribe(
-                            ok -> {
-                                LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
-                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
-                            }, virhe -> {
-                                LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
-                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
-                            });
-                    return laskentaObs;
                 }
         );
     }
@@ -230,8 +216,7 @@ public class LaskentaActorFactory {
                     Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
                     Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
 
-
-                    Observable<String> laskentaObs = wrapAsRunOnlyOnceObservable(Observable.combineLatest(
+                    return wrapAsRunOnlyOnceObservable(Observable.combineLatest(
                             hakijaryhmat,
                             valintaperusteet,
                             hakemukset,
@@ -243,15 +228,6 @@ public class LaskentaActorFactory {
                                             hakukohdeOid,
                                             HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr))
                     ).flatMap(o -> o));
-                    laskentaObs.subscribe(
-                            ok -> {
-                                LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, hakukohdeOid);
-                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.VALMIS);
-                            }, virhe -> {
-                                LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohdeOid, virhe);
-                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, hakukohdeOid, HakukohdeTila.KESKEYTETTY);
-                            });
-                    return laskentaObs;
 
                 }
         );
@@ -277,7 +253,7 @@ public class LaskentaActorFactory {
         LOG.info("Muodostetaan KAIKKI VAIHEET LASKENTA koska valinnanvaihe oli {} ja valintakoelaskenta ehto {}", actorParams.getValinnanvaihe(), actorParams.isValintakoelaskenta());
         return createValintalaskentaJaValintakoelaskentaActor(laskentaSupervisor, haku, actorParams);
     }
-    private <R> LaskentaActor laskentaHakukohteittainActor(LaskentaSupervisor laskentaSupervisor, LaskentaActorParams actorParams, Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<? extends R>> r) {
+    private LaskentaActor laskentaHakukohteittainActor(LaskentaSupervisor laskentaSupervisor, LaskentaActorParams actorParams, Func1<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> r) {
         return new LaskentaActor() {
             final AtomicBoolean active = new AtomicBoolean(true);
             final AtomicBoolean done = new AtomicBoolean(false);
@@ -288,36 +264,56 @@ public class LaskentaActorFactory {
             public void start() {
                 final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue = new ConcurrentLinkedQueue<>(actorParams.getHakukohdeOids());
                 Action0 aloitaAsynkroninenSuoritusHakukohdeJonolle =
-                        () -> {
-                            final PublishSubject<HakukohdeJaOrganisaatio> subject = PublishSubject.create();
-                            hakukohdeKerralla(hakukohdeQueue, subject);
-                            subject.onNext(hakukohdeQueue.poll());
-                        };
+                        () -> hakukohdeKerralla(hakukohdeQueue);
 
                 final boolean onkoTarveSplitata = actorParams.getHakukohdeOids().size() > 20;
                 IntStream.range(0, onkoTarveSplitata ? splittaus : 1).forEach(i -> aloitaAsynkroninenSuoritusHakukohdeJonolle.call());
             }
 
-            private void hakukohdeKerralla(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue, PublishSubject<HakukohdeJaOrganisaatio> subject) {
-                subject.asObservable().flatMap(r).subscribe(
-                        subscribeWithFinally(
-                                () -> { // finally
-                                    if (hakukohdeQueue.isEmpty()) {
-                                        done.set(true);
-                                        lopeta();
-                                    } else {
-                                        if (active.get()) {
-                                            Optional.ofNullable(hakukohdeQueue.poll()).ifPresent(seuraava -> subject.onNext(seuraava));
+            private void hakukohdeKerralla(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue) {
+                Optional<HakukohdeJaOrganisaatio> hkJaOrg = Optional.ofNullable(hakukohdeQueue.poll());
+                hkJaOrg.ifPresent(
+                        h ->
+                                Observable.amb(
+                                        r.call(h),
+                                        Observable.timer(12L, TimeUnit.MINUTES).switchMap(t -> Observable.error(
+                                                new TimeoutException("Laskentaa odotettiin kaksitoista minuuttia ja ohitettiin")
+                                        ))
+                                ).subscribe(
+                                        s -> {
+                                            try {
+                                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.VALMIS);
+                                                LOG.info("(Uuid={}) Hakukohteen {} laskenta on valmis", uuid, h.getHakukohdeOid());
+                                            } catch (Throwable t) {
+                                                LOG.error("(Uuid={}) Hakukohteen {} laskenta on valmis mutta ei saatu merkattua", uuid, h.getHakukohdeOid(), t);
+                                            }
+                                            hakukohdeKerralla(hakukohdeQueue);
+                                        },
+                                        e -> {
+                                            try {
+                                                laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid, h.getHakukohdeOid(), HakukohdeTila.KESKEYTETTY);
+                                                LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, h.getHakukohdeOid(), e);
+                                            } catch (Throwable e1) {
+                                                LOG.error("(Uuid={}) Hakukohteen {} laskenta epäonnistui mutta ei saatu merkattua", uuid, h.getHakukohdeOid(), e1);
+                                            }
+                                            hakukohdeKerralla(hakukohdeQueue);
+                                        },
+                                        () -> {
+
                                         }
-                                    }
-                                }
-                        )
+                                )
                 );
+
+                if (!hkJaOrg.isPresent()) {
+                    done.set(true);
+                    lopeta();
+                }
+
             }
 
             public void lopeta() {
                 active.set(false);
-                if(!done.get()) {
+                if (!done.get()) {
                     LOG.warn("#### (Uuid={}) Laskenta lopetettu", uuid);
                     laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
                 } else {
