@@ -39,11 +39,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * @author Jussi Jartamo
- */
 public class PistesyottoVientiService {
-
     private static final Logger LOG = LoggerFactory.getLogger(PistesyottoVientiService.class);
     private final ValintalaskentaValintakoeAsyncResource valintakoeResource;
     private final ValintaperusteetAsyncResource valintaperusteetResource;
@@ -57,27 +53,20 @@ public class PistesyottoVientiService {
             ValintaperusteetAsyncResource valintaperusteetResource,
             ApplicationAsyncResource applicationAsyncResource,
             TarjontaAsyncResource tarjontaAsyncResource,
-            DokumenttiAsyncResource dokumenttiAsyncResource
-    ) {
+            DokumenttiAsyncResource dokumenttiAsyncResource) {
         this.dokumenttiAsyncResource = dokumenttiAsyncResource;
         this.tarjontaAsyncResource = tarjontaAsyncResource;
         this.valintakoeResource = valintakoeResource;
         this.valintaperusteetResource = valintaperusteetResource;
         this.applicationAsyncResource = applicationAsyncResource;
     }
-    private void vie(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi,
-                     List<ValintakoeOsallistuminenDTO> osallistumistiedot,
-                     List<Hakemus> hakemukset,
-                     List<ValintaperusteDTO> valintaperusteet,
-                     List<ApplicationAdditionalDataDTO> pistetiedot,
-                     List<HakukohdeJaValintakoeDTO> hakukohdeJaValintakoe,
-                     HakuV1RDTO hakuV1RDTO,
-                     HakukohdeV1RDTO hakukohdeDTO) {
+
+    private void vie(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi, List<ValintakoeOsallistuminenDTO> osallistumistiedot,
+                     List<Hakemus> hakemukset, List<ValintaperusteDTO> valintaperusteet, List<ApplicationAdditionalDataDTO> pistetiedot,
+                     List<HakukohdeJaValintakoeDTO> hakukohdeJaValintakoe, HakuV1RDTO hakuV1RDTO, HakukohdeV1RDTO hakukohdeDTO) {
         Consumer<Throwable> poikkeuskasittelija = poikkeus -> {
             LOG.error("Pistesyötön viennissä tapahtui poikkeus:", poikkeus);
-            prosessi.getPoikkeukset().add(
-                    new Poikkeus(Poikkeus.KOOSTEPALVELU,
-                            "Pistesyötön vienti", poikkeus.getMessage()));
+            prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön vienti", poikkeus.getMessage()));
         };
         try {
             String hakuNimi = new Teksti(hakuV1RDTO.getNimi()).getTeksti();
@@ -87,33 +76,27 @@ public class PistesyottoVientiService {
             Collection<String> valintakoeTunnisteet =
                     valintaperusteet.stream().map(v -> v.getTunniste()).collect(Collectors.toList());
 
-            Set<String> kaikkiKutsutaanTunnisteet = //Collections.emptySet();
+            Set<String> kaikkiKutsutaanTunnisteet =
                     hakukohdeJaValintakoe.stream().flatMap(h -> {
                         Optional.ofNullable(h.getValintakoeDTO()).orElse(Collections.emptyList()).forEach(vk ->
                                 LOG.error("Valintakoetunniste=={}, kutsutaankokaikki={}", vk.getTunniste(), vk.getKutsutaankoKaikki()));
                         return h.getValintakoeDTO().stream();
                     }).filter(v -> Boolean.TRUE.equals(v.getKutsutaankoKaikki())).map(v -> v.getTunniste()).collect(Collectors.toSet());
-            PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
-                    hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi,
-                    hakukohdeNimi, tarjoajaNimi, hakemukset,
-                    kaikkiKutsutaanTunnisteet,
-                    valintakoeTunnisteet, osallistumistiedot,
+            PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi,
+                    hakukohdeNimi, tarjoajaNimi, hakemukset, kaikkiKutsutaanTunnisteet, valintakoeTunnisteet, osallistumistiedot,
                     valintaperusteet, pistetiedot);
-            InputStream xlsx = pistesyottoExcel.getExcel()
-                    .vieXlsx();
+            InputStream xlsx = pistesyottoExcel.getExcel().vieXlsx();
             prosessi.inkrementoiTehtyjaToita();
             String id = generateId();
             Long expirationTime = defaultExpirationDate().getTime();
-            List<String> tags = prosessi
-                    .getTags();
+            List<String> tags = prosessi.getTags();
             // LOG.error("Excelin tallennus");
-            dokumenttiAsyncResource.tallenna(id, "pistesyotto.xlsx",
-                    expirationTime, tags,
+            dokumenttiAsyncResource.tallenna(id, "pistesyotto.xlsx", expirationTime, tags,
                     "application/octet-stream", xlsx, response -> {
                         prosessi.setDokumenttiId(id);
                         prosessi.inkrementoiTehtyjaToita();
                     }, poikkeuskasittelija);
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             poikkeuskasittelija.accept(t);
         }
     }
@@ -121,13 +104,10 @@ public class PistesyottoVientiService {
     public void vie(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi) {
         PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
             LOG.error("Pistesyötön viennissä tapahtui poikkeus:", poikkeus);
-            prosessi.getPoikkeukset().add(
-                    new Poikkeus(Poikkeus.KOOSTEPALVELU,
-                            "Pistesyötön vienti", poikkeus.getMessage()));
+            prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Pistesyötön vienti", poikkeus.getMessage()));
         });
         try {
-            prosessi.setKokonaistyo(
-                    7
+            prosessi.setKokonaistyo(7
                             // luonti
                             + 1
                             // dokumenttipalveluun vienti
@@ -145,14 +125,8 @@ public class PistesyottoVientiService {
                 );
                 viimeisteleTuonti = () -> {
                     if (laskuri.decrementAndGet() <= 0) {
-                        vie(hakuOid, hakukohdeOid, prosessi,
-                                osallistumistiedotRef.get(),
-                                hakemusRef.get(),
-                                valintaperusteRef.get(),
-                                lisatiedotRef.get(),
-                                hakukohdeJaValintakoeRef.get(),
-                                hakuRef.get(),
-                                hakukohdeRef.get());
+                        vie(hakuOid, hakukohdeOid, prosessi, osallistumistiedotRef.get(), hakemusRef.get(), valintaperusteRef.get(),
+                                lisatiedotRef.get(), hakukohdeJaValintakoeRef.get(), hakuRef.get(), hakukohdeRef.get());
                     }
                     return null;
                 };
@@ -190,19 +164,17 @@ public class PistesyottoVientiService {
                 viimeisteleTuonti.get();
                 tarkistaYlimaaraisetOsallistujat.get();
             }, poikkeuskasittelija);
-            applicationAsyncResource
-                    .getApplicationsByOid(hakuOid, hakukohdeOid, hakemukset -> {
+            applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid, hakemukset -> {
                         hakemusRef.set(hakemukset);
                         prosessi.inkrementoiTehtyjaToita();
                         viimeisteleTuonti.get();
                         tarkistaYlimaaraisetOsallistujat.get();
                     }, poikkeuskasittelija);
-            valintaperusteetResource
-                    .findAvaimet(hakukohdeOid).subscribe(avaimet -> {
-                        prosessi.inkrementoiTehtyjaToita();
-                        valintaperusteRef.set(avaimet);
-                        viimeisteleTuonti.get();
-                    }, poikkeuskasittelija);
+            valintaperusteetResource.findAvaimet(hakukohdeOid).subscribe(avaimet -> {
+                prosessi.inkrementoiTehtyjaToita();
+                valintaperusteRef.set(avaimet);
+                viimeisteleTuonti.get();
+            }, poikkeuskasittelija);
             applicationAsyncResource
                     .getApplicationAdditionalData(hakuOid,
                             hakukohdeOid, lisatiedot -> {
@@ -226,7 +198,7 @@ public class PistesyottoVientiService {
                 hakuRef.set(haku);
                 viimeisteleTuonti.get();
             }, poikkeuskasittelija);
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             poikkeuskasittelija.accept(t);
         }
     }
