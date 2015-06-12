@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -159,24 +160,34 @@ public class LaskentaActorFactory {
                             String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                             LOG.info("(Uuid={}) Haetaan valintakoelaskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
                             Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
+                            valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                             Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
+                            hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                             Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
+                            oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
+
 
                             return wrapAsRunOnlyOnceObservable(Observable.combineLatest(
                                     valintaperusteet,
                                     hakemukset,
                                     oppijat,
                                     (v, h, o) -> {
-                                        return valintalaskentaAsyncResource.valintakokeet(new LaskeDTO(
-                                                actorParams.getUuid(),
-                                                actorParams.isErillishaku(),
-                                                hakukohdeOid,
-                                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v));
+                                        Observable<String> l =
+                                                valintalaskentaAsyncResource.valintakokeet(new LaskeDTO(
+                                                        actorParams.getUuid(),
+                                                        actorParams.isErillishaku(),
+                                                        hakukohdeOid,
+                                                        HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v));
+                                        l.subscribe(laskentaOK.apply(uuid,hakukohdeOid), laskentaException.apply(uuid,hakukohdeOid));
+                                        return l;
                                     }
                             ).flatMap(o -> o));
                         }
                 );
     }
+
+    private static final BiFunction<String, String, Action1<? super Object>> resurssiOK = (uuid, hakukohde) -> resurssi -> LOG.info("(Uuid={}) Saatiin resurssi hakukohteelle {}", uuid, hakukohde);
+    private static final BiFunction<String, String, Action1<Throwable>> resurssiException = (uuid,hakukohde) -> error -> LOG.info("(Uuid={}) Resurssin lataus epäonnistui hakukohteelle {}", uuid, hakukohde, error);
 
     public LaskentaActor createValintalaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
@@ -185,25 +196,37 @@ public class LaskentaActorFactory {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     LOG.info("(Uuid={}) Haetaan laskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
                     Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
+                    valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                     Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
+                    hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                     Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
+                    oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                     Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
+                    hakijaryhmat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
 
                     return wrapAsRunOnlyOnceObservable(Observable.combineLatest(
                             hakijaryhmat,
                             valintaperusteet,
                             hakemukset,
                             oppijat,
-                            (hr, v, h, o) ->
-                                    valintalaskentaAsyncResource.laske(new LaskeDTO(
-                                            actorParams.getUuid(),
-                                            actorParams.isErillishaku(),
-                                            hakukohdeOid,
-                                            HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr))
+                            (hr, v, h, o) ->{
+                                Observable<String> l =
+                                        valintalaskentaAsyncResource.laske(new LaskeDTO(
+                                                actorParams.getUuid(),
+                                                actorParams.isErillishaku(),
+                                                hakukohdeOid,
+                                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr));
+                                l.subscribe(laskentaOK.apply(uuid,hakukohdeOid), laskentaException.apply(uuid,hakukohdeOid));
+                                return l;
+                            }
+
                     ).flatMap(o -> o));
                 }
         );
     }
+
+    private static final BiFunction<String, String, Action1<? super Object>> laskentaOK = (uuid, hakukohde) -> resurssi -> LOG.info("(Uuid={}) Laskenta onnistui hakukohteelle {}", uuid, hakukohde);
+    private static final BiFunction<String, String, Action1<Throwable>> laskentaException = (uuid,hakukohde) -> error -> LOG.info("(Uuid={}) Laskenta epäonnistui hakukohteelle {}", uuid, hakukohde, error);
 
     public LaskentaActor createValintalaskentaJaValintakoelaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
         final String uuid = actorParams.getUuid();
@@ -212,9 +235,13 @@ public class LaskentaActorFactory {
                     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
                     LOG.info("(Uuid={}) Haetaan laskennan + valintakoelaskennan resursseja hakukohteelle {}", uuid, hakukohdeOid);
                     Observable<List<ValintaperusteetDTO>> valintaperusteet = valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeJaOrganisaatio.getHakukohdeOid(), actorParams.getValinnanvaihe());
+                    valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                     Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
+                    hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                     Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), null);
+                    oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                     Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
+                    hakijaryhmat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
 
                     return wrapAsRunOnlyOnceObservable(Observable.combineLatest(
                             hakijaryhmat,
@@ -222,11 +249,16 @@ public class LaskentaActorFactory {
                             hakemukset,
                             oppijat,
                             (hr, v, h, o) ->
-                                    valintalaskentaAsyncResource.laskeKaikki(new LaskeDTO(
-                                            actorParams.getUuid(),
-                                            actorParams.isErillishaku(),
-                                            hakukohdeOid,
-                                            HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr))
+                            {
+                                Observable<String> l =
+                                        valintalaskentaAsyncResource.laskeKaikki(new LaskeDTO(
+                                                actorParams.getUuid(),
+                                                actorParams.isErillishaku(),
+                                                hakukohdeOid,
+                                                HakemuksetConverterUtil.muodostaHakemuksetDTO(haku, hakukohdeOid, h, o, actorParams.getParametritDTO()), v, hr));
+                                l.subscribe(laskentaOK.apply(uuid,hakukohdeOid), laskentaException.apply(uuid,hakukohdeOid));
+                                return l;
+                            }
                     ).flatMap(o -> o));
 
                 }
