@@ -139,6 +139,7 @@ public class ErillishakuProxyResource {
                         asyncResponse.resume(Response.serverError()
                                 .entity("Erillishakuproxy -palvelukutsu epäonnistui valintaperusteetpalvelun virheeseen: " + poikkeus.getMessage())
                                 .build());
+                        LOG.error("Valintaperusteet, valinnanvaiheen haku epäonnistui", poikkeus);
                     } catch (Exception e) {
                         // kilpailutilanne timeoutin ja virheen kanssa. Oikeastaan sama mitä käyttäjälle näytetään tässä kohtaa.
                         LOG.error("Valintaperusteetpalvelun virhe tuli yhtäaikaa timeoutin kanssa! {}", e.getMessage());
