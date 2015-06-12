@@ -6,12 +6,8 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by kjsaila on 26/01/15.
- */
 @ApiModel(value = "ValinnanvaiheDTO", description = "Valinnan vaihe")
 public class MergeValinnanvaiheDTO {
-
     @ApiModelProperty(value = "Järjestysnumero", required = true)
     private int jarjestysnumero;
 

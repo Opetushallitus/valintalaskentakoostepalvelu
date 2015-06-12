@@ -9,11 +9,7 @@ import java.math.BigDecimal;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-/**
- * Created by jussija on 26/01/15.
- */
 public class MergeHakemusDTO {
-
     // Perustiedot
     private String etunimi;
     private String sukunimi;

@@ -6,11 +6,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by kjsaila on 26/01/15.
- */
 public class MergeValintatapajonoDTO {
-
     private Tasasijasaanto tasasijasaanto = Tasasijasaanto.ARVONTA;
 
     private String oid;

@@ -4,11 +4,7 @@ import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 
-/**
- * Created by jussija on 26/01/15.
- */
 public class HakemusSijoitteluntulosMergeDto {
-
     private String etunimi;
     private String sukunimi;
     private String sahkoposti;
