@@ -308,8 +308,8 @@ public class LaskentaActorFactory {
                         h ->
                                 Observable.amb(
                                         r.call(h),
-                                        Observable.timer(12L, TimeUnit.MINUTES).switchMap(t -> Observable.error(
-                                                new TimeoutException("Laskentaa odotettiin kaksitoista minuuttia ja ohitettiin")
+                                        Observable.timer(30L, TimeUnit.MINUTES).switchMap(t -> Observable.error(
+                                                new TimeoutException("Laskentaa odotettiin 30 minuuttia ja ohitettiin")
                                         ))
                                 ).subscribe(
                                         s -> {
