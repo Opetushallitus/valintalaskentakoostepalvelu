@@ -54,7 +54,10 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     @Override
     public Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
         return getAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {
-        }.getType(), client -> client.query("rows", 100000).query("asId", hakuOid).query("aoOid", hakukohdeOid));
+        }.getType(), client -> {
+            client.query("appState", "ACTIVE", "INCOMPLETE");
+            client.query("rows", 100000).query("asId", hakuOid).query("aoOid", hakukohdeOid);
+        });
     }
 
     @Override
@@ -64,6 +67,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                 Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
+
                     client.query("rows", 100000);
                     return client;
                 });
