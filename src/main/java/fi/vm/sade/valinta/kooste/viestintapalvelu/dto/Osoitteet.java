@@ -3,16 +3,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- *         Koska Viestintapalvelulla ei ole API:a
- * 
- */
-
 public class Osoitteet implements Serializable {
-
     private List<Osoite> addressLabels;
 
     public Osoitteet(List<Osoite> addressLabels) {

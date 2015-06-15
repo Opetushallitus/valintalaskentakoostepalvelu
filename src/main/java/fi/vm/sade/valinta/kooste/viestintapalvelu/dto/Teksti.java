@@ -14,115 +14,91 @@ import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Maps;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- *         Vikasietoinen lokalisoituteksti DTO. Palauttaa aina jotain.
- */
 public class Teksti {
+    private final static String EI_ARVOA = "<< ei arvoa >>";
+    private final TreeMap<String, String> normalisoituKieliJaKoodi;
 
-	private final static String EI_ARVOA = "<< ei arvoa >>";
-	private final TreeMap<String, String> normalisoituKieliJaKoodi;
+    public Teksti() {
+        this.normalisoituKieliJaKoodi = Maps.newTreeMap();
+    }
 
-	public Teksti() {
-		this.normalisoituKieliJaKoodi = Maps.newTreeMap();
-	}
-	public Teksti(Map<String, String> kieletJaKoodit) {
-		this.normalisoituKieliJaKoodi = Maps.newTreeMap();
-		if (kieletJaKoodit != null && !kieletJaKoodit.isEmpty()) {
-			for (Entry<String, String> kk : kieletJaKoodit.entrySet()) {
-				if (StringUtils.isBlank(kk.getKey()) || StringUtils.isBlank(kk.getValue())) {
-					// EI LISATA ARVOTONTA KOODIA
-					// normalisoituKieliJaKoodi.put(normalisoiKielikoodi(kk.getKey()),
-					// EI_ARVOA);
-				} else {
-					normalisoituKieliJaKoodi.put(
-							normalisoiKielikoodi(kk.getKey()), kk.getValue());
-				}
-			}
-		}
-	}
+    public Teksti(Map<String, String> kieletJaKoodit) {
+        this.normalisoituKieliJaKoodi = Maps.newTreeMap();
+        if (kieletJaKoodit != null && !kieletJaKoodit.isEmpty()) {
+            for (Entry<String, String> kk : kieletJaKoodit.entrySet()) {
+                if (StringUtils.isBlank(kk.getKey()) || StringUtils.isBlank(kk.getValue())) {
+                    // EI LISATA ARVOTONTA KOODIA
+                    // normalisoituKieliJaKoodi.put(normalisoiKielikoodi(kk.getKey()),
+                    // EI_ARVOA);
+                } else {
+                    normalisoituKieliJaKoodi.put(normalisoiKielikoodi(kk.getKey()), kk.getValue());
+                }
+            }
+        }
+    }
 
-	public boolean isArvoton() {
-		return normalisoituKieliJaKoodi.isEmpty();
-	}
+    public boolean isArvoton() {
+        return normalisoituKieliJaKoodi.isEmpty();
+    }
 
-	public Teksti(String suomenkielinenTeksti) {
-		this(asMap(SUOMI, suomenkielinenTeksti));
-	}
+    public Teksti(String suomenkielinenTeksti) {
+        this(asMap(SUOMI, suomenkielinenTeksti));
+    }
 
-	public String getKieli() {
-		if (normalisoituKieliJaKoodi.containsKey(SUOMI)) {
-			return SUOMI;
-		} else if (normalisoituKieliJaKoodi.containsKey(RUOTSI)) {
-			return RUOTSI;
-		} else {
-			return ENGLANTI;
-		}
-	}
+    public String getKieli() {
+        if (normalisoituKieliJaKoodi.containsKey(SUOMI)) {
+            return SUOMI;
+        } else if (normalisoituKieliJaKoodi.containsKey(RUOTSI)) {
+            return RUOTSI;
+        } else {
+            return ENGLANTI;
+        }
+    }
 
-	public String getNonEmptyKieli() {
-		if (normalisoituKieliJaKoodi.containsKey(SUOMI) && !StringUtils.isEmpty(normalisoituKieliJaKoodi.get(SUOMI))) {
-			return SUOMI;
-		} else if (normalisoituKieliJaKoodi.containsKey(RUOTSI)&& !StringUtils.isEmpty(normalisoituKieliJaKoodi.get(RUOTSI))) {
-			return RUOTSI;
-		} else {
-			return ENGLANTI;
-		}
-	}
-	
-	/**
-	 * 
-	 * @param normalisoituKielikoodi
-	 * @param oletusarvo
-	 *            jos arvoa ei loydy niin palautetaan oletusarvo
-	 * @return
-	 */
-	public String getTeksti(String normalisoituKielikoodi, String oletusarvo) {
-		if (isArvoton()) {
-			return oletusarvo;
-		}
-		if (normalisoituKieliJaKoodi.containsKey(normalisoituKielikoodi)) {
-			return normalisoituKieliJaKoodi.get(normalisoituKielikoodi);
-		}
-		return getTeksti();
-	}
+    public String getNonEmptyKieli() {
+        if (normalisoituKieliJaKoodi.containsKey(SUOMI) && !StringUtils.isEmpty(normalisoituKieliJaKoodi.get(SUOMI))) {
+            return SUOMI;
+        } else if (normalisoituKieliJaKoodi.containsKey(RUOTSI) && !StringUtils.isEmpty(normalisoituKieliJaKoodi.get(RUOTSI))) {
+            return RUOTSI;
+        } else {
+            return ENGLANTI;
+        }
+    }
 
-	/**
-	 * 
-	 * @param normalisoituKielikoodi
-	 *            normalisoitu KieliUtil:n normalisoikielikoodi-metodilla
-	 *            ("FI","SE","EN")
-	 * @return
-	 */
-	public String getTeksti(String normalisoituKielikoodi) {
-		return getTeksti(normalisoituKielikoodi, EI_ARVOA);
-	}
+    public String getTeksti(String normalisoituKielikoodi, String oletusarvo) {
+        if (isArvoton()) {
+            return oletusarvo;
+        }
+        if (normalisoituKieliJaKoodi.containsKey(normalisoituKielikoodi)) {
+            return normalisoituKieliJaKoodi.get(normalisoituKielikoodi);
+        }
+        return getTeksti();
+    }
 
-	/**
-	 * @return preferoi suomea
-	 */
-	public String getTeksti() {
-		if(normalisoituKieliJaKoodi.isEmpty()){
-			return StringUtils.EMPTY;
-		}
-		if (normalisoituKieliJaKoodi.containsKey(SUOMI)) {
-			return normalisoituKieliJaKoodi.get(SUOMI);
-		} else if (normalisoituKieliJaKoodi.containsKey(RUOTSI)) {
-			return normalisoituKieliJaKoodi.get(RUOTSI);
-		} else {
-			return normalisoituKieliJaKoodi.firstEntry().getValue();
-		}
-	}
+    public String getTeksti(String normalisoituKielikoodi) {
+        return getTeksti(normalisoituKielikoodi, EI_ARVOA);
+    }
 
-	private static TreeMap<String, String> asMap(String key, String value) {
-		TreeMap<String, String> m = Maps.newTreeMap();
-		m.put(key, value);
-		return m;
-	}
+    public String getTeksti() {
+        if (normalisoituKieliJaKoodi.isEmpty()) {
+            return StringUtils.EMPTY;
+        }
+        if (normalisoituKieliJaKoodi.containsKey(SUOMI)) {
+            return normalisoituKieliJaKoodi.get(SUOMI);
+        } else if (normalisoituKieliJaKoodi.containsKey(RUOTSI)) {
+            return normalisoituKieliJaKoodi.get(RUOTSI);
+        } else {
+            return normalisoituKieliJaKoodi.firstEntry().getValue();
+        }
+    }
 
-	public static String getTeksti(final Map<String, String> n) {
-		return new Teksti(n).getTeksti();
-	}
+    private static TreeMap<String, String> asMap(String key, String value) {
+        TreeMap<String, String> m = Maps.newTreeMap();
+        m.put(key, value);
+        return m;
+    }
+
+    public static String getTeksti(final Map<String, String> n) {
+        return new Teksti(n).getTeksti();
+    }
 }

@@ -1,28 +1,25 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
 /**
- * 
- * @author Jussi Jartamo
- * 
  *         Paluuviesti prosessiId:n välittämiseen käyttöliittymään
  */
 public class ProsessiId {
-	private final String id;
+    private final String id;
 
-	private ProsessiId() {
-		this("");
-	}
+    private ProsessiId() {
+        this("");
+    }
 
-	public ProsessiId(String id) {
-		this.id = id;
-	}
+    public ProsessiId(String id) {
+        this.id = id;
+    }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	@Override
-	public String toString() {
-		return id;
-	}
+    @Override
+    public String toString() {
+        return id;
+    }
 }
