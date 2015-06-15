@@ -35,7 +35,8 @@ public class ValintalaskentaKerrallaService {
     @Autowired
     private LaskentaSeurantaAsyncResource seurantaAsyncResource;
 
-    public ValintalaskentaKerrallaService() {}
+    public ValintalaskentaKerrallaService() {
+    }
 
     public void kaynnistaLaskentaHaulle(LaskentaParams laskentaParams, Consumer<Response> callback) {
         String hakuOid = laskentaParams.getHakuOid();
@@ -51,21 +52,10 @@ public class ValintalaskentaKerrallaService {
             returnExistingLaskenta(uuidForExistingNonMaskedLaskenta.get(), callback);
         } else {
             LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
-            valintaperusteetAsyncResource.haunHakukohteet(
-                    hakuOid,
+            valintaperusteetAsyncResource.haunHakukohteet(hakuOid,
                     (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
-                        Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(
-                                hakukohdeViitteet,
-                                hakuOid,
-                                maski,
-                                callback
-                        );
-                        createLaskenta(
-                                haunHakukohteetOids,
-                                (String uuid) -> notifyWorkAvailable(uuid, callback),
-                                laskentaParams,
-                                callback
-                        );
+                        Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, maski, callback);
+                        createLaskenta(haunHakukohteetOids, (String uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
                     },
                     (Throwable poikkeus) -> callback.accept(errorResponse(poikkeus.getMessage()))
             );
@@ -81,13 +71,12 @@ public class ValintalaskentaKerrallaService {
             }
             seurantaAsyncResource.resetoiTilat(
                     uuid,
-                    (LaskentaDto laskenta) -> valintaperusteetAsyncResource.haunHakukohteet(
-                            laskenta.getHakuOid(),
+                    (LaskentaDto laskenta) -> valintaperusteetAsyncResource.haunHakukohteet(laskenta.getHakuOid(),
                             (List<HakukohdeViiteDTO> hakukohdeViitteet) -> notifyWorkAvailable(laskenta.getUuid(), callbackResponse),
                             (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage()))
                     ),
                     (Throwable t) -> {
-                        LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid , t);
+                        LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid, t);
                         callbackResponse.accept(errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
                     });
         } catch (Throwable t) {
@@ -141,11 +130,7 @@ public class ValintalaskentaKerrallaService {
     private void createLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData, Consumer<String> laskennanAloitus, LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
         final List<HakukohdeDto> hakukohdeDtos = toHakukohdeDto(hakukohdeData);
         validateHakukohdeDtos(hakukohdeData, hakukohdeDtos, callbackResponse);
-
-        seurantaAsyncResource.luoLaskenta(
-                laskentaParams,
-                hakukohdeDtos,
-                (String uuid) -> laskennanAloitus.accept(uuid),
+        seurantaAsyncResource.luoLaskenta(laskentaParams, hakukohdeDtos, (String uuid) -> laskennanAloitus.accept(uuid),
                 (Throwable t) -> {
                     LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen", t);
                     callbackResponse.accept(errorResponse(t.getMessage()));
@@ -170,7 +155,7 @@ public class ValintalaskentaKerrallaService {
         return Response.ok(Vastaus.uudelleenOhjaus(target)).build();
     }
 
-    private Response errorResponse(final String errorMessage){
+    private Response errorResponse(final String errorMessage) {
         return Response.serverError().entity(errorMessage).build();
     }
 

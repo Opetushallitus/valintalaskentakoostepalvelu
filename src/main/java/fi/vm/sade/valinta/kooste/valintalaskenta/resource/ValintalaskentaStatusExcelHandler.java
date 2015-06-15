@@ -17,7 +17,6 @@ import java.util.function.Consumer;
 
 @Service
 public class ValintalaskentaStatusExcelHandler {
-
     private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaStatusExcelHandler.class);
 
     @Autowired
