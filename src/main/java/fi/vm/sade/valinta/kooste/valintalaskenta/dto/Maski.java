@@ -15,10 +15,7 @@ import com.google.common.collect.Sets;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 
-
 /**
- * @author Jussi Jartamo
- *         <p/>
  *         Maski osittaiseen laskentaan haulle
  */
 public class Maski {
