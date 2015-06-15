@@ -14,9 +14,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 
 
-/**
- * @author Jussi Jartamo
- */
 public class ValintaperusteetPalvelukutsu extends AbstraktiPalvelukutsu implements Palvelukutsu {
     private final Logger LOG = LoggerFactory.getLogger(ValintaperusteetPalvelukutsu.class);
 
@@ -37,30 +34,27 @@ public class ValintaperusteetPalvelukutsu extends AbstraktiPalvelukutsu implemen
     }
 
     public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
-        aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() -> valintaperusteetAsyncResource.haeValintaperusteet(
-                getHakukohdeOid(),
-                valinnanVaiheJarjestysluku,
-                valintaperusteet -> {
-                    if (valintaperusteet == null) {
-                        LOG.error("Valintaperusteetpalvelu palautti null datajoukon!");
-                        failureCallback(takaisinkutsu);
-                        return;
-                    }
+        aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() -> valintaperusteetAsyncResource.haeValintaperusteet(getHakukohdeOid(), valinnanVaiheJarjestysluku, valintaperusteet -> {
+                            if (valintaperusteet == null) {
+                                LOG.error("Valintaperusteetpalvelu palautti null datajoukon!");
+                                failureCallback(takaisinkutsu);
+                                return;
+                            }
 
-                    // Filteröidään pois jonot, joissa ei käytetä laskentaa
-                    final List<ValintaperusteetDTO> filteroidyt = valintaperusteet.stream()
-                            .map(vp -> {
-                                List<ValintatapajonoJarjestyskriteereillaDTO> laskentaJonot = vp.getValinnanVaihe().getValintatapajono().stream()
-                                        .filter(j -> j.getKaytetaanValintalaskentaa() == null || j.getKaytetaanValintalaskentaa())
-                                        .collect(Collectors.toList());
-                                vp.getValinnanVaihe().setValintatapajono(laskentaJonot);
-                                return vp;
-                            }).collect(Collectors.toList());
+                            // Filteröidään pois jonot, joissa ei käytetä laskentaa
+                            final List<ValintaperusteetDTO> filteroidyt = valintaperusteet.stream()
+                                    .map(vp -> {
+                                        List<ValintatapajonoJarjestyskriteereillaDTO> laskentaJonot = vp.getValinnanVaihe().getValintatapajono().stream()
+                                                .filter(j -> j.getKaytetaanValintalaskentaa() == null || j.getKaytetaanValintalaskentaa())
+                                                .collect(Collectors.toList());
+                                        vp.getValinnanVaihe().setValintatapajono(laskentaJonot);
+                                        return vp;
+                                    }).collect(Collectors.toList());
 
-                    ValintaperusteetPalvelukutsu.this.valintaperusteet.set(filteroidyt);
-                    takaisinkutsu.accept(ValintaperusteetPalvelukutsu.this);
-                },
-                failureCallback(takaisinkutsu))
+                            ValintaperusteetPalvelukutsu.this.valintaperusteet.set(filteroidyt);
+                            takaisinkutsu.accept(ValintaperusteetPalvelukutsu.this);
+                        },
+                        failureCallback(takaisinkutsu))
         );
         return this;
     }

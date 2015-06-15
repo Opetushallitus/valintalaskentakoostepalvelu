@@ -17,48 +17,34 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
-public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu
-		implements Palvelukutsu {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(HakijaryhmatPalvelukutsu.class);
-	private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
-	private final AtomicReference<List<Oppija>> oppijat;
+public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu implements Palvelukutsu {
+    private final static Logger LOG = LoggerFactory.getLogger(HakijaryhmatPalvelukutsu.class);
+    private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
+    private final AtomicReference<List<Oppija>> oppijat;
 
-	public SuoritusrekisteriPalvelukutsu(
-			UuidHakukohdeJaOrganisaatio hakukohdeJaOrganisaatio,
-			SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
-		super(hakukohdeJaOrganisaatio);
-		this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
-		this.oppijat = new AtomicReference<>();
-	}
+    public SuoritusrekisteriPalvelukutsu(UuidHakukohdeJaOrganisaatio hakukohdeJaOrganisaatio, SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
+        super(hakukohdeJaOrganisaatio);
+        this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
+        this.oppijat = new AtomicReference<>();
+    }
 
-	@Override
-	public void vapautaResurssit() {
-		oppijat.set(null);
-	}
+    @Override
+    public void vapautaResurssit() {
+        oppijat.set(null);
+    }
 
-	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
-		aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() ->
-			suoritusrekisteriAsyncResource
-					.getOppijatByHakukohde(
-							getHakukohdeOid(),
-							null, // referenssiPvm ensikertalaisuutta varten
-							oppijat -> {
-								SuoritusrekisteriPalvelukutsu.this.oppijat
-										.set(oppijat);
-								takaisinkutsu
-										.accept(SuoritusrekisteriPalvelukutsu.this);
-							}, failureCallback(takaisinkutsu))
-		);
-		return this;
-	}
+    public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
+        aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() ->
+                        suoritusrekisteriAsyncResource.getOppijatByHakukohde(getHakukohdeOid(), null, // referenssiPvm ensikertalaisuutta varten
+                            oppijat -> {
+                                SuoritusrekisteriPalvelukutsu.this.oppijat.set(oppijat);
+                                takaisinkutsu.accept(SuoritusrekisteriPalvelukutsu.this);
+                            }, failureCallback(takaisinkutsu))
+        );
+        return this;
+    }
 
-	public List<Oppija> getOppijat() {
-		return oppijat.get();
-	}
+    public List<Oppija> getOppijat() {
+        return oppijat.get();
+    }
 }
