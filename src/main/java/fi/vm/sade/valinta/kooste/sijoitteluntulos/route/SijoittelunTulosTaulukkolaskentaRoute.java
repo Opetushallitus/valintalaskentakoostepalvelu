@@ -9,18 +9,18 @@ import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 
 public interface SijoittelunTulosTaulukkolaskentaRoute {
-	final String SEDA_SIJOITTELUNTULOS_TAULUKKOLASKENTA_HAULLE = "seda:sijoitteluntulos_taulukkolaskenta_haulle?"
-			+
-			// jos palvelin sammuu niin ei suorita loppuun tyojonoa
-			"purgeWhenStopping=true" +
-			// reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
-			"&waitForTaskToComplete=Never" +
-			// tyojonossa on yksi tyostaja
-			"&concurrentConsumers=1";
+    final String SEDA_SIJOITTELUNTULOS_TAULUKKOLASKENTA_HAULLE = "seda:sijoitteluntulos_taulukkolaskenta_haulle?"
+            +
+            // jos palvelin sammuu niin ei suorita loppuun tyojonoa
+            "purgeWhenStopping=true" +
+            // reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
+            "&waitForTaskToComplete=Never" +
+            // tyojonossa on yksi tyostaja
+            "&concurrentConsumers=1";
 
-	void taulukkolaskennatHaulle(
-			@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) SijoittelunTulosProsessi prosessi,
-			@Property(OPH.HAKUOID) String hakuOid,
-			@Property(OPH.SIJOITTELUAJOID) String sijoitteluAjoId,
-			@Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
+    void taulukkolaskennatHaulle(
+            @Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) SijoittelunTulosProsessi prosessi,
+            @Property(OPH.HAKUOID) String hakuOid,
+            @Property(OPH.SIJOITTELUAJOID) String sijoitteluAjoId,
+            @Property(SecurityPreprocessor.SECURITY_CONTEXT_HEADER) Authentication auth);
 }
