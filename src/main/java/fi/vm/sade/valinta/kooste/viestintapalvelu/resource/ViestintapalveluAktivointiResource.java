@@ -39,9 +39,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 
 /**
- * 
- * @author Jussi Jartamo
- * 
  *         Ei palauta PDF-tiedostoa vaan URI:n varsinaiseen resurssiin - koska
  *         AngularJS resurssin palauttaman datan konvertoiminen selaimen
  *         ladattavaksi tiedostoksi on ongelmallista (mutta ei mahdotonta - onko
@@ -52,353 +49,282 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/viestintapalvelu", description = "Osoitetarrojen, jälkiohjauskirjeiden ja hyväksymiskirjeiden tuottaminen")
 public class ViestintapalveluAktivointiResource {
+    private static final Logger LOG = LoggerFactory.getLogger(ViestintapalveluAktivointiResource.class);
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ViestintapalveluAktivointiResource.class);
+    @Autowired
+    private OsoitetarratService osoitetarratService;
+    @Autowired
+    private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+    @Autowired
+    private KoekutsukirjeetService koekutsukirjeetService;
+    @Autowired
+    private HyvaksymiskirjeetService hyvaksymiskirjeetService;
+    @Autowired
+    private JalkiohjauskirjeService jalkiohjauskirjeService;
 
-	@Autowired
-	private OsoitetarratService osoitetarratService;
-	@Autowired
-	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
-	@Autowired
-	private KoekutsukirjeetService koekutsukirjeetService;
-	@Autowired
-	private HyvaksymiskirjeetService hyvaksymiskirjeetService;
-	@Autowired
-	private JalkiohjauskirjeService jalkiohjauskirjeService;
+    @POST
+    @Path("/osoitetarrat/aktivoi")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Aktivoi osoitetarrojen luonnin hakukohteelle", response = Response.class)
+    public ProsessiId aktivoiOsoitetarrojenLuonti(
+            DokumentinLisatiedot hakemuksillaRajaus,
+            @QueryParam("hakuOid") String hakuOid,
+            @QueryParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("valintakoeTunnisteet") List<String> valintakoeTunnisteet) {
+        try {
+            if (hakemuksillaRajaus == null) {
+                hakemuksillaRajaus = new DokumentinLisatiedot();
+            }
+            DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi("Osoitetarrat", "Luo osoitetarrat", null, tags("osoitetarrat", hakemuksillaRajaus.getTag()));
+            dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
 
-	@POST
-	@Path("/osoitetarrat/aktivoi")
-	@Consumes("application/json")
-	@Produces("application/json")
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin hakukohteelle", response = Response.class)
-	public ProsessiId aktivoiOsoitetarrojenLuonti(
-	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
-			@QueryParam("hakuOid") String hakuOid,
-			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("valintakoeTunnisteet") List<String> valintakoeTunnisteet) {
-		try {
-			if (hakemuksillaRajaus == null) {
-				hakemuksillaRajaus = new DokumentinLisatiedot();
-			}
-			DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi(
-					"Osoitetarrat", "Luo osoitetarrat", null, tags(
-							"osoitetarrat", hakemuksillaRajaus.getTag()));
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
+            if (hakemuksillaRajaus.getHakemusOids() != null) {
+                osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
+            } else {
+                osoitetarratService.osoitetarratValintakokeeseenOsallistujille(osoiteProsessi, hakuOid, hakukohdeOid, Sets.newHashSet(valintakoeTunnisteet));
+            }
+            return new ProsessiId(osoiteProsessi.getId());
+        } catch (Exception e) {
+            LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
+            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+            // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+            // Ylläpitäjä voi lukea logeista todellisen syyn!
+            e.printStackTrace();
+            throw new RuntimeException("Osoitetarrojen luonti epäonnistui! " + e.getMessage(), e);
+        }
+    }
 
-			if(hakemuksillaRajaus.getHakemusOids() != null) {
-				osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
-			} else {
-				osoitetarratService.osoitetarratValintakokeeseenOsallistujille(
-						osoiteProsessi,
-						hakuOid,
-						hakukohdeOid, Sets.newHashSet(valintakoeTunnisteet));
-			}
-			return new ProsessiId(osoiteProsessi.getId());
-		} catch (Exception e) {
-			LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
-			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
-			// todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
-			// Ylläpitäjä voi lukea logeista todellisen syyn!
-			e.printStackTrace();
-			throw new RuntimeException("Osoitetarrojen luonti epäonnistui! "
-					+ e.getMessage(), e);
-		}
-	}
+    /**
+     * https://test-virkailija.oph.ware.fi/valintalaskentakoostepalvelu/resources/viestintapalvelu/osoitetarrat/sijoittelussahyvaksytyille/aktivoi?hakuOid=1.2.246.562.5.2013080813081926341927&hakukohdeOid=1.2.246.562.5.85532589612&sijoitteluajoId=1392302745967
+     */
+    @POST
+    @Path("/osoitetarrat/sijoittelussahyvaksytyille/aktivoi")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Aktivoi hyväksyttyjen osoitteiden luonnin hakukohteelle haussa", response = Response.class)
+    public ProsessiId aktivoiHyvaksyttyjenOsoitetarrojenLuonti(
+            DokumentinLisatiedot hakemuksillaRajaus,
+            @QueryParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("hakuOid") String hakuOid,
+            @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
+        try {
+            if (hakemuksillaRajaus == null) {
+                hakemuksillaRajaus = new DokumentinLisatiedot();
+            }
+            DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi("Osoitetarrat", "Sijoittelussa hyväksytyille", hakuOid, tags("osoitetarrat", hakemuksillaRajaus.getTag()));
+            dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
+            if (hakemuksillaRajaus.getHakemusOids() != null) {
+                osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
+            } else {
+                osoitetarratService.osoitetarratSijoittelussaHyvaksytyille(osoiteProsessi, hakuOid, hakukohdeOid);
+            }
+            return osoiteProsessi.toProsessiId();
+        } catch (Exception e) {
+            LOG.error("Hyväksyttyjen osoitetarrojen luonnissa virhe! {}", e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Hyväksyttyjen osoitetarrojen luonnissa virhe!", e);
 
-	/**
-	 * @param hakemuksillaRajaus
-	 *            https://test-virkailija.oph.ware.fi/
-	 *            valintalaskentakoostepalvelu/resources/
-	 *            viestintapalvelu/osoitetarrat
-	 *            /sijoittelussahyvaksytyille/aktivoi
-	 *            ?hakuOid=1.2.246.562.5.2013080813081926341927
-	 *            &hakukohdeOid=1.2.246.562.5.85532589612
-	 *            &sijoitteluajoId=1392302745967
-	 */
-	@POST
-	@Path("/osoitetarrat/sijoittelussahyvaksytyille/aktivoi")
-	@Consumes("application/json")
-	@Produces("application/json")
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@ApiOperation(value = "Aktivoi hyväksyttyjen osoitteiden luonnin hakukohteelle haussa", response = Response.class)
-	public ProsessiId aktivoiHyvaksyttyjenOsoitetarrojenLuonti(
-	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
-			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("hakuOid") String hakuOid,
-			@QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
-		try {
-			if (hakemuksillaRajaus == null) {
-				hakemuksillaRajaus = new DokumentinLisatiedot();
-			}
-			DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi(
-					"Osoitetarrat", "Sijoittelussa hyväksytyille", hakuOid,
-					tags("osoitetarrat", hakemuksillaRajaus.getTag()));
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
-			if(hakemuksillaRajaus.getHakemusOids() != null) {
-				osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
-			} else {
-				osoitetarratService.osoitetarratSijoittelussaHyvaksytyille(osoiteProsessi,hakuOid,hakukohdeOid);
-			}
-			return osoiteProsessi.toProsessiId();
-		} catch (Exception e) {
-			LOG.error("Hyväksyttyjen osoitetarrojen luonnissa virhe! {}",
-					e.getMessage());
-			e.printStackTrace();
-			throw new RuntimeException(
-					"Hyväksyttyjen osoitetarrojen luonnissa virhe!", e);
+        }
+    }
 
-		}
-	}
+    /**
+     * @Deprecated Tehdaan eri luontivariaatiot reitin alustusmuuttujilla. Ei enää monta resurssia per toiminto.
+     */
+    @POST
+    @Path("/osoitetarrat/hakemuksille/aktivoi")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
+    public ProsessiId aktivoiOsoitetarrojenLuontiHakemuksille(DokumentinLisatiedot hakemuksillaRajaus) {
+        try {
+            if (hakemuksillaRajaus == null) {
+                hakemuksillaRajaus = new DokumentinLisatiedot();
+            }
+            DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi("Osoitetarrat", "Luo osoitetarrat", null, tags("osoitetarrat", hakemuksillaRajaus.getTag()));
+            dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
+            osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
+            return new ProsessiId(osoiteProsessi.getId());
+        } catch (Exception e) {
+            LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
+            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+            // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+            // Ylläpitäjä voi lukea logeista todellisen syyn!
+            throw new RuntimeException("Osoitetarrojen luonnissa virhe!", e);
 
-	/**
-	 * 
-	 * @Deprecated Tehdaan eri luontivariaatiot reitin alustusmuuttujilla. Ei
-	 *             enää monta resurssia per toiminto.
-	 * 
-	 * @param hakemuksillaRajaus
-	 * @return
-	 */
-	@POST
-	@Path("/osoitetarrat/hakemuksille/aktivoi")
-	@Consumes("application/json")
-	@Produces("application/json")
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
-	public ProsessiId aktivoiOsoitetarrojenLuontiHakemuksille(
-			DokumentinLisatiedot hakemuksillaRajaus) {
-		try {
-			if (hakemuksillaRajaus == null) {
-				hakemuksillaRajaus = new DokumentinLisatiedot();
-			}
-			DokumenttiProsessi osoiteProsessi = new DokumenttiProsessi(
-					"Osoitetarrat", "Luo osoitetarrat", null, tags(
-							"osoitetarrat", hakemuksillaRajaus.getTag()));
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(osoiteProsessi);
-			osoitetarratService.osoitetarratHakemuksille(osoiteProsessi,
-					hakemuksillaRajaus.getHakemusOids());
+        }
+    }
 
-			return new ProsessiId(osoiteProsessi.getId());
-			/*
-			 * dokumenttiResource.viesti(new Message(
-			 * "Osoitetarrojen luonti hakemuksille aloitettu", Arrays
-			 * .asList("osoitetarrat"), DateTime.now().plusDays(1) .toDate()));
-			 */
-		} catch (Exception e) {
-			LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
-			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
-			// todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
-			// Ylläpitäjä voi lukea logeista todellisen syyn!
-			throw new RuntimeException("Osoitetarrojen luonnissa virhe!", e);
+    @POST
+    @Path("/jalkiohjauskirjeet/aktivoi")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Aktivoi jälkiohjauskirjeiden luonnin valitsemattomille", response = Response.class)
+    public ProsessiId aktivoiJalkiohjauskirjeidenLuonti(
+            DokumentinLisatiedot hakemuksillaRajaus,
+            @QueryParam("hakuOid") String hakuOid,
+            @QueryParam("templateName") String templateName,
+            @QueryParam("tarjoajaOid")
+            String tarjoajaOid,
+            @QueryParam("tag") String tag) {
+        try {
+            if (hakemuksillaRajaus == null) {
+                hakemuksillaRajaus = new DokumentinLisatiedot();
+            }
+            KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
+            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+            LOG.warn("Luodaan jälkiohjauskirjeet kielellä {}. Onko {} == {}", hakemuksillaRajaus.getLanguageCode(), KieliUtil.RUOTSI, KieliUtil.RUOTSI.equals(hakemuksillaRajaus.getLanguageCode()));
+            JalkiohjauskirjeDTO jalkiohjauskirjeDTO = new JalkiohjauskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(), templateName, tag, hakuOid, hakemuksillaRajaus.getLanguageCode());
+            if (hakemuksillaRajaus.getHakemusOids() == null) {
+                jalkiohjauskirjeService.jalkiohjauskirjeetHaulle(prosessi, jalkiohjauskirjeDTO);
+            } else {
+                jalkiohjauskirjeService.jalkiohjauskirjeetHakemuksille(prosessi, jalkiohjauskirjeDTO, hakemuksillaRajaus.getHakemusOids());
+            }
+            return prosessi.toProsessiId();
+        } catch (Exception e) {
+            LOG.error("Jälkiohjauskirjeiden luonnissa virhe! {}", e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Jälkiohjauskirjeiden luonti epäonnistui!", e);
+        }
+    }
 
-		}
-	}
+    @POST
+    @Path("/hakukohteessahylatyt/aktivoi")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Aktivoi hakukohteessa hylatyille kirjeiden luonnin", response = Response.class)
+    public ProsessiId aktivoiHakukohteessahylatyilleLuonti(
+            DokumentinLisatiedot hakemuksillaRajaus,
+            @QueryParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("tarjoajaOid") String tarjoajaOid,
+            @QueryParam("templateName") String templateName,
+            @QueryParam("palautusAika") String palautusAika,
+            @QueryParam("palautusPvm") String palautusPvm,
+            @QueryParam("tag") String tag,
+            @QueryParam("hakuOid") String hakuOid,
+            @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
+        try {
+            if (templateName == null) {
+                templateName = "jalkiohjauskirje";
+            }
+            if (hakemuksillaRajaus == null) {
+                hakemuksillaRajaus = new DokumentinLisatiedot();
+            }
+            tag = hakemuksillaRajaus.getTag();
+            KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
+            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+            HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
+                    templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId, palautusPvm, palautusAika);
+            hyvaksymiskirjeetService.jalkiohjauskirjeHakukohteelle(prosessi, hyvaksymiskirjeDTO);
+            return prosessi.toProsessiId();
+        } catch (Exception e) {
+            LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
+            throw new RuntimeException("Hyväksymiskirjeiden luonti epäonnistui! " + e.getMessage(), e);
+        }
+    }
 
-	@POST
-	@Path("/jalkiohjauskirjeet/aktivoi")
-	@Consumes("application/json")
-	@Produces("application/json")
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@ApiOperation(value = "Aktivoi jälkiohjauskirjeiden luonnin valitsemattomille", response = Response.class)
-	public ProsessiId aktivoiJalkiohjauskirjeidenLuonti(
-	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
-			@QueryParam("hakuOid") String hakuOid,
-			@QueryParam("templateName") String templateName,
-			@QueryParam("tarjoajaOid") String tarjoajaOid,
-			@QueryParam("tag") String tag) {
-		try {
-			if (hakemuksillaRajaus == null) {
-				hakemuksillaRajaus = new DokumentinLisatiedot();
-			}
-			KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-			LOG.warn("Luodaan jälkiohjauskirjeet kielellä {}. Onko {} == {}",
-					hakemuksillaRajaus.getLanguageCode(), KieliUtil.RUOTSI,
-					KieliUtil.RUOTSI.equals(hakemuksillaRajaus
-							.getLanguageCode()));
-			JalkiohjauskirjeDTO jalkiohjauskirjeDTO = new JalkiohjauskirjeDTO(
-					tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
-					templateName, tag, hakuOid,
-					hakemuksillaRajaus.getLanguageCode());
-			if (hakemuksillaRajaus.getHakemusOids() == null) {
-				jalkiohjauskirjeService.jalkiohjauskirjeetHaulle(
-						prosessi, jalkiohjauskirjeDTO);
-			} else {
-				jalkiohjauskirjeService.jalkiohjauskirjeetHakemuksille(
-						prosessi, jalkiohjauskirjeDTO,
-						hakemuksillaRajaus.getHakemusOids());
-			}
-			return prosessi.toProsessiId();
-		} catch (Exception e) {
-			LOG.error("Jälkiohjauskirjeiden luonnissa virhe! {}",
-					e.getMessage());
-			e.printStackTrace();
-			throw new RuntimeException(
-					"Jälkiohjauskirjeiden luonti epäonnistui!", e);
-		}
-	}
-	@POST
-	@Path("/hakukohteessahylatyt/aktivoi")
-	@Consumes("application/json")
-	@Produces("application/json")
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@ApiOperation(value = "Aktivoi hakukohteessa hylatyille kirjeiden luonnin", response = Response.class)
-	public ProsessiId aktivoiHakukohteessahylatyilleLuonti(
-	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
-			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("tarjoajaOid") String tarjoajaOid,
-			@QueryParam("templateName") String templateName,
-			@QueryParam("palautusAika") String palautusAika,
-			@QueryParam("palautusPvm") String palautusPvm,
-			@QueryParam("tag") String tag,
-			@QueryParam("hakuOid") String hakuOid,
-			@QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
-		try {
-			if (templateName == null) {
-				templateName = "jalkiohjauskirje";
-			}
-			if (hakemuksillaRajaus == null) {
-				hakemuksillaRajaus = new DokumentinLisatiedot();
-			}
-			tag = hakemuksillaRajaus.getTag();
-			KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-			HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
-					tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
-					templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId,palautusPvm,palautusAika);
-			hyvaksymiskirjeetService.jalkiohjauskirjeHakukohteelle(prosessi, hyvaksymiskirjeDTO);
-			return prosessi.toProsessiId();
-		} catch (Exception e) {
-			LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
+    @POST
+    @Path("/hyvaksymiskirjeet/aktivoi")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Aktivoi hyväksymiskirjeiden luonnin hakukohteelle haussa", response = Response.class)
+    public ProsessiId aktivoiHyvaksymiskirjeidenLuonti(
+            DokumentinLisatiedot hakemuksillaRajaus,
+            @QueryParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("tarjoajaOid") String tarjoajaOid,
+            @QueryParam("palautusAika") String palautusAika,
+            @QueryParam("palautusPvm") String palautusPvm,
+            @QueryParam("templateName") String templateName,
+            @QueryParam("tag") String tag,
+            @QueryParam("hakuOid") String hakuOid,
+            @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
+        try {
+            if (templateName == null) {
+                templateName = "hyvaksymiskirje";
+            }
+            if (hakemuksillaRajaus == null) {
+                hakemuksillaRajaus = new DokumentinLisatiedot();
+            }
+            tag = hakemuksillaRajaus.getTag();
+            KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
+            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+            HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
+                    templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId, palautusPvm, palautusAika);
+            if (hakemuksillaRajaus.getHakemusOids() == null) {
+                hyvaksymiskirjeetService.hyvaksymiskirjeetHakukohteelle(prosessi, hyvaksymiskirjeDTO);
+            } else {
+                hyvaksymiskirjeetService.hyvaksymiskirjeetHakemuksille(prosessi, hyvaksymiskirjeDTO, hakemuksillaRajaus.getHakemusOids());
+            }
+            return prosessi.toProsessiId();
+        } catch (Exception e) {
+            LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
+            throw new RuntimeException("Hyväksymiskirjeiden luonti epäonnistui! " + e.getMessage(), e);
+        }
+    }
 
-			throw new RuntimeException(
-					"Hyväksymiskirjeiden luonti epäonnistui! " + e.getMessage(),
-					e);
-		}
-	}
-	@POST
-	@Path("/hyvaksymiskirjeet/aktivoi")
-	@Consumes("application/json")
-	@Produces("application/json")
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@ApiOperation(value = "Aktivoi hyväksymiskirjeiden luonnin hakukohteelle haussa", response = Response.class)
-	public ProsessiId aktivoiHyvaksymiskirjeidenLuonti(
-	/* OPTIONAL */DokumentinLisatiedot hakemuksillaRajaus,
-			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("tarjoajaOid") String tarjoajaOid,
-			@QueryParam("palautusAika") String palautusAika,
-			@QueryParam("palautusPvm") String palautusPvm,
-			@QueryParam("templateName") String templateName,
-			@QueryParam("tag") String tag,
-			@QueryParam("hakuOid") String hakuOid,
-			@QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
-		try {
-			if (templateName == null) {
-				templateName = "hyvaksymiskirje";
-			}
-			if (hakemuksillaRajaus == null) {
-				hakemuksillaRajaus = new DokumentinLisatiedot();
-			}
-			tag = hakemuksillaRajaus.getTag();
-			KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-			HyvaksymiskirjeDTO hyvaksymiskirjeDTO = new HyvaksymiskirjeDTO(
-					tarjoajaOid, hakemuksillaRajaus.getLetterBodyText(),
-					templateName, tag, hakukohdeOid, hakuOid, sijoitteluajoId,palautusPvm,palautusAika);
-			if (hakemuksillaRajaus.getHakemusOids() == null) {
-				hyvaksymiskirjeetService.hyvaksymiskirjeetHakukohteelle(
-						prosessi, hyvaksymiskirjeDTO);
-			} else {
-				hyvaksymiskirjeetService.hyvaksymiskirjeetHakemuksille(
-						prosessi, hyvaksymiskirjeDTO,
-						hakemuksillaRajaus.getHakemusOids());
-			}
-			return prosessi.toProsessiId();
-		} catch (Exception e) {
-			LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
+    @POST
+    @Path("/koekutsukirjeet/aktivoi")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa", response = Response.class)
+    public ProsessiId aktivoiKoekutsukirjeidenLuonti(
+            @QueryParam(OPH.HAKUOID) String hakuOid,
+            @QueryParam(OPH.HAKUKOHDEOID) String hakukohdeOid,
+            @QueryParam(OPH.TARJOAJAOID) String tarjoajaOid,
+            @QueryParam("templateName") String templateName,
+            @QueryParam("valintakoeTunnisteet") List<String> valintakoeTunnisteet,
+            DokumentinLisatiedot hakemuksillaRajaus) {
+        if (hakemuksillaRajaus != null && hakemuksillaRajaus.getHakemusOids() != null && !hakemuksillaRajaus.getHakemusOids().isEmpty()) {
+            // luodaan koekutsukirjeet rajauksella
+        } else {
+            if (hakukohdeOid == null || valintakoeTunnisteet == null || valintakoeTunnisteet.isEmpty()) {
+                LOG.error("Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
+                throw new RuntimeException("Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
+            }
+        }
+        String tag = null;
+        KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
+        try {
+            if (templateName == null) {
+                templateName = "koekutsukirje";
+            }
+            if (hakemuksillaRajaus == null) {
+                hakemuksillaRajaus = new DokumentinLisatiedot();
+            }
+            tag = hakemuksillaRajaus.getTag();
 
-			throw new RuntimeException(
-					"Hyväksymiskirjeiden luonti epäonnistui! " + e.getMessage(),
-					e);
-		}
-	}
+            if (hakemuksillaRajaus.getHakemusOids() != null) {
+                LOG.error("Koekutsukirjeiden luonti aloitettu yksittaiselle hakemukselle {}", hakemuksillaRajaus.getHakemusOids());
+                koekutsukirjeetService.koekutsukirjeetHakemuksille(prosessi,
+                        new KoekutsuDTO(hakemuksillaRajaus.getLetterBodyText(), tarjoajaOid, tag, hakukohdeOid, hakuOid, templateName), hakemuksillaRajaus.getHakemusOids());
+            } else {
+                LOG.error("Koekutsukirjeiden luonti aloitettu");
+                koekutsukirjeetService.koekutsukirjeetOsallistujille(prosessi,
+                        new KoekutsuDTO(hakemuksillaRajaus.getLetterBodyText(), tarjoajaOid, tag, hakukohdeOid, hakuOid, templateName), valintakoeTunnisteet);
+            }
+            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+        } catch (Exception e) {
+            LOG.error("Koekutsukirjeiden luonti epäonnistui! {}", e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return new ProsessiId(prosessi.getId());// Response.ok().build();
+    }
 
-	/**
-	 * 
-	 * @param hakukohdeOid
-	 * @param hakuOid
-	 * @return 200 OK
-	 */
-	@POST
-	@Path("/koekutsukirjeet/aktivoi")
-	@Consumes("application/json")
-	@Produces("application/json")
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@ApiOperation(value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa", response = Response.class)
-	public ProsessiId aktivoiKoekutsukirjeidenLuonti(
-			@QueryParam(OPH.HAKUOID) String hakuOid,
-			@QueryParam(OPH.HAKUKOHDEOID) String hakukohdeOid,
-			@QueryParam(OPH.TARJOAJAOID) String tarjoajaOid,
-			@QueryParam("templateName") String templateName,
-			@QueryParam("valintakoeTunnisteet") List<String> valintakoeTunnisteet,
-			DokumentinLisatiedot hakemuksillaRajaus) {
-		if (hakemuksillaRajaus != null
-				&& hakemuksillaRajaus.getHakemusOids() != null
-				&& !hakemuksillaRajaus.getHakemusOids().isEmpty()) {
-			// luodaan koekutsukirjeet rajauksella
-		} else {
-			if (hakukohdeOid == null || valintakoeTunnisteet == null
-					|| valintakoeTunnisteet.isEmpty()) {
-				LOG.error("Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
-				throw new RuntimeException(
-						"Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
-			}
-		}
-		String tag = null;
-		KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
-		try {
-			if (templateName == null) {
-				templateName = "koekutsukirje";
-			}
-			if (hakemuksillaRajaus == null) {
-				hakemuksillaRajaus = new DokumentinLisatiedot();
-			}
-			tag = hakemuksillaRajaus.getTag();
-
-			if (hakemuksillaRajaus.getHakemusOids() != null) {
-				LOG.error(
-						"Koekutsukirjeiden luonti aloitettu yksittaiselle hakemukselle {}",
-						hakemuksillaRajaus.getHakemusOids());
-				koekutsukirjeetService.koekutsukirjeetHakemuksille(prosessi,
-						new KoekutsuDTO(hakemuksillaRajaus.getLetterBodyText(),
-								tarjoajaOid, tag, hakukohdeOid, hakuOid,
-								templateName), hakemuksillaRajaus
-								.getHakemusOids());
-			} else {
-				LOG.error("Koekutsukirjeiden luonti aloitettu");
-				koekutsukirjeetService.koekutsukirjeetOsallistujille(prosessi,
-						new KoekutsuDTO(hakemuksillaRajaus.getLetterBodyText(),
-								tarjoajaOid, tag, hakukohdeOid, hakuOid,
-								templateName), valintakoeTunnisteet);
-			}
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-		} catch (Exception e) {
-			LOG.error("Koekutsukirjeiden luonti epäonnistui! {}",
-					e.getMessage());
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-		return new ProsessiId(prosessi.getId());// Response.ok().build();
-	}
-
-	private List<String> tags(String... tag) {
-		List<String> l = Lists.newArrayList();
-		for (String t : tag) {
-			if (t != null) {
-				l.add(t);
-			}
-		}
-		return l;
-	}
+    private List<String> tags(String... tag) {
+        List<String> l = Lists.newArrayList();
+        for (String t : tag) {
+            if (t != null) {
+                l.add(t);
+            }
+        }
+        return l;
+    }
 }
