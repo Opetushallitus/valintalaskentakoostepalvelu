@@ -9,9 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Jussi Jartamo
- *
- * Ohittaa asyncresponse olion body parametrina
+ *         Ohittaa asyncresponse olion body parametrina
  */
 public class AsyncResponseFilter implements SwaggerSpecFilter {
 
@@ -22,7 +20,7 @@ public class AsyncResponseFilter implements SwaggerSpecFilter {
 
     @Override
     public boolean isParamAllowed(Parameter parameter, Operation operation, ApiDescription api, Map<String, List<String>> params, Map<String, String> cookies, Map<String, List<String>> headers) {
-        if(parameter.dataType().equals("AsyncResponse")) { // ignoring AsyncResponse parameters
+        if (parameter.dataType().equals("AsyncResponse")) { // ignoring AsyncResponse parameters
             return false;
         }
         return true;
