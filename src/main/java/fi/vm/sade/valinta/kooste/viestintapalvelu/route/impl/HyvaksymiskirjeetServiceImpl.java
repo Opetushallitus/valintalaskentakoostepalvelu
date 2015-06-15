@@ -30,6 +30,7 @@ import rx.Observable;
 import rx.functions.Action3;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
+
 import static com.google.common.collect.Lists.*;
 
 import com.google.common.collect.Lists;
@@ -63,371 +64,297 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.LueHakijapalvelunO
 import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 @Service
 public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
+    private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetServiceImpl.class);
+    private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
+    private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
+    private final SijoitteluAsyncResource sijoitteluAsyncResource;
+    private final ApplicationAsyncResource applicationAsyncResource;
+    private final OrganisaatioAsyncResource organisaatioAsyncResource;
+    private final HaeOsoiteKomponentti haeOsoiteKomponentti;
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(HyvaksymiskirjeetServiceImpl.class);
-	private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
-	private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
-	// private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
-	private final SijoitteluAsyncResource sijoitteluAsyncResource;
-	private final ApplicationAsyncResource applicationAsyncResource;
-	private final OrganisaatioAsyncResource organisaatioAsyncResource;
-	private final HaeOsoiteKomponentti haeOsoiteKomponentti;
+    @Autowired
+    public HyvaksymiskirjeetServiceImpl(
+            ViestintapalveluAsyncResource viestintapalveluAsyncResource,
+            HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
+            SijoitteluAsyncResource sijoitteluAsyncResource,
+            ApplicationAsyncResource applicationAsyncResource,
+            OrganisaatioAsyncResource organisaatioAsyncResource,
+            HaeOsoiteKomponentti haeOsoiteKomponentti) {
+        this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
+        this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
+        this.sijoitteluAsyncResource = sijoitteluAsyncResource;
+        this.applicationAsyncResource = applicationAsyncResource;
+        this.organisaatioAsyncResource = organisaatioAsyncResource;
+        this.haeOsoiteKomponentti = haeOsoiteKomponentti;
+    }
 
-	@Autowired
-	public HyvaksymiskirjeetServiceImpl(
-			ViestintapalveluAsyncResource viestintapalveluAsyncResource,
-			HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
-			SijoitteluAsyncResource sijoitteluAsyncResource,
-			ApplicationAsyncResource applicationAsyncResource,
-			OrganisaatioAsyncResource organisaatioAsyncResource,
-			HaeOsoiteKomponentti haeOsoiteKomponentti) {
-		this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
-		this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
-		this.sijoitteluAsyncResource = sijoitteluAsyncResource;
-		this.applicationAsyncResource = applicationAsyncResource;
-		this.organisaatioAsyncResource = organisaatioAsyncResource;
-		this.haeOsoiteKomponentti = haeOsoiteKomponentti;
-	}
-	
-	private static Organisaatio responseToOrganisaatio(
-			HaeOsoiteKomponentti haeOsoiteKomponentti,
-			OrganisaatioAsyncResource organisaatioAsyncResource,
-			Response organisaatioResponse) throws IOException {
-		InputStream stream = (InputStream) organisaatioResponse.getEntity();
-		String json = StringUtils.trimToEmpty(IOUtils.toString(stream));
-		IOUtils.closeQuietly(stream);
-		return new Gson().fromJson(json,Organisaatio.class);
-	}
-	private static Osoite haeOsoiteHierarkisesti(
-			HaeOsoiteKomponentti haeOsoiteKomponentti,
-			OrganisaatioAsyncResource organisaatioAsyncResource,
-			String kieli, List<String> oids, Organisaatio rdto, Teksti organisaationimi) {
-		Osoite hakijapalveluidenOsoite = null;
-		try {
-			if(organisaationimi.isArvoton()) {
-				organisaationimi = new Teksti(rdto.getNimi());
-			}
-			hakijapalveluidenOsoite = LueHakijapalvelunOsoite
-					.lueHakijapalvelunOsoite(haeOsoiteKomponentti,
-							kieli,rdto, organisaationimi);
-			if(rdto == null) {
-				LOG.error("Organisaatiopalvelusta ei saatu organisaatiota tunnisteelle {}. Eli ei saatu hakijapalveluiden osoitetta.", Arrays.toString(oids.toArray()));
-				return null;
-			}
-			if(oids == null) {
-				LOG.error("Oidi-listaa ei voitu kerätä kun listaa ei ollut annettu!");
-				return null;
-			}
-			try {
-			oids.add(rdto.getParentOid());
-			} catch(Exception e) {
-				LOG.error("Oidia ei voitu lisätä oidilistaan: {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
-				throw new RuntimeException("Oidia ei voitu lisätä oidilistaan: " + e.getMessage());
-			}
-			if(hakijapalveluidenOsoite != null) {
-				LOG.error("Hakijapalveluiden osoite saatiin tarjoajalta {}.\r\n{}", Arrays.toString(oids.toArray()), new GsonBuilder().setPrettyPrinting().create().toJson(hakijapalveluidenOsoite));
-				return hakijapalveluidenOsoite;
-			}
-			if(hakijapalveluidenOsoite==null && rdto.getParentOid() != null) {
-				LOG.error("Ei saatu hakijapalveluiden osoitetta talta organisaatiolta. Tutkitaan seuraava {}", Arrays.toString(oids.toArray()));
-				return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource, kieli, oids, responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioAsyncResource
-				.haeOrganisaatio(rdto.getParentOid()).get()), organisaationimi);
-			} else {
-				LOG.error("Ei saatu hakijapalveluiden osoitetta! Kaytiin lapi organisaatiot {}!", Arrays.toString(oids.toArray()));
-				return null;
-			}
-		} catch (Exception e) {
-			LOG.error(
-					"Hakijapalveluiden osoitteen haussa odottamaton virhe {},\r\n{}",
-					e.getMessage(),
-					Arrays.toString(e.getStackTrace()));
-		}
-		return null;
-	}
-	public static Osoite organisaatioResponseToHakijapalveluidenOsoite(
-			HaeOsoiteKomponentti haeOsoiteKomponentti,
-			OrganisaatioAsyncResource organisaatioAsyncResource,
-			List<String> oids, String kieli, Response organisaatioResponse){
-		Organisaatio org;
-		Teksti organisaationimi;
-		try {
-			 org = responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioResponse);
-			 organisaationimi = new Teksti(org.getNimi());
-		}catch(Exception e) {
-			LOG.error("Ei saatu organisaatiota! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
-			throw new RuntimeException(e);
-		}
-		return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource,
-				kieli,oids, org, organisaationimi);
-	}
-	
-	public static Map<String, TreeMultiset<Integer>> todellisenJonosijanRatkaisin(Collection<HakijaDTO> hakukohteenHakijat) {
-		Map<String,  TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija = Maps.newHashMap();
-		for (HakijaDTO hakija : hakukohteenHakijat) {
-			for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-				for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
-						.getHakutoiveenValintatapajonot()) {
-					if(!valintatapajono.getTila().isHyvaksytty()) {
-						continue;
-					}
-					if(!valintatapajonoToJonosijaToHakija.containsKey(valintatapajono.getValintatapajonoOid())) {
-						valintatapajonoToJonosijaToHakija.put(valintatapajono.getValintatapajonoOid(), 
-								
-								TreeMultiset.<Integer>create());
-					}
-					int kkJonosija = Optional.ofNullable(
-							valintatapajono.getJonosija()).orElse(0)
-							+ Optional.ofNullable(
-									valintatapajono.getTasasijaJonosija())
-									.orElse(0) - 1;
-					//if(hakutoive.)
-					valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).add(kkJonosija);
-				}
-			}
-		}
-		return valintatapajonoToJonosijaToHakija;
-	}
-	
-	@Override
-	public void hyvaksymiskirjeetHakemuksille(final KirjeProsessi prosessi,
-			final HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
-			final List<String> hakemusOids) {
-		Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource
-				.getApplicationsByOids(hakemusOids);
-		Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource
-				.getKoulutuspaikkallisetHakijat(
-						hyvaksymiskirjeDTO.getHakuOid(),
-						hyvaksymiskirjeDTO.getHakukohdeOid());
-		Future<Response> organisaatioFuture = organisaatioAsyncResource
-				.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
-		final String hakukohdeOid = hyvaksymiskirjeDTO
-				.getHakukohdeOid();
-		
-		zip(
-				from(hakemuksetFuture),
-				from(hakijatFuture),
-				from(organisaatioFuture),
-				(hakemukset, hakijat, organisaatioResponse) -> {
-					LOG.info("Tehdaan valituille hakijoille hyvaksytyt filtterointi.");
+    private static Organisaatio responseToOrganisaatio(
+            HaeOsoiteKomponentti haeOsoiteKomponentti,
+            OrganisaatioAsyncResource organisaatioAsyncResource,
+            Response organisaatioResponse) throws IOException {
+        InputStream stream = (InputStream) organisaatioResponse.getEntity();
+        String json = StringUtils.trimToEmpty(IOUtils.toString(stream));
+        IOUtils.closeQuietly(stream);
+        return new Gson().fromJson(json, Organisaatio.class);
+    }
 
-					final Set<String> kohdeHakijat = Sets
-							.newHashSet(hakemusOids);
-					
-					BiPredicate<HakijaDTO, String> kohdeHakukohteessaHyvaksytty = new SijoittelussaHyvaksyttyHakijaBiPredicate();
+    private static Osoite haeOsoiteHierarkisesti(
+            HaeOsoiteKomponentti haeOsoiteKomponentti,
+            OrganisaatioAsyncResource organisaatioAsyncResource,
+            String kieli, List<String> oids, Organisaatio rdto, Teksti organisaationimi) {
+        Osoite hakijapalveluidenOsoite = null;
+        try {
+            if (organisaationimi.isArvoton()) {
+                organisaationimi = new Teksti(rdto.getNimi());
+            }
+            hakijapalveluidenOsoite = LueHakijapalvelunOsoite.lueHakijapalvelunOsoite(haeOsoiteKomponentti, kieli, rdto, organisaationimi);
+            if (rdto == null) {
+                LOG.error("Organisaatiopalvelusta ei saatu organisaatiota tunnisteelle {}. Eli ei saatu hakijapalveluiden osoitetta.", Arrays.toString(oids.toArray()));
+                return null;
+            }
+            if (oids == null) {
+                LOG.error("Oidi-listaa ei voitu kerätä kun listaa ei ollut annettu!");
+                return null;
+            }
+            try {
+                oids.add(rdto.getParentOid());
+            } catch (Exception e) {
+                LOG.error("Oidia ei voitu lisätä oidilistaan: {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+                throw new RuntimeException("Oidia ei voitu lisätä oidilistaan: " + e.getMessage());
+            }
+            if (hakijapalveluidenOsoite != null) {
+                LOG.error("Hakijapalveluiden osoite saatiin tarjoajalta {}.\r\n{}", Arrays.toString(oids.toArray()), new GsonBuilder().setPrettyPrinting().create().toJson(hakijapalveluidenOsoite));
+                return hakijapalveluidenOsoite;
+            }
+            if (hakijapalveluidenOsoite == null && rdto.getParentOid() != null) {
+                LOG.error("Ei saatu hakijapalveluiden osoitetta talta organisaatiolta. Tutkitaan seuraava {}", Arrays.toString(oids.toArray()));
+                return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource, kieli, oids, responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioAsyncResource
+                        .haeOrganisaatio(rdto.getParentOid()).get()), organisaationimi);
+            } else {
+                LOG.error("Ei saatu hakijapalveluiden osoitetta! Kaytiin lapi organisaatiot {}!", Arrays.toString(oids.toArray()));
+                return null;
+            }
+        } catch (Exception e) {
+            LOG.error("Hakijapalveluiden osoitteen haussa odottamaton virhe {},\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+        }
+        return null;
+    }
 
-					Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat
-							.getResults()
-							.stream()
-							.filter(h -> kohdeHakukohteessaHyvaksytty.test(h,
-									hakukohdeOid))
-							//
-							.filter(h -> kohdeHakijat.contains(h
-									.getHakemusOid()))
-							//
-							.collect(Collectors.toList());
-					Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti
-							.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
-					MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet
-							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
-					
-					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-							todellisenJonosijanRatkaisin(hakijat
-							.getResults()),
-							organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
-									kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
-							hyvaksymiskirjeessaKaytetytHakukohteet,
-							kohdeHakukohteessaHyvaksytyt, hakemukset,
-							hyvaksymiskirjeDTO.getHakukohdeOid(),
-							hyvaksymiskirjeDTO.getHakuOid(),
-							hyvaksymiskirjeDTO.getTarjoajaOid(),
-							hyvaksymiskirjeDTO.getSisalto(),
-							hyvaksymiskirjeDTO.getTag(),
-							hyvaksymiskirjeDTO.getTemplateName(),
-							hyvaksymiskirjeDTO.getPalautusPvm(),
-							hyvaksymiskirjeDTO.getPalautusAika());
-				})
-		//
-				.subscribeOn(Schedulers.newThread())
-				//
-				.subscribe(
-						letterBatch -> {
-							letterBatchToViestintapalvelu().call(letterBatch,
-									prosessi, hyvaksymiskirjeDTO);
-						},
-						throwable -> {
-							LOG.error(
-									"Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}",
-									throwable.getMessage(), Arrays.toString(throwable.getStackTrace()));
-							prosessi.keskeyta();
-						});
-	}
-	@Override
-	public void jalkiohjauskirjeHakukohteelle(final KirjeProsessi prosessi,
-			final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
-		Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource
-				.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(),
-						hyvaksymiskirjeDTO.getHakukohdeOid());
-		Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource
-				.getKaikkiHakijat(
-						hyvaksymiskirjeDTO.getHakuOid(),
-						hyvaksymiskirjeDTO.getHakukohdeOid());
-		Future<Response> organisaatioFuture = organisaatioAsyncResource
-				.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
-		final String hakukohdeOid = hyvaksymiskirjeDTO
-				.getHakukohdeOid();
-		zip(
-				hakemuksetObservable,
-				from(hakijatFuture),
-				from(organisaatioFuture),
-				(hakemukset, hakijat, organisaatioResponse) -> {
-					
-					LOG.error("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.getResults().size());
-					
-					BiPredicate<HakijaDTO, String> kohdeHakukohteessaHylatytTest = new HaussaHylattyHakijaBiPredicate();
+    public static Osoite organisaatioResponseToHakijapalveluidenOsoite(
+            HaeOsoiteKomponentti haeOsoiteKomponentti,
+            OrganisaatioAsyncResource organisaatioAsyncResource,
+            List<String> oids, String kieli, Response organisaatioResponse) {
+        Organisaatio org;
+        Teksti organisaationimi;
+        try {
+            org = responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioResponse);
+            organisaationimi = new Teksti(org.getNimi());
+        } catch (Exception e) {
+            LOG.error("Ei saatu organisaatiota! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+            throw new RuntimeException(e);
+        }
+        return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource, kieli, oids, org, organisaationimi);
+    }
 
-					Collection<HakijaDTO> kohdeHakukohteessaHylatyt = hakijat
-							.getResults()
-							.stream()
-							.filter(h -> kohdeHakukohteessaHylatytTest.test(h,
-									hakukohdeOid)).collect(Collectors.toList());
-					if(kohdeHakukohteessaHylatyt.isEmpty()) {
-						LOG.error(
-								"Hakukohteessa {} ei ole jälkiohjattavia hakijoita!",
-								hyvaksymiskirjeDTO.getHakukohdeOid());
-						prosessi.keskeyta("Hakukohteessa ei ole jälkiohjattavia hakijoita!");
-						throw new RuntimeException("Hakukohteessa "+hyvaksymiskirjeDTO.getHakukohdeOid()+" ei ole jälkiohjattavia hakijoita!");
-					}
-					Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti
-							.haeKiinnostavatHakukohteet(kohdeHakukohteessaHylatyt);
-					MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet
-							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
-					List<String> tarjoajaOidList = newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid()));
-					Osoite hakijapalveluidenOsoite = organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, tarjoajaOidList,
-							kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
-					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-							todellisenJonosijanRatkaisin(hakijat
-									.getResults()),
-							hakijapalveluidenOsoite,
-							hyvaksymiskirjeessaKaytetytHakukohteet,
-							kohdeHakukohteessaHylatyt, hakemukset,
-							hyvaksymiskirjeDTO.getHakukohdeOid(),
-							hyvaksymiskirjeDTO.getHakuOid(),
-							hyvaksymiskirjeDTO.getTarjoajaOid(),
-							hyvaksymiskirjeDTO.getSisalto(),
-							hyvaksymiskirjeDTO.getTag(),
-							hyvaksymiskirjeDTO.getTemplateName(),
-							hyvaksymiskirjeDTO.getPalautusPvm(),
-							hyvaksymiskirjeDTO.getPalautusAika());
-				})
-		//
-				.subscribeOn(Schedulers.newThread())
-				//
-				.subscribe(
-						letterBatch -> {
-							letterBatchToViestintapalvelu().call(letterBatch,
-									prosessi, hyvaksymiskirjeDTO);
-						},
-						throwable -> {
-							LOG.error(
-									"Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}",
-									throwable.getMessage(), Arrays.toString(throwable.getStackTrace()));
-							prosessi.keskeyta();
-						});
-	}
-	@Override
-	public void hyvaksymiskirjeetHakukohteelle(KirjeProsessi prosessi,
-			final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
-		Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource
-				.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(),
-						hyvaksymiskirjeDTO.getHakukohdeOid());
-		Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource
-				.getKoulutuspaikkallisetHakijat(
-						hyvaksymiskirjeDTO.getHakuOid(),
-						hyvaksymiskirjeDTO.getHakukohdeOid());
-		Future<Response> organisaatioFuture = organisaatioAsyncResource
-				.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
-		final String hakukohdeOid = hyvaksymiskirjeDTO
-				.getHakukohdeOid();
-		zip(
-				hakemuksetObservable,
-				from(hakijatFuture),
-				from(organisaatioFuture),
-				(hakemukset, hakijat, organisaatioResponse) -> {
+    public static Map<String, TreeMultiset<Integer>> todellisenJonosijanRatkaisin(Collection<HakijaDTO> hakukohteenHakijat) {
+        Map<String, TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija = Maps.newHashMap();
+        for (HakijaDTO hakija : hakukohteenHakijat) {
+            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+                for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
+                    if (!valintatapajono.getTila().isHyvaksytty()) {
+                        continue;
+                    }
+                    if (!valintatapajonoToJonosijaToHakija.containsKey(valintatapajono.getValintatapajonoOid())) {
+                        valintatapajonoToJonosijaToHakija.put(valintatapajono.getValintatapajonoOid(), TreeMultiset.<Integer>create());
+                    }
+                    int kkJonosija = Optional.ofNullable(
+                            valintatapajono.getJonosija()).orElse(0)
+                            + Optional.ofNullable(
+                            valintatapajono.getTasasijaJonosija())
+                            .orElse(0) - 1;
+                    valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).add(kkJonosija);
+                }
+            }
+        }
+        return valintatapajonoToJonosijaToHakija;
+    }
 
-					LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi.");
-					
-					BiPredicate<HakijaDTO, String> kohdeHakukohteessaHyvaksytty = new SijoittelussaHyvaksyttyHakijaBiPredicate();
+    @Override
+    public void hyvaksymiskirjeetHakemuksille(final KirjeProsessi prosessi,
+                                              final HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
+                                              final List<String> hakemusOids) {
+        Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByOids(hakemusOids);
+        Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkallisetHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+        Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
+        final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
 
-					Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat
-							.getResults()
-							.stream()
-							.filter(h -> kohdeHakukohteessaHyvaksytty.test(h,
-									hakukohdeOid)).collect(Collectors.toList());
-					Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti
-							.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
-					MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet
-							.get(hyvaksymiskirjeDTO.getHakukohdeOid());
-					
-					return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-							todellisenJonosijanRatkaisin(hakijat
-									.getResults()),
-							organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
-									kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
-							hyvaksymiskirjeessaKaytetytHakukohteet,
-							kohdeHakukohteessaHyvaksytyt, hakemukset,
-							hyvaksymiskirjeDTO.getHakukohdeOid(),
-							hyvaksymiskirjeDTO.getHakuOid(),
-							hyvaksymiskirjeDTO.getTarjoajaOid(),
-							hyvaksymiskirjeDTO.getSisalto(),
-							hyvaksymiskirjeDTO.getTag(),
-							hyvaksymiskirjeDTO.getTemplateName(),
-							hyvaksymiskirjeDTO.getPalautusPvm(),
-							hyvaksymiskirjeDTO.getPalautusAika());
-				})
-		//
-				.subscribeOn(Schedulers.newThread())
-				//
-				.subscribe(
-						letterBatch -> {
-							letterBatchToViestintapalvelu().call(letterBatch,
-									prosessi, hyvaksymiskirjeDTO);
-						},
-						throwable -> {
-							LOG.error(
-									"Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}",
-									throwable.getMessage(), Arrays.toString(throwable.getStackTrace()));
-							prosessi.keskeyta();
-						});
-	}
+        zip(
+                from(hakemuksetFuture),
+                from(hakijatFuture),
+                from(organisaatioFuture),
+                (hakemukset, hakijat, organisaatioResponse) -> {
+                    LOG.info("Tehdaan valituille hakijoille hyvaksytyt filtterointi.");
+                    final Set<String> kohdeHakijat = Sets.newHashSet(hakemusOids);
+                    BiPredicate<HakijaDTO, String> kohdeHakukohteessaHyvaksytty = new SijoittelussaHyvaksyttyHakijaBiPredicate();
+                    Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat
+                            .getResults()
+                            .stream()
+                            .filter(h -> kohdeHakukohteessaHyvaksytty.test(h, hakukohdeOid))
+                            .filter(h -> kohdeHakijat.contains(h.getHakemusOid()))
+                            .collect(Collectors.toList());
+                    Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
+                    MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
 
-	public Action3<LetterBatch, KirjeProsessi, HyvaksymiskirjeDTO> letterBatchToViestintapalvelu() {
-		return (letterBatch, prosessi, kirje) -> {
-			try {
-				if (prosessi.isKeskeytetty()) {
-					LOG.error("Hyvaksymiskirjeiden luonti on keskeytetty kayttajantoimesta!");
-					return;
-				}
-				LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
-				final LetterResponse batchId;
-				try {
-					batchId=viestintapalveluAsyncResource
-						.viePdfJaOdotaReferenssi(letterBatch).get(165L,
-								TimeUnit.SECONDS);
-				}catch(Exception e){
-					LOG.error("Viestintapalvelukutsu epaonnistui virheeseen {}", e.getMessage());
-					throw new RuntimeException(e);
-				}
-				LOG.info("Saatiin kirjeen seurantaId {}", batchId.getBatchId());
-				prosessi.vaiheValmistui();
-                if(batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
+                    return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                            todellisenJonosijanRatkaisin(hakijat.getResults()),
+                            organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
+                                    kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
+                            hyvaksymiskirjeessaKaytetytHakukohteet,
+                            kohdeHakukohteessaHyvaksytyt, hakemukset,
+                            hyvaksymiskirjeDTO.getHakukohdeOid(),
+                            hyvaksymiskirjeDTO.getHakuOid(),
+                            hyvaksymiskirjeDTO.getTarjoajaOid(),
+                            hyvaksymiskirjeDTO.getSisalto(),
+                            hyvaksymiskirjeDTO.getTag(),
+                            hyvaksymiskirjeDTO.getTemplateName(),
+                            hyvaksymiskirjeDTO.getPalautusPvm(),
+                            hyvaksymiskirjeDTO.getPalautusAika());
+                })
+                //
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(
+                        letterBatch -> {
+                            letterBatchToViestintapalvelu().call(letterBatch,
+                                    prosessi, hyvaksymiskirjeDTO);
+                        },
+                        throwable -> {
+                            LOG.error(
+                                    "Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}",
+                                    throwable.getMessage(), Arrays.toString(throwable.getStackTrace()));
+                            prosessi.keskeyta();
+                        });
+    }
+
+    @Override
+    public void jalkiohjauskirjeHakukohteelle(final KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
+        Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+        Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKaikkiHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+        Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
+        final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
+        zip(
+                hakemuksetObservable,
+                from(hakijatFuture),
+                from(organisaatioFuture),
+                (hakemukset, hakijat, organisaatioResponse) -> {
+                    LOG.error("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.getResults().size());
+                    BiPredicate<HakijaDTO, String> kohdeHakukohteessaHylatytTest = new HaussaHylattyHakijaBiPredicate();
+                    Collection<HakijaDTO> kohdeHakukohteessaHylatyt = hakijat
+                            .getResults()
+                            .stream()
+                            .filter(h -> kohdeHakukohteessaHylatytTest.test(h, hakukohdeOid)).collect(Collectors.toList());
+                    if (kohdeHakukohteessaHylatyt.isEmpty()) {
+                        LOG.error("Hakukohteessa {} ei ole jälkiohjattavia hakijoita!", hyvaksymiskirjeDTO.getHakukohdeOid());
+                        prosessi.keskeyta("Hakukohteessa ei ole jälkiohjattavia hakijoita!");
+                        throw new RuntimeException("Hakukohteessa " + hyvaksymiskirjeDTO.getHakukohdeOid() + " ei ole jälkiohjattavia hakijoita!");
+                    }
+                    Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHylatyt);
+                    MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
+                    List<String> tarjoajaOidList = newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid()));
+                    Osoite hakijapalveluidenOsoite = organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, tarjoajaOidList,
+                            kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
+                    return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                            todellisenJonosijanRatkaisin(hakijat.getResults()),
+                            hakijapalveluidenOsoite,
+                            hyvaksymiskirjeessaKaytetytHakukohteet,
+                            kohdeHakukohteessaHylatyt, hakemukset,
+                            hyvaksymiskirjeDTO.getHakukohdeOid(),
+                            hyvaksymiskirjeDTO.getHakuOid(),
+                            hyvaksymiskirjeDTO.getTarjoajaOid(),
+                            hyvaksymiskirjeDTO.getSisalto(),
+                            hyvaksymiskirjeDTO.getTag(),
+                            hyvaksymiskirjeDTO.getTemplateName(),
+                            hyvaksymiskirjeDTO.getPalautusPvm(),
+                            hyvaksymiskirjeDTO.getPalautusAika());
+                })
+                //
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(
+                        letterBatch -> {
+                            letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO);
+                        },
+                        throwable -> {
+                            LOG.error("Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}", throwable.getMessage(), Arrays.toString(throwable.getStackTrace()));
+                            prosessi.keskeyta();
+                        });
+    }
+
+    @Override
+    public void hyvaksymiskirjeetHakukohteelle(KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
+        Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+        Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkallisetHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+        Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
+        final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
+        zip(
+                hakemuksetObservable,
+                from(hakijatFuture),
+                from(organisaatioFuture),
+                (hakemukset, hakijat, organisaatioResponse) -> {
+                    LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi.");
+                    BiPredicate<HakijaDTO, String> kohdeHakukohteessaHyvaksytty = new SijoittelussaHyvaksyttyHakijaBiPredicate();
+                    Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat
+                            .getResults()
+                            .stream()
+                            .filter(h -> kohdeHakukohteessaHyvaksytty.test(h, hakukohdeOid)).collect(Collectors.toList());
+                    Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
+                    MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
+
+                    return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                            todellisenJonosijanRatkaisin(hakijat.getResults()),
+                            organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
+                                    kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
+                            hyvaksymiskirjeessaKaytetytHakukohteet,
+                            kohdeHakukohteessaHyvaksytyt, hakemukset,
+                            hyvaksymiskirjeDTO.getHakukohdeOid(),
+                            hyvaksymiskirjeDTO.getHakuOid(),
+                            hyvaksymiskirjeDTO.getTarjoajaOid(),
+                            hyvaksymiskirjeDTO.getSisalto(),
+                            hyvaksymiskirjeDTO.getTag(),
+                            hyvaksymiskirjeDTO.getTemplateName(),
+                            hyvaksymiskirjeDTO.getPalautusPvm(),
+                            hyvaksymiskirjeDTO.getPalautusAika());
+                })
+                //
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(
+                        letterBatch -> {
+                            letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO);
+                        },
+                        throwable -> {
+                            LOG.error("Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}", throwable.getMessage(), Arrays.toString(throwable.getStackTrace()));
+                            prosessi.keskeyta();
+                        });
+    }
+
+    public Action3<LetterBatch, KirjeProsessi, HyvaksymiskirjeDTO> letterBatchToViestintapalvelu() {
+        return (letterBatch, prosessi, kirje) -> {
+            try {
+                if (prosessi.isKeskeytetty()) {
+                    LOG.error("Hyvaksymiskirjeiden luonti on keskeytetty kayttajantoimesta!");
+                    return;
+                }
+                LOG.info("Tehdaan viestintapalvelukutsu kirjeille.");
+                final LetterResponse batchId;
+                try {
+                    batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssi(letterBatch).get(165L, TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    LOG.error("Viestintapalvelukutsu epaonnistui virheeseen {}", e.getMessage());
+                    throw new RuntimeException(e);
+                }
+                LOG.info("Saatiin kirjeen seurantaId {}", batchId.getBatchId());
+                prosessi.vaiheValmistui();
+                if (batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
                     PublishSubject<String> stop = PublishSubject.create();
                     Observable
                             .interval(1, TimeUnit.SECONDS)
@@ -436,12 +363,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             .subscribe(
                                     pulse -> {
                                         try {
-                                            LOG.warn(
-                                                    "Tehdaan status kutsu seurantaId:lle {}",
-                                                    batchId);
-                                            LetterBatchStatusDto status = viestintapalveluAsyncResource
-                                                    .haeStatus(batchId.getBatchId()).get(900L,
-                                                            TimeUnit.MILLISECONDS);
+                                            LOG.warn("Tehdaan status kutsu seurantaId:lle {}", batchId);
+                                            LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatus(batchId.getBatchId()).get(900L, TimeUnit.MILLISECONDS);
                                             if (prosessi.isKeskeytetty()) {
                                                 LOG.error("Hyvaksymiskirjeiden luonti on keskeytetty kayttajantoimesta!");
                                                 stop.onNext(null);
@@ -465,18 +388,17 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                         }
 
                                     }, throwable -> {
-                                prosessi.keskeyta();
-                            }, () -> {
-                                prosessi.keskeyta();
-                            });
-                }  else {
+                                        prosessi.keskeyta();
+                                    }, () -> {
+                                        prosessi.keskeyta();
+                                    });
+                } else {
                     prosessi.keskeyta("Hakemuksissa oli virheitä", batchId.getErrors());
                 }
-			} catch (Exception e) {
-				LOG.error("Virhe hakukohteelle {}: {}",
-						kirje.getHakukohdeOid(), e.getMessage());
-				prosessi.keskeyta();
-			}
-		};
-	}
+            } catch (Exception e) {
+                LOG.error("Virhe hakukohteelle {}: {}", kirje.getHakukohdeOid(), e.getMessage());
+                prosessi.keskeyta();
+            }
+        };
+    }
 }
