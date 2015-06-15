@@ -10,49 +10,32 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HakutoiveenValintatapajonoComparator;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
-public class SijoittelussaHyvaksyttyHakijaPredicate implements
-		Predicate<HakijaDTO> {
+public class SijoittelussaHyvaksyttyHakijaPredicate implements Predicate<HakijaDTO> {
+    private final String hakukohdeOid;
 
-	private final String hakukohdeOid;
+    public SijoittelussaHyvaksyttyHakijaPredicate(String hakukohdeOid) {
+        this.hakukohdeOid = hakukohdeOid;
+    }
 
-	public SijoittelussaHyvaksyttyHakijaPredicate(String hakukohdeOid) {
-		this.hakukohdeOid = hakukohdeOid;
-	}
-
-	@Override
-	public boolean apply(HakijaDTO input) {
-		if (input.getHakutoiveet() == null) {
-		} else {
-			for (HakutoiveDTO h : input.getHakutoiveet()) {
-
-				if (hakukohdeOid.equals(h.getHakukohdeOid())) {
-					final boolean checkFirstValintatapajonoOnly = false;
-					// sort by
-					// priority
-//					Collections.sort(h.getHakutoiveenValintatapajonot(),
-//							HakutoiveenValintatapajonoComparator.DEFAULT);
-
-					for (HakutoiveenValintatapajonoDTO vjono : h
-							.getHakutoiveenValintatapajonot()) {
-						if (HakemuksenTila.HYVAKSYTTY.equals(vjono.getTila())
-								|| HakemuksenTila.VARASIJALTA_HYVAKSYTTY
-										.equals(vjono.getTila())) {
-							return true;
-						}
-						if (checkFirstValintatapajonoOnly) {
-							return false;
-						}
-					}
-				}
-
-			}
-		}
-		return false;
-	}
-
+    @Override
+    public boolean apply(HakijaDTO input) {
+        if (input.getHakutoiveet() == null) {
+        } else {
+            for (HakutoiveDTO h : input.getHakutoiveet()) {
+                if (hakukohdeOid.equals(h.getHakukohdeOid())) {
+                    final boolean checkFirstValintatapajonoOnly = false;
+                    for (HakutoiveenValintatapajonoDTO vjono : h.getHakutoiveenValintatapajonot()) {
+                        if (HakemuksenTila.HYVAKSYTTY.equals(vjono.getTila())
+                                || HakemuksenTila.VARASIJALTA_HYVAKSYTTY.equals(vjono.getTila())) {
+                            return true;
+                        }
+                        if (checkFirstValintatapajonoOnly) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }

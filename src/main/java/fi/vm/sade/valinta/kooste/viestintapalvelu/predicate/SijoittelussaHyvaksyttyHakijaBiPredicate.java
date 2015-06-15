@@ -12,50 +12,32 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HakutoiveenValintatapajonoComparator;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
-public class SijoittelussaHyvaksyttyHakijaBiPredicate implements
-		BiPredicate<HakijaDTO, String> {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(SijoittelussaHyvaksyttyHakijaBiPredicate.class);
+public class SijoittelussaHyvaksyttyHakijaBiPredicate implements BiPredicate<HakijaDTO, String> {
+    private static final Logger LOG = LoggerFactory.getLogger(SijoittelussaHyvaksyttyHakijaBiPredicate.class);
 
-	@Override
-	public boolean test(HakijaDTO hakija, String hakukohdeOid) {
-		if (hakija.getHakutoiveet() == null) {
-		} else {
-			for (HakutoiveDTO h : hakija.getHakutoiveet()) {
-
-				if (hakukohdeOid.equals(h.getHakukohdeOid())) {
-					final boolean checkFirstValintatapajonoOnly = false;
-					// sort by
-					// priority
-					Collections.sort(h.getHakutoiveenValintatapajonot(),
-							HakutoiveenValintatapajonoComparator.DEFAULT);
-
-					for (HakutoiveenValintatapajonoDTO vjono : h
-							.getHakutoiveenValintatapajonot()) {
-						if (vjono.getTila() == null) {
-							LOG.warn(
-									"Hakijalla (hakijaOid={},hakemusOid={}) ei ole hakutoiveen valintatapajonossa tilaa joten merkitaan automaattisesti ei hyvaksytyksi!",
-									hakija.getHakijaOid(),
-									hakija.getHakemusOid());
-						}
-						if (vjono.getTila() != null
-								&& vjono.getTila().isHyvaksytty()) {
-							return true;
-						}
-						if (checkFirstValintatapajonoOnly) {
-							return false;
-						}
-					}
-				}
-
-			}
-		}
-		return false;
-	}
-
+    @Override
+    public boolean test(HakijaDTO hakija, String hakukohdeOid) {
+        if (hakija.getHakutoiveet() == null) {
+        } else {
+            for (HakutoiveDTO h : hakija.getHakutoiveet()) {
+                if (hakukohdeOid.equals(h.getHakukohdeOid())) {
+                    final boolean checkFirstValintatapajonoOnly = false;
+                    Collections.sort(h.getHakutoiveenValintatapajonot(), HakutoiveenValintatapajonoComparator.DEFAULT);
+                    for (HakutoiveenValintatapajonoDTO vjono : h.getHakutoiveenValintatapajonot()) {
+                        if (vjono.getTila() == null) {
+                            LOG.warn("Hakijalla (hakijaOid={},hakemusOid={}) ei ole hakutoiveen valintatapajonossa tilaa joten merkitaan automaattisesti ei hyvaksytyksi!",
+                                    hakija.getHakijaOid(), hakija.getHakemusOid());
+                        }
+                        if (vjono.getTila() != null && vjono.getTila().isHyvaksytty()) {
+                            return true;
+                        }
+                        if (checkFirstValintatapajonoOnly) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }
