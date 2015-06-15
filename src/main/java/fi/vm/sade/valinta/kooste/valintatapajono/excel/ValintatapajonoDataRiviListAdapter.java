@@ -4,18 +4,15 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-public class ValintatapajonoDataRiviListAdapter implements
-		ValintatapajonoDataRiviKuuntelija {
+public class ValintatapajonoDataRiviListAdapter implements ValintatapajonoDataRiviKuuntelija {
+    private final List<ValintatapajonoRivi> rivit = Lists.newArrayList();
 
-	private final List<ValintatapajonoRivi> rivit = Lists.newArrayList();
+    @Override
+    public void valintatapajonoDataRiviTapahtuma(ValintatapajonoRivi valintatapajonoRivi) {
+        rivit.add(valintatapajonoRivi);
+    }
 
-	@Override
-	public void valintatapajonoDataRiviTapahtuma(
-			ValintatapajonoRivi valintatapajonoRivi) {
-		rivit.add(valintatapajonoRivi);
-	}
-
-	public List<ValintatapajonoRivi> getRivit() {
-		return rivit;
-	}
+    public List<ValintatapajonoRivi> getRivit() {
+        return rivit;
+    }
 }

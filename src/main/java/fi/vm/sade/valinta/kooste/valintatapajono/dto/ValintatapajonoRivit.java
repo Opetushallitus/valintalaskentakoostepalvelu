@@ -7,9 +7,6 @@ import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * @author Jussi Jartamo
- */
 @ApiModel
 public class ValintatapajonoRivit {
 
@@ -19,6 +16,7 @@ public class ValintatapajonoRivit {
     public ValintatapajonoRivit() {
         this.rivit = null;
     }
+
     public ValintatapajonoRivit(List<ValintatapajonoRivi> rivit) {
         this.rivit = rivit;
     }

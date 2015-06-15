@@ -10,24 +10,15 @@ import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
 import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute;
 import org.springframework.context.annotation.Profile;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 @Profile("default")
 @Configuration
 public class ValintatapajonoConfig {
 
-	@Bean
-	public ValintatapajonoVientiRoute getValintatapajonoVientiRoute(
-			@Value(ValintatapajonoVientiRoute.SEDA_VALINTATAPAJONO_VIENTI) String valintatapajonoVienti,
-			@Qualifier("javaDslCamelContext") CamelContext context)
-			throws Exception {
-		return ProxyWithAnnotationHelper
-				.createProxy(
-						context.getEndpoint(ValintatapajonoVientiRoute.SEDA_VALINTATAPAJONO_VIENTI),
-						ValintatapajonoVientiRoute.class);
-	}
-
+    @Bean
+    public ValintatapajonoVientiRoute getValintatapajonoVientiRoute(
+            @Value(ValintatapajonoVientiRoute.SEDA_VALINTATAPAJONO_VIENTI) String valintatapajonoVienti,
+            @Qualifier("javaDslCamelContext") CamelContext context)
+            throws Exception {
+        return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(ValintatapajonoVientiRoute.SEDA_VALINTATAPAJONO_VIENTI), ValintatapajonoVientiRoute.class);
+    }
 }

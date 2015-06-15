@@ -1,8 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.dto;
 
-/**
- * @author Jussi Jartamo
- */
 public class Kuvaus {
     private final String kieli;
     private final String teksti;

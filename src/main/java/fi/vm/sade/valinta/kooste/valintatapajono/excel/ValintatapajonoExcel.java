@@ -33,173 +33,124 @@ import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
 
 public class ValintatapajonoExcel {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(ValintatapajonoExcel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ValintatapajonoExcel.class);
 
-	public final static String MAARITTELEMATON = "Määrittelemätön";
-	public final static String HYVAKSYTTAVISSA = "Hyväksyttävissä";
-	public final static String HYLATTY = "Hylätty";
-	public final static String HYVAKSYTTY_HARKINNANVARAISESTI = "Hyväksytty harkinnanvaraisesti";
+    public final static String MAARITTELEMATON = "Määrittelemätön";
+    public final static String HYVAKSYTTAVISSA = "Hyväksyttävissä";
+    public final static String HYLATTY = "Hylätty";
+    public final static String HYVAKSYTTY_HARKINNANVARAISESTI = "Hyväksytty harkinnanvaraisesti";
 
-	public final static String VAKIO_MAARITTELEMATON = "MAARITTELEMATON";
-	public final static String VAKIO_HYVAKSYTTAVISSA = "HYVAKSYTTAVISSA";
-	public final static String VAKIO_HYLATTY = "HYLATTY";
-	public final static String VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI = "HYVAKSYTTY_HARKINNANVARAISESTI";
+    public final static String VAKIO_MAARITTELEMATON = "MAARITTELEMATON";
+    public final static String VAKIO_HYVAKSYTTAVISSA = "HYVAKSYTTAVISSA";
+    public final static String VAKIO_HYLATTY = "HYLATTY";
+    public final static String VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI = "HYVAKSYTTY_HARKINNANVARAISESTI";
 
-	private final static Collection<String> VAIHTOEHDOT = Arrays.asList(
-			MAARITTELEMATON, HYVAKSYTTAVISSA, HYLATTY);
-	public final static Map<String, String> VAIHTOEHDOT_KONVERSIO = new KonversioBuilder()
-	//
-			.addKonversio(StringUtils.EMPTY, MAARITTELEMATON)
-			//
-			.addKonversio(VAKIO_MAARITTELEMATON, MAARITTELEMATON)
-			//
-			.addKonversio(VAKIO_HYVAKSYTTAVISSA, HYVAKSYTTAVISSA)
-			//
-			.addKonversio(VAKIO_HYLATTY, HYLATTY)
-			//
-			.addKonversio(VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI, HYVAKSYTTY_HARKINNANVARAISESTI).build();
-	public final static Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO = new KonversioBuilder()
-	//
-			.addKonversio(StringUtils.EMPTY, VAKIO_MAARITTELEMATON)
-			//
-			.addKonversio(MAARITTELEMATON, VAKIO_MAARITTELEMATON)
-			//
-			.addKonversio(HYVAKSYTTAVISSA, VAKIO_HYVAKSYTTAVISSA)
-			//
-			.addKonversio(HYLATTY, VAKIO_HYLATTY)
-			//
-			.addKonversio(HYVAKSYTTY_HARKINNANVARAISESTI, VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI).build();
+    private final static Collection<String> VAIHTOEHDOT = Arrays.asList(MAARITTELEMATON, HYVAKSYTTAVISSA, HYLATTY);
+    public final static Map<String, String> VAIHTOEHDOT_KONVERSIO = new KonversioBuilder()
+            .addKonversio(StringUtils.EMPTY, MAARITTELEMATON)
+            .addKonversio(VAKIO_MAARITTELEMATON, MAARITTELEMATON)
+            .addKonversio(VAKIO_HYVAKSYTTAVISSA, HYVAKSYTTAVISSA)
+            .addKonversio(VAKIO_HYLATTY, HYLATTY)
+            .addKonversio(VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI, HYVAKSYTTY_HARKINNANVARAISESTI).build();
+    public final static Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO = new KonversioBuilder()
+            .addKonversio(StringUtils.EMPTY, VAKIO_MAARITTELEMATON)
+            .addKonversio(MAARITTELEMATON, VAKIO_MAARITTELEMATON)
+            .addKonversio(HYVAKSYTTAVISSA, VAKIO_HYVAKSYTTAVISSA)
+            .addKonversio(HYLATTY, VAKIO_HYLATTY)
+            .addKonversio(HYVAKSYTTY_HARKINNANVARAISESTI, VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI).build();
 
-	private final Excel excel;
+    private final Excel excel;
 
-	public ValintatapajonoExcel(String hakuOid, String hakukohdeOid,
-			String valintatapajonoOid,
-			//
-			String hakuNimi, String hakukohdeNimi,
-			//
-			List<ValintatietoValinnanvaiheDTO> valinnanvaihe,
-			//
-			List<Hakemus> hakemukset) {
-		this(hakuOid, hakukohdeOid, valintatapajonoOid, hakuNimi,
-				hakukohdeNimi, valinnanvaihe, hakemukset, Collections
-						.<ValintatapajonoDataRiviKuuntelija> emptyList());
-	}
+    public ValintatapajonoExcel(String hakuOid, String hakukohdeOid, String valintatapajonoOid, String hakuNimi, String hakukohdeNimi,
+                                List<ValintatietoValinnanvaiheDTO> valinnanvaihe, List<Hakemus> hakemukset) {
+        this(hakuOid, hakukohdeOid, valintatapajonoOid, hakuNimi, hakukohdeNimi, valinnanvaihe, hakemukset, Collections.<ValintatapajonoDataRiviKuuntelija>emptyList());
+    }
 
-	@SuppressWarnings("unchecked")
-	public ValintatapajonoExcel(String hakuOid, String hakukohdeOid,
-			String valintatapajonoOid,
-			//
-			String hakuNimi, String hakukohdeNimi,
-			//
-			List<ValintatietoValinnanvaiheDTO> valinnanvaihe,
-			// List<ValinnanVaiheJonoillaDTO> valinnanvaiheet,
-			List<Hakemus> hakemukset,
-			//
-			Collection<? extends ValintatapajonoDataRiviKuuntelija> kuuntelijat) {
-		// Jonosija (13) Hakija Valintatieto Kuvaus (FI) Kuvaus (SV) Kuvaus (EN)
-		Collection<Rivi> rivit = Lists.newArrayList();
-		rivit.add(new RiviBuilder().addOid(hakuOid).addTeksti(hakuNimi, 4)
-				.build());
-		rivit.add(new RiviBuilder().addOid(hakukohdeOid)
-				.addTeksti(hakukohdeNimi, 4).build());
+    @SuppressWarnings("unchecked")
+    public ValintatapajonoExcel(String hakuOid, String hakukohdeOid, String valintatapajonoOid, String hakuNimi, String hakukohdeNimi,
+                                List<ValintatietoValinnanvaiheDTO> valinnanvaihe, List<Hakemus> hakemukset,
+                                Collection<? extends ValintatapajonoDataRiviKuuntelija> kuuntelijat) {
+        // Jonosija (13) Hakija Valintatieto Kuvaus (FI) Kuvaus (SV) Kuvaus (EN)
+        Collection<Rivi> rivit = Lists.newArrayList();
+        rivit.add(new RiviBuilder().addOid(hakuOid).addTeksti(hakuNimi, 4).build());
+        rivit.add(new RiviBuilder().addOid(hakukohdeOid).addTeksti(hakukohdeNimi, 4).build());
+        rivit.add(Rivi.tyhjaRivi());
 
-		rivit.add(Rivi.tyhjaRivi());
+        final RiviBuilder otsikkoRiviBuilder = new RiviBuilder()
+                .addKeskitettyTeksti("Hakemus OID")
+                .addKeskitettyTeksti("Jonosija (" + hakemukset.size() + ")")
+                .addKeskitettyTeksti("Hakija")
+                .addKeskitettyTeksti("Valintatieto")
+                .addKeskitettyTeksti("Kuvaus (FI)")
+                .addKeskitettyTeksti("Kuvaus (SV)")
+                .addKeskitettyTeksti("Kuvaus (EN)");
 
-		final RiviBuilder otsikkoRiviBuilder = new RiviBuilder()
-				.addKeskitettyTeksti("Hakemus OID")
-				.addKeskitettyTeksti("Jonosija (" + hakemukset.size() + ")")
-				.addKeskitettyTeksti("Hakija")
-				.addKeskitettyTeksti("Valintatieto")
-				.addKeskitettyTeksti("Kuvaus (FI)")
-				.addKeskitettyTeksti("Kuvaus (SV)")
-				.addKeskitettyTeksti("Kuvaus (EN)");
+        rivit.add(otsikkoRiviBuilder.build());
 
-		rivit.add(otsikkoRiviBuilder.build());
+        final Map<String, Integer> jonosijat = Maps.newHashMap();
+        final Map<String, String> valintatiedot = Maps.newHashMap();
+        final Map<String, Map<String, String>> avaimet = Maps.newHashMap();
+        for (ValintatietoValinnanvaiheDTO vaihe : valinnanvaihe) {
+            for (ValintatapajonoDTO jono : vaihe.getValintatapajonot()) {
+                if (valintatapajonoOid.equals(jono.getOid())) {
+                    for (JonosijaDTO jonosija : jono.getJonosijat()) {
+                        String hakemusOid = jonosija.getHakemusOid();
+                        jonosijat.put(hakemusOid, jonosija.getJonosija());
+                        valintatiedot.put(hakemusOid, jonosija.getTuloksenTila().toString());
+                        if (!jonosija.getJarjestyskriteerit().isEmpty()) {
+                            avaimet.put(hakemusOid, jonosija.getJarjestyskriteerit().last().getKuvaus());
+                        }
+                    }
+                }
+            }
+        }
+        ComparatorChain jonosijaAndHakijaNameComparator = new ComparatorChain(
+                // compare by jonosija
+                new Comparator<Hakemus>() {
+                    @Override
+                    public int compare(Hakemus o1, Hakemus o2) {
+                        Integer i1 = jonosijat.get(o1.getOid());
+                        Integer i2 = jonosijat.get(o2.getOid());
+                        if (i1 == null) {
+                            i1 = Integer.MAX_VALUE;
+                        }
+                        if (i2 == null) {
+                            i2 = Integer.MAX_VALUE;
+                        }
+                        return i1.compareTo(i2);
+                    }
+                });
+        jonosijaAndHakijaNameComparator.addComparator(HakemusComparator.DEFAULT);
+        Collections.sort(hakemukset, jonosijaAndHakijaNameComparator);
 
-		final Map<String, Integer> jonosijat = Maps.newHashMap();
-		final Map<String, String> valintatiedot = Maps.newHashMap();
-		final Map<String, Map<String, String>> avaimet = Maps.newHashMap();
-		for (ValintatietoValinnanvaiheDTO vaihe : valinnanvaihe) {
-			for (ValintatapajonoDTO jono : vaihe.getValintatapajonot()) {
-				if (valintatapajonoOid.equals(jono.getOid())) {
-					for (JonosijaDTO jonosija : jono.getJonosijat()) {
-						String hakemusOid = jonosija.getHakemusOid();
-						jonosijat.put(hakemusOid, jonosija.getJonosija());
-						valintatiedot.put(hakemusOid, jonosija
-								.getTuloksenTila().toString());
-						if (!jonosija.getJarjestyskriteerit().isEmpty()) {
+        Collection<Collection<Arvo>> sx = Lists.newArrayList();
+        for (Hakemus data : hakemukset) {
+            String hakemusOid = data.getOid();
+            Collection<Arvo> s = Lists.newArrayList();
+            s.add(new TekstiArvo(hakemusOid));
 
-							avaimet.put(hakemusOid, jonosija
-									.getJarjestyskriteerit().last().getKuvaus());
+            s.add(new NumeroArvo(jonosijat.get(hakemusOid), 0, hakemukset.size()));
+            Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(data, null, null);
+            s.add(new TekstiArvo(new StringBuilder().append(osoite.getLastName()).append(" ").append(osoite.getFirstName()).toString()));
+            s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO.get(StringUtils.trimToEmpty(valintatiedot.get(hakemusOid))), VAIHTOEHDOT));
+            if (avaimet.containsKey(hakemusOid)) {
+                Map<String, String> a = avaimet.get(hakemusOid);
+                s.add(new TekstiArvo(StringUtils.trimToEmpty(a.get("FI")), false, true));
+                s.add(new TekstiArvo(StringUtils.trimToEmpty(a.get("SV")), false, true));
+                s.add(new TekstiArvo(StringUtils.trimToEmpty(a.get("EN")), false, true));
+            } else {
+                s.add(new TekstiArvo(StringUtils.EMPTY, false, true));
+                s.add(new TekstiArvo(StringUtils.EMPTY, false, true));
+                s.add(new TekstiArvo(StringUtils.EMPTY, false, true));
+            }
+            sx.add(s);
+        }
+        rivit.add(new ValintatapajonoDataRivi(sx, kuuntelijat));
+        this.excel = new Excel("Valintatapajono", rivit, new int[]{0} // piilottaa ensimmaisen pysty sarakkeen
+                , new int[]{});
+    }
 
-						}
-					}
-				}
-			}
-		}
-		ComparatorChain jonosijaAndHakijaNameComparator = new ComparatorChain(
-		// compare by jonosija
-				new Comparator<Hakemus>() {
-					@Override
-					public int compare(Hakemus o1, Hakemus o2) {
-						Integer i1 = jonosijat.get(o1.getOid());
-						Integer i2 = jonosijat.get(o2.getOid());
-						if (i1 == null) {
-							i1 = Integer.MAX_VALUE;
-						}
-						if (i2 == null) {
-							i2 = Integer.MAX_VALUE;
-						}
-						return i1.compareTo(i2);
-					}
-				});
-		jonosijaAndHakijaNameComparator
-				.addComparator(HakemusComparator.DEFAULT);
-		Collections.sort(hakemukset, jonosijaAndHakijaNameComparator);
-
-		Collection<Collection<Arvo>> sx = Lists.newArrayList();
-		for (Hakemus data : hakemukset) {
-			String hakemusOid = data.getOid();
-			Collection<Arvo> s = Lists.newArrayList();
-			s.add(new TekstiArvo(hakemusOid));
-
-			s.add(new NumeroArvo(jonosijat.get(hakemusOid), 0, hakemukset
-					.size()));
-			Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(data,
-					null, null);
-
-			s.add(new TekstiArvo(new StringBuilder()
-					.append(osoite.getLastName()).append(" ")
-					.append(osoite.getFirstName()).toString()));
-
-			s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO.get(StringUtils
-					.trimToEmpty(valintatiedot.get(hakemusOid))), VAIHTOEHDOT));
-			if (avaimet.containsKey(hakemusOid)) {
-				Map<String, String> a = avaimet.get(hakemusOid);
-				s.add(new TekstiArvo(StringUtils.trimToEmpty(a.get("FI")),
-						false, true));
-				s.add(new TekstiArvo(StringUtils.trimToEmpty(a.get("SV")),
-						false, true));
-				s.add(new TekstiArvo(StringUtils.trimToEmpty(a.get("EN")),
-						false, true));
-			} else {
-				s.add(new TekstiArvo(StringUtils.EMPTY, false, true));
-				s.add(new TekstiArvo(StringUtils.EMPTY, false, true));
-				s.add(new TekstiArvo(StringUtils.EMPTY, false, true));
-			}
-			sx.add(s);
-		}
-
-		rivit.add(new ValintatapajonoDataRivi(sx, kuuntelijat));
-		this.excel = new Excel("Valintatapajono", rivit, new int[] { 0 } // piilottaa
-																			// ensimmaisen
-																			// pysty
-																			// sarakkeen
-				, new int[] {});
-	}
-
-	public Excel getExcel() {
-		return excel;
-	}
+    public Excel getExcel() {
+        return excel;
+    }
 }
