@@ -82,25 +82,6 @@ public class ValintalaskennanTulosExcel {
         return new ValintatapaJonoSheet(indexedJonoSheet.getValue(), truncatedSheetName);
     }
 
-    private static class ValintatapaJonoSheet {
-        public final ValintatietoValintatapajonoDTO jono;
-        public final ValinnanvaiheDTO vaihe;
-        public final String sheetName;
-        public ValintatapaJonoSheet(ValintatietoValintatapajonoDTO jono, ValinnanvaiheDTO vaihe) {
-            this.jono = jono;
-            this.vaihe = vaihe;
-            this.sheetName = jono.getNimi();
-        }
-        public ValintatapaJonoSheet(ValintatapaJonoSheet cloneSheetWithNewName, String sheetName) {
-            this.jono = cloneSheetWithNewName.jono;
-            this.vaihe = cloneSheetWithNewName.vaihe;
-            this.sheetName = sheetName;
-        }
-        public Date getCreatedAt() {
-            return vaihe.getCreatedAt();
-        }
-    }
-
     private static void addJonosijaRows(Map<String, Hakemus> hakemusByOid, ValintatietoValintatapajonoDTO jono, XSSFSheet sheet) {
         sortedJonosijat(jono)
                 .map(hakija -> {
@@ -206,6 +187,25 @@ public class ValintalaskennanTulosExcel {
         final XSSFRow row = sheet.createRow(sheet.getPhysicalNumberOfRows());
         for (int col = 0, count = values.size(); col < count; col++) {
             row.createCell(col).setCellValue(values.get(col));
+        }
+    }
+
+    private static class ValintatapaJonoSheet {
+        public final ValintatietoValintatapajonoDTO jono;
+        public final ValinnanvaiheDTO vaihe;
+        public final String sheetName;
+        public ValintatapaJonoSheet(ValintatietoValintatapajonoDTO jono, ValinnanvaiheDTO vaihe) {
+            this.jono = jono;
+            this.vaihe = vaihe;
+            this.sheetName = jono.getNimi();
+        }
+        public ValintatapaJonoSheet(ValintatapaJonoSheet cloneSheetWithNewName, String sheetName) {
+            this.jono = cloneSheetWithNewName.jono;
+            this.vaihe = cloneSheetWithNewName.vaihe;
+            this.sheetName = sheetName;
+        }
+        public Date getCreatedAt() {
+            return vaihe.getCreatedAt();
         }
     }
 }
