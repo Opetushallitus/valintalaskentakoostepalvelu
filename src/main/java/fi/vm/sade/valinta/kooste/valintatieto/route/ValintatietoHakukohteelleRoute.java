@@ -6,7 +6,5 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenD
 import org.apache.camel.Property;
 
 public interface ValintatietoHakukohteelleRoute {
-
-    List<HakemusOsallistuminenDTO> haeValintatiedotHakukohteelle(
-            @Property("valintakoeOid") List<String> valintakoeOids, @Property("hakukohdeOid") String hakukohdeOid);
+    List<HakemusOsallistuminenDTO> haeValintatiedotHakukohteelle(@Property("valintakoeOid") List<String> valintakoeOids, @Property("hakukohdeOid") String hakukohdeOid);
 }

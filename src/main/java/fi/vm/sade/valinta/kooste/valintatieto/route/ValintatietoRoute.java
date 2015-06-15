@@ -6,6 +6,5 @@ import org.apache.camel.Property;
 import fi.vm.sade.valinta.kooste.OPH;
 
 public interface ValintatietoRoute {
-
     HakuDTO haeValintatiedot(@Property(OPH.HAKUOID) String hakuOid);
 }
