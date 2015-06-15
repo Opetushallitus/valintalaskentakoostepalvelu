@@ -47,9 +47,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-/**
- * @author Jussi Jartamo
- */
 @Service
 public class HyvaksymiskirjeetKokoHaulleService {
 
@@ -68,6 +65,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
     private final OrganisaatioAsyncResource organisaatioAsyncResource;
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
     private final Observable<Long> pulse;
+
     @Autowired
     private HyvaksymiskirjeetKokoHaulleService(
             HaeOsoiteKomponentti haeOsoiteKomponentti,
@@ -87,7 +85,6 @@ public class HyvaksymiskirjeetKokoHaulleService {
         this.organisaatioAsyncResource = organisaatioAsyncResource;
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
         this.pulse = Observable.interval(500L, TimeUnit.MILLISECONDS);
-
     }
 
     private static String nimiUriToTag(String nimiUri, String deflt) {
@@ -164,9 +161,6 @@ public class HyvaksymiskirjeetKokoHaulleService {
                     muodostaHyvaksymiskirjeetKokoHaulle(
                             hakuOid,
                             haku.getHakukohdeOids()
-                            //
-                            // Vaan 30 ekaa
-                            //
                             //.stream().limit(115).collect(Collectors.toList())
                             , prosessi
                     );
@@ -200,8 +194,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                             String kieli = KirjeetHakukohdeCache.getOpetuskieli(h.getOpetusKielet());
                                             return wrapAsRunOnlyOnceObservable(Observable.combineLatest(
                                                     sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid, hakukohde),
-                                                    viestintapalveluAsyncResource.haeKirjepohja(hakuOid, tarjoaja, "hyvaksymiskirje",
-                                                            kieli, hakukohde),
+                                                    viestintapalveluAsyncResource.haeKirjepohja(hakuOid, tarjoaja, "hyvaksymiskirje", kieli, hakukohde),
                                                     (s, t) -> {
                                                         try {
                                                             List<HakijaDTO> hyvaksytytHakijat =
@@ -215,24 +208,17 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                                             Optional<TemplateDetail> td = etsiVakioDetail(t);
                                                             if (!td.isPresent()) {
 
-                                                                return Observable.error(
-                                                                        new RuntimeException("Ei " +
-                                                                                VAKIOTEMPLATE + " tai " +
-                                                                                VAKIODETAIL + " templateDetailia hakukohteelle " + hakukohde));
+                                                                return Observable.error(new RuntimeException("Ei " + VAKIOTEMPLATE + " tai " + VAKIODETAIL + " templateDetailia hakukohteelle " + hakukohde));
                                                             } else {
                                                                 return applicationAsyncResource.getApplicationsByHakemusOids(hyvaksytytHakijat.stream().map(hh -> hh.getHakemusOid()).collect(Collectors.toList()))
                                                                         .switchMap(
                                                                                 hakemukset -> {
                                                                                     try {
                                                                                         LOG.info("##### Saatiin hakemukset hakukohteelle {}", hakukohde);
-                                                                                        Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti
-                                                                                                .haeKiinnostavatHakukohteet(hyvaksytytHakijat);
-                                                                                        MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet
-                                                                                                .get(hakukohde);
-                                                                                        Future<Response> organisaatioFuture = organisaatioAsyncResource
-                                                                                                .haeOrganisaatio(tarjoaja);
+                                                                                        Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
+                                                                                        MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohde);
+                                                                                        Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(tarjoaja);
                                                                                         String tag = nimiUriToTag(h.getHakukohteenNimiUri(), hakukohde);
-
 
                                                                                         LetterBatch l = hyvaksymiskirjeetKomponentti
                                                                                                 .teeHyvaksymiskirjeet(
@@ -311,7 +297,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                                                         );
                                                             }
                                                         } catch (Throwable error) {
-                                                            LOG.error("Spluush" ,error);
+                                                            LOG.error("Spluush", error);
                                                             return Observable.error(error);
 
                                                         }
