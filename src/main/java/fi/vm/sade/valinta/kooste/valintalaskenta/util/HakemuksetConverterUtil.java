@@ -29,29 +29,21 @@ import java.util.stream.Stream;
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.wrap;
 import static java.util.stream.Collectors.*;
 
-/**
- * @author Jussi Jartamo
- */
 public class HakemuksetConverterUtil {
     private static final Logger LOG = LoggerFactory.getLogger(HakemuksetConverterUtil.class);
     public static final String PK_PAATTOTODISTUSVUOSI = "PK_PAATTOTODISTUSVUOSI";
     public static final String POHJAKOULUTUS = "POHJAKOULUTUS";
     public static final String ENSIKERTALAINEN = "ensikertalainen";
 
-    public static List<HakemusDTO> muodostaHakemuksetDTO(HakuV1RDTO haku,
-                                                         String hakukohdeOid,
-                                                         List<Hakemus> hakemukset,
-                                                         List<Oppija> oppijat,
-                                                         ParametritDTO parametritDTO) {
+    public static List<HakemusDTO> muodostaHakemuksetDTO(HakuV1RDTO haku, String hakukohdeOid, List<Hakemus> hakemukset,
+                                                         List<Oppija> oppijat, ParametritDTO parametritDTO) {
         ensurePersonOids(hakemukset, hakukohdeOid);
         List<HakemusDTO> hakemusDtot = hakemuksetToHakemusDTOs(hakukohdeOid, hakemukset);
         Map<String, Exception> errors = Maps.newHashMap();
         try {
             if (oppijat != null) {
-                Map<String, Oppija> personOidToOppija = oppijat.stream()
-                        .collect(toMap(Oppija::getOppijanumero, Function.<Oppija>identity()));
-                Map<String, Boolean> hasHetu = hakemukset.stream()
-                        .collect(toMap(Hakemus::getOid, h -> new HakemusWrapper(h).hasHenkilotunnus()));
+                Map<String, Oppija> personOidToOppija = oppijat.stream().collect(toMap(Oppija::getOppijanumero, Function.<Oppija>identity()));
+                Map<String, Boolean> hasHetu = hakemukset.stream().collect(toMap(Hakemus::getOid, h -> new HakemusWrapper(h).hasHenkilotunnus()));
                 hakemusDtot.stream().forEach(h -> {
                     try {
                         String personOid = h.getHakijaOid();
@@ -70,30 +62,19 @@ public class HakemuksetConverterUtil {
         }
         if (!errors.isEmpty()) {
             errors.entrySet().forEach(err -> {
-                LOG.error(String.format("SURE arvosanojen konversiossa (hakukohde=%s, hakemus=%s) odottamaton virhe",
-                                hakukohdeOid, err.getKey()),
-                        err.getValue());
+                LOG.error(String.format("SURE arvosanojen konversiossa (hakukohde=%s, hakemus=%s) odottamaton virhe", hakukohdeOid, err.getKey()), err.getValue());
             });
             throw new RuntimeException(errors.entrySet().iterator().next().getValue());
         }
         return hakemusDtot;
     }
 
-    public static void mergeKeysOfOppijaAndHakemus(boolean hakijallaOnHenkilotunnus,
-                                                   HakuV1RDTO haku,
-                                                   String hakukohdeOid,
-                                                   ParametritDTO parametritDTO,
-                                                   Map<String, Exception> errors,
-                                                   Oppija oppija,
+    public static void mergeKeysOfOppijaAndHakemus(boolean hakijallaOnHenkilotunnus, HakuV1RDTO haku, String hakukohdeOid,
+                                                   ParametritDTO parametritDTO, Map<String, Exception> errors, Oppija oppija,
                                                    HakemusDTO hakemusDTO) {
         hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
-        Map<String, AvainArvoDTO> hakemuksenArvot =
-                toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
-        Map<String, AvainArvoDTO> surenArvot =
-                toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija, parametritDTO),
-                        hakemusDTO.getHakemusoid(),
-                        hakukohdeOid,
-                        errors);
+        Map<String, AvainArvoDTO> hakemuksenArvot = toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
+        Map<String, AvainArvoDTO> surenArvot = toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija, parametritDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
         List<SuoritusJaArvosanat> suoritukset = filterUnrelevantSuoritukset(haku, oppija.getSuoritukset());
         Optional<String> pohjakoulutus = pohjakoulutus(haku, hakemusDTO, suoritukset);
 
@@ -101,8 +82,7 @@ public class HakemuksetConverterUtil {
         merge.putAll(hakemuksenArvot);
         ensikertalaisuus(hakijallaOnHenkilotunnus, haku, hakukohdeOid, oppija, hakemusDTO, merge);
         pohjakoulutus.ifPresent(pk -> merge.put(POHJAKOULUTUS, new AvainArvoDTO(POHJAKOULUTUS, pk)));
-        merge.putAll(suoritustenTiedot(pohjakoulutus, hakemusDTO, suoritukset).entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue()))));
+        merge.putAll(suoritustenTiedot(pohjakoulutus, hakemusDTO, suoritukset).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue()))));
         merge.putAll(surenArvot);
         hakemusDTO.setAvaimet(merge.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));
     }
@@ -111,7 +91,7 @@ public class HakemuksetConverterUtil {
         // Vain korkeakouluhauille
         if (Optional.ofNullable(haku.getKohdejoukkoUri()).orElse("").startsWith("haunkohdejoukko_12")) {
             if (oppija.isEnsikertalainen() == null) {
-                if(!hakijallaOnHenkilotunnus) {
+                if (!hakijallaOnHenkilotunnus) {
                     return; // Henkilötunnuksettomilla hakijoilla ensikertalaisuuden tiedon puuttuminen on laillinen tila
                 }
                 LOG.error("Hakijalta {} (hakemusOid={}) puuttui ensikertalaisuustieto hakukohteen {} laskennassa.", hakemusDTO.getHakijaOid(), hakemusDTO.getHakemusoid(), hakukohdeOid);
@@ -143,9 +123,7 @@ public class HakemuksetConverterUtil {
         if (!epaonnistuneetKonversiot.isEmpty()) {
             RuntimeException e = new RuntimeException(
                     String.format("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle %s ja hakemuksille %s. Esimerkiksi %s!",
-                            hakukohdeOid,
-                            Arrays.toString(epaonnistuneetKonversiot.keySet().toArray()),
-                            epaonnistuneetKonversiot.values().iterator().next().getMessage()));
+                            hakukohdeOid, Arrays.toString(epaonnistuneetKonversiot.keySet().toArray()), epaonnistuneetKonversiot.values().iterator().next().getMessage()));
             LOG.error("hakemuksetToHakemusDTOs", e);
             throw e;
         }
@@ -198,11 +176,11 @@ public class HakemuksetConverterUtil {
     }
 
     public static Optional<String> pohjakoulutus(HakuV1RDTO haku, HakemusDTO h, List<SuoritusJaArvosanat> suoritukset) {
-        Optional<String> pk =  h.getAvaimet().stream()
+        Optional<String> pk = h.getAvaimet().stream()
                 .filter(a -> POHJAKOULUTUS.equals(a.getAvain()))
                 .map(AvainArvoDTO::getArvo)
                 .findFirst();
-        if (!pk.isPresent()){
+        if (!pk.isPresent()) {
             return Optional.empty();
         }
         String pohjakoulutusHakemukselta = pk.get();
@@ -210,10 +188,8 @@ public class HakemuksetConverterUtil {
                 .map(SuoritusJaArvosanatWrapper::wrap)
                 .collect(toList());
 
-        if (suorituksetRekisterista.stream()
-                .anyMatch(s -> s.isLukio() && s.isKeskeytynyt() && hakukaudella(haku, s))) {
-            LOG.error("Hakijan {} lukio keskeytynyt hakukaudella. Käytetään hakemuksen pohjakoulutusta {}.",
-                    h.getHakijaOid(), pohjakoulutusHakemukselta);
+        if (suorituksetRekisterista.stream().anyMatch(s -> s.isLukio() && s.isKeskeytynyt() && hakukaudella(haku, s))) {
+            LOG.error("Hakijan {} lukio keskeytynyt hakukaudella. Käytetään hakemuksen pohjakoulutusta {}.", h.getHakijaOid(), pohjakoulutusHakemukselta);
             return Optional.of(pohjakoulutusHakemukselta);
         }
         if (suorituksetRekisterista.stream()
@@ -222,8 +198,7 @@ public class HakemuksetConverterUtil {
                         (s.isYoTutkinto() && s.isVahvistettu() && s.isValmis()))) {
             return Optional.of(PohjakoulutusToinenAste.YLIOPPILAS);
         }
-        if (suorituksetRekisterista.stream()
-                .anyMatch(s -> s.isPerusopetus() && s.isVahvistettu() && s.isKeskeytynyt() && hakukaudella(haku, s))) {
+        if (suorituksetRekisterista.stream().anyMatch(s -> s.isPerusopetus() && s.isVahvistettu() && s.isKeskeytynyt() && hakukaudella(haku, s))) {
             return Optional.of(PohjakoulutusToinenAste.KESKEYTYNYT);
         }
         if (PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
@@ -246,8 +221,7 @@ public class HakemuksetConverterUtil {
                     break;
             }
             if (!yksilollistaminen.equals(pohjakoulutusHakemukselta)) {
-                LOG.error("Hakijan {} ilmoittama perusopetus {} ei vastaa vahvistettua suoritusta {}. " +
-                                "Käytetään hakemuksen pohjakoulutusta {}.",
+                LOG.error("Hakijan {} ilmoittama perusopetus {} ei vastaa vahvistettua suoritusta {}. " + "Käytetään hakemuksen pohjakoulutusta {}.",
                         h.getHakijaOid(), pohjakoulutusHakemukselta, yksilollistaminen, pohjakoulutusHakemukselta);
                 return Optional.of(pohjakoulutusHakemukselta);
             } else {
@@ -255,23 +229,19 @@ public class HakemuksetConverterUtil {
             }
         }
         if (PohjakoulutusToinenAste.PERUSKOULU.equals(pohjakoulutusHakemukselta) &&
-                suorituksetRekisterista.stream()
-                        .anyMatch(s -> s.isUlkomainenKorvaava() && s.isVahvistettu() && s.isValmis())) {
-            LOG.error("Hakija {} ilmoittanut peruskoulun, mutta löytyi vahvistettu ulkomainen korvaava suoritus. " +
-                            "Käytetään hakemuksen pohjakoulutusta {}.",
+                suorituksetRekisterista.stream().anyMatch(s -> s.isUlkomainenKorvaava() && s.isVahvistettu() && s.isValmis())) {
+            LOG.error("Hakija {} ilmoittanut peruskoulun, mutta löytyi vahvistettu ulkomainen korvaava suoritus. " + "Käytetään hakemuksen pohjakoulutusta {}.",
                     h.getHakijaOid(), pohjakoulutusHakemukselta);
             return Optional.of(pohjakoulutusHakemukselta);
         }
         if (PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO.equals(pohjakoulutusHakemukselta) ||
-                suorituksetRekisterista.stream()
-                        .anyMatch(s -> s.isUlkomainenKorvaava() && s.isVahvistettu() && s.isValmis())) {
+                suorituksetRekisterista.stream().anyMatch(s -> s.isUlkomainenKorvaava() && s.isVahvistettu() && s.isValmis())) {
             return Optional.of(PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO);
         }
         return Optional.of(pohjakoulutusHakemukselta);
     }
 
-    public static List<SuoritusJaArvosanat> pohjakoulutuksenSuoritukset(String pohjakoulutus,
-                                                                        List<SuoritusJaArvosanat> suoritukset) {
+    public static List<SuoritusJaArvosanat> pohjakoulutuksenSuoritukset(String pohjakoulutus, List<SuoritusJaArvosanat> suoritukset) {
         if (pohjakoulutus.equals(PohjakoulutusToinenAste.YLIOPPILAS)) {
             return suoritukset.stream()
                     .filter(s -> wrap(s).isLukio() || wrap(s).isYoTutkinto())
@@ -298,21 +268,16 @@ public class HakemuksetConverterUtil {
                                                         List<SuoritusJaArvosanat> suoritukset) {
         final Map<String, Predicate<SuoritusJaArvosanat>> predicates =
                 new HashMap<String, Predicate<SuoritusJaArvosanat>>() {{
-            put("PK", s -> wrap(s).isPerusopetus());
-            put("AM", s -> wrap(s).isAmmatillinen());
-            put("LK", s -> wrap(s).isLukio());
-            put("YO", s -> wrap(s).isYoTutkinto());
-        }};
+                    put("PK", s -> wrap(s).isPerusopetus());
+                    put("AM", s -> wrap(s).isAmmatillinen());
+                    put("LK", s -> wrap(s).isLukio());
+                    put("YO", s -> wrap(s).isYoTutkinto());
+                }};
         Map<String, String> tiedot = new HashMap<>();
-        pkPaattotodistusvuosi(hakemus, suoritukset)
-                .ifPresent(vuosi -> tiedot.put(PK_PAATTOTODISTUSVUOSI, String.valueOf(vuosi)));
-        suoritustilat(predicates, suoritukset).entrySet().stream()
-                .forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue())));
-        suoritusajat(predicates, suoritukset).entrySet().stream()
-                .forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue())));
-        pohjakoulutus.ifPresent(pk ->
-                lisapistekoulutukset(pk, hakemus, suoritukset).entrySet().stream()
-                        .forEach(e -> tiedot.put(e.getKey().name(), String.valueOf(e.getValue()))));
+        pkPaattotodistusvuosi(hakemus, suoritukset).ifPresent(vuosi -> tiedot.put(PK_PAATTOTODISTUSVUOSI, String.valueOf(vuosi)));
+        suoritustilat(predicates, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue())));
+        suoritusajat(predicates, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue())));
+        pohjakoulutus.ifPresent(pk -> lisapistekoulutukset(pk, hakemus, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey().name(), String.valueOf(e.getValue()))));
         return tiedot;
     }
 
@@ -343,18 +308,13 @@ public class HakemuksetConverterUtil {
         }
     }
 
-    private static Map<String, Boolean> suoritustilat(Map<String, Predicate<SuoritusJaArvosanat>> predicates,
-                                                      List<SuoritusJaArvosanat> suoritukset) {
+    private static Map<String, Boolean> suoritustilat(Map<String, Predicate<SuoritusJaArvosanat>> predicates, List<SuoritusJaArvosanat> suoritukset) {
         return predicates.keySet().stream()
-                .collect(toMap(prefix -> prefix + "_TILA",
-                        prefix -> suoritukset.stream()
-                                .anyMatch(s -> predicates.get(prefix).test(s) && wrap(s).isValmis() &&
-                                        (wrap(s).isVahvistettu() || wrap(s).isLukio()))));
+                .collect(toMap(prefix -> prefix + "_TILA", prefix -> suoritukset.stream()
+                                .anyMatch(s -> predicates.get(prefix).test(s) && wrap(s).isValmis() && (wrap(s).isVahvistettu() || wrap(s).isLukio()))));
     }
 
-    private static Map<Lisapistekoulutus, Boolean> lisapistekoulutukset(String pohjakoulutus,
-                                                                        HakemusDTO hakemus,
-                                                                        List<SuoritusJaArvosanat> suoritukset) {
+    private static Map<Lisapistekoulutus, Boolean> lisapistekoulutukset(String pohjakoulutus, HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
         if (PohjakoulutusToinenAste.KESKEYTYNYT.equals(pohjakoulutus) ||
                 PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutus) ||
                 PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO.equals(pohjakoulutus)) {
@@ -374,8 +334,7 @@ public class HakemuksetConverterUtil {
                 ));
     }
 
-    private static Optional<Integer> pkPaattotodistusvuosi(HakemusDTO hakemus,
-                                                           List<SuoritusJaArvosanat> suoritukset) {
+    private static Optional<Integer> pkPaattotodistusvuosi(HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
         return Stream.concat(
                 suoritukset.stream()
                         .filter(s -> wrap(s).isPerusopetus() && wrap(s).isVahvistettu() && wrap(s).isValmis())
@@ -394,9 +353,12 @@ public class HakemuksetConverterUtil {
         DateTime sStart = new DateTime().withDate(hakuvuosi, 8, 1).minusDays(1);
         DateTime sEnd = new DateTime().withDate(hakuvuosi, 12, 31).plusDays(1);
         switch (haku.getHakukausiUri()) {
-            case "kausi_k#1": return valmistuminen.isAfter(kStart) && valmistuminen.isBefore(kEnd);
-            case "kausi_s#1": return valmistuminen.isAfter(sStart) && valmistuminen.isBefore(sEnd);
-            default: throw new RuntimeException(String.format("Tuntematon hakukausi %s", haku.getHakukausiUri()));
+            case "kausi_k#1":
+                return valmistuminen.isAfter(kStart) && valmistuminen.isBefore(kEnd);
+            case "kausi_s#1":
+                return valmistuminen.isAfter(sStart) && valmistuminen.isBefore(sEnd);
+            default:
+                throw new RuntimeException(String.format("Tuntematon hakukausi %s", haku.getHakukausiUri()));
         }
     }
 }
