@@ -13,6 +13,7 @@ import com.codepoetics.protonpack.Indexed;
 import com.codepoetics.protonpack.StreamUtils;
 import fi.vm.sade.valintalaskenta.domain.dto.FunktioTulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -74,7 +75,8 @@ public class ValintalaskennanTulosExcel {
     private static ValintatapaJonoSheet toValintatapaJonoSheet(Indexed<ValintatapaJonoSheet> indexedJonoSheet) {
         final String index = indexedJonoSheet.getIndex() == 0L ? "" : " (" + (indexedJonoSheet.getIndex() + 1L) + ")";
         final String sheetName = indexedJonoSheet.getValue().sheetName + index;
-        return new ValintatapaJonoSheet(indexedJonoSheet.getValue(), sheetName);
+        final String truncatedSheetName = StringUtils.substring(sheetName, 0, 31 - " (0)".length());
+        return new ValintatapaJonoSheet(indexedJonoSheet.getValue(), truncatedSheetName);
     }
 
     private static class ValintatapaJonoSheet {
