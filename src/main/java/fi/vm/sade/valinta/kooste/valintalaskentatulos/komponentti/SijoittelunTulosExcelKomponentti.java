@@ -43,258 +43,209 @@ import fi.vm.sade.valinta.kooste.util.excel.Highlight;
 import fi.vm.sade.valinta.kooste.util.excel.Span;
 
 /**
- *
- * @author Jussi Jartamo
- *
  *         Komponentti luo sijoittelun tulokset excel tiedostoksi!
  */
 @Component("sijoittelunTulosXlsKomponentti")
 public class SijoittelunTulosExcelKomponentti {
+    private static final Logger LOG = LoggerFactory.getLogger(SijoittelunTulosExcelKomponentti.class);
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(SijoittelunTulosExcelKomponentti.class);
+    public InputStream luoXls(List<Valintatulos> tilat, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi,
+            String hakukohdeOid, List<Hakemus> hakemuksetList, HakukohdeDTO hakukohde) {
+        Map<String, Hakemus> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(
+                h -> h.getOid(), h -> h
+        ));
+        if (hakukohde == null) {
+            LOG.error("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
+            throw new SijoittelultaEiSisaltoaPoikkeus("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
+        }
+        List<Object[]> rivit = new ArrayList<Object[]>();
+        List<ValintatapajonoDTO> valintatapajonot = Optional.ofNullable(hakukohde.getValintatapajonot()).orElse(Collections.emptyList())
+                .stream().filter(v -> v.getHakemukset() != null && !v.getHakemukset().isEmpty()).collect(Collectors.toList());
+        if (valintatapajonot.isEmpty()) {
+            LOG.error("Yritettiin muodostaa sijoittelun tuloksista taulukkolaskenta kohteelle({}) jolla ei ole valintatapajonoja saatavilla!", hakukohdeOid);
+            throw new RuntimeException("Yritettiin muodostaa sijoittelun tuloksista taulukkolaskenta kohteelle(" + hakukohdeOid + ") jolla ei ole valintatapajonoja saatavilla!");
+        }
+        Collections.sort(valintatapajonot,
+                new Comparator<ValintatapajonoDTO>() {
+                    @Override
+                    public int compare(ValintatapajonoDTO o1, ValintatapajonoDTO o2) {
+                        if (o1.getPrioriteetti() == null || o2.getPrioriteetti() == 0) {
+                            return 0;
+                        }
+                        return o1.getPrioriteetti().compareTo(o2.getPrioriteetti());
+                    }
+                });
+        final ValintatapajonoDTO tarkeimmanPrioriteetinValintatapajono = valintatapajonot.iterator().next();
 
-	public InputStream luoXls(
-			List<Valintatulos> tilat,
-			String preferoitukielikoodi,
-			String hakukohdeNimi,
-			String tarjoajaNimi,
-			String hakukohdeOid,
-			List<Hakemus> hakemuksetList,
-			HakukohdeDTO hakukohde) {
-		Map<String, Hakemus> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(
-			h -> h.getOid(), h -> h
-		));
-		if (hakukohde == null) {
-			LOG.error("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
-			throw new SijoittelultaEiSisaltoaPoikkeus(
-					"Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
-		}
-		List<Object[]> rivit = new ArrayList<Object[]>();
-		List<ValintatapajonoDTO> valintatapajonot = Optional.ofNullable(hakukohde.getValintatapajonot()).orElse(Collections.emptyList())
-				.stream().filter(v -> v.getHakemukset() != null && !v.getHakemukset().isEmpty()).collect(Collectors.toList());
-		if(valintatapajonot.isEmpty()) {
-			LOG.error("Yritettiin muodostaa sijoittelun tuloksista taulukkolaskenta kohteelle({}) jolla ei ole valintatapajonoja saatavilla!",hakukohdeOid);
-			throw new RuntimeException("Yritettiin muodostaa sijoittelun tuloksista taulukkolaskenta kohteelle("+hakukohdeOid+") jolla ei ole valintatapajonoja saatavilla!");
-		}
-		Collections.sort(valintatapajonot,
-				new Comparator<ValintatapajonoDTO>() {
-					@Override
-					public int compare(ValintatapajonoDTO o1,
-							ValintatapajonoDTO o2) {
-						if (o1.getPrioriteetti() == null
-								|| o2.getPrioriteetti() == 0) {
-							return 0;
-						}
-						return o1.getPrioriteetti().compareTo(
-								o2.getPrioriteetti());
-					}
-				});
-		final ValintatapajonoDTO tarkeimmanPrioriteetinValintatapajono = valintatapajonot.iterator().next();
+        Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat = valintatapajononTilat(tilat);
+        rivit.add(new Object[]{tarjoajaNimi});
+        rivit.add(new Object[]{hakukohdeNimi});
+        rivit.add(new Object[]{});
 
-		Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat = valintatapajononTilat(tilat);
-		rivit.add(new Object[] { tarjoajaNimi });
-		rivit.add(new Object[] { hakukohdeNimi });
-		rivit.add(new Object[] {});
+        Collections.sort(tarkeimmanPrioriteetinValintatapajono.getHakemukset(),
+                new Comparator<HakemusDTO>() {
+                    private int ordinal(HakemusDTO h) {
+                        switch (h.getTila()) {
+                            case HYLATTY:
+                                return 6;
+                            case VARALLA:
+                                return 2;
+                            case PERUUNTUNUT:
+                                return 3;
+                            case HYVAKSYTTY:
+                                if (h.isHyvaksyttyHarkinnanvaraisesti()) {
+                                    return 0;
+                                } else {
+                                    return 1;
+                                }
+                            case VARASIJALTA_HYVAKSYTTY:
+                                if (h.isHyvaksyttyHarkinnanvaraisesti()) {
+                                    return 0;
+                                } else {
+                                    return 1;
+                                }
+                            case HARKINNANVARAISESTI_HYVAKSYTTY:
+                                return 0;
+                            case PERUNUT:
+                                return 4;
+                            case PERUUTETTU:
+                                return 5;
+                            default:
+                                return 7;
+                        }
+                    }
 
-		Collections.sort(tarkeimmanPrioriteetinValintatapajono.getHakemukset(),
-					new Comparator<HakemusDTO>() {
-						private int ordinal(HakemusDTO h) {
-							// harkinnanvaraisesti hyväksytyt, hyväksytyt,
-							// varalla, peruuntuneet, hylätyt
-							switch (h.getTila()) {
-							case HYLATTY:
-								return 6;
-							case VARALLA:
-								return 2;
-							case PERUUNTUNUT:
-								return 3;
-							case HYVAKSYTTY:
-								if (h.isHyvaksyttyHarkinnanvaraisesti()) {
-									return 0;
-								} else {
-									return 1;
-								}
-							case VARASIJALTA_HYVAKSYTTY:
-								if (h.isHyvaksyttyHarkinnanvaraisesti()) {
-									return 0;
-								} else {
-									return 1;
-								}
-							case HARKINNANVARAISESTI_HYVAKSYTTY:
-								return 0;
-							case PERUNUT:
-								return 4;
-							case PERUUTETTU:
-								return 5;
-							default:
-								return 7;
-							}
-						}
+                    @Override
+                    public int compare(HakemusDTO o1, HakemusDTO o2) {
+                        return new Integer(ordinal(o1))
+                                .compareTo(ordinal(o2));
+                    }
+                });
+        List<Object> valintatapajonoOtsikkoRivi = Lists.newArrayList();
+        valintatapajonoOtsikkoRivi.addAll(Arrays.asList(
+                "", "", "", "", "", "", "", "", "",
+                "", "", "", "", "", "", "", "")); // alun tyhjat pystyrivit
+        List<Object> otsikkoRivi = Lists.newArrayList();
+        otsikkoRivi.addAll(Arrays.asList("Hakemus", "Hakija", "Henkilötunnus", "Syntymäaika", "Sukupuoli", "Äidinkieli",
+                "Lähiosoite", "Postinumero", "Osoite (ulkomaa)", "Postinumero (ulkomaa)", "Kaupunki (ulkomaa)",
+                "Asuinmaa", "Kansallinen ID", "Passin numero", "Sähköposti", "Puhelinnumero", "Lupa julkaisuun", "Hakutoive"));
+        {
+            int index = 0;
+            for (ValintatapajonoDTO jono : valintatapajonot) {
+                ++index;
+                boolean highlight = index % 2 == 1;
+                valintatapajonoOtsikkoRivi.add(new Span("Valintatapajono: " + jono.getNimi(), 6, highlight));
+                List<Object> otsikot = Arrays.asList("Jonosija", "Pisteet", "Sijoittelun tila", "Vastaanottotieto", "Ilmoittautumistieto", "Muokattu");
+                if (highlight) {
+                    otsikot = otsikot.stream().map(o -> new Highlight(o)).collect(Collectors.toList());
+                }
+                otsikkoRivi.addAll(otsikot);
+            }
+        }
+        rivit.add(valintatapajonoOtsikkoRivi.toArray());
+        rivit.add(otsikkoRivi.toArray());
 
-						@Override
-						public int compare(HakemusDTO o1, HakemusDTO o2) {
-							return new Integer(ordinal(o1))
-									.compareTo(ordinal(o2));
-						}
-					});
-		List<Object> valintatapajonoOtsikkoRivi = Lists.newArrayList();
-		valintatapajonoOtsikkoRivi.addAll(Arrays.asList(
-				"","","","","","","","","",
-				"","","","","","","","")); // alun tyhjat pystyrivit
-		List<Object> otsikkoRivi = Lists.newArrayList();
-		otsikkoRivi.addAll(Arrays.asList("Hakemus", "Hakija","Henkilötunnus", "Syntymäaika", "Sukupuoli","Äidinkieli",
-				"Lähiosoite", "Postinumero", "Osoite (ulkomaa)", "Postinumero (ulkomaa)", "Kaupunki (ulkomaa)",
-				"Asuinmaa",
-				"Kansallinen ID",
-				"Passin numero"
-				, "Sähköposti", "Puhelinnumero", "Lupa julkaisuun", "Hakutoive"));
-		{
-		int index = 0;
-		for(ValintatapajonoDTO jono : valintatapajonot) {
-			++index;
-			boolean highlight = index % 2 == 1;
-			valintatapajonoOtsikkoRivi.add(new Span("Valintatapajono: "+jono.getNimi(), 6, highlight));
-			List<Object> otsikot = Arrays.asList("Jonosija", "Pisteet",
-					"Sijoittelun tila", "Vastaanottotieto",
-					"Ilmoittautumistieto", "Muokattu");
-			if(highlight) {
-				otsikot = otsikot.stream().map(o -> new Highlight(o)).collect(Collectors.toList());
-			}
-			otsikkoRivi.addAll(otsikot);
-		}
-		}
-		rivit.add(valintatapajonoOtsikkoRivi.toArray());
-				//
+        Map<String, Map<String, HakemusDTO>> jonoOidHakemusOidHakemusDto =
+                valintatapajonot.stream().collect(Collectors.toMap(v -> ((ValintatapajonoDTO) v).getOid(), v -> v.getHakemukset().stream().collect(Collectors.toMap(h -> ((HakemusDTO) h).getHakemusOid(), h -> h))));
 
-		rivit.add(otsikkoRivi.toArray());
+        for (HakemusDTO hDto : tarkeimmanPrioriteetinValintatapajono.getHakemukset()) {
+            HakemusWrapper wrapper = new HakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
+            String nimi = new StringBuilder().append(wrapper.getSukunimi()).append(", ").append(wrapper.getEtunimi()).toString();
+            List<Object> hakemusRivi = Lists.newArrayList();
 
-		Map<String, Map<String,HakemusDTO>> jonoOidHakemusOidHakemusDto =
-		valintatapajonot.stream().collect(Collectors.toMap(v -> ((ValintatapajonoDTO) v).getOid(), v -> v.getHakemukset().stream().collect(Collectors.toMap(h -> ((HakemusDTO) h).getHakemusOid(), h -> h))));
+            hakemusRivi.addAll(Arrays.asList(hDto.getHakemusOid(), nimi,
+                    wrapper.getHenkilotunnus(),
+                    wrapper.getSyntymaaika(),
+                    wrapper.getSukupuoli(),
+                    wrapper.getAidinkieli(),
+                    wrapper.getSuomalainenLahiosoite(),
+                    wrapper.getSuomalainenPostinumero(),
+                    wrapper.getUlkomainenLahiosoite(),
+                    wrapper.getUlkomainenPostinumero(),
+                    wrapper.getKaupunkiUlkomaa(),
+                    wrapper.getAsuinmaa(),
+                    wrapper.getKansallinenId(),
+                    wrapper.getPassinnumero(),
+                    wrapper.getSahkopostiOsoite(),
 
-		for (HakemusDTO hDto : tarkeimmanPrioriteetinValintatapajono.getHakemukset()) {
-			HakemusWrapper wrapper = new HakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
-			String nimi = new StringBuilder().append(wrapper.getSukunimi()).append(", ")
-			.append(wrapper.getEtunimi()).toString();
-			//"Hakemus", "Hakija","Henkilotunnus", "Osoite", "Sähköposti", "Puhelinnumero", "Lupa julkaisuun", "Hakutoive"
-			List<Object> hakemusRivi = Lists.newArrayList();
+                    wrapper.getPuhelinnumero(),
+                    HakemusUtil.lupaJulkaisuun(wrapper.getLupaJulkaisuun()), wrapper.getHakutoiveenPrioriteetti(hakukohdeOid)
+            ));
+            int index = 0;
+            for (ValintatapajonoDTO jono : valintatapajonot) {
+                ++index;
+                HakemusDTO hakemusDto = jonoOidHakemusOidHakemusDto.get(jono.getOid()).get(hDto.getHakemusOid());
+                String hakemusOid = hakemusDto.getHakemusOid();
+                Map<String, IlmoittautumisTila> hakemusTilat = Collections.emptyMap();
+                if (valintatapajononTilat.containsKey(jono.getOid())) {
+                    hakemusTilat = valintatapajononTilat.get(jono.getOid());
+                    if (hakemusTilat == null) {
+                        hakemusTilat = Collections.emptyMap();
+                    }
+                }
+                String ilmoittautumistieto = StringUtils.EMPTY;
+                try {
+                    ilmoittautumistieto = HakemusUtil.tilaConverter(hakemusTilat.get(hakemusDto.getHakemusOid()), preferoitukielikoodi);
+                } catch (Exception e) {
+                }
+                List<Valintatulos> valintaTulos = tilat.stream().filter(
+                        t -> hakemusOid.equals(t.getHakemusOid())
+                ).collect(Collectors.toList());
+                String valintaTieto = StringUtils.EMPTY; // "--"
+                for (Valintatulos valinta : valintaTulos) {
+                    if (jono.getOid().equals(valinta.getValintatapajonoOid())) {
+                        if (valinta.getTila() != null) {
+                            valintaTieto = HakemusUtil.tilaConverter(valinta.getTila(), preferoitukielikoodi);
+                        }
+                        break;
+                    }
+                }
+                List<Object> jonoHakemusSarakkeet = Arrays.asList(hakemusDto.getJonosija(), Formatter.suomennaNumero(hakemusDto.getPisteet()),
+                        HakemusUtil.tilaConverter(hakemusDto.getTila(), preferoitukielikoodi, hakemusDto.isHyvaksyttyHarkinnanvaraisesti(), true, hakemusDto.getVarasijanNumero()),
+                        valintaTieto, ilmoittautumistieto, muokattu(hakemusDto.getTilaHistoria()));
 
-			hakemusRivi.addAll(Arrays.asList(hDto.getHakemusOid(),nimi,
-					wrapper.getHenkilotunnus(),
-					wrapper.getSyntymaaika(),
-					wrapper.getSukupuoli(),
-					wrapper.getAidinkieli(),
-					wrapper.getSuomalainenLahiosoite(),
-					wrapper.getSuomalainenPostinumero(),
-					wrapper.getUlkomainenLahiosoite(),
-					wrapper.getUlkomainenPostinumero(),
-					wrapper.getKaupunkiUlkomaa(),
-					wrapper.getAsuinmaa(),
-					wrapper.getKansallinenId(),
-					wrapper.getPassinnumero(),
-					wrapper.getSahkopostiOsoite(),
+                if (index % 2 == 1) {
+                    jonoHakemusSarakkeet = jonoHakemusSarakkeet.stream().map(o -> new Highlight(o)).collect(Collectors.toList());
+                }
+                hakemusRivi.addAll(jonoHakemusSarakkeet);
+            }
+            rivit.add(hakemusRivi.toArray());
+        }
+        return ExcelExportUtil.exportGridAsXls(rivit.toArray(new Object[][]{}));
+    }
 
-					wrapper.getPuhelinnumero(),
-					HakemusUtil.lupaJulkaisuun(wrapper.getLupaJulkaisuun()),wrapper.getHakutoiveenPrioriteetti(hakukohdeOid)
-					));
-			int index = 0;
-			for(ValintatapajonoDTO jono : valintatapajonot) {
-				++index;
-				HakemusDTO hakemusDto = jonoOidHakemusOidHakemusDto.get(jono.getOid()).get(hDto.getHakemusOid());
-				String hakemusOid = hakemusDto.getHakemusOid();
-				Map<String, IlmoittautumisTila> hakemusTilat = Collections
-						.emptyMap();
-				if (valintatapajononTilat.containsKey(jono.getOid())) {
-					hakemusTilat = valintatapajononTilat.get(jono.getOid());
-					if (hakemusTilat == null) {
-						hakemusTilat = Collections.emptyMap();
-					}
-				}
-				String ilmoittautumistieto = StringUtils.EMPTY;
-				try {
-					ilmoittautumistieto = HakemusUtil.tilaConverter(
-							hakemusTilat.get(hakemusDto.getHakemusOid()), preferoitukielikoodi);
-				} catch (Exception e) {
-				}
-				List<Valintatulos> valintaTulos = tilat.stream().filter(
-						t -> hakemusOid.equals(t.getHakemusOid())
-				).collect(Collectors.toList());
-				String valintaTieto = StringUtils.EMPTY; // "--"
-				for (Valintatulos valinta : valintaTulos) {
-					if (jono.getOid().equals(valinta.getValintatapajonoOid())) {
-						if (valinta.getTila() != null) {
-							valintaTieto = HakemusUtil.tilaConverter(
-									valinta.getTila(), preferoitukielikoodi);
-						}
-						break;
-					}
-				}
+    private String muokattu(List<TilaHistoriaDTO> h) {
+        if (h == null || h.isEmpty()) {
+            return StringUtils.EMPTY;
+        } else {
+            Collections.sort(h, new Comparator<TilaHistoriaDTO>() {
+                @Override
+                public int compare(TilaHistoriaDTO o1, TilaHistoriaDTO o2) {
+                    if (o1 == null || o2 == null || o1.getLuotu() == null || o2.getLuotu() == null) {
+                        return 0;
+                    }
+                    return -1 * o1.getLuotu().compareTo(o2.getLuotu());
+                }
+            });
+            return Formatter.paivamaara(h.get(0).getLuotu());
+        }
+    }
 
-				//"Jonosija",  "Pisteet", "Sijoittelun tila",
-				//"Vastaanottotieto", "Ilmoittautumistieto", "Muokattu" ));
-				List<Object> jonoHakemusSarakkeet = Arrays.asList(
-						hakemusDto.getJonosija(),
-						Formatter.suomennaNumero(hakemusDto.getPisteet()),
-						HakemusUtil.tilaConverter(hakemusDto.getTila(), //"Sijoittelun tila",
-								preferoitukielikoodi,
-								hakemusDto.isHyvaksyttyHarkinnanvaraisesti(),
-								true, hakemusDto.getVarasijanNumero()),
-								valintaTieto, ilmoittautumistieto,
-								muokattu(hakemusDto.getTilaHistoria()));
-
-				if(index % 2 == 1) {
-					jonoHakemusSarakkeet = jonoHakemusSarakkeet.stream().map(o -> new Highlight(o)).collect(Collectors.toList());
-				}
-				hakemusRivi.addAll(jonoHakemusSarakkeet);
-
-			}
-			rivit.add(hakemusRivi.toArray());
-		}
-
-		return ExcelExportUtil
-				.exportGridAsXls(rivit.toArray(new Object[][] {}));
-	}
-
-	private String muokattu(List<TilaHistoriaDTO> h) {
-		if (h == null || h.isEmpty()) {
-			return StringUtils.EMPTY;
-		} else {
-			Collections.sort(h, new Comparator<TilaHistoriaDTO>() {
-				@Override
-				public int compare(TilaHistoriaDTO o1, TilaHistoriaDTO o2) {
-					if (o1 == null || o2 == null || o1.getLuotu() == null
-							|| o2.getLuotu() == null) {
-						return 0;
-					}
-					return -1 * o1.getLuotu().compareTo(o2.getLuotu());
-
-				}
-			});
-			return Formatter.paivamaara(h.get(0).getLuotu());
-		}
-	}
-
-	private Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat(
-			List<Valintatulos> tilat) {
-		Map<String, Map<String, IlmoittautumisTila>> t = Maps.newHashMap();
-		try {
-			for (Valintatulos tulos : tilat) {
-				Map<String, IlmoittautumisTila> jono;
-				if (!t.containsKey(tulos.getValintatapajonoOid())) {
-					t.put(tulos.getValintatapajonoOid(),
-							jono = Maps
-									.<String, IlmoittautumisTila> newHashMap());
-				} else {
-					jono = t.get(tulos.getValintatapajonoOid());
-				}
-
-				jono.put(tulos.getHakemusOid(), tulos.getIlmoittautumisTila());
-			}
-		} catch (Exception e) {
-			LOG.error(
-					"Ilmoittautumistiloja ei saatu luettua sijoittelusta! {}",
-					Arrays.toString(e.getStackTrace()));
-		}
-		return t;
-	}
+    private Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat(List<Valintatulos> tilat) {
+        Map<String, Map<String, IlmoittautumisTila>> t = Maps.newHashMap();
+        try {
+            for (Valintatulos tulos : tilat) {
+                Map<String, IlmoittautumisTila> jono;
+                if (!t.containsKey(tulos.getValintatapajonoOid())) {
+                    t.put(tulos.getValintatapajonoOid(), jono = Maps.<String, IlmoittautumisTila>newHashMap());
+                } else {
+                    jono = t.get(tulos.getValintatapajonoOid());
+                }
+                jono.put(tulos.getHakemusOid(), tulos.getIlmoittautumisTila());
+            }
+        } catch (Exception e) {
+            LOG.error("Ilmoittautumistiloja ei saatu luettua sijoittelusta! {}", Arrays.toString(e.getStackTrace()));
+        }
+        return t;
+    }
 }
