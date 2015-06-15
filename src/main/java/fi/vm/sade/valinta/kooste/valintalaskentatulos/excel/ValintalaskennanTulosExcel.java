@@ -45,8 +45,11 @@ public class ValintalaskennanTulosExcel {
                                         return " (" + new Long(i + 1L).toString() + ")";
                                     }
                                 }).get())))
-                .sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()))
+                // Sorttaus ensin käänteisesti pvm:n mukaan ja sitten prioriteetin
+                .sorted((o1, o2) -> new CompareToBuilder().append(o2.getCreatedAt(), o1.getCreatedAt())
+                        .append(o1.jono.getPrioriteetti(), o2.jono.getPrioriteetti()).toComparison())
                 .forEach((jonoSheet) -> {
+
                     final XSSFSheet sheet = workbook.createSheet(jonoSheet.sheetName);
                     setColumnWidths(sheet);
                     addRow(sheet, "Haku", getTeksti(haku.getNimi()));
@@ -137,9 +140,6 @@ public class ValintalaskennanTulosExcel {
                 ).append(o1.getSukunimi(),o2.getSukunimi()
                 ).append(o1.getEtunimi(), o2.getEtunimi()).toComparison()
         );
-    }
-    public static int normalizeCompareTo(int value) { // because String.compareTo can return anything
-        return value == 0 ? 0 : (value < 0 ? -1 : 1);
     }
     private static JarjestyskriteeritulosDTO getJarjestyskriteeri(final JonosijaDTO hakija) {
         return hakija.getJarjestyskriteerit().isEmpty()
