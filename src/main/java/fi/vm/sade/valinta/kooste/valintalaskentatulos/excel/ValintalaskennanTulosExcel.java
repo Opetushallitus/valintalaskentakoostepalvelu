@@ -190,7 +190,7 @@ public class ValintalaskennanTulosExcel {
     }
 
     private static void setColumnWidths(final XSSFSheet sheet) {
-        for (int i = 0; i < fixedColumns.size(); i++) {
+        for (int i = 0, columnCount = fixedColumns.size(); i < columnCount; i++) {
             sheet.setColumnWidth(i, fixedColumns.get(i).widthInCharacters * 256);
         }
     }
@@ -201,7 +201,7 @@ public class ValintalaskennanTulosExcel {
 
     private static void addRow(final XSSFSheet sheet, List<String> values) {
         final XSSFRow row = sheet.createRow(sheet.getPhysicalNumberOfRows());
-        for (int col = 0; col < values.size(); col++) {
+        for (int col = 0, count = values.size(); col < count; col++) {
             row.createCell(col).setCellValue(values.get(col));
         }
     }
