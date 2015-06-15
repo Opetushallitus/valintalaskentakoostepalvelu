@@ -43,212 +43,134 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDt
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.JalkiohjauskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 @Service
 public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
+    private final static Logger LOG = LoggerFactory.getLogger(JalkiohjauskirjeetServiceImpl.class);
+    private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
+    private final JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti;
+    private final SijoitteluAsyncResource sijoitteluAsyncResource;
+    private final ApplicationAsyncResource applicationAsyncResource;
+    private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
 
-	private final static Logger LOG = LoggerFactory
-			.getLogger(JalkiohjauskirjeetServiceImpl.class);
-	// private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
-	private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
-	// private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
-	private final JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti;
-	// private final SijoitteluIlmankoulutuspaikkaaKomponentti
-	// sijoitteluIlmankoulutuspaikkaaKomponentti;
-	private final SijoitteluAsyncResource sijoitteluAsyncResource;
-	private final ApplicationAsyncResource applicationAsyncResource;
-	private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
+    @Autowired
+    public JalkiohjauskirjeetServiceImpl(
+            ViestintapalveluAsyncResource viestintapalveluAsyncResource,
+            JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti,
+            SijoitteluAsyncResource sijoitteluAsyncResource,
+            ApplicationAsyncResource applicationAsyncResource,
+            KirjeetHakukohdeCache kirjeetHakukohdeCache) {
+        this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
+        this.jalkiohjauskirjeetKomponentti = jalkiohjauskirjeetKomponentti;
+        this.sijoitteluAsyncResource = sijoitteluAsyncResource;
+        this.applicationAsyncResource = applicationAsyncResource;
+        this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
+    }
 
-	@Autowired
-	public JalkiohjauskirjeetServiceImpl(
-			ViestintapalveluAsyncResource viestintapalveluAsyncResource,
-			// KirjeetHakukohdeCache kirjeetHakukohdeCache,
-			JalkiohjauskirjeetKomponentti jalkiohjauskirjeetKomponentti,
-			SijoitteluAsyncResource sijoitteluAsyncResource,
-			ApplicationAsyncResource applicationAsyncResource,
-			KirjeetHakukohdeCache kirjeetHakukohdeCache) {
-		this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
-		this.jalkiohjauskirjeetKomponentti = jalkiohjauskirjeetKomponentti;
-		this.sijoitteluAsyncResource = sijoitteluAsyncResource;
-		this.applicationAsyncResource = applicationAsyncResource;
-		this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
-	}
+    @Override
+    public void jalkiohjauskirjeetHakemuksille(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids) {
+        from(
+                sijoitteluAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid()))
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(
+                        hakijat -> {
+                            // VIALLISET DATA POIS FILTTEROINTI
+                            Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
+                            //WHITELIST FILTTEROINTI
+                            Set<String> whitelist = Sets.newHashSet(hakemusOids);
+                            Collection<HakijaDTO> whitelistinJalkeen = vainHakeneetJalkiohjattavat
+                                    .stream()
+                                    .filter(h -> whitelist.contains(h.getHakemusOid()))
+                                    .collect(Collectors.toList());
+                            muodostaKirjeet().call(whitelistinJalkeen, prosessi, jalkiohjauskirjeDTO);
+                        },
+                        throwable -> {
+                            LOG.error("Koulutuspaikattomien haku haulle {} epaonnistui! {}", jalkiohjauskirjeDTO.getHakuOid(), throwable.getMessage());
+                            prosessi.keskeyta();
+                        });
+    }
 
-	@Override
-	public void jalkiohjauskirjeetHakemuksille(KirjeProsessi prosessi,
-			JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids) {
-		from(
-				sijoitteluAsyncResource
-						.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO
-								.getHakuOid()))
-		//
-				.subscribeOn(Schedulers.newThread())
-				//
-				.subscribe(
-						hakijat -> {
-							/**
-							 * VIALLISET DATA POIS FILTTEROINTI
-							 */
-							Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat
-									.getResults());
-							/**
-							 * WHITELIST FILTTEROINTI
-							 */
-							Set<String> whitelist = Sets
-									.newHashSet(hakemusOids);
-							Collection<HakijaDTO> whitelistinJalkeen = vainHakeneetJalkiohjattavat
-									.stream()
-									.filter(h -> whitelist.contains(h
-											.getHakemusOid()))
-									.collect(Collectors.toList());
-							muodostaKirjeet().call(whitelistinJalkeen,
-									prosessi, jalkiohjauskirjeDTO);
-						},
-						throwable -> {
-							LOG.error(
-									"Koulutuspaikattomien haku haulle {} epaonnistui! {}",
-									jalkiohjauskirjeDTO.getHakuOid(),
-									throwable.getMessage());
-							prosessi.keskeyta();
-						});
-	}
+    @Override
+    public void jalkiohjauskirjeetHaulle(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO) {
+        from(
+                sijoitteluAsyncResource.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO.getHakuOid()))
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(
+                        hakijat -> {
+                            //VIALLISET DATA POIS FILTTEROINTI
+                            Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
+                            muodostaKirjeet().call(vainHakeneetJalkiohjattavat, prosessi, jalkiohjauskirjeDTO);
+                        },
+                        throwable -> {
+                            LOG.error("Koulutuspaikattomien haku haulle {} epaonnistui!", jalkiohjauskirjeDTO.getHakuOid(), throwable);
+                            prosessi.keskeyta();
+                        });
+    }
 
-	@Override
-	public void jalkiohjauskirjeetHaulle(KirjeProsessi prosessi,
-										 JalkiohjauskirjeDTO jalkiohjauskirjeDTO) {
-		from(
-				sijoitteluAsyncResource
-						.getHakijatIlmanKoulutuspaikkaa(jalkiohjauskirjeDTO
-								.getHakuOid()))
-		//
-				.subscribeOn(Schedulers.newThread())
-				//
-				.subscribe(
-						hakijat -> {
-							/**
-							 * VIALLISET DATA POIS FILTTEROINTI
-							 */
-							Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat
-									.getResults());
-							muodostaKirjeet().call(vainHakeneetJalkiohjattavat,
-									prosessi, jalkiohjauskirjeDTO);
-						},
-						throwable -> {
-							LOG.error(
-									"Koulutuspaikattomien haku haulle {} epaonnistui!",
-									jalkiohjauskirjeDTO.getHakuOid(),
-									throwable);
-							prosessi.keskeyta();
-						});
-	}
+    private Action3<Collection<HakijaDTO>, KirjeProsessi, JalkiohjauskirjeDTO> muodostaKirjeet() {
+        return (hakijat, prosessi, kirje) -> {
+            if (hakijat.isEmpty()) {
+                LOG.error("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
+                throw new RuntimeException("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
+            }
 
-	private Action3<Collection<HakijaDTO>, KirjeProsessi, JalkiohjauskirjeDTO> muodostaKirjeet() {
-		return (hakijat, prosessi, kirje) -> {
-			if (hakijat.isEmpty()) {
-				LOG.error("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
-				throw new RuntimeException(
-						"Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
-			}
+            List<Hakemus> hakemukset;
+            {
+                Collection<String> hakemusOids = hakijat.stream()
+                        .map(h -> h.getHakemusOid())
+                        .collect(Collectors.toList());
+                try {
+                    LOG.info("Haetaan hakemukset!");
+                    hakemukset = applicationAsyncResource.getApplicationsByOids(hakemusOids).get(240L, TimeUnit.MINUTES);
+                } catch (Throwable e) {
+                    LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
+                    throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
+                }
+            }
+            Collection<Hakemus> yksikielisetHakemukset;
+            {
+                final boolean ruotsinkieliset = kirje.isRuotsinkielinenAineisto();
+                yksikielisetHakemukset = hakemukset
+                        .stream()
+                        .filter(h -> ruotsinkieliset == KieliUtil.RUOTSI.equals(new HakemusWrapper(h).getAsiointikieli()))
+                        .collect(Collectors.toList());
+            }
+            Collection<HakijaDTO> yksikielisetHakijat;
+            {
+                Set<String> hakemusOids = yksikielisetHakemukset.stream().map(h -> h.getOid()).collect(Collectors.toSet());
+                yksikielisetHakijat = hakijat.stream()
+                        .filter(h -> hakemusOids.contains(h.getHakemusOid()))
+                        .collect(Collectors.toList());
+            }
+            final Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
+            for (HakijaDTO hakija : yksikielisetHakijat) {
+                for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+                    String hakukohdeOid = hakutoive.getHakukohdeOid();
+                    if (!metaKohteet.containsKey(hakukohdeOid)) {
+                        try {
+                            metaKohteet.put(hakukohdeOid, kirjeetHakukohdeCache.haeHakukohde(hakukohdeOid));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            LOG.error("Tarjonnasta ei saatu hakukohdetta {}: {}", new Object[]{hakukohdeOid, e.getMessage()});
+                            metaKohteet.put(hakukohdeOid, new MetaHakukohde(
+                                    new Teksti(new StringBuilder().append("Hakukohde ").append(hakukohdeOid).append(" ei löydy tarjonnasta!").toString()),
+                                    new Teksti("Nimetön hakukohde")));
+                        }
 
-			List<Hakemus> hakemukset;
-			{
-				Collection<String> hakemusOids = hakijat.stream()
-						.map(h -> h.getHakemusOid())
-						.collect(Collectors.toList());
-				try {
-					LOG.info("Haetaan hakemukset!");
-					hakemukset = applicationAsyncResource
-							.getApplicationsByOids(hakemusOids).get(240L,
-									TimeUnit.MINUTES);
-				} catch (Throwable e) {
-					LOG.error(
-							"Hakemusten haussa oideilla tapahtui virhe!",
-							e);
-					throw new RuntimeException(
-							"Hakemusten haussa oideilla tapahtui virhe!");
-				}
-			}
-			/**
-			 * KIELELLA FILTTEROINTI
-			 */
-			Collection<Hakemus> yksikielisetHakemukset;
-			{
-				final boolean ruotsinkieliset = kirje
-						.isRuotsinkielinenAineisto();
-				yksikielisetHakemukset = hakemukset
-						.stream()
-						.filter(h -> ruotsinkieliset == KieliUtil.RUOTSI
-								.equals(new HakemusWrapper(h)
-										.getAsiointikieli()))
-						.collect(Collectors.toList());
-			}
-			Collection<HakijaDTO> yksikielisetHakijat;
-			{
-				Set<String> hakemusOids = yksikielisetHakemukset.stream()
-						.map(h -> h.getOid()).collect(Collectors.toSet());
-				yksikielisetHakijat = hakijat.stream()
-						.filter(h -> hakemusOids.contains(h.getHakemusOid()))
-						.collect(Collectors.toList());
-			}
-			final Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
-			for (HakijaDTO hakija : yksikielisetHakijat) {
-				for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-					String hakukohdeOid = hakutoive.getHakukohdeOid();
-					if (!metaKohteet.containsKey(hakukohdeOid)) { // lisataan
-																	// puuttuva
-																	// hakukohde
-						try {
-
-							metaKohteet.put(hakukohdeOid, kirjeetHakukohdeCache
-									.haeHakukohde(hakukohdeOid));
-
-						} catch (Exception e) {
-							e.printStackTrace();
-							LOG.error(
-									"Tarjonnasta ei saatu hakukohdetta {}: {}",
-									new Object[] { hakukohdeOid, e.getMessage() });
-							metaKohteet
-									.put(hakukohdeOid,
-											new MetaHakukohde(
-													new Teksti(
-															new StringBuilder()
-																	.append("Hakukohde ")
-																	.append(hakukohdeOid)
-																	.append(" ei löydy tarjonnasta!")
-																	.toString()),
-													new Teksti(
-															"Nimetön hakukohde")));
-						}
-
-					}
-				}
-			}
-			LetterBatch letterBatch = jalkiohjauskirjeetKomponentti
-					.teeJalkiohjauskirjeet(kirje.getKielikoodi(),
-							yksikielisetHakijat, yksikielisetHakemukset,
-							metaKohteet, kirje.getHakuOid(),
-							kirje.getTemplateName(), kirje.getSisalto(),
-							kirje.getTag());
-			try {
-				if (prosessi.isKeskeytetty()) {
-					LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta! (Timeout 30min)");
-					return;
-				}
-				LOG.error(
-						"Aloitetaan jalkiohjauskirjeiden vienti! Kirjeita {}kpl",
-						letterBatch.getLetters().size());
-				LetterResponse batchId = viestintapalveluAsyncResource
-						.viePdfJaOdotaReferenssi(letterBatch).get(240L,
-								TimeUnit.MINUTES);
-				LOG.error(
-						"Saatiin jalkiohjauskirjeen seurantaId {} ja aloitetaan valmistumisen pollaus! (Timeout 60min)",
-						batchId.getBatchId());
-				prosessi.vaiheValmistui();
-                if(batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
+                    }
+                }
+            }
+            LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(kirje.getKielikoodi(), yksikielisetHakijat,
+                    yksikielisetHakemukset, metaKohteet, kirje.getHakuOid(), kirje.getTemplateName(), kirje.getSisalto(), kirje.getTag());
+            try {
+                if (prosessi.isKeskeytetty()) {
+                    LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta! (Timeout 30min)");
+                    return;
+                }
+                LOG.error("Aloitetaan jalkiohjauskirjeiden vienti! Kirjeita {}kpl", letterBatch.getLetters().size());
+                LetterResponse batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssi(letterBatch).get(240L, TimeUnit.MINUTES);
+                LOG.error("Saatiin jalkiohjauskirjeen seurantaId {} ja aloitetaan valmistumisen pollaus! (Timeout 60min)", batchId.getBatchId());
+                prosessi.vaiheValmistui();
+                if (batchId.getStatus().equals(LetterResponse.STATUS_SUCCESS)) {
                     LOG.error("############ Kirjeiden status ok #############");
                     PublishSubject<String> stop = PublishSubject.create();
                     Observable
@@ -258,12 +180,8 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                             .subscribe(
                                     pulse -> {
                                         try {
-                                            LOG.warn(
-                                                    "Tehdaan status kutsu seurantaId:lle {}",
-                                                    batchId);
-                                            LetterBatchStatusDto status = viestintapalveluAsyncResource
-                                                    .haeStatus(batchId.getBatchId()).get(10000L,
-                                                            TimeUnit.MILLISECONDS);
+                                            LOG.warn("Tehdaan status kutsu seurantaId:lle {}", batchId);
+                                            LetterBatchStatusDto status = viestintapalveluAsyncResource.haeStatus(batchId.getBatchId()).get(10000L, TimeUnit.MILLISECONDS);
                                             if (prosessi.isKeskeytetty()) {
                                                 LOG.error("Jalkiohjauskirjeiden luonti on keskeytetty kayttajantoimesta!");
                                                 stop.onNext(null);
@@ -281,56 +199,41 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                                 stop.onNext(null);
                                             }
                                         } catch (Throwable e) {
-                                            LOG.error(
-                                                    "Statuksen haku epaonnistui",
-                                                    e);
+                                            LOG.error("Statuksen haku epaonnistui", e);
                                         }
-                                 }, throwable -> {
-                                prosessi.keskeyta();
-                            }, () -> {
-                                prosessi.keskeyta();
-                            });
+                                    }, throwable -> {
+                                        prosessi.keskeyta();
+                                    }, () -> {
+                                        prosessi.keskeyta();
+                                    });
                 } else {
                     prosessi.keskeyta("Hakemuksissa oli virheitä", batchId.getErrors());
                 }
-			} catch (Throwable e) {
-				LOG.error("Virhe haulle {}", kirje.getHakuOid(),
-						e);
-				prosessi.keskeyta();
-			}
-		};
-	}
+            } catch (Throwable e) {
+                LOG.error("Virhe haulle {}", kirje.getHakuOid(), e);
+                prosessi.keskeyta();
+            }
+        };
+    }
 
-	private Collection<HakijaDTO> puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(
-			Collection<HakijaDTO> hyvaksymattomatHakijat) {
-		return hyvaksymattomatHakijat.stream()
-		//
-		// Filtteröidään puutteellisilla tiedoilla
-		// olevat
-		// hakijat pois
-		//
-				.filter(hakija -> {
-					if (hakija == null || hakija.getHakutoiveet() == null
-							|| hakija.getHakutoiveet().isEmpty()) {
-						LOG.error("Hakija ilman hakutoiveita!");
-						return false;
-					}
-					return true;
-				})
-				//
-				// OVT-8553 Itse itsensa peruuttaneet pois
-				//
-				.filter(hakija -> hakija
-						.getHakutoiveet()
-						.stream()
-						.anyMatch(
-								hakutoive -> hakutoive
-										.getHakutoiveenValintatapajonot()
-										.stream()
-										.noneMatch(
-												valintatapajono -> valintatapajono
-														.getVastaanottotieto() == PERUNUT)))
-				//
-				.collect(Collectors.toList());
-	}
+    private Collection<HakijaDTO> puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(Collection<HakijaDTO> hyvaksymattomatHakijat) {
+        return hyvaksymattomatHakijat.stream()
+                // Filtteröidään puutteellisilla tiedoilla olevat hakijat pois
+                .filter(hakija -> {
+                    if (hakija == null || hakija.getHakutoiveet() == null || hakija.getHakutoiveet().isEmpty()) {
+                        LOG.error("Hakija ilman hakutoiveita!");
+                        return false;
+                    }
+                    return true;
+                })
+                //
+                // OVT-8553 Itse itsensa peruuttaneet pois
+                //
+                .filter(hakija -> hakija
+                        .getHakutoiveet()
+                        .stream()
+                        .anyMatch(hakutoive -> hakutoive.getHakutoiveenValintatapajonot()
+                                .stream().noneMatch(valintatapajono -> valintatapajono.getVastaanottotieto() == PERUNUT)))
+                .collect(Collectors.toList());
+    }
 }
