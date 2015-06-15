@@ -25,9 +25,6 @@ public class HaeHakukohteetTarjonnaltaKomponentti {
         this.tarjontaService = tarjontaService;
     }
 
-    /**
-     * @return hakukohteet
-     */
     public Collection<HakukohdeTyyppi> haeHakukohteetTarjonnalta(@Property(OPH.HAKUOID) String hakuOid) {
         return Collections2.filter(tarjontaService.haeTarjonta(hakuOid).getHakukohde(),
                 new Predicate<HakukohdeTyyppi>() {
@@ -36,5 +33,4 @@ public class HaeHakukohteetTarjonnaltaKomponentti {
                     }
                 });
     }
-
 }

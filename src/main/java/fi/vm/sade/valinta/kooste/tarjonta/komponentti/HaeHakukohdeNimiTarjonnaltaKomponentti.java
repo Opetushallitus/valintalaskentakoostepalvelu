@@ -16,7 +16,7 @@ import fi.vm.sade.valinta.kooste.exception.TarjontaException;
 
 /**
  * @author Jussi Jartamo
- *         <p>
+ *         <p/>
  *         Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti!
  *         Proxy provides retries!
  */
@@ -36,7 +36,7 @@ public class HaeHakukohdeNimiTarjonnaltaKomponentti {
         if (hakukohdeOid == null) {
             throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun hakutoiveen! Hakukohteen tunniste puuttuu!");
         } else {
-            LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[] {tarjontaResourceUrl, hakukohdeOid});
+            LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[]{tarjontaResourceUrl, hakukohdeOid});
             try {
                 // Palauttaa jotain täysin mystistä
                 //HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);

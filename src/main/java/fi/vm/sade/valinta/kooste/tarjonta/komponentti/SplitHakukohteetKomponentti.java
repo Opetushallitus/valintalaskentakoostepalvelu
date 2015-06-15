@@ -8,11 +8,6 @@ import org.springframework.stereotype.Component;
 
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 
-/**
- * User: wuoti Date: 20.5.2013 Time: 13.11
- * 
- * Poimii oidit HakukohdeTyyppi-oliojoukosta. HakukohdeTyyppi -> String
- */
 @Component("splitHakukohteetKomponentti")
 public class SplitHakukohteetKomponentti {
 

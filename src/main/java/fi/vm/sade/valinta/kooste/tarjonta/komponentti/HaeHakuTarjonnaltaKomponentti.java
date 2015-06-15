@@ -9,11 +9,11 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 @Component("hakuTarjonnaltaKomponentti")
 public class HaeHakuTarjonnaltaKomponentti {
 
-	@Autowired
-	private fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource hakuResource;
+    @Autowired
+    private fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource hakuResource;
 
-	public HakuV1RDTO getHaku(@Property("hakuOid") String hakuOid) {
-		HakuV1RDTO haku = hakuResource.findByOid(hakuOid).getResult();
-		return haku;
-	}
+    public HakuV1RDTO getHaku(@Property("hakuOid") String hakuOid) {
+        HakuV1RDTO haku = hakuResource.findByOid(hakuOid).getResult();
+        return haku;
+    }
 }
