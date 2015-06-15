@@ -14,11 +14,8 @@ import org.springframework.stereotype.Component;
 import fi.vm.sade.valinta.kooste.exception.ViestintapalveluException;
 
 /**
- * 
- * @author Jussi Jartamo
- * 
  * @Deprecated Kaikki lataukset on jatkossa epasuoria joten paluuarvolla ei
- *             valia!
+ * valia!
  */
 @Deprecated
 @Component("viestintapalveluProcessor")
@@ -35,16 +32,11 @@ public class ViestintapalveluResponseProcessor implements Processor {
             }
             if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
                 if (response.getEntity() instanceof InputStream) {
-                    LOG.error("Response {}, \r\n{}, \r\n{}, \r\n{}",
-                            new Object[] { response.getStatus(), IOUtils.toString((InputStream) response.getEntity()),
-                                    response.getMetadata(), response });
+                    LOG.error("Response {}, \r\n{}, \r\n{}, \r\n{}", new Object[]{response.getStatus(), IOUtils.toString((InputStream) response.getEntity()), response.getMetadata(), response});
                 } else {
-                    LOG.error(
-                            "Response {}, \r\n{}, \r\n{}, \r\n{}",
-                            new Object[] { response.getStatus(), response.getEntity(), response.getMetadata(), response });
+                    LOG.error("Response {}, \r\n{}, \r\n{}, \r\n{}", new Object[]{response.getStatus(), response.getEntity(), response.getMetadata(), response});
                 }
-                throw new ViestintapalveluException("Viestintäpalvelun käyttö epäonnistui (status "
-                        + response.getStatus() + "). Yritä uudelleen tai ota yhteyttä ylläpitoon!");
+                throw new ViestintapalveluException("Viestintäpalvelun käyttö epäonnistui (status " + response.getStatus() + "). Yritä uudelleen tai ota yhteyttä ylläpitoon!");
             }
         }
         exchange.setOut(exchange.getIn());
