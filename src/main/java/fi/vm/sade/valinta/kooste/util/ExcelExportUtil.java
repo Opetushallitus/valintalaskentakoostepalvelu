@@ -27,143 +27,108 @@ import fi.vm.sade.valinta.kooste.util.excel.Highlight;
 import fi.vm.sade.valinta.kooste.util.excel.Span;
 
 /**
- * 
- * @author Jussi Jartamo
- * 
  *         Muuntaa Object[][]:n xls-tiedostoksi!
  */
 public class ExcelExportUtil {
+    public static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("dd.MM.yyyy hh.mm");
 
-	public static final FastDateFormat DATE_FORMAT = FastDateFormat
-			.getInstance("dd.MM.yyyy hh.mm");
+    public static byte[] exportGridSheetsAsXlsBytes(Map<String, Object[][]> grids) {
+        assert (grids != null);
+        HSSFWorkbook wb = new HSSFWorkbook();
+        CellStyle alignCenterStyle = wb.createCellStyle();
+        alignCenterStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        HSSFCellStyle highlight = wb.createCellStyle();
+        HSSFCellStyle spanhighlight = wb.createCellStyle();
+        spanhighlight.setAlignment(CellStyle.ALIGN_CENTER);
+        for (Entry<String, Object[][]> sheetAndGrid : grids.entrySet()) {
+            Sheet sheet = wb.createSheet(sheetAndGrid.getKey());
+            exportGridToSheet(sheetAndGrid.getValue(), sheet, alignCenterStyle, spanhighlight, highlight);
+        }
 
-	public static byte[] exportGridSheetsAsXlsBytes(
-			Map<String, Object[][]> grids) {
-		assert (grids != null);
-		HSSFWorkbook wb = new HSSFWorkbook();
-		CellStyle alignCenterStyle = wb.createCellStyle();
-		alignCenterStyle.setAlignment(CellStyle.ALIGN_CENTER);
-		HSSFCellStyle highlight = wb.createCellStyle();
-		
-		//highlight.setFillBackgroundColor((short)0x0ff);
-		//highlight.setFillPattern(CellStyle.SOLID_FOREGROUND);
-		//highlight.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
-		HSSFCellStyle spanhighlight = wb.createCellStyle();
-				
-				//highlight.setFillBackgroundColor((short)0x0ff);
-		//spanhighlight.setFillPattern(CellStyle.SOLID_FOREGROUND);
-		//spanhighlight.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
-		spanhighlight.setAlignment(CellStyle.ALIGN_CENTER);
-		
-		for (Entry<String, Object[][]> sheetAndGrid : grids.entrySet()) {
-			Sheet sheet = wb.createSheet(sheetAndGrid.getKey());// DATE_FORMAT.format(new
-																// Date()));
-			exportGridToSheet(sheetAndGrid.getValue(),sheet, alignCenterStyle,spanhighlight,highlight);
-			
-		}
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        try {
+            wb.write(bytesOut);
+        } catch (IOException e) {
+            e.printStackTrace(); // <- not going to happen since not using real
+            // I/O
+        }
+        return bytesOut.toByteArray();
+    }
 
-		ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-		try {
-			wb.write(bytesOut);
-		} catch (IOException e) {
-			e.printStackTrace(); // <- not going to happen since not using real
-									// I/O
-		}
-		return bytesOut.toByteArray();
-	}
-	
-	private static void exportGridToSheet(Object[][] grid, Sheet sheet, CellStyle spanStyle, CellStyle highlightSpanStyle, CellStyle highlightStyle) {
-		int numberOfcolumns = 0;
-		//
-		// Create rows!
-		//
-		short rowIndex = 0;
-		for (Object[] dataRow : grid) {
-			assert (dataRow != null);
-			Row excelRow = sheet.createRow(rowIndex);
-			//
-			// Create columns!
-			//
-			short cellIndex = 0;
-			for (Object dataCell : dataRow) {
-				if (dataCell == null) {
-					dataCell = StringUtils.EMPTY;
-				}
-				if(dataCell instanceof Span) {
-					//
-					// Span over multiple columns
-					//
-					Span span = (Span)dataCell;
-					Cell excelCell = excelRow.createCell(cellIndex);
-					if(span.isAlsoHighlight()) {
-						excelCell.setCellStyle(highlightSpanStyle);
-					} else {
-					excelCell.setCellStyle(spanStyle);
-					}
-					sheet.addMergedRegion(new CellRangeAddress(rowIndex, // first
-							// row
-							// (0-based)
-							rowIndex, // last row (0-based)
-							cellIndex, // first column (0-based)
-							cellIndex + span.getSpanColumns() - 1 // last column
-															// (0-based)
-					));
-					excelCell.setCellValue(span.getText());
-					cellIndex += span.getSpanColumns();
-				} else {
-					//
-					// Normal cell
-					//
-					numberOfcolumns = Math.max(numberOfcolumns, cellIndex);
-					Cell excelCell = excelRow.createCell(cellIndex);
-					if(dataCell instanceof Highlight) {
-						excelCell.setCellStyle(highlightStyle);
-					}
-					String value = dataCell.toString();
-					excelCell.setCellValue(value);
-					++cellIndex;
-				}
-			}
-			++rowIndex;
-		}
-		//
-		// Auto size used columns!
-		//
-		for (int column = 0; column <= numberOfcolumns; ++column) {
-			sheet.autoSizeColumn(column);
-		}
-	}
-	
-	public static byte[] exportGridAsXlsBytes(Object[][] grid) {
-		assert (grid != null);
-		HSSFWorkbook wb = new HSSFWorkbook();
-		CellStyle alignCenterStyle = wb.createCellStyle();
-		alignCenterStyle.setAlignment(CellStyle.ALIGN_CENTER);
-		HSSFCellStyle highlight = wb.createCellStyle();
-		
-		//highlight.setFillBackgroundColor((short)0x0ff);
-		//highlight.setFillPattern(CellStyle.SOLID_FOREGROUND);
-		//highlight.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
-		HSSFCellStyle spanhighlight = wb.createCellStyle();
-				
-				//highlight.setFillBackgroundColor((short)0x0ff);
-		//spanhighlight.setFillPattern(CellStyle.SOLID_FOREGROUND);
-		//spanhighlight.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
-		spanhighlight.setAlignment(CellStyle.ALIGN_CENTER);
-		Sheet sheet = wb.createSheet(DATE_FORMAT.format(new Date()));
-		exportGridToSheet(grid,sheet, alignCenterStyle,spanhighlight, highlight);
+    private static void exportGridToSheet(Object[][] grid, Sheet sheet, CellStyle spanStyle, CellStyle highlightSpanStyle, CellStyle highlightStyle) {
+        int numberOfcolumns = 0;
+        // Create rows!
+        short rowIndex = 0;
+        for (Object[] dataRow : grid) {
+            assert (dataRow != null);
+            Row excelRow = sheet.createRow(rowIndex);
+            // Create columns!
+            short cellIndex = 0;
+            for (Object dataCell : dataRow) {
+                if (dataCell == null) {
+                    dataCell = StringUtils.EMPTY;
+                }
+                if (dataCell instanceof Span) {
+                    // Span over multiple columns
+                    Span span = (Span) dataCell;
+                    Cell excelCell = excelRow.createCell(cellIndex);
+                    if (span.isAlsoHighlight()) {
+                        excelCell.setCellStyle(highlightSpanStyle);
+                    } else {
+                        excelCell.setCellStyle(spanStyle);
+                    }
+                    sheet.addMergedRegion(new CellRangeAddress(rowIndex, // first
+                            // row
+                            // (0-based)
+                            rowIndex, // last row (0-based)
+                            cellIndex, // first column (0-based)
+                            cellIndex + span.getSpanColumns() - 1 // last column
+                            // (0-based)
+                    ));
+                    excelCell.setCellValue(span.getText());
+                    cellIndex += span.getSpanColumns();
+                } else {
+                    // Normal cell
+                    numberOfcolumns = Math.max(numberOfcolumns, cellIndex);
+                    Cell excelCell = excelRow.createCell(cellIndex);
+                    if (dataCell instanceof Highlight) {
+                        excelCell.setCellStyle(highlightStyle);
+                    }
+                    String value = dataCell.toString();
+                    excelCell.setCellValue(value);
+                    ++cellIndex;
+                }
+            }
+            ++rowIndex;
+        }
+        // Auto size used columns!
+        for (int column = 0; column <= numberOfcolumns; ++column) {
+            sheet.autoSizeColumn(column);
+        }
+    }
 
-		ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-		try {
-			wb.write(bytesOut);
-		} catch (IOException e) {
-			e.printStackTrace(); // <- not going to happen since not using real
-									// I/O
-		}
-		return bytesOut.toByteArray();
-	}
+    public static byte[] exportGridAsXlsBytes(Object[][] grid) {
+        assert (grid != null);
+        HSSFWorkbook wb = new HSSFWorkbook();
+        CellStyle alignCenterStyle = wb.createCellStyle();
+        alignCenterStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        HSSFCellStyle highlight = wb.createCellStyle();
+        HSSFCellStyle spanhighlight = wb.createCellStyle();
+        spanhighlight.setAlignment(CellStyle.ALIGN_CENTER);
+        Sheet sheet = wb.createSheet(DATE_FORMAT.format(new Date()));
+        exportGridToSheet(grid, sheet, alignCenterStyle, spanhighlight, highlight);
 
-	public static InputStream exportGridAsXls(Object[][] grid) {
-		return new ByteArrayInputStream(exportGridAsXlsBytes(grid));// bytesOut.newInputStream();
-	}
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        try {
+            wb.write(bytesOut);
+        } catch (IOException e) {
+            e.printStackTrace(); // <- not going to happen since not using real
+            // I/O
+        }
+        return bytesOut.toByteArray();
+    }
+
+    public static InputStream exportGridAsXls(Object[][] grid) {
+        return new ByteArrayInputStream(exportGridAsXlsBytes(grid));// bytesOut.newInputStream();
+    }
 }
