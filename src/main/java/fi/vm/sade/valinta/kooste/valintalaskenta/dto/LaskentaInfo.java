@@ -1,24 +1,9 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 
 public interface LaskentaInfo {
+    String getUuid();
 
-	/**
-	 * 
-	 * @return
-	 */
-	String getUuid();
+    String getHakuOid();
 
-	/**
-	 * 
-	 * @return
-	 */
-	String getHakuOid();
-
-	/**
-	 * 
-	 * @return
-	 */
-	boolean isOsittainenLaskenta(); // eli maskilla aloitettu osajoukko koko
-									// laskennasta
-
+    boolean isOsittainenLaskenta(); // eli maskilla aloitettu osajoukko koko laskennasta
 }

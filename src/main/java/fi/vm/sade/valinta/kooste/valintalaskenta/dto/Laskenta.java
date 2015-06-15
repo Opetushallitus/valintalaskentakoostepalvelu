@@ -1,14 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.dto;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public interface Laskenta extends LaskentaInfo, LaskentaLopeta {
-	/**
-	 * 
-	 * @return
-	 */
-	boolean isValmis();
+    boolean isValmis();
 }
