@@ -25,9 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-/**
- * @author Jussi Jartamo
- */
 @Controller("ValintalaskentaKerrallaResource")
 @Path("valintalaskentakerralla")
 @PreAuthorize("isAuthenticated()")
@@ -44,12 +41,6 @@ public class ValintalaskentaKerrallaResource {
     @Autowired
     private LaskentaSeurantaAsyncResource seurantaAsyncResource;
 
-    /**
-     * Koko haun laskenta
-     *
-     * @param hakuOid
-     * @return
-     */
     @POST
     @Path("/haku/{hakuOid}/tyyppi/{tyyppi}/whitelist/{whitelist}")
     @Consumes(APPLICATION_JSON)
@@ -80,11 +71,6 @@ public class ValintalaskentaKerrallaResource {
         }
     }
 
-    /**
-     * Uudelleen aja vanha haku
-     *
-     * @return
-     */
     @POST
     @Path("/uudelleenyrita/{uuid}")
     @Consumes(APPLICATION_JSON)
@@ -135,12 +121,6 @@ public class ValintalaskentaKerrallaResource {
         valintalaskentaStatusExcelHandler.getStatusXls(uuid, (Response response) -> asyncResponse.resume(response));
     }
 
-    /**
-     * Sammutta laskennan uuid:lla jos laskenta on kaynnissa
-     *
-     * @param uuid
-     * @return 200 OK
-     */
     @DELETE
     @Path("/haku/{uuid}")
     public Response lopetaLaskenta(@PathParam("uuid") String uuid) {
@@ -155,7 +135,7 @@ public class ValintalaskentaKerrallaResource {
         return Response.ok().build();
     }
 
-    private Response errorResponce(final String errorMessage){
+    private Response errorResponce(final String errorMessage) {
         return Response.serverError().entity(errorMessage).build();
     }
 
@@ -164,13 +144,9 @@ public class ValintalaskentaKerrallaResource {
             try {
                 Object[] hakukohdeOidArray = maski.toArray();
                 StringBuilder sb = new StringBuilder();
-                sb.append(Arrays.toString(Arrays.copyOfRange(
-                        hakukohdeOidArray,
-                        0,
-                        Math.min(hakukohdeOidArray.length, 10))));
+                sb.append(Arrays.toString(Arrays.copyOfRange(hakukohdeOidArray, 0, Math.min(hakukohdeOidArray.length, 10))));
                 if (hakukohdeOidArray.length > 10) {
-                    sb.append(" ensimmaiset 10 hakukohdetta maskissa jossa on yhteensa hakukohteita ")
-                            .append(hakukohdeOidArray.length);
+                    sb.append(" ensimmaiset 10 hakukohdetta maskissa jossa on yhteensa hakukohteita ").append(hakukohdeOidArray.length);
                 } else {
                     sb.append(" maskin hakukohteet");
                 }
