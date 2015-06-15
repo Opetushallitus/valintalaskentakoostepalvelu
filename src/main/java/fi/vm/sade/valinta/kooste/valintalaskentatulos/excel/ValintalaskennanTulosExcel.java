@@ -3,14 +3,15 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.excel;
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti.getTeksti;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang.StringUtils.trimToEmpty;
-import static org.apache.commons.lang.StringUtils.trimToNull;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.codepoetics.protonpack.Indexed;
 import com.codepoetics.protonpack.StreamUtils;
+import fi.vm.sade.valintalaskenta.domain.dto.FunktioTulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -26,54 +27,56 @@ import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 
+
 public class ValintalaskennanTulosExcel {
     public static XSSFWorkbook luoExcel(HakuV1RDTO haku, final HakukohdeV1RDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> valinnanVaiheet, final List<Hakemus> hakemukset) {
         final Map<String, Hakemus> hakemusByOid = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
 
         XSSFWorkbook workbook = new XSSFWorkbook();
         valinnanVaiheet.stream()
-
                 .flatMap(vaihe -> vaihe.getValintatapajonot().stream().map(jono -> new ValintatapaJonoSheet(jono, vaihe)))
                 .collect(Collectors.groupingBy(jonoSheet -> jonoSheet.sheetName)).entrySet().stream()
-                // Uudelleen nimetään saman nimiset sheetit (index) suffiksilla, esim Jokujono (5)
-                .flatMap(entry -> StreamUtils.zipWithIndex(entry.getValue().stream().sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt())))
-                        .map(indexedJonoSheet -> new ValintatapaJonoSheet(indexedJonoSheet.getValue(),
-                                indexedJonoSheet.getValue().sheetName + Optional.of(indexedJonoSheet.getIndex()).map(i -> {
-                                    if (i == 0L) {
-                                        return "";
-                                    } else {
-                                        return " (" + new Long(i + 1L).toString() + ")";
-                                    }
-                                }).get())))
-                // Sorttaus ensin käänteisesti pvm:n mukaan ja sitten prioriteetin
-                .sorted((o1, o2) -> new CompareToBuilder().append(o2.getCreatedAt(), o1.getCreatedAt())
-                        .append(o1.jono.getPrioriteetti(), o2.jono.getPrioriteetti()).toComparison())
-                .forEach((jonoSheet) -> {
-
-                    final XSSFSheet sheet = workbook.createSheet(jonoSheet.sheetName);
-                    setColumnWidths(sheet);
-                    addRow(sheet, "Haku", getTeksti(haku.getNimi()));
-                    addRow(sheet, "Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimet()));
-                    addRow(sheet, "Hakukohde", getTeksti(hakukohdeDTO.getHakukohteenNimet()));
-                    addRow(sheet, "Vaihe", jonoSheet.vaihe.getNimi());
-                    addRow(sheet, "Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(jonoSheet.vaihe.getCreatedAt()));
-                    addRow(sheet, "Jono", jonoSheet.jono.getNimi());
-                    addRow(sheet);
-                    if (jonoSheet.jono.getJonosijat().isEmpty()) {
-                        addRow(sheet, "Jonolle ei ole valintalaskennan tuloksia");
-                    } else {
-                        addRow(sheet, columnHeaders);
-                        sortedJonosijat(jonoSheet.jono).forEach(hakija -> {
-                            final HakemusRivi rivi = new HakemusRivi(hakija, hakemusByOid.getOrDefault(hakija.getHakemusOid(), emptyHakemus));
-                            final List<String> columnValues = columns.stream()
-                                    .map(column -> column.extractor.apply(rivi))
-                                    .collect(Collectors.toList());
-                            addRow(sheet, columnValues);
-                        });
-                    }
-                });
+                        .flatMap(ValintalaskennanTulosExcel::toValintatapajonoStream)
+                        .sorted(ValintalaskennanTulosExcel::byReverseDateAndPriority)
+                        .forEach((jonoSheet) -> {
+                            final XSSFSheet sheet = workbook.createSheet(jonoSheet.sheetName);
+                            setColumnWidths(sheet);
+                            addRow(sheet, "Haku", getTeksti(haku.getNimi()));
+                            addRow(sheet, "Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimet()));
+                            addRow(sheet, "Hakukohde", getTeksti(hakukohdeDTO.getHakukohteenNimet()));
+                            addRow(sheet, "Vaihe", jonoSheet.vaihe.getNimi());
+                            addRow(sheet, "Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(jonoSheet.vaihe.getCreatedAt()));
+                            addRow(sheet, "Jono", jonoSheet.jono.getNimi());
+                            addRow(sheet);
+                            if (jonoSheet.jono.getJonosijat().isEmpty()) {
+                                addRow(sheet, "Jonolle ei ole valintalaskennan tuloksia");
+                            } else {
+                                final List<String> fixedColumnHeaders = fixedColumnHeaders();
+                                final List<String> dynamicColumnHeaders = dynamicColumnHeaders(jonoSheet.jono);
+                                final List<String> allColumnHeaders = Stream.concat(fixedColumnHeaders.stream(), dynamicColumnHeaders.stream()).collect(Collectors.toList());
+                                addRow(sheet, allColumnHeaders);
+                                addJonosijaRows(hakemusByOid, jonoSheet.jono, sheet);
+                            }
+                        }
+                );
         return workbook;
     }
+
+    private static Stream<? extends ValintatapaJonoSheet> toValintatapajonoStream(Map.Entry<String, List<ValintatapaJonoSheet>> entry) {
+        final Stream<ValintatapaJonoSheet> entriesSortedByCreationDateStream = entry.getValue().stream().sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()));
+        return StreamUtils.zipWithIndex(entriesSortedByCreationDateStream).map(ValintalaskennanTulosExcel::toValintatapaJonoSheet);
+    }
+
+    private static int byReverseDateAndPriority(ValintatapaJonoSheet o1, ValintatapaJonoSheet o2) {
+        return new CompareToBuilder().append(o2.getCreatedAt(), o1.getCreatedAt()).append(o1.jono.getPrioriteetti(), o2.jono.getPrioriteetti()).toComparison();
+    }
+
+    private static ValintatapaJonoSheet toValintatapaJonoSheet(Indexed<ValintatapaJonoSheet> indexedJonoSheet) {
+        final String index = indexedJonoSheet.getIndex() == 0L ? "" : " (" + (indexedJonoSheet.getIndex() + 1L) + ")";
+        final String sheetName = indexedJonoSheet.getValue().sheetName + index;
+        return new ValintatapaJonoSheet(indexedJonoSheet.getValue(), sheetName);
+    }
+
     private static class ValintatapaJonoSheet {
         public final ValintatietoValintatapajonoDTO jono;
         public final ValinnanvaiheDTO vaihe;
@@ -91,6 +94,39 @@ public class ValintalaskennanTulosExcel {
         public Date getCreatedAt() {
             return vaihe.getCreatedAt();
         }
+    }
+
+    private static void addJonosijaRows(Map<String, Hakemus> hakemusByOid, ValintatietoValintatapajonoDTO jono, XSSFSheet sheet) {
+        sortedJonosijat(jono)
+                .map(hakija -> {
+                    final Stream<Column> fixedColumnValuesStream = fixedColumns.stream();
+                    final Stream<Column> dynamicColumnValuesStream = hakija.getFunktioTulokset().stream().map(FunktioTulosDTO::getTunniste).map(t -> new Column(t, 14, rivi -> extractValue(t, rivi)));
+                    final HakemusRivi hakemusRivi = new HakemusRivi(hakija, hakemusByOid.getOrDefault(hakija.getHakemusOid(), emptyHakemus));
+                    return Stream.concat(fixedColumnValuesStream, dynamicColumnValuesStream)
+                            .map(column -> column.extractor.apply(hakemusRivi))
+                            .collect(Collectors.toList());
+                })
+                .forEach(v -> addRow(sheet, v));
+    }
+
+    private static List<String> fixedColumnHeaders() {
+        return fixedColumns.stream().map(column -> column.name).collect(Collectors.toList());
+    }
+
+    private static List<String> dynamicColumnHeaders(ValintatietoValintatapajonoDTO jono) {
+        return sortedJonosijat(jono)
+                .findFirst()
+                .map(JonosijaDTO::getFunktioTulokset).orElse(new ArrayList<>()).stream()
+                .map(FunktioTulosDTO::getTunniste)
+                .collect(Collectors.toList());
+    }
+
+    private static String extractValue(String tunniste, HakemusRivi rivi) {
+        return rivi.hakija.getFunktioTulokset().stream()
+                .filter(x -> x.getTunniste().equals(tunniste))
+                .findFirst()
+                .map(FunktioTulosDTO::getArvo)
+                .orElse("");
     }
 
     private static Hakemus emptyHakemus = new Hakemus();
@@ -121,7 +157,7 @@ public class ValintalaskennanTulosExcel {
         }
     }
 
-    private static List<Column> columns = Arrays.asList(
+    private static List<Column> fixedColumns = Arrays.asList(
             new Column("Jonosija", 14, rivi -> String.valueOf(rivi.hakija.getJonosija())),
             new Column("Sukunimi", 20, rivi -> rivi.hakija.getSukunimi()),
             new Column("Etunimi", 20, rivi -> rivi.hakija.getEtunimi()),
@@ -131,8 +167,6 @@ public class ValintalaskennanTulosExcel {
             new Column("Laskennan tulos", 20, rivi -> rivi.hakija.getTuloksenTila().toString()),
             new Column("Selite", 30, rivi -> getTeksti(getJarjestyskriteeri(rivi.hakija).getKuvaus())),
             new Column("Kokonaispisteet", 14, rivi -> nullSafeToString(getJarjestyskriteeri(rivi.hakija).getArvo())));
-
-    private final static List<String> columnHeaders = columns.stream().map(column -> column.name).collect(Collectors.toList());
 
     private static Stream<JonosijaDTO> sortedJonosijat(final ValintatietoValintatapajonoDTO jono) {
         return jono.getJonosijat().stream().sorted((o1, o2) ->
@@ -153,8 +187,8 @@ public class ValintalaskennanTulosExcel {
     }
 
     private static void setColumnWidths(final XSSFSheet sheet) {
-        for (int i = 0; i < columns.size(); i++) {
-            sheet.setColumnWidth(i, columns.get(i).widthInCharacters * 256);
+        for (int i = 0; i < fixedColumns.size(); i++) {
+            sheet.setColumnWidth(i, fixedColumns.get(i).widthInCharacters * 256);
         }
     }
 

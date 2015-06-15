@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
+import fi.vm.sade.valintalaskenta.domain.dto.FunktioTulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
@@ -57,8 +58,7 @@ public class ValintalaskennanTulosExcelTest {
                 valintatapajono(1, jonosijat()),
                 valintatapajono(2, EMPTY_LIST)
         )),
-        valinnanvaihe(2, nyt.minusMonths(12).toDate(), asList(
-                        valintatapajono(1, EMPTY_LIST))
+        valinnanvaihe(2, nyt.minusMonths(12).toDate(), asList(valintatapajono(1, EMPTY_LIST))
         )), hakemukset());
 
     @Test
@@ -80,9 +80,9 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
                 asList("Jono", "Jono 1"),
                 asList(),
-                asList("Jonosija", "Sukunimi",  "Etunimi", "Henkilötunnus",  "Hakemus OID",  "Hakutoive",    "Laskennan tulos",  "Selite",   "Kokonaispisteet"),
-                asList("1",        "Suku 2",    "Etu 2",   "",               "Hakemus 2",    "2",            "VIRHE",            "Puuttuu",  ""),
-                asList("2",        "Suku 1",    "Etu 1",   "010101-123N",    "Hakemus 1",    "1",            "HYVAKSYTTAVISSA",  "",         "666")
+                asList("Jonosija", "Sukunimi",  "Etunimi", "Henkilötunnus",  "Hakemus OID",  "Hakutoive",    "Laskennan tulos",  "Selite",   "Kokonaispisteet",  "pääsykoetulos",  "keskiarvo"),
+                asList("1",        "Suku 2",    "Etu 2",   "",               "Hakemus 2",    "2",            "VIRHE",            "Puuttuu",  "",                 "",               "8"),
+                asList("2",        "Suku 1",    "Etu 1",   "010101-123N",    "Hakemus 1",    "1",            "HYVAKSYTTAVISSA",  "",         "666",              "10",             "9")
             ), getWorksheetData(workbook.getSheetAt(0)));
     }
 
@@ -171,12 +171,12 @@ public class ValintalaskennanTulosExcelTest {
 
     private List<JonosijaDTO> jonosijat() {
         return Arrays.asList(
-            new JonosijaDTO(2, "Hakemus 1", "Hakija 1",
-                jarjestyskriteerit(HYVAKSYTTAVISSA, EMPTY_MAP, new BigDecimal(666)),
-                1, "Suku 1", "Etu 1", false, HYVAKSYTTAVISSA, EMPTY_LIST, EMPTY_LIST, EMPTY_LIST, false, false),
-            new JonosijaDTO(1, "Hakemus 2", "Hakija 2",
-                jarjestyskriteerit(JarjestyskriteerituloksenTila.VIRHE, map("fi", "Puuttuu"), null),
-                2, "Suku 2", "Etu 2", false, JarjestyskriteerituloksenTila.VIRHE, EMPTY_LIST, EMPTY_LIST, EMPTY_LIST, false, false)
+                new JonosijaDTO(2, "Hakemus 1", "Hakija 1",
+                        jarjestyskriteerit(HYVAKSYTTAVISSA, EMPTY_MAP, new BigDecimal(666)),
+                        1, "Suku 1", "Etu 1", false, HYVAKSYTTAVISSA, EMPTY_LIST, EMPTY_LIST, Arrays.asList(new FunktioTulosDTO("pääsykoetulos", "10"), new FunktioTulosDTO("keskiarvo", "9")), false, false),
+                new JonosijaDTO(1, "Hakemus 2", "Hakija 2",
+                        jarjestyskriteerit(JarjestyskriteerituloksenTila.VIRHE, map("fi", "Puuttuu"), null),
+                        2, "Suku 2", "Etu 2", false, JarjestyskriteerituloksenTila.VIRHE, EMPTY_LIST, EMPTY_LIST, Arrays.asList(new FunktioTulosDTO("pääsykoetulos", null), new FunktioTulosDTO("keskiarvo", "8")), false, false)
         );
     }
 
