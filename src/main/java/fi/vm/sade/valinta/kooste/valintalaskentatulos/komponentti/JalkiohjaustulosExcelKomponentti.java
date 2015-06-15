@@ -22,63 +22,47 @@ import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.SijoitteluIlmankoulutusp
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 
 /**
- * 
- * @author Jussi Jartamo
- * 
  *         Komponentti tulosten kasaamiseen Excel-muodossa
  */
 @Component("jalkiohjaustulosXlsKomponentti")
 public class JalkiohjaustulosExcelKomponentti {
+    private static final Logger LOG = LoggerFactory.getLogger(JalkiohjaustulosExcelKomponentti.class);
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(JalkiohjaustulosExcelKomponentti.class);
+    @Autowired
+    private SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy;
 
-	@Autowired
-	private SijoitteluIlmankoulutuspaikkaaKomponentti sijoitteluProxy;
+    public InputStream luoXls(@Property(OPH.HAKUOID) String hakuOid) {
+        final Collection<HakijaDTO> hyvaksymattomatHakijat = sijoitteluProxy.ilmankoulutuspaikkaa(hakuOid, SijoitteluResource.LATEST);
 
-	public InputStream luoXls(@Property(OPH.HAKUOID) String hakuOid) {
-
-		final Collection<HakijaDTO> hyvaksymattomatHakijat = sijoitteluProxy
-				.ilmankoulutuspaikkaa(hakuOid, SijoitteluResource.LATEST);
-
-		List<Object[]> rivit = new ArrayList<Object[]>();
-		for (HakijaDTO jalkiohjattava : hyvaksymattomatHakijat) {
-			boolean otsikko = true;
-			for (HakutoiveDTO hakutoive : jalkiohjattava.getHakutoiveet()) {
-				for (HakutoiveenValintatapajonoDTO jono : hakutoive
-						.getHakutoiveenValintatapajonot()) {
-
-					// HakemusDTO hakemus = filterHakemus(hakemusOid,
-					// jono.getHakemukset());
-
-					if (otsikko) { // tehdaan otsikko
-						StringBuilder nimi = new StringBuilder();
-						nimi.append(jalkiohjattava.getSukunimi()).append(", ")
-								.append(jalkiohjattava.getEtunimi());
-						rivit.add(new Object[] { "Hakija", nimi.toString() });
-						otsikko = false;
-					}
-					StringBuilder pisteet = new StringBuilder();
-					for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
-						pisteet.append(pistetieto.getArvo()).append(" ");
-					}
-					rivit.add(new Object[] {
-							"Hakukohde",
-							hakutoive.getHakukohdeOid(),
-							"Valintatapajono",
-							jono.getValintatapajonoOid(),
-							"Pisteet",
-							pisteet.toString().trim(),
-							"Valinnan tulos",
-							jono.getTila(),
-							"Selite",
-							Arrays.toString(jono.getTilanKuvaukset().values()
-									.toArray()) });
-				}
-			}
-		}
-		return ExcelExportUtil
-				.exportGridAsXls(rivit.toArray(new Object[][] {}));
-	}
-
+        List<Object[]> rivit = new ArrayList<Object[]>();
+        for (HakijaDTO jalkiohjattava : hyvaksymattomatHakijat) {
+            boolean otsikko = true;
+            for (HakutoiveDTO hakutoive : jalkiohjattava.getHakutoiveet()) {
+                for (HakutoiveenValintatapajonoDTO jono : hakutoive.getHakutoiveenValintatapajonot()) {
+                    if (otsikko) {
+                        StringBuilder nimi = new StringBuilder();
+                        nimi.append(jalkiohjattava.getSukunimi()).append(", ").append(jalkiohjattava.getEtunimi());
+                        rivit.add(new Object[]{"Hakija", nimi.toString()});
+                        otsikko = false;
+                    }
+                    StringBuilder pisteet = new StringBuilder();
+                    for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
+                        pisteet.append(pistetieto.getArvo()).append(" ");
+                    }
+                    rivit.add(new Object[]{
+                            "Hakukohde",
+                            hakutoive.getHakukohdeOid(),
+                            "Valintatapajono",
+                            jono.getValintatapajonoOid(),
+                            "Pisteet",
+                            pisteet.toString().trim(),
+                            "Valinnan tulos",
+                            jono.getTila(),
+                            "Selite",
+                            Arrays.toString(jono.getTilanKuvaukset().values().toArray())});
+                }
+            }
+        }
+        return ExcelExportUtil.exportGridAsXls(rivit.toArray(new Object[][]{}));
+    }
 }
