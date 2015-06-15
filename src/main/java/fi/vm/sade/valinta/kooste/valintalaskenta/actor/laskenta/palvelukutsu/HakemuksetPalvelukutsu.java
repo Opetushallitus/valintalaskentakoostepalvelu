@@ -17,67 +17,47 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
-public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements
-		Palvelukutsu {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(HakemuksetPalvelukutsu.class);
-	private final String hakuOid;
-	private final ApplicationAsyncResource applicationAsyncResource;
-	private final AtomicReference<List<Hakemus>> hakemukset;
+public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements Palvelukutsu {
+    private final static Logger LOG = LoggerFactory.getLogger(HakemuksetPalvelukutsu.class);
+    private final String hakuOid;
+    private final ApplicationAsyncResource applicationAsyncResource;
+    private final AtomicReference<List<Hakemus>> hakemukset;
 
-	public HakemuksetPalvelukutsu(String hakuOid,
-			UuidHakukohdeJaOrganisaatio hakukohdeOid,
-			ApplicationAsyncResource applicationAsyncResource) {
-		super(hakukohdeOid);
-		this.hakuOid = hakuOid;
-		this.applicationAsyncResource = applicationAsyncResource;
-		this.hakemukset = new AtomicReference<>();
-	}
+    public HakemuksetPalvelukutsu(String hakuOid, UuidHakukohdeJaOrganisaatio hakukohdeOid, ApplicationAsyncResource applicationAsyncResource) {
+        super(hakukohdeOid);
+        this.hakuOid = hakuOid;
+        this.applicationAsyncResource = applicationAsyncResource;
+        this.hakemukset = new AtomicReference<>();
+    }
 
-	@Override
-	public void vapautaResurssit() {
-		hakemukset.set(null);
-	}
+    @Override
+    public void vapautaResurssit() {
+        hakemukset.set(null);
+    }
 
-	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
-		aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
-			public Peruutettava get() {
-				return applicationAsyncResource
-						.getApplicationsByOid(
-								hakuOid,
-								getHakukohdeOid(),
-								hakemukset -> {
-									if (hakemukset == null) {
-										LOG.error("Hakemuksetpalvelu palautti null datajoukon!");
-										failureCallback(takaisinkutsu);
-										return;
-									}
-									HakemuksetPalvelukutsu.this.hakemukset
-											.set(hakemukset);
-									takaisinkutsu
-											.accept(HakemuksetPalvelukutsu.this);
-								}, failureCallback(takaisinkutsu));
-			}
-		});
-		return this;
-	}
+    public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
+        aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
+            public Peruutettava get() {
+                return applicationAsyncResource.getApplicationsByOid(hakuOid, getHakukohdeOid(), hakemukset -> {
+                    if (hakemukset == null) {
+                        LOG.error("Hakemuksetpalvelu palautti null datajoukon!");
+                        failureCallback(takaisinkutsu);
+                        return;
+                    }
+                    HakemuksetPalvelukutsu.this.hakemukset.set(hakemukset);
+                    takaisinkutsu.accept(HakemuksetPalvelukutsu.this);
+                }, failureCallback(takaisinkutsu));
+            }
+        });
+        return this;
+    }
 
-	public List<Hakemus> getHakemukset() {
-		List<Hakemus> h = hakemukset.get();
-		if (h == null) {
-			LOG.error(
-					"Hakemukset palvelu palautti null joukon hakukohteelle {}",
-					getHakukohdeOid());
-			throw new RuntimeException(
-					"Hakemukset palvelu palautti null joukon hakukohteelle "
-							+ getHakukohdeOid());
-		}
-		return h;
-	}
-
+    public List<Hakemus> getHakemukset() {
+        List<Hakemus> h = hakemukset.get();
+        if (h == null) {
+            LOG.error("Hakemukset palvelu palautti null joukon hakukohteelle {}", getHakukohdeOid());
+            throw new RuntimeException("Hakemukset palvelu palautti null joukon hakukohteelle " + getHakukohdeOid());
+        }
+        return h;
+    }
 }

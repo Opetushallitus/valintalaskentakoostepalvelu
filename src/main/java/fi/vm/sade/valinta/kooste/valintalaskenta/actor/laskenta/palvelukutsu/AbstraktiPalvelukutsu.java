@@ -13,9 +13,6 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 
 
-/**
- * @author Jussi Jartamo
- */
 public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
     private final static Logger LOG = LoggerFactory.getLogger(AbstraktiPalvelukutsu.class);
 
