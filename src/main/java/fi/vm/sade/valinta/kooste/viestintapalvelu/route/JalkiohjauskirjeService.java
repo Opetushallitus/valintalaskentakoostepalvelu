@@ -6,17 +6,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public interface JalkiohjauskirjeService {
+    void jalkiohjauskirjeetHakemuksille(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids);
 
-	void jalkiohjauskirjeetHakemuksille(KirjeProsessi prosessi,
-			JalkiohjauskirjeDTO jalkiohjauskirjeDTO, List<String> hakemusOids);
-
-	void jalkiohjauskirjeetHaulle(KirjeProsessi prosessi,
-			JalkiohjauskirjeDTO jalkiohjauskirjeDTO);
-
+    void jalkiohjauskirjeetHaulle(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO);
 }
