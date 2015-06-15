@@ -13,102 +13,95 @@ import com.google.common.collect.Sets;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public abstract class AbstraktiPalvelukutsuStrategia implements PalvelukutsuStrategia {
-	private static final Logger LOG = LoggerFactory.getLogger(AbstraktiPalvelukutsuStrategia.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstraktiPalvelukutsuStrategia.class);
 
-	private final Set<Palvelukutsu> aloitetutPalvelukutsut;
-	private final Queue<PalvelukutsuJaTakaisinkutsu> palvelukutsuJono;
-	private volatile boolean kaikkiPeruutettu = false;
+    private final Set<Palvelukutsu> aloitetutPalvelukutsut;
+    private final Queue<PalvelukutsuJaTakaisinkutsu> palvelukutsuJono;
+    private volatile boolean kaikkiPeruutettu = false;
 
-	public AbstraktiPalvelukutsuStrategia() {
-		this.aloitetutPalvelukutsut = Sets.newConcurrentHashSet();
-		this.palvelukutsuJono = Queues.newConcurrentLinkedQueue();
-	}
+    public AbstraktiPalvelukutsuStrategia() {
+        this.aloitetutPalvelukutsut = Sets.newConcurrentHashSet();
+        this.palvelukutsuJono = Queues.newConcurrentLinkedQueue();
+    }
 
-	protected void kaynnistaJonossaSeuraavaPalvelukutsu() {
-		if (kaikkiPeruutettu) {
-			return;
-		}
-		final PalvelukutsuJaTakaisinkutsu seuraavaPalvelukutsu = palvelukutsuJono.poll();
-		if (seuraavaPalvelukutsu != null) {
-			LOG.info("Aktivoidaan jonossa seuraava {}", seuraavaPalvelukutsu.palvelukutsu.getClass().getSimpleName());
-			aloitetutPalvelukutsut.add(seuraavaPalvelukutsu.palvelukutsu);
-			try {
-				seuraavaPalvelukutsu.palvelukutsu.teePalvelukutsu(palvelukutsu -> {
-					try {
-						aloitetutPalvelukutsut.remove(seuraavaPalvelukutsu.palvelukutsu);
-					} catch (Exception e) {
-						LOG.error("Palvelustrategiassa aloitetun palvelukutsun poisto tyojonosta epaonnistui {}", e.getMessage());
-						throw e;
-					}
-					try {
-						seuraavaPalvelukutsu.takaisinkutsu.accept(palvelukutsu);
-					} catch (Exception e) {
-						LOG.error("Palvelustrategiassa alkuperainen takaisinkutsu heitti poikkeuksen {}", e.getMessage());
-					}
-				});
-			} catch(PalvelukutsunUudelleenAktivointiPoikkeus p) {
-				aloitetutPalvelukutsut.remove(seuraavaPalvelukutsu.palvelukutsu);
-				throw p;
-			} catch (Exception e) {
-				LOG.error("Palvelukutsun kaynnistys heitti poikkeuksen: {}", e.getClass().getSimpleName());
-				aloitetutPalvelukutsut.remove(seuraavaPalvelukutsu.palvelukutsu);
-				throw e;
-			}
-		}
-	}
+    protected void kaynnistaJonossaSeuraavaPalvelukutsu() {
+        if (kaikkiPeruutettu) {
+            return;
+        }
+        final PalvelukutsuJaTakaisinkutsu seuraavaPalvelukutsu = palvelukutsuJono.poll();
+        if (seuraavaPalvelukutsu != null) {
+            LOG.info("Aktivoidaan jonossa seuraava {}", seuraavaPalvelukutsu.palvelukutsu.getClass().getSimpleName());
+            aloitetutPalvelukutsut.add(seuraavaPalvelukutsu.palvelukutsu);
+            try {
+                seuraavaPalvelukutsu.palvelukutsu.teePalvelukutsu(palvelukutsu -> {
+                    try {
+                        aloitetutPalvelukutsut.remove(seuraavaPalvelukutsu.palvelukutsu);
+                    } catch (Exception e) {
+                        LOG.error("Palvelustrategiassa aloitetun palvelukutsun poisto tyojonosta epaonnistui {}", e.getMessage());
+                        throw e;
+                    }
+                    try {
+                        seuraavaPalvelukutsu.takaisinkutsu.accept(palvelukutsu);
+                    } catch (Exception e) {
+                        LOG.error("Palvelustrategiassa alkuperainen takaisinkutsu heitti poikkeuksen {}", e.getMessage());
+                    }
+                });
+            } catch (PalvelukutsunUudelleenAktivointiPoikkeus p) {
+                aloitetutPalvelukutsut.remove(seuraavaPalvelukutsu.palvelukutsu);
+                throw p;
+            } catch (Exception e) {
+                LOG.error("Palvelukutsun kaynnistys heitti poikkeuksen: {}", e.getClass().getSimpleName());
+                aloitetutPalvelukutsut.remove(seuraavaPalvelukutsu.palvelukutsu);
+                throw e;
+            }
+        }
+    }
 
-	public void peruutaKaikki() {
-		kaikkiPeruutettu = true;
-		aloitetutPalvelukutsut.forEach(a -> {
-			try {
-				a.peruuta();
-			} catch (Exception ignored) {}
-		});
-	}
+    public void peruutaKaikki() {
+        kaikkiPeruutettu = true;
+        aloitetutPalvelukutsut.forEach(a -> {
+            try {
+                a.peruuta();
+            } catch (Exception ignored) {
+            }
+        });
+    }
 
-	protected int aloitettujaPalvelukutsuja() {
-		return aloitetutPalvelukutsut.size();
-	}
+    protected int aloitettujaPalvelukutsuja() {
+        return aloitetutPalvelukutsut.size();
+    }
 
-	/**
-	 * Yksikkotesteja varten
-	 */
-	public Set<Palvelukutsu> getAloitetutPalvelukutsut() {
-		return aloitetutPalvelukutsut;
-	}
+    public Set<Palvelukutsu> getAloitetutPalvelukutsut() {
+        return aloitetutPalvelukutsut;
+    }
 
-	public Queue<PalvelukutsuJaTakaisinkutsu> getPalvelukutsuJono() {
-		return palvelukutsuJono;
-	}
+    public Queue<PalvelukutsuJaTakaisinkutsu> getPalvelukutsuJono() {
+        return palvelukutsuJono;
+    }
 
-	public void laitaPalvelukutsuJonoon(Palvelukutsu palvelukutsu, Consumer<Palvelukutsu> takaisinkutsu) {
-		palvelukutsuJono.add(new PalvelukutsuJaTakaisinkutsu(palvelukutsu, takaisinkutsu));
-	}
+    public void laitaPalvelukutsuJonoon(Palvelukutsu palvelukutsu, Consumer<Palvelukutsu> takaisinkutsu) {
+        palvelukutsuJono.add(new PalvelukutsuJaTakaisinkutsu(palvelukutsu, takaisinkutsu));
+    }
 
-	public abstract void aloitaUusiPalvelukutsu();
+    public abstract void aloitaUusiPalvelukutsu();
 
-	public static class PalvelukutsuJaTakaisinkutsu {
-		private final Palvelukutsu palvelukutsu;
-		private final Consumer<Palvelukutsu> takaisinkutsu;
+    public static class PalvelukutsuJaTakaisinkutsu {
+        private final Palvelukutsu palvelukutsu;
+        private final Consumer<Palvelukutsu> takaisinkutsu;
 
-		public PalvelukutsuJaTakaisinkutsu(Palvelukutsu palvelukutsu, Consumer<Palvelukutsu> takaisinkutsu) {
-			this.palvelukutsu = palvelukutsu;
-			this.takaisinkutsu = takaisinkutsu;
-		}
+        public PalvelukutsuJaTakaisinkutsu(Palvelukutsu palvelukutsu, Consumer<Palvelukutsu> takaisinkutsu) {
+            this.palvelukutsu = palvelukutsu;
+            this.takaisinkutsu = takaisinkutsu;
+        }
 
-		public Palvelukutsu getPalvelukutsu() {
-			return palvelukutsu;
-		}
+        public Palvelukutsu getPalvelukutsu() {
+            return palvelukutsu;
+        }
 
-		public Consumer<Palvelukutsu> getTakaisinkutsu() {
-			return takaisinkutsu;
-		}
-	}
+        public Consumer<Palvelukutsu> getTakaisinkutsu() {
+            return takaisinkutsu;
+        }
+    }
 
 }
