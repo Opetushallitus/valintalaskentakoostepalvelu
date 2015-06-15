@@ -5,25 +5,19 @@ import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.Laskuri;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public class PalvelukutsuLaskuri extends Laskuri {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(PalvelukutsuLaskuri.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PalvelukutsuLaskuri.class);
 
-	public PalvelukutsuLaskuri(int palvelukutsuja) {
-		super(palvelukutsuja);
-	}
+    public PalvelukutsuLaskuri(int palvelukutsuja) {
+        super(palvelukutsuja);
+    }
 
-	public boolean isDone(int nyt) {
-		return nyt == 0;
-	}
+    public boolean isDone(int nyt) {
+        return nyt == 0;
+    }
 
-	public int palvelukutsuSaapui() {
-		int laskuriNyt = tiputaLaskuria();
-		return laskuriNyt;
-	}
+    public int palvelukutsuSaapui() {
+        int laskuriNyt = tiputaLaskuria();
+        return laskuriNyt;
+    }
 }

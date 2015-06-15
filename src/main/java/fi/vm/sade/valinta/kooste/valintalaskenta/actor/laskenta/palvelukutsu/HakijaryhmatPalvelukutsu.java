@@ -14,53 +14,40 @@ import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
-public class HakijaryhmatPalvelukutsu extends AbstraktiPalvelukutsu implements
-		Palvelukutsu {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(HakijaryhmatPalvelukutsu.class);
-	private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
-	private final AtomicReference<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat;
+public class HakijaryhmatPalvelukutsu extends AbstraktiPalvelukutsu implements Palvelukutsu {
+    private final static Logger LOG = LoggerFactory.getLogger(HakijaryhmatPalvelukutsu.class);
+    private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
+    private final AtomicReference<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat;
 
-	public HakijaryhmatPalvelukutsu(UuidHakukohdeJaOrganisaatio hakukohdeOid,
-			ValintaperusteetAsyncResource valintaperusteetAsyncResource) {
-		super(hakukohdeOid);
-		this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
-		this.hakijaryhmat = new AtomicReference<>();
-	}
+    public HakijaryhmatPalvelukutsu(UuidHakukohdeJaOrganisaatio hakukohdeOid, ValintaperusteetAsyncResource valintaperusteetAsyncResource) {
+        super(hakukohdeOid);
+        this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
+        this.hakijaryhmat = new AtomicReference<>();
+    }
 
-	@Override
-	public void vapautaResurssit() {
-		hakijaryhmat.set(null);
-	}
+    @Override
+    public void vapautaResurssit() {
+        hakijaryhmat.set(null);
+    }
 
-	public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
-		aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
-			public Peruutettava get() {
-				return valintaperusteetAsyncResource
-						.haeHakijaryhmat(
-								getHakukohdeOid(),
-								hakijaryhmat -> {
-									if (hakijaryhmat == null) {
-										LOG.error("Hakijaryhmatpalvelu palautti null datajoukon!");
-										failureCallback(takaisinkutsu);
-										return;
-									}
-									HakijaryhmatPalvelukutsu.this.hakijaryhmat
-											.set(hakijaryhmat);
-									takaisinkutsu
-											.accept(HakijaryhmatPalvelukutsu.this);
-								}, failureCallback(takaisinkutsu));
-			}
-		});
-		return this;
-	}
+    public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
+        aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
+            public Peruutettava get() {
+                return valintaperusteetAsyncResource.haeHakijaryhmat(getHakukohdeOid(), hakijaryhmat -> {
+                    if (hakijaryhmat == null) {
+                        LOG.error("Hakijaryhmatpalvelu palautti null datajoukon!");
+                        failureCallback(takaisinkutsu);
+                        return;
+                    }
+                    HakijaryhmatPalvelukutsu.this.hakijaryhmat.set(hakijaryhmat);
+                    takaisinkutsu.accept(HakijaryhmatPalvelukutsu.this);
+                }, failureCallback(takaisinkutsu));
+            }
+        });
+        return this;
+    }
 
-	public List<ValintaperusteetHakijaryhmaDTO> getHakijaryhmat() {
-		return hakijaryhmat.get();
-	}
+    public List<ValintaperusteetHakijaryhmaDTO> getHakijaryhmat() {
+        return hakijaryhmat.get();
+    }
 }
