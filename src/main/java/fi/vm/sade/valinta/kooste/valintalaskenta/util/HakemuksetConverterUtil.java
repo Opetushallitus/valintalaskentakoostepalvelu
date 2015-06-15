@@ -348,10 +348,10 @@ public class HakemuksetConverterUtil {
     private static boolean hakukaudella(HakuV1RDTO haku, SuoritusJaArvosanatWrapper s) {
         DateTime valmistuminen = s.getValmistuminenAsDateTime();
         int hakuvuosi = haku.getHakukausiVuosi();
-        DateTime kStart = new DateTime().withDate(hakuvuosi, 1, 1).minusDays(1);
-        DateTime kEnd = new DateTime().withDate(hakuvuosi, 7, 31).plusDays(1);
-        DateTime sStart = new DateTime().withDate(hakuvuosi, 8, 1).minusDays(1);
-        DateTime sEnd = new DateTime().withDate(hakuvuosi, 12, 31).plusDays(1);
+        DateTime kStart = new DateTime(hakuvuosi, 1, 1, 0, 0).minus(1);
+        DateTime kEnd = new DateTime(hakuvuosi, 7, 31, 0, 0).plusDays(1);
+        DateTime sStart = new DateTime(hakuvuosi, 8, 1, 0, 0).minus(1);
+        DateTime sEnd = new DateTime(hakuvuosi, 12, 31, 0, 0).plusDays(1);
         switch (haku.getHakukausiUri()) {
             case "kausi_k#1":
                 return valmistuminen.isAfter(kStart) && valmistuminen.isBefore(kEnd);
