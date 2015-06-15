@@ -16,9 +16,6 @@ import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Stream.concat;
 
-/**
- * @author jussi jartamo
- */
 public class OppijaToAvainArvoDTOConverter {
     private static final String PK_PREFIX = "PK_";
     private static final String LK_PREFIX = "LK_";
@@ -50,11 +47,8 @@ public class OppijaToAvainArvoDTOConverter {
         final Stream<SuoritusJaArvosanat> yo = oppijanSuoritukset.stream()
                 .filter(s -> wrap(s).isYoTutkinto() && wrap(s).isValmis() && wrap(s).isVahvistettu());
 
-        return suorituksetAvainArvoiksi(
-                oppija,
-                removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(
-                        concat(peruskoulu, concat(lukio, concat(lisaopetus, concat(ammatillinen, yo)))),
-                        parametritDTO
+        return suorituksetAvainArvoiksi(oppija, removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(
+                concat(peruskoulu, concat(lukio, concat(lisaopetus, concat(ammatillinen, yo)))), parametritDTO
                 ).collect(Collectors.toList()));
     }
 
