@@ -44,9 +44,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
 import rx.observables.BlockingObservable;
 
 /**
- * 
- * @author Jussi Jartamo
- *
  * @Autowired(required = false) Camelin pois refaktorointi
  */
 ///valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
@@ -57,131 +54,111 @@ import rx.observables.BlockingObservable;
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/valintatapajonolaskenta", description = "Valintatapajonon tuonti ja vienti taulukkolaskentaan")
 public class ValintatapajonoResource {
-	public static final String ROLE_TULOSTENTUONTI = "ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI";
-	private final Logger LOG = LoggerFactory
-			.getLogger(ValintatapajonoResource.class);
+    public static final String ROLE_TULOSTENTUONTI = "ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI";
+    private final Logger LOG = LoggerFactory.getLogger(ValintatapajonoResource.class);
 
-	@Autowired
-	private Authorizer authorizer;
-	@Autowired
-	private ValintatapajonoTuontiService valintatapajonoTuontiService;
-	@Autowired
-	private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
+    @Autowired
+    private Authorizer authorizer;
+    @Autowired
+    private ValintatapajonoTuontiService valintatapajonoTuontiService;
+    @Autowired
+    private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
 
-	@Autowired(required = false)
-	private ValintatapajonoVientiRoute valintatapajonoVienti;
-	@Autowired
-	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
-	@Autowired
-	private TarjontaAsyncResource tarjontaResource;
+    @Autowired(required = false)
+    private ValintatapajonoVientiRoute valintatapajonoVienti;
+    @Autowired
+    private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+    @Autowired
+    private TarjontaAsyncResource tarjontaResource;
 
-	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
-	@POST
-	@Path("/vienti")
-	@Consumes("application/json")
-	@ApiOperation(consumes = "application/json", value = "Valintatapajonon vienti taulukkolaskentaan", response = ProsessiId.class)
-	public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid,
-			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("valintatapajonoOid") String valintatapajonoOid) throws Exception{
-		String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
+    @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
+    @POST
+    @Path("/vienti")
+    @Consumes("application/json")
+    @ApiOperation(consumes = "application/json", value = "Valintatapajonon vienti taulukkolaskentaan", response = ProsessiId.class)
+    public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid,
+                             @QueryParam("hakukohdeOid") String hakukohdeOid,
+                             @QueryParam("valintatapajonoOid") String valintatapajonoOid) throws Exception {
+        String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
+        authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
+        DokumenttiProsessi prosessi = new DokumenttiProsessi("Valintatapajono", "vienti", hakuOid, Arrays.asList(hakukohdeOid));
+        valintatapajonoVienti.vie(prosessi, hakuOid, hakukohdeOid, valintatapajonoOid);
+        dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+        return prosessi.toProsessiId();
+    }
 
-		authorizer.checkOrganisationAccess(tarjoajaOid,
-				ValintatapajonoResource.ROLE_TULOSTENTUONTI
-		);
-		DokumenttiProsessi prosessi = new DokumenttiProsessi("Valintatapajono",
-				"vienti", hakuOid, Arrays.asList(hakukohdeOid));
-		valintatapajonoVienti.vie(prosessi, hakuOid, hakukohdeOid,
-				valintatapajonoOid);
-		dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-		return prosessi.toProsessiId();
-	}
+    @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
+    @POST
+    @Path("/tuonti")
+    @Consumes("application/octet-stream")
+    @Produces("text/plain")
+    @ApiOperation(consumes = "application/octet-stream", value = "Valintatapajonon tuonti taulukkolaskennasta", response = ProsessiId.class)
+    public void tuonti(@QueryParam("hakuOid") String hakuOid,
+                       @QueryParam("hakukohdeOid") String hakukohdeOid,
+                       @QueryParam("valintatapajonoOid") String valintatapajonoOid,
+                       InputStream file,
+                       @Suspended AsyncResponse asyncResponse) throws Exception {
+        asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+        asyncResponse.setTimeoutHandler(new TimeoutHandler() {
+            public void handleTimeout(AsyncResponse asyncResponse) {
+                LOG.error("Valintatapajonon tuonti on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
+                asyncResponse.resume(Response.serverError()
+                        .entity("Valintatapajonon tuonti on aikakatkaistu")
+                        .build());
+            }
+        });
+        String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
+        authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
+        final ByteArrayOutputStream bytes;
+        try {
+            IOUtils.copy(file, bytes = new ByteArrayOutputStream());
+            IOUtils.closeQuietly(file);
+            valintatapajonoTuontiService.tuo((valinnanvaiheet, hakemukset) -> {
+                ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
+                try {
+                    ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(
+                            hakuOid, hakukohdeOid, valintatapajonoOid,
+                            "", "",
+                            valinnanvaiheet, hakemukset, Arrays
+                            .asList(listaus));
+                    valintatapajonoExcel.getExcel().tuoXlsx(new ByteArrayInputStream(bytes.toByteArray()));
+                } catch (Throwable t) {
+                    throw new RuntimeException(t);
+                }
+                return listaus.getRivit();
+            }, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, asyncResponse);
+        } catch (Throwable t) {
+            asyncResponse.resume(Response.serverError()
+                    .entity("Valintatapajonon tuonti epäonnistui tiedoston lukemiseen")
+                    .build());
+        }
+    }
 
-	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
-	@POST
-	@Path("/tuonti")
-	@Consumes("application/octet-stream")
-	@Produces("text/plain")
-	@ApiOperation(consumes = "application/octet-stream", value = "Valintatapajonon tuonti taulukkolaskennasta", response = ProsessiId.class)
-	public void tuonti(@QueryParam("hakuOid") String hakuOid,
-			@QueryParam("hakukohdeOid") String hakukohdeOid,
-			@QueryParam("valintatapajonoOid") String valintatapajonoOid,
-			InputStream file,
-			@Suspended AsyncResponse asyncResponse) throws Exception {
-		asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-		asyncResponse.setTimeoutHandler(new TimeoutHandler() {
-			public void handleTimeout(AsyncResponse asyncResponse) {
-				LOG.error(
-						"Valintatapajonon tuonti on aikakatkaistu: /haku/{}/hakukohde/{}",
-						hakuOid, hakukohdeOid);
-				asyncResponse.resume(Response.serverError()
-						.entity("Valintatapajonon tuonti on aikakatkaistu")
-						.build());
-			}
-		});
-		String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
-		authorizer.checkOrganisationAccess(tarjoajaOid,
-				ValintatapajonoResource.ROLE_TULOSTENTUONTI
-		);
-		final ByteArrayOutputStream bytes;
-		try {
-
-			IOUtils.copy(file, bytes = new ByteArrayOutputStream());
-			IOUtils.closeQuietly(file);
-			valintatapajonoTuontiService.tuo((valinnanvaiheet, hakemukset) -> {
-				ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
-				try {
-					ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(
-							hakuOid, hakukohdeOid, valintatapajonoOid,
-							"", "",
-							//
-							valinnanvaiheet, hakemukset, Arrays
-							.asList(listaus));
-					valintatapajonoExcel.getExcel().tuoXlsx(new ByteArrayInputStream(bytes.toByteArray()));
-				} catch(Throwable t) {
-					//	poikkeusKasittelija("Excelin luku epäonnistui",asyncResponse,dokumenttiIdRef).accept(t);
-					throw new RuntimeException(t);
-				}
-				return listaus.getRivit();
-			}, hakuOid, hakukohdeOid,tarjoajaOid, valintatapajonoOid, asyncResponse);
-		} catch(Throwable t) {
-			asyncResponse.resume(Response.serverError()
-					.entity("Valintatapajonon tuonti epäonnistui tiedoston lukemiseen")
-					.build());
-		}
-
-	}
-
-	@PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
-	@POST
-	@Path("/tuonti/json")
-	@Consumes("application/json")
-	@Produces("text/plain")
-	@ApiOperation(consumes = "application/json", value = "Valintatapajonon tuonti jsonista",
-
-			response = String.class)
-	public void tuonti(@QueryParam("hakuOid") String hakuOid,
-					   @QueryParam("hakukohdeOid") String hakukohdeOid,
-					   @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-					   ValintatapajonoRivit rivit,
-					   @Suspended AsyncResponse asyncResponse) throws Exception {
-		asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-		asyncResponse.setTimeoutHandler(new TimeoutHandler() {
-			public void handleTimeout(AsyncResponse asyncResponse) {
-				LOG.error(
-						"Valintatapajonon tuonti on aikakatkaistu: /haku/{}/hakukohde/{}",
-						hakuOid, hakukohdeOid);
-				asyncResponse.resume(Response.serverError()
-						.entity("Valintatapajonon tuonti on aikakatkaistu")
-						.build());
-			}
-		});
-		String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
-		authorizer.checkOrganisationAccess(tarjoajaOid,
-				ValintatapajonoResource.ROLE_TULOSTENTUONTI
-		);
-		valintatapajonoTuontiService.tuo(
-				(valinnanvaiheet, hakemukset) -> {
-					return rivit.getRivit();
-				}, hakuOid, hakukohdeOid,tarjoajaOid, valintatapajonoOid, asyncResponse);
-	}
+    @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
+    @POST
+    @Path("/tuonti/json")
+    @Consumes("application/json")
+    @Produces("text/plain")
+    @ApiOperation(consumes = "application/json", value = "Valintatapajonon tuonti jsonista", response = String.class)
+    public void tuonti(@QueryParam("hakuOid") String hakuOid,
+                       @QueryParam("hakukohdeOid") String hakukohdeOid,
+                       @QueryParam("valintatapajonoOid") String valintatapajonoOid,
+                       ValintatapajonoRivit rivit,
+                       @Suspended AsyncResponse asyncResponse) throws Exception {
+        asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+        asyncResponse.setTimeoutHandler(new TimeoutHandler() {
+            public void handleTimeout(AsyncResponse asyncResponse) {
+                LOG.error("Valintatapajonon tuonti on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
+                asyncResponse.resume(Response.serverError()
+                        .entity("Valintatapajonon tuonti on aikakatkaistu")
+                        .build());
+            }
+        });
+        String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
+        authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
+        valintatapajonoTuontiService.tuo(
+                (valinnanvaiheet, hakemukset) -> {
+                    return rivit.getRivit();
+                }, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, asyncResponse);
+    }
 }

@@ -7,9 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-/**
- * @author Jussi Jartamo
- */
 @Profile("default")
 @Configuration
 public class CasInterceptors {

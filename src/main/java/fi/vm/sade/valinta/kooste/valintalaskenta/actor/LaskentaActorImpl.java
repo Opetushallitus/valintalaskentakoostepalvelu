@@ -14,9 +14,6 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 
-/**
- * @author Jussi Jartamo
- */
 public class LaskentaActorImpl implements LaskentaActor {
     private final static Logger LOG = LoggerFactory.getLogger(LaskentaActorImpl.class);
 

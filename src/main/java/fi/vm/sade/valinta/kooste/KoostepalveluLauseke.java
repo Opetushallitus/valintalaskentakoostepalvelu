@@ -11,67 +11,58 @@ import org.apache.camel.component.bean.BeanInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public class KoostepalveluLauseke<IN, OUT> implements Expression {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(KoostepalveluLauseke.class);
-	private final Function<IN, OUT> lauseke;
-	private final BiPredicate<IN, Exception> virhekasittelija;
-	private final OUT vakio;
-	private final BiConsumer<IN, Exception> virheloggaus;
+    private final static Logger LOG = LoggerFactory.getLogger(KoostepalveluLauseke.class);
+    private final Function<IN, OUT> lauseke;
+    private final BiPredicate<IN, Exception> virhekasittelija;
+    private final OUT vakio;
+    private final BiConsumer<IN, Exception> virheloggaus;
 
-	public KoostepalveluLauseke(Function<IN, OUT> lauseke) {
-		this.lauseke = lauseke;
-		this.virhekasittelija = null;
-		this.virheloggaus = null;
-		this.vakio = null;
-	}
+    public KoostepalveluLauseke(Function<IN, OUT> lauseke) {
+        this.lauseke = lauseke;
+        this.virhekasittelija = null;
+        this.virheloggaus = null;
+        this.vakio = null;
+    }
 
-	public KoostepalveluLauseke(Function<IN, OUT> lauseke,
-			BiPredicate<IN, Exception> virhekasittelija, OUT vakio) {
-		this.lauseke = lauseke;
-		this.virhekasittelija = virhekasittelija;
-		this.virheloggaus = null;
-		this.vakio = vakio;
-	}
+    public KoostepalveluLauseke(Function<IN, OUT> lauseke,
+                                BiPredicate<IN, Exception> virhekasittelija, OUT vakio) {
+        this.lauseke = lauseke;
+        this.virhekasittelija = virhekasittelija;
+        this.virheloggaus = null;
+        this.vakio = vakio;
+    }
 
-	public KoostepalveluLauseke(Function<IN, OUT> lauseke,
-			BiConsumer<IN, Exception> virheloggaus) {
-		this.lauseke = lauseke;
-		this.virheloggaus = virheloggaus;
-		this.virhekasittelija = null;
-		this.vakio = null;
-	}
+    public KoostepalveluLauseke(Function<IN, OUT> lauseke,
+                                BiConsumer<IN, Exception> virheloggaus) {
+        this.lauseke = lauseke;
+        this.virheloggaus = virheloggaus;
+        this.virhekasittelija = null;
+        this.vakio = null;
+    }
 
-	@SuppressWarnings("unchecked")
-	public Object evaluate(Exchange exchange,
-			@SuppressWarnings("rawtypes") Class type) {
-		IN i = (IN) exchange.getIn().getBody();
-		if (i == null) {
-			throw new RuntimeException(KoostepalveluContext.TYHJA_ARVO_POIKKEUS);
-		}
-		try {
-			return lauseke.apply(i);
-		} catch (Exception e) {
-			try {
-				if (virheloggaus != null) {
-					virheloggaus.accept(i, e);
-					throw e;
-				} else if (virhekasittelija != null
-						&& !virhekasittelija.test(i, e)) {
-					throw e;
-				}
-			} catch (Exception ee) {
-				LOG.error(
-						"Poikkeuksen kasittelijasta lensi poikkeus: {}\r\n{}",
-						ee.getMessage(), Arrays.toString(ee.getStackTrace()));
-				throw ee;
-			}
-			return vakio;
-		}
-	}
+    @SuppressWarnings("unchecked")
+    public Object evaluate(Exchange exchange,
+                           @SuppressWarnings("rawtypes") Class type) {
+        IN i = (IN) exchange.getIn().getBody();
+        if (i == null) {
+            throw new RuntimeException(KoostepalveluContext.TYHJA_ARVO_POIKKEUS);
+        }
+        try {
+            return lauseke.apply(i);
+        } catch (Exception e) {
+            try {
+                if (virheloggaus != null) {
+                    virheloggaus.accept(i, e);
+                    throw e;
+                } else if (virhekasittelija != null && !virhekasittelija.test(i, e)) {
+                    throw e;
+                }
+            } catch (Exception ee) {
+                LOG.error("Poikkeuksen kasittelijasta lensi poikkeus: {}\r\n{}", ee.getMessage(), Arrays.toString(ee.getStackTrace()));
+                throw ee;
+            }
+            return vakio;
+        }
+    }
 }

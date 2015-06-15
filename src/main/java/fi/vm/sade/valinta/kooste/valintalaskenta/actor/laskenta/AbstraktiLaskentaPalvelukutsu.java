@@ -24,8 +24,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
 
 /**
- * @author Jussi Jartamo
- *         <p/>
  *         Abstrakti laskenta tekee tilapaivitykset ja palvelukutsut.
  *         Varsinainen laskennan toteuttaja tekee laskennan ja laskentaDTO:n
  *         luonnin.

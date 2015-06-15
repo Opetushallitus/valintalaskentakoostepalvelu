@@ -5,11 +5,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Hak
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.SuoritusrekisteriPalvelukutsu;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.ValintaperusteetPalvelukutsu;
 
-/**
- * @author Jussi Jartamo
- */
 public class ValintaryhmaPalvelukutsuYhdiste {
-
     private final HakemuksetPalvelukutsu hakemuksetPalvelukutsu;
     private final ValintaperusteetPalvelukutsu valintaperusteetPalvelukutsu;
     private final HakijaryhmatPalvelukutsu hakijaryhmatPalvelukutsu;
@@ -53,5 +49,4 @@ public class ValintaryhmaPalvelukutsuYhdiste {
     public ValintaperusteetPalvelukutsu getValintaperusteetPalvelukutsu() {
         return valintaperusteetPalvelukutsu;
     }
-
 }

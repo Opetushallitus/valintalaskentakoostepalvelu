@@ -20,28 +20,20 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * @author Jussi Jartamo
- *
- * Wraps KoodistoAsyncResource with 1hour cache
- */
 @Service
 public class KoodistoCachedAsyncResource {
-
     public static final String MAAT_JA_VALTIOT_1 = "maatjavaltiot1";
     public static final String POSTI = "posti";
     private final Logger LOG = LoggerFactory.getLogger(KoodistoCachedAsyncResource.class);
     private final KoodistoAsyncResource koodistoAsyncResource;
-    private final Cache<String, Map<String,Koodi>> koodistoCache =
-            CacheBuilder.newBuilder().expireAfterAccess(
-                    7, TimeUnit.HOURS
-            ).build();
+    private final Cache<String, Map<String, Koodi>> koodistoCache = CacheBuilder.newBuilder().expireAfterAccess(7, TimeUnit.HOURS).build();
 
     @Autowired
     public KoodistoCachedAsyncResource(KoodistoAsyncResource koodistoAsyncResource) {
         this.koodistoAsyncResource = koodistoAsyncResource;
     }
-    public Peruutettava haeKoodisto(String koodistoUri, Consumer<Map<String,Koodi>> callback, Consumer<Throwable> failureCallback) {
+
+    public Peruutettava haeKoodisto(String koodistoUri, Consumer<Map<String, Koodi>> callback, Consumer<Throwable> failureCallback) {
         try {
             Map<String, Koodi> koodisto = koodistoCache.getIfPresent(koodistoUri);
             if (koodisto != null) {
@@ -54,16 +46,16 @@ public class KoodistoCachedAsyncResource {
                     callback.accept(konversio);
                 }, failureCallback);
             }
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             failureCallback.accept(t);
             return new PeruutettavaImpl(Futures.immediateFailedFuture(t));
         }
     }
 
-    public Map<String,Koodi> haeKoodisto(String koodistoUri) {
-        Map<String,Koodi> koodisto =
-        koodistoCache.getIfPresent(koodistoUri);
-        if(koodisto == null) {
+    public Map<String, Koodi> haeKoodisto(String koodistoUri) {
+        Map<String, Koodi> koodisto =
+                koodistoCache.getIfPresent(koodistoUri);
+        if (koodisto == null) {
             try {
                 return koodistoCache.get(koodistoUri, () -> {
                     try {
@@ -75,7 +67,7 @@ public class KoodistoCachedAsyncResource {
                         throw new RuntimeException(e);
                     }
                 });
-            } catch(Exception e) {
+            } catch (Exception e) {
                 LOG.error("Koodistosta luku epäonnistui:", e);
                 throw new RuntimeException(e);
             }
@@ -83,11 +75,12 @@ public class KoodistoCachedAsyncResource {
             return koodisto;
         }
     }
+
     private Map<String, Koodi> konversio(List<Koodi> koodit) {
         return koodit.stream().collect(Collectors.toMap(a -> a.getKoodiArvo(), a -> a,
                 // Mergefunktiossa suuremmalla versiolla oleva palautetaan
-                (a,b) -> {
-                    if(a.getVersio() > b.getVersio()) {
+                (a, b) -> {
+                    if (a.getVersio() > b.getVersio()) {
                         return a;
                     }
                     return b;
@@ -95,7 +88,7 @@ public class KoodistoCachedAsyncResource {
     }
 
     public static String haeKoodistaArvo(Koodi koodi, final String preferoituKieli, String defaultArvo) {
-        if(koodi == null || koodi.getMetadata() == null) { // || koodi.getMetadata().isEmpty()
+        if (koodi == null || koodi.getMetadata() == null) { // || koodi.getMetadata().isEmpty()
             return defaultArvo;
         } else {
             return Stream.of(

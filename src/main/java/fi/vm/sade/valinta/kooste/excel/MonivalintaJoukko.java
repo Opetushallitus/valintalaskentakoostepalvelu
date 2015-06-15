@@ -6,40 +6,28 @@ import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
+
 public class MonivalintaJoukko {
+    private final Collection<String> joukko;
+    private final XSSFDataValidationHelper dvHelper;
+    private final XSSFSheet sheet;
+    private final XSSFDataValidationConstraint dvConstraint;
 
-	private final Collection<String> joukko;
-	private final XSSFDataValidationHelper dvHelper;
-	private final XSSFSheet sheet;
-	private final XSSFDataValidationConstraint dvConstraint;
+    public MonivalintaJoukko(Collection<String> joukko, XSSFSheet sheet, XSSFDataValidationHelper dvHelper) {
+        this.joukko = joukko;
+        this.dvHelper = dvHelper;
+        this.sheet = sheet;
+        this.dvConstraint = (XSSFDataValidationConstraint) dvHelper.createExplicitListConstraint(joukko.toArray(new String[]{}));
+    }
 
-	public MonivalintaJoukko(Collection<String> joukko, XSSFSheet sheet,
-			XSSFDataValidationHelper dvHelper) {
-		this.joukko = joukko;
-		this.dvHelper = dvHelper;
-		this.sheet = sheet;
-		this.dvConstraint = (XSSFDataValidationConstraint) dvHelper
-				.createExplicitListConstraint(joukko.toArray(new String[] {}));
+    public void addAddress(int row, int col) {
+        XSSFDataValidation validation = (XSSFDataValidation) dvHelper.createValidation(
+                dvConstraint, new org.apache.poi.ss.util.CellRangeAddressList(row, row, col, col));
+        sheet.addValidationData(validation);
+        validation.setSuppressDropDownArrow(false);
+    }
 
-	}
-
-	public void addAddress(int row, int col) {
-		XSSFDataValidation validation = (XSSFDataValidation) dvHelper
-				.createValidation(dvConstraint,
-						new org.apache.poi.ss.util.CellRangeAddressList(row,
-								row, col, col));
-
-		// validation.setShowErrorBox(true);
-		sheet.addValidationData(validation);
-		validation.setSuppressDropDownArrow(false);
-	}
-
-	public Collection<String> getJoukko() {
-		return joukko;
-	}
+    public Collection<String> getJoukko() {
+        return joukko;
+    }
 }

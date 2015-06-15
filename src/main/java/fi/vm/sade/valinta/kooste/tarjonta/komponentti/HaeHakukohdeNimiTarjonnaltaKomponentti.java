@@ -15,10 +15,8 @@ import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.exception.TarjontaException;
 
 /**
- * @author Jussi Jartamo
- *         <p/>
- *         Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti!
- *         Proxy provides retries!
+ * Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti!
+ * Proxy provides retries!
  */
 @Component("hakukohdeNimiTarjonnaltaKomponentti")
 public class HaeHakukohdeNimiTarjonnaltaKomponentti {
@@ -38,8 +36,6 @@ public class HaeHakukohdeNimiTarjonnaltaKomponentti {
         } else {
             LOG.debug("Yhteys {}, HakukohdeResource.getHakukohdeNimi({})", new Object[]{tarjontaResourceUrl, hakukohdeOid});
             try {
-                // Palauttaa jotain täysin mystistä
-                //HakukohdeNimiRDTO nimi = tarjontaResource.getHakukohdeNimi(hakukohdeOid);
                 HakukohdeDTO nimi = tarjontaResource.getByOID(hakukohdeOid);
                 return nimi;
             } catch (Exception e) {
