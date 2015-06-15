@@ -44,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.Subscriber;
@@ -54,6 +56,7 @@ import rx.observables.ConnectableObservable;
 import rx.subjects.PublishSubject;
 
 @Service
+@ManagedResource(objectName = "OPH:name=LaskentaActorFactory", description = "LaskentaActorFactory mbean")
 public class LaskentaActorFactory {
     private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorFactory.class);
 
@@ -62,11 +65,11 @@ public class LaskentaActorFactory {
     private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
     private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
-    private final int splittaus;
+    private int splittaus;
 
     @Autowired
     public LaskentaActorFactory(
-            @Value("${valintalaskentakoostepalvelu.laskennan.splittaus:5}") int splittaus,
+            @Value("${valintalaskentakoostepalvelu.laskennan.splittaus:1}") int splittaus,
             ValintalaskentaAsyncResource valintalaskentaAsyncResource,
             ApplicationAsyncResource applicationAsyncResource,
             ValintaperusteetAsyncResource valintaperusteetAsyncResource,
@@ -149,6 +152,12 @@ public class LaskentaActorFactory {
         final ConnectableObservable<T> replayingObservable = o.replay(1);
         replayingObservable.connect();
         return replayingObservable;
+    }
+
+    @ManagedOperation
+    public void setLaskentaSplitCount(int splitCount) {
+        this.splittaus = splitCount;
+        LOG.info("Laskenta split count asetettu arvoon {}", splitCount);
     }
 
     public LaskentaActor createValintakoelaskentaActor(LaskentaSupervisor laskentaSupervisor, HakuV1RDTO haku, LaskentaActorParams actorParams) {
