@@ -31,15 +31,10 @@ import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 
-/**
- * @author Jussi Jartamo
- */
 @Service
 public class ValintatapajonoTuontiService {
-
-    private static final Logger LOG = LoggerFactory
-            .getLogger(ValintatapajonoTuontiService.class);
-    private static final String VALMIS ="valmis";
+    private static final Logger LOG = LoggerFactory.getLogger(ValintatapajonoTuontiService.class);
+    private static final String VALMIS = "valmis";
     @Autowired
     private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     @Autowired
@@ -60,10 +55,10 @@ public class ValintatapajonoTuontiService {
             AsyncResponse asyncResponse) {
         AtomicReference<String> dokumenttiIdRef = new AtomicReference<>(null);
         AtomicInteger counter = new AtomicInteger(
-           1 // valinnanvaiheet
-                +1 // valintaperusteet
-                +1 // hakemukset
-                +1 // dokumentti
+                1 // valinnanvaiheet
+                        + 1 // valintaperusteet
+                        + 1 // hakemukset
+                        + 1 // dokumentti
                 //+1 // org oikeuksien tarkistus
         );
         AtomicReference<List<ValintatietoValinnanvaiheDTO>> valinnanvaiheetRef = new AtomicReference<>();
@@ -72,141 +67,105 @@ public class ValintatapajonoTuontiService {
         AtomicReference<String> tarjoajaOidRef = new AtomicReference<>();
 
         final Supplier<Void> mergeSuplier = () -> {
-            if(counter.decrementAndGet() == 0) {
+            if (counter.decrementAndGet() == 0) {
                 Collection<ValintatapajonoRivi> rivit;
                 try {
                     rivit = riviFunction.apply(valinnanvaiheetRef.get(), hakemuksetRef.get());
-                } catch(Throwable t) {
-                    poikkeusKasittelija("Rivien lukeminen annetuista tiedoista epäonnistui",asyncResponse,dokumenttiIdRef).accept(t);
+                } catch (Throwable t) {
+                    poikkeusKasittelija("Rivien lukeminen annetuista tiedoista epäonnistui", asyncResponse, dokumenttiIdRef).accept(t);
                     return null;
                 }
                 try {
-                    ValinnanvaiheDTO valinnanvaihe = ValintatapajonoTuontiConverter.konvertoi(
-                            hakuOid,
-                            hakukohdeOid,
-                            valintatapajonoOid,
-                            valintaperusteetRef.get(),
-                            hakemuksetRef.get(),
-                            valinnanvaiheetRef.get(),
-                            rivit
-                    );
+                    ValinnanvaiheDTO valinnanvaihe = ValintatapajonoTuontiConverter.konvertoi(hakuOid, hakukohdeOid, valintatapajonoOid,
+                            valintaperusteetRef.get(), hakemuksetRef.get(), valinnanvaiheetRef.get(), rivit);
                     LOG.info("{}", new GsonBuilder().setPrettyPrinting().create().toJson(valinnanvaihe));
-                    valintalaskentaAsyncResource.lisaaTuloksia(hakuOid,hakukohdeOid,tarjoajaOid, valinnanvaihe,
+                    valintalaskentaAsyncResource.lisaaTuloksia(hakuOid, hakukohdeOid, tarjoajaOid, valinnanvaihe,
                             ok -> {
                                 LOG.error("Tuli ok viesti");
-                                dokumentinSeurantaAsyncResource.paivitaDokumenttiId(
-                                        dokumenttiIdRef.get(),
-                                        VALMIS,
+                                dokumentinSeurantaAsyncResource.paivitaDokumenttiId(dokumenttiIdRef.get(), VALMIS,
                                         dontcare -> {
                                             LOG.error("Saatiin paivitettya dokId");
                                         },
-                                        dontcare->
+                                        dontcare ->
                                         {
                                             LOG.error("Ei saatu paivitettya {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
                                         });
                             },
-                            poikkeusKasittelija("Tallennus valintapalveluun epäonnistui",asyncResponse,dokumenttiIdRef));
+                            poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef));
                     LOG.info("Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.", hakukohdeOid, hakuOid);
-                    dokumentinSeurantaAsyncResource.paivitaKuvaus(
-                            dokumenttiIdRef.get(),
-                            "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...",
-                            dontcare -> {
-                            },
+                    dokumentinSeurantaAsyncResource.paivitaKuvaus(dokumenttiIdRef.get(), "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...",
+                            dontcare -> {},
                             dontcare -> {
                                 LOG.error("Onnistumisen ilmoittamisessa virhe! {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
                             });
-                } catch(Throwable t) {
-                    poikkeusKasittelija("Tallennus valintapalveluun epäonnistui",asyncResponse,dokumenttiIdRef).accept(t);
+                } catch (Throwable t) {
+                    poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef).accept(t);
                     return null;
                 }
             }
             return null;
         };
-        /*
-        tarjontaResource.haeHakukohde(
-                hakuOid,
-                hakukohdeOid,
-                hakukohde -> {
-                    tarjoajaOidRef.set(hakukohde.getTarjoajaOid());
-                    try {
-
-                        mergeSuplier.get();
-                    } catch(Throwable t) {
-                        poikkeusKasittelija("Organisaatiooikeudet puuttuu",asyncResponse,dokumenttiIdRef).accept(t);
-                    }
-                }, poikkeusKasittelija("Organisaatiooikeuksien tarkistus epäonnistui",asyncResponse,dokumenttiIdRef)
-        );
-        */
         valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid).subscribe(
                 valinnanvaiheet -> {
                     valinnanvaiheetRef.set(valinnanvaiheet);
                     mergeSuplier.get();
                 },
-                poikkeusKasittelija("Valinnanvaiheiden hakeminen epäonnistui",asyncResponse,dokumenttiIdRef));
-        valintaperusteetAsyncResource.haeIlmanlaskentaa(
-                hakukohdeOid,
+                poikkeusKasittelija("Valinnanvaiheiden hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
+        valintaperusteetAsyncResource.haeIlmanlaskentaa(hakukohdeOid,
                 valintaperusteet -> {
                     valintaperusteetRef.set(valintaperusteet);
                     mergeSuplier.get();
                 },
                 poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef)
         );
-        applicationAsyncResource.
-            getApplicationsByOid(hakuOid, hakukohdeOid,
-                    hakemukset -> {
-                        if(hakemukset == null || hakemukset.isEmpty()) {
-                            poikkeusKasittelija("Ei yhtään hakemusta hakukohteessa",asyncResponse,dokumenttiIdRef).accept(null);
+        applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid,
+                hakemukset -> {
+                    if (hakemukset == null || hakemukset.isEmpty()) {
+                            poikkeusKasittelija("Ei yhtään hakemusta hakukohteessa", asyncResponse, dokumenttiIdRef).accept(null);
                         } else {
                             hakemuksetRef.set(hakemukset);
                             mergeSuplier.get();
                         }
-                    },
-                    poikkeusKasittelija("Hakemusten hakeminen epäonnistui",asyncResponse,dokumenttiIdRef));
+                    }, poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
 
         dokumentinSeurantaAsyncResource.luoDokumentti("Valintatapajonon tuonti",
                 dokumenttiId -> {
                     try {
-                        asyncResponse.resume(Response.ok().header("Content-Type","text/plain").entity(dokumenttiId).build());
+                        asyncResponse.resume(Response.ok().header("Content-Type", "text/plain").entity(dokumenttiId).build());
                         dokumenttiIdRef.set(dokumenttiId);
                         mergeSuplier.get();
-                    } catch(Throwable t) {
+                    } catch (Throwable t) {
                         LOG.error("Aikakatkaisu ehti ensin. Palvelu on todennäköisesti kovan kuormanalla. {} {}",
                                 t.getMessage(), Arrays.toString(t.getStackTrace()));
                     }
-                },
-                poikkeusKasittelija("Seurantapalveluun ei saatu yhteyttä",asyncResponse,dokumenttiIdRef));
-
+                }, poikkeusKasittelija("Seurantapalveluun ei saatu yhteyttä", asyncResponse, dokumenttiIdRef));
     }
 
     private PoikkeusKasittelijaSovitin poikkeusKasittelija(String viesti, AsyncResponse asyncResponse, AtomicReference<String> dokumenttiIdRef) {
-       return new PoikkeusKasittelijaSovitin(poikkeus -> {
-           if(poikkeus == null) {
-               LOG.error("###\r\n###Poikkeus tuonnissa {}\r\n###", viesti);
-           } else {
-               LOG.error("###\r\n###Poikkeus tuonnissa {}: {} {}\r\n###", viesti, poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
-           }
-           try {
-               asyncResponse.resume(Response.serverError()
-                   .entity(viesti)
-                   .build());
-           } catch (Throwable t) {
-               // ei väliä vaikka response jos tehty
-           }
-           try {
-               String dokumenttiId = dokumenttiIdRef.get();
-               if (dokumenttiId != null) {
-                   dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId,
-                       Arrays.asList(new VirheilmoitusDto("", viesti)),
-                       dontcare -> {
-                       },
-                       dontcare -> {
-                           LOG.error("Virheen ilmoittamisessa virhe! {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
-                       });
-               }
-           } catch(Throwable t) {
-               LOG.error("Odottamaton virhe: {} {}", t.getMessage(), Arrays.toString(t.getStackTrace()));
-           }
-       });
+        return new PoikkeusKasittelijaSovitin(poikkeus -> {
+            if (poikkeus == null) {
+                LOG.error("###\r\n###Poikkeus tuonnissa {}\r\n###", viesti);
+            } else {
+                LOG.error("###\r\n###Poikkeus tuonnissa {}: {} {}\r\n###", viesti, poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
+            }
+            try {
+                asyncResponse.resume(Response.serverError().entity(viesti).build());
+            } catch (Throwable t) {
+                // ei väliä vaikka response jos tehty
+            }
+            try {
+                String dokumenttiId = dokumenttiIdRef.get();
+                if (dokumenttiId != null) {
+                    dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId, Arrays.asList(new VirheilmoitusDto("", viesti)),
+                            dontcare -> {},
+                            dontcare -> {
+                                LOG.error("Virheen ilmoittamisessa virhe! {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
+                            });
+                }
+            } catch (Throwable t) {
+                LOG.error("Odottamaton virhe: {} {}", t.getMessage(), Arrays.toString(t.getStackTrace()));
+            }
+        });
     }
 }
 

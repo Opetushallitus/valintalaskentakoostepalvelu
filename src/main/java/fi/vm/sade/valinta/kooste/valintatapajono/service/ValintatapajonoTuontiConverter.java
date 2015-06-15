@@ -130,8 +130,7 @@ public class ValintatapajonoTuontiConverter {
 
     private static ValinnanVaiheJonoillaDTO haeVaihe(String oid, List<ValinnanVaiheJonoillaDTO> jonot) {
         for (ValinnanVaiheJonoillaDTO jonoilla : jonot) {
-            for (fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO v : jonoilla
-                    .getJonot()) {
+            for (fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO v : jonoilla.getJonot()) {
                 if (oid.equals(v.getOid())) {
                     return jonoilla;
                 }
@@ -141,8 +140,7 @@ public class ValintatapajonoTuontiConverter {
     }
 
     private static fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO haeJono(String oid, ValinnanVaiheJonoillaDTO vaihe) {
-        for (fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO v : vaihe
-                .getJonot()) {
+        for (fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO v : vaihe.getJonot()) {
             if (oid.equals(v.getOid())) {
                 return v;
             }
