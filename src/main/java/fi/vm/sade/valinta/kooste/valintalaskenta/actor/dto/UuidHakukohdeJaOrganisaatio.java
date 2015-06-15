@@ -1,8 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto;
 
-/**
- * @author Jussi Jartamo
- */
 public class UuidHakukohdeJaOrganisaatio {
     private final String uuid;
     private final HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio;
