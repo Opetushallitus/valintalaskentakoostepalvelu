@@ -102,9 +102,8 @@ public class ValintalaskennanTulosExcel {
     private static List<String> dynamicColumnHeaders(ValintatietoValintatapajonoDTO jono) {
         return sortedJonosijat(jono)
                 .findFirst()
-                .map(JonosijaDTO::getFunktioTulokset).orElse(new ArrayList<>()).stream()
-                .map(FunktioTulosDTO::getTunniste)
-                .collect(Collectors.toList());
+                .map(JonosijaDTO::getFunktioTulokset)
+                .orElse(new ArrayList<>()).stream().map(FunktioTulosDTO::getTunniste).collect(Collectors.toList());
     }
 
     private static String extractValue(String tunniste, HakemusRivi rivi) {
