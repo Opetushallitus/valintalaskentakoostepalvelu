@@ -5,15 +5,10 @@ import org.apache.camel.InOnly;
 
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public interface SijoitteluAktivointiRoute {
 
-	final String SIJOITTELU_REITTI = "direct:sijoittele_haku";
+    final String SIJOITTELU_REITTI = "direct:sijoittele_haku";
 
-	@InOnly
-	void aktivoiSijoittelu(@Body Sijoittelu sijoittelu);
+    @InOnly
+    void aktivoiSijoittelu(@Body Sijoittelu sijoittelu);
 }

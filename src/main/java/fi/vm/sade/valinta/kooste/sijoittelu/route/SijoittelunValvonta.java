@@ -4,6 +4,6 @@ import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
 
 public interface SijoittelunValvonta {
 
-	Sijoittelu haeAktiivinenSijoitteluHaulle(String hakuOid);
+    Sijoittelu haeAktiivinenSijoitteluHaulle(String hakuOid);
 
 }

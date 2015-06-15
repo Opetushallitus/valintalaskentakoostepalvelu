@@ -22,9 +22,6 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncRes
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoittelunValvonta;
 
-/**
- * @author Jussi Jartamo
- */
 @Component
 public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu> implements SijoittelunValvonta {
     private static final Logger LOG = LoggerFactory.getLogger(SijoitteluRouteImpl.class);
@@ -53,39 +50,38 @@ public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu> i
     @Override
     public void configure() throws Exception {
         interceptFrom(SIJOITTELU_REITTI).process(Reititys.<Sijoittelu>kuluttaja(l -> {
-                Sijoittelu vanhaSijoittelu = getKoostepalveluCache().getIfPresent(l.getHakuOid());
-                if (vanhaSijoittelu != null && vanhaSijoittelu.isTekeillaan()) {
-                    // varmistetaan etta uudelleen ajon reunatapauksessa
-                    // mahdollisesti viela suorituksessa oleva vanha
-                    // laskenta
-                    // lakkaa kayttamasta resursseja ja siivoutuu ajallaan
-                    // pois
-                    throw new RuntimeException("Sijoittelu haulle " + l.getHakuOid() + " on jo kaynnissa!");
-                }
-                getKoostepalveluCache().put(l.getHakuOid(), l);
-            }));
+            Sijoittelu vanhaSijoittelu = getKoostepalveluCache().getIfPresent(l.getHakuOid());
+            if (vanhaSijoittelu != null && vanhaSijoittelu.isTekeillaan()) {
+                // varmistetaan etta uudelleen ajon reunatapauksessa
+                // mahdollisesti viela suorituksessa oleva vanha
+                // laskenta
+                // lakkaa kayttamasta resursseja ja siivoutuu ajallaan
+                // pois
+                throw new RuntimeException("Sijoittelu haulle " + l.getHakuOid() + " on jo kaynnissa!");
+            }
+            getKoostepalveluCache().put(l.getHakuOid(), l);
+        }));
         from(DEADLETTERCHANNEL)
-            //
-            .routeId("Sijoittelun deadletterchannel")
-            .process(new Processor() {
-                @Override
-                public void process(Exchange exchange) throws Exception {
-                    LOG.error("Sijoittelu paattyi virheeseen {}\r\n{}", simple("${exception.message}").evaluate(exchange, String.class), simple("${exception.stacktrace}").evaluate(exchange, String.class));
-                }
-            })
-            .stop();
+                .routeId("Sijoittelun deadletterchannel")
+                .process(new Processor() {
+                    @Override
+                    public void process(Exchange exchange) throws Exception {
+                        LOG.error("Sijoittelu paattyi virheeseen {}\r\n{}", simple("${exception.message}").evaluate(exchange, String.class), simple("${exception.stacktrace}").evaluate(exchange, String.class));
+                    }
+                })
+                .stop();
         from(SIJOITTELU_REITTI)
-            .errorHandler(deadLetterChannel())
-            .routeId("Sijoittelureitti")
-            .threads()
-            .process(Reititys.<Sijoittelu>kuluttaja((s -> {
+                .errorHandler(deadLetterChannel())
+                .routeId("Sijoittelureitti")
+                .threads()
+                .process(Reititys.<Sijoittelu>kuluttaja((s -> {
                     LOG.info("Aloitetaan sijoittelu haulle {}", s.getHakuOid());
                     sijoitteluResource.sijoittele(s.getHakuOid(), success -> {
-                            s.setValmis();
-                        }, e -> {
-                            LOG.error("Sijoittelu epaonnistui haulle {}. {}\r\n{}", s.getHakuOid(), e.getMessage(), e.getStackTrace());
-                            s.setOhitettu();
-                        });
+                        s.setValmis();
+                    }, e -> {
+                        LOG.error("Sijoittelu epaonnistui haulle {}. {}\r\n{}", s.getHakuOid(), e.getMessage(), e.getStackTrace());
+                        s.setOhitettu();
+                    });
                 })));
     }
 
