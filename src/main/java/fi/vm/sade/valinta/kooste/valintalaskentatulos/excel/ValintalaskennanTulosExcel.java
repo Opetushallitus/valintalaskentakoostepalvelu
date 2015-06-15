@@ -41,22 +41,25 @@ public class ValintalaskennanTulosExcel {
                         .sorted(ValintalaskennanTulosExcel::byReverseDateAndPriority)
                         .forEach((jonoSheet) -> {
                             final XSSFSheet sheet = workbook.createSheet(jonoSheet.sheetName);
+                            final ValinnanvaiheDTO vaihe = jonoSheet.vaihe;
+                            final ValintatietoValintatapajonoDTO jono = jonoSheet.jono;
+
                             setColumnWidths(sheet);
                             addRow(sheet, "Haku", getTeksti(haku.getNimi()));
                             addRow(sheet, "Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimet()));
                             addRow(sheet, "Hakukohde", getTeksti(hakukohdeDTO.getHakukohteenNimet()));
-                            addRow(sheet, "Vaihe", jonoSheet.vaihe.getNimi());
-                            addRow(sheet, "Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(jonoSheet.vaihe.getCreatedAt()));
-                            addRow(sheet, "Jono", jonoSheet.jono.getNimi());
+                            addRow(sheet, "Vaihe", vaihe.getNimi());
+                            addRow(sheet, "Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(vaihe.getCreatedAt()));
+                            addRow(sheet, "Jono", jono.getNimi());
                             addRow(sheet);
-                            if (jonoSheet.jono.getJonosijat().isEmpty()) {
+                            if (jono.getJonosijat().isEmpty()) {
                                 addRow(sheet, "Jonolle ei ole valintalaskennan tuloksia");
                             } else {
                                 final List<String> fixedColumnHeaders = fixedColumnHeaders();
-                                final List<String> dynamicColumnHeaders = dynamicColumnHeaders(jonoSheet.jono);
+                                final List<String> dynamicColumnHeaders = dynamicColumnHeaders(jono);
                                 final List<String> allColumnHeaders = Stream.concat(fixedColumnHeaders.stream(), dynamicColumnHeaders.stream()).collect(Collectors.toList());
                                 addRow(sheet, allColumnHeaders);
-                                addJonosijaRows(hakemusByOid, jonoSheet.jono, sheet);
+                                addJonosijaRows(hakemusByOid, jono, sheet);
                             }
                         }
                 );
