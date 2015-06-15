@@ -11,31 +11,27 @@ import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 
 public class SijoittelunTulosProsessi extends DokumenttiProsessi {
+    private final AtomicInteger valmis = new AtomicInteger(-1);
+    private final Collection<Valmis> valmiit;
 
-	private final AtomicInteger valmis = new AtomicInteger(-1);
-	private final Collection<Valmis> valmiit;
+    public SijoittelunTulosProsessi(String resurssi, String toiminto, String hakuOid, List<String> tags) {
+        super(resurssi, toiminto, hakuOid, tags);
+        valmiit = Collections.<Valmis>synchronizedList(Lists.<Valmis>newArrayList());
+    }
 
-	public SijoittelunTulosProsessi(String resurssi, String toiminto,
-			String hakuOid, List<String> tags) {
+    public int inkrementoi() {
+        inkrementoiTehtyjaToita();
+        return valmis.decrementAndGet();
+    }
 
-		super(resurssi, toiminto, hakuOid, tags);
-		valmiit = Collections.<Valmis> synchronizedList(Lists
-				.<Valmis> newArrayList());
-	}
+    @Override
+    public void setKokonaistyo(int arvo) {
+        valmis.set(arvo);
+        super.setKokonaistyo(arvo);
+    }
 
-	public int inkrementoi() {
-		inkrementoiTehtyjaToita();
-		return valmis.decrementAndGet();
-	}
-
-	@Override
-	public void setKokonaistyo(int arvo) {
-		valmis.set(arvo);
-		super.setKokonaistyo(arvo);
-	}
-
-	@com.fasterxml.jackson.annotation.JsonIgnore
-	public Collection<Valmis> getValmiit() {
-		return valmiit;
-	}
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public Collection<Valmis> getValmiit() {
+        return valmiit;
+    }
 }

@@ -25,9 +25,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 
 /**
- * 
- * @author Jussi Jartamo
- *
  * @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa.
  */
 @Controller("SijoittelunTulosHaulleResource")
@@ -35,95 +32,77 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/sijoitteluntuloshaulle", description = "Sijoitteluntulosten generointi koko haulle")
 public class SijoittelunTulosHaulleResource {
-	private static final Logger LOG = LoggerFactory
-			.getLogger(SijoittelunTulosHaulleResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SijoittelunTulosHaulleResource.class);
 
-	@Autowired
-	private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
-	@Autowired(required = false)
-	private SijoittelunTulosTaulukkolaskentaRoute sijoittelunTulosTaulukkolaskentaRoute;
-	@Autowired(required = false)
-	private SijoittelunTulosOsoitetarratRoute sijoittelunTulosOsoitetarratRoute;
-	@Autowired
-	private HyvaksymiskirjeetKokoHaulleService hyvaksymiskirjeetKokoHaulleService;
-	@POST
-	@Path("/osoitetarrat")
-	@Consumes("application/json")
-	@Produces("application/json")
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
-	public ProsessiId osoitetarratKokoHaulle(
-			@QueryParam("hakuOid") String hakuOid) {
-		try {
-			SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(
-					"osoitetarrat", "Luo osoitetarrat haulle", null,
-					Arrays.asList("osoitetarrat", "haulle"));
-			sijoittelunTulosOsoitetarratRoute.osoitetarratHaulle(prosessi,
-					hakuOid, SijoitteluResource.LATEST, SecurityContextHolder
-							.getContext().getAuthentication());
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-			return prosessi.toProsessiId();
-		} catch (Exception e) {
-			LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
-			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
-			// todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
-			// Ylläpitäjä voi lukea logeista todellisen syyn!
-			throw new RuntimeException("Osoitetarrojen luonnissa virhe!", e);
+    @Autowired
+    private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+    @Autowired(required = false)
+    private SijoittelunTulosTaulukkolaskentaRoute sijoittelunTulosTaulukkolaskentaRoute;
+    @Autowired(required = false)
+    private SijoittelunTulosOsoitetarratRoute sijoittelunTulosOsoitetarratRoute;
+    @Autowired
+    private HyvaksymiskirjeetKokoHaulleService hyvaksymiskirjeetKokoHaulleService;
 
-		}
-	}
+    @POST
+    @Path("/osoitetarrat")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
+    public ProsessiId osoitetarratKokoHaulle(@QueryParam("hakuOid") String hakuOid) {
+        try {
+            SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi("osoitetarrat", "Luo osoitetarrat haulle", null, Arrays.asList("osoitetarrat", "haulle"));
+            sijoittelunTulosOsoitetarratRoute.osoitetarratHaulle(prosessi, hakuOid, SijoitteluResource.LATEST, SecurityContextHolder.getContext().getAuthentication());
+            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+            return prosessi.toProsessiId();
+        } catch (Exception e) {
+            LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
+            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+            // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+            // Ylläpitäjä voi lukea logeista todellisen syyn!
+            throw new RuntimeException("Osoitetarrojen luonnissa virhe!", e);
+        }
+    }
 
-	@POST
-	@Path("/hyvaksymiskirjeet")
-	@Consumes("application/json")
-	@Produces("application/json")
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
-	public ProsessiId hyvaksymiskirjeetKokoHaulle(
-			@QueryParam("hakuOid") String hakuOid) {
-		try {
-			SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(
-					"hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", null,
-					Arrays.asList("hyvaksymiskirjeet", "haulle"));
-			hyvaksymiskirjeetKokoHaulleService.muodostaHyvaksymiskirjeetKokoHaulle(hakuOid, prosessi);
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-			return prosessi.toProsessiId();
-		} catch (Exception e) {
-			LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
-			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
-			// todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
-			// Ylläpitäjä voi lukea logeista todellisen syyn!
-			throw new RuntimeException("Hyväksymiskirjeiden luonnissa virhe!",
-					e);
+    @POST
+    @Path("/hyvaksymiskirjeet")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
+    public ProsessiId hyvaksymiskirjeetKokoHaulle(@QueryParam("hakuOid") String hakuOid) {
+        try {
+            SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi("hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", null, Arrays.asList("hyvaksymiskirjeet", "haulle"));
+            hyvaksymiskirjeetKokoHaulleService.muodostaHyvaksymiskirjeetKokoHaulle(hakuOid, prosessi);
+            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+            return prosessi.toProsessiId();
+        } catch (Exception e) {
+            LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
+            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+            // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+            // Ylläpitäjä voi lukea logeista todellisen syyn!
+            throw new RuntimeException("Hyväksymiskirjeiden luonnissa virhe!", e);
+        }
+    }
 
-		}
-	}
-
-	@POST
-	@Path("/taulukkolaskennat")
-	@Consumes("application/json")
-	@Produces("application/json")
-	@PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-	@ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
-	public ProsessiId taulukkolaskennatKokoHaulle(
-			@QueryParam("hakuOid") String hakuOid) {
-		try {
-			SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(
-					"taulukkolaskennat", "Luo taulukkolaskennat haulle", null,
-					Arrays.asList("taulukkolaskennat", "haulle"));
-			sijoittelunTulosTaulukkolaskentaRoute.taulukkolaskennatHaulle(
-					prosessi, hakuOid, SijoitteluResource.LATEST,
-					SecurityContextHolder.getContext().getAuthentication());
-			dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
-			return prosessi.toProsessiId();
-		} catch (Exception e) {
-			LOG.error("Taulukkolaskentojen luonnissa virhe! {}", e.getMessage());
-			// Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
-			// todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
-			// Ylläpitäjä voi lukea logeista todellisen syyn!
-			throw new RuntimeException("Taulukkolaskentojen luonnissa virhe!",
-					e);
-
-		}
-	}
+    @POST
+    @Path("/taulukkolaskennat")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
+    @ApiOperation(value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille", response = Response.class)
+    public ProsessiId taulukkolaskennatKokoHaulle(@QueryParam("hakuOid") String hakuOid) {
+        try {
+            SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi("taulukkolaskennat", "Luo taulukkolaskennat haulle", null, Arrays.asList("taulukkolaskennat", "haulle"));
+            sijoittelunTulosTaulukkolaskentaRoute.taulukkolaskennatHaulle(prosessi, hakuOid, SijoitteluResource.LATEST, SecurityContextHolder.getContext().getAuthentication());
+            dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
+            return prosessi.toProsessiId();
+        } catch (Exception e) {
+            LOG.error("Taulukkolaskentojen luonnissa virhe! {}", e.getMessage());
+            // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
+            // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
+            // Ylläpitäjä voi lukea logeista todellisen syyn!
+            throw new RuntimeException("Taulukkolaskentojen luonnissa virhe!", e);
+        }
+    }
 }
