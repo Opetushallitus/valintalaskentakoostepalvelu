@@ -26,58 +26,40 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 
 @Component
 public class KirjeetHakukohdeCache {
-	private final Logger LOG = LoggerFactory
-			.getLogger(KirjeetHakukohdeCache.class);
-	private final Cache<String, MetaHakukohde> metaHakukohdeCache = CacheBuilder
-			.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).build();
+    private final Logger LOG = LoggerFactory.getLogger(KirjeetHakukohdeCache.class);
+    private final Cache<String, MetaHakukohde> metaHakukohdeCache = CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).build();
 
-	// private HaeHakukohdeNimiTarjonnaltaKomponentti tarjontaProxy;
-	@Autowired
-	private fi.vm.sade.valinta.kooste.external.resource.haku.HakukohdeV1Resource hakukohdeV1Resource;
-	//private HakukohdeResource hakukohdeResource;
-	
-	public MetaHakukohde haeHakukohde(final String hakukohdeOid)
-			throws Exception {
+    @Autowired
+    private fi.vm.sade.valinta.kooste.external.resource.haku.HakukohdeV1Resource hakukohdeV1Resource;
 
-		return metaHakukohdeCache.get(hakukohdeOid,
-				new Callable<MetaHakukohde>() {
-					@Override
-					public MetaHakukohde call() throws Exception {
-						
-						HakukohdeV1RDTO
-						 hakukohde = hakukohdeV1Resource
-								.findByOid(hakukohdeOid).getResult();
-						Teksti hakukohdeNimi = new Teksti(hakukohde
-								.getHakukohteenNimet());
-						String opetuskieli = getOpetuskieli(hakukohde.getOpetusKielet());
-						LOG.error("Hakukohdekieli({}) Oid({}) Opetuskieli({})",hakukohdeNimi.getKieli(), hakukohdeOid, opetuskieli);
-						
-						Teksti tarjoajaNimi = new Teksti(hakukohde
-								.getTarjoajaNimet());
-						
-						/*
-						
-						*/
-						return new MetaHakukohde(hakukohdeNimi, tarjoajaNimi,
-								hakukohdeNimi.getKieli(),opetuskieli);
-					}
+    public MetaHakukohde haeHakukohde(final String hakukohdeOid) throws Exception {
 
-				});
-	}
-	
-	public static String getOpetuskieli(Collection<String> opetuskielet) {
-		TreeSet<String> preferoitukieli = Sets.newTreeSet();
-		for (String opetuskieli :opetuskielet) {
-			preferoitukieli.add(KieliUtil
-					.normalisoiKielikoodi(opetuskieli));
-		}
-		if (preferoitukieli.contains(KieliUtil.SUOMI)) {
-			return  KieliUtil.SUOMI;
-		} else if (preferoitukieli.contains(KieliUtil.RUOTSI)) {
-			return KieliUtil.RUOTSI;
-		} else if (preferoitukieli.contains(KieliUtil.ENGLANTI)) {
-			return KieliUtil.ENGLANTI;
-		}
-		return KieliUtil.SUOMI;
-	}
+        return metaHakukohdeCache.get(hakukohdeOid,
+                new Callable<MetaHakukohde>() {
+                    @Override
+                    public MetaHakukohde call() throws Exception {
+                        HakukohdeV1RDTO hakukohde = hakukohdeV1Resource.findByOid(hakukohdeOid).getResult();
+                        Teksti hakukohdeNimi = new Teksti(hakukohde.getHakukohteenNimet());
+                        String opetuskieli = getOpetuskieli(hakukohde.getOpetusKielet());
+                        LOG.error("Hakukohdekieli({}) Oid({}) Opetuskieli({})", hakukohdeNimi.getKieli(), hakukohdeOid, opetuskieli);
+                        Teksti tarjoajaNimi = new Teksti(hakukohde.getTarjoajaNimet());
+                        return new MetaHakukohde(hakukohdeNimi, tarjoajaNimi, hakukohdeNimi.getKieli(), opetuskieli);
+                    }
+                });
+    }
+
+    public static String getOpetuskieli(Collection<String> opetuskielet) {
+        TreeSet<String> preferoitukieli = Sets.newTreeSet();
+        for (String opetuskieli : opetuskielet) {
+            preferoitukieli.add(KieliUtil.normalisoiKielikoodi(opetuskieli));
+        }
+        if (preferoitukieli.contains(KieliUtil.SUOMI)) {
+            return KieliUtil.SUOMI;
+        } else if (preferoitukieli.contains(KieliUtil.RUOTSI)) {
+            return KieliUtil.RUOTSI;
+        } else if (preferoitukieli.contains(KieliUtil.ENGLANTI)) {
+            return KieliUtil.ENGLANTI;
+        }
+        return KieliUtil.SUOMI;
+    }
 }
