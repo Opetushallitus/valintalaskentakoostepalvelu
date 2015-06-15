@@ -168,13 +168,15 @@ public class ValintalaskennanTulosExcel {
             new Column("Hakutoive", 14, rivi -> String.valueOf(rivi.hakija.getPrioriteetti())),
             new Column("Laskennan tulos", 20, rivi -> rivi.hakija.getTuloksenTila().toString()),
             new Column("Selite", 30, rivi -> getTeksti(getJarjestyskriteeri(rivi.hakija).getKuvaus())),
-            new Column("Kokonaispisteet", 14, rivi -> nullSafeToString(getJarjestyskriteeri(rivi.hakija).getArvo())));
+            new Column("Kokonaispisteet", 14, rivi -> nullSafeToString(getJarjestyskriteeri(rivi.hakija).getArvo()))
+    );
 
     private static Stream<JonosijaDTO> sortedJonosijat(final ValintatietoValintatapajonoDTO jono) {
         return jono.getJonosijat().stream().sorted((o1, o2) ->
-                new CompareToBuilder().append(o1.getJonosija(), o2.getJonosija()
-                ).append(o1.getSukunimi(),o2.getSukunimi()
-                ).append(o1.getEtunimi(), o2.getEtunimi()).toComparison()
+                new CompareToBuilder()
+                        .append(o1.getJonosija(), o2.getJonosija()).append(o1.getSukunimi(),o2.getSukunimi())
+                        .append(o1.getEtunimi(), o2.getEtunimi())
+                        .toComparison()
         );
     }
     private static JarjestyskriteeritulosDTO getJarjestyskriteeri(final JonosijaDTO hakija) {
