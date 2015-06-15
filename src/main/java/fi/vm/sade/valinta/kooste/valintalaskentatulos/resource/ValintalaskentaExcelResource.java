@@ -71,12 +71,18 @@ public class ValintalaskentaExcelResource {
     private final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaExcelResource.class);
     public final static MediaType APPLICATION_VND_MS_EXCEL = new MediaType("application", "vnd.ms-excel");
 
-    @Autowired(required = false) private JalkiohjaustulosExcelRoute jalkiohjaustulos;
-    @Autowired private ValintakoekutsutExcelService valintakoekutsutExcelService;
-    @Autowired private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
-    @Autowired private ValintalaskentaAsyncResource valintalaskentaResource;
-    @Autowired private TarjontaAsyncResource tarjontaResource;
-    @Autowired private ApplicationAsyncResource applicationResource;
+    @Autowired(required = false)
+    private JalkiohjaustulosExcelRoute jalkiohjaustulos;
+    @Autowired
+    private ValintakoekutsutExcelService valintakoekutsutExcelService;
+    @Autowired
+    private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+    @Autowired
+    private ValintalaskentaAsyncResource valintalaskentaResource;
+    @Autowired
+    private TarjontaAsyncResource tarjontaResource;
+    @Autowired
+    private ApplicationAsyncResource applicationResource;
 
     @GET
     @Path("/jalkiohjaustulos/aktivoi")
@@ -88,7 +94,7 @@ public class ValintalaskentaExcelResource {
             InputStream input = jalkiohjaustulos.luoXls(hakuOid);
             return Response.ok(input, APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=jalkiohjaustulos.xls").build();
         } catch (Exception e) {
-            LOG.error("Jälkiohjaustulosexcelin luonti epäonnistui haulle {}: {}", new Object[] {hakuOid, e.getMessage()});
+            LOG.error("Jälkiohjaustulosexcelin luonti epäonnistui haulle {}: {}", new Object[]{hakuOid, e.getMessage()});
             return Response.ok(ExcelExportUtil.exportGridAsXls(new Object[][]{new Object[]{"Tarvittavien tietojen hakeminen epäonnistui!", "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!"}}), APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=yritauudelleen.xls").build();
         }
     }
@@ -99,8 +105,7 @@ public class ValintalaskentaExcelResource {
     @Produces("application/json")
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
     @ApiOperation(value = "Hakukohteen hyväksytyt Excel-raporttina", response = Response.class)
-    public ProsessiId haeTuloksetExcelMuodossa(
-    /* OPTIONAL */DokumentinLisatiedot lisatiedot, @QueryParam("hakuOid") String hakuOid, @QueryParam("hakukohdeOid") String hakukohdeOid) {
+    public ProsessiId haeTuloksetExcelMuodossa(DokumentinLisatiedot lisatiedot, @QueryParam("hakuOid") String hakuOid, @QueryParam("hakukohdeOid") String hakukohdeOid) {
         if (lisatiedot == null) {
             throw new RuntimeException("ValintakoeOid on pakollinen!");
         }
@@ -110,10 +115,11 @@ public class ValintalaskentaExcelResource {
             valintakoekutsutExcelService.luoExcel(p, hakuOid, hakukohdeOid, lisatiedot.getValintakoeTunnisteet(), Sets.newHashSet(Optional.ofNullable(lisatiedot.getHakemusOids()).orElse(Collections.emptyList())));
             return p.toProsessiId();
         } catch (Exception e) {
-            LOG.error("Valintakoekutsut excelin luonti epäonnistui hakukohteelle {}, valintakoeoideille {}: {}", new Object[] {hakukohdeOid, Arrays.toString(lisatiedot.getValintakoeTunnisteet().toArray()), e.getMessage()});
+            LOG.error("Valintakoekutsut excelin luonti epäonnistui hakukohteelle {}, valintakoeoideille {}: {}", new Object[]{hakukohdeOid, Arrays.toString(lisatiedot.getValintakoeTunnisteet().toArray()), e.getMessage()});
             throw new RuntimeException("Valintakoekutsut excelin luonti epäonnistui!", e);
         }
     }
+
     @Autowired
     private TilaAsyncResource tilaAsyncResource;
     @Autowired
@@ -126,6 +132,7 @@ public class ValintalaskentaExcelResource {
     private DokumenttiAsyncResource dokumenttiAsyncResource;
     @Autowired
     private TarjontaAsyncResource tarjontaAsyncResource;
+
     @POST
     @Path("/sijoitteluntulos/aktivoi")
     @Consumes("application/json")
@@ -146,25 +153,15 @@ public class ValintalaskentaExcelResource {
                             String opetuskieli = KirjeetHakukohdeCache.getOpetuskieli(tarjonta.getOpetusKielet());
                             Teksti hakukohteenNimet = new Teksti(tarjonta.getHakukohteenNimet());
                             Teksti tarjoajaNimet = new Teksti(tarjonta.getTarjoajaNimet());
-                            InputStream xls = sijoittelunTulosExcelKomponentti.luoXls(
-                                    valintatulokset,
-                                    opetuskieli,
-                                    hakukohteenNimet.getTeksti(opetuskieli),
-                                    tarjoajaNimet.getTeksti(opetuskieli),
-                                    hakukohdeOid,
-                                    hakemukset,
-                                    hakukohde);
+                            InputStream xls = sijoittelunTulosExcelKomponentti.luoXls(valintatulokset, opetuskieli,
+                                    hakukohteenNimet.getTeksti(opetuskieli), tarjoajaNimet.getTeksti(opetuskieli),
+                                    hakukohdeOid, hakemukset, hakukohde);
                             String id = UUID.randomUUID().toString();
-                            Observable<Response> response = dokumenttiAsyncResource.tallenna(
-                                    id,
-                                    "sijoitteluntulos_" + hakukohdeOid + ".xls",
-                                    DateTime.now().plusHours(24).toDate().getTime(),
-                                    Arrays.asList(),
-                                    "application/vnd.ms-excel",
-                                    xls);
+                            Observable<Response> response = dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls",
+                                    DateTime.now().plusHours(24).toDate().getTime(), Arrays.asList(), "application/vnd.ms-excel", xls);
                             response.subscribe(
                                     ehkaOk -> {
-                                        if(ehkaOk.getStatus() < 300) {
+                                        if (ehkaOk.getStatus() < 300) {
                                             p.setDokumenttiId(id);
                                             p.inkrementoiTehtyjaToita();
                                         } else {
@@ -183,7 +180,7 @@ public class ValintalaskentaExcelResource {
                             p.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumentin generointi", e.getMessage()));
                             return Observable.error(e);
                         }
-                }
+                    }
             ).flatMap(o -> o).subscribe(
                     ok -> {
                         LOG.info("Dokumentin generointi valmistui onnistuneesti");
@@ -210,19 +207,16 @@ public class ValintalaskentaExcelResource {
         Observable<HakukohdeV1RDTO> hakukohdeObservable = tarjontaResource.haeHakukohde(hakukohdeOid);
         final Observable<HakuV1RDTO> hakuObservable = hakukohdeObservable.flatMap(hakukohde -> tarjontaResource.haeHaku(hakukohde.getHakuOid()));
         final Observable<List<ValintatietoValinnanvaiheDTO>> valinnanVaiheetObservable = valintalaskentaResource.laskennantulokset(hakukohdeOid);
-
         final Observable<List<Hakemus>> hakemuksetObservable = hakukohdeObservable.flatMap(hakukohde -> applicationResource.getApplicationsByOid(hakukohde.getHakuOid(), hakukohdeOid));
-
-        final Observable<XSSFWorkbook> workbookObservable = Observable.combineLatest(hakuObservable, hakukohdeObservable, valinnanVaiheetObservable, hakemuksetObservable, ValintalaskennanTulosExcel :: luoExcel);
-
+        final Observable<XSSFWorkbook> workbookObservable = Observable.combineLatest(hakuObservable, hakukohdeObservable, valinnanVaiheetObservable, hakemuksetObservable, ValintalaskennanTulosExcel::luoExcel);
         workbookObservable.subscribe(
-            (workbook) -> {
-                asyncResponse.resume(Response.ok(Excel.export(workbook), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").header("content-disposition", "inline; filename=valintalaskennantulos.xlsx").build());
-            },
-            (e) -> {
-                LOG.error("Valintalaskennan tulokset -excelin luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
-                asyncResponse.resume(Response.ok(ExcelExportUtil.exportGridAsXls(new Object[][] {new Object[] {"Tarvittavien tietojen hakeminen epäonnistui!", "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!"}}), APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=yritauudelleen.xls").build());
-            }
+                (workbook) -> {
+                    asyncResponse.resume(Response.ok(Excel.export(workbook), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").header("content-disposition", "inline; filename=valintalaskennantulos.xlsx").build());
+                },
+                (e) -> {
+                    LOG.error("Valintalaskennan tulokset -excelin luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
+                    asyncResponse.resume(Response.ok(ExcelExportUtil.exportGridAsXls(new Object[][]{new Object[]{"Tarvittavien tietojen hakeminen epäonnistui!", "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!"}}), APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=yritauudelleen.xls").build());
+                }
         );
     }
 }
