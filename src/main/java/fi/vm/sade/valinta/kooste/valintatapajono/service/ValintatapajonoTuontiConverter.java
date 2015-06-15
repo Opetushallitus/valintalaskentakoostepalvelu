@@ -29,6 +29,9 @@ public class ValintatapajonoTuontiConverter {
             vaihe = luoValinnanVaihe(valintaperusteet, hakukohdeOid, hakuOid, Optional.ofNullable(valintatapajonoOid));
         }
         ValintatietoValintatapajonoDTO jono = haeValintatapajono(valintatapajonoOid, vaihe);
+        if (jono == null) {
+            throw new RuntimeException("Valintatapajono == null. JonoId=" + valintatapajonoOid + ", vaihe=" + vaihe);
+        }
         vaihe.setValintatapajonot(Arrays.asList(jono));
         List<JonosijaDTO> jonosijat = Lists.newArrayList();
         Map<String, Hakemus> hakemusmappaus = mapHakemukset(hakemukset);
@@ -89,6 +92,9 @@ public class ValintatapajonoTuontiConverter {
             throw new RuntimeException("Tälle valintatapajonolle ei löydy valintaperusteista valinnanvaihetta!");
         }
         fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO jono = haeJono(jonoOid, vaihe);
+        if (jono == null) {
+            throw new RuntimeException("Valintatapajono == null. JonoId=" + valintatapajonoOid + ", vaihe=" + vaihe);
+        }
 
         // luodaan uusi
         LOG.warn("Valinnanvaihetta ei löytynyt valintatapajonolle({}) joten luodaan uusi!", valintatapajonoOid);
