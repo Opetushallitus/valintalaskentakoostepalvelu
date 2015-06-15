@@ -8,7 +8,7 @@ public class TarjontaUriToKoodistoUtil {
     /**
      * Siivoaa (tarjonta uri esim hakukohteet_123#3) versionumeron pois
      * (palauttaa esimerkiksi hakukohteet_123)
-     * 
+     *
      * @param tarjontaUri
      * @return uri ilman versionumeroa
      */
