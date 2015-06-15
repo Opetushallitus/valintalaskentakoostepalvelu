@@ -43,7 +43,7 @@ final public class LaskentaStarterActor extends UntypedActor {
             workerCount.set(0);
             LOG.info("Worker count reset: " + workerCount.get());
         } else if (MaxWorkerCount.class.isInstance(message)) {
-            MaxWorkerCount count = (MaxWorkerCount)message;
+            MaxWorkerCount count = (MaxWorkerCount) message;
             LOG.info("Set maxworker count to " + count.maxWorkerCount);
             maxWorkers = count.maxWorkerCount;
         } else {
@@ -69,18 +69,24 @@ final public class LaskentaStarterActor extends UntypedActor {
         LOG.info("Releasing worker, workerCount: {}", workerCount);
     }
 
-    public static class WorkAvailable {}
+    public static class WorkAvailable {
+    }
 
-    public static class NoWorkAvailable {}
+    public static class NoWorkAvailable {
+    }
 
-    public static class WorkerAvailable {}
+    public static class WorkerAvailable {
+    }
 
-    public static class ResetWorkerCount {}
+    public static class ResetWorkerCount {
+    }
 
-    public static class StartAllWorkers {}
+    public static class StartAllWorkers {
+    }
 
     public static class MaxWorkerCount {
         public final int maxWorkerCount;
+
         public MaxWorkerCount(int count) {
             this.maxWorkerCount = count;
         }

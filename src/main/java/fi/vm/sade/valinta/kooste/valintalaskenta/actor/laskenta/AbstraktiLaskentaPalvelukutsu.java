@@ -92,9 +92,6 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends AbstraktiPalvelukuts
         };
     }
 
-    /**
-     * Ylikirjoita callbackiksi
-     */
     protected void yksiVaiheValmistui() {
 
     }

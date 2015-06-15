@@ -5,16 +5,10 @@ import java.util.function.Consumer;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Palvelukutsu;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public interface LaskentaPalvelukutsu extends Palvelukutsu {
+    String getHakukohdeOid();
 
-	String getHakukohdeOid();
+    HakukohdeTila getHakukohdeTila();
 
-	HakukohdeTila getHakukohdeTila();
-
-	void laitaTyojonoon(Consumer<LaskentaPalvelukutsu> takaisinkutsu);
+    void laitaTyojonoon(Consumer<LaskentaPalvelukutsu> takaisinkutsu);
 }

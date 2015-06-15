@@ -23,9 +23,6 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.palvelukutsu.Val
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.PalvelukutsuJaPalvelukutsuStrategiaImpl;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 
-/**
- * @author Jussi Jartamo
- */
 public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends AbstraktiLaskentaPalvelukutsu implements LaskentaPalvelukutsu {
     private static final Logger LOG = LoggerFactory.getLogger(ValintaryhmatKatenoivaValintalaskentaPalvelukutsu.class);
 
@@ -81,11 +78,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
                                 uuid,
                                 erillishaku,
                                 y.getHakukohdeOid(),
-                                muodostaHakemuksetDTO(
-                                        y.getHakukohdeOid(),
-                                        y.getHakemuksetPalvelukutsu().getHakemukset(),
-                                        y.getSuoritusrekisteriPalvelukutsut().getOppijat()
-                                ),
+                                muodostaHakemuksetDTO(y.getHakukohdeOid(), y.getHakemuksetPalvelukutsu().getHakemukset(), y.getSuoritusrekisteriPalvelukutsut().getOppijat()),
                                 y.getValintaperusteetPalvelukutsu().getValintaperusteet(),
                                 y.getHakijaryhmatPalvelukutsu().getHakijaryhmat()
                         );
@@ -102,8 +95,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
     @Override
     public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
         try {
-            aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() -> valintalaskentaAsyncResource.laskeJaSijoittele(
-                    muodostaLaskeDTOs(),
+            aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() -> valintalaskentaAsyncResource.laskeJaSijoittele(muodostaLaskeDTOs(),
                     laskentaCallback -> takaisinkutsu.accept(ValintaryhmatKatenoivaValintalaskentaPalvelukutsu.this),
                     failureCallback(takaisinkutsu)
             ));
