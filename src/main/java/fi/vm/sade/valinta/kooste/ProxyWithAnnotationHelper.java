@@ -7,11 +7,6 @@ import org.apache.camel.Producer;
 import org.apache.camel.component.bean.MethodInfoCache;
 import org.apache.camel.util.ServiceHelper;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public final class ProxyWithAnnotationHelper {
 
     /**
@@ -19,7 +14,7 @@ public final class ProxyWithAnnotationHelper {
      */
     @SuppressWarnings("unchecked")
     public static <T> T createProxyObject(Endpoint endpoint, Producer producer, ClassLoader classLoader,
-            Class<T>[] interfaces, MethodInfoCache methodCache) {
+                                          Class<T>[] interfaces, MethodInfoCache methodCache) {
         return (T) Proxy.newProxyInstance(classLoader, interfaces.clone(), new CamelWithAnnotationInvocationHandler(
                 endpoint, producer, methodCache));
     }
@@ -28,7 +23,7 @@ public final class ProxyWithAnnotationHelper {
      * Creates a Proxy which sends the exchange to the endpoint.
      */
     public static <T> T createProxy(Endpoint endpoint, ClassLoader cl, Class<T> interfaceClass,
-            MethodInfoCache methodCache) throws Exception {
+                                    MethodInfoCache methodCache) throws Exception {
         return createProxy(endpoint, cl, toArray(interfaceClass), methodCache);
     }
 
@@ -36,7 +31,7 @@ public final class ProxyWithAnnotationHelper {
      * Creates a Proxy which sends the exchange to the endpoint.
      */
     public static <T> T createProxy(Endpoint endpoint, ClassLoader cl, Class<T>[] interfaceClasses,
-            MethodInfoCache methodCache) throws Exception {
+                                    MethodInfoCache methodCache) throws Exception {
         Producer producer = endpoint.createProducer();
         // ensure the producer is started
         ServiceHelper.startService(producer);
@@ -107,6 +102,6 @@ public final class ProxyWithAnnotationHelper {
         // this method and it's usage is introduced to avoid compiler warnings
         // about the generic Class arrays in the case we've got only one single
         // Class to build a Proxy for
-        return new Class[] { interfaceClass };
+        return new Class[]{interfaceClass};
     }
 }

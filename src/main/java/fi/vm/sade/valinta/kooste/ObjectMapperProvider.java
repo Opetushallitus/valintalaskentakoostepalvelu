@@ -11,18 +11,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Provider
 public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
 
-	private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-	public ObjectMapperProvider() {
-		objectMapper = new ObjectMapper();
+    public ObjectMapperProvider() {
+        objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
-		objectMapper.configure(
-				DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-	}
-
-	@Override
-	public ObjectMapper getContext(Class<?> type) {
-		return objectMapper;
-	}
+    @Override
+    public ObjectMapper getContext(Class<?> type) {
+        return objectMapper;
+    }
 }

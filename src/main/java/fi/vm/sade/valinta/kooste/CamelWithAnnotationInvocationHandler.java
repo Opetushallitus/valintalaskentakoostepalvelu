@@ -25,13 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public class CamelWithAnnotationInvocationHandler extends AbstractCamelInvocationHandler implements InvocationHandler {
-
     private final Logger LOG = LoggerFactory.getLogger(CamelWithAnnotationInvocationHandler.class);
     private final MethodInfoCache methodInfoCache;
 
@@ -42,7 +36,6 @@ public class CamelWithAnnotationInvocationHandler extends AbstractCamelInvocatio
 
     @Override
     public Object doInvokeProxy(Object proxy, Method method, Object[] args) throws Throwable {
-
         MethodInfo methodInfo = methodInfoCache.getMethodInfo(method);
         final ExchangePattern pattern = methodInfo != null ? methodInfo.getPattern() : ExchangePattern.InOut;
         final Exchange exchange = new DefaultExchange(endpoint, pattern);
@@ -66,12 +59,6 @@ public class CamelWithAnnotationInvocationHandler extends AbstractCamelInvocatio
         return invokeWithExchange(method, exchange);
     }
 
-    /**
-     * @param value
-     * @param exchange
-     * @param annotations
-     * @return true if value could be added to exchange
-     */
     private boolean updateExchange(Object value, Exchange exchange, Annotation[] annotations) {
         boolean valueAdded = false;
         for (Annotation annotation : annotations) {

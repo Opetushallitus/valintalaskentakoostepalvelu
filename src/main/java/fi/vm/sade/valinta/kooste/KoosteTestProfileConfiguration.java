@@ -16,22 +16,20 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * @author Jussi Jartamo
- */
+
 @Profile("test")
 @Configuration
 public class KoosteTestProfileConfiguration {
 
     public static AtomicReference<String> PROXY_SERVER = new AtomicReference<>();
 
-    @Bean(name="testProps")
+    @Bean(name = "testProps")
     public static org.springframework.context.support.PropertySourcesPlaceholderConfigurer getPropertyPlaceholderConfigurer() {
         final String proxyServer = PROXY_SERVER.get();
         Properties p0 = new Properties();
         p0.setProperty("valintalaskentakoostepalvelu.jatkuvasijoittelu.timer", "time=2018-12-12 10:12:12&delay=10000000");
         p0.setProperty("valintalaskentakoostepalvelu.valintalaskenta.rest.url", "http://" + proxyServer + "/valintalaskenta-laskenta-service/resources");
-        p0.setProperty("valintalaskentakoostepalvelu.viestintapalvelu.url",  "http://" + proxyServer + "/viestintapalvelu");
+        p0.setProperty("valintalaskentakoostepalvelu.viestintapalvelu.url", "http://" + proxyServer + "/viestintapalvelu");
         p0.setProperty("valintalaskentakoostepalvelu.hakemus.rest.url", "http://" + proxyServer + "/haku-app");
         p0.setProperty("valintalaskentakoostepalvelu.koodiService.url", "http://localhost");
         p0.setProperty("cas.callback.valintalaskentakoostepalvelu", "http://localhost");
@@ -59,7 +57,7 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("host.ilb", "http://" + proxyServer);
 
         p0.setProperty("web.url.cas", "http://localhost");
-        p0.setProperty("cas.service.viestintapalvelu","");
+        p0.setProperty("cas.service.viestintapalvelu", "");
         p0.setProperty("cas.service.sijoittelu-service", "");
         p0.setProperty("cas.service.organisaatio-service", "");
         p0.setProperty("cas.service.valintalaskenta-service", "");
@@ -68,8 +66,8 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("host.scheme", "http");
         p0.setProperty("host.virkailija", proxyServer);
         p0.setProperty("cas.service.valintalaskentakoostepalvelu", "");
-        p0.setProperty("cas.service.haku-service","");
-        p0.setProperty("cas.service.authentication-service","");
+        p0.setProperty("cas.service.haku-service", "");
+        p0.setProperty("cas.service.authentication-service", "");
         p0.setProperty("valintalaskentakoostepalvelu.authentication.rest.url", "");
         p0.setProperty("valintalaskentakoostepalvelu.app.username.to.sijoittelu", "");
         p0.setProperty("valintalaskentakoostepalvelu.app.password.to.sijoittelu", "");
@@ -84,7 +82,7 @@ public class KoosteTestProfileConfiguration {
         defaultProps.setProperties(p0);
         defaultProps.setOrder(0);
         defaultProps.setLocalOverride(true);
-        return  defaultProps;
+        return defaultProps;
     }
 
     private static final AbstractPhaseInterceptor<Message> INTERCEPTOR = new AbstractPhaseInterceptor<Message>(Phase.PRE_PROTOCOL) {
@@ -93,7 +91,8 @@ public class KoosteTestProfileConfiguration {
         }
 
     };
-    @Bean(name="springSecurityFilterChain")
+
+    @Bean(name = "springSecurityFilterChain")
     public static Filter getFilter() {
         return new Filter() {
             @Override
@@ -113,47 +112,57 @@ public class KoosteTestProfileConfiguration {
         };
     }
 
-    @Bean(name="viestintapalveluClientCasInterceptor")
+    @Bean(name = "viestintapalveluClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getViestintapalveluClientCasInterceptor() {
         return INTERCEPTOR;
     }
-    @Bean(name="ValintakoeRestClientCasInterceptor")
+
+    @Bean(name = "ValintakoeRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getValintakoeRestClientCasInterceptor() {
         return INTERCEPTOR;
     }
-    @Bean(name="HakemusServiceRestClientAsAdminCasInterceptor")
+
+    @Bean(name = "HakemusServiceRestClientAsAdminCasInterceptor")
     public AbstractPhaseInterceptor<Message> getHakemusServiceRestClientAsAdminCasInterceptor() {
         return INTERCEPTOR;
     }
-    @Bean(name="adminDokumenttipalveluRestClientCasInterceptor")
+
+    @Bean(name = "adminDokumenttipalveluRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getAdminDokumenttipalveluRestClientCasInterceptor() {
         return INTERCEPTOR;
     }
-    @Bean(name="sijoitteluTilaServiceRestClientCasInterceptor")
+
+    @Bean(name = "sijoitteluTilaServiceRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getSijoitteluTilaServiceRestClientCasInterceptor() {
         return INTERCEPTOR;
     }
-    @Bean(name="SijoitteluServiceRestClientCasInterceptor")
+
+    @Bean(name = "SijoitteluServiceRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getSijoitteluServiceRestClientCasInterceptor() {
         return INTERCEPTOR;
     }
-    @Bean(name="ValintalaskentaHakukohdeRestClientCasInterceptor")
+
+    @Bean(name = "ValintalaskentaHakukohdeRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getValintalaskentaHakukohdeRestClientCasInterceptor() {
         return INTERCEPTOR;
     }
-    @Bean(name="SijoittelunSeurantaRestClientCasInterceptor")
+
+    @Bean(name = "SijoittelunSeurantaRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getSijoittelunSeurantaRestClientCasInterceptor() {
         return INTERCEPTOR;
     }
-    @Bean(name="ValintatietoRestClientCasInterceptor")
+
+    @Bean(name = "ValintatietoRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getValintatietoRestClientCasInterceptor() {
         return INTERCEPTOR;
     }
-    @Bean(name="koodiServiceCasInterceptor")
+
+    @Bean(name = "koodiServiceCasInterceptor")
     public AbstractPhaseInterceptor<Message> getKoodiServiceCasInterceptor() {
         return INTERCEPTOR;
     }
-    @Bean(name="OrganisaatioResourceClientCasInterceptor")
+
+    @Bean(name = "OrganisaatioResourceClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getOrganisaatioResourceClientCasInterceptor() {
         return INTERCEPTOR;
     }
