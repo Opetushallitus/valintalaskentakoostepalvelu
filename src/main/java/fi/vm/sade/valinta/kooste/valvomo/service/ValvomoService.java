@@ -4,22 +4,12 @@ import java.util.Collection;
 
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public interface ValvomoService<T> {
+    ProsessiJaStatus<T> getAjossaOlevaProsessiJaStatus();
 
-	/**
-	 * @return null if idle
-	 */
-	ProsessiJaStatus<T> getAjossaOlevaProsessiJaStatus();
+    ProsessiJaStatus<T> getProsessiJaStatus(String uuid);
 
-	ProsessiJaStatus<T> getProsessiJaStatus(String uuid);
+    Collection<T> getUusimmatProsessit();
 
-	Collection<T> getUusimmatProsessit();
-
-	Collection<ProsessiJaStatus<T>> getUusimmatProsessitJaStatukset();
-
+    Collection<ProsessiJaStatus<T>> getUusimmatProsessitJaStatukset();
 }
