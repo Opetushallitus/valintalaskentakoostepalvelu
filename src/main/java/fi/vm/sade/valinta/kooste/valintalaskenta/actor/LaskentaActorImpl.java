@@ -75,7 +75,7 @@ public class LaskentaActorImpl implements LaskentaActor {
                 LOG.warn("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
                 laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
             } catch (Exception e) {
-                LOG.error("Laskennan tilan merkkaaminen peruutetuksi epaonnistui laskennalle ("+uuid+")", e);
+                LOG.error("Laskennan tilan merkkaaminen peruutetuksi epaonnistui laskennalle (" + uuid + ")", e);
             }
         }
     }
@@ -111,7 +111,7 @@ public class LaskentaActorImpl implements LaskentaActor {
         }
     }
 
-    public String formatError(String message, Object ... args) {
+    public String formatError(String message, Object... args) {
         return MessageFormatter.format(message, args).getMessage();
     }
 
@@ -126,22 +126,22 @@ public class LaskentaActorImpl implements LaskentaActor {
                 try {
                     s.peruutaKaikki();
                 } catch (Exception e) {
-                    LOG.error("Palvelukutsu Strategian peruutus epaonnistui laskennalle ("+uuid+")", e);
+                    LOG.error("Palvelukutsu Strategian peruutus epaonnistui laskennalle (" + uuid + ")", e);
                 }
             });
             laskentaStrategia.peruutaKaikki();
         } catch (Exception e) {
-            LOG.error("Strategioiden peruuttaminen epaonnistui laskennalle ("+uuid+")", e);
+            LOG.error("Strategioiden peruuttaminen epaonnistui laskennalle (" + uuid + ")", e);
         }
         try {
             laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
         } catch (Exception e) {
-            LOG.error("Laskennan ("+uuid+") tilan merkkaaminen peruutetuksi epaonnistui", e);
+            LOG.error("Laskennan (" + uuid + ") tilan merkkaaminen peruutetuksi epaonnistui", e);
         }
         try {
             laskentaSupervisor.ready(uuid);
         } catch (Exception e) {
-            LOG.error("Laskennan ("+uuid+")  ilmoittaminen valmiiksi epaonnistui", e);
+            LOG.error("Laskennan (" + uuid + ")  ilmoittaminen valmiiksi epaonnistui", e);
         }
     }
 }

@@ -30,14 +30,8 @@ import java.util.Map;
 
 import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.*;
 
-/**
- * @author Jussi Jartamo
- */
 @Service
-@ManagedResource(
-        objectName = "bean:name=OPH",
-        description = "OPH"
-)
+@ManagedResource(objectName = "bean:name=OPH", description = "OPH")
 public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo, ValintalaskentaKerrallaRoute, LaskentaSupervisor, ApplicationListener<ContextRefreshedEvent> {
     private final static Logger LOG = LoggerFactory.getLogger(LaskentaActorSystem.class);
 

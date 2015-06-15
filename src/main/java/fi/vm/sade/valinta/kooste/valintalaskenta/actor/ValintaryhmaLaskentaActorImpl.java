@@ -13,9 +13,6 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.strategia.Palvel
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 
-/**
- * @author Jussi Jartamo
- */
 public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
     private final static Logger LOG = LoggerFactory.getLogger(ValintaryhmaLaskentaActorImpl.class);
 
@@ -66,7 +63,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Laskennan ("+uuid+") tilan merkkaaminen valmiiksi epaonnistui", e);
+            LOG.error("Laskennan (" + uuid + ") tilan merkkaaminen valmiiksi epaonnistui", e);
         }
     }
 
@@ -77,7 +74,7 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
                 LOG.info("Actor {} sammutettiin ennen laskennan valmistumista joten merkataan laskenta peruutetuksi!", uuid);
                 laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU);
             } catch (Exception e) {
-                LOG.error("Laskennan ("+uuid+") tilan merkkaaminen peruutetuksi epaonnistui", e);
+                LOG.error("Laskennan (" + uuid + ") tilan merkkaaminen peruutetuksi epaonnistui", e);
             }
         }
     }
@@ -128,17 +125,17 @@ public class ValintaryhmaLaskentaActorImpl implements LaskentaActor, Runnable {
                 try {
                     s.peruutaKaikki();
                 } catch (Exception e) {
-                    LOG.error("Palvelukutsu Strategian peruutus epaonnistui laskennalle ("+uuid+")", e);
+                    LOG.error("Palvelukutsu Strategian peruutus epaonnistui laskennalle (" + uuid + ")", e);
                 }
             });
             laskentaStrategia.peruutaKaikki();
         } catch (Exception e) {
-            LOG.error("Strategioiden peruuttaminen epaonnistui laskennalle ("+uuid+") ", e);
+            LOG.error("Strategioiden peruuttaminen epaonnistui laskennalle (" + uuid + ") ", e);
         }
         try {
             laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.PERUUTETTU, HakukohdeTila.KESKEYTETTY);
         } catch (Exception e) {
-            LOG.error("Laskennan tilan merkkaaminen peruutetuksi ja hakukohteet keskeytetyksi epaonnistui laskennalle ("+uuid+")", e);
+            LOG.error("Laskennan tilan merkkaaminen peruutetuksi ja hakukohteet keskeytetyksi epaonnistui laskennalle (" + uuid + ")", e);
         }
         viimeistele();
     }

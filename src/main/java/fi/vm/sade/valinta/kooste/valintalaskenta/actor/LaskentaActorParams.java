@@ -46,7 +46,7 @@ public class LaskentaActorParams {
         return laskentaStartParams.getValintakoelaskenta();
     }
 
-    public boolean isOsittainen(){
+    public boolean isOsittainen() {
         return laskentaStartParams.isOsittainenLaskenta();
     }
 
