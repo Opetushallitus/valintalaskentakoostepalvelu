@@ -10,6 +10,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.codepoetics.protonpack.StreamUtils;
+import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
+import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -29,22 +32,35 @@ public class ValintalaskennanTulosExcel {
 
         XSSFWorkbook workbook = new XSSFWorkbook();
         valinnanVaiheet.stream()
+
+                .flatMap(vaihe -> vaihe.getValintatapajonot().stream().map(jono -> new ValintatapaJonoSheet(jono, vaihe)))
+                .collect(Collectors.groupingBy(jonoSheet -> jonoSheet.sheetName)).entrySet().stream()
+                // Uudelleen nimetään saman nimiset sheetit (index) suffiksilla, esim Jokujono (5)
+                .flatMap(entry -> StreamUtils.zipWithIndex(entry.getValue().stream().sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt())))
+                        .map(indexedJonoSheet -> new ValintatapaJonoSheet(indexedJonoSheet.getValue(),
+                                indexedJonoSheet.getValue().sheetName + Optional.of(indexedJonoSheet.getIndex()).map(i -> {
+                                    if (i == 0L) {
+                                        return "";
+                                    } else {
+                                        return " (" + new Long(i + 1L).toString() + ")";
+                                    }
+                                }).get())))
                 .sorted((o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()))
-                .forEach(vaihe -> vaihe.getValintatapajonot().forEach(jono -> {
-                    final XSSFSheet sheet = workbook.createSheet(vaihe.getNimi() + " - " + jono.getNimi());
+                .forEach((jonoSheet) -> {
+                    final XSSFSheet sheet = workbook.createSheet(jonoSheet.sheetName);
                     setColumnWidths(sheet);
                     addRow(sheet, "Haku", getTeksti(haku.getNimi()));
                     addRow(sheet, "Tarjoaja", getTeksti(hakukohdeDTO.getTarjoajaNimet()));
                     addRow(sheet, "Hakukohde", getTeksti(hakukohdeDTO.getHakukohteenNimet()));
-                    addRow(sheet, "Vaihe", vaihe.getNimi());
-                    addRow(sheet, "Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(vaihe.getCreatedAt()));
-                    addRow(sheet, "Jono", jono.getNimi());
+                    addRow(sheet, "Vaihe", jonoSheet.vaihe.getNimi());
+                    addRow(sheet, "Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(jonoSheet.vaihe.getCreatedAt()));
+                    addRow(sheet, "Jono", jonoSheet.jono.getNimi());
                     addRow(sheet);
-                    if (jono.getJonosijat().isEmpty()) {
+                    if (jonoSheet.jono.getJonosijat().isEmpty()) {
                         addRow(sheet, "Jonolle ei ole valintalaskennan tuloksia");
                     } else {
                         addRow(sheet, columnHeaders);
-                        sortedJonosijat(jono).forEach(hakija -> {
+                        sortedJonosijat(jonoSheet.jono).forEach(hakija -> {
                             final HakemusRivi rivi = new HakemusRivi(hakija, hakemusByOid.getOrDefault(hakija.getHakemusOid(), emptyHakemus));
                             final List<String> columnValues = columns.stream()
                                     .map(column -> column.extractor.apply(rivi))
@@ -52,8 +68,26 @@ public class ValintalaskennanTulosExcel {
                             addRow(sheet, columnValues);
                         });
                     }
-                }));
+                });
         return workbook;
+    }
+    private static class ValintatapaJonoSheet {
+        public final ValintatietoValintatapajonoDTO jono;
+        public final ValinnanvaiheDTO vaihe;
+        public final String sheetName;
+        public ValintatapaJonoSheet(ValintatietoValintatapajonoDTO jono, ValinnanvaiheDTO vaihe) {
+            this.jono = jono;
+            this.vaihe = vaihe;
+            this.sheetName = jono.getNimi();
+        }
+        public ValintatapaJonoSheet(ValintatapaJonoSheet cloneSheetWithNewName, String sheetName) {
+            this.jono = cloneSheetWithNewName.jono;
+            this.vaihe = cloneSheetWithNewName.vaihe;
+            this.sheetName = sheetName;
+        }
+        public Date getCreatedAt() {
+            return vaihe.getCreatedAt();
+        }
     }
 
     private static Hakemus emptyHakemus = new Hakemus();
@@ -98,9 +132,10 @@ public class ValintalaskennanTulosExcel {
     private final static List<String> columnHeaders = columns.stream().map(column -> column.name).collect(Collectors.toList());
 
     private static Stream<JonosijaDTO> sortedJonosijat(final ValintatietoValintatapajonoDTO jono) {
-        return jono.getJonosijat().stream().sorted((o1, o2) -> (o1.getJonosija() - o2.getJonosija()) * 100 +
-                        normalizeCompareTo(trimToNull(o1.getSukunimi()).compareTo(trimToNull(o2.getSukunimi()))) * 10 +
-                        normalizeCompareTo(trimToNull(o1.getEtunimi()).compareTo(trimToNull(o2.getEtunimi())))
+        return jono.getJonosijat().stream().sorted((o1, o2) ->
+                new CompareToBuilder().append(o1.getJonosija(), o2.getJonosija()
+                ).append(o1.getSukunimi(),o2.getSukunimi()
+                ).append(o1.getEtunimi(), o2.getEtunimi()).toComparison()
         );
     }
     public static int normalizeCompareTo(int value) { // because String.compareTo can return anything

@@ -1,10 +1,12 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
+import com.google.common.io.FileBackedOutputStream;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.excel.ValintalaskennanTulosExcel;
 import fi.vm.sade.valintalaskenta.domain.dto.JarjestyskriteeritulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
@@ -13,6 +15,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanva
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 import fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila;
 
+import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -49,21 +52,23 @@ public class ValintalaskennanTulosExcelTest {
     {
         haku.setNimi(map("fi", "Haku 1"));
     }
+    DateTime nyt = DateTime.now();
+
     XSSFWorkbook workbook = ValintalaskennanTulosExcel.luoExcel(haku, hakukohdeDTO, asList(
-        valinnanvaihe(1, asList(
-            valintatapajono(1, jonosijat()),
-            valintatapajono(2, EMPTY_LIST)
+        valinnanvaihe(1, nyt.toDate(), asList(
+                valintatapajono(1, jonosijat()),
+                valintatapajono(2, EMPTY_LIST)
         )),
-        valinnanvaihe(2, asList(
-            valintatapajono(1, EMPTY_LIST))
+        valinnanvaihe(2, nyt.minusMonths(12).toDate(), asList(
+                        valintatapajono(1, EMPTY_LIST))
         )), hakemukset());
 
     @Test
-    public void sheetNames() {
+    public void sheetNames() throws Throwable {
         assertEquals(3, workbook.getNumberOfSheets());
-        assertEquals("Vaihe 1 - Jono 1", workbook.getSheetName(0));
-        assertEquals("Vaihe 1 - Jono 2", workbook.getSheetName(1));
-        assertEquals("Vaihe 2 - Jono 1", workbook.getSheetName(2));
+        assertEquals("Jono 1", workbook.getSheetName(0));
+        assertEquals("Jono 2", workbook.getSheetName(1));
+        assertEquals("Jono 1 (2)", workbook.getSheetName(2));
     }
 
     @Test
@@ -74,7 +79,7 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Tarjoaja", "Tarjoaja 1"),
                 asList("Hakukohde", "Hakukohde 1"),
                 asList("Vaihe", "Vaihe 1"),
-                asList("Päivämäärä", "01.01.1970 02.00"),
+                asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
                 asList("Jono", "Jono 1"),
                 asList(),
                 asList("Jonosija", "Sukunimi",  "Etunimi", "Henkilötunnus",  "Hakemus OID",  "Hakutoive",    "Laskennan tulos",  "Selite",   "Kokonaispisteet"),
@@ -91,7 +96,7 @@ public class ValintalaskennanTulosExcelTest {
                 asList("Tarjoaja", "Tarjoaja 1"),
                 asList("Hakukohde", "Hakukohde 1"),
                 asList("Vaihe", "Vaihe 1"),
-                asList("Päivämäärä", "01.01.1970 02.00"),
+                asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())),
                 asList("Jono", "Jono 2"),
                 asList(),
                 asList("Jonolle ei ole valintalaskennan tuloksia")
@@ -130,13 +135,13 @@ public class ValintalaskennanTulosExcelTest {
         return rowData;
     }
 
-    private ValintatietoValinnanvaiheDTO valinnanvaihe(int jarjestysnumero, List<ValintatietoValintatapajonoDTO> jonot) {
+    private ValintatietoValinnanvaiheDTO valinnanvaihe(int jarjestysnumero, Date d, List<ValintatietoValintatapajonoDTO> jonot) {
         return new ValintatietoValinnanvaiheDTO(
                 jarjestysnumero,
                 "vaiheOid" + jarjestysnumero,
                 "hakuOid",
                 "Vaihe " + jarjestysnumero,
-                new Date(0),
+                d,
                 jonot,
                 EMPTY_LIST
         );
