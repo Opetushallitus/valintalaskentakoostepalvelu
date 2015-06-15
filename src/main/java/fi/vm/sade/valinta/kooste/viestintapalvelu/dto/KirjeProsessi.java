@@ -5,28 +5,22 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import java.util.Collection;
 import java.util.Map;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
 public interface KirjeProsessi {
+    void vaiheValmistui();
 
-	void vaiheValmistui();
+    boolean isValmis();
 
-	boolean isValmis();
+    void valmistui(String dokumenttiId);
 
-	void valmistui(String dokumenttiId);
+    void keskeyta();
 
-	void keskeyta();
+    void keskeyta(Poikkeus syy);
 
-	void keskeyta(Poikkeus syy);
+    void keskeyta(Collection<Poikkeus> syyt);
 
-	void keskeyta(Collection<Poikkeus> syyt);
-
-	void keskeyta(String syy);
+    void keskeyta(String syy);
 
     void keskeyta(String syy, Map<String, String> virheet);
 
-	boolean isKeskeytetty();
+    boolean isKeskeytetty();
 }

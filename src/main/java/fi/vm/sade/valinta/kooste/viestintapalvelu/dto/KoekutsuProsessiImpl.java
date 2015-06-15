@@ -9,62 +9,54 @@ import org.apache.commons.lang.StringUtils;
 
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- */
-public class KoekutsuProsessiImpl extends DokumenttiProsessi implements
-		KirjeProsessi {
+public class KoekutsuProsessiImpl extends DokumenttiProsessi implements KirjeProsessi {
 
-	public KoekutsuProsessiImpl(int vaiheet) {
-		super(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-				Collections.emptyList());
-		setKokonaistyo(vaiheet);
-	}
-	public boolean isValmis() {
-		return getDokumenttiId() != null;
-	}
-	@Override
-	public void vaiheValmistui() {
-		inkrementoiTehtyjaToita();
-	}
+    public KoekutsuProsessiImpl(int vaiheet) {
+        super(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.emptyList());
+        setKokonaistyo(vaiheet);
+    }
 
-	public void valmistui(String dokumentId) {
-		setDokumenttiId(dokumentId);
-	}
+    public boolean isValmis() {
+        return getDokumenttiId() != null;
+    }
 
-	public boolean isKeskeytetty() {
-		return !getPoikkeukset().isEmpty();
-	}
+    @Override
+    public void vaiheValmistui() {
+        inkrementoiTehtyjaToita();
+    }
+
+    public void valmistui(String dokumentId) {
+        setDokumenttiId(dokumentId);
+    }
+
+    public boolean isKeskeytetty() {
+        return !getPoikkeukset().isEmpty();
+    }
 
 
-	public void keskeyta(Poikkeus syy) {
-		if (getDokumenttiId() == null) {
-			getPoikkeukset().add(
-					syy);
-		}
-	}
+    public void keskeyta(Poikkeus syy) {
+        if (getDokumenttiId() == null) {
+            getPoikkeukset().add(syy);
+        }
+    }
 
-	public void keskeyta(Collection<Poikkeus> syyt) {
-		if (getDokumenttiId() == null) {
-			getPoikkeukset().addAll(syyt);
-		}
-	}
-	@Override
-	public void keskeyta(String syy) {
-		if (getDokumenttiId() == null) {
-			getPoikkeukset().add(
-					Poikkeus.koostepalvelupoikkeus(syy));
-		}
-	}
+    public void keskeyta(Collection<Poikkeus> syyt) {
+        if (getDokumenttiId() == null) {
+            getPoikkeukset().addAll(syyt);
+        }
+    }
+
+    @Override
+    public void keskeyta(String syy) {
+        if (getDokumenttiId() == null) {
+            getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus(syy));
+        }
+    }
 
     @Override
     public void keskeyta(String syy, Map<String, String> virheet) {
         if (getDokumenttiId() == null) {
-            getPoikkeukset().add(
-                    new Poikkeus(Poikkeus.KOOSTEPALVELU, syy));
-
+            getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, syy));
             virheet.keySet().stream().forEach(key -> {
                 getVaroitukset().add(
                         new Varoitus(key, virheet.get(key))
@@ -74,9 +66,8 @@ public class KoekutsuProsessiImpl extends DokumenttiProsessi implements
     }
 
     public void keskeyta() {
-		if (getDokumenttiId() == null) {
-			getPoikkeukset().add(
-					new Poikkeus(Poikkeus.KOOSTEPALVELU, StringUtils.EMPTY));
-		}
-	}
+        if (getDokumenttiId() == null) {
+            getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, StringUtils.EMPTY));
+        }
+    }
 }

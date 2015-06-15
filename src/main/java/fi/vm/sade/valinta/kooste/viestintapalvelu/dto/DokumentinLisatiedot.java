@@ -7,66 +7,65 @@ import org.apache.commons.lang.StringUtils;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 
 /**
- * 
- * @author Jussi Jartamo
- * 
  *         Metadataa luotavan dokumentin mukauttamiseen
  */
 public class DokumentinLisatiedot {
+    private String tag;
+    private String letterBodyText;
+    private String languageCode;
+    private List<String> hakemusOids;
+    private List<String> valintakoeTunnisteet;
 
-	private String tag;
-	private String letterBodyText;
-	private String languageCode;
-	private List<String> hakemusOids;
-	private List<String> valintakoeTunnisteet;
+    public DokumentinLisatiedot() {
+    }
 
-	public DokumentinLisatiedot() {}
-	public DokumentinLisatiedot(List<String> valintakoeTunnisteet, String tag, String letterBodyText, String languageCode, List<String> hakemusOids) {
-		this.tag = tag;
-		this.letterBodyText = letterBodyText;
-		this.languageCode = languageCode;
-		this.hakemusOids = hakemusOids;
-		this.valintakoeTunnisteet = valintakoeTunnisteet;
-	}
-	public String getTag() {
-		return tag;
-	}
+    public DokumentinLisatiedot(List<String> valintakoeTunnisteet, String tag, String letterBodyText, String languageCode, List<String> hakemusOids) {
+        this.tag = tag;
+        this.letterBodyText = letterBodyText;
+        this.languageCode = languageCode;
+        this.hakemusOids = hakemusOids;
+        this.valintakoeTunnisteet = valintakoeTunnisteet;
+    }
 
-	public void setValintakoeTunnisteet(List<String> valintakoeTunnisteet) {
-		this.valintakoeTunnisteet = valintakoeTunnisteet;
-	}
+    public String getTag() {
+        return tag;
+    }
 
-	public String getLanguageCode() {
-		if (StringUtils.isBlank(languageCode)) {
-			return StringUtils.EMPTY;
-		}
-		return KieliUtil.normalisoiKielikoodi(languageCode);
-	}
+    public void setValintakoeTunnisteet(List<String> valintakoeTunnisteet) {
+        this.valintakoeTunnisteet = valintakoeTunnisteet;
+    }
 
-	public List<String> getValintakoeTunnisteet() {
-		return valintakoeTunnisteet;
-	}
+    public String getLanguageCode() {
+        if (StringUtils.isBlank(languageCode)) {
+            return StringUtils.EMPTY;
+        }
+        return KieliUtil.normalisoiKielikoodi(languageCode);
+    }
 
-	public void setTag(String tag) {
-		this.tag = tag;
-	}
+    public List<String> getValintakoeTunnisteet() {
+        return valintakoeTunnisteet;
+    }
 
-	public List<String> getHakemusOids() {
-		if (hakemusOids == null || hakemusOids.isEmpty()) {
-			return null;
-		}
-		return hakemusOids;
-	}
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
 
-	public String getLetterBodyText() {
-		return letterBodyText;
-	}
+    public List<String> getHakemusOids() {
+        if (hakemusOids == null || hakemusOids.isEmpty()) {
+            return null;
+        }
+        return hakemusOids;
+    }
 
-	public void setHakemusOids(List<String> hakemusOids) {
-		this.hakemusOids = hakemusOids;
-	}
+    public String getLetterBodyText() {
+        return letterBodyText;
+    }
 
-	public void setLetterBodyText(String letterBodyText) {
-		this.letterBodyText = letterBodyText;
-	}
+    public void setHakemusOids(List<String> hakemusOids) {
+        this.hakemusOids = hakemusOids;
+    }
+
+    public void setLetterBodyText(String letterBodyText) {
+        this.letterBodyText = letterBodyText;
+    }
 }
