@@ -65,7 +65,7 @@ public class LaskentaActorFactory {
     private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
     private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
-    private int splittaus;
+    private volatile int splittaus;
 
     @Autowired
     public LaskentaActorFactory(
