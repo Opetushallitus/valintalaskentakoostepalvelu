@@ -34,13 +34,9 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * @author Jussi Jartamo
- */
 @Service
 public class ValintakoekutsutExcelService {
-    private static final Logger LOG = LoggerFactory
-            .getLogger(ValintakoekutsutExcelService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ValintakoekutsutExcelService.class);
 
     private final ValintalaskentaValintakoeAsyncResource valintalaskentaAsyncResource;
     private final ValintaperusteetAsyncResource valintaperusteetValintakoeResource;
@@ -48,8 +44,7 @@ public class ValintakoekutsutExcelService {
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final TarjontaAsyncResource tarjontaAsyncResource;
     private final DokumenttiAsyncResource dokumenttiAsyncResource;
-    private final ValintakoeKutsuExcelKomponentti valintakoeKutsuExcelKomponentti
-            = new ValintakoeKutsuExcelKomponentti();
+    private final ValintakoeKutsuExcelKomponentti valintakoeKutsuExcelKomponentti = new ValintakoeKutsuExcelKomponentti();
 
     @Autowired
     public ValintakoekutsutExcelService(
@@ -68,13 +63,10 @@ public class ValintakoekutsutExcelService {
         this.dokumenttiAsyncResource = dokumenttiAsyncResource;
     }
 
-    public void luoExcel(DokumenttiProsessi prosessi, String hakuOid, String hakukohdeOid, List<String> valintakoeTunnisteet,
-                         Set<String> hakemusOids) {
+    public void luoExcel(DokumenttiProsessi prosessi, String hakuOid, String hakukohdeOid, List<String> valintakoeTunnisteet, Set<String> hakemusOids) {
         PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
             LOG.error("Valintakoekutsut excelin luonnissa tapahtui poikkeus:", poikkeus);
-            prosessi.getPoikkeukset().add(
-                    new Poikkeus(Poikkeus.KOOSTEPALVELU,
-                            "Valintakoekutsut excelin luonnissa tapahtui poikkeus:", poikkeus.getMessage()));
+            prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Valintakoekutsut excelin luonnissa tapahtui poikkeus:", poikkeus.getMessage()));
         });
         try {
             prosessi.setKokonaistyo(
@@ -94,8 +86,8 @@ public class ValintakoekutsutExcelService {
                     return Stream.concat(vanhatHakemukset.stream(), hakemuksia.stream()).collect(Collectors.toList());
                 });
             };
-            final AtomicReference<Map<String,Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
-            final AtomicReference<Map<String,Koodi>> postiRef = new AtomicReference<>();
+            final AtomicReference<Map<String, Koodi>> maatJaValtiot1Ref = new AtomicReference<>();
+            final AtomicReference<Map<String, Koodi>> postiRef = new AtomicReference<>();
             final SynkronoituLaskuri laskuri = SynkronoituLaskuri.builder()
                     .setLaskurinAlkuarvo(8)
                     .setSuoritaJokaKerta(() -> {
@@ -105,14 +97,8 @@ public class ValintakoekutsutExcelService {
                         String hakuNimi = new Teksti(hakuRef.get().getNimi()).getTeksti();
                         String hakukohdeNimi = new Teksti(hakukohdeRef.get().getHakukohteenNimi()).getTeksti();
                         try {
-                            InputStream filedata = valintakoeKutsuExcelKomponentti.luoTuloksetXlsMuodossa(
-                                    hakuNimi,
-                                    hakukohdeNimi,
-                                    hakukohdeOid,
-                                    maatJaValtiot1Ref.get(),
-                                    postiRef.get(),
-                                    tiedotHakukohteelleRef.get(),
-                                    valintakokeetRef.get(),
+                            InputStream filedata = valintakoeKutsuExcelKomponentti.luoTuloksetXlsMuodossa(hakuNimi, hakukohdeNimi,
+                                    hakukohdeOid, maatJaValtiot1Ref.get(), postiRef.get(), tiedotHakukohteelleRef.get(), valintakokeetRef.get(),
                                     haetutHakemuksetRef.get().stream().distinct().collect(Collectors.toList()),
                                     Optional.ofNullable(hakemusOids).orElse(Collections.emptySet())
                             );
@@ -120,8 +106,7 @@ public class ValintakoekutsutExcelService {
                             String id = UUID.randomUUID().toString();
                             long expirationDate = DateTime.now().plusHours(168).toDate().getTime();
 
-                            dokumenttiAsyncResource.tallenna(
-                                    id, "valintakoekutsut.xls", expirationDate, prosessi.getTags(), "application/vnd.ms-excel", filedata,
+                            dokumenttiAsyncResource.tallenna(id, "valintakoekutsut.xls", expirationDate, prosessi.getTags(), "application/vnd.ms-excel", filedata,
                                     ok -> {
                                         prosessi.inkrementoiTehtyjaToita();
                                         prosessi.setDokumenttiId(id);
@@ -153,8 +138,7 @@ public class ValintakoekutsutExcelService {
                         List<ValintakoeDTO> kiinnostavatValintakokeet = valintakokeet.stream().filter(v -> valintakoeTunnisteet.contains(v.getSelvitettyTunniste()))
                                 .collect(Collectors.toList());
                         valintakokeetRef.set(kiinnostavatValintakokeet.stream().collect(Collectors.toMap(v -> v.getSelvitettyTunniste(), v -> v)));
-                        boolean onkoJossainValintakokeessaKaikkiHaetaan =
-                                kiinnostavatValintakokeet.stream().anyMatch(vk -> Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
+                        boolean onkoJossainValintakokeessaKaikkiHaetaan = kiinnostavatValintakokeet.stream().anyMatch(vk -> Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
                         // estetään ettei haeta kahteen kertaan kaikkia hakemuksia ja siten tuplata muistin käyttöä. joissain hakukohteissa on tuhansia hakemuksia ja hakemusten koko voi olla megatavuja.
                         final SynkronoituLaskuri voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken = SynkronoituLaskuri.builder()
                                 .setLaskurinAlkuarvo(2)
@@ -176,29 +160,28 @@ public class ValintakoekutsutExcelService {
                                     laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                                 }).build();
 
-                        if(onkoJossainValintakokeessaKaikkiHaetaan && !useWhitelist) {
-                            applicationResource.getApplicationsByOid(hakuOid,hakukohdeOid,hakemukset -> {
+                        if (onkoJossainValintakokeessaKaikkiHaetaan && !useWhitelist) {
+                            applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, hakemukset -> {
                                 lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
                                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                                 voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                            },poikkeuskasittelija);
+                            }, poikkeuskasittelija);
                         } else {
                             laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                             voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                         }
                         valintalaskentaAsyncResource.haeValintatiedotHakukohteelle(hakukohdeOid,
                                 kiinnostavatValintakokeet.stream().map(v -> v.getSelvitettyTunniste()).collect(Collectors.toList())).subscribe(osallistuminen -> {
-                                    List<HakemusOsallistuminenDTO> hakukohteeseenOsallistujat = osallistuminen.stream()
-                                            .filter(o -> hakukohdeOid.equals(o.getHakukohdeOid()))
-                                            .collect(Collectors.toList());
-                                    tiedotHakukohteelleRef.set(hakukohteeseenOsallistujat);
-                                    voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
-                                }, poikkeuskasittelija);
+                            List<HakemusOsallistuminenDTO> hakukohteeseenOsallistujat = osallistuminen.stream()
+                                    .filter(o -> hakukohdeOid.equals(o.getHakukohdeOid()))
+                                    .collect(Collectors.toList());
+                            tiedotHakukohteelleRef.set(hakukohteeseenOsallistujat);
+                            voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
+                        }, poikkeuskasittelija);
                         laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                     },
                     poikkeuskasittelija
             );
-
             tarjontaAsyncResource.haeHakukohde(hakukohdeOid).subscribe(hakukohde -> {
                 hakukohdeRef.set(hakukohde);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
@@ -207,7 +190,6 @@ public class ValintakoekutsutExcelService {
                 hakuRef.set(haku);
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);
-
         } catch (Throwable t) {
             poikkeuskasittelija.accept(t);
         }
