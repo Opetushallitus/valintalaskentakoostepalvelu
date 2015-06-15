@@ -23,19 +23,17 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 
 @Path("/api/v1")
 public interface ViestintapalveluResource {
+    @POST
+    @Produces(APPLICATION_OCTET_STREAM)
+    @Consumes(APPLICATION_JSON)
+    @Path("/addresslabel/sync/pdf")
+    InputStream haeOsoitetarratSync(Osoitteet osoitteet);
 
-	@POST
-	@Produces(APPLICATION_OCTET_STREAM)
-	@Consumes(APPLICATION_JSON)
-	@Path("/addresslabel/sync/pdf")
-	InputStream haeOsoitetarratSync(Osoitteet osoitteet);
-
-	@GET
-	@Produces(APPLICATION_JSON)
-	@Path("/template/getHistory")
-	List<TemplateHistory> haeKirjepohja(@QueryParam("oid") String oid,
-			@QueryParam("templateName") String templateName,
-			@QueryParam("languageCode") String languageCode,
-			@QueryParam("tag") String tag);
-
+    @GET
+    @Produces(APPLICATION_JSON)
+    @Path("/template/getHistory")
+    List<TemplateHistory> haeKirjepohja(@QueryParam("oid") String oid,
+                                        @QueryParam("templateName") String templateName,
+                                        @QueryParam("languageCode") String languageCode,
+                                        @QueryParam("tag") String tag);
 }
