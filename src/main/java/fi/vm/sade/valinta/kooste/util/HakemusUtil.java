@@ -29,250 +29,199 @@ import com.google.common.collect.Maps;
 
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 
-/**
- * 
- * 
- * @author Jussi Jartamo
- * 
- */
 public class HakemusUtil {
+    private static final Logger LOG = LoggerFactory.getLogger(HakemusUtil.class);
+    private final static Map<String, Map<HakemuksenTila, String>> TILAT = valmistaTilat();
+    private final static Map<String, String> VARASIJAT = varasijaTekstinTilat();
+    private final static Map<String, Map<IlmoittautumisTila, String>> ILMOITTAUTUMISTILAT = ilmoittautumisTilat();
+    private final static Map<String, Map<ValintatuloksenTila, String>> VALINTATULOKSEN_TILAT = valintatulostenTilat();
+    public static final String ASIOINTIKIELI = "asiointikieli";
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(HakemusUtil.class);
-	private final static Map<String, Map<HakemuksenTila, String>> TILAT = valmistaTilat();
-	private final static Map<String, String> VARASIJAT = varasijaTekstinTilat();
-	private final static Map<String, Map<IlmoittautumisTila, String>> ILMOITTAUTUMISTILAT = ilmoittautumisTilat();
-	private final static Map<String, Map<ValintatuloksenTila, String>> VALINTATULOKSEN_TILAT = valintatulostenTilat();
-	public static final String ASIOINTIKIELI = "asiointikieli";
+    private static Map<String, String> varasijaTekstinTilat() {
+        Map<String, String> varasijaTekstinTilat = Maps.newHashMap();
+        varasijaTekstinTilat.put(KieliUtil.SUOMI, "Varasijan numero on ");
+        varasijaTekstinTilat.put(KieliUtil.RUOTSI, "Reservplatsens nummer är ");
+        varasijaTekstinTilat.put(KieliUtil.ENGLANTI, "Waiting list number is ");
+        return varasijaTekstinTilat;
+    }
 
-	private static Map<String, String> varasijaTekstinTilat() {
-		Map<String, String> varasijaTekstinTilat = Maps.newHashMap();
-		varasijaTekstinTilat.put(KieliUtil.SUOMI, "Varasijan numero on ");
-		varasijaTekstinTilat.put(KieliUtil.RUOTSI, "Reservplatsens nummer är ");
-		varasijaTekstinTilat.put(KieliUtil.ENGLANTI, "Waiting list number is ");
-		return varasijaTekstinTilat;
-	}
+    private static Map<String, Map<ValintatuloksenTila, String>> valintatulostenTilat() {
+        Map<String, Map<ValintatuloksenTila, String>> kielet = new HashMap<String, Map<ValintatuloksenTila, String>>();
+        Map<ValintatuloksenTila, String> fi = new HashMap<ValintatuloksenTila, String>();
+        fi.put(ILMOITETTU, "Ilmoitettu");
+        fi.put(VASTAANOTTANUT, "Vastaanottanut");
+        fi.put(VASTAANOTTANUT_LASNA, "Vastaanottanut läsnä");
+        fi.put(VASTAANOTTANUT_POISSAOLEVA, "Vastaanottanut poissaolevana");
+        fi.put(EI_VASTAANOTETTU_MAARA_AIKANA, "Ei vastaanotettu määräaikana");
+        fi.put(ValintatuloksenTila.PERUNUT, "Perunut");
+        fi.put(PERUUTETTU, "Peruutettu");
+        fi.put(EHDOLLISESTI_VASTAANOTTANUT, "Ehdollisesti vastaanottanut");
 
-	private static Map<String, Map<ValintatuloksenTila, String>> valintatulostenTilat() {
+        Map<ValintatuloksenTila, String> sv = new HashMap<ValintatuloksenTila, String>();
+        sv.put(ILMOITETTU, "Ilmoitettu");
+        sv.put(VASTAANOTTANUT, "Vastaanottanut");
+        sv.put(VASTAANOTTANUT_LASNA, "Vastaanottanut läsnä");
+        sv.put(VASTAANOTTANUT_POISSAOLEVA, "Vastaanottanut poissaolevana");
+        sv.put(EI_VASTAANOTETTU_MAARA_AIKANA, "Ei vastaanotettu määräaikana");
+        sv.put(ValintatuloksenTila.PERUNUT, "Perunut");
+        sv.put(PERUUTETTU, "Peruutettu");
+        sv.put(EHDOLLISESTI_VASTAANOTTANUT, "Ehdollisesti vastaanottanut");
 
-		Map<String, Map<ValintatuloksenTila, String>> kielet = new HashMap<String, Map<ValintatuloksenTila, String>>();
-		// ILMOITETTU, // Hakijalle on ilmoitettu, sijoittelun tulos ei voi
-		// muuttaa paikkaa peruuntuneeksi
-		// VASTAANOTTANUT,
-		// VASTAANOTTANUT_LASNA, // Hakija ottanut paikan vastaan ja on lasna
-		// VASTAANOTTANUT_POISSAOLEVA, // Hakija ottanut paikan vastaan ja
-		// ilmoittautunut poissaolevaksi
-		// EI_VASTAANOTETTU_MAARA_AIKANA, // Hakija ei ole ilmoittanut paikkaa
-		// vastaanotetuksi maaraaikana ja on nain ollen hylatty
-		// PERUNUT, // Hakija ei ota paikkaa vastaan
-		// PERUUTETTU, // Hakijan tila on peruutettu
-		// EHDOLLISESTI_VASTAANOTTANUT // Ehdollisesti vastaanottanut
-		Map<ValintatuloksenTila, String> fi = new HashMap<ValintatuloksenTila, String>();
-		fi.put(ILMOITETTU, "Ilmoitettu");
-		fi.put(VASTAANOTTANUT, "Vastaanottanut");
-		fi.put(VASTAANOTTANUT_LASNA, "Vastaanottanut läsnä");
-		fi.put(VASTAANOTTANUT_POISSAOLEVA, "Vastaanottanut poissaolevana");
-		fi.put(EI_VASTAANOTETTU_MAARA_AIKANA, "Ei vastaanotettu määräaikana");
-		fi.put(ValintatuloksenTila.PERUNUT, "Perunut");
-		fi.put(PERUUTETTU, "Peruutettu");
-		fi.put(EHDOLLISESTI_VASTAANOTTANUT, "Ehdollisesti vastaanottanut");
+        Map<ValintatuloksenTila, String> en = new HashMap<ValintatuloksenTila, String>();
+        en.put(ILMOITETTU, "Ilmoitettu");
+        en.put(VASTAANOTTANUT, "Vastaanottanut");
+        en.put(VASTAANOTTANUT_LASNA, "Vastaanottanut läsnä");
+        en.put(VASTAANOTTANUT_POISSAOLEVA, "Vastaanottanut poissaolevana");
+        en.put(EI_VASTAANOTETTU_MAARA_AIKANA, "Ei vastaanotettu määräaikana");
+        en.put(ValintatuloksenTila.PERUNUT, "Perunut");
+        en.put(PERUUTETTU, "Peruutettu");
+        en.put(EHDOLLISESTI_VASTAANOTTANUT, "Ehdollisesti vastaanottanut");
 
-		Map<ValintatuloksenTila, String> sv = new HashMap<ValintatuloksenTila, String>();
-		sv.put(ILMOITETTU, "Ilmoitettu");
-		sv.put(VASTAANOTTANUT, "Vastaanottanut");
-		sv.put(VASTAANOTTANUT_LASNA, "Vastaanottanut läsnä");
-		sv.put(VASTAANOTTANUT_POISSAOLEVA, "Vastaanottanut poissaolevana");
-		sv.put(EI_VASTAANOTETTU_MAARA_AIKANA, "Ei vastaanotettu määräaikana");
-		sv.put(ValintatuloksenTila.PERUNUT, "Perunut");
-		sv.put(PERUUTETTU, "Peruutettu");
-		sv.put(EHDOLLISESTI_VASTAANOTTANUT, "Ehdollisesti vastaanottanut");
+        kielet.put(KieliUtil.SUOMI, Collections.unmodifiableMap(fi));
+        kielet.put(KieliUtil.RUOTSI, Collections.unmodifiableMap(sv));
+        kielet.put(KieliUtil.ENGLANTI, Collections.unmodifiableMap(en));
+        return Collections.unmodifiableMap(kielet);
+    }
 
-		Map<ValintatuloksenTila, String> en = new HashMap<ValintatuloksenTila, String>();
-		en.put(ILMOITETTU, "Ilmoitettu");
-		en.put(VASTAANOTTANUT, "Vastaanottanut");
-		en.put(VASTAANOTTANUT_LASNA, "Vastaanottanut läsnä");
-		en.put(VASTAANOTTANUT_POISSAOLEVA, "Vastaanottanut poissaolevana");
-		en.put(EI_VASTAANOTETTU_MAARA_AIKANA, "Ei vastaanotettu määräaikana");
-		en.put(ValintatuloksenTila.PERUNUT, "Perunut");
-		en.put(PERUUTETTU, "Peruutettu");
-		en.put(EHDOLLISESTI_VASTAANOTTANUT, "Ehdollisesti vastaanottanut");
+    private static Map<String, Map<IlmoittautumisTila, String>> ilmoittautumisTilat() {
+        Map<String, Map<IlmoittautumisTila, String>> kielet = new HashMap<String, Map<IlmoittautumisTila, String>>();
 
-		kielet.put(KieliUtil.SUOMI, Collections.unmodifiableMap(fi));
-		kielet.put(KieliUtil.RUOTSI, Collections.unmodifiableMap(sv));
-		kielet.put(KieliUtil.ENGLANTI, Collections.unmodifiableMap(en));
-		return Collections.unmodifiableMap(kielet);
-	}
+        {// SUOMI
+            Map<IlmoittautumisTila, String> tmp = new HashMap<IlmoittautumisTila, String>();
+            tmp.put(IlmoittautumisTila.EI_TEHTY, "Ei tehty");
+            tmp.put(IlmoittautumisTila.LASNA_KOKO_LUKUVUOSI, "Läsnä (koko lukuvuosi)");
+            tmp.put(IlmoittautumisTila.POISSA_KOKO_LUKUVUOSI, "Poissa koko lukuvuosi");
+            tmp.put(IlmoittautumisTila.EI_ILMOITTAUTUNUT, "Ei ilmoittautunut");
+            tmp.put(IlmoittautumisTila.LASNA_SYKSY, "Läsnä syksy, poissa kevät");
+            tmp.put(IlmoittautumisTila.POISSA_SYKSY, "Poissa syksy, läsnä kevät");
+            tmp.put(IlmoittautumisTila.LASNA, "Läsnä keväällä alkava koulutus");
+            tmp.put(IlmoittautumisTila.POISSA, "Poissa keväällä alkava koulutus");
+            kielet.put(KieliUtil.SUOMI, Collections.unmodifiableMap(tmp));
+        }
 
-	private static Map<String, Map<IlmoittautumisTila, String>> ilmoittautumisTilat() {
+        {// RUOTSI
+            Map<IlmoittautumisTila, String> tmp = new HashMap<IlmoittautumisTila, String>();
+            tmp.put(IlmoittautumisTila.EI_TEHTY, "Ei tehty");
+            tmp.put(IlmoittautumisTila.LASNA_KOKO_LUKUVUOSI, "Läsnä (koko lukuvuosi)");
+            tmp.put(IlmoittautumisTila.POISSA_KOKO_LUKUVUOSI, "Poissa koko lukuvuosi");
+            tmp.put(IlmoittautumisTila.EI_ILMOITTAUTUNUT, "Ei ilmoittautunut");
+            tmp.put(IlmoittautumisTila.LASNA_SYKSY, "Läsnä syksy, poissa kevät");
+            tmp.put(IlmoittautumisTila.POISSA_SYKSY, "Poissa syksy, läsnä kevät");
+            tmp.put(IlmoittautumisTila.LASNA, "Läsnä keväällä alkava koulutus");
+            tmp.put(IlmoittautumisTila.POISSA, "Poissa keväällä alkava koulutus");
+            kielet.put(KieliUtil.RUOTSI, Collections.unmodifiableMap(tmp));
+        }
 
-		Map<String, Map<IlmoittautumisTila, String>> kielet = new HashMap<String, Map<IlmoittautumisTila, String>>();
+        {// ENGLANTI
+            Map<IlmoittautumisTila, String> tmp = new HashMap<IlmoittautumisTila, String>();
+            tmp.put(IlmoittautumisTila.EI_TEHTY, "Ei tehty");
+            tmp.put(IlmoittautumisTila.LASNA_KOKO_LUKUVUOSI, "Läsnä (koko lukuvuosi)");
+            tmp.put(IlmoittautumisTila.POISSA_KOKO_LUKUVUOSI, "Poissa koko lukuvuosi");
+            tmp.put(IlmoittautumisTila.EI_ILMOITTAUTUNUT, "Ei ilmoittautunut");
+            tmp.put(IlmoittautumisTila.LASNA_SYKSY, "Läsnä syksy, poissa kevät");
+            tmp.put(IlmoittautumisTila.POISSA_SYKSY, "Poissa syksy, läsnä kevät");
+            tmp.put(IlmoittautumisTila.LASNA, "Läsnä keväällä alkava koulutus");
+            tmp.put(IlmoittautumisTila.POISSA, "Poissa keväällä alkava koulutus");
+            kielet.put(KieliUtil.ENGLANTI, Collections.unmodifiableMap(tmp));
+        }
 
-		{// SUOMI
-			Map<IlmoittautumisTila, String> tmp = new HashMap<IlmoittautumisTila, String>();
-			tmp.put(IlmoittautumisTila.EI_TEHTY, "Ei tehty");
-			tmp.put(IlmoittautumisTila.LASNA_KOKO_LUKUVUOSI,
-					"Läsnä (koko lukuvuosi)");
-			tmp.put(IlmoittautumisTila.POISSA_KOKO_LUKUVUOSI,
-					"Poissa koko lukuvuosi");
-			tmp.put(IlmoittautumisTila.EI_ILMOITTAUTUNUT, "Ei ilmoittautunut");
-			tmp.put(IlmoittautumisTila.LASNA_SYKSY, "Läsnä syksy, poissa kevät");
-			tmp.put(IlmoittautumisTila.POISSA_SYKSY,
-					"Poissa syksy, läsnä kevät");
-			tmp.put(IlmoittautumisTila.LASNA, "Läsnä keväällä alkava koulutus");
-			tmp.put(IlmoittautumisTila.POISSA,
-					"Poissa keväällä alkava koulutus");
-			kielet.put(KieliUtil.SUOMI, Collections.unmodifiableMap(tmp));
-		}
+        return Collections.unmodifiableMap(kielet);
+    }
 
-		{// RUOTSI
-			Map<IlmoittautumisTila, String> tmp = new HashMap<IlmoittautumisTila, String>();
-			tmp.put(IlmoittautumisTila.EI_TEHTY, "Ei tehty");
-			tmp.put(IlmoittautumisTila.LASNA_KOKO_LUKUVUOSI,
-					"Läsnä (koko lukuvuosi)");
-			tmp.put(IlmoittautumisTila.POISSA_KOKO_LUKUVUOSI,
-					"Poissa koko lukuvuosi");
-			tmp.put(IlmoittautumisTila.EI_ILMOITTAUTUNUT, "Ei ilmoittautunut");
-			tmp.put(IlmoittautumisTila.LASNA_SYKSY, "Läsnä syksy, poissa kevät");
-			tmp.put(IlmoittautumisTila.POISSA_SYKSY,
-					"Poissa syksy, läsnä kevät");
-			tmp.put(IlmoittautumisTila.LASNA, "Läsnä keväällä alkava koulutus");
-			tmp.put(IlmoittautumisTila.POISSA,
-					"Poissa keväällä alkava koulutus");
-			kielet.put(KieliUtil.RUOTSI, Collections.unmodifiableMap(tmp));
-		}
+    private static Map<String, Map<HakemuksenTila, String>> valmistaTilat() {
+        Map<String, Map<HakemuksenTila, String>> kielet = new HashMap<String, Map<HakemuksenTila, String>>();
+        Map<HakemuksenTila, String> fi = new HashMap<HakemuksenTila, String>();
+        fi.put(HYLATTY, "Hylätty");
+        fi.put(VARALLA, "Varalla");
+        fi.put(VARASIJALTA_HYVAKSYTTY, "Varasijalta hyväksytty");
+        fi.put(PERUUNTUNUT, "Peruuntunut");
+        fi.put(HYVAKSYTTY, "Hyväksytty");
+        fi.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Harkinnanvaraisesti hyväksytty");
+        fi.put(HakemuksenTila.PERUUTETTU, "Peruutettu");
+        fi.put(PERUNUT, "Perunut");
+        Map<HakemuksenTila, String> sv = new HashMap<HakemuksenTila, String>();
+        sv.put(HYLATTY, "Underkänd");
+        sv.put(VARALLA, "På reservplats");
+        sv.put(VARASIJALTA_HYVAKSYTTY, "Godkänd från reservplats");
+        sv.put(PERUUNTUNUT, "Annullerad");
+        sv.put(HYVAKSYTTY, "Godkänd");
+        sv.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Godkänd enligt prövning");
+        sv.put(HakemuksenTila.PERUUTETTU, "Annullerad");
+        sv.put(PERUNUT, "Annullerad");
+        Map<HakemuksenTila, String> en = new HashMap<HakemuksenTila, String>();
+        en.put(HYLATTY, "Rejected");
+        en.put(VARALLA, "In reserve");
+        en.put(PERUUNTUNUT, "Cancelled");
+        en.put(HYVAKSYTTY, "Accepted");
+        en.put(VARASIJALTA_HYVAKSYTTY, "Accepted from reserve");
+        en.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Accepted");
+        en.put(HakemuksenTila.PERUUTETTU, "Canceled");
+        en.put(PERUNUT, "Canceled");
 
-		{// ENGLANTI
-			Map<IlmoittautumisTila, String> tmp = new HashMap<IlmoittautumisTila, String>();
-			tmp.put(IlmoittautumisTila.EI_TEHTY, "Ei tehty");
-			tmp.put(IlmoittautumisTila.LASNA_KOKO_LUKUVUOSI,
-					"Läsnä (koko lukuvuosi)");
-			tmp.put(IlmoittautumisTila.POISSA_KOKO_LUKUVUOSI,
-					"Poissa koko lukuvuosi");
-			tmp.put(IlmoittautumisTila.EI_ILMOITTAUTUNUT, "Ei ilmoittautunut");
-			tmp.put(IlmoittautumisTila.LASNA_SYKSY, "Läsnä syksy, poissa kevät");
-			tmp.put(IlmoittautumisTila.POISSA_SYKSY,
-					"Poissa syksy, läsnä kevät");
-			tmp.put(IlmoittautumisTila.LASNA, "Läsnä keväällä alkava koulutus");
-			tmp.put(IlmoittautumisTila.POISSA,
-					"Poissa keväällä alkava koulutus");
-			kielet.put(KieliUtil.ENGLANTI, Collections.unmodifiableMap(tmp));
-		}
+        kielet.put(KieliUtil.SUOMI, Collections.unmodifiableMap(fi));
+        kielet.put(KieliUtil.RUOTSI, Collections.unmodifiableMap(sv));
+        kielet.put(KieliUtil.ENGLANTI, Collections.unmodifiableMap(en));
+        return Collections.unmodifiableMap(kielet);
+    }
 
-		return Collections.unmodifiableMap(kielet);
-	}
+    public static String varasijanNumeroConverter(Integer numero, String preferoitukielikoodi) {
+        return new StringBuilder().append(VARASIJAT.get(preferoitukielikoodi)).append(numero).toString();
+    }
 
-	private static Map<String, Map<HakemuksenTila, String>> valmistaTilat() {
+    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen) {
+        return tilaConverter(tila, preferoitukielikoodi, harkinnanvarainen, false, null);
+    }
 
-		Map<String, Map<HakemuksenTila, String>> kielet = new HashMap<String, Map<HakemuksenTila, String>>();
+    public static String tilaConverter(IlmoittautumisTila tila, String preferoitukielikoodi) {
+        if (tila == null) {
+            return StringUtils.EMPTY;
+        }
+        try {
+            return ILMOITTAUTUMISTILAT.get(preferoitukielikoodi).get(tila);
+        } catch (Exception e) {
+            LOG.error("Hakemuksen tila utiliteetilla ei ole konversiota ilmoittautumistilalle: {}", tila);
+            return tila.toString();
+        }
+    }
 
-		Map<HakemuksenTila, String> fi = new HashMap<HakemuksenTila, String>();
-		fi.put(HYLATTY, "Hylätty");
-		fi.put(VARALLA, "Varalla");
-		fi.put(VARASIJALTA_HYVAKSYTTY, "Varasijalta hyväksytty");
-		fi.put(PERUUNTUNUT, "Peruuntunut");
-		fi.put(HYVAKSYTTY, "Hyväksytty");
-		fi.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Harkinnanvaraisesti hyväksytty");
-		fi.put(HakemuksenTila.PERUUTETTU, "Peruutettu");
-		fi.put(PERUNUT, "Perunut");
-		Map<HakemuksenTila, String> sv = new HashMap<HakemuksenTila, String>();
-		sv.put(HYLATTY, "Underkänd");
-		sv.put(VARALLA, "På reservplats");
-		sv.put(VARASIJALTA_HYVAKSYTTY, "Godkänd från reservplats");
-		sv.put(PERUUNTUNUT, "Annullerad");
-		sv.put(HYVAKSYTTY, "Godkänd");
-		sv.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Godkänd enligt prövning");
-		sv.put(HakemuksenTila.PERUUTETTU, "Annullerad");
-		sv.put(PERUNUT, "Annullerad");
-		Map<HakemuksenTila, String> en = new HashMap<HakemuksenTila, String>();
-		en.put(HYLATTY, "Rejected");
-		en.put(VARALLA, "In reserve");
-		en.put(PERUUNTUNUT, "Cancelled");
-		en.put(HYVAKSYTTY, "Accepted");
-		en.put(VARASIJALTA_HYVAKSYTTY, "Accepted from reserve");
-		en.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Accepted");
-		en.put(HakemuksenTila.PERUUTETTU, "Canceled");
-		en.put(PERUNUT, "Canceled");
+    public static String lupaJulkaisuun(boolean lupa) {
+        if (lupa) {
+            return "Lupa julkaisuun";
+        }
+        return StringUtils.EMPTY;
+    }
 
-		kielet.put(KieliUtil.SUOMI, Collections.unmodifiableMap(fi));
-		kielet.put(KieliUtil.RUOTSI, Collections.unmodifiableMap(sv));
-		kielet.put(KieliUtil.ENGLANTI, Collections.unmodifiableMap(en));
-		return Collections.unmodifiableMap(kielet);
-	}
+    public static String tilaConverter(ValintatuloksenTila tila, String preferoitukielikoodi) {
+        if (tila == null) {
+            return StringUtils.EMPTY;
+        }
+        try {
+            return VALINTATULOKSEN_TILAT.get(preferoitukielikoodi).get(tila);
+        } catch (Exception e) {
+            LOG.error("Hakemuksen tila utiliteetilla ei ole konversiota ilmoittautumistilalle: {}", tila);
+            return tila.toString();
+        }
+    }
 
-	public static String varasijanNumeroConverter(Integer numero,
-			String preferoitukielikoodi) {
-		return new StringBuilder().append(VARASIJAT.get(preferoitukielikoodi))
-				.append(numero).toString();
-	}
-
-	public static String tilaConverter(HakemuksenTila tila,
-			String preferoitukielikoodi, boolean harkinnanvarainen) {
-		return tilaConverter(tila, preferoitukielikoodi, harkinnanvarainen,
-				false, null);
-	}
-
-	public static String tilaConverter(IlmoittautumisTila tila,
-			String preferoitukielikoodi) {
-		if (tila == null) {
-			return StringUtils.EMPTY;
-		}
-		try {
-			return ILMOITTAUTUMISTILAT.get(preferoitukielikoodi).get(tila);
-		} catch (Exception e) {
-			LOG.error(
-					"Hakemuksen tila utiliteetilla ei ole konversiota ilmoittautumistilalle: {}",
-					tila);
-			return tila.toString();
-		}
-	}
-
-	public static String lupaJulkaisuun(boolean lupa) {
-		if (lupa) {
-			return "Lupa julkaisuun";
-		}
-		return StringUtils.EMPTY;
-	}
-
-	public static String tilaConverter(ValintatuloksenTila tila,
-			String preferoitukielikoodi) {
-		if (tila == null) {
-			return StringUtils.EMPTY;
-		}
-		try {
-			return VALINTATULOKSEN_TILAT.get(preferoitukielikoodi).get(tila);
-		} catch (Exception e) {
-			LOG.error(
-					"Hakemuksen tila utiliteetilla ei ole konversiota ilmoittautumistilalle: {}",
-					tila);
-			return tila.toString();
-		}
-	}
-
-	public static String tilaConverter(HakemuksenTila tila,
-			String preferoitukielikoodi, boolean harkinnanvarainen,
-			boolean lisaaVarasijanNumero, Integer varasijanNumero) {
-		if (tila == null) {
-			return StringUtils.EMPTY;
-		}
-		HakemuksenTila lopullinenTila = tila;
-		if (HYVAKSYTTY.equals(tila) && harkinnanvarainen) {
-			lopullinenTila = HARKINNANVARAISESTI_HYVAKSYTTY;
-		}
-		try {
-			if (lisaaVarasijanNumero && VARALLA.equals(lopullinenTila)
-					&& varasijanNumero != null) {
-				return new StringBuilder()
-						.append(TILAT.get(preferoitukielikoodi).get(
-								lopullinenTila)).append(" (")
-						.append(varasijanNumero).append(")").toString();
-			} else {
-				return TILAT.get(preferoitukielikoodi).get(lopullinenTila);
-			}
-		} catch (Exception e) {
-			LOG.error(
-					"Hakemuksen tila utiliteetilla ei ole konversiota hakemustilalle: {}",
-					tila);
-			return tila.toString();
-		}
-	}
+    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen,
+                                       boolean lisaaVarasijanNumero, Integer varasijanNumero) {
+        if (tila == null) {
+            return StringUtils.EMPTY;
+        }
+        HakemuksenTila lopullinenTila = tila;
+        if (HYVAKSYTTY.equals(tila) && harkinnanvarainen) {
+            lopullinenTila = HARKINNANVARAISESTI_HYVAKSYTTY;
+        }
+        try {
+            if (lisaaVarasijanNumero && VARALLA.equals(lopullinenTila) && varasijanNumero != null) {
+                return new StringBuilder().append(TILAT.get(preferoitukielikoodi).get(lopullinenTila)).append(" (")
+                        .append(varasijanNumero).append(")").toString();
+            } else {
+                return TILAT.get(preferoitukielikoodi).get(lopullinenTila);
+            }
+        } catch (Exception e) {
+            LOG.error("Hakemuksen tila utiliteetilla ei ole konversiota hakemustilalle: {}", tila);
+            return tila.toString();
+        }
+    }
 }
