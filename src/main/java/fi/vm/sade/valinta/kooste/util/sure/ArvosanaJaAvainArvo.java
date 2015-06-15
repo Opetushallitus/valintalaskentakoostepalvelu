@@ -3,9 +3,6 @@ package fi.vm.sade.valinta.kooste.util.sure;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 
-/**
- * @author Jussi Jartamo
- */
 public class ArvosanaJaAvainArvo implements Comparable<ArvosanaJaAvainArvo> {
     private final Arvosana arvosana;
     private final AvainArvoDTO avainArvoDTO;
@@ -16,17 +13,19 @@ public class ArvosanaJaAvainArvo implements Comparable<ArvosanaJaAvainArvo> {
         this.avainArvoDTO = avainArvoDTO;
         this.avain = avain;
     }
+
     public ArvosanaJaAvainArvo(Arvosana arvosana, AvainArvoDTO avainArvoDTO) {
         this.arvosana = arvosana;
         this.avainArvoDTO = avainArvoDTO;
         this.avain = avainArvoDTO.getAvain();
     }
+
     @Override
     public boolean equals(Object obj) {
-        if(avain == null || obj == null || !(obj instanceof ArvosanaJaAvainArvo)) {
+        if (avain == null || obj == null || !(obj instanceof ArvosanaJaAvainArvo)) {
             return false;
         } else {
-            return avain.equals(((ArvosanaJaAvainArvo)obj).avain);
+            return avain.equals(((ArvosanaJaAvainArvo) obj).avain);
         }
 
     }
