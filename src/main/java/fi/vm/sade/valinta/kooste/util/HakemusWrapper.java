@@ -14,12 +14,9 @@ import java.util.TreeMap;
 import java.util.stream.Stream;
 
 /**
- * @author Jussi Jartamo
- *         <p/>
  *         Hakemustietojen luku hakemustietueesta vikasietoisesti
  */
 public class HakemusWrapper {
-
     private final Hakemus hakemus;
     private Map<String, String> henkilotiedot = null;
     private Map<String, String> lisatiedot = null;
@@ -55,52 +52,53 @@ public class HakemusWrapper {
         }
         this.hakemus = hakemus;
     }
+
     public String getUlkomainenLahiosoite() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(OSOITE_ULKOMAA)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(OSOITE_ULKOMAA)).orElse(StringUtils.EMPTY);
     }
+
     public String getSukupuoli() {
         getHenkilotiedot();
         return Stream.of(Optional.ofNullable(henkilotiedot.get(SUKUPUOLI)).orElse(
                 StringUtils.EMPTY)).map(s -> {
-            if(NAINEN.equals(s)) {
+            if (NAINEN.equals(s)) {
                 return "Nainen";
-            } else if(MIES.equals(s)) {
+            } else if (MIES.equals(s)) {
                 return "Mies";
             }
             return s;
         }).findAny().get();
     }
+
     public String getSukupuoliAsIs() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(SUKUPUOLI)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(SUKUPUOLI)).orElse(StringUtils.EMPTY);
     }
+
     public String getAidinkieli() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(AIDINKIELI)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(AIDINKIELI)).orElse(StringUtils.EMPTY);
     }
+
     public String getKaupunkiUlkomaa() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(KAUPUNKI_ULKOMAA)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(KAUPUNKI_ULKOMAA)).orElse(StringUtils.EMPTY);
     }
+
     public String getUlkomainenPostinumero() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(POSTINUMERO_ULKOMAA)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(POSTINUMERO_ULKOMAA)).orElse(StringUtils.EMPTY);
     }
+
     public String getSuomalainenLahiosoite() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(SUOMALAINEN_LAHIOSOITE)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(SUOMALAINEN_LAHIOSOITE)).orElse(StringUtils.EMPTY);
     }
+
     public String getSuomalainenPostinumero() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(SUOMALAINEN_POSTINUMERO)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(SUOMALAINEN_POSTINUMERO)).orElse(StringUtils.EMPTY);
     }
 
     public Osoite getOsoite() {
@@ -109,60 +107,51 @@ public class HakemusWrapper {
 
     public String getAsuinmaa() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(ASUINMAA)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(ASUINMAA)).orElse(StringUtils.EMPTY);
     }
 
 
     public String getKansallinenId() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(KANSALLINEN_ID)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(KANSALLINEN_ID)).orElse(StringUtils.EMPTY);
     }
 
     public String getKansalaisuus() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(KANSALAISUUS)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(KANSALAISUUS)).orElse(StringUtils.EMPTY);
     }
 
     public String getPassinnumero() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(PASSINNUMERO)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(PASSINNUMERO)).orElse(StringUtils.EMPTY);
     }
 
     public String getPuhelinnumero() {
         if (yhteystiedot == null) {
-            this.yhteystiedot = Yhteystiedot
-                    .yhteystiedotHakemukselta(hakemus);
+            this.yhteystiedot = Yhteystiedot.yhteystiedotHakemukselta(hakemus);
         }
         return yhteystiedot.getPuhelinnumerotAsString();
     }
 
     public String getSahkopostiOsoite() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(SAHKOPOSTI)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(SAHKOPOSTI)).orElse(StringUtils.EMPTY);
     }
 
     public String getHenkilotunnusTaiSyntymaaika() {
         getHenkilotiedot();
         return Optional.ofNullable(henkilotiedot.get(HETU)).orElse(
-                Optional.ofNullable(henkilotiedot.get(SYNTYMAAIKA)).orElse(
-                        StringUtils.EMPTY));
+                Optional.ofNullable(henkilotiedot.get(SYNTYMAAIKA)).orElse(StringUtils.EMPTY));
     }
 
     public String getSyntymaaika() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(SYNTYMAAIKA)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(SYNTYMAAIKA)).orElse(StringUtils.EMPTY);
     }
 
     public String getHenkilotunnus() {
         getHenkilotiedot();
-        return Optional.ofNullable(henkilotiedot.get(HETU)).orElse(
-                StringUtils.EMPTY);
+        return Optional.ofNullable(henkilotiedot.get(HETU)).orElse(StringUtils.EMPTY);
     }
 
     public boolean hasHenkilotunnus() {
@@ -171,7 +160,7 @@ public class HakemusWrapper {
     }
 
     public String getPersonOid() {
-        if(hakemus == null) {
+        if (hakemus == null) {
             return null;
         }
         return hakemus.getPersonOid();
