@@ -186,8 +186,7 @@ public class ValintalaskennanTulosExcel {
     }
 
     private static String nullSafeToString(Object o) {
-        if (o == null) return "";
-        return o.toString();
+         return o == null ? "" : o.toString();
     }
 
     private static void setColumnWidths(final XSSFSheet sheet) {
