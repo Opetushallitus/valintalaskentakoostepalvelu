@@ -179,11 +179,8 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
                 .routeId("Jatkuvan sijoittelun ajuri")
                 .process(
                         Reititys.<DelayedSijoittelu>kuluttaja(sijoitteluHakuOid -> {
-                            //
-                            // Aloitetaan sijoittelu ainoastaan jos se
-                            // ei ole jo ajossa
-                            //
-                            if (ajossaHakuOids.putIfAbsent(sijoitteluHakuOid.getHakuOid(), System.currentTimeMillis()) == null) {
+                            final Long onkoAjossa = ajossaHakuOids.putIfAbsent(sijoitteluHakuOid.getHakuOid(), System.currentTimeMillis());
+                            if (onkoAjossa == null) {
                                 LOG.error("Jatkuvasijoittelu kaynnistyy nyt haulle {}", sijoitteluHakuOid.getHakuOid());
                                 sijoitteluAsyncResource.sijoittele(
                                         sijoitteluHakuOid.getHakuOid(),
