@@ -60,23 +60,19 @@ public class HyvaksymiskirjeetKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetKomponentti.class);
 
     private static final String TYHJA_TARJOAJANIMI = "Tuntematon koulu!";
-    private static final String TYHJA_HAKUKOHDENIMI = "Tuntematon koulutus!";
 
     private KirjeetHakukohdeCache kirjeetHakukohdeCache;
     private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private HaeOsoiteKomponentti osoiteKomponentti;
-    private ApplicationResource applicationResource;
 
     @Autowired
     public HyvaksymiskirjeetKomponentti(
             KoodistoCachedAsyncResource koodistoCachedAsyncResource,
             KirjeetHakukohdeCache kirjeetHakukohdeCache,
-            HaeOsoiteKomponentti osoiteKomponentti,
-            ApplicationResource applicationResource) {
+            HaeOsoiteKomponentti osoiteKomponentti) {
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.osoiteKomponentti = osoiteKomponentti;
         this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
-        this.applicationResource = applicationResource;
     }
 
     private String vakioHakukohteenNimi(String hakukohdeOid) {
