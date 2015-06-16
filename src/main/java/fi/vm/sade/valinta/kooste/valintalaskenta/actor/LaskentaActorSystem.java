@@ -65,6 +65,11 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
         laskennanKaynnistajaActor.tell(new MaxWorkerCount(maxWorkerCount), ActorRef.noSender());
     }
 
+    @ManagedOperation
+    public void startAllWorkers() {
+        laskennanKaynnistajaActor.tell(new StartAllWorkers(), ActorRef.noSender());
+    }
+
     @Override
     public void workAvailable() {
         laskennanKaynnistajaActor.tell(new WorkAvailable(), ActorRef.noSender());
