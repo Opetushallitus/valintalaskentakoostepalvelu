@@ -86,25 +86,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
 
     public void teeJatkuvaSijoittelu() {
         LOG.info("Jatkuvansijoittelun ajastin kaynnistyi");
-        Map<String, SijoitteluDto> aktiivisetSijoittelut = sijoittelunSeurantaResource
-                .hae().stream().filter(Objects::nonNull)// .collect(Collectors.toSet());
-                .filter(sijoitteluDto -> {
-                    return sijoitteluDto.isAjossa();
-                })
-                        //
-                        // Onko aloitusajankohta jo mennyt.
-                        // Null-aloitusajankohta tulkitaan etta on.
-                        //
-                .filter(sijoitteluDto -> {
-                    DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
-                    //
-                    // jos aloitusajankohta on jo mennyt tai
-                    // se on nyt niin sijoittelu on
-                    // aktiivinen sen osalta
-                    //
-                    return laitetaankoJoTyoJonoonEliEnaaTuntiJaljellaAktivointiin(aloitusajankohtaTaiNyt);
-                })
-                .collect(Collectors.toMap(s -> s.getHakuOid(), s -> s));
+        Map<String, SijoitteluDto> aktiivisetSijoittelut = getAktiivisetSijoittelut();
         LOG.info("Jatkuvansijoittelun ajastin sai seurannalta {} aktiivista sijoittelua.", aktiivisetSijoittelut.size());
         //
         // Poista yritetyt hakuoidit jaahylta
@@ -157,6 +139,28 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
                         jatkuvaSijoitteluDelayedQueue.add(new DelayedSijoitteluExchange(new DelayedSijoittelu(hakuOid, suoritusAjankohta), new DefaultExchange(getContext())));
                     }
                 });
+    }
+
+    private Map<String, SijoitteluDto> getAktiivisetSijoittelut() {
+        return sijoittelunSeurantaResource
+                    .hae().stream().filter(Objects::nonNull)// .collect(Collectors.toSet());
+                    .filter(sijoitteluDto -> {
+                        return sijoitteluDto.isAjossa();
+                    })
+                            //
+                            // Onko aloitusajankohta jo mennyt.
+                            // Null-aloitusajankohta tulkitaan etta on.
+                            //
+                    .filter(sijoitteluDto -> {
+                        DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
+                        //
+                        // jos aloitusajankohta on jo mennyt tai
+                        // se on nyt niin sijoittelu on
+                        // aktiivinen sen osalta
+                        //
+                        return laitetaankoJoTyoJonoonEliEnaaTuntiJaljellaAktivointiin(aloitusajankohtaTaiNyt);
+                    })
+                    .collect(Collectors.toMap(s -> s.getHakuOid(), s -> s));
     }
 
     @Override
