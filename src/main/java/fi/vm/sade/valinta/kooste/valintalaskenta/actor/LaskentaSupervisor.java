@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
-import akka.actor.ActorRef;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 
 public interface LaskentaSupervisor extends ValintalaskentaKerrallaRouteValvomo {
