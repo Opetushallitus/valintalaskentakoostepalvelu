@@ -297,7 +297,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                                                         );
                                                             }
                                                         } catch (Throwable error) {
-                                                            LOG.error("Spluush", error);
+                                                            LOG.error("Viestintäpalvelukutsun esitietojen muodostuksessa tapahtui virhe", error);
                                                             return Observable.error(error);
 
                                                         }
