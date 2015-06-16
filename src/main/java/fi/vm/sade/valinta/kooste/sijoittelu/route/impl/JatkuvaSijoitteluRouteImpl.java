@@ -144,9 +144,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
                     })
                     .filter(sijoitteluDto -> {
                         DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
-                        // jos aloitusajankohta on jo mennyt tai
-                        // se on nyt niin sijoittelu on
-                        // aktiivinen sen osalta
+                        // jos aloitusajankohta on jo mennyt tai se on nyt niin sijoittelu on aktiivinen sen osalta
                         return laitetaankoJoTyoJonoonEliEnaaTuntiJaljellaAktivointiin(aloitusajankohtaTaiNyt);
                     })
                     .collect(Collectors.toMap(s -> s.getHakuOid(), s -> s));
@@ -161,42 +159,34 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
                         simple("${exception.stacktrace}").evaluate(exchange, String.class)))
                 .stop();
 
-        //
-        // Tarkistaa onko tilanne muuttunut ja laittaa delay jonoon puuttuvat
-        // sijoittelut
-        //
+        // Tarkistaa onko tilanne muuttunut ja laittaa delay jonoon puuttuvat sijoittelut
         from(jatkuvaSijoitteluTimer)
                 .errorHandler(deadLetterChannel(DEADLETTERCHANNEL))
                 .routeId("Jatkuvan sijoittelun ajastin")
                 .autoStartup(autoStartup)
                 .process(exchange -> teeJatkuvaSijoittelu());
 
-        //
         // Vie sijoittelu queuesta toita sijoitteluun sita mukaa kuin vanhenee
-        //
         from(jatkuvaSijoitteluQueue)
                 .errorHandler(deadLetterChannel(DEADLETTERCHANNEL))
                 .routeId("Jatkuvan sijoittelun ajuri")
-                .process(
-                        Reititys.<DelayedSijoittelu>kuluttaja(sijoitteluHakuOid -> {
-                            final Long onkoAjossa = ajossaHakuOids.putIfAbsent(sijoitteluHakuOid.getHakuOid(), System.currentTimeMillis());
-                            if (onkoAjossa == null) {
-                                LOG.error("Jatkuvasijoittelu kaynnistyy nyt haulle {}", sijoitteluHakuOid.getHakuOid());
-                                sijoitteluAsyncResource.sijoittele(
-                                        sijoitteluHakuOid.getHakuOid(),
-                                        done -> {
-                                            LOG.warn("Jatkuva sijoittelu saatiin tehtya haulle {}", sijoitteluHakuOid.getHakuOid());
-                                            sijoittelunSeurantaResource.merkkaaSijoittelunAjetuksi(sijoitteluHakuOid.getHakuOid());
-                                            LOG.warn("Jatkuva sijoittelu merkattiin ajetuksi haulle {}", sijoitteluHakuOid.getHakuOid());
-                                        },
-                                        poikkeus -> {
-                                            LOG.error("Jatkuvan sijoittelun suorittaminen ei onnistunut haulle {}. {}", sijoitteluHakuOid.getHakuOid(), poikkeus.getMessage());
-                                        });
-
-                            } else {
-                                LOG.error("Jatkuvasijoittelu ei kaynnisty haulle {} koska uudelleen kaynnistysviivetta on viela jaljella", sijoitteluHakuOid.getHakuOid());
-                            }
-                        }));
+                .process(Reititys.<DelayedSijoittelu>kuluttaja(sijoitteluHakuOid -> {
+                    final Long onkoAjossa = ajossaHakuOids.putIfAbsent(sijoitteluHakuOid.getHakuOid(), System.currentTimeMillis());
+                    if (onkoAjossa == null) {
+                        LOG.error("Jatkuvasijoittelu kaynnistyy nyt haulle {}", sijoitteluHakuOid.getHakuOid());
+                        sijoitteluAsyncResource.sijoittele(sijoitteluHakuOid.getHakuOid(),
+                                done -> {
+                                    LOG.warn("Jatkuva sijoittelu saatiin tehtya haulle {}", sijoitteluHakuOid.getHakuOid());
+                                    sijoittelunSeurantaResource.merkkaaSijoittelunAjetuksi(sijoitteluHakuOid.getHakuOid());
+                                    LOG.warn("Jatkuva sijoittelu merkattiin ajetuksi haulle {}", sijoitteluHakuOid.getHakuOid());
+                                },
+                                poikkeus -> {
+                                    LOG.error("Jatkuvan sijoittelun suorittaminen ei onnistunut haulle {}. {}", sijoitteluHakuOid.getHakuOid(), poikkeus.getMessage());
+                                });
+                    } else {
+                        LOG.error("Jatkuvasijoittelu ei kaynnisty haulle {} koska uudelleen kaynnistysviivetta on viela jaljella", sijoitteluHakuOid.getHakuOid());
+                    }
+                }));
     }
 
     public int ajotiheysTaiVakio(Integer ajotiheys) {
