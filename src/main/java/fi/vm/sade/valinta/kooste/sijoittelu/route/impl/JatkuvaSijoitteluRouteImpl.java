@@ -156,14 +156,9 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
     public void configure() throws Exception {
         from(DEADLETTERCHANNEL)
                 .routeId("Jatkuvan sijoittelun deadletterchannel")
-                .process(new Processor() {
-                    @Override
-                    public void process(Exchange exchange) throws Exception {
-                        LOG.error("Jatkuvasijoittelu paattyi virheeseen {}\r\n{}",
-                                simple("${exception.message}").evaluate(exchange, String.class),
-                                simple("${exception.stacktrace}").evaluate(exchange, String.class));
-                    }
-                })
+                .process(exchange -> LOG.error("Jatkuvasijoittelu paattyi virheeseen {}\r\n{}",
+                        simple("${exception.message}").evaluate(exchange, String.class),
+                        simple("${exception.stacktrace}").evaluate(exchange, String.class)))
                 .stop();
 
         //
@@ -174,11 +169,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
                 .errorHandler(deadLetterChannel(DEADLETTERCHANNEL))
                 .routeId("Jatkuvan sijoittelun ajastin")
                 .autoStartup(autoStartup)
-                .process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
-                        teeJatkuvaSijoittelu();
-                    }
-                });
+                .process(exchange -> teeJatkuvaSijoittelu());
 
         //
         // Vie sijoittelu queuesta toita sijoitteluun sita mukaa kuin vanhenee
@@ -192,9 +183,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
                             // Aloitetaan sijoittelu ainoastaan jos se
                             // ei ole jo ajossa
                             //
-                            if (ajossaHakuOids.putIfAbsent(
-                                    sijoitteluHakuOid.getHakuOid(),
-                                    System.currentTimeMillis()) == null) {
+                            if (ajossaHakuOids.putIfAbsent(sijoitteluHakuOid.getHakuOid(), System.currentTimeMillis()) == null) {
                                 LOG.error("Jatkuvasijoittelu kaynnistyy nyt haulle {}", sijoitteluHakuOid.getHakuOid());
                                 sijoitteluAsyncResource.sijoittele(
                                         sijoitteluHakuOid.getHakuOid(),
