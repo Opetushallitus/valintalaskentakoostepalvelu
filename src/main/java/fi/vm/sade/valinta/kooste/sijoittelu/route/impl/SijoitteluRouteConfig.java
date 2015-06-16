@@ -22,27 +22,24 @@ public class SijoitteluRouteConfig {
 
     @Bean
     public JatkuvaSijoitteluRouteImpl getJatkuvaSijoitteluRouteImpl(
-            // tarkistetaan viidentoista minuutin valein tilanne
             @Value("timer://jatkuvaSijoitteluTimer?${valintalaskentakoostepalvelu.jatkuvasijoittelu.timer:fixedRate=true&period=5minutes}") String jatkuvaSijoitteluTimer,
             @Value("seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue") String jatkuvaSijoitteluQueue,
             SijoitteleAsyncResource sijoitteluAsyncResource,
             SijoittelunSeurantaResource sijoittelunSeurantaResource,
             @Qualifier("jatkuvaSijoitteluDelayedQueue") DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue
     ) {
-        return new JatkuvaSijoitteluRouteImpl(jatkuvaSijoitteluTimer, jatkuvaSijoitteluQueue, sijoitteluAsyncResource,
-                sijoittelunSeurantaResource, jatkuvaSijoitteluDelayedQueue);
+        return new JatkuvaSijoitteluRouteImpl(jatkuvaSijoitteluTimer, jatkuvaSijoitteluQueue, sijoitteluAsyncResource, sijoittelunSeurantaResource, jatkuvaSijoitteluDelayedQueue);
     }
 
     @Bean(name = "jatkuvaSijoitteluDelayedQueue")
     public DelayQueue<DelayedSijoitteluExchange> createDelayQueue() {
-        return new DelayQueue<DelayedSijoitteluExchange>();
+        return new DelayQueue<>();
     }
 
     @Bean
     public SijoitteluAktivointiRoute getSijoitteluAktivointiRoute(
             @Qualifier("javaDslCamelContext") CamelContext context,
-            @Value(SijoitteluAktivointiRoute.SIJOITTELU_REITTI) String sijoitteluAktivoi)
-            throws Exception {
+            @Value(SijoitteluAktivointiRoute.SIJOITTELU_REITTI) String sijoitteluAktivoi) throws Exception {
         return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(sijoitteluAktivoi), SijoitteluAktivointiRoute.class);
     }
 }
