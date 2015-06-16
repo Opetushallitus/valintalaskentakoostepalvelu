@@ -144,20 +144,12 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
     private Map<String, SijoitteluDto> getAktiivisetSijoittelut() {
         return sijoittelunSeurantaResource
                     .hae().stream().filter(Objects::nonNull)// .collect(Collectors.toSet());
-                    .filter(sijoitteluDto -> {
-                        return sijoitteluDto.isAjossa();
-                    })
-                            //
-                            // Onko aloitusajankohta jo mennyt.
-                            // Null-aloitusajankohta tulkitaan etta on.
-                            //
+                    .filter(sijoitteluDto -> { return sijoitteluDto.isAjossa(); })
                     .filter(sijoitteluDto -> {
                         DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
-                        //
                         // jos aloitusajankohta on jo mennyt tai
                         // se on nyt niin sijoittelu on
                         // aktiivinen sen osalta
-                        //
                         return laitetaankoJoTyoJonoonEliEnaaTuntiJaljellaAktivointiin(aloitusajankohtaTaiNyt);
                     })
                     .collect(Collectors.toMap(s -> s.getHakuOid(), s -> s));
