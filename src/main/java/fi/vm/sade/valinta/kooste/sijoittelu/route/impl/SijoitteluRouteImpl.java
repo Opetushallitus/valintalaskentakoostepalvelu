@@ -63,12 +63,7 @@ public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu> i
         }));
         from(DEADLETTERCHANNEL)
                 .routeId("Sijoittelun deadletterchannel")
-                .process(new Processor() {
-                    @Override
-                    public void process(Exchange exchange) throws Exception {
-                        LOG.error("Sijoittelu paattyi virheeseen {}\r\n{}", simple("${exception.message}").evaluate(exchange, String.class), simple("${exception.stacktrace}").evaluate(exchange, String.class));
-                    }
-                })
+                .process(exchange -> LOG.error("Sijoittelu paattyi virheeseen {}\r\n{}", simple("${exception.message}").evaluate(exchange, String.class), simple("${exception.stacktrace}").evaluate(exchange, String.class)))
                 .stop();
         from(SIJOITTELU_REITTI)
                 .errorHandler(deadLetterChannel())
