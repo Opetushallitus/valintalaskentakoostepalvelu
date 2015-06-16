@@ -40,9 +40,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 @Component
 public class HaeOsoiteKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(HaeOsoiteKomponentti.class);
-    private static final String MAAT_JA_VALTIOT_PREFIX = "maatjavaltiot1_";
     private static final String SUOMI = "fin";
-    private static final String POSTI = "posti_";
     private final Cache<String, Maakoodi> koodiCache = CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).build();
     private KoodiService koodiService;
 
@@ -132,15 +130,6 @@ public class HaeOsoiteKomponentti {
     private static String getNimi(List<KoodiMetadataType> meta) {
         for (KoodiMetadataType data : meta) {
             return data.getNimi();
-        }
-        return null;
-    }
-
-    private static String getNimi(List<KoodiMetadataType> meta, KieliType kieli) {
-        for (KoodiMetadataType data : meta) {
-            if (kieli.equals(data.getKieli())) {
-                return data.getNimi();
-            }
         }
         return null;
     }
