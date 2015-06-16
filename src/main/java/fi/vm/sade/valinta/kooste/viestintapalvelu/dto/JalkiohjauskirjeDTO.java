@@ -19,10 +19,6 @@ public class JalkiohjauskirjeDTO {
         this.kielikoodi = kielikoodi;
     }
 
-    public boolean isRuotsinkielinenAineisto() {
-        return KieliUtil.RUOTSI.equals(kielikoodi);
-    }
-
     public String getKielikoodi() {
         return kielikoodi;
     }

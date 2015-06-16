@@ -3,17 +3,13 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.PERUNUT;
 import static rx.Observable.from;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +104,9 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 
     private Action3<Collection<HakijaDTO>, KirjeProsessi, JalkiohjauskirjeDTO> muodostaKirjeet() {
         return (hakijat, prosessi, kirje) -> {
+            String kieli =
+                    KieliUtil.normalisoiKielikoodi(
+                    Optional.ofNullable(StringUtils.trimToNull(kirje.getKielikoodi())).orElse(KieliUtil.SUOMI));
             if (hakijat.isEmpty()) {
                 LOG.error("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
                 throw new RuntimeException("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
@@ -128,10 +127,9 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
             }
             Collection<Hakemus> yksikielisetHakemukset;
             {
-                final boolean ruotsinkieliset = kirje.isRuotsinkielinenAineisto();
                 yksikielisetHakemukset = hakemukset
                         .stream()
-                        .filter(h -> ruotsinkieliset == KieliUtil.RUOTSI.equals(new HakemusWrapper(h).getAsiointikieli()))
+                        .filter(h -> kieli.equals(new HakemusWrapper(h).getAsiointikieli()))
                         .collect(Collectors.toList());
             }
             Collection<HakijaDTO> yksikielisetHakijat;
