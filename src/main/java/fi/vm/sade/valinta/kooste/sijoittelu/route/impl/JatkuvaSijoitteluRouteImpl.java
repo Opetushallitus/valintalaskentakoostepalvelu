@@ -88,29 +88,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
         Map<String, SijoitteluDto> aktiivisetSijoittelut = getAktiivisetSijoittelut();
         LOG.info("Jatkuvansijoittelun ajastin sai seurannalta {} aktiivista sijoittelua.", aktiivisetSijoittelut.size());
         poistaYritetytJaahylta();
-        //
-        // Poistetaan sammutetut tai sijoittelut joiden
-        // ajankohta ei ole viela alkanut
-        //
-        jatkuvaSijoitteluDelayedQueue
-                .forEach(d -> {
-                    //
-                    // Poistetaan tyojonosta passiiviset
-                    // sijoittelut
-                    //
-                    if (!aktiivisetSijoittelut.containsKey(d.getDelayedSijoittelu().getHakuOid())) {
-                        jatkuvaSijoitteluDelayedQueue.remove(d);
-                        LOG.warn("Sijoittelu haulle {} poistettu ajastuksesta {}. Joko aloitusajankohtaa siirrettiin tulevaisuuteen tai jatkuvasijoittelu ei ole enaa aktiivinen haulle.",
-                                d.getDelayedSijoittelu().getHakuOid(), Formatter.paivamaara(new Date(d.getDelayedSijoittelu().getWhen())));
-                    }
-                    if (ajossaHakuOids.containsKey(d.getDelayedSijoittelu()
-                            .getHakuOid())) {
-                        LOG.info("Sijoittelu haulle {} poistettu ajastuksesta {}. Ylimaarainen sijoitteluajo tai joko parhaillaan ajossa tai epaonnistunut.",
-                                d.getDelayedSijoittelu().getHakuOid(), Formatter.paivamaara(new Date(d.getDelayedSijoittelu().getWhen())));
-                        jatkuvaSijoitteluDelayedQueue.remove(d);
-                    }
-                });
-
+        poistaSammutetutTaiJoidenAjankohtaEiOleViela(aktiivisetSijoittelut);
         //
         // Laita ajoon
         //
@@ -124,6 +102,24 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
                         LOG.info("Jatkuva sijoittelu haulle {} joka on asetettu {} intervallilla {} laitetaan suoritettavaksi seuraavan kerran {}",
                                 hakuOid, Formatter.paivamaara(asetusAjankohta.toDate()), intervalli, Formatter.paivamaara(suoritusAjankohta.toDate()));
                         jatkuvaSijoitteluDelayedQueue.add(new DelayedSijoitteluExchange(new DelayedSijoittelu(hakuOid, suoritusAjankohta), new DefaultExchange(getContext())));
+                    }
+                });
+    }
+
+    private void poistaSammutetutTaiJoidenAjankohtaEiOleViela(Map<String, SijoitteluDto> aktiivisetSijoittelut) {
+        jatkuvaSijoitteluDelayedQueue
+                .forEach(d -> {
+                    // Poistetaan tyojonosta passiiviset sijoittelut
+                    if (!aktiivisetSijoittelut.containsKey(d.getDelayedSijoittelu().getHakuOid())) {
+                        jatkuvaSijoitteluDelayedQueue.remove(d);
+                        LOG.warn("Sijoittelu haulle {} poistettu ajastuksesta {}. Joko aloitusajankohtaa siirrettiin tulevaisuuteen tai jatkuvasijoittelu ei ole enaa aktiivinen haulle.",
+                                d.getDelayedSijoittelu().getHakuOid(), Formatter.paivamaara(new Date(d.getDelayedSijoittelu().getWhen())));
+                    }
+                    if (ajossaHakuOids.containsKey(d.getDelayedSijoittelu()
+                            .getHakuOid())) {
+                        LOG.info("Sijoittelu haulle {} poistettu ajastuksesta {}. Ylimaarainen sijoitteluajo tai joko parhaillaan ajossa tai epaonnistunut.",
+                                d.getDelayedSijoittelu().getHakuOid(), Formatter.paivamaara(new Date(d.getDelayedSijoittelu().getWhen())));
+                        jatkuvaSijoitteluDelayedQueue.remove(d);
                     }
                 });
     }
@@ -144,7 +140,9 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
     private Map<String, SijoitteluDto> getAktiivisetSijoittelut() {
         return sijoittelunSeurantaResource
                     .hae().stream().filter(Objects::nonNull)
-                    .filter(sijoitteluDto -> { return sijoitteluDto.isAjossa(); })
+                    .filter(sijoitteluDto -> {
+                        return sijoitteluDto.isAjossa();
+                    })
                     .filter(sijoitteluDto -> {
                         DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
                         // jos aloitusajankohta on jo mennyt tai
