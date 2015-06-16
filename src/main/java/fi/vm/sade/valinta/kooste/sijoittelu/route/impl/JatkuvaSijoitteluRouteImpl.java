@@ -89,21 +89,21 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
         LOG.info("Jatkuvansijoittelun ajastin sai seurannalta {} aktiivista sijoittelua.", aktiivisetSijoittelut.size());
         poistaYritetytJaahylta();
         poistaSammutetutTaiJoidenAjankohtaEiOleViela(aktiivisetSijoittelut);
-        //
-        // Laita ajoon
-        //
-        aktiivisetSijoittelut
-                .forEach((hakuOid, sijoitteluDto) -> {
-                    boolean hakuEiJonossa = jatkuvaSijoitteluDelayedQueue.stream().filter(j -> hakuOid.equals(j.getHakuOid())).distinct().count() == 0L;
-                    if (!ajossaHakuOids.containsKey(hakuOid) && hakuEiJonossa) {
-                        DateTime asetusAjankohta = aloitusajankohtaTaiNyt(sijoitteluDto);
-                        Integer intervalli = ajotiheysTaiVakio(sijoitteluDto.getAjotiheys());
-                        DateTime suoritusAjankohta = ModuloiPaivamaaraJaTunnit.moduloiSeuraava(asetusAjankohta, DateTime.now(), intervalli);
-                        LOG.info("Jatkuva sijoittelu haulle {} joka on asetettu {} intervallilla {} laitetaan suoritettavaksi seuraavan kerran {}",
-                                hakuOid, Formatter.paivamaara(asetusAjankohta.toDate()), intervalli, Formatter.paivamaara(suoritusAjankohta.toDate()));
-                        jatkuvaSijoitteluDelayedQueue.add(new DelayedSijoitteluExchange(new DelayedSijoittelu(hakuOid, suoritusAjankohta), new DefaultExchange(getContext())));
-                    }
-                });
+        laitaAjoon(aktiivisetSijoittelut);
+    }
+
+    private void laitaAjoon(Map<String, SijoitteluDto> aktiivisetSijoittelut) {
+        aktiivisetSijoittelut.forEach((hakuOid, sijoitteluDto) -> {
+            boolean hakuEiJonossa = jatkuvaSijoitteluDelayedQueue.stream().filter(j -> hakuOid.equals(j.getHakuOid())).distinct().count() == 0L;
+            if (!ajossaHakuOids.containsKey(hakuOid) && hakuEiJonossa) {
+                DateTime asetusAjankohta = aloitusajankohtaTaiNyt(sijoitteluDto);
+                Integer intervalli = ajotiheysTaiVakio(sijoitteluDto.getAjotiheys());
+                DateTime suoritusAjankohta = ModuloiPaivamaaraJaTunnit.moduloiSeuraava(asetusAjankohta, DateTime.now(), intervalli);
+                LOG.info("Jatkuva sijoittelu haulle {} joka on asetettu {} intervallilla {} laitetaan suoritettavaksi seuraavan kerran {}",
+                        hakuOid, Formatter.paivamaara(asetusAjankohta.toDate()), intervalli, Formatter.paivamaara(suoritusAjankohta.toDate()));
+                jatkuvaSijoitteluDelayedQueue.add(new DelayedSijoitteluExchange(new DelayedSijoittelu(hakuOid, suoritusAjankohta), new DefaultExchange(getContext())));
+            }
+        });
     }
 
     private void poistaSammutetutTaiJoidenAjankohtaEiOleViela(Map<String, SijoitteluDto> aktiivisetSijoittelut) {
@@ -115,8 +115,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
                         LOG.warn("Sijoittelu haulle {} poistettu ajastuksesta {}. Joko aloitusajankohtaa siirrettiin tulevaisuuteen tai jatkuvasijoittelu ei ole enaa aktiivinen haulle.",
                                 d.getDelayedSijoittelu().getHakuOid(), Formatter.paivamaara(new Date(d.getDelayedSijoittelu().getWhen())));
                     }
-                    if (ajossaHakuOids.containsKey(d.getDelayedSijoittelu()
-                            .getHakuOid())) {
+                    if (ajossaHakuOids.containsKey(d.getDelayedSijoittelu().getHakuOid())) {
                         LOG.info("Sijoittelu haulle {} poistettu ajastuksesta {}. Ylimaarainen sijoitteluajo tai joko parhaillaan ajossa tai epaonnistunut.",
                                 d.getDelayedSijoittelu().getHakuOid(), Formatter.paivamaara(new Date(d.getDelayedSijoittelu().getWhen())));
                         jatkuvaSijoitteluDelayedQueue.remove(d);
