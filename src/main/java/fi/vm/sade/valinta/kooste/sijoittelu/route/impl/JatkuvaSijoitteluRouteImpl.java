@@ -49,7 +49,6 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
 
     @Autowired
     public JatkuvaSijoitteluRouteImpl(
-            // tarkistetaan viidentoista minuutin valein tilanne
             @Value("timer://jatkuvaSijoitteluTimer?${valintalaskentakoostepalvelu.jatkuvasijoittelu.timer:fixedRate=true&period=5minutes}") String jatkuvaSijoitteluTimer,
             @Value("seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue") String jatkuvaSijoitteluQueue,
             SijoitteleAsyncResource sijoitteluAsyncResource,
@@ -64,7 +63,6 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
     }
 
     public JatkuvaSijoitteluRouteImpl(
-            // tarkistetaan viidentoista minuutin valein tilanne
             String jatkuvaSijoitteluTimer,
             String jatkuvaSijoitteluQueue,
             SijoitteleAsyncResource sijoitteluAsyncResource,
