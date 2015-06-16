@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
@@ -88,19 +87,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
         LOG.info("Jatkuvansijoittelun ajastin kaynnistyi");
         Map<String, SijoitteluDto> aktiivisetSijoittelut = getAktiivisetSijoittelut();
         LOG.info("Jatkuvansijoittelun ajastin sai seurannalta {} aktiivista sijoittelua.", aktiivisetSijoittelut.size());
-        //
-        // Poista yritetyt hakuoidit jaahylta
-        //
-        ajossaHakuOids.forEach((hakuOid, activationTime) -> {
-            DateTime activated = new DateTime(activationTime);
-            DateTime expires = new DateTime(activationTime).plusMillis(DELAY_WHEN_FAILS);
-            boolean vanheneekoNyt = expires.isBeforeNow() || expires.isEqualNow();
-            LOG.debug("Aktivoitu {} ja vanhenee {} vanheneeko nyt {}", Formatter.paivamaara(activated.toDate()), Formatter.paivamaara(expires.toDate()), vanheneekoNyt);
-            if (vanheneekoNyt) {
-                LOG.debug("Jaahy haulle {} vanhentui", hakuOid);
-                ajossaHakuOids.remove(hakuOid);
-            }
-        });
+        poistaYritetytJaahylta();
         //
         // Poistetaan sammutetut tai sijoittelut joiden
         // ajankohta ei ole viela alkanut
@@ -141,9 +128,22 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
                 });
     }
 
+    private void poistaYritetytJaahylta() {
+        ajossaHakuOids.forEach((hakuOid, activationTime) -> {
+            DateTime activated = new DateTime(activationTime);
+            DateTime expires = new DateTime(activationTime).plusMillis(DELAY_WHEN_FAILS);
+            boolean vanheneekoNyt = expires.isBeforeNow() || expires.isEqualNow();
+            LOG.debug("Aktivoitu {} ja vanhenee {} vanheneeko nyt {}", Formatter.paivamaara(activated.toDate()), Formatter.paivamaara(expires.toDate()), vanheneekoNyt);
+            if (vanheneekoNyt) {
+                LOG.debug("Jaahy haulle {} vanhentui", hakuOid);
+                ajossaHakuOids.remove(hakuOid);
+            }
+        });
+    }
+
     private Map<String, SijoitteluDto> getAktiivisetSijoittelut() {
         return sijoittelunSeurantaResource
-                    .hae().stream().filter(Objects::nonNull)// .collect(Collectors.toSet());
+                    .hae().stream().filter(Objects::nonNull)
                     .filter(sijoitteluDto -> { return sijoitteluDto.isAjossa(); })
                     .filter(sijoitteluDto -> {
                         DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
