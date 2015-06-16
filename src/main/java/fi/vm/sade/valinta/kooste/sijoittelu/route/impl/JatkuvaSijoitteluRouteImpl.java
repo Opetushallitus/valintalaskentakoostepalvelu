@@ -213,12 +213,4 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
     private DateTime aloitusajankohtaTaiNyt(SijoitteluDto sijoitteluDto) {
         return new DateTime(Optional.ofNullable(sijoitteluDto.getAloitusajankohta()).orElse(new Date()));
     }
-
-    public ConcurrentHashMap<String, Long> getAjossaHakuOids() {
-        return ajossaHakuOids;
-    }
-
-    public DelayQueue<DelayedSijoitteluExchange> getJatkuvaSijoitteluDelayedQueue() {
-        return jatkuvaSijoitteluDelayedQueue;
-    }
 }
