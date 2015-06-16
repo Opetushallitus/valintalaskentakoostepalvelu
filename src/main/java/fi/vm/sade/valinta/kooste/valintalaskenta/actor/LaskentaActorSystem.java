@@ -25,8 +25,10 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
+import scala.concurrent.duration.FiniteDuration;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.*;
 
@@ -109,7 +111,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
                 (Throwable t) -> {
                     String message = "Uutta laskentaa ei saatu tyon alle seurannasta.";
                     LOG.error(message, t);
-                    laskennanKaynnistajaActor.tell(new WorkerAvailable(), ActorRef.noSender());
+                    actorSystem.scheduler().scheduleOnce(FiniteDuration.create(5, TimeUnit.SECONDS), laskennanKaynnistajaActor, new WorkerAvailable(), actorSystem.dispatcher(), ActorRef.noSender());
                     throw new RuntimeException(message, t);
                 });
     }
