@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.predicate;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 
 import org.slf4j.Logger;
@@ -17,27 +18,17 @@ public class SijoittelussaHyvaksyttyHakijaBiPredicate implements BiPredicate<Hak
 
     @Override
     public boolean test(HakijaDTO hakija, String hakukohdeOid) {
-        if (hakija.getHakutoiveet() == null) {
-        } else {
-            for (HakutoiveDTO h : hakija.getHakutoiveet()) {
-                if (hakukohdeOid.equals(h.getHakukohdeOid())) {
-                    final boolean checkFirstValintatapajonoOnly = false;
-                    Collections.sort(h.getHakutoiveenValintatapajonot(), HakutoiveenValintatapajonoComparator.DEFAULT);
-                    for (HakutoiveenValintatapajonoDTO vjono : h.getHakutoiveenValintatapajonot()) {
-                        if (vjono.getTila() == null) {
-                            LOG.warn("Hakijalla (hakijaOid={},hakemusOid={}) ei ole hakutoiveen valintatapajonossa tilaa joten merkitaan automaattisesti ei hyvaksytyksi!",
-                                    hakija.getHakijaOid(), hakija.getHakemusOid());
-                        }
-                        if (vjono.getTila() != null && vjono.getTila().isHyvaksytty()) {
-                            return true;
-                        }
-                        if (checkFirstValintatapajonoOnly) {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        return Optional.ofNullable(hakija.getHakutoiveet()).orElse(Collections.emptySet()).stream()
+                .filter(h -> hakukohdeOid.equals(h.getHakukohdeOid()))
+                .findAny()
+                .map(
+                        h -> h.getHakutoiveenValintatapajonot()
+                                .stream()
+                                .filter(vjono -> vjono.getTila() != null && vjono.getTila().isHyvaksytty())
+                                .findAny()
+                                .map(vjono -> true)
+                                .orElse(false)
+                )
+                .orElse(false);
     }
 }

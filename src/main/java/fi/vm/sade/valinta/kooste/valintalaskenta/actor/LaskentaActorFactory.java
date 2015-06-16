@@ -309,11 +309,8 @@ public class LaskentaActorFactory {
 
             public void start() {
                 final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue = new ConcurrentLinkedQueue<>(actorParams.getHakukohdeOids());
-                Action0 aloitaAsynkroninenSuoritusHakukohdeJonolle =
-                        () -> hakukohdeKerralla(hakukohdeQueue);
-
                 final boolean onkoTarveSplitata = actorParams.getHakukohdeOids().size() > 20;
-                IntStream.range(0, onkoTarveSplitata ? splittaus : 1).forEach(i -> aloitaAsynkroninenSuoritusHakukohdeJonolle.call());
+                IntStream.range(0, onkoTarveSplitata ? splittaus : 1).forEach(i -> hakukohdeKerralla(hakukohdeQueue));
             }
 
             private void hakukohdeKerralla(ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue) {

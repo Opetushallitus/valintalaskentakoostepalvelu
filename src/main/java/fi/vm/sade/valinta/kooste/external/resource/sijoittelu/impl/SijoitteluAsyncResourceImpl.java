@@ -157,6 +157,19 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
                 });
     }
 
+    public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid) {
+        String url = "/sijoittelu/" + hakuOid + "/hyvaksytyt/";
+        return getAsObservable(
+                url,
+                new TypeToken<HakijaPaginationObject>() {
+                }.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
+
     @Override
     public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(
             String hakuOid, String hakukohdeOid) {

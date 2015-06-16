@@ -26,6 +26,8 @@ public interface SijoitteluAsyncResource {
 
     void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus);
 
+    Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid);
+
     Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid, String hakukohdeOid);
 
     Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid);

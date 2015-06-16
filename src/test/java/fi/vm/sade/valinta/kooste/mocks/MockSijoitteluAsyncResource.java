@@ -62,7 +62,10 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
         hakukohde.accept(resultReference.get());
     }
 
-
+    @Override
+    public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid) {
+        return null;
+    }
 
     @Override
     public Peruutettava getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid, Consumer<HakijaPaginationObject> callback, Consumer<Throwable> failureCallback) {
