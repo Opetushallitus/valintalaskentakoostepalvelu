@@ -104,6 +104,7 @@ public class LaskentaActorSystem implements ValintalaskentaKerrallaRouteValvomo,
                 (Throwable t) -> {
                     String message = "Uutta laskentaa ei saatu tyon alle seurannasta.";
                     LOG.error(message, t);
+                    laskennanKaynnistajaActor.tell(new WorkerAvailable(), ActorRef.noSender());
                     throw new RuntimeException(message, t);
                 });
     }
