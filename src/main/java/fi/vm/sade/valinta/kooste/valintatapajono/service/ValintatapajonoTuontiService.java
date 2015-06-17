@@ -43,8 +43,6 @@ public class ValintatapajonoTuontiService {
     private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
     @Autowired
     private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
-    @Autowired
-    private TarjontaAsyncResource tarjontaResource;
 
     public void tuo(
             BiFunction<List<ValintatietoValinnanvaiheDTO>, List<Hakemus>, Collection<ValintatapajonoRivi>> riviFunction,
@@ -64,7 +62,6 @@ public class ValintatapajonoTuontiService {
         AtomicReference<List<ValintatietoValinnanvaiheDTO>> valinnanvaiheetRef = new AtomicReference<>();
         AtomicReference<List<ValinnanVaiheJonoillaDTO>> valintaperusteetRef = new AtomicReference<>();
         AtomicReference<List<Hakemus>> hakemuksetRef = new AtomicReference<>();
-        AtomicReference<String> tarjoajaOidRef = new AtomicReference<>();
 
         final Supplier<Void> mergeSuplier = () -> {
             if (counter.decrementAndGet() == 0) {

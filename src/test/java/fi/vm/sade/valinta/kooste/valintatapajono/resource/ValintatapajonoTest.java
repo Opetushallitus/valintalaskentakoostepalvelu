@@ -2,53 +2,29 @@ package fi.vm.sade.valinta.kooste.valintatapajono.resource;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
-import fi.vm.sade.integrationtest.tomcat.SharedTomcat;
+
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
-import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
-import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
+import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockHenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoRivit;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
 import fi.vm.sade.valinta.kooste.valintatapajono.service.ValintatapajonoTuontiConverter;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 import junit.framework.Assert;
 import org.apache.commons.io.IOUtils;
-import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.KORKEAKOULU;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.*;
-import static fi.vm.sade.valinta.kooste.erillishaku.util.ErillishakuRiviTestUtil.laillinenRivi;
-import static fi.vm.sade.valinta.kooste.erillishaku.util.ErillishakuRiviTestUtil.viallinenRiviPuuttuvillaTunnisteilla;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static fi.vm.sade.valinta.http.DateDeserializer.GSON;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -127,16 +103,7 @@ public class ValintatapajonoTest {
         }
 
     }
-    final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(Date.class, new JsonDeserializer() {
-                @Override
-                public Object deserialize(JsonElement json, Type typeOfT,
-                                          JsonDeserializationContext context)
-                        throws JsonParseException {
-                    return new Date(json.getAsJsonPrimitive().getAsLong());
-                }
-            })
-            .create();
+
     private static String classpathResourceAsString(String path) throws Exception {
         return IOUtils.toString(new ClassPathResource(path).getInputStream());
     }

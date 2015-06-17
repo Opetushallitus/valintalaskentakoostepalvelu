@@ -35,6 +35,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeHakutulosV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeValintaperusteetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakutuloksetV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
+import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti;
@@ -55,16 +56,7 @@ public class HakuImportTest extends CamelTestSupport {
 		// globally
 		// HakukohdeValintaperusteetV1RDTO obj = mapper.readValue(new File(
 		// "user.json"), User.class);
-		HakukohdeValintaperusteetV1RDTO obj = new GsonBuilder()
-				.registerTypeAdapter(Date.class, new JsonDeserializer() {
-					@Override
-					public Object deserialize(JsonElement json, Type typeOfT,
-							JsonDeserializationContext context)
-							throws JsonParseException {
-						return new Date(json.getAsJsonPrimitive().getAsLong());
-					}
-				})
-				.create()
+		HakukohdeValintaperusteetV1RDTO obj = DateDeserializer.gsonBuilder().create()
 				.fromJson(
 						IOUtils.toString(new ClassPathResource(
 								"hakukohdeimport/data2/1.2.246.562.20.27059719875.json")

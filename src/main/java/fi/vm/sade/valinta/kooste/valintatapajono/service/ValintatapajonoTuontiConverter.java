@@ -1,7 +1,19 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.service;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.EnumConverter;
@@ -9,22 +21,16 @@ import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRiviAsJonosijaConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.ValintatapajonoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.Tasasijasaanto;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class ValintatapajonoTuontiConverter {
     private static final Logger LOG = LoggerFactory.getLogger(ValintatapajonoTuontiConverter.class);
 
     public static ValinnanvaiheDTO konvertoi(String hakuOid, String hakukohdeOid, String valintatapajonoOid, List<ValinnanVaiheJonoillaDTO> valintaperusteet,
-            List<Hakemus> hakemukset, List<ValintatietoValinnanvaiheDTO> valinnanvaiheet, Collection<ValintatapajonoRivi> rivit) {ValintatietoValinnanvaiheDTO vaihe = haeValinnanVaihe(
-                valintatapajonoOid, valinnanvaiheet);
+            List<Hakemus> hakemukset, List<ValintatietoValinnanvaiheDTO> valinnanvaiheet, Collection<ValintatapajonoRivi> rivit) {
+        ValintatietoValinnanvaiheDTO vaihe = haeValinnanVaihe(valintatapajonoOid, valinnanvaiheet);
         if (vaihe == null) {
             vaihe = luoValinnanVaihe(valintaperusteet, hakukohdeOid, hakuOid, Optional.ofNullable(valintatapajonoOid));
         }

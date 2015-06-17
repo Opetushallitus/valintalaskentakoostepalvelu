@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -46,9 +47,7 @@ public class OppijanSuorituksetProxyResourceTest {
         return IOUtils.toString(new ClassPathResource(path).getInputStream());
     }
 
-    final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(Date.class, (JsonDeserializer) (json, typeOfT, context) -> new Date(json.getAsJsonPrimitive().getAsLong()))
-            .create();
+    final Gson GSON = DateDeserializer.GSON;
 
     @BeforeClass
     public static void startServer() {

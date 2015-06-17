@@ -9,7 +9,6 @@ import javax.ws.rs.core.Response;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import rx.Observable;
 
 public interface TilaAsyncResource {

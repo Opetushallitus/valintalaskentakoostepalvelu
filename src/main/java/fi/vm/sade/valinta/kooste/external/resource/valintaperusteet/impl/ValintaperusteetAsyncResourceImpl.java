@@ -177,19 +177,6 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
     }
 
     @Override
-    public Future<List<ValinnanVaiheJonoillaDTO>> ilmanLaskentaa(String oid) {
-        StringBuilder urlBuilder = new StringBuilder().append(
-                "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/").append(oid).append("/ilmanlaskentaa/");
-        String url = urlBuilder.toString();
-
-        return getWebClient()
-                .path(url)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .get(new GenericType<List<ValinnanVaiheJonoillaDTO>>() {});
-    }
-
-    @Override
     public Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
         StringBuilder urlBuilder = new StringBuilder().append(
                 "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/tuoHakukohde/");
@@ -238,18 +225,6 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                         new GsonResponseCallback<List<HakukohdeJaValintakoeDTO>>(address, url,
                                 callback, failureCallback,
                                 new TypeToken<List<HakukohdeJaValintakoeDTO>>() {}.getType())));
-    }
-
-    @Override
-    public Future<List<ValintakoeDTO>> haeValintakokeet(Collection<String> oids) {
-        StringBuilder urlBuilder = new StringBuilder()
-                .append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintakoe/");
-        String url = urlBuilder.toString();
-        return getWebClient()
-                .path(url)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .post(Entity.entity(oids, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<ValintakoeDTO>>() {});
     }
 
     @Override

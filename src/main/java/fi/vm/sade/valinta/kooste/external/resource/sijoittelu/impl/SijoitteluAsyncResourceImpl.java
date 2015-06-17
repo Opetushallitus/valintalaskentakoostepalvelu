@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 
+import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
@@ -33,16 +34,7 @@ import rx.Observable;
 @Service
 public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements SijoitteluAsyncResource {
 
-    private static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(Date.class, new JsonDeserializer() {
-                @Override
-                public Object deserialize(JsonElement json, Type typeOfT,
-                                          JsonDeserializationContext context)
-                        throws JsonParseException {
-                    return new Date(json.getAsJsonPrimitive().getAsLong());
-                }
-            })
-            .create();
+    private static final Gson GSON = DateDeserializer.gsonBuilder().create();
 
     @Override
     public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid) {

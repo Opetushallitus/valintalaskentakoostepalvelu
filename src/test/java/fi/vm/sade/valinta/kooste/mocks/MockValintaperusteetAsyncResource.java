@@ -104,18 +104,8 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
-    public Future<List<ValinnanVaiheJonoillaDTO>> ilmanLaskentaa(String hakukohdeOid) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Future<List<ValintakoeDTO>> haeValintakokeet(Collection<String> oids) {
-        return Futures.immediateFuture(valintakokeetResultReference.get());
     }
 
     @Override

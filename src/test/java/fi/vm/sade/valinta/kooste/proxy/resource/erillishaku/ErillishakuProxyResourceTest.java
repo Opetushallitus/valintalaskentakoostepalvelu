@@ -6,6 +6,7 @@ import fi.vm.sade.integrationtest.tomcat.SharedTomcat;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
+import fi.vm.sade.valinta.http.DateDeserializer;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -43,16 +44,7 @@ public class ErillishakuProxyResourceTest {
     String tarjoajaOid = "1.2.246.562.10.591352080610";
     String valintatapajonoOid = "14090336922663576781797489829886";
     final HttpResource proxyResource = new HttpResource(root + "/proxy/erillishaku/haku/"+hakuOid+"/hakukohde/" + hakukohdeOid);
-    final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(Date.class, new JsonDeserializer() {
-                @Override
-                public Object deserialize(JsonElement json, Type typeOfT,
-                                          JsonDeserializationContext context)
-                        throws JsonParseException {
-                    return new Date(json.getAsJsonPrimitive().getAsLong());
-                }
-            })
-            .create();
+    final Gson GSON = DateDeserializer.GSON;
     @Before
     public void startServer() {
         ValintaKoosteJetty.startShared();
