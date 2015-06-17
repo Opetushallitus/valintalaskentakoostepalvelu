@@ -359,15 +359,19 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                                                                                                 if (VALMIS_STATUS.equals(b.getStatus())) {
                                                                                                                     LOG.info("##### Dokumentti {} valmistui hakukohteelle {} joten uudelleen nimetään se", batchId, hakukohdeOid);
                                                                                                                     try {
-                                                                                                                        dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
-                                                                                                                                .subscribe(
-                                                                                                                                        success -> {
-                                                                                                                                            LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid);
-                                                                                                                                        },
-                                                                                                                                        error -> {
-                                                                                                                                            LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid, error);
-                                                                                                                                        }
-                                                                                                                                );
+                                                                                                                        if(!asiointikieli.isPresent()) {
+                                                                                                                            dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
+                                                                                                                                    .subscribe(
+                                                                                                                                            success -> {
+                                                                                                                                                LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid);
+                                                                                                                                            },
+                                                                                                                                            error -> {
+                                                                                                                                                LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid, error);
+                                                                                                                                            }
+                                                                                                                                    );
+                                                                                                                        } else {
+                                                                                                                            LOG.debug("Uudelleen nimeämistä ei tarvita, kun kirjeitä luodaan asiointikielellä");
+                                                                                                                        }
                                                                                                                     } catch (Throwable ttt) {
                                                                                                                         LOG.error("", ttt);
                                                                                                                     }
