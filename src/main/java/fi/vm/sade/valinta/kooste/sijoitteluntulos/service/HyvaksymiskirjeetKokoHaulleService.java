@@ -158,7 +158,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
     }
 
     public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, SijoittelunTulosProsessi prosessi) {
-        LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", prosessi);
+        LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", hakuOid, prosessi.getAsiointikieli());
         sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid)
                 .switchMap(
                         hakijat -> {
