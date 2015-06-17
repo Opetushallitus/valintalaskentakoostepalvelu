@@ -15,10 +15,14 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
+import rx.Observable;
+
 import org.mockito.Mockito;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -95,12 +99,6 @@ public class ValintalaskentaSpec {
 
         @Override
         public void peruuta() {
-            //p.accept(new RuntimeException("Peruutettu"));
-        }
-
-        @Override
-        public boolean onTehty() {
-            return false;
         }
     }
 
@@ -171,35 +169,30 @@ public class ValintalaskentaSpec {
     }
 
     public static class ApplicationMock {
-        private final Map<BiPredicate<String,String>, BiConsumer<Consumer<List<Hakemus>>, Consumer<Throwable>>> filters = Maps.newHashMap();
+        private final Map<BiPredicate<String,String>, List<Hakemus>> filters = Maps.newHashMap();
 
-        public ApplicationMock addFilter(BiPredicate<String,String> hakuOidJaHakukohdeOidPredicate,
-                                         BiConsumer<Consumer<List<Hakemus>>, Consumer<Throwable>> callback) {
-            filters.put(hakuOidJaHakukohdeOidPredicate, callback);
+        public ApplicationMock addFilter(BiPredicate<String,String> hakuOidJaHakukohdeOidPredicate, List<Hakemus> hakemukset) {
+            filters.put(hakuOidJaHakukohdeOidPredicate, hakemukset);
             return this;
         }
 
 
         public ApplicationAsyncResource build() {
             ApplicationAsyncResource applicationAsyncResource = Mockito.mock(ApplicationAsyncResource.class);
-            Mockito.when(applicationAsyncResource.getApplicationsByOid(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any())).then(
+            Mockito.when(applicationAsyncResource.getApplicationsByOid(Mockito.anyString(), Mockito.anyString())).then(
                     answer -> {
-                        final Consumer<List<Hakemus>> cb = (Consumer<List<Hakemus>>) answer.getArguments()[2];
-                        final Consumer<Throwable> cb2 = (Consumer<Throwable>) answer.getArguments()[3];
                         final String hakuOid = (String) answer.getArguments()[0];
                         final String hakukohdeOid = (String) answer.getArguments()[1];
                         if(filters.entrySet().stream().anyMatch(a -> a.getKey().test(hakuOid, hakukohdeOid))) {
-                            filters.entrySet().stream().filter(
-                                    a -> a.getKey().test(hakuOid, hakukohdeOid)
-                            ).findFirst().ifPresent(
-                                    (a) -> {
-                                        a.getValue().accept(cb, cb2);
-                                    }
-                            );
+                            final Optional<List<Hakemus>> hakemukset = filters.entrySet().stream().filter(entry -> entry.getKey().test(hakuOid, hakukohdeOid)).map(entry -> entry.getValue()).findFirst();
+                            if (hakemukset.isPresent()) {
+                                return Observable.just(hakemukset.get());
+                            } else {
+                                return Observable.just(Collections.EMPTY_LIST);
+                            }
                         } else {
-                            cb2.accept(new RuntimeException("Ei paluuarvoa!"));
+                            return Observable.error(new RuntimeException("Ei paluuarvoa!"));
                         }
-                        return new PeruutettavaMock(cb2);
                     }
             );
             return applicationAsyncResource;

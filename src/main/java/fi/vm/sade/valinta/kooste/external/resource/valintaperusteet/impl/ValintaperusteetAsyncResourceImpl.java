@@ -91,26 +91,10 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
         }
     }
 
-    public Peruutettava haeIlmanlaskentaa(String hakukohdeOid, Consumer<List<ValinnanVaiheJonoillaDTO>> callback, Consumer<Throwable> failureCallback) {
+    public Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid) {
         LOG.info("Valinnanvaiheiden haku...");
-        // /valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
-        try {
-            String url = new StringBuilder()
-                    .append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/")
-                    .append(hakukohdeOid).append("/ilmanlaskentaa").toString();
-
-            WebClient wc = getWebClient().path(url);
-            return new PeruutettavaImpl(wc
-                    .accept(MediaType.APPLICATION_JSON_TYPE)
-                    .async()
-                    .get(new GsonResponseCallback<List<ValinnanVaiheJonoillaDTO>>(address, url, callback,
-                            failureCallback,
-                            new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {
-                            }.getType())));
-        } catch (Exception e) {
-            failureCallback.accept(e);
-            return TyhjaPeruutettava.tyhjaPeruutettava();
-        }
+        String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/ilmanlaskentaa";
+        return getAsObservable(url, new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType());
     }
 
     public Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {
@@ -190,7 +174,8 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 
     @Override
     public Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
-        return getAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/" + hakukohdeOid + "/", new TypeToken<List<ValintaperusteDTO>>() {}.getType());
+        return getAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/" + hakukohdeOid + "/", new TypeToken<List<ValintaperusteDTO>>() {
+        }.getType());
     }
 
     @Override

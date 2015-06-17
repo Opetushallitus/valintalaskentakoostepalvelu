@@ -108,14 +108,14 @@ public class ValintatapajonoTuontiService {
                     mergeSuplier.get();
                 },
                 poikkeusKasittelija("Valinnanvaiheiden hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
-        valintaperusteetAsyncResource.haeIlmanlaskentaa(hakukohdeOid,
+        valintaperusteetAsyncResource.haeIlmanlaskentaa(hakukohdeOid).subscribe(
                 valintaperusteet -> {
                     valintaperusteetRef.set(valintaperusteet);
                     mergeSuplier.get();
                 },
                 poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef)
         );
-        applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid,
+        applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(
                 hakemukset -> {
                     if (hakemukset == null || hakemukset.isEmpty()) {
                             poikkeusKasittelija("Ei yhtään hakemusta hakukohteessa", asyncResponse, dokumenttiIdRef).accept(null);

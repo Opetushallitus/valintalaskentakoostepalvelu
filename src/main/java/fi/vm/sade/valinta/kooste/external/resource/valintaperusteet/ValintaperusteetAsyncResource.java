@@ -36,7 +36,7 @@ public interface ValintaperusteetAsyncResource {
     Observable<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku);
 
     // @GET /valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
-    Peruutettava haeIlmanlaskentaa(String hakukohdeOid, Consumer<List<ValinnanVaiheJonoillaDTO>> callback, Consumer<Throwable> failureCallback);
+    Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid);
 
     // @POST /valintaperusteet-service/resources/valintaperusteet/tuoHakukohde/
     Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde);

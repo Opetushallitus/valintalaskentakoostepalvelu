@@ -182,7 +182,7 @@ public class OsoitetarratService {
             valintaperusteetValintakoeResource.haeValintakokeetHakukohteelle(hakukohdeOid, valintakokeet -> {
                 boolean kutsutaankoJossainKokeessaKaikki = valintakokeet.stream().anyMatch(vk -> selvitetytTunnisteet.contains(vk.getSelvitettyTunniste()) && Boolean.TRUE.equals(vk.getKutsutaankoKaikki()));
                 if (kutsutaankoJossainKokeessaKaikki) {
-                    applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid, hakemukset -> {
+                    applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(hakemukset -> {
                         haetutHakemuksetRef.set(hakemukset);
                         laskuriHakukohteenUlkopuolisilleHakijoille.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                     }, poikkeuskasittelija);

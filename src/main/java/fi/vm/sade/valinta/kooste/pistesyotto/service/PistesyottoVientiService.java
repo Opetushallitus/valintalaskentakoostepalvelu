@@ -164,7 +164,7 @@ public class PistesyottoVientiService {
                 viimeisteleTuonti.get();
                 tarkistaYlimaaraisetOsallistujat.get();
             }, poikkeuskasittelija);
-            applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid, hakemukset -> {
+            applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(hakemukset -> {
                         hakemusRef.set(hakemukset);
                         prosessi.inkrementoiTehtyjaToita();
                         viimeisteleTuonti.get();

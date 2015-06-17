@@ -41,7 +41,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> true,
-                (hakemukset, poikkeus) -> hakemukset.accept(Collections.emptyList())
+                Collections.emptyList()
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
                 (hakukohde, referenssiPvm) -> true,
@@ -100,7 +100,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> true,
-                (hakemukset, poikkeus) -> hakemukset.accept(Collections.emptyList())
+                Collections.emptyList()
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
                 (hakukohde, referenssiPvm) -> true,
@@ -161,7 +161,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> true,
-                (hakemukset, poikkeus) -> hakemukset.accept(Collections.emptyList())
+                Collections.emptyList()
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
                 (hakukohde, referenssiPvm) -> true,
@@ -223,7 +223,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> true,
-                (hakemukset, poikkeus) -> hakemukset.accept(Collections.emptyList())
+                Collections.emptyList()
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
                 (hakukohde, referenssiPvm) -> true,
@@ -285,7 +285,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
 
         ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
                 (haku, hakukohde) -> true,
-                (hakemukset, poikkeus) -> hakemukset.accept(Collections.emptyList())
+                Collections.emptyList()
         ).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
                 (hakukohde, referenssiPvm) -> true,
@@ -345,10 +345,7 @@ public class ValintaryhmaLaskentaActorTest extends ValintalaskentaSpec {
         final HakuV1RDTO hakuDTO = new HakuV1RDTO();
         hakuDTO.setOid(HAKUOID1);
 
-        ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter(
-                (haku, hakukohde) -> true,
-                (hakemukset, poikkeus) -> hakemukset.accept(Collections.emptyList())
-        ).build();
+        ApplicationAsyncResource applicationAsyncResource = new ApplicationMock().addFilter((haku, hakukohde) -> true, Collections.EMPTY_LIST).build();
         SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource = new SuoritusrekisteriMock().addFilter(
                 (hakukohde, referenssiPvm) -> true,
                 (oppijat, poikkeus) -> oppijat.accept(Collections.emptyList())

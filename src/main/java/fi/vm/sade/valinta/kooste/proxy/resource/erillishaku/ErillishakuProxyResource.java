@@ -110,7 +110,7 @@ public class ErillishakuProxyResource {
         };
         // kertaluokassa nopeampaa kuin futureilla, koska säikeet ei blokkaile
         ///haku-app/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid={hakukohdeOid}&asId={hakuOid}
-        applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid,
+        applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(
                 h -> {
                     LOG.info("Haetaan hakemuksia");
                     hakemukset.set(h);

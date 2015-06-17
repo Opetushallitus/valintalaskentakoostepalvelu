@@ -161,7 +161,7 @@ public class ValintakoekutsutExcelService {
                                 }).build();
 
                         if (onkoJossainValintakokeessaKaikkiHaetaan && !useWhitelist) {
-                            applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid, hakemukset -> {
+                            applicationResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(hakemukset -> {
                                 lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
                                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                                 voikoHakeaJoOsallistujienHakemuksetVaiOnkoKaikkienHakemustenHakuKesken.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();

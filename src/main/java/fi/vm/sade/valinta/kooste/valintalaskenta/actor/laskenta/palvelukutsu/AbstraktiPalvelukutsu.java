@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +35,10 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
 
     public abstract void vapautaResurssit();
 
-    protected Consumer<Throwable> failureCallback(final Consumer<Palvelukutsu> takaisinkutsu) {
+    protected PoikkeusKasittelijaSovitin failureCallback(final Consumer<Palvelukutsu> takaisinkutsu) {
         AbstraktiPalvelukutsu self = this;
         final AtomicBoolean K = new AtomicBoolean(false);
-        return poikkeus -> {
+        return new PoikkeusKasittelijaSovitin(poikkeus -> {
             if (!K.compareAndSet(false, true)) {
                 LOG.debug("Silmukka havaittu {}", self.getClass().getSimpleName());
                 return;
@@ -49,7 +50,7 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
             } catch (Exception e) {
                 LOG.error("Takaisinkutsun teko epaonnistui {}! {}", self.getClass().getSimpleName(), e.getMessage());
             }
-        };
+        });
     }
 
     /**

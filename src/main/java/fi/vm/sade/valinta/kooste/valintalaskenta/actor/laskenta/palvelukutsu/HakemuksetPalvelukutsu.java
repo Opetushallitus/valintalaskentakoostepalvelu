@@ -5,17 +5,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
+import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.UuidHakukohdeJaOrganisaatio;
+import rx.Subscription;
 
 public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements Palvelukutsu {
     private final static Logger LOG = LoggerFactory.getLogger(HakemuksetPalvelukutsu.class);
@@ -38,7 +35,7 @@ public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements Pal
     public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
         aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(new Supplier<Peruutettava>() {
             public Peruutettava get() {
-                return applicationAsyncResource.getApplicationsByOid(hakuOid, getHakukohdeOid(), hakemukset -> {
+                return toPeruutettava(applicationAsyncResource.getApplicationsByOid(hakuOid, getHakukohdeOid()).subscribe(hakemukset -> {
                     if (hakemukset == null) {
                         LOG.error("Hakemuksetpalvelu palautti null datajoukon!");
                         failureCallback(takaisinkutsu);
@@ -46,10 +43,19 @@ public class HakemuksetPalvelukutsu extends AbstraktiPalvelukutsu implements Pal
                     }
                     HakemuksetPalvelukutsu.this.hakemukset.set(hakemukset);
                     takaisinkutsu.accept(HakemuksetPalvelukutsu.this);
-                }, failureCallback(takaisinkutsu));
+                }, failureCallback(takaisinkutsu)));
             }
         });
         return this;
+    }
+
+    private static Peruutettava toPeruutettava(final Subscription subscription) {
+        return new Peruutettava() {
+            @Override
+            public void peruuta() {
+                subscription.unsubscribe();
+            }
+        };
     }
 
     public List<Hakemus> getHakemukset() {
