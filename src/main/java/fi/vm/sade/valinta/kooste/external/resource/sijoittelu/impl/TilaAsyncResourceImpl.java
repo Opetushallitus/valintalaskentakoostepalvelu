@@ -29,9 +29,6 @@ import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import rx.Observable;
 
-/**
- *         fi.vm.sade.sijoittelu.laskenta.resource.TilaResource
- */
 @Service
 public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaAsyncResource {
 
@@ -58,18 +55,15 @@ public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaA
         getWebClient()
                 .path(url)
                 .accept(MediaType.WILDCARD)
-                .async().get(new GsonResponseCallback<List<Valintatulos>>(GSON,
-                address, url, valintatulokset, poikkeus,
-                new TypeToken<List<Valintatulos>>() {
-                }.getType()));
+                .async().get(new GsonResponseCallback<>(GSON, address, url, valintatulokset, poikkeus,
+                new TypeToken<List<Valintatulos>>() {}.getType()));
     }
 
     public Observable<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid) {
         String url = "/tila/hakukohde/" + hakukohdeOid;
         return getAsObservable(
                 url,
-                new TypeToken<List<Valintatulos>>() {
-                }.getType(),
+                new TypeToken<List<Valintatulos>>() {}.getType(),
                 client -> {
                     client.accept(MediaType.WILDCARD);
                     return client;
@@ -82,8 +76,7 @@ public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaA
         return getWebClient()
                 .path(url)
                 .accept(MediaType.WILDCARD)
-                .async().get(new GenericType<List<Valintatulos>>() {
-                });
+                .async().get(new GenericType<List<Valintatulos>>() {});
     }
 
     @Override
