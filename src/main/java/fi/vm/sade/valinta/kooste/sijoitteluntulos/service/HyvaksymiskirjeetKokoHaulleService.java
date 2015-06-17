@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
+import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -157,7 +158,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
         };
     }
 
-    public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, SijoittelunTulosProsessi prosessi) {
+    public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<TemplateDetail> defaultDetails) {
         LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", hakuOid, prosessi.getAsiointikieli());
         sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid)
                 .switchMap(
@@ -177,7 +178,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                     prosessi.setKokonaistyo(success.size());
                     final ConcurrentLinkedQueue<HakukohdeJaResurssit> hakukohdeQueue = new ConcurrentLinkedQueue<>(success);
                     final boolean onkoTarveSplitata = success.size() > 20;
-                    IntStream.range(0, onkoTarveSplitata ? 2 : 1).forEach(i -> hakukohdeKerralla(hakuOid, prosessi, hakukohdeQueue));
+                    IntStream.range(0, onkoTarveSplitata ? 2 : 1).forEach(i -> hakukohdeKerralla(hakuOid, prosessi, defaultDetails, hakukohdeQueue));
                 },
                 error -> {
                     LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error);
@@ -254,7 +255,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
         }
      }
 
-    private void hakukohdeKerralla(String hakuOid, SijoittelunTulosProsessi prosessi, ConcurrentLinkedQueue<HakukohdeJaResurssit> hakukohdeQueue) {
+    private void hakukohdeKerralla(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<TemplateDetail> fixedDetails, ConcurrentLinkedQueue<HakukohdeJaResurssit> hakukohdeQueue) {
         Optional<HakukohdeJaResurssit> hakukohdeJaResurssit = Optional.ofNullable(hakukohdeQueue.poll());
         hakukohdeJaResurssit.ifPresent(
                 resurssit -> {
@@ -264,6 +265,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                             getHakukohteenHyvaksymiskirjeObservable(
                                     hakuOid,
                                     resurssit.hakukohdeOid,
+                                    fixedDetails,
                                     prosessi.getAsiointikieli(),
                                     resurssit.hakijat,
                                     resurssit.hakemukset),
@@ -272,13 +274,13 @@ public class HyvaksymiskirjeetKokoHaulleService {
                             s -> {
                                 LOG.error("Hakukohde {} valmis", resurssit.hakukohdeOid);
                                 prosessi.inkrementoi();
-                                hakukohdeKerralla(hakuOid, prosessi, hakukohdeQueue);
+                                hakukohdeKerralla(hakuOid, prosessi, fixedDetails, hakukohdeQueue);
                             },
                             e -> {
                                 LOG.error("Hakukohde {} ohitettu", resurssit.hakukohdeOid, e);
                                 prosessi.inkrementoi();
                                 prosessi.getVaroitukset().add(new Varoitus(resurssit.hakukohdeOid, e.getMessage()));
-                                hakukohdeKerralla(hakuOid, prosessi, hakukohdeQueue);
+                                hakukohdeKerralla(hakuOid, prosessi, fixedDetails, hakukohdeQueue);
                             },
                             () -> {
 
@@ -291,7 +293,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
         }
     }
 
-    private Observable<?> getHakukohteenHyvaksymiskirjeObservable(String hakuOid, String hakukohdeOid, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, List<Hakemus> hakemukset) {
+    private Observable<?> getHakukohteenHyvaksymiskirjeObservable(String hakuOid, String hakukohdeOid, Optional<TemplateDetail> fixedDetails, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, List<Hakemus> hakemukset) {
         return
                 tarjontaAsyncResource.haeHakukohde(hakukohdeOid).switchMap(
                         h -> {
@@ -303,111 +305,112 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                 } else {
                                     kieli = KirjeetHakukohdeCache.getOpetuskieli(h.getOpetusKielet());
                                 }
-                                return viestintapalveluAsyncResource.haeKirjepohja(hakuOid, tarjoaja, "hyvaksymiskirje", kieli, hakukohdeOid).switchMap(
-                                        (t) -> {
-                                            try {
-                                                // TARKISTA JOS TYHJA NIIN DONE
+                                if(fixedDetails.isPresent()) {
+                                    return luoKirjeJaLahetaMuodostettavaksi(hakuOid, hakukohdeOid, asiointikieli, hyvaksytytHakijat, hakemukset, h, tarjoaja, fixedDetails);
+                                } else {
+                                    return viestintapalveluAsyncResource.haeKirjepohja(hakuOid, tarjoaja, "hyvaksymiskirje", kieli, hakukohdeOid).switchMap(
+                                            (t) -> {
                                                 Optional<TemplateDetail> td = etsiVakioDetail(t);
                                                 if (!td.isPresent()) {
-
                                                     return Observable.error(new RuntimeException("Ei " + VAKIOTEMPLATE + " tai " + VAKIODETAIL + " templateDetailia hakukohteelle " + hakukohdeOid));
                                                 } else {
-                                                    try {
-                                                        LOG.info("##### Saatiin hakemukset hakukohteelle {}", hakukohdeOid);
-                                                        Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
-                                                        MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
-                                                        Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(tarjoaja);
-                                                        String tag = nimiUriToTag(h.getHakukohteenNimiUri(), hakukohdeOid);
-
-                                                        LetterBatch l = hyvaksymiskirjeetKomponentti
-                                                                .teeHyvaksymiskirjeet(
-                                                                        HyvaksymiskirjeetServiceImpl.todellisenJonosijanRatkaisin(hyvaksytytHakijat),
-                                                                        HyvaksymiskirjeetServiceImpl.organisaatioResponseToHakijapalveluidenOsoite(
-                                                                                haeOsoiteKomponentti, organisaatioAsyncResource,
-                                                                                newArrayList(Arrays.asList(tarjoaja)),
-                                                                                kohdeHakukohde.getHakukohteenKieli(), organisaatioFuture.get()),
-                                                                        hyvaksymiskirjeessaKaytetytHakukohteet,
-                                                                        hyvaksytytHakijat,
-                                                                        hakemukset,
-                                                                        hakukohdeOid,
-                                                                        hakuOid,
-                                                                        tarjoaja,
-                                                                        //
-                                                                        td.get().getDefaultValue(),
-                                                                        tag,
-                                                                        "hyvaksymiskirje",
-                                                                        null,
-                                                                        null,
-                                                                        asiointikieli.isPresent());
-
-
-                                                        LOG.info("##### Tehdään viestintäpalvelukutsu {}", hakukohdeOid);
-                                                        //LOG.error("{}", new Gson().toJson(l));
-                                                        return viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(l)
-                                                                .switchMap(
-                                                                        letterResponse -> {
-                                                                            LOG.info("##### Viestintäpalvelukutsu onnistui {}", hakukohdeOid);
-                                                                            final String batchId = letterResponse.getBatchId();
-                                                                            LOG.info("##### Odotetaan statusta... BatchId={}", batchId);
-                                                                            AtomicReference<Subscription> pulseRef = new AtomicReference<>();
-                                                                            final Observable<String> plainObservable = Observable.create(subscriber -> {
-                                                                                pulseRef.set(pulse.subscribe(
-                                                                                        aikaTehdaJotain -> {
-                                                                                            LOG.error("Status PING... {}", batchId);
-                                                                                            viestintapalveluAsyncResource.haeStatusObservable(batchId)
-                                                                                                    .subscribe(
-                                                                                                            b -> {
-                                                                                                                if (VALMIS_STATUS.equals(b.getStatus())) {
-                                                                                                                    LOG.info("##### Dokumentti {} valmistui hakukohteelle {} joten uudelleen nimetään se", batchId, hakukohdeOid);
-                                                                                                                    try {
-                                                                                                                        if(!asiointikieli.isPresent()) {
-                                                                                                                            dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
-                                                                                                                                    .subscribe(
-                                                                                                                                            success -> {
-                                                                                                                                                LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid);
-                                                                                                                                            },
-                                                                                                                                            error -> {
-                                                                                                                                                LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid, error);
-                                                                                                                                            }
-                                                                                                                                    );
-                                                                                                                        } else {
-                                                                                                                            LOG.debug("Uudelleen nimeämistä ei tarvita, kun kirjeitä luodaan asiointikielellä");
-                                                                                                                        }
-                                                                                                                    } catch (Throwable ttt) {
-                                                                                                                        LOG.error("", ttt);
-                                                                                                                    }
-                                                                                                                    subscriber.onNext(batchId);
-                                                                                                                }
-                                                                                                                if (KESKEYTETTY_STATUS.equals(b.getStatus())) {
-                                                                                                                    subscriber.onError(new RuntimeException("Viestintäpalvelu palautti error statuksen hakukohteelle " + hakukohdeOid));
-                                                                                                                }
-                                                                                                            }
-                                                                                                    );
-                                                                                        }
-                                                                                ));
-
-                                                                            });
-                                                                            plainObservable.subscribe(subscribeWithFinally(() -> pulseRef.get().unsubscribe()));
-
-                                                                            return plainObservable;
-                                                                        }
-                                                                );
-                                                    } catch (Throwable error) {
-                                                        LOG.error("Viestintäpalveluviestin muodostus epäonnistui hakukohteelle {}", hakukohdeOid, error);
-                                                        return Observable.error(error);
-
-                                                    }
+                                                    return luoKirjeJaLahetaMuodostettavaksi(hakuOid, hakukohdeOid, asiointikieli, hyvaksytytHakijat, hakemukset, h, tarjoaja, td);
                                                 }
-                                            } catch (Throwable error) {
-                                                LOG.error("Viestintäpalvelukutsun esitietojen muodostuksessa tapahtui virhe", error);
-                                                return Observable.error(error);
-
-                                            }
-                                        });
+                                            });
+                                }
                             } catch (Throwable e) {
                                 return Observable.error(e);
                             }
                         });
+    }
+
+    private Observable<?> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String hakukohdeOid, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, List<Hakemus> hakemukset, HakukohdeV1RDTO h, String tarjoaja, Optional<TemplateDetail> td) {
+
+        try {
+            LOG.info("##### Saatiin hakemukset hakukohteelle {}", hakukohdeOid);
+            Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
+            MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
+            Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(tarjoaja);
+            String tag = nimiUriToTag(h.getHakukohteenNimiUri(), hakukohdeOid);
+
+            LetterBatch l = hyvaksymiskirjeetKomponentti
+                    .teeHyvaksymiskirjeet(
+                            HyvaksymiskirjeetServiceImpl.todellisenJonosijanRatkaisin(hyvaksytytHakijat),
+                            HyvaksymiskirjeetServiceImpl.organisaatioResponseToHakijapalveluidenOsoite(
+                                    haeOsoiteKomponentti, organisaatioAsyncResource,
+                                    newArrayList(Arrays.asList(tarjoaja)),
+                                    kohdeHakukohde.getHakukohteenKieli(), organisaatioFuture.get()),
+                            hyvaksymiskirjeessaKaytetytHakukohteet,
+                            hyvaksytytHakijat,
+                            hakemukset,
+                            hakukohdeOid,
+                            hakuOid,
+                            tarjoaja,
+                            //
+                            td.get().getDefaultValue(),
+                            tag,
+                            "hyvaksymiskirje",
+                            null,
+                            null,
+                            asiointikieli.isPresent());
+
+
+            LOG.info("##### Tehdään viestintäpalvelukutsu {}", hakukohdeOid);
+            //LOG.error("{}", new Gson().toJson(l));
+            return viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(l)
+                    .switchMap(
+                            letterResponse -> {
+                                LOG.info("##### Viestintäpalvelukutsu onnistui {}", hakukohdeOid);
+                                final String batchId = letterResponse.getBatchId();
+                                LOG.info("##### Odotetaan statusta... BatchId={}", batchId);
+                                AtomicReference<Subscription> pulseRef = new AtomicReference<>();
+                                final Observable<String> plainObservable = Observable.create(subscriber -> {
+                                    pulseRef.set(pulse.subscribe(
+                                            aikaTehdaJotain -> {
+                                                LOG.error("Status PING... {}", batchId);
+                                                viestintapalveluAsyncResource.haeStatusObservable(batchId)
+                                                        .subscribe(
+                                                                b -> {
+                                                                    if (VALMIS_STATUS.equals(b.getStatus())) {
+                                                                        LOG.info("##### Dokumentti {} valmistui hakukohteelle {} joten uudelleen nimetään se", batchId, hakukohdeOid);
+                                                                        try {
+                                                                            if (!asiointikieli.isPresent()) {
+                                                                                dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
+                                                                                        .subscribe(
+                                                                                                success -> {
+                                                                                                    LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid);
+                                                                                                },
+                                                                                                error -> {
+                                                                                                    LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid, error);
+                                                                                                }
+                                                                                        );
+                                                                            } else {
+                                                                                LOG.debug("Uudelleen nimeämistä ei tarvita, kun kirjeitä luodaan asiointikielellä");
+                                                                            }
+                                                                        } catch (Throwable ttt) {
+                                                                            LOG.error("", ttt);
+                                                                        }
+                                                                        subscriber.onNext(batchId);
+                                                                    }
+                                                                    if (KESKEYTETTY_STATUS.equals(b.getStatus())) {
+                                                                        subscriber.onError(new RuntimeException("Viestintäpalvelu palautti error statuksen hakukohteelle " + hakukohdeOid));
+                                                                    }
+                                                                }
+                                                        );
+                                            }
+                                    ));
+
+                                });
+                                plainObservable.subscribe(subscribeWithFinally(() -> pulseRef.get().unsubscribe()));
+
+                                return plainObservable;
+                            }
+                    );
+        } catch (Throwable error) {
+            LOG.error("Viestintäpalveluviestin muodostus epäonnistui hakukohteelle {}", hakukohdeOid, error);
+            return Observable.error(error);
+
+        }
     }
 
     private <T> Observable<T> wrapAsRunOnlyOnceObservable(Observable<T> o) {

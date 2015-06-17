@@ -80,7 +80,7 @@ public class SijoittelunTulosHaulleResource {
             SijoittelunTulosProsessi prosessi = new SijoittelunTulosProsessi(
                     Optional.ofNullable(asiointikieli).map(KieliUtil::normalisoiKielikoodi),
                     "hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", null, Arrays.asList("hyvaksymiskirjeet", "haulle"));
-            hyvaksymiskirjeetKokoHaulleService.muodostaHyvaksymiskirjeetKokoHaulle(hakuOid, prosessi);
+            hyvaksymiskirjeetKokoHaulleService.muodostaHyvaksymiskirjeetKokoHaulle(hakuOid, prosessi, Optional.empty());
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             return prosessi.toProsessiId();
         } catch (Exception e) {
