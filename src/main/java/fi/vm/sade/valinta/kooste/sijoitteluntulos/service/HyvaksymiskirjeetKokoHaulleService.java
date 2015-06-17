@@ -337,7 +337,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                                                         tag,
                                                                         "hyvaksymiskirje",
                                                                         null,
-                                                                        null);
+                                                                        null,
+                                                                        asiointikieli.isPresent());
 
 
                                                         LOG.info("##### Tehdään viestintäpalvelukutsu {}", hakukohdeOid);

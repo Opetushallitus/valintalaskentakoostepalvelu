@@ -206,7 +206,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             .collect(Collectors.toList());
                     Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
                     MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
-
+                    final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             todellisenJonosijanRatkaisin(hakijat.getResults()),
                             organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
@@ -220,7 +220,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hyvaksymiskirjeDTO.getTag(),
                             hyvaksymiskirjeDTO.getTemplateName(),
                             hyvaksymiskirjeDTO.getPalautusPvm(),
-                            hyvaksymiskirjeDTO.getPalautusAika());
+                            hyvaksymiskirjeDTO.getPalautusAika(),
+                            iPosti
+                    );
                 })
                 //
                 .subscribeOn(Schedulers.newThread())
@@ -264,6 +266,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     List<String> tarjoajaOidList = newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid()));
                     Osoite hakijapalveluidenOsoite = organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, tarjoajaOidList,
                             kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
+                    final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             todellisenJonosijanRatkaisin(hakijat.getResults()),
                             hakijapalveluidenOsoite,
@@ -276,7 +279,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hyvaksymiskirjeDTO.getTag(),
                             hyvaksymiskirjeDTO.getTemplateName(),
                             hyvaksymiskirjeDTO.getPalautusPvm(),
-                            hyvaksymiskirjeDTO.getPalautusAika());
+                            hyvaksymiskirjeDTO.getPalautusAika(),
+                            iPosti
+                    );
                 })
                 //
                 .subscribeOn(Schedulers.newThread())
@@ -309,7 +314,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             .filter(h -> kohdeHakukohteessaHyvaksytty.test(h, hakukohdeOid)).collect(Collectors.toList());
                     Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
                     MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
-
+                    final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             todellisenJonosijanRatkaisin(hakijat.getResults()),
                             organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
@@ -323,7 +328,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             hyvaksymiskirjeDTO.getTag(),
                             hyvaksymiskirjeDTO.getTemplateName(),
                             hyvaksymiskirjeDTO.getPalautusPvm(),
-                            hyvaksymiskirjeDTO.getPalautusAika());
+                            hyvaksymiskirjeDTO.getPalautusAika(),
+                            iPosti);
                 })
                 //
                 .subscribeOn(Schedulers.newThread())

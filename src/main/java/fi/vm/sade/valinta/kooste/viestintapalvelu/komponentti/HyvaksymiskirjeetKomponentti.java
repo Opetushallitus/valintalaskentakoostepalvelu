@@ -92,7 +92,8 @@ public class HyvaksymiskirjeetKomponentti {
             String sisalto, String tag,
             String templateName,
             String palautusPvm,
-            String palautusAika) {
+            String palautusAika,
+            boolean iPosti) {
 
         LOG.debug("Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'", new Object[]{hakukohdeOid, hakuOid,});
         assert (hakukohdeOid != null);
@@ -284,6 +285,7 @@ public class HyvaksymiskirjeetKomponentti {
         viesti.setOrganizationOid(tarjoajaOid);
         viesti.setTag(tag);
         viesti.setTemplateName(templateName);
+        viesti.setIposti(iPosti);
         Map<String, Object> templateReplacements = Maps.newHashMap();
         templateReplacements.put("sisalto", sisalto);
         templateReplacements.put("hakukohde", koulutus.getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
