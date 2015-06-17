@@ -120,6 +120,7 @@ public class ValintatapajonoTuontiConverter {
         vx.setPoissaOlevaTaytto(jono.getPoissaOlevaTaytto());
         vx.setPrioriteetti(jono.getPrioriteetti());
         vx.setSiirretaanSijoitteluun(jono.getSiirretaanSijoitteluun());
+        vx.setValmisSijoiteltavaksi(false);
         vx.setTasasijasaanto(EnumConverter.convert(Tasasijasaanto.class, jono.getTasapistesaanto()));
         vx.setValintatapajonooid(jonoOid);
         v0.getValintatapajonot().add(vx);
