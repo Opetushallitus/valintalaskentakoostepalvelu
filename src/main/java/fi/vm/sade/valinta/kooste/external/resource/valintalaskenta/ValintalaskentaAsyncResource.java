@@ -10,7 +10,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanva
 import rx.Observable;
 
 public interface ValintalaskentaAsyncResource {
-    Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<ValinnanvaiheDTO> callback, Consumer<Throwable> failureCallback);
+    Observable<ValinnanvaiheDTO> lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe);
 
     Peruutettava laskeJaSijoittele(List<LaskeDTO> lista, Consumer<String> callback, Consumer<Throwable> failureCallback);
 

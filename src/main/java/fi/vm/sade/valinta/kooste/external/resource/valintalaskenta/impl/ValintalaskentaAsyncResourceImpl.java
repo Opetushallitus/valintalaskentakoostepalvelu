@@ -52,23 +52,10 @@ public class ValintalaskentaAsyncResourceImpl extends HttpResource implements Va
     }
 
     @Override
-    public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<ValinnanvaiheDTO> callback, Consumer<Throwable> failureCallback) {
-        try {
-            ///valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
-            String url = new StringBuilder("/valintalaskentakoostepalvelu/hakukohde/").append(hakukohdeOid).append("/valinnanvaihe").toString();
-            return new PeruutettavaImpl(getWebClient()
-                    .path(url)
-                    .query("tarjoajaOid", tarjoajaOid)
-                    .async()
-                    .post(Entity.entity(vaihe,
-                            MediaType.APPLICATION_JSON_TYPE), new GsonResponseCallback<ValinnanvaiheDTO>(address, url, callback,
-                            failureCallback, new TypeToken<ValinnanvaiheDTO>() {
-                    }.getType())));
-        } catch (Throwable e) {
-            LOG.error("Valintalaskentaan tulosten tuonti epäonnistui: {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
-            failureCallback.accept(e);
-            return TyhjaPeruutettava.tyhjaPeruutettava();
-        }
+    public Observable<ValinnanvaiheDTO> lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe) {
+        final Entity<ValinnanvaiheDTO> entity = Entity.entity(vaihe, MediaType.APPLICATION_JSON_TYPE);
+        String url = "/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe";
+        return postAsObservable(url, ValinnanvaiheDTO.class, entity, (webclient) -> webclient.query("tarjoajaOid", tarjoajaOid));
     }
 
     @Override

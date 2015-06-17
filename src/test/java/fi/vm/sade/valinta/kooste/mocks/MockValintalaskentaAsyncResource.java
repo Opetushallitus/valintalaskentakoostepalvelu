@@ -1,18 +1,18 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+
+import org.springframework.stereotype.Service;
+
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import rx.Observable;
-
-import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 /**
  * @author Jussi Jartamo
@@ -45,13 +45,13 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
     }
 
     @Override
-    public Peruutettava lisaaTuloksia(String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe, Consumer<ValinnanvaiheDTO> callback, Consumer<Throwable> failureCallback) {
-        throw new UnsupportedOperationException();
+    public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
+        return Observable.just(Collections.EMPTY_LIST);
     }
 
     @Override
-    public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
-        return Observable.just(Collections.EMPTY_LIST);
+    public Observable<ValinnanvaiheDTO> lisaaTuloksia(final String hakuOid, final String hakukohdeOid, final String tarjoajaOid, final ValinnanvaiheDTO vaihe) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

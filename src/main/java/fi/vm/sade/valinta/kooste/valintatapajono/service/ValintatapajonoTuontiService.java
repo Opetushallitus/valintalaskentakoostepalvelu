@@ -76,21 +76,21 @@ public class ValintatapajonoTuontiService {
                     ValinnanvaiheDTO valinnanvaihe = ValintatapajonoTuontiConverter.konvertoi(hakuOid, hakukohdeOid, valintatapajonoOid,
                             valintaperusteetRef.get(), hakemuksetRef.get(), valinnanvaiheetRef.get(), rivit);
                     LOG.info("{}", new GsonBuilder().setPrettyPrinting().create().toJson(valinnanvaihe));
-                    valintalaskentaAsyncResource.lisaaTuloksia(hakuOid, hakukohdeOid, tarjoajaOid, valinnanvaihe,
+                    valintalaskentaAsyncResource.lisaaTuloksia(hakuOid, hakukohdeOid, tarjoajaOid, valinnanvaihe).subscribe(
                             ok -> {
                                 LOG.error("Tuli ok viesti");
-                                dokumentinSeurantaAsyncResource.paivitaDokumenttiId(dokumenttiIdRef.get(), VALMIS,
+                                dokumentinSeurantaAsyncResource.paivitaDokumenttiId(dokumenttiIdRef.get(), VALMIS).subscribe(
                                         dontcare -> {
                                             LOG.error("Saatiin paivitettya dokId");
                                         },
                                         dontcare ->
                                         {
-                                            LOG.error("Ei saatu paivitettya {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
+                                            LOG.error("Ei saatu paivitettya ", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
                                         });
                             },
                             poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef));
                     LOG.info("Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.", hakukohdeOid, hakuOid);
-                    dokumentinSeurantaAsyncResource.paivitaKuvaus(dokumenttiIdRef.get(), "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...",
+                    dokumentinSeurantaAsyncResource.paivitaKuvaus(dokumenttiIdRef.get(), "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...").subscribe(
                             dontcare -> {},
                             dontcare -> {
                                 LOG.error("Onnistumisen ilmoittamisessa virhe! {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
@@ -125,7 +125,7 @@ public class ValintatapajonoTuontiService {
                         }
                     }, poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
 
-        dokumentinSeurantaAsyncResource.luoDokumentti("Valintatapajonon tuonti",
+        dokumentinSeurantaAsyncResource.luoDokumentti("Valintatapajonon tuonti").subscribe(
                 dokumenttiId -> {
                     try {
                         asyncResponse.resume(Response.ok().header("Content-Type", "text/plain").entity(dokumenttiId).build());
@@ -153,7 +153,7 @@ public class ValintatapajonoTuontiService {
             try {
                 String dokumenttiId = dokumenttiIdRef.get();
                 if (dokumenttiId != null) {
-                    dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId, Arrays.asList(new VirheilmoitusDto("", viesti)),
+                    dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId, Arrays.asList(new VirheilmoitusDto("", viesti))).subscribe(
                             dontcare -> {},
                             dontcare -> {
                                 LOG.error("Virheen ilmoittamisessa virhe! {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
