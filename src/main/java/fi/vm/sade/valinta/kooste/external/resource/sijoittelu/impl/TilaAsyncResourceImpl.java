@@ -36,12 +36,7 @@ import rx.Observable;
 public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaAsyncResource {
 
     private static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(Date.class, new JsonDeserializer() {
-                @Override
-                public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                    return new Date(json.getAsJsonPrimitive().getAsLong());
-                }
-            })
+            .registerTypeAdapter(Date.class, (JsonDeserializer) (json, typeOfT, context) -> new Date(json.getAsJsonPrimitive().getAsLong()))
             .create();
 
     @Autowired
