@@ -146,13 +146,9 @@ public class ValintatapajonoResource {
                        ValintatapajonoRivit rivit,
                        @Suspended AsyncResponse asyncResponse) throws Exception {
         asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-        asyncResponse.setTimeoutHandler(new TimeoutHandler() {
-            public void handleTimeout(AsyncResponse asyncResponse) {
-                LOG.error("Valintatapajonon tuonti on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
-                asyncResponse.resume(Response.serverError()
-                        .entity("Valintatapajonon tuonti on aikakatkaistu")
-                        .build());
-            }
+        asyncResponse.setTimeoutHandler(asyncResponse1 -> {
+            LOG.error("Valintatapajonon tuonti on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
+            asyncResponse1.resume(Response.serverError().entity("Valintatapajonon tuonti on aikakatkaistu").build());
         });
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
         authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
