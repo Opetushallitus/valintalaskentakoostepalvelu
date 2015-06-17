@@ -99,14 +99,7 @@ public class ValintatapajonoResource {
                        InputStream file,
                        @Suspended AsyncResponse asyncResponse) throws Exception {
         asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-        asyncResponse.setTimeoutHandler(new TimeoutHandler() {
-            public void handleTimeout(AsyncResponse asyncResponse) {
-                LOG.error("Valintatapajonon tuonti on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
-                asyncResponse.resume(Response.serverError()
-                        .entity("Valintatapajonon tuonti on aikakatkaistu")
-                        .build());
-            }
-        });
+        asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
         authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
         final ByteArrayOutputStream bytes;
@@ -146,15 +139,19 @@ public class ValintatapajonoResource {
                        ValintatapajonoRivit rivit,
                        @Suspended AsyncResponse asyncResponse) throws Exception {
         asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-        asyncResponse.setTimeoutHandler(asyncResponse1 -> {
-            LOG.error("Valintatapajonon tuonti on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
-            asyncResponse1.resume(Response.serverError().entity("Valintatapajonon tuonti on aikakatkaistu").build());
-        });
+        asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
         authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
         valintatapajonoTuontiService.tuo(
                 (valinnanvaiheet, hakemukset) -> {
                     return rivit.getRivit();
                 }, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, asyncResponse);
+    }
+
+    private TimeoutHandler getTimeoutHandler(String hakuOid, String hakukohdeOid) {
+        return asyncResponse1 -> {
+            LOG.error("Valintatapajonon tuonti on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
+            asyncResponse1.resume(Response.serverError().entity("Valintatapajonon tuonti on aikakatkaistu").build());
+        };
     }
 }
