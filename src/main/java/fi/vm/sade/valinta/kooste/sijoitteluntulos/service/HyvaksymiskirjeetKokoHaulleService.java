@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 
+import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
@@ -343,15 +344,15 @@ public class HyvaksymiskirjeetKokoHaulleService {
         try {
             LOG.info("##### Saatiin hakemukset hakukohteelle {}", hakukohdeOid);
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
-            Osoite hakijapalveluidenOsoite = null;
+            Map<String, Osoite> hakijapalveluidenOsoite = Maps.newHashMap();
             if(hakukohdeOid.isPresent()) {
                 MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid.get());
                 Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(tarjoajaOid.get());
-                hakijapalveluidenOsoite = HyvaksymiskirjeetServiceImpl.organisaatioResponseToHakijapalveluidenOsoite(
+                hakijapalveluidenOsoite.put(hakukohdeOid.get(),HyvaksymiskirjeetServiceImpl.organisaatioResponseToHakijapalveluidenOsoite(
                         haeOsoiteKomponentti, organisaatioAsyncResource,
                         newArrayList(Arrays.asList(tarjoajaOid.get())),
                         kohdeHakukohde.getHakukohteenKieli(),
-                        organisaatioFuture.get());
+                        organisaatioFuture.get()));
             }
             LetterBatch l = hyvaksymiskirjeetKomponentti
                     .teeHyvaksymiskirjeet(

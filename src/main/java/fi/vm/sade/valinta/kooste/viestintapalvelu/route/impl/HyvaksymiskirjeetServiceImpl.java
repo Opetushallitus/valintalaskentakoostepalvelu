@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -33,10 +34,6 @@ import rx.subjects.PublishSubject;
 
 import static com.google.common.collect.Lists.*;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.collect.TreeMultiset;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -209,8 +206,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             todellisenJonosijanRatkaisin(hakijat.getResults()),
+                            ImmutableMap.of(hakukohdeOid,
                             organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
-                                    kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
+                                    kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse)),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHyvaksytyt, hakemukset,
                             hyvaksymiskirjeDTO.getHakuOid(),
@@ -268,7 +266,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             todellisenJonosijanRatkaisin(hakijat.getResults()),
-                            hakijapalveluidenOsoite,
+                            ImmutableMap.of(hakukohdeOid,hakijapalveluidenOsoite),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHylatyt, hakemukset,
                             hyvaksymiskirjeDTO.getHakuOid(),
@@ -315,8 +313,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             todellisenJonosijanRatkaisin(hakijat.getResults()),
+                            ImmutableMap.of(hakukohdeOid,
                             organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
-                                    kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse),
+                                    kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse)),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHyvaksytyt, hakemukset,
                             hyvaksymiskirjeDTO.getHakuOid(),

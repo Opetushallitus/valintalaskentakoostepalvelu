@@ -86,7 +86,7 @@ public class HyvaksymiskirjeetKomponentti {
 
     public LetterBatch teeHyvaksymiskirjeet(
             Map<String, TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija,
-            Osoite hakijapalveluidenOsoite,
+            Map<String, Osoite> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat, Collection<Hakemus> hakemukset,
             //String hakukohdeOid,
@@ -263,7 +263,7 @@ public class HyvaksymiskirjeetKomponentti {
             replacements.put("palautusPvm", StringUtils.trimToNull(palautusPvm));
             replacements.put("tulokset", tulosList);
             replacements.put("koulu", koulu.getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(hakukohdeOid)));
-            replacements.put("hakijapalveluidenOsoite", hakijapalveluidenOsoite);
+            replacements.put("hakijapalveluidenOsoite", hakukohdeJaHakijapalveluidenOsoite.get(hakukohdeOid));
             replacements.put("henkilotunnus", new HakemusWrapper(hakemus).getHenkilotunnus());
             replacements.put("koulutus", koulutus.getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
             replacements.put("hakemusOid", hakemus.getOid());
