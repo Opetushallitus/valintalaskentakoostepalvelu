@@ -277,7 +277,7 @@ public class PistesyottoResourceTest {
         MockApplicationAsyncResource.
         getAdditionalDataInput();
         LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(tuodutLisatiedot));
-        Assert.assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!",2, tuodutLisatiedot.size());
+        Assert.assertEquals("Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!", 3, tuodutLisatiedot.size());
         } finally {
             cleanMocks();
         }

@@ -33,14 +33,15 @@ public class PistesyotonTuonti6Test extends PistesyotonTuontiTestBase {
                 valintakoeTunnisteet, osallistumistiedot,
                 valintaperusteet, pistetiedot,
                 pistesyottoTuontiAdapteri);
+
         pistesyottoExcel.getExcel().tuoXlsx(new ClassPathResource("pistesyotto/6/muplattu.xlsx").getInputStream());
         Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = asMap(pistetiedot);
 
         muplaa(pistesyottoTuontiAdapteri, pistetiedotMapping);
 
-        ApplicationAdditionalDataDTO dada = pistetiedot.stream().filter(h -> h.getLastName().equals("Alander")).findFirst().get();
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dada));
-        assertEquals(dada.getAdditionalData().get("SOTE1_kaikkiosiot-OSALLISTUMINEN"), "EI_OSALLISTUNUT");
-        assertEquals(dada.getAdditionalData().get("SOTEKOE_VK_RYHMA1-OSALLISTUMINEN"), "EI_OSALLISTUNUT");
+        ApplicationAdditionalDataDTO alenderinPistetiedot = pistetiedot.stream().filter(h -> h.getLastName().equals("Alander")).findFirst().get();
+        //System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dada));
+        assertEquals(alenderinPistetiedot.getAdditionalData().get("SOTE1_kaikkiosiot-OSALLISTUMINEN"), "EI_OSALLISTUNUT");
+        assertEquals(alenderinPistetiedot.getAdditionalData().get("SOTEKOE_VK_RYHMA1-OSALLISTUMINEN"), "EI_OSALLISTUNUT");
 	}
 }

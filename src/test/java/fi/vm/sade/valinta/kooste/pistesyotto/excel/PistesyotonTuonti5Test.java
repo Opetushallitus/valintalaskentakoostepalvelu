@@ -40,18 +40,18 @@ public class PistesyotonTuonti5Test extends PistesyotonTuontiTestBase {
 
         muplaa(pistesyottoTuontiAdapteri, pistetiedotMapping);
 
-        ApplicationAdditionalDataDTO dada = pistetiedot.stream().filter(h -> h.getLastName().equals("Aaltonen-Ruttunen")).findFirst().get();
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dada));
-        assertEquals("5,5", dada.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84"));
-        assertEquals("OSALLISTUI", dada.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN"));
-        assertEquals("2.00", dada.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6"));
-        assertEquals("OSALLISTUI", dada.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN"));
+        ApplicationAdditionalDataDTO aaltosenPistetiedot = pistetiedot.stream().filter(h -> h.getLastName().equals("Aaltonen-Ruttunen")).findFirst().get();
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(aaltosenPistetiedot));
+        assertEquals("", aaltosenPistetiedot.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84"));
+        assertEquals("MERKITSEMATTA", aaltosenPistetiedot.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN"));
+        assertEquals("2.00", aaltosenPistetiedot.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6"));
+        assertEquals("OSALLISTUI", aaltosenPistetiedot.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN"));
 
-        ApplicationAdditionalDataDTO dada2 = pistetiedot.stream().filter(h -> h.getLastName().equals("Peloton")).findFirst().get();
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dada2));
-        assertEquals("1", dada2.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84"));
-        assertEquals("OSALLISTUI", dada2.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN"));
-        assertEquals("", dada2.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6"));
-        assertEquals("MERKITSEMATTA", dada2.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN"));
+        ApplicationAdditionalDataDTO pelottomanPistetiedot = pistetiedot.stream().filter(h -> h.getLastName().equals("Peloton")).findFirst().get();
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(pelottomanPistetiedot));
+        assertEquals("", pelottomanPistetiedot.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84"));
+        assertEquals("MERKITSEMATTA", pelottomanPistetiedot.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN"));
+        assertEquals("", pelottomanPistetiedot.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6"));
+        assertEquals("MERKITSEMATTA", pelottomanPistetiedot.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN"));
 	}
 }

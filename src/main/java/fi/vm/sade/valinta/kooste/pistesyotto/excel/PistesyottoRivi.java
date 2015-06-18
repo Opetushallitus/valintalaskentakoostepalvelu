@@ -1,5 +1,12 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
+import static fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel.VAKIO_EI_OSALLISTUNUT;
+import static fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel.VAKIO_EI_VAADITA;
+import static fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel.VAKIO_MERKITSEMATTA;
+import static fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel.VAKIO_OSALLISTUI;
+import static org.apache.commons.lang.StringUtils.isBlank;
+
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -21,21 +28,23 @@ public class PistesyottoRivi {
 
     public Map<String, String> asAdditionalData() {
         Map<String, String> data = Maps.newHashMap();
-        for (PistesyottoArvo arvo : arvot) {
-            if (!StringUtils.isBlank(arvo.getArvo()) && !StringUtils.isBlank(arvo.getTila())) {
-                if (!arvo.getTila().equals(PistesyottoExcel.VAKIO_EI_OSALLISTUNUT)) {
-                    data.put(arvo.getTunniste(), arvo.getArvo());
-                } else {
-                    data.put(arvo.getTunniste(), "");
+        for (PistesyottoArvo pisteSyottoArvo : arvot) {
+            if (!isBlank(pisteSyottoArvo.getTila())) {
+                String arvo = pisteSyottoArvo.getArvo();
+                String tila = pisteSyottoArvo.getTila();
+
+                if (isBlank(arvo) && tila.equals(VAKIO_OSALLISTUI)) {
+                    tila = VAKIO_MERKITSEMATTA;
                 }
-                data.put(arvo.getOsallistuminenTunniste(), arvo.getTila());
-            } else if (StringUtils.isBlank(arvo.getArvo()) && arvo.getTila().equals(PistesyottoExcel.VAKIO_EI_OSALLISTUNUT)) {
-                data.put(arvo.getOsallistuminenTunniste(), arvo.getTila());
-                data.put(arvo.getTunniste(), "");
-            } else if (StringUtils.isBlank(arvo.getArvo()) && arvo.getTila().equals(PistesyottoExcel.VAKIO_OSALLISTUI)) {
-                data.put(arvo.getTunniste(), "");
-                data.put(arvo.getOsallistuminenTunniste(), PistesyottoExcel.VAKIO_MERKITSEMATTA);
+
+                if (Arrays.asList(VAKIO_EI_OSALLISTUNUT, VAKIO_MERKITSEMATTA).contains(tila)) {
+                    arvo = "";
+                }
+
+                data.put(pisteSyottoArvo.getTunniste(), arvo);
+                data.put(pisteSyottoArvo.getOsallistuminenTunniste(), tila);
             }
+
         }
         return data;
     }

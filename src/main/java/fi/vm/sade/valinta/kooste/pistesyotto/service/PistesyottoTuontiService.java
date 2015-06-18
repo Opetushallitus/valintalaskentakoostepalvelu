@@ -96,11 +96,6 @@ public class PistesyottoTuontiService {
                             .flatMap(rivi -> {
                                 ApplicationAdditionalDataDTO additionalData = pistetiedotMapping.get(rivi.getOid());
                                 Map<String, String> newPistetiedot = rivi.asAdditionalData();
-                                if (newPistetiedot == null || newPistetiedot.isEmpty()) {
-                                    LOG.info("Rivi on muuttunut ja eheä mutta pistetiedot on tyhjäjoukko. Hakemuspalvelu tallentaa vain muutokset joten ohitetaan rivi.");
-                                    return Stream.empty();
-                                }
-                                LOG.debug("Rivi on muuttunut ja eheä. Tehdään päivitys hakupalveluun");
                                 additionalData.setAdditionalData(newPistetiedot);
                                 return Stream.of(additionalData);
                             }).filter(Objects::nonNull).collect(Collectors.toList());
