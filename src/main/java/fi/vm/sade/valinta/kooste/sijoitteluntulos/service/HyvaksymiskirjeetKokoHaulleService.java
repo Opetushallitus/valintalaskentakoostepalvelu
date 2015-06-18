@@ -69,7 +69,6 @@ public class HyvaksymiskirjeetKokoHaulleService {
     private final DokumenttiAsyncResource dokumenttiAsyncResource;
     private final OrganisaatioAsyncResource organisaatioAsyncResource;
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
-    private final Observable<Long> pulse;
 
     @Autowired
     private HyvaksymiskirjeetKokoHaulleService(
@@ -89,7 +88,6 @@ public class HyvaksymiskirjeetKokoHaulleService {
         this.dokumenttiAsyncResource = dokumenttiAsyncResource;
         this.organisaatioAsyncResource = organisaatioAsyncResource;
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
-        this.pulse = Observable.interval(500L, TimeUnit.MILLISECONDS);
     }
 
     private static String nimiUriToTag(String nimiUri, String deflt) {
@@ -274,7 +272,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                     prosessi.getAsiointikieli(),
                                     resurssit.hakijat,
                                     resurssit.hakemukset),
-                            Observable.timer(3L, TimeUnit.MINUTES)
+                            Observable.timer(getDelay(hakukohdeJaResurssit.get().hakukohdeOid), TimeUnit.MINUTES)
                     ).subscribe(
                             s -> {
                                 LOG.error("Hakukohde {} valmis", resurssit.hakukohdeOid);
@@ -296,6 +294,10 @@ public class HyvaksymiskirjeetKokoHaulleService {
             LOG.error("### Hyväksymiskirjeiden generointi haulle {} on valmis", hakuOid);
 
         }
+    }
+
+    private Long getDelay(Optional<String> hakukohdeOid) {
+        return hakukohdeOid.map(h -> 3L).orElse(780L);
     }
 
     private Observable<?> getHakukohteenHyvaksymiskirjeObservable(String hakuOid, Optional<String> hakukohdeOid, Optional<String> defaultValue, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset) {
@@ -377,45 +379,50 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                 LOG.info("##### Viestintäpalvelukutsu onnistui {}", hakukohdeOid);
                                 final String batchId = letterResponse.getBatchId();
                                 LOG.info("##### Odotetaan statusta... BatchId={}", batchId);
-                                AtomicReference<Subscription> pulseRef = new AtomicReference<>();
-                                final Observable<String> plainObservable = Observable.create(subscriber -> {
-                                    pulseRef.set(pulse.subscribe(
-                                            aikaTehdaJotain -> {
-                                                LOG.error("Status PING... {}", batchId);
-                                                viestintapalveluAsyncResource.haeStatusObservable(batchId)
-                                                        .subscribe(
-                                                                b -> {
-                                                                    if (VALMIS_STATUS.equals(b.getStatus())) {
-                                                                        LOG.info("##### Dokumentti {} valmistui hakukohteelle {} joten uudelleen nimetään se", batchId, hakukohdeOid);
-                                                                        try {
-                                                                            if (!asiointikieli.isPresent()) {
-                                                                                dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
-                                                                                        .subscribe(
-                                                                                                success -> {
-                                                                                                    LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid);
-                                                                                                },
-                                                                                                error -> {
-                                                                                                    LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid, error);
-                                                                                                }
-                                                                                        );
-                                                                            } else {
-                                                                                LOG.debug("Uudelleen nimeämistä ei tarvita, kun kirjeitä luodaan asiointikielellä");
-                                                                            }
-                                                                        } catch (Throwable ttt) {
-                                                                            LOG.error("", ttt);
-                                                                        }
-                                                                        subscriber.onNext(batchId);
-                                                                    }
-                                                                    if (KESKEYTETTY_STATUS.equals(b.getStatus())) {
-                                                                        subscriber.onError(new RuntimeException("Viestintäpalvelu palautti error statuksen hakukohteelle " + hakukohdeOid));
-                                                                    }
-                                                                }
-                                                        );
-                                            }
-                                    ));
+                                PublishSubject<String> stop = PublishSubject.create();
 
-                                });
-                                plainObservable.subscribe(subscribeWithFinally(() -> pulseRef.get().unsubscribe()));
+                                final Observable<String> plainObservable = wrapAsRunOnlyOnceObservable(Observable.create(subscriber -> {
+                                    Observable
+                                            .interval(1, TimeUnit.SECONDS)
+                                            .take((int) TimeUnit.MINUTES.toSeconds(getDelay(hakukohdeOid)))
+                                            .takeUntil(stop)
+                                            .subscribe(
+                                                    aikaTehdaJotain -> {
+
+                                                        LOG.error("Status PING... {}", batchId);
+                                                        viestintapalveluAsyncResource.haeStatusObservable(batchId)
+                                                                .subscribe(
+                                                                        b -> {
+                                                                            if (VALMIS_STATUS.equals(b.getStatus())) {
+                                                                                try {
+                                                                                    if (hakukohdeOid.isPresent()) {
+                                                                                        LOG.info("##### Dokumentti {} valmistui hakukohteelle {} joten uudelleen nimetään se", batchId, hakukohdeOid.get());
+                                                                                        dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid.get() + ".pdf")
+                                                                                                .subscribe(
+                                                                                                        success -> {
+                                                                                                            LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid.get());
+                                                                                                        },
+                                                                                                        error -> {
+                                                                                                            LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid.get(), error);
+                                                                                                        }
+                                                                                                );
+                                                                                    }
+                                                                                } catch (Throwable ttt) {
+                                                                                    LOG.error("", ttt);
+                                                                                }
+                                                                                subscriber.onNext(batchId);
+                                                                                stop.onNext("LOPETUS");
+                                                                            }
+                                                                            if (KESKEYTETTY_STATUS.equals(b.getStatus())) {
+                                                                                subscriber.onError(new RuntimeException("Viestintäpalvelu palautti error statuksen hakukohteelle " + hakukohdeOid.get()));
+                                                                                stop.onNext("LOPETUS");
+                                                                            }
+                                                                        }
+                                                                );
+                                                    }
+                                            );
+
+                                }));
 
                                 return plainObservable;
                             }
