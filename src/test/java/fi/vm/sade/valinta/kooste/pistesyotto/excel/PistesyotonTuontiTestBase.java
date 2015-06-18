@@ -104,12 +104,11 @@ public class PistesyotonTuontiTestBase {
                 }).toList();
     }
 
-    void tuoExcel(final List<ValintakoeOsallistuminenDTO> osallistumistiedot, final List<ValintaperusteDTO> valintaperusteet, final List<ApplicationAdditionalDataDTO> pistetiedot, final String tiedosto, final String hakukohdeOid) throws IOException {
+    void tuoExcel(final List<ValintakoeOsallistuminenDTO> osallistumistiedot, final List<ValintaperusteDTO> valintaperusteet, final List<ApplicationAdditionalDataDTO> pistetiedot, final String tiedosto, final String hakuOid, final String hakukohdeOid) throws IOException {
         List<Hakemus> hakemukset = Collections.emptyList();
         Collection<String> valintakoeTunnisteet = getValintakoeTunnisteet(valintaperusteet);
         PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
-        PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
-            "1.2.246.562.29.173465377510", hakukohdeOid, null, "Haku",
+        PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(hakuOid, hakukohdeOid, null, "Haku",
             "hakukohdeNimi", "tarjoajaNimi", hakemukset,
             Collections.emptySet(),
             valintakoeTunnisteet, osallistumistiedot,

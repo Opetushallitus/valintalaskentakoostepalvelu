@@ -19,7 +19,7 @@ public class PistesyotonTuonti5Test extends PistesyotonTuontiTestBase {
 		List<ValintaperusteDTO> valintaperusteet = lueValintaperusteet("5/List_ValintaperusteDTO.json");
 		List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("5/List_ApplicationAdditionalDataDTO.json");
 
-        tuoExcel(osallistumistiedot, valintaperusteet, pistetiedot, "5/muplattu.xlsx", "1.2.246.562.20.88759382968");
+        tuoExcel(osallistumistiedot, valintaperusteet, pistetiedot, "5/muplattu.xlsx", "1.2.246.562.29.173465377510", "1.2.246.562.20.88759382968");
 
         ApplicationAdditionalDataDTO aaltosenPistetiedot = pistetiedot.stream().filter(h -> h.getLastName().equals("Aaltonen-Ruttunen")).findFirst().get();
         System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(aaltosenPistetiedot));
