@@ -24,7 +24,7 @@ public class HakemusWrapper {
     public final static String ETUNIMET = "Etunimet";
     private final static String KUTSUMANIMI = "Kutsumanimi";
     public final static String SUKUNIMI = "Sukunimi";
-    private final static String ASIOINTIKIELI = "asiointikieli";
+    public final static String ASIOINTIKIELI = "asiointikieli";
     private final static String LUPAJULKAISUUN = "lupaJulkaisu";
     public final static String HETU = "Henkilotunnus";
     private final static String SAHKOPOSTI = "Sähköposti";

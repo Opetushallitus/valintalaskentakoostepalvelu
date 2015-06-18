@@ -88,7 +88,7 @@ public class HyvaksymiskirjeetKomponentti {
             Map<String, TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija,
             Osoite hakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-            Collection<HakijaDTO> hakukohteenHakijat, List<Hakemus> hakemukset,
+            Collection<HakijaDTO> hakukohteenHakijat, Collection<Hakemus> hakemukset,
             //String hakukohdeOid,
             String hakuOid,
             Optional<String> asiointikieli,

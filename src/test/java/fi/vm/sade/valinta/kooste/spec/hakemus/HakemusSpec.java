@@ -4,12 +4,13 @@ import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.spec.ConstantsSpec;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 
 /**
  * @author Jussi Jartamo
  */
-public class HakemusSpec {
+public class HakemusSpec extends ConstantsSpec {
 
     public static class AdditionalDataBuilder {
         private ApplicationAdditionalDataDTO applicationAdditionalDataDTO = new ApplicationAdditionalDataDTO();
@@ -58,6 +59,10 @@ public class HakemusSpec {
         }
         public HakemusBuilder setOid(String oid) {
             hakemus.setOid(oid);
+            return this;
+        }
+        public HakemusBuilder setAsiointikieli(String asiointikieli) {
+            hakemus.getAnswers().getHenkilotiedot().put(HakemusWrapper.ASIOINTIKIELI, asiointikieli);
             return this;
         }
         public HakemusBuilder addHakutoive(String hakukohdeOid) {
