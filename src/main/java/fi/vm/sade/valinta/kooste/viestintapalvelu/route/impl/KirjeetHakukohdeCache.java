@@ -43,7 +43,9 @@ public class KirjeetHakukohdeCache {
                         String opetuskieli = getOpetuskieli(hakukohde.getOpetusKielet());
                         LOG.error("Hakukohdekieli({}) Oid({}) Opetuskieli({})", hakukohdeNimi.getKieli(), hakukohdeOid, opetuskieli);
                         Teksti tarjoajaNimi = new Teksti(hakukohde.getTarjoajaNimet());
-                        return new MetaHakukohde(hakukohdeNimi, tarjoajaNimi, hakukohdeNimi.getKieli(), opetuskieli);
+                        return new MetaHakukohde(
+                                hakukohde.getTarjoajaOids().iterator().next(),
+                                hakukohdeNimi, tarjoajaNimi, hakukohdeNimi.getKieli(), opetuskieli);
                     }
                 });
     }

@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
@@ -88,35 +89,21 @@ public class HyvaksymiskirjeetKomponentti {
             Osoite hakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat, List<Hakemus> hakemukset,
-            String hakukohdeOid, String hakuOid, String tarjoajaOid,
+            //String hakukohdeOid,
+            String hakuOid,
+            Optional<String> asiointikieli,
             String sisalto, String tag,
             String templateName,
             String palautusPvm,
             String palautusAika,
             boolean iPosti) {
-
-        LOG.debug("Hyvaksymiskirjeet for hakukohde '{}' and haku '{}' and sijoitteluajo '{}'", new Object[]{hakukohdeOid, hakuOid,});
-        assert (hakukohdeOid != null);
+        LOG.debug("Hyvaksymiskirjeet for haku '{}'", hakuOid);
         assert (hakuOid != null);
-        Map<String, Hakemus> hakukohteenHakemukset = Maps.newHashMap();
-        for (Hakemus h : hakemukset) {
-            hakukohteenHakemukset.put(h.getOid(), h);
-        }
-        final int kaikkiHakukohteenHyvaksytyt = hakukohteenHakijat.size();
-        if (kaikkiHakukohteenHyvaksytyt == 0) {
-            LOG.error("Hyväksymiskirjeitä yritetään luoda hakukohteelle {} millä ei ole hyväksyttyjä hakijoita!", hakukohdeOid);
-            throw new HakemuspalveluException("Hakukohteella on oltava vähintään yksi hyväksytty hakija että hyväksymiskirjeet voidaan luoda!");
-        }
+        Map<String, Hakemus> hakukohteenHakemukset = hakemukset.stream().collect(
+                Collectors.toMap(h -> h.getOid(), h -> h));
         final List<Letter> kirjeet = new ArrayList<Letter>();
-        final Teksti koulu;
-        final Teksti koulutus;
-        final String preferoituKielikoodi;
-        {
-            MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
-            koulu = metakohde.getTarjoajaNimi();
-            koulutus = metakohde.getHakukohdeNimi();
-            preferoituKielikoodi = metakohde.getOpetuskieli();
-        }
+        /*
+        */
         final Map<fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
         tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HARKINNANVARAISESTI_HYVAKSYTTY, 1);
         tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY, 2);
@@ -128,13 +115,29 @@ public class HyvaksymiskirjeetKomponentti {
         tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY, 8);
         Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
+        LetterBatch viesti = new LetterBatch(kirjeet);
         for (HakijaDTO hakija : hakukohteenHakijat) {
+            final String hakukohdeOid =
+                    hyvaksytynHakutoiveenHakukohdeOid(hakija);
+
+            final Teksti koulu;
+            final Teksti koulutus;
+            final String preferoituKielikoodi;
+            final String tarjoajaOid;
+            {
+                MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
+                koulu = metakohde.getTarjoajaNimi();
+                koulutus = metakohde.getHakukohdeNimi();
+                preferoituKielikoodi = asiointikieli.orElse(metakohde.getOpetuskieli());
+                tarjoajaOid = metakohde.getTarjoajaOid();
+            }
             final String hakemusOid = hakija.getHakemusOid();
             final Hakemus hakemus = hakukohteenHakemukset.get(hakemusOid);
             final Osoite osoite = osoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
             final List<Map<String, Object>> tulosList = new ArrayList<Map<String, Object>>();
             // Hyvaksymiskirjeilla preferoitukieli tulee hakukohteen kielesta
             // jarjestyksessa suomi,ruotsi,englanti
+
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
                 Map<String, Object> tulokset = new HashMap<String, Object>();
@@ -264,7 +267,14 @@ public class HyvaksymiskirjeetKomponentti {
             replacements.put("henkilotunnus", new HakemusWrapper(hakemus).getHenkilotunnus());
             replacements.put("koulutus", koulutus.getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
             replacements.put("hakemusOid", hakemus.getOid());
+
+            replacements.put("hakukohde", koulutus.getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
+            replacements.put("tarjoaja", koulu.getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(tarjoajaOid)));
             kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements));
+
+            viesti.setFetchTarget(hakukohdeOid);
+            viesti.setOrganizationOid(tarjoajaOid);
+            viesti.setLanguageCode(preferoituKielikoodi);
         }
 
         LOG.info("Yritetään luoda viestintapalvelulta hyvaksymiskirjeitä {} kappaletta!", kirjeet.size());
@@ -278,21 +288,22 @@ public class HyvaksymiskirjeetKomponentti {
                 }
             }
         });
-        LetterBatch viesti = new LetterBatch(kirjeet);
         viesti.setApplicationPeriod(hakuOid);
-        viesti.setFetchTarget(hakukohdeOid);
-        viesti.setLanguageCode(preferoituKielikoodi);
-        viesti.setOrganizationOid(tarjoajaOid);
         viesti.setTag(tag);
         viesti.setTemplateName(templateName);
         viesti.setIposti(iPosti);
         Map<String, Object> templateReplacements = Maps.newHashMap();
         templateReplacements.put("sisalto", sisalto);
-        templateReplacements.put("hakukohde", koulutus.getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
-        templateReplacements.put("tarjoaja", koulu.getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(hakukohdeOid)));
         viesti.setTemplateReplacements(templateReplacements);
-        LOG.debug("\r\n{}", new ViestiWrapper(viesti));
         return viesti;
+    }
+
+    private String hyvaksytynHakutoiveenHakukohdeOid(HakijaDTO hakija) {
+        return hakija.getHakutoiveet().stream()
+                .filter(h -> h.getHakutoiveenValintatapajonot().stream()
+                        .filter(j -> j.getTila().isHyvaksytty()).findAny().isPresent()
+                )
+                .findAny().get().getHakukohdeOid();
     }
 
     //
@@ -313,6 +324,7 @@ public class HyvaksymiskirjeetKomponentti {
                         e.printStackTrace();
                         LOG.error("Tarjonnasta ei saatu hakukohdetta {}: {}", new Object[]{hakukohdeOid, e.getMessage()});
                         metaKohteet.put(hakukohdeOid, new MetaHakukohde(
+                                "",
                                 new Teksti(new StringBuilder().append("Hakukohde ").append(hakukohdeOid).append(" ei löydy tarjonnasta!").toString()),
                                 new Teksti(TYHJA_TARJOAJANIMI)));
                     }

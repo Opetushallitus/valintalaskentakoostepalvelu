@@ -150,6 +150,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                             e.printStackTrace();
                             LOG.error("Tarjonnasta ei saatu hakukohdetta {}: {}", new Object[]{hakukohdeOid, e.getMessage()});
                             metaKohteet.put(hakukohdeOid, new MetaHakukohde(
+                                    "",
                                     new Teksti(new StringBuilder().append("Hakukohde ").append(hakukohdeOid).append(" ei löydy tarjonnasta!").toString()),
                                     new Teksti("Nimetön hakukohde")));
                         }

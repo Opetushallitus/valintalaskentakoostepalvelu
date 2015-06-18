@@ -11,26 +11,26 @@ public class MetaHakukohde {
     private final Teksti tarjoajaNimi;
     private final String hakukohteenKieli;
     private final String opetuskieli;
+    private final String tarjoajaOid;
 
-    public MetaHakukohde(Teksti hakukohdeNimi, Teksti tarjoajaNimi) {
-        this.hakukohdeNimi = hakukohdeNimi;
-        this.tarjoajaNimi = tarjoajaNimi;
-        this.hakukohteenKieli = null;
-        this.opetuskieli = null;
+    public MetaHakukohde(String tarjoajaOid, Teksti hakukohdeNimi, Teksti tarjoajaNimi) {
+        this(tarjoajaOid, hakukohdeNimi, tarjoajaNimi, null, null);
     }
 
-    public MetaHakukohde(Teksti hakukohdeNimi, Teksti tarjoajaNimi, String hakukohteenKieli, String opetuskieli) {
+    public MetaHakukohde(String tarjoajaOid, Teksti hakukohdeNimi, Teksti tarjoajaNimi, String hakukohteenKieli, String opetuskieli) {
         this.hakukohdeNimi = hakukohdeNimi;
         this.tarjoajaNimi = tarjoajaNimi;
         this.hakukohteenKieli = hakukohteenKieli;
         this.opetuskieli = opetuskieli;
+        this.tarjoajaOid = tarjoajaOid;
     }
 
-    public MetaHakukohde(Teksti hakukohdeNimi, Teksti tarjoajaNimi, String hakukohteenKieli) {
-        this.hakukohdeNimi = hakukohdeNimi;
-        this.tarjoajaNimi = tarjoajaNimi;
-        this.hakukohteenKieli = hakukohteenKieli;
-        this.opetuskieli = null;
+    public MetaHakukohde(String tarjoajaOid, Teksti hakukohdeNimi, Teksti tarjoajaNimi, String hakukohteenKieli) {
+        this(tarjoajaOid, hakukohdeNimi, tarjoajaNimi, hakukohteenKieli, null);
+    }
+
+    public String getTarjoajaOid() {
+        return tarjoajaOid;
     }
 
     public String getOpetuskieli() {

@@ -343,9 +343,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             hyvaksytytHakijat,
                             hakemukset,
-                            hakukohdeOid,
                             hakuOid,
-                            tarjoaja,
+                            asiointikieli,
                             //
                             defaultValue,
                             tag,
