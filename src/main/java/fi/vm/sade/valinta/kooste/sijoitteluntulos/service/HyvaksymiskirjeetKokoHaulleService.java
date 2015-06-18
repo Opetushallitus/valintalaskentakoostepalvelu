@@ -365,7 +365,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                             try {
                                 return Optional.ofNullable(HyvaksymiskirjeetServiceImpl.organisaatioResponseToHakijapalveluidenOsoite(
                                         haeOsoiteKomponentti, organisaatioAsyncResource,
-                                        newArrayList(Arrays.asList(tarjoajaOid.get())),
+                                        newArrayList(Arrays.asList(t)),
                                         asiointikieli.get(),
                                         organisaatioAsyncResource.haeOrganisaatio(t).get()));
                             } catch (Throwable t0) {
