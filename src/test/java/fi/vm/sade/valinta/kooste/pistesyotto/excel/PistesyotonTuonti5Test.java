@@ -2,19 +2,14 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.core.io.ClassPathResource;
 
 import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 
 public class PistesyotonTuonti5Test extends PistesyotonTuontiTestBase {
@@ -24,21 +19,7 @@ public class PistesyotonTuonti5Test extends PistesyotonTuontiTestBase {
 		List<ValintaperusteDTO> valintaperusteet = lueValintaperusteet("5/List_ValintaperusteDTO.json");
 		List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("5/List_ApplicationAdditionalDataDTO.json");
 
-        Collection<String> valintakoeTunnisteet = getValintakoeTunnisteet(valintaperusteet);
-
-        List<Hakemus> hakemukset = Collections.emptyList();
-        PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
-        PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
-                "1.2.246.562.29.173465377510", "1.2.246.562.20.88759382968", null, "Haku",
-                "hakukohdeNimi", "tarjoajaNimi", hakemukset,
-                Collections.emptySet(),
-                valintakoeTunnisteet, osallistumistiedot,
-                valintaperusteet, pistetiedot,
-                pistesyottoTuontiAdapteri);
-        pistesyottoExcel.getExcel().tuoXlsx(new ClassPathResource("pistesyotto/5/muplattu.xlsx").getInputStream());
-        Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = asMap(pistetiedot);
-
-        muplaa(pistesyottoTuontiAdapteri, pistetiedotMapping);
+        tuoExcel(osallistumistiedot, valintaperusteet, pistetiedot, "5/muplattu.xlsx", "1.2.246.562.20.88759382968");
 
         ApplicationAdditionalDataDTO aaltosenPistetiedot = pistetiedot.stream().filter(h -> h.getLastName().equals("Aaltonen-Ruttunen")).findFirst().get();
         System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(aaltosenPistetiedot));

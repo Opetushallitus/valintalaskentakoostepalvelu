@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -103,47 +104,23 @@ public class PistesyotonTuontiTestBase {
                 }).toList();
     }
 
-    Map<String, ApplicationAdditionalDataDTO> asMap(
-        Collection<ApplicationAdditionalDataDTO> datas) {
-        Map<String, ApplicationAdditionalDataDTO> mapping = Maps.newHashMap();
-        for (ApplicationAdditionalDataDTO data : datas) {
-            mapping.put(data.getOid(), data);
-        }
-        return mapping;
+    void tuoExcel(final List<ValintakoeOsallistuminenDTO> osallistumistiedot, final List<ValintaperusteDTO> valintaperusteet, final List<ApplicationAdditionalDataDTO> pistetiedot, final String tiedosto, final String hakukohdeOid) throws IOException {
+        List<Hakemus> hakemukset = Collections.emptyList();
+        Collection<String> valintakoeTunnisteet = getValintakoeTunnisteet(valintaperusteet);
+        PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
+        PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
+            "1.2.246.562.29.173465377510", hakukohdeOid, null, "Haku",
+            "hakukohdeNimi", "tarjoajaNimi", hakemukset,
+            Collections.emptySet(),
+            valintakoeTunnisteet, osallistumistiedot,
+            valintaperusteet, pistetiedot,
+            pistesyottoTuontiAdapteri);
+        pistesyottoExcel.getExcel().tuoXlsx(new ClassPathResource("pistesyotto/" + tiedosto).getInputStream());
+        muplaa(pistesyottoTuontiAdapteri, pistetiedot);
     }
 
-    PistesyottoDataRiviKuuntelija getPistesyottoDataRiviKuuntelija() {
-        return new PistesyottoDataRiviKuuntelija() {
-            @Override
-            public void pistesyottoDataRiviTapahtuma(
-                PistesyottoRivi pistesyottoRivi) {
-                if (!pistesyottoRivi.isValidi()) {
-                    for (PistesyottoArvo arvo : pistesyottoRivi.getArvot()) {
-                        if (!arvo.isValidi()) {
-                            String virheIlmoitus = new StringBuffer()
-                                .append("Henkilöllä ")
-                                .append(pistesyottoRivi.getNimi())
-                                    //
-                                .append(" (")
-                                .append(pistesyottoRivi.getOid())
-                                .append(")")
-                                    //
-                                .append(" oli virheellinen arvo '")
-                                .append(arvo.getArvo()).append("'")
-                                .append(" kohdassa ")
-                                .append(arvo.getTunniste()).toString();
-
-                            LOG.error("{}", virheIlmoitus);
-                        }
-                    }
-                } else {
-                    LOG.error("{}", pistesyottoRivi);
-                }
-            }
-        };
-    }
-
-    void muplaa(final PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, final Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping) {
+    void muplaa(final PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri, final List<ApplicationAdditionalDataDTO> pistetiedot) {
+        Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = mapByOid(pistetiedot);
         List<ApplicationAdditionalDataDTO> uudetPistetiedot = Lists.newArrayList();
         for (PistesyottoRivi rivi : pistesyottoTuontiAdapteri.getRivit()) {
             ApplicationAdditionalDataDTO additionalData = pistetiedotMapping.get(rivi.getOid());
@@ -166,6 +143,14 @@ public class PistesyotonTuontiTestBase {
                 }
             }
         }
+    }
+
+    private Map<String, ApplicationAdditionalDataDTO> mapByOid(Collection<ApplicationAdditionalDataDTO> datas) {
+        Map<String, ApplicationAdditionalDataDTO> mapping = Maps.newHashMap();
+        for (ApplicationAdditionalDataDTO data : datas) {
+            mapping.put(data.getOid(), data);
+        }
+        return mapping;
     }
 
     void tallenna(final Excel excel) throws IOException {

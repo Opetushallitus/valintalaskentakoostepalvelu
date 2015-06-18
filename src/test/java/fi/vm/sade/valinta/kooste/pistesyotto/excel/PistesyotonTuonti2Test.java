@@ -30,12 +30,13 @@ public class PistesyotonTuonti2Test extends PistesyotonTuontiTestBase {
 		Assert.assertFalse(pistetiedot.isEmpty());
 		List<Hakemus> hakemukset = lueHakemukset("2/listfull.json");
 		Assert.assertFalse(hakemukset.isEmpty());
-		PistesyottoDataRiviKuuntelija kuuntelija = getPistesyottoDataRiviKuuntelija();
+        PistesyottoDataRiviKuuntelija kuuntelija = new PistesyottoDataRiviListAdapter();
 		Collection<String> valintakoeTunnisteet = getValintakoeTunnisteet(valintaperusteet);
 		PistesyottoExcel pistesyottoExcel = new PistesyottoExcel("testioidi1",
 				"1.2.246.562.20.61064567623", "jep", "", "", "",
 				hakemukset,Collections.<String>emptySet(), valintakoeTunnisteet,
 				osallistumistiedot, valintaperusteet, pistetiedot, kuuntelija);
+
 		//tallenna(pistesyottoExcel.getExcel());
 	}
 }

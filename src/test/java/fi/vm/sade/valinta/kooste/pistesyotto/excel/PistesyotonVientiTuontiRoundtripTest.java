@@ -18,9 +18,9 @@ import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 
-public class PistesyotonTuontiTest extends PistesyotonTuontiTestBase {
+public class PistesyotonVientiTuontiRoundtripTest extends PistesyotonTuontiTestBase {
 
-	private static final Logger LOG = LoggerFactory.getLogger(PistesyotonTuontiTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PistesyotonVientiTuontiRoundtripTest.class);
 
 	@Test
 	public void testaaOutput() throws FileNotFoundException, IOException,
@@ -28,8 +28,7 @@ public class PistesyotonTuontiTest extends PistesyotonTuontiTestBase {
 		List<ValintakoeOsallistuminenDTO> osallistumistiedot = lueOsallistumisTiedot("List_ValintakoeOsallistuminenDTO.json");
 		List<ValintaperusteDTO> valintaperusteet = lueValintaperusteet("List_ValintaperusteDTO.json");
 		List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
-
-		PistesyottoDataRiviKuuntelija kuuntelija = getPistesyottoDataRiviKuuntelija();
+		PistesyottoDataRiviKuuntelija kuuntelija = new PistesyottoDataRiviListAdapter();
 
 		PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
 				"testioidi1",
