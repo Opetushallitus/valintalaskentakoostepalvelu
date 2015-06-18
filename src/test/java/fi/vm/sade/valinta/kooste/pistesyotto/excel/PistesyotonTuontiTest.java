@@ -1,109 +1,35 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 
-/**
- * 
- * @author Jussi Jartamo
- * 
- *         Pistesyoton tuonti XLSX-tiedostolla
- */
-// @Ignore
-public class PistesyotonTuontiTest {
+public class PistesyotonTuontiTest extends PistesyotonTuontiTestBase {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(PistesyotonTuontiTest.class);
-
-	private String pistesyottoResurssi(String resurssi) throws IOException {
-		InputStream i;
-		String s = IOUtils.toString(i = new ClassPathResource("pistesyotto/"
-				+ resurssi).getInputStream(), "UTF-8");
-		IOUtils.closeQuietly(i);
-		return s;
-	}
+	private static final Logger LOG = LoggerFactory.getLogger(PistesyotonTuontiTest.class);
 
 	@Test
 	public void testaaOutput() throws FileNotFoundException, IOException,
 			JsonIOException, JsonSyntaxException, Exception {
-		List<ValintakoeOsallistuminenDTO> osallistumistiedot;
-		String s = null;
-		try {
-			s = pistesyottoResurssi("List_ValintakoeOsallistuminenDTO.json");
-			osallistumistiedot = new Gson().fromJson(
+		List<ValintakoeOsallistuminenDTO> osallistumistiedot = lueOsallistumisTiedot("List_ValintakoeOsallistuminenDTO.json");
+		List<ValintaperusteDTO> valintaperusteet = lueValintaperusteet("List_ValintaperusteDTO.json");
+		List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
 
-			s, new TypeToken<ArrayList<ValintakoeOsallistuminenDTO>>() {
-			}.getType());
-		} catch (Exception e) {
-			LOG.error("\r\n{}\r\n", s);
-			throw e;
-		}
-		List<ValintaperusteDTO> valintaperusteet = new Gson().fromJson(
-
-		pistesyottoResurssi("List_ValintaperusteDTO.json"),
-				new TypeToken<ArrayList<ValintaperusteDTO>>() {
-				}.getType());
-		List<ApplicationAdditionalDataDTO> pistetiedot = new Gson().fromJson(
-
-		pistesyottoResurssi("List_ApplicationAdditionalDataDTO.json"),
-				new TypeToken<ArrayList<ApplicationAdditionalDataDTO>>() {
-				}.getType());
-
-		PistesyottoDataRiviKuuntelija kuuntelija = new PistesyottoDataRiviKuuntelija() {
-			@Override
-			public void pistesyottoDataRiviTapahtuma(
-					PistesyottoRivi pistesyottoRivi) {
-				if (!pistesyottoRivi.isValidi()) {
-					for (PistesyottoArvo arvo : pistesyottoRivi.getArvot()) {
-						if (!arvo.isValidi()) {
-							String virheIlmoitus = new StringBuffer()
-									.append("Henkilöllä ")
-									.append(pistesyottoRivi.getNimi())
-									//
-									.append(" (")
-									.append(pistesyottoRivi.getOid())
-									.append(")")
-									//
-									.append(" oli virheellinen arvo '")
-									.append(arvo.getArvo()).append("'")
-									.append(" kohdassa ")
-									.append(arvo.getTunniste()).toString();
-
-							LOG.error("{}", virheIlmoitus);
-						}
-					}
-				}
-				LOG.error("{}", pistesyottoRivi);
-				// LOG.error("{}", new
-				// GsonBuilder().setPrettyPrinting().create()
-				// .toJson(pistesyottoRivi));
-				// System.exit(0);
-			}
-		};
+		PistesyottoDataRiviKuuntelija kuuntelija = getPistesyottoDataRiviKuuntelija();
 
 		PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(
 				"testioidi1",
@@ -120,19 +46,9 @@ public class PistesyotonTuontiTest {
 						"kielikoe_fi"), osallistumistiedot, valintaperusteet,
 				pistetiedot, kuuntelija);
 		Excel excel = pistesyottoExcel.getExcel();
-		// new FileInputStream("02.xlsx"));//
 
 		excel.tuoXlsx(excel.vieXlsx());
 
-		// Arrays.asList(Sarake.PIILOTETTU));
-
-		// !!ALUE ON TURHA ABSTRAKTIO!!
-		// TEE RIVEJÄ/ KOOSTERIVEJÄ / DECORABLE RIVEJÄ
-		// TOISTEISIA RIVEJÄ
-		// excel.tuoXlsx(xlsx);
-		if (false) {
-			IOUtils.copy(excel.vieXlsx(), new FileOutputStream(
-					"pistesyotto.xlsx"));
-		}
+		// tallenna(excel);
 	}
 }
