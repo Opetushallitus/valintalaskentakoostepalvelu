@@ -79,7 +79,7 @@ public class PistesyottoExcel {
     /**
      * @return < HakemusOid , < Tunniste , ValintakoeDTO > >
      */
-    private Map<String, Map<String, ValintakoeDTO>> valintakoeOidit(String hakukohdeOid, Set<String> valintakoeTunnisteet, List<ValintakoeOsallistuminenDTO> osallistumistiedot) {
+    private Map<String, Map<String, ValintakoeDTO>> valintakoeOidit(String hakukohdeOid, List<ValintakoeOsallistuminenDTO> osallistumistiedot) {
         Map<String, Map<String, ValintakoeDTO>> tunnisteOid = Maps.newHashMap();
         for (ValintakoeOsallistuminenDTO o : osallistumistiedot) {
             for (HakutoiveDTO h : o.getHakutoiveet()) {
@@ -158,7 +158,7 @@ public class PistesyottoExcel {
 
         Collections.sort(valintaperusteet, (o1, o2) -> o1.getKuvaus().compareTo(o2.getKuvaus()));
 
-        Map<String, Map<String, ValintakoeDTO>> tunnisteValintakoe = valintakoeOidit(hakukohdeOid, Sets.newHashSet(valintakoeTunnisteet), osallistumistiedot);
+        Map<String, Map<String, ValintakoeDTO>> tunnisteValintakoe = valintakoeOidit(hakukohdeOid, osallistumistiedot);
 
         final Set<String> osallistujat = osallistumistiedot.stream()
                 .filter(o -> OsallistujatPredicate.vainOsallistujatTunnisteella(hakukohdeOid, valintakoeTunnisteet).apply(o))
