@@ -38,8 +38,8 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.tulos.predicate.OsallistujatPre
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 
 public class PistesyottoExcel {
-    private static final Logger LOG = LoggerFactory
-            .getLogger(PistesyottoExcel.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PistesyottoExcel.class);
+
     private final static String MERKITSEMATTA = "Merkitsemättä";
     private final static String OSALLISTUI = "Osallistui";
     private final static String EI_OSALLISTUNUT = "Ei osallistunut";
@@ -56,13 +56,15 @@ public class PistesyottoExcel {
             .addKonversio(VAKIO_MERKITSEMATTA, MERKITSEMATTA)
             .addKonversio(VAKIO_OSALLISTUI, OSALLISTUI)
             .addKonversio(VAKIO_EI_VAADITA, EI_VAADITA)
-            .addKonversio(VAKIO_EI_OSALLISTUNUT, EI_OSALLISTUNUT).build();
+            .addKonversio(VAKIO_EI_OSALLISTUNUT, EI_OSALLISTUNUT)
+            .build();
     private final static Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO = new KonversioBuilder()
             .addKonversio(StringUtils.EMPTY, VAKIO_MERKITSEMATTA)
             .addKonversio(MERKITSEMATTA, VAKIO_MERKITSEMATTA)
             .addKonversio(OSALLISTUI, VAKIO_OSALLISTUI)
             .addKonversio(EI_VAADITA, VAKIO_EI_VAADITA)
-            .addKonversio(EI_OSALLISTUNUT, VAKIO_EI_OSALLISTUNUT).build();
+            .addKonversio(EI_OSALLISTUNUT, VAKIO_EI_OSALLISTUNUT)
+            .build();
     public final static String TOSI = "Hyväksytty";
     public final static String EPATOSI = "Hylätty";
     public final static String TYHJA = "Tyhjä";
@@ -70,14 +72,14 @@ public class PistesyottoExcel {
     private final static Map<String, String> TOTUUSARVO_KONVERSIO = new KonversioBuilder()
             .addKonversio(TOSI, Boolean.TRUE.toString())
             .addKonversio(EPATOSI, Boolean.FALSE.toString())
-            .addKonversio(TYHJA, null).build();
+            .addKonversio(TYHJA, null)
+            .build();
     private final Excel excel;
 
     /**
      * @return < HakemusOid , < Tunniste , ValintakoeDTO > >
      */
-    private Map<String, Map<String, ValintakoeDTO>> valintakoeOidit(String hakukohdeOid, Set<String> valintakoeTunnisteet,
-            List<ValintakoeOsallistuminenDTO> osallistumistiedot) {
+    private Map<String, Map<String, ValintakoeDTO>> valintakoeOidit(String hakukohdeOid, Set<String> valintakoeTunnisteet, List<ValintakoeOsallistuminenDTO> osallistumistiedot) {
         Map<String, Map<String, ValintakoeDTO>> tunnisteOid = Maps.newHashMap();
         for (ValintakoeOsallistuminenDTO o : osallistumistiedot) {
             for (HakutoiveDTO h : o.getHakutoiveet()) {
@@ -96,51 +98,60 @@ public class PistesyottoExcel {
         return tunnisteOid;
     }
 
-    public PistesyottoExcel(String hakuOid, String hakukohdeOid,
-                            String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
-                            String tarjoajaNimi, Collection<Hakemus> hakemukset,
+    public PistesyottoExcel(String hakuOid,
+                            String hakukohdeOid,
+                            String tarjoajaOid,
+                            String hakuNimi,
+                            String hakukohdeNimi,
+                            String tarjoajaNimi,
+                            Collection<Hakemus> hakemukset,
                             Set<String> kaikkiKutsutaanTunnisteet,
                             Collection<String> valintakoeTunnisteet,
                             List<ValintakoeOsallistuminenDTO> osallistumistiedot,
                             List<ValintaperusteDTO> valintaperusteet,
-                            List<ApplicationAdditionalDataDTO> pistetiedot) {
-        this(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi,
-                tarjoajaNimi, hakemukset, kaikkiKutsutaanTunnisteet,
-                valintakoeTunnisteet, osallistumistiedot, valintaperusteet,
-                pistetiedot, Collections.<PistesyottoDataRiviKuuntelija>emptyList());
+                            List<ApplicationAdditionalDataDTO> pistetiedot
+    ) {
+        this(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi, tarjoajaNimi, hakemukset, kaikkiKutsutaanTunnisteet, valintakoeTunnisteet, osallistumistiedot, valintaperusteet, pistetiedot, Collections.<PistesyottoDataRiviKuuntelija>emptyList());
     }
 
-    public PistesyottoExcel(String hakuOid, String hakukohdeOid,
-                            String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
-                            String tarjoajaNimi, Collection<Hakemus> hakemukset,
+    public PistesyottoExcel(String hakuOid,
+                            String hakukohdeOid,
+                            String tarjoajaOid,
+                            String hakuNimi,
+                            String hakukohdeNimi,
+                            String tarjoajaNimi,
+                            Collection<Hakemus> hakemukset,
                             Set<String> kaikkiKutsutaanTunnisteet,
                             Collection<String> valintakoeTunnisteet,
                             List<ValintakoeOsallistuminenDTO> osallistumistiedot,
                             List<ValintaperusteDTO> valintaperusteet,
                             List<ApplicationAdditionalDataDTO> pistetiedot,
-                            PistesyottoDataRiviKuuntelija kuuntelija) {
-        this(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi,
-                tarjoajaNimi, hakemukset, kaikkiKutsutaanTunnisteet,
-                valintakoeTunnisteet, osallistumistiedot, valintaperusteet,
-                pistetiedot, Arrays.asList(kuuntelija));
+                            PistesyottoDataRiviKuuntelija kuuntelija
+    ) {
+        this(hakuOid, hakukohdeOid, tarjoajaOid, hakuNimi, hakukohdeNimi, tarjoajaNimi, hakemukset, kaikkiKutsutaanTunnisteet, valintakoeTunnisteet, osallistumistiedot, valintaperusteet, pistetiedot, Arrays.asList(kuuntelija));
     }
 
     public static String additionalDataToNimi(ApplicationAdditionalDataDTO data) {
         if (data == null) {
             return "'Hakemuksella ei ole nimeä'";
         }
-        return new StringBuilder().append(data.getLastName()).append(", ").append(data.getFirstNames()).toString();
+        return data.getLastName() + ", " + data.getFirstNames();
     }
 
-    public PistesyottoExcel(String hakuOid, String hakukohdeOid,
-                            String tarjoajaOid, String hakuNimi, String hakukohdeNimi,
-                            String tarjoajaNimi, Collection<Hakemus> hakemukset,
+    public PistesyottoExcel(String hakuOid,
+                            String hakukohdeOid,
+                            String tarjoajaOid,
+                            String hakuNimi,
+                            String hakukohdeNimi,
+                            String tarjoajaNimi,
+                            Collection<Hakemus> hakemukset,
                             Set<String> kaikkiKutsutaanTunnisteet,
                             Collection<String> valintakoeTunnisteet,
                             List<ValintakoeOsallistuminenDTO> osallistumistiedot,
                             List<ValintaperusteDTO> valintaperusteet,
                             List<ApplicationAdditionalDataDTO> pistetiedot,
-                            Collection<PistesyottoDataRiviKuuntelija> kuuntelijat) {
+                            Collection<PistesyottoDataRiviKuuntelija> kuuntelijat
+    ) {
         if (pistetiedot == null) {
             pistetiedot = Collections.emptyList();
         }
@@ -151,10 +162,10 @@ public class PistesyottoExcel {
 
         final Set<String> osallistujat = osallistumistiedot.stream()
                 .filter(o -> OsallistujatPredicate.vainOsallistujatTunnisteella(hakukohdeOid, valintakoeTunnisteet).apply(o))
-                .map(o -> o.getHakemusOid())
+                .map(ValintakoeOsallistuminenDTO::getHakemusOid)
                 .collect(Collectors.toSet());
 
-        final List<String> tunnisteet = valintaperusteet.stream().map(vp -> vp.getTunniste()).collect(Collectors.toList());
+        final List<String> tunnisteet = valintaperusteet.stream().map(ValintaperusteDTO::getTunniste).collect(Collectors.toList());
 
         Collection<Rivi> rivit = Lists.newArrayList();
         rivit.add(new RiviBuilder().addOid(hakuOid).addTeksti(hakuNimi, 4).build());
@@ -205,8 +216,7 @@ public class PistesyottoExcel {
                     s.add(TekstiArvo.tyhja(false));
                     continue;
                 }
-                if (syotettavissaKaikille || (valintakoe != null && Osallistuminen.OSALLISTUU.equals(
-                        Optional.ofNullable(valintakoe.getOsallistuminenTulos()).orElse(new OsallistuminenTulosDTO()).getOsallistuminen()))) {
+                if (syotettavissaKaikille || (valintakoe != null && Osallistuminen.OSALLISTUU.equals(Optional.ofNullable(valintakoe.getOsallistuminenTulos()).orElse(new OsallistuminenTulosDTO()).getOsallistuminen()))) {
                     syote = true;
                     if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste.getFunktiotyyppi())) {
                         if (valintaperuste.getArvot() != null && !valintaperuste.getArvot().isEmpty()) {
@@ -287,18 +297,12 @@ public class PistesyottoExcel {
     }
 
     private List<String> createValintakokeet(List<ValintaperusteDTO> valintaperusteet) {
-        return (List<String>) valintaperusteet.stream().map(valintaperuste -> {
+        return valintaperusteet.stream().map(valintaperuste -> {
             if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste.getFunktiotyyppi())
                     && !StringUtils.isBlank(valintaperuste.getMin())
                     && !StringUtils.isBlank(valintaperuste.getMax())) {
                 // create value constraint
-                return new StringBuilder()
-                        .append(valintaperuste.getKuvaus())
-                        .append(" (")
-                        .append(Formatter.suomennaNumero(new BigDecimal(valintaperuste.getMin())))
-                        .append(" - ")
-                        .append(Formatter.suomennaNumero(new BigDecimal(valintaperuste.getMax())))
-                        .append(")").toString();
+                return valintaperuste.getKuvaus() + " (" + Formatter.suomennaNumero(new BigDecimal(valintaperuste.getMin())) + " - " + Formatter.suomennaNumero(new BigDecimal(valintaperuste.getMax())) + ")";
             } else {
                 return valintaperuste.getKuvaus();
             }
