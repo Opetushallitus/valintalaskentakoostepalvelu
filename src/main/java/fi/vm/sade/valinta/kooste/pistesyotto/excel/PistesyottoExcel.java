@@ -221,17 +221,13 @@ public class PistesyottoExcel {
                     if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste.getFunktiotyyppi())) {
                         if (valintaperuste.getArvot() != null && !valintaperuste.getArvot().isEmpty()) {
                             String value = null;
-                            if (data.getAdditionalData() == null) {
-                                value = null;
-                            } else {
+                            if (data.getAdditionalData() != null) {
                                 value = data.getAdditionalData().get(valintaperuste.getTunniste());
                             }
                             s.add(new MonivalintaArvo(value, valintaperuste.getArvot()));
                         } else {
-                            Number value;
-                            if (data.getAdditionalData() == null) {
-                                value = asNumber(null);
-                            } else {
+                            Number value = null;
+                            if (data.getAdditionalData() != null) {
                                 value = asNumber(data.getAdditionalData().get(valintaperuste.getTunniste()));
                             }
                             Number max = asNumber(valintaperuste.getMax());
