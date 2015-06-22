@@ -40,31 +40,26 @@ import fi.vm.sade.valinta.kooste.util.excel.Span;
 public class SijoittelunTulosExcelKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(SijoittelunTulosExcelKomponentti.class);
 
-    public InputStream luoXls(List<Valintatulos> tilat, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi,
-            String hakukohdeOid, List<Hakemus> hakemuksetList, HakukohdeDTO hakukohde) {
-        Map<String, Hakemus> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(
-                h -> h.getOid(), h -> h
-        ));
+    public InputStream luoXls(List<Valintatulos> tilat, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid, List<Hakemus> hakemuksetList, HakukohdeDTO hakukohde) {
+        Map<String, Hakemus> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
         if (hakukohde == null) {
             LOG.error("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
             throw new SijoittelultaEiSisaltoaPoikkeus("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
         }
-        List<Object[]> rivit = new ArrayList<Object[]>();
-        List<ValintatapajonoDTO> valintatapajonot = Optional.ofNullable(hakukohde.getValintatapajonot()).orElse(Collections.emptyList())
-                .stream().filter(v -> v.getHakemukset() != null && !v.getHakemukset().isEmpty()).collect(Collectors.toList());
+        List<Object[]> rivit = new ArrayList<>();
+        List<ValintatapajonoDTO> valintatapajonot = Optional.ofNullable(hakukohde.getValintatapajonot()).orElse(Collections.emptyList()).stream()
+                .filter(v -> v.getHakemukset() != null && !v.getHakemukset().isEmpty())
+                .collect(Collectors.toList());
         if (valintatapajonot.isEmpty()) {
             LOG.error("Yritettiin muodostaa sijoittelun tuloksista taulukkolaskenta kohteelle({}) jolla ei ole valintatapajonoja saatavilla!", hakukohdeOid);
             throw new RuntimeException("Yritettiin muodostaa sijoittelun tuloksista taulukkolaskenta kohteelle(" + hakukohdeOid + ") jolla ei ole valintatapajonoja saatavilla!");
         }
         Collections.sort(valintatapajonot,
-                new Comparator<ValintatapajonoDTO>() {
-                    @Override
-                    public int compare(ValintatapajonoDTO o1, ValintatapajonoDTO o2) {
-                        if (o1.getPrioriteetti() == null || o2.getPrioriteetti() == 0) {
-                            return 0;
-                        }
-                        return o1.getPrioriteetti().compareTo(o2.getPrioriteetti());
+                (o1, o2) -> {
+                    if (o1.getPrioriteetti() == null || o2.getPrioriteetti() == 0) {
+                        return 0;
                     }
+                    return o1.getPrioriteetti().compareTo(o2.getPrioriteetti());
                 });
         final ValintatapajonoDTO tarkeimmanPrioriteetinValintatapajono = valintatapajonot.iterator().next();
 
@@ -77,30 +72,22 @@ public class SijoittelunTulosExcelKomponentti {
                 new Comparator<HakemusDTO>() {
                     private int ordinal(HakemusDTO h) {
                         switch (h.getTila()) {
-                            case HYLATTY:
-                                return 6;
+                            case HARKINNANVARAISESTI_HYVAKSYTTY:
+                                return 0;
+                            case HYVAKSYTTY:
+                                return h.isHyvaksyttyHarkinnanvaraisesti() ?  0 : 1;
+                            case VARASIJALTA_HYVAKSYTTY:
+                                return h.isHyvaksyttyHarkinnanvaraisesti() ? 0 : 1;
                             case VARALLA:
                                 return 2;
                             case PERUUNTUNUT:
                                 return 3;
-                            case HYVAKSYTTY:
-                                if (h.isHyvaksyttyHarkinnanvaraisesti()) {
-                                    return 0;
-                                } else {
-                                    return 1;
-                                }
-                            case VARASIJALTA_HYVAKSYTTY:
-                                if (h.isHyvaksyttyHarkinnanvaraisesti()) {
-                                    return 0;
-                                } else {
-                                    return 1;
-                                }
-                            case HARKINNANVARAISESTI_HYVAKSYTTY:
-                                return 0;
                             case PERUNUT:
                                 return 4;
                             case PERUUTETTU:
                                 return 5;
+                            case HYLATTY:
+                                return 6;
                             default:
                                 return 7;
                         }
@@ -108,14 +95,12 @@ public class SijoittelunTulosExcelKomponentti {
 
                     @Override
                     public int compare(HakemusDTO o1, HakemusDTO o2) {
-                        return new Integer(ordinal(o1))
-                                .compareTo(ordinal(o2));
+                        return new Integer(ordinal(o1)).compareTo(ordinal(o2));
                     }
-                });
+                }
+        );
         List<Object> valintatapajonoOtsikkoRivi = Lists.newArrayList();
-        valintatapajonoOtsikkoRivi.addAll(Arrays.asList(
-                "", "", "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "", "")); // alun tyhjat pystyrivit
+        valintatapajonoOtsikkoRivi.addAll(Arrays.asList("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")); // alun tyhjat pystyrivit
         List<Object> otsikkoRivi = Lists.newArrayList();
         otsikkoRivi.addAll(Arrays.asList("Hakemus", "Hakija", "Henkilötunnus", "Syntymäaika", "Sukupuoli", "Äidinkieli",
                 "Lähiosoite", "Postinumero", "Osoite (ulkomaa)", "Postinumero (ulkomaa)", "Kaupunki (ulkomaa)",
@@ -128,7 +113,7 @@ public class SijoittelunTulosExcelKomponentti {
                 valintatapajonoOtsikkoRivi.add(new Span("Valintatapajono: " + jono.getNimi(), 6, highlight));
                 List<Object> otsikot = Arrays.asList("Jonosija", "Pisteet", "Sijoittelun tila", "Vastaanottotieto", "Ilmoittautumistieto", "Muokattu");
                 if (highlight) {
-                    otsikot = otsikot.stream().map(o -> new Highlight(o)).collect(Collectors.toList());
+                    otsikot = otsikot.stream().map(Highlight::new).collect(Collectors.toList());
                 }
                 otsikkoRivi.addAll(otsikot);
             }
@@ -136,12 +121,12 @@ public class SijoittelunTulosExcelKomponentti {
         rivit.add(valintatapajonoOtsikkoRivi.toArray());
         rivit.add(otsikkoRivi.toArray());
 
-        Map<String, Map<String, HakemusDTO>> jonoOidHakemusOidHakemusDto =
-                valintatapajonot.stream().collect(Collectors.toMap(v -> ((ValintatapajonoDTO) v).getOid(), v -> v.getHakemukset().stream().collect(Collectors.toMap(h -> ((HakemusDTO) h).getHakemusOid(), h -> h))));
+        Map<String, Map<String, HakemusDTO>> jonoOidHakemusOidHakemusDto = valintatapajonot.stream()
+                .collect(Collectors.toMap(ValintatapajonoDTO::getOid, v -> v.getHakemukset().stream().collect(Collectors.toMap(HakemusDTO::getHakemusOid, h -> h))));
 
         for (HakemusDTO hDto : tarkeimmanPrioriteetinValintatapajono.getHakemukset()) {
             HakemusWrapper wrapper = new HakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
-            String nimi = new StringBuilder().append(wrapper.getSukunimi()).append(", ").append(wrapper.getEtunimi()).toString();
+            String nimi = wrapper.getSukunimi() + ", " + wrapper.getEtunimi();
             List<Object> hakemusRivi = Lists.newArrayList();
 
             hakemusRivi.addAll(Arrays.asList(hDto.getHakemusOid(), nimi,
@@ -182,7 +167,7 @@ public class SijoittelunTulosExcelKomponentti {
                 List<Valintatulos> valintaTulos = tilat.stream().filter(
                         t -> hakemusOid.equals(t.getHakemusOid())
                 ).collect(Collectors.toList());
-                String valintaTieto = StringUtils.EMPTY; // "--"
+                String valintaTieto = StringUtils.EMPTY;
                 for (Valintatulos valinta : valintaTulos) {
                     if (jono.getOid().equals(valinta.getValintatapajonoOid())) {
                         if (valinta.getTila() != null) {
@@ -191,12 +176,25 @@ public class SijoittelunTulosExcelKomponentti {
                         break;
                     }
                 }
-                List<Object> jonoHakemusSarakkeet = Arrays.asList(hakemusDto.getJonosija(), Formatter.suomennaNumero(hakemusDto.getPisteet()),
-                        HakemusUtil.tilaConverter(hakemusDto.getTila(), preferoitukielikoodi, hakemusDto.isHyvaksyttyHarkinnanvaraisesti(), true, hakemusDto.getVarasijanNumero()),
-                        valintaTieto, ilmoittautumistieto, muokattu(hakemusDto.getTilaHistoria()));
+                List<Object> jonoHakemusSarakkeet = Arrays.asList(
+                        hakemusDto.getJonosija(),
+                        Formatter.suomennaNumero(hakemusDto.getPisteet()),
+                        HakemusUtil.tilaConverter(
+                                hakemusDto.getTila(),
+                                preferoitukielikoodi,
+                                hakemusDto.isHyvaksyttyHarkinnanvaraisesti(),
+                                true,
+                                hakemusDto.getVarasijanNumero()
+                        ),
+                        valintaTieto,
+                        ilmoittautumistieto,
+                        muokattu(hakemusDto.getTilaHistoria())
+                );
 
                 if (index % 2 == 1) {
-                    jonoHakemusSarakkeet = jonoHakemusSarakkeet.stream().map(o -> new Highlight(o)).collect(Collectors.toList());
+                    jonoHakemusSarakkeet = jonoHakemusSarakkeet.stream()
+                            .map(Highlight::new)
+                            .collect(Collectors.toList());
                 }
                 hakemusRivi.addAll(jonoHakemusSarakkeet);
             }
@@ -209,14 +207,11 @@ public class SijoittelunTulosExcelKomponentti {
         if (h == null || h.isEmpty()) {
             return StringUtils.EMPTY;
         } else {
-            Collections.sort(h, new Comparator<TilaHistoriaDTO>() {
-                @Override
-                public int compare(TilaHistoriaDTO o1, TilaHistoriaDTO o2) {
-                    if (o1 == null || o2 == null || o1.getLuotu() == null || o2.getLuotu() == null) {
-                        return 0;
-                    }
-                    return -1 * o1.getLuotu().compareTo(o2.getLuotu());
+            Collections.sort(h, (o1, o2) -> {
+                if (o1 == null || o2 == null || o1.getLuotu() == null || o2.getLuotu() == null) {
+                    return 0;
                 }
+                return -1 * o1.getLuotu().compareTo(o2.getLuotu());
             });
             return Formatter.paivamaara(h.get(0).getLuotu());
         }
