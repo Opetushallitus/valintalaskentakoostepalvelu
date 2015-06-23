@@ -129,8 +129,6 @@ public class ValintakoekutsutExcelService {
                     lisaaHakemuksiaAtomisestiHakemuksetReferenssiin.accept(hakemukset);
                     laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                 }, poikkeuskasittelija);
-            } else {
-                // vaihtoehtoisesti haetaan hakemukset kun tiedetaan osallistujat laskennan tuloksista
             }
             valintaperusteetValintakoeResource.haeValintakokeetHakukohteelle(
                     hakukohdeOid,

@@ -331,9 +331,7 @@ public class ErillishaunTuontiService {
         if(!isBlank(rivi.getHenkilotunnus()) && !tarkistaHenkilotunnus(rivi.getHenkilotunnus())) {
             return "Henkilötunnus ("+rivi.getHenkilotunnus()+") on virheellinen. " + rivi.toString();
         }
-        if("KESKEN".equalsIgnoreCase(rivi.getHakemuksenTila())) {
-            // KESKENERÄINEN JOTEN TILOILLA EI VÄLIÄ
-        } else {
+        if (!"KESKEN".equalsIgnoreCase(rivi.getHakemuksenTila())) {
             // Valintatuloksen tila on hakua vastaava
             ValintatuloksenTila vt = valintatuloksenTila(rivi);
             ValintatuloksenTila vtc = convertValintatuloksenTilaHakuTyypinMukaan(vt, tyyppi);

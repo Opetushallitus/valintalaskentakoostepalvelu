@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,14 +22,16 @@ public class DiskreettiDataArvo extends TilaDataArvo {
                               String asetettuTila, String osallistuminenTunniste) {
         super(tilaKonvertteri, asetettuTila);
         this.arvot = Sets.newHashSet(arvot);
-        this.konversio = arvot.stream().filter(a -> {
-            try {
-                Double.parseDouble(a);
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }).collect(Collectors.toMap(a -> Double.parseDouble(a), a -> a));
+        this.konversio = arvot.stream()
+                .filter(a -> {
+                    try {
+                        Double.parseDouble(a);
+                        return true;
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
+                })
+                .collect(Collectors.toMap(a -> Double.parseDouble(a), a -> a));
         this.numerot = this.konversio.keySet();
         this.tunniste = tunniste;
         this.osallistuminenTunniste = osallistuminenTunniste;

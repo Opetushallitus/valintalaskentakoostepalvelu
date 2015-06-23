@@ -37,9 +37,7 @@ public class Yhteystiedot {
         } else {
             StringBuilder b = new StringBuilder();
             for (String puhelinnumero : puhelinnumerot) {
-                if (puhelinnumero == null || StringUtils.isEmpty(puhelinnumero)) {
-
-                } else {
+                if (puhelinnumero != null && !StringUtils.isEmpty(puhelinnumero)) {
                     b.append(puhelinnumero).append(" ");
                 }
             }

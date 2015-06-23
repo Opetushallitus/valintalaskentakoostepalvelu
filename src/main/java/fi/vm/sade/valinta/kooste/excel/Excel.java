@@ -168,9 +168,7 @@ public class Excel {
                             }
                             joukko.addAddress(rowIndex, cellNum);
                         }
-                        if (numero.isTyhja()) {
-                            // cell.setCellValue(StringUtils.EMPTY);
-                        } else {
+                        if (!numero.isTyhja()) {
                             cell.setCellStyle(alignRightStyle);
                             cell.setCellValue(numero.getNumero().doubleValue());
                         }

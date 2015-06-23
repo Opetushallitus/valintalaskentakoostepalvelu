@@ -26,11 +26,7 @@ public class Teksti {
         this.normalisoituKieliJaKoodi = Maps.newTreeMap();
         if (kieletJaKoodit != null && !kieletJaKoodit.isEmpty()) {
             for (Entry<String, String> kk : kieletJaKoodit.entrySet()) {
-                if (StringUtils.isBlank(kk.getKey()) || StringUtils.isBlank(kk.getValue())) {
-                    // EI LISATA ARVOTONTA KOODIA
-                    // normalisoituKieliJaKoodi.put(normalisoiKielikoodi(kk.getKey()),
-                    // EI_ARVOA);
-                } else {
+                if (!StringUtils.isBlank(kk.getKey()) && !StringUtils.isBlank(kk.getValue())) {
                     normalisoituKieliJaKoodi.put(normalisoiKielikoodi(kk.getKey()), kk.getValue());
                 }
             }

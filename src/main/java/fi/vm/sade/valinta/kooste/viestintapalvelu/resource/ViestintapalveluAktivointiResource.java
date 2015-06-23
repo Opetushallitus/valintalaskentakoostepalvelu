@@ -281,13 +281,10 @@ public class ViestintapalveluAktivointiResource {
             @QueryParam("templateName") String templateName,
             @QueryParam("valintakoeTunnisteet") List<String> valintakoeTunnisteet,
             DokumentinLisatiedot hakemuksillaRajaus) {
-        if (hakemuksillaRajaus != null && hakemuksillaRajaus.getHakemusOids() != null && !hakemuksillaRajaus.getHakemusOids().isEmpty()) {
-            // luodaan koekutsukirjeet rajauksella
-        } else {
-            if (hakukohdeOid == null || valintakoeTunnisteet == null || valintakoeTunnisteet.isEmpty()) {
-                LOG.error("Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
-                throw new RuntimeException("Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
-            }
+        if ((hakemuksillaRajaus == null || hakemuksillaRajaus.getHakemusOids() == null || hakemuksillaRajaus.getHakemusOids().isEmpty())
+                && (hakukohdeOid == null || valintakoeTunnisteet == null || valintakoeTunnisteet.isEmpty())) {
+            LOG.error("Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
+            throw new RuntimeException("Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
         }
         String tag = null;
         KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
