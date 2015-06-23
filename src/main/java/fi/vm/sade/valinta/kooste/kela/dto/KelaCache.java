@@ -124,12 +124,20 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
         hakukohteet.put(hakukohde.getOid(), hakukohde);
     }
 
+    public boolean containsHakutyyppi(String hakutyyppi) {
+        return hakutyyppiArvo.containsKey(hakutyyppi);
+    }
+
     public void putHakutyyppi(String hakutyyppi, String arvo) {
         hakutyyppiArvo.put(hakutyyppi, arvo);
     }
 
     public String getHakutyyppi(String hakutyyppi) {
         return hakutyyppiArvo.get(hakutyyppi);
+    }
+
+    public boolean containsHaunKohdejoukko(String kohdejoukko) {
+        return haunKohdejoukkoArvo.containsKey(kohdejoukko);
     }
 
     public void putHaunKohdejoukko(String kohdejoukko, String arvo) {

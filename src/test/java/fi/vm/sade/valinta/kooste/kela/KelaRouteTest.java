@@ -193,7 +193,7 @@ public class KelaRouteTest extends CamelTestSupport {
 				dkRivi, hakuResource,
 				haunTyyppiKomponentti, applicationResource,
 				oppilaitosKomponentti, linjakoodiKomponentti,
-				hakukohdeResource, koodiService,valintaTulosServiceAsyncResource,
+				hakukohdeResource, valintaTulosServiceAsyncResource,
 				null,null);
 	}
 

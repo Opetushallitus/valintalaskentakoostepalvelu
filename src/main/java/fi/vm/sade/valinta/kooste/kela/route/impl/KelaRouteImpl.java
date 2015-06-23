@@ -6,7 +6,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.organisaatio.resource.api.KelaResource;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
 import fi.vm.sade.rajapinnat.kela.tkuva.util.KelaUtil;
@@ -31,8 +30,6 @@ import fi.vm.sade.valinta.kooste.sijoittelu.resource.TilaResource;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 import org.apache.camel.Endpoint;
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.DefaultErrorHandlerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +60,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
     private final HakuV1Resource hakuResource;
     private final LinjakoodiKomponentti linjakoodiKomponentti;
     private final HakukohdeResource hakukohdeResource;
-    private final KoodiService koodiService;
     private final String kelaLuonti;
     private final KelaResource kelaResource;
     private final TilaResource tilaResource;
@@ -79,12 +75,11 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
             ApplicationResource applicationResource,
             OppilaitosKomponentti oppilaitosKomponentti,
             LinjakoodiKomponentti linjakoodiKomponentti,
-            HakukohdeResource hakukohdeResource, KoodiService koodiService,
+            HakukohdeResource hakukohdeResource,
             ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
             KelaResource kelaResource,
             TilaResource tilaResource) {
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
-        this.koodiService = koodiService;
         this.hakukohdeResource = hakukohdeResource;
         this.oppilaitosKomponentti = oppilaitosKomponentti;
         this.linjakoodiKomponentti = linjakoodiKomponentti;
@@ -122,20 +117,18 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                 .routeId("KELALUONTI_DEADLETTERCHANNEL")
                         //
 
-                .process(new Processor() {
-                    public void process(Exchange exchange) throws Exception {
-                        String virhe = null;
-                        String stacktrace = null;
-                        try {
-                            virhe = simple("${exception.message}").evaluate(exchange, String.class);
-                            stacktrace = simple("${exception.stacktrace}").evaluate(exchange, String.class);
-                        } catch (Exception e) {
-                        }
-                        LOG.error("Keladokumentin luonti paattyi virheeseen! {}\r\n{}", virhe, stacktrace);
-                        dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Kela-dokumentin luonti", virhe));
-                        dokumenttiprosessi(exchange).addException(virhe);
-                        dokumenttiprosessi(exchange).luovutaUudelleenYritystenKanssa();
+                .process(exchange -> {
+                    String virhe = null;
+                    String stacktrace = null;
+                    try {
+                        virhe = simple("${exception.message}").evaluate(exchange, String.class);
+                        stacktrace = simple("${exception.stacktrace}").evaluate(exchange, String.class);
+                    } catch (Exception e) {
                     }
+                    LOG.error("Keladokumentin luonti paattyi virheeseen! {}\r\n{}", virhe, stacktrace);
+                    dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Kela-dokumentin luonti", virhe));
+                    dokumenttiprosessi(exchange).addException(virhe);
+                    dokumenttiprosessi(exchange).luovutaUudelleenYritystenKanssa();
                 })
                         //
                 .stop();
@@ -194,67 +187,36 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                         //
                 .process(
                         Reititys.<KelaLuontiJaHaut, KelaLuontiJaHaut>funktio(luontiJaHaut -> {
-                            Collection<Haku> haut = Lists.newArrayList();
-                            Boolean kaikkiHautKk = null;
-                            for (Haku haku : luontiJaHaut.getHaut()) {
-                                String hakutyyppiUri = haku.getAsTarjontaHakuDTO().getHakutyyppiUri();
-                                try {
-                                    if (luontiJaHaut.getLuonti().getCache().getHakutyyppi(hakutyyppiUri) == null) {
-                                        luontiJaHaut
-                                                .getLuonti()
-                                                .getCache()
-                                                .putHakutyyppi(hakutyyppiUri, haunTyyppiKomponentti.haunTyyppi(hakutyyppiUri));
-                                    }
-                                } catch (Exception e) {
-                                    luontiJaHaut
-                                            .getLuonti()
-                                            .getProsessi()
-                                            .getPoikkeuksetUudelleenYrityksessa()
-                                            .add(new Poikkeus(Poikkeus.KOODISTO, "Haun tyypille " + hakutyyppiUri + " ei saatu arvoa koodistosta", hakutyyppiUri
-                                            ));
-                                    throw e;
-                                }
-                                String hakutyypinArvo = luontiJaHaut.getLuonti().getCache()
-                                        .getHakutyyppi(haku.getAsTarjontaHakuDTO().getHakutyyppiUri());
-                                String haunKohdejoukkoUri = haku.getAsTarjontaHakuDTO().getKohdejoukkoUri();
-                                try {
-                                    if (luontiJaHaut.getLuonti().getCache().getHaunKohdejoukko(haunKohdejoukkoUri) == null) {
-                                        luontiJaHaut.getLuonti().getCache()
-                                                .putHaunKohdejoukko(haunKohdejoukkoUri, haunTyyppiKomponentti.haunKohdejoukko(haunKohdejoukkoUri));
-                                    }
-                                } catch (Exception e) {
-                                    luontiJaHaut
-                                            .getLuonti()
-                                            .getProsessi()
-                                            .getPoikkeuksetUudelleenYrityksessa()
-                                            .add(new Poikkeus(Poikkeus.KOODISTO,
-                                                    "Haun kohdejoukolle "
-                                                            + haunKohdejoukkoUri
-                                                            + " ei saatu arvoa koodistosta",
-                                                    haunKohdejoukkoUri));
-                                    throw e;
-                                }
-                                String haunKohdejoukonArvo = luontiJaHaut
-                                        .getLuonti()
-                                        .getCache()
-                                        .getHaunKohdejoukko(haku.getAsTarjontaHakuDTO().getKohdejoukkoUri());
+                            Collection<Poikkeus> poikkeuksetUudelleenYrityksessa =
+                                    luontiJaHaut.getLuonti().getProsessi().getPoikkeuksetUudelleenYrityksessa();
+                            if (luontiJaHaut.getHaut().isEmpty()) {
+                                String virhe = "Ei hakuja luonnissa " + luontiJaHaut.getLuonti().getUuid();
+                                poikkeuksetUudelleenYrityksessa.add(new Poikkeus(Poikkeus.KOOSTEPALVELU,
+                                        virhe, luontiJaHaut.getLuonti().getUuid()));
+                                throw new RuntimeException(virhe);
+                            }
+                            KelaCache cache = luontiJaHaut.getLuonti().getCache();
+                            Collection<Haku> haut = luontiJaHaut.getHaut().stream()
+                                    .map(haku -> {
+                                        updateHauntyyppiCache(haku, cache, poikkeuksetUudelleenYrityksessa);
+                                        updateHaunKohdejoukkoCache(haku, cache, poikkeuksetUudelleenYrityksessa);
+                                        HakuV1RDTO asTarjontaHakuDTO = haku.getAsTarjontaHakuDTO();
+                                        String hakutyypinArvo = cache.getHakutyyppi(asTarjontaHakuDTO.getHakutyyppiUri());
+                                        String haunKohdejoukonArvo = cache.getHaunKohdejoukko(asTarjontaHakuDTO.getKohdejoukkoUri());
 
-                                // Koodistosta saa hakutyypille arvon ja nimen.
-                                // Oletetaan etta
-                                // nimi voi vaihtua mutta koodi pysyy vakiona.
+                                        // Koodistosta saa hakutyypille arvon ja nimen.
+                                        // Oletetaan etta nimi voi vaihtua mutta koodi pysyy vakiona.
 
-                                boolean lisahaku = "03".equals(hakutyypinArvo);
-                                boolean kkhaku = "12".equals(haunKohdejoukonArvo);
-                                if (kaikkiHautKk == null) {
-                                    kaikkiHautKk = kkhaku;
-                                }
-                                if (kaikkiHautKk ^ kkhaku) { // ei saa olla erityyppisia hakuja (kk tai keskiaste)
-                                    String virhe = "Annettujen hakujen on kaikkien oltava kk-hakuja tai niistä mikään ei saa olla kk-haku!";
-                                    luontiJaHaut.getLuonti().getProsessi().getPoikkeuksetUudelleenYrityksessa()
-                                            .add(new Poikkeus(Poikkeus.KOOSTEPALVELU, virhe, haunKohdejoukonArvo));
-                                    throw new RuntimeException(virhe);
-                                }
-                                haut.add(new TunnistettuHaku(haku.getAsTarjontaHakuDTO(), kkhaku, lisahaku));
+                                        boolean lisahaku = "03".equals(hakutyypinArvo);
+                                        boolean kkhaku = "12".equals(haunKohdejoukonArvo);
+                                        return new TunnistettuHaku(asTarjontaHakuDTO, kkhaku, lisahaku);
+                                    }).collect(Collectors.toList());
+                            boolean kaikkiHautKk = haut.stream().allMatch(Haku::isKorkeakouluhaku);
+                            if (!kaikkiHautKk && haut.stream().anyMatch(Haku::isKorkeakouluhaku)) {
+                                String virhe = "Annettujen hakujen on kaikkien oltava kk-hakuja tai niistä mikään ei saa olla kk-haku!";
+                                poikkeuksetUudelleenYrityksessa.add(new Poikkeus(Poikkeus.KOOSTEPALVELU,
+                                        virhe, luontiJaHaut.getLuonti().getUuid()));
+                                throw new RuntimeException(virhe);
                             }
                             luontiJaHaut.getLuonti().setKkHaku(kaikkiHautKk);
                             return new KelaLuontiJaHaut(luontiJaHaut.getLuonti(), haut);
@@ -284,11 +246,10 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                             //
                             for (Haku tunnistettuHaku : luontiJaHaut.getHaut()) {
                                 HakuV1RDTO haku = tunnistettuHaku.getAsTarjontaHakuDTO();
-                                log.info("haetaan haku:" + haku.getOid());
-
                                 if (haku == null) {
                                     throw new RuntimeException("Reitillä oli null hakuDTO!");
                                 }
+                                log.info("haetaan haku:" + haku.getOid());
                                 // haetaan kaikki hakemukset lisahaulle koska ei
                                 // voida
                                 // tietaa tarkastelematta ketka on valittuja.
@@ -381,10 +342,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                         hakemukset.addAll(applicationResource.getApplicationsByOids(oidit));
                                     }
                                 }
-                                KelaCache cache = luonti.getLuonti().getCache();
-                                for (Hakemus hakemus : hakemukset) {
-                                    cache.put(hakemus);
-                                }
+                                hakemukset.forEach(luonti.getLuonti().getCache()::put);
                             } catch (Exception e) {
                                 String virhe = "Ei saatu hakemuksia hakupalvelulta!";
                                 luonti.getLuonti()
@@ -415,6 +373,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                             };
                             LinjakoodiSource linjakoodiSource = new LinjakoodiSource() {
                                 Cache<String, String> linjaCache = CacheBuilder.<String, String>newBuilder().build();
+
                                 public String getLinjakoodi(String uri) {
                                     try {
                                         return linjaCache.get(uri, () -> linjakoodiKomponentti.haeLinjakoodi(uri));
@@ -481,57 +440,50 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                     return d.get(hakukohdeOid);
                                 }
                             };
-                            TilaSource tilaSource = new TilaSource() {
-                                @Override
-                                public LogEntry getVastaanottopvm(String hakemusOid,
-                                                                  String hakuOid, String hakukohdeOid,
-                                                                  String valintatapajonoOid) {
-                                    Valintatulos valintatulos = null;
-                                    int tries = 0;
+                            TilaSource tilaSource = (hakemusOid, hakuOid, hakukohdeOid, valintatapajonoOid) -> {
+                                Valintatulos valintatulos = null;
+                                int tries = 0;
 
-                                    while (true) {
+                                while (true) {
+                                    try {
+                                        valintatulos = tilaResource.hakemus(hakuOid, hakukohdeOid, valintatapajonoOid, hakemusOid);
+                                        if (tries > 0) {
+                                            LOG.error("retry ok");
+                                        }
+                                        break;
+                                    } catch (Exception e) {
+                                        if (tries == 20) {
+                                            LOG.error("give up");
+                                            throw e;
+                                        }
+                                        tries++;
+                                        LOG.error("tilaResource ei jaksa palvella {}. Yritetään vielä uudestaan. " + tries + "/20...", e.getMessage());
                                         try {
-                                            valintatulos = tilaResource.hakemus(hakuOid, hakukohdeOid, valintatapajonoOid, hakemusOid);
-                                            if (tries > 0) {
-                                                LOG.error("retry ok");
-                                            }
-                                            break;
-                                        } catch (Exception e) {
-                                            if (tries == 20) {
-                                                LOG.error("give up");
-                                                throw e;
-                                            }
-                                            tries++;
-                                            LOG.error("tilaResource ei jaksa palvella {}. Yritetään vielä uudestaan. " + tries + "/20...", e.getMessage());
-                                            try {
-                                                Thread.sleep(10000L);
-                                            } catch (InterruptedException e1) {
-                                                e1.printStackTrace();
-                                            }
+                                            Thread.sleep(10000L);
+                                        } catch (InterruptedException e1) {
+                                            e1.printStackTrace();
                                         }
                                     }
-
-
-                                    LogEntry ret = null;
-                                    for (LogEntry logEntry : valintatulos.getLogEntries()) {
-                                        if (logEntry.getMuutos().equalsIgnoreCase("VASTAANOTTANUT_SITOVASTI")) {
-                                            return logEntry;
-                                        }
-                                    }
-                                    for (LogEntry logEntry : valintatulos.getLogEntries()) {
-                                        if (logEntry.getMuutos().equalsIgnoreCase("VASTAANOTTANUT")) {
-                                            return logEntry;
-                                        }
-                                    }
-                                    for (LogEntry logEntry : valintatulos.getLogEntries()) {
-                                        if (logEntry.getMuutos().equalsIgnoreCase("EHDOLLISESTI_VASTAANOTTANUT")) {
-                                            return logEntry;
-                                        }
-                                    }
-                                    LOG.error("No logentries for event VASTAANOTTANUT_SITOVASTI, VASTAANOTTANUT or EHDOLLISESTI_VASTAANOTTANUT for hakuOid:" + hakuOid + ",hakukohdeOid:" + hakukohdeOid + ", valintatapajonoOid:" + valintatapajonoOid + ", hakemusOid:" + hakemusOid + " valintatulos tila:" + valintatulos.getTila());
-                                    return ret;
                                 }
 
+
+                                for (LogEntry logEntry : valintatulos.getLogEntries()) {
+                                    if (logEntry.getMuutos().equalsIgnoreCase("VASTAANOTTANUT_SITOVASTI")) {
+                                        return logEntry;
+                                    }
+                                }
+                                for (LogEntry logEntry : valintatulos.getLogEntries()) {
+                                    if (logEntry.getMuutos().equalsIgnoreCase("VASTAANOTTANUT")) {
+                                        return logEntry;
+                                    }
+                                }
+                                for (LogEntry logEntry : valintatulos.getLogEntries()) {
+                                    if (logEntry.getMuutos().equalsIgnoreCase("EHDOLLISESTI_VASTAANOTTANUT")) {
+                                        return logEntry;
+                                    }
+                                }
+                                LOG.error("No logentries for event VASTAANOTTANUT_SITOVASTI, VASTAANOTTANUT or EHDOLLISESTI_VASTAANOTTANUT for hakuOid:" + hakuOid + ",hakukohdeOid:" + hakukohdeOid + ", valintatapajonoOid:" + valintatapajonoOid + ", hakemusOid:" + hakemusOid + " valintatulos tila:" + valintatulos.getTila());
+                                return (LogEntry) null;
                             };
                             for (KelaAbstraktiHaku kelahaku : luontiJaRivit
                                     .getHaut()) {
@@ -650,5 +602,33 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 }
                             }
                         }));
+    }
+
+    private void updateHaunKohdejoukkoCache(Haku haku, KelaCache cache, Collection<Poikkeus> poikkeuksetUudelleenYrityksessa) {
+        String haunKohdejoukkoUri = haku.getAsTarjontaHakuDTO().getKohdejoukkoUri();
+        try {
+            if (!cache.containsHaunKohdejoukko(haunKohdejoukkoUri)) {
+                cache.putHaunKohdejoukko(haunKohdejoukkoUri, haunTyyppiKomponentti.haunKohdejoukko(haunKohdejoukkoUri));
+            }
+        } catch (Exception e) {
+            poikkeuksetUudelleenYrityksessa.add(new Poikkeus(Poikkeus.KOODISTO,
+                    "Haun kohdejoukolle " + haunKohdejoukkoUri + " ei saatu arvoa koodistosta",
+                    haunKohdejoukkoUri));
+            throw e;
+        }
+    }
+
+    private void updateHauntyyppiCache(Haku haku, KelaCache cache, Collection<Poikkeus> poikkeuksetUudelleenYrityksessa) {
+        String hakutyyppiUri = haku.getAsTarjontaHakuDTO().getHakutyyppiUri();
+        try {
+            if (!cache.containsHakutyyppi(hakutyyppiUri)) {
+                cache.putHakutyyppi(hakutyyppiUri, haunTyyppiKomponentti.haunTyyppi(hakutyyppiUri));
+            }
+        } catch (Exception e) {
+            poikkeuksetUudelleenYrityksessa.add(new Poikkeus(Poikkeus.KOODISTO,
+                    "Haun tyypille " + hakutyyppiUri + " ei saatu arvoa koodistosta",
+                    hakutyyppiUri));
+            throw e;
+        }
     }
 }
