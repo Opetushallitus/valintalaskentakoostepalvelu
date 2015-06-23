@@ -112,7 +112,7 @@ public class Converter {
                                 LOG.error("Toivomusjarjestykseton preferenssi {}", e.getKey());
                                 throw ee;
                             }
-                            Hakutoive hakutoive = null;
+                            Hakutoive hakutoive;
                             if (!hakutoiveet.containsKey(prioriteetti)) {
                                 hakutoive = new Hakutoive();
                                 hakutoiveet.put(prioriteetti, hakutoive);

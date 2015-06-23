@@ -286,7 +286,7 @@ public class ViestintapalveluAktivointiResource {
             LOG.error("Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
             throw new RuntimeException("Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
         }
-        String tag = null;
+        String tag;
         KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
         try {
             if (templateName == null) {

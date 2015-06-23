@@ -187,7 +187,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                         HakukohdeTyyppi hakukohde = exchange.getIn().getBody(HakukohdeTyyppi.class);
                         String hakukohdeOid = hakukohde.getOid();
                         String hakuOid = hakuOid(exchange);
-                        String sijoitteluajoId = sijoitteluajoId(exchange);
                         String tarjoajaOid = StringUtils.EMPTY;
                         String hakukohdeNimi;
                         String tarjoajaNimi;

@@ -53,20 +53,13 @@ public class TKUVAYHVAKomponentti {
                                   @Property("lukuvuosi") Date lukuvuosi,
                                   @Property("poimintapaivamaara") Date poimintapaivamaara) throws Exception {
         try {
-            Set<String> linjakoodiErrorSet = new HashSet<String>();
-            Map<String, String> linjakoodiCache = new HashMap<String, String>();
-            Set<String> oppilaitosErrorSet = new HashSet<String>();
-            Map<String, String> oppilaitosCache = new HashMap<String, String>();
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
                         .getHakutoiveenValintatapajonot()) {
                     if (HYVAKSYTTY.equals(valintatapajono.getTila()) || VARASIJALTA_HYVAKSYTTY.equals(valintatapajono.getTila())) {
                         TKUVAYHVA.Builder builder = new TKUVAYHVA.Builder();
-                        String hakukohdeOid = hakutoive.getHakukohdeOid();
-                        String tarjoajaOid = hakutoive.getTarjoajaOid();
                         // KOULUTUKSEN ALKAMISVUOSI
                         builder.setLukuvuosi(lukuvuosi);
-
                         builder.setValintapaivamaara(new Date()); // TODO:
                         // Sijoittelun
                         // täytyy

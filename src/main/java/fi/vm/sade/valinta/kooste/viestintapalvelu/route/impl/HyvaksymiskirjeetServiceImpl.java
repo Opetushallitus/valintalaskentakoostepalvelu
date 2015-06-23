@@ -102,7 +102,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             HaeOsoiteKomponentti haeOsoiteKomponentti,
             OrganisaatioAsyncResource organisaatioAsyncResource,
             String kieli, List<String> oids, Organisaatio rdto, Teksti organisaationimi) {
-        Osoite hakijapalveluidenOsoite = null;
+        Osoite hakijapalveluidenOsoite;
         try {
             if (organisaationimi.isArvoton()) {
                 organisaationimi = new Teksti(rdto.getNimi());

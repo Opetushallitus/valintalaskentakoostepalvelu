@@ -316,7 +316,7 @@ public class ErillishaunTuontiService {
         // Syntymäaika oikeassa formaatissa
         if(!isBlank(rivi.getSyntymaAika())) {
             try {
-                DateTime p = ErillishakuRivi.SYNTYMAAIKAFORMAT.parseDateTime(rivi.getSyntymaAika());
+                ErillishakuRivi.SYNTYMAAIKAFORMAT.parseDateTime(rivi.getSyntymaAika());
             } catch(Exception e){
                 return "Syntymäaika '" + rivi.getSyntymaAika() + "' on väärin muotoiltu. Syntymäaika on syötettävä muodossa pp.mm.vvvv. " + rivi.toString();
             }

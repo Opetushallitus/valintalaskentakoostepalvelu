@@ -97,11 +97,8 @@ public class Excel {
 
     public InputStream vieXlsx() {
         XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFCreationHelper factory = workbook.getCreationHelper();
         XSSFSheet sheet = workbook.createSheet(nimi);
-        XSSFDrawing drawing = sheet.createDrawingPatriarch();
         XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(sheet);
-        XSSFDataFormat format = workbook.createDataFormat();
 
         XSSFDataFormat fmt = workbook.createDataFormat();
         CellStyle textStyle = workbook.createCellStyle();
@@ -112,9 +109,6 @@ public class Excel {
         }
         XSSFCellStyle hiddenStyle = workbook.createCellStyle();
         hiddenStyle.setHidden(true);
-
-        //XSSFCellStyle numberStyle = workbook.createCellStyle();
-        //numberStyle
 
         XSSFCellStyle alignRightStyle = workbook.createCellStyle();
         alignRightStyle.setDataFormat(fmt.getFormat("@"));
@@ -132,8 +126,6 @@ public class Excel {
         editableStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
         editableStyle.setAlignment(CellStyle.ALIGN_LEFT);
         editableStyle.setLocked(false);
-        // lockedStyle.setFillBackgroundColor(new XSSFColor(Color.GREEN));
-        //sheet.enableLocking();
         List<Integer> leveysPreferenssit = Lists.newArrayList();
         int rowIndex = 0;
         int maxCellNum = 0;

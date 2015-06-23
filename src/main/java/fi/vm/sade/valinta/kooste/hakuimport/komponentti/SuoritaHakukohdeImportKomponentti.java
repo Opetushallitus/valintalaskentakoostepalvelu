@@ -192,7 +192,7 @@ public class SuoritaHakukohdeImportKomponentti {
             }
 
             // Kielikoetunnisteen selvittäminen
-            String kielikoetunniste = null;
+            String kielikoetunniste;
             if (StringUtils.isNotBlank(data.getKielikoeTunniste())) {
                 kielikoetunniste = data.getKielikoeTunniste();
             } else if (StringUtils.isNotBlank(opetuskieli)) {
