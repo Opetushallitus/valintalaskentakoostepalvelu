@@ -100,7 +100,7 @@ public class HaeOsoiteKomponentti {
     private String postinumero(String url) {
         if (url != null) {
             String[] o = url.split("_");
-            if (o != null && o.length > 0) {
+            if (o.length > 0) {
                 return o[1];
             }
         }
