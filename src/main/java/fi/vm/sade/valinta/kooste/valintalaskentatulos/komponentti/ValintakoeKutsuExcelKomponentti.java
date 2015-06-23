@@ -168,10 +168,6 @@ public class ValintakoeKutsuExcelKomponentti {
         for (ValintakoeOsallistuminenDTO v : o.getOsallistumiset()) {
             osallistumiset.put(v.getValintakoeTunniste(), v);
         }
-        ArrayList<String> rivi = new ArrayList<>();
-        StringBuilder b = new StringBuilder();
-        b.append(o.getSukunimi()).append(", ").append(o.getEtunimi());
-        rivi.addAll(Arrays.asList(b.toString(), o.getHakemusOid(), date == null ? "" : ExcelExportUtil.DATE_FORMAT.format(date)));
         boolean osallistuuEdesYhteen = false;
         Map<String, String> osallistumistiedot = Maps.newHashMap();
         for (ValintakoeNimi tunniste : tunnisteet) {
