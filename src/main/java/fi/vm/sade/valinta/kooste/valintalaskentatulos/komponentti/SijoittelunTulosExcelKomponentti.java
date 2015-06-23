@@ -45,6 +45,7 @@ public class SijoittelunTulosExcelKomponentti {
 
     public InputStream luoXls(List<Valintatulos> tilat, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid, List<Hakemus> hakemuksetList, HakukohdeDTO hakukohde) {
         Map<String, Koodi> countryCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+        Map<String, Koodi> postCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         Map<String, Hakemus> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
         if (hakukohde == null) {
             LOG.error("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
@@ -107,7 +108,7 @@ public class SijoittelunTulosExcelKomponentti {
         valintatapajonoOtsikkoRivi.addAll(Arrays.asList("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")); // alun tyhjat pystyrivit
         List<Object> otsikkoRivi = Lists.newArrayList();
         otsikkoRivi.addAll(Arrays.asList("Hakemus", "Hakija", "Henkilötunnus", "Syntymäaika", "Sukupuoli", "Äidinkieli",
-                "Lähiosoite", "Postinumero", "Osoite (ulkomaa)", "Postinumero (ulkomaa)", "Kaupunki (ulkomaa)",
+                "Lähiosoite", "Postinumero", "Postitoimipaikka", "Osoite (ulkomaa)", "Postinumero (ulkomaa)", "Kaupunki (ulkomaa)",
                 "Asuinmaa", "Kansallinen ID", "Passin numero", "Sähköposti", "Puhelinnumero", "Lupa julkaisuun", "Hakutoive"));
         {
             int index = 0;
@@ -140,6 +141,7 @@ public class SijoittelunTulosExcelKomponentti {
                     wrapper.getAidinkieli(),
                     wrapper.getSuomalainenLahiosoite(),
                     wrapper.getSuomalainenPostinumero(),
+                    postitoimipaikka(postCodes, wrapper),
                     wrapper.getUlkomainenLahiosoite(),
                     wrapper.getUlkomainenPostinumero(),
                     wrapper.getKaupunkiUlkomaa(),
@@ -236,6 +238,10 @@ public class SijoittelunTulosExcelKomponentti {
             LOG.error("Ilmoittautumistiloja ei saatu luettua sijoittelusta! {}", Arrays.toString(e.getStackTrace()));
         }
         return t;
+    }
+
+    private String postitoimipaikka(Map<String, Koodi> postCodes, HakemusWrapper wrapper) {
+        return KoodistoCachedAsyncResource.haeKoodistaArvo(postCodes.get(wrapper.getSuomalainenPostinumero()), KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero());
     }
 
     private String countryNameInEnglish(Map<String, Koodi> countryCodes, HakemusWrapper wrapper) {
