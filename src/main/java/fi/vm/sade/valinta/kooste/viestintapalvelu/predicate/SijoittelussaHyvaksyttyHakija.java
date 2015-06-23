@@ -7,9 +7,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
-import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARASIJALTA_HYVAKSYTTY;
-
 public class SijoittelussaHyvaksyttyHakija implements Predicate<HakijaDTO> {
     private final String hakukohdeOid;
 

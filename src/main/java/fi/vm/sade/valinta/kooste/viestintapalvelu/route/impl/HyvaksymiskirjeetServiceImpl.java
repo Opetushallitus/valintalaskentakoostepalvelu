@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
 import com.google.common.collect.*;
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -238,24 +239,21 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKaikkiHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
-        final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
         zip(
                 hakemuksetObservable,
                 from(hakijatFuture),
                 from(organisaatioFuture),
                 (hakemukset, hakijat, organisaatioResponse) -> {
                     LOG.error("Tehdaan hakukohteeseen valitsemattomille filtterointi. Saatiin hakijoita {}", hakijat.getResults().size());
-                    BiPredicate<HakijaDTO, String> kohdeHakukohteessaHylatytTest = new HaussaHylattyHakijaBiPredicate();
-                    Collection<HakijaDTO> kohdeHakukohteessaHylatyt = hakijat
-                            .getResults()
-                            .stream()
-                            .filter(h -> kohdeHakukohteessaHylatytTest.test(h, hakukohdeOid)).collect(Collectors.toList());
-                    if (kohdeHakukohteessaHylatyt.isEmpty()) {
+                    Collection<HakijaDTO> hylatyt = hakijat.getResults().stream()
+                            .filter(HyvaksymiskirjeetServiceImpl::haussaHylatty)
+                            .collect(Collectors.toList());
+                    if (hylatyt.isEmpty()) {
                         LOG.error("Hakukohteessa {} ei ole jälkiohjattavia hakijoita!", hyvaksymiskirjeDTO.getHakukohdeOid());
                         prosessi.keskeyta("Hakukohteessa ei ole jälkiohjattavia hakijoita!");
                         throw new RuntimeException("Hakukohteessa " + hyvaksymiskirjeDTO.getHakukohdeOid() + " ei ole jälkiohjattavia hakijoita!");
                     }
-                    Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHylatyt);
+                    Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hylatyt);
                     MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
                     List<String> tarjoajaOidList = newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid()));
                     Osoite hakijapalveluidenOsoite = organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, tarjoajaOidList,
@@ -265,7 +263,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             todellisenJonosijanRatkaisin(hakijat.getResults()),
                             ImmutableMap.of(hyvaksymiskirjeDTO.getTarjoajaOid(),Optional.ofNullable(hakijapalveluidenOsoite)),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
-                            kohdeHakukohteessaHylatyt, hakemukset,
+                            hylatyt, hakemukset,
                             hyvaksymiskirjeDTO.getHakuOid(),
                             Optional.empty(),
                             hyvaksymiskirjeDTO.getSisalto(),
@@ -286,6 +284,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             LOG.error("Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}", throwable.getMessage(), Arrays.toString(throwable.getStackTrace()));
                             prosessi.keskeyta();
                         });
+    }
+
+    private static boolean haussaHylatty(HakijaDTO hakija) {
+        return Optional.ofNullable(hakija.getHakutoiveet())
+                .map(hakutoiveet -> hakutoiveet.stream()
+                        .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
+                        .map(HakutoiveenValintatapajonoDTO::getTila)
+                        .noneMatch(HakemuksenTila::isHyvaksytty))
+                .orElse(true);
     }
 
     @Override
