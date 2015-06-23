@@ -13,7 +13,7 @@ import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 
 public class LaskentaStartParams implements LaskentaInfo {
-    private final static String NIMI_FORMAT = "Laskenta hakuOid(%s) uuid(%s) hakukohteita(%s/%s)";
+    private final static String NIMI_FORMAT = "Laskenta hakuOid(%s) uuid(%s) hakukohteita(%d)";
     private final String uuid;
     private final String hakuOid;
     private final boolean osittainenLaskenta;
@@ -107,7 +107,7 @@ public class LaskentaStartParams implements LaskentaInfo {
     }
 
     public String toString() {
-        return String.format(NIMI_FORMAT, hakuOid, uuid);
+        return String.format(NIMI_FORMAT, hakuOid, uuid, hakukohdeDtos.size());
     }
 
 }
