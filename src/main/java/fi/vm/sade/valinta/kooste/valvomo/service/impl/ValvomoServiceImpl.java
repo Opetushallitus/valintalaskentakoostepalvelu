@@ -52,7 +52,7 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
             LOG.error("Process failed {} with exception {}", new Object[]{process, exception});
             buffer.append(", ").append(exception.getMessage());
         }
-        if (process instanceof ExceptionStack) {
+        if (exception != null && process instanceof ExceptionStack) {
             StringBuffer s = new StringBuffer().append(message).append(": ").append(exception.getClass()).append(": ").append(exception.getMessage());
             if (!((ExceptionStack) process).addException(s.toString())) {
                 // already in process buffer was not first
