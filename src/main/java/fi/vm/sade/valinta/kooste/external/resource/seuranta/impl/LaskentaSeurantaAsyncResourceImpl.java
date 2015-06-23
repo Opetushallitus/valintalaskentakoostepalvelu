@@ -78,12 +78,9 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
 
     public void luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids, Consumer<String> callback, Consumer<Throwable> failureCallback) {
         try {
-            Boolean isErillishaku = laskentaParams.isErillishaku();
             String url = "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + laskentaParams.getHakuOid() + "/tyyppi/" + laskentaParams.getLaskentatyyppi();
             WebClient wc = getWebClient().path(url);
-            if (isErillishaku != null) {
-                wc.query("erillishaku", isErillishaku);
-            }
+            wc.query("erillishaku", (Boolean) laskentaParams.isErillishaku());
             if (laskentaParams.getValinnanvaihe() != null) {
                 wc.query("valinnanvaihe", laskentaParams.getValinnanvaihe());
             }
