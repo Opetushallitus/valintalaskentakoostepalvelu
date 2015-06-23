@@ -25,7 +25,7 @@ public class PistesyotonTuonti5Test extends PistesyotonTuontiTestBase {
         System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(aaltosenPistetiedot));
         assertEquals("", aaltosenPistetiedot.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84"));
         assertEquals("MERKITSEMATTA", aaltosenPistetiedot.getAdditionalData().get("f8523684-9274-fc59-12a6-a8fe79ec8b84-OSALLISTUMINEN"));
-        assertEquals("2.00", aaltosenPistetiedot.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6"));
+        assertEquals("2.0", aaltosenPistetiedot.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6"));
         assertEquals("OSALLISTUI", aaltosenPistetiedot.getAdditionalData().get("582c0bbc-c323-cbff-6aea-0fddbe26d0e6-OSALLISTUMINEN"));
 
         ApplicationAdditionalDataDTO pelottomanPistetiedot = pistetiedot.stream().filter(h -> h.getLastName().equals("Peloton")).findFirst().get();

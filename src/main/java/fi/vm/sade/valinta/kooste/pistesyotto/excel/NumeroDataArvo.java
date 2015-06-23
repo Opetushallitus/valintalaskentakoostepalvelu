@@ -58,10 +58,10 @@ public class NumeroDataArvo extends TilaDataArvo {
     }
 
     private String konvertoi(String arvo) {
-        try {
+        /* try {
             return new java.math.BigDecimal(arvo).setScale(2, RoundingMode.HALF_UP).toString();
         } catch (Exception e) {
-        }
+        } */
         return arvo;
     }
 
