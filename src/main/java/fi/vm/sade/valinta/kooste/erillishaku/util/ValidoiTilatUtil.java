@@ -52,7 +52,7 @@ public class ValidoiTilatUtil {
         if (ILMOITETTU.equals(valintatuloksenTila)) {
             return virheellinenTilaYhdistelma(new StringBuilder("Ilmoitettutila on poistettu käytöstä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
         }
-        if (KAYTOSTAPOISTETTU_VASTAANOTTOTILA.equals(valintatuloksenTila)) {
+        if (KAYTOSTAPOISTETTU_VASTAANOTTOTILA.contains(valintatuloksenTila)) {
             return virheellinenTilaYhdistelma(new StringBuilder("Valintatuloksen tila on poistettu käytöstä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
         }
         if (!EI_ILMOITTAUTUMISTA.contains(ilmoittautumisTila)) {

@@ -85,7 +85,7 @@ public class HaeOsoiteKomponentti {
             maakoodi = new Maakoodi(StringUtils.EMPTY, "FI");
         }
         String country = null;
-        if (Kieli.EN.equals(preferoitutyyppi)) {
+        if (KieliType.EN.equals(preferoitutyyppi)) {
             country = "FINLAND";
         }
         return new Osoite(

@@ -20,7 +20,8 @@ public class ValidoiTilatUtilTest {
         // OK SYOTTEET
         assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA, IlmoittautumisTila.LASNA),is(nullValue()));
         assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.VASTAANOTTANUT, IlmoittautumisTila.POISSA),is(nullValue()));
-        assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.VASTAANOTTANUT_LASNA, IlmoittautumisTila.LASNA_SYKSY),is(nullValue()));
+        assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.VASTAANOTTANUT_LASNA, IlmoittautumisTila.LASNA_SYKSY),
+                is("Valintatuloksen tila on poistettu käytöstä. HYVAKSYTTY, VASTAANOTTANUT_LASNA ja LASNA_SYKSY on virheellinen tilayhdistelmä"));
         assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.VASTAANOTTANUT_POISSAOLEVA, IlmoittautumisTila.LASNA_KOKO_LUKUVUOSI), is(nullValue()));
         assertThat(validoi(HakemuksenTila.HYVAKSYTTY, ValintatuloksenTila.EHDOLLISESTI_VASTAANOTTANUT, IlmoittautumisTila.POISSA_KOKO_LUKUVUOSI),is(nullValue()));
 
