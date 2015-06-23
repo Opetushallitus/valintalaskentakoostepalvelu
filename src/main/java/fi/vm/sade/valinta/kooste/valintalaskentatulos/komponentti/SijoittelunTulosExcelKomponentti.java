@@ -107,7 +107,7 @@ public class SijoittelunTulosExcelKomponentti {
         List<Object> valintatapajonoOtsikkoRivi = Lists.newArrayList();
         valintatapajonoOtsikkoRivi.addAll(Arrays.asList("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")); // alun tyhjat pystyrivit
         List<Object> otsikkoRivi = Lists.newArrayList();
-        otsikkoRivi.addAll(Arrays.asList("Hakemus", "Hakija", "Henkilötunnus", "Syntymäaika", "Sukupuoli", "Äidinkieli",
+        otsikkoRivi.addAll(Arrays.asList("Hakemus", "Hakija", "Henkilötunnus", "Syntymäaika", "Sukupuoli", "Äidinkieli", "Kansalaisuus",
                 "Lähiosoite", "Postinumero", "Postitoimipaikka", "Osoite (ulkomaa)", "Postinumero (ulkomaa)", "Kaupunki (ulkomaa)",
                 "Asuinmaa", "Kansallinen ID", "Passin numero", "Sähköposti", "Puhelinnumero", "Lupa julkaisuun", "Hakutoive"));
         {
@@ -139,6 +139,7 @@ public class SijoittelunTulosExcelKomponentti {
                     wrapper.getSyntymaaika(),
                     wrapper.getSukupuoli(),
                     wrapper.getAidinkieli(),
+                    wrapper.getKansalaisuus(),
                     wrapper.getSuomalainenLahiosoite(),
                     wrapper.getSuomalainenPostinumero(),
                     postitoimipaikka(postCodes, wrapper),
