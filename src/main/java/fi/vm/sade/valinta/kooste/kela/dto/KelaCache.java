@@ -44,7 +44,7 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
             LOG.error("Koulutuksen alkamiskausi URI oli null!");
             throw new RuntimeException("Koulutuksen alkamiskausi URI oli null!");
         }
-        if (!lukuvuosi.contains(uri)) {
+        if (!lukuvuosi.containsKey(uri)) {
             int vuosi = hakuDTO.getKoulutuksenAlkamisVuosi();
             int kuukausi = 1;
             List<KoodiType> koodis;
