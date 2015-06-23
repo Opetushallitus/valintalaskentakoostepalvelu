@@ -53,38 +53,23 @@ public class KoodistoCachedAsyncResource {
     }
 
     public Map<String, Koodi> haeKoodisto(String koodistoUri) {
-        Map<String, Koodi> koodisto =
-                koodistoCache.getIfPresent(koodistoUri);
-        if (koodisto == null) {
-            try {
-                return koodistoCache.get(koodistoUri, () -> {
-                    try {
-                        List<Koodi> koodit = koodistoAsyncResource.haeKoodisto(koodistoUri).get();
-                        Map<String, Koodi> koodistoMappaus = konversio(koodit);
-                        return koodistoMappaus;
-                    } catch (Exception e) {
-                        LOG.error("Koodistosta luku epäonnistui: {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
-                        throw new RuntimeException(e);
-                    }
-                });
-            } catch (Exception e) {
-                LOG.error("Koodistosta luku epäonnistui:", e);
-                throw new RuntimeException(e);
-            }
-        } else {
-            return koodisto;
+        Map<String, Koodi> koodisto = koodistoCache.getIfPresent(koodistoUri);
+        return koodisto != null ? koodisto : loadKoodistoToCache(koodistoUri);
+    }
+
+    private Map<String, Koodi> loadKoodistoToCache(String koodistoUri) {
+        try {
+            return koodistoCache.get(koodistoUri, () -> konversio(koodistoAsyncResource.haeKoodisto(koodistoUri).get()));
+        } catch (Exception e) {
+            LOG.error("Koodistosta luku epäonnistui:", e);
+            throw new RuntimeException(e);
         }
     }
 
     private Map<String, Koodi> konversio(List<Koodi> koodit) {
-        return koodit.stream().collect(Collectors.toMap(a -> a.getKoodiArvo(), a -> a,
-                // Mergefunktiossa suuremmalla versiolla oleva palautetaan
-                (a, b) -> {
-                    if (a.getVersio() > b.getVersio()) {
-                        return a;
-                    }
-                    return b;
-                }));
+        return koodit.stream().collect(
+                Collectors.toMap(Koodi::getKoodiArvo, a -> a, (a, b) -> a.getVersio() > b.getVersio() ? a : b)
+        );
     }
 
     public static String haeKoodistaArvo(Koodi koodi, final String preferoituKieli, String defaultArvo) {
