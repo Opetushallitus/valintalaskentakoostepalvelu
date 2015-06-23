@@ -87,7 +87,10 @@ public class ValintalaskentaExcelResource {
             return Response.ok(input, APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=jalkiohjaustulos.xls").build();
         } catch (Exception e) {
             LOG.error("Jälkiohjaustulosexcelin luonti epäonnistui haulle {}: {}", new Object[]{hakuOid, e.getMessage()});
-            return Response.ok(ExcelExportUtil.exportGridAsXls(new Object[][]{new Object[]{"Tarvittavien tietojen hakeminen epäonnistui!", "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!"}}), APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=yritauudelleen.xls").build();
+            return Response
+                    .ok(ExcelExportUtil.exportGridAsXls(new Object[][]{new Object[]{"Tarvittavien tietojen hakeminen epäonnistui!", "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!"}}), APPLICATION_VND_MS_EXCEL)
+                    .header("content-disposition", "inline; filename=yritauudelleen.xls")
+                    .build();
         }
     }
 
@@ -145,12 +148,9 @@ public class ValintalaskentaExcelResource {
                             String opetuskieli = KirjeetHakukohdeCache.getOpetuskieli(tarjonta.getOpetusKielet());
                             Teksti hakukohteenNimet = new Teksti(tarjonta.getHakukohteenNimet());
                             Teksti tarjoajaNimet = new Teksti(tarjonta.getTarjoajaNimet());
-                            InputStream xls = sijoittelunTulosExcelKomponentti.luoXls(valintatulokset, opetuskieli,
-                                    hakukohteenNimet.getTeksti(opetuskieli), tarjoajaNimet.getTeksti(opetuskieli),
-                                    hakukohdeOid, hakemukset, hakukohde);
+                            InputStream xls = sijoittelunTulosExcelKomponentti.luoXls(valintatulokset, opetuskieli, hakukohteenNimet.getTeksti(opetuskieli), tarjoajaNimet.getTeksti(opetuskieli), hakukohdeOid, hakemukset, hakukohde);
                             String id = UUID.randomUUID().toString();
-                            Observable<Response> response = dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls",
-                                    DateTime.now().plusHours(24).toDate().getTime(), Arrays.asList(), "application/vnd.ms-excel", xls);
+                            Observable<Response> response = dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls", DateTime.now().plusHours(24).toDate().getTime(), Arrays.asList(), "application/vnd.ms-excel", xls);
                             response.subscribe(
                                     ehkaOk -> {
                                         if (ehkaOk.getStatus() < 300) {
