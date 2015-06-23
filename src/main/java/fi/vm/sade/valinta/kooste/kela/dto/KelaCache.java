@@ -22,12 +22,12 @@ import fi.vm.sade.valinta.kooste.kela.komponentti.PaivamaaraSource;
 
 public class KelaCache implements HakemusSource, PaivamaaraSource {
     private static final Logger LOG = LoggerFactory.getLogger(KelaCache.class);
-    private final ConcurrentHashMap<String, HakuDTO> haut = new ConcurrentHashMap<String, HakuDTO>();
-    private final ConcurrentHashMap<String, HakukohdeDTO> hakukohteet = new ConcurrentHashMap<String, HakukohdeDTO>();
-    private final ConcurrentHashMap<String, Hakemus> hakemukset = new ConcurrentHashMap<String, Hakemus>();
-    private final ConcurrentHashMap<String, String> hakutyyppiArvo = new ConcurrentHashMap<String, String>();
-    private final ConcurrentHashMap<String, String> haunKohdejoukkoArvo = new ConcurrentHashMap<String, String>();
-    private final ConcurrentHashMap<String, Date> lukuvuosi = new ConcurrentHashMap<String, Date>();
+    private final ConcurrentHashMap<String, HakuDTO> haut = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, HakukohdeDTO> hakukohteet = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Hakemus> hakemukset = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String> hakutyyppiArvo = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String> haunKohdejoukkoArvo = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Date> lukuvuosi = new ConcurrentHashMap<>();
     private final Date now;
     private final KoodiService koodiService;
 
@@ -47,7 +47,7 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
         if (!lukuvuosi.contains(uri)) {
             int vuosi = hakuDTO.getKoulutuksenAlkamisVuosi();
             int kuukausi = 1;
-            List<KoodiType> koodis = null;
+            List<KoodiType> koodis;
             // haku.get
 
             int tries = 0;
