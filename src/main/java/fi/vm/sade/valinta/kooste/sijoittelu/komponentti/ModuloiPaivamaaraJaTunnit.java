@@ -26,13 +26,15 @@ public class ModuloiPaivamaaraJaTunnit {
     public static int seuraavaAskel(int alkuPiste, int tavoiteAlue, int askel) {
         if (alkuPiste <= tavoiteAlue) {
             int i = alkuPiste;
-            for (; i < tavoiteAlue; i += askel)
-                ;
+            while (i < tavoiteAlue) {
+                i += askel;
+            }
             return i;
         } else {
             int i = alkuPiste;
-            for (; i >= tavoiteAlue; i -= askel)
-                ;
+            while (i >= tavoiteAlue) {
+                i -= askel;
+            }
             return i + askel;
         }
     }
