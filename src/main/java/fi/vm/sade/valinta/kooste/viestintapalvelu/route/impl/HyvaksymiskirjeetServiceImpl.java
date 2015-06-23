@@ -125,7 +125,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 LOG.error("Hakijapalveluiden osoite saatiin tarjoajalta {}.\r\n{}", Arrays.toString(oids.toArray()), new GsonBuilder().setPrettyPrinting().create().toJson(hakijapalveluidenOsoite));
                 return hakijapalveluidenOsoite;
             }
-            if (hakijapalveluidenOsoite == null && rdto.getParentOid() != null) {
+            if (rdto.getParentOid() != null) {
                 LOG.error("Ei saatu hakijapalveluiden osoitetta talta organisaatiolta. Tutkitaan seuraava {}", Arrays.toString(oids.toArray()));
                 return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource, kieli, oids, responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioAsyncResource
                         .haeOrganisaatio(rdto.getParentOid()).get()), organisaationimi);
