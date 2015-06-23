@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
+import java.util.concurrent.TimeUnit;
 import rx.Observable;
 
 @Service
@@ -18,7 +19,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implement
 
     @Autowired
     public ValintaTulosServiceAsyncResourceImpl(@Value("${host.ilb}") String address) {
-        super(address);
+        super(address, TimeUnit.MINUTES.toMillis(30));
     }
 
     @Override
