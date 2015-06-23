@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.predicate;
 
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 
@@ -23,7 +24,7 @@ public class SijoittelussaHyvaksyttyHakija implements Predicate<HakijaDTO> {
                         .filter(hakutoive -> this.hakukohdeOid.equals(hakutoive.getHakukohdeOid()))
                         .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
                         .map(HakutoiveenValintatapajonoDTO::getTila)
-                        .anyMatch(tila -> HYVAKSYTTY.equals(tila) || VARASIJALTA_HYVAKSYTTY.equals(tila)))
+                        .anyMatch(HakemuksenTila::isHyvaksytty))
                 .orElse(false);
     }
 }

@@ -194,11 +194,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 (hakemukset, hakijat, organisaatioResponse) -> {
                     LOG.info("Tehdaan valituille hakijoille hyvaksytyt filtterointi.");
                     final Set<String> kohdeHakijat = Sets.newHashSet(hakemusOids);
-                    BiPredicate<HakijaDTO, String> kohdeHakukohteessaHyvaksytty = new SijoittelussaHyvaksyttyHakijaBiPredicate();
-                    Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat
-                            .getResults()
-                            .stream()
-                            .filter(h -> kohdeHakukohteessaHyvaksytty.test(h, hakukohdeOid))
+                    Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat.getResults().stream()
+                            .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
                             .filter(h -> kohdeHakijat.contains(h.getHakemusOid()))
                             .collect(Collectors.toList());
                     Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
@@ -303,11 +300,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 from(organisaatioFuture),
                 (hakemukset, hakijat, organisaatioResponse) -> {
                     LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi.");
-                    BiPredicate<HakijaDTO, String> kohdeHakukohteessaHyvaksytty = new SijoittelussaHyvaksyttyHakijaBiPredicate();
-                    Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat
-                            .getResults()
-                            .stream()
-                            .filter(h -> kohdeHakukohteessaHyvaksytty.test(h, hakukohdeOid)).collect(Collectors.toList());
+                    Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat.getResults().stream()
+                            .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
+                            .collect(Collectors.toList());
                     Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(kohdeHakukohteessaHyvaksytyt);
                     MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
                     final boolean iPosti = false;

@@ -14,10 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakija;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -68,7 +70,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakijaPredicate;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.AbstractDokumenttiRouteBuilder;
 
@@ -298,16 +299,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             for (HakijaDTO hakija : sijoitteluProxy.koulutuspaikalliset(hakuOid(exchange), hakukohdeOid, SijoitteluResource.LATEST)) {
                                 l.add(hakija);
                             }
-                            o = FluentIterable
-                                    .from(l)
-                                    .filter(new SijoittelussaHyvaksyttyHakijaPredicate(hakukohdeOid))
-                                    .transform(
-                                            new Function<HakijaDTO, String>() {
-                                                @Override
-                                                public String apply(HakijaDTO input) {
-                                                    return input.getHakemusOid();
-                                                }
-                                            }).toList();
+                            o = l.stream()
+                                    .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
+                                    .map(HakijaDTO::getHakemusOid)
+                                    .collect(Collectors.toList());
                             if (o.isEmpty()) {
                                 prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null, true));
                                 return;
