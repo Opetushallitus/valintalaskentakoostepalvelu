@@ -44,8 +44,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
         return getWebClient().path(url)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
-                .put(Entity.entity(new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit), MediaType.APPLICATION_JSON), new GenericType<List<Hakemus>>() {
-                });
+                .put(Entity.entity(new HakemusPrototyyppiBatch(hakuOid, hakukohdeOid, tarjoajaOid, hakemusPrototyypit), MediaType.APPLICATION_JSON), new GenericType<List<Hakemus>>() {});
     }
 
     /**
@@ -53,8 +52,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
      */
     @Override
     public Observable<List<Hakemus>> getApplicationsByOid(String hakuOid, String hakukohdeOid) {
-        return getAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {
-        }.getType(), client -> {
+        return getAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(), client -> {
             client.query("appState", "ACTIVE", "INCOMPLETE");
             client.query("rows", 100000).query("asId", hakuOid).query("aoOid", hakukohdeOid);
             return client;
@@ -63,12 +61,10 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 
     @Override
     public Observable<List<Hakemus>> getApplicationsByHakemusOids(Collection<String> hakemusOids) {
-        return postAsObservable("/applications/list", new TypeToken<List<Hakemus>>() {
-                }.getType(),
+        return postAsObservable("/applications/list", new TypeToken<List<Hakemus>>() {}.getType(),
                 Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
-
                     client.query("rows", 100000);
                     return client;
                 });
@@ -83,8 +79,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                 .query("rows", 100000)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
-                .post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new GenericType<List<Hakemus>>() {
-                });
+                .post(Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE), new GenericType<List<Hakemus>>() {});
     }
 
     @Override
@@ -93,10 +88,8 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     }
 
     @Override
-    public Peruutettava getApplicationsByOids(Collection<String> hakemusOids,
-                                              Consumer<List<Hakemus>> callback,
-                                              Consumer<Throwable> failureCallback) {
-        String url = new StringBuilder().append("/applications/list").toString();
+    public Peruutettava getApplicationsByOids(Collection<String> hakemusOids, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
+        String url = "/applications/list";
         return new PeruutettavaImpl(getWebClient()
                 .path(url)
                 .query("rows", 100000)
@@ -107,8 +100,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                         url + "?rows=100000",
                         callback,
                         failureCallback,
-                        new TypeToken<List<Hakemus>>() {
-                        }.getType())));
+                        new TypeToken<List<Hakemus>>() {}.getType())));
     }
 
     public Peruutettava getApplicationsByOid(String hakuOid, String hakukohdeOid, Consumer<List<Hakemus>> callback, Consumer<Throwable> failureCallback) {
@@ -127,8 +119,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                                     url + "?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid=" + hakukohdeOid + "&asId=" + hakuOid,
                                     callback,
                                     failureCallback,
-                                    new TypeToken<List<Hakemus>>() {
-                                    }.getType())));
+                                    new TypeToken<List<Hakemus>>() {}.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
@@ -147,8 +138,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                                     url,
                                     callback,
                                     failureCallback,
-                                    new TypeToken<List<ApplicationAdditionalDataDTO>>() {
-                                    }.getType())));
+                                    new TypeToken<List<ApplicationAdditionalDataDTO>>() {}.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
@@ -167,8 +157,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
                                     url,
                                     callback,
                                     failureCallback,
-                                    new TypeToken<List<ApplicationAdditionalDataDTO>>() {
-                                    }.getType())));
+                                    new TypeToken<List<ApplicationAdditionalDataDTO>>() {}.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
