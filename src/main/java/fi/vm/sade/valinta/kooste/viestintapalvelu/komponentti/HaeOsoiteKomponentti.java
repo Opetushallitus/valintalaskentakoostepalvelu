@@ -109,19 +109,15 @@ public class HaeOsoiteKomponentti {
 
     public Osoite haeOsoite(Map<String, Koodi> maatJaValtiot1, Map<String, Koodi> posti, Hakemus hakemus) {
         HakemusWrapper wrapper = new HakemusWrapper(hakemus);
-        String hakemusOid = hakemus.getOid();
-        Map<String, String> henkilotiedot = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-        henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
-
         Koodi postiKoodi = posti.get(wrapper.getSuomalainenPostinumero());
         String postitoimipaikka = KoodistoCachedAsyncResource.haeKoodistaArvo(postiKoodi, KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero());
-        String asuinmaaEnglanniksi = KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa());
 
-        Maakoodi maakoodi = null;
+        Maakoodi maakoodi;
         // onko ulkomaalainen?
         if (SUOMI.equalsIgnoreCase(hakemus.getAnswers().getHenkilotiedot().get(ASUINMAA))) {
             maakoodi = new Maakoodi(postitoimipaikka, "Suomi");
         } else {
+            String asuinmaaEnglanniksi = KoodistoCachedAsyncResource.haeKoodistaArvo(maatJaValtiot1.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa());
             maakoodi = new Maakoodi(postitoimipaikka, asuinmaaEnglanniksi);
         }
         return OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maakoodi.getMaa(), maakoodi.getPostitoimipaikka());
