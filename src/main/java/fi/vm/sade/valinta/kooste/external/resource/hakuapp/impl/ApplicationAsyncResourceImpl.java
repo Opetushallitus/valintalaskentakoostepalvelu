@@ -72,10 +72,8 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 
     @Override
     public Future<List<Hakemus>> getApplicationsByOids(Collection<String> hakemusOids) {
-        String url = new StringBuilder().append("/applications/list")
-                .toString();
         return getWebClient()
-                .path(url)
+                .path("/applications/list")
                 .query("rows", 100000)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
