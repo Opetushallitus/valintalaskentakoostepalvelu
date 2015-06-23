@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos.resource;
 
 import java.io.InputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
