@@ -148,6 +148,7 @@ public class ValintalaskentaExcelResource {
                             String opetuskieli = KirjeetHakukohdeCache.getOpetuskieli(tarjonta.getOpetusKielet());
                             Teksti hakukohteenNimet = new Teksti(tarjonta.getHakukohteenNimet());
                             Teksti tarjoajaNimet = new Teksti(tarjonta.getTarjoajaNimet());
+
                             InputStream xls = sijoittelunTulosExcelKomponentti.luoXls(valintatulokset, opetuskieli, hakukohteenNimet.getTeksti(opetuskieli), tarjoajaNimet.getTeksti(opetuskieli), hakukohdeOid, hakemukset, hakukohde);
                             String id = UUID.randomUUID().toString();
                             Observable<Response> response = dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xls", DateTime.now().plusHours(24).toDate().getTime(), Arrays.asList(), "application/vnd.ms-excel", xls);

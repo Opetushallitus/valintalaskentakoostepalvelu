@@ -12,9 +12,13 @@ import java.util.stream.Collectors;
 
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
@@ -26,10 +30,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.TilaHistoriaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.sijoittelu.exception.SijoittelultaEiSisaltoaPoikkeus;
-import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
-import fi.vm.sade.valinta.kooste.util.Formatter;
-import fi.vm.sade.valinta.kooste.util.HakemusUtil;
-import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.excel.Highlight;
 import fi.vm.sade.valinta.kooste.util.excel.Span;
 
@@ -40,7 +40,11 @@ import fi.vm.sade.valinta.kooste.util.excel.Span;
 public class SijoittelunTulosExcelKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(SijoittelunTulosExcelKomponentti.class);
 
+    @Autowired
+    private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
+
     public InputStream luoXls(List<Valintatulos> tilat, String preferoitukielikoodi, String hakukohdeNimi, String tarjoajaNimi, String hakukohdeOid, List<Hakemus> hakemuksetList, HakukohdeDTO hakukohde) {
+        Map<String, Koodi> countryCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Hakemus> hakemukset = hakemuksetList.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
         if (hakukohde == null) {
             LOG.error("Hakukohteessa ei hakijoita tai hakukohdetta ei ole olemassa!");
@@ -139,11 +143,10 @@ public class SijoittelunTulosExcelKomponentti {
                     wrapper.getUlkomainenLahiosoite(),
                     wrapper.getUlkomainenPostinumero(),
                     wrapper.getKaupunkiUlkomaa(),
-                    wrapper.getAsuinmaa(),
+                    countryNameInEnglish(countryCodes, wrapper),
                     wrapper.getKansallinenId(),
                     wrapper.getPassinnumero(),
                     wrapper.getSahkopostiOsoite(),
-
                     wrapper.getPuhelinnumero(),
                     HakemusUtil.lupaJulkaisuun(wrapper.getLupaJulkaisuun()), wrapper.getHakutoiveenPrioriteetti(hakukohdeOid)
             ));
@@ -233,5 +236,9 @@ public class SijoittelunTulosExcelKomponentti {
             LOG.error("Ilmoittautumistiloja ei saatu luettua sijoittelusta! {}", Arrays.toString(e.getStackTrace()));
         }
         return t;
+    }
+
+    private String countryNameInEnglish(Map<String, Koodi> countryCodes, HakemusWrapper wrapper) {
+        return KoodistoCachedAsyncResource.haeKoodistaArvo(countryCodes.get(wrapper.getAsuinmaa()), KieliUtil.ENGLANTI, wrapper.getAsuinmaa());
     }
 }
