@@ -91,8 +91,6 @@ public class ValintakoeRivi implements Comparable<ValintakoeRivi> {
 
     public String[] toArray(List<String> valintakoeOids) {
         ArrayList<String> rivi = new ArrayList<String>();
-        StringBuilder b = new StringBuilder();
-        b.append(sukunimi).append(", ").append(etunimet);
         String pvm;
         if (paivamaara != null) {
             pvm = ExcelExportUtil.DATE_FORMAT.format(paivamaara);
