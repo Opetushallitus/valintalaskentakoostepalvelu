@@ -1,11 +1,13 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.predicate;
 
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 
+import java.util.Optional;
 import java.util.function.Predicate;
+
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARASIJALTA_HYVAKSYTTY;
 
 public class SijoittelussaHyvaksyttyHakija implements Predicate<HakijaDTO> {
     private final String hakukohdeOid;
@@ -16,23 +18,12 @@ public class SijoittelussaHyvaksyttyHakija implements Predicate<HakijaDTO> {
 
     @Override
     public boolean test(HakijaDTO input) {
-        if (input.getHakutoiveet() == null) {
-        } else {
-            for (HakutoiveDTO h : input.getHakutoiveet()) {
-                if (hakukohdeOid.equals(h.getHakukohdeOid())) {
-                    final boolean checkFirstValintatapajonoOnly = false;
-                    for (HakutoiveenValintatapajonoDTO vjono : h.getHakutoiveenValintatapajonot()) {
-                        if (HakemuksenTila.HYVAKSYTTY.equals(vjono.getTila())
-                                || HakemuksenTila.VARASIJALTA_HYVAKSYTTY.equals(vjono.getTila())) {
-                            return true;
-                        }
-                        if (checkFirstValintatapajonoOnly) {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        return Optional.ofNullable(input.getHakutoiveet())
+                .map(hakutoiveet -> hakutoiveet.stream()
+                        .filter(hakutoive -> this.hakukohdeOid.equals(hakutoive.getHakukohdeOid()))
+                        .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
+                        .map(HakutoiveenValintatapajonoDTO::getTila)
+                        .anyMatch(tila -> HYVAKSYTTY.equals(tila) || VARASIJALTA_HYVAKSYTTY.equals(tila)))
+                .orElse(false);
     }
 }
