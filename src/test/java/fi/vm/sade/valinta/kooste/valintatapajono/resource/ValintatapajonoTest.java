@@ -14,7 +14,6 @@ import fi.vm.sade.valinta.kooste.valintatapajono.service.ValintatapajonoTuontiCo
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
-import junit.framework.Assert;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -25,8 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static fi.vm.sade.valinta.http.DateDeserializer.GSON;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Jussi Jartamo
@@ -36,23 +34,29 @@ public class ValintatapajonoTest {
 
     @Test
     public void testaaExcel() throws Exception {
-        List<Hakemus> hakemukset = GSON.fromJson(classpathResourceAsString("/valintatapajono/json_tuonti_listfull.json"), new TypeToken<List<Hakemus>>() {
-        }.getType());
-        List<ValintatietoValinnanvaiheDTO> valinnanvaiheet =
-                GSON.fromJson(classpathResourceAsString("/valintatapajono/json_tuonti_laskenta_valinnanvaihe.json"), new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {
-                }.getType());
+        List<Hakemus> hakemukset = GSON.fromJson(
+                classpathResourceAsString("/valintatapajono/json_tuonti_listfull.json"),
+                new TypeToken<List<Hakemus>>() {}.getType()
+        );
+        List<ValintatietoValinnanvaiheDTO> valinnanvaiheet = GSON.fromJson(
+                classpathResourceAsString("/valintatapajono/json_tuonti_laskenta_valinnanvaihe.json"),
+                new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType()
+        );
 
         ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
         try {
             ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(
-                    "1.2.246.562.29.173465377510", "1.2.246.562.20.85029108298", "14229501603804360431186491391519",
-                    "", "",
-                    //
-                    valinnanvaiheet, hakemukset, Arrays
-                    .asList(listaus));
+                    "1.2.246.562.29.173465377510",
+                    "1.2.246.562.20.85029108298",
+                    "14229501603804360431186491391519",
+                    "",
+                    "",
+                    valinnanvaiheet,
+                    hakemukset,
+                    Arrays.asList(listaus)
+            );
             valintatapajonoExcel.getExcel().tuoXlsx(new ClassPathResource("/valintatapajono/valintatapajono_yksi_hakija.xlsx").getInputStream());
         } catch(Throwable t) {
-            //	poikkeusKasittelija("Excelin luku epäonnistui",asyncResponse,dokumenttiIdRef).accept(t);
             throw new RuntimeException(t);
         }
         LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(listaus.getRivit()));
@@ -61,47 +65,30 @@ public class ValintatapajonoTest {
     @Test
     public void testaaValintatapajononTuontia() throws Exception {
         String valintatapajonoOid = "14229501603804360431186491391519";
-        /*
-        (String oid, String jonosija, String nimi,
-                //
-                String tila, String fi, String sv, String en)
-        */
-        ValintatapajonoRivi rivi = new ValintatapajonoRivi(
-                "1.2.246.562.11.00000000181",
-                "1","Ilman laskentaa","HYVAKSYTTAVISSA","","",""
-
-        );
+        ValintatapajonoRivi rivi = new ValintatapajonoRivi("1.2.246.562.11.00000000181", "1", "Ilman laskentaa", "HYVAKSYTTAVISSA", "", "", "");
         ValintatapajonoRivit rivit = new ValintatapajonoRivit(Arrays.asList(rivi));
         LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(rivit));
-    /*
-    public static ValinnanvaiheDTO konvertoi(
-            String hakuOid,
-            String hakukohdeOid,
-            String valintatapajonoOid,
-            List<ValinnanVaiheJonoillaDTO> valintaperusteet,
-            List<Hakemus> hakemukset,
-            List<ValintatietoValinnanvaiheDTO> valinnanvaiheet,
-            Collection<ValintatapajonoRivi> rivit) {
-
-    }*/
-        List<ValinnanVaiheJonoillaDTO> valintaperusteet =
-                GSON.fromJson(classpathResourceAsString("/valintatapajono/json_tuonti_valinnanvaihe.json"), new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {
-                }.getType());
-        List<Hakemus> hakemukset = GSON.fromJson(classpathResourceAsString("/valintatapajono/json_tuonti_listfull.json"), new TypeToken<List<Hakemus>>() {
-        }.getType());
-        List<ValintatietoValinnanvaiheDTO> valinnanvaihe =
-                GSON.fromJson(classpathResourceAsString("/valintatapajono/json_tuonti_laskenta_valinnanvaihe.json"), new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {
-                }.getType());
+        List<ValinnanVaiheJonoillaDTO> valintaperusteet = GSON.fromJson(
+                classpathResourceAsString("/valintatapajono/json_tuonti_valinnanvaihe.json"),
+                new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType()
+        );
+        List<Hakemus> hakemukset = GSON.fromJson(
+                classpathResourceAsString("/valintatapajono/json_tuonti_listfull.json"),
+                new TypeToken<List<Hakemus>>() {}.getType()
+        );
+        List<ValintatietoValinnanvaiheDTO> valinnanvaihe = GSON.fromJson(
+                classpathResourceAsString("/valintatapajono/json_tuonti_laskenta_valinnanvaihe.json"),
+                new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType()
+        );
 
         ValinnanvaiheDTO generoitu_valinnanvaihe =
-        ValintatapajonoTuontiConverter.konvertoi("hakuOid","1.2.246.562.20.85029108298",valintatapajonoOid,valintaperusteet,hakemukset,valinnanvaihe,rivit.getRivit());
+        ValintatapajonoTuontiConverter.konvertoi("hakuOid", "1.2.246.562.20.85029108298", valintatapajonoOid, valintaperusteet, hakemukset, valinnanvaihe, rivit.getRivit());
 
         LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(generoitu_valinnanvaihe));
-        Assert.assertFalse(generoitu_valinnanvaihe.getValintatapajonot().isEmpty());
+        assertFalse(generoitu_valinnanvaihe.getValintatapajonot().isEmpty());
         for(ValintatietoValintatapajonoDTO jono : generoitu_valinnanvaihe.getValintatapajonot()) {
-            Assert.assertEquals(jono.getOid(), valintatapajonoOid);
+            assertEquals(jono.getOid(), valintatapajonoOid);
         }
-
     }
 
     private static String classpathResourceAsString(String path) throws Exception {
