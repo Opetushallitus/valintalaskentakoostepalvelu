@@ -215,15 +215,18 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
     @Override
     public void hyvaksymiskirjeetHakukohteelle(KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
+
+        String organisaatioOid = hyvaksymiskirjeDTO.getTarjoajaOid();
+
         Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkallisetHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
-        Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
+        Observable<HakutoimistoDTO> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
         final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
         zip(
                 hakemuksetObservable,
                 from(hakijatFuture),
-                from(organisaatioFuture),
-                (hakemukset, hakijat, organisaatioResponse) -> {
+                hakutoimistoObservable,
+                (hakemukset, hakijat, hakutoimisto) -> {
                     LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi.");
                     Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat.getResults().stream()
                             .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
@@ -233,9 +236,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             todellisenJonosijanRatkaisin(hakijat.getResults()),
-                            ImmutableMap.of(hyvaksymiskirjeDTO.getTarjoajaOid(),
-                            Optional.ofNullable(OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
-                                    kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse))),
+                            ImmutableMap.of(organisaatioOid,Hakijapalvelu.osoite(hakutoimisto, kohdeHakukohde.getHakukohteenKieli())),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHyvaksytyt, hakemukset,
                             hyvaksymiskirjeDTO.getHakuOid(),
