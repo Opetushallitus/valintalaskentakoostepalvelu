@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
+import fi.vm.sade.koodisto.service.types.common.KieliType;
 
 public class KieliUtil {
 
@@ -71,6 +72,15 @@ public class KieliUtil {
             return RUOTSI;
         } else {
             return ENGLANTI;
+        }
+    }
+
+    public static KieliType kieliToKieliType(String kieli) {
+        switch (kieli) {
+            case SUOMI: return KieliType.FI;
+            case RUOTSI: case RUOTSI_2: return KieliType.SV;
+            case ENGLANTI: return KieliType.EN;
+            default: return KieliType.FI;
         }
     }
 }
