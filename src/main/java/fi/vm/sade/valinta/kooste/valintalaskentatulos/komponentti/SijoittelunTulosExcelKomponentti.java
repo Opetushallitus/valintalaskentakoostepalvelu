@@ -258,7 +258,7 @@ public class SijoittelunTulosExcelKomponentti {
                 jono.put(tulos.getHakemusOid(), tulos.getIlmoittautumisTila());
             }
         } catch (Exception e) {
-            LOG.error("Ilmoittautumistiloja ei saatu luettua sijoittelusta! {}", Arrays.toString(e.getStackTrace()));
+            LOG.error("Ilmoittautumistiloja ei saatu luettua sijoittelusta!", e);
         }
         return t;
     }
