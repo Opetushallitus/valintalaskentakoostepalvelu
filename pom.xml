@@ -18,7 +18,7 @@
 	</parent>
 	<properties>
 		<jersey.version>2.10.3</jersey.version>
-		<organisaatio.api.version>13.2</organisaatio.api.version>
+		<organisaatio.api.version>2015-13</organisaatio.api.version>
 	</properties>
 
 	<dependencies>
