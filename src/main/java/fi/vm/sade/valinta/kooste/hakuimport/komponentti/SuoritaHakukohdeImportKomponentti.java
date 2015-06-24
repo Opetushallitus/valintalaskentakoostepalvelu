@@ -66,7 +66,7 @@ public class SuoritaHakukohdeImportKomponentti {
                 }
             }
 
-            importTyyppi.setHakuVuosi(new Integer(data.getHakuVuosi()).toString());
+            importTyyppi.setHakuVuosi(Integer.toString(data.getHakuVuosi()));
 
             HakukohdekoodiDTO hkt = new HakukohdekoodiDTO();
             if (data.getHakukohdeNimiUri() != null) {

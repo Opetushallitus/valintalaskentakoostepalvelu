@@ -122,7 +122,7 @@ public class Teksti extends Solu {
 
     @Override
     public String toString() {
-        return new StringBuilder().append("teksti: ").append(teksti).toString();
+        return "teksti: " + teksti;
     }
 
     private static final Teksti TYHJA = new Teksti();

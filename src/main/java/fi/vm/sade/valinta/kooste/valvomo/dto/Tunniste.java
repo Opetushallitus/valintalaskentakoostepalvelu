@@ -38,6 +38,6 @@ public class Tunniste {
 
     @Override
     public String toString() {
-        return new StringBuilder(tyyppi).append(": ").append(tunniste).toString();
+        return tyyppi + ": " + tunniste;
     }
 }

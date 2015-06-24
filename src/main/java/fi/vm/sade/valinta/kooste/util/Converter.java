@@ -242,7 +242,7 @@ public class Converter {
                         // preference2-Koulutus-id = "1.2.246.562.20.645785477510"
                         // To
                         // preference2-Koulutus-id-eligibility = "UNKNOWN"
-                .collect(Collectors.toMap(pair -> new StringBuilder(pair.getKey()).append("-eligibility").toString(),
+                .collect(Collectors.toMap(pair -> pair.getKey() + "-eligibility",
                         pair -> eligibilityAndStatus.get(pair.getValue())));
     }
 }

@@ -199,8 +199,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             hakukohdeNimi = hakukohdeTeksti.getTeksti();
                             tarjoajaNimi = new Teksti(nimi.getTarjoajaNimi()).getTeksti();
                         } catch (Exception e) {
-                            hakukohdeNimi = new StringBuilder().append("Nimetön hakukohde ").append(hakukohdeOid).toString();
-                            tarjoajaNimi = new StringBuilder().append("Nimetön tarjoaja ").append(tarjoajaOid).toString();
+                            hakukohdeNimi = "Nimetön hakukohde " + hakukohdeOid;
+                            tarjoajaNimi = "Nimetön tarjoaja " + tarjoajaOid;
                             prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid, "Hakukohteelle ei saatu tarjoajaOidia!"));
                         }
                         List<Valintatulos> tilat = Collections.emptyList();
@@ -475,10 +475,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         TarArchiveOutputStream tarOutputStream = new TarArchiveOutputStream(tarFileBytes);
         {
             Collection<String> rivit = Lists.newArrayList();
-            rivit.add(new StringBuilder().append("Yhteensä ").append(yhteensa)
-                    .append(", joista onnistuneita ").append(onnistuneita)
-                    .append(" ja epäonnistuneita ")
-                    .append(yhteensa - onnistuneita).toString());
+            rivit.add("Yhteensä " + yhteensa + ", joista onnistuneita " + onnistuneita + " ja epäonnistuneita " + (yhteensa - onnistuneita));
 
             for (Valmis epa : epaonnistuneet) {
                 String otsikko;
@@ -487,8 +484,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                 } else {
                     otsikko = "Epäonnistunut hakukohde ";
                 }
-                rivit.add(new StringBuilder().append(otsikko).append(epa.getHakukohdeOid()).toString());
-                rivit.add(new StringBuilder().append("-- Tarjoaja ").append(epa.getTarjoajaOid()).toString());
+                rivit.add(otsikko + epa.getHakukohdeOid());
+                rivit.add("-- Tarjoaja " + epa.getTarjoajaOid());
             }
             writeLinesToTarFile("yhteenveto.txt", rivit, tarOutputStream);
         }
@@ -498,7 +495,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                 continue;
             }
             String tarjoajaOid = StringUtils.trimToEmpty(perTarjoaja.getKey());
-            String subFileName = new StringBuilder().append("tarjoajaOid_").append(tarjoajaOid.replace(" ", "_")).append(".tar").toString();
+            String subFileName = "tarjoajaOid_" + tarjoajaOid.replace(" ", "_") + ".tar";
 
             ByteArrayOutputStream subTarFileBytes = new ByteArrayOutputStream();
             TarArchiveOutputStream subTarOutputStream = new TarArchiveOutputStream(subTarFileBytes);
@@ -510,8 +507,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                 if (v.containsTiedosto()) {
                     writeLinesToTarFile(v.getTiedosto().getTiedostonNimi(), v.getTiedosto().getData(), subTarOutputStream);
                 } else if (v.isOnnistunut()) {
-                    String hakukohdeFileName = new StringBuilder().append("hakukohdeOid_").append(v.getHakukohdeOid()).append(".txt").toString();
-                    String kokoUrl = new StringBuilder().append(dokumenttipalveluUrl).append(v.getTulosId()).toString();
+                    String hakukohdeFileName = "hakukohdeOid_" + v.getHakukohdeOid() + ".txt";
+                    String kokoUrl = dokumenttipalveluUrl + v.getTulosId();
                     writeLinesToTarFile(hakukohdeFileName, Arrays.asList(v.getTulosId(), kokoUrl), subTarOutputStream);
                 }
 

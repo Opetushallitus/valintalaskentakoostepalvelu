@@ -80,11 +80,9 @@ public class TKUVAYHVAKomponentti {
                                 builder.setHenkilotunnus(standardinMukainenHenkilotunnus);
                             } else { // Ulkomaalaisille syntyma-aika hetun
                                 // sijaan
-                                String syntymaAika = henkilotiedot.get(SYNTYMAAIKA); // esim
                                 // 04.05.1965
                                 // Poistetaan pisteet ja tyhjaa loppuun
-                                String syntymaAikaIlmanPisteita = syntymaAika.replace(".", "");
-                                builder.setHenkilotunnus(syntymaAikaIlmanPisteita.toString());
+                                builder.setHenkilotunnus(henkilotiedot.get(SYNTYMAAIKA).replace(".", ""));
                             }
                         } catch (Exception e) {
                             LOG.error("Henkilötunnuksen hakeminen hakemuspalvelulta hakemukselle {} epäonnistui!", hakija.getHakemusOid());

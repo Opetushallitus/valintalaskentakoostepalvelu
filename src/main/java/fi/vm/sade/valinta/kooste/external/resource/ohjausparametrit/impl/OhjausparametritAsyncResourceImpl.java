@@ -31,7 +31,7 @@ public class OhjausparametritAsyncResourceImpl extends AsyncResourceWithCas impl
     }
 
     public Peruutettava haeHaunOhjausparametrit(String hakuOid, Consumer<ParametritDTO> callback, Consumer<Throwable> failureCallback) {
-        String url = new StringBuilder("/ohjausparametrit-service/api/v1/rest/parametri/").append(hakuOid).toString();
+        String url = "/ohjausparametrit-service/api/v1/rest/parametri/" + hakuOid;
         try {
             return new PeruutettavaImpl(getWebClient()
                     .path(url)

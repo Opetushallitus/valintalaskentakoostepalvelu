@@ -47,7 +47,7 @@ public class ErillishaunDataException extends RuntimeException {
         }
 
         public String toString() {
-            return new StringBuilder().append("Rivi ").append(indeksi).append(": ").append(selite).toString();
+            return "Rivi " + indeksi + ": " + selite;
         }
     }
 }

@@ -46,10 +46,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
     // /valintaperusteet/hakijaryhmä/{hakukohdeoid}
     public Peruutettava haeHakijaryhmat(String hakukohdeOid, Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback, Consumer<Throwable> failureCallback) {
         try {
-            StringBuilder urlBuilder = new StringBuilder().append(
-                    "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/hakijaryhma/").append(
-                    hakukohdeOid);
-            String url = urlBuilder.toString();
+            String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/hakijaryhma/" + hakukohdeOid;
             return new PeruutettavaImpl(
                     getWebClient()
                             .path(url)
@@ -72,9 +69,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
         LOG.info("Valinnanvaiheiden haku...");
         // /valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
         try {
-            String url = new StringBuilder()
-                    .append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/")
-                    .append(hakukohdeOid).append("/valinnanvaihe").toString();
+            String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe";
 
             return new PeruutettavaImpl(
                     getWebClient()
@@ -118,9 +113,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 
     public Peruutettava haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku, Consumer<List<ValintaperusteetDTO>> callback, Consumer<Throwable> failureCallback) {
         try {
-            String url = new StringBuilder()
-                    .append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/")
-                    .append(hakukohdeOid).toString();
+            String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/" + hakukohdeOid;
 
             WebClient wc = getWebClient().path(url);
             if (valinnanVaiheJarjestysluku != null) {
@@ -144,9 +137,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                                         Consumer<List<HakukohdeViiteDTO>> callback,
                                         Consumer<Throwable> failureCallback) {
         try {
-            String url = new StringBuilder()
-                    .append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/haku/")
-                    .append(hakuOid).toString();
+            String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/haku/" + hakuOid;
             return new PeruutettavaImpl(getWebClient()
                     .path(url)
                     .accept(MediaType.APPLICATION_JSON_TYPE)
@@ -162,11 +153,8 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 
     @Override
     public Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
-        StringBuilder urlBuilder = new StringBuilder().append(
-                "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/tuoHakukohde/");
-        String url = urlBuilder.toString();
         return getWebClient()
-                .path(url)
+                .path("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/tuoHakukohde/")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .post(Entity.entity(hakukohde, MediaType.APPLICATION_JSON_TYPE));
@@ -181,13 +169,10 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
     @Override
     public Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
             Collection<String> hakukohdeOids) {
-        StringBuilder urlBuilder = new StringBuilder()
-                .append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe");
-        String url = urlBuilder.toString();
         // LOG.error("POST {}\r\n{}", url,
         // Arrays.toString(hakukohdeOids.toArray()));
         return getWebClient()
-                .path(url)
+                .path("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<HakukohdeJaValintakoeDTO>>() {});
@@ -196,9 +181,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
     @Override
     public Peruutettava haeValintakokeetHakukohteille(
             Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
-        StringBuilder urlBuilder = new StringBuilder()
-                .append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe");
-        String url = urlBuilder.toString();
+        String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe";
         // LOG.error("POST {}\r\n{}", url,
         // Arrays.toString(hakukohdeOids.toArray()));
         return new PeruutettavaImpl(getWebClient()
@@ -214,11 +197,8 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 
     @Override
     public Future<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid) {
-        StringBuilder urlBuilder = new StringBuilder()
-                .append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/").append(hakukohdeOid).append("/valintakoe/");
-        String url = urlBuilder.toString();
         return getWebClient()
-                .path(url)
+                .path("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/" + hakukohdeOid + "/valintakoe/")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .get(new GenericType<List<ValintakoeDTO>>() {});
@@ -226,9 +206,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 
     @Override
     public Peruutettava haeValintakokeetHakukohteelle(String hakukohdeOid, Consumer<List<ValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
-        StringBuilder urlBuilder = new StringBuilder()
-                .append("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/").append(hakukohdeOid).append("/valintakoe/");
-        String url = urlBuilder.toString();
+        String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/" + hakukohdeOid + "/valintakoe/";
         return new PeruutettavaImpl(getWebClient()
                 .path(url)
                 .accept(MediaType.APPLICATION_JSON_TYPE)

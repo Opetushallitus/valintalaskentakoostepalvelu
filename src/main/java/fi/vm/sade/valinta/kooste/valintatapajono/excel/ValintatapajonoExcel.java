@@ -131,7 +131,7 @@ public class ValintatapajonoExcel {
 
             s.add(new NumeroArvo(jonosijat.get(hakemusOid), 0, hakemukset.size()));
             Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(data, null, null);
-            s.add(new TekstiArvo(new StringBuilder().append(osoite.getLastName()).append(" ").append(osoite.getFirstName()).toString()));
+            s.add(new TekstiArvo(osoite.getLastName() + " " + osoite.getFirstName()));
             s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO.get(StringUtils.trimToEmpty(valintatiedot.get(hakemusOid))), VAIHTOEHDOT));
             if (avaimet.containsKey(hakemusOid)) {
                 Map<String, String> a = avaimet.get(hakemusOid);

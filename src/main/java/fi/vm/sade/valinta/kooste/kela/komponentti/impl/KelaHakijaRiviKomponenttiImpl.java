@@ -28,12 +28,10 @@ public class KelaHakijaRiviKomponenttiImpl {
             builder.setHenkilotunnus(hakija.getHenkilotunnus());
         } else { // Ulkomaalaisille syntyma-aika hetun
             // sijaan
-            String syntymaAika = hakija.getSyntymaaika(); // henkilotiedot.get(SYNTYMAAIKA);
             // // esim
             // 04.05.1965
             // Poistetaan pisteet ja tyhjaa loppuun
-            String syntymaAikaIlmanPisteita = syntymaAika.replace(".", "");
-            builder.setHenkilotunnus(syntymaAikaIlmanPisteita.toString());
+            builder.setHenkilotunnus(hakija.getSyntymaaika().replace(".", ""));
         }
         builder.setPoimintapaivamaara(hakija.getPoimintapaivamaara());
         DateTime dateTime = new DateTime(hakija.getLukuvuosi());

@@ -31,7 +31,7 @@ public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoA
 
     @Override
     public Peruutettava haeKoodisto(String koodistoUri, Consumer<List<Koodi>> callback, Consumer<Throwable> failureCallback) {
-        String url = new StringBuilder("/koodisto-service/rest/json/").append(koodistoUri).append("/koodi").toString();
+        String url = "/koodisto-service/rest/json/" + koodistoUri + "/koodi";
         try {
             return new PeruutettavaImpl(getWebClient()
                     .path(url)
@@ -49,10 +49,9 @@ public class KoodistoAsyncResourceImpl extends HttpResource implements KoodistoA
 
     @Override
     public Future<List<Koodi>> haeKoodisto(String koodistoUri) {
-        String url = new StringBuilder("/koodisto-service/rest/json/").append(koodistoUri).append("/koodi").toString();
         try {
             return getWebClient()
-                    .path(url)
+                    .path("/koodisto-service/rest/json/" + koodistoUri + "/koodi")
                     .query("onlyValidKoodis", true)
                             //.query("koodistoVersio", 1)
                     .accept(MediaType.APPLICATION_JSON_TYPE)

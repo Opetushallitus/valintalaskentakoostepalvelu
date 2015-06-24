@@ -165,7 +165,7 @@ public class HakemusUtil {
     }
 
     public static String varasijanNumeroConverter(Integer numero, String preferoitukielikoodi) {
-        return new StringBuilder().append(VARASIJAT.get(preferoitukielikoodi)).append(numero).toString();
+        return VARASIJAT.get(preferoitukielikoodi) + numero;
     }
 
     public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen) {
