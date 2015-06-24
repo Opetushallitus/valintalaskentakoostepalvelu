@@ -175,9 +175,7 @@ public class ValintalaskentaExcelResource {
                         }
                     }
             ).flatMap(o -> o).subscribe(
-                    ok -> {
-                        LOG.info("Dokumentin generointi valmistui onnistuneesti");
-                    },
+                    ok -> LOG.info("Dokumentin generointi valmistui onnistuneesti"),
                     poikkeus -> {
                         LOG.error("Dokumentin generointi epäonnistui", poikkeus);
                         p.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumentin generointi", poikkeus.getMessage()));
@@ -203,9 +201,12 @@ public class ValintalaskentaExcelResource {
         final Observable<List<Hakemus>> hakemuksetObservable = hakukohdeObservable.flatMap(hakukohde -> applicationResource.getApplicationsByOid(hakukohde.getHakuOid(), hakukohdeOid));
         final Observable<XSSFWorkbook> workbookObservable = Observable.combineLatest(hakuObservable, hakukohdeObservable, valinnanVaiheetObservable, hakemuksetObservable, ValintalaskennanTulosExcel::luoExcel);
         workbookObservable.subscribe(
-                (workbook) -> {
-                    asyncResponse.resume(Response.ok(Excel.export(workbook), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").header("content-disposition", "inline; filename=valintalaskennantulos.xlsx").build());
-                },
+                (workbook) -> asyncResponse.resume(
+                        Response
+                                .ok(Excel.export(workbook), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                                .header("content-disposition", "inline; filename=valintalaskennantulos.xlsx")
+                                .build()
+                ),
                 (e) -> {
                     LOG.error("Valintalaskennan tulokset -excelin luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
                     asyncResponse.resume(Response.ok(ExcelExportUtil.exportGridAsXls(new Object[][]{new Object[]{"Tarvittavien tietojen hakeminen epäonnistui!", "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!"}}), APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=yritauudelleen.xls").build());
