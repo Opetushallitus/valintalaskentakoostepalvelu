@@ -82,10 +82,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     }
 
     private final boolean pakkaaTiedostotTarriin;
-    private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
     private final SijoitteluKoulutuspaikkallisetKomponentti sijoitteluProxy;
     private final HaeHakukohdeNimiTarjonnaltaKomponentti nimiTarjonnalta;
-    private final HakukohdeResource tarjontaResource;
     private final HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta;
     private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
     private final TilaResource tilaResource;
@@ -120,11 +118,10 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
             HaeOsoiteKomponentti osoiteKomponentti,
             ApplicationResource applicationResource, TilaResource tilaResource,
             DokumenttiResource dokumenttiResource,
-            HakukohdeResource tarjontaResource,
-            SijoitteluResource sijoitteluResource) {
+            SijoitteluResource sijoitteluResource
+    ) {
         this.sijoitteluResource = sijoitteluResource;
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
-        this.tarjontaResource = tarjontaResource;
         this.tilaResource = tilaResource;
         this.pakkaaTiedostotTarriin = pakkaaTiedostotTarriin;
         this.applicationResource = applicationResource;
@@ -132,7 +129,6 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         this.osoitetarrat = osoitetarrat;
         this.viestintapalveluResource = viestintapalveluResource;
         this.sijoitteluProxy = sijoitteluProxy;
-        this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.nimiTarjonnalta = nimiTarjonnalta;
         this.dokumenttipalveluUrl = dokumenttipalveluUrl;
         this.muodostaDokumentit = "direct:sijoitteluntulos_muodosta_dokumentit";
