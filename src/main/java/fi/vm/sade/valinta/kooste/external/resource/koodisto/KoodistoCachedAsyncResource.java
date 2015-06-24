@@ -73,7 +73,7 @@ public class KoodistoCachedAsyncResource {
     }
 
     public static String haeKoodistaArvo(Koodi koodi, final String preferoituKieli, String defaultArvo) {
-        if (koodi == null || koodi.getMetadata() == null) { // || koodi.getMetadata().isEmpty()
+        if (koodi == null || koodi.getMetadata() == null) {
             return defaultArvo;
         } else {
             return Stream.of(
