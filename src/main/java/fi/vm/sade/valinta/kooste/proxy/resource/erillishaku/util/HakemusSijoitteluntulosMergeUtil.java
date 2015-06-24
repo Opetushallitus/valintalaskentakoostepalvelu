@@ -161,13 +161,13 @@ public class HakemusSijoitteluntulosMergeUtil {
 
     private static Optional<MergeValinnanvaiheDTO> findVaihe(List<MergeValinnanvaiheDTO> vaiheet, String valinnanvaiheOid) {
         return vaiheet.stream()
-                .filter(vaihe -> vaihe.getValinnanvaiheoid().equals(valinnanvaiheOid))
+                .filter(vaihe -> Optional.ofNullable(vaihe.getValinnanvaiheoid().equals(valinnanvaiheOid)).orElse(Boolean.FALSE))
                 .findFirst();
     }
 
     private static Optional<MergeValintatapajonoDTO> findJono(List<MergeValintatapajonoDTO> jonot, String jonoOid) {
         return jonot.stream()
-                .filter(j -> j.getOid().equals(jonoOid))
+                .filter(j -> Optional.ofNullable(j.getOid().equals(jonoOid)).orElse(Boolean.FALSE))
                 .findFirst();
     }
 
