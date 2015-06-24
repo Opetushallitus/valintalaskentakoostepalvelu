@@ -35,7 +35,6 @@ public class HakemusUtil {
     private final static Map<String, String> VARASIJAT = varasijaTekstinTilat();
     private final static Map<String, Map<IlmoittautumisTila, String>> ILMOITTAUTUMISTILAT = ilmoittautumisTilat();
     private final static Map<String, Map<ValintatuloksenTila, String>> VALINTATULOKSEN_TILAT = valintatulostenTilat();
-    public static final String ASIOINTIKIELI = "asiointikieli";
 
     private static Map<String, String> varasijaTekstinTilat() {
         Map<String, String> varasijaTekstinTilat = Maps.newHashMap();
