@@ -203,8 +203,7 @@ public class HakemusUtil {
         }
     }
 
-    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen,
-                                       boolean lisaaVarasijanNumero, Integer varasijanNumero) {
+    public static String tilaConverter(HakemuksenTila tila, String preferoitukielikoodi, boolean harkinnanvarainen, boolean lisaaVarasijanNumero, Integer varasijanNumero) {
         if (tila == null) {
             return StringUtils.EMPTY;
         }
