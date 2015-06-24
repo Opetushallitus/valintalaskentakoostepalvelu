@@ -76,15 +76,23 @@ public class KoodistoCachedAsyncResource {
         if (koodi == null || koodi.getMetadata() == null) {
             return defaultArvo;
         } else {
-            return Stream.of(
-                    // Nimi halutulla kielellä
-                    koodi.getMetadata().stream().filter(m -> preferoituKieli.equals(m.getKieli())),
-                    // tai suomenkielellä
-                    koodi.getMetadata().stream().filter(m -> KieliUtil.SUOMI.equals(m.getKieli())),
-                    // tai millä vaan kielellä
-                    koodi.getMetadata().stream()).flatMap(a -> a).findFirst().map(m -> m.getNimi())
-                    // tai tyhjä merkkijono
+            return Stream.of(nameInPreferredLanguage(koodi, preferoituKieli), nameInFinnish(koodi), nameInAnyLanguage(koodi))
+                    .flatMap(a -> a)
+                    .findFirst()
+                    .map(m -> m.getNimi())
                     .orElse(defaultArvo);
         }
+    }
+
+    private static Stream<Metadata> nameInFinnish(Koodi koodi) {
+        return nameInPreferredLanguage(koodi, KieliUtil.SUOMI);
+    }
+
+    private static Stream<Metadata> nameInPreferredLanguage(Koodi koodi, String preferoituKieli) {
+        return nameInAnyLanguage(koodi).filter(m -> preferoituKieli.equals(m.getKieli()));
+    }
+
+    private static Stream<Metadata> nameInAnyLanguage(Koodi koodi) {
+        return koodi.getMetadata().stream();
     }
 }
