@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeMultiset;
+import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
@@ -14,6 +15,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.OsoiteHaku;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
@@ -98,16 +100,19 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     public void hyvaksymiskirjeetHakemuksille(final KirjeProsessi prosessi,
                                               final HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
                                               final List<String> hakemusOids) {
+
+        String organisaatioOid = hyvaksymiskirjeDTO.getTarjoajaOid();
+
         Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByOids(hakemusOids);
         Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkallisetHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
-        Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(hyvaksymiskirjeDTO.getTarjoajaOid());
+        Observable<HakutoimistoDTO> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
         final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
 
         zip(
                 from(hakemuksetFuture),
                 from(hakijatFuture),
-                from(organisaatioFuture),
-                (hakemukset, hakijat, organisaatioResponse) -> {
+                hakutoimistoObservable,
+                (hakemukset, hakijat, hakutoimisto) -> {
                     LOG.info("Tehdaan valituille hakijoille hyvaksytyt filtterointi.");
                     final Set<String> kohdeHakijat = Sets.newHashSet(hakemusOids);
                     Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat.getResults().stream()
@@ -119,9 +124,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             todellisenJonosijanRatkaisin(hakijat.getResults()),
-                            ImmutableMap.of(hyvaksymiskirjeDTO.getTarjoajaOid(),
-                            Optional.ofNullable(OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
-                                    kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse))),
+                            ImmutableMap.of(organisaatioOid, Hakijapalvelu.osoite(hakutoimisto, kohdeHakukohde.getHakukohteenKieli())),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHyvaksytyt, hakemukset,
                             hyvaksymiskirjeDTO.getHakuOid(),

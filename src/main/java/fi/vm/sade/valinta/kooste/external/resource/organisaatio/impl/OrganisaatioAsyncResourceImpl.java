@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
+import rx.Observable;
 
 /**
  *         https://${host.virkailija}/organisaatio-service/rest esim
@@ -49,5 +51,10 @@ public class OrganisaatioAsyncResourceImpl extends AsyncResourceWithCas implemen
                 .accept(MediaType.WILDCARD)
                 .async()
                 .get(String.class);
+    }
+
+    @Override
+    public Observable<HakutoimistoDTO> haeHakutoimisto(String organisaatioId) {
+        return getAsObservable("/organisaatio/v2/" + organisaatioId + "/hakutoimisto", HakutoimistoDTO.class);
     }
 }
