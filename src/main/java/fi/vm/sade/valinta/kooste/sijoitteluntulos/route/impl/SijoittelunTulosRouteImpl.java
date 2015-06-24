@@ -151,16 +151,11 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     }
 
     private void configureTaulukkolaskenta() {
-        String yksittainenTaulukkoTyo = "seda:sijoitteluntulos_taulukkolaskenta_haulle_yksittainentulos?"
-                +
-                // jos palvelin sammuu niin ei suorita loppuun tyojonoa
-                "purgeWhenStopping=true" +
-                // reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
-                "&waitForTaskToComplete=Never" +
-                // tyojonossa on yksi tyostaja
-                "&concurrentConsumers=6";
+        String yksittainenTaulukkoTyo = yksittainenTyo("taulukkolaskenta");
         from(taulukkolaskenta)
-                .errorHandler(deadLetterChannel(luontiEpaonnistui).maximumRedeliveries(0)
+                .errorHandler(
+                        deadLetterChannel(luontiEpaonnistui)
+                                .maximumRedeliveries(0)
                                 .logExhaustedMessageHistory(true)
                                 .logExhausted(true).logStackTrace(true)
                                 // hide retry/handled stacktrace
@@ -246,14 +241,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     }
 
     private void configureOsoitetarrat() {
-        String yksittainenOsoitetarraTyo = "seda:sijoitteluntulos_osoitetarrat_haulle_yksittainentulos?"
-                +
-                // jos palvelin sammuu niin ei suorita loppuun tyojonoa
-                "purgeWhenStopping=true" +
-                // reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
-                "&waitForTaskToComplete=Never" +
-                // tyojonossa on yksi tyostaja
-                "&concurrentConsumers=6";
+        String yksittainenOsoitetarraTyo = yksittainenTyo("osoitetarrat");
         from(osoitetarrat)
                 .errorHandler(
                         deadLetterChannel(luontiEpaonnistui)
@@ -332,14 +320,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     }
 
     private void configureHyvaksymiskirjeet() {
-        String yksittainenHyvaksymiskirjeTyo = "seda:sijoitteluntulos_hyvaksymiskirjeet_haulle_yksittainentulos?"
-                +
-                // jos palvelin sammuu niin ei suorita loppuun tyojonoa
-                "purgeWhenStopping=true" +
-                // reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
-                "&waitForTaskToComplete=Never" +
-                // tyojonossa on yksi tyostaja
-                "&concurrentConsumers=6";
+        String yksittainenHyvaksymiskirjeTyo = yksittainenTyo("hyvaksymiskirjeet");
         from(hyvaksymiskirjeet)
                 .errorHandler(
                         deadLetterChannel(luontiEpaonnistui)
@@ -516,28 +497,14 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         return new ByteArrayInputStream(tarFileBytes.toByteArray());
     }
 
-    private Map<String, TreeMultiset<Integer>> todellisenJonosijanRatkaisin(Collection<HakijaDTO> hakukohteenHakijat) {
-        Map<String, TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija = Maps.newHashMap();
-        for (HakijaDTO hakija : hakukohteenHakijat) {
-            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-                for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive
-                        .getHakutoiveenValintatapajonot()) {
-                    if (!valintatapajono.getTila().isHyvaksytty()) {
-                        continue;
-                    }
-                    if (!valintatapajonoToJonosijaToHakija.containsKey(valintatapajono.getValintatapajonoOid())) {
-                        valintatapajonoToJonosijaToHakija.put(valintatapajono.getValintatapajonoOid(),
-                                TreeMultiset.<Integer>create());
-                    }
-                    int kkJonosija = Optional.ofNullable(
-                            valintatapajono.getJonosija()).orElse(0)
-                            + Optional.ofNullable(
-                            valintatapajono.getTasasijaJonosija())
-                            .orElse(0) - 1;
-                    valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).add(kkJonosija);
-                }
-            }
-        }
-        return valintatapajonoToJonosijaToHakija;
+    private String yksittainenTyo(String type) {
+        return "seda:sijoitteluntulos_" + type + "_haulle_yksittainentulos?"
+                +
+                // jos palvelin sammuu niin ei suorita loppuun tyojonoa
+                "purgeWhenStopping=true" +
+                // reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
+                "&waitForTaskToComplete=Never" +
+                // tyojonossa on yksi tyostaja
+                "&concurrentConsumers=6";
     }
 }
