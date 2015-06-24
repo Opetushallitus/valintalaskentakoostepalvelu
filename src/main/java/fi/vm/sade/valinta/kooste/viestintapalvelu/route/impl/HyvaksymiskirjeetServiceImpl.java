@@ -1,44 +1,10 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
-import static rx.Observable.from;
-import static rx.Observable.zip;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiPredicate;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.core.Response;
-
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.collect.TreeMultiset;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import rx.Observable;
-import rx.functions.Action3;
-import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
-
-import static com.google.common.collect.Lists.*;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import fi.vm.sade.organisaatio.resource.dto.OrganisaatioRDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
@@ -46,21 +12,38 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.OsoiteHaku;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.LueHakijapalvelunOsoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.*;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.predicate.SijoittelussaHyvaksyttyHakija;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import rx.Observable;
+import rx.functions.Action3;
+import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
+
+import javax.ws.rs.core.Response;
+import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static rx.Observable.from;
+import static rx.Observable.zip;
 
 @Service
 public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
@@ -86,74 +69,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         this.applicationAsyncResource = applicationAsyncResource;
         this.organisaatioAsyncResource = organisaatioAsyncResource;
         this.haeOsoiteKomponentti = haeOsoiteKomponentti;
-    }
-
-    private static Organisaatio responseToOrganisaatio(
-            HaeOsoiteKomponentti haeOsoiteKomponentti,
-            OrganisaatioAsyncResource organisaatioAsyncResource,
-            Response organisaatioResponse) throws IOException {
-        InputStream stream = (InputStream) organisaatioResponse.getEntity();
-        String json = StringUtils.trimToEmpty(IOUtils.toString(stream));
-        IOUtils.closeQuietly(stream);
-        return new Gson().fromJson(json, Organisaatio.class);
-    }
-
-    private static Osoite haeOsoiteHierarkisesti(
-            HaeOsoiteKomponentti haeOsoiteKomponentti,
-            OrganisaatioAsyncResource organisaatioAsyncResource,
-            String kieli, List<String> oids, Organisaatio rdto, Teksti organisaationimi) {
-        Osoite hakijapalveluidenOsoite;
-        try {
-            if (organisaationimi.isArvoton()) {
-                organisaationimi = new Teksti(rdto.getNimi());
-            }
-            hakijapalveluidenOsoite = LueHakijapalvelunOsoite.lueHakijapalvelunOsoite(haeOsoiteKomponentti, kieli, rdto, organisaationimi);
-            if (rdto == null) {
-                LOG.error("Organisaatiopalvelusta ei saatu organisaatiota tunnisteelle {}. Eli ei saatu hakijapalveluiden osoitetta.", Arrays.toString(oids.toArray()));
-                return null;
-            }
-            if (oids == null) {
-                LOG.error("Oidi-listaa ei voitu kerätä kun listaa ei ollut annettu!");
-                return null;
-            }
-            try {
-                oids.add(rdto.getParentOid());
-            } catch (Exception e) {
-                LOG.error("Oidia ei voitu lisätä oidilistaan: {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
-                throw new RuntimeException("Oidia ei voitu lisätä oidilistaan: " + e.getMessage());
-            }
-            if (hakijapalveluidenOsoite != null) {
-                LOG.error("Hakijapalveluiden osoite saatiin tarjoajalta {}.\r\n{}", Arrays.toString(oids.toArray()), new GsonBuilder().setPrettyPrinting().create().toJson(hakijapalveluidenOsoite));
-                return hakijapalveluidenOsoite;
-            }
-            if (rdto.getParentOid() != null) {
-                LOG.error("Ei saatu hakijapalveluiden osoitetta talta organisaatiolta. Tutkitaan seuraava {}", Arrays.toString(oids.toArray()));
-                return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource, kieli, oids, responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioAsyncResource
-                        .haeOrganisaatio(rdto.getParentOid()).get()), organisaationimi);
-            } else {
-                LOG.error("Ei saatu hakijapalveluiden osoitetta! Kaytiin lapi organisaatiot {}!", Arrays.toString(oids.toArray()));
-                return null;
-            }
-        } catch (Exception e) {
-            LOG.error("Hakijapalveluiden osoitteen haussa odottamaton virhe {},\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
-        }
-        return null;
-    }
-
-    public static Osoite organisaatioResponseToHakijapalveluidenOsoite(
-            HaeOsoiteKomponentti haeOsoiteKomponentti,
-            OrganisaatioAsyncResource organisaatioAsyncResource,
-            List<String> oids, String kieli, Response organisaatioResponse) {
-        Organisaatio org;
-        Teksti organisaationimi;
-        try {
-            org = responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioResponse);
-            organisaationimi = new Teksti(org.getNimi());
-        } catch (Exception e) {
-            LOG.error("Ei saatu organisaatiota! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
-            throw new RuntimeException(e);
-        }
-        return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource, kieli, oids, org, organisaationimi);
     }
 
     public static Map<String, TreeMultiset<Integer>> todellisenJonosijanRatkaisin(Collection<HakijaDTO> hakukohteenHakijat) {
@@ -205,7 +120,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             todellisenJonosijanRatkaisin(hakijat.getResults()),
                             ImmutableMap.of(hyvaksymiskirjeDTO.getTarjoajaOid(),
-                            Optional.ofNullable(organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
+                            Optional.ofNullable(OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
                                     kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse))),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHyvaksytyt, hakemukset,
@@ -256,7 +171,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hylatyt);
                     MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
                     List<String> tarjoajaOidList = newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid()));
-                    Osoite hakijapalveluidenOsoite = organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, tarjoajaOidList,
+                    Osoite hakijapalveluidenOsoite = OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, tarjoajaOidList,
                             kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
@@ -316,7 +231,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                             todellisenJonosijanRatkaisin(hakijat.getResults()),
                             ImmutableMap.of(hyvaksymiskirjeDTO.getTarjoajaOid(),
-                            Optional.ofNullable(organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
+                            Optional.ofNullable(OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, newArrayList(Arrays.asList(hyvaksymiskirjeDTO.getTarjoajaOid())),
                                     kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse))),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHyvaksytyt, hakemukset,

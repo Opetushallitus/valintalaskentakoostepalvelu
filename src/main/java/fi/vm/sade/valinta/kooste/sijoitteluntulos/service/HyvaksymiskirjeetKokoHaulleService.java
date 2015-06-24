@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.Viestintapal
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.OsoiteHaku;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
@@ -342,7 +343,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
             if(hakukohdeOid.isPresent()) {
                 MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid.get());
                 Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(tarjoajaOid.get());
-                hakijapalveluidenOsoite.put(tarjoajaOid.get(), Optional.ofNullable(HyvaksymiskirjeetServiceImpl.organisaatioResponseToHakijapalveluidenOsoite(
+                hakijapalveluidenOsoite.put(tarjoajaOid.get(), Optional.ofNullable(OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(
                         haeOsoiteKomponentti, organisaatioAsyncResource,
                         newArrayList(Arrays.asList(tarjoajaOid.get())),
                         kohdeHakukohde.getHakukohteenKieli(),
@@ -355,7 +356,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                         .stream()
                         .collect(Collectors.toMap(t -> t, t -> {
                             try {
-                                return Optional.ofNullable(HyvaksymiskirjeetServiceImpl.organisaatioResponseToHakijapalveluidenOsoite(
+                                return Optional.ofNullable(OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(
                                         haeOsoiteKomponentti, organisaatioAsyncResource,
                                         newArrayList(Arrays.asList(t)),
                                         asiointikieli.get(),
