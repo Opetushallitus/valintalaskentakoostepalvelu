@@ -158,7 +158,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
         Optional<HakukohdeJaResurssit> hakukohdeJaResurssit = Optional.ofNullable(hakukohdeQueue.poll());
         hakukohdeJaResurssit.ifPresent(
                 resurssit -> {
-                    LOG.info("Aloitetaan hakukohteen {} hyväksymiskirjeiden luonti jäljellä {} hakukohdetta", resurssit.hakukohdeOid, hakukohdeQueue.size());
+                    LOG.info("Aloitetaan hakukohteen {} hyväksymiskirjeiden luonti, jäljellä {} hakukohdetta", resurssit.hakukohdeOid, hakukohdeQueue.size());
 
                     Observable.amb(
                             getHakukohteenHyvaksymiskirjeObservable(
@@ -171,12 +171,12 @@ public class HyvaksymiskirjeetKokoHaulleService {
                             Observable.timer(getDelay(hakukohdeJaResurssit.get().hakukohdeOid), TimeUnit.MINUTES)
                     ).subscribe(
                             s -> {
-                                LOG.error("Hakukohde {} valmis", resurssit.hakukohdeOid);
+                                LOG.info("Hakukohde {} valmis", resurssit.hakukohdeOid);
                                 prosessi.inkrementoi();
                                 hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue);
                             },
                             e -> {
-                                LOG.error("Hakukohde {} ohitettu", resurssit.hakukohdeOid, e);
+                                LOG.info("Hakukohde {} ohitettu", resurssit.hakukohdeOid, e);
                                 prosessi.inkrementoi();
                                 prosessi.getVaroitukset().add(new Varoitus(resurssit.hakukohdeOid.orElse(hakuOid), e.getMessage()));
                                 hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue);
@@ -187,7 +187,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                     );
                 });
         if (!hakukohdeJaResurssit.isPresent()) {
-            LOG.error("### Hyväksymiskirjeiden generointi haulle {} on valmis", hakuOid);
+            LOG.info("### Hyväksymiskirjeiden generointi haulle {} on valmis", hakuOid);
 
         }
     }
@@ -297,7 +297,6 @@ public class HyvaksymiskirjeetKokoHaulleService {
                 })
                 .flatMap(letterResponse -> Observable.interval(1, TimeUnit.SECONDS)
                         .take((int) TimeUnit.MINUTES.toSeconds(getDelay(hakukohdeOid)))
-                        .doOnNext(i -> LOG.info("Status PING... {}", letterResponse.getBatchId()))
                         .flatMap(i -> viestintapalveluAsyncResource.haeStatusObservable(letterResponse.getBatchId())
                                 .zipWith(Observable.just(letterResponse.getBatchId()), ResponseWithBatchId::new))
                         .skipWhile(status -> !VALMIS_STATUS.equals(status.resp.getStatus()) && !KESKEYTETTY_STATUS.equals(status.resp.getStatus())))
@@ -308,7 +307,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
         return valmisOrKeskeytettyObs
                 .filter(status -> KESKEYTETTY_STATUS.equals(status.resp.getStatus()))
                 .map(status -> status.batchId)
-                .flatMap(s -> Observable.error(new RuntimeException("Viestintäpalvelu palautti error statuksen hakukohteelle " + hakukohdeOid.get())));
+                .flatMap(s -> Observable.error(new RuntimeException("Viestintäpalvelu palautti virheen hakukohteelle " + hakukohdeOid.get())));
     }
 
     private Observable<String> processReadyDocument(Optional<String> hakukohdeOid, SijoittelunTulosProsessi prosessi, Observable<ResponseWithBatchId> valmisOrKeskeytettyObs) {
