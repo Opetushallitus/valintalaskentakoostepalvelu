@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import com.google.common.collect.*;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
+import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
@@ -24,7 +25,7 @@ public class HyvaksymiskirjeetKomponenttiTest {
     @Test
     public void testLaskennanKanssaPisteetTulevatMukaan() {
         LetterBatch batch = mkTestLetterBatch(1, 2);
-        assertEquals(batchResult("1 / 2", "Pisteet{nimi='null', oma='1', minimi='2'}"), batch.toString());
+        assertEquals(batchResult("1 / 2", "Pisteet{nimi='Jonon nimi', oma='1', minimi='2'}"), batch.toString());
     }
 
     @Test
@@ -38,9 +39,9 @@ public class HyvaksymiskirjeetKomponenttiTest {
         return "LetterBatch [letters=[Letter [addressLabel=null, null null, templateReplacements={palautusPvm=palautusPvm, " +
                 "tulokset=[{oppilaitoksenNimi=, hyvaksytyt=1 / 1 , omatPisteet=" + omatPisteet + " , pisteet=[" + pisteObjekti + "], hylkayksenSyy=, " +
                 "organisaationNimi=Hakukohteella hakukohdeOid ei ole tarjojannimeä, " +
-                "sijoitukset=[Sijoitus{nimi='null', oma='1', hyvaksytyt='1'}], alinHyvaksyttyPistemaara=, hylkaysperuste=, " +
+                "sijoitukset=[Sijoitus{nimi='Jonon nimi', oma='1', hyvaksytyt='1'}], alinHyvaksyttyPistemaara=, hylkaysperuste=, " +
                 "kaikkiHakeneet=, hakukohteenNimi=Hakukohteella hakukohdeOid ei ole hakukohteennimeä, " +
-                "paasyJaSoveltuvuuskoe=, valinnanTulos=Hyväksytty}], palautusAika=palautusAika, koulu=Hakukohteella " +
+                "paasyJaSoveltuvuuskoe=3,99, valinnanTulos=Hyväksytty}], palautusAika=palautusAika, koulu=Hakukohteella " +
                 "hakukohdeOid ei ole tarjojannimeä, henkilotunnus=, tarjoaja=Hakukohteella tarjoajaOid ei ole " +
                 "tarjojannimeä, koulutus=Hakukohteella hakukohdeOid ei ole hakukohteennimeä, hakukohde=Hakukohteella " +
                 "hakukohdeOid ei ole hakukohteennimeä, hakijapalveluidenOsoite=Addressline Addressline2 Addressline3, " +
@@ -73,8 +74,13 @@ public class HyvaksymiskirjeetKomponenttiTest {
                     setHakeneet(1);
                     setPisteet(new BigDecimal(omatPisteet));
                     setAlinHyvaksyttyPistemaara(new BigDecimal(minimipisteet));
+                    setValintatapajonoNimi("Jonon nimi");
                 }};
                 setHakutoiveenValintatapajonot(Lists.newArrayList(j));
+                setPistetiedot(ImmutableList.of(
+                        new PistetietoDTO() {{ setArvo("3,99"); }},
+                        new PistetietoDTO() {{ setArvo("ei-numero"); }}
+                ));
             }};
             setHakutoiveet(Sets.newTreeSet(ImmutableList.of(h)));
         }};
