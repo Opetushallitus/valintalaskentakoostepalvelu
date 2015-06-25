@@ -12,7 +12,6 @@ public class TodellisenJonosijanLaskentaUtiliteetti {
         int todellinenKkJonosija = 1;
         for (com.google.common.collect.Multiset.Entry<Integer> entry : jonosijat.entrySet()) {
             if (entry.getElement().equals(jonosija)) {
-                System.err.println("Palautetaan " + todellinenKkJonosija);
                 return todellinenKkJonosija;
             }
             todellinenKkJonosija += entry.getCount();
