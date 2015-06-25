@@ -26,4 +26,13 @@ public class Pisteet {
     public String getOma() {
         return oma;
     }
+
+    @Override
+    public String toString() {
+        return "Pisteet{" +
+                "nimi='" + nimi + '\'' +
+                ", oma='" + oma + '\'' +
+                ", minimi='" + minimi + '\'' +
+                '}';
+    }
 }

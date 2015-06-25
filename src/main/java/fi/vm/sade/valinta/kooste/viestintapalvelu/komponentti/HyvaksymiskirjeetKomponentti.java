@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.*;
@@ -76,6 +77,38 @@ public class HyvaksymiskirjeetKomponentti {
             Map<String, TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija,
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
+            Collection<HakijaDTO> hakukohteenHakijat,
+            Collection<Hakemus> hakemukset,
+            String hakuOid,
+            Optional<String> asiointikieli,
+            String sisalto,
+            String tag,
+            String templateName,
+            String palautusPvm,
+            String palautusAika,
+            boolean iPosti) {
+        return teeHyvaksymiskirjeet(
+                koodistoCachedAsyncResource::haeKoodisto,
+                valintatapajonoToJonosijaToHakija,
+                hakukohdeJaHakijapalveluidenOsoite,
+                hyvaksymiskirjeessaKaytetytHakukohteet,
+                hakukohteenHakijat,
+                hakemukset,
+                hakuOid,
+                asiointikieli,
+                sisalto,
+                tag,
+                templateName,
+                palautusPvm,
+                palautusAika,
+                iPosti);
+    }
+
+    public static LetterBatch teeHyvaksymiskirjeet(
+            Function<String, Map<String, Koodi>> haeKoodisto,
+            Map<String, TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija,
+            Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
+            Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat, Collection<Hakemus> hakemukset,
             String hakuOid,
             Optional<String> asiointikieli,
@@ -99,8 +132,8 @@ public class HyvaksymiskirjeetKomponentti {
         tilaToPrioriteetti.put(PERUUNTUNUT, 7);
         tilaToPrioriteetti.put(HYLATTY, 8);
 
-        Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-        Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
+        Map<String, Koodi> maajavaltio = haeKoodisto.apply(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+        Map<String, Koodi> posti = haeKoodisto.apply(KoodistoCachedAsyncResource.POSTI);
         LetterBatch viesti = new LetterBatch(kirjeet);
 
         for (HakijaDTO hakija : hakukohteenHakijat) {
@@ -118,7 +151,7 @@ public class HyvaksymiskirjeetKomponentti {
             }
             final String hakemusOid = hakija.getHakemusOid();
             final Hakemus hakemus = hakukohteenHakemukset.get(hakemusOid);
-            final Osoite osoite = osoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
+            final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
             final List<Map<String, Object>> tulosList = new ArrayList<>();
             // Hyvaksymiskirjeilla preferoitukieli tulee hakukohteen kielesta
             // jarjestyksessa suomi,ruotsi,englanti

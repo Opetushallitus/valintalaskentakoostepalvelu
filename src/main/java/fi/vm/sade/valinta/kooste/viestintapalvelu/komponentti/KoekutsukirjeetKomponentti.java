@@ -108,7 +108,7 @@ public class KoekutsukirjeetKomponentti {
             Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
             for (Hakemus hakemus : hakemukset) {
                 HakemusWrapper hakemusWrapper = new HakemusWrapper(hakemus);
-                Osoite addressLabel = osoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
+                Osoite addressLabel = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
 
                 hakukohdeNimiTietyllaKielella = kohdeHakukohdeNimi.getHakukohdeNimi().getTeksti(opetuskieli);
                 tarjoajaNimiTietyllaKielella = kohdeHakukohdeNimi.getTarjoajaNimi().getTeksti(opetuskieli);

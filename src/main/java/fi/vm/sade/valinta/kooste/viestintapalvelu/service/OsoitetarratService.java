@@ -236,7 +236,7 @@ public class OsoitetarratService {
         Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
         try {
             Osoitteet osoitteet = new Osoitteet(haetutHakemukset.stream().map(h ->
-                    osoiteKomponentti.haeOsoite(maatJaValtiot1, posti, h)).collect(Collectors.toList()));
+                    HaeOsoiteKomponentti.haeOsoite(maatJaValtiot1, posti, h)).collect(Collectors.toList()));
             // Aakkosjarjestykseen
             osoitteet.getAddressLabels().sort(
                     (o1, o2) -> {

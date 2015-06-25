@@ -107,7 +107,7 @@ public class HaeOsoiteKomponentti {
         return StringUtils.EMPTY;
     }
 
-    public Osoite haeOsoite(Map<String, Koodi> maatJaValtiot1, Map<String, Koodi> posti, Hakemus hakemus) {
+    public static Osoite haeOsoite(Map<String, Koodi> maatJaValtiot1, Map<String, Koodi> posti, Hakemus hakemus) {
         HakemusWrapper wrapper = new HakemusWrapper(hakemus);
         Koodi postiKoodi = posti.get(wrapper.getSuomalainenPostinumero());
         String postitoimipaikka = KoodistoCachedAsyncResource.haeKoodistaArvo(postiKoodi, KieliUtil.SUOMI, wrapper.getSuomalainenPostinumero());

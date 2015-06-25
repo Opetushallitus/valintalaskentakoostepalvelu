@@ -119,7 +119,7 @@ public class JalkiohjauskirjeetKomponentti {
                 continue;
             }
             final Hakemus hakemus = hakemusOidHakemukset.get(hakemusOid); // hakemusProxy.haeHakemus(hakemusOid);
-            final Osoite osoite = osoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
+            final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
             final List<Map<String, Object>> tulosList = new ArrayList<Map<String, Object>>();
             if (!kaytetaanYlikirjoitettuKielikoodia) {
                 preferoituKielikoodi = new HakemusWrapper(hakemus).getAsiointikieli();

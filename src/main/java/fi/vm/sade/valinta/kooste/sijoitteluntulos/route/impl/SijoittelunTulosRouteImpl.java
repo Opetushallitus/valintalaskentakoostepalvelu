@@ -294,7 +294,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             List<Osoite> addressLabels = Lists.newArrayList();
 
                             for (Hakemus h : hakemukset) {
-                                addressLabels.add(osoiteKomponentti.haeOsoite(maajavaltio, posti, h));
+                                addressLabels.add(HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, h));
                             }
                             Osoitteet osoitteet = new Osoitteet(addressLabels);
                             if (pakkaaTiedostotTarriin) {

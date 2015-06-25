@@ -34,4 +34,13 @@ public class Sijoitus {
     public String getOma() {
         return oma;
     }
+
+    @Override
+    public String toString() {
+        return "Sijoitus{" +
+                "nimi='" + nimi + '\'' +
+                ", oma='" + oma + '\'' +
+                ", hyvaksytyt='" + hyvaksytyt + '\'' +
+                '}';
+    }
 }
