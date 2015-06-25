@@ -79,10 +79,10 @@ public class HyvaksymiskirjeetKokoHaulleService {
     }
 
     private static Optional<TemplateDetail> etsiVakioDetail(List<TemplateHistory> t) {
-        Stream<TemplateHistory> vainVakioHistoriat = t.stream().filter(th -> VAKIOTEMPLATE.equals(th.getName()));
-        return vainVakioHistoriat
-        .flatMap(td -> td.getTemplateReplacements().stream().filter(tdd -> VAKIODETAIL.equals(tdd.getName())))
-        .findAny();
+        return t.stream()
+                .filter(th -> VAKIOTEMPLATE.equals(th.getName()))
+                .flatMap(td -> td.getTemplateReplacements().stream().filter(tdd -> VAKIODETAIL.equals(tdd.getName())))
+                .findAny();
     }
 
     public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
@@ -126,27 +126,28 @@ public class HyvaksymiskirjeetKokoHaulleService {
     }
 
     private List<HakukohdeJaResurssit> filtteroiAsiointikielella(String asiointkieli, HakijaPaginationObject hakijat, List<Hakemus> hakemukset) {
-        final Map<String, Hakemus> hakemuksetAsiointikielellaFiltteroituna
-                = hakemukset.stream().filter(
-                h -> asiointkieli.equals(new HakemusWrapper(h).getAsiointikieli()))
+        final Map<String, Hakemus> hakemuksetAsiointikielellaFiltteroituna = hakemukset
+                .stream()
+                .filter(h -> asiointkieli.equals(new HakemusWrapper(h).getAsiointikieli()))
                 .collect(Collectors.toMap(Hakemus::getOid, h0 -> h0));
 
-        List<HakijaDTO> hakijatAsiointikielellaFiltteroituna;
-        {
-            final Set<String> oidit = hakemuksetAsiointikielellaFiltteroituna.keySet();
-            hakijatAsiointikielellaFiltteroituna = hakijat.getResults().stream().filter(
-                    h -> oidit.contains(h.getHakemusOid())).collect(Collectors.toList());
-        }
+        final Set<String> oidit = hakemuksetAsiointikielellaFiltteroituna.keySet();
+        List<HakijaDTO> hakijatAsiointikielellaFiltteroituna = hakijat.getResults()
+                .stream()
+                .filter(h -> oidit.contains(h.getHakemusOid())).collect(Collectors.toList());
         LOG.info("Saatiin haun hakemukset {} kpl ja asiointkielellä filtteröinnin jälkeen {} kpl", hakemukset.size(), hakemuksetAsiointikielellaFiltteroituna.size());
 
         return ImmutableList.of(new HakukohdeJaResurssit(hakijatAsiointikielellaFiltteroituna, hakemuksetAsiointikielellaFiltteroituna.values()));
     }
 
     private List<HakukohdeJaResurssit> getHakukohteenResurssitHakemuksistaJaHakijoista(Map<String, Hakemus> hakemuksetAsiointikielellaFiltteroituna, Map<String, List<HakijaDTO>> hyvaksytytHakutoiveittain) {
-        return hyvaksytytHakutoiveittain.entrySet().stream()
-                .map(e -> new HakukohdeJaResurssit(e.getKey(), e.getValue(),
-                        e.getValue().stream().map(v -> hakemuksetAsiointikielellaFiltteroituna.get(v.getHakemusOid())).collect(Collectors.toList())
-                )).collect(Collectors.toList());
+        return hyvaksytytHakutoiveittain.entrySet()
+                .stream()
+                .map(e -> new HakukohdeJaResurssit(
+                                e.getKey(),
+                                e.getValue(),
+                                e.getValue().stream().map(v -> hakemuksetAsiointikielellaFiltteroituna.get(v.getHakemusOid())).collect(Collectors.toList()))
+                ).collect(Collectors.toList());
     }
 
     private String hakutoiveMissaHakijaOnHyvaksyttyna(HakijaDTO hakija) {
