@@ -18,9 +18,7 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.OsoiteHaku;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateDetail;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
@@ -30,8 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
-import rx.observables.ConnectableObservable;
-import rx.subjects.PublishSubject;
 
 import javax.ws.rs.core.Response;
 import java.util.*;
@@ -157,34 +153,6 @@ public class HyvaksymiskirjeetKokoHaulleService {
                 .findAny()
                 .map(hjj -> hjj.hakukohdeOid)
                 .get(); // jos heittää npe:n niin sijoittelu palauttaa hyväksymättömiä rajapinnan läpi
-    }
-
-    private static class HakutoiveJaJono {
-        public final String hakukohdeOid;
-        public final HakutoiveenValintatapajonoDTO jono;
-
-        public HakutoiveJaJono(String hakukohdeOid, HakutoiveenValintatapajonoDTO jono) {
-            this.hakukohdeOid = hakukohdeOid;
-            this.jono = jono;
-        }
-    }
-
-    private static class HakukohdeJaResurssit {
-        public final Optional<String> hakukohdeOid;
-        public final List<HakijaDTO> hakijat;
-        public final Collection<Hakemus> hakemukset;
-
-        public HakukohdeJaResurssit(String hakukohdeOid, List<HakijaDTO> hakijat, Collection<Hakemus> hakemukset) {
-            this.hakukohdeOid = Optional.of(hakukohdeOid);
-            this.hakijat = hakijat;
-            this.hakemukset = hakemukset;
-        }
-
-        public HakukohdeJaResurssit(List<HakijaDTO> hakijat, Collection<Hakemus> hakemukset) {
-            this.hakukohdeOid = Optional.empty();
-            this.hakijat = hakijat;
-            this.hakemukset = hakemukset;
-        }
     }
 
     private void hakukohdeKerralla(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue, ConcurrentLinkedQueue<HakukohdeJaResurssit> hakukohdeQueue) {
@@ -322,63 +290,13 @@ public class HyvaksymiskirjeetKokoHaulleService {
 
 
             LOG.info("##### Tehdään viestintäpalvelukutsu {}", hakukohdeOid);
-            //LOG.error("{}", new Gson().toJson(l));
-            return viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(l)
-                    .switchMap(
-                            letterResponse -> {
-                                LOG.info("##### Viestintäpalvelukutsu onnistui {}", hakukohdeOid);
-                                final String batchId = letterResponse.getBatchId();
-                                LOG.info("##### Odotetaan statusta... BatchId={}", batchId);
-                                PublishSubject<String> stop = PublishSubject.create();
 
-                                final Observable<String> plainObservable = wrapAsRunOnlyOnceObservable(Observable.create(subscriber -> {
-                                    Observable
-                                            .interval(1, TimeUnit.SECONDS)
-                                            .take((int) TimeUnit.MINUTES.toSeconds(getDelay(hakukohdeOid)))
-                                            .takeUntil(stop)
-                                            .subscribe(
-                                                    aikaTehdaJotain -> {
+            Observable<ResponseWithBatchId> valmisOrKeskeytettyObs = pollDocumentStatus(hakukohdeOid, viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(l));
+            Observable<String> keskeytettyObs = processInterruptedDocument(hakukohdeOid, valmisOrKeskeytettyObs);
+            Observable<String> valmisBatchIdObs = processReadyDocument(hakukohdeOid, prosessi, valmisOrKeskeytettyObs);
 
-                                                        LOG.error("Status PING... {}", batchId);
-                                                        viestintapalveluAsyncResource.haeStatusObservable(batchId)
-                                                                .subscribe(
-                                                                        b -> {
-                                                                            if (VALMIS_STATUS.equals(b.getStatus())) {
-                                                                                try {
-                                                                                    if (hakukohdeOid.isPresent()) {
-                                                                                        LOG.info("##### Dokumentti {} valmistui hakukohteelle {} joten uudelleen nimetään se", batchId, hakukohdeOid.get());
-                                                                                        dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid.get() + ".pdf")
-                                                                                                .subscribe(
-                                                                                                        success -> {
-                                                                                                            LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid.get());
-                                                                                                        },
-                                                                                                        error -> {
-                                                                                                            LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid.get(), error);
-                                                                                                        }
-                                                                                                );
-                                                                                    } else {
-                                                                                        prosessi.setDokumenttiId(batchId);
-                                                                                    }
-                                                                                } catch (Throwable ttt) {
-                                                                                    LOG.error("", ttt);
-                                                                                }
-                                                                                subscriber.onNext(batchId);
-                                                                                stop.onNext("LOPETUS");
-                                                                            }
-                                                                            if (KESKEYTETTY_STATUS.equals(b.getStatus())) {
-                                                                                subscriber.onError(new RuntimeException("Viestintäpalvelu palautti error statuksen hakukohteelle " + hakukohdeOid.get()));
-                                                                                stop.onNext("LOPETUS");
-                                                                            }
-                                                                        }
-                                                                );
-                                                    }
-                                            );
+            return valmisBatchIdObs.mergeWith(keskeytettyObs);
 
-                                }));
-
-                                return plainObservable;
-                            }
-                    );
         } catch (Throwable error) {
             LOG.error("Viestintäpalveluviestin muodostus epäonnistui hakukohteelle {}", hakukohdeOid, error);
             return Observable.error(error);
@@ -386,9 +304,77 @@ public class HyvaksymiskirjeetKokoHaulleService {
         }
     }
 
-    private <T> Observable<T> wrapAsRunOnlyOnceObservable(Observable<T> o) {
-        final ConnectableObservable<T> replayingObservable = o.replay(1);
-        replayingObservable.connect();
-        return replayingObservable;
+    private Observable<ResponseWithBatchId> pollDocumentStatus(Optional<String> hakukohdeOid, Observable<LetterResponse> letterResponseObs) {
+        return letterResponseObs
+                .doOnNext(letterResponse -> {
+                    LOG.info("##### Viestintäpalvelukutsu onnistui {}", hakukohdeOid);
+                    LOG.info("##### Odotetaan statusta, batchid={}", letterResponse.getBatchId());
+                })
+                .flatMap(letterResponse -> Observable.interval(1, TimeUnit.SECONDS)
+                        .take((int) TimeUnit.MINUTES.toSeconds(getDelay(hakukohdeOid)))
+                        .doOnNext(i -> LOG.info("Status PING... {}", letterResponse.getBatchId()))
+                        .flatMap(i -> viestintapalveluAsyncResource.haeStatusObservable(letterResponse.getBatchId())
+                                .zipWith(Observable.just(letterResponse.getBatchId()), ResponseWithBatchId::new))
+                        .skipWhile(status -> !VALMIS_STATUS.equals(status.resp.getStatus()) && !KESKEYTETTY_STATUS.equals(status.resp.getStatus())))
+                .take(1);
+    }
+
+    private Observable<String> processInterruptedDocument(Optional<String> hakukohdeOid, Observable<ResponseWithBatchId> valmisOrKeskeytettyObs) {
+        return valmisOrKeskeytettyObs
+                .filter(status -> KESKEYTETTY_STATUS.equals(status.resp.getStatus()))
+                .map(status -> status.batchId)
+                .flatMap(s -> Observable.error(new RuntimeException("Viestintäpalvelu palautti error statuksen hakukohteelle " + hakukohdeOid.get())));
+    }
+
+    private Observable<String> processReadyDocument(Optional<String> hakukohdeOid, SijoittelunTulosProsessi prosessi, Observable<ResponseWithBatchId> valmisOrKeskeytettyObs) {
+        Observable<ResponseWithBatchId> valmisObs = valmisOrKeskeytettyObs.filter(status -> VALMIS_STATUS.equals(status.resp.getStatus()));
+        if (hakukohdeOid.isPresent()) {
+            return valmisObs
+                    .doOnNext(s -> LOG.info("##### Dokumentti {} valmistui hakukohteelle {} joten uudelleen nimetään se", s.batchId, hakukohdeOid.get()))
+                    .flatMap(s -> dokumenttiAsyncResource.uudelleenNimea(s.batchId, "hyvaksymiskirje_" + hakukohdeOid.get() + ".pdf")
+                            .doOnNext(str -> LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid.get()))
+                            .doOnError(error -> LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid.get(), error))
+                            .onErrorReturn(error -> s.batchId)
+                            .map(name -> s.batchId));
+        } else {
+            return valmisObs.doOnNext(s -> prosessi.setDokumenttiId(s.batchId)).map(s -> s.batchId);
+        }
+    }
+
+    private static class HakutoiveJaJono {
+        public final String hakukohdeOid;
+        public final HakutoiveenValintatapajonoDTO jono;
+
+        public HakutoiveJaJono(String hakukohdeOid, HakutoiveenValintatapajonoDTO jono) {
+            this.hakukohdeOid = hakukohdeOid;
+            this.jono = jono;
+        }
+    }
+
+    private static class HakukohdeJaResurssit {
+        public final Optional<String> hakukohdeOid;
+        public final List<HakijaDTO> hakijat;
+        public final Collection<Hakemus> hakemukset;
+
+        public HakukohdeJaResurssit(String hakukohdeOid, List<HakijaDTO> hakijat, Collection<Hakemus> hakemukset) {
+            this.hakukohdeOid = Optional.of(hakukohdeOid);
+            this.hakijat = hakijat;
+            this.hakemukset = hakemukset;
+        }
+
+        public HakukohdeJaResurssit(List<HakijaDTO> hakijat, Collection<Hakemus> hakemukset) {
+            this.hakukohdeOid = Optional.empty();
+            this.hakijat = hakijat;
+            this.hakemukset = hakemukset;
+        }
+    }
+
+    private class ResponseWithBatchId {
+        public final LetterBatchStatusDto resp;
+        public final String batchId;
+        public ResponseWithBatchId(LetterBatchStatusDto resp, String batchId) {
+            this.resp = resp;
+            this.batchId = batchId;
+        }
     }
 }
