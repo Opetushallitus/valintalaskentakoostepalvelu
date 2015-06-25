@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.service;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
@@ -29,9 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
-import rx.Subscriber;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.observables.ConnectableObservable;
 import rx.subjects.PublishSubject;
 
@@ -84,112 +82,51 @@ public class HyvaksymiskirjeetKokoHaulleService {
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
     }
 
-    private static String nimiUriToTag(String nimiUri, String deflt) {
-        return Optional.ofNullable(nimiUri).map(
-                n -> n.split("#")[0]//.split("#")[0]
-        ).orElse(deflt);
-    }
-
     private static Optional<TemplateDetail> etsiVakioDetail(List<TemplateHistory> t) {
         Stream<TemplateHistory> vainVakioHistoriat = t.stream().filter(th -> VAKIOTEMPLATE.equals(th.getName()));
-        Optional<TemplateDetail> o =
-                vainVakioHistoriat
-                        .flatMap(td -> td.getTemplateReplacements().stream().filter(tdd -> VAKIODETAIL.equals(tdd.getName())))
-                        .findAny();
-        return o;
-    }
-
-    private static <T> Subscriber<T> subscribeWithFinally(Action0 doFinally) {
-        return subscribeWithFinally(f -> {
-        }, f -> {
-        }, () -> {
-        }, doFinally);
-    }
-
-    private static <T> Subscriber<T> subscribeWithFinally(Action1<T> doNext, Action1<Throwable> doError, Action0 doFinally) {
-        return subscribeWithFinally(doNext, doError, () -> {
-        }, doFinally);
-    }
-
-    private static <T> Subscriber<T> subscribeWithFinally(Action1<T> doNext, Action1<Throwable> doError, Action0 doComplete, Action0 doFinally) {
-        return new Subscriber<T>() {
-            @Override
-            public void onCompleted() {
-                try {
-                    doComplete.call();
-                } finally {
-                    try {
-                        doFinally.call();
-                    } catch (Throwable t) {
-                    }
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                try {
-                    doError.call(e);
-                } finally {
-                    try {
-                        doFinally.call();
-                    } catch (Throwable t) {
-                    }
-                }
-            }
-
-            @Override
-            public void onNext(T t) {
-                try {
-                    doNext.call(t);
-                } finally {
-                    try {
-                        doFinally.call();
-                    } catch (Throwable tt) {
-                    }
-                }
-            }
-        };
+        return vainVakioHistoriat
+        .flatMap(td -> td.getTemplateReplacements().stream().filter(tdd -> VAKIODETAIL.equals(tdd.getName())))
+        .findAny();
     }
 
     public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
         LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", hakuOid, prosessi.getAsiointikieli());
-        sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid)
-                .switchMap(
-                        hakijat -> {
-                            LOG.info("Saatiin haulle hyväksyttyjä {} kpl", hakijat.getTotalCount());
-                            Observable<List<Hakemus>> hakemuksetObs = applicationAsyncResource.getApplicationsByHakemusOids(hakijat.getResults().stream().map(h -> h.getHakemusOid()).collect(Collectors.toList()));
-                            if (!prosessi.getAsiointikieli().isPresent()) {
-                                return hakemuksetObs.switchMap(
-                                        hakemukset -> hakukohteetOpetuskielella(hakijat, hakemukset)
-                                );
-                            }
-                            return hakemuksetObs.switchMap(hakemukset -> filtteroiAsiointikielella(prosessi.getAsiointikieli().get(), hakijat, hakemukset));
-                        }
-                ).subscribe(
-                success -> {
-                    LOG.info("Hyväksyttyjä asiointikielellä {} on yhteensä {} hakukohteessa", prosessi.getAsiointikieli(), success.size());
-                    prosessi.setKokonaistyo(success.size());
-                    final ConcurrentLinkedQueue<HakukohdeJaResurssit> hakukohdeQueue = new ConcurrentLinkedQueue<>(success);
-                    final boolean onkoTarveSplitata = success.size() > 20;
+
+        Observable<HakijaPaginationObject> koulutuspaikallisetObs = sijoitteluAsyncResource
+                .getKoulutuspaikkalliset(hakuOid)
+                .doOnNext(hakijat -> LOG.info("Saatiin haulle hyväksyttyjä {} kpl", hakijat.getTotalCount()));
+
+        Observable<List<Hakemus>> hakijatObs = koulutuspaikallisetObs
+                .flatMap(hakijat -> applicationAsyncResource.getApplicationsByHakemusOids(hakijat.getResults().stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList())));
+
+        Observable<List<HakukohdeJaResurssit>> hakukohdeJaResurssitObs = hakijatObs
+                .zipWith(koulutuspaikallisetObs, (hakemukset, hakijat) -> {
+                    if (!prosessi.getAsiointikieli().isPresent()) {
+                        return hakukohteetOpetuskielella(hakijat, hakemukset);
+                    } else {
+                        return filtteroiAsiointikielella(prosessi.getAsiointikieli().get(), hakijat, hakemukset);
+                    }
+                })
+                .take(1)
+                .doOnNext(list -> prosessi.setKokonaistyo(list.size()));
+
+        hakukohdeJaResurssitObs.subscribe(
+                list -> {
+                    LOG.info("Hyväksyttyjä asiointikielellä {} on yhteensä {} hakukohteessa", prosessi.getAsiointikieli(), list.size());
+                    final ConcurrentLinkedQueue<HakukohdeJaResurssit> hakukohdeQueue = new ConcurrentLinkedQueue<>(list);
+                    final boolean onkoTarveSplitata = list.size() > 20;
                     IntStream.range(0, onkoTarveSplitata ? 2 : 1).forEach(i -> hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue));
                 },
-                error -> {
-                    LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error);
-                }
-        );
+                error -> LOG.error("Ei saatu hakukohteen resureseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error));
     }
 
-    private Observable<List<HakukohdeJaResurssit>> hakukohteetOpetuskielella(HakijaPaginationObject hakijat, List<Hakemus> hakemukset) {
-        return wrapAsRunOnlyOnceObservable(Observable.create(
-                onSub -> {
-                    onSub.onNext(getHakukohteenResurssitHakemuksistaJaHakijoista(
-                            hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h0 -> h0)),
-                            hakijat.getResults().stream().collect(Collectors.groupingBy(this::hakutoiveMissaHakijaOnHyvaksyttyna))));
-                }
-        ));
+    private List<HakukohdeJaResurssit> hakukohteetOpetuskielella(HakijaPaginationObject hakijat, List<Hakemus> hakemukset) {
+        return getHakukohteenResurssitHakemuksistaJaHakijoista(
+                hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h0 -> h0)),
+                hakijat.getResults().stream().collect(Collectors.groupingBy(this::hakutoiveMissaHakijaOnHyvaksyttyna)));
     }
 
-    private Observable<List<HakukohdeJaResurssit>> filtteroiAsiointikielella(String asiointkieli, HakijaPaginationObject hakijat, List<Hakemus> hakemukset) {
+    private List<HakukohdeJaResurssit> filtteroiAsiointikielella(String asiointkieli, HakijaPaginationObject hakijat, List<Hakemus> hakemukset) {
         final Map<String, Hakemus> hakemuksetAsiointikielellaFiltteroituna
                 = hakemukset.stream().filter(
                 h -> asiointkieli.equals(new HakemusWrapper(h).getAsiointikieli()))
@@ -197,20 +134,13 @@ public class HyvaksymiskirjeetKokoHaulleService {
 
         List<HakijaDTO> hakijatAsiointikielellaFiltteroituna;
         {
-            final Set<String> oidit =  hakemuksetAsiointikielellaFiltteroituna.keySet();
-            hakijatAsiointikielellaFiltteroituna=hakijat.getResults().stream().filter(
-                h -> oidit.contains(((HakijaDTO)h).getHakemusOid())).collect(Collectors.toList());
+            final Set<String> oidit = hakemuksetAsiointikielellaFiltteroituna.keySet();
+            hakijatAsiointikielellaFiltteroituna = hakijat.getResults().stream().filter(
+                    h -> oidit.contains(h.getHakemusOid())).collect(Collectors.toList());
         }
         LOG.info("Saatiin haun hakemukset {} kpl ja asiointkielellä filtteröinnin jälkeen {} kpl", hakemukset.size(), hakemuksetAsiointikielellaFiltteroituna.size());
 
-
-        return wrapAsRunOnlyOnceObservable(Observable.create(
-                onSub -> {
-                    onSub.onNext(
-                            Arrays.asList(new HakukohdeJaResurssit(hakijatAsiointikielellaFiltteroituna, hakemuksetAsiointikielellaFiltteroituna.values())
-                            ));
-                }
-        ));
+        return ImmutableList.of(new HakukohdeJaResurssit(hakijatAsiointikielellaFiltteroituna, hakemuksetAsiointikielellaFiltteroituna.values()));
     }
 
     private List<HakukohdeJaResurssit> getHakukohteenResurssitHakemuksistaJaHakijoista(Map<String, Hakemus> hakemuksetAsiointikielellaFiltteroituna, Map<String, List<HakijaDTO>> hyvaksytytHakutoiveittain) {
@@ -222,35 +152,40 @@ public class HyvaksymiskirjeetKokoHaulleService {
 
     private String hakutoiveMissaHakijaOnHyvaksyttyna(HakijaDTO hakija) {
         return hakija.getHakutoiveet().stream()
-                .flatMap(h -> h.getHakutoiveenValintatapajonot().stream().map(j -> new HakutoiveJaJono(h.getHakukohdeOid(),j)))
+                .flatMap(h -> h.getHakutoiveenValintatapajonot().stream().map(j -> new HakutoiveJaJono(h.getHakukohdeOid(), j)))
                 .filter(hjj -> hjj.jono.getTila() != null && hjj.jono.getTila().isHyvaksytty())
                 .findAny()
                 .map(hjj -> hjj.hakukohdeOid)
                 .get(); // jos heittää npe:n niin sijoittelu palauttaa hyväksymättömiä rajapinnan läpi
     }
+
     private static class HakutoiveJaJono {
         public final String hakukohdeOid;
         public final HakutoiveenValintatapajonoDTO jono;
+
         public HakutoiveJaJono(String hakukohdeOid, HakutoiveenValintatapajonoDTO jono) {
             this.hakukohdeOid = hakukohdeOid;
             this.jono = jono;
         }
     }
+
     private static class HakukohdeJaResurssit {
         public final Optional<String> hakukohdeOid;
         public final List<HakijaDTO> hakijat;
         public final Collection<Hakemus> hakemukset;
+
         public HakukohdeJaResurssit(String hakukohdeOid, List<HakijaDTO> hakijat, Collection<Hakemus> hakemukset) {
             this.hakukohdeOid = Optional.of(hakukohdeOid);
             this.hakijat = hakijat;
             this.hakemukset = hakemukset;
         }
+
         public HakukohdeJaResurssit(List<HakijaDTO> hakijat, Collection<Hakemus> hakemukset) {
             this.hakukohdeOid = Optional.empty();
             this.hakijat = hakijat;
             this.hakemukset = hakemukset;
         }
-     }
+    }
 
     private void hakukohdeKerralla(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue, ConcurrentLinkedQueue<HakukohdeJaResurssit> hakukohdeQueue) {
         Optional<HakukohdeJaResurssit> hakukohdeJaResurssit = Optional.ofNullable(hakukohdeQueue.poll());
@@ -265,7 +200,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                     defaultValue,
                                     prosessi.getAsiointikieli(),
                                     resurssit.hakijat,
-                                    resurssit.hakemukset,prosessi),
+                                    resurssit.hakemukset, prosessi),
                             Observable.timer(getDelay(hakukohdeJaResurssit.get().hakukohdeOid), TimeUnit.MINUTES)
                     ).subscribe(
                             s -> {
@@ -296,9 +231,9 @@ public class HyvaksymiskirjeetKokoHaulleService {
 
     private Observable<?> getHakukohteenHyvaksymiskirjeObservable(String hakuOid, Optional<String> hakukohdeOid, Optional<String> defaultValue, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset,
                                                                   SijoittelunTulosProsessi prosessi) {
-        if(!hakukohdeOid.isPresent()) {
+        if (!hakukohdeOid.isPresent()) {
             return luoKirjeJaLahetaMuodostettavaksi(hakuOid, Optional.empty(), Optional.empty(),
-                    asiointikieli, hyvaksytytHakijat, hakemukset, defaultValue.get(),prosessi);
+                    asiointikieli, hyvaksytytHakijat, hakemukset, defaultValue.get(), prosessi);
         } else {
             return
                     tarjontaAsyncResource.haeHakukohde(hakukohdeOid.get()).switchMap(
@@ -313,7 +248,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                                     }
                                     if (defaultValue.isPresent()) {
                                         return luoKirjeJaLahetaMuodostettavaksi(hakuOid, hakukohdeOid, Optional.of(tarjoajaOid),
-                                                asiointikieli, hyvaksytytHakijat, hakemukset, defaultValue.get(),prosessi);
+                                                asiointikieli, hyvaksytytHakijat, hakemukset, defaultValue.get(), prosessi);
                                     } else {
                                         return viestintapalveluAsyncResource.haeKirjepohja(hakuOid, tarjoajaOid, "hyvaksymiskirje", kieli, hakukohdeOid.get()).switchMap(
                                                 (t) -> {
@@ -340,7 +275,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
             LOG.info("##### Saatiin hakemukset hakukohteelle {}", hakukohdeOid);
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
             Map<String, Optional<Osoite>> hakijapalveluidenOsoite = Maps.newHashMap();
-            if(hakukohdeOid.isPresent()) {
+            if (hakukohdeOid.isPresent()) {
                 MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid.get());
                 Future<Response> organisaatioFuture = organisaatioAsyncResource.haeOrganisaatio(tarjoajaOid.get());
                 hakijapalveluidenOsoite.put(tarjoajaOid.get(), Optional.ofNullable(OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(
@@ -350,22 +285,22 @@ public class HyvaksymiskirjeetKokoHaulleService {
                         organisaatioFuture.get())));
             } else { // koko haun kiinnostaville hakukohteille kerralla
                 hakijapalveluidenOsoite =
-                hyvaksymiskirjeessaKaytetytHakukohteet.values()
-                        .stream().map(m -> m.getTarjoajaOid())
-                        .collect(Collectors.toSet()) // koska sama tarjoaja voi olla useammalla hakukohteella
-                        .stream()
-                        .collect(Collectors.toMap(t -> t, t -> {
-                            try {
-                                return Optional.ofNullable(OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(
-                                        haeOsoiteKomponentti, organisaatioAsyncResource,
-                                        newArrayList(Arrays.asList(t)),
-                                        asiointikieli.get(),
-                                        organisaatioAsyncResource.haeOrganisaatio(t).get()));
-                            } catch (Throwable t0) {
-                                LOG.error("Tarjoajalle {} ei saatu hakijapalveluiden osoitetta", t, t0);
-                                return Optional.empty();
-                            }
-                        }));
+                        hyvaksymiskirjeessaKaytetytHakukohteet.values()
+                                .stream().map(m -> m.getTarjoajaOid())
+                                .collect(Collectors.toSet()) // koska sama tarjoaja voi olla useammalla hakukohteella
+                                .stream()
+                                .collect(Collectors.toMap(t -> t, t -> {
+                                    try {
+                                        return Optional.ofNullable(OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(
+                                                haeOsoiteKomponentti, organisaatioAsyncResource,
+                                                newArrayList(Arrays.asList(t)),
+                                                asiointikieli.get(),
+                                                organisaatioAsyncResource.haeOrganisaatio(t).get()));
+                                    } catch (Throwable t0) {
+                                        LOG.error("Tarjoajalle {} ei saatu hakijapalveluiden osoitetta", t, t0);
+                                        return Optional.empty();
+                                    }
+                                }));
 
             }
             LetterBatch l = hyvaksymiskirjeetKomponentti
