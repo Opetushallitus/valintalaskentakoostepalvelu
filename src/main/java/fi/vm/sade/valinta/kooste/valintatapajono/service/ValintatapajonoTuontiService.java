@@ -85,7 +85,7 @@ public class ValintatapajonoTuontiService {
                                         },
                                         dontcare ->
                                         {
-                                            LOG.error("Ei saatu paivitettya ", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
+                                            LOG.error("Ei saatu paivitettya " + dontcare.getMessage(), dontcare);
                                         });
                             },
                             poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef));
@@ -93,7 +93,7 @@ public class ValintatapajonoTuontiService {
                     dokumentinSeurantaAsyncResource.paivitaKuvaus(dokumenttiIdRef.get(), "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...").subscribe(
                             dontcare -> {},
                             dontcare -> {
-                                LOG.error("Onnistumisen ilmoittamisessa virhe! {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
+                                LOG.error("Onnistumisen ilmoittamisessa virhe! " + dontcare.getMessage(), dontcare);
                             });
                 } catch (Throwable t) {
                     poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef).accept(t);
@@ -132,8 +132,7 @@ public class ValintatapajonoTuontiService {
                         dokumenttiIdRef.set(dokumenttiId);
                         mergeSuplier.get();
                     } catch (Throwable t) {
-                        LOG.error("Aikakatkaisu ehti ensin. Palvelu on todennäköisesti kovan kuormanalla. {} {}",
-                                t.getMessage(), Arrays.toString(t.getStackTrace()));
+                        LOG.error("Aikakatkaisu ehti ensin. Palvelu on todennäköisesti kovan kuormanalla. " + t.getMessage(), t);
                     }
                 }, poikkeusKasittelija("Seurantapalveluun ei saatu yhteyttä", asyncResponse, dokumenttiIdRef));
     }
@@ -141,9 +140,9 @@ public class ValintatapajonoTuontiService {
     private PoikkeusKasittelijaSovitin poikkeusKasittelija(String viesti, AsyncResponse asyncResponse, AtomicReference<String> dokumenttiIdRef) {
         return new PoikkeusKasittelijaSovitin(poikkeus -> {
             if (poikkeus == null) {
-                LOG.error("###\r\n###Poikkeus tuonnissa {}\r\n###", viesti);
+                LOG.error("###Poikkeus tuonnissa {}\r\n###", viesti);
             } else {
-                LOG.error("###\r\n###Poikkeus tuonnissa {}: {} {}\r\n###", viesti, poikkeus.getMessage(), Arrays.toString(poikkeus.getStackTrace()));
+                LOG.error("###Poikkeus tuonnissa :" + viesti + " " + poikkeus.getMessage() + "\r\n###", poikkeus);
             }
             try {
                 asyncResponse.resume(Response.serverError().entity(viesti).build());
@@ -156,11 +155,11 @@ public class ValintatapajonoTuontiService {
                     dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId, Arrays.asList(new VirheilmoitusDto("", viesti))).subscribe(
                             dontcare -> {},
                             dontcare -> {
-                                LOG.error("Virheen ilmoittamisessa virhe! {} {}", dontcare.getMessage(), Arrays.toString(dontcare.getStackTrace()));
+                                LOG.error("Virheen ilmoittamisessa virhe! " + dontcare.getMessage(), dontcare);
                             });
                 }
             } catch (Throwable t) {
-                LOG.error("Odottamaton virhe: {} {}", t.getMessage(), Arrays.toString(t.getStackTrace()));
+                LOG.error("Odottamaton virhe: " + t.getMessage(), t);
             }
         });
     }
