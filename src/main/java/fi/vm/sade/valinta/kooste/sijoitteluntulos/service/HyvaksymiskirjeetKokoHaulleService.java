@@ -113,7 +113,10 @@ public class HyvaksymiskirjeetKokoHaulleService {
                     final boolean onkoTarveSplitata = list.size() > 20;
                     IntStream.range(0, onkoTarveSplitata ? 2 : 1).forEach(i -> hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue));
                 },
-                error -> LOG.error("Ei saatu hakukohteen resureseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error));
+                error -> {
+                    LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error);
+                    throw new RuntimeException(error);
+                });
     }
 
     private List<HakukohdeJaResurssit> hakukohteetOpetuskielella(HakijaPaginationObject hakijat, List<Hakemus> hakemukset) {
