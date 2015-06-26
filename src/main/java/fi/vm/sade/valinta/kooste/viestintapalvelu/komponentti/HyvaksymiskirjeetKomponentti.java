@@ -258,13 +258,12 @@ public class HyvaksymiskirjeetKomponentti {
                         });
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
                 if (!hakutoiveenValintatapajonot.isEmpty()) {
-                    HakutoiveenValintatapajonoDTO valintatapajono = hakutoiveenValintatapajonot.get(0);
-                    if (VARALLA.equals(valintatapajono.getTila()) && valintatapajono.getVarasijanNumero() != null) {
-                        tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(valintatapajono.getVarasijanNumero(), preferoituKielikoodi));
+                    HakutoiveenValintatapajonoDTO firstValintatapajono = hakutoiveenValintatapajonot.get(0);
+                    if (VARALLA.equals(firstValintatapajono.getTila()) && firstValintatapajono.getVarasijanNumero() != null) {
+                        tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(firstValintatapajono.getVarasijanNumero(), preferoituKielikoodi));
                     }
-                    String hylkaysPerusteText = HYLATTY.equals(valintatapajono.getTila()) ? hylkaysperusteText(preferoituKielikoodi, valintatapajono) : EMPTY;
-                    tulokset.put("hylkaysperuste", hylkaysPerusteText);
-                    tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(valintatapajono.getTila(), preferoituKielikoodi, valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
+                    tulokset.put("hylkaysperuste", hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot, firstValintatapajono));
+                    tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(firstValintatapajono.getTila(), preferoituKielikoodi, firstValintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
                 }
                 tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi().getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(hakukohdeOid)));
                 tulokset.put("omatPisteet", omatPisteet.toString());
@@ -313,8 +312,9 @@ public class HyvaksymiskirjeetKomponentti {
         return viesti;
     }
 
-    private static String hylkaysperusteText(String preferoituKielikoodi, HakutoiveenValintatapajonoDTO valintatapajono) {
-        return new Teksti(valintatapajono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, EMPTY);
+    private static String hylkaysPerusteText(String preferoituKielikoodi, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot, HakutoiveenValintatapajonoDTO firstJono) {
+        HakutoiveenValintatapajonoDTO lastJono = hakutoiveenValintatapajonot.get(hakutoiveenValintatapajonot.size() - 1);
+        return HYLATTY.equals(firstJono.getTila()) ? new Teksti(lastJono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, EMPTY) : EMPTY;
     }
 
     private static String hyvaksytynHakutoiveenHakukohdeOid(HakijaDTO hakija) {
