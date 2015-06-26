@@ -81,8 +81,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
     private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String asiointikieli, HaunResurssit resurssit, String defaultValue) {
 
         Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(resurssit.hakijat);
-        Observable<Map<String, Optional<Osoite>>> addresses = ViestintapalveluObservables.haunOsoitteet(hakukohteet, organisaatioAsyncResource::haeHakutoimisto);
-        Observable<LetterBatch> hyvaksymiskirje = ViestintapalveluObservables.kirje(hakuOid, Optional.of(asiointikieli), resurssit.hakijat, resurssit.hakemukset, defaultValue, hakukohteet, addresses, hyvaksymiskirjeetKomponentti);
-        return ViestintapalveluObservables.batchId(Optional.empty(), hyvaksymiskirje, viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable, viestintapalveluAsyncResource::haeStatusObservable, batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakuOid + ".pdf"));
+        Observable<Map<String, Optional<Osoite>>> osoitteet = ViestintapalveluObservables.haunOsoitteet(hakukohteet, organisaatioAsyncResource::haeHakutoimisto);
+        Observable<LetterBatch> kirjeet = ViestintapalveluObservables.kirjeet(hakuOid, Optional.of(asiointikieli), resurssit.hakijat, resurssit.hakemukset, defaultValue, hakukohteet, osoitteet, hyvaksymiskirjeetKomponentti);
+        return ViestintapalveluObservables.batchId(Optional.empty(), kirjeet, viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable, viestintapalveluAsyncResource::haeStatusObservable, batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakuOid + ".pdf"));
     }
 }

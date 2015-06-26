@@ -120,7 +120,7 @@ public class ViestintapalveluObservables {
         ));
     }
 
-    public static Observable<LetterBatch> kirje(String hakuOid, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset, String defaultValue, Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet, Observable<Map<String, Optional<Osoite>>> addresses, HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti) {
+    public static Observable<LetterBatch> kirjeet(String hakuOid, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset, String defaultValue, Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet, Observable<Map<String, Optional<Osoite>>> addresses, HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti) {
         return addresses.map(hakijapalveluidenOsoite -> hyvaksymiskirjeetKomponentti
                 .teeHyvaksymiskirjeet(
                         HyvaksymiskirjeetServiceImpl.todellisenJonosijanRatkaisin(hyvaksytytHakijat),
