@@ -211,13 +211,14 @@ public class JalkiohjauskirjeetKomponentti {
                                 return tilaToPrioriteetti.get(h1).compareTo(tilaToPrioriteetti.get(h2));
                             }
                         });
-                for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
+                List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
+                if (hakutoiveenValintatapajonot.isEmpty()) {
+                    HakutoiveenValintatapajonoDTO valintatapajono = hakutoiveenValintatapajonot.get(0);
                     if (VARALLA.equals(valintatapajono.getTila()) && valintatapajono.getVarasijanNumero() != null) {
                         tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(valintatapajono.getVarasijanNumero(), preferoituKielikoodi));
                     }
                     tulokset.put("hylkaysperuste", new Teksti(valintatapajono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, StringUtils.EMPTY));
                     tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(valintatapajono.getTila(), preferoituKielikoodi, valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
-                    break;
                 }
                 tulokset.put("omatPisteet", omatPisteet.toString());
                 tulokset.put("hyvaksytyt", hyvaksytyt.toString());
