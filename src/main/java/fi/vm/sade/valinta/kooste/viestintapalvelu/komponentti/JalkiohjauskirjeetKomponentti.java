@@ -218,7 +218,7 @@ public class JalkiohjauskirjeetKomponentti {
                     if (VARALLA.equals(valintatapajono.getTila()) && valintatapajono.getVarasijanNumero() != null) {
                         tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(valintatapajono.getVarasijanNumero(), preferoituKielikoodi));
                     }
-                    tulokset.put("hylkaysperuste", hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot, hakutoiveenValintatapajonot.get(0)));
+                    tulokset.put("hylkaysperuste", hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot));
                     tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(valintatapajono.getTila(), preferoituKielikoodi, valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
                 }
                 tulokset.put("omatPisteet", omatPisteet.toString());
@@ -249,8 +249,8 @@ public class JalkiohjauskirjeetKomponentti {
         return viesti;
     }
 
-    private static String hylkaysPerusteText(String preferoituKielikoodi, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot, HakutoiveenValintatapajonoDTO firstJono) {
+    private static String hylkaysPerusteText(String preferoituKielikoodi, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot) {
         HakutoiveenValintatapajonoDTO lastJono = hakutoiveenValintatapajonot.get(hakutoiveenValintatapajonot.size() - 1);
-        return HYLATTY.equals(firstJono.getTila()) ? new Teksti(lastJono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, EMPTY) : EMPTY;
+        return HYLATTY.equals(hakutoiveenValintatapajonot.get(0).getTila()) ? new Teksti(lastJono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, EMPTY) : EMPTY;
     }
 }
