@@ -14,7 +14,6 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Varoitus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -44,7 +43,6 @@ public class HyvaksymiskirjeetKokoHaulleService {
     private static final String KESKEYTETTY_STATUS = "error";
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetKokoHaulleService.class);
 
-    private final HaeOsoiteKomponentti haeOsoiteKomponentti;
     private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final SijoitteluAsyncResource sijoitteluAsyncResource;
@@ -55,7 +53,6 @@ public class HyvaksymiskirjeetKokoHaulleService {
 
     @Autowired
     private HyvaksymiskirjeetKokoHaulleService(
-            HaeOsoiteKomponentti haeOsoiteKomponentti,
             HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
             ApplicationAsyncResource applicationAsyncResource,
             SijoitteluAsyncResource sijoitteluAsyncResource,
@@ -63,7 +60,6 @@ public class HyvaksymiskirjeetKokoHaulleService {
             DokumenttiAsyncResource dokumenttiAsyncResource,
             OrganisaatioAsyncResource organisaatioAsyncResource,
             ViestintapalveluAsyncResource viestintapalveluAsyncResource) {
-        this.haeOsoiteKomponentti = haeOsoiteKomponentti;
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.applicationAsyncResource = applicationAsyncResource;
         this.sijoitteluAsyncResource = sijoitteluAsyncResource;
