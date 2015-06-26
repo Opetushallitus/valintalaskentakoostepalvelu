@@ -148,7 +148,7 @@ public class ViestintapalveluObservables {
                         .doOnNext(batch -> LOG.info("##### Tehdään viestintäpalvelukutsu {}", hakukohdeOid))
                         .flatMap(batch -> status(hakukohdeOid, vieDokumentti.apply(batch), haeStatusFn));
 
-        return valmis(hakukohdeOid, prosessi, valmisOrKeskeytettyObs, renameFn).mergeWith(keskeytetty(hakukohdeOid, valmisOrKeskeytettyObs));
+        return valmis(hakukohdeOid, valmisOrKeskeytettyObs, renameFn).mergeWith(keskeytetty(hakukohdeOid, valmisOrKeskeytettyObs));
     }
 
     public static Observable<ResponseWithBatchId> status(Optional<String> hakukohdeOid, Observable<LetterResponse> letterResponseObs, Function<String, Observable<LetterBatchStatusDto>> statusFn) {
@@ -172,7 +172,7 @@ public class ViestintapalveluObservables {
                 .flatMap(s -> Observable.error(new RuntimeException("Viestintäpalvelu palautti virheen hakukohteelle " + hakukohdeOid.get())));
     }
 
-    public static Observable<String> valmis(Optional<String> hakukohdeOid, SijoittelunTulosProsessi prosessi,
+    public static Observable<String> valmis(Optional<String> hakukohdeOid,
                                             Observable<ResponseWithBatchId> valmisOrKeskeytettyObs, Function<String, Observable<String>> renameFn) {
         Observable<ResponseWithBatchId> valmisObs = valmisOrKeskeytettyObs.filter(status -> VALMIS_STATUS.equals(status.resp.getStatus()));
         if (hakukohdeOid.isPresent()) {
@@ -184,7 +184,7 @@ public class ViestintapalveluObservables {
                             .onErrorReturn(error -> s.batchId)
                             .map(name -> s.batchId));
         } else {
-            return valmisObs.doOnNext(s -> prosessi.setDokumenttiId(s.batchId)).map(s -> s.batchId);
+            return valmisObs.map(s -> s.batchId);
         }
     }
 

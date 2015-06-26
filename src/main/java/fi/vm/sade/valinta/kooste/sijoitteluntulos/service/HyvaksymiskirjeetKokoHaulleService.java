@@ -54,49 +54,38 @@ public class HyvaksymiskirjeetKokoHaulleService {
     public void muodostaHyvaksymiskirjeetKokoHaulle(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
         LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", hakuOid, prosessi.getAsiointikieli());
 
-        Observable<HaunResurssit> hakukohdeJaResurssitObs =
+        Observable<HaunResurssit> haunResurssitObs =
                 ViestintapalveluObservables.haunResurssit(asiointikieli, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid), applicationAsyncResource::getApplicationsByHakemusOids)
                 .doOnNext(list -> prosessi.setKokonaistyo(1));
 
-        hakukohdeJaResurssitObs.subscribe(
-                list -> hakuKerralla(hakuOid, asiointikieli, prosessi, defaultValue, list),
-                error -> {
+        haunResurssitObs
+                .doOnError(error -> {
                     LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error);
-                    prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun" + hakuOid + "\n" + error.getMessage()));
-                    throw new RuntimeException(error);
-                });
-    }
+                })
+                .doOnNext(n -> LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti", hakuOid))
+                .flatMap(resurssit -> luoKirjeJaLahetaMuodostettavaksi(hakuOid, asiointikieli, resurssit, defaultValue.get(), prosessi)
+                        .timeout(ViestintapalveluObservables.getDelay(Optional.empty()), TimeUnit.MINUTES, Observable.just("")))
+                .subscribe(
+                        batchId -> {
+                            // TODO timeout handling
+                            prosessi.setDokumenttiId(batchId);
+                            prosessi.inkrementoi();
+                            LOG.info("Haun hyväksymiskirjeet valmiit");
+                        },
+                        error -> {
+                            LOG.error("Haun hyväksymiskirjeiden muodostaminen ei onnistunut", error);
+                            prosessi.inkrementoiOhitettujaToita();
+                            prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus("Hyväksymiskirjeiden muodostaminen ei onnistunut.\n" + error.getMessage()));
+                        }
+                );
 
-    private void hakuKerralla(String hakuOid, String asiointikieli, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue, HaunResurssit resurssit) {
-        LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti", hakuOid);
-
-        luoKirjeJaLahetaMuodostettavaksi(hakuOid, asiointikieli, resurssit, defaultValue.get(), prosessi)
-                .timeout(ViestintapalveluObservables.getDelay(Optional.empty()), TimeUnit.MINUTES, Observable.just("timeout")).subscribe(
-                s -> {
-                    LOG.info("Haun hyväksymiskirje valmis");
-                    prosessi.inkrementoi();
-                },
-                e -> {
-                    LOG.error("Haun hyväksymiskirjeen muodostaminen ei onnistunut", e);
-                    prosessi.inkrementoiOhitettujaToita();
-                    prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus("Hyväksymiskirjeiden muodostaminen ei onnistunut.\n" + e.getMessage()));
-                }
-        );
     }
 
     private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String asiointikieli, HaunResurssit resurssit, String defaultValue, SijoittelunTulosProsessi prosessi) {
 
-        try {
-            Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(resurssit.hakijat);
-
-            Observable<Map<String, Optional<Osoite>>> addresses = ViestintapalveluObservables.addresses(Optional.empty(), Optional.empty(), hyvaksymiskirjeessaKaytetytHakukohteet, organisaatioAsyncResource::haeHakutoimisto);
-            Observable<LetterBatch> hyvaksymiskirje = ViestintapalveluObservables.kirje(hakuOid, Optional.of(asiointikieli), resurssit.hakijat, resurssit.hakemukset, defaultValue, hyvaksymiskirjeessaKaytetytHakukohteet, addresses, hyvaksymiskirjeetKomponentti);
-            return ViestintapalveluObservables.batchId(Optional.empty(), prosessi, hyvaksymiskirje, viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable, viestintapalveluAsyncResource::haeStatusObservable, batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakuOid + ".pdf"));
-
-        } catch (Throwable error) {
-            LOG.error("Viestintäpalveluviestin muodostus epäonnistui", error);
-            return Observable.error(error);
-
-        }
+        Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(resurssit.hakijat);
+        Observable<Map<String, Optional<Osoite>>> addresses = ViestintapalveluObservables.addresses(Optional.empty(), Optional.empty(), hakukohteet, organisaatioAsyncResource::haeHakutoimisto);
+        Observable<LetterBatch> hyvaksymiskirje = ViestintapalveluObservables.kirje(hakuOid, Optional.of(asiointikieli), resurssit.hakijat, resurssit.hakemukset, defaultValue, hakukohteet, addresses, hyvaksymiskirjeetKomponentti);
+        return ViestintapalveluObservables.batchId(Optional.empty(), prosessi, hyvaksymiskirje, viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable, viestintapalveluAsyncResource::haeStatusObservable, batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakuOid + ".pdf"));
     }
 }
