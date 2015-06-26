@@ -104,20 +104,20 @@ public class ViestintapalveluObservables {
                 .take(1);
     }
 
-    public static Observable<Map<String, Optional<Osoite>>> addresses(Optional<String> hakukohdeOid, Optional<String> tarjoajaOid,
-                                                                      Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-                                                                      Function<String, Observable<HakutoimistoDTO>> hakutoimistoFn) {
-        if (hakukohdeOid.isPresent()) {
-            MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid.get());
-            return hakutoimistoFn.apply(kohdeHakukohde.getTarjoajaOid()).map(hakutoimistoDTO -> ImmutableMap.of(
-                    tarjoajaOid.get(), Hakijapalvelu.osoite(hakutoimistoDTO, kohdeHakukohde.getHakukohteenKieli())
-            ));
-        } else { // koko haun kiinnostaville hakukohteille kerralla
-            return Observable.from(hyvaksymiskirjeessaKaytetytHakukohteet.values())
-                    .flatMap(meta -> hakutoimistoFn.apply(meta.getTarjoajaOid())
-                            .map(hakutoimisto -> new TarjoajaWithOsoite(meta.getTarjoajaOid(), Hakijapalvelu.osoite(hakutoimisto, meta.getHakukohteenKieli()))))
-                    .collect(HashMap::new, (map, pair) -> map.put(pair.tarjoajaOid, pair.hakutoimisto));
-        }
+    public static Observable<Map<String, Optional<Osoite>>> haunOsoitteet(Map<String, MetaHakukohde> hakukohteet, Function<String, Observable<HakutoimistoDTO>> hakutoimisto) {
+        return Observable.from(hakukohteet.values())
+                .flatMap(hakukohde -> hakutoimisto.apply(hakukohde.getTarjoajaOid())
+                        .map(toimistonOsoite -> new TarjoajaWithOsoite(hakukohde.getTarjoajaOid(), Hakijapalvelu.osoite(toimistonOsoite, hakukohde.getHakukohteenKieli()))))
+                .collect(HashMap::new, (map, pair) -> map.put(pair.tarjoajaOid, pair.hakutoimisto));
+    }
+
+    public static Observable<Map<String, Optional<Osoite>>> hakukohteenOsoite(String hakukohdeOid, String tarjoajaOid,
+                                                                              Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
+                                                                              Function<String, Observable<HakutoimistoDTO>> hakutoimistoFn) {
+        MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
+        return hakutoimistoFn.apply(kohdeHakukohde.getTarjoajaOid()).map(hakutoimistoDTO -> ImmutableMap.of(
+                tarjoajaOid, Hakijapalvelu.osoite(hakutoimistoDTO, kohdeHakukohde.getHakukohteenKieli())
+        ));
     }
 
     public static Observable<LetterBatch> kirje(String hakuOid, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset, String defaultValue, Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet, Observable<Map<String, Optional<Osoite>>> addresses, HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti) {
