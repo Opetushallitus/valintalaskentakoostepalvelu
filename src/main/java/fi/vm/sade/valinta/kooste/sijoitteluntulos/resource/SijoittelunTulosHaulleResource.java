@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetHaulleHakukohteittain;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.service.HyvaksymiskirjeetKokoHaulleService;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
@@ -46,6 +47,8 @@ public class SijoittelunTulosHaulleResource {
     private SijoittelunTulosOsoitetarratRoute sijoittelunTulosOsoitetarratRoute;
     @Autowired
     private HyvaksymiskirjeetKokoHaulleService hyvaksymiskirjeetKokoHaulleService;
+    @Autowired
+    private HyvaksymiskirjeetHaulleHakukohteittain hyvaksymiskirjeetHakukohteittain;
 
     @POST
     @Path("/osoitetarrat")
@@ -84,7 +87,11 @@ public class SijoittelunTulosHaulleResource {
                     Optional.ofNullable(asiointikieli).map(KieliUtil::normalisoiKielikoodi),
                     "hyvaksymiskirjeet", "Luo hyvaksymiskirjeet haulle", null, Arrays.asList("hyvaksymiskirjeet", "haulle"));
 
-            hyvaksymiskirjeetKokoHaulleService.muodostaHyvaksymiskirjeetKokoHaulle(hakuOid, prosessi, Optional.ofNullable(letterBodyText));
+            if(asiointikieli != null) {
+                hyvaksymiskirjeetKokoHaulleService.muodostaHyvaksymiskirjeetKokoHaulle(hakuOid, asiointikieli, prosessi, Optional.ofNullable(letterBodyText));
+            } else {
+                hyvaksymiskirjeetHakukohteittain.muodostaKirjeet(hakuOid, prosessi, Optional.ofNullable(letterBodyText));
+            }
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             return prosessi.toProsessiId();
         } catch (Exception e) {

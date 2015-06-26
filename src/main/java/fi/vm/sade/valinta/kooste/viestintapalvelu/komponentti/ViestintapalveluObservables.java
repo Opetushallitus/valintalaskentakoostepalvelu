@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
@@ -19,6 +18,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetSe
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
+import rx.functions.Func2;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -62,51 +62,59 @@ public class ViestintapalveluObservables {
     }
 
     public static class HakukohdeJaResurssit {
-        public final Optional<String> hakukohdeOid;
+        public final String hakukohdeOid;
         public final List<HakijaDTO> hakijat;
         public final Collection<Hakemus> hakemukset;
 
         public HakukohdeJaResurssit(String hakukohdeOid, List<HakijaDTO> hakijat, Collection<Hakemus> hakemukset) {
-            this.hakukohdeOid = Optional.of(hakukohdeOid);
-            this.hakijat = hakijat;
-            this.hakemukset = hakemukset;
-        }
-
-        public HakukohdeJaResurssit(List<HakijaDTO> hakijat, Collection<Hakemus> hakemukset) {
-            this.hakukohdeOid = Optional.empty();
+            this.hakukohdeOid = hakukohdeOid;
             this.hakijat = hakijat;
             this.hakemukset = hakemukset;
         }
     }
 
-    public static Observable<List<HakukohdeJaResurssit>> hakukohteetJaResurssit(Optional<String> asiointikieli, Observable<HakijaPaginationObject> koulutusPaikalliset, Function<List<String>, Observable<List<Hakemus>>> haeHakemukset) {
+    public static class HaunResurssit {
+
+        public final List<HakijaDTO> hakijat;
+        public final Collection<Hakemus> hakemukset;
+
+        public HaunResurssit(List<HakijaDTO> hakijat, Collection<Hakemus> hakemukset) {
+            this.hakijat = hakijat;
+            this.hakemukset = hakemukset;
+        }
+    }
+
+    public static Observable<HaunResurssit> haunResurssit(String asiointikieli, Observable<HakijaPaginationObject> koulutuspaikalliset, Function<List<String>, Observable<List<Hakemus>>> haeHakemukset) {
+        return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) -> filtteroiAsiointikielella(asiointikieli, hakijat, hakemukset));
+    }
+
+    public static Observable<List<HakukohdeJaResurssit>> hakukohteetJaResurssit(Observable<HakijaPaginationObject> koulutuspaikalliset, Function<List<String>, Observable<List<Hakemus>>> haeHakemukset) {
+        return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) -> hakukohteetOpetuskielella(hakijat, hakemukset));
+    }
+
+    public static <T> Observable<T> resurssit(Observable<HakijaPaginationObject> koulutusPaikalliset, Function<List<String>,
+            Observable<List<Hakemus>>> haeHakemukset, Func2<List<Hakemus>, HakijaPaginationObject, T> zipper) {
 
         Observable<HakijaPaginationObject> koulutuspaikallisetObs = koulutusPaikalliset
                 .doOnNext(hakijat -> LOG.info("Saatiin haulle hyväksyttyjä {} kpl", hakijat.getTotalCount()));
 
         return koulutuspaikallisetObs
                 .flatMap(hakijat -> haeHakemukset.apply(hakijat.getResults().stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList())))
-                .zipWith(koulutuspaikallisetObs, (hakemukset, hakijat) -> {
-                    if (!asiointikieli.isPresent()) {
-                        return hakukohteetOpetuskielella(hakijat, hakemukset);
-                    } else {
-                        return filtteroiAsiointikielella(asiointikieli.get(), hakijat, hakemukset);
-                    }
-                })
+                .zipWith(koulutuspaikallisetObs, zipper)
                 .take(1);
     }
 
     public static Observable<Map<String, Optional<Osoite>>> addresses(Optional<String> hakukohdeOid, Optional<String> tarjoajaOid,
                                                                       Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-                                                                      Observable<HakutoimistoDTO> hakutoimistoObs) {
+                                                                      Function<String, Observable<HakutoimistoDTO>> hakutoimistoFn) {
         if (hakukohdeOid.isPresent()) {
             MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid.get());
-            return hakutoimistoObs.map(hakutoimistoDTO -> ImmutableMap.of(
+            return hakutoimistoFn.apply(kohdeHakukohde.getTarjoajaOid()).map(hakutoimistoDTO -> ImmutableMap.of(
                     tarjoajaOid.get(), Hakijapalvelu.osoite(hakutoimistoDTO, kohdeHakukohde.getHakukohteenKieli())
             ));
         } else { // koko haun kiinnostaville hakukohteille kerralla
             return Observable.from(hyvaksymiskirjeessaKaytetytHakukohteet.values())
-                    .flatMap(meta -> hakutoimistoObs
+                    .flatMap(meta -> hakutoimistoFn.apply(meta.getTarjoajaOid())
                             .map(hakutoimisto -> new TarjoajaWithOsoite(meta.getTarjoajaOid(), Hakijapalvelu.osoite(hakutoimisto, meta.getHakukohteenKieli()))))
                     .collect(HashMap::new, (map, pair) -> map.put(pair.tarjoajaOid, pair.hakutoimisto));
         }
@@ -194,7 +202,7 @@ public class ViestintapalveluObservables {
                 hakijat.getResults().stream().collect(Collectors.groupingBy(ViestintapalveluObservables::hakutoiveMissaHakijaOnHyvaksyttyna)));
     }
 
-    private static List<HakukohdeJaResurssit> filtteroiAsiointikielella(String asiointkieli, HakijaPaginationObject hakijat, List<Hakemus> hakemukset) {
+    private static HaunResurssit filtteroiAsiointikielella(String asiointkieli, HakijaPaginationObject hakijat, List<Hakemus> hakemukset) {
         final Map<String, Hakemus> hakemuksetAsiointikielellaFiltteroituna = hakemukset
                 .stream()
                 .filter(h -> asiointkieli.equals(new HakemusWrapper(h).getAsiointikieli()))
@@ -206,7 +214,7 @@ public class ViestintapalveluObservables {
                 .filter(h -> oidit.contains(h.getHakemusOid())).collect(Collectors.toList());
         LOG.info("Saatiin haun hakemukset {} kpl ja asiointkielellä filtteröinnin jälkeen {} kpl", hakemukset.size(), hakemuksetAsiointikielellaFiltteroituna.size());
 
-        return ImmutableList.of(new HakukohdeJaResurssit(hakijatAsiointikielellaFiltteroituna, hakemuksetAsiointikielellaFiltteroituna.values()));
+        return new HaunResurssit(hakijatAsiointikielellaFiltteroituna, hakemuksetAsiointikielellaFiltteroituna.values());
     }
 
     private static List<HakukohdeJaResurssit> getHakukohteenResurssitHakemuksistaJaHakijoista(Map<String, Hakemus> hakemuksetAsiointikielellaFiltteroituna, Map<String, List<HakijaDTO>> hyvaksytytHakutoiveittain) {
