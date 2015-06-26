@@ -106,6 +106,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
                 },
                 error -> {
                     LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error);
+                    prosessi.addException("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun "
+                            + hakuOid + "\n" + error.getMessage());
                     throw new RuntimeException(error);
                 });
     }
@@ -173,12 +175,9 @@ public class HyvaksymiskirjeetKokoHaulleService {
                             },
                             e -> {
                                 LOG.info("Hakukohde {} ohitettu", resurssit.hakukohdeOid, e);
-                                prosessi.inkrementoi();
-                                prosessi.getVaroitukset().add(new Varoitus(resurssit.hakukohdeOid.orElse(hakuOid), e.getMessage()));
+                                prosessi.inkrementoiOhitettujaToita();
+                                prosessi.addException("Hyväksymiskirjeiden muodostaminen ei onnistunut.\n" + e.getMessage());
                                 hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue);
-                            },
-                            () -> {
-
                             }
                     );
                 });
