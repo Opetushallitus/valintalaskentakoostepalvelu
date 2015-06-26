@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
+import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.*;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_EROTIN;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
@@ -102,14 +102,14 @@ public class JalkiohjauskirjeetKomponentti {
             preferoituKielikoodi = KieliUtil.SUOMI;
         }
         final Map<fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
-        tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HARKINNANVARAISESTI_HYVAKSYTTY, 1);
-        tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY, 2);
-        tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARASIJALTA_HYVAKSYTTY, 3);
-        tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA, 4);
-        tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUNUT, 5);
-        tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUTETTU, 6);
-        tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUNTUNUT, 7);
-        tilaToPrioriteetti.put(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY, 8);
+        tilaToPrioriteetti.put(HARKINNANVARAISESTI_HYVAKSYTTY, 1);
+        tilaToPrioriteetti.put(HYVAKSYTTY, 2);
+        tilaToPrioriteetti.put(VARASIJALTA_HYVAKSYTTY, 3);
+        tilaToPrioriteetti.put(VARALLA, 4);
+        tilaToPrioriteetti.put(PERUNUT, 5);
+        tilaToPrioriteetti.put(PERUUTETTU, 6);
+        tilaToPrioriteetti.put(PERUUNTUNUT, 7);
+        tilaToPrioriteetti.put(HYLATTY, 8);
 
         Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
@@ -204,10 +204,9 @@ public class JalkiohjauskirjeetKomponentti {
                         new Comparator<HakutoiveenValintatapajonoDTO>() {
                             @Override
                             public int compare(HakutoiveenValintatapajonoDTO o1, HakutoiveenValintatapajonoDTO o2) {
-                                fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila h1 = Optional.ofNullable(o1.getTila()).orElse(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY);
-                                fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila h2 = Optional.ofNullable(o2.getTila()).orElse(fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY);
-                                if (fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA.equals(h1)
-                                        && fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA.equals(h2)) {
+                                fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila h1 = Optional.ofNullable(o1.getTila()).orElse(HYLATTY);
+                                fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila h2 = Optional.ofNullable(o2.getTila()).orElse(HYLATTY);
+                                if (VARALLA.equals(h1) && VARALLA.equals(h2)) {
                                     Integer i1 = Optional.ofNullable(o1.getVarasijanNumero()).orElse(0);
                                     Integer i2 = Optional.ofNullable(o2.getVarasijanNumero()).orElse(0);
                                     return i1.compareTo(i2);
