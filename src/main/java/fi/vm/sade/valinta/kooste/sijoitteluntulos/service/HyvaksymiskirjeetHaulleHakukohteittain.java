@@ -130,7 +130,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                                 }
                                 if (defaultValue.isPresent()) {
                                     return luoKirjeJaLahetaMuodostettavaksi(hakuOid, hakukohdeOid, tarjoajaOid,
-                                            asiointikieli, hyvaksytytHakijat, hakemukset, defaultValue.get(), prosessi);
+                                            asiointikieli, hyvaksytytHakijat, hakemukset, defaultValue.get());
                                 } else {
                                     return viestintapalveluAsyncResource.haeKirjepohja(hakuOid, tarjoajaOid, "hyvaksymiskirje", kieli, hakukohdeOid).switchMap(
                                             (t) -> {
@@ -139,7 +139,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                                                     return Observable.error(new RuntimeException("Ei " + VAKIOTEMPLATE + " tai " + VAKIODETAIL + " templateDetailia hakukohteelle " + hakukohdeOid));
                                                 } else {
                                                     return luoKirjeJaLahetaMuodostettavaksi(hakuOid, hakukohdeOid, tarjoajaOid,
-                                                            asiointikieli, hyvaksytytHakijat, hakemukset, td.get().getDefaultValue(), prosessi);
+                                                            asiointikieli, hyvaksytytHakijat, hakemukset, td.get().getDefaultValue());
                                                 }
                                             });
                                 }
@@ -151,7 +151,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
     }
 
     private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String hakukohdeOid, String tarjoajaOid, Optional<String> asiointikieli,
-                                                                List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset, String defaultValue, SijoittelunTulosProsessi prosessi) {
+                                                                List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset, String defaultValue) {
 
         try {
             LOG.info("##### Saatiin hakemukset hakukohteelle {}", hakukohdeOid);
