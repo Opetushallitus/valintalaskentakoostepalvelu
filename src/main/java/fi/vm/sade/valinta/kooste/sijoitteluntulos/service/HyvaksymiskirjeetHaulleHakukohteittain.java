@@ -22,7 +22,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCac
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import rx.Observable;
 
 import java.util.Collection;
@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
-@Component
+@Service
 public class HyvaksymiskirjeetHaulleHakukohteittain {
 
     private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetHaulleHakukohteittain.class);
