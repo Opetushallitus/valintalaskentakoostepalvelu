@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -106,8 +107,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
                 },
                 error -> {
                     LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error);
-                    prosessi.addException("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun "
-                            + hakuOid + "\n" + error.getMessage());
+                    prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun"
+                            + hakuOid + "\n" + error.getMessage()));
                     throw new RuntimeException(error);
                 });
     }
@@ -176,7 +177,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                             e -> {
                                 LOG.info("Hakukohde {} ohitettu", resurssit.hakukohdeOid, e);
                                 prosessi.inkrementoiOhitettujaToita();
-                                prosessi.addException("Hyväksymiskirjeiden muodostaminen ei onnistunut.\n" + e.getMessage());
+                                prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus("Hyväksymiskirjeiden muodostaminen ei onnistunut.\n" + e.getMessage()));
                                 hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue);
                             }
                     );
