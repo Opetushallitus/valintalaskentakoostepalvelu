@@ -12,8 +12,10 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -77,24 +79,21 @@ public class ViestintapalveluObservables {
         }
     }
 
-    public static Observable<List<HakukohdeJaResurssit>> hakukohteetJaResurssit(SijoittelunTulosProsessi prosessi, Observable<HakijaPaginationObject> koulutusPaikalliset, Function<List<String>, Observable<List<Hakemus>>> hakemusFn) {
+    public static Observable<List<HakukohdeJaResurssit>> hakukohteetJaResurssit(Optional<String> asiointikieli, Observable<HakijaPaginationObject> koulutusPaikalliset, Function<List<String>, Observable<List<Hakemus>>> haeHakemukset) {
 
         Observable<HakijaPaginationObject> koulutuspaikallisetObs = koulutusPaikalliset
                 .doOnNext(hakijat -> LOG.info("Saatiin haulle hyväksyttyjä {} kpl", hakijat.getTotalCount()));
 
-        Observable<List<Hakemus>> hakijatObs = koulutuspaikallisetObs
-                .flatMap(hakijat -> hakemusFn.apply(hakijat.getResults().stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList())));
-
-        return hakijatObs
+        return koulutuspaikallisetObs
+                .flatMap(hakijat -> haeHakemukset.apply(hakijat.getResults().stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList())))
                 .zipWith(koulutuspaikallisetObs, (hakemukset, hakijat) -> {
-                    if (!prosessi.getAsiointikieli().isPresent()) {
+                    if (!asiointikieli.isPresent()) {
                         return hakukohteetOpetuskielella(hakijat, hakemukset);
                     } else {
-                        return filtteroiAsiointikielella(prosessi.getAsiointikieli().get(), hakijat, hakemukset);
+                        return filtteroiAsiointikielella(asiointikieli.get(), hakijat, hakemukset);
                     }
                 })
-                .take(1)
-                .doOnNext(list -> prosessi.setKokonaistyo(list.size()));
+                .take(1);
     }
 
     public static Observable<Map<String, Optional<Osoite>>> addresses(Optional<String> hakukohdeOid, Optional<String> tarjoajaOid,
@@ -113,7 +112,38 @@ public class ViestintapalveluObservables {
         }
     }
 
-    public static Observable<ResponseWithBatchId> pollDocumentStatus(Optional<String> hakukohdeOid, Observable<LetterResponse> letterResponseObs, Function<String, Observable<LetterBatchStatusDto>> statusFn) {
+    public static Observable<LetterBatch> kirje(String hakuOid, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset, String defaultValue, Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet, Observable<Map<String, Optional<Osoite>>> addresses, HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti) {
+        return addresses.map(hakijapalveluidenOsoite -> hyvaksymiskirjeetKomponentti
+                .teeHyvaksymiskirjeet(
+                        HyvaksymiskirjeetServiceImpl.todellisenJonosijanRatkaisin(hyvaksytytHakijat),
+                        hakijapalveluidenOsoite,
+                        hyvaksymiskirjeessaKaytetytHakukohteet,
+                        hyvaksytytHakijat,
+                        hakemukset,
+                        hakuOid,
+                        asiointikieli,
+                        //
+                        defaultValue,
+                        hakuOid, // nimiUriToTag(h.getHakukohteenNimiUri(), hakukohdeOid.get());
+                        "hyvaksymiskirje",
+                        null,
+                        null,
+                        asiointikieli.isPresent()));
+    }
+
+    public static Observable<String> batchId(Optional<String> hakukohdeOid, SijoittelunTulosProsessi prosessi, Observable<LetterBatch> hyvaksymiskirje,
+                                             Function<LetterBatch, Observable<LetterResponse>> vieDokumentti, Function<String, Observable<LetterBatchStatusDto>> haeStatusFn,
+                                             Function<String, Observable<String>> renameFn) {
+
+        Observable<ViestintapalveluObservables.ResponseWithBatchId> valmisOrKeskeytettyObs =
+                hyvaksymiskirje
+                        .doOnNext(batch -> LOG.info("##### Tehdään viestintäpalvelukutsu {}", hakukohdeOid))
+                        .flatMap(batch -> status(hakukohdeOid, vieDokumentti.apply(batch), haeStatusFn));
+
+        return valmis(hakukohdeOid, prosessi, valmisOrKeskeytettyObs, renameFn).mergeWith(keskeytetty(hakukohdeOid, valmisOrKeskeytettyObs));
+    }
+
+    public static Observable<ResponseWithBatchId> status(Optional<String> hakukohdeOid, Observable<LetterResponse> letterResponseObs, Function<String, Observable<LetterBatchStatusDto>> statusFn) {
         return letterResponseObs
                 .doOnNext(letterResponse -> {
                     LOG.info("##### Viestintäpalvelukutsu onnistui {}", hakukohdeOid);
@@ -127,15 +157,15 @@ public class ViestintapalveluObservables {
                 .take(1);
     }
 
-    public static Observable<String> processInterruptedDocument(Optional<String> hakukohdeOid, Observable<ResponseWithBatchId> valmisOrKeskeytettyObs) {
+    public static Observable<String> keskeytetty(Optional<String> hakukohdeOid, Observable<ResponseWithBatchId> valmisOrKeskeytettyObs) {
         return valmisOrKeskeytettyObs
                 .filter(status -> KESKEYTETTY_STATUS.equals(status.resp.getStatus()))
                 .map(status -> status.batchId)
                 .flatMap(s -> Observable.error(new RuntimeException("Viestintäpalvelu palautti virheen hakukohteelle " + hakukohdeOid.get())));
     }
 
-    public static Observable<String> processReadyDocument(Optional<String> hakukohdeOid, SijoittelunTulosProsessi prosessi,
-                                                          Observable<ResponseWithBatchId> valmisOrKeskeytettyObs, Function<String, Observable<String>> renameFn) {
+    public static Observable<String> valmis(Optional<String> hakukohdeOid, SijoittelunTulosProsessi prosessi,
+                                            Observable<ResponseWithBatchId> valmisOrKeskeytettyObs, Function<String, Observable<String>> renameFn) {
         Observable<ResponseWithBatchId> valmisObs = valmisOrKeskeytettyObs.filter(status -> VALMIS_STATUS.equals(status.resp.getStatus()));
         if (hakukohdeOid.isPresent()) {
             return valmisObs

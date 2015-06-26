@@ -18,7 +18,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HakukohdeJaResurssit;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
@@ -75,7 +77,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
         LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti asiointikielelle {} hakemalla hyväksytyt koko haulle", hakuOid, prosessi.getAsiointikieli());
 
         Observable<List<HakukohdeJaResurssit>> hakukohdeJaResurssitObs =
-                ViestintapalveluObservables.hakukohteetJaResurssit(prosessi, sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid), applicationAsyncResource::getApplicationsByHakemusOids);
+                ViestintapalveluObservables.hakukohteetJaResurssit(prosessi.getAsiointikieli(), sijoitteluAsyncResource.getKoulutuspaikkalliset(hakuOid), applicationAsyncResource::getApplicationsByHakemusOids)
+                .doOnNext(list -> prosessi.setKokonaistyo(list.size()));
 
         hakukohdeJaResurssitObs.subscribe(
                 list -> {
@@ -175,32 +178,8 @@ public class HyvaksymiskirjeetKokoHaulleService {
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
 
             Observable<Map<String, Optional<Osoite>>> addresses = ViestintapalveluObservables.addresses(hakukohdeOid, tarjoajaOid, hyvaksymiskirjeessaKaytetytHakukohteet, organisaatioAsyncResource.haeHakutoimisto(tarjoajaOid.get()));
-
-            Observable<LetterBatch> hyvaksymiskirje = addresses.map(hakijapalveluidenOsoite -> hyvaksymiskirjeetKomponentti
-                    .teeHyvaksymiskirjeet(
-                            HyvaksymiskirjeetServiceImpl.todellisenJonosijanRatkaisin(hyvaksytytHakijat),
-                            hakijapalveluidenOsoite,
-                            hyvaksymiskirjeessaKaytetytHakukohteet,
-                            hyvaksytytHakijat,
-                            hakemukset,
-                            hakuOid,
-                            asiointikieli,
-                            //
-                            defaultValue,
-                            hakuOid, // nimiUriToTag(h.getHakukohteenNimiUri(), hakukohdeOid.get());
-                            "hyvaksymiskirje",
-                            null,
-                            null,
-                            asiointikieli.isPresent()));
-
-            LOG.info("##### Tehdään viestintäpalvelukutsu {}", hakukohdeOid);
-
-            Observable<ViestintapalveluObservables.ResponseWithBatchId> valmisOrKeskeytettyObs =
-                    hyvaksymiskirje.flatMap(l -> ViestintapalveluObservables.pollDocumentStatus(hakukohdeOid, viestintapalveluAsyncResource.viePdfJaOdotaReferenssiObservable(l), viestintapalveluAsyncResource::haeStatusObservable));
-            Observable<String> keskeytettyObs = ViestintapalveluObservables.processInterruptedDocument(hakukohdeOid, valmisOrKeskeytettyObs);
-            Observable<String> valmisBatchIdObs = ViestintapalveluObservables.processReadyDocument(hakukohdeOid, prosessi, valmisOrKeskeytettyObs, batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid.get() + ".pdf"));
-
-            return valmisBatchIdObs.mergeWith(keskeytettyObs);
+            Observable<LetterBatch> hyvaksymiskirje = ViestintapalveluObservables.kirje(hakuOid, asiointikieli, hyvaksytytHakijat, hakemukset, defaultValue, hyvaksymiskirjeessaKaytetytHakukohteet, addresses, hyvaksymiskirjeetKomponentti);
+            return ViestintapalveluObservables.batchId(hakukohdeOid, prosessi, hyvaksymiskirje, viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable, viestintapalveluAsyncResource::haeStatusObservable, batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid.get() + ".pdf"));
 
         } catch (Throwable error) {
             LOG.error("Viestintäpalveluviestin muodostus epäonnistui hakukohteelle {}", hakukohdeOid, error);
