@@ -139,62 +139,49 @@ public class ViestintapalveluObservables {
                         asiointikieli.isPresent()));
     }
 
-    public static Observable<String> batchId(Optional<String> hakukohdeOid, SijoittelunTulosProsessi prosessi, Observable<LetterBatch> hyvaksymiskirje,
-                                             Function<LetterBatch, Observable<LetterResponse>> vieDokumentti, Function<String, Observable<LetterBatchStatusDto>> haeStatusFn,
+    public static Observable<String> batchId(Optional<String> hakukohdeOid, Observable<LetterBatch> hyvaksymiskirje,
+                                             Function<LetterBatch, Observable<LetterResponse>> vieDokumentti,
+                                             Function<String, Observable<LetterBatchStatusDto>> haeStatusFn,
                                              Function<String, Observable<String>> renameFn) {
 
-        Observable<ViestintapalveluObservables.ResponseWithBatchId> valmisOrKeskeytettyObs =
-                hyvaksymiskirje
-                        .doOnNext(batch -> LOG.info("##### Tehdään viestintäpalvelukutsu {}", hakukohdeOid))
-                        .flatMap(batch -> status(hakukohdeOid, vieDokumentti.apply(batch), haeStatusFn));
-
-        return valmis(hakukohdeOid, valmisOrKeskeytettyObs, renameFn).mergeWith(keskeytetty(hakukohdeOid, valmisOrKeskeytettyObs));
-    }
-
-    public static Observable<ResponseWithBatchId> status(Optional<String> hakukohdeOid, Observable<LetterResponse> letterResponseObs, Function<String, Observable<LetterBatchStatusDto>> statusFn) {
-        return letterResponseObs
+        return hyvaksymiskirje
+                .doOnNext(batch -> LOG.info("##### Tehdään viestintäpalvelukutsu {}", hakukohdeOid))
+                .flatMap(vieDokumentti::apply)
                 .doOnNext(letterResponse -> {
                     LOG.info("##### Viestintäpalvelukutsu onnistui {}", hakukohdeOid);
                     LOG.info("##### Odotetaan statusta, batchid={}", letterResponse.getBatchId());
                 })
                 .flatMap(letterResponse -> Observable.interval(1, TimeUnit.SECONDS)
                         .take((int) TimeUnit.MINUTES.toSeconds(getDelay(hakukohdeOid)))
-                        .flatMap(i -> statusFn.apply(letterResponse.getBatchId())
+                        .flatMap(i -> haeStatusFn.apply(letterResponse.getBatchId())
                                 .zipWith(Observable.just(letterResponse.getBatchId()), ResponseWithBatchId::new))
                         .skipWhile(status -> !VALMIS_STATUS.equals(status.resp.getStatus()) && !KESKEYTETTY_STATUS.equals(status.resp.getStatus())))
-                .take(1);
-    }
-
-    public static Observable<String> keskeytetty(Optional<String> hakukohdeOid, Observable<ResponseWithBatchId> valmisOrKeskeytettyObs) {
-        return valmisOrKeskeytettyObs
-                .filter(status -> KESKEYTETTY_STATUS.equals(status.resp.getStatus()))
-                .map(status -> status.batchId)
-                .flatMap(s -> Observable.error(new RuntimeException("Viestintäpalvelu palautti virheen hakukohteelle " + hakukohdeOid.get())));
-    }
-
-    public static Observable<String> valmis(Optional<String> hakukohdeOid,
-                                            Observable<ResponseWithBatchId> valmisOrKeskeytettyObs, Function<String, Observable<String>> renameFn) {
-        Observable<ResponseWithBatchId> valmisObs = valmisOrKeskeytettyObs.filter(status -> VALMIS_STATUS.equals(status.resp.getStatus()));
-        if (hakukohdeOid.isPresent()) {
-            return valmisObs
-                    .doOnNext(s -> LOG.info("##### Dokumentti {} valmistui hakukohteelle {} joten uudelleen nimetään se", s.batchId, hakukohdeOid.get()))
-                    .flatMap(s -> renameFn.apply(s.batchId)
-                            .doOnNext(str -> LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid.get()))
-                            .doOnError(error -> LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid.get(), error))
-                            .onErrorReturn(error -> s.batchId)
-                            .map(name -> s.batchId));
-        } else {
-            return valmisObs.map(s -> s.batchId);
-        }
-    }
-
-    public static Long getDelay(Optional<String> hakukohdeOid) {
-        return hakukohdeOid.map(h -> 3L).orElse(780L);
+                .take(1)
+                .flatMap(status -> {
+                    if (KESKEYTETTY_STATUS.equals(status.resp.getStatus())) {
+                        return Observable.error(new RuntimeException("Viestintäpalvelun statuspyyntö palautti virheen"));
+                    } else {
+                        LOG.info("Viestintäpalvelun status on valmis");
+                        if (hakukohdeOid.isPresent()) {
+                            return renameFn.apply(status.batchId)
+                                    .doOnNext(str -> LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid.get()))
+                                    .doOnError(error -> LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid.get(), error))
+                                    .onErrorReturn(error -> status.batchId)
+                                    .map(name -> status.batchId);
+                        } else {
+                            return Observable.just(status.batchId);
+                        }
+                    }
+                });
     }
 
     /*
      * Helper functions
      */
+
+    public static Long getDelay(Optional<String> hakukohdeOid) {
+        return hakukohdeOid.map(h -> 3L).orElse(780L);
+    }
 
     private static List<HakukohdeJaResurssit> hakukohteetOpetuskielella(HakijaPaginationObject hakijat, List<Hakemus> hakemukset) {
         return getHakukohteenResurssitHakemuksistaJaHakijoista(

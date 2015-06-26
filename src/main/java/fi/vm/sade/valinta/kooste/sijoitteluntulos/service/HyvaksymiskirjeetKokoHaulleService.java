@@ -83,6 +83,6 @@ public class HyvaksymiskirjeetKokoHaulleService {
         Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(resurssit.hakijat);
         Observable<Map<String, Optional<Osoite>>> addresses = ViestintapalveluObservables.haunOsoitteet(hakukohteet, organisaatioAsyncResource::haeHakutoimisto);
         Observable<LetterBatch> hyvaksymiskirje = ViestintapalveluObservables.kirje(hakuOid, Optional.of(asiointikieli), resurssit.hakijat, resurssit.hakemukset, defaultValue, hakukohteet, addresses, hyvaksymiskirjeetKomponentti);
-        return ViestintapalveluObservables.batchId(Optional.empty(), prosessi, hyvaksymiskirje, viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable, viestintapalveluAsyncResource::haeStatusObservable, batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakuOid + ".pdf"));
+        return ViestintapalveluObservables.batchId(Optional.empty(), hyvaksymiskirje, viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable, viestintapalveluAsyncResource::haeStatusObservable, batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakuOid + ".pdf"));
     }
 }

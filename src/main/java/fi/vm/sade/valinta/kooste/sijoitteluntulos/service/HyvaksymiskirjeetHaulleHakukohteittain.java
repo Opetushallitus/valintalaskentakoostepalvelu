@@ -159,7 +159,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
 
             Observable<Map<String, Optional<Osoite>>> addresses = ViestintapalveluObservables.hakukohteenOsoite(hakukohdeOid, tarjoajaOid, hyvaksymiskirjeessaKaytetytHakukohteet, organisaatioAsyncResource::haeHakutoimisto);
             Observable<LetterBatch> hyvaksymiskirje = ViestintapalveluObservables.kirje(hakuOid, asiointikieli, hyvaksytytHakijat, hakemukset, defaultValue, hyvaksymiskirjeessaKaytetytHakukohteet, addresses, hyvaksymiskirjeetKomponentti);
-            return ViestintapalveluObservables.batchId(Optional.of(hakukohdeOid), prosessi, hyvaksymiskirje, viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable, viestintapalveluAsyncResource::haeStatusObservable, batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf"));
+            return ViestintapalveluObservables.batchId(Optional.of(hakukohdeOid), hyvaksymiskirje, viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable, viestintapalveluAsyncResource::haeStatusObservable, batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf"));
 
         } catch (Throwable error) {
             LOG.error("Viestintäpalveluviestin muodostus epäonnistui hakukohteelle {}", hakukohdeOid, error);
