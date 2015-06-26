@@ -89,7 +89,6 @@ public class JalkiohjauskirjeetKomponentti {
         final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
         if (kaikkiHyvaksymattomat == 0) {
             LOG.error("Jälkiohjauskirjeitä yritetään luoda haulle jolla kaikki hakijat on hyväksytty koulutukseen!");
-            viestintapalveluLogi("Sijoittelupalvelun mukaan kaikki hakijat on hyväksytty johonkin koulutukseen!");
             throw new SijoittelupalveluException("Sijoittelupalvelun mukaan kaikki hakijat on hyväksytty johonkin koulutukseen!");
         }
         final Map<String, Hakemus> hakemusOidHakemukset = hakemuksistaOidMap(hakemukset);
@@ -192,11 +191,9 @@ public class JalkiohjauskirjeetKomponentti {
                     // selitteita jarkevasti
 
                     if (valintatapajono.getHyvaksytty() == null) {
-                        viestintapalveluLogi("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
                         throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
                     }
                     if (valintatapajono.getHakeneet() == null) {
-                        viestintapalveluLogi("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
                         throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
                     }
                 }
@@ -247,16 +244,6 @@ public class JalkiohjauskirjeetKomponentti {
         templateReplacements.put("sisalto", sisalto);
         viesti.setTemplateReplacements(templateReplacements);
         LOG.debug("\r\n{}", new ViestiWrapper(viesti));
-        viestintapalveluLogi("Tiedot jälkiohjauskirjeen luontiin on välitetty viestintäpalvelulle.");
         return viesti;
     }
-
-    private void viestintapalveluLogi(String logiViesti) {
-        try {
-            // messageProxy.message(logiViesti);
-        } catch (Exception ex) {
-            LOG.error("Viestintäpalvelun message rajapinta ei ole käytettävissä! {}", logiViesti);
-        }
-    }
-
 }
