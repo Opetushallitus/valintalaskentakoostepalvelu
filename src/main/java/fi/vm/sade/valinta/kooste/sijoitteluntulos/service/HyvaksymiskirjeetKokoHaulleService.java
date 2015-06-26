@@ -60,7 +60,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
                 })
                 .doOnNext(list -> prosessi.setKokonaistyo(1))
                 .doOnNext(n -> LOG.info("Aloitetaan haun {} hyväksymiskirjeiden luonti", hakuOid))
-                .flatMap(resurssit -> luoKirjeJaLahetaMuodostettavaksi(hakuOid, asiointikieli, resurssit, defaultValue.get(), prosessi)
+                .flatMap(resurssit -> luoKirjeJaLahetaMuodostettavaksi(hakuOid, asiointikieli, resurssit, defaultValue.get())
                         .timeout(ViestintapalveluObservables.getDelay(Optional.empty()), TimeUnit.MINUTES, Observable.just("")))
                 .subscribe(
                         batchId -> {
@@ -78,7 +78,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
 
     }
 
-    private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String asiointikieli, HaunResurssit resurssit, String defaultValue, SijoittelunTulosProsessi prosessi) {
+    private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String asiointikieli, HaunResurssit resurssit, String defaultValue) {
 
         Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(resurssit.hakijat);
         Observable<Map<String, Optional<Osoite>>> addresses = ViestintapalveluObservables.haunOsoitteet(hakukohteet, organisaatioAsyncResource::haeHakutoimisto);
