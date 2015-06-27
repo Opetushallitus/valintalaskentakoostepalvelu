@@ -84,11 +84,13 @@ public class ViestintapalveluObservables {
         }
     }
 
-    public static Observable<HaunResurssit> haunResurssit(String asiointikieli, Observable<HakijaPaginationObject> koulutuspaikalliset, Function<List<String>, Observable<List<Hakemus>>> haeHakemukset) {
+    public static Observable<HaunResurssit> haunResurssit(String asiointikieli, Observable<HakijaPaginationObject> koulutuspaikalliset,
+                                                          Function<List<String>, Observable<List<Hakemus>>> haeHakemukset) {
         return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) -> filtteroiAsiointikielella(asiointikieli, hakijat, hakemukset));
     }
 
-    public static Observable<List<HakukohdeJaResurssit>> hakukohteetJaResurssit(Observable<HakijaPaginationObject> koulutuspaikalliset, Function<List<String>, Observable<List<Hakemus>>> haeHakemukset) {
+    public static Observable<List<HakukohdeJaResurssit>> hakukohteetJaResurssit(Observable<HakijaPaginationObject> koulutuspaikalliset,
+                                                                                Function<List<String>, Observable<List<Hakemus>>> haeHakemukset) {
         return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) -> hakukohteetOpetuskielella(hakijat, hakemukset));
     }
 
@@ -115,12 +117,13 @@ public class ViestintapalveluObservables {
                                                                               Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
                                                                               Function<String, Observable<HakutoimistoDTO>> hakutoimistoFn) {
         MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
-        return hakutoimistoFn.apply(kohdeHakukohde.getTarjoajaOid()).map(hakutoimistoDTO -> ImmutableMap.of(
-                tarjoajaOid, Hakijapalvelu.osoite(hakutoimistoDTO, kohdeHakukohde.getHakukohteenKieli())
-        ));
+        return hakutoimistoFn.apply(kohdeHakukohde.getTarjoajaOid())
+                .map(hakutoimistoDTO -> ImmutableMap.of(tarjoajaOid, Hakijapalvelu.osoite(hakutoimistoDTO, kohdeHakukohde.getHakukohteenKieli())));
     }
 
-    public static Observable<LetterBatch> kirjeet(String hakuOid, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset, String defaultValue, Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet, Observable<Map<String, Optional<Osoite>>> addresses, HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti) {
+    public static Observable<LetterBatch> kirjeet(String hakuOid, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat,
+                                                  Collection<Hakemus> hakemukset, String defaultValue, Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
+                                                  Observable<Map<String, Optional<Osoite>>> addresses, HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti) {
         return addresses.map(hakijapalveluidenOsoite -> hyvaksymiskirjeetKomponentti
                 .teeHyvaksymiskirjeet(
                         HyvaksymiskirjeetServiceImpl.todellisenJonosijanRatkaisin(hyvaksytytHakijat),
@@ -137,6 +140,34 @@ public class ViestintapalveluObservables {
                         null,
                         null,
                         asiointikieli.isPresent()));
+    }
+
+    public static Observable<String> batchId(Observable<LetterBatch> hyvaksymiskirje,
+                                             Function<LetterBatch, Observable<LetterResponse>> vieDokumentti,
+                                             Function<String, Observable<LetterBatchStatusDto>> haeStatusFn, Long delay,
+                                             Function<ResponseWithBatchId, Observable<String>> statusHandler) {
+
+        return hyvaksymiskirje
+                .doOnNext(batch -> LOG.info("##### Viedään dokumentti viestintäpalveluun"))
+                .flatMap(vieDokumentti::apply)
+                .doOnNext(letterResponse -> {
+                    LOG.info("##### Dokumentin vietin onnistui");
+                    LOG.info("##### Odotetaan statusta, batchid={}", letterResponse.getBatchId());
+                })
+                .flatMap(letterResponse -> Observable.interval(1, TimeUnit.SECONDS)
+                        .take((int) TimeUnit.MINUTES.toSeconds(delay))
+                        .flatMap(i -> haeStatusFn.apply(letterResponse.getBatchId())
+                                .zipWith(Observable.just(letterResponse.getBatchId()), ResponseWithBatchId::new))
+                        .skipWhile(status -> !VALMIS_STATUS.equals(status.resp.getStatus()) && !KESKEYTETTY_STATUS.equals(status.resp.getStatus())))
+                .take(1)
+                .flatMap(status -> {
+                    if (KESKEYTETTY_STATUS.equals(status.resp.getStatus())) {
+                        return Observable.error(new RuntimeException("Viestintäpalvelun statuspyyntö palautti virheen"));
+                    } else {
+                        LOG.info("Viestintäpalvelun status on valmis");
+                        return statusHandler.apply(status);
+                    }
+                });
     }
 
     public static Observable<String> batchId(Optional<String> hakukohdeOid, Observable<LetterBatch> hyvaksymiskirje,
