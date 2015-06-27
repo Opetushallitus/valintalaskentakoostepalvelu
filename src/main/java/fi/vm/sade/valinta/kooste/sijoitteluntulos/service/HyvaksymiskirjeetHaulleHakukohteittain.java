@@ -152,19 +152,26 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
 
     private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String hakukohdeOid, String tarjoajaOid, Optional<String> asiointikieli,
                                                                 List<HakijaDTO> hyvaksytytHakijat, Collection<Hakemus> hakemukset, String defaultValue) {
-
         try {
             LOG.info("##### Saatiin hakemukset hakukohteelle {}", hakukohdeOid);
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
 
             Observable<Map<String, Optional<Osoite>>> osoitteet = ViestintapalveluObservables.hakukohteenOsoite(hakukohdeOid, tarjoajaOid, hyvaksymiskirjeessaKaytetytHakukohteet, organisaatioAsyncResource::haeHakutoimisto);
             Observable<LetterBatch> kirjeet = ViestintapalveluObservables.kirjeet(hakuOid, asiointikieli, hyvaksytytHakijat, hakemukset, defaultValue, hyvaksymiskirjeessaKaytetytHakukohteet, osoitteet, hyvaksymiskirjeetKomponentti);
-            return ViestintapalveluObservables.batchId(Optional.of(hakukohdeOid), kirjeet, viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable, viestintapalveluAsyncResource::haeStatusObservable, batchId -> dokumenttiAsyncResource.uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf"));
 
+            return ViestintapalveluObservables.batchId(
+                    kirjeet,
+                    viestintapalveluAsyncResource::viePdfJaOdotaReferenssiObservable,
+                    viestintapalveluAsyncResource::haeStatusObservable,
+                    ViestintapalveluObservables.getDelay(Optional.of(hakukohdeOid)),
+                    status -> dokumenttiAsyncResource.uudelleenNimea(status.batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
+                            .doOnNext(str -> LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid))
+                            .doOnError(error -> LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid, error))
+                            .onErrorReturn(error -> status.batchId)
+                            .map(name -> status.batchId));
         } catch (Throwable error) {
             LOG.error("Viestintäpalveluviestin muodostus epäonnistui hakukohteelle {}", hakukohdeOid, error);
             return Observable.error(error);
-
         }
     }
 

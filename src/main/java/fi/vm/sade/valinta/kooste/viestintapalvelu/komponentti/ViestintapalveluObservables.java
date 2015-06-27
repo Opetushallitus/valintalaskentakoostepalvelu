@@ -34,6 +34,7 @@ public class ViestintapalveluObservables {
     public static class ResponseWithBatchId {
         public final LetterBatchStatusDto resp;
         public final String batchId;
+
         public ResponseWithBatchId(LetterBatchStatusDto resp, String batchId) {
             this.resp = resp;
             this.batchId = batchId;
@@ -94,8 +95,9 @@ public class ViestintapalveluObservables {
         return resurssit(koulutuspaikalliset, haeHakemukset, (hakemukset, hakijat) -> hakukohteetOpetuskielella(hakijat, hakemukset));
     }
 
-    public static <T> Observable<T> resurssit(Observable<HakijaPaginationObject> koulutusPaikalliset, Function<List<String>,
-            Observable<List<Hakemus>>> haeHakemukset, Func2<List<Hakemus>, HakijaPaginationObject, T> zipper) {
+    public static <T> Observable<T> resurssit(Observable<HakijaPaginationObject> koulutusPaikalliset,
+                                              Function<List<String>, Observable<List<Hakemus>>> haeHakemukset,
+                                              Func2<List<Hakemus>, HakijaPaginationObject, T> zipper) {
 
         Observable<HakijaPaginationObject> koulutuspaikallisetObs = koulutusPaikalliset
                 .doOnNext(hakijat -> LOG.info("Saatiin haulle hyväksyttyjä {} kpl", hakijat.getTotalCount()));
@@ -166,42 +168,6 @@ public class ViestintapalveluObservables {
                     } else {
                         LOG.info("Viestintäpalvelun status on valmis");
                         return statusHandler.apply(status);
-                    }
-                });
-    }
-
-    public static Observable<String> batchId(Optional<String> hakukohdeOid, Observable<LetterBatch> hyvaksymiskirje,
-                                             Function<LetterBatch, Observable<LetterResponse>> vieDokumentti,
-                                             Function<String, Observable<LetterBatchStatusDto>> haeStatusFn,
-                                             Function<String, Observable<String>> renameFn) {
-
-        return hyvaksymiskirje
-                .doOnNext(batch -> LOG.info("##### Tehdään viestintäpalvelukutsu {}", hakukohdeOid))
-                .flatMap(vieDokumentti::apply)
-                .doOnNext(letterResponse -> {
-                    LOG.info("##### Viestintäpalvelukutsu onnistui {}", hakukohdeOid);
-                    LOG.info("##### Odotetaan statusta, batchid={}", letterResponse.getBatchId());
-                })
-                .flatMap(letterResponse -> Observable.interval(1, TimeUnit.SECONDS)
-                        .take((int) TimeUnit.MINUTES.toSeconds(getDelay(hakukohdeOid)))
-                        .flatMap(i -> haeStatusFn.apply(letterResponse.getBatchId())
-                                .zipWith(Observable.just(letterResponse.getBatchId()), ResponseWithBatchId::new))
-                        .skipWhile(status -> !VALMIS_STATUS.equals(status.resp.getStatus()) && !KESKEYTETTY_STATUS.equals(status.resp.getStatus())))
-                .take(1)
-                .flatMap(status -> {
-                    if (KESKEYTETTY_STATUS.equals(status.resp.getStatus())) {
-                        return Observable.error(new RuntimeException("Viestintäpalvelun statuspyyntö palautti virheen"));
-                    } else {
-                        LOG.info("Viestintäpalvelun status on valmis");
-                        if (hakukohdeOid.isPresent()) {
-                            return renameFn.apply(status.batchId)
-                                    .doOnNext(str -> LOG.info("Uudelleen nimeäminen onnistui hakukohteelle {}", hakukohdeOid.get()))
-                                    .doOnError(error -> LOG.error("Uudelleen nimeäminen epäonnistui hakukohteelle {}", hakukohdeOid.get(), error))
-                                    .onErrorReturn(error -> status.batchId)
-                                    .map(name -> status.batchId);
-                        } else {
-                            return Observable.just(status.batchId);
-                        }
                     }
                 });
     }
