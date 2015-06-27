@@ -31,7 +31,6 @@ public class HyvaksymiskirjeetKokoHaulleService {
     private final HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final SijoitteluAsyncResource sijoitteluAsyncResource;
-    private final DokumenttiAsyncResource dokumenttiAsyncResource;
     private final OrganisaatioAsyncResource organisaatioAsyncResource;
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
 
@@ -40,13 +39,11 @@ public class HyvaksymiskirjeetKokoHaulleService {
             HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti,
             ApplicationAsyncResource applicationAsyncResource,
             SijoitteluAsyncResource sijoitteluAsyncResource,
-            DokumenttiAsyncResource dokumenttiAsyncResource,
             OrganisaatioAsyncResource organisaatioAsyncResource,
             ViestintapalveluAsyncResource viestintapalveluAsyncResource) {
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.applicationAsyncResource = applicationAsyncResource;
         this.sijoitteluAsyncResource = sijoitteluAsyncResource;
-        this.dokumenttiAsyncResource = dokumenttiAsyncResource;
         this.organisaatioAsyncResource = organisaatioAsyncResource;
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
     }
