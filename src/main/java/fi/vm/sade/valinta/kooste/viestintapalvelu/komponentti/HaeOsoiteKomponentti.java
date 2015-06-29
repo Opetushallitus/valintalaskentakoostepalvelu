@@ -1,13 +1,9 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import static fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil.ASUINMAA;
-import static fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil.SUOMALAINEN_POSTINUMERO;
-import static fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil.SUOMI;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -15,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +20,12 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.gson.GsonBuilder;
 
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.common.KieliType;
 import fi.vm.sade.koodisto.service.types.common.KoodiMetadataType;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
-import fi.vm.sade.service.valintaperusteet.dto.model.Kieli;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
@@ -88,13 +83,15 @@ public class HaeOsoiteKomponentti {
         if (KieliType.EN.equals(preferoitutyyppi)) {
             country = "FINLAND";
         }
-        return new Osoite(
-                null, null,  // firstname, lastname
-                yhteystiedot.getOsoite(), // addressline1
-                null, null, // addressline2, addressline3
-                postinumero(yhteystiedot.getPostinumeroUri()), // postalCode
-                StringUtils.capitalize(StringUtils.lowerCase(maakoodi.getPostitoimipaikka())), // city
-                null, country, null, organisaationimi, numero, email, null);
+        return new OsoiteBuilder()
+                .setAddressline(yhteystiedot.getOsoite())
+                .setPostalCode(postinumero(yhteystiedot.getPostinumeroUri()))
+                .setCity(StringUtils.capitalize(StringUtils.lowerCase(maakoodi.getPostitoimipaikka())))
+                .setCountry(country)
+                .setOrganisaationimi(organisaationimi)
+                .setNumero(numero)
+                .setEmail(email)
+                .createOsoite();
     }
 
     private String postinumero(String url) {

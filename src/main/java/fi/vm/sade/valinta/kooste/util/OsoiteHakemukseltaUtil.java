@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.util;
 import java.util.Map;
 import java.util.TreeMap;
 
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +102,16 @@ public class OsoiteHakemukseltaUtil {
         } else {
             nimi = kutsumanimi;
         }
-        return new Osoite(nimi, sukunimi, lahiosoite, null, null, postinumero, postitoimipaikka, maakunta, maa, maakoodi,
-                ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt);
+        return new OsoiteBuilder()
+                .setFirstName(nimi)
+                .setLastName(sukunimi)
+                .setAddressline(lahiosoite)
+                .setPostalCode(postinumero)
+                .setCity(postitoimipaikka)
+                .setRegion(maakunta)
+                .setCountry(maa)
+                .setCountryCode(maakoodi)
+                .setUlkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt(ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt)
+                .createOsoite();
     }
 }

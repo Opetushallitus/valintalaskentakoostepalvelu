@@ -4,6 +4,7 @@ import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteBuilder;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Map;
@@ -22,15 +23,16 @@ public class Hakijapalvelu {
 
             HakutoimistoDTO.OsoiteDTO osoite = yhteystiedot.posti != null ? yhteystiedot.posti : yhteystiedot.kaynti;
             return Optional.of(
-                    // TODO replace with builder?
-                    new Osoite(
-                            null, null,
-                            osoite.katuosoite,
-                            null, null,
-                            postinumero(osoite.postinumero),
-                            postitoimipaikka(osoite.postitoimipaikka),
-                            null, country(hakukohteenKieli), null,
-                            nimiOpt.orElse(""), yhteystiedot.puhelin, yhteystiedot.email, null)
+                    new OsoiteBuilder()
+                            .setAddressline(osoite.katuosoite)
+                            .setPostalCode(postinumero(osoite.postinumero))
+                            .setCity(postitoimipaikka(osoite.postitoimipaikka))
+                            .setCountry(country(hakukohteenKieli))
+                            .setOrganisaationimi(nimiOpt.orElse(""))
+                            .setNumero(yhteystiedot.puhelin)
+                            .setEmail(yhteystiedot.email)
+                            .setWww(yhteystiedot.www)
+                            .createOsoite()
             );
         });
     }

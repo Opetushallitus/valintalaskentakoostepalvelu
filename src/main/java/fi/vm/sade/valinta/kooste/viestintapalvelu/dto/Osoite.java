@@ -18,6 +18,8 @@ public class Osoite implements Serializable {
     private String organisaationimi;
     private String email;
     private String numero;
+    private String www;
+
     @JsonIgnore
     private Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
 
@@ -32,38 +34,12 @@ public class Osoite implements Serializable {
             String region,
             String country,
             String countryCode,
-            Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.addressline = addressline;
-        this.addressline2 = addressline2;
-        this.addressline3 = addressline3;
-        this.postalCode = postalCode;
-        this.city = city;
-        this.region = region;
-        this.country = country;
-        this.countryCode = countryCode;
-        this.ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
-        this.organisaationimi = null;
-        this.email = null;
-        this.numero = null;
-    }
-
-    public Osoite(
-            String firstName,
-            String lastName,
-            String addressline,
-            String addressline2,
-            String addressline3,
-            String postalCode,
-            String city,
-            String region,
-            String country,
-            String countryCode,
+            Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt,
             String organisaationimi,
             String numero,
             String email,
-            Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt) {
+            String www
+            ) {
         this.numero = numero;
         this.email = email;
         this.firstName = firstName;
@@ -78,6 +54,7 @@ public class Osoite implements Serializable {
         this.countryCode = countryCode;
         this.ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt = ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
         this.organisaationimi = organisaationimi;
+        this.www = www;
     }
 
     public String getOrganisaationimi() {
@@ -143,6 +120,10 @@ public class Osoite implements Serializable {
 
     public String getRegion() {
         return region;
+    }
+
+    public String getWww() {
+        return www;
     }
 
     @Override

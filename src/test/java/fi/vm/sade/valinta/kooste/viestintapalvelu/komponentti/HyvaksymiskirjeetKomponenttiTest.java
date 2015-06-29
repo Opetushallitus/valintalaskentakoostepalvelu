@@ -11,6 +11,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteBuilder;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import org.junit.Test;
@@ -92,11 +93,23 @@ public class HyvaksymiskirjeetKomponenttiTest {
                     "asuinmaa", "Suomi"));
         }};
 
+        Osoite osoite = new OsoiteBuilder()
+                .setFirstName("Etunimi")
+                .setLastName("Sukunimi")
+                .setAddressline("Addressline")
+                .setAddressline2("Addressline2")
+                .setAddressline3("Addressline3")
+                .setPostalCode("Postal code")
+                .setCity("City")
+                .setRegion("Region")
+                .setCountry("Country")
+                .setCountryCode("CountryCode")
+                .createOsoite();
+
         return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                 (String x) -> new HashMap<>(),
                 ImmutableMap.of(VALINTATAPAJONO_OID, TreeMultiset.create(ImmutableList.of(-1))),
-                ImmutableMap.of(TARJOAJA_OID, ofNullable(new Osoite("Etunimi", "Sukunimi", "Addressline", "Addressline2",
-                        "Addressline3", "Postal code", "City", "Region", "Country", "CountryCode", false))),
+                ImmutableMap.of(TARJOAJA_OID, ofNullable(osoite)),
                 ImmutableMap.of(HAKUKOHDE_OID, new MetaHakukohde(TARJOAJA_OID, new Teksti(), new Teksti())),
                 ImmutableList.of(hakija),
                 ImmutableList.of(new Hakemus("type", "applicationSystemId", answers, ImmutableMap.of(),
