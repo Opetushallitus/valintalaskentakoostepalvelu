@@ -78,7 +78,7 @@ public class HyvaksymiskirjeetKokoHaulleService {
     private Observable<String> luoKirjeJaLahetaMuodostettavaksi(String hakuOid, String asiointikieli, HaunResurssit resurssit, String defaultValue) {
 
         Map<String, MetaHakukohde> hakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(resurssit.hakijat);
-        Observable<Map<String, Optional<Osoite>>> osoitteet = ViestintapalveluObservables.haunOsoitteet(hakukohteet, organisaatioAsyncResource::haeHakutoimisto);
+        Observable<Map<String, Optional<Osoite>>> osoitteet = ViestintapalveluObservables.haunOsoitteet(asiointikieli, hakukohteet, organisaatioAsyncResource::haeHakutoimisto);
         Observable<LetterBatch> kirjeet = ViestintapalveluObservables.kirjeet(hakuOid, Optional.of(asiointikieli), resurssit.hakijat, resurssit.hakemukset, defaultValue, hakukohteet, osoitteet, hyvaksymiskirjeetKomponentti);
         return ViestintapalveluObservables.batchId(
                 kirjeet,
