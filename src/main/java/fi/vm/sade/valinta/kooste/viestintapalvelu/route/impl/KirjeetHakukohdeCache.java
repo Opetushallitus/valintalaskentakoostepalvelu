@@ -41,7 +41,7 @@ public class KirjeetHakukohdeCache {
                         HakukohdeV1RDTO hakukohde = hakukohdeV1Resource.findByOid(hakukohdeOid).getResult();
                         Teksti hakukohdeNimi = new Teksti(hakukohde.getHakukohteenNimet());
                         String opetuskieli = getOpetuskieli(hakukohde.getOpetusKielet());
-                        LOG.error("Hakukohdekieli({}) Oid({}) Opetuskieli({})", hakukohdeNimi.getKieli(), hakukohdeOid, opetuskieli);
+                        LOG.debug("Hakukohdekieli({}) Oid({}) Opetuskieli({})", hakukohdeNimi.getKieli(), hakukohdeOid, opetuskieli);
                         Teksti tarjoajaNimi = new Teksti(hakukohde.getTarjoajaNimet());
                         return new MetaHakukohde(
                                 hakukohde.getTarjoajaOids().iterator().next(),
