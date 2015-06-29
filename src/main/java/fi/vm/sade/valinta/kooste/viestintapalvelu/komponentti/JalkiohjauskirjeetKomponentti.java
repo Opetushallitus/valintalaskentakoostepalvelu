@@ -213,7 +213,7 @@ public class JalkiohjauskirjeetKomponentti {
                             }
                         });
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
-                if (hakutoiveenValintatapajonot.isEmpty()) {
+                if (!hakutoiveenValintatapajonot.isEmpty()) {
                     HakutoiveenValintatapajonoDTO valintatapajono = hakutoiveenValintatapajonot.get(0);
                     if (VARALLA.equals(valintatapajono.getTila()) && valintatapajono.getVarasijanNumero() != null) {
                         tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(valintatapajono.getVarasijanNumero(), preferoituKielikoodi));
