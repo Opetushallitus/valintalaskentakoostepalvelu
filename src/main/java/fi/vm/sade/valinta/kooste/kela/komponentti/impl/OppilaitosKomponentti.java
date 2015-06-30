@@ -28,15 +28,24 @@ public class OppilaitosKomponentti {
                 List<String> visitedOids = new LinkedList<String>();
                 while (!organisaatio.getTyypit().contains("Oppilaitos")) {
                     visitedOids.add(organisaatio.getOid());
-                    organisaatio = organisaatioProxy.getOrganisaatioByOID(organisaatio.getParentOid());
-                    if (organisaatio == null) {
-                        LOG.error("Organisaatiopalvelu ei palauttanut yhteishaun oppilaitosnumeroa tarjoajalle " + tarjoajaOid);
+                    
+                    if (organisaatio.getParentOid() != null && !organisaatio.getParentOid().isEmpty()) {
+                        organisaatio = organisaatioProxy.getOrganisaatioByOID(organisaatio.getParentOid());
+                        
+                        if (organisaatio == null) {
+                            LOG.error("Organisaatiopalvelu ei palauttanut yhteishaun oppilaitosnumeroa tarjoajalle " + tarjoajaOid);
+                            return "XXXXX";
+                        }
+                        if (visitedOids.contains(organisaatio.getParentOid())) {
+                            //we should never get here
+                            throw new OrganisaatioException("Organisaatiopalvelu : circular reference in parentoids {} " + tarjoajaOid);
+                        }
+                    } else {
+                        LOG.error("Organisaatiopalvelu ei palauttanut yhteishaun oppilaitosnumeroa tarjoajalle " 
+                                + tarjoajaOid + " eikä sen isäntäorganisaatioille.");
                         return "XXXXX";
-                    }
-                    if (visitedOids.contains(organisaatio.getParentOid())) {
-                        //we should never get here
-                        throw new OrganisaatioException("Organisaatiopalvelu : circular reference in parentoids {} " + tarjoajaOid);
-                    }
+                    } 
+                    
                 }
                 if (organisaatio.getOppilaitosKoodi() == null || organisaatio.getOppilaitosKoodi().trim().length() == 0) {
                     LOG.error("Organisaatiolla  {} ei ole oppilaitosnumeroa (oppilatoskoodi)", tarjoajaOid);
