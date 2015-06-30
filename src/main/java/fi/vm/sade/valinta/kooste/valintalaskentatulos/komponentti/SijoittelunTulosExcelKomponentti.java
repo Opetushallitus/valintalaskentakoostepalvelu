@@ -66,14 +66,18 @@ public class SijoittelunTulosExcelKomponentti {
                     }
                     return o1.getPrioriteetti().compareTo(o2.getPrioriteetti());
                 });
-        final ValintatapajonoDTO tarkeimmanPrioriteetinValintatapajono = valintatapajonot.iterator().next();
 
         Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat = valintatapajononTilat(tilat);
         rivit.add(new Object[]{tarjoajaNimi});
         rivit.add(new Object[]{hakukohdeNimi});
         rivit.add(new Object[]{});
 
-        Collections.sort(tarkeimmanPrioriteetinValintatapajono.getHakemukset(),
+        List<HakemusDTO> distinctHakemuksetFromAllQueues = valintatapajonot.stream()
+                .flatMap(jono -> jono.getHakemukset().stream())
+                .distinct()
+                .collect(Collectors.toList());
+
+        Collections.sort(distinctHakemuksetFromAllQueues,
                 new Comparator<HakemusDTO>() {
                     private int ordinal(HakemusDTO h) {
                         switch (h.getTila()) {
@@ -148,7 +152,7 @@ public class SijoittelunTulosExcelKomponentti {
         Map<String, Map<String, HakemusDTO>> jonoOidHakemusOidHakemusDto = valintatapajonot.stream()
                 .collect(Collectors.toMap(ValintatapajonoDTO::getOid, v -> v.getHakemukset().stream().collect(Collectors.toMap(HakemusDTO::getHakemusOid, h -> h))));
 
-        for (HakemusDTO hDto : tarkeimmanPrioriteetinValintatapajono.getHakemukset()) {
+        for (HakemusDTO hDto : distinctHakemuksetFromAllQueues) {
             HakemusWrapper wrapper = new HakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
             String nimi = wrapper.getSukunimi() + ", " + wrapper.getEtunimi();
             List<Object> hakemusRivi = Lists.newArrayList();
