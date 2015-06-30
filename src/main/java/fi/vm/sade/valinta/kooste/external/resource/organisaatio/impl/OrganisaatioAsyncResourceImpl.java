@@ -1,21 +1,17 @@
 package fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl;
 
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
+import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import rx.Observable;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
-import org.apache.cxf.jaxrs.client.WebClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
-
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
-import rx.Observable;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  *         https://${host.virkailija}/organisaatio-service/rest esim
@@ -23,16 +19,11 @@ import rx.Observable;
  *         ?noCache=1413976497594
  */
 @Service
-public class OrganisaatioAsyncResourceImpl extends AsyncResourceWithCas implements OrganisaatioAsyncResource {
+public class OrganisaatioAsyncResourceImpl extends HttpResource implements OrganisaatioAsyncResource {
     @Autowired
     public OrganisaatioAsyncResourceImpl(
-            @Value("${web.url.cas}") String webCasUrl,
-            @Value("${cas.service.organisaatio-service}/j_spring_cas_security_check") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
-            @Value("${valintalaskentakoostepalvelu.organisaatioService.rest.url}") String address,
-            ApplicationContext context) {
-        super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.HOURS.toMillis(1));
+            @Value("${valintalaskentakoostepalvelu.organisaatioService.rest.url}") String address) {
+        super(address, TimeUnit.HOURS.toMillis(1));
     }
 
     @Override
