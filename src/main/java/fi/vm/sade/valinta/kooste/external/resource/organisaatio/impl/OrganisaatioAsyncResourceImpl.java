@@ -23,7 +23,7 @@ public class OrganisaatioAsyncResourceImpl extends HttpResource implements Organ
     @Autowired
     public OrganisaatioAsyncResourceImpl(
             @Value("${valintalaskentakoostepalvelu.organisaatioService.rest.url}") String address) {
-        super(address, TimeUnit.HOURS.toMillis(1));
+        super(address, TimeUnit.MINUTES.toMillis(1));
     }
 
     @Override
