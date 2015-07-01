@@ -15,15 +15,12 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
-import junit.framework.Assert;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -32,7 +29,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -40,19 +36,17 @@ import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.hakemusOsallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Jussi Jartamo
  */
 public class ValintalaskentaTulosExcelTest {
-
-    final static Logger LOG = LoggerFactory.getLogger(ValintalaskentaTulosExcelTest.class);
-    public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); //5sec
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
     final HttpResource valintakoekutsutResource = new HttpResource(root + "/valintalaskentaexcel/valintakoekutsut/aktivoi");
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
-    final String TARJOAJA1 = "TARJOAJA1";
     final String VALINTAKOENIMI1 = "VALINTAKOENIMI1";
     final String VALINTAKOENIMI2 = "VALINTAKOENIMI2";
     final String HAKEMUS1 = "HAKEMUS1";
@@ -70,25 +64,19 @@ public class ValintalaskentaTulosExcelTest {
         ValintaKoosteJetty.startShared();
     }
 
-    @Ignore // Tällä voi kokeilla tuotannon jsoneilla luontia
+    @Ignore("This can be used for testing creation of production jsons")
     @Test
     public void testaaExcelinLuontiJsonLahteesta() throws Throwable {
         String listFull = IOUtils.toString(new FileInputStream("listfull.json"));
         String osallistumiset = IOUtils.toString(new FileInputStream("osallistumiset.json"));
         String valintakoe = IOUtils.toString(new FileInputStream("valintakoe.json"));
-        List<Hakemus> hakemuses = HttpResource.GSON.fromJson(listFull,
-                new TypeToken<List<Hakemus>>() {
-                }.getType());
+        List<Hakemus> hakemuses = HttpResource.GSON.fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
 
-        List<HakemusOsallistuminenDTO> osallistuminenDTOs = HttpResource.GSON.fromJson(osallistumiset,
-                new TypeToken<List<HakemusOsallistuminenDTO>>() { }.getType());
+        List<HakemusOsallistuminenDTO> osallistuminenDTOs = HttpResource.GSON.fromJson(osallistumiset, new TypeToken<List<HakemusOsallistuminenDTO>>() { }.getType());
 
-        List<ValintakoeDTO> valintakoeDTOs = HttpResource.GSON.fromJson(valintakoe,
-                new TypeToken<List<ValintakoeDTO>>() { }.getType());
+        List<ValintakoeDTO> valintakoeDTOs = HttpResource.GSON.fromJson(valintakoe, new TypeToken<List<ValintakoeDTO>>() {}.getType());
         Set<String> h = hakemuses.stream().map(h0 -> h0.getOid()).collect(Collectors.toSet());
         Set<String> o = osallistuminenDTOs.stream().map(h0 -> h0.getHakemusOid()).collect(Collectors.toSet());
-        System.err.println(h.containsAll(o));
-        System.err.println(o.containsAll(h));
         Mocks.reset();
         try {
             List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays.asList();
@@ -108,19 +96,24 @@ public class ValintalaskentaTulosExcelTest {
             MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
             ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
             Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
-                    Mockito.anyString(), Mockito.anyString(), Mockito.anyLong(), Mockito.anyList(), Mockito.anyString(),
-                    inputStreamArgumentCaptor.capture(), Mockito.any(Consumer.class), Mockito.any(Consumer.class))).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
+                    Mockito.anyString(),
+                    Mockito.anyString(),
+                    Mockito.anyLong(),
+                    Mockito.anyList(),
+                    Mockito.anyString(),
+                    inputStreamArgumentCaptor.capture(),
+                    Mockito.any(Consumer.class),
+                    Mockito.any(Consumer.class)
+            )).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
             lisatiedot.setValintakoeTunnisteet(Arrays.asList("7c0c20aa-c9a1-53eb-5e46-ca689b3625c0", "d579283e-ab61-e140-306c-7582a666fd85"));
-            Response r =
-                    valintakoekutsutResource.getWebClient()
+            Response r = valintakoekutsutResource.getWebClient()
                             .query("hakuOid", "1.2.246.562.29.95390561488")
                             .query("hakukohdeOid", "1.2.246.562.20.40041089257")
-                            .post(Entity.entity(lisatiedot,
-                                    "application/json"));
-            Assert.assertEquals(200, r.getStatus());
+                            .post(Entity.entity(lisatiedot, "application/json"));
+            assertEquals(200, r.getStatus());
             byte[] excelBytes = IOUtils.toByteArray(inputStreamArgumentCaptor.getValue());
             IOUtils.copy(new ByteArrayInputStream(excelBytes), new FileOutputStream("e.xls"));
         } finally {
@@ -170,7 +163,6 @@ public class ValintalaskentaTulosExcelTest {
                                     .setHakutoive(HAKUKOHDE1)
                                     .addOsallistuminen(SELVITETTY_TUNNISTE1, OsallistuminenDTO.VIRHE)
                                     .build(),
-                            //
                             hakemusOsallistuminen()
                                     .setHakemusOid(HAKEMUS1)
                                     .setHakutoive(HAKUKOHDE1)
@@ -181,7 +173,7 @@ public class ValintalaskentaTulosExcelTest {
                                     .setHakutoive(HAKUKOHDE1)
                                     .addOsallistuminen(SELVITETTY_TUNNISTE2)
                                     .build()
-                    ) // Osallistumiset
+                    )
             );
             MockValintaperusteetAsyncResource.setValintakokeetResult(
                     Arrays.asList(valintakoe()
@@ -223,8 +215,15 @@ public class ValintalaskentaTulosExcelTest {
 
             ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
             Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
-                    Mockito.anyString(), Mockito.anyString(), Mockito.anyLong(), Mockito.anyList(), Mockito.anyString(),
-                    inputStreamArgumentCaptor.capture(), Mockito.any(Consumer.class), Mockito.any(Consumer.class))).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
+                    Mockito.anyString(),
+                    Mockito.anyString(),
+                    Mockito.anyLong(),
+                    Mockito.anyList(),
+                    Mockito.anyString(),
+                    inputStreamArgumentCaptor.capture(),
+                    Mockito.any(Consumer.class),
+                    Mockito.any(Consumer.class)
+            )).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
@@ -233,21 +232,19 @@ public class ValintalaskentaTulosExcelTest {
                     valintakoekutsutResource.getWebClient()
                             .query("hakuOid", HAKU1)
                             .query("hakukohdeOid", HAKUKOHDE1)
-                            .post(Entity.entity(lisatiedot,
-                                    "application/json"));
-            Assert.assertEquals(200, r.getStatus());
+                            .post(Entity.entity(lisatiedot, "application/json"));
+            assertEquals(200, r.getStatus());
             byte[] excelBytes = IOUtils.toByteArray(inputStreamArgumentCaptor.getValue());
-            //IOUtils.copy(new ByteArrayInputStream(excelBytes), new FileOutputStream("e.xls"));
             InputStream excelData = new ByteArrayInputStream(excelBytes);
-            Assert.assertTrue(excelData != null);
+            assertTrue(excelData != null);
             Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(excelData);
 
-            Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS1.equals(r0.toTeksti().getTeksti()))));
-            Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS2.equals(r0.toTeksti().getTeksti()))));
+            assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS1.equals(r0.toTeksti().getTeksti()))));
+            assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS2.equals(r0.toTeksti().getTeksti()))));
             // Ei osallistujat ei tule mukaan
-            Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS3.equals(r0.toTeksti().getTeksti()))));
-            Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS4.equals(r0.toTeksti().getTeksti()))));
-            Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS5.equals(r0.toTeksti().getTeksti()))));
+            assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS3.equals(r0.toTeksti().getTeksti()))));
+            assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS4.equals(r0.toTeksti().getTeksti()))));
+            assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS5.equals(r0.toTeksti().getTeksti()))));
 
         } finally {
             Mocks.reset();
@@ -265,7 +262,6 @@ public class ValintalaskentaTulosExcelTest {
                             .hakutoive()
                             .valinnanvaihe()
                             .valintakoe()
-                                    //.setValintakoeOid(VALINTAKOE1)
                             .setTunniste(SELVITETTY_TUNNISTE1)
                             .setOsallistuu()
                             .build()
@@ -277,7 +273,6 @@ public class ValintalaskentaTulosExcelTest {
                             .hakutoive()
                             .valinnanvaihe()
                             .valintakoe()
-                                    //.setValintakoeOid(VALINTAKOE1)
                             .setTunniste(SELVITETTY_TUNNISTE1)
                             .setOsallistuu()
                             .build()
@@ -320,7 +315,7 @@ public class ValintalaskentaTulosExcelTest {
                                     .setHakutoive(HAKUKOHDE1)
                                     .addOsallistuminen(SELVITETTY_TUNNISTE1, OsallistuminenDTO.VIRHE)
                                     .build()
-                    ) // Osallistumiset
+                    )
             );
             MockValintaperusteetAsyncResource.setValintakokeetResult(
                     Arrays.asList(valintakoe()
@@ -357,35 +352,34 @@ public class ValintalaskentaTulosExcelTest {
 
             ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
             Mockito.when(Mocks.getDokumenttiAsyncResource().tallenna(
-                    Mockito.anyString(), Mockito.anyString(), Mockito.anyLong(), Mockito.anyList(), Mockito.anyString(),
-                    inputStreamArgumentCaptor.capture(), Mockito.any(Consumer.class), Mockito.any(Consumer.class))).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
+                    Mockito.anyString(),
+                    Mockito.anyString(),
+                    Mockito.anyLong(),
+                    Mockito.anyList(),
+                    Mockito.anyString(),
+                    inputStreamArgumentCaptor.capture(),
+                    Mockito.any(Consumer.class),
+                    Mockito.any(Consumer.class)
+            )).thenReturn(new PeruutettavaImpl(Futures.immediateFuture(null)));
 
 
             DokumentinLisatiedot lisatiedot = new DokumentinLisatiedot();
             lisatiedot.setValintakoeTunnisteet(Arrays.asList(SELVITETTY_TUNNISTE1));
-            Response r =
-                    valintakoekutsutResource.getWebClient()
+            Response r = valintakoekutsutResource.getWebClient()
                             .query("hakuOid", HAKU1)
                             .query("hakukohdeOid", HAKUKOHDE1)
-                            .post(Entity.entity(lisatiedot,
-                                    "application/json"));
-            Assert.assertEquals(200, r.getStatus());
+                            .post(Entity.entity(lisatiedot, "application/json"));
+            assertEquals(200, r.getStatus());
             byte[] excelBytes = IOUtils.toByteArray(inputStreamArgumentCaptor.getValue());
-            //IOUtils.copy(new ByteArrayInputStream(excelBytes), new FileOutputStream("e.xls"));//new File("")));
             InputStream excelData = new ByteArrayInputStream(excelBytes);
-            Assert.assertTrue(excelData != null);
+            assertTrue(excelData != null);
             Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(excelData);
-        /*
-        rivit.forEach(r0 -> {
-            System.err.println(r0);
-        });
-        */
-            Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS1.equals(r0.toTeksti().getTeksti()))));
-            Assert.assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS2.equals(r0.toTeksti().getTeksti()))));
+            assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS1.equals(r0.toTeksti().getTeksti()))));
+            assertTrue(rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS2.equals(r0.toTeksti().getTeksti()))));
             // Ei osallistujat ei tule mukaan
-            Assert.assertTrue(!rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS3.equals(r0.toTeksti().getTeksti()))));
-            Assert.assertTrue(!rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS4.equals(r0.toTeksti().getTeksti()))));
-            Assert.assertTrue(!rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS5.equals(r0.toTeksti().getTeksti()))));
+            assertTrue(!rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS3.equals(r0.toTeksti().getTeksti()))));
+            assertTrue(!rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS4.equals(r0.toTeksti().getTeksti()))));
+            assertTrue(!rivit.stream().anyMatch(rivi -> rivi.getSolut().stream().anyMatch(r0 -> HAKEMUS5.equals(r0.toTeksti().getTeksti()))));
 
         } finally {
             Mocks.reset();
