@@ -184,53 +184,56 @@ public class SijoittelunTulosExcelKomponentti {
             int index = 0;
             for (ValintatapajonoDTO jono : valintatapajonot) {
                 ++index;
-                HakemusDTO hakemusDto = jonoOidHakemusOidHakemusDto.get(jono.getOid()).get(hDto.getHakemusOid());
-                String hakemusOid = hakemusDto.getHakemusOid();
-                Map<String, IlmoittautumisTila> hakemusTilat = Collections.emptyMap();
-                if (valintatapajononTilat.containsKey(jono.getOid())) {
-                    hakemusTilat = valintatapajononTilat.get(jono.getOid());
-                    if (hakemusTilat == null) {
-                        hakemusTilat = Collections.emptyMap();
-                    }
-                }
-                String ilmoittautumistieto = StringUtils.EMPTY;
-                try {
-                    ilmoittautumistieto = HakemusUtil.tilaConverter(hakemusTilat.get(hakemusDto.getHakemusOid()), preferoitukielikoodi);
-                } catch (Exception e) {
-                }
-                List<Valintatulos> valintaTulos = tilat.stream().filter(
-                        t -> hakemusOid.equals(t.getHakemusOid())
-                ).collect(Collectors.toList());
-                String valintaTieto = StringUtils.EMPTY;
-                for (Valintatulos valinta : valintaTulos) {
-                    if (jono.getOid().equals(valinta.getValintatapajonoOid())) {
-                        if (valinta.getTila() != null) {
-                            valintaTieto = HakemusUtil.tilaConverter(valinta.getTila(), preferoitukielikoodi);
+                Map<String, HakemusDTO> jonoOidToHakemusOid = jonoOidHakemusOidHakemusDto.get(jono.getOid());
+                if (jonoOidToHakemusOid.containsKey(hDto.getHakemusOid())) {
+                    HakemusDTO hakemusDto = jonoOidHakemusOidHakemusDto.get(jono.getOid()).get(hDto.getHakemusOid());
+                    String hakemusOid = hakemusDto.getHakemusOid();
+                    Map<String, IlmoittautumisTila> hakemusTilat = Collections.emptyMap();
+                    if (valintatapajononTilat.containsKey(jono.getOid())) {
+                        hakemusTilat = valintatapajononTilat.get(jono.getOid());
+                        if (hakemusTilat == null) {
+                            hakemusTilat = Collections.emptyMap();
                         }
-                        break;
                     }
-                }
-                List<Object> jonoHakemusSarakkeet = Arrays.asList(
-                        hakemusDto.getJonosija(),
-                        Formatter.suomennaNumero(hakemusDto.getPisteet()),
-                        HakemusUtil.tilaConverter(
-                                hakemusDto.getTila(),
-                                preferoitukielikoodi,
-                                hakemusDto.isHyvaksyttyHarkinnanvaraisesti(),
-                                true,
-                                hakemusDto.getVarasijanNumero()
-                        ),
-                        valintaTieto,
-                        ilmoittautumistieto,
-                        muokattu(hakemusDto.getTilaHistoria())
-                );
+                    String ilmoittautumistieto = StringUtils.EMPTY;
+                    try {
+                        ilmoittautumistieto = HakemusUtil.tilaConverter(hakemusTilat.get(hakemusDto.getHakemusOid()), preferoitukielikoodi);
+                    } catch (Exception e) {
+                    }
+                    List<Valintatulos> valintaTulos = tilat.stream().filter(
+                            t -> hakemusOid.equals(t.getHakemusOid())
+                    ).collect(Collectors.toList());
+                    String valintaTieto = StringUtils.EMPTY;
+                    for (Valintatulos valinta : valintaTulos) {
+                        if (jono.getOid().equals(valinta.getValintatapajonoOid())) {
+                            if (valinta.getTila() != null) {
+                                valintaTieto = HakemusUtil.tilaConverter(valinta.getTila(), preferoitukielikoodi);
+                            }
+                            break;
+                        }
+                    }
+                    List<Object> jonoHakemusSarakkeet = Arrays.asList(
+                            hakemusDto.getJonosija(),
+                            Formatter.suomennaNumero(hakemusDto.getPisteet()),
+                            HakemusUtil.tilaConverter(
+                                    hakemusDto.getTila(),
+                                    preferoitukielikoodi,
+                                    hakemusDto.isHyvaksyttyHarkinnanvaraisesti(),
+                                    true,
+                                    hakemusDto.getVarasijanNumero()
+                            ),
+                            valintaTieto,
+                            ilmoittautumistieto,
+                            muokattu(hakemusDto.getTilaHistoria())
+                    );
 
-                if (index % 2 == 1) {
-                    jonoHakemusSarakkeet = jonoHakemusSarakkeet.stream()
-                            .map(Highlight::new)
-                            .collect(Collectors.toList());
+                    if (index % 2 == 1) {
+                        jonoHakemusSarakkeet = jonoHakemusSarakkeet.stream()
+                                .map(Highlight::new)
+                                .collect(Collectors.toList());
+                    }
+                    hakemusRivi.addAll(jonoHakemusSarakkeet);
                 }
-                hakemusRivi.addAll(jonoHakemusSarakkeet);
             }
             rivit.add(hakemusRivi.toArray());
         }
