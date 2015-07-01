@@ -146,8 +146,7 @@ public class KoekutsukirjeetKomponentti {
             viesti.setTemplateReplacements(templateReplacements);
             return viesti;
         } catch (Exception e) {
-            LOG.error("Koekutsukirjeiden luonti epäonnistui!");
-            e.printStackTrace();
+            LOG.error("Koekutsukirjeiden luonti epäonnistui!", e);
             throw e;
         }
     }

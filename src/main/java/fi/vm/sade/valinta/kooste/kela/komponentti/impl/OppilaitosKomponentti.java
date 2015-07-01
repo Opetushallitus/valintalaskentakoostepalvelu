@@ -54,8 +54,7 @@ public class OppilaitosKomponentti {
                 return organisaatio.getOppilaitosKoodi();
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}: Virhe {}", new Object[]{tarjoajaOid, e.getMessage()});
+            LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle " + tarjoajaOid, e);
         }
         throw new OrganisaatioException("Organisaatiopalvelu ei palauttanut oppilaitosnumeroa tarjoajalle " + tarjoajaOid);
     }
@@ -68,16 +67,13 @@ public class OppilaitosKomponentti {
                 LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
             } else {
                 if (organisaatio.getYhteishaunKoulukoodi() == null) {
-                    // new
-                    // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
                     LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
                 } else {
                     return organisaatio.getYhteishaunKoulukoodi();
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}: Virhe {}", new Object[]{tarjoajaOid, e.getMessage()});
+            LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle " + tarjoajaOid, e);
         }
         throw new OrganisaatioException("Organisaatiopalvelu ei palauttanut yhteishaun koulukoodia tarjoajalle " + tarjoajaOid);
     }

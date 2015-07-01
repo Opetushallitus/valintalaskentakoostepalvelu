@@ -340,8 +340,7 @@ public class HyvaksymiskirjeetKomponentti {
                     try {
                         metaKohteet.put(hakukohdeOid, kirjeetHakukohdeCache.haeHakukohde(hakukohdeOid));
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        LOG.error("Tarjonnasta ei saatu hakukohdetta {}: {}", new Object[]{hakukohdeOid, e.getMessage()});
+                        LOG.error("Tarjonnasta ei saatu hakukohdetta " + hakukohdeOid, e);
                         metaKohteet.put(hakukohdeOid, new MetaHakukohde(
                                 "",
                                 new Teksti("Hakukohde " + hakukohdeOid + " ei löydy tarjonnasta!"),

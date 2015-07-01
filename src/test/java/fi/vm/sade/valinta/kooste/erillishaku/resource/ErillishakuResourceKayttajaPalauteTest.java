@@ -132,7 +132,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
             try {
                 Thread.sleep(0L);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                //ignore
             }
             return odotaPaluuarvoTaiEpaonnistuTimeouttiin(prosessiId, timeout - (System.currentTimeMillis() - t0));
         } else {

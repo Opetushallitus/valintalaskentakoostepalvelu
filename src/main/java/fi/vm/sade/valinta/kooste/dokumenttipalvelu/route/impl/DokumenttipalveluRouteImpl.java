@@ -35,8 +35,7 @@ public class DokumenttipalveluRouteImpl extends SpringRouteBuilder {
                         try {
                             dokumenttiResource.tyhjenna();
                         } catch (Exception e) {
-                            LOG.error("Dokumenttipalvelun tyhjennys-kutsu epäonnistui! {}", e.getMessage());
-                            e.printStackTrace();
+                            LOG.error("Dokumenttipalvelun tyhjennys-kutsu epäonnistui!", e);
                         }
                     }
                 });

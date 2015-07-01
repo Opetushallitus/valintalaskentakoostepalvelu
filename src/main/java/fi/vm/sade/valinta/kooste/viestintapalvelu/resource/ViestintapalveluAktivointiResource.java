@@ -87,11 +87,10 @@ public class ViestintapalveluAktivointiResource {
             }
             return new ProsessiId(osoiteProsessi.getId());
         } catch (Exception e) {
-            LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
+            LOG.error("Osoitetarrojen luonnissa virhe!", e);
             // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
             // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
             // Ylläpitäjä voi lukea logeista todellisen syyn!
-            e.printStackTrace();
             throw new RuntimeException("Osoitetarrojen luonti epäonnistui! " + e.getMessage(), e);
         }
     }
@@ -123,8 +122,7 @@ public class ViestintapalveluAktivointiResource {
             }
             return osoiteProsessi.toProsessiId();
         } catch (Exception e) {
-            LOG.error("Hyväksyttyjen osoitetarrojen luonnissa virhe! {}", e.getMessage());
-            e.printStackTrace();
+            LOG.error("Hyväksyttyjen osoitetarrojen luonnissa virhe!", e);
             throw new RuntimeException("Hyväksyttyjen osoitetarrojen luonnissa virhe!", e);
 
         }
@@ -186,8 +184,7 @@ public class ViestintapalveluAktivointiResource {
             }
             return prosessi.toProsessiId();
         } catch (Exception e) {
-            LOG.error("Jälkiohjauskirjeiden luonnissa virhe! {}", e.getMessage());
-            e.printStackTrace();
+            LOG.error("Jälkiohjauskirjeiden luonnissa virhe!", e);
             throw new RuntimeException("Jälkiohjauskirjeiden luonti epäonnistui!", e);
         }
     }
@@ -308,8 +305,7 @@ public class ViestintapalveluAktivointiResource {
             }
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
         } catch (Exception e) {
-            LOG.error("Koekutsukirjeiden luonti epäonnistui! {}", e.getMessage());
-            e.printStackTrace();
+            LOG.error("Koekutsukirjeiden luonti epäonnistui!", e);
             throw new RuntimeException(e);
         }
         return new ProsessiId(prosessi.getId());// Response.ok().build();

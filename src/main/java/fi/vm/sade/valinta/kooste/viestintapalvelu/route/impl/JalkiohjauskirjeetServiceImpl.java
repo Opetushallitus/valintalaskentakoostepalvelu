@@ -147,8 +147,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                         try {
                             metaKohteet.put(hakukohdeOid, kirjeetHakukohdeCache.haeHakukohde(hakukohdeOid));
                         } catch (Exception e) {
-                            e.printStackTrace();
-                            LOG.error("Tarjonnasta ei saatu hakukohdetta {}: {}", new Object[]{hakukohdeOid, e.getMessage()});
+                            LOG.error("Tarjonnasta ei saatu hakukohdetta " + hakukohdeOid, e);
                             metaKohteet.put(hakukohdeOid, new MetaHakukohde(
                                     "",
                                     new Teksti(new StringBuilder().append("Hakukohde ").append(hakukohdeOid).append(" ei löydy tarjonnasta!").toString()),

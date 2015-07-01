@@ -461,7 +461,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                         try {
                                             Thread.sleep(10000L);
                                         } catch (InterruptedException e1) {
-                                            e1.printStackTrace();
+                                            // Ignore this for now
                                         }
                                     }
                                 }
@@ -595,11 +595,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                         .add(new Poikkeus(
                                                 Poikkeus.DOKUMENTTIPALVELU,
                                                 "Kela-dokumentin tallennus dokumenttipalveluun epäonnistui"));
-                                try {
-                                    throw e;
-                                } catch (Exception e1) {
-                                    e1.printStackTrace();
-                                }
+                                log.error("Virhetilanne", e);
                             }
                         }));
     }

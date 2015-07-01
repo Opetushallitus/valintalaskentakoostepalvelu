@@ -25,11 +25,15 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 
 import fi.vm.sade.valinta.kooste.util.excel.Highlight;
 import fi.vm.sade.valinta.kooste.util.excel.Span;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *         Muuntaa Object[][]:n xls-tiedostoksi!
  */
 public class ExcelExportUtil {
+    private static final Logger LOG = LoggerFactory.getLogger(ExcelExportUtil.class);
+
     public static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("dd.MM.yyyy hh.mm");
 
     public static byte[] exportGridSheetsAsXlsBytes(Map<String, Object[][]> grids) {
@@ -49,8 +53,7 @@ public class ExcelExportUtil {
         try {
             wb.write(bytesOut);
         } catch (IOException e) {
-            e.printStackTrace(); // <- not going to happen since not using real
-            // I/O
+            LOG.error("XLS-bytes generointi epäonnistui, ei pitäisi tapahtua, koska ei oikea I/O?", e);
         }
         return bytesOut.toByteArray();
     }
@@ -122,8 +125,7 @@ public class ExcelExportUtil {
         try {
             wb.write(bytesOut);
         } catch (IOException e) {
-            e.printStackTrace(); // <- not going to happen since not using real
-            // I/O
+            LOG.error("XLS-bytes generointi epäonnistui, ei pitäisi tapahtua, koska ei oikea I/O?", e);
         }
         return bytesOut.toByteArray();
     }

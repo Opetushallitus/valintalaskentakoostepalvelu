@@ -69,7 +69,7 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
                     try {
                         Thread.sleep(15000L);
                     } catch (InterruptedException e1) {
-                        e1.printStackTrace();
+                        // ignore this for now
                     }
                 }
             }
@@ -88,8 +88,7 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                LOG.error("Ei voitu hakea lukuvuotta tarjonnalta syystä {}", e.getMessage());
+                LOG.error("Ei voitu hakea lukuvuotta tarjonnalta", e);
                 throw new RuntimeException(e);
             }
             lukuvuosi.put(uri, new DateTime(vuosi, kuukausi, 1, 1, 1).toDate());

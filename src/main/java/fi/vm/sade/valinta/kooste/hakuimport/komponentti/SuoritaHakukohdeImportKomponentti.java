@@ -215,8 +215,7 @@ public class SuoritaHakukohdeImportKomponentti {
 
             return importTyyppi;
         } catch (Exception e) {
-            LOG.error("\r\n###\r\n### Importointi hakukohteelle {} epaonnistui! Virhe {}\r\n###", hakukohdeOid, e.getMessage());
-            e.printStackTrace();
+            LOG.error("Importointi hakukohteelle " + hakukohdeOid + " epaonnistui!", e);
             throw e;
         }
     }

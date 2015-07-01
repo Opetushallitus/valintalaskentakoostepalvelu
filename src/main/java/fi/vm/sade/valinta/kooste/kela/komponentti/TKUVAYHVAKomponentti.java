@@ -103,8 +103,7 @@ public class TKUVAYHVAKomponentti {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            LOG.error("Odottamaton virhe {}", e.getMessage());
+            LOG.error("Odottamaton virhe", e);
             throw e;
         }
         LOG.error("Sijoittelulta palautui hakija (hakemusoid: {}) joka ei oikeasti ollut hyväksyttynä koulutukseen!", hakija.getHakemusOid());
@@ -123,8 +122,7 @@ public class TKUVAYHVAKomponentti {
                     linjakoodiCache.put(hakukohdeOid, linjakoodi);
                     return linjakoodi;
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    LOG.error("Linjakoodia ei saatu tarjonnan kohteelle {}: Syystä {}", new Object[]{hakukohdeOid, e.getMessage()});
+                    LOG.error("Linjakoodia ei saatu tarjonnan kohteelle " + hakukohdeOid, e);
                     linjakoodiErrorSet.add(hakukohdeOid);
                 }
             }
@@ -142,14 +140,10 @@ public class TKUVAYHVAKomponentti {
                 try {
                     OrganisaatioRDTO organisaatio = organisaatioProxy.haeOrganisaatio(tarjoajaOid);
                     if (organisaatio == null) {
-                        // new
-                        // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
                         LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
                         oppilaitosErrorSet.add(tarjoajaOid);
                     } else {
                         if (organisaatio.getYhteishaunKoulukoodi() == null) {
-                            // new
-                            // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
                             LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}", tarjoajaOid);
                             oppilaitosErrorSet.add(tarjoajaOid);
                         } else {
@@ -158,9 +152,7 @@ public class TKUVAYHVAKomponentti {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle {}: Virhe {}", new Object[]{tarjoajaOid, e.getMessage()});
-                    // OrganisaatioException("Organisaatio ei palauttanut yhteishaun koulukoodia!");
+                    LOG.error("Yhteishaunkoulukoodia ei voitu hakea organisaatiolle " + tarjoajaOid, e);
                     oppilaitosErrorSet.add(tarjoajaOid);
                 }
             }
