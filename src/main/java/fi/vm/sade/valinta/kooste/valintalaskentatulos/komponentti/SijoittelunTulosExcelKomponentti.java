@@ -1,13 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
@@ -15,6 +9,7 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.util.*;
+import fi.vm.sade.valinta.kooste.util.Formatter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,14 +61,19 @@ public class SijoittelunTulosExcelKomponentti {
                     }
                     return o1.getPrioriteetti().compareTo(o2.getPrioriteetti());
                 });
-        final ValintatapajonoDTO tarkeimmanPrioriteetinValintatapajono = valintatapajonot.iterator().next();
+
+        Map<String, HakemusDTO> uniqueMap = new HashMap<>();
+        valintatapajonot.stream()
+                .flatMap(jono -> jono.getHakemukset().stream())
+                .forEach(hakemus -> uniqueMap.put(hakemus.getHakemusOid(), hakemus));
+        List<HakemusDTO> distinctHakemuksetFromAllQueues = new ArrayList<>(uniqueMap.values());
 
         Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat = valintatapajononTilat(tilat);
         rivit.add(new Object[]{tarjoajaNimi});
         rivit.add(new Object[]{hakukohdeNimi});
         rivit.add(new Object[]{});
 
-        Collections.sort(tarkeimmanPrioriteetinValintatapajono.getHakemukset(),
+        Collections.sort(distinctHakemuksetFromAllQueues,
                 new Comparator<HakemusDTO>() {
                     private int ordinal(HakemusDTO h) {
                         switch (h.getTila()) {
@@ -148,7 +148,7 @@ public class SijoittelunTulosExcelKomponentti {
         Map<String, Map<String, HakemusDTO>> jonoOidHakemusOidHakemusDto = valintatapajonot.stream()
                 .collect(Collectors.toMap(ValintatapajonoDTO::getOid, v -> v.getHakemukset().stream().collect(Collectors.toMap(HakemusDTO::getHakemusOid, h -> h))));
 
-        for (HakemusDTO hDto : tarkeimmanPrioriteetinValintatapajono.getHakemukset()) {
+        for (HakemusDTO hDto : distinctHakemuksetFromAllQueues) {
             HakemusWrapper wrapper = new HakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
             String nimi = wrapper.getSukunimi() + ", " + wrapper.getEtunimi();
             List<Object> hakemusRivi = Lists.newArrayList();
