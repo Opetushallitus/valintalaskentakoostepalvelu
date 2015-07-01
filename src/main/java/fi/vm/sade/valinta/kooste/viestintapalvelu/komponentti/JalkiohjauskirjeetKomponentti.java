@@ -163,15 +163,19 @@ public class JalkiohjauskirjeetKomponentti {
                 tulokset.put("pisteet", kkPisteet);
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
                     String kkNimi = valintatapajono.getValintatapajonoNimi();
-                    int kkJonosija = Optional.ofNullable(valintatapajono.getJonosija()).orElse(0)
-                            + Optional.ofNullable(valintatapajono.getTasasijaJonosija()).orElse(0) - 1;
-                    int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(kkJonosija,
-                            valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()));
                     int kkHyvaksytyt = Optional.ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
+                    if (valintatapajono.getTila().isHyvaksyttyOrVaralla()) {
+                        int kkJonosija = Optional.ofNullable(valintatapajono.getJonosija()).orElse(0)
+                                + Optional.ofNullable(valintatapajono.getTasasijaJonosija()).orElse(0) - 1;
+                        int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(kkJonosija,
+                                valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()));
+                        kkSijoitukset.add(new Sijoitus(kkNimi, todellinenKkJonosija, kkHyvaksytyt));
+                    } else {
+                        kkSijoitukset.add(new Sijoitus(kkNimi, null, kkHyvaksytyt));
+                    }
                     BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
                     String kkPiste = suomennaNumero(Optional.ofNullable(numeerisetPisteet).orElse(BigDecimal.ZERO));
                     String kkMinimi = suomennaNumero(Optional.ofNullable(valintatapajono.getAlinHyvaksyttyPistemaara()).orElse(BigDecimal.ZERO));
-                    kkSijoitukset.add(new Sijoitus(kkNimi, todellinenKkJonosija, kkHyvaksytyt));
 
                     // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
                     // pisteet pois jos jono ei käytä laskentaa, tietoa ei kuitenkaan ole käsillä
