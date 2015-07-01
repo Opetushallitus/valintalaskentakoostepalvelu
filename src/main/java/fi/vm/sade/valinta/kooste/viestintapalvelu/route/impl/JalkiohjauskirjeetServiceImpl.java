@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import fi.vm.sade.valinta.kooste.util.TodellisenJonosijanLaskentaUtiliteetti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -157,7 +158,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                     }
                 }
             }
-            LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(kirje.getKielikoodi(), yksikielisetHakijat,
+            LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(TodellisenJonosijanLaskentaUtiliteetti.todellisenJonosijanRatkaisin(hakijat), kirje.getKielikoodi(), yksikielisetHakijat,
                     yksikielisetHakemukset, metaKohteet, kirje.getHakuOid(), kirje.getTemplateName(), kirje.getSisalto(), kirje.getTag());
             try {
                 if (prosessi.isKeskeytetty()) {

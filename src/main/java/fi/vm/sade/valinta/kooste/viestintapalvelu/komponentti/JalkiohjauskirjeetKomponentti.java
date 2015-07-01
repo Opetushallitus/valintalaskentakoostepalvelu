@@ -17,8 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.google.common.collect.TreeMultiset;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.util.TodellisenJonosijanLaskentaUtiliteetti;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
@@ -79,7 +81,7 @@ public class JalkiohjauskirjeetKomponentti {
     }
 
     public LetterBatch teeJalkiohjauskirjeet(
-            String ylikirjoitettuPreferoitukielikoodi,
+            Map<String, TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija, String ylikirjoitettuPreferoitukielikoodi,
             @Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
             final Collection<Hakemus> hakemukset,
             final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
@@ -163,12 +165,13 @@ public class JalkiohjauskirjeetKomponentti {
                     String kkNimi = valintatapajono.getValintatapajonoNimi();
                     int kkJonosija = Optional.ofNullable(valintatapajono.getJonosija()).orElse(0)
                             + Optional.ofNullable(valintatapajono.getTasasijaJonosija()).orElse(0) - 1;
+                    int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(kkJonosija,
+                            valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()));
                     int kkHyvaksytyt = Optional.ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
                     BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
                     String kkPiste = suomennaNumero(Optional.ofNullable(numeerisetPisteet).orElse(BigDecimal.ZERO));
                     String kkMinimi = suomennaNumero(Optional.ofNullable(valintatapajono.getAlinHyvaksyttyPistemaara()).orElse(BigDecimal.ZERO));
-                    kkSijoitukset.add(new Sijoitus(kkNimi, kkJonosija, kkHyvaksytyt));
-
+                    kkSijoitukset.add(new Sijoitus(kkNimi, todellinenKkJonosija, kkHyvaksytyt));
 
                     // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
                     // pisteet pois jos jono ei käytä laskentaa, tietoa ei kuitenkaan ole käsillä
