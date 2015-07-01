@@ -149,13 +149,13 @@ public class HakemusUtil {
         sv.put(PERUNUT, "Annullerad");
         Map<HakemuksenTila, String> en = new HashMap<HakemuksenTila, String>();
         en.put(HYLATTY, "Rejected");
-        en.put(VARALLA, "In reserve");
+        en.put(VARALLA, "On a waiting list");
         en.put(PERUUNTUNUT, "Cancelled");
         en.put(HYVAKSYTTY, "Accepted");
-        en.put(VARASIJALTA_HYVAKSYTTY, "Accepted from reserve");
+        en.put(VARASIJALTA_HYVAKSYTTY, "Accepted from a waiting list");
         en.put(HARKINNANVARAISESTI_HYVAKSYTTY, "Accepted");
-        en.put(HakemuksenTila.PERUUTETTU, "Canceled");
-        en.put(PERUNUT, "Canceled");
+        en.put(HakemuksenTila.PERUUTETTU, "Cancelled");
+        en.put(PERUNUT, "Cancelled");
 
         kielet.put(KieliUtil.SUOMI, Collections.unmodifiableMap(fi));
         kielet.put(KieliUtil.RUOTSI, Collections.unmodifiableMap(sv));
