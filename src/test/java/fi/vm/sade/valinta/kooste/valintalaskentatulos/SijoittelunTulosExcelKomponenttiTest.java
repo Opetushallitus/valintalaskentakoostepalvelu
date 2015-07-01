@@ -42,9 +42,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
 
     @Before
     public void setup() {
-        HashMap<String, Koodi> koodisto = new HashMap<>();
-        koodisto.put("00100", new Koodi());
-        when(koodistoResource.haeKoodisto(any())).thenReturn(koodisto);
+        when(koodistoResource.haeKoodisto(any())).thenReturn(new HashMap<>());
     }
 
     @Test
