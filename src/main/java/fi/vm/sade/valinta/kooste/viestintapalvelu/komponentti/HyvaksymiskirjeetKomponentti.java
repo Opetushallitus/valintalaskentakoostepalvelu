@@ -199,7 +199,7 @@ public class HyvaksymiskirjeetKomponentti {
                     String kkPiste = suomennaNumero(ofNullable(numeerisetPisteet).orElse(BigDecimal.ZERO));
                     String kkMinimi = suomennaNumero(ofNullable(valintatapajono.getAlinHyvaksyttyPistemaara()).orElse(BigDecimal.ZERO));
 
-                    if (valintatapajono.getTila().isHyvaksytty()) {
+                    if (valintatapajono.getTila().isHyvaksyttyOrVaralla()) {
                         int kkJonosija = ofNullable(
                                 valintatapajono.getJonosija()).orElse(0)
                                 + ofNullable(

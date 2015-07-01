@@ -34,7 +34,7 @@ public class TodellisenJonosijanLaskentaUtiliteetti {
         for (HakijaDTO hakija : hakukohteenHakijat) {
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
-                    if (!valintatapajono.getTila().isHyvaksytty()) {
+                    if (!valintatapajono.getTila().isHyvaksyttyOrVaralla()) {
                         continue;
                     }
                     if (!valintatapajonoToJonosijaToHakija.containsKey(valintatapajono.getValintatapajonoOid())) {
