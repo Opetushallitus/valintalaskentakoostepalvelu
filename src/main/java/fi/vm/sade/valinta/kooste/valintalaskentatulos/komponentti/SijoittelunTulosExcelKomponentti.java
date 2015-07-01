@@ -63,9 +63,11 @@ public class SijoittelunTulosExcelKomponentti {
                 });
 
         Map<String, HakemusDTO> uniqueMap = new HashMap<>();
-        valintatapajonot.stream()
-                .flatMap(jono -> jono.getHakemukset().stream())
-                .forEach(hakemus -> uniqueMap.put(hakemus.getHakemusOid(), hakemus));
+        for (ValintatapajonoDTO jono : valintatapajonot) {
+            for (HakemusDTO hakemus : jono.getHakemukset()) {
+                uniqueMap.putIfAbsent(hakemus.getHakemusOid(), hakemus);
+            }
+        }
         List<HakemusDTO> distinctHakemuksetFromAllQueues = new ArrayList<>(uniqueMap.values());
 
         Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat = valintatapajononTilat(tilat);
