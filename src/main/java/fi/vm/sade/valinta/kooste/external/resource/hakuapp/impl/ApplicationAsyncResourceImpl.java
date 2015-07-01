@@ -61,14 +61,13 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
 
     @Override
     public Observable<List<Hakemus>> getApplicationsByHakemusOids(Collection<String> hakemusOids) {
-        return Observable.from(hakemusOids).buffer(100)
-                .flatMap(oids ->
-                        postAsObservable("/applications/list", new TypeToken<List<Hakemus>>() {}.getType(),
-                                Entity.entity(oids, MediaType.APPLICATION_JSON_TYPE),
-                                client -> {
-                                    client.accept(MediaType.APPLICATION_JSON_TYPE);
-                                    return client;
-                                }), 1);
+        return postAsObservable("/applications/list", new TypeToken<List<Hakemus>>() {}.getType(),
+                Entity.entity(Lists.newArrayList(hakemusOids), MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    client.query("rows", 100000);
+                    return client;
+                });
     }
 
     @Override
