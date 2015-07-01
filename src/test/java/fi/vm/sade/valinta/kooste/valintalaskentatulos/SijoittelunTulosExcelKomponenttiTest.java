@@ -46,7 +46,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
     }
 
     @Test
-    public void createsExcel() throws Throwable {
+    public void addsNameFromAnswers() throws Throwable {
         HakukohdeDTO hakukohde = new HakukohdeDTO();
         ValintatapajonoDTO jono = new ValintatapajonoDTO();
         HakemusDTO hakemusDTO = new HakemusDTO();
