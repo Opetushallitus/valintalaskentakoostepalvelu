@@ -62,13 +62,17 @@ public class SijoittelunTulosExcelKomponentti {
                     return o1.getPrioriteetti().compareTo(o2.getPrioriteetti());
                 });
 
-        Map<String, HakemusDTO> uniqueMap = new HashMap<>();
+        Set<String> hakemusOids = new HashSet<>();
+        List<HakemusDTO> distinctHakemuksetFromAllQueues = new ArrayList<>();
         for (ValintatapajonoDTO jono : valintatapajonot) {
             for (HakemusDTO hakemus : jono.getHakemukset()) {
-                uniqueMap.putIfAbsent(hakemus.getHakemusOid(), hakemus);
+                String hakemusOid = hakemus.getHakemusOid();
+                if (!hakemusOids.contains(hakemusOid)) {
+                    distinctHakemuksetFromAllQueues.add(hakemus);
+                    hakemusOids.add(hakemusOid);
+                }
             }
         }
-        List<HakemusDTO> distinctHakemuksetFromAllQueues = new ArrayList<>(uniqueMap.values());
 
         Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat = valintatapajononTilat(tilat);
         rivit.add(new Object[]{tarjoajaNimi});
