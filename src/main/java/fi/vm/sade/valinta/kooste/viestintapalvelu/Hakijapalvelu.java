@@ -9,36 +9,40 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
 
 public class Hakijapalvelu {
 
-    public static Optional<Osoite> osoite(HakutoimistoDTO hakutoimisto, String hakukohteenKieli) {
-
-        Optional<String> nimiOpt = extract(hakukohteenKieli, hakutoimisto.nimi);
-        Optional<HakutoimistoDTO.HakutoimistonYhteystiedotDTO> yhteystiedotOpt = extract(hakukohteenKieli, hakutoimisto.yhteystiedot);
-
-        return yhteystiedotOpt.flatMap(yhteystiedot -> {
-
-            HakutoimistoDTO.OsoiteDTO osoite = yhteystiedot.posti != null ? yhteystiedot.posti : yhteystiedot.kaynti;
-            return Optional.of(
-                    new OsoiteBuilder()
-                            .setAddressline(osoite.katuosoite)
-                            .setPostalCode(postinumero(osoite.postinumero))
-                            .setCity(postitoimipaikka(osoite.postitoimipaikka))
-                            .setCountry(country(hakukohteenKieli))
-                            .setOrganisaationimi(nimiOpt.orElse(""))
-                            .setNumero(yhteystiedot.puhelin)
-                            .setEmail(yhteystiedot.email)
-                            .setWww(yhteystiedot.www)
-                            .createOsoite()
-            );
-        });
+    public static Optional<Osoite> osoite(HakutoimistoDTO hakutoimisto, String kieli) {
+        Optional<String> nimi = byKieliOrSuomi(kieli, hakutoimisto.nimi);
+        Optional<HakutoimistoDTO.HakutoimistonYhteystiedotDTO> kielenYhteystieto =
+                byKieliOrSuomi(kieli, hakutoimisto.yhteystiedot);
+        Optional<HakutoimistoDTO.OsoiteDTO> kielenOsoite = kielenYhteystieto.flatMap(Hakijapalvelu::osoite);
+        if (!kielenOsoite.isPresent()) {
+            kielenOsoite = byKieli(KieliUtil.SUOMI, hakutoimisto.yhteystiedot).flatMap(Hakijapalvelu::osoite);
+        }
+        Optional<HakutoimistoDTO.OsoiteDTO> fOsoite = kielenOsoite;
+        return kielenYhteystieto.flatMap(yhteystiedot ->
+                        fOsoite.map(osoite ->
+                                        new OsoiteBuilder()
+                                                .setAddressline(osoite.katuosoite)
+                                                .setPostalCode(postinumero(osoite.postinumero))
+                                                .setCity(postitoimipaikka(osoite.postitoimipaikka))
+                                                .setCountry(country(kieli))
+                                                .setOrganisaationimi(nimi.orElse(""))
+                                                .setNumero(yhteystiedot.puhelin)
+                                                .setEmail(yhteystiedot.email)
+                                                .setWww(yhteystiedot.www)
+                                                .createOsoite()
+                        )
+        );
     }
 
-    private static String country(String hakukohteenKieli) {
-        return hakukohteenKieli.equals(KieliUtil.ENGLANTI) ? "FINLAND" : null;
+    private static Optional<HakutoimistoDTO.OsoiteDTO> osoite(HakutoimistoDTO.HakutoimistonYhteystiedotDTO yhteystieto) {
+        return Optional.ofNullable(yhteystieto.posti != null ? yhteystieto.posti : yhteystieto.kaynti);
+    }
+
+    private static String country(String kieli) {
+        return kieli.equals(KieliUtil.ENGLANTI) ? "FINLAND" : null;
     }
 
     private static String postitoimipaikka(String postitoimipaikka) {
@@ -55,30 +59,22 @@ public class Hakijapalvelu {
         return StringUtils.EMPTY;
     }
 
-
-    private static <T> Optional<T> extract(String hakukohteenKieli, Map<String, T> map) {
-        return kielikoodi(hakukohteenKieli, map.keySet()).map(map::get);
+    private static <T> Optional<T> byKieli(String kieli, Map<String, T> m) {
+        return m.keySet().stream()
+                .filter(langUri -> normalizeLang(langUri).equals(kieli))
+                .findFirst()
+                .map(k -> m.get(k));
     }
 
-    private static Optional<String> kielikoodi(String hakukohteenKieli, Set<String> providedLangs) {
-        Optional<String> preferredLang = languageKeyIfExists(hakukohteenKieli, providedLangs);
-        if (preferredLang.isPresent()) {
-            return preferredLang;
-        } else {
-            Optional<String> fi = languageKeyIfExists(KieliUtil.SUOMI, providedLangs);
-            return fi.isPresent() ? fi : providedLangs.stream().findFirst();
+    private static <T> Optional<T> byKieliOrSuomi(String kieli, Map<String, T> m) {
+        Optional<T> o = byKieli(kieli, m);
+        if (o.isPresent()) {
+            return o;
         }
-    }
-
-    private static Optional<String> languageKeyIfExists(String hakukohteenKieli, Set<String> keys) {
-        return keys.stream().filter(langMatch(hakukohteenKieli)).findAny();
+        return byKieli(KieliUtil.SUOMI, m);
     }
 
     private static String normalizeLang(String lang) {
         return KieliUtil.normalisoiKielikoodi(TarjontaUriToKoodistoUtil.cleanUri(lang));
-    }
-
-    private static Predicate<String> langMatch(String hakukohteenKieli) {
-        return lang -> normalizeLang(lang).equals(hakukohteenKieli);
     }
 }
