@@ -36,6 +36,12 @@ public class HyvaksymiskirjeetKomponenttiTest {
         assertEquals(batchResult("-1 / -2", ""), batch.toString());
     }
 
+    @Test
+    public void testNollaPistettaJonossaEiOtetaMukaan() {
+        LetterBatch batch = mkTestLetterBatch(0, -2);
+        assertEquals(batchResult("0 / -2", ""), batch.toString());
+    }
+
     private String batchResult(String omatPisteet, String pisteObjekti) {
         return "LetterBatch [letters=[Letter [addressLabel=null, null null, templateReplacements={palautusPvm=palautusPvm, " +
                 "tulokset=[{oppilaitoksenNimi=, hyvaksytyt=1 / 1 , omatPisteet=" + omatPisteet + " , pisteet=[" + pisteObjekti + "], hylkayksenSyy=, " +
