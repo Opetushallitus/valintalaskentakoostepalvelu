@@ -197,7 +197,8 @@ public class HyvaksymiskirjeetKomponentti {
                     int kkHyvaksytyt = ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
                     BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
                     String kkPiste = suomennaNumero(ofNullable(numeerisetPisteet).orElse(BigDecimal.ZERO));
-                    String kkMinimi = suomennaNumero(ofNullable(valintatapajono.getAlinHyvaksyttyPistemaara()).orElse(BigDecimal.ZERO));
+                    BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
+                    String kkMinimi = suomennaNumero(ofNullable(alinHyvaksyttyPistemaara).orElse(BigDecimal.ZERO));
 
                     if (valintatapajono.getTila().isHyvaksyttyOrVaralla()) {
                         int kkJonosija = ofNullable(
@@ -214,7 +215,10 @@ public class HyvaksymiskirjeetKomponentti {
 
                     // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
                     // pisteet pois jos jono ei käytä laskentaa, tietoa ei kuitenkaan ole käsillä
-                    if (numeerisetPisteet != null && numeerisetPisteet.signum() != -1) {
+                    if (numeerisetPisteet != null
+                            && numeerisetPisteet.signum() != -1
+                            && alinHyvaksyttyPistemaara != null
+                            && alinHyvaksyttyPistemaara.signum() != -1) {
                         kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
                     }
 
@@ -223,11 +227,11 @@ public class HyvaksymiskirjeetKomponentti {
                     if (osoite.isUlkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt()) {
                         // ei pisteita
                         omatPisteet.append(ARVO_VAKIO).append(ARVO_EROTIN)
-                                .append(suomennaNumero(valintatapajono.getAlinHyvaksyttyPistemaara(), ARVO_VAKIO)).append(ARVO_VALI);
+                                .append(suomennaNumero(alinHyvaksyttyPistemaara, ARVO_VAKIO)).append(ARVO_VALI);
                     } else {
                         omatPisteet.append(suomennaNumero(numeerisetPisteet, ARVO_VAKIO))
                                 .append(ARVO_EROTIN)
-                                .append(suomennaNumero(valintatapajono.getAlinHyvaksyttyPistemaara(), ARVO_VAKIO)).append(ARVO_VALI);
+                                .append(suomennaNumero(alinHyvaksyttyPistemaara, ARVO_VAKIO)).append(ARVO_VALI);
                     }
                     hyvaksytyt.append(suomennaNumero(valintatapajono.getHyvaksytty(), ARVO_VAKIO))
                             .append(ARVO_EROTIN)
