@@ -110,8 +110,18 @@ public class ViestintapalveluObservables {
 
     public static Observable<Map<String, Optional<Osoite>>> haunOsoitteet(String asiointikieli, Map<String, MetaHakukohde> hakukohteet, Function<String, Observable<HakutoimistoDTO>> hakutoimisto) {
         return Observable.from(hakukohteet.values())
-                .flatMap(hakukohde -> hakutoimisto.apply(hakukohde.getTarjoajaOid())
-                        .map(toimistonOsoite -> new TarjoajaWithOsoite(hakukohde.getTarjoajaOid(), Hakijapalvelu.osoite(toimistonOsoite, asiointikieli))))
+                .flatMap(hakukohde -> {
+                    String tarjoajaOid = hakukohde.getTarjoajaOid();
+                    return hakutoimisto.apply(tarjoajaOid)
+                            .map(toimisto -> {
+                                Optional<Osoite> o = Hakijapalvelu.osoite(toimisto, asiointikieli);
+                                if (!o.isPresent()) {
+                                    LOG.error("Tarjoajalla {} ei osoitetta", tarjoajaOid);
+                                }
+                                return o;
+                            })
+                            .map(osoite -> new TarjoajaWithOsoite(tarjoajaOid, osoite));
+                })
                 .collect(HashMap::new, (map, pair) -> map.put(pair.tarjoajaOid, pair.hakutoimisto));
     }
 
