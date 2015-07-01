@@ -68,15 +68,20 @@ public class SijoittelunTulosExcelKomponenttiTest {
     }
 
     @Test
-    public void addsEachHakemusOnlyOnce() throws Throwable {
+    public void addsEachHakemusExactlyOnce() throws Throwable {
         HakukohdeDTO hakukohde = new HakukohdeDTO();
         ValintatapajonoDTO jono1 = createValintatapajonot("jono1", Arrays.asList(HAKEMUS1, HAKEMUS2));
-        ValintatapajonoDTO jono2 = createValintatapajonot("jono2", Arrays.asList(HAKEMUS1, HAKEMUS2, HAKEMUS3));
-        Hakemus hakemus1 = new Hakemus("", "", new Answers(), new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
-        Hakemus hakemus2 = new Hakemus("", "", new Answers(), new HashMap<>(), new ArrayList<>(), HAKEMUS2, "", "");
-        Hakemus hakemus3 = new Hakemus("", "", new Answers(), new HashMap<>(), new ArrayList<>(), HAKEMUS3, "", "");
+        ValintatapajonoDTO jono2 = createValintatapajonot("jono2", Arrays.asList(HAKEMUS2, HAKEMUS3));
         hakukohde.setValintatapajonot(Arrays.asList(jono1, jono2));
-        InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus1, hakemus2, hakemus3), hakukohde);
+        InputStream inputStream = excelKomponentti.luoXls(
+                new ArrayList<>(),
+                "FI",
+                "Konetekniikka",
+                "Aalto yliopisto",
+                "hakukohde1",
+                Arrays.asList(createHakemus(HAKEMUS1), createHakemus(HAKEMUS2), createHakemus(HAKEMUS3)),
+                hakukohde
+        );
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
         assertEquals(1, rowsContaining(HAKEMUS1, rivit).size());
         assertEquals(1, rowsContaining(HAKEMUS2, rivit).size());
@@ -110,5 +115,9 @@ public class SijoittelunTulosExcelKomponenttiTest {
         }).collect(Collectors.toList());
         jono.setHakemukset(hakemusDTOs);
         return jono;
+    }
+
+    private Hakemus createHakemus(String oid) {
+        return new Hakemus("", "", new Answers(), new HashMap<>(), new ArrayList<>(), oid, "", "");
     }
 }
