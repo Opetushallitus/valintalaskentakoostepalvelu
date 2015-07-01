@@ -15,6 +15,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
+import fi.vm.sade.valinta.kooste.util.TodellisenJonosijanLaskentaUtiliteetti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.OsoiteHaku;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
@@ -73,29 +74,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         this.haeOsoiteKomponentti = haeOsoiteKomponentti;
     }
 
-    public static Map<String, TreeMultiset<Integer>> todellisenJonosijanRatkaisin(Collection<HakijaDTO> hakukohteenHakijat) {
-        Map<String, TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija = Maps.newHashMap();
-        for (HakijaDTO hakija : hakukohteenHakijat) {
-            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-                for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
-                    if (!valintatapajono.getTila().isHyvaksytty()) {
-                        continue;
-                    }
-                    if (!valintatapajonoToJonosijaToHakija.containsKey(valintatapajono.getValintatapajonoOid())) {
-                        valintatapajonoToJonosijaToHakija.put(valintatapajono.getValintatapajonoOid(), TreeMultiset.<Integer>create());
-                    }
-                    int kkJonosija = Optional.ofNullable(
-                            valintatapajono.getJonosija()).orElse(0)
-                            + Optional.ofNullable(
-                            valintatapajono.getTasasijaJonosija())
-                            .orElse(0) - 1;
-                    valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()).add(kkJonosija);
-                }
-            }
-        }
-        return valintatapajonoToJonosijaToHakija;
-    }
-
     @Override
     public void hyvaksymiskirjeetHakemuksille(final KirjeProsessi prosessi,
                                               final HyvaksymiskirjeDTO hyvaksymiskirjeDTO,
@@ -123,7 +101,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                            todellisenJonosijanRatkaisin(hakijat.getResults()),
+                            TodellisenJonosijanLaskentaUtiliteetti.todellisenJonosijanRatkaisin(hakijat.getResults()),
                             ImmutableMap.of(organisaatioOid, Hakijapalvelu.osoite(hakutoimisto, kohdeHakukohde.getHakukohteenKieli())),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHyvaksytyt, hakemukset,
@@ -178,7 +156,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                             kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                            todellisenJonosijanRatkaisin(hakijat.getResults()),
+                            TodellisenJonosijanLaskentaUtiliteetti.todellisenJonosijanRatkaisin(hakijat.getResults()),
                             ImmutableMap.of(hyvaksymiskirjeDTO.getTarjoajaOid(),Optional.ofNullable(hakijapalveluidenOsoite)),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             hylatyt, hakemukset,
@@ -235,7 +213,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                            todellisenJonosijanRatkaisin(hakijat.getResults()),
+                            TodellisenJonosijanLaskentaUtiliteetti.todellisenJonosijanRatkaisin(hakijat.getResults()),
                             ImmutableMap.of(organisaatioOid,Hakijapalvelu.osoite(hakutoimisto, kohdeHakukohde.getHakukohteenKieli())),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHyvaksytyt, hakemukset,

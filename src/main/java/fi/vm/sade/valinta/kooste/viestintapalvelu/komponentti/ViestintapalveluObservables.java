@@ -8,6 +8,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.TodellisenJonosijanLaskentaUtiliteetti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -138,7 +139,7 @@ public class ViestintapalveluObservables {
                                                   Observable<Map<String, Optional<Osoite>>> addresses, HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti) {
         return addresses.map(hakijapalveluidenOsoite -> hyvaksymiskirjeetKomponentti
                 .teeHyvaksymiskirjeet(
-                        HyvaksymiskirjeetServiceImpl.todellisenJonosijanRatkaisin(hyvaksytytHakijat),
+                        TodellisenJonosijanLaskentaUtiliteetti.todellisenJonosijanRatkaisin(hyvaksytytHakijat),
                         hakijapalveluidenOsoite,
                         hyvaksymiskirjeessaKaytetytHakukohteet,
                         hyvaksytytHakijat,
