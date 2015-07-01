@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.util.TodellisenJonosijanLaskentaUtiliteetti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import rx.Observable;
 import rx.functions.Action3;
+import rx.functions.Action4;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
@@ -78,7 +80,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                     .stream()
                                     .filter(h -> whitelist.contains(h.getHakemusOid()))
                                     .collect(Collectors.toList());
-                            muodostaKirjeet().call(whitelistinJalkeen, prosessi, jalkiohjauskirjeDTO);
+                            muodostaKirjeet().call(hakijat, whitelistinJalkeen, prosessi, jalkiohjauskirjeDTO);
                         },
                         throwable -> {
                             LOG.error("Koulutuspaikattomien haku haulle {} epaonnistui! {}", jalkiohjauskirjeDTO.getHakuOid(), throwable.getMessage());
@@ -95,7 +97,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                         hakijat -> {
                             //VIALLISET DATA POIS FILTTEROINTI
                             Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
-                            muodostaKirjeet().call(vainHakeneetJalkiohjattavat, prosessi, jalkiohjauskirjeDTO);
+                            muodostaKirjeet().call(hakijat, vainHakeneetJalkiohjattavat, prosessi, jalkiohjauskirjeDTO);
                         },
                         throwable -> {
                             LOG.error("Koulutuspaikattomien haku haulle {} epaonnistui!", jalkiohjauskirjeDTO.getHakuOid(), throwable);
@@ -103,8 +105,8 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                         });
     }
 
-    private Action3<Collection<HakijaDTO>, KirjeProsessi, JalkiohjauskirjeDTO> muodostaKirjeet() {
-        return (hakijat, prosessi, kirje) -> {
+    private Action4<HakijaPaginationObject, Collection<HakijaDTO>, KirjeProsessi, JalkiohjauskirjeDTO> muodostaKirjeet() {
+        return (kaikkiHakijat, hakijat, prosessi, kirje) -> {
             String kieli =
                     KieliUtil.normalisoiKielikoodi(
                     Optional.ofNullable(StringUtils.trimToNull(kirje.getKielikoodi())).orElse(KieliUtil.SUOMI));
@@ -158,7 +160,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                     }
                 }
             }
-            LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(TodellisenJonosijanLaskentaUtiliteetti.todellisenJonosijanRatkaisin(hakijat), kirje.getKielikoodi(), yksikielisetHakijat,
+            LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(TodellisenJonosijanLaskentaUtiliteetti.todellisenJonosijanRatkaisin(kaikkiHakijat.getResults()), kirje.getKielikoodi(), yksikielisetHakijat,
                     yksikielisetHakemukset, metaKohteet, kirje.getHakuOid(), kirje.getTemplateName(), kirje.getSisalto(), kirje.getTag());
             try {
                 if (prosessi.isKeskeytetty()) {
