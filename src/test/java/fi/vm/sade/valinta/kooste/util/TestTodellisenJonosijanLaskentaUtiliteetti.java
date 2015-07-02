@@ -10,8 +10,6 @@ import com.google.common.collect.TreeMultiset;
 
 public class TestTodellisenJonosijanLaskentaUtiliteetti {
 
-	//FIXME: check setJonosija values
-
 	@Test
 	public void testaaJonosijanLaskentaUtiliteetti() {
 		HakutoiveenValintatapajonoDTO valintatapajono = new HakutoiveenValintatapajonoDTO();
@@ -44,7 +42,8 @@ public class TestTodellisenJonosijanLaskentaUtiliteetti {
 	@Test
 	public void testaaJonosijanLaskentaUtiliteettiMontaSamaaKunEiAlaYkkosesta() {
 		HakutoiveenValintatapajonoDTO valintatapajono = new HakutoiveenValintatapajonoDTO();
-		valintatapajono.setJonosija(15);
+		valintatapajono.setJonosija(14);
+		valintatapajono.setTasasijaJonosija(1);
 
 		Multiset<Integer> hyvaksyttyjenJonosijat = TreeMultiset.<Integer>create();
 		hyvaksyttyjenJonosijat.add(11);
@@ -58,7 +57,8 @@ public class TestTodellisenJonosijanLaskentaUtiliteetti {
 	@Test
 	public void testaaJonosijanLaskentaUtiliteettiMonenSamanJalkeenKunEiAlaYkkosesta() {
 		HakutoiveenValintatapajonoDTO valintatapajono = new HakutoiveenValintatapajonoDTO();
-		valintatapajono.setJonosija(16);
+		valintatapajono.setJonosija(15);
+		valintatapajono.setTasasijaJonosija(1);
 
 		Multiset<Integer> hyvaksyttyjenJonosijat = TreeMultiset.<Integer>create();
 		hyvaksyttyjenJonosijat.add(11);
