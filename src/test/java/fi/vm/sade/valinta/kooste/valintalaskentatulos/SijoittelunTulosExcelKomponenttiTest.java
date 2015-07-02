@@ -91,8 +91,9 @@ public class SijoittelunTulosExcelKomponenttiTest {
     public void addsCellsForEachHakemusAndEachJono() throws Throwable {
         HakukohdeDTO hakukohde = new HakukohdeDTO();
         ValintatapajonoDTO jono1 = createValintatapajonot("jono1", Arrays.asList(HAKEMUS1));
-        ValintatapajonoDTO jono2 = createValintatapajonot("jono2", Arrays.asList(HAKEMUS2, HAKEMUS3));
-        hakukohde.setValintatapajonot(Arrays.asList(jono1, jono2));
+        ValintatapajonoDTO jono2 = createValintatapajonot("jono2", Arrays.asList(HAKEMUS1, HAKEMUS3));
+        ValintatapajonoDTO jono3 = createValintatapajonot("jono3", Arrays.asList(HAKEMUS1, HAKEMUS2));
+        hakukohde.setValintatapajonot(Arrays.asList(jono1, jono2, jono3));
         InputStream inputStream = excelKomponentti.luoXls(
                 new ArrayList<>(),
                 "FI",
@@ -103,9 +104,9 @@ public class SijoittelunTulosExcelKomponenttiTest {
                 hakukohde
         );
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
-        assertEquals(32, solut(HAKEMUS1, rivit).size());
-        assertEquals(32, solut(HAKEMUS1, rivit).size());
-        assertEquals(32, solut(HAKEMUS1, rivit).size());
+        assertEquals(38, solut(HAKEMUS1, rivit).size());
+        assertEquals(38, solut(HAKEMUS2, rivit).size());
+        assertEquals(38, solut(HAKEMUS3, rivit).size());
     }
 
     private List<String> cellTexts(Collection<Rivi> rivit, String oid) {
