@@ -187,6 +187,8 @@ public class HyvaksymiskirjeetKomponentti {
                 tulokset.put("sijoitukset", kkSijoitukset);
                 tulokset.put("pisteet", kkPisteet);
 
+                final boolean valittuHakukohteeseen = hakutoive.getHakutoiveenValintatapajonot().stream().anyMatch((jono) -> jono.getTila().isHyvaksytty());
+
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
                     String kkNimi = valintatapajono.getValintatapajonoNimi();
                     int kkHyvaksytyt = ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
@@ -195,7 +197,7 @@ public class HyvaksymiskirjeetKomponentti {
                     BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
                     String kkMinimi = suomennaNumero(ofNullable(alinHyvaksyttyPistemaara).orElse(BigDecimal.ZERO));
 
-                    Integer varasijanumero = valintatapajono.getTila().isVaralla() ? valintatapajono.getVarasijanNumero() : null;
+                    Integer varasijanumero = (!valittuHakukohteeseen && valintatapajono.getTila().isVaralla()) ? valintatapajono.getVarasijanNumero() : null;
                     kkSijoitukset.add(new Sijoitus(kkNimi, kkHyvaksytyt, varasijanumero));
 
                     // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
