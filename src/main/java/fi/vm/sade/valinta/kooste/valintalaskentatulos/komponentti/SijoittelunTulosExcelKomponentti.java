@@ -233,6 +233,8 @@ public class SijoittelunTulosExcelKomponentti {
                                 .collect(Collectors.toList());
                     }
                     hakemusRivi.addAll(jonoHakemusSarakkeet);
+                } else {
+                    hakemusRivi.add(Arrays.asList("", "", "", "", "", ""));
                 }
             }
             rivit.add(hakemusRivi.toArray());
