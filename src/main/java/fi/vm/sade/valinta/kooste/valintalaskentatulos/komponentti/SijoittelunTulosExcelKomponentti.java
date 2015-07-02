@@ -234,7 +234,7 @@ public class SijoittelunTulosExcelKomponentti {
                     }
                     hakemusRivi.addAll(jonoHakemusSarakkeet);
                 } else {
-                    hakemusRivi.add(Arrays.asList("", "", "", "", "", ""));
+                    hakemusRivi.addAll(Arrays.asList("", "", "", "", "", ""));
                 }
             }
             rivit.add(hakemusRivi.toArray());
