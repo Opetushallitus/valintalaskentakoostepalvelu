@@ -17,10 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.google.common.collect.TreeMultiset;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.util.TodellisenJonosijanLaskentaUtiliteetti;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
@@ -80,7 +78,7 @@ public class JalkiohjauskirjeetKomponentti {
     }
 
     public LetterBatch teeJalkiohjauskirjeet(
-            Map<String, TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija, String ylikirjoitettuPreferoitukielikoodi,
+            String ylikirjoitettuPreferoitukielikoodi,
             @Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
             final Collection<Hakemus> hakemukset,
             final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
@@ -163,13 +161,10 @@ public class JalkiohjauskirjeetKomponentti {
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
                     String kkNimi = valintatapajono.getValintatapajonoNimi();
                     int kkHyvaksytyt = Optional.ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
-                    if (valintatapajono.getTila().isHyvaksyttyOrVaralla()) {
-                        int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(valintatapajono,
-                                valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()));
-                        kkSijoitukset.add(new Sijoitus(kkNimi, todellinenKkJonosija, kkHyvaksytyt));
-                    } else {
-                        kkSijoitukset.add(new Sijoitus(kkNimi, null, kkHyvaksytyt));
-                    }
+
+                    Integer varasijanumero = valintatapajono.getTila().isVaralla() ? valintatapajono.getVarasijanNumero() : null;
+                    kkSijoitukset.add(new Sijoitus(kkNimi, kkHyvaksytyt, varasijanumero));
+
                     BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
                     String kkPiste = suomennaNumero(Optional.ofNullable(numeerisetPisteet).orElse(BigDecimal.ZERO));
                     BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();

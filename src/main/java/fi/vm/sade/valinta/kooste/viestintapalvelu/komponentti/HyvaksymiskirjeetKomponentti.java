@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.TreeMultiset;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
@@ -14,7 +13,6 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncR
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.TodellisenJonosijanLaskentaUtiliteetti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
@@ -74,7 +72,6 @@ public class HyvaksymiskirjeetKomponentti {
     }
 
     public LetterBatch teeHyvaksymiskirjeet(
-            Map<String, TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija,
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat,
@@ -89,7 +86,6 @@ public class HyvaksymiskirjeetKomponentti {
             boolean iPosti) {
         return teeHyvaksymiskirjeet(
                 koodistoCachedAsyncResource::haeKoodisto,
-                valintatapajonoToJonosijaToHakija,
                 hakukohdeJaHakijapalveluidenOsoite,
                 hyvaksymiskirjeessaKaytetytHakukohteet,
                 hakukohteenHakijat,
@@ -106,7 +102,6 @@ public class HyvaksymiskirjeetKomponentti {
 
     public static LetterBatch teeHyvaksymiskirjeet(
             Function<String, Map<String, Koodi>> haeKoodisto,
-            Map<String, TreeMultiset<Integer>> valintatapajonoToJonosijaToHakija,
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat, Collection<Hakemus> hakemukset,
@@ -200,13 +195,8 @@ public class HyvaksymiskirjeetKomponentti {
                     BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
                     String kkMinimi = suomennaNumero(ofNullable(alinHyvaksyttyPistemaara).orElse(BigDecimal.ZERO));
 
-                    if (valintatapajono.getTila().isHyvaksyttyOrVaralla()) {
-                        int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(valintatapajono,
-                                valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()));
-                        kkSijoitukset.add(new Sijoitus(kkNimi, todellinenKkJonosija, kkHyvaksytyt));
-                    } else {
-                        kkSijoitukset.add(new Sijoitus(kkNimi, null, kkHyvaksytyt));
-                    }
+                    Integer varasijanumero = valintatapajono.getTila().isVaralla() ? valintatapajono.getVarasijanNumero() : null;
+                    kkSijoitukset.add(new Sijoitus(kkNimi, kkHyvaksytyt, varasijanumero));
 
                     // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
                     // pisteet pois jos jono ei käytä laskentaa, tietoa ei kuitenkaan ole käsillä

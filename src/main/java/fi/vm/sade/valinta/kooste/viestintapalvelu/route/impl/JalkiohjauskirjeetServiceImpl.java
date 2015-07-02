@@ -7,9 +7,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.google.gson.Gson;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
-import fi.vm.sade.valinta.kooste.util.TodellisenJonosijanLaskentaUtiliteetti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -18,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import rx.Observable;
-import rx.functions.Action3;
 import rx.functions.Action4;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
@@ -160,7 +157,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                     }
                 }
             }
-            LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(TodellisenJonosijanLaskentaUtiliteetti.todellisenJonosijanRatkaisin(kaikkiHakijat.getResults()), kirje.getKielikoodi(), yksikielisetHakijat,
+            LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(kirje.getKielikoodi(), yksikielisetHakijat,
                     yksikielisetHakemukset, metaKohteet, kirje.getHakuOid(), kirje.getTemplateName(), kirje.getSisalto(), kirje.getTag());
             try {
                 if (prosessi.isKeskeytetty()) {

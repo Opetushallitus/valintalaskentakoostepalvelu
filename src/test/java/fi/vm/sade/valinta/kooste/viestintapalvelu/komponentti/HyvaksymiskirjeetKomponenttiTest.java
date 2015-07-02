@@ -46,7 +46,7 @@ public class HyvaksymiskirjeetKomponenttiTest {
         return "LetterBatch [letters=[Letter [addressLabel=null, null null, templateReplacements={palautusPvm=palautusPvm, " +
                 "tulokset=[{oppilaitoksenNimi=, hyvaksytyt=1 / 1 , omatPisteet=" + omatPisteet + " , pisteet=[" + pisteObjekti + "], hylkayksenSyy=, " +
                 "organisaationNimi=Hakukohteella hakukohdeOid ei ole tarjojannimeä, " +
-                "sijoitukset=[Sijoitus{nimi='Jonon nimi', oma='1', hyvaksytyt='1'}], alinHyvaksyttyPistemaara=, hylkaysperuste=, " +
+                "sijoitukset=[Sijoitus{nimi='Jonon nimi', oma='1', hyvaksytyt='-'}], alinHyvaksyttyPistemaara=, hylkaysperuste=, " +
                 "kaikkiHakeneet=, hakukohteenNimi=Hakukohteella hakukohdeOid ei ole hakukohteennimeä, " +
                 "paasyJaSoveltuvuuskoe=3,99, valinnanTulos=Hyväksytty}], palautusAika=palautusAika, koulu=Hakukohteella " +
                 "hakukohdeOid ei ole tarjojannimeä, henkilotunnus=, tarjoaja=Hakukohteella tarjoajaOid ei ole " +
@@ -114,7 +114,6 @@ public class HyvaksymiskirjeetKomponenttiTest {
 
         return HyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
                 (String x) -> new HashMap<>(),
-                ImmutableMap.of(VALINTATAPAJONO_OID, TreeMultiset.create(ImmutableList.of(-1))),
                 ImmutableMap.of(TARJOAJA_OID, ofNullable(osoite)),
                 ImmutableMap.of(HAKUKOHDE_OID, new MetaHakukohde(TARJOAJA_OID, new Teksti(), new Teksti())),
                 ImmutableList.of(hakija),
