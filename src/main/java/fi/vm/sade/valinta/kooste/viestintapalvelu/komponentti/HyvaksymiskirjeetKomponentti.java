@@ -201,12 +201,7 @@ public class HyvaksymiskirjeetKomponentti {
                     String kkMinimi = suomennaNumero(ofNullable(alinHyvaksyttyPistemaara).orElse(BigDecimal.ZERO));
 
                     if (valintatapajono.getTila().isHyvaksyttyOrVaralla()) {
-                        int kkJonosija = ofNullable(
-                                valintatapajono.getJonosija()).orElse(0)
-                                + ofNullable(
-                                valintatapajono.getTasasijaJonosija())
-                                .orElse(0) - 1;
-                        int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(kkJonosija,
+                        int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(valintatapajono,
                                 valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()));
                         kkSijoitukset.add(new Sijoitus(kkNimi, todellinenKkJonosija, kkHyvaksytyt));
                     } else {

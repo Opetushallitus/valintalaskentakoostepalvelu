@@ -33,7 +33,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
@@ -165,9 +164,7 @@ public class JalkiohjauskirjeetKomponentti {
                     String kkNimi = valintatapajono.getValintatapajonoNimi();
                     int kkHyvaksytyt = Optional.ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
                     if (valintatapajono.getTila().isHyvaksyttyOrVaralla()) {
-                        int kkJonosija = Optional.ofNullable(valintatapajono.getJonosija()).orElse(0)
-                                + Optional.ofNullable(valintatapajono.getTasasijaJonosija()).orElse(0) - 1;
-                        int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(kkJonosija,
+                        int todellinenKkJonosija = TodellisenJonosijanLaskentaUtiliteetti.laskeTodellinenJonosija(valintatapajono,
                                 valintatapajonoToJonosijaToHakija.get(valintatapajono.getValintatapajonoOid()));
                         kkSijoitukset.add(new Sijoitus(kkNimi, todellinenKkJonosija, kkHyvaksytyt));
                     } else {
