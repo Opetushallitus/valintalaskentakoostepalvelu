@@ -17,29 +17,36 @@ public class HakijapalveluTest {
     @Test
     public void testParsingForFinnishFromFinnish() throws Exception {
         HakutoimistoDTO hakutoimisto = hakutoimistoFi();
-        assertCorrectAddress(Hakijapalvelu.osoite(hakutoimisto, KieliUtil.SUOMI), "Hakutoimisto", "Testitie 1", "Helsinki");
+        assertCorrectAddress(Hakijapalvelu.osoite(hakutoimisto, KieliUtil.SUOMI), "Hakutoimisto", "Testitie 1", "Helsinki", "http://www.foo.fi");
     }
 
     @Test
     public void testParsingForEnglishFromFiAndEn() throws Exception {
         HakutoimistoDTO hakutoimisto = hakutoimistoFiAndEn();
-        assertCorrectAddress(Hakijapalvelu.osoite(hakutoimisto, KieliUtil.ENGLANTI), "Admission services", "Testitie 1, 00100, Helsinki, Finland", StringUtils.EMPTY);
+        assertCorrectAddress(Hakijapalvelu.osoite(hakutoimisto, KieliUtil.ENGLANTI), "Admission services", "Testitie 1, 00100, Helsinki, Finland", StringUtils.EMPTY, "http://www.foo.fi");
     }
 
 
     @Test
     public void testParsingForEnglishFromFinnish() throws Exception {
         HakutoimistoDTO hakutoimisto = hakutoimistoFi();
-        assertCorrectAddress(Hakijapalvelu.osoite(hakutoimisto, KieliUtil.ENGLANTI), "Hakutoimisto", "Testitie 1", "Helsinki");
-
+        assertCorrectAddress(Hakijapalvelu.osoite(hakutoimisto, KieliUtil.ENGLANTI), "Hakutoimisto", "Testitie 1", "Helsinki", "http://www.foo.fi");
     }
 
-    private void assertCorrectAddress(Optional<Osoite> osoiteOpt, String nimi, String katuosoite, String postitoimipaikka) {
+    @Test
+    public void testFallbackToFinnishWhenParsingForEnglishWithNoAddress() throws Exception {
+        HakutoimistoDTO hakutoimisto = hakutoimistoFiAndEnWithNoAddress();
+        assertCorrectAddress(Hakijapalvelu.osoite(hakutoimisto, KieliUtil.ENGLANTI), "Admission services", "Testitie 1", "Helsinki", "http://www.foo.com");
+    }
+
+    private void assertCorrectAddress(Optional<Osoite> osoiteOpt,
+                                      String nimi, String katuosoite, String postitoimipaikka, String www) {
         assertTrue(osoiteOpt.isPresent());
         Osoite osoite = osoiteOpt.get();
         assertEquals(nimi, osoite.getOrganisaationimi());
         assertEquals(katuosoite, osoite.getAddressline());
         assertEquals(postitoimipaikka, osoite.getCity());
+        assertEquals(www, osoite.getWww());
     }
 
     private HakutoimistoDTO hakutoimistoFi() {
@@ -55,6 +62,16 @@ public class HakijapalveluTest {
                 ImmutableMap.of(
                         "kieli_fi#1", yhteystiedot("Testitie 1", false),
                         "kieli_en#1", yhteystiedot("Testitie 1, 00100, Helsinki, Finland", true))
+        );
+    }
+
+    private HakutoimistoDTO hakutoimistoFiAndEnWithNoAddress() {
+        return new HakutoimistoDTO(
+                ImmutableMap.of("kieli_fi#1", "Hakutoimisto", "kieli_en#1", "Admission services"),
+                ImmutableMap.of(
+                        "kieli_fi#1", yhteystiedot("Testitie 1", false),
+                        "kieli_en#1", new HakutoimistoDTO.HakutoimistonYhteystiedotDTO(
+                                null, null, "http://www.foo.com", "bar@foo.com", "01000700"))
         );
     }
 
