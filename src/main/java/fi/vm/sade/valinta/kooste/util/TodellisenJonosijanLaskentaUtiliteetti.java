@@ -52,10 +52,8 @@ public class TodellisenJonosijanLaskentaUtiliteetti {
     }
 
     public static int getKkJonosija(HakutoiveenValintatapajonoDTO valintatapajono) {
-        return Optional.ofNullable(
-                valintatapajono.getJonosija()).orElse(0)
-                                + Optional.ofNullable(
-                                valintatapajono.getTasasijaJonosija())
-                                .orElse(0) - 1;
+        return Optional.ofNullable(valintatapajono.getJonosija()).orElse(0)
+                + Optional.ofNullable(valintatapajono.getTasasijaJonosija()).orElse(0)
+                - 1;
     }
 }
