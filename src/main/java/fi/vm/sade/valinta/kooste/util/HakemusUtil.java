@@ -40,7 +40,7 @@ public class HakemusUtil {
 
     private static Map<String, Map<ValintatuloksenTila, String>> valintatulostenTilat() {
         Map<String, Map<ValintatuloksenTila, String>> kielet = new HashMap<String, Map<ValintatuloksenTila, String>>();
-        Map<ValintatuloksenTila, String> fi = new HashMap<ValintatuloksenTila, String>();
+        Map<ValintatuloksenTila, String> fi = new HashMap<>();
         fi.put(ILMOITETTU, "Ilmoitettu");
         fi.put(VASTAANOTTANUT, "Vastaanottanut");
         fi.put(VASTAANOTTANUT_LASNA, "Vastaanottanut läsnä");
@@ -85,7 +85,7 @@ public class HakemusUtil {
 
     private static Map<String, Map<HakemuksenTila, String>> valmistaTilat() {
         Map<String, Map<HakemuksenTila, String>> kielet = new HashMap<String, Map<HakemuksenTila, String>>();
-        Map<HakemuksenTila, String> fi = new HashMap<HakemuksenTila, String>();
+        Map<HakemuksenTila, String> fi = new HashMap<>();
         fi.put(HYLATTY, "Hylätty");
         fi.put(VARALLA, "Varalla");
         fi.put(VARASIJALTA_HYVAKSYTTY, "Varasijalta hyväksytty");
@@ -95,7 +95,7 @@ public class HakemusUtil {
         fi.put(HakemuksenTila.PERUUTETTU, "Peruutettu");
         fi.put(PERUNUT, "Perunut");
 
-        Map<HakemuksenTila, String> sv = new HashMap<HakemuksenTila, String>();
+        Map<HakemuksenTila, String> sv = new HashMap<>();
         sv.put(HYLATTY, "Underkänd");
         sv.put(VARALLA, "På reservplats");
         sv.put(VARASIJALTA_HYVAKSYTTY, "Godkänd från reservplats");
