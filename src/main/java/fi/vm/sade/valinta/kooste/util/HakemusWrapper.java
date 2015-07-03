@@ -191,6 +191,17 @@ public class HakemusWrapper {
         }
     }
 
+    public String getEtunimet() {
+        getHenkilotiedot(); // lazy load henkilotiedot
+        if (henkilotiedot.containsKey(ETUNIMET)) {
+            return henkilotiedot.get(ETUNIMET);
+        } else if (henkilotiedot.containsKey(KUTSUMANIMI)) {
+            return henkilotiedot.get(KUTSUMANIMI);
+        } else {
+            return StringUtils.EMPTY;
+        }
+    }
+
     public String getSukunimi() {
         getHenkilotiedot(); // lazy load henkilotiedot
         if (henkilotiedot.containsKey(SUKUNIMI)) {

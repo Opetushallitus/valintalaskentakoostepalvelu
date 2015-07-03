@@ -156,7 +156,7 @@ public class SijoittelunTulosExcelKomponentti {
 
         for (HakemusDTO hDto : distinctHakemuksetFromAllQueues) {
             HakemusWrapper wrapper = new HakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
-            String nimi = wrapper.getSukunimi() + ", " + wrapper.getEtunimi();
+            String nimi = wrapper.getSukunimi() + ", " + wrapper.getEtunimet();
             List<Object> hakemusRivi = Lists.newArrayList();
 
             hakemusRivi.addAll(Arrays.asList(

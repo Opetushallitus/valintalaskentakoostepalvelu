@@ -63,7 +63,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
         Hakemus hakemus = new Hakemus("", "", answers, new HashMap<>(), new ArrayList<>(), HAKEMUS1, "", "");
         InputStream inputStream = excelKomponentti.luoXls(new ArrayList<>(), "FI", "Konetekniikka", "Aalto yliopisto", "hakukohde1", Arrays.asList(hakemus), hakukohde);
         Collection<Rivi> rivit = ExcelImportUtil.importHSSFExcel(inputStream);
-        assertTrue(cellTexts(rivit, HAKEMUS1).contains("Alamäki, Pekka"));
+        assertTrue(cellTexts(rivit, HAKEMUS1).contains("Alamäki, Pekka Johannes"));
     }
 
     @Test
