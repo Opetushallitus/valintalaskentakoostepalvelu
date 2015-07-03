@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.util;
 
+import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.*;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HARKINNANVARAISESTI_HYVAKSYTTY;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYLATTY;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.HYVAKSYTTY;
@@ -7,13 +8,6 @@ import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARASIJALTA_HYVAKSY
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUNUT;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.PERUUNTUNUT;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.VARALLA;
-import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.EHDOLLISESTI_VASTAANOTTANUT;
-import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA;
-import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.ILMOITETTU;
-import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.PERUUTETTU;
-import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.VASTAANOTTANUT;
-import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.VASTAANOTTANUT_LASNA;
-import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.VASTAANOTTANUT_POISSAOLEVA;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,16 +45,20 @@ public class HakemusUtil {
         fi.put(VASTAANOTTANUT, "Vastaanottanut");
         fi.put(VASTAANOTTANUT_LASNA, "Vastaanottanut läsnä");
         fi.put(VASTAANOTTANUT_POISSAOLEVA, "Vastaanottanut poissaolevana");
+        fi.put(VASTAANOTTANUT_SITOVASTI, "Vastaanottanut sitovasti");
         fi.put(EI_VASTAANOTETTU_MAARA_AIKANA, "Ei vastaanotettu määräaikana");
+        fi.put(KESKEN, "Kesken");
         fi.put(ValintatuloksenTila.PERUNUT, "Perunut");
         fi.put(PERUUTETTU, "Peruutettu");
         fi.put(EHDOLLISESTI_VASTAANOTTANUT, "Ehdollisesti vastaanottanut");
 
         Map<ValintatuloksenTila, String> sv = new HashMap<ValintatuloksenTila, String>();
         sv.put(ILMOITETTU, "Ilmoitettu");
+        sv.put(KESKEN, "Kesken");
         sv.put(VASTAANOTTANUT, "Vastaanottanut");
         sv.put(VASTAANOTTANUT_LASNA, "Vastaanottanut läsnä");
         sv.put(VASTAANOTTANUT_POISSAOLEVA, "Vastaanottanut poissaolevana");
+        sv.put(VASTAANOTTANUT_SITOVASTI, "Vastaanottanut sitovasti");
         sv.put(EI_VASTAANOTETTU_MAARA_AIKANA, "Ei vastaanotettu määräaikana");
         sv.put(ValintatuloksenTila.PERUNUT, "Perunut");
         sv.put(PERUUTETTU, "Peruutettu");
@@ -68,9 +66,11 @@ public class HakemusUtil {
 
         Map<ValintatuloksenTila, String> en = new HashMap<ValintatuloksenTila, String>();
         en.put(ILMOITETTU, "Ilmoitettu");
+        en.put(KESKEN, "Kesken");
         en.put(VASTAANOTTANUT, "Vastaanottanut");
         en.put(VASTAANOTTANUT_LASNA, "Vastaanottanut läsnä");
         en.put(VASTAANOTTANUT_POISSAOLEVA, "Vastaanottanut poissaolevana");
+        en.put(VASTAANOTTANUT_SITOVASTI, "Vastaanottanut sitovasti");
         en.put(EI_VASTAANOTETTU_MAARA_AIKANA, "Ei vastaanotettu määräaikana");
         en.put(ValintatuloksenTila.PERUNUT, "Perunut");
         en.put(PERUUTETTU, "Peruutettu");
