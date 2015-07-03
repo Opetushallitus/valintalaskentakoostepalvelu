@@ -196,9 +196,9 @@ public class SijoittelunTulosExcelKomponentti {
                         }
                     }
                     String ilmoittautumistieto = StringUtils.EMPTY;
-                    try {
-                        ilmoittautumistieto = HakemusUtil.tilaConverter(hakemusTilat.get(hakemusDto.getHakemusOid()), preferoitukielikoodi);
-                    } catch (Exception e) {
+                    IlmoittautumisTila tila = hakemusTilat.get(hakemusDto.getHakemusOid());
+                    if (hakemusTilat.containsKey(tila)) {
+                        ilmoittautumistieto = HakemusUtil.tilaConverter(tila, preferoitukielikoodi);
                     }
                     List<Valintatulos> valintaTulos = tilat.stream().filter(
                             t -> hakemusOid.equals(t.getHakemusOid())
