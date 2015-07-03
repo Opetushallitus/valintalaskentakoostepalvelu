@@ -200,9 +200,9 @@ public class SijoittelunTulosExcelKomponentti {
                     if (hakemusTilat.containsKey(tila)) {
                         ilmoittautumistieto = HakemusUtil.tilaConverter(tila, preferoitukielikoodi);
                     }
-                    List<Valintatulos> valintaTulos = tilat.stream().filter(
-                            t -> hakemusOid.equals(t.getHakemusOid())
-                    ).collect(Collectors.toList());
+                    List<Valintatulos> valintaTulos = tilat.stream()
+                            .filter(t -> hakemusOid.equals(t.getHakemusOid()))
+                            .collect(Collectors.toList());
                     String valintaTieto = StringUtils.EMPTY;
                     for (Valintatulos valinta : valintaTulos) {
                         if (jono.getOid().equals(valinta.getValintatapajonoOid())) {
