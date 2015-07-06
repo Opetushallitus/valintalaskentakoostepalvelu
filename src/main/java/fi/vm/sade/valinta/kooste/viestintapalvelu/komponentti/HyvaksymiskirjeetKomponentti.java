@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.*;
 import static fi.vm.sade.valinta.kooste.util.Formatter.*;
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang.StringUtils.EMPTY;
 
 /**
  * OLETTAA ETTA KAIKILLE VALINTATAPAJONOILLE TEHDAAN HYVAKSYMISKIRJE JOS
@@ -198,8 +197,8 @@ public class HyvaksymiskirjeetKomponentti {
                 tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi().getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(hakukohdeOid)));
                 tulokset.put("omatPisteet", omatPisteet.toString());
                 tulokset.put("hyvaksytyt", hyvaksytyt.toString());
-                tulokset.put("alinHyvaksyttyPistemaara", EMPTY);
-                tulokset.put("kaikkiHakeneet", EMPTY);
+                tulokset.put("alinHyvaksyttyPistemaara", "");
+                tulokset.put("kaikkiHakeneet", "");
                 tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi().getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
                 tulosList.add(tulokset);
             }
