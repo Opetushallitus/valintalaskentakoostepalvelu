@@ -202,19 +202,16 @@ public class JalkiohjauskirjeetKomponentti {
                     }
                 }
                 Collections.sort(hakutoive.getHakutoiveenValintatapajonot(),
-                        new Comparator<HakutoiveenValintatapajonoDTO>() {
-                            @Override
-                            public int compare(HakutoiveenValintatapajonoDTO o1, HakutoiveenValintatapajonoDTO o2) {
-                                final Map<HakemuksenTila, Integer> tilaToPrioriteetti = KirjeetUtil.getHakemuksenTilaIntegerMap();
-                                fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila h1 = Optional.ofNullable(o1.getTila()).orElse(HYLATTY);
-                                fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila h2 = Optional.ofNullable(o2.getTila()).orElse(HYLATTY);
-                                if (VARALLA.equals(h1) && VARALLA.equals(h2)) {
-                                    Integer i1 = Optional.ofNullable(o1.getVarasijanNumero()).orElse(0);
-                                    Integer i2 = Optional.ofNullable(o2.getVarasijanNumero()).orElse(0);
-                                    return i1.compareTo(i2);
-                                }
-                                return tilaToPrioriteetti.get(h1).compareTo(tilaToPrioriteetti.get(h2));
+                        (o1, o2) -> {
+                            final Map<HakemuksenTila, Integer> tilaToPrioriteetti = KirjeetUtil.getHakemuksenTilaIntegerMap();
+                            HakemuksenTila h1 = Optional.ofNullable(o1.getTila()).orElse(HYLATTY);
+                            HakemuksenTila h2 = Optional.ofNullable(o2.getTila()).orElse(HYLATTY);
+                            if (VARALLA.equals(h1) && VARALLA.equals(h2)) {
+                                Integer i1 = Optional.ofNullable(o1.getVarasijanNumero()).orElse(0);
+                                Integer i2 = Optional.ofNullable(o2.getVarasijanNumero()).orElse(0);
+                                return i1.compareTo(i2);
                             }
+                            return tilaToPrioriteetti.get(h1).compareTo(tilaToPrioriteetti.get(h2));
                         });
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
                 if (!hakutoiveenValintatapajonot.isEmpty()) {
