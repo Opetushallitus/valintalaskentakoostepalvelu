@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
@@ -67,14 +68,6 @@ public class JalkiohjauskirjeetKomponentti {
         return "Hakukohteella " + hakukohdeOid + " ei ole tarjojannimeä";
     }
 
-    private Map<String, Hakemus> hakemuksistaOidMap(final Collection<Hakemus> hakemukset) {
-        Map<String, Hakemus> m = Maps.newHashMap();
-        for (Hakemus h : hakemukset) {
-            m.put(h.getOid(), h);
-        }
-        return m;
-    }
-
     public LetterBatch teeJalkiohjauskirjeet(
             String ylikirjoitettuPreferoitukielikoodi,
             @Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
@@ -89,7 +82,7 @@ public class JalkiohjauskirjeetKomponentti {
             LOG.error("Jälkiohjauskirjeitä yritetään luoda haulle jolla kaikki hakijat on hyväksytty koulutukseen!");
             throw new SijoittelupalveluException("Sijoittelupalvelun mukaan kaikki hakijat on hyväksytty johonkin koulutukseen!");
         }
-        final Map<String, Hakemus> hakemusOidHakemukset = hakemuksistaOidMap(hakemukset);
+        final Map<String, Hakemus> hakemusOidHakemukset = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
         final List<Letter> kirjeet = new ArrayList<>();
         final boolean kaytetaanYlikirjoitettuKielikoodia = StringUtils.isNotBlank(ylikirjoitettuPreferoitukielikoodi);
         String preferoituKielikoodi = kaytetaanYlikirjoitettuKielikoodia ? ylikirjoitettuPreferoitukielikoodi : KieliUtil.SUOMI;
