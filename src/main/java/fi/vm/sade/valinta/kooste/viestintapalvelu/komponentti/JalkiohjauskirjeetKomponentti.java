@@ -32,7 +32,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
@@ -107,7 +106,7 @@ public class JalkiohjauskirjeetKomponentti {
                 tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi().getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
                 tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana hakukohdenimea joten tuskin tarvii toistaa
                 tulokset.put("hylkayksenSyy", "");
-                tulokset.put("paasyJaSoveltuvuuskoe", createPaasyJaSoveltuvuuskoePisteet(hakutoive).toString().trim());
+                tulokset.put("paasyJaSoveltuvuuskoe", KirjeetUtil.createPaasyJaSoveltuvuuskoePisteet(hakutoive).toString().trim());
                 tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi().getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(hakukohdeOid)));
                 StringBuilder omatPisteet = new StringBuilder();
                 StringBuilder hyvaksytyt = new StringBuilder();
@@ -205,21 +204,6 @@ public class JalkiohjauskirjeetKomponentti {
         viesti.setTemplateReplacements(templateReplacements);
         LOG.debug("\r\n{}", new ViestiWrapper(viesti));
         return viesti;
-    }
-
-    StringBuilder createPaasyJaSoveltuvuuskoePisteet(HakutoiveDTO hakutoive) {
-        StringBuilder pisteet = new StringBuilder();
-        for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
-            if (pistetieto.getArvo() != null) {
-                try {
-                    BigDecimal ehkaNumeroEhkaTotuusarvo = new BigDecimal(pistetieto.getArvo());
-                    pisteet.append(suomennaNumero(ehkaNumeroEhkaTotuusarvo)).append(ARVO_VALI);
-                } catch (NumberFormatException notNumber) {
-                    // OVT-6340 filtteroidaan totuusarvot pois
-                }
-            }
-        }
-        return pisteet;
     }
 
     private static String hylkaysPerusteText(String preferoituKielikoodi, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot) {

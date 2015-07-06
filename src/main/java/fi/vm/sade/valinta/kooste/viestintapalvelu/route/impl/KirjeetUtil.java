@@ -2,13 +2,19 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
 import com.google.common.collect.Maps;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
+import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
+import org.apache.commons.lang.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.*;
+import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
+import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
 
 public class KirjeetUtil {
     static final Map<HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
@@ -34,5 +40,21 @@ public class KirjeetUtil {
             }
             return tilaToPrioriteetti.get(h1).compareTo(tilaToPrioriteetti.get(h2));
         };
+    }
+
+    public static StringBuilder createPaasyJaSoveltuvuuskoePisteet(HakutoiveDTO hakutoive) {
+        StringBuilder pisteet = new StringBuilder();
+        for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
+            if (pistetieto.getArvo() != null) {
+                try {
+                    String arvo = StringUtils.trimToEmpty(pistetieto.getArvo()).replace(",", ".");
+                    BigDecimal ehkaNumeroEhkaTotuusarvo = new BigDecimal(arvo);
+                    pisteet.append(suomennaNumero(ehkaNumeroEhkaTotuusarvo)).append(ARVO_VALI);
+                } catch (NumberFormatException notNumber) {
+                    // OVT-6340 filtteroidaan totuusarvot pois
+                }
+            }
+        }
+        return pisteet;
     }
 }
