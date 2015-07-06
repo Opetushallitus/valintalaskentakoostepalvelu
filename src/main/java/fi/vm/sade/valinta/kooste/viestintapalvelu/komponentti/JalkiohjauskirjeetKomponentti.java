@@ -11,13 +11,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
@@ -201,18 +199,7 @@ public class JalkiohjauskirjeetKomponentti {
                         throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo kaikki hakeneet.");
                     }
                 }
-                Collections.sort(hakutoive.getHakutoiveenValintatapajonot(),
-                        (o1, o2) -> {
-                            final Map<HakemuksenTila, Integer> tilaToPrioriteetti = KirjeetUtil.getHakemuksenTilaIntegerMap();
-                            HakemuksenTila h1 = Optional.ofNullable(o1.getTila()).orElse(HYLATTY);
-                            HakemuksenTila h2 = Optional.ofNullable(o2.getTila()).orElse(HYLATTY);
-                            if (VARALLA.equals(h1) && VARALLA.equals(h2)) {
-                                Integer i1 = Optional.ofNullable(o1.getVarasijanNumero()).orElse(0);
-                                Integer i2 = Optional.ofNullable(o2.getVarasijanNumero()).orElse(0);
-                                return i1.compareTo(i2);
-                            }
-                            return tilaToPrioriteetti.get(h1).compareTo(tilaToPrioriteetti.get(h2));
-                        });
+                Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
                 if (!hakutoiveenValintatapajonot.isEmpty()) {
                     HakutoiveenValintatapajonoDTO valintatapajono = hakutoiveenValintatapajonot.get(0);

@@ -226,18 +226,7 @@ public class HyvaksymiskirjeetKomponentti {
                     }
                 }
 
-                Collections.sort(hakutoive.getHakutoiveenValintatapajonot(),
-                        (o1, o2) -> {
-                            final Map<HakemuksenTila, Integer> tilaToPrioriteetti = KirjeetUtil.getHakemuksenTilaIntegerMap();
-                            HakemuksenTila h1 = ofNullable(o1.getTila()).orElse(HYLATTY);
-                            HakemuksenTila h2 = ofNullable(o2.getTila()).orElse(HYLATTY);
-                            if (VARALLA.equals(h1) && VARALLA.equals(h2)) {
-                                Integer i1 = ofNullable(o1.getVarasijanNumero()).orElse(0);
-                                Integer i2 = ofNullable(o2.getVarasijanNumero()).orElse(0);
-                                return i1.compareTo(i2);
-                            }
-                            return tilaToPrioriteetti.get(h1).compareTo(tilaToPrioriteetti.get(h2));
-                        });
+                Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
                 if (!hakutoiveenValintatapajonot.isEmpty()) {
                     HakutoiveenValintatapajonoDTO firstValintatapajono = hakutoiveenValintatapajonot.get(0);
