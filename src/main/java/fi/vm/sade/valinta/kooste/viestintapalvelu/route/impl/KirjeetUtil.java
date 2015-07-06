@@ -16,8 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.*;
-import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
-import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
+import static fi.vm.sade.valinta.kooste.util.Formatter.*;
 
 public class KirjeetUtil {
     static final Map<HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
@@ -75,5 +74,14 @@ public class KirjeetUtil {
             tulokset.put("hylkaysperuste", hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot));
             tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(firstValintatapajono.getTila(), preferoituKielikoodi, firstValintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
         }
+    }
+
+    public static void putHyvaksyttyHakeneetData(StringBuilder hyvaksytyt, HakutoiveenValintatapajonoDTO valintatapajono) {
+        // Ylikirjoittuu viimeisella arvolla jos valintatapajonoja on useampi
+        // Nykyinen PDF formaatti ei kykene esittamaan usean jonon selitteita jarkevasti
+        hyvaksytyt.append(suomennaNumero(valintatapajono.getHyvaksytty(), ARVO_VAKIO))
+                .append(ARVO_EROTIN)
+                .append(suomennaNumero(valintatapajono.getHakeneet(), ARVO_VAKIO))
+                .append(ARVO_VALI);
     }
 }

@@ -147,15 +147,7 @@ public class JalkiohjauskirjeetKomponentti {
                                 .append(ARVO_EROTIN)
                                 .append(suomennaNumero(alinHyvaksyttyPistemaara, ARVO_VAKIO)).append(ARVO_VALI);
                     }
-                    hyvaksytyt
-                            .append(suomennaNumero(valintatapajono.getHyvaksytty(), ARVO_VAKIO))
-                            .append(ARVO_EROTIN)
-                            .append(suomennaNumero(valintatapajono.getHakeneet(), ARVO_VAKIO))
-                            .append(ARVO_VALI);
-                    // Ylikirjoittuu viimeisella arvolla jos valintatapajonoja
-                    // on useampi
-                    // Nykyinen PDF formaatti ei kykene esittamaan usean jonon
-                    // selitteita jarkevasti
+                    KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
 
                     if (valintatapajono.getHyvaksytty() == null) {
                         throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");

@@ -9,7 +9,6 @@ import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
-import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -31,7 +30,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.*;
 import static fi.vm.sade.valinta.kooste.util.Formatter.*;
 import static java.util.Optional.ofNullable;
 
@@ -175,14 +173,7 @@ public class HyvaksymiskirjeetKomponentti {
                                 .append(ARVO_EROTIN)
                                 .append(suomennaNumero(alinHyvaksyttyPistemaara, ARVO_VAKIO)).append(ARVO_VALI);
                     }
-                    hyvaksytyt.append(suomennaNumero(valintatapajono.getHyvaksytty(), ARVO_VAKIO))
-                            .append(ARVO_EROTIN)
-                            .append(suomennaNumero(valintatapajono.getHakeneet(), ARVO_VAKIO))
-                            .append(ARVO_VALI);
-                    // Ylikirjoittuu viimeisella arvolla jos valintatapajonoja
-                    // on useampi
-                    // Nykyinen PDF formaatti ei kykene esittamaan usean jonon
-                    // selitteita jarkevasti
+                    KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
                     if (valintatapajono.getHyvaksytty() == null) {
                         throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
                     }
