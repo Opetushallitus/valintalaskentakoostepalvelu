@@ -169,8 +169,8 @@ public class JalkiohjauskirjeetKomponentti {
                 KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(preferoituKielikoodi, tulokset, hakutoiveenValintatapajonot);
                 tulokset.put("omatPisteet", omatPisteet.toString());
                 tulokset.put("hyvaksytyt", hyvaksytyt.toString());
-                tulokset.put("alinHyvaksyttyPistemaara", StringUtils.EMPTY);
-                tulokset.put("kaikkiHakeneet", StringUtils.EMPTY);
+                tulokset.put("alinHyvaksyttyPistemaara", "");
+                tulokset.put("kaikkiHakeneet", "");
                 tulosList.add(tulokset);
             }
             Map<String, Object> replacements = Maps.newHashMap();
