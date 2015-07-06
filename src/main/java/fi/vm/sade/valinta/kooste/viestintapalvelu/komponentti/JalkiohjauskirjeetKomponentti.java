@@ -1,18 +1,13 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_EROTIN;
-import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
-import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
 import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
@@ -105,17 +100,8 @@ public class JalkiohjauskirjeetKomponentti {
                     KirjeetUtil.putSijoituksetData(kkSijoitukset, false, valintatapajono, kkNimi);
 
                     BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
-                    String kkPiste = suomennaNumero(Optional.ofNullable(numeerisetPisteet).orElse(BigDecimal.ZERO));
                     BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
-                    String kkMinimi = suomennaNumero(Optional.ofNullable(alinHyvaksyttyPistemaara).orElse(BigDecimal.ZERO));
-                    // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
-                    // pisteet pois jos jono ei käytä laskentaa, tietoa ei kuitenkaan ole käsillä
-                    if (numeerisetPisteet != null
-                            && numeerisetPisteet.signum() != -1
-                            && alinHyvaksyttyPistemaara != null
-                            && alinHyvaksyttyPistemaara.signum() != -1) {
-                        kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
-                    }
+                    KirjeetUtil.putPisteetData(kkPisteet, kkNimi, numeerisetPisteet, alinHyvaksyttyPistemaara);
 
                     KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
                     KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);

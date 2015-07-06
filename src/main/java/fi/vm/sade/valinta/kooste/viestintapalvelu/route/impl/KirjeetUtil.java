@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Pisteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import org.apache.commons.lang.StringUtils;
 
@@ -124,5 +125,18 @@ public class KirjeetUtil {
         int kkHyvaksytyt = ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
         Integer varasijanumero = (!valittuHakukohteeseen && valintatapajono.getTila().isVaralla()) ? valintatapajono.getVarasijanNumero() : null;
         kkSijoitukset.add(new Sijoitus(kkNimi, kkHyvaksytyt, varasijanumero));
+    }
+
+    public static void putPisteetData(List<Pisteet> kkPisteet, String kkNimi, BigDecimal numeerisetPisteet, BigDecimal alinHyvaksyttyPistemaara) {
+        String kkPiste = suomennaNumero(ofNullable(numeerisetPisteet).orElse(BigDecimal.ZERO));
+        String kkMinimi = suomennaNumero(ofNullable(alinHyvaksyttyPistemaara).orElse(BigDecimal.ZERO));
+        // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
+        // pisteet pois jos jono ei käytä laskentaa, tietoa ei kuitenkaan ole käsillä
+        if (numeerisetPisteet != null
+                && numeerisetPisteet.signum() != -1
+                && alinHyvaksyttyPistemaara != null
+                && alinHyvaksyttyPistemaara.signum() != -1) {
+            kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
+        }
     }
 }

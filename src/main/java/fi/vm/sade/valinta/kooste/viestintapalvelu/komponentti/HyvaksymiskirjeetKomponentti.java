@@ -143,17 +143,8 @@ public class HyvaksymiskirjeetKomponentti {
                     KirjeetUtil.putSijoituksetData(kkSijoitukset, valittuHakukohteeseen, valintatapajono, kkNimi);
 
                     BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
-                    String kkPiste = suomennaNumero(ofNullable(numeerisetPisteet).orElse(BigDecimal.ZERO));
                     BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
-                    String kkMinimi = suomennaNumero(ofNullable(alinHyvaksyttyPistemaara).orElse(BigDecimal.ZERO));
-                    // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
-                    // pisteet pois jos jono ei käytä laskentaa, tietoa ei kuitenkaan ole käsillä
-                    if (numeerisetPisteet != null
-                            && numeerisetPisteet.signum() != -1
-                            && alinHyvaksyttyPistemaara != null
-                            && alinHyvaksyttyPistemaara.signum() != -1) {
-                        kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
-                    }
+                    KirjeetUtil.putPisteetData(kkPisteet, kkNimi, numeerisetPisteet, alinHyvaksyttyPistemaara);
 
                     KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
                     KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
