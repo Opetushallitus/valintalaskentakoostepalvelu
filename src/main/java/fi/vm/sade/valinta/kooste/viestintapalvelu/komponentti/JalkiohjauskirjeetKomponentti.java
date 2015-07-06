@@ -175,7 +175,7 @@ public class JalkiohjauskirjeetKomponentti {
                     if (VARALLA.equals(valintatapajono.getTila()) && valintatapajono.getVarasijanNumero() != null) {
                         tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(valintatapajono.getVarasijanNumero(), preferoituKielikoodi));
                     }
-                    tulokset.put("hylkaysperuste", hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot));
+                    tulokset.put("hylkaysperuste", KirjeetUtil.hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot));
                     tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(valintatapajono.getTila(), preferoituKielikoodi, valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
                 }
                 tulokset.put("omatPisteet", omatPisteet.toString());
@@ -204,10 +204,5 @@ public class JalkiohjauskirjeetKomponentti {
         viesti.setTemplateReplacements(templateReplacements);
         LOG.debug("\r\n{}", new ViestiWrapper(viesti));
         return viesti;
-    }
-
-    private static String hylkaysPerusteText(String preferoituKielikoodi, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot) {
-        HakutoiveenValintatapajonoDTO lastJono = hakutoiveenValintatapajonot.get(hakutoiveenValintatapajonot.size() - 1);
-        return HYLATTY.equals(hakutoiveenValintatapajonot.get(0).getTila()) ? new Teksti(lastJono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, EMPTY) : EMPTY;
     }
 }
