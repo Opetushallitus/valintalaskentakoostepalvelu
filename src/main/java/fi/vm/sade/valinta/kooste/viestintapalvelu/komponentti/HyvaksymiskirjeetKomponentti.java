@@ -21,6 +21,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Pisteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,15 +118,7 @@ public class HyvaksymiskirjeetKomponentti {
         Map<String, Hakemus> hakukohteenHakemukset = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
         final List<Letter> kirjeet = new ArrayList<>();
 
-        final Map<HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
-        tilaToPrioriteetti.put(HARKINNANVARAISESTI_HYVAKSYTTY, 1);
-        tilaToPrioriteetti.put(HYVAKSYTTY, 2);
-        tilaToPrioriteetti.put(VARASIJALTA_HYVAKSYTTY, 3);
-        tilaToPrioriteetti.put(VARALLA, 4);
-        tilaToPrioriteetti.put(PERUNUT, 5);
-        tilaToPrioriteetti.put(PERUUTETTU, 6);
-        tilaToPrioriteetti.put(PERUUNTUNUT, 7);
-        tilaToPrioriteetti.put(HYLATTY, 8);
+        final Map<HakemuksenTila, Integer> tilaToPrioriteetti = KirjeetUtil.getHakemuksenTilaIntegerMap();
 
         Map<String, Koodi> maajavaltio = haeKoodisto.apply(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> posti = haeKoodisto.apply(KoodistoCachedAsyncResource.POSTI);

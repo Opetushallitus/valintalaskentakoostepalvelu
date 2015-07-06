@@ -17,8 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetUtil;
 import org.apache.camel.Body;
 import org.apache.camel.Property;
 import org.apache.camel.language.Simple;
@@ -100,15 +102,7 @@ public class JalkiohjauskirjeetKomponentti {
         } else {
             preferoituKielikoodi = KieliUtil.SUOMI;
         }
-        final Map<fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
-        tilaToPrioriteetti.put(HARKINNANVARAISESTI_HYVAKSYTTY, 1);
-        tilaToPrioriteetti.put(HYVAKSYTTY, 2);
-        tilaToPrioriteetti.put(VARASIJALTA_HYVAKSYTTY, 3);
-        tilaToPrioriteetti.put(VARALLA, 4);
-        tilaToPrioriteetti.put(PERUNUT, 5);
-        tilaToPrioriteetti.put(PERUUTETTU, 6);
-        tilaToPrioriteetti.put(PERUUNTUNUT, 7);
-        tilaToPrioriteetti.put(HYLATTY, 8);
+        final Map<HakemuksenTila, Integer> tilaToPrioriteetti = KirjeetUtil.getHakemuksenTilaIntegerMap();
 
         Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
