@@ -6,6 +6,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import org.apache.commons.lang.StringUtils;
 
@@ -83,5 +84,18 @@ public class KirjeetUtil {
                 .append(ARVO_EROTIN)
                 .append(suomennaNumero(valintatapajono.getHakeneet(), ARVO_VAKIO))
                 .append(ARVO_VALI);
+    }
+
+    public static void putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(Osoite osoite, StringBuilder omatPisteet, BigDecimal numeerisetPisteet, BigDecimal alinHyvaksyttyPistemaara) {
+        // OVT-6334 : Logiikka ei kuulu koostepalveluun!
+        if (osoite.isUlkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt()) {
+            // ei pisteita
+            omatPisteet.append(ARVO_VAKIO).append(ARVO_EROTIN)
+                    .append(suomennaNumero(alinHyvaksyttyPistemaara, ARVO_VAKIO)).append(ARVO_VALI);
+        } else {
+            omatPisteet.append(suomennaNumero(numeerisetPisteet, ARVO_VAKIO))
+                    .append(ARVO_EROTIN)
+                    .append(suomennaNumero(alinHyvaksyttyPistemaara, ARVO_VAKIO)).append(ARVO_VALI);
+        }
     }
 }

@@ -134,21 +134,8 @@ public class JalkiohjauskirjeetKomponentti {
                         kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
                     }
 
-                    //
-                    // OVT-6334 : Logiikka ei kuulu koostepalveluun!
-                    //
-                    if (osoite.isUlkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt()) { // ei
-                        // pisteita
-                        omatPisteet.append(ARVO_VAKIO).append(ARVO_EROTIN)
-                                .append(suomennaNumero(alinHyvaksyttyPistemaara, ARVO_VAKIO)).append(ARVO_VALI);
-                    } else {
-                        omatPisteet
-                                .append(suomennaNumero(numeerisetPisteet, ARVO_VAKIO))
-                                .append(ARVO_EROTIN)
-                                .append(suomennaNumero(alinHyvaksyttyPistemaara, ARVO_VAKIO)).append(ARVO_VALI);
-                    }
+                    KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
                     KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
-
                     if (valintatapajono.getHyvaksytty() == null) {
                         throw new SijoittelupalveluException("Sijoittelu palautti puutteellisesti luodun valintatapajonon! Määrittelemätön arvo hyväksyt.");
                     }
