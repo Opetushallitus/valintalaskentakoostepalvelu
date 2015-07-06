@@ -118,23 +118,15 @@ public class HyvaksymiskirjeetKomponentti {
 
         for (HakijaDTO hakija : hakukohteenHakijat) {
             final String hakukohdeOid = hyvaksytynHakutoiveenHakukohdeOid(hakija);
-            final Teksti koulu;
-            final Teksti koulutus;
-            final String preferoituKielikoodi;
-            final String tarjoajaOid;
-            {
-                MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
-                koulu = metakohde.getTarjoajaNimi();
-                koulutus = metakohde.getHakukohdeNimi();
-                preferoituKielikoodi = asiointikieli.orElse(metakohde.getOpetuskieli());
-                tarjoajaOid = metakohde.getTarjoajaOid();
-            }
+            MetaHakukohde hyvaksyttyMeta = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
+            Teksti koulu = hyvaksyttyMeta.getTarjoajaNimi();
+            Teksti koulutus = hyvaksyttyMeta.getHakukohdeNimi();
+            String preferoituKielikoodi = asiointikieli.orElse(hyvaksyttyMeta.getOpetuskieli());
+            String tarjoajaOid = hyvaksyttyMeta.getTarjoajaOid();
             final String hakemusOid = hakija.getHakemusOid();
             final Hakemus hakemus = hakukohteenHakemukset.get(hakemusOid);
             final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
             final List<Map<String, Object>> tulosList = new ArrayList<>();
-            // Hyvaksymiskirjeilla preferoitukieli tulee hakukohteen kielesta
-            // jarjestyksessa suomi,ruotsi,englanti
 
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
@@ -145,8 +137,6 @@ public class HyvaksymiskirjeetKomponentti {
                 StringBuilder pisteet = new StringBuilder();
                 for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
                     try {
-                        // OVT-7877 Koepisteiden formaattiin ei pysty luottamaan
-                        // koostepalvelussa
                         String arvo = StringUtils.trimToEmpty(pistetieto.getArvo()).replace(",", ".");
                         BigDecimal ehkaNumeroEhkaTotuusarvo = new BigDecimal(arvo);
                         pisteet.append(suomennaNumero(ehkaNumeroEhkaTotuusarvo)).append(ARVO_VALI);
