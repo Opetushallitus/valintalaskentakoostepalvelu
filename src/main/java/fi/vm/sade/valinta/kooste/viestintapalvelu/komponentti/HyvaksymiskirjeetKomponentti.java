@@ -144,12 +144,7 @@ public class HyvaksymiskirjeetKomponentti {
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
                 Map<String, Object> tulokset = new HashMap<>();
-                tulokset.put("oppilaitoksenNimi", "");
-                // tieto on jo osana hakukohdenimea
-                //
-                // joten
-                // tuskin tarvii
-                // toistaa
+                tulokset.put("oppilaitoksenNimi", "");  // tieto on jo osana hakukohdenimea joten tuskin tarvii toistaa
                 tulokset.put("hylkayksenSyy", EMPTY);
 
                 StringBuilder pisteet = new StringBuilder();
@@ -301,8 +296,7 @@ public class HyvaksymiskirjeetKomponentti {
     // niihin liittyvat hakukohteet - eli myos hakijoiden hylatyt hakukohteet!
     // Metahakukohteille haetaan muun muassa tarjoajanimi!
     //
-    public Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(
-            Collection<HakijaDTO> hakukohteenHakijat) {
+    public Map<String, MetaHakukohde> haeKiinnostavatHakukohteet(Collection<HakijaDTO> hakukohteenHakijat) {
         Map<String, MetaHakukohde> metaKohteet = new HashMap<>();
         for (HakijaDTO hakija : hakukohteenHakijat) {
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
