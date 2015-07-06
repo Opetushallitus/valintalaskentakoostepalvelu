@@ -140,15 +140,12 @@ public class HyvaksymiskirjeetKomponentti {
 
                 for (HakutoiveenValintatapajonoDTO valintatapajono : hakutoive.getHakutoiveenValintatapajonot()) {
                     String kkNimi = valintatapajono.getValintatapajonoNimi();
-                    int kkHyvaksytyt = ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
+                    KirjeetUtil.putSijoituksetData(kkSijoitukset, valittuHakukohteeseen, valintatapajono, kkNimi);
+
                     BigDecimal numeerisetPisteet = valintatapajono.getPisteet();
                     String kkPiste = suomennaNumero(ofNullable(numeerisetPisteet).orElse(BigDecimal.ZERO));
                     BigDecimal alinHyvaksyttyPistemaara = valintatapajono.getAlinHyvaksyttyPistemaara();
                     String kkMinimi = suomennaNumero(ofNullable(alinHyvaksyttyPistemaara).orElse(BigDecimal.ZERO));
-
-                    Integer varasijanumero = (!valittuHakukohteeseen && valintatapajono.getTila().isVaralla()) ? valintatapajono.getVarasijanNumero() : null;
-                    kkSijoitukset.add(new Sijoitus(kkNimi, kkHyvaksytyt, varasijanumero));
-
                     // Negatiivisia pisteitä ei lähetetä eteenpäin. Oikea tarkastus olisi jättää
                     // pisteet pois jos jono ei käytä laskentaa, tietoa ei kuitenkaan ole käsillä
                     if (numeerisetPisteet != null
@@ -157,6 +154,7 @@ public class HyvaksymiskirjeetKomponentti {
                             && alinHyvaksyttyPistemaara.signum() != -1) {
                         kkPisteet.add(new Pisteet(kkNimi, kkPiste, kkMinimi));
                     }
+
                     KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
                     KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
                     if (valintatapajono.getHyvaksytty() == null) {

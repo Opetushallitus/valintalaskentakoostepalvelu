@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ import java.util.*;
 
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.*;
 import static fi.vm.sade.valinta.kooste.util.Formatter.*;
+import static java.util.Optional.ofNullable;
 
 public class KirjeetUtil {
     static final Map<HakemuksenTila, Integer> tilaToPrioriteetti = Maps.newHashMap();
@@ -116,5 +118,11 @@ public class KirjeetUtil {
         tulokset.put("kaikkiHakeneet", "");
         tulokset.put("paasyJaSoveltuvuuskoe", createPaasyJaSoveltuvuuskoePisteet(hakutoive).toString().trim());
         return tulokset;
+    }
+
+    public static void putSijoituksetData(List<Sijoitus> kkSijoitukset, boolean valittuHakukohteeseen, HakutoiveenValintatapajonoDTO valintatapajono, String kkNimi) {
+        int kkHyvaksytyt = ofNullable(valintatapajono.getHyvaksytty()).orElse(0);
+        Integer varasijanumero = (!valittuHakukohteeseen && valintatapajono.getTila().isVaralla()) ? valintatapajono.getVarasijanNumero() : null;
+        kkSijoitukset.add(new Sijoitus(kkNimi, kkHyvaksytyt, varasijanumero));
     }
 }
