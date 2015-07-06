@@ -55,14 +55,6 @@ public class JalkiohjauskirjeetKomponentti {
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     }
 
-    private String vakioHakukohteenNimi(String hakukohdeOid) {
-        return "Hakukohteella " + hakukohdeOid + " ei ole hakukohteennimeä";
-    }
-
-    private String vakioTarjoajanNimi(String hakukohdeOid) {
-        return "Hakukohteella " + hakukohdeOid + " ei ole tarjojannimeä";
-    }
-
     public LetterBatch teeJalkiohjauskirjeet(
             String ylikirjoitettuPreferoitukielikoodi,
             @Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
@@ -97,13 +89,8 @@ public class JalkiohjauskirjeetKomponentti {
 
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 String hakukohdeOid = hakutoive.getHakukohdeOid();
-                MetaHakukohde metakohde = jalkiohjauskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
-                Map<String, Object> tulokset = new HashMap<>();
-                tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi().getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
-                tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana hakukohdenimea joten tuskin tarvii toistaa
-                tulokset.put("hylkayksenSyy", "");
-                tulokset.put("paasyJaSoveltuvuuskoe", KirjeetUtil.createPaasyJaSoveltuvuuskoePisteet(hakutoive).toString().trim());
-                tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi().getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(hakukohdeOid)));
+                Map<String, Object> tulokset = KirjeetUtil.getTuloksetMap(jalkiohjauskirjeessaKaytetytHakukohteet, hakukohdeOid, preferoituKielikoodi, hakutoive);
+
                 StringBuilder omatPisteet = new StringBuilder();
                 StringBuilder hyvaksytyt = new StringBuilder();
                 //
@@ -148,8 +135,6 @@ public class JalkiohjauskirjeetKomponentti {
                 KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(preferoituKielikoodi, tulokset, hakutoiveenValintatapajonot);
                 tulokset.put("omatPisteet", omatPisteet.toString());
                 tulokset.put("hyvaksytyt", hyvaksytyt.toString());
-                tulokset.put("alinHyvaksyttyPistemaara", "");
-                tulokset.put("kaikkiHakeneet", "");
                 tulosList.add(tulokset);
             }
             Map<String, Object> replacements = Maps.newHashMap();

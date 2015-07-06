@@ -124,11 +124,7 @@ public class HyvaksymiskirjeetKomponentti {
             final List<Map<String, Object>> tulosList = new ArrayList<>();
 
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-                MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
-                Map<String, Object> tulokset = new HashMap<>();
-                tulokset.put("oppilaitoksenNimi", "");  // tieto on jo osana hakukohdenimea joten tuskin tarvii toistaa
-                tulokset.put("hylkayksenSyy", "");
-                tulokset.put("paasyJaSoveltuvuuskoe", KirjeetUtil.createPaasyJaSoveltuvuuskoePisteet(hakutoive).toString().trim());
+                Map<String, Object> tulokset = KirjeetUtil.getTuloksetMap(hyvaksymiskirjeessaKaytetytHakukohteet, hakukohdeOid, preferoituKielikoodi, hakutoive);
 
                 StringBuilder omatPisteet = new StringBuilder();
                 StringBuilder hyvaksytyt = new StringBuilder();
@@ -174,12 +170,8 @@ public class HyvaksymiskirjeetKomponentti {
                 Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
                 KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(preferoituKielikoodi, tulokset, hakutoiveenValintatapajonot);
-                tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi().getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(hakukohdeOid)));
                 tulokset.put("omatPisteet", omatPisteet.toString());
                 tulokset.put("hyvaksytyt", hyvaksytyt.toString());
-                tulokset.put("alinHyvaksyttyPistemaara", "");
-                tulokset.put("kaikkiHakeneet", "");
-                tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi().getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
                 tulosList.add(tulokset);
             }
             Map<String, Object> replacements = Maps.newHashMap();

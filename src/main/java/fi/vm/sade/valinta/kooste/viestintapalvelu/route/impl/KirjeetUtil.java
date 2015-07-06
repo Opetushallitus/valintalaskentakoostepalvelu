@@ -6,15 +6,13 @@ import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusUtil;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.*;
 import static fi.vm.sade.valinta.kooste.util.Formatter.*;
@@ -97,5 +95,26 @@ public class KirjeetUtil {
                     .append(ARVO_EROTIN)
                     .append(suomennaNumero(alinHyvaksyttyPistemaara, ARVO_VAKIO)).append(ARVO_VALI);
         }
+    }
+
+    private static String vakioHakukohteenNimi(String hakukohdeOid) {
+        return "Hakukohteella " + hakukohdeOid + " ei ole hakukohteennimeä";
+    }
+
+    private static String vakioTarjoajanNimi(String hakukohdeOid) {
+        return "Hakukohteella " + hakukohdeOid + " ei ole tarjojannimeä";
+    }
+
+    public static Map<String, Object> getTuloksetMap(Map<String, MetaHakukohde> kirjeessaKaytetytHakukohteet, String hakukohdeOid, String preferoituKielikoodi, HakutoiveDTO hakutoive) {
+        Map<String, Object> tulokset = new HashMap<>();
+        MetaHakukohde metakohde = kirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
+        tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi().getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
+        tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi().getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(hakukohdeOid)));
+        tulokset.put("oppilaitoksenNimi", "");  // tieto on jo osana hakukohdenimea joten tuskin tarvii toistaa
+        tulokset.put("hylkayksenSyy", "");
+        tulokset.put("alinHyvaksyttyPistemaara", "");
+        tulokset.put("kaikkiHakeneet", "");
+        tulokset.put("paasyJaSoveltuvuuskoe", createPaasyJaSoveltuvuuskoePisteet(hakutoive).toString().trim());
+        return tulokset;
     }
 }
