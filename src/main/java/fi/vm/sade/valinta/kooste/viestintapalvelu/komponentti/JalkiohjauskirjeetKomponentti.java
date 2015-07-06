@@ -92,7 +92,7 @@ public class JalkiohjauskirjeetKomponentti {
             throw new SijoittelupalveluException("Sijoittelupalvelun mukaan kaikki hakijat on hyväksytty johonkin koulutukseen!");
         }
         final Map<String, Hakemus> hakemusOidHakemukset = hakemuksistaOidMap(hakemukset);
-        final List<Letter> kirjeet = new ArrayList<Letter>();
+        final List<Letter> kirjeet = new ArrayList<>();
         String preferoituKielikoodi;
         final boolean kaytetaanYlikirjoitettuKielikoodia = StringUtils.isNotBlank(ylikirjoitettuPreferoitukielikoodi);
         if (kaytetaanYlikirjoitettuKielikoodia) {
