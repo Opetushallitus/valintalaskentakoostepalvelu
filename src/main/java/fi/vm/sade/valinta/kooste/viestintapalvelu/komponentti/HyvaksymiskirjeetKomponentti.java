@@ -52,15 +52,10 @@ public class HyvaksymiskirjeetKomponentti {
 
     private final KirjeetHakukohdeCache kirjeetHakukohdeCache;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
-    private final HaeOsoiteKomponentti osoiteKomponentti;
 
     @Autowired
-    public HyvaksymiskirjeetKomponentti(
-            KoodistoCachedAsyncResource koodistoCachedAsyncResource,
-            KirjeetHakukohdeCache kirjeetHakukohdeCache,
-            HaeOsoiteKomponentti osoiteKomponentti) {
+    public HyvaksymiskirjeetKomponentti(KoodistoCachedAsyncResource koodistoCachedAsyncResource, KirjeetHakukohdeCache kirjeetHakukohdeCache) {
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
-        this.osoiteKomponentti = osoiteKomponentti;
         this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
     }
 

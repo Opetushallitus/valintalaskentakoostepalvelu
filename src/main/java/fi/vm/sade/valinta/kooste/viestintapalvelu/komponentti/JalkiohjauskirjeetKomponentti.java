@@ -52,13 +52,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Sijoitus;
 public class JalkiohjauskirjeetKomponentti {
     private static final Logger LOG = LoggerFactory.getLogger(JalkiohjauskirjeetKomponentti.class);
 
-    private final HaeOsoiteKomponentti osoiteKomponentti;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
     @Autowired
-    public JalkiohjauskirjeetKomponentti(KoodistoCachedAsyncResource koodistoCachedAsyncResource, HaeOsoiteKomponentti osoiteKomponentti) {
+    public JalkiohjauskirjeetKomponentti(KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
-        this.osoiteKomponentti = osoiteKomponentti;
     }
 
     private String vakioHakukohteenNimi(String hakukohdeOid) {
