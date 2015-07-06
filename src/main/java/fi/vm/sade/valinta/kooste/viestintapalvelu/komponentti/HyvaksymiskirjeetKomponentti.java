@@ -117,9 +117,6 @@ public class HyvaksymiskirjeetKomponentti {
         assert (hakuOid != null);
         Map<String, Hakemus> hakukohteenHakemukset = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> h));
         final List<Letter> kirjeet = new ArrayList<>();
-
-        final Map<HakemuksenTila, Integer> tilaToPrioriteetti = KirjeetUtil.getHakemuksenTilaIntegerMap();
-
         Map<String, Koodi> maajavaltio = haeKoodisto.apply(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> posti = haeKoodisto.apply(KoodistoCachedAsyncResource.POSTI);
         LetterBatch viesti = new LetterBatch(kirjeet);
@@ -231,6 +228,7 @@ public class HyvaksymiskirjeetKomponentti {
 
                 Collections.sort(hakutoive.getHakutoiveenValintatapajonot(),
                         (o1, o2) -> {
+                            final Map<HakemuksenTila, Integer> tilaToPrioriteetti = KirjeetUtil.getHakemuksenTilaIntegerMap();
                             HakemuksenTila h1 = ofNullable(o1.getTila()).orElse(HYLATTY);
                             HakemuksenTila h2 = ofNullable(o2.getTila()).orElse(HYLATTY);
                             if (VARALLA.equals(h1) && VARALLA.equals(h2)) {
