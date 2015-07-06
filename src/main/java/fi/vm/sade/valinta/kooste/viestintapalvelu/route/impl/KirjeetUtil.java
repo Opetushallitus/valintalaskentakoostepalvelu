@@ -100,11 +100,11 @@ public class KirjeetUtil {
         }
     }
 
-    private static String vakioHakukohteenNimi(String hakukohdeOid) {
+    public static String vakioHakukohteenNimi(String hakukohdeOid) {
         return "Hakukohteella " + hakukohdeOid + " ei ole hakukohteennimeä";
     }
 
-    private static String vakioTarjoajanNimi(String hakukohdeOid) {
+    public static String vakioTarjoajanNimi(String hakukohdeOid) {
         return "Hakukohteella " + hakukohdeOid + " ei ole tarjojannimeä";
     }
 

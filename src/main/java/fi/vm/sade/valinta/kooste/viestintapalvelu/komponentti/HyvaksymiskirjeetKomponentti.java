@@ -54,14 +54,6 @@ public class HyvaksymiskirjeetKomponentti {
         this.kirjeetHakukohdeCache = kirjeetHakukohdeCache;
     }
 
-    private static String vakioHakukohteenNimi(String hakukohdeOid) {
-        return "Hakukohteella " + hakukohdeOid + " ei ole hakukohteennimeä";
-    }
-
-    private static String vakioTarjoajanNimi(String hakukohdeOid) {
-        return "Hakukohteella " + hakukohdeOid + " ei ole tarjojannimeä";
-    }
-
     public LetterBatch teeHyvaksymiskirjeet(
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
@@ -167,16 +159,16 @@ public class HyvaksymiskirjeetKomponentti {
             replacements.put("palautusAika", StringUtils.trimToNull(palautusAika));
             replacements.put("palautusPvm", StringUtils.trimToNull(palautusPvm));
             replacements.put("tulokset", tulosList);
-            replacements.put("koulu", koulu.getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(hakukohdeOid)));
+            replacements.put("koulu", koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(hakukohdeOid)));
             Optional<Osoite> hakijapalveluidenOsoite = hakukohdeJaHakijapalveluidenOsoite.get(tarjoajaOid);
             hakijapalveluidenOsoite.ifPresent(h -> replacements.put("hakijapalveluidenOsoite", h));
 
             replacements.put("henkilotunnus", new HakemusWrapper(hakemus).getHenkilotunnus());
-            replacements.put("koulutus", koulutus.getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
+            replacements.put("koulutus", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
             replacements.put("hakemusOid", hakemus.getOid());
 
-            replacements.put("hakukohde", koulutus.getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
-            replacements.put("tarjoaja", koulu.getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(tarjoajaOid)));
+            replacements.put("hakukohde", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
+            replacements.put("tarjoaja", koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)));
             kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements));
 
             viesti.setFetchTarget(hakukohdeOid);
