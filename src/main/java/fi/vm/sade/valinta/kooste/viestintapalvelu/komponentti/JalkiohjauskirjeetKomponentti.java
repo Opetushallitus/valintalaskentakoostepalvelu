@@ -102,9 +102,9 @@ public class JalkiohjauskirjeetKomponentti {
             if (!hakemusOidHakemukset.containsKey(hakemusOid)) {
                 continue;
             }
-            final Hakemus hakemus = hakemusOidHakemukset.get(hakemusOid); // hakemusProxy.haeHakemus(hakemusOid);
+            final Hakemus hakemus = hakemusOidHakemukset.get(hakemusOid);
             final Osoite osoite = HaeOsoiteKomponentti.haeOsoite(maajavaltio, posti, hakemus);
-            final List<Map<String, Object>> tulosList = new ArrayList<Map<String, Object>>();
+            final List<Map<String, Object>> tulosList = new ArrayList<>();
             if (!kaytetaanYlikirjoitettuKielikoodia) {
                 preferoituKielikoodi = new HakemusWrapper(hakemus).getAsiointikieli();
             }
@@ -112,14 +112,10 @@ public class JalkiohjauskirjeetKomponentti {
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 String hakukohdeOid = hakutoive.getHakukohdeOid();
                 MetaHakukohde metakohde = jalkiohjauskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
-                Map<String, Object> tulokset = new HashMap<String, Object>();
+                Map<String, Object> tulokset = new HashMap<>();
                 tulokset.put("hakukohteenNimi", metakohde.getHakukohdeNimi().getTeksti(preferoituKielikoodi, vakioHakukohteenNimi(hakukohdeOid)));
-                tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana
-                // hakukohdenimea
-                // joten
-                // tuskin tarvii
-                // toistaa
-                tulokset.put("hylkayksenSyy", StringUtils.EMPTY);
+                tulokset.put("oppilaitoksenNimi", ""); // tieto on jo osana hakukohdenimea joten tuskin tarvii toistaa
+                tulokset.put("hylkayksenSyy", "");
 
                 StringBuilder pisteet = new StringBuilder();
                 for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
