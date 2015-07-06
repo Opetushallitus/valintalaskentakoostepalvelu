@@ -132,20 +132,8 @@ public class HyvaksymiskirjeetKomponentti {
                 MetaHakukohde metakohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakutoive.getHakukohdeOid());
                 Map<String, Object> tulokset = new HashMap<>();
                 tulokset.put("oppilaitoksenNimi", "");  // tieto on jo osana hakukohdenimea joten tuskin tarvii toistaa
-                tulokset.put("hylkayksenSyy", EMPTY);
-
-                StringBuilder pisteet = new StringBuilder();
-                for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
-                    try {
-                        String arvo = StringUtils.trimToEmpty(pistetieto.getArvo()).replace(",", ".");
-                        BigDecimal ehkaNumeroEhkaTotuusarvo = new BigDecimal(arvo);
-                        pisteet.append(suomennaNumero(ehkaNumeroEhkaTotuusarvo)).append(ARVO_VALI);
-                    } catch (NumberFormatException notNumber) {
-                        // OVT-6340 filtteroidaan totuusarvot pois
-                    }
-
-                }
-                tulokset.put("paasyJaSoveltuvuuskoe", pisteet.toString().trim());
+                tulokset.put("hylkayksenSyy", "");
+                tulokset.put("paasyJaSoveltuvuuskoe", createPaasyJaSoveltuvuuskoePisteet(hakutoive).toString().trim());
 
                 StringBuilder omatPisteet = new StringBuilder();
                 StringBuilder hyvaksytyt = new StringBuilder();
@@ -261,6 +249,21 @@ public class HyvaksymiskirjeetKomponentti {
         templateReplacements.put("sisalto", sisalto);
         viesti.setTemplateReplacements(templateReplacements);
         return viesti;
+    }
+
+    static StringBuilder createPaasyJaSoveltuvuuskoePisteet(HakutoiveDTO hakutoive) {
+        StringBuilder pisteet = new StringBuilder();
+        for (PistetietoDTO pistetieto : hakutoive.getPistetiedot()) {
+            try {
+                String arvo = StringUtils.trimToEmpty(pistetieto.getArvo()).replace(",", ".");
+                BigDecimal ehkaNumeroEhkaTotuusarvo = new BigDecimal(arvo);
+                pisteet.append(suomennaNumero(ehkaNumeroEhkaTotuusarvo)).append(ARVO_VALI);
+            } catch (NumberFormatException notNumber) {
+                // OVT-6340 filtteroidaan totuusarvot pois
+            }
+
+        }
+        return pisteet;
     }
 
     private static String hylkaysPerusteText(String preferoituKielikoodi, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot) {
