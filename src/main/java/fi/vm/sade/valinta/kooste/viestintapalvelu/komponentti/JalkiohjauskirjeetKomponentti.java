@@ -93,13 +93,8 @@ public class JalkiohjauskirjeetKomponentti {
         }
         final Map<String, Hakemus> hakemusOidHakemukset = hakemuksistaOidMap(hakemukset);
         final List<Letter> kirjeet = new ArrayList<>();
-        String preferoituKielikoodi;
         final boolean kaytetaanYlikirjoitettuKielikoodia = StringUtils.isNotBlank(ylikirjoitettuPreferoitukielikoodi);
-        if (kaytetaanYlikirjoitettuKielikoodia) {
-            preferoituKielikoodi = ylikirjoitettuPreferoitukielikoodi;
-        } else {
-            preferoituKielikoodi = KieliUtil.SUOMI;
-        }
+        String preferoituKielikoodi = kaytetaanYlikirjoitettuKielikoodia ? ylikirjoitettuPreferoitukielikoodi : KieliUtil.SUOMI;
         Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         Map<String, Koodi> posti = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         for (HakijaDTO hakija : hyvaksymattomatHakijat) {
