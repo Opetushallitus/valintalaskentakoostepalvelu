@@ -62,11 +62,11 @@ public class JalkiohjauskirjeetKomponentti {
     }
 
     private String vakioHakukohteenNimi(String hakukohdeOid) {
-        return new StringBuilder().append("Hakukohteella ").append(hakukohdeOid).append(" ei ole hakukohteennimeä").toString();
+        return "Hakukohteella " + hakukohdeOid + " ei ole hakukohteennimeä";
     }
 
     private String vakioTarjoajanNimi(String hakukohdeOid) {
-        return new StringBuilder().append("Hakukohteella ").append(hakukohdeOid).append(" ei ole tarjojannimeä").toString();
+        return "Hakukohteella " + hakukohdeOid + " ei ole tarjojannimeä";
     }
 
     private Map<String, Hakemus> hakemuksistaOidMap(final Collection<Hakemus> hakemukset) {
