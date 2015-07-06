@@ -1,11 +1,9 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
-import static fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila.*;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_EROTIN;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VAKIO;
 import static fi.vm.sade.valinta.kooste.util.Formatter.ARVO_VALI;
 import static fi.vm.sade.valinta.kooste.util.Formatter.suomennaNumero;
-import static org.apache.commons.lang.StringUtils.EMPTY;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -37,12 +35,10 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.exception.SijoittelupalveluException;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Letter;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.Pisteet;
@@ -170,14 +166,7 @@ public class JalkiohjauskirjeetKomponentti {
                 }
                 Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
-                if (!hakutoiveenValintatapajonot.isEmpty()) {
-                    HakutoiveenValintatapajonoDTO valintatapajono = hakutoiveenValintatapajonot.get(0);
-                    if (VARALLA.equals(valintatapajono.getTila()) && valintatapajono.getVarasijanNumero() != null) {
-                        tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(valintatapajono.getVarasijanNumero(), preferoituKielikoodi));
-                    }
-                    tulokset.put("hylkaysperuste", KirjeetUtil.hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot));
-                    tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(valintatapajono.getTila(), preferoituKielikoodi, valintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
-                }
+                KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(preferoituKielikoodi, tulokset, hakutoiveenValintatapajonot);
                 tulokset.put("omatPisteet", omatPisteet.toString());
                 tulokset.put("hyvaksytyt", hyvaksytyt.toString());
                 tulokset.put("alinHyvaksyttyPistemaara", StringUtils.EMPTY);
@@ -205,4 +194,5 @@ public class JalkiohjauskirjeetKomponentti {
         LOG.debug("\r\n{}", new ViestiWrapper(viesti));
         return viesti;
     }
+
 }

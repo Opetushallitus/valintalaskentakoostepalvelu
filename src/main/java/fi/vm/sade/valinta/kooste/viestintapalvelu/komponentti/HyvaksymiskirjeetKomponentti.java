@@ -194,14 +194,7 @@ public class HyvaksymiskirjeetKomponentti {
 
                 Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
                 List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive.getHakutoiveenValintatapajonot();
-                if (!hakutoiveenValintatapajonot.isEmpty()) {
-                    HakutoiveenValintatapajonoDTO firstValintatapajono = hakutoiveenValintatapajonot.get(0);
-                    if (VARALLA.equals(firstValintatapajono.getTila()) && firstValintatapajono.getVarasijanNumero() != null) {
-                        tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(firstValintatapajono.getVarasijanNumero(), preferoituKielikoodi));
-                    }
-                    tulokset.put("hylkaysperuste", KirjeetUtil.hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot));
-                    tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(firstValintatapajono.getTila(), preferoituKielikoodi, firstValintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
-                }
+                KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(preferoituKielikoodi, tulokset, hakutoiveenValintatapajonot);
                 tulokset.put("organisaationNimi", metakohde.getTarjoajaNimi().getTeksti(preferoituKielikoodi, vakioTarjoajanNimi(hakukohdeOid)));
                 tulokset.put("omatPisteet", omatPisteet.toString());
                 tulokset.put("hyvaksytyt", hyvaksytyt.toString());

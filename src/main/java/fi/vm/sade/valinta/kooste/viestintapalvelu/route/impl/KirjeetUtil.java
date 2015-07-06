@@ -5,6 +5,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.PistetietoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
+import fi.vm.sade.valinta.kooste.util.HakemusUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import org.apache.commons.lang.StringUtils;
 
@@ -64,5 +65,16 @@ public class KirjeetUtil {
     public static String hylkaysPerusteText(String preferoituKielikoodi, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot) {
         HakutoiveenValintatapajonoDTO lastJono = hakutoiveenValintatapajonot.get(hakutoiveenValintatapajonot.size() - 1);
         return HYLATTY.equals(hakutoiveenValintatapajonot.get(0).getTila()) ? new Teksti(lastJono.getTilanKuvaukset()).getTeksti(preferoituKielikoodi, EMPTY) : EMPTY;
+    }
+
+    public static void putValinnanTulosHylkausPerusteAndVarasijaData(String preferoituKielikoodi, Map<String, Object> tulokset, List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot) {
+        if (!hakutoiveenValintatapajonot.isEmpty()) {
+            HakutoiveenValintatapajonoDTO firstValintatapajono = hakutoiveenValintatapajonot.get(0);
+            if (VARALLA.equals(firstValintatapajono.getTila()) && firstValintatapajono.getVarasijanNumero() != null) {
+                tulokset.put("varasija", HakemusUtil.varasijanNumeroConverter(firstValintatapajono.getVarasijanNumero(), preferoituKielikoodi));
+            }
+            tulokset.put("hylkaysperuste", hylkaysPerusteText(preferoituKielikoodi, hakutoiveenValintatapajonot));
+            tulokset.put("valinnanTulos", HakemusUtil.tilaConverter(firstValintatapajono.getTila(), preferoituKielikoodi, firstValintatapajono.isHyvaksyttyHarkinnanvaraisesti()));
+        }
     }
 }
