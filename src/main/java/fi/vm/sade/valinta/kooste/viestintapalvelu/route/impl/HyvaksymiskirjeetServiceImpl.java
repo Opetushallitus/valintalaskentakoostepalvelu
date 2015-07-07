@@ -113,16 +113,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 //
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
-                        letterBatch -> {
-                            letterBatchToViestintapalvelu().call(letterBatch,
-                                    prosessi, hyvaksymiskirjeDTO);
-                        },
-                        throwable -> {
-                            LOG.error(
-                                    "Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}",
-                                    throwable.getMessage(), Arrays.toString(throwable.getStackTrace()));
-                            prosessi.keskeyta();
-                        });
+                        letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
+                        throwable -> logErrorAndKeskeyta(prosessi, throwable));
     }
 
     @Override
@@ -167,13 +159,8 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 //
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
-                        letterBatch -> {
-                            letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO);
-                        },
-                        throwable -> {
-                            LOG.error("Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}", throwable.getMessage(), Arrays.toString(throwable.getStackTrace()));
-                            prosessi.keskeyta();
-                        });
+                        letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
+                        throwable -> logErrorAndKeskeyta(prosessi, throwable));
     }
 
     private static boolean haussaHylatty(HakijaDTO hakija) {
@@ -187,9 +174,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
     @Override
     public void hyvaksymiskirjeetHakukohteelle(KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
-
         String organisaatioOid = hyvaksymiskirjeDTO.getTarjoajaOid();
-
         Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkallisetHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Observable<HakutoimistoDTO> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
@@ -222,13 +207,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 //
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(
-                        letterBatch -> {
-                            letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO);
-                        },
-                        throwable -> {
-                            LOG.error("Sijoittelu tai hakemuspalvelukutsu epaonnistui {} {}", throwable.getMessage(), Arrays.toString(throwable.getStackTrace()));
-                            prosessi.keskeyta();
-                        });
+                        letterBatch -> letterBatchToViestintapalvelu().call(letterBatch, prosessi, hyvaksymiskirjeDTO),
+                        throwable -> logErrorAndKeskeyta(prosessi, throwable));
+    }
+
+    void logErrorAndKeskeyta(KirjeProsessi prosessi, Throwable throwable) {
+        LOG.error("Sijoittelu tai hakemuspalvelukutsu epaonnistui", throwable);
+        prosessi.keskeyta();
     }
 
     public Action3<LetterBatch, KirjeProsessi, HyvaksymiskirjeDTO> letterBatchToViestintapalvelu() {
@@ -290,7 +275,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     prosessi.keskeyta("Hakemuksissa oli virheitä", batchId.getErrors());
                 }
             } catch (Exception e) {
-                LOG.error("Virhe hakukohteelle {}: {}", kirje.getHakukohdeOid(), e.getMessage());
+                LOG.error("Virhe hakukohteelle " + kirje.getHakukohdeOid(), e);
                 prosessi.keskeyta();
             }
         };
