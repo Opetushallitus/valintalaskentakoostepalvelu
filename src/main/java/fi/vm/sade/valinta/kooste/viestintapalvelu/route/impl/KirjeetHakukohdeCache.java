@@ -35,18 +35,15 @@ public class KirjeetHakukohdeCache {
     public MetaHakukohde haeHakukohde(final String hakukohdeOid) throws Exception {
 
         return metaHakukohdeCache.get(hakukohdeOid,
-                new Callable<MetaHakukohde>() {
-                    @Override
-                    public MetaHakukohde call() throws Exception {
-                        HakukohdeV1RDTO hakukohde = hakukohdeV1Resource.findByOid(hakukohdeOid).getResult();
-                        Teksti hakukohdeNimi = new Teksti(hakukohde.getHakukohteenNimet());
-                        String opetuskieli = getOpetuskieli(hakukohde.getOpetusKielet());
-                        LOG.debug("Hakukohdekieli({}) Oid({}) Opetuskieli({})", hakukohdeNimi.getKieli(), hakukohdeOid, opetuskieli);
-                        Teksti tarjoajaNimi = new Teksti(hakukohde.getTarjoajaNimet());
-                        return new MetaHakukohde(
-                                hakukohde.getTarjoajaOids().iterator().next(),
-                                hakukohdeNimi, tarjoajaNimi, hakukohdeNimi.getKieli(), opetuskieli);
-                    }
+                () -> {
+                    HakukohdeV1RDTO hakukohde = hakukohdeV1Resource.findByOid(hakukohdeOid).getResult();
+                    Teksti hakukohdeNimi = new Teksti(hakukohde.getHakukohteenNimet());
+                    String opetuskieli = getOpetuskieli(hakukohde.getOpetusKielet());
+                    LOG.debug("Hakukohdekieli({}) Oid({}) Opetuskieli({})", hakukohdeNimi.getKieli(), hakukohdeOid, opetuskieli);
+                    Teksti tarjoajaNimi = new Teksti(hakukohde.getTarjoajaNimet());
+                    return new MetaHakukohde(
+                            hakukohde.getTarjoajaOids().iterator().next(),
+                            hakukohdeNimi, tarjoajaNimi, hakukohdeNimi.getKieli(), opetuskieli);
                 });
     }
 
