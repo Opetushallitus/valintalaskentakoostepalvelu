@@ -79,10 +79,12 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                                     .collect(Collectors.toList());
                             muodostaKirjeet().call(hakijat, whitelistinJalkeen, prosessi, jalkiohjauskirjeDTO);
                         },
-                        throwable -> {
-                            LOG.error("Koulutuspaikattomien haku haulle {} epaonnistui! {}", jalkiohjauskirjeDTO.getHakuOid(), throwable.getMessage());
-                            prosessi.keskeyta();
-                        });
+                        throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
+    }
+
+    void handleKoulutuspaikattomienHakuError(KirjeProsessi prosessi, JalkiohjauskirjeDTO jalkiohjauskirjeDTO, Throwable throwable) {
+        LOG.error("Koulutuspaikattomien haku haulle " + jalkiohjauskirjeDTO.getHakuOid() + " epaonnistui!", throwable);
+        prosessi.keskeyta();
     }
 
     @Override
@@ -96,10 +98,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                             Collection<HakijaDTO> vainHakeneetJalkiohjattavat = puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(hakijat.getResults());
                             muodostaKirjeet().call(hakijat, vainHakeneetJalkiohjattavat, prosessi, jalkiohjauskirjeDTO);
                         },
-                        throwable -> {
-                            LOG.error("Koulutuspaikattomien haku haulle {} epaonnistui!", jalkiohjauskirjeDTO.getHakuOid(), throwable);
-                            prosessi.keskeyta();
-                        });
+                        throwable -> handleKoulutuspaikattomienHakuError(prosessi, jalkiohjauskirjeDTO, throwable));
     }
 
     private Action4<HakijaPaginationObject, Collection<HakijaDTO>, KirjeProsessi, JalkiohjauskirjeDTO> muodostaKirjeet() {
