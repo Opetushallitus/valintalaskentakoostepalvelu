@@ -46,8 +46,9 @@ public class HyvaksymiskirjeetKomponenttiTest {
         return "LetterBatch [letters=[Letter [addressLabel=null, null null, templateReplacements={palautusPvm=palautusPvm, " +
                 "tulokset=[{oppilaitoksenNimi=, hyvaksytyt=1 / 1 , omatPisteet=" + omatPisteet + " , pisteet=[" + pisteObjekti + "], hylkayksenSyy=, " +
                 "organisaationNimi=Hakukohteella hakukohdeOid ei ole tarjojannimeä, " +
-                "sijoitukset=[Sijoitus{nimi='Jonon nimi', oma='1', hyvaksytyt='-'}], alinHyvaksyttyPistemaara=, hylkaysperuste=, " +
-                "kaikkiHakeneet=, hakukohteenNimi=Hakukohteella hakukohdeOid ei ole hakukohteennimeä, " +
+                "sijoitukset=[Sijoitus{nimi='Jonon nimi', oma='1', hyvaksytyt='-'}], alinHyvaksyttyPistemaara=, " +
+                "hakukohteenNimi=Hakukohteella hakukohdeOid ei ole hakukohteennimeä, " +
+                "kaikkiHakeneet=, hylkaysperuste=, " +
                 "paasyJaSoveltuvuuskoe=3,99, valinnanTulos=Hyväksytty}], palautusAika=palautusAika, koulu=Hakukohteella " +
                 "hakukohdeOid ei ole tarjojannimeä, henkilotunnus=, tarjoaja=Hakukohteella tarjoajaOid ei ole " +
                 "tarjojannimeä, koulutus=Hakukohteella hakukohdeOid ei ole hakukohteennimeä, hakukohde=Hakukohteella " +
