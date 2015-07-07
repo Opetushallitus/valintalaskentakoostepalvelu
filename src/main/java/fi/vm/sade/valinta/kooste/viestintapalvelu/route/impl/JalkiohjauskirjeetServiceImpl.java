@@ -130,24 +130,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
             Collection<HakijaDTO> yksikielisetHakijat = hakijat.stream()
                     .filter(h -> yksikielisetHakemusOids.contains(h.getHakemusOid()))
                     .collect(Collectors.toList());
-            final Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
-            for (HakijaDTO hakija : yksikielisetHakijat) {
-                for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-                    String hakukohdeOid = hakutoive.getHakukohdeOid();
-                    if (!metaKohteet.containsKey(hakukohdeOid)) {
-                        try {
-                            metaKohteet.put(hakukohdeOid, kirjeetHakukohdeCache.haeHakukohde(hakukohdeOid));
-                        } catch (Exception e) {
-                            LOG.error("Tarjonnasta ei saatu hakukohdetta " + hakukohdeOid, e);
-                            metaKohteet.put(hakukohdeOid, new MetaHakukohde(
-                                    "",
-                                    new Teksti("Hakukohde " + hakukohdeOid + " ei löydy tarjonnasta!"),
-                                    new Teksti("Nimetön hakukohde")));
-                        }
-
-                    }
-                }
-            }
+            final Map<String, MetaHakukohde> metaKohteet = getStringMetaHakukohdeMap(yksikielisetHakijat);
             LetterBatch letterBatch = jalkiohjauskirjeetKomponentti.teeJalkiohjauskirjeet(kirje.getKielikoodi(), yksikielisetHakijat,
                     yksikielisetHakemukset, metaKohteet, kirje.getHakuOid(), kirje.getTemplateName(), kirje.getSisalto(), kirje.getTag());
             try {
@@ -203,6 +186,28 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                 prosessi.keskeyta();
             }
         };
+    }
+
+    private Map<String, MetaHakukohde> getStringMetaHakukohdeMap(Collection<HakijaDTO> yksikielisetHakijat) {
+        final Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
+        for (HakijaDTO hakija : yksikielisetHakijat) {
+            for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
+                String hakukohdeOid = hakutoive.getHakukohdeOid();
+                if (!metaKohteet.containsKey(hakukohdeOid)) {
+                    try {
+                        metaKohteet.put(hakukohdeOid, kirjeetHakukohdeCache.haeHakukohde(hakukohdeOid));
+                    } catch (Exception e) {
+                        LOG.error("Tarjonnasta ei saatu hakukohdetta " + hakukohdeOid, e);
+                        metaKohteet.put(hakukohdeOid, new MetaHakukohde(
+                                "",
+                                new Teksti("Hakukohde " + hakukohdeOid + " ei löydy tarjonnasta!"),
+                                new Teksti("Nimetön hakukohde")));
+                    }
+
+                }
+            }
+        }
+        return metaKohteet;
     }
 
     private Collection<HakijaDTO> puutteellisillaTiedoillaOlevatJaItseItsensaPeruneetPois(Collection<HakijaDTO> hyvaksymattomatHakijat) {
