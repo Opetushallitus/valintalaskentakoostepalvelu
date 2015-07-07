@@ -117,19 +117,8 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                 .filter(OsallistujatPredicate.osallistujat(valintakoeTunnisteet, koekutsu.getHakukohdeOid()))
                                 .map(ValintakoeOsallistuminenDTO::getHakemusOid)
                                 .collect(Collectors.toSet());
-                        Stream<Hakemus> hakukohteenUlkopuolisetHakemukset;
-                        {
-                            Set<String> hakemusOids = hakemukset.stream().map(h -> (String) h.getOid()).collect(Collectors.toSet());
-                            Set<String> hakukohteenUlkopuolisetKoekutsuttavat = Sets.newHashSet(osallistujienHakemusOidit);
-                            hakukohteenUlkopuolisetKoekutsuttavat.removeIf(hakemusOids::contains);
-                            if (!hakukohteenUlkopuolisetKoekutsuttavat.isEmpty()) {
-                                hakukohteenUlkopuolisetHakemukset = applicationAsyncResource.getApplicationsByOids(hakukohteenUlkopuolisetKoekutsuttavat).get().stream();
-                            } else {
-                                hakukohteenUlkopuolisetHakemukset = Stream.empty();
-                            }
-                        }
+                        Stream<Hakemus> hakukohteenUlkopuolisetHakemukset = getHakukohteenUlkopuolisetHakemukset(hakemukset, osallistujienHakemusOidit);
                         // vain hakukohteen osallistujat
-
                         List<Hakemus> lopullinenHakemusJoukko = Stream.concat(hakukohteenUlkopuolisetHakemukset,
                                 hakemukset.stream().filter(h -> osallistujienHakemusOidit.contains(h.getOid())))
                                 .collect(Collectors.toList());
@@ -149,6 +138,21 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                 );
     }
 
+    Stream<Hakemus> getHakukohteenUlkopuolisetHakemukset(List<Hakemus> hakemukset, Set<String> osallistujienHakemusOidit) throws InterruptedException, java.util.concurrent.ExecutionException {
+        Stream<Hakemus> hakukohteenUlkopuolisetHakemukset;
+        {
+            Set<String> hakemusOids = hakemukset.stream().map(Hakemus::getOid).collect(Collectors.toSet());
+            Set<String> hakukohteenUlkopuolisetKoekutsuttavat = Sets.newHashSet(osallistujienHakemusOidit);
+            hakukohteenUlkopuolisetKoekutsuttavat.removeIf(hakemusOids::contains);
+            if (!hakukohteenUlkopuolisetKoekutsuttavat.isEmpty()) {
+                hakukohteenUlkopuolisetHakemukset = applicationAsyncResource.getApplicationsByOids(hakukohteenUlkopuolisetKoekutsuttavat).get().stream();
+            } else {
+                hakukohteenUlkopuolisetHakemukset = Stream.empty();
+            }
+        }
+        return hakukohteenUlkopuolisetHakemukset;
+    }
+
     private Action1<List<Hakemus>> koekutsukirjeiksi(final KirjeProsessi prosessi, final KoekutsuDTO koekutsu) {
         return hakemukset -> {
             if (hakemukset.isEmpty()) {
@@ -164,13 +168,13 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                         .filter(e -> StringUtils.trimToEmpty(e.getKey()).endsWith("Opetuspiste-id"))
                         .map(Map.Entry::getValue);
 
-                LOG.error("Haetaan valintakokeet hakutoiveille!");
+                LOG.info("Haetaan valintakokeet hakutoiveille!");
                 final Map<String, HakukohdeJaValintakoeDTO> valintakoeOidsHakutoiveille;
                 try {
                     Set<String> hakutoiveetKaikistaHakemuksista = Sets.newHashSet(hakemukset.stream()
                             .flatMap(hakutoiveetHakemuksesta).collect(Collectors.toSet()));
                     hakutoiveetKaikistaHakemuksista.add(koekutsu.getHakukohdeOid());
-                    LOG.error("Hakutoiveet hakemuksista:\r\n{}", Arrays.toString(hakutoiveetKaikistaHakemuksista.toArray()));
+                    LOG.info("Hakutoiveet hakemuksista:\r\n{}", Arrays.toString(hakutoiveetKaikistaHakemuksista.toArray()));
                     valintakoeOidsHakutoiveille = valintakoeResource
                             .haeValintakokeetHakukohteille(hakutoiveetKaikistaHakemuksista)
                             .get()
