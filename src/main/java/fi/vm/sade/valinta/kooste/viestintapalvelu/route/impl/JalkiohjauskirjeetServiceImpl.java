@@ -113,32 +113,23 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
             }
 
             List<Hakemus> hakemukset;
-            {
-                Collection<String> hakemusOids = hakijat.stream()
-                        .map(h -> h.getHakemusOid())
-                        .collect(Collectors.toList());
-                try {
-                    LOG.info("Haetaan hakemukset!");
-                    hakemukset = applicationAsyncResource.getApplicationsByOids(hakemusOids).get(240L, TimeUnit.MINUTES);
-                } catch (Throwable e) {
-                    LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
-                    throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
-                }
+            Collection<String> hakemusOids = hakijat.stream()
+                    .map(HakijaDTO::getHakemusOid)
+                    .collect(Collectors.toList());
+            try {
+                LOG.info("Haetaan hakemukset!");
+                hakemukset = applicationAsyncResource.getApplicationsByOids(hakemusOids).get(240L, TimeUnit.MINUTES);
+            } catch (Throwable e) {
+                LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
+                throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
             }
-            Collection<Hakemus> yksikielisetHakemukset;
-            {
-                yksikielisetHakemukset = hakemukset
-                        .stream()
-                        .filter(h -> kieli.equals(new HakemusWrapper(h).getAsiointikieli()))
-                        .collect(Collectors.toList());
-            }
-            Collection<HakijaDTO> yksikielisetHakijat;
-            {
-                Set<String> hakemusOids = yksikielisetHakemukset.stream().map(h -> h.getOid()).collect(Collectors.toSet());
-                yksikielisetHakijat = hakijat.stream()
-                        .filter(h -> hakemusOids.contains(h.getHakemusOid()))
-                        .collect(Collectors.toList());
-            }
+            Collection<Hakemus> yksikielisetHakemukset = hakemukset.stream()
+                    .filter(h -> kieli.equals(new HakemusWrapper(h).getAsiointikieli()))
+                    .collect(Collectors.toList());
+            Set<String> yksikielisetHakemusOids = yksikielisetHakemukset.stream().map(Hakemus::getOid).collect(Collectors.toSet());
+            Collection<HakijaDTO> yksikielisetHakijat = hakijat.stream()
+                    .filter(h -> yksikielisetHakemusOids.contains(h.getHakemusOid()))
+                    .collect(Collectors.toList());
             final Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
             for (HakijaDTO hakija : yksikielisetHakijat) {
                 for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
