@@ -104,18 +104,13 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
 
     private Action4<HakijaPaginationObject, Collection<HakijaDTO>, KirjeProsessi, JalkiohjauskirjeDTO> muodostaKirjeet() {
         return (kaikkiHakijat, hakijat, prosessi, kirje) -> {
-            String kieli =
-                    KieliUtil.normalisoiKielikoodi(
-                    Optional.ofNullable(StringUtils.trimToNull(kirje.getKielikoodi())).orElse(KieliUtil.SUOMI));
             if (hakijat.isEmpty()) {
                 LOG.error("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
                 throw new RuntimeException("Jalkiohjauskirjeita ei voida muodostaa tyhjalle joukolle!");
             }
 
             List<Hakemus> hakemukset;
-            Collection<String> hakemusOids = hakijat.stream()
-                    .map(HakijaDTO::getHakemusOid)
-                    .collect(Collectors.toList());
+            Collection<String> hakemusOids = hakijat.stream().map(HakijaDTO::getHakemusOid).collect(Collectors.toList());
             try {
                 LOG.info("Haetaan hakemukset!");
                 hakemukset = applicationAsyncResource.getApplicationsByOids(hakemusOids).get(240L, TimeUnit.MINUTES);
@@ -123,6 +118,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                 LOG.error("Hakemusten haussa oideilla tapahtui virhe!", e);
                 throw new RuntimeException("Hakemusten haussa oideilla tapahtui virhe!");
             }
+            String kieli = KieliUtil.normalisoiKielikoodi(Optional.ofNullable(StringUtils.trimToNull(kirje.getKielikoodi())).orElse(KieliUtil.SUOMI));
             Collection<Hakemus> yksikielisetHakemukset = hakemukset.stream()
                     .filter(h -> kieli.equals(new HakemusWrapper(h).getAsiointikieli()))
                     .collect(Collectors.toList());
@@ -193,17 +189,13 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
         for (HakijaDTO hakija : yksikielisetHakijat) {
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 String hakukohdeOid = hakutoive.getHakukohdeOid();
-                if (!metaKohteet.containsKey(hakukohdeOid)) {
-                    try {
-                        metaKohteet.put(hakukohdeOid, kirjeetHakukohdeCache.haeHakukohde(hakukohdeOid));
-                    } catch (Exception e) {
-                        LOG.error("Tarjonnasta ei saatu hakukohdetta " + hakukohdeOid, e);
-                        metaKohteet.put(hakukohdeOid, new MetaHakukohde(
-                                "",
-                                new Teksti("Hakukohde " + hakukohdeOid + " ei löydy tarjonnasta!"),
-                                new Teksti("Nimetön hakukohde")));
-                    }
-
+                try {
+                    metaKohteet.putIfAbsent(hakukohdeOid, kirjeetHakukohdeCache.haeHakukohde(hakukohdeOid));
+                } catch (Exception e) {
+                    LOG.error("Tarjonnasta ei saatu hakukohdetta " + hakukohdeOid, e);
+                    metaKohteet.put(hakukohdeOid, new MetaHakukohde("",
+                            new Teksti("Hakukohde " + hakukohdeOid + " ei löydy tarjonnasta!"),
+                            new Teksti("Nimetön hakukohde")));
                 }
             }
         }
