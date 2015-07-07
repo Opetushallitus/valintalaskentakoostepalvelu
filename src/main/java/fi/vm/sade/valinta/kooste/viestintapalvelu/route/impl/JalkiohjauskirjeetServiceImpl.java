@@ -185,7 +185,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
     }
 
     private Map<String, MetaHakukohde> getStringMetaHakukohdeMap(Collection<HakijaDTO> yksikielisetHakijat) {
-        final Map<String, MetaHakukohde> metaKohteet = new HashMap<String, MetaHakukohde>();
+        final Map<String, MetaHakukohde> metaKohteet = new HashMap<>();
         for (HakijaDTO hakija : yksikielisetHakijat) {
             for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
                 String hakukohdeOid = hakutoive.getHakukohdeOid();
