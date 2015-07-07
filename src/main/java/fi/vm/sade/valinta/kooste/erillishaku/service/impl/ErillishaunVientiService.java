@@ -152,10 +152,9 @@ public class ErillishaunVientiService {
                     .filter(v -> erillishaku.getValintatapajonoOid().equals(v.getValintatapajonoOid()))
                     .collect(Collectors.toMap(v -> v.getHakemusOid(), v -> v));
         } catch (Exception e1) {
-            LOG.error("Sijoittelusta ei saatu tietoja hakukohteelle vientia varten!"
-                            + "Resurssi /sijoittelu/{}/sijoitteluajo/{}/hakukohde/{} "
-                            + "{}: {}", erillishaku.getHakuOid(),
-                    erillishaku.getHakukohdeOid(), SijoitteluResource.LATEST, e1.getMessage(), Arrays.toString(e1.getStackTrace()));
+            LOG.error("Sijoittelusta ei saatu tietoja hakukohteelle vientia varten! Resurssi /sijoittelu/{}/sijoitteluajo/{}/hakukohde/{} ",
+                    erillishaku.getHakuOid(), erillishaku.getHakukohdeOid(), SijoitteluResource.LATEST);
+            LOG.error("Stack trace", e1);
             throw new RuntimeException(e1);
         }
     }

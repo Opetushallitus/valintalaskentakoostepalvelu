@@ -243,7 +243,7 @@ public class ErillishakuProxyResource {
         try {
             asyncResponse.resume(Response.ok().header("Content-Type", "application/json").entity(msg).build());
         } catch (Throwable e) {
-            LOG.error("Paluuarvon muodostos epäonnistui! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+            LOG.error("Paluuarvon muodostos epäonnistui!", e);
         }
     }
 }

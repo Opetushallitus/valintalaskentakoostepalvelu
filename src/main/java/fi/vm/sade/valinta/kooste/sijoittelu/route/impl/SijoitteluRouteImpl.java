@@ -74,7 +74,7 @@ public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu> i
                     sijoitteluResource.sijoittele(s.getHakuOid(), success -> {
                         s.setValmis();
                     }, e -> {
-                        LOG.error("Sijoittelu epaonnistui haulle {}. {}\r\n{}", s.getHakuOid(), e.getMessage(), e.getStackTrace());
+                        LOG.error("Sijoittelu epaonnistui haulle " + s.getHakuOid(), e);
                         s.setOhitettu();
                     });
                 })));

@@ -278,9 +278,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                     log.info("hakijat:" + hakijat.size());
                                     haut.add(kelahaku);
                                 } catch (Exception e) {
-                                    LOG.error("Virhe kelaluonnissa {}\r\n{}",
-                                            e.getMessage(),
-                                            Arrays.toString(e.getStackTrace()));
+                                    LOG.error("Virhe kelaluonnissa!", e);
                                     luontiJaHaut
                                             .getLuonti()
                                             .getProsessi()

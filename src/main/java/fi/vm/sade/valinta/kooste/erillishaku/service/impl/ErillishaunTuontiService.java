@@ -87,11 +87,7 @@ public class ErillishaunTuontiService {
                 erillishakuExcel = importer.apply(haku);
                 tuoHakijatJaLuoHakemukset(prosessi, erillishakuExcel, haku);
             } catch(Exception e) {
-                LOG.error("Poikkeus {} {}: {}",  e.getMessage(),
-                        Arrays.asList(e.getStackTrace())
-                                .stream()
-                                .map(i -> i.toString())
-                                .collect(Collectors.joining("\r\n")));
+                LOG.error("tuoData exception!", e);
                 prosessi.keskeyta();
             }
         }, poikkeus -> {
@@ -187,7 +183,7 @@ public class ErillishaunTuontiService {
                             return rivi.toHenkiloCreateDTO();
                         }).collect(Collectors.toList())).get();
             } catch (Exception e) {
-                LOG.error("{}: {} {}", POIKKEUS_HENKILOPALVELUN_VIRHE, e.getMessage(), Arrays.toString(e.getStackTrace()));
+                LOG.error(POIKKEUS_HENKILOPALVELUN_VIRHE, e);
                 prosessi.keskeyta(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_HENKILOPALVELUN_VIRHE));
                 throw e;
             }
@@ -218,7 +214,7 @@ public class ErillishaunTuontiService {
                     }).collect(Collectors.toList());
             return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
         } catch (Throwable e) { // temporary catch to avoid missing service dependencies
-            LOG.error("{}: {} {}",POIKKEUS_HAKEMUSPALVELUN_VIRHE,e.getMessage(),Arrays.toString(e.getStackTrace()));
+            LOG.error(POIKKEUS_HAKEMUSPALVELUN_VIRHE, e);
             prosessi.keskeyta(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_HAKEMUSPALVELUN_VIRHE));
             throw e;
         }

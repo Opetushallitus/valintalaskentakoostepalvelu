@@ -220,19 +220,16 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                             "application/vnd.ms-excel", input);
                                     prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, id));
                                 } catch (Exception e) {
-                                    LOG.error("Dokumentin tallennus epäonnistui hakukohteelle {}: {}", hakukohdeOid, e.getMessage());
-                                    prosessi.getVaroitukset()
-                                            .add(new Varoitus(hakukohdeOid, "Ei saatu tallennettua dokumenttikantaan! " + e.getMessage() + "\r\n" + Arrays.toString(e.getStackTrace())));
+                                    LOG.error("Dokumentin tallennus epäonnistui hakukohteelle " + hakukohdeOid, e);
+                                    prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid, "Ei saatu tallennettua dokumenttikantaan! " + e.getMessage()));
                                     prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null));
-                                    return;
                                 }
                             }
                         } catch (SijoittelultaEiSisaltoaPoikkeus e) {
                             prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null, true));
                         } catch (Exception e) {
-                            LOG.error("Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle {}: {}", hakukohdeOid, e.getMessage());
-                            prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid, "Ei saatu sijoittelun tuloksia tai hakukohteita! "
-                                                    + e.getMessage() + "\r\n" + Arrays.toString(e.getStackTrace())));
+                            LOG.error("Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
+                            prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid, "Ei saatu sijoittelun tuloksia tai hakukohteita! " + e.getMessage()));
                             prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null));
                         }
                     }
@@ -309,9 +306,8 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                 prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, id));
                             }
                         } catch (Exception e) {
-                            LOG.error("Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle {}: {}", hakukohdeOid, e.getMessage());
-                            prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid, "Ei saatu sijoittelun tuloksia tai hakukohteita! "
-                                    + e.getMessage() + "\r\n" + Arrays.toString(e.getStackTrace())));
+                            LOG.error("Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
+                            prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid, "Ei saatu sijoittelun tuloksia tai hakukohteita! " + e.getMessage()));
                             prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null));
                         }
                     }
@@ -366,7 +362,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                                         dokumenttiprosessi(exchange).getTags(), "application/x-tar", tar);
                                 prosessi.setDokumenttiId(id);
                             } catch (Exception e) {
-                                LOG.error("Tulostietojen tallennus dokumenttipalveluun epäonnistui! {}:\r\n{}", e.getMessage(), Arrays.asList(e.getStackTrace()));
+                                LOG.error("Tulostietojen tallennus dokumenttipalveluun epäonnistui!", e);
                                 prosessi.getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Tulostietojen tallennus epäonnistui!"));
                             }
                         }
@@ -398,7 +394,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
                             exchange.getOut().setBody(hakukohteet);
                             dokumenttiprosessi(exchange).setKokonaistyo(hakukohteet.size());
                         } catch (Exception e) {
-                            LOG.error("Hakukohteiden haku epäonnistui! {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+                            LOG.error("Hakukohteiden haku epäonnistui!", e);
                             throw kasittelePoikkeus(Poikkeus.TARJONTA, exchange, e);
                         }
                     }

@@ -60,7 +60,7 @@ public class KoostepalveluKuluttaja<IN> implements Processor {
                             throw e;
                         }
                     } catch (Exception ee) {
-                        LOG.error("Poikkeuksen kasittelijasta lensi poikkeus: {}\r\n{}", ee.getMessage(), Arrays.toString(ee.getStackTrace()));
+                        LOG.error("Poikkeuksen kasittelijasta lensi poikkeus:", ee);
                         throw ee;
                     }
                 }

@@ -59,7 +59,7 @@ public class KoostepalveluLauseke<IN, OUT> implements Expression {
                     throw e;
                 }
             } catch (Exception ee) {
-                LOG.error("Poikkeuksen kasittelijasta lensi poikkeus: {}\r\n{}", ee.getMessage(), Arrays.toString(ee.getStackTrace()));
+                LOG.error("Poikkeuksen kasittelijasta lensi poikkeus:", ee);
                 throw ee;
             }
             return vakio;

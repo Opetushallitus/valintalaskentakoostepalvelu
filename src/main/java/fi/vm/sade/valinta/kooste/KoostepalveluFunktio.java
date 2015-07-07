@@ -43,7 +43,7 @@ public class KoostepalveluFunktio<IN, OUT> implements Processor {
                     try {
                         exchange.getOut().setBody(oletusluoja.apply(i));
                     } catch (Exception ee) {
-                        LOG.error("Poikkeuksen kasittelijasta lensi poikkeus: {}\r\n{}", ee.getMessage(), Arrays.toString(ee.getStackTrace()));
+                        LOG.error("Poikkeuksen kasittelijasta lensi poikkeus:", ee);
                         throw ee;
                     }
                     return;
