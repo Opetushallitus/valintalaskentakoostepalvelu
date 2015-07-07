@@ -58,7 +58,7 @@ public class OsoiteHaku {
             try {
                 oids.add(rdto.getParentOid());
             } catch (Exception e) {
-                LOG.error("Oidia ei voitu lisätä oidilistaan: {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+                LOG.error("Oidia ei voitu lisätä oidilistaan oid=" + rdto.getParentOid(), e);
                 throw new RuntimeException("Oidia ei voitu lisätä oidilistaan: " + e.getMessage());
             }
             if (hakijapalveluidenOsoite != null) {
@@ -74,7 +74,7 @@ public class OsoiteHaku {
                 return null;
             }
         } catch (Exception e) {
-            LOG.error("Hakijapalveluiden osoitteen haussa odottamaton virhe {},\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+            LOG.error("Hakijapalveluiden osoitteen haussa odottamaton virhe", e);
         }
         return null;
     }
@@ -89,7 +89,7 @@ public class OsoiteHaku {
             org = responseToOrganisaatio(haeOsoiteKomponentti, organisaatioAsyncResource, organisaatioResponse);
             organisaationimi = new Teksti(org.getNimi());
         } catch (Exception e) {
-            LOG.error("Ei saatu organisaatiota! {} {}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+            LOG.error("Ei saatu organisaatiota!", e);
             throw new RuntimeException(e);
         }
         return haeOsoiteHierarkisesti(haeOsoiteKomponentti, organisaatioAsyncResource, kieli, oids, org, organisaationimi);

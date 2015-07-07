@@ -95,7 +95,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                             LOG.debug("Saatiin hakemukset {}", hakemukset.size());
                             dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
                         } catch (Exception e) {
-                            LOG.error("Hakemuspalvelun virhe: {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+                            LOG.error("Hakemuspalvelun virhe", e);
                             dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.HAKU, "Hakemuspalvelulta ei saatu hakemuksia hakukohteelle", ""));
                             throw e;
                         }
@@ -109,7 +109,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                             valinnanvaiheet = hakukohdeResource.hakukohde(hakukohdeOid);
                             dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
                         } catch (Exception e) {
-                            LOG.error("Valinnanvaiheiden haku virhe: {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+                            LOG.error("Valinnanvaiheiden haku virhe", e);
                             dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.VALINTALASKENTA, "Valintalaskennalta ei saatu valinnanvaiheita", ""));
                             throw e;
                         }
@@ -120,7 +120,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                             xlsx = valintatapajonoExcel.getExcel().vieXlsx();
                             dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
                         } catch (Exception e) {
-                            LOG.error("Valintatapajono excelin luonti virhe: {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+                            LOG.error("Valintatapajono excelin luonti virhe", e);
                             dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Valintatapajono exceliä ei saatu luotua!", ""));
                             throw e;
                         }
@@ -132,7 +132,7 @@ public class ValintatapajonoVientiRouteImpl extends AbstractDokumenttiRouteBuild
                             dokumenttiprosessi(exchange).setDokumenttiId(id);
                             dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
                         } catch (Exception e) {
-                            LOG.error("Dokumenttipalveluun vienti virhe: {}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+                            LOG.error("Dokumenttipalveluun vienti virhe", e);
                             dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Dokumenttipalveluun ei saatu vietyä taulukkolaskentatiedostoa!", ""));
                             throw e;
                         }

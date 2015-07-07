@@ -142,8 +142,7 @@ public class ValintakoeKutsuExcelKomponentti {
             }
             return ExcelExportUtil.exportGridAsXls(rows.toArray(new Object[][]{}));
         } catch (Exception e) {
-            LOG.error("Jotain meni pieleen!");
-            LOG.error("{}\r\n{}", e.getMessage(), Arrays.toString(e.getStackTrace()));
+            LOG.error("Jotain meni pieleen!", e);
             throw e;
         }
     }

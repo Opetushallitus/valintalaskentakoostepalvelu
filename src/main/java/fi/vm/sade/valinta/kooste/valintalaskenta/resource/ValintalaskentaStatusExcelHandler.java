@@ -39,13 +39,13 @@ public class ValintalaskentaStatusExcelHandler {
                         byte[] bytes = LaskentaDtoAsExcel.laskentaDtoAsExcel(laskenta);
                         excelResponce.accept(excelResponse("yhteenveto.xls", bytes));
                     } catch (Throwable e) {
-                        LOG.error("Excelin muodostuksessa(kohteelle /laskenta/{}) tapahtui virhe: {}", uuid, e.getMessage());
+                        LOG.error("Excelin muodostuksessa(kohteelle /laskenta/" + uuid + ") tapahtui virhe", e);
                         excelResponce.accept(luoVirheExcelVastaus("yhteenveto_virhe.xls", "Virhe Excelin muodostuksessa!", e));
                         throw e;
                     }
                 },
                 poikkeus -> {
-                    LOG.error("Excelin tietojen haussa seurantapalvelusta(/laskenta/{}) tapahtui virhe: {}", uuid, poikkeus.getMessage());
+                    LOG.error("Excelin tietojen haussa seurantapalvelusta(/laskenta/" + uuid + ") tapahtui virhe", poikkeus);
                     excelResponce.accept(luoVirheExcelVastaus("yhteenveto_seurantavirhe.xls", "Virhe seurantapavelun kutsumisessa!", poikkeus));
                 });
     }

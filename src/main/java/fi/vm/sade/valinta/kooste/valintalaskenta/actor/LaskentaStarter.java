@@ -67,13 +67,13 @@ public class LaskentaStarter {
                                 if (!hakukohdeOids.isEmpty()) {
                                     fetchHakuInformation(laskennanKaynnistajaActor, hakuOid, hakukohdeOids, laskenta, startActor);
                                 } else {
-                                    cancelLaskenta(laskennanKaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", uuid);
+                                    cancelLaskenta(laskennanKaynnistajaActor, "Haulla " + laskenta.getUuid() + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?", null, uuid);
                                 }
                             },
-                            (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Haun kohteiden haku epäonnistui haulle: " + uuid, uuid)
+                            (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Haun kohteiden haku epäonnistui haulle: " + uuid, Optional.empty(), uuid)
                     );
                 },
-                (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Laskennan haku epäonnistui " + t.getMessage() + ": \r\n" + Arrays.toString(t.getStackTrace()), uuid)
+                (Throwable t) -> cancelLaskenta(laskennanKaynnistajaActor, "Laskennan haku epäonnistui ", Optional.of(t), uuid)
         );
     }
 
@@ -99,7 +99,7 @@ public class LaskentaStarter {
                     hakuRef.set(haku);
                     counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                 },
-                (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Tarjontatietojen haku epäonnistui: " + t.getMessage() + " " + Arrays.toString(t.getStackTrace()), laskenta.getUuid())
+                (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Tarjontatietojen haku epäonnistui: ", Optional.of(t), laskenta.getUuid())
         );
 
         ohjausparametritAsyncResource.haeHaunOhjausparametrit(
@@ -108,7 +108,7 @@ public class LaskentaStarter {
                     parametritRef.set(laskentaActorParams(hakuOid, laskenta, haunHakukohdeOidit, parametrit));
                     counter.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                 },
-                (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Ohjausparametrien luku epäonnistui: " + t.getMessage() + " " + Arrays.toString(t.getStackTrace()), laskenta.getUuid())
+                (Throwable t) -> cancelLaskenta(laskennankaynnistajaActor, "Ohjausparametrien luku epäonnistui: ", Optional.of(t), laskenta.getUuid())
         );
     }
 
@@ -137,8 +137,9 @@ public class LaskentaStarter {
                 .collect(Collectors.toList());
     }
 
-    private void cancelLaskenta(ActorRef laskennanKaynnistajaActor, String msg, String uuid) {
-        LOG.error(msg);
+    private void cancelLaskenta(ActorRef laskennanKaynnistajaActor, String msg, Optional<Throwable> t,  String uuid) {
+        if (t.isPresent()) LOG.error(msg, t);
+        else LOG.error(msg);
         seurantaAsyncResource.merkkaaLaskennanTila(uuid, LaskentaTila.VALMIS, HakukohdeTila.KESKEYTETTY);
         laskennanKaynnistajaActor.tell(new LaskentaStarterActor.WorkerAvailable(), ActorRef.noSender());
     }
