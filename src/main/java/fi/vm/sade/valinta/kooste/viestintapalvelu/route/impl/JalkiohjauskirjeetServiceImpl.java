@@ -177,7 +177,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                     prosessi.keskeyta("Hakemuksissa oli virheitä", batchId.getErrors());
                 }
             } catch (Throwable e) {
-                LOG.error("Virhe haulle {}", kirje.getHakuOid(), e);
+                LOG.error("Virhe haulle {}" + kirje.getHakuOid(), e);
                 prosessi.keskeyta();
             }
         };
