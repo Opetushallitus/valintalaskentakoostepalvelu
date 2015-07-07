@@ -31,51 +31,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
  *         dokumenttireittejä varten
  */
 public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder {
-    private final Processor inkrementoiKokonaistyota = new Processor() {
-        public void process(Exchange exchange) throws Exception {
-            dokumenttiprosessi(exchange).inkrementoiKokonaistyota();
-        }
-    };
-    private final Processor inkrementoiTehtyjaToita = new Processor() {
-        public void process(Exchange exchange) throws Exception {
-            dokumenttiprosessi(exchange).inkrementoiTehtyjaToita();
-        }
-    };
-
     public AbstractDokumenttiRouteBuilder() {
-    }
-
-    protected Processor merkkaaTyoTehdyksi() {
-        return this.inkrementoiTehtyjaToita;
-    }
-
-    protected Processor inkrementoiKokonaistyota() {
-        return this.inkrementoiKokonaistyota;
-    }
-
-    protected Processor asetaKokonaistyo(final int kokonaistoidenMaara) {
-        return new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                dokumenttiprosessi(exchange).setKokonaistyo(kokonaistoidenMaara);
-            }
-        };
     }
 
     protected DokumenttiProsessi dokumenttiprosessi(Exchange exchange) {
         return exchange.getProperty(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI, DokumenttiProsessi.class);
-    }
-
-    protected Predicate prosessiOnKeskeytetty() {
-        return new Predicate() {
-            public boolean matches(Exchange exchange) {
-                return dokumenttiprosessi(exchange).isKeskeytetty();
-            }
-        };
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<String> valintakoeOids(Exchange exchange) {
-        return exchange.getProperty("valintakoeOid", Collections.<String>emptyList(), List.class);
     }
 
     protected List<String> hakemusOids(Exchange exchange) {
@@ -95,7 +55,7 @@ public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder 
     }
 
     protected Date defaultExpirationDate() {
-        return DateTime.now().plusHours(168).toDate(); // almost a day
+        return DateTime.now().plusHours(168).toDate();
     }
 
     protected String generateId() {
@@ -106,17 +66,6 @@ public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder 
         exchange.setException(exception);
         dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus(palvelu, StringUtils.EMPTY, exception.getMessage(), oids));
         return exception;
-    }
-
-    protected Processor kirjaaPoikkeus(final Poikkeus... poikkeus) {
-        return new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                dokumenttiprosessi(exchange).getPoikkeukset().addAll(Lists.newArrayList(poikkeus));
-                if (exchange.getException() != null) {
-                    dokumenttiprosessi(exchange).getPoikkeukset().add(new Poikkeus("", "", exchange.getException().getMessage()));
-                }
-            }
-        };
     }
 
     protected InputStream pipeInputStreams(InputStream incoming) throws IOException {
@@ -130,18 +79,12 @@ public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder 
     }
 
     protected Predicate isEmpty(final ValueBuilder v) {
-        return new Predicate() {
-            @Override
-            public boolean matches(Exchange exchange) {
-                try {
-                    Collection<?> c = v.evaluate(exchange, Collection.class);
-                    if (c == null) {
-                        return true;
-                    }
-                    return c.isEmpty();
-                } catch (Exception e) {
-                    return true;
-                }
+        return exchange -> {
+            try {
+                Collection<?> c = v.evaluate(exchange, Collection.class);
+                return c == null || c.isEmpty();
+            } catch (Exception e) {
+                return true;
             }
         };
     }
