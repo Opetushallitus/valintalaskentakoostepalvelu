@@ -81,7 +81,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(koekutsukirjeiksi(prosessi, koekutsu),
                         t1 -> {
-                            LOG.error("Hakemuksien haussa hakutoiveelle {}: {}", koekutsu.getHakukohdeOid(), t1.getMessage());
+                            LOG.error("Hakemuksien haussa hakutoiveelle " + koekutsu.getHakukohdeOid(), t1);
                             prosessi.keskeyta();
                         }
                 );
@@ -106,7 +106,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                             return hakemukset;
                         }
                     } catch (Exception e) {
-                        LOG.error("Kutsutaanko kaikki kokeeseen tarkistus epaonnistui! {}", e.getMessage());
+                        LOG.error("Kutsutaanko kaikki kokeeseen tarkistus epaonnistui!", e);
                         throw e;
                     }
                     try {
@@ -115,13 +115,13 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                 .stream()
                                 .filter(Objects::nonNull)
                                 .filter(OsallistujatPredicate.osallistujat(valintakoeTunnisteet, koekutsu.getHakukohdeOid()))
-                                .map(vk -> vk.getHakemusOid())
+                                .map(ValintakoeOsallistuminenDTO::getHakemusOid)
                                 .collect(Collectors.toSet());
                         Stream<Hakemus> hakukohteenUlkopuolisetHakemukset;
                         {
                             Set<String> hakemusOids = hakemukset.stream().map(h -> (String) h.getOid()).collect(Collectors.toSet());
                             Set<String> hakukohteenUlkopuolisetKoekutsuttavat = Sets.newHashSet(osallistujienHakemusOidit);
-                            hakukohteenUlkopuolisetKoekutsuttavat.removeIf(h -> hakemusOids.contains(h));
+                            hakukohteenUlkopuolisetKoekutsuttavat.removeIf(hakemusOids::contains);
                             if (!hakukohteenUlkopuolisetKoekutsuttavat.isEmpty()) {
                                 hakukohteenUlkopuolisetHakemukset = applicationAsyncResource.getApplicationsByOids(hakukohteenUlkopuolisetKoekutsuttavat).get().stream();
                             } else {
@@ -136,14 +136,14 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                         LOG.info("{}", lopullinenHakemusJoukko.size());
                         return lopullinenHakemusJoukko;
                     } catch (Exception e) {
-                        LOG.error("Osallistumisia ei saatu valintalaskennasta! Valintakokeita oli " + valintakoeTunnisteet.size());
+                        LOG.error("Osallistumisia ei saatu valintalaskennasta! Valintakokeita oli " + valintakoeTunnisteet.size(), e);
                         throw new RuntimeException("Osallistumisia ei saatu valintalaskennasta! Valintakokeita oli " + valintakoeTunnisteet.size() + ". Syy " + e.getMessage());
                     }
                 })
                 .subscribeOn(Schedulers.newThread())
                 .subscribe(koekutsukirjeiksi(prosessi, koekutsu),
                         t1 -> {
-                            LOG.error("Osallistumistietojen haussa hakutoiveelle {}: {}", koekutsu.getHakukohdeOid(), t1.getMessage());
+                            LOG.error("Osallistumistietojen haussa hakutoiveelle " + koekutsu.getHakukohdeOid(), t1);
                             prosessi.keskeyta();
                         }
                 );
@@ -162,7 +162,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                         .stream()
                         .filter(Objects::nonNull)
                         .filter(e -> StringUtils.trimToEmpty(e.getKey()).endsWith("Opetuspiste-id"))
-                        .map(e -> e.getValue());
+                        .map(Map.Entry::getValue);
 
                 LOG.error("Haetaan valintakokeet hakutoiveille!");
                 final Map<String, HakukohdeJaValintakoeDTO> valintakoeOidsHakutoiveille;
@@ -176,7 +176,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                             .get()
                             .stream()
                             .filter(h -> h.getValintakoeDTO() != null && !h.getValintakoeDTO().isEmpty())
-                            .collect(Collectors.toMap(h -> h.getHakukohdeOid(), h -> h));
+                            .collect(Collectors.toMap(HakukohdeJaValintakoeDTO::getHakukohdeOid, h -> h));
                     if (valintakoeOidsHakutoiveille.isEmpty()) {
                         throw new RuntimeException("Yhdellekaan hakutoiveelle ei loytynyt valintakokeita!");
                     }
@@ -193,7 +193,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                             .getValintakoeDTO().stream()
                             .filter(Objects::nonNull)
                             .filter(v -> Boolean.TRUE.equals(v.getAktiivinen()))
-                            .map(v -> v.getSelvitettyTunniste())
+                            .map(ValintakoeDTO::getSelvitettyTunniste)
                             .collect(Collectors.toSet());
                     LOG.error("Mapataan muut hakukohteet");
                     hakemusOidJaHakijanMuutHakutoiveOids = hakemukset
@@ -202,20 +202,13 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                             .filter(h -> h.getOid() != null)
                             .collect(
                                     Collectors.toMap(
-                                            h -> h.getOid(),
+                                            Hakemus::getOid,
                                             h -> hakutoiveetHakemuksesta
                                                     .apply(h)
                                                     .filter(Objects::nonNull)
-                                                            //
-                                                            // jos joku hakutoive
-                                                            // sisaltaa
-                                                            // valintakokeen
-                                                            // jolla sama tunniste
-                                                            // kuin
-                                                            // taman hakukohteen
-                                                            // valintakokeilla
-                                                            //
-                                                    .filter(hakutoive -> valintakoeOidsHakutoiveille.containsKey(hakutoive))
+                                                            // jos joku hakutoive sisaltaa valintakokeen
+                                                            // jolla sama tunniste kuin taman hakukohteen valintakokeilla
+                                                    .filter(valintakoeOidsHakutoiveille::containsKey)
                                                     .filter(hakutoive -> valintakoeOidsHakutoiveille
                                                             .get(hakutoive)
                                                             .getValintakoeDTO()
@@ -226,7 +219,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                                             .anyMatch(v -> kohdeHakukohteenTunnisteet.contains(v.getSelvitettyTunniste())))
                                                     .collect(Collectors.toList())));
                 } catch (Exception e) {
-                    LOG.error("Muiden hakukohteiden mappauksessa tapahtui odottamaton virhe {}", e.getMessage());
+                    LOG.error("Muiden hakukohteiden mappauksessa tapahtui odottamaton virhe", e);
                     throw e;
                 }
                 LOG.info("Luodaan kirje.");
@@ -261,7 +254,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                                 stop.onNext(null);
                                             }
                                         } catch (Exception e) {
-                                            LOG.error("Statuksen haku epaonnistui {}", e.getMessage());
+                                            LOG.error("Statuksen haku epaonnistui", e);
                                         }
                                     }, throwable -> {
                                         prosessi.keskeyta();
