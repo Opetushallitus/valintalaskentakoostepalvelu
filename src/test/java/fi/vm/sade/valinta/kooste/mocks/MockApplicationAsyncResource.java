@@ -144,6 +144,11 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
     }
 
     @Override
+    public Observable<Response> changeStateOfApplicationsToPassive(List<String> hakemusOid, String reason) {
+        return Observable.just(Response.ok().build());
+    }
+
+    @Override
     public Future<List<Hakemus>> getApplicationsByOids(final Collection<String> hakemusOids) {
         return Futures.immediateFuture(resultByOidReference.get());
     }

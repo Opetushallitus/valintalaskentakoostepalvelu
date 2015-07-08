@@ -30,4 +30,6 @@ public interface ApplicationAsyncResource {
     Peruutettava getApplicationAdditionalData(Collection<String> hakemusOids, Consumer<List<ApplicationAdditionalDataDTO>> callback, Consumer<Throwable> failureCallback);
 
     Observable<Response> putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData);
+
+    Observable<Response> changeStateOfApplicationsToPassive(List<String> hakemusOid, String reason);
 }

@@ -1,44 +1,20 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
-import static com.codepoetics.protonpack.StreamUtils.*;
-import static fi.vm.sade.valinta.kooste.converter.ValintatuloksenTilaHakuTyypinMukaanConverter.convertValintatuloksenTilaHakuTyypinMukaan;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
-import static org.apache.commons.lang.StringUtils.*;
-import static rx.schedulers.Schedulers.newThread;
-
-import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import fi.vm.sade.authentication.model.Kielisyys;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
-import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
-import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-
 import fi.vm.sade.authentication.model.Henkilo;
+import fi.vm.sade.authentication.model.Kielisyys;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
+import fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil;
 import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -49,8 +25,31 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.Scheduler;
+
+import java.io.InputStream;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.codepoetics.protonpack.StreamUtils.zip;
+import static com.codepoetics.protonpack.StreamUtils.zipWithIndex;
+import static fi.vm.sade.valinta.kooste.converter.ValintatuloksenTilaHakuTyypinMukaanConverter.convertValintatuloksenTilaHakuTyypinMukaan;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static rx.schedulers.Schedulers.newThread;
 
 @Service
 public class ErillishaunTuontiService {
@@ -266,13 +265,19 @@ public class ErillishaunTuontiService {
             pois = Stream.empty();
         }
         try {
-            tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(),
-                    Stream.concat(hakijat, pois).collect(Collectors.toList()));
+            List<ErillishaunHakijaDTO> poisLista = pois.collect(Collectors.toList());
+            List<String> hakemusOidit = poisLista.stream().map(p -> p.getHakemusOid()).collect(Collectors.toList());
+            applicationAsyncResource.changeStateOfApplicationsToPassive(hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä").toBlocking().first();
+            List<ErillishaunHakijaDTO> hakijatJaPoistettavat = new ArrayList<>();
+            hakijatJaPoistettavat.addAll(hakijat.collect(Collectors.toList()));
+            hakijatJaPoistettavat.addAll(poisLista);
+            tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijatJaPoistettavat);
         } catch (Exception e) {
             LOG.error("Erillishaun tilojen tuonti epaonnistui", e);
             throw new RuntimeException(e);
         }
     }
+
 
     private static HakemuksenTila hakemuksenTila(ErillishakuRivi rivi) {
         return Optional.ofNullable(nullIfFails(() -> HakemuksenTila.valueOf(rivi.getHakemuksenTila()))).orElse(HakemuksenTila.HYLATTY);

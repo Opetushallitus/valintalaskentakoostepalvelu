@@ -3,12 +3,16 @@ package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.http.GsonResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.*;
+import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppiBatch;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.hakemus.dto.ApplicationOidsAndReason;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -165,5 +169,10 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     @Override
     public Observable<Response> putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData) {
         return putAsObservable("/applications/additionalData/" + hakuOid + "/" + hakukohdeOid, Entity.json(additionalData));
+    }
+
+    @Override
+    public Observable<Response> changeStateOfApplicationsToPassive(List<String> hakemusOids, String reason) {
+        return postAsObservable("/applications/state/passivate", Entity.json(new ApplicationOidsAndReason(hakemusOids, reason)));
     }
 }

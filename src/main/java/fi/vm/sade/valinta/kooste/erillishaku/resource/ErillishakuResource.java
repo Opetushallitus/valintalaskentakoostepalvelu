@@ -1,34 +1,8 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Optional;
-
-import javax.ws.rs.*;
-
-import com.google.common.hash.HashCode;
-import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-
-import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.*;
-import static rx.observables.BlockingObservable.from;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.poi.util.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
-
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
-
 import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
@@ -36,9 +10,27 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiService;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunVientiService;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
-import rx.observables.BlockingObservable;
+import org.apache.poi.util.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+
+import javax.ws.rs.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.Optional;
+
+import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.oidHaustaJaHakukohteesta;
+import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.trimToNull;
+import static org.springframework.security.core.context.SecurityContextHolder.getContext;
+import static rx.observables.BlockingObservable.from;
 
 @Controller("ErillishakuResource")
 @Path("erillishaku")
@@ -102,6 +94,7 @@ public class ErillishakuResource {
             @QueryParam("valintatapajonoOid") String valintatapajonoOid,
             @QueryParam("valintatapajononNimi") String valintatapajononNimi,
             InputStream file) throws Exception {
+        LOG.info("Käyttäjä " + getContext().getAuthentication().getName() + " tuo excelillä hakuun " + hakuOid + " hakemuksia");
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ByteArrayOutputStream b;
@@ -136,6 +129,7 @@ public class ErillishakuResource {
                     "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>" +
                     "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>")
                     ErillishakuJson json) throws Exception {
+        LOG.info("Käyttäjä " + getContext().getAuthentication().getName() + " päivittää " + json.getRivit().size() + " kpl haun " + hakuOid + " hakemusta");
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
