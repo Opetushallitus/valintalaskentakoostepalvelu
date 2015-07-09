@@ -266,8 +266,10 @@ public class ErillishaunTuontiService {
         }
         try {
             List<ErillishaunHakijaDTO> poisLista = pois.collect(Collectors.toList());
-            List<String> hakemusOidit = poisLista.stream().map(p -> p.getHakemusOid()).collect(Collectors.toList());
-            applicationAsyncResource.changeStateOfApplicationsToPassive(hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä").toBlocking().first();
+            if (!poisLista.isEmpty()) {
+                List<String> hakemusOidit = poisLista.stream().map(ErillishaunHakijaDTO::getHakemusOid).collect(Collectors.toList());
+                applicationAsyncResource.changeStateOfApplicationsToPassive(hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä").toBlocking().first();
+            }
             List<ErillishaunHakijaDTO> hakijatJaPoistettavat = new ArrayList<>();
             hakijatJaPoistettavat.addAll(hakijat.collect(Collectors.toList()));
             hakijatJaPoistettavat.addAll(poisLista);
