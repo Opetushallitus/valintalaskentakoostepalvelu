@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 
 import javax.ws.rs.*;
@@ -94,7 +95,7 @@ public class ErillishakuResource {
             @QueryParam("valintatapajonoOid") String valintatapajonoOid,
             @QueryParam("valintatapajononNimi") String valintatapajononNimi,
             InputStream file) throws Exception {
-        LOG.info("Käyttäjä " + getContext().getAuthentication().getName() + " tuo excelillä hakuun " + hakuOid + " hakemuksia");
+        LOG.info("Käyttäjä " + getUsernameFromSession() + " tuo excelillä hakuun " + hakuOid + " hakemuksia");
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ByteArrayOutputStream b;
@@ -129,12 +130,18 @@ public class ErillishakuResource {
                     "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>" +
                     "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>")
                     ErillishakuJson json) throws Exception {
-        LOG.info("Käyttäjä " + getContext().getAuthentication().getName() + " päivittää " + json.getRivit().size() + " kpl haun " + hakuOid + " hakemusta");
+
+        LOG.info("Käyttäjä " + getUsernameFromSession() + " päivittää " + json.getRivit().size() + " kpl haun " + hakuOid + " hakemusta");
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
         tuontiService.tuoJson(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi), json.getRivit());
         return prosessi.toProsessiId();
+    }
+
+    private String getUsernameFromSession() {
+        Authentication authentication = getContext().getAuthentication();
+        return authentication == null ? "[No user defined in session]" : authentication.getName();
     }
 }
