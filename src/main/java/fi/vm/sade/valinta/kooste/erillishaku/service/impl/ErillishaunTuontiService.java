@@ -92,9 +92,7 @@ public class ErillishaunTuontiService {
         }, poikkeus -> {
             LOG.error("Erillishaun tuonti keskeytyi virheeseen", poikkeus);
             prosessi.keskeyta();
-        }, () -> {
-            LOG.info("Tuonti lopetettiin");
-        });
+        }, () -> LOG.info("Tuonti lopetettiin"));
     }
 
     private static void validoiRivit(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> rivit) {
@@ -162,7 +160,7 @@ public class ErillishaunTuontiService {
         }
 
     private void tuoHakijatJaLuoHakemukset(final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final ErillishakuDTO haku) throws Exception {
-        LOG.info("Aloitetaan tuonti. Rivit" + erillishakuExcel.rivit.size());
+        LOG.info("Aloitetaan tuonti. Rivit=" + erillishakuExcel.rivit.size());
         final List<ErillishakuRivi> rivit = autoTaytto(erillishakuExcel.rivit);
 
         validoiRivit(prosessi,haku,rivit);

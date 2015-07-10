@@ -1,27 +1,23 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import fi.vm.sade.authentication.model.HenkiloTyyppi;
+import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
+import fi.vm.sade.valinta.kooste.excel.Excel;
+import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import fi.vm.sade.authentication.model.HenkiloTyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuExcel;
-import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
-import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class ImportedErillisHakuExcel {
     private static final Logger LOG = LoggerFactory.getLogger(ImportedErillisHakuExcel.class);
@@ -52,9 +48,9 @@ public class ImportedErillisHakuExcel {
     private static List<ErillishakuRivi> createExcel(Hakutyyppi hakutyyppi, InputStream inputStream) {
         try {
             final List<ErillishakuRivi> rivit = Lists.newArrayList();
-            new ErillishakuExcel(hakutyyppi, rivi -> {
-                rivit.add(rivi);
-            }).getExcel().tuoXlsx(inputStream);
+            ErillishakuExcel erillishakuExcel = new ErillishakuExcel(hakutyyppi, rivi -> rivit.add(rivi));
+            Excel excel = erillishakuExcel.getExcel();
+            excel.tuoXlsx(inputStream);
             return rivit;
         } catch(Throwable t) {
             LOG.error("Excelin muodostus epaonnistui! {}", t);
