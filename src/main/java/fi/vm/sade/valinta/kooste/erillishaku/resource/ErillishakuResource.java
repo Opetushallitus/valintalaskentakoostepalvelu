@@ -129,8 +129,7 @@ public class ErillishakuResource {
                     "aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|<br>" +
                     "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>" +
                     "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>")
-                    ErillishakuJson json) throws Exception {
-
+            ErillishakuJson json) throws Exception {
         LOG.info("Käyttäjä " + getUsernameFromSession() + " päivittää " + json.getRivit().size() + " kpl haun " + hakuOid + " hakemusta");
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
         authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);

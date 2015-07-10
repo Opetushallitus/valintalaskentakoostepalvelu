@@ -162,14 +162,14 @@ public class ErillishaunTuontiService {
         }
 
     private void tuoHakijatJaLuoHakemukset(final KirjeProsessi prosessi, final ImportedErillisHakuExcel erillishakuExcel, final ErillishakuDTO haku) throws Exception {
-        LOG.info("Aloitetaan tuonti");
+        LOG.info("Aloitetaan tuonti. Rivit" + erillishakuExcel.rivit.size());
         final List<ErillishakuRivi> rivit = autoTaytto(erillishakuExcel.rivit);
 
         validoiRivit(prosessi,haku,rivit);
 
         List<ErillishakuRivi> lisattavatTaiKeskeneraiset = rivit.stream()
                 .filter(rivi -> !rivi.isPoistetaankoRivi()).collect(Collectors.toList());
-
+        LOG.info("lisattavatTaiKeskeneraiset="+lisattavatTaiKeskeneraiset.size());
         List<ErillishakuRivi> poistettavat = rivit.stream()
                 .filter(rivi -> !rivi.isKesken() && rivi.isPoistetaankoRivi()).collect(Collectors.toList());
         final List<Hakemus> hakemukset;
@@ -178,9 +178,8 @@ public class ErillishaunTuontiService {
             final List<Henkilo> henkilot;
             try {
                 henkilot = henkiloAsyncResource.haeTaiLuoHenkilot(lisattavatTaiKeskeneraiset.stream()
-                        .map(rivi -> {
-                            return rivi.toHenkiloCreateDTO();
-                        }).collect(Collectors.toList())).get();
+                        .map(rivi -> rivi.toHenkiloCreateDTO()).collect(Collectors.toList())).get();
+                LOG.info("Luotiin henkilot=" + henkilot.stream().map(h -> h.getOidHenkilo()).collect(Collectors.toList()));
             } catch (Exception e) {
                 LOG.error(POIKKEUS_HENKILOPALVELUN_VIRHE, e);
                 prosessi.keskeyta(Poikkeus.henkilopalvelupoikkeus(POIKKEUS_HENKILOPALVELUN_VIRHE));
