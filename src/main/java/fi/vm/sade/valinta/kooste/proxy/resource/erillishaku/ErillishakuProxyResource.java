@@ -133,16 +133,8 @@ public class ErillishakuProxyResource {
                                             mergeSuplier.get();
                                         }
                                     },
-                                    throwable -> {
-                                        LOG.error("Erillishakuproxy -palvelukutsu epäonnistui erillissijoittelun virheeseen: ", throwable);
-                                        try {
-                                            asyncResponse.resume(Response.serverError()
-                                                    .entity("Erillishakuproxy -palvelukutsu epäonnistui erillissijoittelun virheeseen: " + throwable.getMessage())
-                                                    .build());
-                                        } catch (Exception e) {
-                                            LOG.error("Erillissijoittelun virhe tuli yhtäaikaa timeoutin kanssa!", e);
-                                        }
-                                    });
+                                    throwable -> logAndReturnError("valintalaskenta", asyncResponse, throwable)
+                            );
                         });
                     } else {
                         LOG.info("Ei saatu erillisiä sijoitteluajoideitä.");
@@ -152,34 +144,18 @@ public class ErillishakuProxyResource {
 
                     mergeSuplier.get();
                 },
-                poikkeus -> {
-                    LOG.error("Erillishakuproxy -palvelukutsu epäonnistui valintalaskennan virheeseen", poikkeus);
-                    try {
-                        asyncResponse.resume(Response.serverError()
-                                .entity("Erillishakuproxy -palvelukutsu epäonnistui valintalaskennan virheeseen: " + poikkeus.getMessage())
-                                .build());
-                    } catch (Exception e) {
-                        LOG.error("Valintalaskennan virhe tuli yhtäaikaa timeoutin kanssa!", e);
-                    }
-                }
+                poikkeus -> logAndReturnError("valintalaskenta", asyncResponse, poikkeus)
         );
     }
 
     void fetchValintatulos(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<Valintatulos>> vtsValintatulokset, Supplier<Void> mergeSuplier) {
         tilaResource.getValintatulokset(hakuOid, hakukohdeOid, vts -> {
-            LOG.info("Haetaan sijoittelusta valintatulokset");
-            vtsValintatulokset.set(vts);
-            mergeSuplier.get();
-        }, poikkeus -> {
-            LOG.error("Erillishakuproxy -palvelukutsu epäonnistui valintatulosservice-palvelun virheeseen", poikkeus);
-            try {
-                asyncResponse.resume(Response.serverError()
-                        .entity("Erillishakuproxy -palvelukutsu epäonnistui valintatulosservice-palvelun virheeseen: " + poikkeus.getMessage())
-                        .build());
-            } catch (Exception e) {
-                LOG.error("Valintatulosservice-palvelun virhe tuli yhtäaikaa timeoutin kanssa!", e);
-            }
-        });
+                    LOG.info("Haetaan sijoittelusta valintatulokset");
+                    vtsValintatulokset.set(vts);
+                    mergeSuplier.get();
+                },
+                poikkeus -> logAndReturnError("valintatulosservice", asyncResponse, poikkeus)
+        );
     }
 
     void fetchSijoittelu(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<HakukohdeDTO> hakukohde, Supplier<Void> mergeSuplier) {
@@ -189,16 +165,7 @@ public class ErillishakuProxyResource {
                     hakukohde.set(s);
                     mergeSuplier.get();
                 },
-                poikkeus -> {
-                    LOG.error("Erillishakuproxy -palvelukutsu epäonnistui sijoittelupalvelun virheeseen", poikkeus);
-                    try {
-                        asyncResponse.resume(Response.serverError()
-                                .entity("Erillishakuproxy -palvelukutsu epäonnistui sijoittelupalvelun virheeseen: " + poikkeus.getMessage())
-                                .build());
-                    } catch (Exception e) {
-                        LOG.error("Sijoittelupalvelun virhe tuli yhtäaikaa timeoutin kanssa!", e);
-                    }
-                }
+                poikkeus -> logAndReturnError("sijoittelupalvelu", asyncResponse, poikkeus)
         );
     }
 
@@ -209,16 +176,7 @@ public class ErillishakuProxyResource {
                     valinnanvaiheet.set(v.stream().filter(vaihe -> vaihe.getValinnanVaiheTyyppi().equals(ValinnanVaiheTyyppi.TAVALLINEN)).collect(Collectors.toList()));
                     mergeSuplier.get();
                 },
-                poikkeus -> {
-                    LOG.error("Valintaperusteet, valinnanvaiheen haku epäonnistui", poikkeus);
-                    try {
-                        asyncResponse.resume(Response.serverError()
-                                .entity("Erillishakuproxy -palvelukutsu epäonnistui valintaperusteetpalvelun virheeseen: " + poikkeus.getMessage())
-                                .build());
-                    } catch (Exception e) {
-                        LOG.error("Valintaperusteetpalvelun virhe tuli yhtäaikaa timeoutin kanssa!", e);
-                    }
-                }
+                poikkeus -> logAndReturnError("valintaperusteet", asyncResponse, poikkeus)
         );
     }
 
@@ -229,17 +187,19 @@ public class ErillishakuProxyResource {
                     hakemukset.set(h);
                     mergeSuplier.get();
                 },
-                poikkeus -> {
-                    LOG.error("Erillishakuproxy -palvelukutsu epäonnistui haku-app:n virheeseen!", poikkeus);
-                    try {
-                        asyncResponse.resume(Response.serverError()
-                                .entity("Erillishakuproxy -palvelukutsu epäonnistui haku-app:n virheeseen: " + poikkeus.getMessage())
-                                .build());
-                    } catch (Exception e) {
-                        LOG.error("Haku-app virhe tuli yhtäaikaa timeoutin kanssa!", e);
-                    }
-                }
+                poikkeus -> logAndReturnError("haku-app", asyncResponse, poikkeus)
         );
+    }
+
+    private void logAndReturnError(String appName, @Suspended AsyncResponse asyncResponse, Throwable poikkeus) {
+        LOG.error("Erillishakuproxy -palvelukutsu epäonnistui " + appName + " :n virheeseen!", poikkeus);
+        try {
+            asyncResponse.resume(Response.serverError()
+                    .entity("Erillishakuproxy -palvelukutsu epäonnistui + " + appName + " :n virheeseen: " + poikkeus.getMessage())
+                    .build());
+        } catch (Exception e) {
+            LOG.error(appName + " virhe tuli yhtäaikaa timeoutin kanssa!", e);
+        }
     }
 
     private void r(AsyncResponse asyncResponse, List<MergeValinnanvaiheDTO> msg) {
