@@ -52,13 +52,7 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                             .path(url)
                             .accept(MediaType.APPLICATION_JSON_TYPE)
                             .async()
-                            .get(new GsonResponseCallback<List<ValintaperusteetHakijaryhmaDTO>>(
-                                    address,
-                                    url,
-                                    callback,
-                                    failureCallback,
-                                    new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {
-                                    }.getType())));
+                            .get(new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {}.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
@@ -70,16 +64,12 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
         // /valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
         try {
             String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/" + hakukohdeOid + "/valinnanvaihe";
-
             return new PeruutettavaImpl(
                     getWebClient()
                     .path(url)
                     .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
-                    .get(new GsonResponseCallback<List<ValinnanVaiheJonoillaDTO>>(address, url, callback,
-                            failureCallback,
-                            new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {
-                            }.getType())));
+                    .get(new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
@@ -114,7 +104,6 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
     public Peruutettava haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku, Consumer<List<ValintaperusteetDTO>> callback, Consumer<Throwable> failureCallback) {
         try {
             String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/" + hakukohdeOid;
-
             WebClient wc = getWebClient().path(url);
             if (valinnanVaiheJarjestysluku != null) {
                 wc.query("vaihe", valinnanVaiheJarjestysluku);
@@ -122,29 +111,21 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
             return new PeruutettavaImpl(wc
                     .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
-                    .get(new GsonResponseCallback<List<ValintaperusteetDTO>>(address, url
-                            + "?vaihe=" + valinnanVaiheJarjestysluku, callback,
-                            failureCallback,
-                            new TypeToken<List<ValintaperusteetDTO>>() {
-                            }.getType())));
+                    .get(new GsonResponseCallback<>(address, url + "?vaihe=" + valinnanVaiheJarjestysluku, callback, failureCallback, new TypeToken<List<ValintaperusteetDTO>>() {}.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
         }
     }
 
-    public Peruutettava haunHakukohteet(String hakuOid,
-                                        Consumer<List<HakukohdeViiteDTO>> callback,
-                                        Consumer<Throwable> failureCallback) {
+    public Peruutettava haunHakukohteet(String hakuOid, Consumer<List<HakukohdeViiteDTO>> callback, Consumer<Throwable> failureCallback) {
         try {
             String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/haku/" + hakuOid;
             return new PeruutettavaImpl(getWebClient()
                     .path(url)
                     .accept(MediaType.APPLICATION_JSON_TYPE)
                     .async()
-                    .get(new GsonResponseCallback<List<HakukohdeViiteDTO>>(address, url,
-                            callback, failureCallback,
-                            new TypeToken<List<HakukohdeViiteDTO>>() {}.getType())));
+                    .get(new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<List<HakukohdeViiteDTO>>() {}.getType())));
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
@@ -162,15 +143,11 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
 
     @Override
     public Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
-        return getAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/" + hakukohdeOid + "/", new TypeToken<List<ValintaperusteDTO>>() {
-        }.getType());
+        return getAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/" + hakukohdeOid + "/", new TypeToken<List<ValintaperusteDTO>>() {}.getType());
     }
 
     @Override
-    public Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
-            Collection<String> hakukohdeOids) {
-        // LOG.error("POST {}\r\n{}", url,
-        // Arrays.toString(hakukohdeOids.toArray()));
+    public Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids) {
         return getWebClient()
                 .path("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
@@ -179,20 +156,14 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
     }
 
     @Override
-    public Peruutettava haeValintakokeetHakukohteille(
-            Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
+    public Peruutettava haeValintakokeetHakukohteille(Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback) {
         String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe";
-        // LOG.error("POST {}\r\n{}", url,
-        // Arrays.toString(hakukohdeOids.toArray()));
         return new PeruutettavaImpl(getWebClient()
                 .path(url)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
-                .post(Entity.entity(hakukohdeOids,
-                                MediaType.APPLICATION_JSON_TYPE),
-                        new GsonResponseCallback<List<HakukohdeJaValintakoeDTO>>(address, url,
-                                callback, failureCallback,
-                                new TypeToken<List<HakukohdeJaValintakoeDTO>>() {}.getType())));
+                .post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE),
+                        new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<List<HakukohdeJaValintakoeDTO>>() {}.getType())));
     }
 
     @Override
@@ -211,8 +182,6 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                 .path(url)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
-                .get(new GsonResponseCallback<List<ValintakoeDTO>>(address, url,
-                        callback, failureCallback,
-                        new TypeToken<List<ValintakoeDTO>>() {}.getType())));
+                .get(new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<List<ValintakoeDTO>>() {}.getType())));
     }
 }
