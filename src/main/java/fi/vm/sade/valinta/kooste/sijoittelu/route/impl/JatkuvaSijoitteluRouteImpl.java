@@ -181,7 +181,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
                                     LOG.warn("Jatkuva sijoittelu merkattiin ajetuksi haulle {}", sijoitteluHakuOid.getHakuOid());
                                 },
                                 poikkeus -> {
-                                    LOG.error("Jatkuvan sijoittelun suorittaminen ei onnistunut haulle {}. {}", sijoitteluHakuOid.getHakuOid(), poikkeus.getMessage());
+                                    LOG.error("Jatkuvan sijoittelun suorittaminen ei onnistunut haulle " + sijoitteluHakuOid.getHakuOid(), poikkeus);
                                 });
                     } else {
                         LOG.error("Jatkuvasijoittelu ei kaynnisty haulle {} koska uudelleen kaynnistysviivetta on viela jaljella", sijoitteluHakuOid.getHakuOid());

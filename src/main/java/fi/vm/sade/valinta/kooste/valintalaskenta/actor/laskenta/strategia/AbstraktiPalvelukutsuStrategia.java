@@ -38,20 +38,20 @@ public abstract class AbstraktiPalvelukutsuStrategia implements PalvelukutsuStra
                     try {
                         aloitetutPalvelukutsut.remove(seuraavaPalvelukutsu.palvelukutsu);
                     } catch (Exception e) {
-                        LOG.error("Palvelustrategiassa aloitetun palvelukutsun poisto tyojonosta epaonnistui {}", e.getMessage());
+                        LOG.error("Palvelustrategiassa aloitetun palvelukutsun poisto tyojonosta epaonnistui", e);
                         throw e;
                     }
                     try {
                         seuraavaPalvelukutsu.takaisinkutsu.accept(palvelukutsu);
                     } catch (Exception e) {
-                        LOG.error("Palvelustrategiassa alkuperainen takaisinkutsu heitti poikkeuksen {}", e.getMessage());
+                        LOG.error("Palvelustrategiassa alkuperainen takaisinkutsu heitti poikkeuksen", e);
                     }
                 });
             } catch (PalvelukutsunUudelleenAktivointiPoikkeus p) {
                 aloitetutPalvelukutsut.remove(seuraavaPalvelukutsu.palvelukutsu);
                 throw p;
             } catch (Exception e) {
-                LOG.error("Palvelukutsun kaynnistys heitti poikkeuksen: {}", e.getClass().getSimpleName());
+                LOG.error("Palvelukutsun kaynnistys heitti poikkeuksen", e);
                 aloitetutPalvelukutsut.remove(seuraavaPalvelukutsu.palvelukutsu);
                 throw e;
             }

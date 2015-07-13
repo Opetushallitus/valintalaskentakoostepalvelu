@@ -60,7 +60,7 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends AbstraktiPalvelukuts
                         return null;
                     });
                 } catch (Exception e) {
-                    LOG.error("Laskentapalvelukutsun takaisinkutsu epaonnistui {}", e.getMessage());
+                    LOG.error("Laskentapalvelukutsun takaisinkutsu epaonnistui", e);
                     throw e;
                 }
 
@@ -79,7 +79,7 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends AbstraktiPalvelukuts
                             return null;
                         });
                     } catch (Exception e) {
-                        LOG.error("Laskentapalvelukutsun takaisinkutsu epaonnistui {}", e.getMessage());
+                        LOG.error("Laskentapalvelukutsun takaisinkutsu epaonnistui", e);
                         throw e;
                     }
                 } else if (laskuriNyt < 0) {
@@ -103,7 +103,7 @@ public abstract class AbstraktiLaskentaPalvelukutsu extends AbstraktiPalvelukuts
             super.peruuta();
             palvelukutsut.forEach(PalvelukutsuJaPalvelukutsuStrategia::peruuta);
         } catch (Exception e) {
-            LOG.error("AbstraktiLaskentaPalvelukutsun peruutus epaonnistui! {}", e.getMessage());
+            LOG.error("AbstraktiLaskentaPalvelukutsun peruutus epaonnistui!", e);
         }
     }
 

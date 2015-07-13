@@ -59,7 +59,7 @@ public class OsoiteHaku {
                 oids.add(rdto.getParentOid());
             } catch (Exception e) {
                 LOG.error("Oidia ei voitu lisätä oidilistaan oid=" + rdto.getParentOid(), e);
-                throw new RuntimeException("Oidia ei voitu lisätä oidilistaan: " + e.getMessage());
+                throw new RuntimeException("Oidia ei voitu lisätä oidilistaan", e);
             }
             if (hakijapalveluidenOsoite != null) {
                 LOG.error("Hakijapalveluiden osoite saatiin tarjoajalta {}.\r\n{}", Arrays.toString(oids.toArray()), new GsonBuilder().setPrettyPrinting().create().toJson(hakijapalveluidenOsoite));

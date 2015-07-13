@@ -30,7 +30,7 @@ public class PalvelukutsuJaPalvelukutsuStrategiaImpl<T extends Palvelukutsu> imp
             try {
                 palvelukutsu.peruuta();
             } catch (Exception e) {
-                LOG.error("Laskennanpalvelukutsustakasin aloitettu alipalvelukutsujen peruutu epaonnistui palvelukutsulle {} syysta {}", palvelukutsu.getClass().getSimpleName(), e.getMessage());
+                LOG.error("Laskennanpalvelukutsustakasin aloitettu alipalvelukutsujen peruutu epaonnistui palvelukutsulle" + palvelukutsu.getClass().getSimpleName(), e);
             }
         }
     }

@@ -65,7 +65,7 @@ public class ValintalaskentaKerrallaResource {
             Maski maski = whitelist ? Maski.whitelist(stringMaski) : Maski.blacklist(stringMaski);
             valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, maski, Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
         } catch (Throwable e) {
-            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
+            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
             asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
             throw e;
         }
@@ -84,7 +84,7 @@ public class ValintalaskentaKerrallaResource {
             });
             valintalaskentaKerrallaService.kaynnistaLaskentaUudelleen(uuid, (Response response) -> asyncResponse.resume(response));
         } catch (Throwable e) {
-            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe: {}", e.getMessage());
+            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe", e);
             asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
             throw e;
         }
@@ -106,7 +106,7 @@ public class ValintalaskentaKerrallaResource {
         try {
             return valintalaskentaValvomo.fetchLaskenta(uuid);
         } catch (Exception e) {
-            LOG.error("Valintalaskennan statuksen luku heitti poikkeuksen! {}", e.getMessage());
+            LOG.error("Valintalaskennan statuksen luku heitti poikkeuksen!", e);
             return null;
         }
     }
@@ -152,6 +152,7 @@ public class ValintalaskentaKerrallaResource {
                 }
                 return sb.toString();
             } catch (Exception e) {
+                LOG.error("hakukohdeOidsFromMaskiToString", e);
                 return e.getMessage();
             }
         }

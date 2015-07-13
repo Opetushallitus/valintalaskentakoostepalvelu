@@ -332,7 +332,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                         hakemukset.addAll(h);
                                         LOG.warn("Saatiin erä hakemuksia {}. {}/{}", h.size(), hakemukset.size(), hakemusOidit.size());
                                     } catch (Exception e) {
-                                        LOG.error("Hakemuspalvelu ei jaksa tarjoilla hakemuksia {}. Yritetään vielä uudestaan.", e.getMessage());
+                                        LOG.error("Hakemuspalvelu ei jaksa tarjoilla hakemuksia. Yritetään vielä uudestaan.", e);
                                         // annetaan hakuapp:lle vahan aikaa
                                         // toipua
                                         // ja yritetaan uudestaan
@@ -411,8 +411,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                         try {
                                             c.put(hakukohdeOid, kelaResource.tutkinnontaso(hakukohdeOid));
                                         } catch (Exception e) {
-                                            LOG.error("Ei saatu kela-rajapinnalta tutkinnon tasoa hakukohteelle (oid: {})\r\n{}",
-                                                    hakukohdeOid, e.getMessage());
+                                            LOG.error("Ei saatu kela-rajapinnalta tutkinnon tasoa hakukohteelle" + hakukohdeOid, e);
                                             throw e;
                                         }
                                     }
@@ -431,7 +430,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                             }
 
                                         } catch (Exception e) {
-                                            LOG.error("Ei saatu kela-rajapinnalta koulutusastetta hakukohteelle (oid: {})\r\n{}", hakukohdeOid, e.getMessage());
+                                            LOG.error("Ei saatu kela-rajapinnalta koulutusastetta hakukohteelle" + hakukohdeOid, e);
                                             throw e;
                                         }
                                     }
@@ -455,7 +454,7 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                             throw e;
                                         }
                                         tries++;
-                                        LOG.error("tilaResource ei jaksa palvella {}. Yritetään vielä uudestaan. " + tries + "/20...", e.getMessage());
+                                        LOG.error("tilaResource ei jaksa palvella {}. Yritetään vielä uudestaan. " + tries + "/20...", e);
                                         try {
                                             Thread.sleep(10000L);
                                         } catch (InterruptedException e1) {

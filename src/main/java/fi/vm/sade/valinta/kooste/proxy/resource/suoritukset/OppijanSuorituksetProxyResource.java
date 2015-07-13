@@ -65,7 +65,7 @@ public class OppijanSuorituksetProxyResource {
 
         try {
             PoikkeusKasittelijaSovitin poikkeuskasittelija = new PoikkeusKasittelijaSovitin(poikkeus -> {
-                LOG.error("", poikkeus);
+                LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
                 asyncResponse.resume(Response.serverError().entity(poikkeus.getMessage()).build());
             });
 
@@ -118,7 +118,7 @@ public class OppijanSuorituksetProxyResource {
                 laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
             }, poikkeuskasittelija);
         } catch (Throwable t) {
-            LOG.error("", t);
+            LOG.error("OppijanSuorituksetProxyResource throws", t);
             asyncResponse.resume(Response.serverError().entity(t.getMessage()).build());
         }
     }

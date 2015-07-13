@@ -101,7 +101,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
                     .async()
                     .put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
         } catch (Exception e) {
-            LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url, e.getMessage());
+            LOG.error("Seurantapalvelun kutsu paatyi virheeseen!" + url, e);
         }
     }
 
@@ -113,7 +113,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
                     .async()
                     .put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
         } catch (Exception e) {
-            LOG.error("Seurantapalvelun kutsu {} laskennalle {} paatyi virheeseen: {}", url, uuid, e.getMessage());
+            LOG.error("Seurantapalvelun kutsu " + url + " laskennalle " + uuid + " paatyi virheeseen", e);
         }
     }
 
@@ -126,7 +126,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
                     .async()
                     .put(Entity.entity(tila, MediaType.APPLICATION_JSON_TYPE), responseCallback);
         } catch (Exception e) {
-            LOG.error("Seurantapalvelun kutsu {} laskennalle {} ja hakukohteelle {} paatyi virheeseen: {}", url, uuid, hakukohdeOid, e.getMessage());
+            LOG.error("Seurantapalvelun kutsu " + url + " laskennalle " + uuid + " ja hakukohteelle " + hakukohdeOid + " paatyi virheeseen", e);
         }
     }
 
@@ -138,7 +138,7 @@ public class LaskentaSeurantaAsyncResourceImpl extends HttpResource implements L
                     .async()
                     .post(Entity.entity(gson.toJson(ilmoitus), MediaType.APPLICATION_JSON_TYPE), responseCallback);
         } catch (Exception e) {
-            LOG.error("Seurantapalvelun kutsu {} paatyi virheeseen: {}", url, e.getMessage());
+            LOG.error("Seurantapalvelun kutsu paatyi virheeseen " + url, e);
         }
     }
 

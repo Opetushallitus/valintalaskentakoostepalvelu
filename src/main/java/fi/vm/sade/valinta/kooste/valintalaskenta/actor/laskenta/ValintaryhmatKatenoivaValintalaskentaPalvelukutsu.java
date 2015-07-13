@@ -85,7 +85,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
                         y.vapautaResurssit();
                         return l;
                     } catch (Exception e) {
-                        LOG.error("LaskeDTO:n muodostaminen epaonnistui {}", e.getMessage());
+                        LOG.error("LaskeDTO:n muodostaminen epaonnistui", e);
                         throw e;
                     }
                 })
@@ -100,7 +100,7 @@ public class ValintaryhmatKatenoivaValintalaskentaPalvelukutsu extends Abstrakti
                     failureCallback(takaisinkutsu)
             ));
         } catch (Exception e) {
-            LOG.error("ValintalaskentaPalvelukutsu palvelukutsun muodostus epaonnistui virheeseen {}", e.getMessage());
+            LOG.error("ValintalaskentaPalvelukutsu palvelukutsun muodostus epaonnistui virheeseen", e);
             failureCallback(takaisinkutsu).accept(e);
         }
         return this;

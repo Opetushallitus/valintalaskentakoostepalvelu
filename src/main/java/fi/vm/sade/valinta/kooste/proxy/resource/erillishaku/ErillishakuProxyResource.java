@@ -117,13 +117,13 @@ public class ErillishakuProxyResource {
                     mergeSuplier.get();
                 },
                 poikkeus -> {
+                    LOG.error("Erillishakuproxy -palvelukutsu epäonnistui haku-app:n virheeseen!", poikkeus);
                     try {
                         asyncResponse.resume(Response.serverError()
                                 .entity("Erillishakuproxy -palvelukutsu epäonnistui haku-app:n virheeseen: " + poikkeus.getMessage())
                                 .build());
                     } catch (Exception e) {
-                        // kilpailutilanne timeoutin ja virheen kanssa. Oikeastaan sama mitä käyttäjälle näytetään tässä kohtaa.
-                        LOG.error("Haku-app virhe tuli yhtäaikaa timeoutin kanssa! {}", e.getMessage());
+                        LOG.error("Haku-app virhe tuli yhtäaikaa timeoutin kanssa!", e);
                     }
                 }
         );
@@ -135,14 +135,13 @@ public class ErillishakuProxyResource {
                     mergeSuplier.get();
                 },
                 poikkeus -> {
+                    LOG.error("Valintaperusteet, valinnanvaiheen haku epäonnistui", poikkeus);
                     try {
                         asyncResponse.resume(Response.serverError()
                                 .entity("Erillishakuproxy -palvelukutsu epäonnistui valintaperusteetpalvelun virheeseen: " + poikkeus.getMessage())
                                 .build());
-                        LOG.error("Valintaperusteet, valinnanvaiheen haku epäonnistui", poikkeus);
                     } catch (Exception e) {
-                        // kilpailutilanne timeoutin ja virheen kanssa. Oikeastaan sama mitä käyttäjälle näytetään tässä kohtaa.
-                        LOG.error("Valintaperusteetpalvelun virhe tuli yhtäaikaa timeoutin kanssa! {}", e.getMessage());
+                        LOG.error("Valintaperusteetpalvelun virhe tuli yhtäaikaa timeoutin kanssa!", e);
                     }
                 }
         );
@@ -154,13 +153,13 @@ public class ErillishakuProxyResource {
                     mergeSuplier.get();
                 },
                 poikkeus -> {
+                    LOG.error("Erillishakuproxy -palvelukutsu epäonnistui sijoittelupalvelun virheeseen", poikkeus);
                     try {
                         asyncResponse.resume(Response.serverError()
                                 .entity("Erillishakuproxy -palvelukutsu epäonnistui sijoittelupalvelun virheeseen: " + poikkeus.getMessage())
                                 .build());
                     } catch (Exception e) {
-                        // kilpailutilanne timeoutin ja virheen kanssa. Oikeastaan sama mitä käyttäjälle näytetään tässä kohtaa.
-                        LOG.error("Sijoittelupalvelun virhe tuli yhtäaikaa timeoutin kanssa! {}", e.getMessage());
+                        LOG.error("Sijoittelupalvelun virhe tuli yhtäaikaa timeoutin kanssa!", e);
                     }
                 }
         );
@@ -170,13 +169,13 @@ public class ErillishakuProxyResource {
             vtsValintatulokset.set(vts);
             mergeSuplier.get();
         }, poikkeus -> {
+            LOG.error("Erillishakuproxy -palvelukutsu epäonnistui valintatulosservice-palvelun virheeseen", poikkeus);
             try {
                 asyncResponse.resume(Response.serverError()
                         .entity("Erillishakuproxy -palvelukutsu epäonnistui valintatulosservice-palvelun virheeseen: " + poikkeus.getMessage())
                         .build());
             } catch (Exception e) {
-                // kilpailutilanne timeoutin ja virheen kanssa. Oikeastaan sama mitä käyttäjälle näytetään tässä kohtaa.
-                LOG.error("Valintatulosservice-palvelun virhe tuli yhtäaikaa timeoutin kanssa! {}", e.getMessage());
+                LOG.error("Valintatulosservice-palvelun virhe tuli yhtäaikaa timeoutin kanssa!", e);
             }
         });
         ///valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
@@ -208,13 +207,13 @@ public class ErillishakuProxyResource {
                                         }
                                     },
                                     p0 -> {
+                                        LOG.error("Erillishakuproxy -palvelukutsu epäonnistui erillissijoittelun virheeseen: ", p0);
                                         try {
                                             asyncResponse.resume(Response.serverError()
                                                     .entity("Erillishakuproxy -palvelukutsu epäonnistui erillissijoittelun virheeseen: " + p0.getMessage())
                                                     .build());
                                         } catch (Exception e) {
-                                            // kilpailutilanne timeoutin ja virheen kanssa. Oikeastaan sama mitä käyttäjälle näytetään tässä kohtaa.
-                                            LOG.error("Erillissijoittelun virhe tuli yhtäaikaa timeoutin kanssa! {}", e.getMessage());
+                                            LOG.error("Erillissijoittelun virhe tuli yhtäaikaa timeoutin kanssa!", e);
                                         }
                                     });
                         });
@@ -227,13 +226,13 @@ public class ErillishakuProxyResource {
                     mergeSuplier.get();
                 },
                 poikkeus -> {
+                    LOG.error("Erillishakuproxy -palvelukutsu epäonnistui valintalaskennan virheeseen", poikkeus);
                     try {
                         asyncResponse.resume(Response.serverError()
                                 .entity("Erillishakuproxy -palvelukutsu epäonnistui valintalaskennan virheeseen: " + poikkeus.getMessage())
                                 .build());
                     } catch (Exception e) {
-                        // kilpailutilanne timeoutin ja virheen kanssa. Oikeastaan sama mitä käyttäjälle näytetään tässä kohtaa.
-                        LOG.error("Valintalaskennan virhe tuli yhtäaikaa timeoutin kanssa! {}", e.getMessage());
+                        LOG.error("Valintalaskennan virhe tuli yhtäaikaa timeoutin kanssa!", e);
                     }
                 }
         );

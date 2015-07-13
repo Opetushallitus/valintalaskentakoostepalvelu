@@ -228,7 +228,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                 try {
                     batchId = viestintapalveluAsyncResource.viePdfJaOdotaReferenssi(letterBatch).get(165L, TimeUnit.SECONDS);
                 } catch (Exception e) {
-                    LOG.error("Viestintapalvelukutsu epaonnistui virheeseen {}", e.getMessage());
+                    LOG.error("Viestintapalvelukutsu epaonnistui virheeseen", e);
                     throw new RuntimeException(e);
                 }
                 LOG.info("Saatiin kirjeen seurantaId {}", batchId.getBatchId());
@@ -261,9 +261,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                                 stop.onNext(null);
                                             }
                                         } catch (Exception e) {
-                                            LOG.error(
-                                                    "Statuksen haku epaonnistui {}",
-                                                    e.getMessage());
+                                            LOG.error("Statuksen haku epaonnistui", e);
                                         }
 
                                     }, throwable -> {

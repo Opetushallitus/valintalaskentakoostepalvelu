@@ -23,7 +23,7 @@ public class HakukohdeLaskuri extends Laskuri {
                 LOG.error("Hakukohde {} saattoi olla jo merkittyna valmiiksi! Havainto oli virheellinen noin 3% todennakoisyydella!", hakukohdeOid);
             }
         } catch (Exception e) {
-            LOG.error("Bloomfilterin kutsu epaonnistui! {}", e.getMessage());
+            LOG.error("Bloomfilterin kutsu epaonnistui!", e);
         }
         int l = tiputaLaskuria();
         if (l < 0) {

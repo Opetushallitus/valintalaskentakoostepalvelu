@@ -81,7 +81,7 @@ public class Converter {
                     }
                 }
             } catch (Exception e) {
-                LOG.error("Epaonnistuminen henkilotietojen konversioon {}!", e.getMessage());
+                LOG.error("Epaonnistuminen henkilotietojen konversioon!", e);
                 throw e;
             }
 
@@ -90,7 +90,7 @@ public class Converter {
                     hakemus.getAnswers().getHakutoiveet().putAll(mapEligibilityAndStatus(
                             hakemus.getPreferenceEligibilities(), hakemus.getAnswers().getHakutoiveet()));
                 } catch (Exception e) {
-                    throw new RuntimeException("Eligibilities statusten mappaus preferensseihin epaonnistui! " + e.getMessage(), e);
+                    throw new RuntimeException("Eligibilities statusten mappaus preferensseihin epaonnistui!", e);
                 }
                 Map<Integer, Hakutoive> hakutoiveet = new HashMap<Integer, Hakutoive>();
                 if (hakemus.getAnswers().getHakutoiveet() != null) {
@@ -143,7 +143,7 @@ public class Converter {
                     }
                 }
             } catch (Exception e) {
-                LOG.error("Epaonnistuminen hakuvoiteiden konversioon {}!", e.getMessage());
+                LOG.error("Epaonnistuminen hakuvoiteiden konversioon!", e);
                 throw e;
             }
 
@@ -157,7 +157,7 @@ public class Converter {
                     }
                 }
             } catch (Exception e) {
-                LOG.error("Epaonnistuminen koulutustaustan konversioon {}!", e.getMessage());
+                LOG.error("Epaonnistuminen koulutustaustan konversioon!", e);
                 throw e;
             }
 
@@ -171,7 +171,7 @@ public class Converter {
                     }
                 }
             } catch (Exception e) {
-                LOG.error("Epaonnistuminen lisatietojen konversioon {}!", e.getMessage());
+                LOG.error("Epaonnistuminen lisatietojen konversioon!", e);
                 throw e;
             }
 
@@ -191,7 +191,7 @@ public class Converter {
 
                 }
             } catch (Exception e) {
-                LOG.error("Epaonnistuminen osaamisen konversioon {}!", e.getMessage());
+                LOG.error("Epaonnistuminen osaamisen konversioon!", e);
                 throw e;
             }
         }
@@ -205,7 +205,7 @@ public class Converter {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Epaonnistuminen avainten konversioon {}!", e.getMessage());
+            LOG.error("Epaonnistuminen avainten konversioon!", e);
             throw e;
         }
 

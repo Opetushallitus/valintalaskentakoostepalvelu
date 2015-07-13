@@ -15,7 +15,7 @@ public class YksiPalvelukutsuKerrallaPalvelukutsuStrategia extends AbstraktiPalv
         } catch (PalvelukutsunUudelleenAktivointiPoikkeus p) {
             LOG.info("Yritettiin aktivoida palvelua joka oli mahdollisesti peruutettu.");
         } catch (Exception e) {
-            LOG.error("Kaynnistyksessa tapahtui virhe! {}", e.getMessage());
+            LOG.error("Kaynnistyksessa tapahtui virhe!", e);
         }
     }
 }

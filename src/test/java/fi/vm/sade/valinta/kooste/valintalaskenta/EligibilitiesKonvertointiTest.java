@@ -82,9 +82,7 @@ public class EligibilitiesKonvertointiTest {
 						}
 					}).collect(Collectors.toList());
 		} catch (Exception e) {
-			LOG.error(
-					"Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle {} ja null hakemukselle. Syy {}!",
-					hakukohdeOid, e.getMessage());
+			LOG.error("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle " + hakukohdeOid" +  ja null hakemukselle", e);
 			throw e;
 		}
 		if (!epaonnistuneetKonversiot.isEmpty()) {

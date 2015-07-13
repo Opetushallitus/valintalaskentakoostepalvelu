@@ -85,7 +85,7 @@ public class ValintatapajonoTuontiService {
                                         },
                                         dontcare ->
                                         {
-                                            LOG.error("Ei saatu paivitettya " + dontcare.getMessage(), dontcare);
+                                            LOG.error("Ei saatu paivitettya!", dontcare);
                                         });
                             },
                             poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef));
@@ -93,7 +93,7 @@ public class ValintatapajonoTuontiService {
                     dokumentinSeurantaAsyncResource.paivitaKuvaus(dokumenttiIdRef.get(), "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...").subscribe(
                             dontcare -> {},
                             dontcare -> {
-                                LOG.error("Onnistumisen ilmoittamisessa virhe! " + dontcare.getMessage(), dontcare);
+                                LOG.error("Onnistumisen ilmoittamisessa virhe!", dontcare);
                             });
                 } catch (Throwable t) {
                     poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef).accept(t);
@@ -155,7 +155,7 @@ public class ValintatapajonoTuontiService {
                     dokumentinSeurantaAsyncResource.lisaaVirheilmoituksia(dokumenttiId, Arrays.asList(new VirheilmoitusDto("", viesti))).subscribe(
                             dontcare -> {},
                             dontcare -> {
-                                LOG.error("Virheen ilmoittamisessa virhe! " + dontcare.getMessage(), dontcare);
+                                LOG.error("Virheen ilmoittamisessa virhe!", dontcare);
                             });
                 }
             } catch (Throwable t) {

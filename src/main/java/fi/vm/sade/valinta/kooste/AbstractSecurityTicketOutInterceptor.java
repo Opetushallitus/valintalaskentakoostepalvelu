@@ -165,7 +165,7 @@ public class AbstractSecurityTicketOutInterceptor<T extends Message> extends Abs
         try {
             LOG.error("\r\n{}", new GsonBuilder().setPrettyPrinting().create().toJson(message));
         } catch (Exception e) {
-            LOG.error("Prettyprinting error message failed! {}", e.getMessage());
+            LOG.error("Prettyprinting error message failed!", e);
         }
     }
 

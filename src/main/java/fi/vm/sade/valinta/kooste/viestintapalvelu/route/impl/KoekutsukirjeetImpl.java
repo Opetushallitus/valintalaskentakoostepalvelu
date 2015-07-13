@@ -126,7 +126,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                         return lopullinenHakemusJoukko;
                     } catch (Exception e) {
                         LOG.error("Osallistumisia ei saatu valintalaskennasta! Valintakokeita oli " + valintakoeTunnisteet.size(), e);
-                        throw new RuntimeException("Osallistumisia ei saatu valintalaskennasta! Valintakokeita oli " + valintakoeTunnisteet.size() + ". Syy " + e.getMessage());
+                        throw new RuntimeException("Osallistumisia ei saatu valintalaskennasta! Valintakokeita oli " + valintakoeTunnisteet.size(), e);
                     }
                 })
                 .subscribeOn(Schedulers.newThread())

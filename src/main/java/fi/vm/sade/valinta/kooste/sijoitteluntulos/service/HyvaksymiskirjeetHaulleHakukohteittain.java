@@ -92,7 +92,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                                 hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue);
                             },
                             e -> {
-                                LOG.info("Hakukohde {} ohitettu", resurssit.hakukohdeOid, e);
+                                LOG.info("Hakukohde ohitettu virhe?" + resurssit.hakukohdeOid, e);
                                 prosessi.inkrementoiOhitettujaToita();
                                 prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus("Hyväksymiskirjeiden muodostaminen ei onnistunut.\n" + e.getMessage()));
                                 hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue);

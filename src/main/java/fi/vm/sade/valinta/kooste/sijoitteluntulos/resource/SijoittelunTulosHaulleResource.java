@@ -65,7 +65,7 @@ public class SijoittelunTulosHaulleResource {
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             return prosessi.toProsessiId();
         } catch (Exception e) {
-            LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
+            LOG.error("Osoitetarrojen luonnissa virhe!", e);
             // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
             // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
             // Ylläpitäjä voi lukea logeista todellisen syyn!
@@ -95,7 +95,7 @@ public class SijoittelunTulosHaulleResource {
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             return prosessi.toProsessiId();
         } catch (Exception e) {
-            LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
+            LOG.error("Hyväksymiskirjeiden luonnissa virhe!", e);
             // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
             // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
             // Ylläpitäjä voi lukea logeista todellisen syyn!
@@ -118,7 +118,7 @@ public class SijoittelunTulosHaulleResource {
             dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
             return prosessi.toProsessiId();
         } catch (Exception e) {
-            LOG.error("Taulukkolaskentojen luonnissa virhe! {}", e.getMessage());
+            LOG.error("Taulukkolaskentojen luonnissa virhe!", e);
             // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
             // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
             // Ylläpitäjä voi lukea logeista todellisen syyn!

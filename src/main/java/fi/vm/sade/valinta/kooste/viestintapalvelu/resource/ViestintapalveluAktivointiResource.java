@@ -91,7 +91,7 @@ public class ViestintapalveluAktivointiResource {
             // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
             // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
             // Ylläpitäjä voi lukea logeista todellisen syyn!
-            throw new RuntimeException("Osoitetarrojen luonti epäonnistui! " + e.getMessage(), e);
+            throw new RuntimeException("Osoitetarrojen luonti epäonnistui!", e);
         }
     }
 
@@ -147,7 +147,7 @@ public class ViestintapalveluAktivointiResource {
             osoitetarratService.osoitetarratHakemuksille(osoiteProsessi, hakemuksillaRajaus.getHakemusOids());
             return new ProsessiId(osoiteProsessi.getId());
         } catch (Exception e) {
-            LOG.error("Osoitetarrojen luonnissa virhe! {}", e.getMessage());
+            LOG.error("Osoitetarrojen luonnissa virhe!", e);
             // Ei oikeastaan väliä loppukäyttäjälle miksi palvelu pettää!
             // todennäköisin syy on hakemuspalvelun ylikuormittumisessa!
             // Ylläpitäjä voi lukea logeista todellisen syyn!
@@ -220,8 +220,8 @@ public class ViestintapalveluAktivointiResource {
             hyvaksymiskirjeetService.jalkiohjauskirjeHakukohteelle(prosessi, hyvaksymiskirjeDTO);
             return prosessi.toProsessiId();
         } catch (Exception e) {
-            LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
-            throw new RuntimeException("Hyväksymiskirjeiden luonti epäonnistui! " + e.getMessage(), e);
+            LOG.error("Hyväksymiskirjeiden luonnissa virhe!", e);
+            throw new RuntimeException("Hyväksymiskirjeiden luonti epäonnistui!", e);
         }
     }
 
@@ -260,8 +260,8 @@ public class ViestintapalveluAktivointiResource {
             }
             return prosessi.toProsessiId();
         } catch (Exception e) {
-            LOG.error("Hyväksymiskirjeiden luonnissa virhe! {}", e.getMessage());
-            throw new RuntimeException("Hyväksymiskirjeiden luonti epäonnistui! " + e.getMessage(), e);
+            LOG.error("Hyväksymiskirjeiden luonnissa virhe!", e);
+            throw new RuntimeException("Hyväksymiskirjeiden luonti epäonnistui!", e);
         }
     }
 

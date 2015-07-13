@@ -43,12 +43,12 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
                 LOG.debug("Silmukka havaittu {}", self.getClass().getSimpleName());
                 return;
             }
-            LOG.error("{} epaonnistui (uuid={}, hakukohde={})! {} {}", self.getClass().getSimpleName(), getUuid(), getHakukohdeOid(), poikkeus.getMessage());
+            LOG.error(self.getClass().getSimpleName() + " epaonnistui (uuid=" + getUuid() + ", hakukohde=" + getHakukohdeOid() + ")!", poikkeus);
             try {
                 self.peruuta();
                 takaisinkutsu.accept(self);
             } catch (Exception e) {
-                LOG.error("Takaisinkutsun teko epaonnistui {}! {}", self.getClass().getSimpleName(), e.getMessage());
+                LOG.error("Takaisinkutsun teko epaonnistui "+ self.getClass().getSimpleName(), e);
             }
         });
     }
@@ -65,7 +65,7 @@ public abstract class AbstraktiPalvelukutsu implements Palvelukutsu {
                 try {
                     aiempi.peruuta();
                 } catch (Exception e) {
-                    LOG.error("Palvelukutsun peruutus epaonnistui {}", e.getMessage());
+                    LOG.error("Palvelukutsun peruutus epaonnistui", e);
                 }
             }
             // palautetaan tyhjareferenssi koska ei tarvita enaa referenssia

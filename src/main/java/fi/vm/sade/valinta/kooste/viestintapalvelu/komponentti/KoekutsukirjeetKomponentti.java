@@ -122,7 +122,7 @@ public class KoekutsukirjeetKomponentti {
                                 return nimet.get(h).getHakukohdeNimi().getTeksti(opetuskieli);
                             }).collect(Collectors.toList());
                 } catch (Exception e) {
-                    LOG.error("\r\n###\r\n### {}\r\n###", e.getMessage());
+                    LOG.error("valmistaKoekutsukirjeet throws", e);
                 }
                 Map<String, Object> replacements = Maps.newHashMap();
                 replacements.put("koulu", hakukohdeNimiTietyllaKielella);

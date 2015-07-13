@@ -57,7 +57,10 @@ public class ValintalaskentaKerrallaService {
                         Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, maski, callback);
                         createLaskenta(haunHakukohteetOids, (String uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
                     },
-                    (Throwable poikkeus) -> callback.accept(errorResponse(poikkeus.getMessage()))
+                    (Throwable poikkeus) -> {
+                        LOG.error("kaynnistaLaskentaHaulle throws", poikkeus);
+                        callback.accept(errorResponse(poikkeus.getMessage()));
+                    }
             );
         }
     }
@@ -73,7 +76,10 @@ public class ValintalaskentaKerrallaService {
                     uuid,
                     (LaskentaDto laskenta) -> valintaperusteetAsyncResource.haunHakukohteet(laskenta.getHakuOid(),
                             (List<HakukohdeViiteDTO> hakukohdeViitteet) -> notifyWorkAvailable(laskenta.getUuid(), callbackResponse),
-                            (Throwable poikkeus) -> callbackResponse.accept(errorResponse(poikkeus.getMessage()))
+                            (Throwable poikkeus) -> {
+                                LOG.error("seurantaAsyncResource throws", poikkeus);
+                                callbackResponse.accept(errorResponse(poikkeus.getMessage()));
+                            }
                     ),
                     (Throwable t) -> {
                         LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid, t);

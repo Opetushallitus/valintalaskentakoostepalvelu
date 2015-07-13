@@ -225,7 +225,7 @@ public class Excel {
                     r.setRowStyle(hiddenStyle);
                 }
             } catch (Exception e) {
-                LOG.error("{}", e.getMessage());
+                LOG.error("Excel throws", e);
             }
         }
         for (int i = 0; i < leveysPreferenssit.size(); ++i) {

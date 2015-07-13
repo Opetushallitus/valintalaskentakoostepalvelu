@@ -86,7 +86,7 @@ public class ValintalaskentaExcelResource {
             InputStream input = jalkiohjaustulos.luoXls(hakuOid);
             return Response.ok(input, APPLICATION_VND_MS_EXCEL).header("content-disposition", "inline; filename=jalkiohjaustulos.xls").build();
         } catch (Exception e) {
-            LOG.error("Jälkiohjaustulosexcelin luonti epäonnistui haulle {}: {}", new Object[]{hakuOid, e.getMessage()});
+            LOG.error("Jälkiohjaustulosexcelin luonti epäonnistui haulle" + hakuOid, e);
             return Response
                     .ok(ExcelExportUtil.exportGridAsXls(new Object[][]{new Object[]{"Tarvittavien tietojen hakeminen epäonnistui!", "Hakemuspalvelu saattaa olla ylikuormittunut!", "Yritä uudelleen!"}}), APPLICATION_VND_MS_EXCEL)
                     .header("content-disposition", "inline; filename=yritauudelleen.xls")
@@ -110,7 +110,7 @@ public class ValintalaskentaExcelResource {
             valintakoekutsutExcelService.luoExcel(p, hakuOid, hakukohdeOid, lisatiedot.getValintakoeTunnisteet(), Sets.newHashSet(Optional.ofNullable(lisatiedot.getHakemusOids()).orElse(Collections.emptyList())));
             return p.toProsessiId();
         } catch (Exception e) {
-            LOG.error("Valintakoekutsut excelin luonti epäonnistui hakukohteelle {}, valintakoeoideille {}: {}", new Object[]{hakukohdeOid, Arrays.toString(lisatiedot.getValintakoeTunnisteet().toArray()), e.getMessage()});
+            LOG.error("Valintakoekutsut excelin luonti epäonnistui hakukohteelle " + hakukohdeOid + ", valintakoeoideille" + Arrays.toString(lisatiedot.getValintakoeTunnisteet().toArray()), e);
             throw new RuntimeException("Valintakoekutsut excelin luonti epäonnistui!", e);
         }
     }
