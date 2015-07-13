@@ -1,14 +1,5 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.apache.commons.lang.StringUtils;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila;
@@ -18,7 +9,15 @@ import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.SoluLukija;
 import fi.vm.sade.valinta.kooste.excel.arvo.Arvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ErillishakuDataRivi extends DataRivi {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ErillishakuDataRivi.class);
@@ -58,7 +57,9 @@ public class ErillishakuDataRivi extends DataRivi {
 
     boolean isNewRow(Rivi rivi, String syntymaAika) {
         LOG.info("Checking for new row {} {} {}", rivi.isTyhja(), rivi.getSolut().size(), syntymaAika);
-        return !rivi.isTyhja() && rivi.getSolut().size() == 12 && !"Syntymäaika".equals(syntymaAika);
+        return !rivi.isTyhja()
+                && rivi.getSolut().size() >= 12 //Copy-paste easily creates extra columns for excel doc
+                && !"Syntymäaika".equals(syntymaAika);
     }
 
     public static final Collection<String> SUKUPUOLEN_ARVOT = Arrays.asList(Sukupuoli.values()).stream().map(Object::toString).collect(Collectors.toList());
