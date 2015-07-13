@@ -73,13 +73,10 @@ public class ErillishakuProxyResource {
             @PathParam("hakuOid") String hakuOid,
             @PathParam("hakukohdeOid") String hakukohdeOid,
             @Suspended AsyncResponse asyncResponse) {
-        //authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_APP_HAKEMUS_CRUD);
         asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-        asyncResponse.setTimeoutHandler(new TimeoutHandler() {
-            public void handleTimeout(AsyncResponse asyncResponse) {
-                LOG.error("Erillishakuproxy -palvelukutsu on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
-                asyncResponse.resume(Response.serverError().entity("Erillishakuproxy -palvelukutsu on aikakatkaistu").build());
-            }
+        asyncResponse.setTimeoutHandler(asyncResponse1 -> {
+            LOG.error("Erillishakuproxy -palvelukutsu on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
+            asyncResponse1.resume(Response.serverError().entity("Erillishakuproxy -palvelukutsu on aikakatkaistu").build());
         });
         final AtomicReference<List<Hakemus>> hakemukset = new AtomicReference<>();
         final AtomicReference<List<ValinnanVaiheJonoillaDTO>> valinnanvaiheet = new AtomicReference<>();
