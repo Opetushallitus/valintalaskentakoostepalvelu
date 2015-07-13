@@ -36,11 +36,7 @@ public class ErillishakuExcel {
 
     public ErillishakuExcel(Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
                             String tarjoajaNimi, List<ErillishakuRivi> erillishakurivit) {
-        this(tyyppi, hakuNimi, hakukohdeNimi, tarjoajaNimi, erillishakurivit, new ErillishakuRiviKuuntelija() {
-            @Override
-            public void erillishakuRiviTapahtuma(ErillishakuRivi rivi) {
-            }
-        });
+        this(tyyppi, hakuNimi, hakukohdeNimi, tarjoajaNimi, erillishakurivit, rivi -> {});
     }
 
     public ErillishakuExcel(final Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,
@@ -66,21 +62,18 @@ public class ErillishakuExcel {
                 new TekstiArvo("Vastaanottotila"),
                 new TekstiArvo("Ilmoittautumistila"),
                 new TekstiArvo("Julkaistavissa")));
-        Collections.sort(erillishakurivit, new Comparator<ErillishakuRivi>() {
-            @Override
-            public int compare(ErillishakuRivi h1, ErillishakuRivi h2) {
-                ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(emptyErillishakuRivi());
-                ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(emptyErillishakuRivi());
-                String s1 = Optional.ofNullable(e1.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
-                String s2 = Optional.ofNullable(e2.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
-                int i = s1.compareTo(s2);
-                if (i != 0) {
-                    return i;
-                } else {
-                    String ee1 = Optional.ofNullable(e1.getEtunimi()).orElse(StringUtils.EMPTY).toUpperCase();
-                    String ee2 = Optional.ofNullable(e2.getEtunimi()).orElse(StringUtils.EMPTY).toUpperCase();
-                    return ee1.compareTo(ee2);
-                }
+        Collections.sort(erillishakurivit, (h1, h2) -> {
+            ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(emptyErillishakuRivi());
+            ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(emptyErillishakuRivi());
+            String s1 = Optional.ofNullable(e1.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
+            String s2 = Optional.ofNullable(e2.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
+            int i = s1.compareTo(s2);
+            if (i != 0) {
+                return i;
+            } else {
+                String ee1 = Optional.ofNullable(e1.getEtunimi()).orElse(StringUtils.EMPTY).toUpperCase();
+                String ee2 = Optional.ofNullable(e2.getEtunimi()).orElse(StringUtils.EMPTY).toUpperCase();
+                return ee1.compareTo(ee2);
             }
         });
         ErillishakuDataRivi dataRivit = new ErillishakuDataRivi(
