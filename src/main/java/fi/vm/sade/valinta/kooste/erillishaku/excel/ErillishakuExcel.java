@@ -31,7 +31,7 @@ public class ErillishakuExcel {
     private final Excel excel;
 
     public ErillishakuExcel(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija) {
-        this(tyyppi, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, Collections.emptyList(), kuuntelija);
+        this(tyyppi, "", "", "", Collections.emptyList(), kuuntelija);
     }
 
     public ErillishakuExcel(Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi,

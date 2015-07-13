@@ -46,7 +46,7 @@ public class ErillishakuDataRivi extends DataRivi {
         String vastaanottoTila = lukija.getArvoAt(9);
         String ilmoittautumisTila = lukija.getArvoAt(10);
         boolean julkaistaankoTiedot = LUPA_JULKAISUUN.equals(lukija.getArvoAt(11));
-        if (!rivi.isTyhja() && rivi.getSolut().size() == 12 && !"Syntymäaika".equals(syntymaAika)) {
+        if (isNewRow(rivi, syntymaAika)) {
             kuuntelija.erillishakuRiviTapahtuma(new ErillishakuRivi(null,
                     sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika,
                     sukupuoli, oid, aidinkieli, hakemuksenTila,
@@ -54,6 +54,11 @@ public class ErillishakuDataRivi extends DataRivi {
                     false));
         }
         return true;
+    }
+
+    boolean isNewRow(Rivi rivi, String syntymaAika) {
+        LOG.info("Checking for new row {} {} {}", rivi.isTyhja(), rivi.getSolut().size(), syntymaAika);
+        return !rivi.isTyhja() && rivi.getSolut().size() == 12 && !"Syntymäaika".equals(syntymaAika);
     }
 
     public static final Collection<String> SUKUPUOLEN_ARVOT = Arrays.asList(Sukupuoli.values()).stream().map(Object::toString).collect(Collectors.toList());
