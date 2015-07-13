@@ -108,44 +108,44 @@ public class ErillishakuProxyResource {
 
     void fetchValinnanTulos(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset, AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId, Supplier<Void> mergeSuplier) {
         valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid).subscribe(
-                v -> {
+                valintatietoValinnanvaihes -> {
                     LOG.info("Haetaan valintalaskennasta tulokset");
-                    valintatulokset.set(v);
-
-                    Set<Long> sijoitteluAjoIdSetti = v.stream().flatMap(v0 -> v0.getValintatapajonot().stream())
-                            .filter(v0 -> v0.getSijoitteluajoId() != null)
-                            .map(ValintatietoValintatapajonoDTO::getSijoitteluajoId).collect(Collectors.toSet());
-                    //
-                    // erillinen vaihe missä haetaan vielä n-kappaletta hakukohteen tietoja eri sijoitteluajoid:eillä
-                    //
-                    if (!sijoitteluAjoIdSetti.isEmpty()) {
-                        LOG.info("Saatiin sijoitteluajoid:eitä: {} ja haetaan ne erikseen.", Arrays.toString(sijoitteluAjoIdSetti.toArray()));
-                        final Map<Long, HakukohdeDTO> erillissijoittelutmp = Maps.newConcurrentMap();
-                        final AtomicInteger erillissijoitteluCounter = new AtomicInteger(sijoitteluAjoIdSetti.size());
-                        ///sijoittelu-service/resources/erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
-                        sijoitteluAjoIdSetti.forEach(id -> {
-                            sijoitteluAsyncResource.getLatestHakukohdeBySijoitteluAjoId(hakuOid, hakukohdeOid, id,
-                                    hakukohde -> {
-                                        LOG.info("Haettiin laskenta sijoitteluajoid:llä {}.", id);
-                                        erillissijoittelutmp.put(id, hakukohde);
-                                        if (erillissijoitteluCounter.decrementAndGet() == 0) {
-                                            hakukohteetBySijoitteluAjoId.set(erillissijoittelutmp);
-                                            mergeSuplier.get();
-                                        }
-                                    },
-                                    throwable -> logAndReturnError("valintalaskenta", asyncResponse, throwable)
-                            );
-                        });
-                    } else {
-                        LOG.info("Ei saatu erillisiä sijoitteluajoideitä.");
-                        hakukohteetBySijoitteluAjoId.set(Collections.emptyMap());
-                        mergeSuplier.get();
-                    }
-
+                    valintatulokset.set(valintatietoValinnanvaihes);
+                    fetchSijoitteluAjoIds(hakuOid, hakukohdeOid, asyncResponse, hakukohteetBySijoitteluAjoId, mergeSuplier, valintatietoValinnanvaihes);
                     mergeSuplier.get();
                 },
                 poikkeus -> logAndReturnError("valintalaskenta", asyncResponse, poikkeus)
         );
+    }
+
+    private void fetchSijoitteluAjoIds(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId, Supplier<Void> mergeSuplier, List<ValintatietoValinnanvaiheDTO> valintatietoValinnanvaihes) {
+        Set<Long> sijoitteluAjoIdSetti = valintatietoValinnanvaihes.stream().flatMap(v0 -> v0.getValintatapajonot().stream())
+                .filter(v0 -> v0.getSijoitteluajoId() != null)
+                .map(ValintatietoValintatapajonoDTO::getSijoitteluajoId).collect(Collectors.toSet());
+        // erillinen vaihe missä haetaan vielä n-kappaletta hakukohteen tietoja eri sijoitteluajoid:eillä
+        if (!sijoitteluAjoIdSetti.isEmpty()) {
+            LOG.info("Saatiin sijoitteluajoid:eitä: {} ja haetaan ne erikseen.", Arrays.toString(sijoitteluAjoIdSetti.toArray()));
+            final Map<Long, HakukohdeDTO> erillissijoittelutmp = Maps.newConcurrentMap();
+            final AtomicInteger erillissijoitteluCounter = new AtomicInteger(sijoitteluAjoIdSetti.size());
+            ///sijoittelu-service/resources/erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
+            sijoitteluAjoIdSetti.forEach(id -> {
+                sijoitteluAsyncResource.getLatestHakukohdeBySijoitteluAjoId(hakuOid, hakukohdeOid, id,
+                        hakukohde -> {
+                            LOG.info("Haettiin laskenta sijoitteluajoid:llä {}.", id);
+                            erillissijoittelutmp.put(id, hakukohde);
+                            if (erillissijoitteluCounter.decrementAndGet() == 0) {
+                                hakukohteetBySijoitteluAjoId.set(erillissijoittelutmp);
+                                mergeSuplier.get();
+                            }
+                        },
+                        throwable -> logAndReturnError("valintalaskenta", asyncResponse, throwable)
+                );
+            });
+        } else {
+            LOG.info("Ei saatu erillisiä sijoitteluajoideitä.");
+            hakukohteetBySijoitteluAjoId.set(Collections.emptyMap());
+            mergeSuplier.get();
+        }
     }
 
     void fetchValintatulos(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<Valintatulos>> vtsValintatulokset, Supplier<Void> mergeSuplier) {
