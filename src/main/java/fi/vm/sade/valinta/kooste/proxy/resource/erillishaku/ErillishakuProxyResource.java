@@ -20,6 +20,7 @@ import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvai
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 
+import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,33 +112,32 @@ public class ErillishakuProxyResource {
                     LOG.info("Haetaan valintalaskennasta tulokset");
                     valintatulokset.set(v);
 
-                    Set<Long> sijoitteluAjoIdSetti =
-                            v.stream().flatMap(v0 -> v0.getValintatapajonot().stream()).filter(v0 ->
-                                            v0.getSijoitteluajoId() != null
-                            ).map(v0 -> v0.getSijoitteluajoId()).collect(Collectors.toSet());
+                    Set<Long> sijoitteluAjoIdSetti = v.stream().flatMap(v0 -> v0.getValintatapajonot().stream())
+                            .filter(v0 -> v0.getSijoitteluajoId() != null)
+                            .map(ValintatietoValintatapajonoDTO::getSijoitteluajoId).collect(Collectors.toSet());
                     //
                     // erillinen vaihe missä haetaan vielä n-kappaletta hakukohteen tietoja eri sijoitteluajoid:eillä
                     //
                     if (!sijoitteluAjoIdSetti.isEmpty()) {
-                        LOG.error("Saatiin sijoitteluajoid:eitä: {} ja haetaan ne erikseen.", Arrays.toString(sijoitteluAjoIdSetti.toArray()));
+                        LOG.info("Saatiin sijoitteluajoid:eitä: {} ja haetaan ne erikseen.", Arrays.toString(sijoitteluAjoIdSetti.toArray()));
                         final Map<Long, HakukohdeDTO> erillissijoittelutmp = Maps.newConcurrentMap();
                         final AtomicInteger erillissijoitteluCounter = new AtomicInteger(sijoitteluAjoIdSetti.size());
                         ///sijoittelu-service/resources/erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
                         sijoitteluAjoIdSetti.forEach(id -> {
                             sijoitteluAsyncResource.getLatestHakukohdeBySijoitteluAjoId(hakuOid, hakukohdeOid, id,
-                                    s0 -> {
-                                        LOG.error("Haettiin laskenta sijoitteluajoid:llä {}.", id);
-                                        erillissijoittelutmp.put(id, s0);
+                                    hakukohde -> {
+                                        LOG.info("Haettiin laskenta sijoitteluajoid:llä {}.", id);
+                                        erillissijoittelutmp.put(id, hakukohde);
                                         if (erillissijoitteluCounter.decrementAndGet() == 0) {
                                             hakukohteetBySijoitteluAjoId.set(erillissijoittelutmp);
                                             mergeSuplier.get();
                                         }
                                     },
-                                    p0 -> {
-                                        LOG.error("Erillishakuproxy -palvelukutsu epäonnistui erillissijoittelun virheeseen: ", p0);
+                                    throwable -> {
+                                        LOG.error("Erillishakuproxy -palvelukutsu epäonnistui erillissijoittelun virheeseen: ", throwable);
                                         try {
                                             asyncResponse.resume(Response.serverError()
-                                                    .entity("Erillishakuproxy -palvelukutsu epäonnistui erillissijoittelun virheeseen: " + p0.getMessage())
+                                                    .entity("Erillishakuproxy -palvelukutsu epäonnistui erillissijoittelun virheeseen: " + throwable.getMessage())
                                                     .build());
                                         } catch (Exception e) {
                                             LOG.error("Erillissijoittelun virhe tuli yhtäaikaa timeoutin kanssa!", e);
