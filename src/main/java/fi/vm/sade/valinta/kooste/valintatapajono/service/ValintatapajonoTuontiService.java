@@ -132,7 +132,7 @@ public class ValintatapajonoTuontiService {
                         dokumenttiIdRef.set(dokumenttiId);
                         mergeSuplier.get();
                     } catch (Throwable t) {
-                        LOG.error("Aikakatkaisu ehti ensin. Palvelu on todennäköisesti kovan kuormanalla. " + t.getMessage(), t);
+                        LOG.error("Aikakatkaisu ehti ensin. Palvelu on todennäköisesti kovan kuormanalla.", t);
                     }
                 }, poikkeusKasittelija("Seurantapalveluun ei saatu yhteyttä", asyncResponse, dokumenttiIdRef));
     }
@@ -142,7 +142,7 @@ public class ValintatapajonoTuontiService {
             if (poikkeus == null) {
                 LOG.error("###Poikkeus tuonnissa {}\r\n###", viesti);
             } else {
-                LOG.error("###Poikkeus tuonnissa :" + viesti + " " + poikkeus.getMessage() + "\r\n###", poikkeus);
+                LOG.error("###Poikkeus tuonnissa :" + viesti + "###", poikkeus);
             }
             try {
                 asyncResponse.resume(Response.serverError().entity(viesti).build());
@@ -159,7 +159,7 @@ public class ValintatapajonoTuontiService {
                             });
                 }
             } catch (Throwable t) {
-                LOG.error("Odottamaton virhe: " + t.getMessage(), t);
+                LOG.error("Odottamaton virhe", t);
             }
         });
     }

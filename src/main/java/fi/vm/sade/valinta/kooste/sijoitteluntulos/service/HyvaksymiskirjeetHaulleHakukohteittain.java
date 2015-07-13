@@ -70,7 +70,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                     IntStream.range(0, onkoTarveSplitata ? 2 : 1).forEach(i -> hakukohdeKerralla(hakuOid, prosessi, defaultValue, hakukohdeQueue));
                 },
                 error -> {
-                    LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun {}", hakuOid, error);
+                    LOG.error("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun " + hakuOid, error);
                     prosessi.getPoikkeukset().add(Poikkeus.koostepalvelupoikkeus("Ei saatu hakukohteen resursseja massahyväksymiskirjeitä varten hakuun"
                             + hakuOid + "\n" + error.getMessage()));
                     throw new RuntimeException(error);

@@ -49,10 +49,11 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
             LOG.info("Process failed {}", process);
             buffer.append(", ").append("<< null exception >>");
         } else {
-            LOG.error("Process failed {} with exception {}", new Object[]{process, exception});
+            LOG.error("Process failed " + process + " with exception", exception);
             buffer.append(", ").append(exception.getMessage());
         }
         if (exception != null && process instanceof ExceptionStack) {
+            LOG.error("fail got exception", exception);
             StringBuffer s = new StringBuffer().append(message).append(": ").append(exception.getClass()).append(": ").append(exception.getMessage());
             if (!((ExceptionStack) process).addException(s.toString())) {
                 // already in process buffer was not first

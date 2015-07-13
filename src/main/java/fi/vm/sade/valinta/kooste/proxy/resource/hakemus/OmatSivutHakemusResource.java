@@ -44,8 +44,10 @@ public class OmatSivutHakemusResource {
                                         .header("Content-Type", "application/json")
                                         .entity(toiveenValintaTulokset)
                                         .build()),
-                        error ->
-                                asyncResponse.resume(Response.serverError().entity(error.getMessage()).build())
+                        error -> {
+                            LOG.error("getHakemuksenValintatulosAsString throws", error);
+                            asyncResponse.resume(Response.serverError().entity(error.getMessage()).build());
+                        }
                 );
     }
 }
