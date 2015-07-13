@@ -81,11 +81,11 @@ public class ErillishakuProxyResource {
         });
         final AtomicReference<List<Hakemus>> hakemukset = new AtomicReference<>();
         final AtomicReference<List<ValinnanVaiheJonoillaDTO>> valinnanvaiheet = new AtomicReference<>();
-        final AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset = new AtomicReference<>();
         final AtomicReference<HakukohdeDTO> hakukohde = new AtomicReference<>();
-        final AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId = new AtomicReference<>();
         final AtomicReference<List<Valintatulos>> vtsValintatulokset = new AtomicReference<>();
-        AtomicInteger counter = new AtomicInteger(1 + 1 + 1 + 1 + 1 + 1);
+        final AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset = new AtomicReference<>();
+        final AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId = new AtomicReference<>();
+        AtomicInteger counter = new AtomicInteger(1 + 1 + 1 + 1 + 2);
 
         Supplier<Void> mergeSuplier = () -> {
             if (counter.decrementAndGet() == 0) {
