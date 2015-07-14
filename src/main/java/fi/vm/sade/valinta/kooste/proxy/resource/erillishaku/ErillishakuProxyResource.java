@@ -107,7 +107,7 @@ public class ErillishakuProxyResource {
     }
 
     void fetchValinnanTulos(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset, AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId, Supplier<Void> mergeSuplier) {
-        valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid).subscribe(
+        valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid).take(1).subscribe(
                 valintatietoValinnanvaihes -> {
                     LOG.info("Haetaan valintalaskennasta tulokset");
                     valintatulokset.set(valintatietoValinnanvaihes);
@@ -181,7 +181,7 @@ public class ErillishakuProxyResource {
     }
 
     void fetchHakemus(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<Hakemus>> hakemukset, Supplier<Void> mergeSuplier) {
-        applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(
+        applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).take(1).subscribe(
                 h -> {
                     LOG.info("Haetaan hakemuksia");
                     hakemukset.set(h);
