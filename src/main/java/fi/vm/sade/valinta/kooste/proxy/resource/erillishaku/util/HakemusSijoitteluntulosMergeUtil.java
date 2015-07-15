@@ -43,19 +43,7 @@ public class HakemusSijoitteluntulosMergeUtil {
 
         // Pelkät hakemukset tai ei mitään dataa
         if (!laskennanTulosLoytyi && hakukohdeDTO.getValintatapajonot().isEmpty()) {
-            // Ei valintaperusteita
-            if (result.get(0).getValintatapajonot().isEmpty()) {
-                MergeValintatapajonoDTO jonoDTO = new MergeValintatapajonoDTO();
-                jonoDTO.setKaytetaanValintalaskentaa(false);
-                List<MergeHakemusDTO> luodut = hakemukset.stream().map(h -> luo(Optional.of(h))).collect(Collectors.toList());
-                jonoDTO.setHakemukset(luodut);
-                result.get(0).getValintatapajonot().add(jonoDTO);
-            } else {
-                result.forEach(v -> v.getValintatapajonot().forEach(j -> {
-                    List<MergeHakemusDTO> luodut = hakemukset.stream().map(h -> luo(Optional.of(h))).collect(Collectors.toList());
-                    j.setHakemukset(luodut);
-                }));
-            }
+            handlePelkatHakemuksetTaiEiMitaanDataa(hakemukset, result);
         }
         // Ei laskennan tuloksia, generoidaan valinnanvaihe sijoittelun tuloksille ja mergataan hakemukset
         else if (!laskennanTulosLoytyi) {
@@ -146,6 +134,22 @@ public class HakemusSijoitteluntulosMergeUtil {
         result.get(result.size() - 1).setViimeinenVaihe(true);
         return result;
 
+    }
+
+    private static void handlePelkatHakemuksetTaiEiMitaanDataa(List<Hakemus> hakemukset, List<MergeValinnanvaiheDTO> result) {
+        // Ei valintaperusteita
+        if (result.get(0).getValintatapajonot().isEmpty()) {
+            MergeValintatapajonoDTO jonoDTO = new MergeValintatapajonoDTO();
+            jonoDTO.setKaytetaanValintalaskentaa(false);
+            List<MergeHakemusDTO> luodut = hakemukset.stream().map(h -> luo(Optional.of(h))).collect(Collectors.toList());
+            jonoDTO.setHakemukset(luodut);
+            result.get(0).getValintatapajonot().add(jonoDTO);
+        } else {
+            result.forEach(v -> v.getValintatapajonot().forEach(j -> {
+                List<MergeHakemusDTO> luodut = hakemukset.stream().map(h -> luo(Optional.of(h))).collect(Collectors.toList());
+                j.setHakemukset(luodut);
+            }));
+        }
     }
 
     private static List<MergeValinnanvaiheDTO> getMergeValinnanvaiheDTOs(String hakuOid, String hakukohdeOid, List<ValinnanVaiheJonoillaDTO> valinnanvaiheet) {
