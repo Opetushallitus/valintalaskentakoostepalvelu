@@ -6,8 +6,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
-import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.HakemusSijoitteluntulosMergeDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeHakemusDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValintatapajonoDTO;
@@ -15,9 +13,7 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.JonosijaDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValintatapajonoDTO;
-import scala.annotation.meta.companionClass;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,16 +43,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         }
         // Ei laskennan tuloksia, generoidaan valinnanvaihe sijoittelun tuloksille ja mergataan hakemukset
         else if (!laskennanTulosLoytyi) {
-            List<MergeValintatapajonoDTO> valintatapajonot = hakukohdeDTO
-                    .getValintatapajonot()
-                    .stream()
-                    .map(jono -> {
-                        MergeValintatapajonoDTO jonoDTO = luoSijoittelunTiedoista(hakuOid, hakukohdeOid, jono);
-                        jonoDTO.setHakemukset(mergaaSijoittelusta(hakemukset, jono.getHakemukset(), valintatulosDtos));
-                        jonoDTO.setKaytetaanValintalaskentaa(false);
-                        return jonoDTO;
-                    }).collect(Collectors.toList());
-            result.get(0).setValintatapajonot(valintatapajonot);
+            handleEiLaskennanTuloksia(hakuOid, hakukohdeOid, hakemukset, hakukohdeDTO, valintatulosDtos, result);
         }
         // Ei sijoittelun tuloksia, yhdistetään hakemukset ja laskennan tulokset
         else if (hakukohdeDTO == null || hakukohdeDTO.getValintatapajonot().isEmpty()) {
@@ -134,6 +121,19 @@ public class HakemusSijoitteluntulosMergeUtil {
         result.get(result.size() - 1).setViimeinenVaihe(true);
         return result;
 
+    }
+
+    private static void handleEiLaskennanTuloksia(String hakuOid, String hakukohdeOid, List<Hakemus> hakemukset, HakukohdeDTO hakukohdeDTO, List<Valintatulos> valintatulosDtos, List<MergeValinnanvaiheDTO> result) {
+        List<MergeValintatapajonoDTO> valintatapajonot = hakukohdeDTO
+                .getValintatapajonot()
+                .stream()
+                .map(jono -> {
+                    MergeValintatapajonoDTO jonoDTO = luoSijoittelunTiedoista(hakuOid, hakukohdeOid, jono);
+                    jonoDTO.setHakemukset(mergaaSijoittelusta(hakemukset, jono.getHakemukset(), valintatulosDtos));
+                    jonoDTO.setKaytetaanValintalaskentaa(false);
+                    return jonoDTO;
+                }).collect(Collectors.toList());
+        result.get(0).setValintatapajonot(valintatapajonot);
     }
 
     private static void handlePelkatHakemuksetTaiEiMitaanDataa(List<Hakemus> hakemukset, List<MergeValinnanvaiheDTO> result) {
