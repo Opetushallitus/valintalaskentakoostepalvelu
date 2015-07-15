@@ -192,9 +192,7 @@ public class ErillishaunTuontiService {
         } else {
             hakemukset = Collections.emptyList();
         }
-        if(LOG.isInfoEnabled()) { // Count vie aikaa
-            LOG.info("Viedaan hakijoita ohittaen rivit hakemuksentilalla kesken ({}/{}) jonoon {}", lisattavatTaiKeskeneraiset.stream().filter(r -> !r.isKesken()).count(), rivit.size(), haku.getValintatapajononNimi());
-        }
+        LOG.info("Viedaan hakijoita ohittaen rivit hakemuksentilalla kesken ({}/{}) jonoon {}", lisattavatTaiKeskeneraiset.stream().filter(r -> !r.isKesken()).count(), rivit.size(), haku.getValintatapajononNimi());
         tuoErillishaunTilat(haku, lisattavatTaiKeskeneraiset, poistettavat, hakemukset);
 
         prosessi.vaiheValmistui();
