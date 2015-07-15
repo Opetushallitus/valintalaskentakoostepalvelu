@@ -51,43 +51,47 @@ public class HakemusSijoitteluntulosMergeUtil {
         }
         // Laskenta ja sijoittelu löytyi
         else {
-            laskennantulokset.stream().forEach(vv -> {
-                Optional<MergeValinnanvaiheDTO> opt = findVaihe(result, vv.getValinnanvaiheoid());
-
-                MergeValinnanvaiheDTO dto;
-                if (opt.isPresent()) {
-                    dto = opt.get();
-                    dto.setJarjestysnumero(vv.getJarjestysnumero());
-                } else {
-                    result.add(createValinnanvaihe(hakuOid, hakukohdeOid, vv));
-                    dto = result.get(result.size() - 1);
-                }
-                vv.getValintatapajonot().stream().forEach(jono -> {
-                    Optional<MergeValintatapajonoDTO> jonoOpt = findJono(dto.getValintatapajonot(), jono.getOid());
-                    MergeValintatapajonoDTO jonoDTO;
-                    if (jonoOpt.isPresent()) {
-                        jonoDTO = jonoOpt.get();
-                        yhdistaLaskennanTiedoista(jonoDTO, jono);
-                    } else {
-                        jonoDTO = luoLaskennanTiedoista(hakuOid, hakukohdeOid, jono);
-                        dto.getValintatapajonot().add(jonoDTO);
-                    }
-                    jonoDTO.setHakemukset(mergaaLaskennasta(hakemukset, jono.getJonosijat()));
-                    Optional<ValintatapajonoDTO> sJono = hakukohdeDTO.getValintatapajonot()
-                            .stream()
-                            .filter(j -> j.getOid().equals(jonoDTO.getOid()))
-                            .findFirst();
-
-                    if (sJono.isPresent()) {
-                        asetaSijoittelunTiedoista(hakuOid, hakukohdeOid, jonoDTO, sJono.get(), valintatulosDtos);
-                    }
-                });
-            });
+            handleLaskentaJaSijoitteluOlemassa(hakuOid, hakukohdeOid, hakemukset, hakukohdeDTO, laskennantulokset, valintatulosDtos, result);
         }
         Collections.sort(result, (v1, v2) -> Integer.compare(v1.getJarjestysnumero(), v2.getJarjestysnumero()));
         result.get(result.size() - 1).setViimeinenVaihe(true);
         return result;
 
+    }
+
+    private static void handleLaskentaJaSijoitteluOlemassa(String hakuOid, String hakukohdeOid, List<Hakemus> hakemukset, HakukohdeDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> laskennantulokset, List<Valintatulos> valintatulosDtos, List<MergeValinnanvaiheDTO> result) {
+        laskennantulokset.stream().forEach(vv -> {
+            Optional<MergeValinnanvaiheDTO> opt = findVaihe(result, vv.getValinnanvaiheoid());
+
+            MergeValinnanvaiheDTO dto;
+            if (opt.isPresent()) {
+                dto = opt.get();
+                dto.setJarjestysnumero(vv.getJarjestysnumero());
+            } else {
+                result.add(createValinnanvaihe(hakuOid, hakukohdeOid, vv));
+                dto = result.get(result.size() - 1);
+            }
+            vv.getValintatapajonot().stream().forEach(jono -> {
+                Optional<MergeValintatapajonoDTO> jonoOpt = findJono(dto.getValintatapajonot(), jono.getOid());
+                MergeValintatapajonoDTO jonoDTO;
+                if (jonoOpt.isPresent()) {
+                    jonoDTO = jonoOpt.get();
+                    yhdistaLaskennanTiedoista(jonoDTO, jono);
+                } else {
+                    jonoDTO = luoLaskennanTiedoista(hakuOid, hakukohdeOid, jono);
+                    dto.getValintatapajonot().add(jonoDTO);
+                }
+                jonoDTO.setHakemukset(mergaaLaskennasta(hakemukset, jono.getJonosijat()));
+                Optional<ValintatapajonoDTO> sJono = hakukohdeDTO.getValintatapajonot()
+                        .stream()
+                        .filter(j -> j.getOid().equals(jonoDTO.getOid()))
+                        .findFirst();
+
+                if (sJono.isPresent()) {
+                    asetaSijoittelunTiedoista(hakuOid, hakukohdeOid, jonoDTO, sJono.get(), valintatulosDtos);
+                }
+            });
+        });
     }
 
     private static void handleEiSijoittelunTuloksia(String hakuOid, String hakukohdeOid, List<Hakemus> hakemukset, List<ValintatietoValinnanvaiheDTO> laskennantulokset, Map<Long, HakukohdeDTO> hakukohteetBySijoitteluAjoId, List<Valintatulos> valintatulosDtos, List<MergeValinnanvaiheDTO> result) {
