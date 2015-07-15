@@ -32,21 +32,10 @@ public class HakemusSijoitteluntulosMergeUtil {
             List<ValinnanVaiheJonoillaDTO> valinnanvaiheet,
             List<ValintatietoValinnanvaiheDTO> laskennantulokset,
             Map<Long, HakukohdeDTO> hakukohteetBySijoitteluAjoId,
-            List<Valintatulos> valintatulosDtos
-            // <- empty map jos ei erillissijoittelun hakukohteita
-    ) {
-        List<MergeValinnanvaiheDTO> result = new ArrayList<>();
-        if (valinnanvaiheet.isEmpty()) {
-            // Ei yhtään valinnanvaihetta, generoidaan yksi
-            result.add(createValinnanvaihe(hakuOid, hakukohdeOid, 0));
-        } else {
-            valinnanvaiheet.forEach(vaihe -> {
-                result.add(createValinnanvaihe(hakuOid, hakukohdeOid, vaihe));
-            });
-        }
+            List<Valintatulos> valintatulosDtos) {
+        List<MergeValinnanvaiheDTO> result = getMergeValinnanvaiheDTOs(hakuOid, hakukohdeOid, valinnanvaiheet);
 
-        boolean laskennanTulosLoytyi = laskennantulokset
-                .stream()
+        boolean laskennanTulosLoytyi = laskennantulokset.stream()
                 .flatMap(v -> v.getValintatapajonot().stream())
                 .flatMap(j -> j.getJonosijat().stream())
                 .findAny()
@@ -157,6 +146,19 @@ public class HakemusSijoitteluntulosMergeUtil {
         result.get(result.size() - 1).setViimeinenVaihe(true);
         return result;
 
+    }
+
+    private static List<MergeValinnanvaiheDTO> getMergeValinnanvaiheDTOs(String hakuOid, String hakukohdeOid, List<ValinnanVaiheJonoillaDTO> valinnanvaiheet) {
+        List<MergeValinnanvaiheDTO> result = new ArrayList<>();
+        if (valinnanvaiheet.isEmpty()) {
+            // Ei yhtään valinnanvaihetta, generoidaan yksi
+            result.add(createValinnanvaihe(hakuOid, hakukohdeOid, 0));
+        } else {
+            valinnanvaiheet.forEach(vaihe -> {
+                result.add(createValinnanvaihe(hakuOid, hakukohdeOid, vaihe));
+            });
+        }
+        return result;
     }
 
     private static Optional<MergeValinnanvaiheDTO> findVaihe(List<MergeValinnanvaiheDTO> vaiheet, String valinnanvaiheOid) {
