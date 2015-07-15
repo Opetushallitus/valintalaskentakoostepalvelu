@@ -37,26 +37,18 @@ public class HakemusSijoitteluntulosMergeUtil {
                 .findAny()
                 .isPresent();
 
-        // Pelkät hakemukset tai ei mitään dataa
         if (!laskennanTulosLoytyi && hakukohdeDTO.getValintatapajonot().isEmpty()) {
             handlePelkatHakemuksetTaiEiMitaanDataa(hakemukset, result);
-        }
-        // Ei laskennan tuloksia, generoidaan valinnanvaihe sijoittelun tuloksille ja mergataan hakemukset
-        else if (!laskennanTulosLoytyi) {
+        } else if (!laskennanTulosLoytyi) {
             handleEiLaskennanTuloksia(hakuOid, hakukohdeOid, hakemukset, hakukohdeDTO, valintatulosDtos, result);
-        }
-        // Ei sijoittelun tuloksia, yhdistetään hakemukset ja laskennan tulokset
-        else if (hakukohdeDTO == null || hakukohdeDTO.getValintatapajonot().isEmpty()) {
+        } else if (hakukohdeDTO == null || hakukohdeDTO.getValintatapajonot().isEmpty()) {
             handleEiSijoittelunTuloksia(hakuOid, hakukohdeOid, hakemukset, laskennantulokset, hakukohteetBySijoitteluAjoId, valintatulosDtos, result);
-        }
-        // Laskenta ja sijoittelu löytyi
-        else {
+        } else {
             handleLaskentaJaSijoitteluOlemassa(hakuOid, hakukohdeOid, hakemukset, hakukohdeDTO, laskennantulokset, valintatulosDtos, result);
         }
         Collections.sort(result, (v1, v2) -> Integer.compare(v1.getJarjestysnumero(), v2.getJarjestysnumero()));
         result.get(result.size() - 1).setViimeinenVaihe(true);
         return result;
-
     }
 
     private static void handleLaskentaJaSijoitteluOlemassa(String hakuOid, String hakukohdeOid, List<Hakemus> hakemukset, HakukohdeDTO hakukohdeDTO, List<ValintatietoValinnanvaiheDTO> laskennantulokset, List<Valintatulos> valintatulosDtos, List<MergeValinnanvaiheDTO> result) {
@@ -95,6 +87,7 @@ public class HakemusSijoitteluntulosMergeUtil {
     }
 
     private static void handleEiSijoittelunTuloksia(String hakuOid, String hakukohdeOid, List<Hakemus> hakemukset, List<ValintatietoValinnanvaiheDTO> laskennantulokset, Map<Long, HakukohdeDTO> hakukohteetBySijoitteluAjoId, List<Valintatulos> valintatulosDtos, List<MergeValinnanvaiheDTO> result) {
+        // Ei sijoittelun tuloksia, yhdistetään hakemukset ja laskennan tulokset
         laskennantulokset.stream().forEach(vv -> {
             Optional<MergeValinnanvaiheDTO> opt = findVaihe(result, vv.getValinnanvaiheoid());
             MergeValinnanvaiheDTO dto;
