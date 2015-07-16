@@ -192,10 +192,10 @@ public class ErillishakuProxyResource {
     }
 
     private void logAndReturnError(String appName, @Suspended AsyncResponse asyncResponse, Throwable poikkeus) {
-        LOG.error("Erillishakuproxy -palvelukutsu epäonnistui " + appName + " :n virheeseen!", poikkeus);
+        LOG.error("Erillishakuproxy -palvelukutsu epäonnistui " + appName + ":n virheeseen!", poikkeus);
         try {
             asyncResponse.resume(Response.serverError()
-                    .entity("Erillishakuproxy -palvelukutsu epäonnistui + " + appName + " :n virheeseen: " + poikkeus.getMessage())
+                    .entity("Erillishakuproxy -palvelukutsu epäonnistui " + appName + ":n virheeseen: " + poikkeus.getMessage())
                     .build());
         } catch (Exception e) {
             LOG.error(appName + " virhe tuli yhtäaikaa timeoutin kanssa!", e);
