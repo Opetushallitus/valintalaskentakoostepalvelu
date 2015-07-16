@@ -31,7 +31,7 @@ public class PistesyottoDataRivi extends DataRivi {
 
     @Override
     public boolean validoi(Rivi rivi) {
-        SoluLukija lukija = new SoluLukija(false, rivi.getSolut());
+        SoluLukija lukija = new SoluLukija(rivi.getSolut());
         String oid = lukija.getArvoAt(0);
         String nimi = lukija.getArvoAt(1);
         String hetu = lukija.getArvoAt(2);

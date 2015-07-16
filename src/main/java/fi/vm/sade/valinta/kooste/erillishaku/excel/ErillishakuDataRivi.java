@@ -31,7 +31,7 @@ public class ErillishakuDataRivi extends DataRivi {
 
     @Override
     public boolean validoi(Rivi rivi) {
-        SoluLukija lukija = new SoluLukija(false, rivi.getSolut());
+        SoluLukija lukija = new SoluLukija(rivi.getSolut());
         String sukunimi = lukija.getArvoAt(0);
         String etunimi = lukija.getArvoAt(1);
         String henkilotunnus = lukija.getArvoAt(2);

@@ -9,29 +9,13 @@ import com.google.common.collect.Lists;
 
 public class SoluLukija {
     private final List<Solu> solut;
-    private final boolean palautaTyhjaNullArvona;
 
-    public SoluLukija(boolean palautaTyhjaNullArvona, Collection<Solu> solut) {
+    public SoluLukija(Collection<Solu> solut) {
         this.solut = Lists.newArrayList(solut);
-        this.palautaTyhjaNullArvona = palautaTyhjaNullArvona;
     }
 
     public String getArvoAt(int index) {
-        Solu solu = get(index);
-        String arvo = solu.toTeksti().getTeksti();
-        if (StringUtils.isBlank(arvo)) {
-            return tyhja();
-        } else {
-            return arvo;
-        }
-    }
-
-    private String tyhja() {
-        if (palautaTyhjaNullArvona) {
-            return null;
-        } else {
-            return StringUtils.EMPTY;
-        }
+        return StringUtils.trimToEmpty(get(index).toTeksti().getTeksti());
     }
 
     public Solu get(int index) {
@@ -44,10 +28,6 @@ public class SoluLukija {
             }
             return solu;
         }
-    }
-
-    public boolean isPalautaTyhjaNullArvona() {
-        return palautaTyhjaNullArvona;
     }
 
     public Collection<Solu> getSolut() {

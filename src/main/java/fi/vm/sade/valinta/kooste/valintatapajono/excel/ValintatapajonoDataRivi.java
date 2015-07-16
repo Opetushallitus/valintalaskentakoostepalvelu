@@ -16,7 +16,7 @@ public class ValintatapajonoDataRivi extends DataRivi {
     }
 
     public boolean validoi(Rivi rivi) {
-        SoluLukija lukija = new SoluLukija(false, rivi.getSolut());
+        SoluLukija lukija = new SoluLukija(rivi.getSolut());
         String oid = lukija.getArvoAt(0);
         String jonosija = lukija.getArvoAt(1);
         String nimi = lukija.getArvoAt(2);
