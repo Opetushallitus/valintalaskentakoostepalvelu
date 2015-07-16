@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.KomotoResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
@@ -68,7 +69,8 @@ public class KelaRouteTest extends CamelTestSupport {
 			.mock(LinjakoodiKomponentti.class);
 	private final HakukohdeResource hakukohdeResource = Mockito
 			.mock(HakukohdeResource.class);
-	private final KoodiService koodiService = Mockito.mock(KoodiService.class);
+        private final KomotoResource komotoResource = Mockito
+                        .mock(KomotoResource.class);
 
 	private final String HAKU1 = "HAKU1OID";
 	private final String HAKU2 = "HAKU2OID";
@@ -160,7 +162,7 @@ public class KelaRouteTest extends CamelTestSupport {
 		KelaProsessi kelaProsessi = new KelaProsessi("luonti", hakuOids);
 		KelaLuonti kelaLuonti = new KelaLuonti(UUID, hakuOids,
 				StringUtils.EMPTY, StringUtils.EMPTY, new KelaCache(
-						koodiService), kelaProsessi);
+						hakukohdeResource, komotoResource), kelaProsessi);
 		template.sendBodyAndProperty(kelaLuonti,
 				ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI, kelaProsessi);
 	}

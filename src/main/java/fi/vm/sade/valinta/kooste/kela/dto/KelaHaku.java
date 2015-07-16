@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.kela.dto;
 
 import com.google.common.collect.Lists;
+import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
@@ -57,11 +58,12 @@ public class KelaHaku extends KelaAbstraktiHaku {
                                 Hakemus hakemus = hakemusSource.getHakemusByOid(hakija.getHakemusOid());
                                 Map<String, String> henkilotiedot = henkilotiedot(hakemus);
                                 String hakukohdeOid = hakutoive.getHakukohdeOid();
+                                HakukohdeDTO hakuKohde = hakukohdeSource.getHakukohdeByOid(hakukohdeOid);
                                 final String etunimi = henkilotiedot.get(ETUNIMET);
                                 final String sukunimi = henkilotiedot.get(SUKUNIMI);
                                 final String henkilotunnus = henkilotiedot.get(HENKILOTUNNUS);
                                 final String syntymaaika = henkilotiedot.get(SYNTYMAAIKA);
-                                final Date lukuvuosi = getPaivamaaraSource().lukuvuosi(getHaku());
+                                final Date lukuvuosi = getPaivamaaraSource().lukuvuosi(getHaku(), hakukohdeOid);
                                 final Date poimintapaivamaara = getPaivamaaraSource().poimintapaivamaara(getHaku());
                                 LogEntry valintaEntry = tilaSource.getVastaanottopvm(hakemus.getOid(), hakuOid, hakukohdeOid, hakutoive.getValintatapajonoOid());
 
@@ -78,7 +80,8 @@ public class KelaHaku extends KelaAbstraktiHaku {
                                     return;
                                 }
 
-                                String organisaatioOid = hakukohdeSource.getHakukohdeByOid(hakukohdeOid).getTarjoajaOid();
+                                
+                                String organisaatioOid = hakuKohde.getTarjoajaOid();
                                 String oppilaitosnumero = "XXXXX";
 
                                 if (organisaatioOid == null || organisaatioOid.equalsIgnoreCase("undefined")) {

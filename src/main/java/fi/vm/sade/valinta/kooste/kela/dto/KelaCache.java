@@ -13,8 +13,12 @@ import org.slf4j.LoggerFactory;
 
 import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.KomotoResource;
 import fi.vm.sade.tarjonta.service.resources.dto.HakuDTO;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
+import fi.vm.sade.tarjonta.service.resources.dto.KomotoDTO;
+import fi.vm.sade.tarjonta.service.resources.dto.OidRDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.kela.komponentti.HakemusSource;
@@ -28,72 +32,57 @@ public class KelaCache implements HakemusSource, PaivamaaraSource {
     private final ConcurrentHashMap<String, String> hakutyyppiArvo = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, String> haunKohdejoukkoArvo = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Date> lukuvuosi = new ConcurrentHashMap<>();
+    
     private final Date now;
-    private final KoodiService koodiService;
+    private final HakukohdeResource hakukohdeResource;
+    private final KomotoResource komotoResource;
 
 
-    public KelaCache(KoodiService koodiService) {
+    public KelaCache(HakukohdeResource hakukohdeResource,
+            KomotoResource komotoResource) {
         now = new Date();
-        this.koodiService = koodiService;
+        this.hakukohdeResource = hakukohdeResource;
+        this.komotoResource = komotoResource;
+        
     }
 
     @Override
-    public Date lukuvuosi(HakuV1RDTO hakuDTO) {
-        String uri = hakuDTO.getKoulutuksenAlkamiskausiUri();
-        if (uri == null) {
-            LOG.error("Koulutuksen alkamiskausi URI oli null!");
-            throw new RuntimeException("Koulutuksen alkamiskausi URI oli null!");
-        }
-        if (!lukuvuosi.containsKey(uri)) {
+    public Date lukuvuosi(HakuV1RDTO hakuDTO, String hakukohdeOid) {
+        if (!lukuvuosi.containsKey(hakukohdeOid)) {
+            String alkamiskausiUri = hakuDTO.getKoulutuksenAlkamiskausiUri();
             int vuosi = hakuDTO.getKoulutuksenAlkamisVuosi();
-            int kuukausi = 1;
-            List<KoodiType> koodis;
-            // haku.get
-
-            int tries = 0;
-
-            while (true) {
+            
+            if (alkamiskausiUri == null) {
+                // Kyseessä jatkuva haku, haetaan alkamistiedot koulutukselta
                 try {
-                    koodis = koodiService.searchKoodis(toSearchCriteria(hakuDTO.getKoulutuksenAlkamiskausiUri()));
-                    if (tries > 0) {
-                        LOG.error("retry ok");
+                    List<OidRDTO> komotoOids = hakukohdeResource.getKomotosByHakukohdeOID(hakukohdeOid);
+
+                    for (OidRDTO komotoOid : komotoOids) {
+                        KomotoDTO komoto = komotoResource.getByOID(komotoOid.getOid());
+                        alkamiskausiUri = komoto.getKoulutuksenAlkamiskausi();
+                        vuosi = komoto.getKoulutuksenAlkamisvuosi();
                     }
-                    break;
                 } catch (Exception e) {
-                    if (tries == 30) {
-                        LOG.error("give up");
-                        throw e;
-                    }
-                    tries++;
-                    LOG.error("koodiService ei jaksa palvella {}. Yritetään vielä uudestaan. " + tries + "/30...", e);
-                    try {
-                        Thread.sleep(15000L);
-                    } catch (InterruptedException e1) {
-                        // ignore this for now
-                    }
+                    LOG.error("Ei voitu hakea lukuvuotta tarjonnalta", e);
+                    throw new RuntimeException(e);
                 }
             }
+            
+            int kuukausi = 1;
 
+            if (alkamiskausiUri != null && alkamiskausiUri.startsWith("kausi_s")) {
 
-            try {
-                for (KoodiType koodi : koodis) {
-                    if ("S".equals(StringUtils.upperCase(koodi.getKoodiArvo()))) {
-
-                        kuukausi = 8;
-                    } else if ("K".equals(StringUtils.upperCase(koodi
-                            .getKoodiArvo()))) {
-                        kuukausi = 1;
-                    } else {
-                        LOG.error("Viallinen arvo {}, koodilla {} ", new Object[]{koodi.getKoodiArvo(), hakuDTO.getKoulutuksenAlkamiskausiUri()});
-                    }
-                }
-            } catch (Exception e) {
-                LOG.error("Ei voitu hakea lukuvuotta tarjonnalta", e);
-                throw new RuntimeException(e);
+                kuukausi = 8;
+            } else if (alkamiskausiUri != null && alkamiskausiUri.startsWith("kausi_k")) {
+                kuukausi = 1;
+            } else {
+                LOG.error("Viallinen arvo {}, koodilla kausi ", new Object[]{alkamiskausiUri});
             }
-            lukuvuosi.put(uri, new DateTime(vuosi, kuukausi, 1, 1, 1).toDate());
+
+            
+            lukuvuosi.put(hakukohdeOid, new DateTime(vuosi, kuukausi, 1, 1, 1).toDate());
         }
-        return lukuvuosi.get(uri);
+        return lukuvuosi.get(hakukohdeOid);
     }
 
     @Override

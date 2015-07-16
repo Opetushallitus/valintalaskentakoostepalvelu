@@ -14,7 +14,8 @@ import org.springframework.stereotype.Controller;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-import fi.vm.sade.koodisto.service.KoodiService;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.KomotoResource;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaHakuFiltteri;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
@@ -33,8 +34,11 @@ public class KelaResource {
     private static final Logger LOG = LoggerFactory.getLogger(KelaResource.class);
 
     @Autowired
-    private KoodiService koodiService;
+    private HakukohdeResource hakukohdeResource;
 
+    @Autowired
+    private KomotoResource komotoResource;
+    
     @Autowired(required = false)
     private KelaRoute kelaRoute;
 
@@ -64,7 +68,7 @@ public class KelaResource {
         String organisaationNimi = "OPH";
         KelaProsessi kelaProsessi = new KelaProsessi("Kela-dokumentin luonti", hakuTietue.getHakuOids());
         kelaRoute.aloitaKelaLuonti(kelaProsessi, new KelaLuonti(kelaProsessi.getId(), hakuTietue.getHakuOids(),
-                        aineistonNimi, organisaationNimi, new KelaCache(koodiService), kelaProsessi, alkuPvm, loppuPvm));
+                        aineistonNimi, organisaationNimi, new KelaCache(hakukohdeResource, komotoResource), kelaProsessi, alkuPvm, loppuPvm));
         // SecurityContextHolder.getContext().getAuthentication()
         dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
         return kelaProsessi.toProsessiId();

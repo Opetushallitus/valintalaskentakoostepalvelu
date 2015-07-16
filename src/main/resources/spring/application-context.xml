@@ -213,6 +213,15 @@
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
 			</jaxrs-client:providers>
 		</jaxrs-client:client>
+                <jaxrs-client:client id="TarjontaServiceKomotoRestClient"
+							 address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
+							 serviceClass="fi.vm.sade.tarjonta.service.resources.KomotoResource"
+							 inheritHeaders="true">
+			<jaxrs-client:providers>
+				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
+				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
+			</jaxrs-client:providers>
+		</jaxrs-client:client>
 		<jaxrs-client:client id="TarjontaHakuResourceRestClient"
 							 address="${valintalaskentakoostepalvelu.tarjonta.rest.url}"
 							 serviceClass="fi.vm.sade.valinta.kooste.external.resource.haku.HakuV1Resource"

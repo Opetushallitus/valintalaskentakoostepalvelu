@@ -163,14 +163,6 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
                                             .add(new Poikkeus(Poikkeus.TARJONTA, "Haun haku oid:lla.", hakuOid));
                                     throw e;
                                 }
-                                try {
-                                    luonti.getCache().lukuvuosi(haku);
-                                } catch (Exception e) {
-                                    luonti.getProsessi()
-                                            .getPoikkeuksetUudelleenYrityksessa()
-                                            .add(new Poikkeus(Poikkeus.KOODISTO, "Lukuvuoden haku haulle koodistosta URI:lla " + haku.getKoulutuksenAlkamiskausiUri(), hakuOid));
-                                    throw e;
-                                }
                             }
                             return new KelaLuontiJaHaut(luonti, haut);
                         }))
@@ -465,17 +457,17 @@ public class KelaRouteImpl extends AbstractDokumenttiRouteBuilder {
 
 
                                 for (LogEntry logEntry : valintatulos.getLogEntries()) {
-                                    if (logEntry.getMuutos().equalsIgnoreCase("VASTAANOTTANUT_SITOVASTI")) {
+                                    if (logEntry.getMuutos().trim().toUpperCase().endsWith("VASTAANOTTANUT_SITOVASTI")) {
                                         return logEntry;
                                     }
                                 }
                                 for (LogEntry logEntry : valintatulos.getLogEntries()) {
-                                    if (logEntry.getMuutos().equalsIgnoreCase("VASTAANOTTANUT")) {
+                                    if (logEntry.getMuutos().trim().toUpperCase().endsWith("VASTAANOTTANUT")) {
                                         return logEntry;
                                     }
                                 }
                                 for (LogEntry logEntry : valintatulos.getLogEntries()) {
-                                    if (logEntry.getMuutos().equalsIgnoreCase("EHDOLLISESTI_VASTAANOTTANUT")) {
+                                    if (logEntry.getMuutos().trim().toUpperCase().endsWith("EHDOLLISESTI_VASTAANOTTANUT")) {
                                         return logEntry;
                                     }
                                 }

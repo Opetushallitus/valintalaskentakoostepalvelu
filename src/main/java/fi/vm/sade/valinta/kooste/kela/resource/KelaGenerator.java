@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import fi.vm.sade.koodisto.service.KoodiService;
+import fi.vm.sade.tarjonta.service.resources.HakukohdeResource;
+import fi.vm.sade.tarjonta.service.resources.KomotoResource;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaCache;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaHakuFiltteri;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaLuonti;
@@ -24,7 +26,10 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
 public class KelaGenerator {
 
     @Autowired
-    private KoodiService koodiService;
+    private HakukohdeResource hakukohdeResource;
+
+    @Autowired
+    private KomotoResource komotoResource;
 
     @Autowired(required = false)
     private KelaRoute kelaRoute;
@@ -41,7 +46,7 @@ public class KelaGenerator {
         String organisaationNimi = "OPH";
         KelaProsessi kelaProsessi = new KelaProsessi("Kela-dokumentin luonti", hakuTietue.getHakuOids());
         kelaRoute.aloitaKelaLuonti(kelaProsessi, new KelaLuonti(kelaProsessi.getId(), hakuTietue.getHakuOids(),
-                        aineistonNimi, organisaationNimi, new KelaCache(koodiService), kelaProsessi));
+                        aineistonNimi, organisaationNimi, new KelaCache(hakukohdeResource, komotoResource), kelaProsessi));
         dokumenttiProsessiKomponentti.tuoUusiProsessi(kelaProsessi);
         return kelaProsessi.toProsessiId();
     }
