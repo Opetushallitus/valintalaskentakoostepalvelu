@@ -26,7 +26,7 @@ public class HenkiloCreateDTO {
             this.aidinkieli = null;
         } else {
             this.aidinkieli = new Kielisyys();
-            this.aidinkieli.setKieliKoodi(StringUtils.trim(aidinkieli).toLowerCase());
+            this.aidinkieli.setKieliKoodi(aidinkieli.toLowerCase());
         }
         this.sukupuoli = sukupuoli;
         this.etunimet = etunimet;
