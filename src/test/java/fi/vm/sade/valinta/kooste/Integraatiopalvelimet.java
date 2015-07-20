@@ -21,12 +21,19 @@ public class Integraatiopalvelimet {
 
     public static ClientAndServerWithHost mockServer =
             new ClientAndServerWithHost(PortChecker.findFreeLocalPort());
-
+    public static void mockForward(String method, MockServer server) {
+        server.getPaths().forEach(
+                p -> {
+                    mockForward(method, p, server.getPort());
+                }
+        );
+    }
     public static void mockForward(MockServer server) {
         server.getPaths().forEach(
                 p -> {
                     mockForward(GET, p, server.getPort());
                     mockForward(POST, p, server.getPort());
+                    mockForward(PUT, p, server.getPort());
                 }
         );
     }

@@ -10,6 +10,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -56,6 +57,7 @@ public class LaskentaKerrallaTest {
         Mocks.resetMocks();
     }
 
+    @Ignore
     @Test
     public void testOnnistunutLaskenta() throws InterruptedException {
         AsyncResponse asyncResponse = mock(AsyncResponse.class);

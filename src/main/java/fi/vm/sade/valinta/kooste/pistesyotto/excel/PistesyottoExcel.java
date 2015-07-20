@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.*;
@@ -75,7 +76,13 @@ public class PistesyottoExcel {
             .addKonversio(TYHJA, null)
             .build();
     private final Excel excel;
-
+    private Map<String, Boolean> onkoHakijaOsallistuja = Maps.newHashMap();
+    private String hakemusValintakoeYhdiste(String hakemus, String valintakoe) {
+        return new StringBuilder().append(hakemus).append("_").append(valintakoe).toString();
+    }
+    public boolean onkoHakijaOsallistujaValintakokeeseen(String hakemus, String valintakoe) {
+        return onkoHakijaOsallistuja.getOrDefault(hakemusValintakoeYhdiste(hakemus,valintakoe), false);
+    }
     /**
      * @return < HakemusOid , < Tunniste , ValintakoeDTO > >
      */
@@ -197,26 +204,25 @@ public class PistesyottoExcel {
 
         // Asennetaan konvertterit
         Collection<PistesyottoDataArvo> dataArvot = getPistesyotonDataArvot(valintaperusteet);
+        Predicate<ValintakoeDTO> osallistuuValintakokeeseen = valintakoe ->
+                (valintakoe != null && Osallistuminen.OSALLISTUU.equals(Optional.ofNullable(valintakoe.getOsallistuminenTulos()).orElse(new OsallistuminenTulosDTO()).getOsallistuminen()));
         Map<String, String> oidToHetu = hakemukset.stream().collect(Collectors.toMap(Hakemus::getOid, h -> new HakemusWrapper(h).getHenkilotunnusTaiSyntymaaika()));
         for (ApplicationAdditionalDataDTO data : pistetiedot) {
-            boolean osallistuja = osallistujat.contains(data.getOid());
+            final String hakemusOid = data.getOid();
+            final boolean mahdollinenOsallistuja = osallistujat.contains(hakemusOid);
             // Hakemuksen <tunniste, valintakoeDTO> tiedot
             Map<String, ValintakoeDTO> tunnisteDTO = Optional.ofNullable(tunnisteValintakoe.get(data.getOid())).orElse(Collections.emptyMap());
             Collection<Arvo> s = Lists.newArrayList();
             s.add(new TekstiArvo(data.getOid()));
             s.add(new TekstiArvo(additionalDataToNimi(data)));
-            s.add(new TekstiArvo(Optional.ofNullable(oidToHetu.get(data.getOid())).orElse(StringUtils.EMPTY)));
+            s.add(new TekstiArvo(Optional.ofNullable(oidToHetu.get(data.getOid())).orElse("")));
             boolean syote = false;
             for (ValintaperusteDTO valintaperuste : valintaperusteet) {
                 ValintakoeDTO valintakoe = Optional.ofNullable(tunnisteDTO.get(valintaperuste.getTunniste())).orElse(new ValintakoeDTO());
-                boolean syotettavissaKaikille = kaikkiKutsutaanTunnisteet.contains(valintaperuste.getTunniste())
+                final boolean syotettavissaKaikille = kaikkiKutsutaanTunnisteet.contains(valintaperuste.getTunniste())
                         || Boolean.TRUE.equals(valintaperuste.getSyotettavissaKaikille());
-                if (!syotettavissaKaikille && !osallistuja) {
-                    s.add(TekstiArvo.tyhja(false));
-                    s.add(TekstiArvo.tyhja(false));
-                    continue;
-                }
-                if (syotettavissaKaikille || (valintakoe != null && Osallistuminen.OSALLISTUU.equals(Optional.ofNullable(valintakoe.getOsallistuminenTulos()).orElse(new OsallistuminenTulosDTO()).getOsallistuminen()))) {
+                if (syotettavissaKaikille || (mahdollinenOsallistuja && osallistuuValintakokeeseen.test(valintakoe))) {
+                    onkoHakijaOsallistuja.put(hakemusValintakoeYhdiste(hakemusOid,valintakoe.getValintakoeTunniste()),true);
                     syote = true;
                     if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste.getFunktiotyyppi())) {
                         if (valintaperuste.getArvot() != null && !valintaperuste.getArvot().isEmpty()) {
@@ -232,7 +238,6 @@ public class PistesyottoExcel {
                             }
                             Number max = asNumber(valintaperuste.getMax());
                             Number min = asNumber(valintaperuste.getMin());
-
                             s.add(new NumeroArvo(value, min, max));
                         }
                     } else if (Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(valintaperuste.getFunktiotyyppi())) {
@@ -242,9 +247,9 @@ public class PistesyottoExcel {
                         s.add(new TekstiArvo(data.getAdditionalData().get(StringUtils.trimToEmpty(valintaperuste.getTunniste())), false));
                     }
                     s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO.get(StringUtils.trimToEmpty(data.getAdditionalData().get(valintaperuste.getOsallistuminenTunniste()))), VAIHTOEHDOT));
-                } else {
-                    s.add(TekstiArvo.tyhja(false));
-                    s.add(TekstiArvo.tyhja(false));
+                } else { // Ei ole kaikille syotettava arvo eika hakija ole tahan valintakokeeseen osallistuja
+                    s.add(TekstiArvo.editoimatonTyhja());
+                    s.add(TekstiArvo.editoimatonTyhja());
                 }
             }
             if (syote) {

@@ -1,1 +1,36 @@
-[{"tunniste":"Eläintenhoidon koulutusohjelma, pk (Maatalousalan perustutkinto), pääsy- ja soveltuvuuskoe","kuvaus":"Pääsy- ja soveltuvuuskoe","funktiotyyppi":"LUKUARVOFUNKTIO","lahde":"SYOTETTAVA_ARVO","onPakollinen":true,"min":"0.0","max":"10.0","arvot":null,"osallistuminenTunniste":"Eläintenhoidon koulutusohjelma, pk (Maatalousalan perustutkinto), pääsy- ja soveltuvuuskoe-OSALLISTUMINEN"},{"tunniste":"kielikoe_fi","kuvaus":"Kielikoe","funktiotyyppi":"TOTUUSARVOFUNKTIO","lahde":"SYOTETTAVA_ARVO","onPakollinen":false,"min":null,"max":null,"arvot":null,"osallistuminenTunniste":"kielikoe_fi-OSALLISTUMINEN"},{"tunniste":"1_2_246_562_5_85532589612_urheilija_lisapiste","kuvaus":"Urheilijan lisäpiste","funktiotyyppi":"LUKUARVOFUNKTIO","lahde":"SYOTETTAVA_ARVO","onPakollinen":false,"min":"0","max":"3","arvot":null,"osallistuminenTunniste":"1_2_246_562_5_85532589612_urheilija_lisapiste-OSALLISTUMINEN"}]
+[
+  {
+    "tunniste": "Eläintenhoidon koulutusohjelma, pk (Maatalousalan perustutkinto), pääsy- ja soveltuvuuskoe",
+    "kuvaus": "Pääsy- ja soveltuvuuskoe",
+    "funktiotyyppi": "LUKUARVOFUNKTIO",
+    "lahde": "SYOTETTAVA_ARVO",
+    "onPakollinen": true,
+    "min": "0.0",
+    "max": "10.0",
+    "arvot": null,
+    "osallistuminenTunniste": "Eläintenhoidon koulutusohjelma, pk (Maatalousalan perustutkinto), pääsy- ja soveltuvuuskoe-OSALLISTUMINEN"
+  },
+  {
+    "tunniste": "kielikoe_fi",
+    "kuvaus": "Kielikoe",
+    "funktiotyyppi": "TOTUUSARVOFUNKTIO",
+    "lahde": "SYOTETTAVA_ARVO",
+    "onPakollinen": false,
+    "min": null,
+    "max": null,
+    "arvot": null,
+    "osallistuminenTunniste": "kielikoe_fi-OSALLISTUMINEN"
+  },
+  {
+    "tunniste": "1_2_246_562_5_85532589612_urheilija_lisapiste",
+    "kuvaus": "Urheilijan lisäpiste",
+    "syotettavissaKaikille": false,
+    "funktiotyyppi": "LUKUARVOFUNKTIO",
+    "lahde": "SYOTETTAVA_ARVO",
+    "onPakollinen": false,
+    "min": "0",
+    "max": "3",
+    "arvot": null,
+    "osallistuminenTunniste": "1_2_246_562_5_85532589612_urheilija_lisapiste-OSALLISTUMINEN"
+  }
+]

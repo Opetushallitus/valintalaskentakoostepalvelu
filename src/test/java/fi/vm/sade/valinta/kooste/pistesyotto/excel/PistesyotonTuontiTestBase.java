@@ -124,7 +124,7 @@ public class PistesyotonTuontiTestBase {
         for (PistesyottoRivi rivi : pistesyottoTuontiAdapteri.getRivit()) {
             ApplicationAdditionalDataDTO additionalData = pistetiedotMapping.get(rivi.getOid());
             Map<String, String> originalPistetiedot = additionalData.getAdditionalData();
-            Map<String, String> newPistetiedot = rivi.asAdditionalData();
+            Map<String, String> newPistetiedot = rivi.asAdditionalData(t -> true);
             if (originalPistetiedot.equals(newPistetiedot)) {
                 LOG.debug("Ei muutoksia riville({},{})", rivi.getOid(), rivi.getNimi());
             } else {

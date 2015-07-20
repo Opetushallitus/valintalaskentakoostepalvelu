@@ -56,18 +56,9 @@ public class TekstiArvo extends Arvo {
         // Excel.VAKIO_LEVEYS
         // / 2);
     }
-
-    private static final TekstiArvo TYHJA = new TekstiArvo(null);
     private static final TekstiArvo TYHJA_EI_NIMIKE = new TekstiArvo(null, false);
 
-    public static TekstiArvo tyhja() {
-        return TYHJA;
-    }
-
-    public static TekstiArvo tyhja(boolean nimike) {
-        if (!nimike) {
-            return TYHJA_EI_NIMIKE;
-        }
-        return TYHJA;
+    public static TekstiArvo editoimatonTyhja() {
+        return TYHJA_EI_NIMIKE;
     }
 }

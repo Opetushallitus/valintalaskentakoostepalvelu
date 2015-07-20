@@ -4,8 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.ws.rs.*;
@@ -77,7 +79,10 @@ public class PistesyottoResource {
                     "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray()), response -> {
                         LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.", SecurityContextHolder.getContext().getAuthentication().getName(), hakuOid, hakukohdeOid, uuid);
                     }, poikkeus -> {
-                        LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Exceliä ei voitu tallentaa dokumenttipalveluun.", SecurityContextHolder.getContext().getAuthentication().getName(), hakuOid, hakukohdeOid, poikkeus);
+                        LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Exceliä ei voitu tallentaa dokumenttipalveluun.",
+                                Optional.ofNullable((Principal)SecurityContextHolder.getContext().getAuthentication()).orElse(
+                                () -> "Kirjautumaton käyttäjä"
+                        ).getName(), hakuOid, hakukohdeOid);
                     });
         } catch (Throwable t) {
         }

@@ -1,8 +1,10 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.hakemus;
 
 import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.server.SeurantaServerMock;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -26,6 +28,11 @@ public class OmatSivutHakemusResourceTest {
     public void startServer() {
         mockForward(new SeurantaServerMock());
         startShared();
+    }
+
+    @After
+    public void reset() {
+        Integraatiopalvelimet.mockServer.reset();
     }
 
     @Test

@@ -22,13 +22,6 @@ public class PistesyottoDataRivi extends DataRivi {
         this.dataArvot = dataArvot;
     }
 
-    public PistesyottoDataRivi(Collection<Collection<Arvo>> arvot, PistesyottoDataRiviKuuntelija kuuntelija,
-                               Collection<PistesyottoDataArvo> dataArvot) {
-        super(arvot);
-        this.kuuntelijat = Arrays.asList(kuuntelija);
-        this.dataArvot = dataArvot;
-    }
-
     @Override
     public boolean validoi(Rivi rivi) {
         SoluLukija lukija = new SoluLukija(rivi.getSolut());
@@ -41,7 +34,6 @@ public class PistesyottoDataRivi extends DataRivi {
             for (PistesyottoDataArvo dataArvo : dataArvot) {
                 arvot.add(dataArvo.asPistesyottoArvo(lukija.getArvoAt(i),
                         lukija.getArvoAt(i + 1)));
-                // arvot.add(new PistesyottoArvo());
                 i += 2;
             }
         }

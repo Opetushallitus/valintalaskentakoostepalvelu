@@ -9,6 +9,8 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
@@ -26,25 +28,26 @@ public class PistesyottoRivi {
         this.arvot = arvot;
     }
 
-    public Map<String, String> asAdditionalData() {
+    public Map<String, String> asAdditionalData(Predicate<String> valintakoetunnisteFiltteri) {
         Map<String, String> data = Maps.newHashMap();
         for (PistesyottoArvo pisteSyottoArvo : arvot) {
             if (!isBlank(pisteSyottoArvo.getTila())) {
-                String arvo = pisteSyottoArvo.getArvo();
-                String tila = pisteSyottoArvo.getTila();
+                if(valintakoetunnisteFiltteri.test(pisteSyottoArvo.getTunniste())) {
+                    String arvo = pisteSyottoArvo.getArvo();
+                    String tila = pisteSyottoArvo.getTila();
 
-                if (isBlank(arvo) && tila.equals(VAKIO_OSALLISTUI)) {
-                    tila = VAKIO_MERKITSEMATTA;
+                    if (isBlank(arvo) && tila.equals(VAKIO_OSALLISTUI)) {
+                        tila = VAKIO_MERKITSEMATTA;
+                    }
+
+                    if (Arrays.asList(VAKIO_EI_OSALLISTUNUT, VAKIO_MERKITSEMATTA).contains(tila)) {
+                        arvo = "";
+                    }
+
+                    data.put(pisteSyottoArvo.getTunniste(), arvo);
+                    data.put(pisteSyottoArvo.getOsallistuminenTunniste(), tila);
                 }
-
-                if (Arrays.asList(VAKIO_EI_OSALLISTUNUT, VAKIO_MERKITSEMATTA).contains(tila)) {
-                    arvo = "";
-                }
-
-                data.put(pisteSyottoArvo.getTunniste(), arvo);
-                data.put(pisteSyottoArvo.getOsallistuminenTunniste(), tila);
             }
-
         }
         return data;
     }
