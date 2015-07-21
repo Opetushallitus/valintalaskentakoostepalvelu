@@ -40,12 +40,7 @@ public class PistesyottoE2ETest {
 
     @Before
     public void startServer() throws Throwable{
-        mockToNoContent(GET, "/seuranta-service/resources/seuranta/laskenta/otaSeuraavaLaskentaTyonAlle");
         startShared();
-    }
-    @After
-    public void reset() {
-        mockServer.reset();
     }
     @Test
     public void tuonnissaEiYlikirjoitetaEditoimattomiaKenttiaHakemuspalveluun() throws Throwable {

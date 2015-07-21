@@ -26,7 +26,6 @@ public class OmatSivutHakemusResourceTest {
 
     @Before
     public void startServer() {
-        mockForward(new SeurantaServerMock());
         startShared();
     }
 

@@ -23,6 +23,7 @@ public class ValintalaskentakoostepalveluJetty {
     public final static String resourcesAddress = "http://localhost:" + ValintalaskentakoostepalveluJetty.port + "/valintalaskentakoostepalvelu/resources";
 
     public static void startShared() {
+        Integraatiopalvelimet.mockServer.reset();
         SpringProfile.setProfile("test");
         try {
             if (server.isStopped()) {

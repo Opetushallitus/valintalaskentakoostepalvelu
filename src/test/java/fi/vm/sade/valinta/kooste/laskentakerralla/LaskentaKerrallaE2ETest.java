@@ -13,6 +13,7 @@ import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSp
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.server.SeurantaServerMock;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,76 +38,67 @@ public class LaskentaKerrallaE2ETest {
 
     @Before
     public void startServer() throws Throwable{
-        mockForward(seurantaServerMock);
         startShared();
     }
 
     @Test
     public void testaaLaskentaa() throws Throwable {
-        try {
-            HttpResource http = new HttpResource(resourcesAddress + "/valintalaskentakerralla/haku/HAKUOID1/tyyppi/HAKU/whitelist/true");
-            mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/haku/.*",
-                    Arrays.asList(
-                            hakukohdeviite()
-                                    .setHakukohdeOid(HAKUKOHDE1)
-                                    .build(),
-                            hakukohdeviite()
-                                    .setHakukohdeOid(HAKUKOHDE2)
-                                    .build()
-                    )
-            );
-            mockToReturnJson(GET,
-                    "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/.*",
-                    Arrays.asList(
-                            valintaperusteet()
-                                    .build()
-                    )
-            );
-            mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/.*",new ParametriDTO());
-            mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/.*",new HakuV1RDTO());
-            mockToReturnJson(GET, "/suoritusrekisteri/rest/v1/oppijat.*", Arrays.asList());
-            mockToReturnJson(GET, "/haku-app/applications/listfull.*", Arrays.asList());
-            MockServer fakeValintalaskenta = new MockServer();
-            CyclicBarrier barrier = new CyclicBarrier(2);
-            Action0 waitRequestForMax7Seconds = () ->{
-                try {
-                    barrier.await(7L, TimeUnit.SECONDS);
-                } catch (Throwable t) {
-                    throw new RuntimeException(t);
-                }
-            };
-            AtomicBoolean first = new AtomicBoolean(true);
-            mockForward(
-                    fakeValintalaskenta.addHandler("/valintalaskenta-laskenta-service/resources/valintalaskenta/valintakokeet", exchange -> {
-                        try {
-                            // failataan tarkoituksella ensimmainen laskenta
-                            if (first.getAndSet(false)) {
-                                String resp = "ERR!";
-                                exchange.sendResponseHeaders(505, resp.length());
-                                exchange.getResponseBody().write(resp.getBytes());
-                                exchange.getResponseBody().close();
-                                return;
-                            }
-                            waitRequestForMax7Seconds.call();
-                            String resp = "OK!";
-                            exchange.sendResponseHeaders(200, resp.length());
+        mockForward(seurantaServerMock);
+        HttpResource http = new HttpResource(resourcesAddress + "/valintalaskentakerralla/haku/HAKUOID1/tyyppi/HAKU/whitelist/true");
+        mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/haku/.*",
+                Arrays.asList(
+                        hakukohdeviite()
+                                .setHakukohdeOid(HAKUKOHDE1)
+                                .build(),
+                        hakukohdeviite()
+                                .setHakukohdeOid(HAKUKOHDE2)
+                                .build()
+                )
+        );
+        mockToReturnJson(GET,
+                "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/.*",
+                Arrays.asList(
+                        valintaperusteet()
+                                .build()
+                )
+        );
+        mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/.*",new ParametriDTO());
+        mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/.*",new HakuV1RDTO());
+        mockToReturnJson(GET, "/suoritusrekisteri/rest/v1/oppijat.*", Arrays.asList());
+        mockToReturnJson(GET, "/haku-app/applications/listfull.*", Arrays.asList());
+        MockServer fakeValintalaskenta = new MockServer();
+        CyclicBarrier barrier = new CyclicBarrier(2);
+        Action0 waitRequestForMax7Seconds = () ->{
+            try {
+                barrier.await(7L, TimeUnit.SECONDS);
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
+            }
+        };
+        AtomicBoolean first = new AtomicBoolean(true);
+        mockForward(
+                fakeValintalaskenta.addHandler("/valintalaskenta-laskenta-service/resources/valintalaskenta/valintakokeet", exchange -> {
+                    try {
+                        // failataan tarkoituksella ensimmainen laskenta
+                        if (first.getAndSet(false)) {
+                            String resp = "ERR!";
+                            exchange.sendResponseHeaders(505, resp.length());
                             exchange.getResponseBody().write(resp.getBytes());
                             exchange.getResponseBody().close();
-                        } catch (Throwable t) {
-                            throw new RuntimeException(t);
+                            return;
                         }
-                    }));
-            Assert.assertEquals(200, http.getWebClient()
-                    .query("valintakoelaskenta", "true")
-                    .post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2))).getStatus());
-            waitRequestForMax7Seconds.call();
-        } finally {
-            mockServer.reset();
-        }
+                        waitRequestForMax7Seconds.call();
+                        String resp = "OK!";
+                        exchange.sendResponseHeaders(200, resp.length());
+                        exchange.getResponseBody().write(resp.getBytes());
+                        exchange.getResponseBody().close();
+                    } catch (Throwable t) {
+                        throw new RuntimeException(t);
+                    }
+                }));
+        Assert.assertEquals(200, http.getWebClient()
+                .query("valintakoelaskenta", "true")
+                .post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2))).getStatus());
+        waitRequestForMax7Seconds.call();
     }
-    /*
-        mockToReturnJson(GET, "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valintaperusteet/hakijaryhma/.*",Arrays.asList());
-        mockToReturnString(POST,
-                "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/" + UUID1 + "/hakukohde/" + HAKUKOHDE1 + "/tila/.*",
-                "OK!");*/
 }
