@@ -73,8 +73,6 @@ public class SijoittelunTulosExcelKomponentti {
                 }
             }
         }
-
-        Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat = valintatapajononTilat(tilat);
         rivit.add(new Object[]{tarjoajaNimi});
         rivit.add(new Object[]{hakukohdeNimi});
         rivit.add(new Object[]{});
@@ -154,6 +152,8 @@ public class SijoittelunTulosExcelKomponentti {
         Map<String, Map<String, HakemusDTO>> jonoOidHakemusOidHakemusDto = valintatapajonot.stream()
                 .collect(Collectors.toMap(ValintatapajonoDTO::getOid, v -> v.getHakemukset().stream().collect(Collectors.toMap(HakemusDTO::getHakemusOid, h -> h))));
 
+
+        Map<String, IlmoittautumisTila> hakemusJaJonoMappaus = valintatapajononTilat(tilat);
         for (HakemusDTO hDto : distinctHakemuksetFromAllQueues) {
             HakemusWrapper wrapper = new HakemusWrapper(hakemukset.get(hDto.getHakemusOid()));
             String nimi = wrapper.getSukunimi() + ", " + wrapper.getEtunimet();
@@ -188,18 +188,9 @@ public class SijoittelunTulosExcelKomponentti {
                 if (jonoOidToHakemusOid.containsKey(hDto.getHakemusOid())) {
                     HakemusDTO hakemusDto = jonoOidHakemusOidHakemusDto.get(jono.getOid()).get(hDto.getHakemusOid());
                     String hakemusOid = hakemusDto.getHakemusOid();
-                    Map<String, IlmoittautumisTila> hakemusTilat = Collections.emptyMap();
-                    if (valintatapajononTilat.containsKey(jono.getOid())) {
-                        hakemusTilat = valintatapajononTilat.get(jono.getOid());
-                        if (hakemusTilat == null) {
-                            hakemusTilat = Collections.emptyMap();
-                        }
-                    }
-                    String ilmoittautumistieto = StringUtils.EMPTY;
-                    IlmoittautumisTila tila = hakemusTilat.get(hakemusDto.getHakemusOid());
-                    if (hakemusTilat.containsKey(tila)) {
-                        ilmoittautumistieto = HakemusUtil.tilaConverter(tila, preferoitukielikoodi);
-                    }
+                    String ilmoittautumistieto =
+                            HakemusUtil.tilaConverter(hakemusJaJonoMappaus.get(hakemusOidJaValintatapajonoOidYhdiste(hakemusOid, jono.getOid())), preferoitukielikoodi);
+
                     List<Valintatulos> valintaTulos = tilat.stream()
                             .filter(t -> hakemusOid.equals(t.getHakemusOid()))
                             .collect(Collectors.toList());
@@ -256,17 +247,15 @@ public class SijoittelunTulosExcelKomponentti {
         }
     }
 
-    private Map<String, Map<String, IlmoittautumisTila>> valintatapajononTilat(List<Valintatulos> tilat) {
-        Map<String, Map<String, IlmoittautumisTila>> t = Maps.newHashMap();
+    private String hakemusOidJaValintatapajonoOidYhdiste(String hakemusOid, String valintatapajonoOid) {
+        return new StringBuilder().append(hakemusOid).append("_").append(valintatapajonoOid).toString();
+    }
+
+    private Map<String, IlmoittautumisTila> valintatapajononTilat(List<Valintatulos> tilat) {
+        Map<String, IlmoittautumisTila> t = Maps.newHashMap();
         try {
             for (Valintatulos tulos : tilat) {
-                Map<String, IlmoittautumisTila> jono;
-                if (!t.containsKey(tulos.getValintatapajonoOid())) {
-                    t.put(tulos.getValintatapajonoOid(), jono = Maps.<String, IlmoittautumisTila>newHashMap());
-                } else {
-                    jono = t.get(tulos.getValintatapajonoOid());
-                }
-                jono.put(tulos.getHakemusOid(), tulos.getIlmoittautumisTila());
+                t.put(hakemusOidJaValintatapajonoOidYhdiste(tulos.getHakemusOid(), tulos.getValintatapajonoOid()), tulos.getIlmoittautumisTila());
             }
         } catch (Exception e) {
             LOG.error("Ilmoittautumistiloja ei saatu luettua sijoittelusta!", e);
