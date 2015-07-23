@@ -276,11 +276,6 @@
 		</dependency>
 		<dependency>
 			<groupId>fi.vm.sade.sijoittelu</groupId>
-			<artifactId>sijoittelu-algoritmi-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>fi.vm.sade.sijoittelu</groupId>
 			<artifactId>sijoittelu-algoritmi-domain</artifactId>
 			<version>${project.version}</version>
 		</dependency>
