@@ -13,6 +13,7 @@ import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -59,13 +60,9 @@ public class ErillishakuProxyResourceTest {
                 new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType()
         );
         HakukohdeDTO hakukohde = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/ilmanlaskentaa/hakukohde.json"), HakukohdeDTO.class);
-        try {
-            initMocks(hakemukset, hakukohde, valintatieto, valintatulokset, valinnanvaihejonoilla);
-            List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
-            mergeValinnanvaiheDTOs.forEach(valinnanvaihe -> valinnanvaihe.getValintatapajonot().forEach(valintatapajono -> assertFalse(valintatapajono.isKaytetaanValintalaskentaa())));
-        } finally {
-            resetMocks();
-        }
+        initMocks(hakemukset, hakukohde, valintatieto, valintatulokset, valinnanvaihejonoilla);
+        List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
+        mergeValinnanvaiheDTOs.forEach(valinnanvaihe -> valinnanvaihe.getValintatapajonot().forEach(valintatapajono -> assertFalse(valintatapajono.isKaytetaanValintalaskentaa())));
     }
 
     @Test
@@ -89,28 +86,30 @@ public class ErillishakuProxyResourceTest {
         );
         HakukohdeDTO hakukohde = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/hakukohde.json"), HakukohdeDTO.class);
         HakukohdeDTO hakukohde_1422533823300 = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/hakukohde_1422533823300.json"), HakukohdeDTO.class);
-        try {
-            initMocks(hakemukset, hakukohde, valintatieto, valintatulokset, valinnanvaihejonoilla);
-            MockSijoitteluAsyncResource.getResultMap().put(1422533823300L, hakukohde_1422533823300);
-            List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
-            mergeValinnanvaiheDTOs.forEach(valinnanvaihe -> valinnanvaihe.getValintatapajonot().forEach(valintatapajono -> assertTrue(valintatapajono.isKaytetaanValintalaskentaa())));
-        } finally {
-            resetMocks();
-        }
+        initMocks(hakemukset, hakukohde, valintatieto, valintatulokset, valinnanvaihejonoilla);
+        MockSijoitteluAsyncResource.getResultMap().put(1422533823300L, hakukohde_1422533823300);
+        List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
+        mergeValinnanvaiheDTOs.forEach(valinnanvaihe -> valinnanvaihe.getValintatapajonot().forEach(valintatapajono -> assertTrue(valintatapajono.isKaytetaanValintalaskentaa())));
     }
 
     @Test
     public void testaaProxyResurssinJononGenerointiKunValintaperusteetPuuttuu() throws Exception {
-        try {
-            initMocks(emptyList(), new HakukohdeDTO(), emptyList(), emptyList(), emptyList());
-            List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
-            assertEquals(1, mergeValinnanvaiheDTOs.size());
-            MergeValinnanvaiheDTO vv = mergeValinnanvaiheDTOs.iterator().next();
-            assertEquals(1, vv.getValintatapajonot().size());
-        } finally {
-            resetMocks();
-        }
+        initMocks(emptyList(), new HakukohdeDTO(), emptyList(), emptyList(), emptyList());
+        List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
+        assertEquals(1, mergeValinnanvaiheDTOs.size());
+        MergeValinnanvaiheDTO vv = mergeValinnanvaiheDTOs.iterator().next();
+        assertEquals(1, vv.getValintatapajonot().size());
     }
+
+    @After
+    public void resetMocks() {
+        MockApplicationAsyncResource.clear();
+        MockSijoitteluAsyncResource.clear();
+        MockTilaAsyncResource.clear();
+        MockValintalaskentaAsyncResource.clear();
+        MockValintaperusteetAsyncResource.clear();
+    }
+
     private void initMocks(
             List<Hakemus> hakemukset,
             HakukohdeDTO hakukohde,
@@ -130,13 +129,5 @@ public class ErillishakuProxyResourceTest {
                 IOUtils.toString((InputStream) proxyResource.getWebClient().get().getEntity()),
                 new TypeToken<List<MergeValinnanvaiheDTO>>() {}.getType()
         );
-    }
-
-    private void resetMocks() {
-        MockApplicationAsyncResource.clear();
-        MockSijoitteluAsyncResource.clear();
-        MockTilaAsyncResource.clear();
-        MockValintalaskentaAsyncResource.clear();
-        MockValintaperusteetAsyncResource.clear();
     }
 }
