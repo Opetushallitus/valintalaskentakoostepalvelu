@@ -60,27 +60,17 @@ public class ErillishakuProxyResourceTest {
         );
         HakukohdeDTO hakukohde = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/ilmanlaskentaa/hakukohde.json"), HakukohdeDTO.class);
         try {
-            MockApplicationAsyncResource.setResult(hakemukset);
-            MockSijoitteluAsyncResource.setResult(hakukohde);
-            MockValintalaskentaAsyncResource.setResult(valintatieto);
-            MockTilaAsyncResource.setResult(valintatulokset);
-            MockValintaperusteetAsyncResource.setResult(valinnanvaihejonoilla);
-            List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = GSON.fromJson(
-                    IOUtils.toString((InputStream) proxyResource.getWebClient().get().getEntity()),
-                    new TypeToken<List<MergeValinnanvaiheDTO>>() {}.getType()
-            );
+            initMocks(hakemukset, hakukohde, valintatieto, valintatulokset, valinnanvaihejonoilla);
+            List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
             mergeValinnanvaiheDTOs.forEach(valinnanvaihe -> valinnanvaihe.getValintatapajonot().forEach(valintatapajono -> assertFalse(valintatapajono.isKaytetaanValintalaskentaa())));
         } finally {
-            MockApplicationAsyncResource.clear();
-            MockSijoitteluAsyncResource.clear();
-            MockTilaAsyncResource.clear();
-            MockValintalaskentaAsyncResource.clear();
-            MockValintaperusteetAsyncResource.clear();
+            resetMocks();
         }
     }
+
     @Test
     public void testaaProxyResurssiHakukohteelleLaskennalla() throws Exception {
-        LOG.error("{}",root + "/proxy/erillishaku/haku/"+hakuOid+"/hakukohde/" + hakukohdeOid);
+        LOG.error("{}", root + "/proxy/erillishaku/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid);
         List<ValintatietoValinnanvaiheDTO> valintatieto = GSON.fromJson(
                 classpathResourceAsString("/proxy/erillishaku/data/laskennalla/laskenta_valinnanvaihe.json"),
                 new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType()
@@ -100,50 +90,53 @@ public class ErillishakuProxyResourceTest {
         HakukohdeDTO hakukohde = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/hakukohde.json"), HakukohdeDTO.class);
         HakukohdeDTO hakukohde_1422533823300 = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/hakukohde_1422533823300.json"), HakukohdeDTO.class);
         try {
-            MockApplicationAsyncResource.setResult(hakemukset);
-            MockSijoitteluAsyncResource.setResult(hakukohde);
+            initMocks(hakemukset, hakukohde, valintatieto, valintatulokset, valinnanvaihejonoilla);
             MockSijoitteluAsyncResource.getResultMap().put(1422533823300L, hakukohde_1422533823300);
-            MockValintalaskentaAsyncResource.setResult(valintatieto);
-            MockTilaAsyncResource.setResult(valintatulokset);
-            MockValintaperusteetAsyncResource.setResult(valinnanvaihejonoilla);
-            List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = GSON.fromJson(
-                    IOUtils.toString((InputStream) proxyResource.getWebClient().get().getEntity()),
-                    new TypeToken<List<MergeValinnanvaiheDTO>>() {}.getType()
-            );
+            List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
             mergeValinnanvaiheDTOs.forEach(valinnanvaihe -> valinnanvaihe.getValintatapajonot().forEach(valintatapajono -> assertTrue(valintatapajono.isKaytetaanValintalaskentaa())));
         } finally {
-            MockApplicationAsyncResource.clear();
-            MockSijoitteluAsyncResource.clear();
-            MockTilaAsyncResource.clear();
-            MockValintalaskentaAsyncResource.clear();
-            MockValintaperusteetAsyncResource.clear();
+            resetMocks();
         }
     }
 
     @Test
     public void testaaProxyResurssinJononGenerointiKunValintaperusteetPuuttuu() throws Exception {
         try {
-            MockApplicationAsyncResource.setResult(emptyList());
-            MockSijoitteluAsyncResource.setResult(new HakukohdeDTO());
-            MockValintalaskentaAsyncResource.setResult(emptyList());
-            MockTilaAsyncResource.setResult(emptyList());
-            MockValintaperusteetAsyncResource.setResult(emptyList());
-            List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = GSON.fromJson(
-                    IOUtils.toString((InputStream) proxyResource.getWebClient().get().getEntity()),
-                    new TypeToken<List<MergeValinnanvaiheDTO>>() {}.getType()
-            );
+            initMocks(emptyList(), new HakukohdeDTO(), emptyList(), emptyList(), emptyList());
+            List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
             assertEquals(1, mergeValinnanvaiheDTOs.size());
             MergeValinnanvaiheDTO vv = mergeValinnanvaiheDTOs.iterator().next();
             assertEquals(1, vv.getValintatapajonot().size());
         } finally {
-            MockApplicationAsyncResource.clear();
-            MockSijoitteluAsyncResource.clear();
-            MockTilaAsyncResource.clear();
-            MockValintalaskentaAsyncResource.clear();
-            MockValintaperusteetAsyncResource.clear();
+            resetMocks();
         }
-
-
+    }
+    private void initMocks(
+            List<Hakemus> hakemukset,
+            HakukohdeDTO hakukohde,
+            List<ValintatietoValinnanvaiheDTO> valintatieto,
+            List<Valintatulos> valintatulokset,
+            List<ValinnanVaiheJonoillaDTO> valinnanvaihejonoilla
+    ) {
+        MockApplicationAsyncResource.setResult(hakemukset);
+        MockSijoitteluAsyncResource.setResult(hakukohde);
+        MockValintalaskentaAsyncResource.setResult(valintatieto);
+        MockTilaAsyncResource.setResult(valintatulokset);
+        MockValintaperusteetAsyncResource.setResult(valinnanvaihejonoilla);
     }
 
+    public List<MergeValinnanvaiheDTO> callErillishakuProxy() throws Exception {
+        return GSON.fromJson(
+                IOUtils.toString((InputStream) proxyResource.getWebClient().get().getEntity()),
+                new TypeToken<List<MergeValinnanvaiheDTO>>() {}.getType()
+        );
+    }
+
+    private void resetMocks() {
+        MockApplicationAsyncResource.clear();
+        MockSijoitteluAsyncResource.clear();
+        MockTilaAsyncResource.clear();
+        MockValintalaskentaAsyncResource.clear();
+        MockValintaperusteetAsyncResource.clear();
+    }
 }
