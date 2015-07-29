@@ -34,6 +34,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         List<MergeValinnanvaiheDTO> result = getMergeValinnanvaiheDTOs(hakuOid, hakukohdeOid, valinnanvaiheet);
 
         boolean laskennanTulosLoytyi = laskennantulokset.stream()
+                .filter(laskennantulos -> valinnanvaiheExists(laskennantulos.getValinnanvaiheoid(), valinnanvaiheet))
                 .flatMap(v -> v.getValintatapajonot().stream())
                 .flatMap(j -> j.getJonosijat().stream())
                 .findAny()
@@ -177,6 +178,10 @@ public class HakemusSijoitteluntulosMergeUtil {
                 .filter(Objects::nonNull)
                 .filter(j -> j.getOid() != null && j.getOid().equals(jonoOid))
                 .findFirst();
+    }
+
+    private static boolean valinnanvaiheExists(String valinnanvaiheOid, List<ValinnanVaiheJonoillaDTO> valinnanvaiheet) {
+        return valinnanvaiheet.stream().anyMatch(valinnanvaihe -> valinnanvaihe.getOid().equals(valinnanvaiheOid));
     }
 
     private static MergeValinnanvaiheDTO createValinnanvaihe(String hakuOid, String hakukohdeOid, int jarjestysnumero) {

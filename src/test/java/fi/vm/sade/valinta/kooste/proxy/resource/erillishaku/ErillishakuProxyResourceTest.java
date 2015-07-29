@@ -11,7 +11,9 @@ import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
+import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValintatapajonoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import junit.framework.Assert;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -22,7 +24,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.InputStream;
 import static java.util.Collections.*;
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -99,6 +101,31 @@ public class ErillishakuProxyResourceTest {
         assertEquals(1, mergeValinnanvaiheDTOs.size());
         MergeValinnanvaiheDTO vv = mergeValinnanvaiheDTOs.iterator().next();
         assertEquals(1, vv.getValintatapajonot().size());
+    }
+
+    @Test
+    public void excludesLaskentasIfValinnanvaiheDoesNotExist() throws Exception {
+        List<ValintatietoValinnanvaiheDTO> valintatieto = GSON.fromJson(
+                classpathResourceAsString("/proxy/erillishaku/data/laskennalla/laskenta_valinnanvaihe.json"),
+                new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType()
+        );
+        List<Hakemus> hakemukset = GSON.fromJson(
+                classpathResourceAsString("/proxy/erillishaku/data/laskennalla/listfull.json"),
+                new TypeToken<List<Hakemus>>() {}.getType()
+        );
+        List<Valintatulos> valintatulokset = GSON.fromJson(
+                classpathResourceAsString("/proxy/erillishaku/data/laskennalla/tila.json"),
+                new TypeToken<List<Valintatulos>>() {}.getType()
+        );
+        HakukohdeDTO hakukohde = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/hakukohde.json"), HakukohdeDTO.class);
+        HakukohdeDTO hakukohde_1422533823300 = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/laskennalla/hakukohde_1422533823300.json"), HakukohdeDTO.class);
+        initMocks(hakemukset, hakukohde, valintatieto, valintatulokset, emptyList());
+        MockSijoitteluAsyncResource.getResultMap().put(1422533823300L, hakukohde_1422533823300);
+        List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
+        assertEquals(1, mergeValinnanvaiheDTOs.size());
+        List<MergeValintatapajonoDTO> valintatapajonot = mergeValinnanvaiheDTOs.get(0).getValintatapajonot();
+        assertEquals(valintatapajonot.size(), 1);
+        assertFalse(valintatapajonot.get(0).isKaytetaanValintalaskentaa());
     }
 
     @After
