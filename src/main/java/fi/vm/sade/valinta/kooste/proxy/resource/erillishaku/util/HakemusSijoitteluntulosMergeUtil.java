@@ -22,7 +22,9 @@ import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSa
 
 public class HakemusSijoitteluntulosMergeUtil {
 
-    public static List<MergeValinnanvaiheDTO> merge(String hakuOid, String hakukohdeOid,
+    public static List<MergeValinnanvaiheDTO> merge(
+            String hakuOid,
+            String hakukohdeOid,
             List<Hakemus> hakemukset,
             HakukohdeDTO hakukohdeDTO,
             List<ValinnanVaiheJonoillaDTO> valinnanvaiheet,
