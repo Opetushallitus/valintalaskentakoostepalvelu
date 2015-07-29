@@ -94,6 +94,15 @@ public class ErillishakuProxyResourceTest {
         assertFalse(valintatapajonot.get(0).isKaytetaanValintalaskentaa());
     }
 
+    @After
+    public void resetMocks() {
+        MockApplicationAsyncResource.clear();
+        MockSijoitteluAsyncResource.clear();
+        MockTilaAsyncResource.clear();
+        MockValintalaskentaAsyncResource.clear();
+        MockValintaperusteetAsyncResource.clear();
+    }
+
     private List<ValintatietoValinnanvaiheDTO> valintatietoFromJson(String path) throws Exception {
         return GSON.fromJson(
                 classpathResourceAsString(path),
@@ -116,15 +125,6 @@ public class ErillishakuProxyResourceTest {
 
     private List<Hakemus> hakemuksetFromJson(String path) throws Exception {
         return GSON.fromJson(classpathResourceAsString(path), new TypeToken<List<Hakemus>>() {}.getType());
-    }
-
-    @After
-    public void resetMocks() {
-        MockApplicationAsyncResource.clear();
-        MockSijoitteluAsyncResource.clear();
-        MockTilaAsyncResource.clear();
-        MockValintalaskentaAsyncResource.clear();
-        MockValintaperusteetAsyncResource.clear();
     }
 
     private void initMocks(
