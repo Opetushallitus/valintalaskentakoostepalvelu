@@ -160,9 +160,7 @@ public class HakemusSijoitteluntulosMergeUtil {
             // Ei yhtään valinnanvaihetta, generoidaan yksi
             result.add(createValinnanvaihe(hakuOid, hakukohdeOid, 0));
         } else {
-            valinnanvaiheet.forEach(vaihe -> {
-                result.add(createValinnanvaihe(hakuOid, hakukohdeOid, vaihe));
-            });
+            valinnanvaiheet.forEach(vaihe -> result.add(createValinnanvaihe(hakuOid, hakukohdeOid, vaihe)));
         }
         return result;
     }
