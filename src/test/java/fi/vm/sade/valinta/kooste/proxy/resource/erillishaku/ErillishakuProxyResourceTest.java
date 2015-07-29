@@ -36,7 +36,6 @@ import java.util.List;
  *
  */
 public class ErillishakuProxyResourceTest {
-    final static Logger LOG = LoggerFactory.getLogger(ErillishakuProxyResourceTest.class);
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
     String hakuOid = "1.2.246.562.5.2013080813081926341928";
     String hakukohdeOid = "1.2.246.562.5.72607738902";
@@ -53,7 +52,6 @@ public class ErillishakuProxyResourceTest {
 
     @Test
     public void testaaProxyResurssiIlmanLaskentaaHakukohteelle() throws Exception {
-        LOG.error("{}",root + "/proxy/erillishaku/haku/"+hakuOid+"/hakukohde/" + hakukohdeOid);
         List<ValintatietoValinnanvaiheDTO> valintatieto = emptyList(); // ei valinnanvaiheita
         List<Hakemus> hakemukset = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/ilmanlaskentaa/listfull.json"), new TypeToken<List<Hakemus>>() {}.getType());
         List<Valintatulos> valintatulokset = GSON.fromJson(classpathResourceAsString("/proxy/erillishaku/data/ilmanlaskentaa/tila.json"), new TypeToken<List<Valintatulos>>() {}.getType());
@@ -69,7 +67,6 @@ public class ErillishakuProxyResourceTest {
 
     @Test
     public void testaaProxyResurssiHakukohteelleLaskennalla() throws Exception {
-        LOG.error("{}", root + "/proxy/erillishaku/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid);
         List<ValintatietoValinnanvaiheDTO> valintatieto = GSON.fromJson(
                 classpathResourceAsString("/proxy/erillishaku/data/laskennalla/laskenta_valinnanvaihe.json"),
                 new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType()
