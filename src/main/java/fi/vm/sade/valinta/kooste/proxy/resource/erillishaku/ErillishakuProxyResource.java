@@ -87,7 +87,7 @@ public class ErillishakuProxyResource {
         final AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId = new AtomicReference<>();
         AtomicInteger counter = new AtomicInteger(1 + 1 + 1 + 1 + 2);
 
-        Supplier<Void> mergeSuplier = () -> {
+        Supplier<Void> mergeSupplier = () -> {
             if (counter.decrementAndGet() == 0) {
                 LOG.info("Muodostetaan vastaus hakukohteelle {} haussa {}", hakukohdeOid, hakuOid);
                 r(asyncResponse, merge(hakuOid, hakukohdeOid, hakemukset.get(), hakukohde.get(), valinnanvaiheet.get(), valintatulokset.get(), hakukohteetBySijoitteluAjoId.get(), vtsValintatulokset.get()));
@@ -95,30 +95,30 @@ public class ErillishakuProxyResource {
             return null;
         };
         ///haku-app/applications/listfull?appStates=ACTIVE&appStates=INCOMPLETE&rows=100000&aoOid={hakukohdeOid}&asId={hakuOid}
-        fetchHakemus(hakuOid, hakukohdeOid, asyncResponse, hakemukset, mergeSuplier);
+        fetchHakemus(hakuOid, hakukohdeOid, asyncResponse, hakemukset, mergeSupplier);
         ///valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
-        fetchValinnanVaihes(hakukohdeOid, asyncResponse, valinnanvaiheet, mergeSuplier);
+        fetchValinnanVaihes(hakukohdeOid, asyncResponse, valinnanvaiheet, mergeSupplier);
         ///sijoittelu-service/resources/sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
-        fetchSijoittelu(hakuOid, hakukohdeOid, asyncResponse, hakukohde, mergeSuplier);
+        fetchSijoittelu(hakuOid, hakukohdeOid, asyncResponse, hakukohde, mergeSupplier);
         ///sijoittelu-service/resources/tila/hakukohde/{hakukohdeOid}
-        fetchValintatulos(hakuOid, hakukohdeOid, asyncResponse, vtsValintatulokset, mergeSuplier);
+        fetchValintatulos(hakuOid, hakukohdeOid, asyncResponse, vtsValintatulokset, mergeSupplier);
         ///valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
-        fetchValinnanTulos(hakuOid, hakukohdeOid, asyncResponse, valintatulokset, hakukohteetBySijoitteluAjoId, mergeSuplier);
+        fetchValinnanTulos(hakuOid, hakukohdeOid, asyncResponse, valintatulokset, hakukohteetBySijoitteluAjoId, mergeSupplier);
     }
 
-    void fetchValinnanTulos(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset, AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId, Supplier<Void> mergeSuplier) {
+    void fetchValinnanTulos(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<ValintatietoValinnanvaiheDTO>> valintatulokset, AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId, Supplier<Void> mergeSupplier) {
         valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid).subscribe(
                 valintatietoValinnanvaihes -> {
                     LOG.info("Haetaan valintalaskennasta tulokset");
                     valintatulokset.set(valintatietoValinnanvaihes);
-                    fetchSijoitteluAjoIds(hakuOid, hakukohdeOid, asyncResponse, hakukohteetBySijoitteluAjoId, mergeSuplier, valintatietoValinnanvaihes);
-                    mergeSuplier.get();
+                    fetchSijoitteluAjoIds(hakuOid, hakukohdeOid, asyncResponse, hakukohteetBySijoitteluAjoId, mergeSupplier, valintatietoValinnanvaihes);
+                    mergeSupplier.get();
                 },
                 poikkeus -> logAndReturnError("valintalaskenta", asyncResponse, poikkeus)
         );
     }
 
-    private void fetchSijoitteluAjoIds(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId, Supplier<Void> mergeSuplier, List<ValintatietoValinnanvaiheDTO> valintatietoValinnanvaihes) {
+    private void fetchSijoitteluAjoIds(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<Map<Long, HakukohdeDTO>> hakukohteetBySijoitteluAjoId, Supplier<Void> mergeSupplier, List<ValintatietoValinnanvaiheDTO> valintatietoValinnanvaihes) {
         Set<Long> sijoitteluAjoIdSetti = valintatietoValinnanvaihes.stream().flatMap(v0 -> v0.getValintatapajonot().stream())
                 .filter(v0 -> v0.getSijoitteluajoId() != null)
                 .map(ValintatietoValintatapajonoDTO::getSijoitteluajoId).collect(Collectors.toSet());
@@ -135,7 +135,7 @@ public class ErillishakuProxyResource {
                             erillissijoittelutmp.put(id, hakukohde);
                             if (erillissijoitteluCounter.decrementAndGet() == 0) {
                                 hakukohteetBySijoitteluAjoId.set(erillissijoittelutmp);
-                                mergeSuplier.get();
+                                mergeSupplier.get();
                             }
                         },
                         throwable -> logAndReturnError("valintalaskenta", asyncResponse, throwable)
@@ -144,48 +144,48 @@ public class ErillishakuProxyResource {
         } else {
             LOG.info("Ei saatu erillisiä sijoitteluajoideitä.");
             hakukohteetBySijoitteluAjoId.set(Collections.emptyMap());
-            mergeSuplier.get();
+            mergeSupplier.get();
         }
     }
 
-    void fetchValintatulos(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<Valintatulos>> vtsValintatulokset, Supplier<Void> mergeSuplier) {
+    void fetchValintatulos(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<Valintatulos>> vtsValintatulokset, Supplier<Void> mergeSupplier) {
         tilaResource.getValintatulokset(hakuOid, hakukohdeOid, vts -> {
                     LOG.info("Haetaan sijoittelusta valintatulokset");
                     vtsValintatulokset.set(vts);
-                    mergeSuplier.get();
+                    mergeSupplier.get();
                 },
                 poikkeus -> logAndReturnError("valintatulosservice", asyncResponse, poikkeus)
         );
     }
 
-    void fetchSijoittelu(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<HakukohdeDTO> hakukohde, Supplier<Void> mergeSuplier) {
+    void fetchSijoittelu(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<HakukohdeDTO> hakukohde, Supplier<Void> mergeSupplier) {
         sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(hakuOid, hakukohdeOid,
                 s -> {
                     LOG.info("Haetaan sijoittelusta hakukohteen tiedot");
                     hakukohde.set(s);
-                    mergeSuplier.get();
+                    mergeSupplier.get();
                 },
                 poikkeus -> logAndReturnError("sijoittelupalvelu", asyncResponse, poikkeus)
         );
     }
 
-    void fetchValinnanVaihes(@PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<ValinnanVaiheJonoillaDTO>> valinnanvaiheet, Supplier<Void> mergeSuplier) {
+    void fetchValinnanVaihes(@PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<ValinnanVaiheJonoillaDTO>> valinnanvaiheet, Supplier<Void> mergeSupplier) {
         valintaperusteetAsyncResource.haeValinnanvaiheetHakukohteelle(hakukohdeOid,
                 v -> {
                     LOG.info("Haetaan valinnanvaiheita");
                     valinnanvaiheet.set(v.stream().filter(vaihe -> vaihe.getValinnanVaiheTyyppi().equals(ValinnanVaiheTyyppi.TAVALLINEN)).collect(Collectors.toList()));
-                    mergeSuplier.get();
+                    mergeSupplier.get();
                 },
                 poikkeus -> logAndReturnError("valintaperusteet", asyncResponse, poikkeus)
         );
     }
 
-    void fetchHakemus(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<Hakemus>> hakemukset, Supplier<Void> mergeSuplier) {
+    void fetchHakemus(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<Hakemus>> hakemukset, Supplier<Void> mergeSupplier) {
         applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).subscribe(
                 h -> {
                     LOG.info("Haetaan hakemuksia");
                     hakemukset.set(h);
-                    mergeSuplier.get();
+                    mergeSupplier.get();
                 },
                 poikkeus -> logAndReturnError("haku-app", asyncResponse, poikkeus)
         );
