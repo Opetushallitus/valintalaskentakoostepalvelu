@@ -46,7 +46,7 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
 
     @Override
     public Observable<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
-        return Observable.just(Collections.EMPTY_LIST);
+        return Observable.just(resultReference.get());
     }
 
     @Override
