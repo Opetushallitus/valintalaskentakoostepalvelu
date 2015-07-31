@@ -7,10 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -41,13 +38,7 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
 
     @Override
     public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
-        Valintatulos valintatulos = new Valintatulos();
-        valintatulos.setHakemusOid(hakemusOid);
-        valintatulos.setHakijaOid(hakijaOid);
-        valintatulos.setHakukohdeOid(hakukohdeOid);
-        valintatulos.setHakuOid(hakuOid);
-        valintatulos.setValintatapajonoOid(valintatapajonoOid);
-        return Futures.immediateFuture(Arrays.asList(valintatulos));
+        return Futures.immediateFuture(Collections.singletonList(new Valintatulos(valintatapajonoOid, hakemusOid, hakukohdeOid, hakijaOid, hakuOid, 1)));
     }
 
     @Override
