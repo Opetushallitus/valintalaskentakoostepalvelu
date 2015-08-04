@@ -10,6 +10,7 @@ import rx.Observable;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +46,11 @@ public class OrganisaatioAsyncResourceImpl extends HttpResource implements Organ
     }
 
     @Override
-    public Observable<HakutoimistoDTO> haeHakutoimisto(String organisaatioId) {
-        return getAsObservable("/organisaatio/v2/" + organisaatioId + "/hakutoimisto", HakutoimistoDTO.class);
+    public Observable<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
+        return getAsObservable("/organisaatio/v2/" + organisaatioId + "/hakutoimisto", HakutoimistoDTO.class)
+                        .map(m -> Optional.ofNullable((HakutoimistoDTO)m))
+                        .onErrorResumeNext(Observable.create(subscriber -> {
+                            subscriber.onNext(Optional.<HakutoimistoDTO>empty());
+                        }));
     }
 }

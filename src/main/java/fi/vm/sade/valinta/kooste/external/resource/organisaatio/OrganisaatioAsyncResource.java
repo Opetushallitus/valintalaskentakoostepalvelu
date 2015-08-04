@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.organisaatio;
 
+import java.util.Optional;
 import java.util.concurrent.Future;
 
 import javax.ws.rs.core.Response;
@@ -20,6 +21,6 @@ public interface OrganisaatioAsyncResource {
      */
     Future<String> haeOrganisaationOidKetju(String organisaatioOid);
 
-    Observable<HakutoimistoDTO> haeHakutoimisto(String organisaatioId);
+    Observable<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId);
 
 }

@@ -79,7 +79,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
         Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByOids(hakemusOids);
         Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkallisetHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
-        Observable<HakutoimistoDTO> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
+        Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
         final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
 
         zip(
@@ -97,7 +97,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                            ImmutableMap.of(organisaatioOid, Hakijapalvelu.osoite(hakutoimisto, kohdeHakukohde.getHakukohteenKieli())),
+                            ImmutableMap.of(organisaatioOid, hakutoimisto.map(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli())).orElse(Optional.empty())),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHyvaksytyt, hakemukset,
                             hyvaksymiskirjeDTO.getHakuOid(),
@@ -177,7 +177,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         String organisaatioOid = hyvaksymiskirjeDTO.getTarjoajaOid();
         Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkallisetHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
-        Observable<HakutoimistoDTO> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
+        Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
         final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
         zip(
                 hakemuksetObservable,
@@ -192,7 +192,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hyvaksymiskirjeDTO.getHakukohdeOid());
                     final boolean iPosti = false;
                     return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
-                            ImmutableMap.of(organisaatioOid,Hakijapalvelu.osoite(hakutoimisto, kohdeHakukohde.getHakukohteenKieli())),
+                            ImmutableMap.of(organisaatioOid,hakutoimisto.map(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli())).orElse(Optional.empty())),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             kohdeHakukohteessaHyvaksytyt, hakemukset,
                             hyvaksymiskirjeDTO.getHakuOid(),
