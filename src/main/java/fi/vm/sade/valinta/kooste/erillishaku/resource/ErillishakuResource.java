@@ -103,7 +103,11 @@ public class ErillishakuResource {
         IOUtils.closeQuietly(file);
         ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-        tuontiService.tuoExcelistä(prosessi, new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi), new ByteArrayInputStream(b.toByteArray()));
+        tuontiService.tuoExcelistä(
+                prosessi,
+                new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid, Optional.ofNullable(trimToNull(valintatapajonoOid)).orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid)), valintatapajononNimi),
+                new ByteArrayInputStream(b.toByteArray())
+        );
         return prosessi.toProsessiId();
     }
 
