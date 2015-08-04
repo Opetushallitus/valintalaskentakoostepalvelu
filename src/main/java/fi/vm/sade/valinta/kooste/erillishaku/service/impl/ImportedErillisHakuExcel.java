@@ -25,7 +25,7 @@ public class ImportedErillisHakuExcel {
     public final List<ErillishakuRivi> rivit;
     public final Map<String, ErillishakuRivi> hetuToRivi;
 
-    public ImportedErillisHakuExcel(Hakutyyppi hakutyyppi, List<ErillishakuRivi> erillishakuRivi) {
+    public ImportedErillisHakuExcel(List<ErillishakuRivi> erillishakuRivi) {
         hetuToRivi = Maps.newHashMap();
         henkiloPrototyypit = Lists.newArrayList();
         this.rivit = erillishakuRivi;
@@ -41,7 +41,7 @@ public class ImportedErillisHakuExcel {
 
     }
     public ImportedErillisHakuExcel(Hakutyyppi hakutyyppi, InputStream inputStream) {
-        this(hakutyyppi,createExcel(hakutyyppi, inputStream));
+        this(createExcel(hakutyyppi, inputStream));
     }
 
     private static List<ErillishakuRivi> createExcel(Hakutyyppi hakutyyppi, InputStream inputStream) {

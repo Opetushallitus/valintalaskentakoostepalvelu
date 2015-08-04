@@ -76,7 +76,7 @@ public class ErillishaunTuontiService {
     }
 
     public void tuoJson(KirjeProsessi prosessi, ErillishakuDTO erillishaku, List<ErillishakuRivi> erillishakuRivit) {
-        tuoData(prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(erillishaku.getHakutyyppi(), erillishakuRivit));
+        tuoData(prosessi, erillishaku, (haku) -> new ImportedErillisHakuExcel(erillishakuRivit));
     }
 
     private void tuoData(KirjeProsessi prosessi, ErillishakuDTO erillishaku, Function<ErillishakuDTO, ImportedErillisHakuExcel> importer) {
