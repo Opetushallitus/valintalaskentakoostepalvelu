@@ -47,9 +47,11 @@ public class ImportedErillisHakuExcel {
     private static List<ErillishakuRivi> createExcel(Hakutyyppi hakutyyppi, InputStream inputStream) {
         try {
             final List<ErillishakuRivi> rivit = Lists.newArrayList();
-            new ErillishakuExcel(hakutyyppi, rivi -> rivit.add(rivi)).getExcel().tuoXlsx(inputStream);
+            new ErillishakuExcel(hakutyyppi, rivi -> rivit.add(rivi.withAidinkieli(resolveAidinkieli(rivi.getAidinkieli()))))
+                    .getExcel()
+                    .tuoXlsx(inputStream);
             return rivit;
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             LOG.error("Excelin muodostus epaonnistui!", t);
             throw new RuntimeException(t);
         }
@@ -57,7 +59,7 @@ public class ImportedErillisHakuExcel {
 
     private HenkiloCreateDTO convert(final ErillishakuRivi rivi) {
         return new HenkiloCreateDTO(
-                rivi.getAidinkieli(),
+                resolveAidinkieli(rivi.getAidinkieli()),
                 rivi.getSyntymaAika(),
                 rivi.getEtunimi(),
                 rivi.getSukunimi(),
@@ -75,5 +77,13 @@ public class ImportedErillisHakuExcel {
             LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", rivi.getSyntymaAika());
             return null;
         }
+    }
+
+    private static String resolveAidinkieli(String aidinkieli) {
+        return isFloatingPointNumber(aidinkieli) ? aidinkieli.substring(0, aidinkieli.indexOf(".")) : aidinkieli;
+    }
+
+    private static boolean isFloatingPointNumber(String str) {
+        return str.matches("\\d+\\.\\d+");
     }
 }

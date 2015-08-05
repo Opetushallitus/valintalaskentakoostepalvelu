@@ -167,6 +167,17 @@ public class ErillishaunTuontiServiceTest {
         }
     }
 
+    public final static class TuntemattomallaAidinkielella extends ErillisHakuTuontiTestCase {
+        @Test
+        public void poistetaaanKielikoodistaDesimaalit() {
+            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
+            tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuTuntemattomallaKielella());
+            Mockito.verify(prosessi).valmistui("ok");
+            applicationAsyncResource.results.get(0);
+            assertEquals(1, applicationAsyncResource.results.size());
+        }
+    }
+
 
     public final static class HakijaOidilla extends ErillisHakuTuontiTestCase {
         @Test

@@ -163,6 +163,10 @@ public class ErillishakuRivi {
                 .append(julkaistaankoTiedot).toString();
     }
 
+    public ErillishakuRivi withAidinkieli(String aidinkieli) {
+        return new ErillishakuRivi(hakemusOid, sukunimi, etunimi, henkilotunnus, sahkoposti, syntymaAika, sukupuoli, personOid, aidinkieli, hakemuksenTila, vastaanottoTila, ilmoittautumisTila, julkaistaankoTiedot, poistetaankoRivi);
+    }
+
     public HenkiloCreateDTO toHenkiloCreateDTO() {
         return new HenkiloCreateDTO(getAidinkieli(), getSukupuoli().toString(), getEtunimi(), getSukunimi(), getHenkilotunnus(), parseSyntymaAika(), getPersonOid(), HenkiloTyyppi.OPPIJA);
     }

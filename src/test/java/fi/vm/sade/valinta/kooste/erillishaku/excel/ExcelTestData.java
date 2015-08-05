@@ -24,6 +24,10 @@ public class ExcelTestData {
         return getInputStream("erillishaku_syntymaajalla.xlsx");
     }
 
+    public static InputStream erillisHakuTuntemattomallaKielella() {
+        return getInputStream("erillishaku_tuntemattomalla_aidinkielella.xlsx");
+    }
+
     private static InputStream getInputStream(final String filename) {
         try {
             return new ClassPathResource(filename).getInputStream();
