@@ -76,6 +76,19 @@ public class Integraatiopalvelimet {
 
                 );
     }
+    public static void mockToNotFound(String method, String p) {
+        mockServer
+                .when(
+                        request()
+                                .withMethod(method)
+                                .withPath(p)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+
+                );
+    }
     public static void mockToReturnJson(String method, String p, Object r) {
         String s;
         mockToReturnValue(method, p, s = HttpResource.GSON.toJson(r));
@@ -92,6 +105,10 @@ public class Integraatiopalvelimet {
 
         public String getHost() {
             return super.host;
+        }
+
+        public String getUrl() {
+            return new StringBuilder("http://").append(super.host).append(":").append(port).toString();
         }
     }
 }

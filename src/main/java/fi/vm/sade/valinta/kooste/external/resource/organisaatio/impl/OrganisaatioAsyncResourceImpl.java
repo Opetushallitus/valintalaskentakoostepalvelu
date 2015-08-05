@@ -48,9 +48,7 @@ public class OrganisaatioAsyncResourceImpl extends HttpResource implements Organ
     @Override
     public Observable<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
         return getAsObservable("/organisaatio/v2/" + organisaatioId + "/hakutoimisto", HakutoimistoDTO.class)
-                        .map(m -> Optional.ofNullable((HakutoimistoDTO)m))
-                        .onErrorResumeNext(Observable.create(subscriber -> {
-                            subscriber.onNext(Optional.<HakutoimistoDTO>empty());
-                        }));
+                .map(m -> Optional.ofNullable((HakutoimistoDTO) m))
+                .onErrorResumeNext(Observable.create(subscriber -> subscriber.onNext(Optional.<HakutoimistoDTO>empty())));
     }
 }
