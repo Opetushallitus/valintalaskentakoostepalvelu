@@ -10,15 +10,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.stream.Collectors;
+import java.io.InputStream;
 
-import static org.hamcrest.CoreMatchers.*;
-
-import com.codepoetics.protonpack.StreamUtils;
 import com.google.common.util.concurrent.Futures;
-import com.google.gson.GsonBuilder;
-import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
@@ -53,9 +47,7 @@ public class ErillishaunTuontiServiceTest {
     public final static class Autotaytto extends ErillisHakuTuontiTestCase {
         @Test
         public void tuodaanHylattyjaJaPeruutettujaJaVarallaOleviaPuutteellisinTiedoinAutosyotonTestaamiseksi() {
-            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
-            tuontiService.tuoExcelistä(prosessi, erillisHaku, puutteellisiaTietojaAutotayttoaVarten());
-            Mockito.verify(prosessi).valmistui("ok");
+            importData(puutteellisiaTietojaAutotayttoaVarten());
 
             // tarkistetaan tilatulokset
             assertEquals(1, tilaAsyncResource.results.size());
@@ -72,9 +64,7 @@ public class ErillishaunTuontiServiceTest {
     public final static class KorkeaKouluHaku extends ErillisHakuTuontiTestCase {
         @Test
         public void tuodaanToisenAsteenValintatilojaKorkeaKoulunHakuun() {
-            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
-            tuontiService.tuoExcelistä(prosessi, erillisHaku, kkHakuToisenAsteenValintatuloksella());
-            Mockito.verify(prosessi).valmistui("ok");
+            importData(kkHakuToisenAsteenValintatuloksella());
 
             // tarkistetaan henkilöt
             assertEquals(1, henkiloAsyncResource.henkiloPrototyypit.size());
@@ -98,9 +88,7 @@ public class ErillishaunTuontiServiceTest {
     public final static class HetullaJaSyntymaAjalla extends ErillisHakuTuontiTestCase {
         @Test
         public void tuontiSuoritetaan() throws IOException, InterruptedException {
-            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
-            tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
-            Mockito.verify(prosessi).valmistui("ok");
+            importData(erillisHakuHetullaJaSyntymaAjalla());
 
             // tarkistetaan henkilöt
             assertEquals(1, henkiloAsyncResource.henkiloPrototyypit.size());
@@ -148,9 +136,7 @@ public class ErillishaunTuontiServiceTest {
     public final static class SyntymaAjalla extends ErillisHakuTuontiTestCase {
         @Test
         public void tuodaan() {
-            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
-            tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuSyntymaAjalla());
-            Mockito.verify(prosessi).valmistui("ok");
+            importData(erillisHakuSyntymaAjalla());
 
             assertEquals(1, applicationAsyncResource.results.size());
             applicationAsyncResource.results.get(0);
@@ -170,21 +156,17 @@ public class ErillishaunTuontiServiceTest {
     public final static class TuntemattomallaAidinkielella extends ErillisHakuTuontiTestCase {
         @Test
         public void poistetaaanKielikoodistaDesimaalit() {
-            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
-            tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuTuntemattomallaKielella());
-            Mockito.verify(prosessi).valmistui("ok");
+            importData(erillisHakuTuntemattomallaKielella());
             applicationAsyncResource.results.get(0);
             assertEquals(1, applicationAsyncResource.results.size());
         }
-    }
 
+    }
 
     public final static class HakijaOidilla extends ErillisHakuTuontiTestCase {
         @Test
         public void tuodaan() {
-            final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
-            tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHenkiloOidilla());
-            Mockito.verify(prosessi).valmistui("ok");
+            importData(erillisHakuHenkiloOidilla());
         }
     }
 
@@ -235,4 +217,10 @@ class ErillisHakuTuontiTestCase {
     final MockTilaAsyncResource tilaAsyncResource = new MockTilaAsyncResource();
     final KirjeProsessi prosessi = Mockito.mock(KirjeProsessi.class);
     final ErillishakuDTO erillisHaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "haku1", "kohde1", "tarjoaja1", "jono1", "varsinainen jono");
+
+    protected void importData(InputStream data) {
+        final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
+        tuontiService.tuoExcelistä(prosessi, erillisHaku, data);
+        Mockito.verify(prosessi).valmistui("ok");
+    }
 }
