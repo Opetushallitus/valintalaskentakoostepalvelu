@@ -48,8 +48,6 @@ public class ErillishaunTuontiServiceTest {
         @Test
         public void tuodaanHylattyjaJaPeruutettujaJaVarallaOleviaPuutteellisinTiedoinAutosyotonTestaamiseksi() {
             importData(puutteellisiaTietojaAutotayttoaVarten());
-
-            // tarkistetaan tilatulokset
             assertEquals(1, tilaAsyncResource.results.size());
             assertEquals(5, tilaAsyncResource.results.stream()
                     .flatMap(r -> r.erillishaunHakijat.stream()).count());
@@ -66,13 +64,8 @@ public class ErillishaunTuontiServiceTest {
         public void tuodaanToisenAsteenValintatilojaKorkeaKoulunHakuun() {
             importData(kkHakuToisenAsteenValintatuloksella());
 
-            // tarkistetaan henkilöt
             assertEquals(1, henkiloAsyncResource.henkiloPrototyypit.size());
-
-            // tarkistetaan hakemukset
             assertEquals(1, applicationAsyncResource.results.size());
-
-            // tarkistetaan tilatulokset
             assertEquals(1, tilaAsyncResource.results.size());
             final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
             assertEquals(MockData.hakuOid, tilaResult.hakuOid);
@@ -90,7 +83,6 @@ public class ErillishaunTuontiServiceTest {
         public void tuontiSuoritetaan() throws IOException, InterruptedException {
             importData(erillisHakuHetullaJaSyntymaAjalla());
 
-            // tarkistetaan henkilöt
             assertEquals(1, henkiloAsyncResource.henkiloPrototyypit.size());
             final HenkiloCreateDTO henkilo = henkiloAsyncResource.henkiloPrototyypit.get(0);
             assertEquals("Tuomas", henkilo.etunimet);
@@ -100,7 +92,6 @@ public class ErillishaunTuontiServiceTest {
             assertNotNull(henkilo.syntymaaika);
             assertEquals(HenkiloTyyppi.OPPIJA, henkilo.henkiloTyyppi);
 
-            // tarkistetaan hakemukset
             assertEquals(1, applicationAsyncResource.results.size());
             applicationAsyncResource.results.get(0);
             final MockApplicationAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
@@ -115,7 +106,6 @@ public class ErillishaunTuontiServiceTest {
             assertEquals("Hakkarainen", hakemusProto.sukunimi);
             assertEquals("01.01.1901", hakemusProto.syntymaAika);
 
-            // tarkistetaan tilatulokset
             assertEquals(1, tilaAsyncResource.results.size());
             final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
             assertEquals(MockData.hakuOid, tilaResult.hakuOid);
@@ -205,10 +195,6 @@ public class ErillishaunTuontiServiceTest {
             assertTrue(prosessi.isKeskeytetty());
         }
     }
-
-
-    // TODO: testaa 1) pelkkä hetu 2) pelkkä hakija-oid 3) pelkkä syntymäpäivä 4) hetu+synt.päivä
-    // ehkä ilman varsinaista excel-parsintaa. ehkä json-interfacesta? ks. jussin testi
 }
 
 class ErillisHakuTuontiTestCase {
