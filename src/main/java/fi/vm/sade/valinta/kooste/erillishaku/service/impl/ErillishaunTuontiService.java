@@ -103,27 +103,28 @@ public class ErillishaunTuontiService {
         }
 
         Collection<ErillishaunDataException.PoikkeusRivi> poikkeusRivis = Lists.newArrayList();
-        zipWithIndex(rivit.stream()
-                .map(rivi -> {
+        zipWithIndex(
+                rivit.stream().map(rivi -> {
                     // AUTOTAYTTO VA
                     rivi.getHakemuksenTila();
                     return rivi;
-                })).forEach(riviJaIndeksi -> {
-            int indeksi = ((int) riviJaIndeksi.getIndex()) + 1;
-            ErillishakuRivi rivi = riviJaIndeksi.getValue();
+                }))
+                .forEach(riviJaIndeksi -> {
+                    int indeksi = ((int) riviJaIndeksi.getIndex()) + 1;
+                    ErillishakuRivi rivi = riviJaIndeksi.getValue();
 
-            if (!rivi.isPoistetaankoRivi()) {
-                String validointiVirhe = validoi(haku.getHakutyyppi(), rivi);
-                if (validointiVirhe != null) {
-                    poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, validointiVirhe));
-                }
-            } else {
-                // validoi poistettavaksi merkitty rivi
-                if (rivi.getHakemusOid() == null) {
-                    poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, "Poistettavaksi merkatulla riville ei löytynyt hakemuksen tunnistetta"));
-                }
-            }
-        });
+                    if (!rivi.isPoistetaankoRivi()) {
+                        String validointiVirhe = validoi(haku.getHakutyyppi(), rivi);
+                        if (validointiVirhe != null) {
+                            poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, validointiVirhe));
+                        }
+                    } else {
+                        // validoi poistettavaksi merkitty rivi
+                        if (rivi.getHakemusOid() == null) {
+                            poikkeusRivis.add(new ErillishaunDataException.PoikkeusRivi(indeksi, "Poistettavaksi merkatulla riville ei löytynyt hakemuksen tunnistetta"));
+                        }
+                    }
+                });
         if(!poikkeusRivis.isEmpty()) {
             prosessi.keskeyta(Poikkeus.koostepalvelupoikkeus(ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO,
                     poikkeusRivis.stream().map(p -> new Tunniste("Rivi " + p.getIndeksi() + ": " + p.getSelite(),ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN)).collect(Collectors.toList())));
@@ -175,8 +176,11 @@ public class ErillishaunTuontiService {
             LOG.info("Haetaan/luodaan henkilöt");
             final List<Henkilo> henkilot;
             try {
-                henkilot = henkiloAsyncResource.haeTaiLuoHenkilot(lisattavatTaiKeskeneraiset.stream()
-                        .map(rivi -> rivi.toHenkiloCreateDTO()).collect(Collectors.toList())).get();
+                henkilot = henkiloAsyncResource.haeTaiLuoHenkilot(
+                        lisattavatTaiKeskeneraiset.stream()
+                                .map(rivi -> rivi.toHenkiloCreateDTO())
+                                .collect(Collectors.toList()))
+                        .get();
                 LOG.info("Luotiin henkilot=" + henkilot.stream().map(h -> h.getOidHenkilo()).collect(Collectors.toList()));
             } catch (Exception e) {
                 LOG.error(POIKKEUS_HENKILOPALVELUN_VIRHE, e);

@@ -40,6 +40,7 @@ public class ImportedErillisHakuExcel {
         }
 
     }
+
     public ImportedErillisHakuExcel(Hakutyyppi hakutyyppi, InputStream inputStream) {
         this(createExcel(hakutyyppi, inputStream));
     }

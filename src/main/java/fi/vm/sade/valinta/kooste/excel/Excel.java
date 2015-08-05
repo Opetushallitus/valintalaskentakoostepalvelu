@@ -44,8 +44,7 @@ public class Excel {
         this.sarakkeetVaaka = new int[]{};
     }
 
-    public Excel(String nimi, Collection<Rivi> rivit, int[] sarakkeetPysty,
-                 int[] sarakkeetVaaka) {
+    public Excel(String nimi, Collection<Rivi> rivit, int[] sarakkeetPysty, int[] sarakkeetVaaka) {
         this.rivit = rivit;
         this.nimi = nimi;
         this.sarakkeetPysty = sarakkeetPysty;
