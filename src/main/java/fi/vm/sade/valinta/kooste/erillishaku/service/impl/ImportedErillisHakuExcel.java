@@ -35,7 +35,7 @@ public class ImportedErillisHakuExcel {
                 henkiloPrototyypit.add(convert(rivi));
             });
         } catch (Exception e) {
-            LOG.error("Erillishaunrivien muodostus epaonnistui! {}", e);
+            LOG.error("Erillishaunrivien muodostus epaonnistui!", e);
             throw e;
         }
 
@@ -50,7 +50,7 @@ public class ImportedErillisHakuExcel {
             new ErillishakuExcel(hakutyyppi, rivi -> rivit.add(rivi)).getExcel().tuoXlsx(inputStream);
             return rivit;
         } catch(Throwable t) {
-            LOG.error("Excelin muodostus epaonnistui! {}", t);
+            LOG.error("Excelin muodostus epaonnistui!", t);
             throw new RuntimeException(t);
         }
     }
@@ -59,7 +59,13 @@ public class ImportedErillisHakuExcel {
         return new HenkiloCreateDTO(
                 rivi.getAidinkieli(),
                 rivi.getSyntymaAika(),
-                rivi.getEtunimi(), rivi.getSukunimi(), rivi.getHenkilotunnus(), parseSyntymaAika(rivi), rivi.getPersonOid(), HenkiloTyyppi.OPPIJA);
+                rivi.getEtunimi(),
+                rivi.getSukunimi(),
+                rivi.getHenkilotunnus(),
+                parseSyntymaAika(rivi),
+                rivi.getPersonOid(),
+                HenkiloTyyppi.OPPIJA
+        );
     }
 
     private static Date parseSyntymaAika(ErillishakuRivi rivi) {
