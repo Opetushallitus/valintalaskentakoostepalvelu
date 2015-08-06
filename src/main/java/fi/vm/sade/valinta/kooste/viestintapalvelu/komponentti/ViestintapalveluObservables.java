@@ -129,7 +129,7 @@ public class ViestintapalveluObservables {
         MetaHakukohde kohdeHakukohde = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
         return hakutoimistoFn.apply(kohdeHakukohde.getTarjoajaOid())
                 .map(hakutoimistoDTO -> ImmutableMap.of(tarjoajaOid,
-                        hakutoimistoDTO.map(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli())).orElse(Optional.<Osoite>empty())));
+                            hakutoimistoDTO.map(h -> Hakijapalvelu.osoite(h, kohdeHakukohde.getHakukohteenKieli())).orElse(Optional.<Osoite>empty())));
     }
 
     public static Observable<LetterBatch> kirjeet(String hakuOid, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat,

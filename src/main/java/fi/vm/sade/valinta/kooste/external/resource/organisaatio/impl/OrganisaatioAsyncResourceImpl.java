@@ -47,8 +47,12 @@ public class OrganisaatioAsyncResourceImpl extends HttpResource implements Organ
 
     @Override
     public Observable<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
-        return getAsObservable("/organisaatio/v2/" + organisaatioId + "/hakutoimisto", HakutoimistoDTO.class)
-                .map(m -> Optional.ofNullable((HakutoimistoDTO) m))
-                .onErrorResumeNext(Observable.create(subscriber -> subscriber.onNext(Optional.<HakutoimistoDTO>empty())));
+        return this.<HakutoimistoDTO>getAsObservable("/organisaatio/v2/" + organisaatioId + "/hakutoimisto", HakutoimistoDTO.class)
+                .onErrorReturn(
+                        exception -> {
+                            LOG.error("Unable to fetch hakutoimisto for organisaatioId={}",organisaatioId);
+                            return null;
+                        })
+                .map(m -> Optional.ofNullable(m));
     }
 }

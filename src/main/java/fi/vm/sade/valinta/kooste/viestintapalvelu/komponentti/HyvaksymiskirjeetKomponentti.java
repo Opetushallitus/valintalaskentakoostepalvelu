@@ -161,8 +161,11 @@ public class HyvaksymiskirjeetKomponentti {
             replacements.put("tulokset", tulosList);
             replacements.put("koulu", koulu.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(hakukohdeOid)));
             Optional<Osoite> hakijapalveluidenOsoite = hakukohdeJaHakijapalveluidenOsoite.get(tarjoajaOid);
-            hakijapalveluidenOsoite.ifPresent(h -> replacements.put("hakijapalveluidenOsoite", h));
-
+            if(hakijapalveluidenOsoite != null) {
+                hakijapalveluidenOsoite.ifPresent(h -> replacements.put("hakijapalveluidenOsoite", h));
+            } else {
+                LOG.error("Hakijalle (hakemusOid={},hakijaOid={}) hakutoiveessa={} ei saatu hakijapalveluiden osoitetta tarjoajalle {}", hakija.getHakemusOid(), hakija.getHakijaOid(), hakukohdeOid, tarjoajaOid);
+            }
             replacements.put("henkilotunnus", new HakemusWrapper(hakemus).getHenkilotunnus());
             replacements.put("koulutus", koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
             replacements.put("hakemusOid", hakemus.getOid());

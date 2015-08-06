@@ -122,17 +122,6 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
                 .get(new GenericType<HakijaPaginationObject>() {});
     }
 
-    @Override
-    public Future<HakijaPaginationObject> getKoulutuspaikkallisetHakijat(String hakuOid, String hakukohdeOid) {
-        String url = "/sijoittelu/" + hakuOid + "/hyvaksytyt/hakukohde/" + hakukohdeOid;
-        LOG.info("Asynkroninen kutsu: {}{}", address, url);
-        return getWebClient()
-                .path(url)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .get(new GenericType<HakijaPaginationObject>() {});
-    }
-
     public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid) {
         String url = "/sijoittelu/" + hakuOid + "/hyvaksytyt/";
         return getAsObservable(

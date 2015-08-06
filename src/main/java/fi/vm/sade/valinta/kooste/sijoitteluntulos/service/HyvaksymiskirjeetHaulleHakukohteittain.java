@@ -156,8 +156,19 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
             LOG.info("##### Saatiin hakemukset hakukohteelle {}", hakukohdeOid);
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
 
-            Observable<Map<String, Optional<Osoite>>> osoitteet = ViestintapalveluObservables.hakukohteenOsoite(hakukohdeOid, tarjoajaOid, hyvaksymiskirjeessaKaytetytHakukohteet, organisaatioAsyncResource::haeHakutoimisto);
-            Observable<LetterBatch> kirjeet = ViestintapalveluObservables.kirjeet(hakuOid, asiointikieli, hyvaksytytHakijat, hakemukset, defaultValue, hyvaksymiskirjeessaKaytetytHakukohteet, osoitteet, hyvaksymiskirjeetKomponentti);
+            Observable<LetterBatch> kirjeet = ViestintapalveluObservables.kirjeet(
+                    hakuOid,
+                    asiointikieli,
+                    hyvaksytytHakijat,
+                    hakemukset,
+                    defaultValue,
+                    hyvaksymiskirjeessaKaytetytHakukohteet,
+                    ViestintapalveluObservables.hakukohteenOsoite(
+                            hakukohdeOid,
+                            tarjoajaOid,
+                            hyvaksymiskirjeessaKaytetytHakukohteet,
+                            organisaatioAsyncResource::haeHakutoimisto),
+                    hyvaksymiskirjeetKomponentti);
 
             return ViestintapalveluObservables.batchId(
                     kirjeet,

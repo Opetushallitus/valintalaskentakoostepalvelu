@@ -78,13 +78,13 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         String organisaatioOid = hyvaksymiskirjeDTO.getTarjoajaOid();
 
         Future<List<Hakemus>> hakemuksetFuture = applicationAsyncResource.getApplicationsByOids(hakemusOids);
-        Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkallisetHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+        Observable<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkalliset(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
         final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
 
         zip(
                 from(hakemuksetFuture),
-                from(hakijatFuture),
+                hakijatFuture,
                 hakutoimistoObservable,
                 (hakemukset, hakijat, hakutoimisto) -> {
                     LOG.info("Tehdaan valituille hakijoille hyvaksytyt filtterointi.");
@@ -176,15 +176,15 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     public void hyvaksymiskirjeetHakukohteelle(KirjeProsessi prosessi, final HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
         String organisaatioOid = hyvaksymiskirjeDTO.getTarjoajaOid();
         Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOid(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
-        Future<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkallisetHakijat(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
+        Observable<HakijaPaginationObject> hakijatFuture = sijoitteluAsyncResource.getKoulutuspaikkalliset(hyvaksymiskirjeDTO.getHakuOid(), hyvaksymiskirjeDTO.getHakukohdeOid());
         Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = organisaatioAsyncResource.haeHakutoimisto(organisaatioOid);
         final String hakukohdeOid = hyvaksymiskirjeDTO.getHakukohdeOid();
         zip(
                 hakemuksetObservable,
-                from(hakijatFuture),
+                hakijatFuture,
                 hakutoimistoObservable,
                 (hakemukset, hakijat, hakutoimisto) -> {
-                    LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi.");
+                    LOG.info("Tehdaan hakukohteeseen valituille hyvaksytyt filtterointi. {}", hakutoimisto);
                     Collection<HakijaDTO> kohdeHakukohteessaHyvaksytyt = hakijat.getResults().stream()
                             .filter(new SijoittelussaHyvaksyttyHakija(hakukohdeOid))
                             .collect(Collectors.toList());
