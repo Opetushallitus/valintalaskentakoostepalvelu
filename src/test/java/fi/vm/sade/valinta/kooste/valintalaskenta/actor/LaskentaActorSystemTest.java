@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
-import akka.actor.ActorRef;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
@@ -9,7 +8,6 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.Suoritusrek
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import org.junit.After;
@@ -19,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -77,13 +74,11 @@ public class LaskentaActorSystemTest {
             LOG.info("Count {}", count);
             return null;
         }).when(seurantaAsyncResource).otaSeuraavaLaskentaTyonAlle(any(), any());
-        doAnswer(invocation -> {
-                    return create(((LaskentaActorParams) invocation.getArguments()[2]).getUuid(), laskentaActorSystem);
-                }
+        doAnswer(invocation -> create(((LaskentaActorParams) invocation.getArguments()[2]).getUuid(), laskentaActorSystem)
         ).when(laskentaActorFactory).createLaskentaActor(any(), any(), any());
         doAnswer(invocation -> {
             String uuid = (String) invocation.getArguments()[1];
-            LaskentaStartParams laskentaStartParams = new LaskentaStartParams(uuid, HAKUOID, false, 0, false, new ArrayList<HakukohdeJaOrganisaatio>(), LaskentaTyyppi.HAKUKOHDE);
+            LaskentaStartParams laskentaStartParams = new LaskentaStartParams(uuid, HAKUOID, false, 0, false, new ArrayList<>(), LaskentaTyyppi.HAKUKOHDE);
             ((BiConsumer<HakuV1RDTO, LaskentaActorParams>) invocation.getArguments()[2]).accept(new HakuV1RDTO(), new LaskentaActorParams(laskentaStartParams, null));
             return null;
         }).when(LaskentaStarter).fetchLaskentaParams(any(), any(), any());
@@ -114,9 +109,6 @@ public class LaskentaActorSystemTest {
                 new LaskentaStartParams(UUID, HAKUOID, false, null, false, null, null),
                 create(UUID, laskentaActorSystem)
         );
-
-        LOG.info("Ajossa olevat laskennat nyt {}", laskentaActorSystem.runningLaskentas());
-        laskentaActorSystem.ready(UUID);
     }
 
     private LaskentaActor create(final String laskentaUuid, final LaskentaSupervisor supervisor) {
@@ -128,9 +120,7 @@ public class LaskentaActorSystemTest {
             public void postStop() {
             }
 
-            private Thread t;
             private volatile boolean valmis = false;
-            private AtomicReference<ActorRef> refinery = new AtomicReference<>();
             private LaskentaSupervisor laskentaSupervisor = supervisor;
 
             public void start() {
@@ -139,17 +129,11 @@ public class LaskentaActorSystemTest {
                     if (0 == c.decrementAndGet()) {
                         valmis = true;
                         LOG.error("Actor: Valmis!");
-                        LOG.error("Actor: Self! {}", refinery.get());
                         laskentaSupervisor.ready(getUuid());
-
-                        try {
-                            t.stop();
-                        } catch (Exception ignored) {
-                        }
                     }
                 };
-                t = new Thread(() -> {
-                    while (true) {
+                new Thread(() -> {
+                    while (!valmis) {
                         try {
                             Thread.sleep(50L);
                         } catch (InterruptedException ignored) {
@@ -157,8 +141,7 @@ public class LaskentaActorSystemTest {
                         LOG.error("Thread: kutsutaan Actoria!");
                         takaisinkutsu.accept(null);
                     }
-                });
-                t.start();
+                }).start();
             }
 
             public void lopeta() {
