@@ -77,14 +77,16 @@ public class PistesyottoResource {
             List<String> tags = Arrays.asList();
             dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
                     "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray()), response -> {
-                        LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.", SecurityContextHolder.getContext().getAuthentication().getName(), hakuOid, hakukohdeOid, uuid);
+                        LOG.info("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.", SecurityContextHolder.getContext().getAuthentication().getName(), hakuOid, hakukohdeOid, uuid);
                     }, poikkeus -> {
                         LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Exceliä ei voitu tallentaa dokumenttipalveluun.",
                                 Optional.ofNullable((Principal)SecurityContextHolder.getContext().getAuthentication()).orElse(
                                 () -> "Kirjautumaton käyttäjä"
                         ).getName(), hakuOid, hakukohdeOid);
+                        LOG.error("Virheen tiedot", poikkeus);
                     });
         } catch (Throwable t) {
+            LOG.error("Tuntematon virhetilanne", t);
         }
         DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, Arrays.asList(hakukohdeOid));
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
