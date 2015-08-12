@@ -77,13 +77,15 @@ public class PistesyottoResource {
             List<String> tags = Arrays.asList();
             dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
                     "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray()), response -> {
-                        LOG.info("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.", SecurityContextHolder.getContext().getAuthentication().getName(), hakuOid, hakukohdeOid, uuid);
+                        LOG.info("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.",
+                                SecurityContextHolder.getContext().getAuthentication().getName(),
+                                hakuOid, hakukohdeOid, uuid);
                     }, poikkeus -> {
-                        LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Exceliä ei voitu tallentaa dokumenttipalveluun.",
-                                Optional.ofNullable((Principal)SecurityContextHolder.getContext().getAuthentication()).orElse(
-                                () -> "Kirjautumaton käyttäjä"
-                        ).getName(), hakuOid, hakukohdeOid);
-                        LOG.error("Virheen tiedot", poikkeus);
+                        LOG.error(
+                                String.format("Käyttäjä %s aloitti pistesyötön tuonnin haussa %s ja hakukohteelle %s. Exceliä ei voitu tallentaa dokumenttipalveluun.",
+                                        Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication()).map(Principal::getName).orElse("Kirjautumaton käyttäjä"),
+                                        hakuOid, hakukohdeOid),
+                                poikkeus);
                     });
         } catch (Throwable t) {
             LOG.error("Tuntematon virhetilanne", t);
