@@ -19,6 +19,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.config.FilterFactory;
 import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.tarjonta.service.resources.v1.HakukohdeV1Resource;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.HakukohdeHelper;
@@ -98,6 +99,7 @@ public class ValintatapajonoResource {
                        @QueryParam("valintatapajonoOid") String valintatapajonoOid,
                        InputStream file,
                        @Suspended AsyncResponse asyncResponse) throws Exception {
+        final String username = KoosteAudit.username();
         asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
@@ -106,7 +108,7 @@ public class ValintatapajonoResource {
         try {
             IOUtils.copy(file, bytes = new ByteArrayOutputStream());
             IOUtils.closeQuietly(file);
-            valintatapajonoTuontiService.tuo((valinnanvaiheet, hakemukset) -> {
+            valintatapajonoTuontiService.tuo(username, (valinnanvaiheet, hakemukset) -> {
                 ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
                 try {
                     ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(
@@ -138,11 +140,13 @@ public class ValintatapajonoResource {
                        @QueryParam("valintatapajonoOid") String valintatapajonoOid,
                        ValintatapajonoRivit rivit,
                        @Suspended AsyncResponse asyncResponse) throws Exception {
+        final String username = KoosteAudit.username();
         asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
         asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
         String tarjoajaOid = HakukohdeHelper.tarjoajaOid(from(tarjontaResource.haeHakukohde(hakukohdeOid)).first());
         authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
         valintatapajonoTuontiService.tuo(
+                username,
                 (valinnanvaiheet, hakemukset) -> {
                     return rivit.getRivit();
                 }, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, asyncResponse);

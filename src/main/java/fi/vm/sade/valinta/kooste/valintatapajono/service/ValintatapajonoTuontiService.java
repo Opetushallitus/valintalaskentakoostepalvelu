@@ -17,7 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.GsonBuilder;
-
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static fi.vm.sade.auditlog.LogMessage.builder;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -45,6 +46,7 @@ public class ValintatapajonoTuontiService {
     private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
 
     public void tuo(
+            String username,
             BiFunction<List<ValintatietoValinnanvaiheDTO>, List<Hakemus>, Collection<ValintatapajonoRivi>> riviFunction,
             final String hakuOid,
             final String hakukohdeOid,
@@ -78,7 +80,26 @@ public class ValintatapajonoTuontiService {
                     LOG.info("{}", new GsonBuilder().setPrettyPrinting().create().toJson(valinnanvaihe));
                     valintalaskentaAsyncResource.lisaaTuloksia(hakuOid, hakukohdeOid, tarjoajaOid, valinnanvaihe).subscribe(
                             ok -> {
-                                LOG.error("Tuli ok viesti");
+                                try {
+                                    valinnanvaihe.getValintatapajonot()
+                                            .forEach(
+                                                    v -> {
+                                                        v.getHakija().forEach(h -> {
+                                                            AUDIT.log(builder()
+                                                                    .hakuOid(hakuOid)
+                                                                    .hakemusOid(h.getHakemusOid())
+                                                                    .valinnanvaiheOid(valinnanvaihe.getValinnanvaiheoid())
+                                                                    .hakukohdeOid(hakukohdeOid)
+                                                                    .valintatapajonoOid(v.getOid())
+                                                                    .add("jonosija", new Integer(h.getJonosija()))
+                                                                    .message("Valinnanvaiheen tuonti Excelillä")
+                                                                    .build());
+                                                        });
+                                                    }
+                                            );
+                                } catch (Throwable t) {
+                                    LOG.error("Audit logitus epäonnistui", t);
+                                }
                                 dokumentinSeurantaAsyncResource.paivitaDokumenttiId(dokumenttiIdRef.get(), VALMIS).subscribe(
                                         dontcare -> {
                                             LOG.error("Saatiin paivitettya dokId");
