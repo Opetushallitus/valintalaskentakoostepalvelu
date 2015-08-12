@@ -5,7 +5,11 @@ import com.google.gson.Gson;
 import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.server.MockServer;
+import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
+
+import java.util.concurrent.TimeUnit;
+
 import static javax.ws.rs.HttpMethod.*;
 
 import static org.mockserver.model.HttpRequest.*;
@@ -19,8 +23,10 @@ import static org.mockserver.model.HttpResponse.*;
  */
 public class Integraatiopalvelimet {
 
-    public static ClientAndServerWithHost mockServer =
-            new ClientAndServerWithHost(PortChecker.findFreeLocalPort());
+    public static ClientAndServerWithHost mockServer = new ClientAndServerWithHost(PortChecker.findFreeLocalPort());
+    static {
+        ConfigurationProperties.maxSocketTimeout(TimeUnit.SECONDS.toMillis(5));
+    }
     public static void mockForward(String method, MockServer server) {
         server.getPaths().forEach(
                 p -> {
