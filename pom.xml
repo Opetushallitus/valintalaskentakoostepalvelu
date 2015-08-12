@@ -23,6 +23,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>fi.vm.sade</groupId>
+			<artifactId>auditlogger</artifactId>
+			<version>1.0.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
 			<version>9.2.10.v20150310</version>

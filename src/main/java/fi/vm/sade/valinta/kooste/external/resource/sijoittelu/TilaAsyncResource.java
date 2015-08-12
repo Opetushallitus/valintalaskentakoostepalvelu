@@ -12,7 +12,7 @@ import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import rx.Observable;
 
 public interface TilaAsyncResource {
-    Response tuoErillishaunTilat(String hakuOid, String hakukohdeOid, String valintatapajononNimi, Collection<ErillishaunHakijaDTO> erillishaunHakijat);
+    Observable<Response> tuoErillishaunTilat(String hakuOid, String hakukohdeOid, String valintatapajononNimi, Collection<ErillishaunHakijaDTO> erillishaunHakijat);
 
     void getValintatulokset(String hakuOid, String hakukohdeOid, Consumer<List<Valintatulos>> valintatulokset, Consumer<Throwable> poikkeus);
 

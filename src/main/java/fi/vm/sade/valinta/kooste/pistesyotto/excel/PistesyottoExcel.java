@@ -222,7 +222,7 @@ public class PistesyottoExcel {
                 final boolean syotettavissaKaikille = kaikkiKutsutaanTunnisteet.contains(valintaperuste.getTunniste())
                         || Boolean.TRUE.equals(valintaperuste.getSyotettavissaKaikille());
                 if (syotettavissaKaikille || (mahdollinenOsallistuja && osallistuuValintakokeeseen.test(valintakoe))) {
-                    onkoHakijaOsallistuja.put(hakemusValintakoeYhdiste(hakemusOid,valintakoe.getValintakoeTunniste()),true);
+                    onkoHakijaOsallistuja.put(hakemusValintakoeYhdiste(hakemusOid,valintaperuste.getTunniste()),true);
                     syote = true;
                     if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(valintaperuste.getFunktiotyyppi())) {
                         if (valintaperuste.getArvot() != null && !valintaperuste.getArvot().isEmpty()) {

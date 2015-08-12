@@ -95,6 +95,19 @@ public class Integraatiopalvelimet {
 
                 );
     }
+    public static void mockToAccept(String method, String p) {
+        mockServer
+                .when(
+                        request()
+                                .withMethod(method)
+                                .withPath(p)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+
+                );
+    }
     public static void mockToReturnJson(String method, String p, Object r) {
         String s;
         mockToReturnValue(method, p, s = HttpResource.GSON.toJson(r));

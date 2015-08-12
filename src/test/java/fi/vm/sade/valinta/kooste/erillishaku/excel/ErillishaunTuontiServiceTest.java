@@ -168,7 +168,7 @@ public class ErillishaunTuontiServiceTest {
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, failingHenkiloResource, Schedulers.immediate());
             assertEquals(0, tilaAsyncResource.results.size());
             assertEquals(0, applicationAsyncResource.results.size());
-            tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
+            tuontiService.tuoExcelistä(null, prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
             Mockito.verify(prosessi).keskeyta();
         }
 
@@ -179,7 +179,7 @@ public class ErillishaunTuontiServiceTest {
             final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(failingResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
             assertEquals(0, applicationAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
-            tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
+            tuontiService.tuoExcelistä(null,prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
             Mockito.verify(prosessi).keskeyta();
         }
 
@@ -191,7 +191,7 @@ public class ErillishaunTuontiServiceTest {
             assertEquals(0, tilaAsyncResource.results.size());
             assertNull(henkiloAsyncResource.henkiloPrototyypit);
             KirjeProsessi prosessi = new ErillishakuProsessiDTO(1);
-            tuontiService.tuoExcelistä(prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
+            tuontiService.tuoExcelistä(null,prosessi, erillisHaku, erillisHakuHetullaJaSyntymaAjalla());
             assertTrue(prosessi.isKeskeytetty());
         }
     }
@@ -206,7 +206,7 @@ class ErillisHakuTuontiTestCase {
 
     protected void importData(InputStream data) {
         final ErillishaunTuontiService tuontiService = new ErillishaunTuontiService(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, Schedulers.immediate());
-        tuontiService.tuoExcelistä(prosessi, erillisHaku, data);
+        tuontiService.tuoExcelistä(null, prosessi, erillisHaku, data);
         Mockito.verify(prosessi).valmistui("ok");
     }
 }

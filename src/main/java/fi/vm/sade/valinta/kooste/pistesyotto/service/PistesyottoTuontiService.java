@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -34,6 +35,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import static fi.vm.sade.auditlog.LogMessage.builder;
 
 /**
  *         GET
@@ -61,7 +63,7 @@ public class PistesyottoTuontiService {
         this.applicationAsyncResource = applicationAsyncResource;
     }
 
-    private void tuo(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi,
+    private void tuo(String username, String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi,
                      List<ValintakoeOsallistuminenDTO> osallistumistiedot,
                      List<ApplicationAdditionalDataDTO> pistetiedot,
                      List<ValintaperusteDTO> valintaperusteet,
@@ -104,15 +106,29 @@ public class PistesyottoTuontiService {
                                         valintakoetunniste -> pistesyottoExcel.onkoHakijaOsallistujaValintakokeeseen(hakemusOid, valintakoetunniste));
                                 additionalData.setAdditionalData(newPistetiedot);
                                 return Stream.of(additionalData);
-                            }).filter(Objects::nonNull).collect(Collectors.toList());
+                            }).filter(Objects::nonNull)
+                            .filter(a -> !a.getAdditionalData().isEmpty())
+                            .collect(Collectors.toList());
 
             if (uudetPistetiedot.isEmpty()) {
+                LOG.info("Pistesyötössä hakukohteeseen {} ei yhtäkään muuttunutta tietoa tallennettavaksi", hakukohdeOid);
                 prosessi.inkrementoiTehtyjaToita();
                 prosessi.setDokumenttiId("valmis");
             } else {
-                //applicationAsyncResource.
+                LOG.info("Pistesyötössä hakukohteeseen {} muuttunutta {} tietoa tallennettavaksi", hakukohdeOid, uudetPistetiedot.size());
                 applicationAsyncResource.putApplicationAdditionalData(
                         hakuOid, hakukohdeOid, uudetPistetiedot).subscribe(response -> {
+                    uudetPistetiedot.forEach(p ->
+                                    AUDIT.log(builder()
+                                            .id(username)
+                                            .hakuOid(hakuOid)
+                                            .hakukohdeOid(hakukohdeOid)
+                                            .hakijaOid(p.getPersonOid())
+                                            .hakemusOid(p.getOid())
+                                            .addAll(p.getAdditionalData())
+                                            .message("Pistetietojen tuonti Excelillä")
+                                            .build())
+                    );
                     prosessi.setDokumenttiId("valmis");
                     prosessi.inkrementoiTehtyjaToita();
                 }, poikkeusilmoitus);
@@ -173,7 +189,7 @@ public class PistesyottoTuontiService {
     }
 
 
-    public void tuo(String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi, InputStream stream) {
+    public void tuo(String username, String hakuOid, String hakukohdeOid, DokumenttiProsessi prosessi, InputStream stream) {
         prosessi.setKokonaistyo(5
                         // luonti
                         + 1);
@@ -189,7 +205,7 @@ public class PistesyottoTuontiService {
         AtomicInteger laskuriYlimaaraisilleOsallistujille = new AtomicInteger(2);
         Supplier<Void> viimeisteleTuonti = () -> {
             if (laskuri.decrementAndGet() <= 0) {
-                tuo(hakuOid, hakukohdeOid, prosessi, osallistumistiedot.get(), additionaldata.get(), valintaperusteet.get(), kaikkiKutsutaanTunnisteetRef.get(), stream);
+                tuo(username, hakuOid, hakukohdeOid, prosessi, osallistumistiedot.get(), additionaldata.get(), valintaperusteet.get(), kaikkiKutsutaanTunnisteetRef.get(), stream);
             }
             return null;
         };

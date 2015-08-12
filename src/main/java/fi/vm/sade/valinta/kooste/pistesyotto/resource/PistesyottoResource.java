@@ -13,6 +13,7 @@ import java.util.UUID;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
@@ -68,6 +69,7 @@ public class PistesyottoResource {
     @Produces("application/json")
     @ApiOperation(consumes = "application/json", value = "Pistesyötön tuonti taulukkolaskentaan", response = ProsessiId.class)
     public ProsessiId tuonti(@QueryParam("hakuOid") String hakuOid, @QueryParam("hakukohdeOid") String hakukohdeOid, InputStream file) throws IOException {
+        final String username = KoosteAudit.username();
         ByteArrayOutputStream xlsx;
         IOUtils.copy(file, xlsx = new ByteArrayOutputStream());
         IOUtils.closeQuietly(file);
@@ -77,22 +79,18 @@ public class PistesyottoResource {
             List<String> tags = Arrays.asList();
             dokumenttiAsyncResource.tallenna(uuid, "pistesyotto.xlsx", expirationTime, tags,
                     "application/octet-stream", new ByteArrayInputStream(xlsx.toByteArray()), response -> {
-                        LOG.info("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.",
-                                SecurityContextHolder.getContext().getAuthentication().getName(),
-                                hakuOid, hakukohdeOid, uuid);
+                        LOG.info("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.", username, hakuOid, hakukohdeOid, uuid);
                     }, poikkeus -> {
-                        LOG.error(
-                                String.format("Käyttäjä %s aloitti pistesyötön tuonnin haussa %s ja hakukohteelle %s. Exceliä ei voitu tallentaa dokumenttipalveluun.",
-                                        Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication()).map(Principal::getName).orElse("Kirjautumaton käyttäjä"),
-                                        hakuOid, hakukohdeOid),
-                                poikkeus);
+                        LOG.error("Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Exceliä ei voitu tallentaa dokumenttipalveluun.",
+                                username, hakuOid, hakukohdeOid);
+                        LOG.error("Virheen tiedot", poikkeus);
                     });
         } catch (Throwable t) {
             LOG.error("Tuntematon virhetilanne", t);
         }
         DokumenttiProsessi prosessi = new DokumenttiProsessi("Pistesyöttö", "tuonti", hakuOid, Arrays.asList(hakukohdeOid));
         dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-        tuontiService.tuo(hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
+        tuontiService.tuo(username, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
         return prosessi.toProsessiId();
     }
 }

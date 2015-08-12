@@ -71,12 +71,12 @@ public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaA
     }
 
     @Override
-    public Response tuoErillishaunTilat(String hakuOid, String hakukohdeOid, String valintatapajononNimi, Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
+    public Observable<Response> tuoErillishaunTilat(String hakuOid, String hakukohdeOid, String valintatapajononNimi, Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
         String url = "/tila/erillishaku/" + hakuOid + "/hakukohde/" + hakukohdeOid + "/";
         LOG.info("Asynkroninen kutsu: {}{}?hyvaksytyt=true&hakukohdeOid={}&valintatapajononNimi={}", address, url, hakukohdeOid, valintatapajononNimi);
-        return getWebClient()
-                .path(url)
-                .query("valintatapajononNimi", Optional.ofNullable(valintatapajononNimi).orElse(StringUtils.EMPTY))
-                .post(Entity.entity(erillishaunHakijat, MediaType.APPLICATION_JSON_TYPE));
+        return postAsObservable(url, Entity.entity(erillishaunHakijat, MediaType.APPLICATION_JSON_TYPE), client -> {
+            client.query("valintatapajononNimi", Optional.ofNullable(valintatapajononNimi).orElse(StringUtils.EMPTY));
+            return client;
+        });
     }
 }
