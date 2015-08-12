@@ -6,40 +6,26 @@ import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl.OrganisaatioAsyncResourceImpl;
-
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl.SijoitteluAsyncResourceImpl;
-import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl.ViestintapalveluAsyncResourceImpl;
-import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.*;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponentti;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Value;
 import rx.Observable;
-import rx.Scheduler;
-import rx.functions.Action0;
-import rx.schedulers.Schedulers;
-import scala.Option;
 
 import java.util.*;
-import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
-import static javax.ws.rs.HttpMethod.*;
+import static javax.ws.rs.HttpMethod.GET;
 
 /**
  * @author Jussi Jartamo
@@ -57,7 +43,7 @@ public class HakijatoimistoTest {
     }
 
     @Test
-    public void testaaHyvaksymiskirjeetServicenLapi()  throws Throwable{
+    public void testaaHyvaksymiskirjeetServicenLapi() {
         final String hakuOid = "haku";
         final String hakukohdeOid = "hakukohde";
         final String tarjoajaOid = "tarjoajaOid";
@@ -85,31 +71,29 @@ public class HakijatoimistoTest {
         Observable<List<Hakemus>> hakemuksetObservable = a.getApplicationsByOid(hakuOid, hakukohdeOid);
         Observable<HakijaPaginationObject> hakijatFuture = s.getKoulutuspaikkalliset(hakuOid, hakukohdeOid);
         Observable<Optional<HakutoimistoDTO>> hakutoimistoObservable = o.haeHakutoimisto(tarjoajaOid);
-        final CyclicBarrier barrier = new CyclicBarrier(2);
+        final Semaphore counter = new Semaphore(0);
         final AtomicReference<Optional<HakutoimistoDTO>> option = new AtomicReference<>();
         Observable.zip(
                 hakemuksetObservable,
                 hakijatFuture,
                 hakutoimistoObservable,
-                (hakemukset, hakijat, hakutoimisto) -> {
-                    return hakutoimisto;
-                }
+                (hakemukset, hakijat, hakutoimisto) -> hakutoimisto
         ).subscribe(
                 hakutoimisto -> {
-                    try {
-                        option.set(hakutoimisto);
-                        barrier.await(5L, TimeUnit.SECONDS);
-                    } catch (Throwable t){
-                        t.printStackTrace();
-                    }
+                    option.set(hakutoimisto);
+                    counter.release();
                 }
         );
-        barrier.await(5L, TimeUnit.SECONDS);
+        try {
+            Assert.assertTrue(counter.tryAcquire(1, 10, TimeUnit.SECONDS));
+        } catch (InterruptedException e) {
+            Assert.fail();
+        }
         Assert.assertEquals(Optional.empty(), option.get());
     }
 
     @Test
-    public void testaaHakijatoimistonValinnaisuus() throws Throwable{
+    public void testaaHakijatoimistonValinnaisuus() {
         final String EI_LOYDY_ORGANISAATIO_ID = "ei_loydy";
         final String HAKUKOHDE_OID = "hakukohdeOid";
         final String LOYTYY_ORGANISAATIO_ID = "loytyy";
@@ -119,19 +103,8 @@ public class HakijatoimistoTest {
         ));
 
         OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl(Integraatiopalvelimet.mockServer.getUrl());
-        final CyclicBarrier barrier = new CyclicBarrier(4);
-        final Consumer<Action0> breakBarrier = r -> {
-            try {
-            r.call();
-                } catch(Throwable t0) {
-                  t0.printStackTrace();
-                }
-            finally {
-                try {
-                    barrier.await();
-                } catch (Throwable t) {t.printStackTrace();}
-            }
-        };
+        final Semaphore counter = new Semaphore(0);
+
         final AtomicReference<Optional<HakutoimistoDTO>> notFoundWasPresent = new AtomicReference<>();
         final AtomicBoolean notFoundHadErrors = new AtomicBoolean(false);
         final AtomicReference<Optional<HakutoimistoDTO>> foundWasPresent = new AtomicReference<>();
@@ -142,20 +115,20 @@ public class HakijatoimistoTest {
         Observable<Optional<HakutoimistoDTO>> hakutoimistoNotFound= o.haeHakutoimisto(EI_LOYDY_ORGANISAATIO_ID);
         hakutoimistoNotFound
                 .subscribe(
-                        h -> breakBarrier.accept(() -> notFoundWasPresent.set(h)),
-                        e -> breakBarrier.accept(() -> {
-                            e.printStackTrace();
-                            notFoundHadErrors.set(true);
-                        })
+                        h -> {
+                            counter.release();
+                            notFoundWasPresent.set(h);
+                        },
+                        e -> notFoundHadErrors.set(true)
                 );
         Observable<Optional<HakutoimistoDTO>> hakutoimistoFound= o.haeHakutoimisto(LOYTYY_ORGANISAATIO_ID);
         hakutoimistoFound
                 .subscribe(
-                        h -> breakBarrier.accept(() -> foundWasPresent.set(h)),
-                        e -> breakBarrier.accept(() -> {
-                            e.printStackTrace();
-                            foundHadErrors.set(true);
-                        })
+                        h -> {
+                            counter.release();
+                            foundWasPresent.set(h);
+                        },
+                        e -> foundHadErrors.set(true)
                 );
 
         ViestintapalveluObservables.hakukohteenOsoite(
@@ -164,14 +137,18 @@ public class HakijatoimistoTest {
                 ImmutableMap.of(HAKUKOHDE_OID, new MetaHakukohde(EI_LOYDY_ORGANISAATIO_ID, new Teksti(HAKUKOHDE_OID),new Teksti(EI_LOYDY_ORGANISAATIO_ID))),
                 o::haeHakutoimisto)
                 .subscribe(
-                        h -> breakBarrier.accept(() -> osoitePresent.set(h)),
-                        e -> breakBarrier.accept(() -> {
-                            e.printStackTrace();
-                            osoiteHadErrors.set(true);
-                        })
+                        h -> {
+                            counter.release();
+                            osoitePresent.set(h);
+                        },
+                        e -> osoiteHadErrors.set(true)
                 );
 
-        barrier.await(5L, TimeUnit.SECONDS);
+        try {
+            Assert.assertTrue(counter.tryAcquire(3, 10, TimeUnit.SECONDS));
+        } catch (InterruptedException e) {
+            Assert.fail();
+        }
 
         Assert.assertFalse("Should not fail on 200 result", foundHadErrors.get());
         Assert.assertTrue("Should not be empty with 200", foundWasPresent.get().isPresent());

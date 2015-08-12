@@ -8,33 +8,27 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakukohdeV1RDTO;
-import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
-import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateDetail;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
-import org.junit.*;
-import rx.functions.Action0;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import javax.ws.rs.client.Entity;
 import java.util.Arrays;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToNoContent;
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockServer;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKU1;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKUKOHDE1;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKUKOHDE2;
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.*;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.*;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.HAKEMUS1;
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
 
@@ -47,11 +41,13 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     public void startServer() throws Throwable{
         startShared();
     }
+
     public static class Result<T> {
         private T result;
-public Result(T result){
- this.result = result;
-}
+
+        public Result(T result) {
+            this.result = result;
+        }
 
         public T getResult() {
             return result;
@@ -75,10 +71,10 @@ public Result(T result){
         hakutoiveDTO.setHakukohdeOid(HAKUKOHDE1);
         HakutoiveenValintatapajonoDTO jono = new HakutoiveenValintatapajonoDTO();
         jono.setTila(HakemuksenTila.HYVAKSYTTY);
-        hakutoiveDTO.setHakutoiveenValintatapajonot(Arrays.asList(jono));
-        hakija1.setHakutoiveet(Sets.newTreeSet(Arrays.asList(hakutoiveDTO)));
+        hakutoiveDTO.setHakutoiveenValintatapajonot(Collections.singletonList(jono));
+        hakija1.setHakutoiveet(Sets.newTreeSet(Collections.singletonList(hakutoiveDTO)));
         HakijaPaginationObject hp = new HakijaPaginationObject();
-        hp.setResults(Arrays.asList(hakija1));
+        hp.setResults(Collections.singletonList(hakija1));
         hp.setTotalCount(hp.getResults().size());
         mockToReturnJson(GET, "/sijoittelu-service/resources/sijoittelu/HAKU1/hyvaksytyt/.*", hp);
 
@@ -86,8 +82,8 @@ public Result(T result){
         templateHistory.setName("default");
         TemplateDetail detail = new TemplateDetail();
         detail.setName("sisalto");
-        templateHistory.setTemplateReplacements(Arrays.asList(detail));
-        mockToReturnJson(GET, "/viestintapalvelu/api/v1/template/getHistory.*", Arrays.asList(templateHistory));
+        templateHistory.setTemplateReplacements(Collections.singletonList(detail));
+        mockToReturnJson(GET, "/viestintapalvelu/api/v1/template/getHistory.*", Collections.singletonList(templateHistory));
 
 
         mockToReturnJson(POST, "/haku-app/applications/list.*", Arrays.asList(
@@ -101,19 +97,10 @@ public Result(T result){
                         .build()
         ));
 
-        CyclicBarrier barrier = new CyclicBarrier(2);
-        Action0 waitRequestForMax7Seconds = () ->{
-            try {
-                barrier.await(7L, TimeUnit.SECONDS);
-            } catch (Throwable t) {
-                throw new RuntimeException(t);
-            }
-        };
         Assert.assertEquals(200, http.getWebClient()
                 .query("hakuOid", HAKU1)
                 .query("asiointikieli", "SV")
                 .query("letterBodyText","letterBodyText")
                 .post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2))).getStatus());
-        waitRequestForMax7Seconds.call();
     }
 }

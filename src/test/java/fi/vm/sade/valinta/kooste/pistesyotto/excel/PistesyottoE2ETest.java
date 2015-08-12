@@ -3,35 +3,25 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.server.MockServer;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
-import rx.functions.Action0;
 
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.*;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
 import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
-import static javax.ws.rs.HttpMethod.GET;
-import static javax.ws.rs.HttpMethod.PUT;
-import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.HttpMethod.*;
 
 /**
  * @author Jussi Jartamo
@@ -57,21 +47,14 @@ public class PistesyottoE2ETest {
         );
         mockToReturnJson(POST,
                 "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe",
-                Arrays.asList()
+                Collections.emptyList()
         );
 
         HttpResource http = new HttpResource(resourcesAddress + "/pistesyotto/tuonti");
 
 
         MockServer fakeHakuApp = new MockServer();
-        CyclicBarrier barrier = new CyclicBarrier(2);
-        Action0 waitRequestForMax7Seconds = () ->{
-            try {
-                barrier.await(7L, TimeUnit.SECONDS);
-            } catch (Throwable t) {
-                throw new RuntimeException(t);
-            }
-        };
+        final Semaphore counter = new Semaphore(0);
         mockForward(PUT,
                 fakeHakuApp.addHandler("/haku-app/applications/additionalData/testioidi1/1.2.246.562.5.85532589612", exchange -> {
                     try {
@@ -83,7 +66,7 @@ public class PistesyottoE2ETest {
                         Assert.assertEquals("Editoimattomat lisätietokentät ohitetaan, eli viedään vain 836/1260.", 836, additionalData.stream()
                                 .flatMap(a -> a.getAdditionalData().entrySet().stream())
                                 .count());
-                        waitRequestForMax7Seconds.call();
+                        counter.release();
                         exchange.sendResponseHeaders(200, 0);
                     } catch (Throwable t) {
                         t.printStackTrace();
@@ -96,6 +79,10 @@ public class PistesyottoE2ETest {
                 .accept(MediaType.APPLICATION_JSON)
                 .post(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream());
         Assert.assertEquals(200, r.getStatus());
-        waitRequestForMax7Seconds.call();
+        try {
+            Assert.assertTrue(counter.tryAcquire(1, 10, TimeUnit.SECONDS));
+        } catch (InterruptedException e) {
+            Assert.fail();
+        }
     }
 }
