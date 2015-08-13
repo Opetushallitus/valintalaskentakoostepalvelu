@@ -60,7 +60,7 @@ public class ImportedErillisHakuExcel {
 
     private HenkiloCreateDTO convert(final ErillishakuRivi rivi) {
         return new HenkiloCreateDTO(
-                resolveAidinkieli(rivi.getAidinkieli()),
+                Optional.ofNullable(rivi.getAidinkieli()).map(ImportedErillisHakuExcel::resolveAidinkieli).orElse("fi"),
                 rivi.getSyntymaAika(),
                 rivi.getEtunimi(),
                 rivi.getSukunimi(),
