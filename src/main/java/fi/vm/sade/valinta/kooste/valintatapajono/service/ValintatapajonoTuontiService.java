@@ -86,6 +86,7 @@ public class ValintatapajonoTuontiService {
                                                     v -> {
                                                         v.getHakija().forEach(h -> {
                                                             AUDIT.log(builder()
+                                                                    .id(username)
                                                                     .hakuOid(hakuOid)
                                                                     .hakemusOid(h.getHakemusOid())
                                                                     .valinnanvaiheOid(valinnanvaihe.getValinnanvaiheoid())
