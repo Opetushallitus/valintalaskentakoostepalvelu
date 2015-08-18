@@ -53,7 +53,7 @@ import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkista
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static rx.schedulers.Schedulers.newThread;
-import static fi.vm.sade.auditlog.LogMessage.builder;
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 
 @Service
 public class ErillishaunTuontiService {

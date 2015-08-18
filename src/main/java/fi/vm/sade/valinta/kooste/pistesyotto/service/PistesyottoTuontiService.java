@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import static fi.vm.sade.auditlog.LogMessage.builder;
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 
 /**
  *         GET

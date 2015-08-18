@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.gson.GsonBuilder;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-import static fi.vm.sade.auditlog.LogMessage.builder;
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
