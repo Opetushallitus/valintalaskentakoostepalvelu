@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import fi.vm.sade.auditlog.ApplicationType;
 import fi.vm.sade.auditlog.Audit;
+import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.authentication.model.Kielisyys;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
@@ -286,8 +287,8 @@ public class ErillishaunTuontiService {
                                     .hakemusOid(h.getHakemusOid())
                                             //.henkiloOid(h.getHakijaOid())
                                     .valintatapajonoOid(haku.getValintatapajonoOid())
-                                    .message(h.getPoistetaankoTulokset() ? "Poistetaan hakija sijoittelusta erillishaun tuonnissa" :
-                                            "Päivitetään hakijan tiedot sijoitteluun erillishaun tuonnissa")
+                                    .setOperaatio(h.getPoistetaankoTulokset() ? ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO :
+                                            ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS)
                                     .add("hakemuksentila", h.getHakemuksenTila())
                                     .add("valintatuloksentila", h.getValintatuloksenTila())
                                     .add("ilmoittautumistila", h.getIlmoittautumisTila())

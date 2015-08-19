@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
@@ -126,7 +127,7 @@ public class PistesyottoTuontiService {
                                             .hakijaOid(p.getPersonOid())
                                             .hakemusOid(p.getOid())
                                             .addAll(p.getAdditionalData())
-                                            .message("Pistetietojen tuonti Excelillä")
+                                            .setOperaatio(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL)
                                             .build())
                     );
                     prosessi.setDokumenttiId("valmis");

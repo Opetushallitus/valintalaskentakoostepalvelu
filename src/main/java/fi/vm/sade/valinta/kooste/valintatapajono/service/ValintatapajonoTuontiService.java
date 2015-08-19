@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Response;
 
+import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,8 +93,8 @@ public class ValintatapajonoTuontiService {
                                                                     .valinnanvaiheOid(valinnanvaihe.getValinnanvaiheoid())
                                                                     .hakukohdeOid(hakukohdeOid)
                                                                     .valintatapajonoOid(v.getOid())
-                                                                    .add("jonosija", new Integer(h.getJonosija()))
-                                                                    .message("Valinnanvaiheen tuonti Excelillä")
+                                                                    .add("jonosija", h.getJonosija())
+                                                                    .setOperaatio(ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL)
                                                                     .build());
                                                         });
                                                     }
