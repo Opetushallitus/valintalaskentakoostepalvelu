@@ -238,6 +238,8 @@ public class HakemuksetConverterUtil {
                 suorituksetRekisterista.stream().anyMatch(s -> s.isUlkomainenKorvaava() && s.isVahvistettu() && s.isValmis())) {
             return Optional.of(PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO);
         }
+        LOG.error("Hakijan {} pohjakoulutusta ei voitu päätellä, käytetään hakemuksen pohjakoulutusta {}.",
+                h.getHakijaOid(), pohjakoulutusHakemukselta);
         return Optional.of(pohjakoulutusHakemukselta);
     }
 
