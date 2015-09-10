@@ -99,6 +99,11 @@ public class HakemuksetConverterUtilTest {
                     .setKymppiluokka().setVahvistettu(true)
                     .setValmistuminen(HAKUKAUDELLA).setKeskeytynyt()
                     .done();
+    private static final SuoritusJaArvosanat vahvistettuKymppiKeskeytynytEiHakukaudella =
+            new SuoritusrekisteriSpec.SuoritusBuilder()
+                    .setKymppiluokka().setVahvistettu(true)
+                    .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA).setKeskeytynyt()
+                    .done();
     private static final SuoritusJaArvosanat vahvistettuAmmattistarttiValmisHakukaudella =
             new SuoritusrekisteriSpec.SuoritusBuilder()
                     .setAmmattistartti().setVahvistettu(true)
@@ -206,44 +211,6 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
-    public void suodattaaPoisVahvistetutHakukaudenUlkopuolellaValmistuneetLisäpistekoulutusSuoritukset() {
-        Oppija o = new SuoritusrekisteriSpec.OppijaBuilder()
-                .suoritus().setKymppiluokka()
-                .setVahvistettu(true)
-                .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA)
-                .setValmis()
-                .build()
-                .suoritus().setAmmattistartti()
-                .setVahvistettu(true)
-                .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA)
-                .setValmis()
-                .build()
-                .suoritus().setAmmatilliseenValmistava()
-                .setVahvistettu(true)
-                .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA)
-                .setValmis()
-                .build()
-                .suoritus().setLukioonValmistava()
-                .setVahvistettu(true)
-                .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA)
-                .setValmis()
-                .build()
-                .suoritus().setLisaopetusTalous()
-                .setVahvistettu(true)
-                .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA)
-                .setValmis()
-                .build()
-                .suoritus().setValmentava()
-                .setVahvistettu(true)
-                .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA)
-                .setValmis()
-                .build()
-                .build();
-        List<SuoritusJaArvosanat> suoritukset = HakemuksetConverterUtil.filterUnrelevantSuoritukset(haku, o.getSuoritukset());
-        assertTrue(suoritukset.isEmpty());
-    }
-
-    @Test
     public void suodattaaPoisVahvistamattomatLisäpistekoulutusSuoritukset() {
         Oppija o = new SuoritusrekisteriSpec.OppijaBuilder()
                 .suoritus().setKymppiluokka()
@@ -262,7 +229,7 @@ public class HakemuksetConverterUtilTest {
                 .setValmis()
                 .build()
                 .suoritus().setLukioonValmistava()
-                .setVahvistettu(true)
+                .setVahvistettu(false)
                 .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA)
                 .setValmis()
                 .build()
@@ -534,9 +501,9 @@ public class HakemuksetConverterUtilTest {
         oletettu.put("AM_TILA", "false");
         oletettu.put("LK_TILA", "false");
         oletettu.put("YO_TILA", "false");
-        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.KESKEYTYNYT), h, suoritukset));
-        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.YLIOPPILAS), h, suoritukset));
-        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO), h, suoritukset));
+        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.KESKEYTYNYT), haku, h, suoritukset));
+        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.YLIOPPILAS), haku, h, suoritukset));
+        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO), haku, h, suoritukset));
     }
 
     @Test
@@ -554,7 +521,7 @@ public class HakemuksetConverterUtilTest {
         oletettu.put("LK_TILA", "false");
         oletettu.put("YO_TILA", "false");
         Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
-        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.PERUSKOULU), h, suoritukset));
+        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.PERUSKOULU), haku, h, suoritukset));
     }
 
     @Test
@@ -571,7 +538,26 @@ public class HakemuksetConverterUtilTest {
         oletettu.put("YO_TILA", "false");
         Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
         oletettu.put(Lisapistekoulutus.LISAKOULUTUS_KYMPPI.name(), "true");
-        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.PERUSKOULU), h, suoritukset));
+        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.PERUSKOULU), haku, h, suoritukset));
+    }
+
+    @Test
+    public void lisapistekoulutusHakemukseltaJosKeskeytynytSuoritusEiHakukaudella() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            add(new AvainArvoDTO(Lisapistekoulutus.LISAKOULUTUS_KYMPPI.name(), "true"));
+        }});
+        List<SuoritusJaArvosanat> suoritukset = new ArrayList<SuoritusJaArvosanat>() {{
+            add(vahvistettuKymppiKeskeytynytEiHakukaudella);
+        }};
+        Map<String, String> oletettu = new HashMap<>();
+        oletettu.put("PK_TILA", "false");
+        oletettu.put("AM_TILA", "false");
+        oletettu.put("LK_TILA", "false");
+        oletettu.put("YO_TILA", "false");
+        Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
+        oletettu.put(Lisapistekoulutus.LISAKOULUTUS_KYMPPI.name(), "true");
+        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.PERUSKOULU), haku, h, suoritukset));
     }
 
     @Test
@@ -589,7 +575,7 @@ public class HakemuksetConverterUtilTest {
         oletettu.put("PK_PAATTOTODISTUSVUOSI", "2015");
         oletettu.put("PK_SUORITUSVUOSI", "2015");
         oletettu.put("PK_SUORITUSLUKUKAUSI", "2");
-        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.PERUSKOULU), h, suoritukset));
+        Assert.assertEquals(oletettu, HakemuksetConverterUtil.suoritustenTiedot(Optional.of(PohjakoulutusToinenAste.PERUSKOULU), haku, h, suoritukset));
     }
 
     @Test

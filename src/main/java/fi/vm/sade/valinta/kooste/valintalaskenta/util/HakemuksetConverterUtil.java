@@ -82,7 +82,7 @@ public class HakemuksetConverterUtil {
         merge.putAll(hakemuksenArvot);
         ensikertalaisuus(hakijallaOnHenkilotunnus, haku, hakukohdeOid, oppija, hakemusDTO, merge);
         pohjakoulutus.ifPresent(pk -> merge.put(POHJAKOULUTUS, new AvainArvoDTO(POHJAKOULUTUS, pk)));
-        merge.putAll(suoritustenTiedot(pohjakoulutus, hakemusDTO, suoritukset).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue()))));
+        merge.putAll(suoritustenTiedot(pohjakoulutus, haku, hakemusDTO, suoritukset).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue()))));
         merge.putAll(surenArvot);
         hakemusDTO.setAvaimet(merge.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));
     }
@@ -170,7 +170,6 @@ public class HakemuksetConverterUtil {
                 .filter(s -> !(s.isPerusopetus() && s.isKeskeytynyt() && !hakukaudella(haku, s)))
                 .filter(s -> !(s.isLukio() && s.isKeskeytynyt() && !hakukaudella(haku, s)))
                 .filter(s -> !(s.isYoTutkinto() && (s.isKesken() || s.isKeskeytynyt())))
-                .filter(s -> !(s.isLisapistekoulutus() && s.isVahvistettu() && !hakukaudella(haku, s)))
                 .map(SuoritusJaArvosanatWrapper::getSuoritusJaArvosanat)
                 .collect(toList());
     }
@@ -266,6 +265,7 @@ public class HakemuksetConverterUtil {
     }
 
     public static Map<String, String> suoritustenTiedot(Optional<String> pohjakoulutus,
+                                                        HakuV1RDTO haku,
                                                         HakemusDTO hakemus,
                                                         List<SuoritusJaArvosanat> suoritukset) {
         final Map<String, Predicate<SuoritusJaArvosanat>> predicates =
@@ -279,7 +279,7 @@ public class HakemuksetConverterUtil {
         pkPaattotodistusvuosi(hakemus, suoritukset).ifPresent(vuosi -> tiedot.put(PK_PAATTOTODISTUSVUOSI, String.valueOf(vuosi)));
         suoritustilat(predicates, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue())));
         suoritusajat(predicates, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue())));
-        pohjakoulutus.ifPresent(pk -> lisapistekoulutukset(pk, hakemus, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey().name(), String.valueOf(e.getValue()))));
+        pohjakoulutus.ifPresent(pk -> lisapistekoulutukset(pk, haku, hakemus, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey().name(), String.valueOf(e.getValue()))));
         return tiedot;
     }
 
@@ -316,7 +316,7 @@ public class HakemuksetConverterUtil {
                                 .anyMatch(s -> predicates.get(prefix).test(s) && wrap(s).isValmis() && (wrap(s).isVahvistettu() || wrap(s).isLukio()))));
     }
 
-    private static Map<Lisapistekoulutus, Boolean> lisapistekoulutukset(String pohjakoulutus, HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
+    private static Map<Lisapistekoulutus, Boolean> lisapistekoulutukset(String pohjakoulutus, HakuV1RDTO haku, HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
         if (PohjakoulutusToinenAste.KESKEYTYNYT.equals(pohjakoulutus) ||
                 PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutus) ||
                 PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO.equals(pohjakoulutus)) {
@@ -327,6 +327,7 @@ public class HakemuksetConverterUtil {
                 .collect(toMap(Function.<Lisapistekoulutus>identity(),
                         lpk -> suoritukset.stream()
                                 .filter(s -> lpk.komoOid.equals(s.getSuoritus().getKomo()))
+                                .filter(s -> !(wrap(s).isKeskeytynyt() && !hakukaudella(haku, wrap(s))))
                                 .findFirst()
                                 .map(s -> !wrap(s).isKeskeytynyt())
                                 .orElse(hakemus.getAvaimet().stream()
