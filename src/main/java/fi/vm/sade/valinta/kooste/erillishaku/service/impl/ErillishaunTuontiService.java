@@ -12,6 +12,8 @@ import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+
+import fi.vm.sade.valinta.http.FailedHttpException;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
@@ -24,7 +26,9 @@ import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncRe
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
@@ -202,10 +206,7 @@ public class ErillishaunTuontiService {
             hakemukset = Collections.emptyList();
         }
         LOG.info("Viedaan hakijoita ohittaen rivit hakemuksentilalla kesken ({}/{}) jonoon {}", lisattavatTaiKeskeneraiset.stream().filter(r -> !r.isKesken()).count(), rivit.size(), haku.getValintatapajononNimi());
-        tuoErillishaunTilat(username, haku, lisattavatTaiKeskeneraiset, poistettavat, hakemukset);
-
-        prosessi.vaiheValmistui();
-        prosessi.valmistui("ok");
+        tuoErillishaunTilat(username, haku, lisattavatTaiKeskeneraiset, poistettavat, hakemukset, prosessi);
     }
 
     private List<Hakemus> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, Map<String, String> sahkopostit, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
@@ -239,7 +240,7 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private void tuoErillishaunTilat(final String username, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat,final List<Hakemus> hakemukset) {
+    private void tuoErillishaunTilat(final String username, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat,final List<Hakemus> hakemukset, final KirjeProsessi prosessi) {
         final Stream<ErillishaunHakijaDTO> hakijat;
         final Stream<ErillishaunHakijaDTO> pois;
         if(!lisattavatTaiKeskeneraiset.isEmpty()){
@@ -294,8 +295,13 @@ public class ErillishaunTuontiService {
                                     .add("ilmoittautumistila", h.getIlmoittautumisTila())
                                     .build())
                         );
+                        prosessi.vaiheValmistui();
+                        prosessi.valmistui("ok");
                     }, poikkeus -> {
                         LOG.error("Erillishaun tuonti epäonnistui", poikkeus);
+                        HakukohteenValintatulosUpdateStatuses respObj = ((FailedHttpException)poikkeus).response.readEntity(HakukohteenValintatulosUpdateStatuses.class);
+                        List<ValintatulosUpdateStatus> statuses = respObj.statuses;
+                        prosessi.keskeyta("error", statuses.stream().collect(Collectors.toMap(k -> k.valintatapajonoOid + "_" + k.hakemusOid, v -> v.message)));
                     });
 
         } catch (Exception e) {
