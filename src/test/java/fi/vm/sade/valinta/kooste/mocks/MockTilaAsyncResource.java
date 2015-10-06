@@ -61,7 +61,7 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
     @Override
     public Observable<Response> tuoErillishaunTilat(final String hakuOid, final String hakukohdeOid, final String valintatapajononNimi, final Collection<ErillishaunHakijaDTO> erillishaunHakijat) {
         results.add(new Result(hakuOid, hakukohdeOid, valintatapajononNimi, erillishaunHakijat));
-        return Observable.empty();
+        return Observable.just(null);
     }
 
 }
