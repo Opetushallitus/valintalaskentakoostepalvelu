@@ -300,6 +300,7 @@
 
 		<!-- Parametrit -->
 		<bean id="ParametritResource" class="fi.vm.sade.valinta.kooste.parametrit.resource.ParametritResource" />
+		<bean id="HakuParametritService" class="fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService" />
 		<bean
 				class="fi.vm.sade.valinta.kooste.parametrit.service.impl.ParametriServiceImpl" />
 		<bean id="parametrit" class="fi.vm.sade.valinta.kooste.parametrit.Parametrit">

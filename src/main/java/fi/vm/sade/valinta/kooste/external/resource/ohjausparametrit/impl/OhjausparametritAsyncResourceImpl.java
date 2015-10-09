@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.impl;
 import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.valinta.http.GsonResponseCallback;
+import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
@@ -16,18 +17,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 @Service
-public class OhjausparametritAsyncResourceImpl extends AsyncResourceWithCas implements OhjausparametritAsyncResource {
-
+public class OhjausparametritAsyncResourceImpl extends HttpResource implements OhjausparametritAsyncResource {
 
     @Autowired
-    public OhjausparametritAsyncResourceImpl(
-            @Value("${web.url.cas}") String webCasUrl,
-            @Value("https://${host.virkailija}/ohjausparametrit-service/j_spring_cas_security_check") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
-            @Value("${host.scheme:https}://${host.virkailija}") String address,
-            ApplicationContext context) {
-        super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(10));
+    public OhjausparametritAsyncResourceImpl(@Value("${host.scheme:https}://${host.virkailija}") String address) {
+        super(address, TimeUnit.MINUTES.toMillis(10));
     }
 
     public Peruutettava haeHaunOhjausparametrit(String hakuOid, Consumer<ParametritDTO> callback, Consumer<Throwable> failureCallback) {
