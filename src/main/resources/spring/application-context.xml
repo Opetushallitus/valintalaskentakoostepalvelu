@@ -26,7 +26,7 @@
 	</beans>
 	<beans  profile="default">
 		<ctx:property-placeholder
-				location="classpath:META-INF/kela.properties, classpath:META-INF/valintalaskentakoostepalvelu.properties, classpath:META-INF/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valinta.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/hakuparametrit.properties, file:///${user.home:''}/oph-configuration/override.properties"
+				location="classpath:META-INF/kela.properties, classpath:META-INF/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/common.properties, file:///${user.home:''}/oph-configuration/valinta.properties, file:///${user.home:''}/oph-configuration/valintalaskentakoostepalvelu.properties, file:///${user.home:''}/oph-configuration/override.properties"
 				ignore-resource-not-found="true" properties-ref="defaultProps" />
 
 		<bean id="defaultProps"
@@ -301,15 +301,6 @@
 		<!-- Parametrit -->
 		<bean id="ParametritResource" class="fi.vm.sade.valinta.kooste.parametrit.resource.ParametritResource" />
 		<bean id="HakuParametritService" class="fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService" />
-		<bean
-				class="fi.vm.sade.valinta.kooste.parametrit.service.impl.ParametriServiceImpl" />
-		<bean id="parametrit" class="fi.vm.sade.valinta.kooste.parametrit.Parametrit">
-			<property name="koetuloksetAlkupvm" value="${koetulokset.alkupvm}" />
-			<property name="koetuloksetLoppupvm" value="${koetulokset.loppupvm}" />
-			<property name="valintaesitysPvm" value="${valintaesitys.pvm}" />
-			<property name="hakuAlkupvm" value="${haku.alkupvm}" />
-			<property name="hakuLoppupvm" value="${haku.loppupvm}" />
-		</bean>
 		<!-- Sijoitteluntulokset haulle -->
 		<bean id="SijoittelunTulosHaulleResource"
 			  class="fi.vm.sade.valinta.kooste.sijoitteluntulos.resource.SijoittelunTulosHaulleResource" />

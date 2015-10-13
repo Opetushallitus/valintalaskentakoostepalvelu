@@ -41,11 +41,6 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.koodisto.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.tarjontaService.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.valintaperusteet.rest.url", "http://localhost");
-        p0.setProperty("koetulokset.alkupvm", "");
-        p0.setProperty("koetulokset.loppupvm", "");
-        p0.setProperty("valintaesitys.pvm", "");
-        p0.setProperty("haku.alkupvm", "");
-        p0.setProperty("haku.loppupvm", "");
         p0.setProperty("root.organisaatio.oid", "");
         p0.setProperty("kela.ftp.protocol", "ftp");
         p0.setProperty("kela.ftp.username", "username");

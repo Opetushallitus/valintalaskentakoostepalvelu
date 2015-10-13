@@ -11,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,6 @@ import com.google.gson.Gson;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
@@ -49,7 +49,7 @@ public class SijoitteluAktivointiResource {
     private JatkuvaSijoittelu jatkuvaSijoittelu;
 
     @Autowired
-    private ParametriService parametriService;
+    private HakuParametritService hakuParametritService;
 
     @Autowired
     private SijoittelunSeurantaResource sijoittelunSeurantaResource;
@@ -78,7 +78,7 @@ public class SijoitteluAktivointiResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_CRUD')")
     @ApiOperation(value = "Sijoittelun aktivointi", response = String.class)
     public void aktivoiSijoittelu(@QueryParam("hakuOid") String hakuOid) {
-        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+        if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
             LOG.error("Sijoittelua yritettiin käynnistää haulle({}) ilman käyttöoikeuksia!", hakuOid);
             throw new RuntimeException("Ei käyttöoikeuksia!");
         }
@@ -99,7 +99,7 @@ public class SijoitteluAktivointiResource {
     @ApiOperation(value = "Ajastetun sijoittelun aktivointi", response = String.class)
     public String aktivoiJatkuvassaSijoittelussa(
             @QueryParam("hakuOid") String hakuOid) {
-        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+        if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
             return "no privileges.";
         }
 
@@ -119,7 +119,7 @@ public class SijoitteluAktivointiResource {
     @ApiOperation(value = "Ajastetun sijoittelun deaktivointi", response = String.class)
     public String poistaJatkuvastaSijoittelusta(
             @QueryParam("hakuOid") String hakuOid) {
-        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+        if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
             return "no privileges.";
         }
 
@@ -164,7 +164,7 @@ public class SijoitteluAktivointiResource {
             @QueryParam("hakuOid") String hakuOid,
             @QueryParam("aloitusajankohta") Long aloitusajankohta,
             @QueryParam("ajotiheys") Integer ajotiheys) {
-        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+        if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
             return "no privileges.";
         }
         if (StringUtils.isBlank(hakuOid)) {

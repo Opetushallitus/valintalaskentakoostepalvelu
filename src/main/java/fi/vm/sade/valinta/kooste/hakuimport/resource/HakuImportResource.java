@@ -4,12 +4,12 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.Collection;
 
-import javax.annotation.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
+import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.route.HakuImportRoute;
 import fi.vm.sade.valinta.kooste.hakuimport.route.HakukohdeImportRoute;
-import fi.vm.sade.valinta.kooste.parametrit.service.ParametriService;
 import fi.vm.sade.valinta.kooste.valvomo.dto.ProsessiJaStatus;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 
@@ -41,7 +40,7 @@ public class HakuImportResource {
     @Autowired(required = false)
     private HakukohdeImportRoute hakukohdeImportRoute;
     @Autowired(required = false)
-    private ParametriService parametriService;
+    private HakuParametritService hakuParametritService;
 
     @Autowired(required = false)
     @Qualifier("hakuImportValvomo")
@@ -59,7 +58,7 @@ public class HakuImportResource {
     @Path("/aktivoi")
     @ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
     public String aktivoiHakuImport(@QueryParam("hakuOid") String hakuOid) {
-        if (!parametriService.valinnanhallintaEnabled(hakuOid)) {
+        if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
             return "no privileges.";
         }
 
