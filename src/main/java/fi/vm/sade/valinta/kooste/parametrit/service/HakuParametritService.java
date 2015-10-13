@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.parametrit.service;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
+import fi.vm.sade.valinta.http.HttpExceptionWithStatus;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -33,13 +34,18 @@ public class HakuParametritService {
     public ParametritParser getParametritForHaku(String hakuOid) {
 
         final CompletableFuture<ParametritDTO> promise = new CompletableFuture<>();
+        // ohjausparametrit-service returns 404 for haku without parameters
         ohjausparametritAsyncResource.haeHaunOhjausparametrit(
                 hakuOid,
                 parametrit -> {
                     promise.complete(parametrit);
                 },
                 (Throwable t) -> {
-                    promise.completeExceptionally(t);
+                    if(t instanceof HttpExceptionWithStatus && ((HttpExceptionWithStatus)t).status == 404) {
+                        promise.complete(new ParametritDTO());
+                    } else {
+                        promise.completeExceptionally(t);
+                    }
                 }
         );
 

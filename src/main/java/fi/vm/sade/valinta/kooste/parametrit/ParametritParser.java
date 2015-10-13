@@ -99,7 +99,6 @@ public class ParametritParser {
         return true;
     }
 
-
     private boolean isOPH() {
         Authentication authentication = SecurityContextHolder.getContext()
                 .getAuthentication();
