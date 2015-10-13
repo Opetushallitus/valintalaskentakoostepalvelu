@@ -43,17 +43,6 @@ public class ParametritResource {
     @ApiOperation(value = "Parametrien listaus", response = Response.class)
     public Response listParametrit(@PathParam("hakuOid") String hakuOid) {
 
-
-/*        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("pistesyotto", parametriService.pistesyottoEnabled(hakuOid));
-        params.put("hakeneet", parametriService.hakeneetEnabled(hakuOid));
-        params.put("harkinnanvaraiset", parametriService.harkinnanvaraisetEnabled(hakuOid));
-        params.put("valintakoekutsut", parametriService.valintakoekutsutEnabled(hakuOid));
-        params.put("valintalaskenta", parametriService.valintalaskentaEnabled(hakuOid));
-        params.put("valinnanhallinta", parametriService.valinnanhallintaEnabled(hakuOid));
-        params.put("hakijaryhmat", parametriService.hakijaryhmatEnabled(hakuOid));
-*/
-
         ParametritUIDTO resp = new ParametritUIDTO();
         ParametritParser parser = hakuParametritService.getParametritForHaku(hakuOid);
         resp.pistesyotto = parser.pistesyottoEnabled();
