@@ -14,6 +14,7 @@ import rx.Observable;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -34,47 +35,63 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
         super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(10));
     }
 
-    public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm) {
+    @Override
+    public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid,
+                                                          String ensikertalaisuudenRajapvm) {
         return getAsObservable(
                 "/suoritusrekisteri/rest/v1/oppijat",
-                new TypeToken<List<Oppija>>() {
-                }.getType(),
+                new TypeToken<List<Oppija>>() { }.getType(),
                 client -> {
                     client.query("hakukohde", hakukohdeOid);
-                    if (referenssiPvm != null) {
-                        client.query("ensikertalaisuudenReferenssiPvm", referenssiPvm);
+                    if (ensikertalaisuudenRajapvm != null) {
+                        client.query("ensikertalaisuudenRajapvm", ensikertalaisuudenRajapvm);
                     }
                     return client;
                 }
         );
     }
 
-    public Peruutettava getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
-        String url = "/suoritusrekisteri/rest/v1/oppijat";
+    @Override
+    public Peruutettava getOppijatByHakukohde(String hakukohdeOid,
+                                              String ensikertalaisuudenRajapvm,
+                                              Consumer<List<Oppija>> callback,
+                                              Consumer<Throwable> failureCallback) {
+        String url = "/suoritusrekisteri/rest/v1/oppijat?hakukohde=" + hakukohdeOid + "&ensikertalaisuudenRajapvm=" + ensikertalaisuudenRajapvm;
         try {
-            WebClient client = getWebClient()
-                    .path(url);
-            if (referenssiPvm != null) {
-                client.query("ensikertalaisuudenReferenssiPvm", referenssiPvm);
-            }
-            return new PeruutettavaImpl(client
-                    .query("hakukohde", hakukohdeOid)
+            return new PeruutettavaImpl(getWebClient()
+                    .path(url)
                     .async()
-                    .get(new GsonResponseCallback<List<Oppija>>(address, url + "?hakukohde=" + hakukohdeOid + "&ensikertalaisuudenReferenssiPvm=" + referenssiPvm, callback, failureCallback, new TypeToken<List<Oppija>>() {
-                    }.getType())));
+                    .get(new GsonResponseCallback<>(
+                            address,
+                            url,
+                            callback,
+                            failureCallback, new TypeToken<List<Oppija>>() {
+                            }.getType()
+                    ))
+            );
         } catch (Exception e) {
             failureCallback.accept(e);
             return TyhjaPeruutettava.tyhjaPeruutettava();
         }
     }
 
-    public Future<Response> getSuorituksetByOppija(String opiskelijaOid, Consumer<Oppija> callback, Consumer<Throwable> failureCallback) {
-        String url = "/suoritusrekisteri/rest/v1/oppijat/" + opiskelijaOid;
+    @Override
+    public Future<Response> getSuorituksetByOppija(String opiskelijaOid,
+                                                   String ensikertalaisuudenRajapvm,
+                                                   Consumer<Oppija> callback,
+                                                   Consumer<Throwable> failureCallback) {
+        String url = "/suoritusrekisteri/rest/v1/oppijat/" + opiskelijaOid + "?ensikertalaisuudenRajapvm=" + ensikertalaisuudenRajapvm;
         return getWebClient()
                 .path(url)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
-                .get(new GsonResponseCallback<Oppija>(address, url, callback, failureCallback, new TypeToken<Oppija>() {
-                }.getType()));
+                .get(new GsonResponseCallback<Oppija>(
+                        address,
+                        url,
+                        callback,
+                        failureCallback,
+                        new TypeToken<Oppija>() {
+                        }.getType()
+                ));
     }
 }

@@ -11,11 +11,18 @@ import java.util.function.Consumer;
 
 public interface SuoritusrekisteriAsyncResource {
 
-    Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm);
+    Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid,
+                                                   String ensikertalaisuudenRajapvm);
 
     @Deprecated
-    Peruutettava getOppijatByHakukohde(String hakukohdeOid, String referenssiPvm,
-                                       Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback);
+    Peruutettava getOppijatByHakukohde(String hakukohdeOid,
+                                       String ensikertalaisuudenRajapvm,
+                                       Consumer<List<Oppija>> callback,
+                                       Consumer<Throwable> failureCallback);
 
-    Future<Response> getSuorituksetByOppija(String opiskelijaOid, Consumer<Oppija> callback, Consumer<Throwable> failureCallback);
+    Future<Response> getSuorituksetByOppija(String opiskelijaOid,
+                                            String ensikertalaisuudenRajapvm,
+                                            Consumer<Oppija> callback,
+                                            Consumer<Throwable> failureCallback);
+
 }
