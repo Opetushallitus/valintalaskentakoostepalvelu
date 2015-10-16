@@ -52,6 +52,8 @@ public class ParametritResource {
         resp.valintalaskenta = parser.valintalaskentaEnabled();
         resp.valinnanhallinta = parser.valinnanhallintaEnabled();
         resp.hakijaryhmat = parser.hakijaryhmatEnabled();
+        resp.koetulostentallennus = parser.koetulostenTallentaminenEnabled();
+        resp.koekutsujenmuodostaminen = parser.koekutsujenMuodostaminenEnabled();
 
         return Response.ok(resp).build();
     }

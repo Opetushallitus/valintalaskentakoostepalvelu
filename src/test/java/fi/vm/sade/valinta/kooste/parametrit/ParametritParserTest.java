@@ -60,6 +60,30 @@ public class ParametritParserTest {
         assertTrue(parametritParser.valintapalvelunKayttoEnabled());
     }
 
+    @Test
+    public void testKoetulostenTallentaminenEnabled() {
+        this.setNormalUser();
+
+        ParametritDTO parametritDTO = new ParametritDTO();
+        ParametriDTO ph_ktt = new ParametriDTO();
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND, -100);
+        ph_ktt.setDateStart(cal.getTime());
+        cal.add(Calendar.SECOND, 200);
+        ph_ktt.setDateEnd(cal.getTime());
+        parametritDTO.setPH_KTT(ph_ktt);
+        ParametritParser parametritParser = new ParametritParser(parametritDTO, null, ROOTOID);
+        assertTrue(parametritParser.koetulostenTallentaminenEnabled());
+
+        ph_ktt.setDateStart(cal.getTime());
+        parametritParser = new ParametritParser(parametritDTO, null, ROOTOID);
+        assertFalse(parametritParser.koetulostenTallentaminenEnabled());
+
+        ph_ktt.setDateStart(null);
+        parametritParser = new ParametritParser(parametritDTO, null, ROOTOID);
+        assertTrue(parametritParser.koetulostenTallentaminenEnabled());
+    }
+
 
     private void setOphUser() {
         Authentication authentication = new UsernamePasswordAuthenticationToken("test", "test", Arrays.asList(new SimpleGrantedAuthority("ROLE_" + ROOTOID)));

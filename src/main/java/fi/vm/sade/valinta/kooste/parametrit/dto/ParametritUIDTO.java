@@ -9,6 +9,8 @@ public class ParametritUIDTO {
     public boolean valintalaskenta;
     public boolean valinnanhallinta;
     public boolean hakijaryhmat;
+    public boolean koetulostentallennus;
+    public boolean koekutsujenmuodostaminen;
 
     public ParametritUIDTO() {
     }

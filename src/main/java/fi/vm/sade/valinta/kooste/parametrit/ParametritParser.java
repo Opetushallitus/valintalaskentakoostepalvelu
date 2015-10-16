@@ -99,6 +99,28 @@ public class ParametritParser {
         return true;
     }
 
+    public boolean koetulostenTallentaminenEnabled() {
+        return isAllowedBetween(this.parametrit.getPH_KTT());
+    }
+
+    public boolean koekutsujenMuodostaminenEnabled() {
+        return isAllowedBetween(this.parametrit.getPH_KKM());
+    }
+
+    private boolean isAllowedBetween(ParametriDTO param) {
+        if(isOPH()) {
+            return true;
+        }
+        Date now = Calendar.getInstance().getTime();
+        if(param != null && param.getDateStart() != null && now.before(param.getDateStart())) {
+            return false;
+        } else if(param != null && param.getDateEnd() != null && now.after(param.getDateEnd())) {
+            return false;
+        }
+        return true;
+    }
+
+
     private boolean isOPH() {
         Authentication authentication = SecurityContextHolder.getContext()
                 .getAuthentication();
