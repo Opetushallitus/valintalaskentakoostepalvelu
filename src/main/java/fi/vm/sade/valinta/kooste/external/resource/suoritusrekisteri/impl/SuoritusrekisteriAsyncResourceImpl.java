@@ -5,7 +5,6 @@ import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
-import org.apache.cxf.jaxrs.client.WebClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -14,7 +13,6 @@ import rx.Observable;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -56,14 +54,16 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
                                               String ensikertalaisuudenRajapvm,
                                               Consumer<List<Oppija>> callback,
                                               Consumer<Throwable> failureCallback) {
-        String url = "/suoritusrekisteri/rest/v1/oppijat?hakukohde=" + hakukohdeOid + "&ensikertalaisuudenRajapvm=" + ensikertalaisuudenRajapvm;
+        String url = "/suoritusrekisteri/rest/v1/oppijat";
         try {
             return new PeruutettavaImpl(getWebClient()
                     .path(url)
+                    .query("hakukohde", hakukohdeOid)
+                    .query("ensikertalaisuudenRajapvm", ensikertalaisuudenRajapvm)
                     .async()
                     .get(new GsonResponseCallback<>(
                             address,
-                            url,
+                            url + "?hakukohde=" + hakukohdeOid + "&ensikertalaisuudenRajapvm=" + ensikertalaisuudenRajapvm,
                             callback,
                             failureCallback, new TypeToken<List<Oppija>>() {
                             }.getType()
@@ -80,14 +80,15 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
                                                    String ensikertalaisuudenRajapvm,
                                                    Consumer<Oppija> callback,
                                                    Consumer<Throwable> failureCallback) {
-        String url = "/suoritusrekisteri/rest/v1/oppijat/" + opiskelijaOid + "?ensikertalaisuudenRajapvm=" + ensikertalaisuudenRajapvm;
+        String url = "/suoritusrekisteri/rest/v1/oppijat/" + opiskelijaOid;
         return getWebClient()
                 .path(url)
+                .query("ensikertalaisuudenRajapvm", ensikertalaisuudenRajapvm)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .get(new GsonResponseCallback<Oppija>(
                         address,
-                        url,
+                        url  + "?ensikertalaisuudenRajapvm=" + ensikertalaisuudenRajapvm,
                         callback,
                         failureCallback,
                         new TypeToken<Oppija>() {
