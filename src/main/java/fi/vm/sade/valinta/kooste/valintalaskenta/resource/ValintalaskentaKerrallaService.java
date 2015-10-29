@@ -6,12 +6,12 @@ import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyn
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.dto.HakukohdeJaOrganisaatio;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaInfo;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRoute;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,21 +40,17 @@ public class ValintalaskentaKerrallaService {
 
     public void kaynnistaLaskentaHaulle(LaskentaParams laskentaParams, Consumer<Response> callback) {
         String hakuOid = laskentaParams.getHakuOid();
-        Maski maski = laskentaParams.getMaski();
+        Optional<String> uuidForExistingNonMaskedLaskenta = uuidForExistingNonMaskedLaskenta(laskentaParams.getMaski(), hakuOid);
 
-        if (StringUtils.isBlank(hakuOid)) {
-            LOG.error("HakuOid on pakollinen");
-            throw new RuntimeException("HakuOid on pakollinen");
-        }
-
-        Optional<String> uuidForExistingNonMaskedLaskenta = uuidForExistingNonMaskedLaskenta(maski, hakuOid);
         if (uuidForExistingNonMaskedLaskenta.isPresent()) {
-            returnExistingLaskenta(uuidForExistingNonMaskedLaskenta.get(), callback);
+            String uuid = uuidForExistingNonMaskedLaskenta.get();
+            LOG.warn("Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun", uuid, uuid);
+            callback.accept(redirectResponse(uuid));
         } else {
             LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
             valintaperusteetAsyncResource.haunHakukohteet(hakuOid,
                     (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
-                        Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, maski, callback);
+                        Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
                         createLaskenta(haunHakukohteetOids, (String uuid) -> notifyWorkAvailable(uuid, callback), laskentaParams, callback);
                     },
                     (Throwable poikkeus) -> {
@@ -98,10 +94,10 @@ public class ValintalaskentaKerrallaService {
                 .findFirst();
     }
 
-    private Collection<HakukohdeJaOrganisaatio> kasitteleHakukohdeViitteet(
+    private static Collection<HakukohdeJaOrganisaatio> kasitteleHakukohdeViitteet(
             final List<HakukohdeViiteDTO> hakukohdeViitteet,
             final String hakuOid,
-            final Maski maski,
+            final Optional<Maski> maski,
             final Consumer<Response> callback
     ) {
         LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
@@ -117,7 +113,7 @@ public class ValintalaskentaKerrallaService {
                 .map(u -> new HakukohdeJaOrganisaatio(u.getOid(), u.getTarjoajaOid()))
                 .collect(Collectors.toList());
 
-        Collection<HakukohdeJaOrganisaatio> oids = maski.isMask() ? maski.maskaa(haunHakukohdeOids) : haunHakukohdeOids;
+        Collection<HakukohdeJaOrganisaatio> oids = maski.map(m -> m.maskaa(haunHakukohdeOids)).orElse(haunHakukohdeOids);
         if (oids.isEmpty()) {
             String msg = "Haulla " + hakuOid + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?";
             LOG.error(msg);
@@ -143,7 +139,7 @@ public class ValintalaskentaKerrallaService {
                 });
     }
 
-    private void validateHakukohdeDtos(Collection<HakukohdeJaOrganisaatio> hakukohdeData, List<HakukohdeDto> hakukohdeDtos, Consumer<Response> callbackResponse) {
+    private static void validateHakukohdeDtos(Collection<HakukohdeJaOrganisaatio> hakukohdeData, List<HakukohdeDto> hakukohdeDtos, Consumer<Response> callbackResponse) {
         if (hakukohdeDtos.isEmpty()) {
             String msg = "Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!";
             LOG.error(msg);
@@ -157,15 +153,15 @@ public class ValintalaskentaKerrallaService {
         }
     }
 
-    private Response redirectResponse(final String target) {
+    private static Response redirectResponse(final String target) {
         return Response.ok(Vastaus.uudelleenOhjaus(target)).build();
     }
 
-    private Response errorResponse(final String errorMessage) {
+    private static Response errorResponse(final String errorMessage) {
         return Response.serverError().entity(errorMessage).build();
     }
 
-    private List<HakukohdeDto> toHakukohdeDto(Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
+    private static List<HakukohdeDto> toHakukohdeDto(Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
         return hakukohdeData.stream()
                 .filter(Objects::nonNull)
                 .filter(hk -> hk.getHakukohdeOid() != null)
@@ -174,13 +170,8 @@ public class ValintalaskentaKerrallaService {
                 .collect(Collectors.toList());
     }
 
-    private Optional<String> uuidForExistingNonMaskedLaskenta(Maski maski, String hakuOid) {
-        final Optional<Laskenta> ajossaOlevaLaskentaHaulle = !maski.isMask() ? haeAjossaOlevaLaskentaHaulle(hakuOid) : Optional.<Laskenta>empty();
-        return ajossaOlevaLaskentaHaulle.isPresent() ? Optional.of(ajossaOlevaLaskentaHaulle.get().getUuid()) : Optional.<String>empty();
-    }
-
-    private void returnExistingLaskenta(String uuid, Consumer<Response> callback) {
-        LOG.warn("Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun", uuid, uuid);
-        callback.accept(redirectResponse(uuid));
+    private Optional<String> uuidForExistingNonMaskedLaskenta(Optional<Maski> maski, String hakuOid) {
+        final Optional<Laskenta> ajossaOlevaLaskentaHaulle = !maski.isPresent() || !maski.get().isMask() ? haeAjossaOlevaLaskentaHaulle(hakuOid) : Optional.<Laskenta>empty();
+        return ajossaOlevaLaskentaHaulle.map(LaskentaInfo::getUuid);
     }
 }

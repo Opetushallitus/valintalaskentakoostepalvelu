@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import fi.vm.sade.hakemuseditori.tarjonta.domain.HakuTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
@@ -21,6 +22,7 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -40,6 +42,31 @@ public class ValintalaskentaKerrallaResource {
     private ValintalaskentaStatusExcelHandler valintalaskentaStatusExcelHandler;
     @Autowired
     private LaskentaSeurantaAsyncResource seurantaAsyncResource;
+
+    @POST
+    @Path("/haku/{hakuOid}/tyyppi/HAKU")
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
+    public void valintalaskentaKokoHaulle(
+            @PathParam("hakuOid") String hakuOid,
+            @QueryParam("erillishaku") Boolean erillishaku,
+            @QueryParam("valinnanvaihe") Integer valinnanvaihe,
+            @QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
+            @Suspended AsyncResponse asyncResponse) {
+        try {
+            asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+            asyncResponse.setTimeoutHandler((AsyncResponse asyncResponseTimeout) -> {
+                LOG.error("Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/HAKU?valinnanvaihe={}&valintakoelaskenta={}\r\n{}", hakuOid, valinnanvaihe, valintakoelaskenta);
+                asyncResponse.resume(errorResponce("Ajo laskennalle aikakatkaistu!"));
+            });
+
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(LaskentaTyyppi.HAKU, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.empty(), Boolean.TRUE.equals(erillishaku)), asyncResponse::resume);
+        } catch (Throwable e) {
+            LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
+            asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
+            throw e;
+        }
+    }
 
     @POST
     @Path("/haku/{hakuOid}/tyyppi/{tyyppi}/whitelist/{whitelist}")
@@ -63,7 +90,7 @@ public class ValintalaskentaKerrallaResource {
             });
 
             Maski maski = whitelist ? Maski.whitelist(stringMaski) : Maski.blacklist(stringMaski);
-            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, maski, Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
+            valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(new LaskentaParams(laskentatyyppi, valintakoelaskenta, valinnanvaihe, hakuOid, Optional.of(maski), Boolean.TRUE.equals(erillishaku)), (Response response) -> asyncResponse.resume(response));
         } catch (Throwable e) {
             LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
             asyncResponse.resume(errorResponce("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));

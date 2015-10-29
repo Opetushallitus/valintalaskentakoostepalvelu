@@ -77,13 +77,13 @@ public class LaskentaStarter {
         );
     }
 
-    private Collection<HakukohdeJaOrganisaatio> maskHakukohteet(String hakuOid, List<HakukohdeViiteDTO> hakukohdeViitteet, LaskentaDto laskenta) {
+    private static Collection<HakukohdeJaOrganisaatio> maskHakukohteet(String hakuOid, List<HakukohdeViiteDTO> hakukohdeViitteet, LaskentaDto laskenta) {
         LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
 
         final List<HakukohdeJaOrganisaatio> haunHakukohdeOidit = hakukohdeViitteet != null ? publishedNonNulltoHakukohdeJaOrganisaatio(hakukohdeViitteet) : new ArrayList<>();
         final Maski maski = createMaskiFromLaskenta(laskenta);
 
-        return maski.isMask() ? maski.maskaa(haunHakukohdeOidit) : haunHakukohdeOidit;
+        return maski.maskaa(haunHakukohdeOidit);
     }
 
     private void fetchHakuInformation(ActorRef laskennankaynnistajaActor, String hakuOid, Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, LaskentaDto laskenta, BiConsumer<HakuV1RDTO, LaskentaActorParams> startActor) {
@@ -112,7 +112,7 @@ public class LaskentaStarter {
         );
     }
 
-    private LaskentaActorParams laskentaActorParams(String hakuOid, LaskentaDto laskenta, Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, ParametritDTO parametrit) {
+    private static LaskentaActorParams laskentaActorParams(String hakuOid, LaskentaDto laskenta, Collection<HakukohdeJaOrganisaatio> haunHakukohdeOidit, ParametritDTO parametrit) {
         return new LaskentaActorParams(
                 new LaskentaStartParams(
                         laskenta.getUuid(),
@@ -128,7 +128,7 @@ public class LaskentaStarter {
                 parametrit);
     }
 
-    private List<HakukohdeJaOrganisaatio> publishedNonNulltoHakukohdeJaOrganisaatio(final List<HakukohdeViiteDTO> hakukohdeViitteet) {
+    private static List<HakukohdeJaOrganisaatio> publishedNonNulltoHakukohdeJaOrganisaatio(final List<HakukohdeViiteDTO> hakukohdeViitteet) {
         return hakukohdeViitteet.stream()
                 .filter(Objects::nonNull)
                 .filter(h -> h.getOid() != null)
@@ -144,7 +144,7 @@ public class LaskentaStarter {
         laskennanKaynnistajaActor.tell(new LaskentaStarterActor.WorkerAvailable(), ActorRef.noSender());
     }
 
-    private Maski createMaskiFromLaskenta(final LaskentaDto laskenta) {
+    private static Maski createMaskiFromLaskenta(final LaskentaDto laskenta) {
         final List<String> hakukohdeOids = laskenta.getHakukohteet().stream()
                 .filter(h -> !HakukohdeTila.VALMIS.equals(h.getTila()))
                 .map(h -> new HakukohdeJaOrganisaatio(h.getHakukohdeOid(), h.getOrganisaatioOid()))

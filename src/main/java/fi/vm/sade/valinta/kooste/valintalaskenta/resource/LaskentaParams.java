@@ -2,6 +2,9 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.Optional;
 
 
 public class LaskentaParams {
@@ -9,14 +12,22 @@ public class LaskentaParams {
     private final Boolean isValintakoelaskenta;
     private final Integer valinnanvaihe;
     private final String hakuOid;
-    private final Maski maski;
+    private final Optional<Maski> maski;
     private final boolean isErillishaku;
 
-    public LaskentaParams(LaskentaTyyppi laskentatyyppi, Boolean isValintakoelaskenta, Integer valinnanvaihe, String hakuOid, Maski maski, boolean isErillishaku) {
+    public LaskentaParams(LaskentaTyyppi laskentatyyppi, Boolean isValintakoelaskenta, Integer valinnanvaihe, String hakuOid, Optional<Maski> maski, boolean isErillishaku) {
         this.laskentatyyppi = laskentatyyppi;
         this.isValintakoelaskenta = isValintakoelaskenta;
         this.valinnanvaihe = valinnanvaihe;
+
+        if (StringUtils.isBlank(hakuOid)) {
+            throw new RuntimeException("HakuOid on pakollinen");
+        }
         this.hakuOid = hakuOid;
+
+        if (maski == null) {
+            throw new RuntimeException("maski on pakollinen");
+        }
         this.maski = maski;
         this.isErillishaku = isErillishaku;
     }
@@ -37,7 +48,7 @@ public class LaskentaParams {
         return hakuOid;
     }
 
-    public Maski getMaski() {
+    public Optional<Maski> getMaski() {
         return maski;
     }
 
