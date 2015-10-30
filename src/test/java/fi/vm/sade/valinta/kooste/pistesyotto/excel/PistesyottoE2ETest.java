@@ -58,7 +58,6 @@ public class PistesyottoE2ETest {
         mockForward(PUT,
                 fakeHakuApp.addHandler("/haku-app/applications/additionalData/testioidi1/1.2.246.562.5.85532589612", exchange -> {
                     try {
-                        counter.release();
                         List<ApplicationAdditionalDataDTO> additionalData = new Gson().fromJson(
                                 IOUtils.toString(exchange.getRequestBody()), new TypeToken<List<ApplicationAdditionalDataDTO>>() {
                                 }.getType()
@@ -70,6 +69,7 @@ public class PistesyottoE2ETest {
 
                         Assert.assertEquals("Editoimattomat lisätietokentät ohitetaan, eli viedään vain 840/1260.", 840, count);
                         exchange.sendResponseHeaders(200, 0);
+                        counter.release();
                     } catch (Throwable t) {
                         t.printStackTrace();
                     }
