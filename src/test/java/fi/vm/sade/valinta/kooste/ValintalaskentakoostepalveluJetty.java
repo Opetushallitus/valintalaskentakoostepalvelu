@@ -5,6 +5,10 @@ import fi.vm.sade.integrationtest.util.ProjectRootFinder;
 import fi.vm.sade.integrationtest.util.SpringProfile;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
 /**
  * @author Jussi Jartamo
@@ -13,8 +17,19 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
  */
 public class ValintalaskentakoostepalveluJetty {
 
-    public final static int port = PortChecker.findFreeLocalPort();
-    private static Server server = new Server(port);
+    public final static int port;
+    private static Server server;
+
+    static {
+        try {
+            ServerSocket s = new ServerSocket(0);
+            port = s.getLocalPort();
+            s.close();
+            server = new Server(port);
+        } catch (IOException e) {
+            throw new RuntimeException("free port not found");
+        }
+    }
 
     public static void main(String[] args) throws Exception{
         startShared();
