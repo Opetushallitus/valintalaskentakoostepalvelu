@@ -107,6 +107,18 @@ public class ParametritParser {
         return isAllowedBetween(this.parametrit.getPH_KKM());
     }
 
+    public boolean harkinnanvarainenPaatosTallennusEnabled() {
+        if(isOPH()) {
+            return true;
+        }
+        ParametriDTO param = this.parametrit.getPH_HVVPTP();
+        Date now = Calendar.getInstance().getTime();
+        if(param == null || param.getDate() == null || now.before(param.getDate())) {
+            return true;
+        }
+        return false;
+    }
+
     private boolean isAllowedBetween(ParametriDTO param) {
         if(isOPH()) {
             return true;

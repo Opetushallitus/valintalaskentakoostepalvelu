@@ -54,6 +54,7 @@ public class ParametritResource {
         resp.hakijaryhmat = parser.hakijaryhmatEnabled();
         resp.koetulostentallennus = parser.koetulostenTallentaminenEnabled();
         resp.koekutsujenmuodostaminen = parser.koekutsujenMuodostaminenEnabled();
+        resp.harkinnanvarainenpaatostallennus = parser.harkinnanvarainenPaatosTallennusEnabled();
 
         return Response.ok(resp).build();
     }
