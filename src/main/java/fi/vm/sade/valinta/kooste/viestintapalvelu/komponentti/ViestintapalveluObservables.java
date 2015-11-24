@@ -6,6 +6,8 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveenValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
+import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
@@ -13,6 +15,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -134,7 +137,8 @@ public class ViestintapalveluObservables {
 
     public static Observable<LetterBatch> kirjeet(String hakuOid, Optional<String> asiointikieli, List<HakijaDTO> hyvaksytytHakijat,
                                                   Collection<Hakemus> hakemukset, String defaultValue, Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-                                                  Observable<Map<String, Optional<Osoite>>> addresses, HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti) {
+                                                  Observable<Map<String, Optional<Osoite>>> addresses, HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti, HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl,
+                                                  ParametritParser haunParametrit) {
         return addresses.map(hakijapalveluidenOsoite -> hyvaksymiskirjeetKomponentti
                 .teeHyvaksymiskirjeet(
                         hakijapalveluidenOsoite,
@@ -147,8 +151,8 @@ public class ViestintapalveluObservables {
                         defaultValue,
                         hakuOid, // nimiUriToTag(h.getHakukohteenNimiUri(), hakukohdeOid.get());
                         "hyvaksymiskirje",
-                        null,
-                        null,
+                        hyvaksymiskirjeetServiceImpl.parsePalautusPvm(null, haunParametrit),
+                        hyvaksymiskirjeetServiceImpl.parsePalautusAika(null, haunParametrit),
                         asiointikieli.isPresent()));
     }
 

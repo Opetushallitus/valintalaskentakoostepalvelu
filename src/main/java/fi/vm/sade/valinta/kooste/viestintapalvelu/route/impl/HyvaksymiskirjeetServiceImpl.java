@@ -295,14 +295,14 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         };
     }
 
-    private String parsePalautusPvm(String specifiedPvm, ParametritParser haunParametrit) {
+    public String parsePalautusPvm(String specifiedPvm, ParametritParser haunParametrit) {
         if(StringUtils.trimToNull(specifiedPvm) == null && haunParametrit.opiskelijanPaikanVastaanottoPaattyy() != null) {
             return pvmMuoto.format(haunParametrit.opiskelijanPaikanVastaanottoPaattyy());
         }
         return specifiedPvm;
     }
 
-    private String parsePalautusAika(String specifiedAika, ParametritParser haunParametrit) {
+    public String parsePalautusAika(String specifiedAika, ParametritParser haunParametrit) {
         if(StringUtils.trimToNull(specifiedAika) == null && haunParametrit.opiskelijanPaikanVastaanottoPaattyy() != null) {
             return kelloMuoto.format(haunParametrit.opiskelijanPaikanVastaanottoPaattyy());
         }

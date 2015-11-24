@@ -8,6 +8,8 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyn
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
+import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
+import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.SijoittelunTulosProsessi;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
@@ -18,6 +20,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HyvaksymiskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.ViestintapalveluObservables.HakukohdeJaResurssit;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.HyvaksymiskirjeetServiceImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +47,14 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
     private final DokumenttiAsyncResource dokumenttiAsyncResource;
     private final OrganisaatioAsyncResource organisaatioAsyncResource;
     private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
+    private final HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl;
+    private final HakuParametritService hakuParametritService;
 
     @Autowired
-    public HyvaksymiskirjeetHaulleHakukohteittain(HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti, ApplicationAsyncResource applicationAsyncResource, SijoitteluAsyncResource sijoitteluAsyncResource, TarjontaAsyncResource tarjontaAsyncResource, DokumenttiAsyncResource dokumenttiAsyncResource, OrganisaatioAsyncResource organisaatioAsyncResource, ViestintapalveluAsyncResource viestintapalveluAsyncResource) {
+    public HyvaksymiskirjeetHaulleHakukohteittain(HyvaksymiskirjeetKomponentti hyvaksymiskirjeetKomponentti, ApplicationAsyncResource applicationAsyncResource,
+                                                  SijoitteluAsyncResource sijoitteluAsyncResource, TarjontaAsyncResource tarjontaAsyncResource, DokumenttiAsyncResource dokumenttiAsyncResource,
+                                                  OrganisaatioAsyncResource organisaatioAsyncResource, ViestintapalveluAsyncResource viestintapalveluAsyncResource,
+                                                  HyvaksymiskirjeetServiceImpl hyvaksymiskirjeetServiceImpl, HakuParametritService hakuParametritService) {
         this.hyvaksymiskirjeetKomponentti = hyvaksymiskirjeetKomponentti;
         this.applicationAsyncResource = applicationAsyncResource;
         this.sijoitteluAsyncResource = sijoitteluAsyncResource;
@@ -54,6 +62,8 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
         this.dokumenttiAsyncResource = dokumenttiAsyncResource;
         this.organisaatioAsyncResource = organisaatioAsyncResource;
         this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
+        this.hyvaksymiskirjeetServiceImpl = hyvaksymiskirjeetServiceImpl;
+        this.hakuParametritService = hakuParametritService;
     }
 
     public void muodostaKirjeet(String hakuOid, SijoittelunTulosProsessi prosessi, Optional<String> defaultValue) {
@@ -155,6 +165,7 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
         try {
             LOG.info("##### Saatiin hakemukset hakukohteelle {}", hakukohdeOid);
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet = hyvaksymiskirjeetKomponentti.haeKiinnostavatHakukohteet(hyvaksytytHakijat);
+            ParametritParser haunParametrit = hakuParametritService.getParametritForHaku(hakuOid);
 
             Observable<LetterBatch> kirjeet = ViestintapalveluObservables.kirjeet(
                     hakuOid,
@@ -168,7 +179,9 @@ public class HyvaksymiskirjeetHaulleHakukohteittain {
                             tarjoajaOid,
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             organisaatioAsyncResource::haeHakutoimisto),
-                    hyvaksymiskirjeetKomponentti);
+                    hyvaksymiskirjeetKomponentti,
+                    hyvaksymiskirjeetServiceImpl,
+                    haunParametrit);
 
             return ViestintapalveluObservables.batchId(
                     kirjeet,
