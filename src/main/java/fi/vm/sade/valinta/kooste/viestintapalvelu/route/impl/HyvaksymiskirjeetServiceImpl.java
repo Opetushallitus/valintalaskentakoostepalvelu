@@ -60,7 +60,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     private final HakuParametritService hakuParametritService;
 
     private SimpleDateFormat pvmMuoto = new SimpleDateFormat("dd.MM.yyyy");
-    private SimpleDateFormat kelloMuoto = new SimpleDateFormat("hh.mm");
+    private SimpleDateFormat kelloMuoto = new SimpleDateFormat("HH.mm");
 
     @Autowired
     public HyvaksymiskirjeetServiceImpl(
