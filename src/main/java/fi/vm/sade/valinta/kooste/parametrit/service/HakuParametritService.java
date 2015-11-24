@@ -22,13 +22,11 @@ public class HakuParametritService {
 
     private String rootOrganisaatioOid;
     private OhjausparametritAsyncResource ohjausparametritAsyncResource;
-    private TarjontaAsyncResource tarjontaAsyncResource;
 
     @Autowired
-    public HakuParametritService(OhjausparametritAsyncResource ohjausparametritAsyncResource, TarjontaAsyncResource tarjontaAsyncResource, @Value("${root.organisaatio.oid:1.2.246.562.10.00000000001}") String rootOrganisaatioOid) {
+    public HakuParametritService(OhjausparametritAsyncResource ohjausparametritAsyncResource, @Value("${root.organisaatio.oid:1.2.246.562.10.00000000001}") String rootOrganisaatioOid) {
         this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
         this.rootOrganisaatioOid = rootOrganisaatioOid;
-        this.tarjontaAsyncResource = tarjontaAsyncResource;
     }
 
     public ParametritParser getParametritForHaku(String hakuOid) {
@@ -49,10 +47,8 @@ public class HakuParametritService {
                 }
         );
 
-        Observable<HakuV1RDTO> hakuFuture = tarjontaAsyncResource.haeHaku(hakuOid);
-
         try {
-            ParametritParser ret = new ParametritParser(promise.get(), BlockingObservable.from(hakuFuture).first(), this.rootOrganisaatioOid);
+            ParametritParser ret = new ParametritParser(promise.get(), this.rootOrganisaatioOid);
             return ret;
         } catch (InterruptedException e) {
             LOG.error("Ohjausparametrien luku epäonnistui", e);

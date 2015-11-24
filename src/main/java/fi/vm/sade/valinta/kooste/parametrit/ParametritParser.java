@@ -27,12 +27,10 @@ public class ParametritParser {
     private static final Logger LOG = LoggerFactory.getLogger(ParametritParser.class);
 
     private ParametritDTO parametrit;
-    private HakuV1RDTO haku;
     private String rootOrganisaatioOid;
 
-    public ParametritParser(ParametritDTO parametrit,HakuV1RDTO haku, String rootOrganisaatioOid) {
+    public ParametritParser(ParametritDTO parametrit, String rootOrganisaatioOid) {
         this.parametrit = parametrit;
-        this.haku = haku;
         this.rootOrganisaatioOid = rootOrganisaatioOid;
     }
 
@@ -130,6 +128,10 @@ public class ParametritParser {
             return false;
         }
         return true;
+    }
+
+    public Date opiskelijanPaikanVastaanottoPaattyy() {
+        return this.parametrit.getPH_OPVP().getDate();
     }
 
 
