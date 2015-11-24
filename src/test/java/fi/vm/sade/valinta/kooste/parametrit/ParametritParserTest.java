@@ -29,7 +29,7 @@ public class ParametritParserTest {
         cal.add(Calendar.SECOND, 100);
         olvvpke.setDateStart(cal.getTime());
         parametritDTO.setPH_OLVVPKE(olvvpke);
-        ParametritParser parametritParser = new ParametritParser(parametritDTO, null, ROOTOID);
+        ParametritParser parametritParser = new ParametritParser(parametritDTO, ROOTOID);
 
         assertTrue(parametritParser.valintapalvelunKayttoEnabled());
 
@@ -38,25 +38,25 @@ public class ParametritParserTest {
 
         cal.add(Calendar.SECOND, -200);
         olvvpke.setDateStart(cal.getTime());
-        parametritParser = new ParametritParser(parametritDTO, null, ROOTOID);
+        parametritParser = new ParametritParser(parametritDTO, ROOTOID);
         assertFalse(parametritParser.valintapalvelunKayttoEnabled());
 
         cal.add(Calendar.SECOND, 50);
         olvvpke.setDateEnd(cal.getTime());
-        parametritParser = new ParametritParser(parametritDTO, null, ROOTOID);
+        parametritParser = new ParametritParser(parametritDTO, ROOTOID);
         assertTrue(parametritParser.valintapalvelunKayttoEnabled());
 
         cal.add(Calendar.SECOND, 100);
         olvvpke.setDateEnd(cal.getTime());
-        parametritParser = new ParametritParser(parametritDTO, null, ROOTOID);
+        parametritParser = new ParametritParser(parametritDTO, ROOTOID);
         assertFalse(parametritParser.valintapalvelunKayttoEnabled());
 
         olvvpke.setDateStart(null);
-        parametritParser = new ParametritParser(parametritDTO, null, ROOTOID);
+        parametritParser = new ParametritParser(parametritDTO, ROOTOID);
         assertFalse(parametritParser.valintapalvelunKayttoEnabled());
 
         olvvpke.setDateEnd(null);
-        parametritParser = new ParametritParser(parametritDTO, null, ROOTOID);
+        parametritParser = new ParametritParser(parametritDTO, ROOTOID);
         assertTrue(parametritParser.valintapalvelunKayttoEnabled());
     }
 
@@ -72,15 +72,15 @@ public class ParametritParserTest {
         cal.add(Calendar.SECOND, 200);
         ph_ktt.setDateEnd(cal.getTime());
         parametritDTO.setPH_KTT(ph_ktt);
-        ParametritParser parametritParser = new ParametritParser(parametritDTO, null, ROOTOID);
+        ParametritParser parametritParser = new ParametritParser(parametritDTO, ROOTOID);
         assertTrue(parametritParser.koetulostenTallentaminenEnabled());
 
         ph_ktt.setDateStart(cal.getTime());
-        parametritParser = new ParametritParser(parametritDTO, null, ROOTOID);
+        parametritParser = new ParametritParser(parametritDTO, ROOTOID);
         assertFalse(parametritParser.koetulostenTallentaminenEnabled());
 
         ph_ktt.setDateStart(null);
-        parametritParser = new ParametritParser(parametritDTO, null, ROOTOID);
+        parametritParser = new ParametritParser(parametritDTO, ROOTOID);
         assertTrue(parametritParser.koetulostenTallentaminenEnabled());
     }
 
