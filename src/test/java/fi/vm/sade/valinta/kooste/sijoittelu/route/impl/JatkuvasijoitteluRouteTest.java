@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 
@@ -52,7 +53,7 @@ public class JatkuvasijoitteluRouteTest extends CamelTestSupport {
 	public void testaaJatkuvaSijoitteluRouteSamaaHakuaEiLaitetaJonoonMoneenOtteeseen() {
 		final String HK = "hk1";
 		Mockito.reset(sijoittelunSeurantaResource, sijoitteluResource);
-		SijoitteluDto s = new SijoitteluDto(HK, true, null, null, null, 1);
+		SijoitteluDto s = new SijoitteluDto(HK, true, null, null, new Date(), 1);
 		Mockito.when(sijoittelunSeurantaResource.hae()).thenReturn(
 				Arrays.asList(s));
 		for (int i = 0; i < 2; ++i) {
@@ -69,7 +70,7 @@ public class JatkuvasijoitteluRouteTest extends CamelTestSupport {
 	public void testaaJatkuvaSijoitteluRouteAjossaOlevaaHakuaEiLaitetaUudestaanJonoon() {
 		final String HK = "hk1";
 		Mockito.reset(sijoittelunSeurantaResource, sijoitteluResource);
-		SijoitteluDto s = new SijoitteluDto(HK, true, null, null, null, 1);
+		SijoitteluDto s = new SijoitteluDto(HK, true, null, null, new Date(), 1);
 		Mockito.when(sijoittelunSeurantaResource.hae()).thenReturn(
 				Arrays.asList(s));
 		timerTemplate.send(new DefaultExchange(context()));

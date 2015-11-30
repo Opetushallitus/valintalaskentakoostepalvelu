@@ -31,6 +31,8 @@ import fi.vm.sade.valinta.kooste.util.Formatter;
 import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
 
+import static org.apache.commons.lang.StringUtils.*;
+
 public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaSijoittelu {
     private static final Logger LOG = LoggerFactory.getLogger(JatkuvaSijoitteluRouteImpl.class);
     private final String DEADLETTERCHANNEL = "direct:jatkuvan_sijoittelun_deadletterchannel";
@@ -96,12 +98,16 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
         aktiivisetSijoittelut.forEach((hakuOid, sijoitteluDto) -> {
             boolean hakuEiJonossa = jatkuvaSijoitteluDelayedQueue.stream().filter(j -> hakuOid.equals(j.getHakuOid())).distinct().count() == 0L;
             if (!ajossaHakuOids.containsKey(hakuOid) && hakuEiJonossa) {
-                DateTime asetusAjankohta = aloitusajankohtaTaiNyt(sijoitteluDto);
-                Integer intervalli = ajotiheysTaiVakio(sijoitteluDto.getAjotiheys());
-                DateTime suoritusAjankohta = ModuloiPaivamaaraJaTunnit.moduloiSeuraava(asetusAjankohta, DateTime.now(), intervalli);
-                LOG.info("Jatkuva sijoittelu haulle {} joka on asetettu {} intervallilla {} laitetaan suoritettavaksi seuraavan kerran {}",
-                        hakuOid, Formatter.paivamaara(asetusAjankohta.toDate()), intervalli, Formatter.paivamaara(suoritusAjankohta.toDate()));
-                jatkuvaSijoitteluDelayedQueue.add(new DelayedSijoitteluExchange(new DelayedSijoittelu(hakuOid, suoritusAjankohta), new DefaultExchange(getContext())));
+                if(sijoitteluDto.getAloitusajankohta() == null || sijoitteluDto.getAjotiheys() == null) {
+                    LOG.warn("Jatkuvaa sijoittelua ei suoriteta haulle {} koska siltä puuttuu pakollisia parametreja.", hakuOid);
+                } else {
+                    DateTime asetusAjankohta = aloitusajankohtaTaiNyt(sijoitteluDto);
+                    Integer intervalli = ajotiheysTaiVakio(sijoitteluDto.getAjotiheys());
+                    DateTime suoritusAjankohta = ModuloiPaivamaaraJaTunnit.moduloiSeuraava(asetusAjankohta, DateTime.now(), intervalli);
+                    LOG.info("Jatkuva sijoittelu haulle {} joka on asetettu {} intervallilla {} laitetaan suoritettavaksi seuraavan kerran {}",
+                            hakuOid, Formatter.paivamaara(asetusAjankohta.toDate()), intervalli, Formatter.paivamaara(suoritusAjankohta.toDate()));
+                    jatkuvaSijoitteluDelayedQueue.add(new DelayedSijoitteluExchange(new DelayedSijoittelu(hakuOid, suoritusAjankohta), new DefaultExchange(getContext())));
+                }
             }
         });
     }
