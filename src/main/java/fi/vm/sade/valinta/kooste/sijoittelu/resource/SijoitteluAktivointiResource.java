@@ -106,9 +106,16 @@ public class SijoitteluAktivointiResource {
         if (StringUtils.isBlank(hakuOid)) {
             return "get parameter 'hakuOid' required";
         } else {
-            LOG.info("jatkuva sijoittelu aktivoitu haulle {}", hakuOid);
-            sijoittelunSeurantaResource.merkkaaSijoittelunAjossaTila(hakuOid, true);
-            return "aktivoitu";
+            SijoitteluDto sijoitteluDto = sijoittelunSeurantaResource.hae(hakuOid);
+            if(sijoitteluDto.getAloitusajankohta() == null || sijoitteluDto.getAjotiheys() == null) {
+                LOG.warn("Haulta {} puuttuu jatkuvan sijoittelun parametreja. Ei aktivoida jatkuvaa sijoittelua.");
+                return "ei aktivoitu";
+            } else {
+                LOG.info("jatkuva sijoittelu aktivoitu haulle {}", hakuOid);
+                sijoittelunSeurantaResource.merkkaaSijoittelunAjossaTila(hakuOid, true);
+                return "aktivoitu";
+            }
+
         }
     }
 
