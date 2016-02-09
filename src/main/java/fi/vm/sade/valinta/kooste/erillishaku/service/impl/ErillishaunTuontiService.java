@@ -51,7 +51,6 @@ import java.util.stream.Stream;
 
 import static com.codepoetics.protonpack.StreamUtils.zip;
 import static com.codepoetics.protonpack.StreamUtils.zipWithIndex;
-import static fi.vm.sade.valinta.kooste.converter.ValintatuloksenTilaHakuTyypinMukaanConverter.convertValintatuloksenTilaHakuTyypinMukaan;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
 import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
@@ -253,7 +252,7 @@ public class ErillishaunTuontiService {
                     return Stream.of(new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), hakemus.getOid(), haku.getHakukohdeOid(),
                             rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(),
                             haku.getTarjoajaOid(),
-                            convertValintatuloksenTilaHakuTyypinMukaan(valintatuloksenTila(rivi), haku.getHakutyyppi()), ilmoittautumisTila(rivi),
+                            valintatuloksenTila(rivi), ilmoittautumisTila(rivi),
                             hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi(), Optional.of(rivi.isPoistetaankoRivi())));
                 }
             }).flatMap(s -> s);
@@ -365,13 +364,8 @@ public class ErillishaunTuontiService {
             return "Henkilötunnus ("+rivi.getHenkilotunnus()+") on virheellinen. " + rivi.toString();
         }
         if (!"KESKEN".equalsIgnoreCase(rivi.getHakemuksenTila())) {
-            // Valintatuloksen tila on hakua vastaava
             ValintatuloksenTila vt = valintatuloksenTila(rivi);
-            ValintatuloksenTila vtc = convertValintatuloksenTilaHakuTyypinMukaan(vt, tyyppi);
-            if (vt != null && vtc == null) {
-                return "Valintatuloksen tila (" + vt + ") on virheellinen. " + rivi.toString();
-            }
-            String tilaVirhe = ValidoiTilatUtil.validoi(hakemuksenTila(rivi), vtc, ilmoittautumisTila(rivi));
+            String tilaVirhe = ValidoiTilatUtil.validoi(hakemuksenTila(rivi), vt, ilmoittautumisTila(rivi));
             if (tilaVirhe != null) {
                 return tilaVirhe + ". " + rivi.toString();
             }

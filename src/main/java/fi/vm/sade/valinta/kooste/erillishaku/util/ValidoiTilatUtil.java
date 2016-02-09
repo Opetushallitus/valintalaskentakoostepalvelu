@@ -12,26 +12,18 @@ import java.util.Set;
 import static fi.vm.sade.sijoittelu.domain.ValintatuloksenTila.*;
 
 public class ValidoiTilatUtil {
-
-    private static final Set<ValintatuloksenTila> VIALLISET_VALINTATULOKSENTILAT =
-            Sets.newEnumSet(Arrays.asList(ILMOITETTU,VASTAANOTTANUT_LASNA,VASTAANOTTANUT_POISSAOLEVA,EHDOLLISESTI_VASTAANOTTANUT),ValintatuloksenTila.class);
-
     private static final Set<HakemuksenTila> HYVAKSYTTYNA =
             Sets.newEnumSet(Arrays.asList(HakemuksenTila.HYVAKSYTTY,HakemuksenTila.VARASIJALTA_HYVAKSYTTY),HakemuksenTila.class);
-    private static final Set<HakemuksenTila> HYVAKSYTTYNA_TAI_PERUNEENA =
-            Sets.newEnumSet(Arrays.asList(HakemuksenTila.HYVAKSYTTY,HakemuksenTila.VARASIJALTA_HYVAKSYTTY, HakemuksenTila.PERUNUT, HakemuksenTila.PERUUNTUNUT, HakemuksenTila.PERUUTETTU),HakemuksenTila.class);
     private static final Set<HakemuksenTila> HYLATTY_TAI_VARALLA =
             Sets.newEnumSet(Arrays.asList(HakemuksenTila.HYLATTY,HakemuksenTila.VARALLA),HakemuksenTila.class);
 
     private static final Set<HakemuksenTila> PERUNEENA =
             Sets.newEnumSet(Arrays.asList(HakemuksenTila.PERUNUT,HakemuksenTila.PERUUTETTU,HakemuksenTila.PERUUNTUNUT),HakemuksenTila.class);
-    private static final Set<ValintatuloksenTila> KAYTOSTAPOISTETTU_VASTAANOTTOTILA =
-            Sets.newEnumSet(Arrays.asList(VASTAANOTTANUT_LASNA),ValintatuloksenTila.class);
     private static final Set<ValintatuloksenTila> VASTAANOTTANEENA =
-            Sets.newEnumSet(Arrays.asList(VASTAANOTTANUT,VASTAANOTTANUT_LASNA,VASTAANOTTANUT_POISSAOLEVA,EI_VASTAANOTETTU_MAARA_AIKANA,
+            Sets.newEnumSet(Arrays.asList(EI_VASTAANOTETTU_MAARA_AIKANA,
                     EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT_SITOVASTI),ValintatuloksenTila.class);
     private static final Set<ValintatuloksenTila> VASTAANOTTANEENA_TAI_PERUNEENA =
-            Sets.newEnumSet(Arrays.asList(VASTAANOTTANUT,VASTAANOTTANUT_LASNA,VASTAANOTTANUT_POISSAOLEVA,EI_VASTAANOTETTU_MAARA_AIKANA,
+            Sets.newEnumSet(Arrays.asList(EI_VASTAANOTETTU_MAARA_AIKANA,
                     EHDOLLISESTI_VASTAANOTTANUT,VASTAANOTTANUT_SITOVASTI, PERUNUT, PERUUTETTU),ValintatuloksenTila.class);
     private static final Set<ValintatuloksenTila> KESKEN_TAI_PERUNUT_VASTAANOTTAJA =
             Sets.newHashSet(Arrays.asList(KESKEN, PERUUTETTU, PERUNUT));
@@ -42,18 +34,8 @@ public class ValidoiTilatUtil {
      * @return (null if ok) validation error
      */
     public static String validoi(HakemuksenTila hakemuksenTila, ValintatuloksenTila valintatuloksenTila, IlmoittautumisTila ilmoittautumisTila) {
-        /* NÄMÄ PITÄÄ SITTENKIN SALLIA
-        if(VIALLISET_VALINTATULOKSENTILAT.contains(valintatuloksenTila)) {
-            return "Valintatuloksentila " + valintatuloksenTila + " on viallinen. ";
-        }*/
         if (hakemuksenTila == null || valintatuloksenTila == null || ilmoittautumisTila == null) {
             return virheellinenTilaYhdistelma(new StringBuilder("Tila ei saa olla tyhjä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
-        }
-        if (ILMOITETTU.equals(valintatuloksenTila)) {
-            return virheellinenTilaYhdistelma(new StringBuilder("Ilmoitettutila on poistettu käytöstä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
-        }
-        if (KAYTOSTAPOISTETTU_VASTAANOTTOTILA.contains(valintatuloksenTila)) {
-            return virheellinenTilaYhdistelma(new StringBuilder("Valintatuloksen tila on poistettu käytöstä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
         }
         if (!EI_ILMOITTAUTUMISTA.contains(ilmoittautumisTila)) {
             if (HYVAKSYTTYNA.contains(hakemuksenTila) && VASTAANOTTANEENA_TAI_PERUNEENA.contains(valintatuloksenTila)) {
@@ -89,15 +71,11 @@ public class ValidoiTilatUtil {
 
 
         /* VTTILA
-                ILMOITETTU,                    // Hakijalle on ilmoitettu, sijoittelun tulos ei voi muuttaa paikkaa peruuntuneeksi
-                VASTAANOTTANUT,
-                VASTAANOTTANUT_LASNA,          // Hakija ottanut paikan vastaan ja on lasna
-                VASTAANOTTANUT_POISSAOLEVA,    // Hakija ottanut paikan vastaan ja ilmoittautunut poissaolevaksi
                 EI_VASTAANOTETTU_MAARA_AIKANA, // Hakija ei ole ilmoittanut paikkaa vastaanotetuksi maaraaikana ja on nain ollen hylatty
                 PERUNUT,                       // Hakija ei ota paikkaa vastaan
                 PERUUTETTU,                    // Hakijan tila on peruutettu
                 EHDOLLISESTI_VASTAANOTTANUT,    // Ehdollisesti vastaanottanut
-                VASTAANOTTANUT_SITOVASTI,       // Sitovasti vastaanottanut, kk-tila
+                VASTAANOTTANUT_SITOVASTI,       // Sitovasti vastaanottanut
                 KESKEN
                 */
         /* ILMOTILAT

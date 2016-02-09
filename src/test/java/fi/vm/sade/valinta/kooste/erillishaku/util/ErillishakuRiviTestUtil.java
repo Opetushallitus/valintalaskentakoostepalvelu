@@ -25,13 +25,13 @@ public class ErillishakuRiviTestUtil {
         return new ErillishakuRivi(null, SUKUNIMI, ETUNIMI, HETU,
                 EMPTY, SYNTYMAAIKA, SUKUPUOLI, EMPTY,
                 AIDINKIELI, HakemuksenTila.HYVAKSYTTY.toString(),
-                ValintatuloksenTila.VASTAANOTTANUT.toString(),
+                ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI.toString(),
                 IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false);
     }
     public static ErillishakuRivi viallinenRiviPuuttuvillaTunnisteilla() {
         return new ErillishakuRivi(null, SUKUNIMI, ETUNIMI,
                 EMPTY, EMPTY, EMPTY, Sukupuoli.EI_SUKUPUOLTA, EMPTY, EMPTY, HakemuksenTila.HYVAKSYTTY.toString(),
-                ValintatuloksenTila.VASTAANOTTANUT.toString(),
+                ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI.toString(),
                 IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false);
     }
 
@@ -41,7 +41,7 @@ public class ErillishakuRiviTestUtil {
 
                 "{\"etunimi\":\"Etunimi\",\"sukunimi\":\"Sukunimi\"," +
                 "\"henkilotunnus\":\"\",\"sahkoposti\":\"\",\"syntymaAika\"" +
-                ":\"\",\"sukupuoli\":\"2\",\"aidinkieli\":\"\",\"personOid\":\"\",\"hakemuksenTila\":\"HYVAKSYTTY\",\"vastaanottoTila\":\"VASTAANOTTANUT\",\"ilmoittautumisTila\":\"EI_ILMOITTAUTUNUT\",\"julkaistaankoTiedot\":true,\"poistetaankoRivi\":false}"
+                ":\"\",\"sukupuoli\":\"2\",\"aidinkieli\":\"\",\"personOid\":\"\",\"hakemuksenTila\":\"HYVAKSYTTY\",\"vastaanottoTila\":\"VASTAANOTTANUT_SITOVASTI\",\"ilmoittautumisTila\":\"EI_ILMOITTAUTUNUT\",\"julkaistaankoTiedot\":true,\"poistetaankoRivi\":false}"
                 +"]}";
     }
 }

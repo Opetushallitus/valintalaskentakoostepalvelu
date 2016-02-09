@@ -86,7 +86,7 @@ public class ErillishakuDataRivi extends DataRivi {
     private static final Collection<String> VASTAANOTTOTILA_ARVOT_TOINEN_ASTE =
             Arrays.asList(
                     // TOISEN ASTEEN VALINTATULOKSEN TILAT
-                    ValintatuloksenTila.VASTAANOTTANUT,
+                    ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI,
                     ValintatuloksenTila.EI_VASTAANOTETTU_MAARA_AIKANA,
                     ValintatuloksenTila.PERUNUT,
                     ValintatuloksenTila.KESKEN

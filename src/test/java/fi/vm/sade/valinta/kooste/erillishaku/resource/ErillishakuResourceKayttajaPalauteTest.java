@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
 import com.google.gson.GsonBuilder;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.integrationtest.tomcat.SharedTomcat;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -78,7 +77,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
                 // Odotetaan tyhjää datajoukko palautetta!
                 .poikkeukset, equalTo(asList(Poikkeus.koostepalvelupoikkeus(POIKKEUS_VIALLINEN_DATAJOUKKO, asList(
                 new Tunniste(
-                        "Rivi 2: Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. Etunimi, Sukunimi, , HYVAKSYTTY, ***HENKILOTUNNUS***, , NAINEN, , EI_ILMOITTAUTUNUT, VASTAANOTTANUT, true",
+                        "Rivi 2: Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid oli tyhjiä. Vähintään yksi tunniste on syötettävä. Etunimi, Sukunimi, , HYVAKSYTTY, ***HENKILOTUNNUS***, , NAINEN, , EI_ILMOITTAUTUNUT, VASTAANOTTANUT_SITOVASTI, true",
                         ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN
                 )
         )))));

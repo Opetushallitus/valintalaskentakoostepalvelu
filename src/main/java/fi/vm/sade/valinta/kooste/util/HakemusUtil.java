@@ -41,10 +41,6 @@ public class HakemusUtil {
     private static Map<String, Map<ValintatuloksenTila, String>> valintatulostenTilat() {
         Map<String, Map<ValintatuloksenTila, String>> kielet = new HashMap<String, Map<ValintatuloksenTila, String>>();
         Map<ValintatuloksenTila, String> fi = new HashMap<>();
-        fi.put(ILMOITETTU, "Ilmoitettu");
-        fi.put(VASTAANOTTANUT, "Vastaanottanut");
-        fi.put(VASTAANOTTANUT_LASNA, "Vastaanottanut läsnä");
-        fi.put(VASTAANOTTANUT_POISSAOLEVA, "Vastaanottanut poissaolevana");
         fi.put(VASTAANOTTANUT_SITOVASTI, "Vastaanottanut sitovasti");
         fi.put(EI_VASTAANOTETTU_MAARA_AIKANA, "Ei vastaanotettu määräaikana");
         fi.put(KESKEN, "Kesken");
