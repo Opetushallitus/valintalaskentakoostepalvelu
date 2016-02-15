@@ -15,6 +15,8 @@ import javax.ws.rs.core.Response;
 
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import org.apache.camel.Produce;
@@ -93,4 +95,19 @@ public class PistesyottoResource {
         tuontiService.tuo(username, hakuOid, hakukohdeOid, prosessi, new ByteArrayInputStream(xlsx.toByteArray()));
         return prosessi.toProsessiId();
     }
+
+    @PUT
+    @Path("/ulkoinen")
+    @Consumes("application/json")
+    @Produces("application/json")
+    @ApiOperation(consumes = "application/json", value = "Pistesyötön tuonti hakemuksille ulkoisesta järjstelmästä", response = UlkoinenResponseDTO.class)
+    public UlkoinenResponseDTO ulkoinenTuonti(@QueryParam("hakuOid") String hakuOid, List<HakemusDTO> hakemukset) {
+        UlkoinenResponseDTO response = new UlkoinenResponseDTO();
+        LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
+        if(hakemukset != null) {
+            response.setKasiteltyOk(Integer.toString(hakemukset.size()));
+        }
+        return response;
+    }
+
 }
