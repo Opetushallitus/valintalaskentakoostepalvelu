@@ -328,6 +328,8 @@
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.valintalaskenta.resource" />
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.tarjonta.komponentti" />
 
+		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemukset.resource" />
+
 		<!-- Viestintapalvelu -->
 		<ctx:component-scan
 				base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti" />
@@ -466,6 +468,7 @@
 				<ref bean="ViestintapalveluAktivointiResource"/>
 				<ref bean="SessionResource"/>
 				<ref bean="swaggerResourceJSON"/>
+				<ref bean="HakemuksetResource"/>
 			</jaxrs:serviceBeans>
 			<jaxrs:providers>
 				<ref bean="jsonProvider" />

@@ -96,8 +96,9 @@ public class PistesyottoResource {
         return prosessi.toProsessiId();
     }
 
-    @PUT
+    @POST
     @Path("/ulkoinen")
+    @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @Consumes("application/json")
     @Produces("application/json")
     @ApiOperation(consumes = "application/json", value = "Pistesyötön tuonti hakemuksille ulkoisesta järjstelmästä", response = UlkoinenResponseDTO.class)

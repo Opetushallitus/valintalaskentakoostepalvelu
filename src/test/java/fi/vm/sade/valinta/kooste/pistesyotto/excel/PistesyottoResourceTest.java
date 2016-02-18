@@ -17,6 +17,12 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -41,6 +47,10 @@ import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import junit.framework.Assert;
+import org.springframework.core.io.ClassPathResource;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Jussi Jartamo
  */
@@ -50,6 +60,7 @@ public class PistesyottoResourceTest {
     final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
     final HttpResource pistesyottoTuontiResource = new HttpResource(root + "/pistesyotto/tuonti");
     final HttpResource pistesyottoVientiResource = new HttpResource(root + "/pistesyotto/vienti");
+    final HttpResource pistesyottoUlkoinenTuontiResource = new HttpResource(root + "/pistesyotto/ulkoinen");
     final String HAKU1 = "HAKU1";
     final String HAKUKOHDE1 = "HAKUKOHDE1";
     final String TARJOAJA1 = "TARJOAJA1";
@@ -65,6 +76,27 @@ public class PistesyottoResourceTest {
     @Before
     public void startServer() {
         ValintaKoosteJetty.startShared();
+    }
+
+    @Test
+    public void pistesyottoUlkoinenTuontiResource() throws Exception {
+        cleanMocks();
+        String requestBody = IOUtils.toString(new ClassPathResource("pistesyotto/ulkoinen_tuonti.json").getInputStream());
+        List<HakemusDTO> hakemusDTOs  = HttpResource.GSON.fromJson(requestBody, new TypeToken<List<HakemusDTO>>() {}.getType());
+        assertEquals(3, hakemusDTOs.size());
+        Response response = pistesyottoUlkoinenTuontiResource.getWebClient()
+                .query("hakuOid", "HAKUOID")
+                .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON_TYPE));
+        assertEquals(200, response.getStatus());
+
+        String responseAsString = response.readEntity(String.class);
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonParser jp = new JsonParser();
+        JsonElement je = jp.parse(responseAsString);
+        String prettyJsonString = gson.toJson(je);
+
+        System.out.println(prettyJsonString);
     }
 
     @Test
