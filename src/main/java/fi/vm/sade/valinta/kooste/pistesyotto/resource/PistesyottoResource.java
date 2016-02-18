@@ -5,10 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -17,6 +14,7 @@ import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.VirheDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import org.apache.camel.Produce;
@@ -106,7 +104,20 @@ public class PistesyottoResource {
         UlkoinenResponseDTO response = new UlkoinenResponseDTO();
         LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
         if(hakemukset != null) {
-            response.setKasiteltyOk(Integer.toString(hakemukset.size()));
+            if(hakemukset.size() < 2) {
+                response.setKasiteltyOk(Integer.toString(hakemukset.size()));
+                response.setVirheet(new ArrayList<>());
+            } else {
+                response.setKasiteltyOk(Integer.toString(hakemukset.size() - 1));
+                response.setVirheet(new ArrayList<>());
+                VirheDTO virhe = new VirheDTO();
+                virhe.setHakemusOid(hakemukset.get(0).getHakemusOid());
+                virhe.setVirhe("Ei onnistunut!!!");
+                response.getVirheet().add(virhe);
+            }
+        } else {
+            response.setKasiteltyOk("0");
+            response.setVirheet(new ArrayList<>());
         }
         return response;
     }
