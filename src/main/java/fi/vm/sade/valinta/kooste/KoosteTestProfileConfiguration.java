@@ -74,6 +74,8 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.app.password.to.haku", "");
         p0.setProperty("valintalaskentakoostepalvelu.app.username.to.valintaperusteet", "");
         p0.setProperty("valintalaskentakoostepalvelu.app.password.to.valintaperusteet", "");
+        p0.setProperty("valintalaskentakoostepalvelu.maxWorkerCount", "0");
+
 
         org.springframework.context.support.PropertySourcesPlaceholderConfigurer defaultProps = new org.springframework.context.support.PropertySourcesPlaceholderConfigurer();
         defaultProps.setProperties(p0);

@@ -5,9 +5,12 @@ import fi.vm.sade.integrationtest.util.ProjectRootFinder;
 import fi.vm.sade.integrationtest.util.SpringProfile;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Optional;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
 /**
@@ -16,16 +19,20 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
  * Tuotantoa vastaava konfiguraatio
  */
 public class ValintalaskentakoostepalveluJetty {
+    private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentakoostepalveluJetty.class);
 
     public final static int port;
     private static Server server;
 
     static {
         try {
-            ServerSocket s = new ServerSocket(0);
+            // -Dport=8090
+            Integer portFlagOrZero = Integer.parseInt(Optional.ofNullable(System.getProperty("port")).orElse("0"));
+            ServerSocket s = new ServerSocket(portFlagOrZero);
             port = s.getLocalPort();
             s.close();
             server = new Server(port);
+            LOG.info("Starting server to port {}", port);
         } catch (IOException e) {
             throw new RuntimeException("free port not found");
         }

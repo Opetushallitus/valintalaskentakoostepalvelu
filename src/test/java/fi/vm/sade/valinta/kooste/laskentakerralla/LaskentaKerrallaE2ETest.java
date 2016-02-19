@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.server.SeurantaServerMock;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +26,7 @@ import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startS
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.*;
 import static javax.ws.rs.HttpMethod.GET;
 
-/**
- * @author Jussi Jartamo
- */
+@Ignore
 public class LaskentaKerrallaE2ETest {
     private final SeurantaServerMock seurantaServerMock = new SeurantaServerMock();
 
