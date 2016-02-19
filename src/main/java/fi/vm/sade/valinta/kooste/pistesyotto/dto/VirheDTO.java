@@ -1,10 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.dto;
 
-import java.io.Serializable;
-
-public class VirheDTO implements Serializable {
-
-    private static final long serialVersionUID = 6591935646238664674L;
+public class VirheDTO {
 
     private String hakemusOid;
     private String virhe;

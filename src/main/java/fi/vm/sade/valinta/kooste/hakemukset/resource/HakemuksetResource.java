@@ -73,8 +73,8 @@ public class HakemuksetResource {
             hakemusDTO.setPostitoimipaikka("PUUTTUU");
 
             List<HakukohdeDTO> hakukohdeDTOs = hakemus.getAnswers().getHakutoiveet().entrySet().stream()
-                    .filter(key -> key.getKey().startsWith("preference") && key.getKey().endsWith("-Koulutus-id"))
-                    .map(key -> key.getValue())
+                    .filter(entry -> entry.getKey().startsWith("preference") && entry.getKey().endsWith("-Koulutus-id"))
+                    .map(entry -> entry.getValue())
                     .filter(value -> StringUtils.isNotEmpty(value))
                     .map(createHakukohdeDTO)
                     .collect(Collectors.toList());
@@ -85,17 +85,14 @@ public class HakemuksetResource {
         }
     };
 
-    private Function<String, HakukohdeDTO> createHakukohdeDTO = new Function<String, HakukohdeDTO>() {
-        @Override
-        public HakukohdeDTO apply(String hakukohdeOid) {
-            HakukohdeDTO hakukohdeDTO = new HakukohdeDTO();
-            hakukohdeDTO.setHakukohdeOid(hakukohdeOid);
-            ValintakoeDTO valintakoeDTO = new ValintakoeDTO();
-            valintakoeDTO.setTunniste("sotelikoe2016k");
-            hakukohdeDTO.setValintakokeet(new ArrayList<>());
-            hakukohdeDTO.getValintakokeet().add(valintakoeDTO);
-            return hakukohdeDTO;
-        }
+    private Function<String, HakukohdeDTO> createHakukohdeDTO = hakukohdeOid -> {
+        HakukohdeDTO hakukohdeDTO = new HakukohdeDTO();
+        hakukohdeDTO.setHakukohdeOid(hakukohdeOid);
+        ValintakoeDTO valintakoeDTO = new ValintakoeDTO();
+        valintakoeDTO.setTunniste("sotelikoe2016k");
+        hakukohdeDTO.setValintakokeet(new ArrayList<>());
+        hakukohdeDTO.getValintakokeet().add(valintakoeDTO);
+        return hakukohdeDTO;
     };
 
 }

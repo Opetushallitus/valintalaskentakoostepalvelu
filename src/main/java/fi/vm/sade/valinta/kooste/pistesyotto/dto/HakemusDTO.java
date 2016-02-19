@@ -1,11 +1,8 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.dto;
 
-import java.io.Serializable;
 import java.util.List;
 
-public class HakemusDTO implements Serializable {
-
-    private static final long serialVersionUID = -9039578038048161610L;
+public class HakemusDTO {
 
     private String hakemusOid;
     private String henkiloOid;

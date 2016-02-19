@@ -1,11 +1,8 @@
 package fi.vm.sade.valinta.kooste.hakemukset.dto;
 
-import java.io.Serializable;
 import java.util.List;
 
-public class HakukohdeDTO implements Serializable {
-
-    private static final long serialVersionUID = 3384740333940585758L;
+public class HakukohdeDTO {
 
     private String hakukohdeOid;
 

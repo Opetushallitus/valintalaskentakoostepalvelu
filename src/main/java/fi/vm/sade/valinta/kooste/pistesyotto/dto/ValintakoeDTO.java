@@ -1,10 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.dto;
 
-import java.io.Serializable;
-
-public class ValintakoeDTO implements Serializable {
-
-    private static final long serialVersionUID = -7076537760941865340L;
+public class ValintakoeDTO {
 
     private String tunniste;
     private Osallistuminen osallistuminen;

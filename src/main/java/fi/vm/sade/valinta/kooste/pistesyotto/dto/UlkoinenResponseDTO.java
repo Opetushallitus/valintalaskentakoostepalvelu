@@ -1,11 +1,8 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.dto;
 
-import java.io.Serializable;
 import java.util.List;
 
-public class UlkoinenResponseDTO implements Serializable {
-
-    private static final long serialVersionUID = 4370237271186029557L;
+public class UlkoinenResponseDTO {
 
     private String kasiteltyOk;
     private List<VirheDTO> virheet;
