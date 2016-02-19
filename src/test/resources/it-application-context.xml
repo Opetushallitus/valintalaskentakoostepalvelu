@@ -51,6 +51,10 @@
   <bean id="SuorituksenArvosanatProxyResource"
         class="fi.vm.sade.valinta.kooste.proxy.resource.suoritukset.OppijanSuorituksetProxyResource"/>
 
+  <bean id="HakemuksetResource"
+        class="fi.vm.sade.valinta.kooste.hakemukset.resource.HakemuksetResource"/>
+
+
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"
     xsi:schemaLocation="http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
@@ -114,6 +118,7 @@
         <ref bean="DokumenttiProsessiResource"/>
         <ref bean="ViestintapalveluAktivointiResource"/>
         <ref bean="ValintalaskentaExcelResource"/>
+        <ref bean="HakemuksetResource"/>
       </jaxrs:serviceBeans>
       <jaxrs:providers>
         <ref bean="jsonProvider" />
