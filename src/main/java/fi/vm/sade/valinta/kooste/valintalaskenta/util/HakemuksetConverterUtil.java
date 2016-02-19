@@ -135,9 +135,10 @@ public class HakemuksetConverterUtil {
                 .filter(h -> StringUtils.isBlank(h.getPersonOid()))
                 .collect(toList());
         if (!noPersonOid.isEmpty()) {
+            String hakemusOids = noPersonOid.stream().map(h -> h.getOid()).collect(Collectors.joining(", "));
             RuntimeException e = new RuntimeException(
                     String.format("Hakukohteessa %s hakemuksilta %s puuttui personOid! Jalkikasittely ehka tekematta! Tarkista hakemusten tiedot!",
-                            hakukohdeOid, Arrays.toString(noPersonOid.toArray())));
+                            hakukohdeOid, hakemusOids));
             LOG.error("ensurePersonOids", e);
             throw e;
         }
