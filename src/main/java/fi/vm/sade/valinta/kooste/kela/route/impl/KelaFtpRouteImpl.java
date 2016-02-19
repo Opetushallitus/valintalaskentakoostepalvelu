@@ -32,7 +32,7 @@ public class KelaFtpRouteImpl extends SpringRouteBuilder {
     public KelaFtpRouteImpl(
             @Value(KelaRoute.KELA_SIIRTO) String kelaSiirto,
             @Value("${kela.ftp.protocol}://${kela.ftp.username}@${kela.ftp.host}:${kela.ftp.port}${kela.ftp.path}") final String host,
-            @Value("password=${kela.ftp.password}&ftpClient.dataTimeout=30000&passiveMode=true") final String params,
+            @Value("password=${kela.ftp.password}${kela.ftp.parameters}") final String params,
             DokumenttiResource dokumenttiResource) {
         this.kelaSiirto = kelaSiirto;
         this.ftpKelaSiirto = host + "?" + params;

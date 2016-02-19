@@ -45,6 +45,7 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("kela.ftp.protocol", "ftp");
         p0.setProperty("kela.ftp.username", "username");
         p0.setProperty("kela.ftp.password", "password");
+        p0.setProperty("kela.ftp.parameters", "");
         p0.setProperty("kela.ftp.host", "host");
         p0.setProperty("kela.ftp.port", "22");
         p0.setProperty("kela.ftp.path", "/");
