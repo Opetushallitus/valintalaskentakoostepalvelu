@@ -59,7 +59,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
         super(casInterceptor, address, context, TimeUnit.MINUTES.toMillis(50));
     }
 
-    public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
+    public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, String sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
         ///erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
         String url = "/erillissijoittelu/" + hakuOid + "/sijoitteluajo/" + sijoitteluAjoId + "/hakukohde/" + hakukohdeOid;
         getWebClient()
@@ -78,7 +78,15 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
                 .async()
                 .get(new GsonResponseCallback<HakukohdeDTO>(GSON, address, url, hakukohde, poikkeus, new TypeToken<HakukohdeDTO>() {}.getType()));
     }
-
+    public void getLatestHakukohdeBySijoittelu(String hakuOid, String sijoitteluAjoId, String hakukohdeOid, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
+        ///sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
+        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + sijoitteluAjoId + "/hakukohde/" + hakukohdeOid;
+        getWebClient()
+                .path(url)
+                .accept(MediaType.WILDCARD)
+                .async()
+                .get(new GsonResponseCallback<HakukohdeDTO>(GSON, address, url, hakukohde, poikkeus, new TypeToken<HakukohdeDTO>() {}.getType()));
+    }
     @Override
     public Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
         String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + SijoitteluResource.LATEST + "/hakemukset";

@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Profile;
 
 import javax.servlet.*;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,7 +36,8 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.koodiService.url", "http://localhost");
         p0.setProperty("cas.callback.valintalaskentakoostepalvelu", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url", "http://localhost");
-        p0.setProperty("valintalaskentakoostepalvelu.sijoittelu.rest.url", "http://" + proxyServer + "/sijoittelu-service/resources");
+        p0.setProperty("valintalaskentakoostepalvelu.sijoittelu.rest.url",Optional.ofNullable(System.getProperty("sijoittelu_server")).orElse("http://" + proxyServer) + "/sijoittelu-service/resources");
+
         p0.setProperty("valintalaskentakoostepalvelu.seuranta.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.organisaatioService.rest.url", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.tarjonta.rest.url", "http://" + proxyServer + "/tarjonta-service/rest");

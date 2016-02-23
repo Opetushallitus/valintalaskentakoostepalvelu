@@ -129,7 +129,7 @@ public class ErillishakuProxyResource {
             final AtomicInteger erillissijoitteluCounter = new AtomicInteger(sijoitteluAjoIdSetti.size());
             ///sijoittelu-service/resources/erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
             sijoitteluAjoIdSetti.forEach(id -> {
-                sijoitteluAsyncResource.getLatestHakukohdeBySijoitteluAjoId(hakuOid, hakukohdeOid, id,
+                sijoitteluAsyncResource.getLatestHakukohdeBySijoitteluAjoId(hakuOid, hakukohdeOid, new Long(id).toString(),
                         hakukohde -> {
                             LOG.info("Haettiin laskenta sijoitteluajoid:llä {}.", id);
                             erillissijoittelutmp.put(id, hakukohde);
