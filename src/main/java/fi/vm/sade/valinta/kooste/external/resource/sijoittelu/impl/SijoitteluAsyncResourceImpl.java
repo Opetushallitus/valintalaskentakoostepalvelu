@@ -78,15 +78,7 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
                 .async()
                 .get(new GsonResponseCallback<HakukohdeDTO>(GSON, address, url, hakukohde, poikkeus, new TypeToken<HakukohdeDTO>() {}.getType()));
     }
-    public void getLatestHakukohdeBySijoittelu(String hakuOid, String sijoitteluAjoId, String hakukohdeOid, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
-        ///sijoittelu/{hakuOid}/sijoitteluajo/latest/hakukohde/{hakukohdeOid}
-        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + sijoitteluAjoId + "/hakukohde/" + hakukohdeOid;
-        getWebClient()
-                .path(url)
-                .accept(MediaType.WILDCARD)
-                .async()
-                .get(new GsonResponseCallback<HakukohdeDTO>(GSON, address, url, hakukohde, poikkeus, new TypeToken<HakukohdeDTO>() {}.getType()));
-    }
+
     @Override
     public Future<HakijaPaginationObject> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
         String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + SijoitteluResource.LATEST + "/hakemukset";
@@ -147,6 +139,18 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
         return getAsObservable(
                 url,
                 new TypeToken<HakijaPaginationObject>() {}.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
+
+    public Observable<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String sijoitteluAjoId, String hakukohdeOid) {
+        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + sijoitteluAjoId + "/hakukohde/" + hakukohdeOid;
+        return getAsObservable(
+                url,
+                new TypeToken<HakukohdeDTO>() {}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     return client;

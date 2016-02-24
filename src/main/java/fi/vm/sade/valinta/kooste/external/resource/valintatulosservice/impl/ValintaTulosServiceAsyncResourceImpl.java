@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.ws.rs.core.GenericType;
 
+import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Service;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
+
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import rx.Observable;
 
@@ -30,6 +34,12 @@ public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implement
     @Override
     public Observable<ValintaTulosServiceDto> getHakemuksenValintatulos(String hakuOid, String hakemusOid) {
         return getAsObservable("/valinta-tulos-service/haku/" + hakuOid + "/hakemus/" + hakemusOid, ValintaTulosServiceDto.class);
+    }
+
+    @Override
+    public Observable<List<HakemuksenVastaanottotila>> getVastaanottotilatByHakemus(String hakuOid, String hakukohdeOid) {
+        String url = "/valinta-tulos-service/virkailija/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid;
+        return getAsObservable(url, new GenericType<List<HakemuksenVastaanottotila>>(){}.getType());
     }
 
     @Override
