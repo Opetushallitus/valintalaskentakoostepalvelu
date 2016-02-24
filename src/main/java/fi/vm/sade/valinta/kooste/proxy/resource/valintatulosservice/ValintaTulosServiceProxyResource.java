@@ -1,13 +1,11 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
-import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
-import fi.vm.sade.sijoittelu.domain.Valintatulos;
-import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
 import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,17 +17,15 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static fi.vm.sade.valinta.kooste.KoosteAudit.username;
 
@@ -42,7 +38,13 @@ public class ValintaTulosServiceProxyResource {
     private TilaAsyncResource tilaResource;
 
     @Autowired
+    private SijoitteluAsyncResource sijoitteluResource;
+
+    @Autowired
     private VastaanottoService vastaanottoService;
+
+    @Autowired
+    private ValintaTulosServiceAsyncResource valintaTulosServiceResource;
 
     @GET
     @Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
