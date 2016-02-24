@@ -125,11 +125,11 @@ public class ValintaTulosServiceProxyResource {
 
         String muokkaaja = username();
         vastaanottoService.tallenna(hakukohdeOid, valintatulokset, muokkaaja).subscribe(integer -> mergeSupplier.get(), throwable -> {
-            LOG.error("Async call failed", throwable);
+            LOG.error("Async call to valinta-tulos-service failed", throwable);
             respondWithError(asyncResponse, throwable.getMessage());
         });
         sijoitteluResource.muutaHakemuksenTilaa(hakuOid, hakukohdeOid, valintatulokset, selite).subscribe(aVoid -> mergeSupplier.get(), throwable -> {
-            LOG.error("Async call failed", throwable);
+            LOG.error("Async call to sijoittelu-service failed", throwable);
             respondWithError(asyncResponse, throwable.getMessage());
         });
     }
