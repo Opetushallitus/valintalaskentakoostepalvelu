@@ -2,8 +2,11 @@ package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
 import java.util.List;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 
+import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
+import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,5 +48,20 @@ public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implement
     @Override
     public Observable<String> getHakemuksenValintatulosAsString(String hakuOid, String hakemusOid) {
         return getStringAsObservable("/valinta-tulos-service/haku/" + hakuOid + "/hakemus/" + hakemusOid);
+    }
+
+    @Override
+    public Observable<List<VastaanottoRecordDTO>> hakukohteenVastaanotot(String hakukohdeOid) {
+        return getAsObservable("/valinta-tulos-service/virkailija/vastaanotto/hakukohde/" + hakukohdeOid, new GenericType<List<VastaanottoRecordDTO>>() {}.getType());
+    }
+
+    @Override
+    public Observable<Void> poista(PoistaVastaanottoDTO poistaVastaanottoDTO) {
+        return postAsObservable("/valinta-tulos-service/virkailija/vastaanotto/poista", Void.class, Entity.json(poistaVastaanottoDTO));
+    }
+
+    @Override
+    public Observable<Void> tallenna(List<VastaanottoRecordDTO> tallennettavat) {
+        return postAsObservable("/valinta-tulos-service/virkailija/vastaanotto", Void.class, Entity.json(tallennettavat));
     }
 }

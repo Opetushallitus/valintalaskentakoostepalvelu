@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -41,4 +42,5 @@ public interface SijoitteluAsyncResource {
 
     Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid);
 
+    Observable<Void> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite) throws UnsupportedEncodingException;
 }

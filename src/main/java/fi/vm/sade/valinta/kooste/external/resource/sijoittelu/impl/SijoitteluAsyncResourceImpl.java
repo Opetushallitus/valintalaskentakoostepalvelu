@@ -1,10 +1,13 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
@@ -57,6 +60,13 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
             ApplicationContext context
     ) {
         super(casInterceptor, address, context, TimeUnit.MINUTES.toMillis(50));
+    }
+
+    @Override
+    public Observable<Void> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite) throws UnsupportedEncodingException {
+        String url = "/sijoittelu/tila/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid + "?selite=" + URLEncoder.encode(selite, "UTF-8");
+
+        return postAsObservable(url, Void.class, Entity.json(valintatulokset));
     }
 
     public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, String sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {

@@ -70,6 +70,7 @@ public class ErillishakuProxyResource {
     @Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
     @Consumes("application/json")
     @ApiOperation(consumes = "application/json", value = "Hakukohteen valintatulokset", response = ProsessiId.class)
+// TODO
     public void vienti(
             @PathParam("hakuOid") String hakuOid,
             @PathParam("hakukohdeOid") String hakukohdeOid,
