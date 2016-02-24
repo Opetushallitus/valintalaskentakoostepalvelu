@@ -36,6 +36,7 @@ public class KoosteTestProfileConfiguration {
         p0.setProperty("valintalaskentakoostepalvelu.koodiService.url", "http://localhost");
         p0.setProperty("cas.callback.valintalaskentakoostepalvelu", "http://localhost");
         p0.setProperty("valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url", "http://localhost");
+        p0.setProperty("valintalaskentakoostepalvelu.valintatulosservice.url",Optional.ofNullable(System.getProperty("vts_server")).orElse("http://" + proxyServer));
         p0.setProperty("valintalaskentakoostepalvelu.sijoittelu.rest.url",Optional.ofNullable(System.getProperty("sijoittelu_server")).orElse("http://" + proxyServer) + "/sijoittelu-service/resources");
 
         p0.setProperty("valintalaskentakoostepalvelu.seuranta.rest.url", "http://localhost");

@@ -18,7 +18,7 @@ import rx.Observable;
 public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implements ValintaTulosServiceAsyncResource {
 
     @Autowired
-    public ValintaTulosServiceAsyncResourceImpl(@Value("${host.ilb}") String address) {
+    public ValintaTulosServiceAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.valintatulosservice.url:${host.ilb}}") String address) {
         super(address, TimeUnit.MINUTES.toMillis(30));
     }
 
