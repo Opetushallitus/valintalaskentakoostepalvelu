@@ -1,11 +1,14 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
 import com.google.common.collect.ImmutableMap;
+
+import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +55,7 @@ public class ValintaTulosServiceProxyResource {
     public void sijoittelunTulokset(
             @PathParam("hakuOid") String hakuOid,
             @PathParam("hakukohdeOid") String hakukohdeOid,
+            @QueryParam("valintatapajonoOid") String valintatapajonoOid,
             @Suspended AsyncResponse asyncResponse) {
         try {
             asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
@@ -59,7 +63,9 @@ public class ValintaTulosServiceProxyResource {
                 LOG.error("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
                 asyncResponse1.resume(Response.serverError().entity("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu").build());
             });
-            Observable<List<Valintatulos>> valintatuloksetObs = tilaResource.getValintatuloksetHakukohteelle(hakukohdeOid);
+            Observable<List<Valintatulos>> valintatuloksetObs = valintatapajonoOid == null ?
+                tilaResource.getValintatuloksetHakukohteelle(hakukohdeOid) :
+                tilaResource.getValintatuloksetValintatapajonolle(hakukohdeOid, valintatapajonoOid);
             Observable<List<HakemuksenVastaanottotila>> valinnantilatObs = valintaTulosServiceResource.getVastaanottotilatByHakemus(hakuOid, hakukohdeOid);
             Observable.zip(valintatuloksetObs, valinnantilatObs, (valintatulokset, valinnantilat) -> {
                     Map<String, HakemuksenVastaanottotila> vastaanottotilaByHakemus = valinnantilat.stream()
@@ -148,4 +154,67 @@ public class ValintaTulosServiceProxyResource {
         asyncResponse.resume(Response.serverError().entity(ImmutableMap.of("error", error)).build());
     }
 
+    @GET
+    @Path("/hakemus/{hakemusOid}/haku/{hakuOid}/hakukohde/{hakukohdeOid}/valintatapajono/{valintatapajonoOid}")
+    @Consumes("application/json")
+    public void hakemuksenSijoittelunTulos(
+            @PathParam("hakemusOid") String hakemusOid,
+            @PathParam("hakuOid") String hakuOid,
+            @PathParam("hakukohdeOid") String hakukohdeOid,
+            @PathParam("valintatapajonoOid") String valintatapajonoOid,
+            @Suspended AsyncResponse asyncResponse) {
+        asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+        asyncResponse.setTimeoutHandler(asyncResponse1 -> {
+            LOG.error("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /hakemus/{}/haku/{}/hakukohde/{}/valintatapajono/{}",
+                hakemusOid, hakuOid, hakukohdeOid, valintatapajonoOid);
+            asyncResponse1.resume(Response.serverError().entity("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu").build());
+        });
+        Observable<Valintatulos> valintatulosObs = tilaResource.getHakemuksenSijoittelunTulos(hakemusOid, hakuOid, hakukohdeOid, valintatapajonoOid);
+        Observable<ValintaTulosServiceDto> hakemuksenVastaanottotiedotObs = valintaTulosServiceResource.getHakemuksenValintatulos(hakuOid, hakemusOid);
+        Observable.zip(valintatulosObs, hakemuksenVastaanottotiedotObs, (valintatulos, hakemuksenVastaanottotiedot) -> {
+            hakemuksenVastaanottotiedot.getHakutoiveet().stream().filter(h -> h.getHakukohdeOid().equals(hakukohdeOid)).forEach(hakutoive ->
+                valintatulos.setTila(ValintatuloksenTila.valueOf(hakutoive.getVastaanottotila().name()), ""));
+            return valintatulos;
+        }).subscribe(
+            done -> asyncResponse.resume(Response.ok(done).header("Content-Type", "application/json").build()),
+            error -> {
+                LOG.error("Resurssien haku epäonnistui!", error);
+                asyncResponse
+                    .resume(Response.serverError()
+                        .header("Content-Type", "plain/text;charset=UTF8")
+                        .entity("ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: " + error.getMessage())
+                        .build());
+        });
+    }
+
+    @GET
+    @Path("/hakemus/{hakemusOid}/haku/{hakuOid}")
+    @Consumes("application/json")
+    public void kaikkiHakemuksenSijoittelunTulokset(
+            @PathParam("hakemusOid") String hakemusOid,
+            @PathParam("hakuOid") String hakuOid,
+            @Suspended AsyncResponse asyncResponse) {
+        asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+        asyncResponse.setTimeoutHandler(asyncResponse1 -> {
+            LOG.error("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /hakemus/{}/haku/{}", hakemusOid, hakuOid);
+            asyncResponse1.resume(Response.serverError().entity("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu").build());
+        });
+        Observable<List<Valintatulos>> valintatulosObs = tilaResource.getHakemuksenTulokset(hakemusOid);
+        Observable<ValintaTulosServiceDto> hakemuksenVastaanottotiedotObs = valintaTulosServiceResource.getHakemuksenValintatulos(hakuOid, hakemusOid);
+        Observable.zip(valintatulosObs, hakemuksenVastaanottotiedotObs, (valintatulokset, hakemuksenVastaanottotiedot) -> {
+            valintatulokset.forEach(valintatulos ->
+                hakemuksenVastaanottotiedot.getHakutoiveet().stream().filter(ht -> ht.getHakukohdeOid().equals(valintatulos.getHakukohdeOid())).forEach(hakutoive ->
+                    valintatulos.setTila(ValintatuloksenTila.valueOf(hakutoive.getVastaanottotila().name()), "")));
+            return valintatulokset;
+        }).subscribe(
+            done -> asyncResponse.resume(Response.ok(done).header("Content-Type", "application/json").build()),
+            error -> {
+                LOG.error("Resurssien haku epäonnistui!", error);
+                asyncResponse
+                    .resume(Response.serverError()
+                        .header("Content-Type", "plain/text;charset=UTF8")
+                        .entity("ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: " + error.getMessage())
+                        .build());
+        });
+    }
 }

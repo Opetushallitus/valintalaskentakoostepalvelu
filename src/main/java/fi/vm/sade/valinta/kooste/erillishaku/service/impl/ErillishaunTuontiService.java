@@ -10,6 +10,7 @@ import fi.vm.sade.authentication.model.Kielisyys;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
+import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
 
@@ -29,6 +30,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
+import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoService;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
@@ -65,18 +67,21 @@ public class ErillishaunTuontiService {
     private final TilaAsyncResource tilaAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final HenkiloAsyncResource henkiloAsyncResource;
+    private final VastaanottoService vastaanottoService;
     private final Scheduler scheduler;
 
-    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource, Scheduler scheduler) {
+    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource,
+                                    VastaanottoService vastaanottoService, Scheduler scheduler) {
         this.applicationAsyncResource = applicationAsyncResource;
         this.tilaAsyncResource = tilaAsyncResource;
         this.henkiloAsyncResource = henkiloAsyncResource;
+        this.vastaanottoService = vastaanottoService;
         this.scheduler = scheduler;
     }
 
     @Autowired
-    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource) {
-        this(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, newThread());
+    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource, VastaanottoService vastaanottoService) {
+        this(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, vastaanottoService, newThread());
     }
 
     public void tuoExcelistä(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
@@ -277,6 +282,10 @@ public class ErillishaunTuontiService {
             List<ErillishaunHakijaDTO> hakijatJaPoistettavat = new ArrayList<>();
             hakijatJaPoistettavat.addAll(hakijat.collect(Collectors.toList()));
             hakijatJaPoistettavat.addAll(poisLista);
+            // TODO handle with tilaAsyncResourceCall more sanely
+            vastaanottoService.tallenna(haku.getHakukohdeOid(), convertToValintaTulosList(hakijatJaPoistettavat), username).subscribe(
+                response -> LOG.info("Got from vastaanottoService: " + response),
+                error -> { throw new RuntimeException(error); });
             tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijatJaPoistettavat)
                     .subscribe(response -> {
                         hakijatJaPoistettavat.forEach(h ->
@@ -307,6 +316,19 @@ public class ErillishaunTuontiService {
             LOG.error("Erillishaun tilojen tuonti epaonnistui", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private List<Valintatulos> convertToValintaTulosList(List<ErillishaunHakijaDTO> hakijatJaPoistettavat) {
+        // TODO does this make sense? Or should we have a more focused API.
+        return hakijatJaPoistettavat.stream().map(erillishaunHakijaDTO -> {
+            Valintatulos v = new Valintatulos();
+            v.setHakemusOid(erillishaunHakijaDTO.getHakemusOid(), "");
+            v.setHakijaOid(erillishaunHakijaDTO.getHakijaOid(), "");
+            v.setHakuOid(erillishaunHakijaDTO.getHakuOid(), "");
+            v.setHakukohdeOid(erillishaunHakijaDTO.getHakukohdeOid(), "");
+            v.setTila(erillishaunHakijaDTO.getValintatuloksenTila(), "");
+            return v;
+        }).collect(Collectors.toList());
     }
 
 

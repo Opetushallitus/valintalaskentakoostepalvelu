@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import rx.*;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
@@ -63,11 +62,11 @@ public class ErillishaunVientiService {
     public void vie(KirjeProsessi prosessi, ErillishakuDTO erillishaku) {
         Observable<List<Hakemus>> hakemusObservable = applicationAsyncResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
         Future<HakukohdeDTO> hakukohdeFuture = sijoitteluAsyncResource.getLatestHakukohdeBySijoittelu(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid());
-        Future<List<Valintatulos>> valintatulosFuture = tilaAsyncResource.getValintatuloksetHakukohteelle(erillishaku.getHakukohdeOid(), erillishaku.getValintatapajonoOid());
+        Observable<List<Valintatulos>> valintatulosObservable = tilaAsyncResource.getValintatuloksetValintatapajonolle(erillishaku.getHakukohdeOid(), erillishaku.getValintatapajonoOid());
         Observable<HakuV1RDTO> hakuFuture = hakuV1AsyncResource.haeHaku(erillishaku.getHakuOid());
         Observable<HakukohdeV1RDTO> tarjontaHakukohdeObservable = hakuV1AsyncResource.haeHakukohde(erillishaku.getHakukohdeOid());
 
-        zip(hakemusObservable, hakuFuture, tarjontaHakukohdeObservable, from(valintatulosFuture), from(hakukohdeFuture),
+        zip(hakemusObservable, hakuFuture, tarjontaHakukohdeObservable, valintatulosObservable, from(hakukohdeFuture),
                 (hakemukset, haku, tarjontaHakukohde, valintatulos, hakukohde) -> {
                     System.out.println("Hakukohde: " + hakukohde.getSijoitteluajoId());
                     Map<String, Valintatulos> valintatulokset = getValintatulokset(erillishaku, valintatulos);

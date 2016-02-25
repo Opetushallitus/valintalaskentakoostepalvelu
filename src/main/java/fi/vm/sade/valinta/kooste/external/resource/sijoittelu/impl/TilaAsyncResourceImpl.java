@@ -3,11 +3,9 @@ package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -47,12 +45,34 @@ public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaA
             });
     }
 
-    public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
+    @Override
+    public Observable<Valintatulos> getHakemuksenSijoittelunTulos(String hakemusOid, String hakuOid, String hakukohdeOid, String valintatapajonoOid) {
+        String url = "/tila/" + hakemusOid + "/" + hakuOid + "/" + hakukohdeOid + "/" + valintatapajonoOid;
+        return getAsObservable(url, new TypeToken<Valintatulos>() {
+            }.getType(), client -> {
+                client.accept(MediaType.WILDCARD);
+                return client;
+            });
+    }
+
+    @Override
+    public Observable<List<Valintatulos>> getHakemuksenTulokset(String hakemusOid) {
+        String url = "/tila/" + hakemusOid;
+        return getAsObservable(url, new TypeToken<List<Valintatulos>>() {
+            }.getType(), client -> {
+                client.accept(MediaType.WILDCARD);
+                return client;
+            });
+    }
+
+    @Override
+    public Observable<List<Valintatulos>> getValintatuloksetValintatapajonolle(String hakukohdeOid, String valintatapajonoOid) {
         String url = "/tila/hakukohde/" + hakukohdeOid + "/" + valintatapajonoOid;
-        return getWebClient()
-                .path(url)
-                .accept(MediaType.WILDCARD)
-                .async().get(new GenericType<List<Valintatulos>>() {});
+        return getAsObservable(url, new TypeToken<List<Valintatulos>>() {
+            }.getType(), client -> {
+                client.accept(MediaType.WILDCARD);
+                return client;
+            });
     }
 
     @Override

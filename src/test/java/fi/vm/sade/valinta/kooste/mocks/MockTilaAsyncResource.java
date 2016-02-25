@@ -1,21 +1,19 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import com.google.common.util.concurrent.Futures;
+import static fi.vm.sade.valinta.kooste.mocks.MockData.*;
+
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
-
-import javax.ws.rs.core.Response;
-import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.springframework.stereotype.Service;
 import rx.Observable;
 
-import static fi.vm.sade.valinta.kooste.mocks.MockData.hakemusOid;
-import static fi.vm.sade.valinta.kooste.mocks.MockData.hakijaOid;
-import static fi.vm.sade.valinta.kooste.mocks.MockData.hakuOid;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class MockTilaAsyncResource implements TilaAsyncResource {
@@ -35,12 +33,22 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
     private static AtomicReference<List<Valintatulos>> resultReference = new AtomicReference<>();
 
     @Override
-    public Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid) {
-        return Futures.immediateFuture(Collections.singletonList(new Valintatulos(valintatapajonoOid, hakemusOid, hakukohdeOid, hakijaOid, hakuOid, 1)));
+    public Observable<List<Valintatulos>> getValintatuloksetValintatapajonolle(String hakukohdeOid, String valintatapajonoOid) {
+        return Observable.just(Collections.singletonList(new Valintatulos(valintatapajonoOid, hakemusOid, hakukohdeOid, hakijaOid, hakuOid, 1)));
     }
 
     @Override
     public Observable<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid) {
+        return null;
+    }
+
+    @Override
+    public Observable<Valintatulos> getHakemuksenSijoittelunTulos(String hakemusOid, String hakuOid, String hakukohdeOid, String valintatapajonoOid) {
+        return null;
+    }
+
+    @Override
+    public Observable<List<Valintatulos>> getHakemuksenTulokset(String hakemusOid) {
         return null;
     }
 

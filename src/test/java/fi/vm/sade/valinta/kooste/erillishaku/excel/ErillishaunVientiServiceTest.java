@@ -60,8 +60,7 @@ public class ErillishaunVientiServiceTest {
 
         SijoitteluAsyncResource sijoitteluMock = mock(SijoitteluAsyncResource.class);
         TilaAsyncResource tilaMock = mock(TilaAsyncResource.class);
-        when(tilaMock.getValintatuloksetHakukohteelle(anyString(), anyString())).thenReturn(Futures.immediateFuture(ImmutableList.of()));
-        //when(sijoitteluMock.getLatestHakukohdeBySijoittelu(anyString(), anyString())).thenReturn(mockSijoitteluAsyncResource.getLatestHakukohdeBySijoittelu("1", "2"));
+        when(tilaMock.getValintatuloksetValintatapajonolle(anyString(), anyString())).thenReturn(Observable.from(ImmutableList.of()));
         when(sijoitteluMock.getLatestHakukohdeBySijoittelu(anyString(), anyString())).thenReturn(mockSijoitteluAsyncResource.getLatestHakukohdeBySijoittelu("sjfhaskdjhfa", "dskfasadkjhf"));
 
         final ErillishaunVientiService erillishaunVientiService =
@@ -78,5 +77,4 @@ public class ErillishaunVientiServiceTest {
         assertEquals("Esimerkki", erillishakuRivi.getSukunimi());
         assertEquals(false, erillishakuRivi.isJulkaistaankoTiedot());
     }
-
 }
