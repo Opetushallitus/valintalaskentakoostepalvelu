@@ -285,7 +285,10 @@ public class ErillishaunTuontiService {
             // TODO handle with tilaAsyncResourceCall more sanely
             vastaanottoService.tallenna(haku.getHakukohdeOid(), convertToValintaTulosList(hakijatJaPoistettavat), username).subscribe(
                 response -> LOG.info("Got from vastaanottoService: " + response),
-                error -> { throw new RuntimeException(error); });
+                error -> {
+                    LOG.error("Got from vastaanottoService: " + error.getMessage(), error);
+                    throw new RuntimeException(error);
+                });
             tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijatJaPoistettavat)
                     .subscribe(response -> {
                         hakijatJaPoistettavat.forEach(h ->
