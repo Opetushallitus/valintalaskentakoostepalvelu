@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
@@ -24,8 +23,6 @@ import com.google.common.reflect.TypeToken;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
-import fi.vm.sade.valinta.http.DateDeserializer;
-import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import rx.Observable;
@@ -39,17 +36,6 @@ public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaA
             ApplicationContext context
     ) {
         super(casInterceptor, address, context, TimeUnit.MINUTES.toMillis(50));
-    }
-
-    public void getValintatulokset(String hakuOid, String hakukohdeOid
-            , Consumer<List<Valintatulos>> valintatulokset, Consumer<Throwable> poikkeus) {
-        ///tila/hakukohde/{hakukohdeOid}
-        String url = "/tila/hakukohde/" + hakukohdeOid;
-        getWebClient()
-                .path(url)
-                .accept(MediaType.WILDCARD)
-                .async().get(new GsonResponseCallback<>(DateDeserializer.GSON, address, url, valintatulokset, poikkeus,
-                new TypeToken<List<Valintatulos>>() {}.getType()));
     }
 
     public Observable<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid) {

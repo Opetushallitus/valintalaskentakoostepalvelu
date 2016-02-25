@@ -15,9 +15,6 @@ public interface TilaAsyncResource {
     Observable<Response> tuoErillishaunTilat(String hakuOid, String hakukohdeOid, String valintatapajononNimi, Collection<ErillishaunHakijaDTO> erillishaunHakijat);
 
     @Deprecated
-    void getValintatulokset(String hakuOid, String hakukohdeOid, Consumer<List<Valintatulos>> valintatulokset, Consumer<Throwable> poikkeus);
-
-    @Deprecated
     Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid);
 
     Observable<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid);
