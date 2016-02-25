@@ -33,13 +33,11 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.2.10.v20150310</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
-			<version>9.2.10.v20150310</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -764,7 +762,7 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.2.10.v20150310</version>
+				<version>${jetty.version}</version>
 				<configuration>
 					<systemProperties>
 						<systemProperty>
@@ -808,7 +806,7 @@
 					<dependency>
 						<groupId>org.eclipse.jetty</groupId>
 						<artifactId>jetty-servlets</artifactId>
-						<version>9.2.10.v20150310</version>
+						<version>${jetty.version}</version>
 						<exclusions>
 							<exclusion>
 								<groupId>org.javassist</groupId>
