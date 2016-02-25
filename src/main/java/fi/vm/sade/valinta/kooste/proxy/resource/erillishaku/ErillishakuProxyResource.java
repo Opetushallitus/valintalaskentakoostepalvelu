@@ -151,11 +151,11 @@ public class ErillishakuProxyResource {
 
     void fetchValintatulos(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<Valintatulos>> vtsValintatulokset, Supplier<Void> mergeSupplier) {
         tilaResource.getValintatulokset(hakuOid, hakukohdeOid, vts -> {
-                    LOG.info("Haetaan sijoittelusta valintatulokset");
-                    vtsValintatulokset.set(vts);
-                    mergeSupplier.get();
-                },
-                poikkeus -> logAndReturnError("valintatulosservice", asyncResponse, poikkeus)
+                LOG.info("Haetaan sijoittelusta valintatulokset");
+                vtsValintatulokset.set(vts);
+                mergeSupplier.get();
+            },
+            poikkeus -> logAndReturnError("valintatulosservice", asyncResponse, poikkeus)
         );
     }
 
