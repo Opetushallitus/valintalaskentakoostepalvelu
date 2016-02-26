@@ -2,8 +2,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import fi.vm.sade.auditlog.ApplicationType;
-import fi.vm.sade.auditlog.Audit;
+
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.authentication.model.Kielisyys;
@@ -283,7 +282,7 @@ public class ErillishaunTuontiService {
             hakijatJaPoistettavat.addAll(hakijat.collect(Collectors.toList()));
             hakijatJaPoistettavat.addAll(poisLista);
             // TODO handle with tilaAsyncResourceCall more sanely
-            vastaanottoService.tallenna(haku.getHakukohdeOid(), convertToValintaTulosList(hakijatJaPoistettavat), username).subscribe(
+            vastaanottoService.tallenna(convertToValintaTulosList(hakijatJaPoistettavat), username).subscribe(
                 response -> LOG.info("Got from vastaanottoService: " + response),
                 error -> {
                     LOG.error("Got from vastaanottoService: " + error.getMessage(), error);

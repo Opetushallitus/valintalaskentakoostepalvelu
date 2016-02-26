@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
+import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
-import fi.vm.sade.sijoittelu.domain.VastaanotettavuusDTO.VastaanottoAction;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class VastaanottoRecordDTO {
@@ -10,7 +10,7 @@ public class VastaanottoRecordDTO {
     private String hakuOid;
     private String hakukohdeOid;
     private String ilmoittaja;
-    private VastaanottoAction action;
+    private ValintatuloksenTila uusiVastaanottotila;
 
     public String getHenkiloOid() {
         return henkiloOid;
@@ -52,12 +52,12 @@ public class VastaanottoRecordDTO {
         this.ilmoittaja = ilmoittaja;
     }
 
-    public VastaanottoAction getAction() {
-        return action;
+    public ValintatuloksenTila getUusiVastaanottotila() {
+        return uusiVastaanottotila;
     }
 
-    public void setAction(VastaanottoAction action) {
-        this.action = action;
+    public void setUusiVastaanottotila(ValintatuloksenTila uusiVastaanottotila) {
+        this.uusiVastaanottotila = uusiVastaanottotila;
     }
 
     @Override
@@ -72,7 +72,7 @@ public class VastaanottoRecordDTO {
         v.setHakuOid(valintatulos.getHakuOid());
         v.setHakukohdeOid(valintatulos.getHakukohdeOid());
         v.setIlmoittaja(muokkaaja);
-        v.setAction(VastaanottoAction.of(valintatulos.getTila()));
+        v.setUusiVastaanottotila(valintatulos.getTila());
         return v;
     }
 }
