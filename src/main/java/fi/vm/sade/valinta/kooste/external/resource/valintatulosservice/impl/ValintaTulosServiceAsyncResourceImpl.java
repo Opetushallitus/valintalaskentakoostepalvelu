@@ -1,24 +1,22 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
-import java.util.List;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericType;
-
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.valinta.http.HttpResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
+import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
-
-import java.util.concurrent.TimeUnit;
 import rx.Observable;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implements ValintaTulosServiceAsyncResource {
@@ -65,7 +63,7 @@ public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implement
     }
 
     @Override
-    public Observable<Void> tallenna(List<VastaanottoRecordDTO> tallennettavat) {
-        return postAsObservable("/valinta-tulos-service/virkailija/vastaanotto", Void.class, Entity.json(tallennettavat));
+    public Observable<List<VastaanottoResultDTO>> tallenna(List<VastaanottoRecordDTO> tallennettavat) {
+        return postAsObservable("/valinta-tulos-service/virkailija/vastaanotto", new GenericType<List<VastaanottoResultDTO>>() {}.getType(), Entity.json(tallennettavat));
     }
 }

@@ -5,6 +5,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Hakem
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.PoistaVastaanottoDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
+import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import rx.Observable;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface ValintaTulosServiceAsyncResource {
 
     Observable<Void> poista(PoistaVastaanottoDTO poistaVastaanottoDTO);
 
-    Observable<Void> tallenna(List<VastaanottoRecordDTO> tallennettavat);
+    Observable<List<VastaanottoResultDTO>> tallenna(List<VastaanottoRecordDTO> tallennettavat);
 
     Observable<List<HakemuksenVastaanottotila>> getVastaanottotilatByHakemus(String hakuOid, String hakukohdeOid);
 

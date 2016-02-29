@@ -1,5 +1,15 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
+import static com.codepoetics.protonpack.StreamUtils.zip;
+import static com.codepoetics.protonpack.StreamUtils.zipWithIndex;
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
+import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static rx.schedulers.Schedulers.newThread;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
@@ -9,10 +19,7 @@ import fi.vm.sade.authentication.model.Kielisyys;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
-import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
-import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
-
 import fi.vm.sade.valinta.http.FailedHttpException;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
@@ -29,7 +36,9 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
-import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoService;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
+import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
+import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
@@ -42,23 +51,20 @@ import org.springframework.stereotype.Service;
 import rx.Observable;
 import rx.Scheduler;
 
+import javax.ws.rs.core.Response;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.codepoetics.protonpack.StreamUtils.zip;
-import static com.codepoetics.protonpack.StreamUtils.zipWithIndex;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HENKILOPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static rx.schedulers.Schedulers.newThread;
-import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 
 @Service
 public class ErillishaunTuontiService {
@@ -66,21 +72,21 @@ public class ErillishaunTuontiService {
     private final TilaAsyncResource tilaAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final HenkiloAsyncResource henkiloAsyncResource;
-    private final VastaanottoService vastaanottoService;
+    private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final Scheduler scheduler;
 
     public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource,
-                                    VastaanottoService vastaanottoService, Scheduler scheduler) {
+                                    ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource, Scheduler scheduler) {
         this.applicationAsyncResource = applicationAsyncResource;
         this.tilaAsyncResource = tilaAsyncResource;
         this.henkiloAsyncResource = henkiloAsyncResource;
-        this.vastaanottoService = vastaanottoService;
+        this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
         this.scheduler = scheduler;
     }
 
     @Autowired
-    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource, VastaanottoService vastaanottoService) {
-        this(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, vastaanottoService, newThread());
+    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource, ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource) {
+        this(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, valintaTulosServiceAsyncResource, newThread());
     }
 
     public void tuoExcelistä(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
@@ -281,54 +287,58 @@ public class ErillishaunTuontiService {
             List<ErillishaunHakijaDTO> hakijatJaPoistettavat = new ArrayList<>();
             hakijatJaPoistettavat.addAll(hakijat.collect(Collectors.toList()));
             hakijatJaPoistettavat.addAll(poisLista);
-            // TODO handle with tilaAsyncResourceCall more sanely
-            vastaanottoService.tallenna(convertToValintaTulosList(hakijatJaPoistettavat), username).subscribe(
-                response -> LOG.info("Got from vastaanottoService: " + response),
-                error -> {
-                    LOG.error("Got from vastaanottoService: " + error.getMessage(), error);
-                    throw new RuntimeException(error);
+            Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceAsyncResource.tallenna(convertToValintaTulosList(hakijatJaPoistettavat, username)).doOnError(
+                e -> LOG.error("Virhe vastaanottotilojen tallennuksessa valinta-tulos-service :en", e));
+            Observable<Response> erillishaunTilojenTuonti = tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijatJaPoistettavat).doOnError(
+                e -> {
+                    LOG.error("Erillishaun tuonti epäonnistui", e);
+                    HakukohteenValintatulosUpdateStatuses respObj = ((FailedHttpException) e).response.readEntity(HakukohteenValintatulosUpdateStatuses.class);
+                    List<ValintatulosUpdateStatus> statuses = respObj.statuses;
+                    prosessi.keskeyta("error", statuses.stream().collect(Collectors.toMap(k -> k.valintatapajonoOid + "_" + k.hakemusOid, v -> v.message)));
                 });
-            tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijatJaPoistettavat)
-                    .subscribe(response -> {
-                        hakijatJaPoistettavat.forEach(h ->
-                                AUDIT.log(builder()
-                                    .id(username)
-                                    .hakuOid(haku.getHakuOid())
-                                    .hakukohdeOid(haku.getHakukohdeOid())
-                                    .hakemusOid(h.getHakemusOid())
-                                            //.henkiloOid(h.getHakijaOid())
-                                    .valintatapajonoOid(haku.getValintatapajonoOid())
-                                    .setOperaatio(h.getPoistetaankoTulokset() ? ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO :
-                                            ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS)
-                                    .add("hakemuksentila", h.getHakemuksenTila())
-                                    .add("valintatuloksentila", h.getValintatuloksenTila())
-                                    .add("ilmoittautumistila", h.getIlmoittautumisTila())
-                                    .build())
-                        );
-                        prosessi.vaiheValmistui();
-                        prosessi.valmistui("ok");
-                    }, poikkeus -> {
-                        LOG.error("Erillishaun tuonti epäonnistui", poikkeus);
-                        HakukohteenValintatulosUpdateStatuses respObj = ((FailedHttpException)poikkeus).response.readEntity(HakukohteenValintatulosUpdateStatuses.class);
-                        List<ValintatulosUpdateStatus> statuses = respObj.statuses;
-                        prosessi.keskeyta("error", statuses.stream().collect(Collectors.toMap(k -> k.valintatapajonoOid + "_" + k.hakemusOid, v -> v.message)));
-                    });
+            Observable.zip(vastaanottoTilojenTallennus, erillishaunTilojenTuonti, (vastaanottoResponse, erillishaunTuontiResponse) -> {
+                for (VastaanottoResultDTO resultDTO : vastaanottoResponse) {
+                    if (resultDTO.getResult().getStatus() != Response.Status.OK.getStatusCode()) {
+                        LOG.warn(resultDTO.toString());
+                    }
+                }
+                return vastaanottoResponse;
+            }).subscribe(
+                done -> {
+                    hakijatJaPoistettavat.forEach(h ->
+                        AUDIT.log(builder()
+                            .id(username)
+                            .hakuOid(haku.getHakuOid())
+                            .hakukohdeOid(haku.getHakukohdeOid())
+                            .hakemusOid(h.getHakemusOid())
+                            //.henkiloOid(h.getHakijaOid())
+                            .valintatapajonoOid(haku.getValintatapajonoOid())
+                            .setOperaatio(h.getPoistetaankoTulokset() ? ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_POISTO :
+                                ValintaperusteetOperation.ERILLISHAKU_TUONTI_HAKIJA_PAIVITYS)
+                            .add("hakemuksentila", h.getHakemuksenTila())
+                            .add("valintatuloksentila", h.getValintatuloksenTila())
+                            .add("ilmoittautumistila", h.getIlmoittautumisTila())
+                            .build())
+                    );
+                    prosessi.vaiheValmistui();
+                    prosessi.valmistui("ok");
 
+                }, poikkeus -> LOG.error("Erillishaun tilojen tuonti epäonnistui", poikkeus));
         } catch (Exception e) {
             LOG.error("Erillishaun tilojen tuonti epaonnistui", e);
             throw new RuntimeException(e);
         }
     }
 
-    private List<Valintatulos> convertToValintaTulosList(List<ErillishaunHakijaDTO> hakijatJaPoistettavat) {
-        // TODO does this make sense? Or should we have a more focused API.
+    private List<VastaanottoRecordDTO> convertToValintaTulosList(List<ErillishaunHakijaDTO> hakijatJaPoistettavat, String muokkaaja) {
         return hakijatJaPoistettavat.stream().map(erillishaunHakijaDTO -> {
-            Valintatulos v = new Valintatulos();
-            v.setHakemusOid(erillishaunHakijaDTO.getHakemusOid(), "");
-            v.setHakijaOid(erillishaunHakijaDTO.getHakijaOid(), "");
-            v.setHakuOid(erillishaunHakijaDTO.getHakuOid(), "");
-            v.setHakukohdeOid(erillishaunHakijaDTO.getHakukohdeOid(), "");
-            v.setTila(erillishaunHakijaDTO.getValintatuloksenTila(), "");
+            VastaanottoRecordDTO v = new VastaanottoRecordDTO();
+            v.setHakemusOid(erillishaunHakijaDTO.getHakemusOid());
+            v.setHakukohdeOid(erillishaunHakijaDTO.getHakukohdeOid());
+            v.setHakuOid(erillishaunHakijaDTO.getHakuOid());
+            v.setHenkiloOid(erillishaunHakijaDTO.hakijaOid);
+            v.setIlmoittaja(muokkaaja);
+            v.setTila(erillishaunHakijaDTO.getValintatuloksenTila());
             return v;
         }).collect(Collectors.toList());
     }
