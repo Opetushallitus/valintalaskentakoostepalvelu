@@ -10,7 +10,7 @@ public class VastaanottoRecordDTO {
     private String hakuOid;
     private String hakukohdeOid;
     private String ilmoittaja;
-    private ValintatuloksenTila uusiVastaanottotila;
+    private ValintatuloksenTila tila;
 
     public String getHenkiloOid() {
         return henkiloOid;
@@ -52,12 +52,12 @@ public class VastaanottoRecordDTO {
         this.ilmoittaja = ilmoittaja;
     }
 
-    public ValintatuloksenTila getUusiVastaanottotila() {
-        return uusiVastaanottotila;
+    public ValintatuloksenTila getTila() {
+        return tila;
     }
 
-    public void setUusiVastaanottotila(ValintatuloksenTila uusiVastaanottotila) {
-        this.uusiVastaanottotila = uusiVastaanottotila;
+    public void setTila(ValintatuloksenTila tila) {
+        this.tila = tila;
     }
 
     @Override
@@ -72,7 +72,7 @@ public class VastaanottoRecordDTO {
         v.setHakuOid(valintatulos.getHakuOid());
         v.setHakukohdeOid(valintatulos.getHakukohdeOid());
         v.setIlmoittaja(muokkaaja);
-        v.setUusiVastaanottotila(valintatulos.getTila());
+        v.setTila(valintatulos.getTila());
         return v;
     }
 }
