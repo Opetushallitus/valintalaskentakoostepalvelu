@@ -12,6 +12,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valin
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import rx.Observable;
 
@@ -50,6 +51,7 @@ public class ValintaTulosServiceProxyResource {
     private ValintaTulosServiceAsyncResource valintaTulosServiceResource;
 
     @GET
+    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ')")
     @Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
     @Consumes("application/json")
     public void sijoittelunTulokset(
@@ -113,6 +115,7 @@ public class ValintaTulosServiceProxyResource {
 
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
@@ -154,6 +157,7 @@ public class ValintaTulosServiceProxyResource {
         asyncResponse.resume(Response.serverError().entity(ImmutableMap.of("error", error)).build());
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ')")
     @GET
     @Path("/hakemus/{hakemusOid}/haku/{hakuOid}/hakukohde/{hakukohdeOid}/valintatapajono/{valintatapajonoOid}")
     @Consumes("application/json")
@@ -186,7 +190,8 @@ public class ValintaTulosServiceProxyResource {
                         .build());
         });
     }
-
+    
+    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ')")
     @GET
     @Path("/hakemus/{hakemusOid}/haku/{hakuOid}")
     @Consumes("application/json")
