@@ -296,13 +296,20 @@ public class ErillishaunTuontiService {
                     List<ValintatulosUpdateStatus> statuses = respObj.statuses;
                     prosessi.keskeyta("error", statuses.stream().collect(Collectors.toMap(k -> k.valintatapajonoOid + "_" + k.hakemusOid, v -> v.message)));
                 });
-            Observable.zip(vastaanottoTilojenTallennus, erillishaunTilojenTuonti, (vastaanottoResponse, erillishaunTuontiResponse) -> {
-                for (VastaanottoResultDTO resultDTO : vastaanottoResponse) {
-                    if (resultDTO.getResult().getStatus() != Response.Status.OK.getStatusCode()) {
-                        LOG.warn(resultDTO.toString());
-                    }
+            vastaanottoTilojenTallennus.flatMap(vastaanottoResponse -> {
+                List<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed).collect(Collectors.toList());
+                epaonnistuneet.forEach(v -> LOG.warn(v.toString()));
+                if (epaonnistuneet.isEmpty()) {
+                    return erillishaunTilojenTuonti;
+                } else {
+                    Stream<Poikkeus> poikkeusStream = epaonnistuneet.stream().map(
+                        v -> {
+                            Tunniste tunniste = new Tunniste(v.getHakemusOid(), Poikkeus.HAKEMUSOID);
+                            return new Poikkeus(Poikkeus.KOOSTEPALVELU, v.getResult().getMessage(), tunniste);
+                        });
+                    prosessi.keskeyta(poikkeusStream.collect(Collectors.toList()));
+                    return Observable.error(new RuntimeException("Error when updating vastaanotto statuses"));
                 }
-                return vastaanottoResponse;
             }).subscribe(
                 done -> {
                     hakijatJaPoistettavat.forEach(h ->

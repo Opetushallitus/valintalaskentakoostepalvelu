@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.ws.rs.core.Response;
+
 public class VastaanottoResultDTO {
     private String henkiloOid;
     private String hakemusOid;
@@ -43,6 +45,10 @@ public class VastaanottoResultDTO {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    public boolean isFailed() {
+        return result == null || result.getStatus() != Response.Status.OK.getStatusCode();
     }
 
     public static class Result {
