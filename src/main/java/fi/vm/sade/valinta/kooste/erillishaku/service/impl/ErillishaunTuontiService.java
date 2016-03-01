@@ -287,7 +287,7 @@ public class ErillishaunTuontiService {
             List<ErillishaunHakijaDTO> hakijatJaPoistettavat = new ArrayList<>();
             hakijatJaPoistettavat.addAll(hakijat.collect(Collectors.toList()));
             hakijatJaPoistettavat.addAll(poisLista);
-            Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceAsyncResource.tallenna(convertToValintaTulosList(hakijatJaPoistettavat, username)).doOnError(
+            Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceAsyncResource.tallenna(convertToValintaTulosList(hakijatJaPoistettavat, username, "Erillishaun tuonti")).doOnError(
                 e -> LOG.error("Virhe vastaanottotilojen tallennuksessa valinta-tulos-service :en", e));
             Observable<Response> erillishaunTilojenTuonti = tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijatJaPoistettavat).doOnError(
                 e -> {
@@ -337,7 +337,7 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private List<VastaanottoRecordDTO> convertToValintaTulosList(List<ErillishaunHakijaDTO> hakijatJaPoistettavat, String muokkaaja) {
+    private List<VastaanottoRecordDTO> convertToValintaTulosList(List<ErillishaunHakijaDTO> hakijatJaPoistettavat, String muokkaaja, String selite) {
         return hakijatJaPoistettavat.stream().map(erillishaunHakijaDTO -> {
             VastaanottoRecordDTO v = new VastaanottoRecordDTO();
             v.setHakemusOid(erillishaunHakijaDTO.getHakemusOid());
@@ -346,6 +346,7 @@ public class ErillishaunTuontiService {
             v.setHenkiloOid(erillishaunHakijaDTO.hakijaOid);
             v.setIlmoittaja(muokkaaja);
             v.setTila(erillishaunHakijaDTO.getValintatuloksenTila());
+            v.setSelite(selite);
             return v;
         }).collect(Collectors.toList());
     }

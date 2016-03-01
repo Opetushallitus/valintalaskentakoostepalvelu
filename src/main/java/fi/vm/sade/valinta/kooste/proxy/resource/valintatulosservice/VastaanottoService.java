@@ -16,9 +16,9 @@ public class VastaanottoService {
     @Autowired
     private ValintaTulosServiceAsyncResource valintaTulosServiceResource;
 
-    public Observable<Integer> tallenna(List<Valintatulos> valintatulokset, String muokkaaja) {
+    public Observable<Integer> tallenna(List<Valintatulos> valintatulokset, String muokkaaja, String selite) {
         List<VastaanottoRecordDTO> tallennettavat = valintatulokset.stream()
-            .<VastaanottoRecordDTO>map(valintatulos -> VastaanottoRecordDTO.of(valintatulos, muokkaaja))
+            .<VastaanottoRecordDTO>map(valintatulos -> VastaanottoRecordDTO.of(valintatulos, muokkaaja, selite))
             .collect(Collectors.toList());
         return valintaTulosServiceResource.tallenna(tallennettavat).map(v -> tallennettavat.size());
     }

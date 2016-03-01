@@ -135,7 +135,7 @@ public class ValintaTulosServiceProxyResource {
         };
 
         String muokkaaja = username();
-        vastaanottoService.tallenna(valintatulokset, muokkaaja).subscribe(integer -> mergeSupplier.get(), throwable -> {
+        vastaanottoService.tallenna(valintatulokset, muokkaaja, selite).subscribe(integer -> mergeSupplier.get(), throwable -> {
             LOG.error("Async call to valinta-tulos-service failed", throwable);
             respondWithError(asyncResponse, throwable.getMessage());
         });

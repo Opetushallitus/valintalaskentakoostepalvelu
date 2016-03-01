@@ -11,6 +11,7 @@ public class VastaanottoRecordDTO {
     private String hakukohdeOid;
     private String ilmoittaja;
     private ValintatuloksenTila tila;
+    private String selite;
 
     public String getHenkiloOid() {
         return henkiloOid;
@@ -60,12 +61,20 @@ public class VastaanottoRecordDTO {
         this.tila = tila;
     }
 
+    public String getSelite() {
+        return selite;
+    }
+
+    public void setSelite(String selite) {
+        this.selite = selite;
+    }
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
 
-    public static VastaanottoRecordDTO of(Valintatulos valintatulos, String muokkaaja) {
+    public static VastaanottoRecordDTO of(Valintatulos valintatulos, String muokkaaja, String selite) {
         VastaanottoRecordDTO v = new VastaanottoRecordDTO();
         v.setHenkiloOid(valintatulos.getHakijaOid());
         v.setHakemusOid(valintatulos.getHakemusOid());
@@ -73,6 +82,7 @@ public class VastaanottoRecordDTO {
         v.setHakukohdeOid(valintatulos.getHakukohdeOid());
         v.setIlmoittaja(muokkaaja);
         v.setTila(valintatulos.getTila());
+        v.setSelite(selite);
         return v;
     }
 }
