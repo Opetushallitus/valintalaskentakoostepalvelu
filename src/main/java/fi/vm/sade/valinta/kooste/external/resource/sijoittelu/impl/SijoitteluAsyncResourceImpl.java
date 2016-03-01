@@ -64,9 +64,9 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 
     @Override
     public Observable<Void> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite) throws UnsupportedEncodingException {
-        String url = "/tila/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid + "?selite=" + URLEncoder.encode(selite, "UTF-8");
-
-        return postAsObservable(url, Void.class, Entity.json(valintatulokset));
+        String url = "/tila/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid;
+        String encodedSelite = URLEncoder.encode(selite, "UTF-8");
+        return postAsObservable(url, Void.class, Entity.json(valintatulokset), (webclient) -> webclient.query("selite", encodedSelite));
     }
 
     public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, String sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
