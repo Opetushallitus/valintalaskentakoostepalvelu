@@ -4,6 +4,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTu
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import javax.ws.rs.GET;
@@ -23,6 +24,7 @@ public class OmatSivutHakemusResource {
     @Autowired
     private ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
 
+    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
     @GET
     @Path("/haku/{hakuOid}/hakemusOid/{hakemusOid}")
     public void getValintatulos(
