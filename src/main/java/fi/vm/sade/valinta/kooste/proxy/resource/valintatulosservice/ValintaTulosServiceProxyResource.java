@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
+import static fi.vm.sade.valinta.kooste.KoosteAudit.username;
 import com.google.common.collect.ImmutableMap;
 
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
@@ -17,7 +18,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import rx.Observable;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
@@ -27,12 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.valinta.kooste.KoosteAudit.username;
 
 @Controller("ValintaTulosServiceProxyResource")
 @Path("/proxy/valintatulosservice")
@@ -44,9 +47,6 @@ public class ValintaTulosServiceProxyResource {
 
     @Autowired
     private SijoitteluAsyncResource sijoitteluResource;
-
-    @Autowired
-    private VastaanottoService vastaanottoService;
 
     @Autowired
     private ValintaTulosServiceAsyncResource valintaTulosServiceResource;
@@ -127,23 +127,35 @@ public class ValintaTulosServiceProxyResource {
                                      @Suspended AsyncResponse asyncResponse) throws UnsupportedEncodingException {
         setAsyncTimeout(asyncResponse, String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /haku/%s/hakukohde/%s?selite=%s", hakuOid, hakukohdeOid, selite));
 
-        AtomicInteger counter = new AtomicInteger(2);
-        Supplier<Void> mergeSupplier = () -> {
-            if (counter.decrementAndGet() == 0) {
-                asyncResponse.resume(Response.ok().build());
+        Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(createVastaanottoRecordsFrom(valintatulokset, username(), selite));
+        vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
+        Observable<Void> tilojenTallennusSijoitteluun = sijoitteluResource.muutaHakemuksenTilaa(hakuOid, hakukohdeOid, valintatulokset, selite).doOnError(
+            throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
+        vastaanottoTilojenTallennus.flatMap(vastaanottoResponse -> {
+            List<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed).collect(Collectors.toList());
+            epaonnistuneet.forEach(v -> LOG.warn(v.toString()));
+            if (epaonnistuneet.isEmpty()) {
+                return tilojenTallennusSijoitteluun;
+            } else {
+              return Observable.error(new RuntimeException("Error when updating vastaanotto statuses"));
             }
-            return null;
-        };
+        }).subscribe(
+            done -> asyncResponse.resume(Response.ok().build()),
+            poikkeus -> respondWithError(asyncResponse, poikkeus.getMessage()));
+    }
 
-        String muokkaaja = username();
-        vastaanottoService.tallenna(valintatulokset, muokkaaja, selite).subscribe(integer -> mergeSupplier.get(), throwable -> {
-            LOG.error("Async call to valinta-tulos-service failed", throwable);
-            respondWithError(asyncResponse, throwable.getMessage());
-        });
-        sijoitteluResource.muutaHakemuksenTilaa(hakuOid, hakukohdeOid, valintatulokset, selite).subscribe(aVoid -> mergeSupplier.get(), throwable -> {
-            LOG.error("Async call to sijoittelu-service failed", throwable);
-            respondWithError(asyncResponse, throwable.getMessage());
-        });
+    private List<VastaanottoRecordDTO> createVastaanottoRecordsFrom(List<Valintatulos> valintatulokset, String muokkaaja, String selite) {
+        return valintatulokset.stream().map(v -> {
+            VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
+            dto.setHakemusOid(v.getHakemusOid());
+            dto.setHakukohdeOid(v.getHakukohdeOid());
+            dto.setHakuOid(v.getHakuOid());
+            dto.setHenkiloOid(v.getHakijaOid());
+            dto.setIlmoittaja(muokkaaja);
+            dto.setSelite(selite);
+            dto.setTila(v.getTila());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {
