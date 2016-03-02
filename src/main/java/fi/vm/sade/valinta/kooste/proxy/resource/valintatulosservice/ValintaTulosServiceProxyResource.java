@@ -141,7 +141,7 @@ public class ValintaTulosServiceProxyResource {
               return Observable.error(new RuntimeException("Error when updating vastaanotto statuses"));
             }
         }).subscribe(
-            done -> asyncResponse.resume(Response.ok().build()),
+            updateStatuses -> asyncResponse.resume(Response.ok(updateStatuses).build()),
             poikkeus -> respondWithError(asyncResponse, poikkeus.getMessage()));
     }
 
