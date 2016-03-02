@@ -8,6 +8,7 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakemuksenVastaanottotila;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
@@ -31,12 +32,14 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Controller("ValintaTulosServiceProxyResource")
 @Path("/proxy/valintatulosservice")
@@ -133,16 +136,23 @@ public class ValintaTulosServiceProxyResource {
         Observable<HakukohteenValintatulosUpdateStatuses> tilojenTallennusSijoitteluun = sijoitteluResource.muutaHakemuksenTilaa(hakuOid, hakukohdeOid, valintatulokset, selite).doOnError(
             throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
         vastaanottoTilojenTallennus.flatMap(vastaanottoResponse -> {
-            List<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed).collect(Collectors.toList());
-            epaonnistuneet.forEach(v -> LOG.warn(v.toString()));
-            if (epaonnistuneet.isEmpty()) {
+            Stream<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed);
+            List<ValintatulosUpdateStatus> failedUpdateStatuses = epaonnistuneet.map(v -> {
+                LOG.warn(v.toString());
+                return new ValintatulosUpdateStatus(Response.Status.FORBIDDEN.getStatusCode(), v.getResult().getMessage(), null, v.getHakemusOid());
+            }).collect(Collectors.toList());
+            if (failedUpdateStatuses.isEmpty()) {
                 return tilojenTallennusSijoitteluun;
             } else {
-              return Observable.error(new RuntimeException("Error when updating vastaanotto statuses"));
+              return Observable.error(new VastaanottoUpdateFailuresException(failedUpdateStatuses));
             }
         }).subscribe(
             updateStatuses -> asyncResponse.resume(Response.ok(updateStatuses).build()),
-            poikkeus -> respondWithError(asyncResponse, poikkeus.getMessage()));
+            poikkeus -> {
+                List<ValintatulosUpdateStatus> failedUpdateStatuses = poikkeus instanceof VastaanottoUpdateFailuresException ?
+                    ((VastaanottoUpdateFailuresException) poikkeus).failedUpdateStatuses : Collections.emptyList();
+                asyncResponse.resume(Response.serverError().entity(new HakukohteenValintatulosUpdateStatuses(poikkeus.getMessage(), failedUpdateStatuses)).build());
+            });
     }
 
     private List<VastaanottoRecordDTO> createVastaanottoRecordsFrom(List<Valintatulos> valintatulokset, String muokkaaja, String selite) {
