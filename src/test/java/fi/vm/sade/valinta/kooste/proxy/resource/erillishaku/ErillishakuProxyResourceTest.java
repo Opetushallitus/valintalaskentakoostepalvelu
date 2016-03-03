@@ -51,10 +51,9 @@ public class ErillishakuProxyResourceTest {
     public void testaaProxyResurssiIlmanLaskentaaHakukohteelle() throws Exception {
         List<ValintatietoValinnanvaiheDTO> valintatieto = emptyList(); // ei valinnanvaiheita
         List<Hakemus> hakemukset = hakemuksetFromJson("/proxy/erillishaku/data/ilmanlaskentaa/listfull.json");
-        List<Valintatulos> valintatulokset = valintatuloksetFromJson("/proxy/erillishaku/data/ilmanlaskentaa/tila.json");
         List<ValinnanVaiheJonoillaDTO> valinnanvaihejonoilla = valinnanvaihejonoillaFromJson("/proxy/erillishaku/data/ilmanlaskentaa/valinnanvaihe.json");
         HakukohdeDTO hakukohde = hakukohdeFromJson("/proxy/erillishaku/data/ilmanlaskentaa/hakukohde.json");
-        initMocks(hakemukset, hakukohde, valintatieto, valintatulokset, valinnanvaihejonoilla);
+        initMocks(hakemukset, hakukohde, valintatieto, valinnanvaihejonoilla);
         List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
         mergeValinnanvaiheDTOs.forEach(valinnanvaihe -> valinnanvaihe.getValintatapajonot().forEach(valintatapajono -> assertFalse(valintatapajono.isKaytetaanValintalaskentaa())));
     }
@@ -63,17 +62,16 @@ public class ErillishakuProxyResourceTest {
     public void testaaProxyResurssiHakukohteelleLaskennalla() throws Exception {
         List<ValintatietoValinnanvaiheDTO> valintatieto = valintatietoFromJson("/proxy/erillishaku/data/laskennalla/laskenta_valinnanvaihe.json");
         List<Hakemus> hakemukset = hakemuksetFromJson("/proxy/erillishaku/data/laskennalla/listfull.json");
-        List<Valintatulos> valintatulokset = valintatuloksetFromJson("/proxy/erillishaku/data/laskennalla/tila.json");
         List<ValinnanVaiheJonoillaDTO> valinnanvaihejonoilla = valinnanvaihejonoillaFromJson("/proxy/erillishaku/data/laskennalla/valinnanvaihe.json");
         HakukohdeDTO hakukohdeWithSijoittelu = hakukohdeFromJson("/proxy/erillishaku/data/laskennalla/hakukohde_1422533823300.json");
-        initMocksWithSijoittelu(hakemukset, hakukohdeWithSijoittelu, valintatieto, valintatulokset, valinnanvaihejonoilla);
+        initMocksWithSijoittelu(hakemukset, hakukohdeWithSijoittelu, valintatieto, valinnanvaihejonoilla);
         List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
         mergeValinnanvaiheDTOs.forEach(valinnanvaihe -> valinnanvaihe.getValintatapajonot().forEach(valintatapajono -> assertTrue(valintatapajono.isKaytetaanValintalaskentaa())));
     }
 
     @Test
     public void testaaProxyResurssinJononGenerointiKunValintaperusteetPuuttuu() throws Exception {
-        initMocks(emptyList(), new HakukohdeDTO(), emptyList(), emptyList(), emptyList());
+        initMocks(emptyList(), new HakukohdeDTO(), emptyList(),emptyList());
         List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
         assertEquals(1, mergeValinnanvaiheDTOs.size());
         MergeValinnanvaiheDTO vv = mergeValinnanvaiheDTOs.iterator().next();
@@ -86,7 +84,7 @@ public class ErillishakuProxyResourceTest {
         List<Hakemus> hakemukset = hakemuksetFromJson("/proxy/erillishaku/data/laskennalla/listfull.json");
         List<Valintatulos> valintatulokset = valintatuloksetFromJson("/proxy/erillishaku/data/laskennalla/tila.json");
         HakukohdeDTO hakukohdeWithSijoittelu = hakukohdeFromJson(("/proxy/erillishaku/data/laskennalla/hakukohde_1422533823300.json"));
-        initMocksWithSijoittelu(hakemukset, hakukohdeWithSijoittelu, valintatieto, valintatulokset, emptyList());
+        initMocksWithSijoittelu(hakemukset, hakukohdeWithSijoittelu, valintatieto, emptyList());
         List<MergeValinnanvaiheDTO> mergeValinnanvaiheDTOs = callErillishakuProxy();
         assertEquals(1, mergeValinnanvaiheDTOs.size());
         List<MergeValintatapajonoDTO> valintatapajonot = mergeValinnanvaiheDTOs.get(0).getValintatapajonot();
@@ -98,7 +96,6 @@ public class ErillishakuProxyResourceTest {
     public void resetMocks() {
         MockApplicationAsyncResource.clear();
         MockSijoitteluAsyncResource.clear();
-        MockTilaAsyncResource.clear();
         MockValintalaskentaAsyncResource.clear();
         MockValintaperusteetAsyncResource.clear();
     }
@@ -131,23 +128,20 @@ public class ErillishakuProxyResourceTest {
             List<Hakemus> hakemukset,
             HakukohdeDTO hakukohde,
             List<ValintatietoValinnanvaiheDTO> valintatieto,
-            List<Valintatulos> valintatulokset,
             List<ValinnanVaiheJonoillaDTO> valinnanvaihejonoilla
     ) {
         MockApplicationAsyncResource.setResult(hakemukset);
         MockSijoitteluAsyncResource.setResult(hakukohde);
         MockValintalaskentaAsyncResource.setResult(valintatieto);
-        MockTilaAsyncResource.setResult(valintatulokset);
         MockValintaperusteetAsyncResource.setResult(valinnanvaihejonoilla);
     }
 
     private void initMocksWithSijoittelu(List<Hakemus> hakemukset,
                                          HakukohdeDTO hakukohde,
                                          List<ValintatietoValinnanvaiheDTO> valintatieto,
-                                         List<Valintatulos> valintatulokset,
                                          List<ValinnanVaiheJonoillaDTO> valinnanvaihejonoilla
     ) {
-        initMocks(hakemukset, hakukohde, valintatieto, valintatulokset, valinnanvaihejonoilla);
+        initMocks(hakemukset, hakukohde, valintatieto, valinnanvaihejonoilla);
         MockSijoitteluAsyncResource.getResultMap().put(hakukohde.getSijoitteluajoId(), hakukohde);
     }
 

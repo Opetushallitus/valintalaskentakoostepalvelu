@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class MockTilaAsyncResource implements TilaAsyncResource {
@@ -30,7 +29,6 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
             this.erillishaunHakijat = erillishaunHakijat;
         }
     }
-    private static AtomicReference<List<Valintatulos>> resultReference = new AtomicReference<>();
 
     @Override
     public Observable<List<Valintatulos>> getValintatuloksetValintatapajonolle(String hakukohdeOid, String valintatapajonoOid) {
@@ -50,13 +48,6 @@ public class MockTilaAsyncResource implements TilaAsyncResource {
     @Override
     public Observable<List<Valintatulos>> getHakemuksenTulokset(String hakemusOid) {
         return null;
-    }
-
-    public static void setResult(List<Valintatulos> result) {
-        resultReference.set(result);
-    }
-    public static void clear() {
-        resultReference.set(null);
     }
 
     public final List<Result> results = new ArrayList<>();
