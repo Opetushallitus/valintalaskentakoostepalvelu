@@ -1,31 +1,18 @@
 package fi.vm.sade.valinta.kooste.koekutsukirjeet;
 
-import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.Futures;
-import com.google.gson.*;
-import fi.vm.sade.integrationtest.tomcat.SharedTomcat;
-import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
+import com.google.gson.GsonBuilder;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.http.HttpResource;
-import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
-import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.*;
-
-import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.*;
-
-import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.*;
-
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
-import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import junit.framework.Assert;
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -33,16 +20,16 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.naming.InitialContext;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
+import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.hakukohdeJaValintakoe;
+import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
 
 /**
  * @author Jussi Jartamo
@@ -73,7 +60,7 @@ public class KoekutsukirjeetTest {
             ViestintapalveluAsyncResource viestintapalveluAsyncResource =
                     Mocks.getViestintapalveluAsyncResource();
             ArgumentCaptor<LetterBatch> letterBatchArgumentCaptor = ArgumentCaptor.forClass(LetterBatch.class);
-            Mockito.when(viestintapalveluAsyncResource.viePdfJaOdotaReferenssi(letterBatchArgumentCaptor.capture())).thenReturn(Futures.immediateCancelledFuture());
+            Mockito.when(viestintapalveluAsyncResource.viePdfJaOdotaReferenssi(Mockito.any(LetterBatch.class))).thenReturn(Futures.immediateCancelledFuture());
             Mockito.when(Mocks.getHakukohdeResource().getByOID(Mockito.anyString())).thenReturn(HAKUKOHDEDTO1);
             MockValintaperusteetAsyncResource.setHakukohdeResult(
                     Arrays.asList(
@@ -141,7 +128,7 @@ public class KoekutsukirjeetTest {
             Assert.assertEquals(200, r.getStatus());
 
 
-            Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1)).viePdfJaOdotaReferenssi(Mockito.any());
+            Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1)).viePdfJaOdotaReferenssi(letterBatchArgumentCaptor.capture());
             LetterBatch batch = letterBatchArgumentCaptor.getValue();
             Assert.assertEquals("Odotetaan kahta kirjettä. Yksi hakukohteessa olevalle hakijalle ja toinen osallistumistiedoista saadulle hakijalle.", 2, batch.getLetters().size());
             LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(batch));
