@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.util.sure.YoToAvainSuoritustietoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainMetatiedotDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -58,7 +59,7 @@ public class SureKonvertointiTest {
 		ph_vls.setDateStart(DateTime.now().minusDays(1).toDate()); // LASKENTA ALKANUT PAIVA SITTEN
 		pmetrit.setPH_VLS(ph_vls);
 
-		List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(o, pmetrit);
+		List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(o.getOppijanumero(), o.getSuoritukset(), new HakemusDTO(), pmetrit);
 
 		aa.stream().forEach(a -> {
 			LOG.info("{}\t\t{}", a.getAvain(), a.getArvo());
@@ -92,7 +93,7 @@ public class SureKonvertointiTest {
 								.setPrettyPrinting()
 								.create()
 								.toJson(OppijaToAvainArvoDTOConverter
-										.convert(o,null)));
+										.convert(o.getOppijanumero(), o.getSuoritukset(), new HakemusDTO(),null)));
 
 			}
 		}
@@ -115,7 +116,7 @@ public class SureKonvertointiTest {
                                 .setPrettyPrinting()
                                 .create()
                                 .toJson(OppijaToAvainArvoDTOConverter
-                                        .convert(o,null)));
+                                        .convert(o.getOppijanumero(), o.getSuoritukset(), new HakemusDTO(),null)));
 
             }
         }

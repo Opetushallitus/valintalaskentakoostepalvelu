@@ -1131,6 +1131,45 @@ public class HakemuksetConverterUtilTest {
         }
     }
 
+    @Test
+    public void kaytetanVainKyseisenHakemuksenItseSyotettyjaArvosanoja() {
+        DateTime nyt = DateTime.now();
+        HakemusDTO hakemus = new HakemusDTO();
+        hakemus.setHakemusoid(HAKEMUS1_OID);
+        Oppija suoritus = new SuoritusrekisteriSpec.OppijaBuilder()
+                .suoritus()
+                .setPerusopetus()
+                .setVahvistettu(false)
+                .setMyontaja(HAKEMUS1_OID)
+                .setValmistuminen("1.1.2015")
+                .setValmis()
+                .arvosana()
+                .setAine("AI")
+                .setAsteikko_4_10()
+                .setArvosana("6")
+                .setMyonnetty(nyt)
+                .build()
+                .build()
+                .suoritus()
+                .setPerusopetus()
+                .setVahvistettu(false)
+                .setMyontaja(HAKEMUS2_OID)
+                .setValmistuminen("1.1.2015")
+                .setValmis()
+                .arvosana()
+                .setAine("AI")
+                .setAsteikko_4_10()
+                .setArvosana("8")
+                .setMyonnetty(nyt)
+                .build()
+                .build()
+                .build();
+        {
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", laskennanalkamisparametri(nyt.plusDays(1)), new HashMap<>(), suoritus, hakemus);
+            Assert.assertTrue("PK_AI löytyy ja sen arvo on 6",
+                    hakemus.getAvaimet().stream().filter(a -> "PK_AI".equals(a.getAvain()) && "6".equals(a.getArvo())).count() == 1L);
+        }
+    }
 
     @Test
     public void pkSamanArvosananToistuessaKaytetaanParastaPaitsiJosMuutOnValinnaisia() {

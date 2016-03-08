@@ -74,7 +74,7 @@ public class HakemuksetConverterUtil {
                                                    HakemusDTO hakemusDTO) {
         hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
         Map<String, AvainArvoDTO> hakemuksenArvot = toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
-        Map<String, AvainArvoDTO> surenArvot = toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija, parametritDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
+        Map<String, AvainArvoDTO> surenArvot = toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija.getOppijanumero(), oppija.getSuoritukset(), hakemusDTO, parametritDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
         List<SuoritusJaArvosanat> suoritukset = filterUnrelevantSuoritukset(haku, oppija.getSuoritukset());
         Optional<String> pohjakoulutus = pohjakoulutus(haku, hakemusDTO, suoritukset);
 

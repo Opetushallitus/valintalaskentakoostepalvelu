@@ -6,6 +6,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.util.sure.ArvosanaToAvainArvoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
+import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import org.joda.time.DateTime;
 
 import java.util.*;
@@ -21,12 +22,12 @@ public class OppijaToAvainArvoDTOConverter {
     private static final String LK_PREFIX = "LK_";
     private static final String AM_PREFIX = "AM_";
 
-    public static List<AvainArvoDTO> convert(Oppija oppija, ParametritDTO parametritDTO) {
-        if (oppija == null || oppija.getSuoritukset() == null) {
+    public static List<AvainArvoDTO> convert(String oppijanumero, List<SuoritusJaArvosanat> suoritukset, HakemusDTO hakemus, ParametritDTO parametritDTO) {
+        if (suoritukset == null) {
             return Collections.emptyList();
         }
 
-        final List<SuoritusJaArvosanat> oppijanSuoritukset = oppija.getSuoritukset().stream()
+        final List<SuoritusJaArvosanat> oppijanSuoritukset = suoritukset.stream()
                 .filter(Objects::nonNull)
                 .filter(s -> s.getSuoritus() != null)
                 .filter(s -> s.getArvosanat() != null)
@@ -47,9 +48,15 @@ public class OppijaToAvainArvoDTOConverter {
         final Stream<SuoritusJaArvosanat> yo = oppijanSuoritukset.stream()
                 .filter(s -> wrap(s).isYoTutkinto() && wrap(s).isValmis() && wrap(s).isVahvistettu());
 
-        return suorituksetAvainArvoiksi(oppija, removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(
-                concat(peruskoulu, concat(lukio, concat(lisaopetus, concat(ammatillinen, yo)))), parametritDTO
-                ).collect(Collectors.toList()));
+        final Stream<SuoritusJaArvosanat> suorituksetFilteredByKoulutusType = concat(peruskoulu, concat(lukio, concat(lisaopetus, concat(ammatillinen, yo))));
+        return suorituksetAvainArvoiksi(
+                oppijanumero,
+                removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(removeHakijanMuillaHakemuksillaSyottamatTiedot(suorituksetFilteredByKoulutusType, hakemus), parametritDTO).collect(Collectors.toList())
+        );
+    }
+
+    private static Stream<SuoritusJaArvosanat> removeHakijanMuillaHakemuksillaSyottamatTiedot(Stream<SuoritusJaArvosanat> filtteroimattomat, HakemusDTO hakemus) {
+        return filtteroimattomat.filter(s -> !(wrap(s).onHakemukselta() && !wrap(s).onTaltaHakemukselta(hakemus)));
     }
 
     private static Stream<SuoritusJaArvosanat> removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(
@@ -67,7 +74,7 @@ public class OppijaToAvainArvoDTOConverter {
         }
     }
 
-    private static List<AvainArvoDTO> suorituksetAvainArvoiksi(Oppija oppija, List<SuoritusJaArvosanat> suoritukset) {
+    private static List<AvainArvoDTO> suorituksetAvainArvoiksi(String oppijanumero, List<SuoritusJaArvosanat> suoritukset) {
         List<SuoritusJaArvosanat> peruskoulunkaltaisetSuoritukset = suoritukset.stream()
                 .filter(s -> wrap(s).isSuoritusMistaSyntyyPeruskoulunArvosanoja())
                 .collect(Collectors.toList());
@@ -78,9 +85,9 @@ public class OppijaToAvainArvoDTOConverter {
                 .filter(s -> wrap(s).isAmmatillinen())
                 .collect(Collectors.toList());
         return new ArrayList<AvainArvoDTO>() {{
-            addAll(ArvosanaToAvainArvoDTOConverter.convert(peruskoulunkaltaisetSuoritukset, PK_PREFIX, "", oppija.getOppijanumero()));
-            addAll(ArvosanaToAvainArvoDTOConverter.convert(lukioSuoritukset, LK_PREFIX, "", oppija.getOppijanumero()));
-            addAll(ArvosanaToAvainArvoDTOConverter.convert(ammatillisetSuoritukset, AM_PREFIX, "", oppija.getOppijanumero()));
+            addAll(ArvosanaToAvainArvoDTOConverter.convert(peruskoulunkaltaisetSuoritukset, PK_PREFIX, "", oppijanumero));
+            addAll(ArvosanaToAvainArvoDTOConverter.convert(lukioSuoritukset, LK_PREFIX, "", oppijanumero));
+            addAll(ArvosanaToAvainArvoDTOConverter.convert(ammatillisetSuoritukset, AM_PREFIX, "", oppijanumero));
         }};
     }
 
