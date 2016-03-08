@@ -1571,7 +1571,7 @@ public class HakemuksetConverterUtilTest {
         // vahvistamaton suoritus
         oppijaBuilder.suoritus()
                 .setKymppiluokka()
-                .setVahvistettu(true)
+                .setVahvistettu(false)
                 .setValmistuminen(HAKUKAUDELLA)
                 .setKeskeytynyt()
                 .arvosana()
@@ -1625,7 +1625,7 @@ public class HakemuksetConverterUtilTest {
         // vahvistamaton suoritus
         oppijaBuilder.suoritus()
                 .setKymppiluokka()
-                .setVahvistettu(true)
+                .setVahvistettu(false)
                 .setValmistuminen(HAKUKAUDELLA)
                 .setKeskeytynyt()
                 .arvosana()
