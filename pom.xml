@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>fi.vm.sade.valintaperusteet</groupId>
 		<artifactId>valintaperusteet</artifactId>
-		<version>1.1-SNAPSHOT</version>
+		<version>yhdenpaikansaanto-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<properties>
@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>fi.vm.sade.valintaperusteet</groupId>
 			<artifactId>http</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.glassfish.jersey.media</groupId>
