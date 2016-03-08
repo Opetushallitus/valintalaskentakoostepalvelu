@@ -213,6 +213,10 @@ public class SuoritusrekisteriSpec {
             suoritus.setKomo(SuoritusJaArvosanatWrapper.LK_KOMO);
             return SuoritusBuilder.this;
         }
+        public SuoritusBuilder setMyontaja(String myontaja) {
+            suoritus.setMyontaja(myontaja);
+            return SuoritusBuilder.this;
+        }
         public SuoritusBuilder setKymppiluokka() {
             suoritus.setKomo(SuoritusJaArvosanatWrapper.PK_10_KOMO);
             return SuoritusBuilder.this;

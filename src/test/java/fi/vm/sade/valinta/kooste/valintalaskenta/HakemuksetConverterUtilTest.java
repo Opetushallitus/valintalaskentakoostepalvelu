@@ -30,6 +30,8 @@ public class HakemuksetConverterUtilTest {
     public ExpectedException expected = ExpectedException.none();
 
     private static final HakuV1RDTO haku = new HakuV1RDTO();
+    private static final String HAKEMUS1_OID = "1.2.246.562.11.1";
+    private static final String HAKEMUS2_OID = "1.2.246.562.11.2";
     private static final String HAKUKAUDELLA = "1.1.2015";
     private static final String HAKUKAUDEN_ULKOPUOLELLA = "1.1.2014";
     private static final SuoritusJaArvosanat vahvistettuPerusopetusValmisHakukaudella =
@@ -42,6 +44,7 @@ public class HakemuksetConverterUtilTest {
             new SuoritusrekisteriSpec.SuoritusBuilder()
                     .setPerusopetus().setVahvistettu(false)
                     .setYksilollistaminen("Ei")
+                    .setMyontaja(HAKEMUS1_OID)
                     .setValmistuminen(HAKUKAUDELLA).setValmis()
                     .done();
     private static final SuoritusJaArvosanat vahvistamatonPerusopetusValmisEiHakukaudella =
