@@ -56,7 +56,7 @@ public class ValintaTulosServiceProxyResource {
     private ValintaTulosServiceAsyncResource valintaTulosServiceResource;
 
     @GET
-    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ')")
+    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
     @Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
     @Consumes("application/json")
     public void sijoittelunTulokset(
@@ -120,7 +120,7 @@ public class ValintaTulosServiceProxyResource {
 
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
+    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
@@ -181,7 +181,7 @@ public class ValintaTulosServiceProxyResource {
         asyncResponse.resume(Response.serverError().entity(ImmutableMap.of("error", error)).build());
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ')")
+    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
     @GET
     @Path("/hakemus/{hakemusOid}/haku/{hakuOid}/hakukohde/{hakukohdeOid}/valintatapajono/{valintatapajonoOid}")
     @Consumes("application/json")
@@ -215,7 +215,7 @@ public class ValintaTulosServiceProxyResource {
         });
     }
     
-    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ')")
+    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
     @GET
     @Path("/hakemus/{hakemusOid}/haku/{hakuOid}")
     @Consumes("application/json")
