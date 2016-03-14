@@ -30,6 +30,17 @@ public class HakemuksetConverterUtilTest {
     public ExpectedException expected = ExpectedException.none();
 
     private static final HakuV1RDTO haku = new HakuV1RDTO();
+    static {
+        haku.setHakukausiUri("kausi_k#1");
+        haku.setHakukausiVuosi(2015);
+    }
+
+    private static final HakuV1RDTO haku_syksy = new HakuV1RDTO();
+    static {
+        haku_syksy.setHakukausiUri("kausi_s#1");
+        haku_syksy.setHakukausiVuosi(2015);
+    }
+
     private static final String HAKEMUS1_OID = "1.2.246.562.11.1";
     private static final String HAKEMUS2_OID = "1.2.246.562.11.2";
     private static final String HAKUKAUDELLA = "1.1.2015";
@@ -183,43 +194,41 @@ public class HakemuksetConverterUtilTest {
                     .setValmistuminen(HAKUKAUDELLA).setValmis()
                     .done();
 
-    static {
-        haku.setHakukausiUri("kausi_k#1");
-        haku.setHakukausiVuosi(2015);
-    }
-
     @Test
     public void suodattaaPoisHakukaudenUlkopuolellaKeskenOlleetPeruskoulunSuoritukset() {
+        HakemusDTO h = new HakemusDTO();
         Oppija o = new Oppija();
         o.getSuoritukset().add(vahvistettuPerusopetusKeskenHakukaudella);
         o.getSuoritukset().add(vahvistettuPerusopetusKeskenEiHakukaudella);
-        List<SuoritusJaArvosanat> suoritukset = HakemuksetConverterUtil.filterUnrelevantSuoritukset(haku, o.getSuoritukset());
+        List<SuoritusJaArvosanat> suoritukset = HakemuksetConverterUtil.filterUnrelevantSuoritukset(haku, h, o.getSuoritukset());
         assertEquals(1, suoritukset.size());
         assertEquals(vahvistettuPerusopetusKeskenHakukaudella, suoritukset.get(0));
     }
 
     @Test
     public void suodattaaPoisHakukaudenUlkopuolellaKeskeytyneetPeruskoulunSuoritukset() {
+        HakemusDTO h = new HakemusDTO();
         Oppija o = new Oppija();
         o.getSuoritukset().add(vahvistettuPerusopetusKeskeytynytEiHakukaudella);
         o.getSuoritukset().add(vahvistettuPerusopetusKeskeytynytHakukaudella);
-        List<SuoritusJaArvosanat> suoritukset = HakemuksetConverterUtil.filterUnrelevantSuoritukset(haku, o.getSuoritukset());
+        List<SuoritusJaArvosanat> suoritukset = HakemuksetConverterUtil.filterUnrelevantSuoritukset(haku, h, o.getSuoritukset());
         assertEquals(1, suoritukset.size());
         assertEquals(vahvistettuPerusopetusKeskeytynytHakukaudella, suoritukset.get(0));
     }
 
     @Test
-    public void suodattaaPoisHakukaudenUlkopuolellaKeskeytyneetLukionSuoritukset() {
+    public void suodattaaPoisKeskeytyneetLukionSuoritukset() {
+        HakemusDTO h = new HakemusDTO();
         Oppija o = new Oppija();
         o.getSuoritukset().add(vahvistamatonLukioKeskeytynytEiHakukaudella);
         o.getSuoritukset().add(vahvistamatonLukioKeskeytynytHakukaudella);
-        List<SuoritusJaArvosanat> suoritukset = HakemuksetConverterUtil.filterUnrelevantSuoritukset(haku, o.getSuoritukset());
-        assertEquals(1, suoritukset.size());
-        assertEquals(vahvistamatonLukioKeskeytynytHakukaudella, suoritukset.get(0));
+        List<SuoritusJaArvosanat> suoritukset = HakemuksetConverterUtil.filterUnrelevantSuoritukset(haku, h, o.getSuoritukset());
+        assertEquals(0, suoritukset.size());
     }
 
     @Test
     public void suodattaaPoisVahvistamattomatLisäpistekoulutusSuoritukset() {
+        HakemusDTO h = new HakemusDTO();
         Oppija o = new SuoritusrekisteriSpec.OppijaBuilder()
                 .suoritus().setKymppiluokka()
                 .setVahvistettu(false)
@@ -252,16 +261,17 @@ public class HakemuksetConverterUtilTest {
                 .setValmis()
                 .build()
                 .build();
-        List<SuoritusJaArvosanat> suoritukset = HakemuksetConverterUtil.filterUnrelevantSuoritukset(haku, o.getSuoritukset());
+        List<SuoritusJaArvosanat> suoritukset = HakemuksetConverterUtil.filterUnrelevantSuoritukset(haku, h, o.getSuoritukset());
         assertTrue(suoritukset.isEmpty());
     }
 
     @Test
     public void suodattaaPoisKeskenjaKeskeytynytTilaisetYOSuoritukset() {
+        HakemusDTO h = new HakemusDTO();
         Oppija o = new Oppija();
         o.getSuoritukset().add(vahvistettuYOKeskenHakukaudella);
         o.getSuoritukset().add(vahvistettuYOKeskeytynytHakukaudella);
-        List<SuoritusJaArvosanat> suoritukset = HakemuksetConverterUtil.filterUnrelevantSuoritukset(haku, o.getSuoritukset());
+        List<SuoritusJaArvosanat> suoritukset = HakemuksetConverterUtil.filterUnrelevantSuoritukset(haku, h, o.getSuoritukset());
         assertTrue(suoritukset.isEmpty());
     }
 
@@ -397,7 +407,7 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
-    public void pohjakoulutusHakemukseltaJosPohjakoulutusPeruskouluEiVastaaVahvistettuaPeruskoulunValmistaSuoritusta() {
+    public void pohjakoulutusPeruskouluSurestaVaikkaHakemuksenPohjakoulutusEiVastaaSurenSuoritusta() {
         HakemusDTO h = new HakemusDTO();
         h.setAvaimet(new ArrayList<AvainArvoDTO>() {{
             this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
@@ -405,7 +415,7 @@ public class HakemuksetConverterUtilTest {
         List<SuoritusJaArvosanat> suoritukset = new ArrayList<SuoritusJaArvosanat>() {{
             add(vahvistettuAlueittainYksilollistettyPerusopetusValmisHakukaudella);
         }};
-        Assert.assertEquals(PohjakoulutusToinenAste.PERUSKOULU, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+        Assert.assertEquals(PohjakoulutusToinenAste.ALUEITTAIN_YKSILOLLISTETTY, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
     }
 
     @Test
@@ -954,12 +964,32 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
-    public void perusopetusSuoritusvuosiJaSuorituskausi() {
+    public void vainHaunHakukaudenPerusopetusSuoritusvuosiJaSuorituskausi() {
         /*
         PK_SUORITUSLUKUKAUSI = 1/2
         1.1. - 31.7. ->  2
         1.8. -> 31.12. -> 1
                 */
+        {
+            HakemusDTO hakemus = new HakemusDTO();
+            Oppija suoritus = new SuoritusrekisteriSpec.OppijaBuilder()
+                    .suoritus()
+                    .setPerusopetus()
+                    .setVahvistettu(true)
+                    .setValmistuminen("31.5.2015")
+                    .setValmis()
+                    .build()
+                    .build();
+
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus);
+            Assert.assertTrue("PK_SUORITUSVUOSI löytyy ja sen arvo on 2015",
+                    hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2015".equals(a.getArvo())).count() == 1L);
+            Assert.assertEquals("PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 2",
+                    new AvainArvoDTO("PK_SUORITUSLUKUKAUSI", "2"),
+                    hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain())).findFirst().get());
+            Assert.assertTrue("PK_PAATTOTODISTUSVUOSI löytyy ja sen arvo on 2015",
+                    hakemus.getAvaimet().stream().filter(a -> "PK_PAATTOTODISTUSVUOSI".equals(a.getAvain()) && "2015".equals(a.getArvo())).count() == 1L);
+        }
         {
             HakemusDTO hakemus = new HakemusDTO();
             Oppija suoritus = new SuoritusrekisteriSpec.OppijaBuilder()
@@ -986,37 +1016,18 @@ public class HakemuksetConverterUtilTest {
                     .suoritus()
                     .setPerusopetus()
                     .setVahvistettu(true)
-                    .setValmistuminen("01.01.2018")
+                    .setValmistuminen("01.08.2015")
                     .setValmis()
                     .build()
                     .build();
 
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus);
-            Assert.assertTrue("PK_SUORITUSVUOSI löytyy ja sen arvo on 2018",
-                    hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2018".equals(a.getArvo())).count() == 1L);
-            assertTrue("PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 2",
-                    hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain()) && "2".equals(a.getArvo())).count() == 1L);
-            Assert.assertTrue("PK_PAATTOTODISTUSVUOSI löytyy ja sen arvo on 2018",
-                    hakemus.getAvaimet().stream().filter(a -> "PK_PAATTOTODISTUSVUOSI".equals(a.getAvain()) && "2018".equals(a.getArvo())).count() == 1L);
-        }
-        {
-            HakemusDTO hakemus = new HakemusDTO();
-            Oppija suoritus = new SuoritusrekisteriSpec.OppijaBuilder()
-                    .suoritus()
-                    .setPerusopetus()
-                    .setVahvistettu(true)
-                    .setValmistuminen("01.08.2008")
-                    .setValmis()
-                    .build()
-                    .build();
-
-            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus);
-            Assert.assertTrue("PK_SUORITUSVUOSI löytyy ja sen arvo on 2008",
-                    hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2008".equals(a.getArvo())).count() == 1L);
+            HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku_syksy, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus);
+            Assert.assertTrue("PK_SUORITUSVUOSI löytyy ja sen arvo on 2015",
+                    hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2015".equals(a.getArvo())).count() == 1L);
             assertTrue("PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 1",
                     hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain()) && "1".equals(a.getArvo())).count() == 1L);
-            assertTrue("PK_PAATTOTODISTUSVUOSI löytyy ja sen arvo on 2008",
-                    hakemus.getAvaimet().stream().filter(a -> "PK_PAATTOTODISTUSVUOSI".equals(a.getAvain()) && "2008".equals(a.getArvo())).count() == 1L);
+            assertTrue("PK_PAATTOTODISTUSVUOSI löytyy ja sen arvo on 2015",
+                    hakemus.getAvaimet().stream().filter(a -> "PK_PAATTOTODISTUSVUOSI".equals(a.getAvain()) && "2015".equals(a.getArvo())).count() == 1L);
         }
         {
             HakemusDTO hakemus = new HakemusDTO();
@@ -1030,12 +1041,12 @@ public class HakemuksetConverterUtilTest {
                     .build();
 
             HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus);
-            Assert.assertTrue("PK_SUORITUSVUOSI löytyy ja sen arvo on 2008",
-                    hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2008".equals(a.getArvo())).count() == 1L);
-            assertTrue("PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 1",
-                    hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain()) && "1".equals(a.getArvo())).count() == 1L);
-            assertTrue("PK_PAATTOTODISTUSVUOSI löytyy ja sen arvo on 2008",
-                    hakemus.getAvaimet().stream().filter(a -> "PK_PAATTOTODISTUSVUOSI".equals(a.getAvain()) && "2008".equals(a.getArvo())).count() == 1L);
+            Assert.assertTrue("PK_SUORITUSVUOSI ei löydy",
+                    hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain())).count() == 0L);
+            assertTrue("PK_SUORITUSLUKUKAUSI ei löydy",
+                    hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain())).count() == 0L);
+            assertTrue("PK_PAATTOTODISTUSVUOSI ei löydy",
+                    hakemus.getAvaimet().stream().filter(a -> "PK_PAATTOTODISTUSVUOSI".equals(a.getAvain())).count() == 0L);
         }
     }
 
@@ -1325,9 +1336,9 @@ public class HakemuksetConverterUtilTest {
                         .build()
                     .build();
         HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), tunnistamatonArvosana, hakemus);
-        assertEquals(13, hakemus.getAvaimet().size());
         assertEquals(PohjakoulutusToinenAste.PERUSKOULU, getFirstHakemusArvo(hakemus, "POHJAKOULUTUS"));
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
+        assertEquals("not 13:" + hakemus.getAvaimet(), 13, hakemus.getAvaimet().size());
     }
 
     @Test

@@ -75,7 +75,7 @@ public class HakemuksetConverterUtil {
         hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
         Map<String, AvainArvoDTO> hakemuksenArvot = toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
         Map<String, AvainArvoDTO> surenArvot = toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija.getOppijanumero(), oppija.getSuoritukset(), hakemusDTO, parametritDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
-        List<SuoritusJaArvosanat> suoritukset = filterUnrelevantSuoritukset(haku, oppija.getSuoritukset());
+        List<SuoritusJaArvosanat> suoritukset = filterUnrelevantSuoritukset(haku, hakemusDTO, oppija.getSuoritukset());
         Optional<String> pohjakoulutus = pohjakoulutus(haku, hakemusDTO, suoritukset);
 
         Map<String, AvainArvoDTO> merge = Maps.newHashMap();
@@ -162,12 +162,11 @@ public class HakemuksetConverterUtil {
                 .collect(toMap(a -> a.getAvain(), a -> a));
     }
 
-    public static List<SuoritusJaArvosanat> filterUnrelevantSuoritukset(HakuV1RDTO haku, List<SuoritusJaArvosanat> suoritukset) {
+    public static List<SuoritusJaArvosanat> filterUnrelevantSuoritukset(HakuV1RDTO haku, HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
         return suoritukset.stream()
                 .map(SuoritusJaArvosanatWrapper::wrap)
-                .filter(s -> !(s.isPerusopetus() && !s.isVahvistettu()))
-                .filter(s -> !(s.isPerusopetus() && s.isKesken() && !hakukaudella(haku, s)))
-                .filter(s -> !(s.isLisapistekoulutus() && !s.isVahvistettu()))
+                .filter(s -> !(s.isSuoritusMistaSyntyyPeruskoulunArvosanoja() && !s.isVahvistettu() && !s.onTaltaHakemukselta(hakemus)))
+                .filter(s -> !(s.isSuoritusMistaSyntyyPeruskoulunArvosanoja() && s.isVahvistettu() && !hakukaudella(haku, s)))
                 .filter(s -> !(s.isPerusopetus() && s.isKeskeytynyt() && !hakukaudella(haku, s)))
                 .filter(s -> !(s.isLukio() && s.isKeskeytynyt() && !hakukaudella(haku, s)))
                 .filter(s -> !(s.isYoTutkinto() && (s.isKesken() || s.isKeskeytynyt())))
@@ -189,7 +188,7 @@ public class HakemuksetConverterUtil {
                 .collect(toList());
 
         if (suorituksetRekisterista.stream().anyMatch(s -> s.isLukio() && s.isKeskeytynyt() && hakukaudella(haku, s))) {
-            LOG.error("Hakijan {} lukio keskeytynyt hakukaudella. Käytetään hakemuksen pohjakoulutusta {}.", h.getHakijaOid(), pohjakoulutusHakemukselta);
+            LOG.warn("Hakijan {} lukio keskeytynyt hakukaudella. Käytetään hakemuksen pohjakoulutusta {}.", h.getHakijaOid(), pohjakoulutusHakemukselta);
             return Optional.of(pohjakoulutusHakemukselta);
         }
         if (suorituksetRekisterista.stream()
@@ -220,17 +219,11 @@ public class HakemuksetConverterUtil {
                     yksilollistaminen = PohjakoulutusToinenAste.ALUEITTAIN_YKSILOLLISTETTY;
                     break;
             }
-            if (!yksilollistaminen.equals(pohjakoulutusHakemukselta)) {
-                LOG.error("Hakijan {} ilmoittama perusopetus {} ei vastaa vahvistettua suoritusta {}. " + "Käytetään hakemuksen pohjakoulutusta {}.",
-                        h.getHakijaOid(), pohjakoulutusHakemukselta, yksilollistaminen, pohjakoulutusHakemukselta);
-                return Optional.of(pohjakoulutusHakemukselta);
-            } else {
-                return Optional.of(yksilollistaminen);
-            }
+            return Optional.of(yksilollistaminen);
         }
         if (PohjakoulutusToinenAste.PERUSKOULU.equals(pohjakoulutusHakemukselta) &&
                 suorituksetRekisterista.stream().anyMatch(s -> s.isUlkomainenKorvaava() && s.isVahvistettu() && s.isValmis())) {
-            LOG.error("Hakija {} ilmoittanut peruskoulun, mutta löytyi vahvistettu ulkomainen korvaava suoritus. " + "Käytetään hakemuksen pohjakoulutusta {}.",
+            LOG.warn("Hakija {} ilmoittanut peruskoulun, mutta löytyi vahvistettu ulkomainen korvaava suoritus. " + "Käytetään hakemuksen pohjakoulutusta {}.",
                     h.getHakijaOid(), pohjakoulutusHakemukselta);
             return Optional.of(pohjakoulutusHakemukselta);
         }
@@ -238,7 +231,7 @@ public class HakemuksetConverterUtil {
                 suorituksetRekisterista.stream().anyMatch(s -> s.isUlkomainenKorvaava() && s.isVahvistettu() && s.isValmis())) {
             return Optional.of(PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO);
         }
-        LOG.error("Hakijan {} pohjakoulutusta ei voitu päätellä, käytetään hakemuksen pohjakoulutusta {}.",
+        LOG.warn("Hakijan {} pohjakoulutusta ei voitu päätellä, käytetään hakemuksen pohjakoulutusta {}.",
                 h.getHakijaOid(), pohjakoulutusHakemukselta);
         return Optional.of(pohjakoulutusHakemukselta);
     }
