@@ -166,7 +166,7 @@ public class HakemuksetConverterUtil {
         return suoritukset.stream()
                 .map(SuoritusJaArvosanatWrapper::wrap)
                 .filter(s -> !(s.isPerusopetus() && !s.isVahvistettu()))
-                .filter(s -> !(s.isPerusopetus() && s.isVahvistettu() && s.isKesken()))
+                .filter(s -> !(s.isPerusopetus() && s.isKesken() && !hakukaudella(haku, s)))
                 .filter(s -> !(s.isLisapistekoulutus() && !s.isVahvistettu()))
                 .filter(s -> !(s.isPerusopetus() && s.isKeskeytynyt() && !hakukaudella(haku, s)))
                 .filter(s -> !(s.isLukio() && s.isKeskeytynyt() && !hakukaudella(haku, s)))

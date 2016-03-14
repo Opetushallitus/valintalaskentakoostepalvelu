@@ -82,6 +82,11 @@ public class HakemuksetConverterUtilTest {
                     .setPerusopetus().setVahvistettu(true)
                     .setValmistuminen(HAKUKAUDELLA).setKesken()
                     .done();
+    private static final SuoritusJaArvosanat vahvistettuPerusopetusKeskenEiHakukaudella =
+            new SuoritusrekisteriSpec.SuoritusBuilder()
+                    .setPerusopetus().setVahvistettu(true)
+                    .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA).setKesken()
+                    .done();
     private static final SuoritusJaArvosanat vahvistettuPerusopetusKeskeytynytHakukaudella =
             new SuoritusrekisteriSpec.SuoritusBuilder()
                     .setPerusopetus().setVahvistettu(true)
@@ -184,13 +189,13 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
-    public void suodattaaPoisVahvistetutPeruskouluKeskenSuoritukset() {
+    public void suodattaaPoisHakukaudenUlkopuolellaKeskenOlleetPeruskoulunSuoritukset() {
         Oppija o = new Oppija();
         o.getSuoritukset().add(vahvistettuPerusopetusKeskenHakukaudella);
-        o.getSuoritukset().add(vahvistamatonLukioValmisHakukaudella);
+        o.getSuoritukset().add(vahvistettuPerusopetusKeskenEiHakukaudella);
         List<SuoritusJaArvosanat> suoritukset = HakemuksetConverterUtil.filterUnrelevantSuoritukset(haku, o.getSuoritukset());
         assertEquals(1, suoritukset.size());
-        assertEquals(vahvistamatonLukioValmisHakukaudella, suoritukset.get(0));
+        assertEquals(vahvistettuPerusopetusKeskenHakukaudella, suoritukset.get(0));
     }
 
     @Test
