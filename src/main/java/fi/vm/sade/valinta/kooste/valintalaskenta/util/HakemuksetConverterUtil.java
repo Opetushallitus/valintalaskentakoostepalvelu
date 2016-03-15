@@ -330,7 +330,7 @@ public class HakemuksetConverterUtil {
     private static Optional<Integer> pkPaattotodistusvuosi(HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
         return Stream.concat(
                 suoritukset.stream()
-                        .filter(s -> wrap(s).isPerusopetus() && wrap(s).isVahvistettu() && wrap(s).isValmis())
+                        .filter(s -> wrap(s).isPerusopetus() && (wrap(s).isValmis() || wrap(s).isKesken()))
                         .map(s -> wrap(s).getValmistuminenAsDateTime().getYear()),
                 hakemus.getAvaimet().stream()
                         .filter(a -> PK_PAATTOTODISTUSVUOSI.equals(a.getAvain()))
