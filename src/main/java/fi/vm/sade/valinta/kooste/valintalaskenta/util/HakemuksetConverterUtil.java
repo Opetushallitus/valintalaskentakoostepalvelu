@@ -193,14 +193,14 @@ public class HakemuksetConverterUtil {
                         (s.isYoTutkinto() && s.isVahvistettu() && s.isValmis()))) {
             return Optional.of(PohjakoulutusToinenAste.YLIOPPILAS);
         }
-        if (suorituksetRekisterista.stream().anyMatch(s -> s.isPerusopetus() && s.isVahvistettu() && s.isKeskeytynyt() && hakukaudella(haku, s))) {
+        if (suorituksetRekisterista.stream().anyMatch(s -> s.isPerusopetus() && s.isVahvistettu() && s.isKeskeytynyt())) {
             return Optional.of(PohjakoulutusToinenAste.KESKEYTYNYT);
         }
         if (PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
             return Optional.of(PohjakoulutusToinenAste.YLIOPPILAS);
         }
         Optional<SuoritusJaArvosanatWrapper> perusopetus = suorituksetRekisterista.stream()
-                .filter(s -> s.isPerusopetus() && s.isVahvistettu() && s.isValmis())
+                .filter(s -> s.isPerusopetus() && s.isVahvistettu())
                 .findFirst();
         if (perusopetus.isPresent()) {
             String yksilollistaminen = PohjakoulutusToinenAste.PERUSKOULU;
