@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -53,4 +54,7 @@ public interface ValintaperusteetAsyncResource {
     Peruutettava haeValintakokeetHakukohteille(Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback);
 
     Peruutettava haeValinnanvaiheetHakukohteelle(String hakukohdeOid, Consumer<List<ValinnanVaiheJonoillaDTO>> callback, Consumer<Throwable> failureCallback);
+
+    // @GET /valintaperusteet-service/resources/valinnanvaihe/{oid}/hakukohteet
+    Future<Set<String>> haeHakukohteetValinnanvaiheelle(String oid);
 }
