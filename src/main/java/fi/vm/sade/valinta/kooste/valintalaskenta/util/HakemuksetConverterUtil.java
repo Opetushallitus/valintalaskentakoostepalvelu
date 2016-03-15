@@ -168,7 +168,7 @@ public class HakemuksetConverterUtil {
                 .filter(s -> !(s.isSuoritusMistaSyntyyPeruskoulunArvosanoja() && !s.isVahvistettu() && !s.onTaltaHakemukselta(hakemus)))
                 .filter(s -> !(s.isSuoritusMistaSyntyyPeruskoulunArvosanoja() && s.isVahvistettu() && !hakukaudella(haku, s)))
                 .filter(s -> !(s.isPerusopetus() && s.isKeskeytynyt() && !hakukaudella(haku, s)))
-                .filter(s -> !(s.isLukio() && s.isKeskeytynyt() && !hakukaudella(haku, s)))
+                .filter(s -> !(s.isLukio() && s.isKeskeytynyt()))
                 .filter(s -> !(s.isYoTutkinto() && (s.isKesken() || s.isKeskeytynyt())))
                 .map(SuoritusJaArvosanatWrapper::getSuoritusJaArvosanat)
                 .collect(toList());
@@ -187,10 +187,6 @@ public class HakemuksetConverterUtil {
                 .map(SuoritusJaArvosanatWrapper::wrap)
                 .collect(toList());
 
-        if (suorituksetRekisterista.stream().anyMatch(s -> s.isLukio() && s.isKeskeytynyt() && hakukaudella(haku, s))) {
-            LOG.warn("Hakijan {} lukio keskeytynyt hakukaudella. Käytetään hakemuksen pohjakoulutusta {}.", h.getHakijaOid(), pohjakoulutusHakemukselta);
-            return Optional.of(pohjakoulutusHakemukselta);
-        }
         if (suorituksetRekisterista.stream()
                 .anyMatch(s -> (s.isLukio() && s.isValmis()) ||
                         (s.isLukio() && s.isKesken() && hakukaudella(haku, s)) ||
