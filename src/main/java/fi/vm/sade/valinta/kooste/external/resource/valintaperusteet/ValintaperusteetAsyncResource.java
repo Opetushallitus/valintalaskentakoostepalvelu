@@ -1,23 +1,15 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet;
 
+import fi.vm.sade.service.valintaperusteet.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import rx.Observable;
+
+import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
-
-import javax.ws.rs.core.Response;
-
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import rx.Observable;
 
 public interface ValintaperusteetAsyncResource {
 
