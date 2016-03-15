@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -184,4 +185,17 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                 .async()
                 .get(new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<List<ValintakoeDTO>>() {}.getType())));
     }
+
+    @Override
+    public Future<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
+        String url = "/valintaperusteet-service/resources/valinnanvaihe/" + oid + "/hakukohteet";
+        return getWebClient()
+                .path(url)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .async()
+                .get(new GenericType<Set<String>>() {
+                });
+    }
+
+
 }

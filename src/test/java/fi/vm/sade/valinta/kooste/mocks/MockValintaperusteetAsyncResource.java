@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.mocks;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -83,6 +84,12 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
         callback.accept(resultReference.get());
         return new PeruutettavaImpl(Futures.immediateCancelledFuture());
     }
+
+    @Override
+    public Future<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public Peruutettava haeHakijaryhmat(String hakukohdeOid, Consumer<List<ValintaperusteetHakijaryhmaDTO>> callback, Consumer<Throwable> failureCallback) {
         throw new UnsupportedOperationException();
