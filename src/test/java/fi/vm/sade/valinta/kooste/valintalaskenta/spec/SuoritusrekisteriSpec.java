@@ -245,6 +245,10 @@ public class SuoritusrekisteriSpec {
             suoritus.setKomo(SuoritusJaArvosanatWrapper.PK_AMMATTISTARTTI_KOMO);
             return SuoritusBuilder.this;
         }
+        public SuoritusBuilder setSuoritusKieli(String suoritusKieli) {
+            suoritus.setSuoritusKieli(suoritusKieli);
+            return SuoritusBuilder.this;
+        }
         public ArvosanaBuilder arvosana() {
             return new ArvosanaBuilder(SuoritusBuilder.this);
         }
