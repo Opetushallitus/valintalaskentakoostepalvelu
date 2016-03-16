@@ -11,10 +11,7 @@ import fi.vm.sade.valinta.kooste.util.Converter;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.YoToAvainSuoritustietoDTOConverter;
-import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
-import fi.vm.sade.valintalaskenta.domain.dto.Lisapistekoulutus;
-import fi.vm.sade.valintalaskenta.domain.dto.PohjakoulutusToinenAste;
+import fi.vm.sade.valintalaskenta.domain.dto.*;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -35,6 +32,10 @@ public class HakemuksetConverterUtil {
     public static final String PERUSOPETUS_KIELI = "perusopetuksen_kieli";
     public static final String POHJAKOULUTUS = "POHJAKOULUTUS";
     public static final String ENSIKERTALAINEN = "ensikertalainen";
+    public static final String PREFERENCE_PREFIX = "preference";
+    public static final String DISCRETIONARY_POSTFIX = "discretionary";
+
+    public static final String KOHDEJOUKKO_AMMATILLINEN_JA_LUKIO = "haunkohdejoukko_11";
 
     public static List<HakemusDTO> muodostaHakemuksetDTO(HakuV1RDTO haku, String hakukohdeOid, List<Hakemus> hakemukset,
                                                          List<Oppija> oppijat, ParametritDTO parametritDTO) {
@@ -269,9 +270,28 @@ public class HakemuksetConverterUtil {
         Map<String, String> tiedot = new HashMap<>();
         pkPaattotodistusvuosi(hakemus, suoritukset).ifPresent(vuosi -> tiedot.put(PK_PAATTOTODISTUSVUOSI, String.valueOf(vuosi)));
         pkOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(PERUSOPETUS_KIELI, kieli));
+        pohjakoulutus.ifPresent(pk -> tiedot.putAll(automaticDiscretionaryOptions(pk, haku, hakemus)));
         suoritustilat(predicates, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue())));
         suoritusajat(predicates, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue())));
         pohjakoulutus.ifPresent(pk -> lisapistekoulutukset(pk, haku, hakemus, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey().name(), String.valueOf(e.getValue()))));
+        return tiedot;
+    }
+
+    private static boolean isDiscretionaryInUse(HakuV1RDTO haku) {
+        return KOHDEJOUKKO_AMMATILLINEN_JA_LUKIO.equals(haku.getKohdejoukkoUri().split("#")[0]);
+    }
+
+    private static Map<String, String> automaticDiscretionaryOptions(String pohjakoulutus, HakuV1RDTO haku, HakemusDTO hakemus) {
+        Map<String, String> tiedot = new HashMap<>();
+        if (isDiscretionaryInUse(haku) &&
+            (PohjakoulutusToinenAste.KESKEYTYNYT.equals(pohjakoulutus) ||
+            PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO.equals(pohjakoulutus))) {
+            for (int preferenceIndex = 1; preferenceIndex <= hakemus.getHakukohteet().size();  preferenceIndex++) {
+                String discretionaryQuestionId = PREFERENCE_PREFIX + preferenceIndex + "-" + DISCRETIONARY_POSTFIX;
+                tiedot.put(discretionaryQuestionId, "true");
+                tiedot.put(discretionaryQuestionId + "-follow-up", "todistustenpuuttuminen");
+            }
+        }
         return tiedot;
     }
 

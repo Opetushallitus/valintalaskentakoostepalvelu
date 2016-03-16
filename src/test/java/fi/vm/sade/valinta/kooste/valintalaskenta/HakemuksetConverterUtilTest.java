@@ -33,6 +33,7 @@ public class HakemuksetConverterUtilTest {
     static {
         haku.setHakukausiUri("kausi_k#1");
         haku.setHakukausiVuosi(2015);
+        haku.setKohdejoukkoUri(HakemuksetConverterUtil.KOHDEJOUKKO_AMMATILLINEN_JA_LUKIO + "#1");
     }
 
     private static final HakuV1RDTO haku_syksy = new HakuV1RDTO();
@@ -344,6 +345,25 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuPerusopetusKeskeytynytHakukaudella);
         }};
         Assert.assertEquals(PohjakoulutusToinenAste.KESKEYTYNYT, HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+    }
+
+    @Test
+    public void automaticPreferenceDiscretionarySetJosVahvistettuPeruskoulunSuoritusKeskeytynytHakukaudella() {
+        HakemusDTO h = new HakemusDTO();
+        h.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+        }});
+        h.setHakukohteet(Arrays.asList(new HakukohdeDTO(), new HakukohdeDTO()));
+        List<SuoritusJaArvosanat> suoritukset = new ArrayList<SuoritusJaArvosanat>() {{
+            add(vahvistettuPerusopetusKeskeytynytHakukaudella);
+        }};
+        Optional<String> pohjakoulutus = HakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset);
+        Map<String,String> answers = HakemuksetConverterUtil.suoritustenTiedot(pohjakoulutus, haku, h, suoritukset);
+        Assert.assertEquals("true", answers.get("preference1-discretionary"));
+        Assert.assertEquals("todistustenpuuttuminen", answers.get("preference1-discretionary-follow-up"));
+        Assert.assertEquals("true", answers.get("preference2-discretionary"));
+        Assert.assertEquals("todistustenpuuttuminen", answers.get("preference2-discretionary-follow-up"));
+        Assert.assertFalse(answers.containsKey("preference3-discretionary"));
     }
 
     @Test
