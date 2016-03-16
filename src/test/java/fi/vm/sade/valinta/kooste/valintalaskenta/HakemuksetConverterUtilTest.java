@@ -920,6 +920,68 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
+    public void hakemukseltaKopioituJaValmis() {
+        HakemusDTO hakemus = new HakemusDTO();
+        hakemus.setHakemusoid(HAKEMUS1_OID);
+        hakemus.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            add(new AvainArvoDTO("PK_PAATTOTODISTUSVUOSI", "2014"));
+            add(new AvainArvoDTO(HakemuksetConverterUtil.PERUSOPETUS_KIELI, "FI"));
+        }});
+        Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
+                .suoritus()
+                .setSuoritusKieli("FI")
+                .setPerusopetus()
+                .setVahvistettu(false)
+                .setMyontaja(HAKEMUS1_OID)
+                .setValmistuminen("1.1.2014")
+                .setValmis()
+                .build()
+                .suoritus()
+                .setSuoritusKieli("SV")
+                .setPerusopetus()
+                .setVahvistettu(true)
+                .setValmistuminen("1.1.2015")
+                .setValmis()
+                .build()
+                .build();
+
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+        assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_SUORITUSVUOSI"));
+        assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
+        assertEquals("SV", getFirstHakemusArvo(hakemus,  HakemuksetConverterUtil.PERUSOPETUS_KIELI));
+    }
+
+    @Test
+    public void keskenJaValmis() {
+        HakemusDTO hakemus = new HakemusDTO();
+        hakemus.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            add(new AvainArvoDTO("PK_PAATTOTODISTUSVUOSI", "2014"));
+            add(new AvainArvoDTO(HakemuksetConverterUtil.PERUSOPETUS_KIELI, "FI"));
+        }});
+        Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
+                .suoritus()
+                .setSuoritusKieli("FI")
+                .setPerusopetus()
+                .setVahvistettu(true)
+                .setValmistuminen("1.1.2015")
+                .setKesken()
+                .build()
+                .suoritus()
+                .setSuoritusKieli("SV")
+                .setPerusopetus()
+                .setVahvistettu(true)
+                .setValmistuminen("1.1.2015")
+                .setValmis()
+                .build()
+                .build();
+
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+        assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_SUORITUSVUOSI"));
+        assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
+        assertEquals("SV", getFirstHakemusArvo(hakemus,  HakemuksetConverterUtil.PERUSOPETUS_KIELI));
+    }
+
+    @Test
     public void itseIlmoitettuJaKaksiValmista() {
         HakemusDTO hakemus = new HakemusDTO();
         hakemus.setAvaimet(new ArrayList<AvainArvoDTO>() {{
