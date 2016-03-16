@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.Sets;
 import org.springframework.stereotype.Service;
 
 import com.google.common.util.concurrent.Futures;
@@ -87,7 +88,8 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
 
     @Override
     public Future<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
-        throw new UnsupportedOperationException();
+        Set<String> hakukohdelist = Sets.newHashSet("1.2.3.4", "4.3.2.1");
+        return Futures.immediateFuture(hakukohdelist);
     }
 
     @Override
