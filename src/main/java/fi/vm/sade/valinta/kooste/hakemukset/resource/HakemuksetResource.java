@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakemukset.resource;
 
+import com.google.common.base.Preconditions;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -21,7 +22,10 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -46,14 +50,25 @@ public class HakemuksetResource {
     @Produces("application/json")
     @ApiOperation(value = "Pistesyötön vienti taulukkolaskentaan", response = HakemusDTO.class)
     public void hakemuksetValinnanvaiheelle(@QueryParam("hakuOid") String hakuOid, @QueryParam("valinnanvaiheOid") String valinnanvaiheOid, @Suspended AsyncResponse asyncResponse) {
-
-        asyncResponse.setTimeout(10, TimeUnit.MINUTES);
-        final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOid(hakuOid, "");
-
-        hakemuksetObservable.subscribe((hakemukset) -> {
-            List<HakemusDTO> hakemusDTOs = hakemukset.stream().limit(100).map(hakemusTOHakemusDTO).collect(Collectors.toList());
+        try {
+            Preconditions.checkNotNull(hakuOid);
+            Preconditions.checkNotNull(valinnanvaiheOid);
+            asyncResponse.setTimeout(10, TimeUnit.MINUTES);
+            Set<String> hakukohdeOidit = valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid).get();
+            Set<HakemusDTO> hakemusDTOs = new HashSet<>();
+            hakukohdeOidit.forEach(hakukohdeOid -> {
+                final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid);
+                hakemuksetObservable.subscribe((hakemukset) -> {
+                    List<HakemusDTO> dtos = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());
+                    hakemusDTOs.addAll(dtos);
+                });
+            });
             asyncResponse.resume(Response.ok(hakemusDTOs).build());
-        });
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
     }
 
