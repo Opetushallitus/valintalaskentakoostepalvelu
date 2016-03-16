@@ -77,15 +77,11 @@ public class HakemuksetConverterUtil {
         hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
         Map<String, AvainArvoDTO> hakemuksenArvot = toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
         Map<String, AvainArvoDTO> surenArvosanat = toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija.getOppijanumero(), oppija.getSuoritukset(), hakemusDTO, parametritDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
-        List<SuoritusJaArvosanat> suoritukset = filterUnrelevantSuoritukset(haku, hakemusDTO, oppija.getSuoritukset());
-        Collections.sort(suoritukset);
-        Optional<String> pohjakoulutus = pohjakoulutus(haku, hakemusDTO, suoritukset);
 
         Map<String, AvainArvoDTO> merge = Maps.newHashMap();
         merge.putAll(hakemuksenArvot);
         ensikertalaisuus(hakijallaOnHenkilotunnus, haku, hakukohdeOid, oppija, hakemusDTO, merge);
-        pohjakoulutus.ifPresent(pk -> merge.put(POHJAKOULUTUS, new AvainArvoDTO(POHJAKOULUTUS, pk)));
-        merge.putAll(suoritustenTiedot(pohjakoulutus, haku, hakemusDTO, suoritukset).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue()))));
+        merge.putAll(suoritustenTiedot(haku, hakemusDTO, oppija.getSuoritukset()).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue()))));
         merge.putAll(surenArvosanat);
         hakemusDTO.setAvaimet(merge.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));
     }
@@ -257,10 +253,9 @@ public class HakemuksetConverterUtil {
         throw new RuntimeException(String.format("Tuntematon pohjakoulutus %s", pohjakoulutus));
     }
 
-    public static Map<String, String> suoritustenTiedot(Optional<String> pohjakoulutus,
-                                                        HakuV1RDTO haku,
+    public static Map<String, String> suoritustenTiedot(HakuV1RDTO haku,
                                                         HakemusDTO hakemus,
-                                                        List<SuoritusJaArvosanat> suoritukset) {
+                                                        List<SuoritusJaArvosanat> sureSuoritukset) {
         final Map<String, Predicate<SuoritusJaArvosanat>> predicates =
                 new HashMap<String, Predicate<SuoritusJaArvosanat>>() {{
                     put("PK", s -> wrap(s).isPerusopetus());
@@ -268,7 +263,12 @@ public class HakemuksetConverterUtil {
                     put("LK", s -> wrap(s).isLukio());
                     put("YO", s -> wrap(s).isYoTutkinto());
                 }};
-        Map<String, String> tiedot = new HashMap<>();
+        final Map<String, String> tiedot = new HashMap<>();
+        final List<SuoritusJaArvosanat> suoritukset = filterUnrelevantSuoritukset(haku, hakemus, sureSuoritukset);
+        Collections.sort(suoritukset);
+
+        Optional<String> pohjakoulutus = pohjakoulutus(haku, hakemus, suoritukset);
+        pohjakoulutus.ifPresent(pk -> tiedot.put(POHJAKOULUTUS, pk));
         pkPaattotodistusvuosi(hakemus, suoritukset).ifPresent(vuosi -> tiedot.put(PK_PAATTOTODISTUSVUOSI, String.valueOf(vuosi)));
         pkOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(PERUSOPETUS_KIELI, kieli));
         pohjakoulutus.ifPresent(pk -> tiedot.putAll(automaticDiscretionaryOptions(pk, haku, hakemus)));
