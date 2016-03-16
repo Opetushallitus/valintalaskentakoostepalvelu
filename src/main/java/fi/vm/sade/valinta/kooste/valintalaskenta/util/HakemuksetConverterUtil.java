@@ -74,7 +74,7 @@ public class HakemuksetConverterUtil {
                                                    HakemusDTO hakemusDTO) {
         hakemusDTO.setAvainMetatiedotDTO(YoToAvainSuoritustietoDTOConverter.convert(oppija));
         Map<String, AvainArvoDTO> hakemuksenArvot = toAvainMap(hakemusDTO.getAvaimet(), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
-        Map<String, AvainArvoDTO> surenArvot = toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija.getOppijanumero(), oppija.getSuoritukset(), hakemusDTO, parametritDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
+        Map<String, AvainArvoDTO> surenArvosanat = toAvainMap(OppijaToAvainArvoDTOConverter.convert(oppija.getOppijanumero(), oppija.getSuoritukset(), hakemusDTO, parametritDTO), hakemusDTO.getHakemusoid(), hakukohdeOid, errors);
         List<SuoritusJaArvosanat> suoritukset = filterUnrelevantSuoritukset(haku, hakemusDTO, oppija.getSuoritukset());
         Optional<String> pohjakoulutus = pohjakoulutus(haku, hakemusDTO, suoritukset);
 
@@ -83,7 +83,7 @@ public class HakemuksetConverterUtil {
         ensikertalaisuus(hakijallaOnHenkilotunnus, haku, hakukohdeOid, oppija, hakemusDTO, merge);
         pohjakoulutus.ifPresent(pk -> merge.put(POHJAKOULUTUS, new AvainArvoDTO(POHJAKOULUTUS, pk)));
         merge.putAll(suoritustenTiedot(pohjakoulutus, haku, hakemusDTO, suoritukset).entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue()))));
-        merge.putAll(surenArvot);
+        merge.putAll(surenArvosanat);
         hakemusDTO.setAvaimet(merge.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList()));
     }
 
