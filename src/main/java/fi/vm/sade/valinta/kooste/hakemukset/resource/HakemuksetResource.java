@@ -48,7 +48,7 @@ public class HakemuksetResource {
     @GET
     @Path("/valinnanvaihe")
     @Produces("application/json")
-    @ApiOperation(value = "Pistesyötön vienti taulukkolaskentaan", response = HakemusDTO.class)
+    @ApiOperation(value = "Valinnanvaiheen hakemusten listaus", response = HakemusDTO.class)
     public void hakemuksetValinnanvaiheelle(@QueryParam("hakuOid") String hakuOid, @QueryParam("valinnanvaiheOid") String valinnanvaiheOid, @Suspended AsyncResponse asyncResponse) {
         try {
             Preconditions.checkNotNull(hakuOid);
@@ -57,15 +57,14 @@ public class HakemuksetResource {
             Set<String> hakukohdeOidit = valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid).get();
             Set<HakemusDTO> hakemusDTOs = new HashSet<>();
             final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOids(hakuOid, hakukohdeOidit);
-            hakemuksetObservable.subscribe((hakemukset) -> {
+            hakemuksetObservable.subscribe(hakemukset -> {
                 List<HakemusDTO> dtos = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());
                 hakemusDTOs.addAll(dtos);
             });
             asyncResponse.resume(Response.ok(hakemusDTOs).build());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOG.error("Listing hakemus for valinnanvaihe {} and haku {} failed",valinnanvaiheOid, hakuOid, e);
+            asyncResponse.cancel();
         }
 
     }
