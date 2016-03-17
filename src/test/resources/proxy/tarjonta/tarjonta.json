@@ -1,10 +1,4 @@
 {
-  "accessRights": {
-    "update": false,
-    "delete": false,
-    "create": false
-  },
-  "result": {
     "modified": 1428507067283,
     "modifiedBy": "1.2.246.562.24.72453542949",
     "oid": "1.2.246.562.29.90697286251",
@@ -3118,6 +3112,4 @@
     "usePriority": true,
     "sisaltyvatHaut": [],
     "organisaatioryhmat": []
-  },
-  "status": "OK"
 }

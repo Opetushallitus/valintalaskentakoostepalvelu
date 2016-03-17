@@ -22,6 +22,9 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
 
     @Override
     public Observable<HakuV1RDTO> haeHaku(String hakuOid) {
+        if(mockHaku.containsKey(hakuOid)) {
+            return Observable.just(mockHaku.get(hakuOid));
+        }
         HakuV1RDTO hakuV1RDTO = new HakuV1RDTO();
         hakuV1RDTO.setOid(hakuOid);
         return Observable.just(hakuV1RDTO);

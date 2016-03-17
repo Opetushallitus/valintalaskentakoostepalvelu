@@ -40,7 +40,7 @@ public class OppijanSuorituksetProxyResourceTest {
     private static final String URL = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
     private static final String opiskelijaOid = "1.2.246.562.24.71943835646";
     private static final String hakemusOid = "1.2.246.562.11.00000000615";
-    private static final String hakuOid = "bar";
+    private static final String hakuOid = "1.2.246.562.29.90697286251";
     final HttpResource proxyResource = new HttpResource(URL + "/proxy/suoritukset/suorituksetByOpiskelijaOid/hakuOid/" + hakuOid + "/opiskeljaOid/" + opiskelijaOid + "/hakemusOid/" + hakemusOid);
 
     private static String classpathResourceAsString(String path) throws Exception {
