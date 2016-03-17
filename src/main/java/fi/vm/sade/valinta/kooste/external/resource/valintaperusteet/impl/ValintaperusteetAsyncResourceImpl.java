@@ -187,14 +187,9 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
     }
 
     @Override
-    public Future<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
+    public Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
         String url = "/valintaperusteet-service/resources/valinnanvaihe/" + oid + "/hakukohteet";
-        return getWebClient()
-                .path(url)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .async()
-                .get(new GenericType<Set<String>>() {
-                });
+        return getAsObservable(url, new TypeToken<Set<String>>() {}.getType());
     }
 
 

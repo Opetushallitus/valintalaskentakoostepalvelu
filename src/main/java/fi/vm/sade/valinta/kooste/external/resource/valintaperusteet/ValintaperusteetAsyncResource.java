@@ -56,5 +56,5 @@ public interface ValintaperusteetAsyncResource {
     Peruutettava haeValinnanvaiheetHakukohteelle(String hakukohdeOid, Consumer<List<ValinnanVaiheJonoillaDTO>> callback, Consumer<Throwable> failureCallback);
 
     // @GET /valintaperusteet-service/resources/valinnanvaihe/{oid}/hakukohteet
-    Future<Set<String>> haeHakukohteetValinnanvaiheelle(String oid);
+    Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid);
 }
