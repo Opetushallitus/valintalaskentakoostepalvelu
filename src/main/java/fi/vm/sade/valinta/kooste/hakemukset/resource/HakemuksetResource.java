@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.hakemukset.resource;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -57,15 +58,21 @@ public class HakemuksetResource {
             Set<HakemusDTO> hakemusDTOs = new HashSet<>();
             final Observable<Set<String>> hakukohdeOiditObservable = valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid);
             hakukohdeOiditObservable.subscribe(hakukohdeOidit -> {
-                final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOids(hakuOid, hakukohdeOidit);
-                hakemuksetObservable.subscribe(hakemukset -> {
-                    List<HakemusDTO> dtos = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());
-                    hakemusDTOs.addAll(dtos);
-                });
+                List<String> hakukohteet = hakukohdeOidit.stream().collect(Collectors.toList());
+                LOG.info("Löydettiin {} hakukohdetta", hakukohteet.size());
+                for (List<String> sublist : Lists.partition(hakukohteet, 10)) {
+                    LOG.info("Käsitellään {} hakukohdetta", sublist.size());
+                    final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOids(hakuOid, sublist);
+                    hakemuksetObservable.subscribe(hakemukset -> {
+                        LOG.info("Löydettiin {} hakemusta", hakemukset.size());
+                        List<HakemusDTO> dtos = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());
+                        hakemusDTOs.addAll(dtos);
+                    });
+                }
                 asyncResponse.resume(Response.ok(hakemusDTOs).build());
             });
         } catch (Exception e) {
-            LOG.error("Listing hakemus for valinnanvaihe {} and haku {} failed",valinnanvaiheOid, hakuOid, e);
+            LOG.error("Listing hakemus for valinnanvaihe {} and haku {} failed", valinnanvaiheOid, hakuOid, e);
             asyncResponse.cancel();
         }
 
