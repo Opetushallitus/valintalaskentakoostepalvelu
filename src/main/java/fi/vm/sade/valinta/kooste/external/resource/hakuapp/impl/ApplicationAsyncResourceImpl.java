@@ -67,6 +67,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
         return getAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(), client -> {
             client.query("appState", "ACTIVE", "INCOMPLETE");
             client.query("rows", 100000).query("asId", hakuOid).query("aoOid", hakukohdeOids);
+            LOG.info("Calling url {}", client.getCurrentURI());
             return client;
         });
     }

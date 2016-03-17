@@ -56,6 +56,7 @@ public class HakemuksetResource {
             Preconditions.checkNotNull(valinnanvaiheOid);
             asyncResponse.setTimeout(10, TimeUnit.MINUTES);
             Set<HakemusDTO> hakemusDTOs = new HashSet<>();
+            LOG.info("Aloitetaan hakemusten listaaminen valinnenvaiheelle {} haussa {}", valinnanvaiheOid, hakuOid);
             final Observable<Set<String>> hakukohdeOiditObservable = valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid);
             hakukohdeOiditObservable.subscribe(hakukohdeOidit -> {
                 List<String> hakukohteet = hakukohdeOidit.stream().collect(Collectors.toList());
