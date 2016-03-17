@@ -87,9 +87,9 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
-    public Future<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
+    public Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
         Set<String> hakukohdelist = Sets.newHashSet("1.2.3.4", "4.3.2.1");
-        return Futures.immediateFuture(hakukohdelist);
+        return Observable.just(hakukohdelist);
     }
 
     @Override
