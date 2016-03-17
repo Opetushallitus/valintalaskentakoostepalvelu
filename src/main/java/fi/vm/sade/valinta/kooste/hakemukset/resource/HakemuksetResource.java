@@ -54,14 +54,16 @@ public class HakemuksetResource {
             Preconditions.checkNotNull(hakuOid);
             Preconditions.checkNotNull(valinnanvaiheOid);
             asyncResponse.setTimeout(10, TimeUnit.MINUTES);
-            Set<String> hakukohdeOidit = valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid).get();
             Set<HakemusDTO> hakemusDTOs = new HashSet<>();
-            final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOids(hakuOid, hakukohdeOidit);
-            hakemuksetObservable.subscribe(hakemukset -> {
-                List<HakemusDTO> dtos = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());
-                hakemusDTOs.addAll(dtos);
+            final Observable<Set<String>> hakukohdeOiditObservable = valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid);
+            hakukohdeOiditObservable.subscribe(hakukohdeOidit -> {
+                final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOids(hakuOid, hakukohdeOidit);
+                hakemuksetObservable.subscribe(hakemukset -> {
+                    List<HakemusDTO> dtos = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());
+                    hakemusDTOs.addAll(dtos);
+                });
+                asyncResponse.resume(Response.ok(hakemusDTOs).build());
             });
-            asyncResponse.resume(Response.ok(hakemusDTOs).build());
         } catch (Exception e) {
             LOG.error("Listing hakemus for valinnanvaihe {} and haku {} failed",valinnanvaiheOid, hakuOid, e);
             asyncResponse.cancel();
