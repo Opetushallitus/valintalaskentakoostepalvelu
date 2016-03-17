@@ -56,12 +56,10 @@ public class HakemuksetResource {
             asyncResponse.setTimeout(10, TimeUnit.MINUTES);
             Set<String> hakukohdeOidit = valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid).get();
             Set<HakemusDTO> hakemusDTOs = new HashSet<>();
-            hakukohdeOidit.forEach(hakukohdeOid -> {
-                final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid);
-                hakemuksetObservable.subscribe((hakemukset) -> {
-                    List<HakemusDTO> dtos = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());
-                    hakemusDTOs.addAll(dtos);
-                });
+            final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOids(hakuOid, hakukohdeOidit);
+            hakemuksetObservable.subscribe((hakemukset) -> {
+                List<HakemusDTO> dtos = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());
+                hakemusDTOs.addAll(dtos);
             });
             asyncResponse.resume(Response.ok(hakemusDTOs).build());
         } catch (InterruptedException e) {
