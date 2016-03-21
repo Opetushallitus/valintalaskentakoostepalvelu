@@ -69,12 +69,15 @@ public class ErillishaunVientiService {
 
         zip(hakemusObservable, hakuFuture, tarjontaHakukohdeObservable, from(valintatulosFuture), from(hakukohdeFuture),
                 (hakemukset, haku, tarjontaHakukohde, valintatulos, hakukohde) -> {
+                    System.out.println("Hakukohde: " + hakukohde.getSijoitteluajoId());
                     Map<String, Valintatulos> valintatulokset = getValintatulokset(erillishaku, valintatulos);
-                    if (MapUtils.isEmpty(valintatulokset)) {
+                    if (MapUtils.isEmpty(valintatulokset) && hakukohde.getSijoitteluajoId() == null) {
                         // ei viela tuloksia, joten tehdaan tuonti haetuista hakemuksista
-                        return generoiIlmanTuloksia(erillishaku, hakemukset, haku, tarjontaHakukohde);
+                        return generoiIlmanHakukohdettaJaTuloksia(erillishaku, hakemukset, haku, tarjontaHakukohde);
+                    } else if(MapUtils.isEmpty(valintatulokset) && hakukohde.getSijoitteluajoId() != null) {
+                        return generoiHakukohteella(erillishaku, hakemukset, haku, tarjontaHakukohde, hakukohde);
                     } else {
-                        return generoiTuloksilla(erillishaku, hakemukset, haku, tarjontaHakukohde, hakukohde, valintatulokset);
+                        return generoiHakukohteellaJaTuloksilla(erillishaku, hakemukset, haku, tarjontaHakukohde, hakukohde, valintatulokset);
                     }
 
             })
@@ -104,7 +107,7 @@ public class ErillishaunVientiService {
             return o.toString();
         }
     }
-    private ErillishakuExcel generoiTuloksilla(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde, final HakukohdeDTO hakukohde, final Map<String, Valintatulos> valintatulokset) {
+    private ErillishakuExcel generoiHakukohteellaJaTuloksilla(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde, final HakukohdeDTO hakukohde, final Map<String, Valintatulos> valintatulokset) {
         LOG.info("Muodostetaan Excel valintaperusteista!");
         Map<String, Hakemus> oidToHakemus = hakemukset.stream().collect(Collectors.toMap(h -> h.getOid(), h -> h));
         List<ErillishakuRivi> erillishakurivit = hakukohde
@@ -133,7 +136,35 @@ public class ErillishaunVientiService {
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakurivit);
     }
 
-    private ErillishakuExcel generoiIlmanTuloksia(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde) {
+    private ErillishakuExcel generoiHakukohteella(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde, final HakukohdeDTO hakukohde) {
+        LOG.info("Muodostetaan Excel valintaperusteista!");
+        Map<String, Hakemus> oidToHakemus = hakemukset.stream().collect(Collectors.toMap(h -> h.getOid(), h -> h));
+        List<ErillishakuRivi> erillishakurivit = hakukohde
+                .getValintatapajonot().stream()
+                .flatMap(v -> v.getHakemukset().stream())
+                .map(h -> {
+                    HakemusWrapper wrapper = new HakemusWrapper(oidToHakemus.get(h.getHakemusOid()));
+                    ErillishakuRivi e = new ErillishakuRivi(
+                            h.getHakemusOid(),
+                            h.getSukunimi(),
+                            h.getEtunimi(),
+                            wrapper.getHenkilotunnus(),
+                            wrapper.getSahkopostiOsoite(),
+                            wrapper.getSyntymaaika(),
+                            Sukupuoli.fromString(wrapper.getSukupuoliAsIs()),
+                            wrapper.getPersonOid(),
+                            wrapper.getAidinkieli(),
+                            objectToString(h.getTila()),
+                            "",
+                            "",
+                            false,
+                            false);
+                    return e;
+                }).collect(Collectors.toList());
+        return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakurivit);
+    }
+
+    private ErillishakuExcel generoiIlmanHakukohdettaJaTuloksia(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde) {
         LOG.info("Hakemuksia ei ole viela tuotu ensimmaistakaan kertaa talle hakukohteelle! Generoidaan hakemuksista excel...");
         List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus -> {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus);
