@@ -9,7 +9,9 @@ import fi.vm.sade.valinta.kooste.external.resource.authentication.AuthorizationA
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
@@ -30,15 +32,11 @@ public class AuthorizationAsyncResourceImpl extends AsyncResourceWithCas impleme
     private final TarjontaAsyncResource tarjontaAsyncResource;
 
     @Autowired
-    public AuthorizationAsyncResourceImpl(@Value("${web.url.cas}")
-                                              String webCasUrl,
-                                          @Value("${cas.service.authentication-service}/j_spring_cas_security_check") String targetService,
-                                          @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String appClientUsername,
-                                          @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword,
+    public AuthorizationAsyncResourceImpl(@Qualifier("AuthenticationServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
                                           @Value("${valintalaskentakoostepalvelu.authentication.rest.url}") String address,
                                           ApplicationContext context,
                                           TarjontaAsyncResource tarjontaAsyncResource) {
-        super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.HOURS.toMillis(1));
+        super(casInterceptor, address, context, TimeUnit.HOURS.toMillis(1));
         this.tarjontaAsyncResource = tarjontaAsyncResource;
     }
 

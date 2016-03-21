@@ -13,7 +13,9 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppiBatch;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.hakemus.dto.ApplicationOidsAndReason;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -33,13 +35,10 @@ import java.util.function.Consumer;
 public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implements ApplicationAsyncResource {
     @Autowired
     public ApplicationAsyncResourceImpl(
-            @Value("${web.url.cas}") String webCasUrl,
-            @Value("${cas.service.haku-service}/j_spring_cas_security_check") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword,
+            @Qualifier("HakemusServiceRestClientAsAdminCasInterceptor") AbstractPhaseInterceptor casInterceptor,
             @Value("${valintalaskentakoostepalvelu.hakemus.rest.url}") String address,
             ApplicationContext context) {
-        super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.HOURS.toMillis(1));
+        super(casInterceptor, address, context, TimeUnit.HOURS.toMillis(1));
     }
 
     @Override

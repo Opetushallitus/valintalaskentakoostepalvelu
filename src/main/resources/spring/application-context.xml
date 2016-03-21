@@ -72,6 +72,9 @@
 			<jaxws:outInterceptors>
 				<ref bean="koodiServiceCasInterceptor"/>
 			</jaxws:outInterceptors>
+			<jaxws:inInterceptors>
+				<ref bean="koodiServiceCasInterceptor"/>
+			</jaxws:inInterceptors>
 		</jaxws:client>
 		<jaxrs-client:client id="viestintapalveluClient"
 							 name="ViestintapalveluRestClient"
@@ -81,6 +84,9 @@
 			<jaxrs-client:outInterceptors>
 				<ref bean="viestintapalveluClientCasInterceptor"/>
 			</jaxrs-client:outInterceptors>
+			<jaxrs-client:inInterceptors>
+				<ref bean="viestintapalveluClientCasInterceptor"/>
+			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
@@ -92,6 +98,9 @@
 			<jaxrs-client:outInterceptors>
 				<ref bean="ValintakoeRestClientCasInterceptor"/>
 			</jaxrs-client:outInterceptors>
+			<jaxrs-client:inInterceptors>
+				<ref bean="ValintakoeRestClientCasInterceptor"/>
+			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
@@ -104,6 +113,9 @@
 			<jaxrs-client:outInterceptors>
 				<ref bean="HakemusServiceRestClientAsAdminCasInterceptor"/>
 			</jaxrs-client:outInterceptors>
+			<jaxrs-client:inInterceptors>
+				<ref bean="HakemusServiceRestClientAsAdminCasInterceptor"/>
+			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
@@ -116,6 +128,9 @@
 			<jaxrs-client:outInterceptors>
 				<ref bean="adminDokumenttipalveluRestClientCasInterceptor"/>
 			</jaxrs-client:outInterceptors>
+			<jaxrs-client:inInterceptors>
+				<ref bean="adminDokumenttipalveluRestClientCasInterceptor"/>
+			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
@@ -128,6 +143,9 @@
 			<jaxrs-client:outInterceptors>
 				<ref bean="sijoitteluTilaServiceRestClientCasInterceptor"/>
 			</jaxrs-client:outInterceptors>
+			<jaxrs-client:inInterceptors>
+				<ref bean="sijoitteluTilaServiceRestClientCasInterceptor"/>
+			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
@@ -140,6 +158,9 @@
 			<jaxrs-client:outInterceptors>
 				<ref bean="SijoitteluServiceRestClientCasInterceptor"/>
 			</jaxrs-client:outInterceptors>
+			<jaxrs-client:inInterceptors>
+				<ref bean="SijoitteluServiceRestClientCasInterceptor"/>
+			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
@@ -152,6 +173,9 @@
 			<jaxrs-client:outInterceptors>
 				<ref bean="ValintalaskentaHakukohdeRestClientCasInterceptor"/>
 			</jaxrs-client:outInterceptors>
+			<jaxrs-client:inInterceptors>
+				<ref bean="ValintalaskentaHakukohdeRestClientCasInterceptor"/>
+			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
@@ -164,6 +188,9 @@
 			<jaxrs-client:outInterceptors>
 				<ref bean="SijoittelunSeurantaRestClientCasInterceptor"/>
 			</jaxrs-client:outInterceptors>
+			<jaxrs-client:inInterceptors>
+				<ref bean="SijoittelunSeurantaRestClientCasInterceptor"/>
+			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
@@ -176,6 +203,9 @@
 			<jaxrs-client:outInterceptors>
 				<ref bean="ValintatietoRestClientCasInterceptor"/>
 			</jaxrs-client:outInterceptors>
+			<jaxrs-client:inInterceptors>
+				<ref bean="ValintatietoRestClientCasInterceptor"/>
+			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />
@@ -188,6 +218,9 @@
 			<jaxrs-client:outInterceptors>
 				<ref bean="OrganisaatioResourceClientCasInterceptor"/>
 			</jaxrs-client:outInterceptors>
+			<jaxrs-client:inInterceptors>
+				<ref bean="OrganisaatioResourceClientCasInterceptor"/>
+			</jaxrs-client:inInterceptors>
 			<jaxrs-client:providers>
 				<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
 				<bean class="fi.vm.sade.valinta.kooste.ObjectMapperProvider" />

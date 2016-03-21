@@ -19,14 +19,7 @@ public class AsyncErrorTest {
 	public void v() throws InterruptedException {
 		ApplicationContext context = null;
 		ApplicationAsyncResourceImpl a = new ApplicationAsyncResourceImpl(
-				"https://test-virkailija.oph.ware.fi/cas",
-				//
-				"https://test-virkailija.oph.ware.fi/haku-app/j_spring_cas_security_check",
-				//
-				"valintalaskentakoostepalvelu",
-				//
-				"joku virheellinen salasana",
-				//
+				null,
 				"https://test-virkailija.oph.ware.fi/haku-app",
 				context);
 		String hakuOid = "1.2.246.562.5.2013080813081926341927";

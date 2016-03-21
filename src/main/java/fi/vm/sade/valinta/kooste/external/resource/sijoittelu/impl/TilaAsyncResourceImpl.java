@@ -13,7 +13,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -32,14 +34,11 @@ import rx.Observable;
 public class TilaAsyncResourceImpl extends AsyncResourceWithCas implements TilaAsyncResource {
     @Autowired
     public TilaAsyncResourceImpl(
-            @Value("${web.url.cas}") String webCasUrl,
-            @Value("${cas.service.sijoittelu-service}/j_spring_cas_security_check") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.sijoittelu}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.sijoittelu}") String appClientPassword,
+            @Qualifier("sijoitteluTilaServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
             @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String address,
             ApplicationContext context
     ) {
-        super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(50));
+        super(casInterceptor, address, context, TimeUnit.MINUTES.toMillis(50));
     }
 
     public void getValintatulokset(String hakuOid, String hakukohdeOid

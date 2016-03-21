@@ -16,7 +16,9 @@ import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -50,14 +52,11 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
 
     @Autowired
     public SijoitteluAsyncResourceImpl(
-            @Value("${web.url.cas}") String webCasUrl,
-            @Value("${cas.service.sijoittelu-service}/j_spring_cas_security_check") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.sijoittelu}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.sijoittelu}") String appClientPassword,
+            @Qualifier("SijoitteluServiceRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
             @Value("${valintalaskentakoostepalvelu.sijoittelu.rest.url}") String address,
             ApplicationContext context
     ) {
-        super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(50));
+        super(casInterceptor, address, context, TimeUnit.MINUTES.toMillis(50));
     }
 
     public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {

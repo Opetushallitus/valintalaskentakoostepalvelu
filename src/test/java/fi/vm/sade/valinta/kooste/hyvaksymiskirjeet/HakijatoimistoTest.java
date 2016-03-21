@@ -53,18 +53,12 @@ public class HakijatoimistoTest {
         OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl(Integraatiopalvelimet.mockServer.getUrl());
         final String host= Integraatiopalvelimet.mockServer.getUrl();
         SijoitteluAsyncResourceImpl s = new SijoitteluAsyncResourceImpl(
-                host,
-                host,
-                host,
-                host,
+                null,
                 host,
                 null
         );
         ApplicationAsyncResourceImpl a = new ApplicationAsyncResourceImpl(
-                host,
-                host,
-                host,
-                host,
+                null,
                 host,
                 null
         );

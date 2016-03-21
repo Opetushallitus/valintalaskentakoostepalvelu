@@ -5,7 +5,9 @@ import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.*;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -23,14 +25,11 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 
     @Autowired
     public SuoritusrekisteriAsyncResourceImpl(
-            @Value("${web.url.cas}") String webCasUrl,
-            @Value("https://${host.virkailija}/suoritusrekisteri/j_spring_cas_security_check") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
+            @Qualifier("ValintatietoRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
             @Value("${host.scheme:https}://${host.virkailija}") String address,
             ApplicationContext context
     ) {
-        super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.MINUTES.toMillis(10));
+        super(casInterceptor, address, context, TimeUnit.MINUTES.toMillis(10));
     }
 
     @Override

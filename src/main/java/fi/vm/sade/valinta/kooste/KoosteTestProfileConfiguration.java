@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste;
 
+import fi.vm.sade.authentication.cas.CasFriendlyCache;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -108,6 +109,11 @@ public class KoosteTestProfileConfiguration {
         };
     }
 
+    @Bean(name = "sessionCache")
+    public CasFriendlyCache getCasFriendlyCache() {
+        return new CasFriendlyCache();
+    }
+
     @Bean(name = "viestintapalveluClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getViestintapalveluClientCasInterceptor() {
         return INTERCEPTOR;
@@ -115,6 +121,11 @@ public class KoosteTestProfileConfiguration {
 
     @Bean(name = "ValintakoeRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getValintakoeRestClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+
+    @Bean(name = "AuthenticationServiceRestClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getAuthenticationServiceRestClientCasInterceptor() {
         return INTERCEPTOR;
     }
 

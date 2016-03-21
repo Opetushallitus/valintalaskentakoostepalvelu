@@ -8,7 +8,9 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -25,12 +27,9 @@ import rx.Observable;
 public class ValintalaskentaValintakoeAsyncResourceImpl extends AsyncResourceWithCas implements ValintalaskentaValintakoeAsyncResource {
     @Autowired
     public ValintalaskentaValintakoeAsyncResourceImpl(
-            @Value("${web.url.cas}") String webCasUrl,
-            @Value("${cas.service.valintalaskenta-service}/j_spring_cas_security_check") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
+            @Qualifier("ValintakoeRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
             @Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}") String address, ApplicationContext context) {
-        super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.HOURS.toMillis(1));
+        super(casInterceptor, address, context, TimeUnit.HOURS.toMillis(1));
     }
 
     @Override

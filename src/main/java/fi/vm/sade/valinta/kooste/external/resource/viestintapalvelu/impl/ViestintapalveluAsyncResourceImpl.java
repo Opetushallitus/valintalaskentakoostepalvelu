@@ -19,7 +19,9 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -41,14 +43,11 @@ public class ViestintapalveluAsyncResourceImpl extends AsyncResourceWithCas impl
 
     @Autowired
     public ViestintapalveluAsyncResourceImpl(
-            @Value("${web.url.cas}") String webCasUrl,
-            @Value("${cas.service.viestintapalvelu}/j_spring_cas_security_check") String targetService,
-            @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String appClientUsername,
-            @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String appClientPassword,
+            @Qualifier("viestintapalveluClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
             @Value("${valintalaskentakoostepalvelu.viestintapalvelu.url}") String address,
             ApplicationContext context
     ) {
-        super(webCasUrl, targetService, appClientUsername, appClientPassword, address, context, TimeUnit.HOURS.toMillis(20));
+        super(casInterceptor, address, context, TimeUnit.HOURS.toMillis(20));
     }
 
     @Override
