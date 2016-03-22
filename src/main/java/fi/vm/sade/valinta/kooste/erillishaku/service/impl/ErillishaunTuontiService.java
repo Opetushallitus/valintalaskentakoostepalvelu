@@ -278,26 +278,29 @@ public class ErillishaunTuontiService {
             hakijatJaPoistettavat.addAll(poistettavatDtos);
             if (!hakijatJaPoistettavat.isEmpty()) {
                 Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceAsyncResource.tallenna(convertToValintaTulosList(hakijatJaPoistettavat, username, "Erillishaun tuonti")).doOnError(
-                        e -> LOG.error("Virhe vastaanottotilojen tallennuksessa valinta-tulos-service :en", e));
-                Observable<Response> erillishaunTilojenTuonti = tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijatJaPoistettavat).doOnError(
                         e -> {
-                            LOG.error("Erillishaun tuonti epäonnistui", e);
-                            HakukohteenValintatulosUpdateStatuses respObj = ((FailedHttpException) e).response.readEntity(HakukohteenValintatulosUpdateStatuses.class);
-                            List<ValintatulosUpdateStatus> statuses = respObj.statuses;
-                            prosessi.keskeyta("error", statuses.stream().collect(Collectors.toMap(k -> k.valintatapajonoOid + "_" + k.hakemusOid, v -> v.message)));
+                            LOG.error("Virhe vastaanottotilojen tallennuksessa valinta-tulos-serviceen", e);
+                            prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE, e.getMessage()));
                         });
                 vastaanottoTilojenTallennus.flatMap(vastaanottoResponse -> {
                     List<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed).collect(Collectors.toList());
                     epaonnistuneet.forEach(v -> LOG.warn(v.toString()));
                     if (epaonnistuneet.isEmpty()) {
-                        return erillishaunTilojenTuonti;
-                    } else {
-                        Stream<Poikkeus> poikkeusStream = epaonnistuneet.stream().map(
-                                v -> {
-                                    Tunniste tunniste = new Tunniste(v.getHakemusOid(), Poikkeus.HAKEMUSOID);
-                                    return new Poikkeus(Poikkeus.KOOSTEPALVELU, v.getResult().getMessage(), tunniste);
+                        return tilaAsyncResource.tuoErillishaunTilat(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getValintatapajononNimi(), hakijatJaPoistettavat).doOnError(
+                                e -> {
+                                    LOG.error("Erillishaun tuonti epäonnistui", e);
+                                    List<ValintatulosUpdateStatus> statuses = ((FailedHttpException) e).response.readEntity(HakukohteenValintatulosUpdateStatuses.class).statuses;
+                                    prosessi.keskeyta(statuses.stream()
+                                            .map(s -> new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.SIJOITTELU,
+                                                    s.message, new Tunniste(s.hakemusOid, Poikkeus.HAKEMUSOID)))
+                                            .collect(Collectors.toList()));
                                 });
-                        prosessi.keskeyta(poikkeusStream.collect(Collectors.toList()));
+                    } else {
+                        List<Poikkeus> poikkeukset = epaonnistuneet.stream()
+                                .map(v -> new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE,
+                                        v.getResult().getMessage(), new Tunniste(v.getHakemusOid(), Poikkeus.HAKEMUSOID)))
+                                .collect(Collectors.toList());
+                        prosessi.keskeyta(poikkeukset);
                         return Observable.error(new RuntimeException("Error when updating vastaanotto statuses"));
                     }
                 }).subscribe(
@@ -319,8 +322,10 @@ public class ErillishaunTuontiService {
                             );
                             prosessi.vaiheValmistui();
                             prosessi.valmistui("ok");
-
-                        }, poikkeus -> LOG.error("Erillishaun tilojen tuonti epäonnistui", poikkeus));
+                        },
+                        poikkeus -> {
+                            LOG.error("Erillishaun tilojen tuonti epäonnistui", poikkeus);
+                        });
             } else {
                 prosessi.vaiheValmistui();
                 prosessi.valmistui("ok");
