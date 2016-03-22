@@ -378,6 +378,7 @@ public class HakemusSijoitteluntulosMergeUtil {
         dto.setHakemuksentila(h.getTila());
         if (valintatulos.isPresent()) {
             dto.setValintatuloksentila(valintatulos.get().getTila());
+            dto.setValintatuloksenTilaHakijalle(valintatulos.get().getTilaHakijalle());
             dto.setIlmoittautumistila(valintatulos.get().getIlmoittautumisTila());
             dto.setJulkaistavissa(valintatulos.get().getJulkaistavissa());
             dto.setHyvaksyttyVarasijalta(valintatulos.get().getHyvaksyttyVarasijalta());

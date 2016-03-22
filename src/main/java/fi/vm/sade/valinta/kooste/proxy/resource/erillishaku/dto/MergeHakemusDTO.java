@@ -28,6 +28,7 @@ public class MergeHakemusDTO {
     private BigDecimal pisteet;
     private BigDecimal paasyJaSoveltuvuusKokeenTulos;
     private HakemuksenTila hakemuksentila;
+    private ValintatuloksenTila valintatuloksenTilaHakijalle;
     private ValintatuloksenTila valintatuloksentila;
     private IlmoittautumisTila ilmoittautumistila;
     private int prioriteetti;
@@ -251,5 +252,13 @@ public class MergeHakemusDTO {
 
     public void setHyvaksyttyVarasijalta(boolean hyvaksyttyVarasijalta) {
         this.hyvaksyttyVarasijalta = hyvaksyttyVarasijalta;
+    }
+
+    public ValintatuloksenTila getValintatuloksenTilaHakijalle() {
+        return valintatuloksenTilaHakijalle;
+    }
+
+    public void setValintatuloksenTilaHakijalle(ValintatuloksenTila valintatuloksenTilaHakijalle) {
+        this.valintatuloksenTilaHakijalle = valintatuloksenTilaHakijalle;
     }
 }
