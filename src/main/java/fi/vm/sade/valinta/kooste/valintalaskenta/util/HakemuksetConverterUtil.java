@@ -30,6 +30,7 @@ public class HakemuksetConverterUtil {
     private static final Logger LOG = LoggerFactory.getLogger(HakemuksetConverterUtil.class);
     public static final String PK_PAATTOTODISTUSVUOSI = "PK_PAATTOTODISTUSVUOSI";
     public static final String PERUSOPETUS_KIELI = "perusopetuksen_kieli";
+    public static final String LUKIO_KIELI = "lukion_kieli";
     public static final String POHJAKOULUTUS = "POHJAKOULUTUS";
     public static final String ENSIKERTALAINEN = "ensikertalainen";
     public static final String PREFERENCE_PREFIX = "preference";
@@ -271,6 +272,7 @@ public class HakemuksetConverterUtil {
         pohjakoulutus.ifPresent(pk -> tiedot.put(POHJAKOULUTUS, pk));
         pkPaattotodistusvuosi(hakemus, suoritukset).ifPresent(vuosi -> tiedot.put(PK_PAATTOTODISTUSVUOSI, String.valueOf(vuosi)));
         pkOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(PERUSOPETUS_KIELI, kieli));
+        lukioOpetuskieli(hakemus, suoritukset).ifPresent(kieli -> tiedot.put(LUKIO_KIELI, kieli));
         pohjakoulutus.ifPresent(pk -> tiedot.putAll(automaticDiscretionaryOptions(pk, haku, hakemus)));
         suoritustilat(predicates, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue())));
         suoritusajat(predicates, suoritukset).entrySet().stream().forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue())));
@@ -369,6 +371,18 @@ public class HakemuksetConverterUtil {
                         .filter(s -> !StringUtils.isEmpty(s)),
                 hakemus.getAvaimet().stream()
                         .filter(a -> PERUSOPETUS_KIELI.equals(a.getAvain()))
+                        .map(a -> a.getArvo()))
+                .findFirst();
+    }
+
+    private static Optional<String> lukioOpetuskieli(HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
+        return Stream.concat(
+                suoritukset.stream()
+                        .filter(s -> wrap(s).isLukio() && (wrap(s).isValmis() || wrap(s).isKesken()))
+                        .map(s -> wrap(s).getSuoritusJaArvosanat().getSuoritus().getSuoritusKieli())
+                        .filter(s -> !StringUtils.isEmpty(s)),
+                hakemus.getAvaimet().stream()
+                        .filter(a -> LUKIO_KIELI.equals(a.getAvain()))
                         .map(a -> a.getArvo()))
                 .findFirst();
     }

@@ -932,7 +932,7 @@ public class HakemuksetConverterUtilTest {
     }
 
     @Test
-    public void hakemukseltaKopioituJaValmis() {
+    public void hakemukseltaKopioituJaValmisPk() {
         HakemusDTO hakemus = new HakemusDTO();
         hakemus.setHakemusoid(HAKEMUS1_OID);
         hakemus.setAvaimet(new ArrayList<AvainArvoDTO>() {{
@@ -961,6 +961,28 @@ public class HakemuksetConverterUtilTest {
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_SUORITUSVUOSI"));
         assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
         assertEquals("SV", getFirstHakemusArvo(hakemus,  HakemuksetConverterUtil.PERUSOPETUS_KIELI));
+    }
+
+    @Test
+    public void hakemukseltaKopioituMuokattuLukioKieli() {
+        HakemusDTO hakemus = new HakemusDTO();
+        hakemus.setHakemusoid(HAKEMUS1_OID);
+        hakemus.setAvaimet(new ArrayList<AvainArvoDTO>() {{
+            add(new AvainArvoDTO(HakemuksetConverterUtil.LUKIO_KIELI, "FI"));
+        }});
+        Oppija oppija = new SuoritusrekisteriSpec.OppijaBuilder()
+                .suoritus()
+                .setSuoritusKieli("SV")
+                .setLukio()
+                .setVahvistettu(false)
+                .setMyontaja(HAKEMUS1_OID)
+                .setValmistuminen("1.1.2014")
+                .setKesken()
+                .build()
+                .build();
+
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus);
+        assertEquals("SV", getFirstHakemusArvo(hakemus,  HakemuksetConverterUtil.LUKIO_KIELI));
     }
 
     @Test
