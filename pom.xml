@@ -27,6 +27,10 @@
 			<artifactId>auditlogger</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>fi.vm.sade.java-utils</groupId>
+			<artifactId>java-cas-cxf</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
 			<version>9.2.10.v20150310</version>
