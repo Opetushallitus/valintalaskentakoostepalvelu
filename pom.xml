@@ -18,6 +18,7 @@
 	<properties>
 		<jersey.version>2.10.3</jersey.version>
 		<organisaatio.api.version>2015-13</organisaatio.api.version>
+		<cxf.version>3.0.8</cxf.version> <!-- Higher than the version in parent pom.xml -->
 	</properties>
 
 	<dependencies>
@@ -295,6 +296,7 @@
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-frontend-jaxws</artifactId>
+			<version>${cxf.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>jaxb-impl</artifactId>
@@ -305,6 +307,7 @@
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-rs-client</artifactId>
+			<version>${cxf.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>spring-web</artifactId>
@@ -319,6 +322,7 @@
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-transports-http</artifactId>
+			<version>${cxf.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>spring-web</artifactId>
