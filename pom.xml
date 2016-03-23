@@ -16,7 +16,6 @@
 		<relativePath>..</relativePath>
 	</parent>
 	<properties>
-		<jersey.version>2.10.3</jersey.version>
 		<organisaatio.api.version>2015-13</organisaatio.api.version>
 		<cxf.version>3.0.8</cxf.version> <!-- Higher than the version in parent pom.xml -->
 	</properties>
@@ -124,16 +123,12 @@
 		</dependency>
 		<dependency>
 			<groupId>com.wordnik</groupId>
-			<artifactId>swagger-jersey2-jaxrs_2.11</artifactId>
+			<artifactId>swagger-jaxrs_2.11</artifactId>
 			<version>${swagger.version}</version>
 			<exclusions>
 				<exclusion>
-					<groupId>org.glassfish.jersey.containers</groupId>
-					<artifactId>jersey-container-servlet-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.glassfish.jersey.media</groupId>
-					<artifactId>jersey-media-multipart</artifactId>
+					<groupId>javax.ws.rs</groupId>
+					<artifactId>jsr311-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -193,7 +188,7 @@
 			<artifactId>seuranta-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<!-- Jersey, REST, Json -->
+		<!-- REST, Json -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.jaxrs</groupId>
 			<artifactId>jackson-jaxrs-json-provider</artifactId>
