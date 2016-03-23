@@ -61,7 +61,8 @@ public class ErillishaunVientiServiceTest {
         SijoitteluAsyncResource sijoitteluMock = mock(SijoitteluAsyncResource.class);
         TilaAsyncResource tilaMock = mock(TilaAsyncResource.class);
         when(tilaMock.getValintatuloksetHakukohteelle(anyString(), anyString())).thenReturn(Futures.immediateFuture(ImmutableList.of()));
-        when(sijoitteluMock.getLatestHakukohdeBySijoittelu(anyString(), anyString())).thenReturn(mockSijoitteluAsyncResource.getLatestHakukohdeBySijoittelu("1", "2"));
+        //when(sijoitteluMock.getLatestHakukohdeBySijoittelu(anyString(), anyString())).thenReturn(mockSijoitteluAsyncResource.getLatestHakukohdeBySijoittelu("1", "2"));
+        when(sijoitteluMock.getLatestHakukohdeBySijoittelu(anyString(), anyString())).thenReturn(mockSijoitteluAsyncResource.getLatestHakukohdeBySijoittelu("sjfhaskdjhfa", "dskfasadkjhf"));
 
         final ErillishaunVientiService erillishaunVientiService =
                 new ErillishaunVientiService(tilaMock, applicationMock, sijoitteluMock, mockTarjontaAsyncService, mockDokumenttiResource);
@@ -77,4 +78,5 @@ public class ErillishaunVientiServiceTest {
         assertEquals("Esimerkki", erillishakuRivi.getSukunimi());
         assertEquals(false, erillishakuRivi.isJulkaistaankoTiedot());
     }
+
 }
