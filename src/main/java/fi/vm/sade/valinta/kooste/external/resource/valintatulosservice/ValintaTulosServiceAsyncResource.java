@@ -26,4 +26,6 @@ public interface ValintaTulosServiceAsyncResource {
     Observable<List<HakemuksenVastaanottotila>> getVastaanottotilatByHakemus(String hakuOid, String hakukohdeOid);
 
     Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid);
+
+    Observable<List<Valintatulos>> findValintatuloksetByHakemus(String hakuOid, String hakemusOid);
 }

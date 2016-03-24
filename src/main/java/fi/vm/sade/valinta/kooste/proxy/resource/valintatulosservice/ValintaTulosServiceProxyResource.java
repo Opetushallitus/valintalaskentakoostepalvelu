@@ -156,22 +156,24 @@ public class ValintaTulosServiceProxyResource {
         setAsyncTimeout(asyncResponse,
                 String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /hakemus/%s/haku/%s/hakukohde/%s/valintatapajono/%s",
                         hakemusOid, hakuOid, hakukohdeOid, valintatapajonoOid));
-        Observable<Valintatulos> valintatulosObs = tilaResource.getHakemuksenSijoittelunTulos(hakemusOid, hakuOid, hakukohdeOid, valintatapajonoOid);
-        Observable<ValintaTulosServiceDto> hakemuksenVastaanottotiedotObs = valintaTulosServiceResource.getHakemuksenValintatulos(hakuOid, hakemusOid);
-        Observable.zip(valintatulosObs, hakemuksenVastaanottotiedotObs, (valintatulos, hakemuksenVastaanottotiedot) -> {
-            hakemuksenVastaanottotiedot.getHakutoiveet().stream().filter(h -> h.getHakukohdeOid().equals(hakukohdeOid)).forEach(hakutoive ->
-                valintatulos.setTila(ValintatuloksenTila.valueOf(hakutoive.getVastaanottotila().name()), ""));
-            return valintatulos;
-        }).subscribe(
-            done -> asyncResponse.resume(Response.ok(done).header("Content-Type", "application/json").build()),
-            error -> {
-                LOG.error("Resurssien haku epäonnistui!", error);
-                asyncResponse
-                    .resume(Response.serverError()
-                        .header("Content-Type", "plain/text;charset=UTF8")
-                        .entity("ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: " + error.getMessage())
-                        .build());
-        });
+        valintaTulosServiceResource.findValintatuloksetByHakemus(hakuOid, hakemusOid)
+                .map(valintatulokset -> {
+                    if (StringUtils.isBlank(valintatapajonoOid)) {
+                        return valintatulokset;
+                    } else {
+                        return valintatulokset.stream()
+                                .filter(v -> valintatapajonoOid.equals(v.getValintatapajonoOid()))
+                                .collect(Collectors.toList());
+                    }
+                })
+                .map(valintatulokset -> Response.ok(valintatulokset).type(MediaType.APPLICATION_JSON_TYPE).build())
+                .subscribe(
+                        asyncResponse::resume,
+                        error -> {
+                            LOG.error("Valintatulosten haku valinta-tulos-servicestä epäonnistui", error);
+                            respondWithError(asyncResponse, "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: " + error.getMessage());
+                        }
+                );
     }
     
     @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
@@ -185,22 +187,14 @@ public class ValintaTulosServiceProxyResource {
         setAsyncTimeout(asyncResponse,
                 String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /hakemus/%s/haku/%s",
                         hakemusOid, hakuOid));
-        Observable<List<Valintatulos>> valintatulosObs = tilaResource.getHakemuksenTulokset(hakemusOid);
-        Observable<ValintaTulosServiceDto> hakemuksenVastaanottotiedotObs = valintaTulosServiceResource.getHakemuksenValintatulos(hakuOid, hakemusOid);
-        Observable.zip(valintatulosObs, hakemuksenVastaanottotiedotObs, (valintatulokset, hakemuksenVastaanottotiedot) -> {
-            valintatulokset.forEach(valintatulos ->
-                hakemuksenVastaanottotiedot.getHakutoiveet().stream().filter(ht -> ht.getHakukohdeOid().equals(valintatulos.getHakukohdeOid())).forEach(hakutoive ->
-                    valintatulos.setTila(ValintatuloksenTila.valueOf(hakutoive.getVastaanottotila().name()), "")));
-            return valintatulokset;
-        }).subscribe(
-            done -> asyncResponse.resume(Response.ok(done).header("Content-Type", "application/json").build()),
-            error -> {
-                LOG.error("Resurssien haku epäonnistui!", error);
-                asyncResponse
-                    .resume(Response.serverError()
-                        .header("Content-Type", "plain/text;charset=UTF8")
-                        .entity("ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: " + error.getMessage())
-                        .build());
-        });
+        valintaTulosServiceResource.findValintatuloksetByHakemus(hakuOid, hakemusOid)
+                .map(valintatulokset -> Response.ok(valintatulokset).type(MediaType.APPLICATION_JSON_TYPE).build())
+                .subscribe(
+                        asyncResponse::resume,
+                        error -> {
+                            LOG.error("Valintatulosten haku valinta-tulos-servicestä epäonnistui", error);
+                            respondWithError(asyncResponse, "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: " + error.getMessage());
+                        }
+                );
     }
 }

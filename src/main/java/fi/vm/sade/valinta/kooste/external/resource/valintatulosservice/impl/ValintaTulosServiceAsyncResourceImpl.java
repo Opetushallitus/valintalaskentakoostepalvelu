@@ -53,6 +53,12 @@ public class ValintaTulosServiceAsyncResourceImpl extends HttpResource implement
     }
 
     @Override
+    public Observable<List<Valintatulos>> findValintatuloksetByHakemus(String hakuOid, String hakemusOid) {
+        return getAsObservable("/valinta-tulos-service/virkailija/valintatulos/haku/" + hakuOid +  "/hakemus/" + hakemusOid,
+                new GenericType<List<Valintatulos>>() {}.getType());
+    }
+
+    @Override
     public Observable<List<VastaanottoRecordDTO>> hakukohteenVastaanotot(String hakukohdeOid) {
         return getAsObservable("/valinta-tulos-service/virkailija/vastaanotto/hakukohde/" + hakukohdeOid, new GenericType<List<VastaanottoRecordDTO>>() {}.getType());
     }
