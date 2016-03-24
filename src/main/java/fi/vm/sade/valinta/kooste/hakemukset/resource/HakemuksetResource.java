@@ -49,7 +49,6 @@ public class HakemuksetResource {
 
     @Autowired
     private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
-    Map<String, Koodi> postCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @GET
@@ -62,7 +61,8 @@ public class HakemuksetResource {
             Preconditions.checkNotNull(valinnanvaiheOid);
             asyncResponse.setTimeout(10, TimeUnit.MINUTES);
             Set<HakemusDTO> hakemusDTOs = new HashSet<>();
-            LOG.info("Aloitetaan hakemusten listaaminen valinnenvaiheelle {} haussa {}", valinnanvaiheOid, hakuOid);
+
+            LOG.warn("Aloitetaan hakemusten listaaminen valinnenvaiheelle {} haussa {}", valinnanvaiheOid, hakuOid);
             final Observable<Set<String>> hakukohdeOiditObservable = valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid);
             hakukohdeOiditObservable.subscribe(hakukohdeOidit -> {
                 List<String> hakukohteet = hakukohdeOidit.stream().collect(Collectors.toList());
@@ -82,12 +82,12 @@ public class HakemuksetResource {
             LOG.error("Listing hakemus for valinnanvaihe {} and haku {} failed", valinnanvaiheOid, hakuOid, e);
             asyncResponse.cancel();
         }
-
     }
 
     private Function<Hakemus, HakemusDTO> hakemusTOHakemusDTO = new Function<Hakemus, HakemusDTO>() {
         @Override
         public HakemusDTO apply(Hakemus hakemus) {
+            Map<String, Koodi> postCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
             HakemusDTO hakemusDTO = new HakemusDTO();
             hakemusDTO.setHakemusOid(hakemus.getOid());
             hakemusDTO.setHenkiloOid(hakemus.getPersonOid());
