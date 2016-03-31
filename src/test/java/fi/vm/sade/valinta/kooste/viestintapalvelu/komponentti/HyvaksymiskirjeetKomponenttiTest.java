@@ -120,6 +120,7 @@ public class HyvaksymiskirjeetKomponenttiTest {
                 ImmutableList.of(hakija),
                 ImmutableList.of(new Hakemus("type", "applicationSystemId", answers, ImmutableMap.of(),
                         ImmutableList.of(), HAKEMUS_OID, "state", "personOid")),
+                null,
                 "hakuOid",
                 ofNullable(KieliUtil.SUOMI),
                 "sisalto",

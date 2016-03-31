@@ -73,6 +73,38 @@ public class HyvaksymiskirjeetKomponentti {
                 hyvaksymiskirjeessaKaytetytHakukohteet,
                 hakukohteenHakijat,
                 hakemukset,
+                null,
+                hakuOid,
+                asiointikieli,
+                sisalto,
+                tag,
+                templateName,
+                palautusPvm,
+                palautusAika,
+                iPosti);
+    }
+
+    public LetterBatch teeJalkiohjauskirjeet(
+            Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
+            Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
+            Collection<HakijaDTO> hakukohteenHakijat,
+            Collection<Hakemus> hakemukset,
+            String hakukohdeOid,
+            String hakuOid,
+            Optional<String> asiointikieli,
+            String sisalto,
+            String tag,
+            String templateName,
+            String palautusPvm,
+            String palautusAika,
+            boolean iPosti) {
+        return teeHyvaksymiskirjeet(
+                koodistoCachedAsyncResource::haeKoodisto,
+                hakukohdeJaHakijapalveluidenOsoite,
+                hyvaksymiskirjeessaKaytetytHakukohteet,
+                hakukohteenHakijat,
+                hakemukset,
+                hakukohdeOid,
                 hakuOid,
                 asiointikieli,
                 sisalto,
@@ -88,6 +120,7 @@ public class HyvaksymiskirjeetKomponentti {
             Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
             Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
             Collection<HakijaDTO> hakukohteenHakijat, Collection<Hakemus> hakemukset,
+            String hakukohdeOidFromRequest,
             String hakuOid,
             Optional<String> asiointikieli,
             String sisalto, String tag,
@@ -104,7 +137,7 @@ public class HyvaksymiskirjeetKomponentti {
         LetterBatch viesti = new LetterBatch(kirjeet);
 
         for (HakijaDTO hakija : hakukohteenHakijat) {
-            final String hakukohdeOid = hyvaksytynHakutoiveenHakukohdeOid(hakija);
+            final String hakukohdeOid = StringUtils.isEmpty(hakukohdeOidFromRequest) ? hyvaksytynHakutoiveenHakukohdeOid(hakija) : hakukohdeOidFromRequest;
             MetaHakukohde hyvaksyttyMeta = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
             Teksti koulu = hyvaksyttyMeta.getTarjoajaNimi();
             Teksti koulutus = hyvaksyttyMeta.getHakukohdeNimi();
