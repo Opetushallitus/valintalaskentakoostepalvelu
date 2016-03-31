@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakemukset.resource;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -60,23 +59,17 @@ public class HakemuksetResource {
             Preconditions.checkNotNull(hakuOid);
             Preconditions.checkNotNull(valinnanvaiheOid);
             asyncResponse.setTimeout(10, TimeUnit.MINUTES);
-            Set<HakemusDTO> hakemusDTOs = new HashSet<>();
-
             LOG.warn("Aloitetaan hakemusten listaaminen valinnenvaiheelle {} haussa {}", valinnanvaiheOid, hakuOid);
             final Observable<Set<String>> hakukohdeOiditObservable = valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid);
             hakukohdeOiditObservable.subscribe(hakukohdeOidit -> {
                 List<String> hakukohteet = hakukohdeOidit.stream().collect(Collectors.toList());
                 LOG.info("Löydettiin {} hakukohdetta", hakukohteet.size());
-                for (List<String> sublist : Lists.partition(hakukohteet, 10)) {
-                    LOG.info("Käsitellään {} hakukohdetta", sublist.size());
-                    final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOids(hakuOid, sublist);
-                    hakemuksetObservable.subscribe(hakemukset -> {
-                        LOG.info("Löydettiin {} hakemusta", hakemukset.size());
-                        List<HakemusDTO> dtos = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());
-                        hakemusDTOs.addAll(dtos);
-                    });
-                }
-                asyncResponse.resume(Response.ok(hakemusDTOs).build());
+                final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOids(hakuOid, hakukohteet);
+                hakemuksetObservable.subscribe(hakemukset -> {
+                    LOG.info("Löydettiin {} hakemusta", hakemukset.size());
+                    List<HakemusDTO> hakemusDTOs = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());
+                    asyncResponse.resume(Response.ok(hakemusDTOs).build());
+                });
             });
         } catch (Exception e) {
             LOG.error("Listing hakemus for valinnanvaihe {} and haku {} failed", valinnanvaiheOid, hakuOid, e);
