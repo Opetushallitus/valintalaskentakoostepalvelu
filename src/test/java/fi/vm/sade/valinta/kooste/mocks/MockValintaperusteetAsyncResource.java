@@ -96,7 +96,10 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     public Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
         return Observable.just(valintaperusteetResultReference.get());
     }
-
+    @Override
+    public Observable<List<ValintakoeDTO>> readByTunnisteet(Collection<String> tunnisteet) {
+        throw new UnsupportedOperationException();
+    }
     @Override
     public Peruutettava haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku, Consumer<List<ValintaperusteetDTO>> callback, Consumer<Throwable> failureCallback) {
         throw new UnsupportedOperationException();

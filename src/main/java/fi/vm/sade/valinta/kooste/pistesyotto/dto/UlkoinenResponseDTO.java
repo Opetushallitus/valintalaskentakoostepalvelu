@@ -4,14 +4,14 @@ import java.util.List;
 
 public class UlkoinenResponseDTO {
 
-    private String kasiteltyOk;
+    private Integer kasiteltyOk;
     private List<VirheDTO> virheet;
 
-    public String getKasiteltyOk() {
+    public Integer getKasiteltyOk() {
         return kasiteltyOk;
     }
 
-    public void setKasiteltyOk(String kasiteltyOk) {
+    public void setKasiteltyOk(Integer kasiteltyOk) {
         this.kasiteltyOk = kasiteltyOk;
     }
 

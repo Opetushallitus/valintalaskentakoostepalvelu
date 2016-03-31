@@ -11,6 +11,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.Lists;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,6 +146,19 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
     @Override
     public Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
         return getAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/" + hakukohdeOid + "/", new TypeToken<List<ValintaperusteDTO>>() {}.getType());
+    }
+    @Override
+    public Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid) {
+        return getAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valinnanvaihe/"+valinnanvaiheOid+"/valintaperusteet", new TypeToken<List<ValintaperusteetDTO>>() {}.getType());
+    }
+    @Override
+    public Observable<List<ValintakoeDTO>> readByTunnisteet(Collection<String> tunnisteet) {
+        return postAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/tunniste/", new TypeToken<List<ValintakoeDTO>>() {}.getType(),
+                Entity.entity(Lists.newArrayList(tunnisteet), MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                });
     }
 
     @Override

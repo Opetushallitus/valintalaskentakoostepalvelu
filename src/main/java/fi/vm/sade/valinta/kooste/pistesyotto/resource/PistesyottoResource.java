@@ -6,16 +6,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.*;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.Lists;
+import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.VirheDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiSoteliService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
 import org.apache.camel.Produce;
 import org.apache.poi.util.IOUtils;
@@ -33,6 +41,9 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+
 @Controller("PistesyottoResource")
 @Path("pistesyotto")
 @PreAuthorize("isAuthenticated()")
@@ -48,6 +59,8 @@ public class PistesyottoResource {
     private PistesyottoVientiService vientiService;
     @Autowired
     private PistesyottoTuontiService tuontiService;
+    @Autowired
+    private PistesyottoTuontiSoteliService tuontiSoteliService;
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @POST
@@ -99,27 +112,36 @@ public class PistesyottoResource {
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @Consumes("application/json")
     @Produces("application/json")
-    @ApiOperation(consumes = "application/json", value = "Pistesyötön tuonti hakemuksille ulkoisesta järjstelmästä", response = UlkoinenResponseDTO.class)
-    public UlkoinenResponseDTO ulkoinenTuonti(@QueryParam("hakuOid") String hakuOid, List<HakemusDTO> hakemukset) {
-        UlkoinenResponseDTO response = new UlkoinenResponseDTO();
-        LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
-        if(hakemukset != null) {
-            if(hakemukset.size() < 2) {
-                response.setKasiteltyOk(Integer.toString(hakemukset.size()));
-                response.setVirheet(new ArrayList<>());
-            } else {
-                response.setKasiteltyOk(Integer.toString(hakemukset.size() - 1));
-                response.setVirheet(new ArrayList<>());
-                VirheDTO virhe = new VirheDTO();
-                virhe.setHakemusOid(hakemukset.get(0).getHakemusOid());
-                virhe.setVirhe("Ei onnistunut!!!");
-                response.getVirheet().add(virhe);
-            }
+    @ApiOperation(consumes = "application/json", value = "Pistesyötön tuonti hakemuksille ulkoisesta järjestelmästä", response = UlkoinenResponseDTO.class)
+    public void ulkoinenTuonti(@QueryParam("hakuOid") String hakuOid,
+                                              @QueryParam("valinnanvaiheOid") String valinnanvaiheOid,
+                                              List<HakemusDTO> hakemukset,
+                                              @Suspended AsyncResponse asyncResponse) {
+        if(hakemukset == null || hakemukset.isEmpty()) {
+            asyncResponse.resume(Response.serverError().entity("Ulkoinen pistesyotto API requires at least one hakemus").build());
         } else {
-            response.setKasiteltyOk("0");
-            response.setVirheet(new ArrayList<>());
+            asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
+            asyncResponse.setTimeoutHandler(asyncResponse1 -> {
+                LOG.error("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu: /haku/{}", hakuOid);
+                asyncResponse1.resume(Response.serverError().entity("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu").build());
+            });
+            LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
+            final String username = KoosteAudit.username();
+            tuontiSoteliService.tuo(hakemukset,username, hakuOid, valinnanvaiheOid,
+                    (onnistuneet, validointivirheet) -> {
+                        UlkoinenResponseDTO response = new UlkoinenResponseDTO();
+                        response.setKasiteltyOk(onnistuneet);
+                        response.setVirheet(Lists.newArrayList(validointivirheet));
+                        asyncResponse.resume(Response.ok(response).build());
+                    },
+                    sisainenPoikkeus -> {
+                        LOG.error("Soteli tuonti epaonnistui!", sisainenPoikkeus);
+                        asyncResponse.resume(Response.serverError().entity(sisainenPoikkeus.toString()).build());
+                    });
+
         }
-        return response;
+
+        //return response;
     }
 
 }

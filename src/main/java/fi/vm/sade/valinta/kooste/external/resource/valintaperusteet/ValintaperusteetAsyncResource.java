@@ -1,9 +1,11 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet;
 
+import com.wordnik.swagger.annotations.ApiParam;
 import fi.vm.sade.service.valintaperusteet.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import rx.Observable;
 
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
@@ -35,6 +37,9 @@ public interface ValintaperusteetAsyncResource {
     Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde);
 
     Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
+
+    Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid);
+    Observable<List<ValintakoeDTO>> readByTunnisteet(Collection<String> tunnisteet);
 
     Future<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid);
 
