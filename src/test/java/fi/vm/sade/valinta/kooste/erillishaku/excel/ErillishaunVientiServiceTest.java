@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.Futures;
+import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
@@ -56,19 +55,18 @@ public class ErillishaunVientiServiceTest {
         final ErillishakuProsessiDTO prosessi = spy(new ErillishakuProsessiDTO(1));
 
         ApplicationAsyncResource applicationMock = mock(ApplicationAsyncResource.class);
-        when(applicationMock.getApplicationsByOid(anyString(), anyString())).thenReturn(Observable.just(ImmutableList.of()));
+        when(applicationMock.getApplicationsByOid(anyString(), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
 
         SijoitteluAsyncResource sijoitteluMock = mock(SijoitteluAsyncResource.class);
         TilaAsyncResource tilaMock = mock(TilaAsyncResource.class);
-        when(tilaMock.getValintatuloksetHakukohteelle(anyString(), anyString())).thenReturn(Futures.immediateFuture(ImmutableList.of()));
-        //when(sijoitteluMock.getLatestHakukohdeBySijoittelu(anyString(), anyString())).thenReturn(mockSijoitteluAsyncResource.getLatestHakukohdeBySijoittelu("1", "2"));
+        when(tilaMock.getValintatuloksetValintatapajonolle(anyString(), anyString())).thenReturn(Observable.just(Lists.newArrayList()));
         when(sijoitteluMock.getLatestHakukohdeBySijoittelu(anyString(), anyString())).thenReturn(mockSijoitteluAsyncResource.getLatestHakukohdeBySijoittelu("sjfhaskdjhfa", "dskfasadkjhf"));
 
         final ErillishaunVientiService erillishaunVientiService =
                 new ErillishaunVientiService(tilaMock, applicationMock, sijoitteluMock, mockTarjontaAsyncService, mockDokumenttiResource);
         erillishaunVientiService.vie(prosessi, erillishaku);
 
-        verify(prosessi, timeout(10000).times(1)).valmistui(anyString());
+        verify(prosessi, timeout(5000).times(1)).valmistui(anyString());
 
         ImportedErillisHakuExcel excel = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU, MockDokumenttiResource.getStoredDocument(prosessi.getDokumenttiId()));
         assertEquals(1, excel.rivit.size());
@@ -78,5 +76,4 @@ public class ErillishaunVientiServiceTest {
         assertEquals("Esimerkki", erillishakuRivi.getSukunimi());
         assertEquals(false, erillishakuRivi.isJulkaistaankoTiedot());
     }
-
 }

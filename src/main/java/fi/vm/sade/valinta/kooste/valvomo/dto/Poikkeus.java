@@ -28,6 +28,7 @@ public class Poikkeus {
     public static final String TARJONTA = "Tarjontapalvelu";
     public static final String VALINTALASKENTA = "Valintalaskentapalvelu";
     public static final String KOOSTEPALVELU = "Koostepalvelu";
+    public static final String VALINTA_TULOS_SERVICE = "Valinta-tulos-service";
 
     private final Collection<Tunniste> tunnisteet;
     private final String palvelu;

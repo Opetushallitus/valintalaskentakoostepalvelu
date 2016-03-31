@@ -2,8 +2,6 @@ package fi.vm.sade.valinta.kooste.external.resource.sijoittelu;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
 
 import javax.ws.rs.core.Response;
 
@@ -14,9 +12,11 @@ import rx.Observable;
 public interface TilaAsyncResource {
     Observable<Response> tuoErillishaunTilat(String hakuOid, String hakukohdeOid, String valintatapajononNimi, Collection<ErillishaunHakijaDTO> erillishaunHakijat);
 
-    void getValintatulokset(String hakuOid, String hakukohdeOid, Consumer<List<Valintatulos>> valintatulokset, Consumer<Throwable> poikkeus);
-
-    Future<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid, String valintatapajonoOid);
+    Observable<List<Valintatulos>> getValintatuloksetValintatapajonolle(String hakukohdeOid, String valintatapajonoOid);
 
     Observable<List<Valintatulos>> getValintatuloksetHakukohteelle(String hakukohdeOid);
+
+    Observable<Valintatulos> getHakemuksenSijoittelunTulos(String hakemusOid, String hakuOid, String hakukohdeOid, String valintatapajonoOid);
+
+    Observable<List<Valintatulos>> getHakemuksenTulokset(String hakemusOid);
 }

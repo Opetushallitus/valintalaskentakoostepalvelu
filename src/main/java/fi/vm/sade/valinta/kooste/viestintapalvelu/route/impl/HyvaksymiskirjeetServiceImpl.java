@@ -155,10 +155,11 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                     Osoite hakijapalveluidenOsoite = OsoiteHaku.organisaatioResponseToHakijapalveluidenOsoite(haeOsoiteKomponentti, organisaatioAsyncResource, tarjoajaOidList,
                             kohdeHakukohde.getHakukohteenKieli(), organisaatioResponse);
                     final boolean iPosti = false;
-                    return hyvaksymiskirjeetKomponentti.teeHyvaksymiskirjeet(
+                    return hyvaksymiskirjeetKomponentti.teeJalkiohjauskirjeet(
                             ImmutableMap.of(hyvaksymiskirjeDTO.getTarjoajaOid(),Optional.ofNullable(hakijapalveluidenOsoite)),
                             hyvaksymiskirjeessaKaytetytHakukohteet,
                             hylatyt, hakemukset,
+                            hyvaksymiskirjeDTO.getHakukohdeOid(),
                             hyvaksymiskirjeDTO.getHakuOid(),
                             Optional.empty(),
                             hyvaksymiskirjeDTO.getSisalto(),

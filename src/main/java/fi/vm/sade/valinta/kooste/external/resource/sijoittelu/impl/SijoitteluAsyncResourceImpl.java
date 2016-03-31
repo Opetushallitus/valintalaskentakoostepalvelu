@@ -1,35 +1,37 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-
 import com.google.common.reflect.TypeToken;
-import com.google.gson.*;
-
-import fi.vm.sade.valinta.http.DateDeserializer;
-import fi.vm.sade.valinta.http.GsonResponseCallback;
-import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
-import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
+import com.google.gson.Gson;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
+import fi.vm.sade.valinta.http.DateDeserializer;
+import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.kooste.external.resource.AsyncResourceWithCas;
+import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
+import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
+
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
 import rx.Observable;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 
 @Service
@@ -59,7 +61,14 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
         super(casInterceptor, address, context, TimeUnit.MINUTES.toMillis(50));
     }
 
-    public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
+    @Override
+    public Observable<HakukohteenValintatulosUpdateStatuses> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite) throws UnsupportedEncodingException {
+        String url = "/tila/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid;
+        String encodedSelite = URLEncoder.encode(selite, "UTF-8");
+        return postAsObservable(url, HakukohteenValintatulosUpdateStatuses.class, Entity.json(valintatulokset), (webclient) -> webclient.query("selite", encodedSelite));
+    }
+
+    public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, String sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
         ///erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
         String url = "/erillissijoittelu/" + hakuOid + "/sijoitteluajo/" + sijoitteluAjoId + "/hakukohde/" + hakukohdeOid;
         getWebClient()
@@ -139,6 +148,18 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
         return getAsObservable(
                 url,
                 new TypeToken<HakijaPaginationObject>() {}.getType(),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                }
+        );
+    }
+
+    public Observable<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String sijoitteluAjoId, String hakukohdeOid) {
+        String url = "/sijoittelu/" + hakuOid + "/sijoitteluajo/" + sijoitteluAjoId + "/hakukohde/" + hakukohdeOid;
+        return getAsObservable(
+                url,
+                new TypeToken<HakukohdeDTO>() {}.getType(),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
                     return client;

@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
 
-import static fi.vm.sade.valinta.kooste.mocks.MockData.*;
-
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
@@ -12,10 +10,9 @@ import fi.vm.sade.sijoittelu.tulos.dto.ValintatapajonoDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
-import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,6 +46,11 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
     }
 
     @Override
+    public Observable<HakukohteenValintatulosUpdateStatuses> muutaHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<Valintatulos> valintatulokset, String selite) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Observable<HakijaPaginationObject> getKoulutuspaikkalliset(String hakuOid, String hakukohdeOid) {
         return null;
     }
@@ -74,8 +76,13 @@ public class MockSijoitteluAsyncResource implements SijoitteluAsyncResource {
     }
 
     @Override
-    public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, Long sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
-        hakukohde.accept(resultMap.get(sijoitteluAjoId));
+    public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, String sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {
+        hakukohde.accept(resultMap.get(Long.valueOf(sijoitteluAjoId)));
+    }
+
+    @Override
+    public Observable<HakukohdeDTO> getLatestHakukohdeBySijoittelu(String hakuOid, String sijoitteluAjoId, String hakukohdeOid) {
+        return null;
     }
 
     @Override

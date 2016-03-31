@@ -128,7 +128,7 @@ public class ErillishakuResource {
             @QueryParam("valintatapajonoOid") String valintatapajonoOid,
             @QueryParam("valintatapajononNimi") String valintatapajononNimi,
             @ApiParam("hakemuksenTila=[HYLATTY|VARALLA|PERUUNTUNUT|HYVAKSYTTY|VARASIJALTA_HYVAKSYTTY|HARKINNANVARAISESTI_HYVAKSYTTY|PERUNUT|PERUUTETTU]<br>" +
-                    "vastaanottoTila=[PERUNUT|KESKEN|EI_VASTAANOTTANUT_MAARA_AIKANA|VASTAANOTTANUT|VASTAANOTTANUT_SITOVASTI|PERUUTETTU]<br>" +
+                    "vastaanottoTila=[PERUNUT|KESKEN|EI_VASTAANOTTANUT_MAARA_AIKANA|VASTAANOTTANUT_SITOVASTI|PERUUTETTU]<br>" +
                     "ilmoittautumisTila=[EI_TEHTY|LASNA_KOKO_LUKUVUOSI|POISSA_KOKO_LUKUVUOSI|EI_ILMOITTAUTUNUT|LASNA_SYKSY|POISSA_SYKSY|LASNA|POISSA]<br>" +
                     "sukupuoli=[MIES|NAINEN|1|2]<br>" +
                     "aidinkieli=[fi|en|sv|ae|lo|sl|bm|mo|nr|kn|ga|tl|la|nv|ti|gl|to|sa|lv|hi|ke|ty|ho|cv|ts|kj|xx|vo|ro|mr|sd|ak|kv|98|fj|su|sq|<br>" +

@@ -16,6 +16,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.HakemusSijoitteluntulosMergeUtil.*;
 
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto.MergeValinnanvaiheDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
@@ -33,7 +34,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
-import javax.ws.rs.container.TimeoutHandler;
 import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -64,12 +64,15 @@ public class ErillishakuProxyResource {
     private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
     @Autowired
     private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
+    @Autowired
+    private ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @GET
     @Path("/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
     @Consumes("application/json")
     @ApiOperation(consumes = "application/json", value = "Hakukohteen valintatulokset", response = ProsessiId.class)
+// TODO
     public void vienti(
             @PathParam("hakuOid") String hakuOid,
             @PathParam("hakukohdeOid") String hakukohdeOid,
@@ -129,7 +132,7 @@ public class ErillishakuProxyResource {
             final AtomicInteger erillissijoitteluCounter = new AtomicInteger(sijoitteluAjoIdSetti.size());
             ///sijoittelu-service/resources/erillissijoittelu/{hakuOid}/sijoitteluajo/{sijoitteluAjoId}/hakukohde/{hakukodeOid}
             sijoitteluAjoIdSetti.forEach(id -> {
-                sijoitteluAsyncResource.getLatestHakukohdeBySijoitteluAjoId(hakuOid, hakukohdeOid, id,
+                sijoitteluAsyncResource.getLatestHakukohdeBySijoitteluAjoId(hakuOid, hakukohdeOid, new Long(id).toString(),
                         hakukohde -> {
                             LOG.info("Haettiin laskenta sijoitteluajoid:llä {}.", id);
                             erillissijoittelutmp.put(id, hakukohde);
@@ -148,14 +151,12 @@ public class ErillishakuProxyResource {
         }
     }
 
-    void fetchValintatulos(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<Valintatulos>> vtsValintatulokset, Supplier<Void> mergeSupplier) {
-        tilaResource.getValintatulokset(hakuOid, hakukohdeOid, vts -> {
-                    LOG.info("Haetaan sijoittelusta valintatulokset");
-                    vtsValintatulokset.set(vts);
-                    mergeSupplier.get();
-                },
-                poikkeus -> logAndReturnError("valintatulosservice", asyncResponse, poikkeus)
-        );
+    void fetchValintatulos(String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<List<Valintatulos>> vtsValintatulokset, Supplier<Void> mergeSupplier) {
+        valintaTulosServiceAsyncResource.findValintatulokset(hakuOid, hakukohdeOid).subscribe(valintatulokset -> {
+            LOG.info("Haetaan valinta-tulos-service :stä valintatulokset");
+            vtsValintatulokset.set(valintatulokset);
+            mergeSupplier.get();
+        }, poikkeus -> logAndReturnError("valintatulosservice", asyncResponse, poikkeus));
     }
 
     void fetchSijoittelu(@PathParam("hakuOid") String hakuOid, @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse, AtomicReference<HakukohdeDTO> hakukohde, Supplier<Void> mergeSupplier) {

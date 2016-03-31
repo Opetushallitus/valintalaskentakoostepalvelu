@@ -29,6 +29,7 @@
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.resource"/>
+  <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice" />
 
   <bean id="koekutsukirjeetImpl"
         class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KoekutsukirjeetImpl"/>
