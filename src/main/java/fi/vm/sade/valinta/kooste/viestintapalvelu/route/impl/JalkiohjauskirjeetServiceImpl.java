@@ -217,8 +217,7 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                 .filter(hakija -> hakija
                         .getHakutoiveet()
                         .stream()
-                        .anyMatch(hakutoive -> hakutoive.getHakutoiveenValintatapajonot()
-                                .stream().noneMatch(valintatapajono -> valintatapajono.getVastaanottotieto() == PERUNUT)))
+                        .noneMatch(hakutoive -> hakutoive.getVastaanottotieto() == PERUNUT))
                 .collect(Collectors.toList());
     }
 }
