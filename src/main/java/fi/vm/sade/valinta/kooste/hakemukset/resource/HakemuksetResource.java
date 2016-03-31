@@ -64,7 +64,7 @@ public class HakemuksetResource {
             hakukohdeOiditObservable.subscribe(hakukohdeOidit -> {
                 List<String> hakukohteet = hakukohdeOidit.stream().collect(Collectors.toList());
                 LOG.info("Löydettiin {} hakukohdetta", hakukohteet.size());
-                final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOids(hakuOid, hakukohteet);
+                final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohteet);
                 hakemuksetObservable.subscribe(hakemukset -> {
                     LOG.info("Löydettiin {} hakemusta", hakemukset.size());
                     List<HakemusDTO> hakemusDTOs = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());

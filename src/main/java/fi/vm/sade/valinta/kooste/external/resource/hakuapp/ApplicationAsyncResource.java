@@ -17,6 +17,8 @@ public interface ApplicationAsyncResource {
 
     Observable<List<Hakemus>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids);
 
+    Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids);
+
     Observable<List<Hakemus>> getApplicationsByHakemusOids(Collection<String> hakemusOids);
 
     Future<List<Hakemus>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid, Collection<HakemusPrototyyppi> hakemusPrototyypit);

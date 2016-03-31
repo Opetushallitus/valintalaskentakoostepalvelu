@@ -25,8 +25,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -70,6 +69,21 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
             LOG.info("Calling url {}", client.getCurrentURI());
             return client;
         });
+    }
+
+    @Override
+    public Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids) {
+        Map<String, List<String>> requestBody = new HashMap();
+        requestBody.put("states", Arrays.asList("ACTIVE", "INCOMPLETE"));
+        requestBody.put("asIds", Arrays.asList(hakuOid));
+        requestBody.put("aoOids", Lists.newArrayList(hakukohdeOids));
+        return postAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(),
+                Entity.entity(requestBody, MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    LOG.info("Calling url {}", client.getCurrentURI());
+                    return client;
+                });
     }
 
     @Override
