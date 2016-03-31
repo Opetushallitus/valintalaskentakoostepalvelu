@@ -24,6 +24,7 @@ import com.google.gson.JsonParser;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -78,6 +79,7 @@ public class PistesyottoResourceTest {
         ValintaKoosteJetty.startShared();
     }
 
+    @Ignore
     @Test
     public void pistesyottoUlkoinenTuontiResource() throws Exception {
         cleanMocks();
