@@ -48,6 +48,11 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         return new PeruutettavaImpl(Futures.immediateFuture(resultByOidReference.get()));
     }
 
+    @Override
+    public Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids) {
+        return null;
+    }
+
     private static <T> Future<T> serviceAvailableCheck() {
         if(!serviceIsAvailable.get()) {
             return Futures.immediateFailedFuture(new RuntimeException("MockHakemuspalvelu on kytketty pois päältä!"));
