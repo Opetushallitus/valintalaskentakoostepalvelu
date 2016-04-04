@@ -3,6 +3,8 @@ package fi.vm.sade.valinta.kooste.hakemukset.resource;
 import com.google.common.base.Preconditions;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
@@ -27,10 +29,17 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
+import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+
 
 @Controller("HakemuksetResource")
 @Path("hakemukset")
@@ -59,6 +68,12 @@ public class HakemuksetResource {
             Preconditions.checkNotNull(hakuOid);
             Preconditions.checkNotNull(valinnanvaiheOid);
             asyncResponse.setTimeout(10, TimeUnit.MINUTES);
+            AUDIT.log(builder()
+                    .id(KoosteAudit.username())
+                    .valinnanvaiheOid(valinnanvaiheOid)
+                    .hakuOid(hakuOid)
+                    .setOperaatio(ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU)
+                    .build());
             LOG.warn("Aloitetaan hakemusten listaaminen valinnenvaiheelle {} haussa {}", valinnanvaiheOid, hakuOid);
             final Observable<Set<String>> hakukohdeOiditObservable = valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid);
             hakukohdeOiditObservable.subscribe(hakukohdeOidit -> {
