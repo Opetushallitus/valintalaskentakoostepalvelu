@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -34,5 +35,10 @@ public class MockValintalaskentaValintakoeAsyncResource implements Valintalasken
     @Override
     public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid) {
         return Observable.just(osallistumistiedot.get());
+    }
+
+    @Override
+    public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(Collection<String> hakukohdeOids) {
+        throw new UnsupportedOperationException();
     }
 }

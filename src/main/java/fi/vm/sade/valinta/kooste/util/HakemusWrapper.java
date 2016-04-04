@@ -6,11 +6,9 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -243,6 +241,12 @@ public class HakemusWrapper {
             henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
         }
         return henkilotiedot;
+    }
+
+    public Collection<String> getHakutoiveOids() {
+        return getHakutoiveet().entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith("preference") && entry.getKey().endsWith("-Koulutus-id"))
+                .map(entry -> entry.getValue()).collect(Collectors.toList());
     }
 
     public Map<String, String> getHakutoiveet() {

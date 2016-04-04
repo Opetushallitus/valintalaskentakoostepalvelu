@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -8,6 +9,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
+import com.google.common.collect.Lists;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,6 +37,16 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends AsyncResourceWit
     @Override
     public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid) {
         return getAsObservable("/valintakoe/hakutoive/" + hakukohdeOid, new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType());
+    }
+
+    @Override
+    public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(Collection<String> hakukohdeOids) {
+        return postAsObservable("/valintakoe/hakutoive", new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType(),
+                Entity.entity(Lists.newArrayList(hakukohdeOids), MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                });
     }
 
     @Override

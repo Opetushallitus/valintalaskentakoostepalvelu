@@ -98,6 +98,11 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     }
 
     @Override
+    public Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid) {
         throw new UnsupportedOperationException();
     }
@@ -119,6 +124,11 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     @Override
     public Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids) {
         return Futures.immediateFuture(hakukohdeResultReference.get());
+    }
+
+    @Override
+    public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(Collection<String> hakukohdeOids) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

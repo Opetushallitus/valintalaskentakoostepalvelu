@@ -150,10 +150,18 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                 .async()
                 .post(Entity.entity(hakukohde, MediaType.APPLICATION_JSON_TYPE));
     }
-
     @Override
     public Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
         return getAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/" + hakukohdeOid + "/", new TypeToken<List<ValintaperusteDTO>>() {}.getType());
+    }
+    @Override
+    public Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids) {
+        return postAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet", new TypeToken<List<HakukohdeJaValintaperusteDTO>>() {}.getType(),
+                Entity.entity(Lists.newArrayList(hakukohdeOids), MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                });
     }
     @Override
     public Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid) {
@@ -176,6 +184,15 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<HakukohdeJaValintakoeDTO>>() {});
+    }
+    @Override
+    public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(Collection<String> hakukohdeOids) {
+        return postAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe", new TypeToken<List<HakukohdeJaValintakoeDTO>>() {}.getType(),
+                Entity.entity(Lists.newArrayList(hakukohdeOids), MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                });
     }
 
     @Override
