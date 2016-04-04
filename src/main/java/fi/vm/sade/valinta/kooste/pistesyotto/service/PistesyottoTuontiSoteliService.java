@@ -22,6 +22,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.OsallistuminenTulosDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -197,7 +198,7 @@ public class PistesyottoTuontiSoteliService {
 
         return hakemuksenKokeetStream.stream()
                 // filter virheet where koe with same tunniste succeeded in another hakutoive
-                .filter(k -> !k.virhe.isPresent() || onnistuneetKokeet.contains(k.tunniste));
+                .filter(k -> !k.virhe.isPresent() || !onnistuneetKokeet.contains(k.tunniste));
     }
     private List<HakemusJaHakutoiveet> collect(List<HakemusDTO> hakemukset, List<Hakemus> hakemuses) {
         Map<String, Collection<String>> hakemusOidJaHakutoiveet = hakemuses.stream().collect(Collectors.toMap(h -> h.getOid(), h -> new HakemusWrapper(h).getHakutoiveOids()));
@@ -212,7 +213,8 @@ public class PistesyottoTuontiSoteliService {
             Observable<List<HakukohdeJaValintakoeDTO>> valintakokeetHakutoiveille = valintaperusteetResource.haeValintakokeetHakutoiveille(hakutoiveet);
             Observable<List<HakukohdeJaValintaperusteDTO>> valintaperusteetHakutoiveille = valintaperusteetResource.findAvaimet(hakutoiveet);
             Observable<List<ValintakoeOsallistuminenDTO>> osallistumisetHakutoiveille = valintakoeResource.haeHakutoiveille(hakutoiveet);
-            Observable.zip(valintakokeetHakutoiveille, valintaperusteetHakutoiveille, osallistumisetHakutoiveille, (hakukohdeJaValintakoeDTOs, hakukohdeJaValintaperusteDTOs, osallistuminenDTOs) -> {
+
+            Observable.combineLatest(valintakokeetHakutoiveille, valintaperusteetHakutoiveille, osallistumisetHakutoiveille, (hakukohdeJaValintakoeDTOs, hakukohdeJaValintaperusteDTOs, osallistuminenDTOs) -> {
                 Map<String, HakukohdeJaValintaperusteDTO> valintaperusteDTOMap = hakukohdeJaValintaperusteDTOs.stream().collect(Collectors.toMap(h -> h.getHakukohdeOid(), hh -> hh));
                 Map<String, HakukohdeJaValintakoeDTO> valintakoeDTOMap = hakukohdeJaValintakoeDTOs.stream().collect(Collectors.toMap(h -> h.getHakukohdeOid(), hh -> hh));
                 Map<String, List<ValintakoeOsallistuminenDTO>> osallistuminenDTOMap = osallistuminenDTOs.stream().collect(Collectors.toMap(h -> h.getHakemusOid(), h -> Arrays.asList(h), (h0,h1) -> Lists.newArrayList(Iterables.concat(h0,h1))));
@@ -232,20 +234,24 @@ public class PistesyottoTuontiSoteliService {
                 List<ApplicationAdditionalDataDTO> additionalData =
                         osallistumiset.stream().filter(o -> !o.isVirhe()).map(OsallistuminenHakutoiveeseen::asApplicationAdditionalDataDTO).collect(Collectors.toList());
                 List<VirheDTO> virheet = osallistumiset.stream().filter(o -> o.isVirhe()).map(o -> o.asVirheDTO()).collect(Collectors.toList());
-                applicationAsyncResource.putApplicationAdditionalData(
-                        hakuOid, "", additionalData).subscribe(response -> {
-                    additionalData.forEach(p ->
-                            AUDIT.log(builder()
-                                    .id(username)
-                                    .hakuOid(hakuOid)
-                                    .hakijaOid(p.getPersonOid())
-                                    .hakemusOid(p.getOid())
-                                    .addAll(p.getAdditionalData())
-                                    .setOperaatio(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL)
-                                    .build())
-                    );
-                    successHandler.accept(additionalData.size(), virheet);
-                }, exception -> exceptionHandler.accept(exception));
+                if(!additionalData.isEmpty()) {
+                    applicationAsyncResource.putApplicationAdditionalData(
+                            hakuOid, "", additionalData).subscribe(response -> {
+                        additionalData.forEach(p ->
+                                AUDIT.log(builder()
+                                        .id(username)
+                                        .hakuOid(hakuOid)
+                                        .hakijaOid(p.getPersonOid())
+                                        .hakemusOid(p.getOid())
+                                        .addAll(p.getAdditionalData())
+                                        .setOperaatio(ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL)
+                                        .build())
+                        );
+                        successHandler.accept(additionalData.size(), virheet);
+                    }, exception -> exceptionHandler.accept(exception));
+                } else {
+                    successHandler.accept(0, virheet);
+                }
             },
             exception -> exceptionHandler.accept(exception));
 
