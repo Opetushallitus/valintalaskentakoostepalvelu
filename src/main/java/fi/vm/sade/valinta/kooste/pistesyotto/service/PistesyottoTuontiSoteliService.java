@@ -17,6 +17,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.VirheDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.OsallistuminenTulosDTO;
@@ -54,14 +55,14 @@ public class PistesyottoTuontiSoteliService {
         this.applicationAsyncResource = applicationAsyncResource;
     }
 
-    private Supplier<Stream<OsallistuminenHakutoiveeseen>> osallistumisenTunnistePuuttuuPalvelunKutsujanSyotteesta(HakemusDTO hakemus, fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe) {
+    private Supplier<Stream<OsallistuminenHakutoiveeseen>> osallistumisenTunnistePuuttuuPalvelunKutsujanSyotteesta(String hakutoiveOid, HakemusDTO hakemus, fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe) {
         return () -> {
             boolean osallistumisenTunnistePuuttuuPalvelunKutsujanSyotteesta = koe.getOsallistuminen() == null;
             if (osallistumisenTunnistePuuttuuPalvelunKutsujanSyotteesta) {
                 VirheDTO virheDTO = new VirheDTO();
                 virheDTO.setHakemusOid(hakemus.getHakemusOid());
                 virheDTO.setVirhe("Osallistumistieto puuttui tunnisteelle " + koe.getTunniste());
-                return Stream.of(new OsallistuminenHakutoiveeseen(koe.getTunniste(), virheDTO));
+                return Stream.of(new OsallistuminenHakutoiveeseen(koe.getTunniste(), hakutoiveOid, virheDTO));
             } else {
                 return Stream.empty();
             }
@@ -116,11 +117,11 @@ public class PistesyottoTuontiSoteliService {
             return Optional.of("Tuntematon funktiotyyppi " + peruste.getFunktiotyyppi());
         }
     }
-    private Supplier<Stream<OsallistuminenHakutoiveeseen>> valintaperusteetKaikkiKutsutaan(HakemusDTO hakemus, fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe, ValintakoeDTO valintakoeDTO, ValintaperusteDTO peruste) {
+    private Supplier<Stream<OsallistuminenHakutoiveeseen>> valintaperusteetKaikkiKutsutaan(String hakutoiveOid, HakemusDTO hakemus, fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe, ValintakoeDTO valintakoeDTO, ValintaperusteDTO peruste) {
         return () -> {
             final boolean valintaperusteetKaikkiKutsutaan = Boolean.TRUE.equals(valintakoeDTO.getKutsutaankoKaikki());
             if(valintaperusteetKaikkiKutsutaan) {
-                return getOsallistuminenHakutoiveeseenStream(hakemus, koe, peruste);
+                return getOsallistuminenHakutoiveeseenStream(hakutoiveOid, hakemus, koe, peruste);
             } else {
                 return Stream.empty();
             }
@@ -137,31 +138,31 @@ public class PistesyottoTuontiSoteliService {
                 final boolean osallistuu = o.map(o0 -> Osallistuminen.OSALLISTUU.equals(o0.getOsallistuminen())).orElse(false);
                 final boolean laskentaKaikkiKutsutaan = Boolean.TRUE.equals(vk.getKutsutaankoKaikki());
                 if(laskentaKaikkiKutsutaan || osallistuu) {
-                    return getOsallistuminenHakutoiveeseenStream(hakemus, koe, peruste);
+                    return getOsallistuminenHakutoiveeseenStream(hakutoiveOid, hakemus, koe, peruste);
                 } else {
                     StringBuilder errorMsg = new StringBuilder("Hakijaa ei ole kutsuttu hakutoiveen ").append(hakutoiveOid).append(" tunnisteella ").append(koe.getTunniste());
                     VirheDTO virheDTO = new VirheDTO();
                     virheDTO.setHakemusOid(hakemus.getHakemusOid());
                     virheDTO.setVirhe(errorMsg.toString());
-                    return Stream.of(new OsallistuminenHakutoiveeseen(koe.getTunniste(), virheDTO));
+                    return Stream.of(new OsallistuminenHakutoiveeseen(koe.getTunniste(), hakutoiveOid, virheDTO));
                 }
             }).orElseGet(() -> {
                 StringBuilder errorMsg = new StringBuilder("Puuttuva osallistumisen tulos hakutoiveelle ").append(hakutoiveOid).append(" tunnisteella ").append(koe.getTunniste());
                 VirheDTO virheDTO = new VirheDTO();
                 virheDTO.setHakemusOid(hakemus.getHakemusOid());
                 virheDTO.setVirhe(errorMsg.toString());
-                return Stream.of(new OsallistuminenHakutoiveeseen(koe.getTunniste(), virheDTO));
+                return Stream.of(new OsallistuminenHakutoiveeseen(koe.getTunniste(), hakutoiveOid, virheDTO));
             });
         };
     }
 
-    private Stream<OsallistuminenHakutoiveeseen> getOsallistuminenHakutoiveeseenStream(HakemusDTO hakemus, fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe, ValintaperusteDTO peruste) {
+    private Stream<OsallistuminenHakutoiveeseen> getOsallistuminenHakutoiveeseenStream(String hakutoiveOid, HakemusDTO hakemus, fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe, ValintaperusteDTO peruste) {
         Optional<String> syoteVirhe = validoiSyote(koe,peruste);
         OsallistuminenHakutoiveeseen osallistuminenHakutoiveeseen = syoteVirhe.map(virhe -> {
             VirheDTO virheDto = new VirheDTO();
             virheDto.setHakemusOid(hakemus.getHakemusOid());
             virheDto.setVirhe("Validointivirhe pisteiden (" +koe.getPisteet()+ ") tuonnissa tunnisteelle " + koe.getTunniste() + ". " + virhe);
-            return new OsallistuminenHakutoiveeseen(koe.getTunniste(), virheDto);
+            return new OsallistuminenHakutoiveeseen(koe.getTunniste(), hakutoiveOid, virheDto);
         }).orElseGet(() -> {
         ApplicationAdditionalDataDTO additionalDataDTO = new ApplicationAdditionalDataDTO();
         additionalDataDTO.setOid(hakemus.getHakemusOid());
@@ -171,7 +172,7 @@ public class PistesyottoTuontiSoteliService {
                         peruste.getOsallistuminenTunniste(), koe.getOsallistuminen().toString(),
                         peruste.getTunniste(), koe.getPisteet()
                 ));
-        return new OsallistuminenHakutoiveeseen(koe.getTunniste(), additionalDataDTO);
+        return new OsallistuminenHakutoiveeseen(koe.getTunniste(), hakutoiveOid, additionalDataDTO);
         });
         return Stream.of(osallistuminenHakutoiveeseen);
     }
@@ -179,8 +180,8 @@ public class PistesyottoTuontiSoteliService {
     private OsallistuminenHakutoiveeseen validoi(String hakutoiveOid, HakemusDTO hakemus, fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe, ValintaperusteDTO valintaperusteDTO, ValintakoeDTO valintakoeDTO
             , Optional<ValintakoeOsallistuminenDTO> valintakoeOsallistuminenDTO) {
         return Stream.of(
-                osallistumisenTunnistePuuttuuPalvelunKutsujanSyotteesta(hakemus,koe),
-                valintaperusteetKaikkiKutsutaan(hakemus,koe,valintakoeDTO,valintaperusteDTO),
+                osallistumisenTunnistePuuttuuPalvelunKutsujanSyotteesta(hakutoiveOid, hakemus,koe),
+                valintaperusteetKaikkiKutsutaan(hakutoiveOid, hakemus,koe,valintakoeDTO,valintaperusteDTO),
                 valintalaskentaKutsutaan(hakutoiveOid, hakemus, koe, valintakoeOsallistuminenDTO, valintaperusteDTO)
         ).flatMap(s -> s.get()).findFirst().get();
     }
@@ -208,7 +209,7 @@ public class PistesyottoTuontiSoteliService {
         return hakemukset.stream().map(h -> new HakemusJaHakutoiveet(h, hakemusOidJaHakutoiveet.get(h.getHakemusOid()))).collect(Collectors.toList());
     }
 
-    public void tuo(List<HakemusDTO> hakemukset, String username, String hakuOid, String valinnanvaiheOid, BiConsumer<Integer, Collection<VirheDTO>> successHandler, Consumer<Throwable> exceptionHandler) {
+    public void tuo(HakukohdeOIDAuthorityCheck authorityCheck, List<HakemusDTO> hakemukset, String username, String hakuOid, String valinnanvaiheOid, BiConsumer<Integer, Collection<VirheDTO>> successHandler, Consumer<Throwable> exceptionHandler) {
         Observable<List<Hakemus>> applicationsByHakemusOids = applicationAsyncResource.getApplicationsByHakemusOids(hakemukset.stream().map(HakemusDTO::getHakemusOid).collect(Collectors.toList()));
         applicationsByHakemusOids.subscribe(hakemuses -> {
             List<HakemusJaHakutoiveet> hakemusJaHakutoiveets = collect(hakemukset, hakemuses);
@@ -223,17 +224,30 @@ public class PistesyottoTuontiSoteliService {
                 Map<String, List<ValintakoeOsallistuminenDTO>> osallistuminenDTOMap = osallistuminenDTOs.stream().collect(Collectors.toMap(h -> h.getHakemusOid(), h -> Arrays.asList(h), (h0,h1) -> Lists.newArrayList(Iterables.concat(h0,h1))));
                 return hakemusJaHakutoiveets.stream().flatMap(
                         h -> {
-                            List<Hakutoive> hakutoiveetList = h.hakutoiveet.stream().map(oid -> new Hakutoive(
+                            List<Hakutoive> hakutoiveetList = h.hakutoiveet.stream().filter(authorityCheck).map(oid -> new Hakutoive(
                                     oid,
                                     valintaperusteDTOMap.get(oid).getValintaperusteDTO(),
                                     valintakoeDTOMap.get(oid).getValintakoeDTO(),
                                     Optional.ofNullable(osallistuminenDTOMap.get(oid)).orElse(Collections.emptyList()))).collect(Collectors.toList());
 
-                            return validoi(h.hakemusDTO, hakutoiveetList);
+                            return validoi(h.hakemusDTO, hakutoiveetList).map(o -> {
+                                boolean isAuthorized = authorityCheck.test(o.hakukohdeOid);
+                                if(isAuthorized) {
+                                    return o;
+                                } else {
+                                    VirheDTO virheDTO = new VirheDTO();
+                                    if(o.isVirhe()) {
+                                        virheDTO.setHakemusOid(o.asVirheDTO().getHakemusOid());
+                                    } else {
+                                        virheDTO.setHakemusOid(o.asApplicationAdditionalDataDTO().getOid());
+                                    }
+                                    virheDTO.setVirhe("Tarvittavat muokkausoikeudet puuttuu hakutoiveelle " + o.hakukohdeOid);
+                                    return new OsallistuminenHakutoiveeseen(o.tunniste, o.hakukohdeOid, virheDTO);
+                                }
+                            });
                         }
                 ).collect(Collectors.toList());
             }).subscribe(osallistumiset -> {
-
                 List<ApplicationAdditionalDataDTO> additionalData =
                         osallistumiset.stream().filter(o -> !o.isVirhe()).map(OsallistuminenHakutoiveeseen::asApplicationAdditionalDataDTO).collect(Collectors.toList());
                 List<VirheDTO> virheet = osallistumiset.stream().filter(o -> o.isVirhe()).map(o -> o.asVirheDTO()).collect(Collectors.toList());
@@ -263,15 +277,18 @@ public class PistesyottoTuontiSoteliService {
     }
     private static class OsallistuminenHakutoiveeseen {
         public final String tunniste;
+        public final String hakukohdeOid;
         private final Optional<VirheDTO> virhe;
         private final Optional<ApplicationAdditionalDataDTO> addData;
 
-        public OsallistuminenHakutoiveeseen(String tunniste, ApplicationAdditionalDataDTO applicationAdditionalDataDTO) {
+        public OsallistuminenHakutoiveeseen(String tunniste, String hakukohdeOid, ApplicationAdditionalDataDTO applicationAdditionalDataDTO) {
+            this.hakukohdeOid = hakukohdeOid;
             this.tunniste = tunniste;
             this.virhe = Optional.empty();
             this.addData = Optional.of(applicationAdditionalDataDTO);
         }
-        public OsallistuminenHakutoiveeseen(String tunniste, VirheDTO virheDTO) {
+        public OsallistuminenHakutoiveeseen(String tunniste, String hakukohdeOid, VirheDTO virheDTO) {
+            this.hakukohdeOid = hakukohdeOid;
             this.tunniste = tunniste;
             this.virhe = Optional.of(virheDTO);
             this.addData = Optional.empty();
