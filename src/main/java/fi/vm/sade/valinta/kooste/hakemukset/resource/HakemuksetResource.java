@@ -13,6 +13,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.hakemukset.dto.ValintakoeDTO;
+import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 
 import static fi.vm.sade.auditlog.valintaperusteet.LogMessage.builder;
 import static fi.vm.sade.valinta.kooste.KoosteAudit.AUDIT;
+import static java.util.Arrays.asList;
 
 
 @Controller("HakemuksetResource")
@@ -58,6 +60,9 @@ public class HakemuksetResource {
     @Autowired
     private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
+    @Autowired
+    private AuthorityCheckService authorityCheckService;
+
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @GET
     @Path("/valinnanvaihe")
@@ -75,17 +80,26 @@ public class HakemuksetResource {
                     .setOperaatio(ValintaperusteetOperation.VALINNANVAIHEEN_HAKEMUKSET_HAKU)
                     .build());
             LOG.warn("Aloitetaan hakemusten listaaminen valinnenvaiheelle {} haussa {}", valinnanvaiheOid, hakuOid);
-            final Observable<Set<String>> hakukohdeOiditObservable = valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid);
-            hakukohdeOiditObservable.subscribe(hakukohdeOidit -> {
-                List<String> hakukohteet = hakukohdeOidit.stream().collect(Collectors.toList());
-                LOG.info("Löydettiin {} hakukohdetta", hakukohteet.size());
-                final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohteet);
-                hakemuksetObservable.subscribe(hakemukset -> {
-                    LOG.info("Löydettiin {} hakemusta", hakemukset.size());
-                    List<HakemusDTO> hakemusDTOs = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());
-                    asyncResponse.resume(Response.ok(hakemusDTOs).build());
-                });
-            });
+            authorityCheckService.getAuthorityCheckForRoles(
+                    asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_READ", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+                    authCheck -> {
+                        final Observable<Set<String>> hakukohdeOiditObservable = valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid);
+                        hakukohdeOiditObservable.subscribe(hakukohdeOidit -> {
+                            List<String> hakukohteet = hakukohdeOidit.stream().filter(authCheck).collect(Collectors.toList());
+                            LOG.info("Löydettiin {} hakukohdetta", hakukohteet.size());
+                            final Observable<List<Hakemus>> hakemuksetObservable = applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohteet);
+                            hakemuksetObservable.subscribe(hakemukset -> {
+                                LOG.info("Löydettiin {} hakemusta", hakemukset.size());
+                                List<HakemusDTO> hakemusDTOs = hakemukset.stream().map(hakemusTOHakemusDTO).collect(Collectors.toList());
+                                asyncResponse.resume(Response.ok(hakemusDTOs).build());
+                            });
+                        });
+                    },
+                    poikkeus -> {
+                        LOG.error("Unable to get hakukohteet from tarjonta", poikkeus);
+                        asyncResponse.resume(Response.serverError().entity(poikkeus).build());
+                    }
+            );
         } catch (Exception e) {
             LOG.error("Listing hakemus for valinnanvaihe {} and haku {} failed", valinnanvaiheOid, hakuOid, e);
             asyncResponse.cancel();
