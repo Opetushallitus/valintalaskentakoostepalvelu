@@ -107,7 +107,10 @@ public class PistesyottoTuontiSoteliService {
                 return Optional.empty();
             }
         } else if(Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(peruste.getFunktiotyyppi())) {
-
+            boolean pisteetIsBooleanString = Arrays.asList(Boolean.TRUE.toString(),Boolean.FALSE.toString()).contains(koe.getPisteet());
+            if(!pisteetIsBooleanString) {
+                return Optional.of("Totuusarvo on muotoa true tai false");
+            }
             return Optional.empty();
         } else {
             return Optional.of("Tuntematon funktiotyyppi " + peruste.getFunktiotyyppi());
