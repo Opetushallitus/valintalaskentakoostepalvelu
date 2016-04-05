@@ -32,6 +32,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiSoteliService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
+import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import org.apache.camel.Produce;
 import org.apache.poi.util.IOUtils;
@@ -75,7 +76,7 @@ public class PistesyottoResource {
     @Autowired
     private PistesyottoTuontiSoteliService tuontiSoteliService;
     @Autowired
-    private TarjontaAsyncResource tarjontaAsyncResource;
+    private AuthorityCheckService authorityCheckService;
 
     @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
     @POST
@@ -145,7 +146,7 @@ public class PistesyottoResource {
                 asyncResponse1.resume(Response.serverError().entity("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu").build());
             });
 
-            getAuthorityCheckForRoles(asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
+            authorityCheckService.getAuthorityCheckForRoles(asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
                     authorityCheck -> {
                         LOG.info("Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}", hakuOid, hakemukset);
                         final String username = KoosteAudit.username();
@@ -171,45 +172,7 @@ public class PistesyottoResource {
 
 
         }
-
-        //return response;
     }
 
-    public void getAuthorityCheckForRoles(Collection<String> roles, Consumer<HakukohdeOIDAuthorityCheck> callback, Consumer<Throwable> failureCallback) {
-        final Collection<String> authorities = getAuthoritiesFromAuthenticationStartingWith(roles);
-        final Set<String> organizationOids = parseOrganizationOidsFromSecurityRoles(authorities);
-        boolean isRootAuthority = organizationOids.stream().anyMatch(oid -> isRootOrganizationOID(oid));
-        if(isRootAuthority) {
-            callback.accept((OID) -> true);
-        } else {
-            final Set<String> organizationGroupOids = parseOrganizationGroupOidsFromSecurityRoles(authorities);
-            if(organizationGroupOids.isEmpty() && organizationOids.isEmpty()) {
-                LOG.error("Unauthorized! User has no organization OIDS");
-                throw new RuntimeException("Unauthorized");
-            }
-            Observable<List<ResultOrganization>> searchByOrganizationOids =
-            Optional.of(organizationOids).filter(oids -> !oids.isEmpty()).map(tarjontaAsyncResource::hakukohdeSearchByOrganizationOids).orElse(Observable.just(Collections.emptyList()));
-
-
-            Observable<List<ResultOrganization>> searchByOrganizationGroupOids =
-                    Optional.of(organizationOids).filter(oids -> !oids.isEmpty()).map(tarjontaAsyncResource::hakukohdeSearchByOrganizationGroupOids)
-                            .orElse(Observable.just(Collections.emptyList()));
-
-            Observable.combineLatest(searchByOrganizationOids, searchByOrganizationGroupOids, (orgs, groupOrgs) -> {
-                Set<String> hakukohdeOidSet1 = orgs.stream().flatMap(o -> o.getTulokset().stream()).map(ResultHakukohde::getOid).collect(Collectors.toSet());
-                Set<String> hakukohdeOidSet2 = groupOrgs.stream().flatMap(o -> o.getTulokset().stream()).map(ResultHakukohde::getOid).collect(Collectors.toSet());
-
-                return Sets.union(hakukohdeOidSet1, hakukohdeOidSet2);
-            }).subscribe(
-                    hakukohdeOIDS -> {
-                        callback.accept((OID) -> hakukohdeOIDS.contains(OID));
-                    },
-                    exception -> {
-                        failureCallback.accept(exception);
-                    }
-            );
-
-        }
-    }
 
 }

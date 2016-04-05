@@ -37,6 +37,8 @@
     <bean id="sijoittelunTulosXlsKomponentti" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti"/>
   <bean id="PistesyottoResource"
         class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
+  <bean id="AuthorityCheckService"
+        class="fi.vm.sade.valinta.kooste.security.AuthorityCheckService"/>
   <bean id="PistesyottoTuontiSoteliService"
         class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiSoteliService"/>
   <bean id="PistesyottoTuontiService"
