@@ -56,7 +56,7 @@ public class SecurityUtil {
         String[] pieces = StringUtils.trimToEmpty(role).split("_");
         if(pieces.length > 0) {
             String lastPiece = pieces[pieces.length - 1];
-            if(lastPiece.startsWith(ORGANIZATION_OID_PREFIX)) {
+            if(lastPiece.startsWith(ORGANIZATION_GROUP_OID_PREFIX)) {
                 return Optional.of(lastPiece);
             } else {
                 return Optional.empty();
