@@ -10,7 +10,6 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.function.SynkronoituLaskuri;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
-import fi.vm.sade.valinta.kooste.util.SuoritusrekisteriUtil;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
@@ -30,8 +29,6 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
-import static fi.vm.sade.valinta.kooste.util.SuoritusrekisteriUtil.getEnsikertalaisuudenRajapvm;
 
 @Controller("SuorituksenArvosanatProxyResource")
 @Path("/proxy/suoritukset")
@@ -103,7 +100,7 @@ public class OppijanSuorituksetProxyResource {
                         tarjontaRef.set(tarjonta);
                         laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
 
-                        suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, getEnsikertalaisuudenRajapvm(tarjonta), opiskelija -> {
+                        suoritusrekisteriAsyncResource.getSuorituksetByOppija(opiskeljaOid, tarjonta.getOid(), opiskelija -> {
                             oppijaRef.set(opiskelija);
                             laskuri.vahennaLaskuriaJaJosValmisNiinSuoritaToiminto();
                         }, poikkeuskasittelija);

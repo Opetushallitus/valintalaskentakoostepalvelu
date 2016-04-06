@@ -50,8 +50,6 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.observables.ConnectableObservable;
 
-import static fi.vm.sade.valinta.kooste.util.SuoritusrekisteriUtil.getEnsikertalaisuudenRajapvm;
-
 @Service
 @ManagedResource(objectName = "OPH:name=LaskentaActorFactory", description = "LaskentaActorFactory mbean")
 public class LaskentaActorFactory {
@@ -167,7 +165,7 @@ public class LaskentaActorFactory {
                     valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                     Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
                     hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
-                    Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), getEnsikertalaisuudenRajapvm(haku));
+                    Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), haku.getOid());
                     oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
 
 
@@ -203,7 +201,7 @@ public class LaskentaActorFactory {
                     valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                     Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
                     hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
-                    Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), getEnsikertalaisuudenRajapvm(haku));
+                    Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), haku.getOid());
                     oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                     Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
                     hakijaryhmat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
@@ -242,7 +240,7 @@ public class LaskentaActorFactory {
                     valintaperusteet.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                     Observable<List<Hakemus>> hakemukset = applicationAsyncResource.getApplicationsByOid(actorParams.getHakuOid(), hakukohdeJaOrganisaatio.getHakukohdeOid());
                     hakemukset.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
-                    Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), getEnsikertalaisuudenRajapvm(haku));
+                    Observable<List<Oppija>> oppijat = suoritusrekisteriAsyncResource.getOppijatByHakukohde(hakukohdeJaOrganisaatio.getHakukohdeOid(), haku.getOid());
                     oppijat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));
                     Observable<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat = valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid);
                     hakijaryhmat.subscribe(resurssiOK.apply(uuid, hakukohdeOid), resurssiException.apply(uuid, hakukohdeOid));

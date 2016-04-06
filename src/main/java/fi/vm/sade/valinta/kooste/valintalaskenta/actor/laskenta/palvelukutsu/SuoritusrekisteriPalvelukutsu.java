@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static fi.vm.sade.valinta.kooste.util.SuoritusrekisteriUtil.getEnsikertalaisuudenRajapvm;
-
 public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu implements Palvelukutsu {
     private final static Logger LOG = LoggerFactory.getLogger(HakijaryhmatPalvelukutsu.class);
     private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
@@ -33,7 +31,7 @@ public class SuoritusrekisteriPalvelukutsu extends AbstraktiPalvelukutsu impleme
 
     public Palvelukutsu teePalvelukutsu(Consumer<Palvelukutsu> takaisinkutsu) {
         aloitaPalvelukutsuJosPalvelukutsuaEiOlePeruutettu(() ->
-                        suoritusrekisteriAsyncResource.getOppijatByHakukohde(getHakukohdeOid(), getEnsikertalaisuudenRajapvm(haku), // referenssiPvm ensikertalaisuutta varten
+                        suoritusrekisteriAsyncResource.getOppijatByHakukohde(getHakukohdeOid(), haku.getOid(),
                             oppijat -> {
                                 SuoritusrekisteriPalvelukutsu.this.oppijat.set(oppijat);
                                 takaisinkutsu.accept(SuoritusrekisteriPalvelukutsu.this);

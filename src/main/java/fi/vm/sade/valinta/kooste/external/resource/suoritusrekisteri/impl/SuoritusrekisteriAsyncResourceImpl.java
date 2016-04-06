@@ -34,15 +34,13 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 
     @Override
     public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid,
-                                                          String ensikertalaisuudenRajapvm) {
+                                                          String hakuOid) {
         return getAsObservable(
                 "/suoritusrekisteri/rest/v1/oppijat",
                 new TypeToken<List<Oppija>>() { }.getType(),
                 client -> {
                     client.query("hakukohde", hakukohdeOid);
-                    if (ensikertalaisuudenRajapvm != null) {
-                        client.query("ensikertalaisuudenRajapvm", ensikertalaisuudenRajapvm);
-                    }
+                    client.query("haku", hakuOid);
                     return client;
                 }
         );
@@ -50,7 +48,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 
     @Override
     public Peruutettava getOppijatByHakukohde(String hakukohdeOid,
-                                              String ensikertalaisuudenRajapvm,
+                                              String hakuOid,
                                               Consumer<List<Oppija>> callback,
                                               Consumer<Throwable> failureCallback) {
         String url = "/suoritusrekisteri/rest/v1/oppijat";
@@ -58,11 +56,11 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
             return new PeruutettavaImpl(getWebClient()
                     .path(url)
                     .query("hakukohde", hakukohdeOid)
-                    .query("ensikertalaisuudenRajapvm", ensikertalaisuudenRajapvm)
+                    .query("haku", hakuOid)
                     .async()
                     .get(new GsonResponseCallback<>(
                             address,
-                            url + "?hakukohde=" + hakukohdeOid + "&ensikertalaisuudenRajapvm=" + ensikertalaisuudenRajapvm,
+                            url + "?hakukohde=" + hakukohdeOid + "&haku=" + hakuOid,
                             callback,
                             failureCallback, new TypeToken<List<Oppija>>() {
                             }.getType()
@@ -76,18 +74,18 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 
     @Override
     public Future<Response> getSuorituksetByOppija(String opiskelijaOid,
-                                                   String ensikertalaisuudenRajapvm,
+                                                   String hakuOid,
                                                    Consumer<Oppija> callback,
                                                    Consumer<Throwable> failureCallback) {
         String url = "/suoritusrekisteri/rest/v1/oppijat/" + opiskelijaOid;
         return getWebClient()
                 .path(url)
-                .query("ensikertalaisuudenRajapvm", ensikertalaisuudenRajapvm)
+                .query("haku", hakuOid)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .get(new GsonResponseCallback<Oppija>(
                         address,
-                        url  + "?ensikertalaisuudenRajapvm=" + ensikertalaisuudenRajapvm,
+                        url  + "?haku=" + hakuOid,
                         callback,
                         failureCallback,
                         new TypeToken<Oppija>() {

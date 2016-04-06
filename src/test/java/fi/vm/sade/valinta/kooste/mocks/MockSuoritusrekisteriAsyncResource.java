@@ -26,17 +26,17 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
     }
 
     @Override
-    public Peruutettava getOppijatByHakukohde(String hakukohdeOid, String ensikertalaisuudenRajapvm, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
+    public Peruutettava getOppijatByHakukohde(String hakukohdeOid, String hakuOid, Consumer<List<Oppija>> callback, Consumer<Throwable> failureCallback) {
         return null;
     }
 
     @Override
-    public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String ensikertalaisuudenRajapvm) {
+    public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String hakuOid) {
         return null;
     }
 
     @Override
-    public Future<Response> getSuorituksetByOppija(String opiskelijaOid, String ensikertalaisuudenRajapvm, Consumer<Oppija> callback, Consumer<Throwable> failureCallback) {
+    public Future<Response> getSuorituksetByOppija(String opiskelijaOid, String hakuOid, Consumer<Oppija> callback, Consumer<Throwable> failureCallback) {
         callback.accept(oppijaRef.get());
         return Futures.immediateCancelledFuture();
     }

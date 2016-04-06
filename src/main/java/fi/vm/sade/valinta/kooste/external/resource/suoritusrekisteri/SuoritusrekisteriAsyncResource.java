@@ -12,16 +12,16 @@ import java.util.function.Consumer;
 public interface SuoritusrekisteriAsyncResource {
 
     Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid,
-                                                   String ensikertalaisuudenRajapvm);
+                                                   String hakuOid);
 
     @Deprecated
     Peruutettava getOppijatByHakukohde(String hakukohdeOid,
-                                       String ensikertalaisuudenRajapvm,
+                                       String hakuOid,
                                        Consumer<List<Oppija>> callback,
                                        Consumer<Throwable> failureCallback);
 
     Future<Response> getSuorituksetByOppija(String opiskelijaOid,
-                                            String ensikertalaisuudenRajapvm,
+                                            String hakuOid,
                                             Consumer<Oppija> callback,
                                             Consumer<Throwable> failureCallback);
 
