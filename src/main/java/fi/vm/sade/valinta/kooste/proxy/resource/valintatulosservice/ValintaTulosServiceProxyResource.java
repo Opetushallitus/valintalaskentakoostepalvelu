@@ -13,14 +13,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import rx.Observable;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
@@ -48,12 +44,6 @@ public class ValintaTulosServiceProxyResource {
 
     @Autowired
     private ValintaTulosServiceAsyncResource valintaTulosServiceResource;
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleError(HttpServletRequest request, Exception e) {
-        LOG.error("Request " + request.getRequestURL() + " failed", e);
-        return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 
     @GET
     @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
