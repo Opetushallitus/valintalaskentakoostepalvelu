@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncResource {
     private static AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeResultReference = new AtomicReference<>();
     private static AtomicReference<List<ValinnanVaiheJonoillaDTO>> resultReference = new AtomicReference<>();
+    private static AtomicReference<List<HakukohdeJaValintaperusteDTO>> hakukohdeJaValintaperusteetResultReference = new AtomicReference<>();
     private static AtomicReference<List<ValintaperusteDTO>> valintaperusteetResultReference = new AtomicReference<>();
     private static AtomicReference<List<ValintakoeDTO>> valintakokeetResultReference = new AtomicReference<>();
     public static void setValintaperusteetResultReference(List<ValintaperusteDTO> result) {
@@ -39,7 +40,9 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     public Observable<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
         return null;
     }
-
+    public static void setHakukohdeValintaperusteResult(List<HakukohdeJaValintaperusteDTO> result) {
+        hakukohdeJaValintaperusteetResultReference.set(result);
+    }
     public static void setValintakokeetResult(List<ValintakoeDTO> result) {
         valintakokeetResultReference.set(result);
     }
@@ -99,7 +102,7 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
 
     @Override
     public Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids) {
-        throw new UnsupportedOperationException();
+        return Observable.just(hakukohdeJaValintaperusteetResultReference.get());
     }
 
     @Override
@@ -128,7 +131,7 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
 
     @Override
     public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(Collection<String> hakukohdeOids) {
-        throw new UnsupportedOperationException();
+        return Observable.just(hakukohdeResultReference.get());
     }
 
     @Override

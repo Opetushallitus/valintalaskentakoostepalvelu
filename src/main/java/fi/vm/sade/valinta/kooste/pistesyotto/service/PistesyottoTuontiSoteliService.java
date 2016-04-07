@@ -78,43 +78,47 @@ public class PistesyottoTuontiSoteliService {
         });
     }
     private Optional<String> validoiSyote(fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe, ValintaperusteDTO peruste) {
-        if(Funktiotyyppi.LUKUARVOFUNKTIO.equals(peruste.getFunktiotyyppi())) {
-            BigDecimal pisteet;
-            try {
-                pisteet = new BigDecimal(koe.getPisteet());
-            } catch(NumberFormatException ne) {
-                return Optional.of("Arvon muuntaminen numeroksi " + koe.getPisteet() + " ei onnistunut");
-            }
-            if(peruste.getArvot() != null && !peruste.getArvot().isEmpty()) {
-                // Diskreettiarvo
-                boolean diskreettiArvoLoytyi = peruste.getArvot().stream().map(a -> new BigDecimal(a)).filter(a -> pisteet.equals(a)).findFirst().isPresent();
-                if(diskreettiArvoLoytyi) {
-                    return Optional.empty();
+        if(fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO.Osallistuminen.OSALLISTUI.equals(koe.getOsallistuminen())) {
+            if (Funktiotyyppi.LUKUARVOFUNKTIO.equals(peruste.getFunktiotyyppi())) {
+                BigDecimal pisteet;
+                try {
+                    pisteet = new BigDecimal(koe.getPisteet());
+                } catch (NumberFormatException ne) {
+                    return Optional.of("Arvon muuntaminen numeroksi " + koe.getPisteet() + " ei onnistunut");
+                }
+                if (peruste.getArvot() != null && !peruste.getArvot().isEmpty()) {
+                    // Diskreettiarvo
+                    boolean diskreettiArvoLoytyi = peruste.getArvot().stream().map(a -> new BigDecimal(a)).filter(a -> pisteet.equals(a)).findFirst().isPresent();
+                    if (diskreettiArvoLoytyi) {
+                        return Optional.empty();
+                    } else {
+                        return Optional.of("Arvo " + koe.getPisteet() + " ei ole joukossa " + Arrays.toString(peruste.getArvot().toArray()));
+                    }
                 } else {
-                    return Optional.of("Arvo " + koe.getPisteet() + " ei ole joukossa " + Arrays.toString(peruste.getArvot().toArray()));
+                    // Mahdollisesti raja-arvot
+                    Optional<BigDecimal> max = asLimit(peruste.getMax());
+                    Optional<BigDecimal> min = asLimit(peruste.getMin());
+                    boolean ylarajaKunnossa = max.map(m -> pisteet.compareTo(m) <= 0).orElse(true);
+                    boolean alarajaKunnossa = min.map(m -> pisteet.compareTo(m) >= 0).orElse(true);
+                    if (!ylarajaKunnossa) {
+                        return Optional.of("Suurin sallittu arvo on " + peruste.getMax());
+                    }
+                    if (!alarajaKunnossa) {
+                        return Optional.of("Pienin sallittu arvo on " + peruste.getMin());
+                    }
+                    return Optional.empty();
                 }
-            } else {
-                // Mahdollisesti raja-arvot
-                Optional<BigDecimal> max = asLimit(peruste.getMax());
-                Optional<BigDecimal> min = asLimit(peruste.getMin());
-                boolean ylarajaKunnossa = max.map(m -> pisteet.compareTo(m) <= 0).orElse(true);
-                boolean alarajaKunnossa = min.map(m -> pisteet.compareTo(m) >= 0).orElse(true);
-                if(!ylarajaKunnossa) {
-                    return Optional.of("Suurin sallittu arvo on " + peruste.getMax());
-                }
-                if(!alarajaKunnossa) {
-                    return Optional.of("Pienin sallittu arvo on " + peruste.getMin());
+            } else if (Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(peruste.getFunktiotyyppi())) {
+                boolean pisteetIsBooleanString = Arrays.asList(Boolean.TRUE.toString(), Boolean.FALSE.toString()).contains(koe.getPisteet());
+                if (!pisteetIsBooleanString) {
+                    return Optional.of("Totuusarvo on muotoa true tai false");
                 }
                 return Optional.empty();
+            } else {
+                return Optional.of("Tuntematon funktiotyyppi " + peruste.getFunktiotyyppi());
             }
-        } else if(Funktiotyyppi.TOTUUSARVOFUNKTIO.equals(peruste.getFunktiotyyppi())) {
-            boolean pisteetIsBooleanString = Arrays.asList(Boolean.TRUE.toString(),Boolean.FALSE.toString()).contains(koe.getPisteet());
-            if(!pisteetIsBooleanString) {
-                return Optional.of("Totuusarvo on muotoa true tai false");
-            }
-            return Optional.empty();
         } else {
-            return Optional.of("Tuntematon funktiotyyppi " + peruste.getFunktiotyyppi());
+            return Optional.empty();
         }
     }
     private Supplier<Stream<OsallistuminenHakutoiveeseen>> valintaperusteetKaikkiKutsutaan(String hakutoiveOid, HakemusDTO hakemus, fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe, ValintakoeDTO valintakoeDTO, ValintaperusteDTO peruste) {
@@ -170,7 +174,9 @@ public class PistesyottoTuontiSoteliService {
         additionalDataDTO.setAdditionalData(
                 ImmutableMap.of(
                         peruste.getOsallistuminenTunniste(), koe.getOsallistuminen().toString(),
-                        peruste.getTunniste(), koe.getPisteet()
+                        peruste.getTunniste(),
+                        // only set pisteet for osallistuja
+                        Optional.of(koe.getOsallistuminen()).filter(o -> fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO.Osallistuminen.OSALLISTUI.equals(o)).map(o -> koe.getPisteet()).orElse("")
                 ));
         return new OsallistuminenHakutoiveeseen(koe.getTunniste(), hakutoiveOid, additionalDataDTO);
         });
@@ -206,7 +212,7 @@ public class PistesyottoTuontiSoteliService {
     }
     private List<HakemusJaHakutoiveet> collect(List<HakemusDTO> hakemukset, List<Hakemus> hakemuses) {
         Map<String, Collection<String>> hakemusOidJaHakutoiveet = hakemuses.stream().collect(Collectors.toMap(h -> h.getOid(), h -> new HakemusWrapper(h).getHakutoiveOids()));
-        return hakemukset.stream().map(h -> new HakemusJaHakutoiveet(h, hakemusOidJaHakutoiveet.get(h.getHakemusOid()))).collect(Collectors.toList());
+        return hakemukset.stream().map(h -> new HakemusJaHakutoiveet(h, Optional.ofNullable(hakemusOidJaHakutoiveet.get(h.getHakemusOid())).orElse(Collections.emptyList()))).collect(Collectors.toList());
     }
 
     public void tuo(HakukohdeOIDAuthorityCheck authorityCheck, List<HakemusDTO> hakemukset, String username, String hakuOid, String valinnanvaiheOid, BiConsumer<Integer, Collection<VirheDTO>> successHandler, Consumer<Throwable> exceptionHandler) {
