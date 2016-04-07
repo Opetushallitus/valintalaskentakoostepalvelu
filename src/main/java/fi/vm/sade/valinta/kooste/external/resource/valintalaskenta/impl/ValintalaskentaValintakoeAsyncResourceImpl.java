@@ -10,6 +10,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
 import com.google.common.collect.Lists;
+import fi.vm.sade.valinta.http.HttpResource;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,22 +27,21 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenD
 import rx.Observable;
 
 @Service
-public class ValintalaskentaValintakoeAsyncResourceImpl extends AsyncResourceWithCas implements ValintalaskentaValintakoeAsyncResource {
+public class ValintalaskentaValintakoeAsyncResourceImpl extends HttpResource implements ValintalaskentaValintakoeAsyncResource {
     @Autowired
     public ValintalaskentaValintakoeAsyncResourceImpl(
-            @Qualifier("ValintakoeRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-            @Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}") String address, ApplicationContext context) {
-        super(casInterceptor, address, context, TimeUnit.HOURS.toMillis(1));
+            @Value("${valintalaskentakoostepalvelu.valintalaskenta.rest.url}") String address) {
+        super(address, TimeUnit.HOURS.toMillis(1));
     }
 
     @Override
     public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid) {
-        return getAsObservable("/valintakoe/hakutoive/" + hakukohdeOid, new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType());
+        return getAsObservable("/valintalaskentakoostepalvelu/valintakoe/hakutoive/" + hakukohdeOid, new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType());
     }
 
     @Override
     public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(Collection<String> hakukohdeOids) {
-        return postAsObservable("/valintakoe/hakutoive", new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType(),
+        return postAsObservable("/valintalaskentakoostepalvelu/valintakoe/hakutoive", new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType(),
                 Entity.entity(Lists.newArrayList(hakukohdeOids), MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
@@ -51,7 +51,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends AsyncResourceWit
 
     @Override
     public Observable<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(String hakukohdeOid, List<String> valintakoeTunnisteet) {
-        return postAsObservable("/valintatieto/hakukohde/" + hakukohdeOid, new TypeToken<List<HakemusOsallistuminenDTO>>() {
+        return postAsObservable("/valintalaskentakoostepalvelu/valintatieto/hakukohde/" + hakukohdeOid, new TypeToken<List<HakemusOsallistuminenDTO>>() {
         }.getType(), Entity.entity(valintakoeTunnisteet, MediaType.APPLICATION_JSON_TYPE));
     }
 }
