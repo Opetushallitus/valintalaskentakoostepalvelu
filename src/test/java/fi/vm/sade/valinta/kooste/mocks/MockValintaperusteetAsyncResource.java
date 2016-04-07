@@ -27,9 +27,12 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
     private static AtomicReference<List<HakukohdeJaValintaperusteDTO>> hakukohdeJaValintaperusteetResultReference = new AtomicReference<>();
     private static AtomicReference<List<ValintaperusteDTO>> valintaperusteetResultReference = new AtomicReference<>();
     private static AtomicReference<List<ValintakoeDTO>> valintakokeetResultReference = new AtomicReference<>();
+
     public static void setValintaperusteetResultReference(List<ValintaperusteDTO> result) {
         valintaperusteetResultReference.set(result);
     }
+
+
 
     @Override
     public Observable<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {

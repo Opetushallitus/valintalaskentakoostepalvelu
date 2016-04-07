@@ -48,11 +48,6 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         return new PeruutettavaImpl(Futures.immediateFuture(resultByOidReference.get()));
     }
 
-    @Override
-    public Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids) {
-        return null;
-    }
-
     private static <T> Future<T> serviceAvailableCheck() {
         if(!serviceIsAvailable.get()) {
             return Futures.immediateFailedFuture(new RuntimeException("MockHakemuspalvelu on kytketty pois päältä!"));
@@ -146,6 +141,27 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
         hakemus.setAnswers(answers);
         return hakemus;
+    }
+
+    @Override
+    public Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids) {
+        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(() -> {
+            if (resultReference.get() != null) {
+                return Futures.immediateFuture(resultReference.get());
+            } else {
+                Hakemus hakemus = new Hakemus();
+                hakemus.setOid(MockData.hakemusOid);
+                hakemus.setPersonOid(MockData.hakijaOid);
+                Answers answers = new Answers();
+                answers.getHenkilotiedot().put("Henkilotunnus", MockData.hetu);
+                answers.getHenkilotiedot().put("Etunimet", MockData.etunimi);
+                answers.getHenkilotiedot().put("Kutsumanimi", MockData.etunimi);
+                answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
+                answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
+                hakemus.setAnswers(answers);
+                return Futures.immediateFuture(Arrays.asList(hakemus));
+            }
+        }));
     }
 
     @Override

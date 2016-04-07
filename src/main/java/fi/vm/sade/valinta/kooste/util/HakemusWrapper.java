@@ -243,7 +243,7 @@ public class HakemusWrapper {
         return henkilotiedot;
     }
 
-    public Collection<String> getHakutoiveOids() {
+    public List<String> getHakutoiveOids() {
         return getHakutoiveet().entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith("preference") && entry.getKey().endsWith("-Koulutus-id"))
                 .map(entry -> StringUtils.trimToEmpty(entry.getValue())).filter(e -> !StringUtils.isBlank(e)).collect(Collectors.toList());
