@@ -277,7 +277,7 @@ public class ErillishaunTuontiService {
             hakijatJaPoistettavat.addAll(hakijat);
             hakijatJaPoistettavat.addAll(poistettavatDtos);
             if (!hakijatJaPoistettavat.isEmpty()) {
-                Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceAsyncResource.tallenna(convertToValintaTulosList(hakijatJaPoistettavat, username, "Erillishaun tuonti")).doOnError(
+                Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceAsyncResource.tallenna(convertToValintaTulosList(hakijat, username, "Erillishaun tuonti")).doOnError(
                         e -> {
                             LOG.error("Virhe vastaanottotilojen tallennuksessa valinta-tulos-serviceen", e);
                             prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE, e.getMessage()));
