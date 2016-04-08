@@ -95,7 +95,7 @@ public class HakemuksetResource {
                         .flatMap(hakukohdeOidit -> {
                             LOG.info("Löydettiin {} hakukohdetta", hakukohdeOidit.size());
                             return Observable.from(Iterables.partition(hakukohdeOidit, 10))
-                                    .flatMap(x -> applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOidit));
+                                    .flatMap(hakukohdeOiditOsajoukko -> applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOiditOsajoukko));
                         })
                         .subscribe(hakemukset -> {
                             LOG.info("Löydettiin {} hakemusta", hakemukset.size());
