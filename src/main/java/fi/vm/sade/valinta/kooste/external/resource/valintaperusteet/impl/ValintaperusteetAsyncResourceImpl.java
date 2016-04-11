@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -10,6 +11,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.common.collect.Lists;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,22 +20,30 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.reflect.TypeToken;
-
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
+import fi.vm.sade.service.valintaperusteet.dto.*;
 import fi.vm.sade.valinta.http.GsonResponseCallback;
 import fi.vm.sade.valinta.http.HttpResource;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.PeruutettavaImpl;
 import fi.vm.sade.valinta.kooste.external.resource.TyhjaPeruutettava;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import org.apache.cxf.jaxrs.client.WebClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import rx.Observable;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 @Service
 public class ValintaperusteetAsyncResourceImpl extends HttpResource implements ValintaperusteetAsyncResource {
@@ -140,10 +150,31 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                 .async()
                 .post(Entity.entity(hakukohde, MediaType.APPLICATION_JSON_TYPE));
     }
-
     @Override
     public Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
         return getAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet/" + hakukohdeOid + "/", new TypeToken<List<ValintaperusteDTO>>() {}.getType());
+    }
+    @Override
+    public Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids) {
+        return postAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/avaimet", new TypeToken<List<HakukohdeJaValintaperusteDTO>>() {}.getType(),
+                Entity.entity(Lists.newArrayList(hakukohdeOids), MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                });
+    }
+    @Override
+    public Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid) {
+        return getAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valinnanvaihe/"+valinnanvaiheOid+"/valintaperusteet", new TypeToken<List<ValintaperusteetDTO>>() {}.getType());
+    }
+    @Override
+    public Observable<List<ValintakoeDTO>> readByTunnisteet(Collection<String> tunnisteet) {
+        return postAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/tunniste/", new TypeToken<List<ValintakoeDTO>>() {}.getType(),
+                Entity.entity(Lists.newArrayList(tunnisteet), MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                });
     }
 
     @Override
@@ -153,6 +184,15 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .post(Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE), new GenericType<List<HakukohdeJaValintakoeDTO>>() {});
+    }
+    @Override
+    public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(Collection<String> hakukohdeOids) {
+        return postAsObservable("/valintaperusteet-service/resources/valintalaskentakoostepalvelu/hakukohde/valintakoe", new TypeToken<List<HakukohdeJaValintakoeDTO>>() {}.getType(),
+                Entity.entity(Lists.newArrayList(hakukohdeOids), MediaType.APPLICATION_JSON_TYPE),
+                client -> {
+                    client.accept(MediaType.APPLICATION_JSON_TYPE);
+                    return client;
+                });
     }
 
     @Override
@@ -183,5 +223,12 @@ public class ValintaperusteetAsyncResourceImpl extends HttpResource implements V
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .async()
                 .get(new GsonResponseCallback<>(address, url, callback, failureCallback, new TypeToken<List<ValintakoeDTO>>() {}.getType())));
+    }
+
+    @Override
+    public Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
+        String url = "/valintaperusteet-service/resources/valintalaskentakoostepalvelu/valinnanvaihe/" + oid + "/hakukohteet";
+        LOG.info("Calling url {}", url);
+        return getAsObservable(url, new TypeToken<Set<String>>() {}.getType());
     }
 }

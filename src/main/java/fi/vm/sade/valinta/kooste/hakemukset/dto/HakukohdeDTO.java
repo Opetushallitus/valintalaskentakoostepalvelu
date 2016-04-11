@@ -5,8 +5,12 @@ import java.util.List;
 public class HakukohdeDTO {
 
     private String hakukohdeOid;
-
     private List<ValintakoeDTO> valintakokeet;
+
+    public HakukohdeDTO(String hakukohdeOid, List<ValintakoeDTO> valintakokeet) {
+        this.hakukohdeOid = hakukohdeOid;
+        this.valintakokeet = valintakokeet;
+    }
 
     public String getHakukohdeOid() {
         return hakukohdeOid;

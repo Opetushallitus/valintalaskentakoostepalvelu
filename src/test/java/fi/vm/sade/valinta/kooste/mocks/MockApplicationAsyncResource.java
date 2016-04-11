@@ -39,7 +39,7 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     @Override
     public Observable<List<Hakemus>> getApplicationsByHakemusOids(Collection<String> hakemusOids) {
-        return null;
+        return Observable.just(resultReference.get());
     }
 
     @Override
@@ -107,6 +107,44 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
 
     @Override
     public Observable<List<Hakemus>> getApplicationsByOid(final String hakuOid, final String hakukohdeOid) {
+        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(() -> {
+            if (resultReference.get() != null) {
+                return Futures.immediateFuture(resultReference.get());
+            } else {
+                Hakemus hakemus = getHakemus();
+                return Futures.immediateFuture(Arrays.asList(hakemus));
+            }
+        }));
+    }
+
+    @Override
+    public Observable<List<Hakemus>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids) {
+        return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(() -> {
+            if (resultReference.get() != null) {
+                return Futures.immediateFuture(resultReference.get());
+            } else {
+                Hakemus hakemus = getHakemus();
+                return Futures.immediateFuture(Arrays.asList(hakemus));
+            }
+        }));
+    }
+
+    private Hakemus getHakemus() {
+        Hakemus hakemus = new Hakemus();
+        hakemus.setOid(MockData.hakemusOid);
+        hakemus.setPersonOid(MockData.hakijaOid);
+        Answers answers = new Answers();
+        answers.getHenkilotiedot().put("Henkilotunnus", MockData.hetu);
+        answers.getHenkilotiedot().put("Etunimet", MockData.etunimi);
+        answers.getHenkilotiedot().put("Kutsumanimi", MockData.etunimi);
+        answers.getHenkilotiedot().put("Sukunimi", MockData.sukunimi);
+        answers.getHenkilotiedot().put("syntymaaika", MockData.syntymaAika);
+        hakemus.setAnswers(answers);
+        return hakemus;
+    }
+
+    @Override
+    public Observable<List<Hakemus>> getApplicationsByOidsWithPOST(String hakuOid, Collection<String> hakukohdeOids) {
         return Observable.from(Optional.ofNullable(MockApplicationAsyncResource.<List<Hakemus>>serviceAvailableCheck()).orElseGet(() -> {
             if (resultReference.get() != null) {
                 return Futures.immediateFuture(resultReference.get());

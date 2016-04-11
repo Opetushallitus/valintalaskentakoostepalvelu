@@ -4,6 +4,10 @@ public class ValintakoeDTO {
 
     private String tunniste;
 
+    public ValintakoeDTO(String tunniste) {
+        this.tunniste = tunniste;
+    }
+
     public String getTunniste() {
         return tunniste;
     }

@@ -1,22 +1,17 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
-
-import javax.ws.rs.core.Response;
-
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
+import com.wordnik.swagger.annotations.ApiParam;
+import fi.vm.sade.service.valintaperusteet.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.Peruutettava;
 import rx.Observable;
+
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 public interface ValintaperusteetAsyncResource {
 
@@ -42,6 +37,10 @@ public interface ValintaperusteetAsyncResource {
     Future<Response> tuoHakukohde(HakukohdeImportDTO hakukohde);
 
     Observable<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
+    Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids);
+
+    Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid);
+    Observable<List<ValintakoeDTO>> readByTunnisteet(Collection<String> tunnisteet);
 
     Future<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid);
 
@@ -50,7 +49,12 @@ public interface ValintaperusteetAsyncResource {
     // @POST /valintaperusteet-service/resources/hakukohde/valintakoe
     Future<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids);
 
+    Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(Collection<String> hakukohdeOids);
+
     Peruutettava haeValintakokeetHakukohteille(Collection<String> hakukohdeOids, Consumer<List<HakukohdeJaValintakoeDTO>> callback, Consumer<Throwable> failureCallback);
 
     Peruutettava haeValinnanvaiheetHakukohteelle(String hakukohdeOid, Consumer<List<ValinnanVaiheJonoillaDTO>> callback, Consumer<Throwable> failureCallback);
+
+    // @GET /valintaperusteet-service/resources/valinnanvaihe/{oid}/hakukohteet
+    Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid);
 }

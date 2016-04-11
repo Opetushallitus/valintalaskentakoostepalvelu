@@ -1,7 +1,12 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +29,22 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
     @Autowired
     public TarjontaAsyncResourceImpl(@Value("${valintalaskentakoostepalvelu.tarjonta.rest.url}") String address) {
         super(address, TimeUnit.MINUTES.toMillis(5));
+    }
+    @Override
+    public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationGroupOids(Collection<String> organizationGroupOids) {
+        return this.<ResultSearch>getAsObservable("/rest/v1/hakukohde/search", new TypeToken<ResultSearch>() {
+        }.getType(), client -> {
+            client.query("organisaatioRyhmaOid", organizationGroupOids.toArray());
+            return client;
+        }).map(ResultSearch::getResult).map(ResultTulos::getTulokset);
+    }
+    @Override
+    public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(Collection<String> organizationOids) {
+        return this.<ResultSearch>getAsObservable("/rest/v1/hakukohde/search", new TypeToken<ResultSearch>() {
+        }.getType(), client -> {
+            client.query("organisationOid", organizationOids.toArray());
+            return client;
+        }).map(ResultSearch::getResult).map(ResultTulos::getTulokset);
     }
 
     @Override

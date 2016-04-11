@@ -21,12 +21,22 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
+import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
+import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
+import fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec;
+import fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +58,9 @@ import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import junit.framework.Assert;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.junit.Assert.*;
 
@@ -80,7 +93,33 @@ public class PistesyottoResourceTest {
 
     @Test
     public void pistesyottoUlkoinenTuontiResource() throws Exception {
+        final String tunniste1 = "1234";
+        final String tunniste2 = "1235";
+        final String hakemusOid1 = "12316.7.7.74";
+        final String hakemusOid2 = "12316.7.7.998";
+        final String hakukohdeOid1 = "1.2.3.4";
         cleanMocks();
+        Hakemus hakemus1 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid1).addHakutoive(hakukohdeOid1).addHakutoive("1.2.3.4").build();
+        Hakemus hakemus2 = new HakemusSpec.HakemusBuilder().setOid(hakemusOid2).addHakutoive(hakukohdeOid1).addHakutoive("1.2.3.4").build();
+        List<Hakemus> hakemuses = Arrays.asList(hakemus1, hakemus2);
+        MockApplicationAsyncResource.setResult(hakemuses);
+
+        HakukohdeJaValintaperusteDTO vp = new HakukohdeJaValintaperusteDTO(hakukohdeOid1,
+                Arrays.asList(
+                        new ValintaperusteetSpec.ValintaperusteBuilder().setTunniste(tunniste1).setLukuarvofunktio().setArvot("8.34", "5.00").build(),
+                        new ValintaperusteetSpec.ValintaperusteBuilder().setTunniste(tunniste2).setLukuarvofunktio().setMax("9.00").setMin("5.00").build()));
+        MockValintaperusteetAsyncResource.setHakukohdeValintaperusteResult(Arrays.asList(vp));
+
+        HakukohdeJaValintakoeDTO vk = new HakukohdeJaValintakoeDTO(hakukohdeOid1,
+                Arrays.asList(
+                        new ValintaperusteetSpec.ValintakoeDTOBuilder().setTunniste(tunniste1).setKaikkiKutsutaan().build(),
+                        new ValintaperusteetSpec.ValintakoeDTOBuilder().setTunniste(tunniste2).setKaikkiKutsutaan().build()));
+        MockValintaperusteetAsyncResource.setHakukohdeResult(Arrays.asList(vk));
+
+        List<ValintakoeOsallistuminenDTO> osallistuminenDTOs =
+                Arrays.asList(new ValintalaskentaSpec.ValintakoeOsallistuminenBuilder().hakutoive().setHakukohdeOid(hakukohdeOid1).build().build());
+        MockValintalaskentaValintakoeAsyncResource.setResult(osallistuminenDTOs);
+
         String requestBody = IOUtils.toString(new ClassPathResource("pistesyotto/ulkoinen_tuonti.json").getInputStream());
         List<HakemusDTO> hakemusDTOs  = HttpResource.GSON.fromJson(requestBody, new TypeToken<List<HakemusDTO>>() {}.getType());
         assertEquals(3, hakemusDTOs.size());
@@ -316,6 +355,12 @@ public class PistesyottoResourceTest {
     }
     public void cleanMocks() {
         Mocks.reset();
+        Mockito.doAnswer(invocation -> {
+            Consumer<HakukohdeOIDAuthorityCheck> authOidCheck = (Consumer<HakukohdeOIDAuthorityCheck>)invocation.getArguments()[1];
+            authOidCheck.accept((OID)-> true);
+            return null;
+        }).when(Mocks.getAuthorityCheckService())
+                .getAuthorityCheckForRoles(Mockito.<String>anyCollection(), Mockito.<Consumer<HakukohdeOIDAuthorityCheck> >any(), Mockito.<Consumer<Throwable> >any());
         MockApplicationAsyncResource.clear();
     }
     @Test
