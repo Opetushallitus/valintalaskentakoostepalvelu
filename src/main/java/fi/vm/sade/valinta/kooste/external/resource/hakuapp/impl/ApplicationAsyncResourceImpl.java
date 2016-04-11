@@ -77,13 +77,14 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
         requestBody.put("states", Arrays.asList("ACTIVE", "INCOMPLETE"));
         requestBody.put("asIds", Arrays.asList(hakuOid));
         requestBody.put("aoOids", Lists.newArrayList(hakukohdeOids));
-        return postAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(),
+        /*return postAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(),
                 Entity.entity(requestBody, MediaType.APPLICATION_JSON_TYPE),
                 client -> {
                     client.accept(MediaType.APPLICATION_JSON_TYPE);
-                    LOG.info("Calling url {}", client.getCurrentURI());
+                    LOG.info("Calling url {} with asIds {} and aoOids {}", client.getCurrentURI(), requestBody.get("asIds"), requestBody.get("aoOids"));
                     return client;
-                });
+                });*/
+        return postAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(), Entity.json(requestBody));
     }
 
     @Override
