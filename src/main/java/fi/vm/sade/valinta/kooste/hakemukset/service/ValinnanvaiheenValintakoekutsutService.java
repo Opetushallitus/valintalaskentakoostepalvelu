@@ -52,12 +52,12 @@ public class ValinnanvaiheenValintakoekutsutService {
                     return Observable.from(Iterables.partition(hakukohdeOidit, 10))
                             .flatMap(hakukohdeOiditOsajoukko -> applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOiditOsajoukko));
                 })
-                .subscribe(hakemukset -> {
+                .flatMap(hakemukset -> {
                     LOG.info("Löydettiin {} hakemusta", hakemukset.size());
                     List<String> hakutoiveet = collect(hakemukset);
                     Observable<List<HakukohdeJaValintakoeDTO>> valintakokeetHakutoiveille = valintaperusteetAsyncResource.haeValintakokeetHakutoiveille(hakutoiveet);
                     Observable<List<ValintakoeOsallistuminenDTO>> valintakoeOsallistumisetHakutoiveille = valintalaskentaValintakoeAsyncResource.haeHakutoiveille(hakutoiveet);
-                    Observable.combineLatest(valintakokeetHakutoiveille, valintakoeOsallistumisetHakutoiveille, (hakutoiveidenValintakokeet, hakutoiveidenValintakoeOsallistumiset) -> {
+                    return Observable.combineLatest(valintakokeetHakutoiveille, valintakoeOsallistumisetHakutoiveille, (hakutoiveidenValintakokeet, hakutoiveidenValintakoeOsallistumiset) -> {
                         Map<String, HakukohdeJaValintakoeDTO> valintakoeDTOMap = hakutoiveidenValintakokeet.stream().collect(Collectors.toMap(HakukohdeJaValintakoeDTO::getHakukohdeOid, hh -> hh));
                         Map<String, List<ValintakoeOsallistuminenDTO>> osallistuminenDTOMap = hakutoiveidenValintakoeOsallistumiset.stream().collect(Collectors.toMap(ValintakoeOsallistuminenDTO::getHakemusOid, Arrays::asList, (h0, h1) -> Lists.newArrayList(Iterables.concat(h0,h1))));
                         return hakemukset.stream().map(hakemus -> {
@@ -96,10 +96,10 @@ public class ValinnanvaiheenValintakoekutsutService {
                                     .collect(Collectors.toList());
                             return hakemusToHakemusDTO(hakemus, hakukohteet);
                         }).collect(Collectors.toList());
-                    }).subscribe(hakemusDTOs -> {
-                        successHandler.accept(hakemusDTOs);
-                        //asyncResponse.resume(Response.ok(hakemusDTOs).build());
                     });
+                })
+                .subscribe(hakemusDTOs -> {
+                    successHandler.accept(hakemusDTOs);
                 });
     }
 
