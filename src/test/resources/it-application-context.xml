@@ -59,7 +59,8 @@
 
   <bean id="HakemuksetResource"
         class="fi.vm.sade.valinta.kooste.hakemukset.resource.HakemuksetResource"/>
-
+  <bean id="ValinnanvaiheenValintakoekutsutService"
+        class="fi.vm.sade.valinta.kooste.hakemukset.service.ValinnanvaiheenValintakoekutsutService"/>
 
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"

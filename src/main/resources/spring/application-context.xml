@@ -358,6 +358,9 @@
 			  class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService" />
 		<bean id="PistesyottoVientiService"
 			  class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService" />
+
+		<bean id="ValinnanvaiheenValintakoekutsutService"
+			  class="fi.vm.sade.valinta.kooste.hakemukset.service.ValinnanvaiheenValintakoekutsutService"/>
 		<!-- Valintalaskenta -->
 		<bean id="ValintalaskentaKerrallaResource"
 			  class="fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrallaResource" />
