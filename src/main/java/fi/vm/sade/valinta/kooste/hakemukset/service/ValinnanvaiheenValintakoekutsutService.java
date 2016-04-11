@@ -50,7 +50,11 @@ public class ValinnanvaiheenValintakoekutsutService {
                 .flatMap(hakukohdeOidit -> {
                     LOG.info("Löydettiin {} hakukohdetta", hakukohdeOidit.size());
                     return Observable.from(Iterables.partition(hakukohdeOidit, 10))
-                            .flatMap(hakukohdeOiditOsajoukko -> applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOiditOsajoukko));
+                            .flatMap(hakukohdeOiditOsajoukko ->
+                            {
+                                LOG.info("Haetaan hakemukset hakukohteille {}", hakukohdeOiditOsajoukko);
+                                return applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOiditOsajoukko);
+                            });
                 })
                 .flatMap(hakemukset -> {
                     LOG.info("Löydettiin {} hakemusta", hakemukset.size());
