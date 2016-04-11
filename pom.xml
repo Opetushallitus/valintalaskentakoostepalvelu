@@ -26,10 +26,6 @@
 			<artifactId>auditlogger</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>fi.vm.sade.java-utils</groupId>
-			<artifactId>java-cas-cxf</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
 			<scope>test</scope>
@@ -64,7 +60,7 @@
     			<groupId>com.codepoetics</groupId>
     			<artifactId>protonpack</artifactId>
     		<version>1.0</version>
-	</dependency>	    		
+	</dependency>
 		<dependency>
 			<groupId>fi.vm.sade.authentication</groupId>
 			<artifactId>authentication-domain</artifactId>
@@ -534,8 +530,8 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
-		<!-- Commons-Logging on loggaus jarjestelma siina missa SLF4J jos halutaan 
-			logitus SLF4J:lla niin taytyy kayttaa JCL-OVER-SLF4J:ta eli java commons 
+		<!-- Commons-Logging on loggaus jarjestelma siina missa SLF4J jos halutaan
+			logitus SLF4J:lla niin taytyy kayttaa JCL-OVER-SLF4J:ta eli java commons
 			logging over slf4j !!! -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
