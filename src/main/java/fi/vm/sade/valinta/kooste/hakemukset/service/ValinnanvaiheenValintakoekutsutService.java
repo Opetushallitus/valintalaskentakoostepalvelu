@@ -58,6 +58,9 @@ public class ValinnanvaiheenValintakoekutsutService {
                 })
                 .flatMap(hakemukset -> {
                     LOG.info("Löydettiin {} hakemusta", hakemukset.size());
+                    if (hakemukset.size() > 0) {
+                        LOG.info("Ensimmäisen hakemukset OID: {}", hakemukset.get(0).getOid());
+                    }
                     List<String> hakutoiveet = collect(hakemukset);
                     Observable<List<HakukohdeJaValintakoeDTO>> valintakokeetHakutoiveille = valintaperusteetAsyncResource.haeValintakokeetHakutoiveille(hakutoiveet);
                     Observable<List<ValintakoeOsallistuminenDTO>> valintakoeOsallistumisetHakutoiveille = valintalaskentaValintakoeAsyncResource.haeHakutoiveille(hakutoiveet);
