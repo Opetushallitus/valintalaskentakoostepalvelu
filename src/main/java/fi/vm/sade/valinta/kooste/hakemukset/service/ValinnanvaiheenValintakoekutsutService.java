@@ -99,6 +99,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                     });
                 })
                 .subscribe(hakemusDTOs -> {
+                    LOG.info("Palautetaan {} hakemusta", hakemusDTOs.size());
                     successHandler.accept(hakemusDTOs);
                 });
     }
