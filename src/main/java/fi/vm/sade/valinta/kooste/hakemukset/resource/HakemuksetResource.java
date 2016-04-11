@@ -49,7 +49,7 @@ public class HakemuksetResource {
     public void hakemuksetValinnanvaiheelle(@QueryParam("hakuOid") String hakuOid, @QueryParam("valinnanvaiheOid") String valinnanvaiheOid, @Suspended AsyncResponse asyncResponse) {
         Preconditions.checkNotNull(hakuOid);
         Preconditions.checkNotNull(valinnanvaiheOid);
-        asyncResponse.setTimeout(3, TimeUnit.MINUTES);
+        asyncResponse.setTimeout(10, TimeUnit.MINUTES);
         AUDIT.log(builder()
                 .id(KoosteAudit.username())
                 .valinnanvaiheOid(valinnanvaiheOid)
