@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mockito="http://www.mockito.org/spring/mockito"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
 	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:jaxws="http://cxf.apache.org/jaxws"
 	xmlns:jaxrs-client="http://cxf.apache.org/jaxrs-client" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
@@ -12,7 +13,8 @@
            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
            http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
            http://cxf.apache.org/jaxrs-client http://cxf.apache.org/schemas/jaxrs-client.xsd
-           http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd">
+           http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd
+        http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
 
 	<ctx:annotation-config />
 
@@ -30,6 +32,7 @@
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.viestintapalvelu.resource"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice" />
+  <mockito:mock id="AuthorityCheckService" class="fi.vm.sade.valinta.kooste.security.AuthorityCheckService" />
 
   <bean id="koekutsukirjeetImpl"
         class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KoekutsukirjeetImpl"/>
@@ -37,6 +40,8 @@
     <bean id="sijoittelunTulosXlsKomponentti" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti"/>
   <bean id="PistesyottoResource"
         class="fi.vm.sade.valinta.kooste.pistesyotto.resource.PistesyottoResource" />
+  <bean id="PistesyottoTuontiSoteliService"
+        class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiSoteliService"/>
   <bean id="PistesyottoTuontiService"
         class="fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService" />
   <bean id="PistesyottoVientiService"
@@ -54,7 +59,8 @@
 
   <bean id="HakemuksetResource"
         class="fi.vm.sade.valinta.kooste.hakemukset.resource.HakemuksetResource"/>
-
+  <bean id="ValinnanvaiheenValintakoekutsutService"
+        class="fi.vm.sade.valinta.kooste.hakemukset.service.ValinnanvaiheenValintakoekutsutService"/>
 
   <beans
     xmlns:mockito="http://www.mockito.org/spring/mockito"

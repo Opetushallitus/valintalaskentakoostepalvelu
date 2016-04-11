@@ -1,9 +1,12 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import org.springframework.stereotype.Service;
 
 import com.google.common.util.concurrent.Futures;
@@ -28,6 +31,16 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
         HakuV1RDTO hakuV1RDTO = new HakuV1RDTO();
         hakuV1RDTO.setOid(hakuOid);
         return Observable.just(hakuV1RDTO);
+    }
+
+    @Override
+    public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationGroupOids(Collection<String> organizationGroupOids) {
+        return null;
+    }
+
+    @Override
+    public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(Collection<String> organizationOids) {
+        return null;
     }
 
     @Override

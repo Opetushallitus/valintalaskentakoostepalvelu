@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.spec.ConstantsSpec;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * @author Jussi Jartamo
@@ -28,6 +29,9 @@ public class ValintaperusteetSpec extends ConstantsSpec {
         private final ValintaperusteDTO valintaperusteDTO = new ValintaperusteDTO();
         public ValintaperusteBuilder setTunniste(String tunniste) {
             valintaperusteDTO.setTunniste(tunniste);
+            if(valintaperusteDTO.getOsallistuminenTunniste() == null) {
+                valintaperusteDTO.setOsallistuminenTunniste(tunniste + "-OSALLISTUMINEN");
+            }
             return this;
         }
         public ValintaperusteBuilder setOsallistumisenTunniste(String tunniste) {
@@ -44,6 +48,14 @@ public class ValintaperusteetSpec extends ConstantsSpec {
         }
         public ValintaperusteBuilder setArvot(String ... arvot) {
             valintaperusteDTO.setArvot(Arrays.asList(arvot));
+            return this;
+        }
+        public ValintaperusteBuilder setMin(String min) {
+            valintaperusteDTO.setMin(min);
+            return this;
+        }
+        public ValintaperusteBuilder setMax(String max) {
+            valintaperusteDTO.setMax(max);
             return this;
         }
         public ValintaperusteDTO build() {

@@ -1,14 +1,14 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.springframework.stereotype.Service;
-
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
+import org.springframework.stereotype.Service;
 import rx.Observable;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Jussi Jartamo
@@ -18,6 +18,7 @@ public class MockValintalaskentaValintakoeAsyncResource implements Valintalasken
 
     private static final AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedot = new AtomicReference<>();
     private static final AtomicReference<List<HakemusOsallistuminenDTO>> hakemusOsallistuminen = new AtomicReference<>();
+
 
     public static void setHakemusOsallistuminenResult(List<HakemusOsallistuminenDTO> res) {
         hakemusOsallistuminen.set(res);
@@ -33,6 +34,11 @@ public class MockValintalaskentaValintakoeAsyncResource implements Valintalasken
 
     @Override
     public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid) {
+        return Observable.just(osallistumistiedot.get());
+    }
+
+    @Override
+    public Observable<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(Collection<String> hakukohdeOids) {
         return Observable.just(osallistumistiedot.get());
     }
 }

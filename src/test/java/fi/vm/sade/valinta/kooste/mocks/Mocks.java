@@ -5,6 +5,7 @@ import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncRes
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
+import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,8 @@ public class Mocks {
     private KoodistoAsyncResource koodistoAsyncResource;
     @Autowired
     private OhjausparametritAsyncResource ohjausparametritAsyncResource;
+    @Autowired
+    private AuthorityCheckService authorityCheckService;
 
     @PostConstruct
     public void init() {
@@ -50,8 +53,10 @@ public class Mocks {
     public static DokumenttiAsyncResource getDokumenttiAsyncResource() {
         return MOCKS.dokumenttiAsyncResource;
     }
-
+    public static AuthorityCheckService getAuthorityCheckService() {
+        return MOCKS.authorityCheckService;
+    }
     public static void reset() {
-        Mockito.reset(getViestintapalveluAsyncResource(), getKoodistoAsyncResource(), getHakukohdeResource(), getDokumenttiAsyncResource());
+        Mockito.reset(getViestintapalveluAsyncResource(), getKoodistoAsyncResource(), getHakukohdeResource(), getDokumenttiAsyncResource(), getAuthorityCheckService());
     }
 }
