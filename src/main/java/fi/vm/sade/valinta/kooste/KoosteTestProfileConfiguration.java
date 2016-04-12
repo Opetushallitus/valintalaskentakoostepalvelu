@@ -164,6 +164,11 @@ public class KoosteTestProfileConfiguration {
         return INTERCEPTOR;
     }
 
+    @Bean(name = "SuoritusrekisteriRestClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getSuoritusrekisteriRestClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+
     @Bean(name = "koodiServiceCasInterceptor")
     public AbstractPhaseInterceptor<Message> getKoodiServiceCasInterceptor() {
         return INTERCEPTOR;
