@@ -34,7 +34,7 @@ public class PistesyottoE2ETest {
     }
     @Test
     public void tuonnissaEiYlikirjoitetaEditoimattomiaKenttiaHakemuspalveluun() throws Throwable {
-        mockToReturnString(GET, "/valintalaskenta-laskenta-service/resources/valintakoe/hakutoive/1.2.246.562.5.85532589612",
+        mockToReturnString(GET, "/valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/valintakoe/hakutoive/1.2.246.562.5.85532589612",
                 IOUtils.toString(new ClassPathResource("pistesyotto/List_ValintakoeOsallistuminenDTO.json").getInputStream())
         );
         mockToReturnString(GET,
