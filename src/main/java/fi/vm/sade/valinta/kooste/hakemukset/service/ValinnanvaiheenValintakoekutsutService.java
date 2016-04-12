@@ -54,8 +54,10 @@ public class ValinnanvaiheenValintakoekutsutService {
                             {
                                 LOG.info("Haetaan hakemukset hakukohteille {}", hakukohdeOiditOsajoukko);
                                 return applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOiditOsajoukko);
-                            });
+                            })
+                            .flatMap(x -> Observable.from(x));
                 })
+                .toList()
                 .flatMap(hakemukset -> {
                     LOG.info("Löydettiin {} hakemusta", hakemukset.size());
                     if (hakemukset.size() > 0) {
@@ -70,15 +72,19 @@ public class ValinnanvaiheenValintakoekutsutService {
                         Map<String, HakukohdeJaValintakoeDTO> valintakoeDTOMap = hakutoiveidenValintakokeet.stream().collect(Collectors.toMap(HakukohdeJaValintakoeDTO::getHakukohdeOid, hh -> hh));
                         Map<String, List<ValintakoeOsallistuminenDTO>> osallistuminenDTOMap = hakutoiveidenValintakoeOsallistumiset.stream().collect(Collectors.toMap(ValintakoeOsallistuminenDTO::getHakemusOid, Arrays::asList, (h0, h1) -> Lists.newArrayList(Iterables.concat(h0,h1))));
                         return hakemukset.stream().map(hakemus -> {
+                            assert hakemus != null;
                             if (osallistuminenDTOMap.get(hakemus.getOid()) == null) {
                                 LOG.error("Listing hakemus for valinnanvaihe {} and haku {} failed", valinnanvaiheOid, hakuOid);
                                 exceptionHandler.accept(new RuntimeException("null response from valintalaskentaValintakoeAsyncResource"));
                             }
+                            assert osallistuminenDTOMap != null;
+                            assert hakemus.getOid() != null;
                             Set<String> kutsututValintakokeet = osallistuminenDTOMap.get(hakemus.getOid()).stream()
+                                    .filter(x -> x != null && x.getHakutoiveet() != null)
                                     .flatMap(x -> x.getHakutoiveet().stream())
-                                    .filter(x -> x != null)
+                                    .filter(x -> x != null && x.getValinnanVaiheet() != null)
                                     .flatMap(x -> x.getValinnanVaiheet().stream())
-                                    .filter(x -> x != null)
+                                    .filter(x -> x != null & x.getValintakokeet() != null)
                                     .flatMap(x -> x.getValintakokeet().stream())
                                     .filter(x -> x != null)
                                     .map(x -> x.getValintakoeOid())
