@@ -49,20 +49,10 @@ public class ValinnanvaiheenValintakoekutsutService {
         valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid)
                 .flatMap(hakukohdeOidit -> {
                     LOG.info("Löydettiin {} hakukohdetta", hakukohdeOidit.size());
-                    return Observable.from(Iterables.partition(hakukohdeOidit, 10))
-                            .flatMap(hakukohdeOiditOsajoukko ->
-                            {
-                                LOG.info("Haetaan hakemukset hakukohteille {}", hakukohdeOiditOsajoukko);
-                                return applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOiditOsajoukko);
-                            })
-                            .flatMap(x -> Observable.from(x));
+                    return applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOidit);
                 })
-                .toList()
                 .flatMap(hakemukset -> {
                     LOG.info("Löydettiin {} hakemusta", hakemukset.size());
-                    if (hakemukset.size() > 0) {
-                        LOG.info("Ensimmäisen hakemukset OID: {}", hakemukset.get(0).getOid());
-                    }
                     Set<String> hakutoiveet = collect(hakemukset);
                     LOG.info("Hakutoivejoukon koko: {} hakutoivetta", hakutoiveet.size());
                     Observable<List<HakukohdeJaValintakoeDTO>> valintakokeetHakutoiveille =
