@@ -51,6 +51,10 @@ public class ValinnanvaiheenValintakoekutsutService {
                 .subscribe(hakukohdeOidit -> {
                     LOG.info("Löydettiin {} hakukohdetta", hakukohdeOidit.size());
                     applicationAsyncResource.getApplicationsByOidsWithPOST(hakuOid, hakukohdeOidit).subscribe(hakemukset -> {
+                        if (hakemukset == null) {
+                            exceptionHandler.accept(new RuntimeException("null response from applicationAsyncResource"));
+                            return;
+                        }
                         LOG.info("Löydettiin {} hakemusta", hakemukset.size());
                         Set<String> hakutoiveet = Sets.intersection(collect(hakemukset), hakukohdeOidit);
                         LOG.info("Hakutoivejoukon koko: {} hakutoivetta", hakutoiveet.size());
@@ -99,7 +103,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                                             }).collect(Collectors.toList());
                                             return new HakukohdeJaValintakoeDTO(hakukohdeJaValintakoe.getHakukohdeOid(), filteredValintakokeet);
                                         })
-                                        .filter(hakukohdeJaValintakoeDTO -> !hakukohdeJaValintakoeDTO.getValintakoeDTO().isEmpty())
+                                        .filter(hakukohdeJaValintakoeDTO -> hakukohdeJaValintakoeDTO.getValintakoeDTO() != null && !hakukohdeJaValintakoeDTO.getValintakoeDTO().isEmpty())
                                         .collect(Collectors.toList());
                                 LOG.info("hakemus {} {}", hakemus, System.currentTimeMillis());
                                 return hakemusToHakemusDTO(hakemus, hakukohteet);
