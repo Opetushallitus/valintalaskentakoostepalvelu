@@ -61,8 +61,10 @@ public class ValinnanvaiheenValintakoekutsutService {
                     if (hakemukset.size() > 0) {
                         LOG.info("Ensimmäisen hakemukset OID: {}", hakemukset.get(0).getOid());
                     }
-                    List<String> hakutoiveet = collect(hakemukset);
-                    Observable<List<HakukohdeJaValintakoeDTO>> valintakokeetHakutoiveille = valintaperusteetAsyncResource.haeValintakokeetHakutoiveille(hakutoiveet);
+                    Set<String> hakutoiveet = collect(hakemukset);
+                    LOG.info("Hakutoivejoukon koko: {} hakutoivetta", hakutoiveet.size());
+                    Observable<List<HakukohdeJaValintakoeDTO>> valintakokeetHakutoiveille =
+                            valintaperusteetAsyncResource.haeValintakokeetHakutoiveille(hakutoiveet);
                     Observable<List<ValintakoeOsallistuminenDTO>> valintakoeOsallistumisetHakutoiveille = valintalaskentaValintakoeAsyncResource.haeHakutoiveille(hakutoiveet);
                     return Observable.combineLatest(valintakokeetHakutoiveille, valintakoeOsallistumisetHakutoiveille, (hakutoiveidenValintakokeet, hakutoiveidenValintakoeOsallistumiset) -> {
                         Map<String, HakukohdeJaValintakoeDTO> valintakoeDTOMap = hakutoiveidenValintakokeet.stream().collect(Collectors.toMap(HakukohdeJaValintakoeDTO::getHakukohdeOid, hh -> hh));
@@ -111,8 +113,8 @@ public class ValinnanvaiheenValintakoekutsutService {
                 });
     }
 
-    private List<String> collect(List<Hakemus> hakemukset) {
-        return hakemukset.stream().flatMap(h -> new HakemusWrapper(h).getHakutoiveOids().stream()).collect(Collectors.toList());
+    private Set<String> collect(List<Hakemus> hakemukset) {
+        return hakemukset.stream().flatMap(h -> new HakemusWrapper(h).getHakutoiveOids().stream()).collect(Collectors.toSet());
     }
 
     private HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, List<HakukohdeJaValintakoeDTO> valintakoeDTOs) {
