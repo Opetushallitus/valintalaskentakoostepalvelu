@@ -45,9 +45,6 @@
 		<import resource="file:///${user.home:''}/oph-configuration/security-context-backend.xml" />
 
 		<!-- AUTHENTICATION / AUTHORIZATION SUPPORT -->
-		<!--<import resource="classpath:authentication-client.xml"/> -->
-		<bean id="ticketInterceptor" class="fi.vm.sade.valinta.kooste.SecurityTicketOutInterceptor" />
-
 		<authorizationPolicy id="admin" access="isAuthenticated()"
 							 authenticationManager="authenticationManager" accessDecisionManager="accessDecisionManager"
 							 xmlns="http://camel.apache.org/schema/spring-security" />
