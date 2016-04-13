@@ -1,28 +1,11 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
-import static fi.vm.sade.sijoittelu.tulos.dto.ValintatuloksenTila.PERUNUT;
 import static rx.Observable.from;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import rx.Observable;
-import rx.functions.Action4;
-import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
-
 import com.google.common.collect.Sets;
 
+import fi.vm.sade.sijoittelu.tulos.dto.HakemuksenTila;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
+import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakutoiveDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -36,8 +19,27 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.MetaHakukohde;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.JalkiohjauskirjeetKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.JalkiohjauskirjeService;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import rx.Observable;
+import rx.functions.Action4;
+import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
@@ -217,7 +219,8 @@ public class JalkiohjauskirjeetServiceImpl implements JalkiohjauskirjeService {
                 .filter(hakija -> hakija
                         .getHakutoiveet()
                         .stream()
-                        .noneMatch(hakutoive -> hakutoive.getVastaanottotieto() == PERUNUT))
+                        .anyMatch(hakutoive -> hakutoive.getHakutoiveenValintatapajonot()
+                                .stream().noneMatch(valintatapajono -> valintatapajono.getTila() == HakemuksenTila.PERUNUT)))
                 .collect(Collectors.toList());
     }
 }
