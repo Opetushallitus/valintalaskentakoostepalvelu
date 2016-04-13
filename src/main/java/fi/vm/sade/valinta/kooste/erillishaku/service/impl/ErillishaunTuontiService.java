@@ -11,6 +11,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static rx.schedulers.Schedulers.newThread;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
@@ -248,21 +249,24 @@ public class ErillishaunTuontiService {
             return Optional.ofNullable(sahkopostit.get(henkilo.getHetu()));
         }
     }
-
+    private static boolean ainoastaanHakemuksenTilaPaivitys(ErillishaunHakijaDTO erillishakuRivi) {
+        return erillishakuRivi.getValintatuloksenTila() == null && erillishakuRivi.getIlmoittautumisTila() == null;
+    }
+    private static VastaanottoResultDTO convertToHyvaksyttyResult(ErillishaunHakijaDTO hakija) {
+        VastaanottoResultDTO resultDTO = new VastaanottoResultDTO();
+        resultDTO.setHakemusOid(hakija.getHakemusOid());
+        resultDTO.setHakukohdeOid(hakija.getHakukohdeOid());
+        resultDTO.setHenkiloOid(hakija.getHakijaOid());
+        resultDTO.setResult(new VastaanottoResultDTO.Result());
+        resultDTO.getResult().setStatus(Response.Status.OK.getStatusCode());
+        return resultDTO;
+    }
     private void tuoErillishaunTilat(final String username, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat,final List<Hakemus> hakemukset, final KirjeProsessi prosessi) {
         assert (hakemukset.size() == lisattavatTaiKeskeneraiset.size()); // 1-1 relationship assumed
-        final List<ErillishaunHakijaDTO> hakijat = zip(hakemukset.stream(), lisattavatTaiKeskeneraiset.stream(), (hakemus, rivi) -> {
-            if (rivi.isKesken()) {
-                return Stream.<ErillishaunHakijaDTO>empty(); // Keskeneräisiä ei viedä sijoitteluun
-            } else {
-                HakemusWrapper wrapper = new HakemusWrapper(hakemus);
-                return Stream.of(new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), hakemus.getOid(), haku.getHakukohdeOid(),
-                        rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(),
-                        haku.getTarjoajaOid(),
-                        valintatuloksenTila(rivi), ilmoittautumisTila(rivi),
-                        hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi(), Optional.of(rivi.isPoistetaankoRivi())));
-            }
-        }).flatMap(s -> s).collect(Collectors.toList());
+
+        final List<ErillishaunHakijaDTO> hakijat = zip(hakemukset.stream(), lisattavatTaiKeskeneraiset.stream(), (hakemus, rivi) ->
+                toErillishaunHakijaStream(haku, hakemus, rivi)).flatMap(s -> s).collect(Collectors.toList());
+
         final List<ErillishaunHakijaDTO> poistettavatDtos = poistettavat.stream()
                 .map(rivi -> new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), rivi.getHakemusOid(),
                         haku.getHakukohdeOid(), rivi.isJulkaistaankoTiedot(), rivi.getPersonOid(), haku.getHakuOid(),
@@ -277,11 +281,15 @@ public class ErillishaunTuontiService {
             hakijatJaPoistettavat.addAll(hakijat);
             hakijatJaPoistettavat.addAll(poistettavatDtos);
             if (!hakijatJaPoistettavat.isEmpty()) {
-                Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceAsyncResource.tallenna(convertToValintaTulosList(hakijat, username, "Erillishaun tuonti")).doOnError(
-                        e -> {
-                            LOG.error("Virhe vastaanottotilojen tallennuksessa valinta-tulos-serviceen", e);
-                            prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE, e.getMessage()));
-                        });
+                final List<ErillishaunHakijaDTO> hakijatAinastaanHakemuksenTilaPaivityksella = hakijat.stream().filter(h -> ainoastaanHakemuksenTilaPaivitys(h)).collect(Collectors.toList());
+                final List<ErillishaunHakijaDTO> hakijatKaikillaTilaPaivityksilla = hakijat.stream().filter(h -> !ainoastaanHakemuksenTilaPaivitys(h)).collect(Collectors.toList());
+
+                Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus =
+                        doTilojenTallennusValintaTulosServiceen(username, hakijatKaikillaTilaPaivityksilla, prosessi)
+                                .map(o -> {
+                                    List<VastaanottoResultDTO> okResult = hakijatAinastaanHakemuksenTilaPaivityksella.stream().map(ErillishaunTuontiService::convertToHyvaksyttyResult).collect(Collectors.toList());
+                                    return Lists.newArrayList(Iterables.concat(o, okResult));
+                                });
                 vastaanottoTilojenTallennus.flatMap(vastaanottoResponse -> {
                     List<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed).collect(Collectors.toList());
                     epaonnistuneet.forEach(v -> LOG.warn(v.toString()));
@@ -333,6 +341,31 @@ public class ErillishaunTuontiService {
         } catch (Exception e) {
             LOG.error("Erillishaun tilojen tuonti epaonnistui", e);
             throw new RuntimeException(e);
+        }
+    }
+
+    private Observable<List<VastaanottoResultDTO>> doTilojenTallennusValintaTulosServiceen(String username, List<ErillishaunHakijaDTO> hakijat, final KirjeProsessi prosessi) {
+        if(hakijat.isEmpty()) {
+            return Observable.just(Collections.emptyList());
+        } else {
+            return valintaTulosServiceAsyncResource.tallenna(convertToValintaTulosList(hakijat, username, "Erillishaun tuonti")).doOnError(
+                    e -> {
+                        LOG.error("Virhe vastaanottotilojen tallennuksessa valinta-tulos-serviceen", e);
+                        prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, Poikkeus.VALINTA_TULOS_SERVICE, e.getMessage()));
+                    });
+        }
+    }
+
+    private Stream<ErillishaunHakijaDTO> toErillishaunHakijaStream(ErillishakuDTO haku, Hakemus hakemus, ErillishakuRivi rivi) {
+        if (rivi.isKesken()) {
+            return Stream.<ErillishaunHakijaDTO>empty(); // Keskeneräisiä ei viedä sijoitteluun
+        } else {
+            HakemusWrapper wrapper = new HakemusWrapper(hakemus);
+            return Stream.of(new ErillishaunHakijaDTO(haku.getValintatapajonoOid(), hakemus.getOid(), haku.getHakukohdeOid(),
+                    rivi.isJulkaistaankoTiedot(), hakemus.getPersonOid(), haku.getHakuOid(),
+                    haku.getTarjoajaOid(),
+                    valintatuloksenTila(rivi), ilmoittautumisTila(rivi),
+                    hakemuksenTila(rivi), wrapper.getEtunimi(), wrapper.getSukunimi(), Optional.of(rivi.isPoistetaankoRivi())));
         }
     }
 

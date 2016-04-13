@@ -34,6 +34,9 @@ public class ValidoiTilatUtil {
      * @return (null if ok) validation error
      */
     public static String validoi(HakemuksenTila hakemuksenTila, ValintatuloksenTila valintatuloksenTila, IlmoittautumisTila ilmoittautumisTila) {
+        if (hakemuksenTila != null && (valintatuloksenTila == null && ilmoittautumisTila == null)) {
+            return null; // OK
+        }
         if (hakemuksenTila == null || valintatuloksenTila == null || ilmoittautumisTila == null) {
             return virheellinenTilaYhdistelma(new StringBuilder("Tila ei saa olla tyhjä. "), hakemuksenTila, valintatuloksenTila, ilmoittautumisTila).toString();
         }
