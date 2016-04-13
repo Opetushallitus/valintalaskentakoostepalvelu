@@ -58,6 +58,9 @@ public class ValinnanvaiheenValintakoekutsutService {
                         LOG.info("Löydettiin {} hakemusta", hakemukset.size());
                         Set<String> hakutoiveet = Sets.intersection(collect(hakemukset), hakukohdeOidit);
                         LOG.info("Hakutoivejoukon koko: {} hakutoivetta", hakutoiveet.size());
+                        if (hakutoiveet.isEmpty()) {
+                            successHandler.accept(new ArrayList<>());
+                        }
                         Observable<List<HakukohdeJaValintakoeDTO>> valintakokeetHakutoiveille =
                                 valintaperusteetAsyncResource.haeValintakokeetHakutoiveille(hakutoiveet);
                         Observable<List<ValintakoeOsallistuminenDTO>> valintakoeOsallistumisetHakutoiveille = valintalaskentaValintakoeAsyncResource.haeHakutoiveille(hakutoiveet);
@@ -69,21 +72,23 @@ public class ValinnanvaiheenValintakoekutsutService {
                             return hakemukset.stream().map(hakemus -> {
                                 LOG.info("hakemus {} {}", hakemus, System.currentTimeMillis());
                                 assert hakemus != null;
-                                if (osallistuminenDTOMap.get(hakemus.getOid()) == null) {
-                                    LOG.error("Listing hakemus for valinnanvaihe {} and haku {} failed", valinnanvaiheOid, hakuOid);
-                                    exceptionHandler.accept(new RuntimeException("null response from valintalaskentaValintakoeAsyncResource"));
-                                }
                                 assert hakemus.getOid() != null;
-                                Set<String> kutsututValintakokeet = osallistuminenDTOMap.get(hakemus.getOid()).stream()
-                                        .filter(x -> x != null && x.getHakutoiveet() != null)
-                                        .flatMap(x -> x.getHakutoiveet().stream())
-                                        .filter(x -> x != null && x.getValinnanVaiheet() != null)
-                                        .flatMap(x -> x.getValinnanVaiheet().stream())
-                                        .filter(x -> x != null && x.getValintakokeet() != null)
-                                        .flatMap(x -> x.getValintakokeet().stream())
-                                        .filter(x -> x != null)
-                                        .map(x -> x.getValintakoeOid())
-                                        .collect(Collectors.toSet());
+
+                                Set<String> kutsututValintakokeet = new HashSet<>();
+                                List<ValintakoeOsallistuminenDTO> osallistumisetHakemukselle = osallistuminenDTOMap.get(hakemus.getOid());
+                                if (osallistumisetHakemukselle != null) {
+                                    kutsututValintakokeet.addAll(osallistumisetHakemukselle
+                                            .stream()
+                                            .filter(x -> x != null && x.getHakutoiveet() != null)
+                                            .flatMap(x -> x.getHakutoiveet().stream())
+                                            .filter(x -> x != null && x.getValinnanVaiheet() != null)
+                                            .flatMap(x -> x.getValinnanVaiheet().stream())
+                                            .filter(x -> x != null && x.getValintakokeet() != null)
+                                            .flatMap(x -> x.getValintakokeet().stream())
+                                            .filter(x -> x != null)
+                                            .map(x -> x.getValintakoeOid())
+                                            .collect(Collectors.toSet()));
+                                }
 
                                 final List<String> hakutoiveOids = new HakemusWrapper(hakemus).getHakutoiveOids();
                                 final List<HakukohdeJaValintakoeDTO> hakukohteet = hakutoiveOids
