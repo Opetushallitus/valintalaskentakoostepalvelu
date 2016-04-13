@@ -4,6 +4,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.sijoittelu.tulos.resource.SijoitteluResource;
@@ -66,6 +67,12 @@ public class SijoitteluAsyncResourceImpl extends AsyncResourceWithCas implements
         String url = "/tila/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid;
         String encodedSelite = URLEncoder.encode(selite, "UTF-8");
         return postAsObservable(url, HakukohteenValintatulosUpdateStatuses.class, Entity.json(valintatulokset), (webclient) -> webclient.query("selite", encodedSelite));
+    }
+
+    @Override
+    public Observable<HakukohteenValintatulosUpdateStatuses> muutaErillishaunHakemuksenTilaa(String hakuOid, String hakukohdeOid, List<ErillishaunHakijaDTO> hakijat) {
+        String url = "/tila/erillishaku/haku/" + hakuOid + "/hakukohde/" + hakukohdeOid;
+        return postAsObservable(url, HakukohteenValintatulosUpdateStatuses.class, Entity.json(hakijat));
     }
 
     public void getLatestHakukohdeBySijoitteluAjoId(String hakuOid, String hakukohdeOid, String sijoitteluAjoId, Consumer<HakukohdeDTO> hakukohde, Consumer<Throwable> poikkeus) {

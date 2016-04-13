@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
+import fi.vm.sade.sijoittelu.domain.dto.ErillishaunHakijaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
@@ -114,6 +115,43 @@ public class ValintaTulosServiceProxyResource {
             });
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/erillishaku/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
+    public void tuoErillishaunHakijat(@QueryParam("selite") String selite,
+                                      @PathParam("hakuOid") String hakuOid,
+                                      @PathParam("hakukohdeOid") String hakukohdeOid,
+                                      List<ErillishaunHakijaDTO> erillishaunHakijaDtos,
+                                      @Suspended AsyncResponse asyncResponse) throws UnsupportedEncodingException {
+        setAsyncTimeout(asyncResponse,
+                String.format("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /erillishaku/haku/%s/hakukohde/%s?selite=%s",
+                        hakuOid, hakukohdeOid, selite));
+
+        Observable<List<VastaanottoResultDTO>> vastaanottoTilojenTallennus = valintaTulosServiceResource.tallenna(erillishakuCreateVastaanottoRecordsFrom(erillishaunHakijaDtos, username(), selite));
+        vastaanottoTilojenTallennus.doOnError(throwable -> LOG.error("Async call to valinta-tulos-service failed", throwable));
+        Observable<HakukohteenValintatulosUpdateStatuses> tilojenTallennusSijoitteluun = sijoitteluResource.muutaErillishaunHakemuksenTilaa(hakuOid, hakukohdeOid, erillishaunHakijaDtos).doOnError(
+                throwable -> LOG.error("Async call to sijoittelu-service failed", throwable));
+        vastaanottoTilojenTallennus.flatMap(vastaanottoResponse -> {
+            Stream<VastaanottoResultDTO> epaonnistuneet = vastaanottoResponse.stream().filter(VastaanottoResultDTO::isFailed);
+            List<ValintatulosUpdateStatus> failedUpdateStatuses = epaonnistuneet.map(v -> {
+                LOG.warn(v.toString());
+                return new ValintatulosUpdateStatus(Response.Status.FORBIDDEN.getStatusCode(), v.getResult().getMessage(), null, v.getHakemusOid());
+            }).collect(Collectors.toList());
+            if (failedUpdateStatuses.isEmpty()) {
+                return tilojenTallennusSijoitteluun;
+            } else {
+                return Observable.error(new VastaanottoUpdateFailuresException(failedUpdateStatuses));
+            }
+        }).subscribe(
+                updateStatuses -> asyncResponse.resume(Response.ok(updateStatuses).build()),
+                poikkeus -> {
+                    List<ValintatulosUpdateStatus> failedUpdateStatuses = poikkeus instanceof VastaanottoUpdateFailuresException ?
+                            ((VastaanottoUpdateFailuresException) poikkeus).failedUpdateStatuses : Collections.emptyList();
+                    asyncResponse.resume(Response.serverError().entity(new HakukohteenValintatulosUpdateStatuses(poikkeus.getMessage(), failedUpdateStatuses)).build());
+                });
+    }
+
     private List<VastaanottoRecordDTO> createVastaanottoRecordsFrom(List<Valintatulos> valintatulokset, String muokkaaja, String selite) {
         return valintatulokset.stream().map(v -> {
             VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
@@ -124,6 +162,20 @@ public class ValintaTulosServiceProxyResource {
             dto.setIlmoittaja(muokkaaja);
             dto.setSelite(selite);
             dto.setTila(v.getTila());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    private List<VastaanottoRecordDTO> erillishakuCreateVastaanottoRecordsFrom(List<ErillishaunHakijaDTO> hakijat, String muokkaaja, String selite) {
+        return hakijat.stream().map(hakija -> {
+            VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
+            dto.setHakemusOid(hakija.getHakemusOid());
+            dto.setHakukohdeOid(hakija.getHakukohdeOid());
+            dto.setHakuOid(hakija.getHakuOid());
+            dto.setHenkiloOid(hakija.getHakijaOid());
+            dto.setIlmoittaja(muokkaaja);
+            dto.setSelite(selite);
+            dto.setTila(hakija.getValintatuloksenTila());
             return dto;
         }).collect(Collectors.toList());
     }
