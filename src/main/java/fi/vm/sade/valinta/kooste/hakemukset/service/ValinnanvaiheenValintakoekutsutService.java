@@ -5,6 +5,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
@@ -61,12 +63,11 @@ public class ValinnanvaiheenValintakoekutsutService {
                         if (hakutoiveet.isEmpty()) {
                             successHandler.accept(new ArrayList<>());
                         }
-                        Observable<List<HakukohdeJaValintakoeDTO>> valintakokeetHakutoiveille =
-                                valintaperusteetAsyncResource.haeValintakokeetHakutoiveille(hakutoiveet);
+                        Observable<List<HakukohdeJaValintaperusteDTO>> avaimetHakutoiveille = valintaperusteetAsyncResource.findAvaimet(hakutoiveet);
                         Observable<List<ValintakoeOsallistuminenDTO>> valintakoeOsallistumisetHakutoiveille = valintalaskentaValintakoeAsyncResource.haeHakutoiveille(hakutoiveet);
-                        Observable.combineLatest(valintakokeetHakutoiveille, valintakoeOsallistumisetHakutoiveille, (hakutoiveidenValintakokeet, hakutoiveidenValintakoeOsallistumiset) -> {
-                            LOG.info("hakutoiveidenValintakokeet {}", hakutoiveidenValintakokeet);
-                            Map<String, HakukohdeJaValintakoeDTO> valintakoeDTOMap = hakutoiveidenValintakokeet.stream().collect(Collectors.toMap(HakukohdeJaValintakoeDTO::getHakukohdeOid, hh -> hh));
+                        Observable.combineLatest(avaimetHakutoiveille, valintakoeOsallistumisetHakutoiveille, (hakutoiveidenAvaimet, hakutoiveidenValintakoeOsallistumiset) -> {
+                            LOG.info("hakutoiveidenAvaimet {}", hakutoiveidenAvaimet);
+                            Map<String, HakukohdeJaValintaperusteDTO> valintakoeDTOMap = hakutoiveidenAvaimet.stream().collect(Collectors.toMap(HakukohdeJaValintaperusteDTO::getHakukohdeOid, hh -> hh));
                             Map<String, List<ValintakoeOsallistuminenDTO>> osallistuminenDTOMap = hakutoiveidenValintakoeOsallistumiset.stream().collect(Collectors.toMap(ValintakoeOsallistuminenDTO::getHakemusOid, Arrays::asList, (h0, h1) -> Lists.newArrayList(Iterables.concat(h0, h1))));
 
                             return hakemukset
@@ -87,28 +88,28 @@ public class ValinnanvaiheenValintakoekutsutService {
                                                     .filter(x -> x != null && x.getValintakokeet() != null)
                                                     .flatMap(x -> x.getValintakokeet().stream())
                                                     .filter(x -> x != null)
-                                                    .map(x -> x.getValintakoeOid())
+                                                    .map(x -> x.getValintakoeTunniste())
                                                     .collect(Collectors.toSet()));
                                         }
 
                                         final List<String> hakutoiveOids = new HakemusWrapper(hakemus).getHakutoiveOids();
-                                        final List<HakukohdeJaValintakoeDTO> hakukohteet = hakutoiveOids
+                                        final List<HakukohdeJaValintaperusteDTO> hakukohteet = hakutoiveOids
                                                 .stream()
                                                 .map(x -> valintakoeDTOMap.get(x))
                                                 .filter(x -> x != null)
-                                                .map(hakukohdeJaValintakoe -> {
-                                                    final List<ValintakoeDTO> valintakokeet = hakukohdeJaValintakoe.getValintakoeDTO();
-                                                    final List<ValintakoeDTO> filteredValintakokeet = valintakokeet.stream().filter(valintakoe -> {
-                                                        if (valintakoe.getKutsutaankoKaikki()) {
+                                                .map(hakukohdeJaValintaperuste -> {
+                                                    final List<ValintaperusteDTO> valintaperusteet = hakukohdeJaValintaperuste.getValintaperusteDTO();
+                                                    final List<ValintaperusteDTO> filteredValintaperusteet = valintaperusteet.stream().filter(valintaperuste -> {
+                                                        if (valintaperuste.getSyotettavissaKaikille()) {
                                                             return true;
-                                                        } else if (kutsututValintakokeet.contains(valintakoe.getOid())) {
+                                                        } else if (kutsututValintakokeet.contains(valintaperuste.getTunniste())) {
                                                             return true;
                                                         }
                                                         return false;
                                                     }).collect(Collectors.toList());
-                                                    return new HakukohdeJaValintakoeDTO(hakukohdeJaValintakoe.getHakukohdeOid(), filteredValintakokeet);
+                                                    return new HakukohdeJaValintaperusteDTO(hakukohdeJaValintaperuste.getHakukohdeOid(), filteredValintaperusteet);
                                                 })
-                                                .filter(hakukohdeJaValintakoeDTO -> hakukohdeJaValintakoeDTO.getValintakoeDTO() != null && !hakukohdeJaValintakoeDTO.getValintakoeDTO().isEmpty())
+                                                .filter(hakukohdeJaValintaperusteDTO -> hakukohdeJaValintaperusteDTO.getValintaperusteDTO() != null && !hakukohdeJaValintaperusteDTO.getValintaperusteDTO().isEmpty())
                                                 .collect(Collectors.toList());
                                         return hakemusToHakemusDTO(hakemus, hakukohteet);
                                     })
@@ -126,7 +127,7 @@ public class ValinnanvaiheenValintakoekutsutService {
         return hakemukset.stream().flatMap(h -> new HakemusWrapper(h).getHakutoiveOids().stream()).collect(Collectors.toSet());
     }
 
-    private HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, List<HakukohdeJaValintakoeDTO> valintakoeDTOs) {
+    private HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, List<HakukohdeJaValintaperusteDTO> valintaperusteDTOs) {
         Map<String, Koodi> postCodes = null;
         try {
             postCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
@@ -148,7 +149,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                 postCodes.get(postinumero),
                 KieliUtil.SUOMI,
                 postinumero));
-        hakemusDTO.setHakukohteet(valintakoeDTOs.stream().map(vk -> new HakukohdeDTO(vk.getHakukohdeOid(), vk.getValintakoeDTO().stream().map(vv -> new fi.vm.sade.valinta.kooste.hakemukset.dto.ValintakoeDTO(vv.getSelvitettyTunniste())).collect(Collectors.toList()))).collect(Collectors.toList()));
+        hakemusDTO.setHakukohteet(valintaperusteDTOs.stream().map(vp -> new HakukohdeDTO(vp.getHakukohdeOid(), vp.getValintaperusteDTO().stream().map(vv -> new fi.vm.sade.valinta.kooste.hakemukset.dto.ValintakoeDTO(vv.getTunniste())).collect(Collectors.toList()))).collect(Collectors.toList()));
         return hakemusDTO;
     }
 }
