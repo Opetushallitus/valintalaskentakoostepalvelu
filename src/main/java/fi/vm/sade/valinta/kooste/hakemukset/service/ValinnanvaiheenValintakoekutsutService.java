@@ -73,14 +73,13 @@ public class ValinnanvaiheenValintakoekutsutService {
                                     LOG.error("Listing hakemus for valinnanvaihe {} and haku {} failed", valinnanvaiheOid, hakuOid);
                                     exceptionHandler.accept(new RuntimeException("null response from valintalaskentaValintakoeAsyncResource"));
                                 }
-                                assert osallistuminenDTOMap != null;
                                 assert hakemus.getOid() != null;
                                 Set<String> kutsututValintakokeet = osallistuminenDTOMap.get(hakemus.getOid()).stream()
                                         .filter(x -> x != null && x.getHakutoiveet() != null)
                                         .flatMap(x -> x.getHakutoiveet().stream())
                                         .filter(x -> x != null && x.getValinnanVaiheet() != null)
                                         .flatMap(x -> x.getValinnanVaiheet().stream())
-                                        .filter(x -> x != null & x.getValintakokeet() != null)
+                                        .filter(x -> x != null && x.getValintakokeet() != null)
                                         .flatMap(x -> x.getValintakokeet().stream())
                                         .filter(x -> x != null)
                                         .map(x -> x.getValintakoeOid())
