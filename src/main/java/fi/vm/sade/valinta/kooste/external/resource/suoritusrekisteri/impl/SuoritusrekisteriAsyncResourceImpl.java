@@ -25,7 +25,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends AsyncResourceWithCas imp
 
     @Autowired
     public SuoritusrekisteriAsyncResourceImpl(
-            @Qualifier("ValintatietoRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
+            @Qualifier("SuoritusrekisteriRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
             @Value("${host.scheme:https}://${host.virkailija}") String address,
             ApplicationContext context
     ) {

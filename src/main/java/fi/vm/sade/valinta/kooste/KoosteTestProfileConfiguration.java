@@ -114,11 +114,6 @@ public class KoosteTestProfileConfiguration {
         };
     }
 
-    @Bean(name = "sessionCache")
-    public CasFriendlyCache getCasFriendlyCache() {
-        return new CasFriendlyCache();
-    }
-
     @Bean(name = "viestintapalveluClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getViestintapalveluClientCasInterceptor() {
         return INTERCEPTOR;
@@ -166,6 +161,11 @@ public class KoosteTestProfileConfiguration {
 
     @Bean(name = "ValintatietoRestClientCasInterceptor")
     public AbstractPhaseInterceptor<Message> getValintatietoRestClientCasInterceptor() {
+        return INTERCEPTOR;
+    }
+
+    @Bean(name = "SuoritusrekisteriRestClientCasInterceptor")
+    public AbstractPhaseInterceptor<Message> getSuoritusrekisteriRestClientCasInterceptor() {
         return INTERCEPTOR;
     }
 
