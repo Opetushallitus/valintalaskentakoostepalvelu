@@ -32,7 +32,7 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
     }
     @Override
     public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationGroupOids(Collection<String> organizationGroupOids) {
-        return this.<ResultSearch>getAsObservable("/rest/v1/hakukohde/search", new TypeToken<ResultSearch>() {
+        return this.<ResultSearch>getAsObservable("/v1/hakukohde/search", new TypeToken<ResultSearch>() {
         }.getType(), client -> {
             client.query("organisaatioRyhmaOid", organizationGroupOids.toArray());
             return client;
@@ -40,7 +40,7 @@ public class TarjontaAsyncResourceImpl extends HttpResource implements TarjontaA
     }
     @Override
     public Observable<List<ResultOrganization>> hakukohdeSearchByOrganizationOids(Collection<String> organizationOids) {
-        return this.<ResultSearch>getAsObservable("/rest/v1/hakukohde/search", new TypeToken<ResultSearch>() {
+        return this.<ResultSearch>getAsObservable("/v1/hakukohde/search", new TypeToken<ResultSearch>() {
         }.getType(), client -> {
             client.query("organisationOid", organizationOids.toArray());
             return client;
