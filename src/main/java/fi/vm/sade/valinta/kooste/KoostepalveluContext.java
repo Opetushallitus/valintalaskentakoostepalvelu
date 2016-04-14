@@ -1,8 +1,5 @@
 package fi.vm.sade.valinta.kooste;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import fi.vm.sade.authentication.business.service.Authorizer;
 import fi.vm.sade.authentication.cas.CasFriendlyCache;
 import fi.vm.sade.authentication.cas.CasFriendlyCxfInterceptor;
@@ -13,8 +10,6 @@ import fi.vm.sade.valinta.kooste.converter.HakemusToHakemusDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 
 import org.apache.camel.RoutesBuilder;
-import org.apache.camel.ThreadPoolRejectedPolicy;
-import org.apache.camel.spi.ThreadPoolProfile;
 import org.apache.camel.spring.SpringCamelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,17 +29,6 @@ public class KoostepalveluContext {
     static final String TYHJA_ARVO_POIKKEUS = "Reititysta ei voida jatkaa tyhjalle arvolle!";
 
     private static final Logger LOG = LoggerFactory.getLogger(KoostepalveluContext.class);
-
-    @Bean(name = "sessionCache")
-    public CasFriendlyCache getCasFriendlyCache() {
-        return new CasFriendlyCache();
-    }
-
-    @Bean(name = "casTicketInterceptor")
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public CasFriendlyCxfInterceptor<?> getCasFriendlyCxfInterceptor(CasFriendlyCache casCache) {
-        return new CasFriendlyCxfInterceptor<>();
-    }
 
     @Bean
     public OidProvider getOidProvider() {
