@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste;
 
 import fi.vm.sade.authentication.business.service.Authorizer;
-import fi.vm.sade.authentication.cas.CasFriendlyCache;
-import fi.vm.sade.authentication.cas.CasFriendlyCxfInterceptor;
 import fi.vm.sade.security.OidProvider;
 import fi.vm.sade.security.OrganisationHierarchyAuthorizer;
 import fi.vm.sade.security.ThreadLocalAuthorizer;
