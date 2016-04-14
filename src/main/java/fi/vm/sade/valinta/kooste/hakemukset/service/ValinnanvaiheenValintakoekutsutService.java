@@ -4,10 +4,8 @@ package fi.vm.sade.valinta.kooste.hakemukset.service;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
@@ -19,6 +17,8 @@ import fi.vm.sade.valinta.kooste.hakemukset.dto.HakukohdeDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
+import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +63,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                         if (hakutoiveet.isEmpty()) {
                             successHandler.accept(new ArrayList<>());
                         }
+
                         Observable<List<HakukohdeJaValintaperusteDTO>> avaimetHakutoiveille = valintaperusteetAsyncResource.findAvaimet(hakutoiveet);
                         Observable<List<ValintakoeOsallistuminenDTO>> valintakoeOsallistumisetHakutoiveille = valintalaskentaValintakoeAsyncResource.haeHakutoiveille(hakutoiveet);
                         Observable.combineLatest(avaimetHakutoiveille, valintakoeOsallistumisetHakutoiveille, (hakutoiveidenAvaimet, hakutoiveidenValintakoeOsallistumiset) -> {
@@ -76,20 +77,24 @@ public class ValinnanvaiheenValintakoekutsutService {
                                         assert hakemus != null;
                                         assert hakemus.getOid() != null;
 
-                                        Set<String> kutsututValintakokeet = new HashSet<>();
+                                        Set<Pair<String, String>> kutsututValintakokeet = new HashSet<>();
                                         List<ValintakoeOsallistuminenDTO> osallistumisetHakemukselle = osallistuminenDTOMap.get(hakemus.getOid());
                                         if (osallistumisetHakemukselle != null) {
                                             kutsututValintakokeet.addAll(osallistumisetHakemukselle
                                                     .stream()
-                                                    .filter(x -> x != null && x.getHakutoiveet() != null)
+                                                    .filter(x -> x != null && x.getHakutoiveet() != null)                   // ValintakoeosallistuminenDTO
                                                     .flatMap(x -> x.getHakutoiveet().stream())
                                                     .filter(x -> x != null && x.getValinnanVaiheet() != null)
-                                                    .flatMap(x -> x.getValinnanVaiheet().stream())
-                                                    .filter(x -> x != null && x.getValintakokeet() != null)
-                                                    .flatMap(x -> x.getValintakokeet().stream())
-                                                    .filter(x -> x != null)
-                                                    .map(x -> x.getValintakoeTunniste())
-                                                    .collect(Collectors.toSet()));
+                                                    .map(x -> Pair.of(x.getHakukohdeOid(), x.getValinnanVaiheet()))         // HakutoiveDTO
+                                                    .flatMap(x -> x.getRight().stream()                                     // <Hakutoive, ValintakoeValinnanVaihe>
+                                                            .flatMap(y -> y.getValintakokeet().stream())
+                                                            .filter(z -> z != null)
+                                                            .map(z -> Pair.of(x.getLeft(), z)))
+                                                    .filter(x -> x != null && x.getRight() != null)
+                                                    .filter(x -> x.getRight().getOsallistuminenTulos() != null)
+                                                    .filter(x -> x.getRight().getOsallistuminenTulos().getOsallistuminen() == Osallistuminen.OSALLISTUU)
+                                                    .map(x -> Pair.of(x.getLeft(), x.getRight().getValintakoeTunniste()))   // <Hakutoive, ValintakoeDTO>
+                                                    .collect(Collectors.toSet()));                                          // <Hakutoive, ValintakoeTunniste>
                                         }
 
                                         final List<String> hakutoiveOids = new HakemusWrapper(hakemus).getHakutoiveOids();
@@ -102,7 +107,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                                                     final List<ValintaperusteDTO> filteredValintaperusteet = valintaperusteet.stream().filter(valintaperuste -> {
                                                         if (valintaperuste.getSyotettavissaKaikille()) {
                                                             return true;
-                                                        } else if (kutsututValintakokeet.contains(valintaperuste.getTunniste())) {
+                                                        } else if (kutsututValintakokeet.contains(Pair.of(hakukohdeJaValintaperuste.getHakukohdeOid(), valintaperuste.getTunniste()))) {
                                                             return true;
                                                         }
                                                         return false;
@@ -128,7 +133,7 @@ public class ValinnanvaiheenValintakoekutsutService {
     }
 
     private HakemusDTO hakemusToHakemusDTO(Hakemus hakemus, List<HakukohdeJaValintaperusteDTO> valintaperusteDTOs) {
-        Map<String, Koodi> postCodes = null;
+        Map<String, Koodi> postCodes;
         try {
             postCodes = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
         } catch (Exception e) {
