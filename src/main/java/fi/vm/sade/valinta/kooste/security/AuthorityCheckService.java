@@ -41,7 +41,7 @@ public class AuthorityCheckService {
 
 
             Observable<List<ResultOrganization>> searchByOrganizationGroupOids =
-                    Optional.of(organizationOids).filter(oids -> !oids.isEmpty()).map(tarjontaAsyncResource::hakukohdeSearchByOrganizationGroupOids)
+                    Optional.of(organizationGroupOids).filter(oids -> !oids.isEmpty()).map(tarjontaAsyncResource::hakukohdeSearchByOrganizationGroupOids)
                             .orElse(Observable.just(Collections.emptyList()));
 
             Observable.combineLatest(searchByOrganizationOids, searchByOrganizationGroupOids, (orgs, groupOrgs) -> {
