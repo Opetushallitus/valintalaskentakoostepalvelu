@@ -155,6 +155,7 @@ public class ValintaTulosServiceProxyResource {
     private List<VastaanottoRecordDTO> createVastaanottoRecordsFrom(List<Valintatulos> valintatulokset, String muokkaaja, String selite) {
         return valintatulokset.stream().map(v -> {
             VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
+            dto.setValintatapajonoOid(v.getValintatapajonoOid());
             dto.setHakemusOid(v.getHakemusOid());
             dto.setHakukohdeOid(v.getHakukohdeOid());
             dto.setHakuOid(v.getHakuOid());
@@ -169,6 +170,7 @@ public class ValintaTulosServiceProxyResource {
     private List<VastaanottoRecordDTO> erillishakuCreateVastaanottoRecordsFrom(List<ErillishaunHakijaDTO> hakijat, String muokkaaja, String selite) {
         return hakijat.stream().map(hakija -> {
             VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
+            dto.setValintatapajonoOid(hakija.getValintatapajonoOid());
             dto.setHakemusOid(hakija.getHakemusOid());
             dto.setHakukohdeOid(hakija.getHakukohdeOid());
             dto.setHakuOid(hakija.getHakuOid());

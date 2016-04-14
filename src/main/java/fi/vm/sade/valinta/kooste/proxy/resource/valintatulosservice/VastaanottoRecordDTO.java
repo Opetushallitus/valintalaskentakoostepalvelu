@@ -5,6 +5,7 @@ import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class VastaanottoRecordDTO {
+    private String valintatapajonoOid;
     private String henkiloOid;
     private String hakemusOid;
     private String hakuOid;
@@ -12,6 +13,10 @@ public class VastaanottoRecordDTO {
     private String ilmoittaja;
     private ValintatuloksenTila tila;
     private String selite;
+
+    public String getValintatapajonoOid() {
+        return valintatapajonoOid;
+    }
 
     public String getHenkiloOid() {
         return henkiloOid;
@@ -69,6 +74,10 @@ public class VastaanottoRecordDTO {
         this.selite = selite;
     }
 
+    public void setValintatapajonoOid(String valintatapajonoOid) {
+        this.valintatapajonoOid = valintatapajonoOid;
+    }
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
@@ -76,6 +85,7 @@ public class VastaanottoRecordDTO {
 
     public static VastaanottoRecordDTO of(Valintatulos valintatulos, String muokkaaja, String selite) {
         VastaanottoRecordDTO v = new VastaanottoRecordDTO();
+        v.setValintatapajonoOid(valintatulos.getValintatapajonoOid());
         v.setHenkiloOid(valintatulos.getHakijaOid());
         v.setHakemusOid(valintatulos.getHakemusOid());
         v.setHakuOid(valintatulos.getHakuOid());
