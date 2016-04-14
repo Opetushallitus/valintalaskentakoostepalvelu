@@ -121,9 +121,9 @@ public class PistesyottoTuontiSoteliService {
             return Optional.empty();
         }
     }
-    private Supplier<Stream<OsallistuminenHakutoiveeseen>> valintaperusteetKaikkiKutsutaan(String hakutoiveOid, HakemusDTO hakemus, fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe, ValintakoeDTO valintakoeDTO, ValintaperusteDTO peruste) {
+    private Supplier<Stream<OsallistuminenHakutoiveeseen>> valintaperusteetKaikkiKutsutaan(String hakutoiveOid, HakemusDTO hakemus, fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe, ValintaperusteDTO peruste) {
         return () -> {
-            final boolean valintaperusteetKaikkiKutsutaan = Boolean.TRUE.equals(valintakoeDTO.getKutsutaankoKaikki());
+            final boolean valintaperusteetKaikkiKutsutaan = Boolean.TRUE.equals(peruste.getSyotettavissaKaikille());
             if(valintaperusteetKaikkiKutsutaan) {
                 return getOsallistuminenHakutoiveeseenStream(hakutoiveOid, hakemus, koe, peruste);
             } else {
@@ -183,11 +183,10 @@ public class PistesyottoTuontiSoteliService {
         return Stream.of(osallistuminenHakutoiveeseen);
     }
 
-    private OsallistuminenHakutoiveeseen validoi(String hakutoiveOid, HakemusDTO hakemus, fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe, ValintaperusteDTO valintaperusteDTO, ValintakoeDTO valintakoeDTO
-            , Optional<ValintakoeOsallistuminenDTO> valintakoeOsallistuminenDTO) {
+    private OsallistuminenHakutoiveeseen validoi(String hakutoiveOid, HakemusDTO hakemus, fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe, ValintaperusteDTO valintaperusteDTO, Optional<ValintakoeOsallistuminenDTO> valintakoeOsallistuminenDTO) {
         return Stream.of(
                 osallistumisenTunnistePuuttuuPalvelunKutsujanSyotteesta(hakutoiveOid, hakemus,koe),
-                valintaperusteetKaikkiKutsutaan(hakutoiveOid, hakemus,koe,valintakoeDTO,valintaperusteDTO),
+                valintaperusteetKaikkiKutsutaan(hakutoiveOid, hakemus,koe,valintaperusteDTO),
                 valintalaskentaKutsutaan(hakutoiveOid, hakemus, koe, valintakoeOsallistuminenDTO, valintaperusteDTO)
         ).flatMap(s -> s.get()).findFirst().get();
     }
@@ -198,9 +197,8 @@ public class PistesyottoTuontiSoteliService {
                 Stream<ValintaperusteDTO> valintaperusteStream = h.valintaperusteetDTO.stream().filter(v -> v.getTunniste().equals(koe.getTunniste()));
                 return valintaperusteStream.flatMap(v -> {
                     fi.vm.sade.valinta.kooste.pistesyotto.dto.ValintakoeDTO koe1 = koe;
-                    ValintakoeDTO valintakoeDTO = h.valintakokeetDTO.stream().findAny().get();
                     Optional<ValintakoeOsallistuminenDTO> ot = h.osallistuminenDTO.stream().findAny();
-                    return Stream.of(validoi(h.hakukohdeOid, hakemusDTO, koe1,v,valintakoeDTO, ot));
+                    return Stream.of(validoi(h.hakukohdeOid, hakemusDTO, koe1,v,ot));
                 });
             })).collect(Collectors.toList());
         final Set<String> onnistuneetKokeet =
@@ -220,20 +218,17 @@ public class PistesyottoTuontiSoteliService {
         applicationsByHakemusOids.subscribe(hakemuses -> {
             List<HakemusJaHakutoiveet> hakemusJaHakutoiveets = collect(hakemukset, hakemuses);
             Set<String> hakutoiveet = hakemusJaHakutoiveets.stream().flatMap(h -> h.hakutoiveet.stream()).collect(Collectors.toSet());
-            Observable<List<HakukohdeJaValintakoeDTO>> valintakokeetHakutoiveille = valintaperusteetResource.haeValintakokeetHakutoiveille(hakutoiveet);
             Observable<List<HakukohdeJaValintaperusteDTO>> valintaperusteetHakutoiveille = valintaperusteetResource.findAvaimet(hakutoiveet);
             Observable<List<ValintakoeOsallistuminenDTO>> osallistumisetHakutoiveille = valintakoeResource.haeHakutoiveille(hakutoiveet);
 
-            Observable.combineLatest(valintakokeetHakutoiveille, valintaperusteetHakutoiveille, osallistumisetHakutoiveille, (hakukohdeJaValintakoeDTOs, hakukohdeJaValintaperusteDTOs, osallistuminenDTOs) -> {
+            Observable.combineLatest(valintaperusteetHakutoiveille, osallistumisetHakutoiveille, (hakukohdeJaValintaperusteDTOs, osallistuminenDTOs) -> {
                 Map<String, HakukohdeJaValintaperusteDTO> valintaperusteDTOMap = hakukohdeJaValintaperusteDTOs.stream().collect(Collectors.toMap(h -> h.getHakukohdeOid(), hh -> hh));
-                Map<String, HakukohdeJaValintakoeDTO> valintakoeDTOMap = hakukohdeJaValintakoeDTOs.stream().collect(Collectors.toMap(h -> h.getHakukohdeOid(), hh -> hh));
                 Map<String, List<ValintakoeOsallistuminenDTO>> osallistuminenDTOMap = osallistuminenDTOs.stream().collect(Collectors.toMap(h -> h.getHakemusOid(), h -> Arrays.asList(h), (h0,h1) -> Lists.newArrayList(Iterables.concat(h0,h1))));
                 return hakemusJaHakutoiveets.stream().flatMap(
                         h -> {
                             List<Hakutoive> hakutoiveetList = h.hakutoiveet.stream().filter(authorityCheck).map(oid -> new Hakutoive(
                                     oid,
                                     valintaperusteDTOMap.get(oid).getValintaperusteDTO(),
-                                    valintakoeDTOMap.get(oid).getValintakoeDTO(),
                                     Optional.ofNullable(osallistuminenDTOMap.get(oid)).orElse(Collections.emptyList()))).collect(Collectors.toList());
 
                             return validoi(h.hakemusDTO, hakutoiveetList).map(o -> {
@@ -315,11 +310,9 @@ public class PistesyottoTuontiSoteliService {
     private static class Hakutoive {
         public final String hakukohdeOid;
         public final List<ValintaperusteDTO> valintaperusteetDTO;
-        public final List<ValintakoeDTO> valintakokeetDTO;
         public final List<ValintakoeOsallistuminenDTO> osallistuminenDTO;
-        public Hakutoive(String hakukohdeOid, List<ValintaperusteDTO> valintaperusteetDTO, List<ValintakoeDTO> valintakokeetDTO, List<ValintakoeOsallistuminenDTO> osallistuminenDTO) {
+        public Hakutoive(String hakukohdeOid, List<ValintaperusteDTO> valintaperusteetDTO, List<ValintakoeOsallistuminenDTO> osallistuminenDTO) {
             this.hakukohdeOid = hakukohdeOid;
-            this.valintakokeetDTO = valintakokeetDTO;
             this.valintaperusteetDTO = valintaperusteetDTO;
             this.osallistuminenDTO = osallistuminenDTO;
         }
