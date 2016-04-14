@@ -156,7 +156,7 @@ public class ErillishaunTuontiService {
             HakemuksenTila.VARALLA,HakemuksenTila.PERUUNTUNUT);
 
     private static boolean isUusi(ErillishakuRivi rivi) {
-        return null == rivi.getVastaanottoTila() && null == rivi.getIlmoittautumisTila();
+        return StringUtils.isEmpty(rivi.getVastaanottoTila()) && StringUtils.isEmpty(rivi.getIlmoittautumisTila());
     }
 
     private static List<ErillishakuRivi> autoTaytto(final List<ErillishakuRivi> rivit) {
