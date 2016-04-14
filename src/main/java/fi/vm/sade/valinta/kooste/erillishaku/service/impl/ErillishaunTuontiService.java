@@ -155,11 +155,15 @@ public class ErillishaunTuontiService {
             Arrays.asList(HakemuksenTila.PERUNUT, HakemuksenTila.PERUUTETTU, HakemuksenTila.HYLATTY,
             HakemuksenTila.VARALLA,HakemuksenTila.PERUUNTUNUT);
 
+    private static boolean isUusi(ErillishakuRivi rivi) {
+        return null == rivi.getVastaanottoTila() && null == rivi.getIlmoittautumisTila();
+    }
+
     private static List<ErillishakuRivi> autoTaytto(final List<ErillishakuRivi> rivit) {
         // jos hakemuksentila on hylatty tai varalla niin autotaytetaan loput tilat KESKEN, EI_TEHTY
 
         return rivit.stream().map(rivi -> {
-            if (VAIN_HAKEMUKSENTILALLISET_TILAT.contains(hakemuksenTila(rivi))) {
+            if (VAIN_HAKEMUKSENTILALLISET_TILAT.contains(hakemuksenTila(rivi)) && !isUusi(rivi) ) {
                 return new ErillishakuRivi(
                         rivi.getHakemusOid(),
                         rivi.getSukunimi(),
