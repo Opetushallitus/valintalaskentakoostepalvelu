@@ -63,7 +63,7 @@ public class HakemuksetResource {
         authorityCheckService.getAuthorityCheckForRoles(
                 asList("ROLE_APP_HAKEMUS_READ_UPDATE", "ROLE_APP_HAKEMUS_READ", "ROLE_APP_HAKEMUS_CRUD", "ROLE_APP_HAKEMUS_LISATIETORU", "ROLE_APP_HAKEMUS_LISATIETOCRUD"),
                 authCheck -> {
-                    valinnanvaiheenValintakoekutsutService.hae(valinnanvaiheOid, hakuOid,
+                    valinnanvaiheenValintakoekutsutService.hae(valinnanvaiheOid, hakuOid, authCheck,
                             hakemusDTOs -> {
                                 long duration = (System.currentTimeMillis() - started) / 1000;
                                 LOG.warn("hakemusten listaaminen valinnenvaiheelle {} haussa {} kesti {} sekuntia", valinnanvaiheOid, hakuOid, duration);

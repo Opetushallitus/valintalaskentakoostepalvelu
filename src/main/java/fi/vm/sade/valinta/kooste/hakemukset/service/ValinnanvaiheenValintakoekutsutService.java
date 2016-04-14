@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.hakemukset.dto.HakukohdeDTO;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -48,7 +49,7 @@ public class ValinnanvaiheenValintakoekutsutService {
         this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     }
 
-    public void hae(String valinnanvaiheOid, String hakuOid, Consumer<Collection<HakemusDTO>> successHandler, Consumer<Throwable> exceptionHandler) {
+    public void hae(String valinnanvaiheOid, String hakuOid, final HakukohdeOIDAuthorityCheck authorityCheck, Consumer<Collection<HakemusDTO>> successHandler, Consumer<Throwable> exceptionHandler) {
         valintaperusteetAsyncResource.haeHakukohteetValinnanvaiheelle(valinnanvaiheOid)
                 .subscribe(hakukohdeOidit -> {
                     LOG.info("Löydettiin {} hakukohdetta", hakukohdeOidit.size());
@@ -58,7 +59,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                             return;
                         }
                         LOG.info("Löydettiin {} hakemusta", hakemukset.size());
-                        Set<String> hakutoiveet = Sets.intersection(collect(hakemukset), hakukohdeOidit);
+                        Set<String> hakutoiveet = Sets.intersection(collect(hakemukset), hakukohdeOidit).stream().filter(authorityCheck).collect(Collectors.toSet());
                         LOG.info("Hakutoivejoukon koko: {} hakutoivetta", hakutoiveet.size());
                         if (hakutoiveet.isEmpty()) {
                             successHandler.accept(new ArrayList<>());
@@ -83,7 +84,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                                             kutsututValintakokeet.addAll(osallistumisetHakemukselle
                                                     .stream()
                                                     .filter(x -> x != null && x.getHakutoiveet() != null)                   // ValintakoeosallistuminenDTO
-                                                    .flatMap(x -> x.getHakutoiveet().stream())
+                                                    .flatMap(x -> x.getHakutoiveet().stream().filter(h -> authorityCheck.test(h.getHakukohdeOid())))
                                                     .filter(x -> x != null && x.getValinnanVaiheet() != null)
                                                     .map(x -> Pair.of(x.getHakukohdeOid(), x.getValinnanVaiheet()))         // HakutoiveDTO
                                                     .flatMap(x -> x.getRight().stream()                                     // <Hakutoive, ValintakoeValinnanVaihe>
@@ -97,7 +98,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                                                     .collect(Collectors.toSet()));                                          // <Hakutoive, ValintakoeTunniste>
                                         }
 
-                                        final List<String> hakutoiveOids = new HakemusWrapper(hakemus).getHakutoiveOids();
+                                        final List<String> hakutoiveOids = new HakemusWrapper(hakemus).getHakutoiveOids().stream().filter(authorityCheck).collect(Collectors.toList());
                                         final List<HakukohdeJaValintaperusteDTO> hakukohteet = hakutoiveOids
                                                 .stream()
                                                 .map(x -> valintakoeDTOMap.get(x))
