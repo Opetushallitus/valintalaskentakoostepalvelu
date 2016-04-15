@@ -37,7 +37,7 @@ public class CasInterceptors {
     @Bean(name="AuthenticationServiceRestClientCasInterceptor")
     public fi.vm.sade.authentication.cas.CasApplicationAsAUserInterceptor getAuthenticationServiceRestClientCasInterceptor(
             @Value("${web.url.cas}") String webCasUrl,
-            @Value("${cas.service.haku-service}/j_spring_cas_security_check") String targetService,
+            @Value("${cas.service.authentication-service}/j_spring_cas_security_check") String targetService,
             @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String appClientUsername,
             @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String appClientPassword) {
         return createCasInterceptor(webCasUrl,targetService,appClientUsername,appClientPassword);
