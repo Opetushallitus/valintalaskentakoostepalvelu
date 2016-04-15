@@ -63,6 +63,7 @@ public class ValinnanvaiheenValintakoekutsutService {
                         LOG.info("Hakutoivejoukon koko: {} hakutoivetta", hakutoiveet.size());
                         if (hakutoiveet.isEmpty()) {
                             successHandler.accept(new ArrayList<>());
+                            return;
                         }
 
                         Observable<List<HakukohdeJaValintaperusteDTO>> avaimetHakutoiveille = valintaperusteetAsyncResource.findAvaimet(hakutoiveet);
