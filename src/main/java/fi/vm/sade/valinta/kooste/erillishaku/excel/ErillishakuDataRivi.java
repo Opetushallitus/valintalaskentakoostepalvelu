@@ -69,7 +69,6 @@ public class ErillishakuDataRivi extends DataRivi {
     }
 
     boolean isNewRow(Rivi rivi, String syntymaAika) {
-        LOG.info("Checking for new row {} {} {}", rivi.isTyhja(), rivi.getSolut().size(), syntymaAika);
         return !rivi.isTyhja()
                 && rivi.getSolut().size() >= 12 //Copy-paste easily creates extra columns for excel doc
                 && !"Syntymäaika".equals(syntymaAika);
@@ -111,7 +110,7 @@ public class ErillishakuDataRivi extends DataRivi {
     private static final String EI_LUPAA_JULKAISUUN = "EI JULKAISTAVISSA";
     private static final Collection<String> JULKAISU_LUPA_ARVOT =
             Arrays.asList(LUPA_JULKAISUUN, StringUtils.EMPTY, EI_LUPAA_JULKAISUUN);
-    private static final Collection<String> ASIONTIKIELEN_ARVOT = Arrays.asList("fi", "sv", "en");
+    public static final Collection<String> ASIONTIKIELEN_ARVOT = Arrays.asList("fi", "sv", "en");
 
     public static MonivalintaArvo hakemuksenTila(String arvo) {
         return new MonivalintaArvo(arvo, HAKEMUKSENTILA_ARVOT);

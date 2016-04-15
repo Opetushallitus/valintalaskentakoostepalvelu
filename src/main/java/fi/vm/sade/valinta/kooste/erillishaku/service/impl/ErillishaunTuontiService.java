@@ -34,6 +34,7 @@ import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncRe
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
@@ -74,10 +75,14 @@ public class ErillishaunTuontiService {
     private final ApplicationAsyncResource applicationAsyncResource;
     private final HenkiloAsyncResource henkiloAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
+    private KoodistoCachedAsyncResource koodistoCachedAsyncResource = null;
     private final Scheduler scheduler;
 
-    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource,
-                                    ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource, Scheduler scheduler) {
+    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource,
+                                    ApplicationAsyncResource applicationAsyncResource,
+                                    HenkiloAsyncResource henkiloAsyncResource,
+                                    ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
+                                    Scheduler scheduler) {
         this.applicationAsyncResource = applicationAsyncResource;
         this.tilaAsyncResource = tilaAsyncResource;
         this.henkiloAsyncResource = henkiloAsyncResource;
@@ -86,8 +91,17 @@ public class ErillishaunTuontiService {
     }
 
     @Autowired
-    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource, ApplicationAsyncResource applicationAsyncResource, HenkiloAsyncResource henkiloAsyncResource, ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource) {
-        this(tilaAsyncResource, applicationAsyncResource, henkiloAsyncResource, valintaTulosServiceAsyncResource, newThread());
+    public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource,
+                                    ApplicationAsyncResource applicationAsyncResource,
+                                    HenkiloAsyncResource henkiloAsyncResource,
+                                    ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
+                                    KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+        this(tilaAsyncResource,
+                applicationAsyncResource,
+                henkiloAsyncResource,
+                valintaTulosServiceAsyncResource,
+                newThread());
+        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     }
 
     public void tuoExcelistä(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
@@ -114,7 +128,7 @@ public class ErillishaunTuontiService {
         }, () -> LOG.info("Tuonti lopetettiin"));
     }
 
-    private static void validoiRivit(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> rivit) {
+    private void validoiRivit(final KirjeProsessi prosessi, final ErillishakuDTO haku, final List<ErillishakuRivi> rivit) {
         if (rivit.isEmpty()) {
             LOG.error("Syötteestä ei saatu poimittua yhtaan hakijaa sijoitteluun tuotavaksi!");
             prosessi.keskeyta(ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO);
@@ -413,7 +427,7 @@ public class ErillishaunTuontiService {
     /**
      * @return Validointivirhe tai null jos kaikki ok
      */
-    private static String validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi) {
+    private String validoi(Hakutyyppi tyyppi, ErillishakuRivi rivi) {
         // Yksilöinti onnistuu, eli joku kolmesta löytyy: henkilötunnus,syntymäaika+sukupuoli,henkilö-oid
         if (// mikään seuraavista ei ole totta:
                 !(// on syntymaika+sukupuoli tunnistus
@@ -462,6 +476,12 @@ public class ErillishaunTuontiService {
                     "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg] "
                     + rivi.toString();
         }
+        if (!isBlank(rivi.getAsiointikieli()) && !ErillishakuDataRivi.ASIONTIKIELEN_ARVOT.contains(StringUtils.trimToEmpty(rivi.getAsiointikieli()).toLowerCase())) {
+            return "Asiointikieli on virheellinen. Sallitus arvot ["+
+                    StringUtils.join(ErillishakuDataRivi.ASIONTIKIELEN_ARVOT, '|') +
+                    "] " + rivi.toString();
+        }
+        
         return null;
     }
 }
