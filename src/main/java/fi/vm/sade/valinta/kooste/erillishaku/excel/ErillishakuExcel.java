@@ -88,7 +88,31 @@ public class ErillishakuExcel {
 
     private Stream<ErillishakuRivi> arvoRivit(List<ErillishakuRivi> erillishakurivit) {
         if (erillishakurivit.isEmpty()) {
-            return ImmutableList.of(new ErillishakuRivi(null, "Esimerkki", "Rivi", "123456-7890", "esimerkki.rivi@example.com", "01.01.1901", Sukupuoli.NAINEN, "", "FI", "HYVAKSYTTY", "KESKEN", "EI_TEHTY", false, false)).stream();
+            return ImmutableList.of(
+                    new ErillishakuRivi(
+                            null,
+                            "Esimerkki",
+                            "Rivi",
+                            "123456-7890",
+                            "esimerkki.rivi@example.com",
+                            "01.01.1901",
+                            Sukupuoli.NAINEN,
+                            "",
+                            "FI",
+                            "HYVAKSYTTY",
+                            "KESKEN",
+                            "EI_TEHTY",
+                            false,
+                            false,
+                            "FI",
+                            "040123456789",
+                            "Esimerkkitie 2",
+                            "00100",
+                            "HELSINKI",
+                            "SUOMI",
+                            "Suomi",
+                            "HELSINKI",
+                            "Pohjakoulutusmaatoinenaste")).stream();
         } else {
             return erillishakurivit.stream();
         }

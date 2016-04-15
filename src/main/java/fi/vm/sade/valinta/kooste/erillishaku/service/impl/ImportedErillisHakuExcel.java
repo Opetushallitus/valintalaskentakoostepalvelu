@@ -67,7 +67,8 @@ public class ImportedErillisHakuExcel {
                 rivi.getHenkilotunnus(),
                 parseSyntymaAika(rivi),
                 rivi.getPersonOid(),
-                HenkiloTyyppi.OPPIJA
+                HenkiloTyyppi.OPPIJA,
+                rivi.getAsiointikieli()
         );
     }
 

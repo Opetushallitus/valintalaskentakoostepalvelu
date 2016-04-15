@@ -20,14 +20,11 @@ public class HenkiloCreateDTO {
     public final HenkiloTyyppi henkiloTyyppi;
     public final String sukupuoli;
     public final Kielisyys aidinkieli;
+    public final Kielisyys asiointiKieli;
 
-    public HenkiloCreateDTO(String aidinkieli, String sukupuoli, String etunimet, String sukunimi, String hetu, Date syntymaaika, String oidHenkilo, HenkiloTyyppi henkiloTyyppi) {
-        if(StringUtils.trimToNull(aidinkieli)==null){
-            this.aidinkieli = null;
-        } else {
-            this.aidinkieli = new Kielisyys();
-            this.aidinkieli.setKieliKoodi(aidinkieli.toLowerCase());
-        }
+    public HenkiloCreateDTO(String aidinkieli, String sukupuoli, String etunimet, String sukunimi, String hetu, Date syntymaaika, String oidHenkilo,
+                            HenkiloTyyppi henkiloTyyppi, String asiointiKieli) {
+        this.aidinkieli = createKielisyys(aidinkieli);
         this.sukupuoli = sukupuoli;
         this.etunimet = etunimet;
         this.kutsumanimi = etunimet;
@@ -36,6 +33,17 @@ public class HenkiloCreateDTO {
         this.syntymaaika = syntymaaika;
         this.oidHenkilo = oidHenkilo;
         this.henkiloTyyppi = henkiloTyyppi;
+        this.asiointiKieli = createKielisyys(asiointiKieli);
+    }
+
+    private Kielisyys createKielisyys(String kielikoodi) {
+        if (null == StringUtils.trimToNull(kielikoodi)) {
+            return null;
+        } else {
+            Kielisyys kielisyys = new Kielisyys();
+            kielisyys.setKieliKoodi(kielikoodi.toLowerCase());
+            return kielisyys;
+        }
     }
 
     @Override

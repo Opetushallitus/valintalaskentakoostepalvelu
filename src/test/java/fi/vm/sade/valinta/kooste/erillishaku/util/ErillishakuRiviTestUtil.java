@@ -26,13 +26,15 @@ public class ErillishakuRiviTestUtil {
                 EMPTY, SYNTYMAAIKA, SUKUPUOLI, EMPTY,
                 AIDINKIELI, HakemuksenTila.HYVAKSYTTY.toString(),
                 ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI.toString(),
-                IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false);
+                IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false, "FI",
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "SUOMI", "Suomi", "HELSINKI", "Pohjakoulutusmaatoinenaste");
     }
     public static ErillishakuRivi viallinenRiviPuuttuvillaTunnisteilla() {
         return new ErillishakuRivi(null, SUKUNIMI, ETUNIMI,
                 EMPTY, EMPTY, EMPTY, Sukupuoli.EI_SUKUPUOLTA, EMPTY, EMPTY, HakemuksenTila.HYVAKSYTTY.toString(),
                 ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI.toString(),
-                IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false);
+                IlmoittautumisTila.EI_ILMOITTAUTUNUT.toString(), true, false, "FI",
+                "040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "SUOMI", "Suomi", "HELSINKI", "Pohjakoulutusmaatoinenaste");
     }
 
     public static String viallinenJsonRiviPuuttuvillaTunnisteilla() {
@@ -41,7 +43,10 @@ public class ErillishakuRiviTestUtil {
 
                 "{\"etunimi\":\"Etunimi\",\"sukunimi\":\"Sukunimi\"," +
                 "\"henkilotunnus\":\"\",\"sahkoposti\":\"\",\"syntymaAika\"" +
-                ":\"\",\"sukupuoli\":\"2\",\"aidinkieli\":\"\",\"personOid\":\"\",\"hakemuksenTila\":\"HYVAKSYTTY\",\"vastaanottoTila\":\"VASTAANOTTANUT_SITOVASTI\",\"ilmoittautumisTila\":\"EI_ILMOITTAUTUNUT\",\"julkaistaankoTiedot\":true,\"poistetaankoRivi\":false}"
+                ":\"\",\"sukupuoli\":\"2\",\"aidinkieli\":\"\",\"personOid\"" +
+                ":\"\",\"hakemuksenTila\":\"HYVAKSYTTY\",\"vastaanottoTila\"" +
+                ":\"VASTAANOTTANUT_SITOVASTI\",\"ilmoittautumisTila\"" +
+                ":\"EI_ILMOITTAUTUNUT\",\"julkaistaankoTiedot\":true,\"poistetaankoRivi\":false}"
                 +"]}";
     }
 }

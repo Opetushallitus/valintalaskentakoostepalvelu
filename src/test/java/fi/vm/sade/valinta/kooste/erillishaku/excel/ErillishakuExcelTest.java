@@ -45,9 +45,12 @@ public class ErillishakuExcelTest {
 	public void testaaVienti() throws IOException {
 		List<ErillishakuRivi> rivit = Lists.newArrayList();
 		String syntymaAika = "11.11.2011";
-		ErillishakuRivi rivi = new ErillishakuRivi(null, "sukunimi","etunimi1","hetu","test.email@example.com", syntymaAika, Sukupuoli.MIES, "", "FI", "HYLATTY", "", "", false, false);
+		ErillishakuRivi rivi = new ErillishakuRivi(
+				null, "sukunimi","etunimi1","hetu","test.email@example.com", syntymaAika, Sukupuoli.MIES, "", "FI", "HYLATTY", "", "", false, false, "FI",
+				"040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "SUOMI", "Suomi", "HELSINKI", "Pohjakoulutusmaatoinenaste");
 		rivit.add(rivi);
-		ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, Sukupuoli.NAINEN, "", "FI", "HYLATTY", "", "", true, false);
+		ErillishakuRivi rivi2= new ErillishakuRivi(null, "sukunimi","etunimi2","hetu","test.email@example.com", syntymaAika, Sukupuoli.NAINEN, "", "FI", "HYLATTY", "", "", true, false, "FI",
+				"040123456789", "Esimerkkitie 2", "00100", "HELSINKI", "SUOMI", "Suomi", "HELSINKI", "Pohjakoulutusmaatoinenaste");
 		rivit.add(rivi2);
 		ErillishakuRivi rivi3 = emptyErillishakuRivi();
 		rivit.add(rivi3);

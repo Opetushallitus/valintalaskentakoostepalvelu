@@ -131,7 +131,16 @@ public class ErillishaunVientiService {
                     objectToString(tulos.getTila()),
                     objectToString(tulos.getIlmoittautumisTila()),
                     tulos.getJulkaistavissa(),
-                    false);
+                    false,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null);
             return e;
         }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakurivit);
@@ -160,7 +169,16 @@ public class ErillishaunVientiService {
                             "",
                             "",
                             false,
-                            false);
+                            false,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null);
                     return e;
                 }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakurivit);
@@ -170,10 +188,30 @@ public class ErillishaunVientiService {
         LOG.info("Hakemuksia ei ole viela tuotu ensimmaistakaan kertaa talle hakukohteelle! Generoidaan hakemuksista excel...");
         List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus -> {
             HakemusWrapper wrapper = new HakemusWrapper(hakemus);
-            ErillishakuRivi r = new ErillishakuRivi(hakemus.getOid(), wrapper.getSukunimi(),
-                    wrapper.getEtunimi(), wrapper.getHenkilotunnus(), wrapper.getSahkopostiOsoite(),
-                    wrapper.getSyntymaaika(), Sukupuoli.fromString(wrapper.getSukupuoliAsIs()), wrapper.getPersonOid(),
-                    wrapper.getAidinkieli(), "HYLATTY", "", "", false, false);
+            ErillishakuRivi r = new ErillishakuRivi(
+                    hakemus.getOid(),
+                    wrapper.getSukunimi(),
+                    wrapper.getEtunimi(),
+                    wrapper.getHenkilotunnus(),
+                    wrapper.getSahkopostiOsoite(),
+                    wrapper.getSyntymaaika(),
+                    Sukupuoli.fromString(wrapper.getSukupuoliAsIs()),
+                    wrapper.getPersonOid(),
+                    wrapper.getAidinkieli(),
+                    "HYLATTY",
+                    "",
+                    "",
+                    false,
+                    false,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null);
             return r;
         }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), rivit);

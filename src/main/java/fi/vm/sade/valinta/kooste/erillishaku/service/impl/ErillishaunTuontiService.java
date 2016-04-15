@@ -176,7 +176,17 @@ public class ErillishaunTuontiService {
                         rivi.getAidinkieli(),
                         rivi.getHakemuksenTila(),
                         "KESKEN", "EI_TEHTY",
-                        rivi.isJulkaistaankoTiedot(), rivi.isPoistetaankoRivi());
+                        rivi.isJulkaistaankoTiedot(),
+                        rivi.isPoistetaankoRivi(),
+                        rivi.getAsiointikieli(),
+                        rivi.getPuhelinnumero(),
+                        rivi.getOsoite(),
+                        rivi.getPostinumero(),
+                        rivi.getPostitoimipaikka(),
+                        rivi.getAsuinmaa(),
+                        rivi.getKansalaisuus(),
+                        rivi.getKotikunta(),
+                        rivi.getPohjakoulutusMaaToinenAste());
             } else {
                 return rivi;
                 }
