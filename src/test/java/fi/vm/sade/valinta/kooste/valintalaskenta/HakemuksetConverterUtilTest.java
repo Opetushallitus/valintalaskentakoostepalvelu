@@ -1552,22 +1552,87 @@ public class HakemuksetConverterUtilTest {
     @Test
     public void lkSuoritusVainKerran() {
         HakemusDTO hakemus = new HakemusDTO();
+        hakemus.setHakemusoid(HAKEMUS1_OID);
         Oppija virheellinenKoskaUseampiSuoritus = new SuoritusrekisteriSpec.OppijaBuilder()
                 .suoritus()
                 .setLukio()
                 .setValmistuminen("1.1.2015")
                 .setKesken()
+                .setMyontaja(HAKEMUS1_OID)
                 .build()
                 .suoritus()
                 .setLukio()
                 .setValmistuminen("1.1.2015")
                 .setValmis()
+                .setVahvistettu(true)
                 .build()
                 .build();
 
         HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), virheellinenKoskaUseampiSuoritus, hakemus);
         Assert.assertTrue("LK_TILA löytyy ja sen arvo on true",
                 hakemus.getAvaimet().stream().filter(a -> "LK_TILA".equals(a.getAvain()) && "true".equals(a.getArvo())).count() == 1L);
+    }
+
+    @Test
+    public void lkSuoritusVainTaltaHakemuseltaJosEiVahvistettu1() {
+        DateTime nyt = DateTime.now();
+        HakemusDTO hakemus = new HakemusDTO();
+        hakemus.setHakemusoid(HAKEMUS1_OID);
+        Oppija toisellaHakemuksellaKorkeampiArvosana = new SuoritusrekisteriSpec.OppijaBuilder()
+                .suoritus()
+                .setLukio()
+                .setValmistuminen("1.1.2015")
+                .setKesken()
+                .setMyontaja(HAKEMUS2_OID)
+                .setVahvistettu(false)
+                .arvosana()
+                .setAine("AI")
+                .setAsteikko_4_10()
+                .setArvosana("8")
+                .setMyonnetty(nyt)
+                .build()
+                .build()
+                .suoritus()
+                .setLukio()
+                .setValmistuminen("1.1.2015")
+                .setValmis()
+                .setMyontaja(HAKEMUS1_OID)
+                .setVahvistettu(false)
+                .arvosana()
+                .setAine("AI")
+                .setAsteikko_4_10()
+                .setArvosana("6")
+                .setMyonnetty(nyt)
+                .build()
+                .build()
+                .build();
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), toisellaHakemuksellaKorkeampiArvosana, hakemus);
+        Assert.assertTrue("LK_AI löytyy ja sen arvo on 6",
+                hakemus.getAvaimet().stream().filter(a -> "LK_AI".equals(a.getAvain()) && "6".equals(a.getArvo())).count() == 1L);
+    }
+
+    @Test
+    public void lkSuoritusVainTaltaHakemuseltaJosEiVahvistettu2() {
+        HakemusDTO hakemus = new HakemusDTO();
+        hakemus.setHakemusoid(HAKEMUS1_OID);
+        Oppija toisellaHakemuksellaKorkeampiArvosana = new SuoritusrekisteriSpec.OppijaBuilder()
+                .suoritus()
+                .setLukio()
+                .setValmistuminen("1.1.2015")
+                .setValmis()
+                .setMyontaja(HAKEMUS2_OID)
+                .build()
+                .suoritus()
+                .setPerusopetus()
+                .setValmistuminen("1.1.2012")
+                .setValmis()
+                .setMyontaja(HAKEMUS1_OID)
+                .setVahvistettu(false)
+                .build()
+                .build();
+        HakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(false, haku, "", new ParametritDTO(), new HashMap<>(), toisellaHakemuksellaKorkeampiArvosana, hakemus);
+        Assert.assertTrue("LK_TILA löytyy ja sen arvo on false",
+                hakemus.getAvaimet().stream().filter(a -> "LK_TILA".equals(a.getAvain()) && "false".equals(a.getArvo())).count() == 1L);
     }
 
     @Test

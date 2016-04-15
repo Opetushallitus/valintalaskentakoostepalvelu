@@ -168,6 +168,7 @@ public class HakemuksetConverterUtil {
                 .filter(s -> !(s.isSuoritusMistaSyntyyPeruskoulunArvosanoja() && !s.isVahvistettu() && !s.onTaltaHakemukselta(hakemus)))
                 .filter(s -> !(s.isSuoritusMistaSyntyyPeruskoulunArvosanoja() && s.isVahvistettu() && !hakukaudella(haku, s)))
                 .filter(s -> !(s.isPerusopetus() && s.isKeskeytynyt() && !hakukaudella(haku, s)))
+                .filter(s -> !(s.isLukio() && !s.isVahvistettu() && !s.onTaltaHakemukselta(hakemus)))
                 .filter(s -> !(s.isLukio() && s.isKeskeytynyt()))
                 .filter(s -> !(s.isYoTutkinto() && (s.isKesken() || s.isKeskeytynyt())))
                 .map(SuoritusJaArvosanatWrapper::getSuoritusJaArvosanat)
