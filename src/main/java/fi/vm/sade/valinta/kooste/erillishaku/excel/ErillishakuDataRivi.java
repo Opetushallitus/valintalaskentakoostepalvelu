@@ -111,6 +111,7 @@ public class ErillishakuDataRivi extends DataRivi {
     private static final String EI_LUPAA_JULKAISUUN = "EI JULKAISTAVISSA";
     private static final Collection<String> JULKAISU_LUPA_ARVOT =
             Arrays.asList(LUPA_JULKAISUUN, StringUtils.EMPTY, EI_LUPAA_JULKAISUUN);
+    private static final Collection<String> ASIONTIKIELEN_ARVOT = Arrays.asList("fi", "sv", "en");
 
     public static MonivalintaArvo hakemuksenTila(String arvo) {
         return new MonivalintaArvo(arvo, HAKEMUKSENTILA_ARVOT);
@@ -131,7 +132,10 @@ public class ErillishakuDataRivi extends DataRivi {
     }
 
     public static MonivalintaArvo ilmoittautumisTila(String arvo) {
-
         return new MonivalintaArvo(arvo, ILMOITTAUTUMISTILA_ARVOT);
+    }
+
+    public static MonivalintaArvo asiointiKieli(String arvo) {
+        return new MonivalintaArvo(arvo, ASIONTIKIELEN_ARVOT);
     }
 }

@@ -61,7 +61,17 @@ public class ErillishakuExcel {
                 new TekstiArvo("Hakemuksentila"),
                 new TekstiArvo("Vastaanottotila"),
                 new TekstiArvo("Ilmoittautumistila"),
-                new TekstiArvo("Julkaistavissa")));
+                new TekstiArvo("Julkaistavissa"),
+                new TekstiArvo("Asiointikieli"),
+                new TekstiArvo("Puhelinnumero"),
+                new TekstiArvo("Osoite"),
+                new TekstiArvo("Postinumero"),
+                new TekstiArvo("Postitoimipaikka"),
+                new TekstiArvo("Asuinmaa"),
+                new TekstiArvo("Kansalaisuus"),
+                new TekstiArvo("Kotikunta"),
+                new TekstiArvo("Pohjakoulutuksen maa (toinen aste)"))
+        );
         Collections.sort(erillishakurivit, (h1, h2) -> {
             ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(emptyErillishakuRivi());
             ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(emptyErillishakuRivi());
@@ -136,6 +146,15 @@ public class ErillishakuExcel {
             a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
             a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
             a.add(ErillishakuDataRivi.julkaisuLupa(rivi.isJulkaistaankoTiedot()));
+            a.add(ErillishakuDataRivi.asiointiKieli(rivi.getAsiointikieli()));
+            a.add(new TekstiArvo(rivi.getPuhelinnumero(), true, true));
+            a.add(new TekstiArvo(rivi.getOsoite(), true, true));
+            a.add(new TekstiArvo(rivi.getPostinumero(), true, true));
+            a.add(new TekstiArvo(rivi.getPostitoimipaikka(), true, true));
+            a.add(new TekstiArvo(rivi.getAsuinmaa(), true, true));
+            a.add(new TekstiArvo(rivi.getKansalaisuus(), true, true));
+            a.add(new TekstiArvo(rivi.getKotikunta(), true, true));
+            a.add(new TekstiArvo(rivi.getPohjakoulutusMaaToinenAste(), true, true));
             return a;
         };
     }
