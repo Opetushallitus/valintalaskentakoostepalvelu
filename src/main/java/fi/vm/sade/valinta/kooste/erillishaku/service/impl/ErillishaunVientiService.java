@@ -70,7 +70,6 @@ public class ErillishaunVientiService {
 
         zip(hakemusObservable, hakuFuture, tarjontaHakukohdeObservable, valintatulosObservable, from(hakukohdeFuture),
                 (hakemukset, haku, tarjontaHakukohde, valintatulos, hakukohde) -> {
-                    System.out.println("Hakukohde: " + hakukohde.getSijoitteluajoId());
                     Map<String, Valintatulos> valintatulokset = getValintatulokset(erillishaku, valintatulos);
                     if (MapUtils.isEmpty(valintatulokset) && hakukohde.getSijoitteluajoId() == null) {
                         // ei viela tuloksia, joten tehdaan tuonti haetuista hakemuksista
