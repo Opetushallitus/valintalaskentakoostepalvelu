@@ -35,5 +35,7 @@ public interface ApplicationAsyncResource {
 
     Observable<Response> putApplicationAdditionalData(String hakuOid, String hakukohdeOid, List<ApplicationAdditionalDataDTO> additionalData);
 
+    Observable<Response> putApplicationAdditionalData(String hakuOid, List<ApplicationAdditionalDataDTO> additionalData);
+
     Observable<Response> changeStateOfApplicationsToPassive(List<String> hakemusOid, String reason);
 }

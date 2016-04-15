@@ -254,7 +254,7 @@ public class PistesyottoTuontiSoteliService {
                 List<VirheDTO> virheet = osallistumiset.stream().filter(o -> o.isVirhe()).map(o -> o.asVirheDTO()).collect(Collectors.toList());
                 if(!additionalData.isEmpty()) {
                     applicationAsyncResource.putApplicationAdditionalData(
-                            hakuOid, "", additionalData).subscribe(response -> {
+                            hakuOid, additionalData).subscribe(response -> {
                         additionalData.forEach(p ->
                                 AUDIT.log(builder()
                                         .id(username)

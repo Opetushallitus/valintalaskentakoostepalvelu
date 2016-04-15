@@ -197,6 +197,11 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
     }
 
     @Override
+    public Observable<Response> putApplicationAdditionalData(String hakuOid, List<ApplicationAdditionalDataDTO> additionalData) {
+        return putAsObservable("/applications/additionalData/" + hakuOid, Entity.json(additionalData));
+    }
+
+    @Override
     public Observable<Response> changeStateOfApplicationsToPassive(List<String> hakemusOids, String reason) {
         return postAsObservable("/applications/state/passivate", Entity.json(new ApplicationOidsAndReason(hakemusOids, reason)));
     }
