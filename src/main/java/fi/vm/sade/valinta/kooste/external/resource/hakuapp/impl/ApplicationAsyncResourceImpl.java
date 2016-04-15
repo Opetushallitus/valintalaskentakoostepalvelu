@@ -77,7 +77,7 @@ public class ApplicationAsyncResourceImpl extends AsyncResourceWithCas implement
         requestBody.put("states", Arrays.asList("ACTIVE", "INCOMPLETE"));
         requestBody.put("asIds", Arrays.asList(hakuOid));
         requestBody.put("aoOids", Lists.newArrayList(hakukohdeOids));
-        requestBody.put("keys", Arrays.asList("applicationSystemId", "oid", "answers.henkilotiedot", "answers.hakutoiveet"));
+        requestBody.put("keys", Arrays.asList("applicationSystemId", "oid", "personOid", "answers.henkilotiedot", "answers.hakutoiveet"));
         return postAsObservable("/applications/listfull", new TypeToken<List<Hakemus>>() {}.getType(),
                 Entity.entity(requestBody, MediaType.APPLICATION_JSON_TYPE),
                 client -> {
