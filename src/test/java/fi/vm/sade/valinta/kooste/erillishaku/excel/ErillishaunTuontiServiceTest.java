@@ -266,12 +266,18 @@ class ErillisHakuTuontiTestCase {
         when(koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)).thenReturn(maaKoodit);
 
         Koodi kuntaKoodi = new Koodi();
-        List<Metadata> metadatat = null; // XXX
+        kuntaKoodi.setMetadata(Arrays.asList(createMetadata("Helsinki", "FI"), createMetadata("Helsingfors", "SV")));
 
-        kuntaKoodi.setMetadata();
         Map<String, Koodi> kuntaKoodit = ImmutableMap.of(
-                "091", new Koodi());
-        when(koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)).thenReturn(maaKoodit);
+                "091", kuntaKoodi);
+        when(koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KUNTA)).thenReturn(kuntaKoodit);
+    }
+
+    private Metadata createMetadata(String nimi, String kieli) {
+        Metadata metadata = new Metadata();
+        metadata.setKieli(kieli);
+        metadata.setNimi(nimi);
+        return metadata;
     }
 
     protected void importData(InputStream data) {
