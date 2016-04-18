@@ -13,9 +13,11 @@ public class ExcelTestData {
     public static InputStream kkHakuToisenAsteenValintatuloksella() {
         return getInputStream("kkhaku_toisenasteen_valintatuloksella.xlsx");
     }
+
     public static InputStream puutteellisiaTietojaAutotayttoaVarten() {
         return getInputStream("puutteellisiaTietojaAutotayttoaVarten.xlsx");
     }
+
     public static InputStream erillisHakuHenkiloOidilla() {
         return getInputStream("erillishaku_oidilla.xlsx");
     }
@@ -26,6 +28,10 @@ public class ExcelTestData {
 
     public static InputStream erillisHakuTuntemattomallaKielella() {
         return getInputStream("erillishaku_tuntemattomalla_aidinkielella.xlsx");
+    }
+
+    public static InputStream erillisHakuUusillaKentilla() {
+        return getInputStream("erillishaku_uusilla_kentilla.xlsx");
     }
 
     private static InputStream getInputStream(final String filename) {

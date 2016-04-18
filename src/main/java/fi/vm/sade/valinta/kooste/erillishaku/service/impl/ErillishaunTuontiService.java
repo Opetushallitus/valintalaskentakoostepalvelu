@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+import com.google.common.collect.Sets;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.authentication.model.Kielisyys;
@@ -36,6 +37,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
@@ -44,6 +46,7 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoR
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
+import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
@@ -57,13 +60,7 @@ import rx.Scheduler;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -73,12 +70,16 @@ import java.util.stream.Stream;
 @Service
 public class ErillishaunTuontiService {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishaunTuontiService.class);
+
     private final TilaAsyncResource tilaAsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final HenkiloAsyncResource henkiloAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
     private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final Scheduler scheduler;
+
+    private static final String PHONE_PATTERN = "^$|^([0-9\\(\\)\\/\\+ \\-]*)$";
+
 
     public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource,
                                     ApplicationAsyncResource applicationAsyncResource,
@@ -488,6 +489,60 @@ public class ErillishaunTuontiService {
             return "Asiointikieli on virheellinen. Sallitus arvot ["+
                     StringUtils.join(ErillishakuDataRivi.ASIONTIKIELEN_ARVOT, '|') +
                     "] " + rivi.toString();
+        }
+
+
+        Map<String, Koodi> maaKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+        String asuinmaa = StringUtils.trimToEmpty(rivi.getAsuinmaa()).toUpperCase();
+        if (!asuinmaa.isEmpty() && !maaKoodit.keySet().contains(asuinmaa)) {
+            return "Asuinmaan maakoodi on virheellinen. " + maaKoodit.keySet() +  " " + rivi.getAsuinmaa();
+        }
+
+        String kansalaisuus = StringUtils.trimToEmpty(rivi.getKansalaisuus()).toUpperCase();
+        if (! kansalaisuus.isEmpty() && !maaKoodit.keySet().contains(kansalaisuus)) {
+            return "Kansalaisuuden maakoodi on virheellinen. " + rivi.toString();
+        }
+
+        String pohjakoulutusMaaToinenAste = StringUtils.trimToEmpty(rivi.getPohjakoulutusMaaToinenAste()).toUpperCase();
+        if (! pohjakoulutusMaaToinenAste.isEmpty() && !maaKoodit.keySet().contains(pohjakoulutusMaaToinenAste)) {
+            return "Pohjakoulutuksen (toinen aste) maakoodi on virheellinen. " + rivi.toString();
+        }
+
+        Map<String, Koodi> kuntaKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KUNTA);
+        String kotikunta = StringUtils.trimToEmpty(rivi.getKotikunta());
+        boolean kotikuntaKoodistossa = kuntaKoodit.values().stream().flatMap(koodi -> koodi.getMetadata().stream())
+                .map(Metadata::getNimi)
+                .anyMatch(x -> x.equals(kotikunta));
+        if (!kotikunta.isEmpty() && !kotikuntaKoodistossa) {
+            return "Virheellinen kotikunta";
+        }
+
+        if (asuinmaa.equals(OsoiteHakemukseltaUtil.SUOMI)) {
+            Map<String, Koodi> postiKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
+            String postinumero = StringUtils.trimToEmpty(rivi.getPostinumero());
+            if (!postinumero.isEmpty() && !postiKoodit.keySet().contains(postinumero)) {
+                return "Virheellinen suomalainen postinumero. " + rivi.toString();
+            }
+
+            String postitoimipaikka = StringUtils.trimToEmpty(rivi.getPostitoimipaikka()).toUpperCase();
+            boolean postitoimipaikkaKoodistossa = postiKoodit.values().stream()
+                    .flatMap(x -> x.getMetadata().stream())
+                    .map(Metadata::getNimi)
+                    .anyMatch(x -> x.equals(postitoimipaikka));
+            if (!postitoimipaikka.isEmpty() && !postitoimipaikkaKoodistossa) {
+                return "Virheellinen suomalainen postitoimipaikka. " + rivi.toString();
+            }
+
+            if (!postinumero.isEmpty() &&
+                    !postitoimipaikka.isEmpty() &&
+                    !postiKoodit.get(postinumero).getKoodiArvo().equals(postitoimipaikka)) {
+                return "Annettu suomalainen postinumero ei vastaa annettua postitoimipaikkaa. " + rivi.toString();
+            }
+        }
+
+        String puhelinnumero = StringUtils.trimToEmpty(rivi.getPuhelinnumero());
+        if (! puhelinnumero.isEmpty() && !puhelinnumero.matches(PHONE_PATTERN)) {
+            return "Virheellinen puhelinnumero";
         }
 
         return null;

@@ -1,11 +1,6 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuHenkiloOidilla;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuHetullaJaSyntymaAjalla;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuSyntymaAjalla;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuTuntemattomallaKielella;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.kkHakuToisenAsteenValintatuloksella;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.puutteellisiaTietojaAutotayttoaVarten;
+import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.*;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -16,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.gson.Gson;
 
@@ -34,6 +30,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
@@ -176,7 +173,13 @@ public class ErillishaunTuontiServiceTest {
             applicationAsyncResource.results.get(0);
             assertEquals(1, applicationAsyncResource.results.size());
         }
+    }
 
+    public final static class UusillaKentilla extends ErillisHakuTuontiTestCase {
+        @Test
+        public void tuodaan() {
+            importData(erillisHakuUusillaKentilla());
+        }
     }
 
     public final static class HakijaOidilla extends ErillisHakuTuontiTestCase {
@@ -258,6 +261,17 @@ class ErillisHakuTuontiTestCase {
 
         when(koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KIELI)).thenReturn(kieliKoodit);
 
+        Map<String, Koodi> maaKoodit = ImmutableMap.of(
+                "FIN", new Koodi());
+        when(koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)).thenReturn(maaKoodit);
+
+        Koodi kuntaKoodi = new Koodi();
+        List<Metadata> metadatat = null; // XXX
+
+        kuntaKoodi.setMetadata();
+        Map<String, Koodi> kuntaKoodit = ImmutableMap.of(
+                "091", new Koodi());
+        when(koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1)).thenReturn(maaKoodit);
     }
 
     protected void importData(InputStream data) {

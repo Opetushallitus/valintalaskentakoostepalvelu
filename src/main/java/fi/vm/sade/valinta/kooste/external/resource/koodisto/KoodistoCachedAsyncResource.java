@@ -25,6 +25,7 @@ public class KoodistoCachedAsyncResource {
     public static final String MAAT_JA_VALTIOT_1 = "maatjavaltiot1";
     public static final String POSTI = "posti";
     public static final String KIELI = "kieli";
+    public static final String KUNTA = "kunta";
 
     private final Logger LOG = LoggerFactory.getLogger(KoodistoCachedAsyncResource.class);
     private final KoodistoAsyncResource koodistoAsyncResource;
