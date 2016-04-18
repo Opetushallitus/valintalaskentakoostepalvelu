@@ -35,6 +35,7 @@ import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.HakukohteenValintatulosUpdateStatuses;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
@@ -42,6 +43,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTu
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
@@ -75,18 +77,20 @@ public class ErillishaunTuontiService {
     private final ApplicationAsyncResource applicationAsyncResource;
     private final HenkiloAsyncResource henkiloAsyncResource;
     private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
-    private KoodistoCachedAsyncResource koodistoCachedAsyncResource = null;
+    private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
     private final Scheduler scheduler;
 
     public ErillishaunTuontiService(TilaAsyncResource tilaAsyncResource,
                                     ApplicationAsyncResource applicationAsyncResource,
                                     HenkiloAsyncResource henkiloAsyncResource,
                                     ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
+                                    KoodistoCachedAsyncResource koodistoCachedAsyncResource,
                                     Scheduler scheduler) {
         this.applicationAsyncResource = applicationAsyncResource;
         this.tilaAsyncResource = tilaAsyncResource;
         this.henkiloAsyncResource = henkiloAsyncResource;
         this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
+        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
         this.scheduler = scheduler;
     }
 
@@ -100,8 +104,8 @@ public class ErillishaunTuontiService {
                 applicationAsyncResource,
                 henkiloAsyncResource,
                 valintaTulosServiceAsyncResource,
+                koodistoCachedAsyncResource,
                 newThread());
-        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     }
 
     public void tuoExcelistä(String username, KirjeProsessi prosessi, ErillishakuDTO erillishaku, InputStream data) {
@@ -467,21 +471,25 @@ public class ErillishaunTuontiService {
         if((isBlank(rivi.getPersonOid()) && isBlank(rivi.getHenkilotunnus())) && Sukupuoli.EI_SUKUPUOLTA.equals(rivi.getSukupuoli())) {
             return "Sukupuoli ("+rivi.getSukupuoli()+") on pakollinen kun henkilötunnus ja personOID puuttuu. " + rivi.toString();
         }
-        if(isBlank(rivi.getHenkilotunnus()) && isBlank(rivi.getPersonOid()) && !ErillishakuDataRivi.KIELITYYPIN_ARVOT.contains(StringUtils.trimToEmpty(rivi.getAidinkieli()).toLowerCase())) {
-            return "Äidinkieli ("+rivi.getAidinkieli()+") on virheellinen. Lailliset arvot [" +
-            "fi|en|sv|ae|lo|sl|bm|mo|nr|kn|ga|tl|la|nv|ti|gl|to|sa|lv|hi|ke|ty|ho|cv|ts|kj|xx|vo|ro|mr|sd|ak|kv|98|fj|su|sq|" +
-            "ie|ab|ug|hr|my|hy|is|gd|ko|tg|am|bi|so|te|lg|dz|wo|az|oc|kl|kw|sk|uz|oj|ng|uk|gg|se|gu|ii|ne|ce|ee|ur|hu|mt|mg|je|zu|pa|sg|" +
-                    "aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|" +
-                    "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|" +
-                    "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg] "
-                    + rivi.toString();
+
+        if (isBlank(rivi.getHenkilotunnus()) &&
+                isBlank(rivi.getPersonOid()) &&
+                StringUtils.trimToEmpty(rivi.getAidinkieli()).isEmpty()) {
+            return "Äidinkieli puuttuu. Äidinkieli on pakollinen tieto, kun henkilötunnus ja henkilö OID puuttuvat";
         }
+
+        Map<String, Koodi> kieliKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KIELI);
+        if (! StringUtils.trimToEmpty(rivi.getAidinkieli()).isEmpty() &&
+                ! kieliKoodit.keySet().contains(rivi.getAidinkieli().toUpperCase())) {
+            return "Äidinkieli ("+rivi.getAidinkieli()+") on virheellinen. Lailliset arvot " + kieliKoodit.keySet() + ", " + rivi.toString();
+        }
+
         if (!isBlank(rivi.getAsiointikieli()) && !ErillishakuDataRivi.ASIONTIKIELEN_ARVOT.contains(StringUtils.trimToEmpty(rivi.getAsiointikieli()).toLowerCase())) {
             return "Asiointikieli on virheellinen. Sallitus arvot ["+
                     StringUtils.join(ErillishakuDataRivi.ASIONTIKIELEN_ARVOT, '|') +
                     "] " + rivi.toString();
         }
-        
+
         return null;
     }
 }

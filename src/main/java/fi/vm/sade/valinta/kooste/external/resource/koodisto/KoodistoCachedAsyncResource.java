@@ -24,6 +24,8 @@ import java.util.stream.Stream;
 public class KoodistoCachedAsyncResource {
     public static final String MAAT_JA_VALTIOT_1 = "maatjavaltiot1";
     public static final String POSTI = "posti";
+    public static final String KIELI = "kieli";
+
     private final Logger LOG = LoggerFactory.getLogger(KoodistoCachedAsyncResource.class);
     private final KoodistoAsyncResource koodistoAsyncResource;
     private final Cache<String, Map<String, Koodi>> koodistoCache = CacheBuilder.newBuilder().expireAfterAccess(7, TimeUnit.HOURS).build();

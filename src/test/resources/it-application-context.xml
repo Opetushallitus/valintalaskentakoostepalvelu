@@ -50,8 +50,6 @@
         class="fi.vm.sade.valinta.kooste.valintalaskentatulos.resource.ValintalaskentaExcelResource" />
   <bean id="ValintakoekutsutExcelService"
         class="fi.vm.sade.valinta.kooste.valintalaskentatulos.service.ValintakoekutsutExcelService" />
-  <bean id="KoodistoCachedAsyncResource"
-        class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource"/>
   <bean id="OsoitetarratService" class="fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService"/>
   <!--Suorituksen arvosanat-->
   <bean id="SuorituksenArvosanatProxyResource"
@@ -83,11 +81,11 @@
     <mockito:mock id="dokumenttiResource" class="fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource" />
     <mockito:mock id="hakukohdeResource" class="fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource" />
     <mockito:mock id="haeHakukohdeNimiTarjonnaltaKomponentti" class="fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohdeNimiTarjonnaltaKomponentti" />
-    <mockito:mock id="KoodistoAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource"/>
     <mockito:mock id="JalkiohjaustulosExcelRoute" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.JalkiohjaustulosExcelRoute" />
     <mockito:mock id="SijoittelunTulosExcelRoute" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute" />
     <mockito:mock id="ValintalaskentaTulosExcelRoute" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute" />
     <mockito:mock id="kirjeetHakukohdeCache" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache" />
+    <mockito:mock id="koodistoAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource" />
     <!-- Swagger -->
     <!-- Swagger API listing resource -->
     <bean id="swaggerResourceJSON"
