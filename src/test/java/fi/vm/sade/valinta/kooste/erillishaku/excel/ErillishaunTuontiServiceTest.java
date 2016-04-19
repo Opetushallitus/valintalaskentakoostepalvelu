@@ -123,11 +123,11 @@ public class ErillishaunTuontiServiceTest {
             assertEquals("tarjoaja1", appResult.tarjoajaOid);
             assertEquals(1, appResult.hakemusPrototyypit.size());
             final HakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
-            assertEquals("hakija1", hakemusProto.hakijaOid);
-            assertEquals(MockData.hetu, hakemusProto.henkilotunnus);
-            assertEquals("Tuomas", hakemusProto.etunimi);
-            assertEquals("Hakkarainen", hakemusProto.sukunimi);
-            assertEquals("01.01.1901", hakemusProto.syntymaAika);
+            assertEquals("hakija1", hakemusProto.getHakijaOid());
+            assertEquals(MockData.hetu, hakemusProto.getHenkilotunnus());
+            assertEquals("Tuomas", hakemusProto.getEtunimi());
+            assertEquals("Hakkarainen", hakemusProto.getSukunimi());
+            assertEquals("01.01.1901", hakemusProto.getSyntymaAika());
 
             assertEquals(1, tilaAsyncResource.results.size());
             final MockTilaAsyncResource.Result tilaResult = tilaAsyncResource.results.get(0);
@@ -159,10 +159,10 @@ public class ErillishaunTuontiServiceTest {
             assertEquals("tarjoaja1", appResult.tarjoajaOid);
             assertEquals(1, appResult.hakemusPrototyypit.size());
             final HakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
-            assertEquals("hakija1", hakemusProto.hakijaOid);
-            assertEquals("Tuomas", hakemusProto.etunimi);
-            assertEquals("Hakkarainen", hakemusProto.sukunimi);
-            assertEquals("01.01.1901", hakemusProto.syntymaAika);
+            assertEquals("hakija1", hakemusProto.getHakijaOid());
+            assertEquals("Tuomas", hakemusProto.getEtunimi());
+            assertEquals("Hakkarainen", hakemusProto.getSukunimi());
+            assertEquals("01.01.1901", hakemusProto.getSyntymaAika());
         }
     }
 

@@ -18,7 +18,7 @@ public class HenkiloCreateDTO {
     public final Date syntymaaika;
     public final String oidHenkilo;
     public final HenkiloTyyppi henkiloTyyppi;
-    public final String sukupuoli;
+    public final String sukupuoli; //MIES tai NAINEN
     public final Kielisyys aidinkieli;
     public final Kielisyys asiointiKieli;
 

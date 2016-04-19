@@ -6,32 +6,165 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuDataRivi;
 
 public class HakemusPrototyyppi {
 
-    public final String hakijaOid;
-    public final String etunimi;
-    public final String sukunimi;
-    public final String henkilotunnus;
-    public final String sahkoposti;
-    public final String syntymaAika;
-    public final String sukupuoli;
-    public final String aidinkieli;
+    private String hakijaOid;
+    private String etunimi;
+    private String sukunimi;
+    private String henkilotunnus;
+    private String sahkoposti;
+    private String syntymaAika;
+    private String sukupuoli;
+    private String aidinkieli;
+    private String asiointikieli;
+    private String puhelinnumero;
+    private String osoite;
+    private String postinumero;
+    private String postitoimipaikka;
+    private String asuinmaa;
+    private String kansalaisuus;
+    private String kotikunta;
+    private String toinenAstePohjakoulutusMaa;
 
-    public HakemusPrototyyppi(String sukupuoli, String aidinkieli, String hakijaOid, String etunimi, String sukunimi, String henkilotunnus, String sahkoposti, String syntymaAika) {
-        this.sukupuoli = sukupuoli;
-        this.aidinkieli = aidinkieli;
+    public String getHakijaOid() {
+        return hakijaOid;
+    }
+
+    public void setHakijaOid(String hakijaOid) {
         this.hakijaOid = hakijaOid;
+    }
+
+    public String getEtunimi() {
+        return etunimi;
+    }
+
+    public void setEtunimi(String etunimi) {
         this.etunimi = etunimi;
+    }
+
+    public String getSukunimi() {
+        return sukunimi;
+    }
+
+    public void setSukunimi(String sukunimi) {
         this.sukunimi = sukunimi;
+    }
+
+    public String getHenkilotunnus() {
+        return henkilotunnus;
+    }
+
+    public void setHenkilotunnus(String henkilotunnus) {
         this.henkilotunnus = henkilotunnus;
+    }
+
+    public String getSahkoposti() {
+        return sahkoposti;
+    }
+
+    public void setSahkoposti(String sahkoposti) {
         this.sahkoposti = sahkoposti;
+    }
+
+    public String getSyntymaAika() {
+        return syntymaAika;
+    }
+
+    public void setSyntymaAika(String syntymaAika) {
         this.syntymaAika = syntymaAika;
     }
 
-    public HakemusPrototyyppi(final String sukupuoli, final String aidinkieli, final String hakijaOid, final String etunimi, final String sukunimi, final String henkilotunnus, final String sahkoposti, final Date syntymaAika) {
-        this(sukupuoli, aidinkieli, hakijaOid, etunimi, sukunimi, henkilotunnus, sahkoposti, parseDate(syntymaAika));
-
+    public void setSyntymaAika(Date syntymaAika) {
+        this.syntymaAika = parseDate(syntymaAika);
     }
 
-    private static String parseDate(final Date syntymaAika) {
+    public String getSukupuoli() {
+        return sukupuoli;
+    }
+
+    public void setSukupuoli(String sukupuoli) {
+        this.sukupuoli = sukupuoli;
+    }
+
+    public String getAidinkieli() {
+        return aidinkieli;
+    }
+
+    public void setAidinkieli(String aidinkieli) {
+        this.aidinkieli = aidinkieli;
+    }
+
+    public String getAsiointikieli() {
+        return asiointikieli;
+    }
+
+    public void setAsiointikieli(String asiointikieli) {
+        this.asiointikieli = asiointikieli;
+    }
+
+    public String getPuhelinnumero() {
+        return puhelinnumero;
+    }
+
+    public void setPuhelinnumero(String puhelinnumero) {
+        this.puhelinnumero = puhelinnumero;
+    }
+
+    public String getOsoite() {
+        return osoite;
+    }
+
+    public void setOsoite(String osoite) {
+        this.osoite = osoite;
+    }
+
+    public String getPostinumero() {
+        return postinumero;
+    }
+
+    public void setPostinumero(String postinumero) {
+        this.postinumero = postinumero;
+    }
+
+    public String getPostitoimipaikka() {
+        return postitoimipaikka;
+    }
+
+    public void setPostitoimipaikka(String postitoimipaikka) {
+        this.postitoimipaikka = postitoimipaikka;
+    }
+
+    public String getAsuinmaa() {
+        return asuinmaa;
+    }
+
+    public void setAsuinmaa(String asuinmaa) {
+        this.asuinmaa = asuinmaa;
+    }
+
+    public String getKansalaisuus() {
+        return kansalaisuus;
+    }
+
+    public void setKansalaisuus(String kansalaisuus) {
+        this.kansalaisuus = kansalaisuus;
+    }
+
+    public String getKotikunta() {
+        return kotikunta;
+    }
+
+    public void setKotikunta(String kotikunta) {
+        this.kotikunta = kotikunta;
+    }
+
+    public String getToinenAstePohjakoulutusMaa() {
+        return toinenAstePohjakoulutusMaa;
+    }
+
+    public void setToinenAstePohjakoulutusMaa(String toinenAstePohjakoulutusMaa) {
+        this.toinenAstePohjakoulutusMaa = toinenAstePohjakoulutusMaa;
+    }
+
+    public static String parseDate(final Date syntymaAika) {
         if (syntymaAika == null) return null;
         return ErillishakuDataRivi.SYNTYMAAIKA.print(syntymaAika.getTime());
     }

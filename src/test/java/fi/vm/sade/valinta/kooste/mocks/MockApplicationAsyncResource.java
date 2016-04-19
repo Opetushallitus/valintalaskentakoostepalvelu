@@ -95,13 +95,13 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
         final Hakemus hakemus = new Hakemus();
         hakemus.setAnswers(new Answers());
         final Map<String, String> henkilotiedot = hakemus.getAnswers().getHenkilotiedot();
-        henkilotiedot.put("Henkilotunnus", prototyyppi.henkilotunnus);
-        henkilotiedot.put("Etunimet", prototyyppi.etunimi);
-        henkilotiedot.put("Kutsumanimi", prototyyppi.etunimi);
-        henkilotiedot.put("Sukunimi", prototyyppi.sukunimi);
-        henkilotiedot.put("syntymaaika", prototyyppi.syntymaAika);
+        henkilotiedot.put("Henkilotunnus", prototyyppi.getHenkilotunnus());
+        henkilotiedot.put("Etunimet", prototyyppi.getEtunimi());
+        henkilotiedot.put("Kutsumanimi", prototyyppi.getEtunimi());
+        henkilotiedot.put("Sukunimi", prototyyppi.getSukunimi());
+        henkilotiedot.put("syntymaaika", prototyyppi.getSyntymaAika());
         hakemus.setOid(MockData.hakemusOid);
-        hakemus.setPersonOid(prototyyppi.hakijaOid);
+        hakemus.setPersonOid(prototyyppi.getHakijaOid());
         return hakemus;
     }
 

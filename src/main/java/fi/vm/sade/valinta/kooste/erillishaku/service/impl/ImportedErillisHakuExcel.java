@@ -61,7 +61,7 @@ public class ImportedErillisHakuExcel {
     private HenkiloCreateDTO convert(final ErillishakuRivi rivi) {
         return new HenkiloCreateDTO(
                 Optional.ofNullable(rivi.getAidinkieli()).map(ImportedErillisHakuExcel::resolveAidinkieli).orElse("fi"),
-                rivi.getSyntymaAika(),
+                rivi.getSukupuoli().name(),
                 rivi.getEtunimi(),
                 rivi.getSukunimi(),
                 rivi.getHenkilotunnus(),

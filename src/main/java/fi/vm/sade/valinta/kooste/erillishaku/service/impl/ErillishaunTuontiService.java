@@ -10,6 +10,8 @@ import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkista
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static rx.schedulers.Schedulers.newThread;
+
+import com.google.common.base.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -60,7 +62,9 @@ import rx.Scheduler;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -240,11 +244,8 @@ public class ErillishaunTuontiService {
                 throw e;
             }
             LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());
-            Map<String, String> sahkopostit = ImmutableMap.<String, String>builder()
-                    .putAll(lisattavatTaiKeskeneraiset.stream().filter(rivi -> isNotBlank(rivi.getPersonOid())).collect(Collectors.toMap(rivi -> rivi.getPersonOid(), rivi -> rivi.getSahkoposti())))
-                    .putAll(lisattavatTaiKeskeneraiset.stream().filter(rivi -> isNotBlank(rivi.getHenkilotunnus())).collect(Collectors.toMap(rivi -> rivi.getHenkilotunnus(), rivi -> rivi.getSahkoposti())))
-                    .build();
-            hakemukset = kasitteleHakemukset(haku, henkilot, sahkopostit, prosessi);
+            Map<String, ErillishakuRivi> rivitHenkiloittain = createRivitHenkiloittain(lisattavatTaiKeskeneraiset);
+            hakemukset = kasitteleHakemukset(haku, henkilot, rivitHenkiloittain, prosessi);
         } else {
             hakemukset = Collections.emptyList();
         }
@@ -252,13 +253,26 @@ public class ErillishaunTuontiService {
         tuoErillishaunTilat(username, haku, lisattavatTaiKeskeneraiset, poistettavat, hakemukset, prosessi);
     }
 
-    private List<Hakemus> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, Map<String, String> sahkopostit, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
+    private Map<String, ErillishakuRivi> createRivitHenkiloittain(List<ErillishakuRivi> lisattavatTaiKeskeneraiset) {
+        Map<String, ErillishakuRivi> rivitHenkiloittain = new HashMap<>();
+
+        for(ErillishakuRivi rivi : lisattavatTaiKeskeneraiset) {
+            if(isNotBlank(rivi.getPersonOid())) {
+                rivitHenkiloittain.put(rivi.getPersonOid(), rivi);
+            } else if(isNotBlank(rivi.getHenkilotunnus())) {
+                rivitHenkiloittain.put(rivi.getHenkilotunnus(), rivi);
+            } else {
+                rivitHenkiloittain.put(HakemusPrototyyppi.parseDate(rivi.parseSyntymaAika()) + rivi.getSukupuoli().name(), rivi);
+            }
+        }
+        return ImmutableMap.<String, ErillishakuRivi>builder().putAll(rivitHenkiloittain).build();
+    }
+
+    private List<Hakemus> kasitteleHakemukset(ErillishakuDTO haku, List<Henkilo> henkilot, Map<String, ErillishakuRivi> rivitHenkiloittain, KirjeProsessi prosessi) throws InterruptedException, ExecutionException {
         try {
             final List<HakemusPrototyyppi> hakemusPrototyypit = henkilot.stream()
-                    .map(h -> {
-                        //LOG.info("Hakija {}", new GsonBuilder().setPrettyPrinting().create().toJson(h));
-                        return new HakemusPrototyyppi(h.getSukupuoli(), aidinkieliToString(h.getAidinkieli()), h.getOidHenkilo(), h.getEtunimet(), h.getSukunimi(), h.getHetu(), selectEmail(h, sahkopostit).orElse(""), h.getSyntymaaika());
-                    }).collect(Collectors.toList());
+                    .map(h -> createHakemusprototyyppi(h, rivitHenkiloittain))
+                    .collect(Collectors.toList());
             return applicationAsyncResource.putApplicationPrototypes(haku.getHakuOid(), haku.getHakukohdeOid(), haku.getTarjoajaOid(), hakemusPrototyypit).get();
         } catch (Throwable e) { // temporary catch to avoid missing service dependencies
             LOG.error(POIKKEUS_HAKEMUSPALVELUN_VIRHE, e);
@@ -266,7 +280,41 @@ public class ErillishaunTuontiService {
             throw e;
         }
     }
-    private String aidinkieliToString(Kielisyys kielisyys) {
+
+    private HakemusPrototyyppi createHakemusprototyyppi(Henkilo henkilo, Map<String, ErillishakuRivi> rivitHenkiloittain) {
+        ErillishakuRivi rivi = rivitHenkiloittain.get(henkilo.getOidHenkilo());
+        if(null == rivi) {
+            rivi = rivitHenkiloittain.get(henkilo.getHetu());
+        }
+        if(null == rivi) {
+            rivi = rivitHenkiloittain.get(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()) + Sukupuoli.fromString(henkilo.getSukupuoli()).name());
+        }
+        return createHakemusprototyyppi(henkilo, rivi);
+    }
+
+    private HakemusPrototyyppi createHakemusprototyyppi(Henkilo henkilo, ErillishakuRivi rivi) {
+        HakemusPrototyyppi hakemus = new HakemusPrototyyppi();
+        hakemus.setAidinkieli(kielisyysToString(henkilo.getAidinkieli()));
+        hakemus.setAsiointikieli(kielisyysToString(henkilo.getAsiointiKieli()));
+        hakemus.setAsuinmaa(rivi.getAsuinmaa());
+        hakemus.setEtunimi(henkilo.getEtunimet());
+        hakemus.setHakijaOid(henkilo.getOidHenkilo());
+        hakemus.setHenkilotunnus(henkilo.getHetu());
+        hakemus.setKansalaisuus(rivi.getKansalaisuus());
+        hakemus.setKotikunta(rivi.getKotikunta());
+        hakemus.setOsoite(rivi.getOsoite());
+        hakemus.setPostinumero(rivi.getPostinumero());
+        hakemus.setPostitoimipaikka(rivi.getPostitoimipaikka());
+        hakemus.setPuhelinnumero(rivi.getPuhelinnumero());
+        hakemus.setSukunimi(henkilo.getSukunimi());
+        hakemus.setSukupuoli(henkilo.getSukupuoli());
+        hakemus.setSahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()));
+        hakemus.setSyntymaAika(henkilo.getSyntymaaika());
+        hakemus.setToinenAstePohjakoulutusMaa(rivi.getPohjakoulutusMaaToinenAste());
+        return hakemus;
+    }
+
+    private String kielisyysToString(Kielisyys kielisyys) {
         if(kielisyys == null) {
             return "";
         } else {
@@ -274,17 +322,10 @@ public class ErillishaunTuontiService {
         }
     }
 
-    private static Optional<String> selectEmail(Henkilo henkilo, Map<String, String> sahkopostit) {
-        Optional<String> email = Optional.ofNullable(sahkopostit.get(henkilo.getOidHenkilo()));
-        if (email.isPresent()) {
-            return email;
-        } else {
-            return Optional.ofNullable(sahkopostit.get(henkilo.getHetu()));
-        }
-    }
     private static boolean ainoastaanHakemuksenTilaPaivitys(ErillishaunHakijaDTO erillishakuRivi) {
         return erillishakuRivi.getValintatuloksenTila() == null && erillishakuRivi.getIlmoittautumisTila() == null;
     }
+
     private static VastaanottoResultDTO convertToHyvaksyttyResult(ErillishaunHakijaDTO hakija) {
         VastaanottoResultDTO resultDTO = new VastaanottoResultDTO();
         resultDTO.setHakemusOid(hakija.getHakemusOid());
@@ -294,6 +335,7 @@ public class ErillishaunTuontiService {
         resultDTO.getResult().setStatus(Response.Status.OK.getStatusCode());
         return resultDTO;
     }
+
     private void tuoErillishaunTilat(final String username, final ErillishakuDTO haku, final List<ErillishakuRivi> lisattavatTaiKeskeneraiset, final List<ErillishakuRivi> poistettavat,final List<Hakemus> hakemukset, final KirjeProsessi prosessi) {
         assert (hakemukset.size() == lisattavatTaiKeskeneraiset.size()); // 1-1 relationship assumed
 

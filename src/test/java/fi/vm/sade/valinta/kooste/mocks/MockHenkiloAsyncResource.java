@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.mocks;
 
 import com.google.common.util.concurrent.Futures;
 import fi.vm.sade.authentication.model.Henkilo;
+import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.HenkiloAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.authentication.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
@@ -59,6 +60,7 @@ public class MockHenkiloAsyncResource implements HenkiloAsyncResource {
         henkilo.setHetu(proto.hetu);
         henkilo.setOidHenkilo(MockData.hakijaOid);
         henkilo.setSyntymaaika(proto.syntymaaika);
+        henkilo.setSukupuoli(Sukupuoli.toHenkiloString(proto.sukupuoli));
         return henkilo;
     }
     private static <T> Future<T> serviceAvailableCheck() {
