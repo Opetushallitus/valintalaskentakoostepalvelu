@@ -42,4 +42,7 @@ public class Koodi {
         return metadata;
     }
 
+    public void setKoodiArvo(String koodiArvo) {
+        this.koodiArvo = koodiArvo;
+    }
 }

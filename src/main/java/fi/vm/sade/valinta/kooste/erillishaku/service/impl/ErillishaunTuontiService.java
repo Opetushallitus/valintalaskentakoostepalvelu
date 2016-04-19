@@ -482,11 +482,11 @@ public class ErillishaunTuontiService {
         Map<String, Koodi> kieliKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KIELI);
         if (! StringUtils.trimToEmpty(rivi.getAidinkieli()).isEmpty() &&
                 ! kieliKoodit.keySet().contains(rivi.getAidinkieli().toUpperCase())) {
-            return "Äidinkieli ("+rivi.getAidinkieli()+") on virheellinen. Lailliset arvot " + kieliKoodit.keySet() + ", " + rivi.toString();
+            return "Äidinkielen kielikoodi ("+rivi.getAidinkieli()+") on virheellinen." + rivi.toString();
         }
 
         if (!isBlank(rivi.getAsiointikieli()) && !ErillishakuDataRivi.ASIONTIKIELEN_ARVOT.contains(StringUtils.trimToEmpty(rivi.getAsiointikieli()).toLowerCase())) {
-            return "Asiointikieli on virheellinen. Sallitus arvot ["+
+            return "Asiointikieli on virheellinen. Sallitut arvot ["+
                     StringUtils.join(ErillishakuDataRivi.ASIONTIKIELEN_ARVOT, '|') +
                     "] " + rivi.toString();
         }
@@ -495,54 +495,61 @@ public class ErillishaunTuontiService {
         Map<String, Koodi> maaKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
         String asuinmaa = StringUtils.trimToEmpty(rivi.getAsuinmaa()).toUpperCase();
         if (!asuinmaa.isEmpty() && !maaKoodit.keySet().contains(asuinmaa)) {
-            return "Asuinmaan maakoodi on virheellinen. " + maaKoodit.keySet() +  " " + rivi.getAsuinmaa();
+            return "Asuinmaan maakoodi (" +  rivi.getAsuinmaa() + ") on virheellinen. " + rivi.toString();
         }
 
         String kansalaisuus = StringUtils.trimToEmpty(rivi.getKansalaisuus()).toUpperCase();
         if (! kansalaisuus.isEmpty() && !maaKoodit.keySet().contains(kansalaisuus)) {
-            return "Kansalaisuuden maakoodi on virheellinen. " + rivi.toString();
+            return "Kansalaisuuden maakoodi (" + rivi.getKansalaisuus() + ") on virheellinen. " + rivi.toString();
         }
 
         String pohjakoulutusMaaToinenAste = StringUtils.trimToEmpty(rivi.getPohjakoulutusMaaToinenAste()).toUpperCase();
         if (! pohjakoulutusMaaToinenAste.isEmpty() && !maaKoodit.keySet().contains(pohjakoulutusMaaToinenAste)) {
-            return "Pohjakoulutuksen (toinen aste) maakoodi on virheellinen. " + rivi.toString();
+            return "Pohjakoulutuksen (toinen aste) maakoodi (" + rivi.getPohjakoulutusMaaToinenAste() + ") on virheellinen. " + rivi.toString();
         }
 
-        Map<String, Koodi> kuntaKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KUNTA);
         String kotikunta = StringUtils.trimToEmpty(rivi.getKotikunta());
-        boolean kotikuntaKoodistossa = kuntaKoodit.values().stream().flatMap(koodi -> koodi.getMetadata().stream())
-                .map(Metadata::getNimi)
-                .anyMatch(x -> x.equals(kotikunta));
-        if (!kotikunta.isEmpty() && !kotikuntaKoodistossa) {
-            return "Virheellinen kotikunta";
+        if(!kotikunta.isEmpty()) {
+            Map<String, Koodi> kuntaKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KUNTA);
+
+            boolean kotikuntaKoodistossa = kuntaKoodit.values().stream().flatMap(koodi -> koodi.getMetadata().stream())
+                    .map(Metadata::getNimi)
+                    .anyMatch(x -> kotikunta.equalsIgnoreCase(x));
+
+            if (!kotikuntaKoodistossa) {
+                return "Virheellinen kotikunta (" + rivi.getKotikunta() + "). " + rivi.toString();
+            }
         }
 
         if (asuinmaa.equals(OsoiteHakemukseltaUtil.SUOMI)) {
             Map<String, Koodi> postiKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
             String postinumero = StringUtils.trimToEmpty(rivi.getPostinumero());
             if (!postinumero.isEmpty() && !postiKoodit.keySet().contains(postinumero)) {
-                return "Virheellinen suomalainen postinumero. " + rivi.toString();
+                return "Virheellinen suomalainen postinumero (" + rivi.getPostinumero() + "). " + rivi.toString();
             }
 
             String postitoimipaikka = StringUtils.trimToEmpty(rivi.getPostitoimipaikka()).toUpperCase();
-            boolean postitoimipaikkaKoodistossa = postiKoodit.values().stream()
-                    .flatMap(x -> x.getMetadata().stream())
-                    .map(Metadata::getNimi)
-                    .anyMatch(x -> x.equals(postitoimipaikka));
-            if (!postitoimipaikka.isEmpty() && !postitoimipaikkaKoodistossa) {
-                return "Virheellinen suomalainen postitoimipaikka. " + rivi.toString();
-            }
 
-            if (!postinumero.isEmpty() &&
-                    !postitoimipaikka.isEmpty() &&
-                    !postiKoodit.get(postinumero).getKoodiArvo().equals(postitoimipaikka)) {
-                return "Annettu suomalainen postinumero ei vastaa annettua postitoimipaikkaa. " + rivi.toString();
+            if(!postitoimipaikka.isEmpty()) {
+                boolean postitoimipaikkaKoodistossa = postiKoodit.values().stream()
+                        .flatMap(x -> x.getMetadata().stream())
+                        .map(Metadata::getNimi)
+                        .anyMatch(x -> x.equalsIgnoreCase(postitoimipaikka));
+                if (!postitoimipaikkaKoodistossa) {
+                    return "Virheellinen suomalainen postitoimipaikka (" + rivi.getPostinumero() + "). " + rivi.toString();
+                }
+
+                if (!postinumero.isEmpty() &&
+                        !postiKoodit.get(postinumero).getMetadata().stream().anyMatch(m -> m.getNimi().equalsIgnoreCase(postitoimipaikka))) {
+                    return "Annettu suomalainen postinumero (" + rivi.getPostinumero() + ") ei vastaa annettua postitoimipaikkaa ("
+                            + rivi.getPostitoimipaikka() + "). " + rivi.toString();
+                }
             }
         }
 
         String puhelinnumero = StringUtils.trimToEmpty(rivi.getPuhelinnumero());
         if (! puhelinnumero.isEmpty() && !puhelinnumero.matches(PHONE_PATTERN)) {
-            return "Virheellinen puhelinnumero";
+            return "Virheellinen puhelinnumero (" + rivi.getPuhelinnumero() + "). " + rivi.toString();
         }
 
         return null;

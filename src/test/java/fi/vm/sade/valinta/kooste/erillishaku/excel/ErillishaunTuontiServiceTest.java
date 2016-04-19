@@ -253,6 +253,11 @@ class ErillisHakuTuontiTestCase {
                     return dto;
                 }).collect(Collectors.toList())));
 
+
+        mockKoodisto();
+    }
+
+    private void mockKoodisto() {
         Map<String, Koodi> kieliKoodit = ImmutableMap.of(
                 "FI", new Koodi(),
                 "99", new Koodi(),
@@ -267,10 +272,19 @@ class ErillisHakuTuontiTestCase {
 
         Koodi kuntaKoodi = new Koodi();
         kuntaKoodi.setMetadata(Arrays.asList(createMetadata("Helsinki", "FI"), createMetadata("Helsingfors", "SV")));
+        kuntaKoodi.setKoodiArvo("091");
 
         Map<String, Koodi> kuntaKoodit = ImmutableMap.of(
                 "091", kuntaKoodi);
         when(koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KUNTA)).thenReturn(kuntaKoodit);
+
+        Koodi postinumeroKoodi = new Koodi();
+        postinumeroKoodi.setMetadata(Arrays.asList(createMetadata("HELSINKI", "FI"), createMetadata("HELSINGFORS", "SV")));
+        postinumeroKoodi.setKoodiArvo("00100");
+
+        Map<String, Koodi> postinumeroKoodit = ImmutableMap.of(
+                "00100", postinumeroKoodi);
+        when(koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI)).thenReturn(postinumeroKoodit);
     }
 
     private Metadata createMetadata(String nimi, String kieli) {

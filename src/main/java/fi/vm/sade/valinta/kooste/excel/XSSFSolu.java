@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
  */
 public class XSSFSolu {
 
-    private static final Logger LOG = LoggerFactory.getLogger(XSSFSolu.class);
-
     private XSSFSolu() {
     }
 
@@ -22,7 +20,6 @@ public class XSSFSolu {
             if (DateUtil.isCellDateFormatted(cell)) {
                 return new Paivamaara(cell.getDateCellValue());
             } else {
-                // LOG.error("{}", cell.getNumericCellValue());
                 return new Numero(cell.getNumericCellValue());
             }
         } else {
@@ -31,14 +28,6 @@ public class XSSFSolu {
                 rawValue = cell.getStringCellValue();
             } else {
                 rawValue = StringUtils.EMPTY;
-            }
-
-            // String rawValue = StringUtils.trimToEmpty(cell.getRawValue());
-            try {
-                String maybeNumber = rawValue.replace(",", ".");
-                double d = Double.parseDouble(maybeNumber);
-                return new Numero(d);
-            } catch (Exception e) {
             }
             return new Teksti(rawValue);
         }
