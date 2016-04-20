@@ -106,7 +106,7 @@ public class ErillishakuExcel {
                             "123456-7890",
                             "esimerkki.rivi@example.com",
                             "01.01.1901",
-                            Sukupuoli.NAINEN,
+                            Sukupuoli.NAINEN.name(),
                             "",
                             "FI",
                             "HYVAKSYTTY",
@@ -119,10 +119,10 @@ public class ErillishakuExcel {
                             "Esimerkkitie 2",
                             "00100",
                             "HELSINKI",
-                            "SUOMI",
-                            "Suomi",
+                            "FIN",
+                            "FIN",
                             "HELSINKI",
-                            "Pohjakoulutusmaatoinenaste")).stream();
+                            "FIN")).stream();
         } else {
             return erillishakurivit.stream();
         }
