@@ -184,7 +184,7 @@ public class ErillishaunVientiService {
                 wrapper.getAsuinmaa(),
                 wrapper.getKansalaisuus(),
                 readKotikunta(wrapper),
-                null);
+                wrapper.getPohjakoulutusmaaToinenAste());
     }
 
     private String readAsiointikieli(HakemusWrapper wrapper) {

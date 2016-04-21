@@ -11,12 +11,10 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static rx.schedulers.Schedulers.newThread;
 
-import com.google.common.base.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import com.google.common.collect.Sets;
 import fi.vm.sade.auditlog.valintaperusteet.ValintaperusteetOperation;
 import fi.vm.sade.authentication.model.Henkilo;
 import fi.vm.sade.authentication.model.Kielisyys;
@@ -47,12 +45,12 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTu
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoRecordDTO;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoResultDTO;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.OsoiteHakemukseltaUtil;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +60,6 @@ import rx.Scheduler;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -324,9 +321,9 @@ public class ErillishaunTuontiService {
 
     private String convertKuntaNimiToKuntaKoodi(String nimi) {
         Map<String, Koodi> kuntaKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KUNTA);
-        return kuntaKoodit.values().stream().flatMap(koodi -> koodi.getMetadata().stream())
-                .map(Metadata::getNimi)
-                .filter(nimi::equalsIgnoreCase)
+        return kuntaKoodit.values().stream().flatMap(koodi -> koodi.getMetadata().stream().map(metadata -> new ImmutablePair<>(koodi.getKoodiArvo(), metadata.getNimi())))
+                .filter(x -> x.getLeft().equalsIgnoreCase(nimi))
+                .map(ImmutablePair::getRight)
                 .findFirst()
                 .orElse(null);
     }

@@ -19,6 +19,7 @@ public class HakemusWrapper {
     private Map<String, String> henkilotiedot = null;
     private Map<String, String> lisatiedot = null;
     private Map<String, String> hakutoiveet = null;
+    private Map<String, String> koulutustausta = null;
     public final static String ETUNIMET = "Etunimet";
     private final static String KUTSUMANIMI = "Kutsumanimi";
     public final static String SUKUNIMI = "Sukunimi";
@@ -41,6 +42,8 @@ public class HakemusWrapper {
     private final static String KOTIKUNTA = "kotikunta";
     private final static String NAINEN = "2";
     private final static String MIES = "1";
+    private final static String POHJAKOULUTUSMAA_TOINEN_ASTE = "pohjakoulutusmaa_toinen_aste";
+
     private Yhteystiedot yhteystiedot = null;
 
     public HakemusWrapper(Hakemus hakemus) {
@@ -48,6 +51,7 @@ public class HakemusWrapper {
             this.henkilotiedot = Collections.emptyMap();
             this.lisatiedot = Collections.emptyMap();
             this.hakutoiveet = Collections.emptyMap();
+            this.koulutustausta = Collections.emptyMap();
         }
         this.hakemus = hakemus;
     }
@@ -184,6 +188,14 @@ public class HakemusWrapper {
         return null;
     }
 
+    public String getPohjakoulutusmaaToinenAste() {
+        getKoulutustausta();
+        if (koulutustausta.containsKey(POHJAKOULUTUSMAA_TOINEN_ASTE)) {
+            return koulutustausta.get(POHJAKOULUTUSMAA_TOINEN_ASTE);
+        }
+        return StringUtils.EMPTY;
+    }
+
     public String getEtunimi() {
         getHenkilotiedot(); // lazy load henkilotiedot
         if (henkilotiedot.containsKey(KUTSUMANIMI)) {
@@ -240,7 +252,7 @@ public class HakemusWrapper {
 
     public Map<String, String> getLisatiedot() {
         if (lisatiedot == null) {
-            lisatiedot = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+            lisatiedot = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
             lisatiedot.putAll(hakemus.getAnswers().getLisatiedot());
         }
         return lisatiedot;
@@ -248,23 +260,31 @@ public class HakemusWrapper {
 
     public Map<String, String> getHenkilotiedot() {
         if (henkilotiedot == null) {
-            henkilotiedot = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+            henkilotiedot = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
             henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
         }
         return henkilotiedot;
+    }
+
+    public Map<String, String> getKoulutustausta() {
+        if (koulutustausta == null) {
+            koulutustausta = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+            koulutustausta.putAll(hakemus.getAnswers().getKoulutustausta());
+        }
+        return koulutustausta;
+    }
+
+    public Map<String, String> getHakutoiveet() {
+        if (hakutoiveet == null) {
+            hakutoiveet = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+            hakutoiveet.putAll(hakemus.getAnswers().getHakutoiveet());
+        }
+        return hakutoiveet;
     }
 
     public List<String> getHakutoiveOids() {
         return getHakutoiveet().entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith("preference") && entry.getKey().endsWith("-Koulutus-id"))
                 .map(entry -> StringUtils.trimToEmpty(entry.getValue())).filter(e -> !StringUtils.isBlank(e)).collect(Collectors.toList());
-    }
-
-    public Map<String, String> getHakutoiveet() {
-        if (hakutoiveet == null) {
-            hakutoiveet = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-            hakutoiveet.putAll(hakemus.getAnswers().getHakutoiveet());
-        }
-        return hakutoiveet;
     }
 }
