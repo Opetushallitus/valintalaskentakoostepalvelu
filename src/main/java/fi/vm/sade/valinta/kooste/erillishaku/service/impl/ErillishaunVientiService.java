@@ -14,12 +14,16 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.external.resource.haku.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.TilaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.collections.MapUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -37,6 +41,8 @@ import java.util.stream.Collectors;
 import static rx.Observable.from;
 import static rx.Observable.zip;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @Service
 public class ErillishaunVientiService {
     private static final Logger LOG = LoggerFactory.getLogger(ErillishaunVientiService.class);
@@ -45,16 +51,22 @@ public class ErillishaunVientiService {
     private final TarjontaAsyncResource hakuV1AsyncResource;
     private final ApplicationAsyncResource applicationAsyncResource;
     private final DokumenttiResource dokumenttiResource;
+    private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
 
     @Autowired
     public ErillishaunVientiService(
             TilaAsyncResource tilaAsyncResource,
-            ApplicationAsyncResource applicationAsyncResource, SijoitteluAsyncResource sijoitteluAsyncResource, TarjontaAsyncResource hakuV1AsyncResource, DokumenttiResource dokumenttiResource) {
+            ApplicationAsyncResource applicationAsyncResource,
+            SijoitteluAsyncResource sijoitteluAsyncResource,
+            TarjontaAsyncResource hakuV1AsyncResource,
+            DokumenttiResource dokumenttiResource,
+            KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
         this.sijoitteluAsyncResource = sijoitteluAsyncResource;
         this.tilaAsyncResource = tilaAsyncResource;
         this.hakuV1AsyncResource = hakuV1AsyncResource;
         this.applicationAsyncResource = applicationAsyncResource;
         this.dokumenttiResource = dokumenttiResource;
+        this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
     }
 
     private String teksti(final Map<String, String> nimi) {
@@ -112,36 +124,15 @@ public class ErillishaunVientiService {
         Map<String, HakemusDTO> oidToHakemus = hakukohde
                 .getValintatapajonot().stream()
                 .flatMap(v -> v.getHakemukset().stream()).collect(Collectors.toMap(h -> h.getHakemusOid(), h -> h));
-        List<ErillishakuRivi> erillishakurivit = hakemukset.stream().map(h -> {
-            HakemusWrapper wrapper = new HakemusWrapper(h);
-            Optional<HakemusDTO> hakemusDTO = Optional.ofNullable(oidToHakemus.get(h.getOid()));
+        List<ErillishakuRivi> erillishakurivit = hakemukset.stream().map(hakemus -> {
+            Optional<HakemusDTO> hakemusDTO = Optional.ofNullable(oidToHakemus.get(hakemus.getOid()));
             Optional<HakemuksenTila> hakemuksenTila = hakemusDTO.map(h0 -> h0.getTila());
-            Valintatulos tulos = Optional.ofNullable(valintatulokset.get(h.getOid())).orElse(new Valintatulos());
-            ErillishakuRivi e = new ErillishakuRivi(
-                    h.getOid(),
-                    wrapper.getSukunimi(),
-                    wrapper.getEtunimet(),
-                    wrapper.getHenkilotunnus(),
-                    wrapper.getSahkopostiOsoite(),
-                    wrapper.getSyntymaaika(),
-                    Sukupuoli.fromString(wrapper.getSukupuoliAsIs()),
-                    wrapper.getPersonOid(),
-                    wrapper.getAidinkieli(),
+            Valintatulos tulos = Optional.ofNullable(valintatulokset.get(hakemus.getOid())).orElse(new Valintatulos());
+            return createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus),
                     hakemuksenTila.map(HakemuksenTila::toString).orElse(""),
                     objectToString(tulos.getTila()),
                     objectToString(tulos.getIlmoittautumisTila()),
-                    tulos.getJulkaistavissa(),
-                    false,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null);
-            return e;
+                    tulos.getJulkaistavissa());
         }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakurivit);
     }
@@ -151,70 +142,83 @@ public class ErillishaunVientiService {
         Map<String, HakemusDTO> oidToHakemus = hakukohde
                 .getValintatapajonot().stream()
                 .flatMap(v -> v.getHakemukset().stream()).collect(Collectors.toMap(h -> h.getHakemusOid(), h -> h));
-        List<ErillishakuRivi> erillishakurivit = hakemukset.stream().map(h -> {
-            HakemusWrapper wrapper = new HakemusWrapper(h);
-            Optional<HakemusDTO> hakemusDTO = Optional.ofNullable(oidToHakemus.get(h.getOid()));
-            Optional<HakemuksenTila> hakemuksenTila = hakemusDTO.map(h0 -> h0.getTila());
-                    ErillishakuRivi e = new ErillishakuRivi(
-                            h.getOid(),
-                            wrapper.getSukunimi(),
-                            wrapper.getEtunimet(),
-                            wrapper.getHenkilotunnus(),
-                            wrapper.getSahkopostiOsoite(),
-                            wrapper.getSyntymaaika(),
-                            Sukupuoli.fromString(wrapper.getSukupuoliAsIs()),
-                            wrapper.getPersonOid(),
-                            wrapper.getAidinkieli(),
-                            hakemuksenTila.map(HakemuksenTila::toString).orElse(""),
-                            "",
-                            "",
-                            false,
-                            false,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null);
-                    return e;
-                }).collect(Collectors.toList());
+        List<ErillishakuRivi> erillishakurivit = hakemukset.stream().map(hakemus -> {
+                Optional<HakemusDTO> hakemusDTO = Optional.ofNullable(oidToHakemus.get(hakemus.getOid()));
+                Optional<HakemuksenTila> hakemuksenTila = hakemusDTO.map(h0 -> h0.getTila());
+                return createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus), hakemuksenTila.map(HakemuksenTila::toString).orElse(""), "", "", false);
+            }).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), erillishakurivit);
     }
 
     private ErillishakuExcel generoiIlmanHakukohdettaJaTuloksia(final ErillishakuDTO erillishaku, final List<Hakemus> hakemukset, final HakuV1RDTO haku, final HakukohdeV1RDTO tarjontaHakukohde) {
         LOG.info("Hakemuksia ei ole viela tuotu ensimmaistakaan kertaa talle hakukohteelle! Generoidaan hakemuksista excel...");
-        List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus -> {
-            HakemusWrapper wrapper = new HakemusWrapper(hakemus);
-            ErillishakuRivi r = new ErillishakuRivi(
-                    hakemus.getOid(),
-                    wrapper.getSukunimi(),
-                    wrapper.getEtunimi(),
-                    wrapper.getHenkilotunnus(),
-                    wrapper.getSahkopostiOsoite(),
-                    wrapper.getSyntymaaika(),
-                    Sukupuoli.fromString(wrapper.getSukupuoliAsIs()),
-                    wrapper.getPersonOid(),
-                    wrapper.getAidinkieli(),
-                    "HYLATTY",
-                    "",
-                    "",
-                    false,
-                    false,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null);
-            return r;
-        }).collect(Collectors.toList());
+        List<ErillishakuRivi> rivit = hakemukset.stream().map(hakemus ->
+            createErillishakuRivi(hakemus.getOid(), new HakemusWrapper(hakemus), "HYLATTY", "", "", false)
+        ).collect(Collectors.toList());
         return new ErillishakuExcel(erillishaku.getHakutyyppi(), teksti(haku.getNimi()), teksti(tarjontaHakukohde.getHakukohteenNimet()), teksti(tarjontaHakukohde.getTarjoajaNimet()), rivit);
+    }
+
+    private ErillishakuRivi createErillishakuRivi(String oid, HakemusWrapper wrapper, String hakemuksenTila,
+                                                  String vastaanottoTila, String ilmoittautumisTila,
+                                                  boolean julkaistaankoTiedot) {
+        return new ErillishakuRivi(
+                oid,
+                wrapper.getSukunimi(),
+                wrapper.getEtunimi(),
+                wrapper.getHenkilotunnus(),
+                wrapper.getSahkopostiOsoite(),
+                wrapper.getSyntymaaika(),
+                Sukupuoli.fromString(wrapper.getSukupuoliAsIs()),
+                wrapper.getPersonOid(),
+                wrapper.getAidinkieli(),
+                hakemuksenTila,
+                vastaanottoTila,
+                ilmoittautumisTila,
+                julkaistaankoTiedot,
+                false,
+                readAsiointikieli(wrapper),
+                wrapper.getPuhelinnumero(),
+                readLahiosoite(wrapper),
+                readPostinumero(wrapper),
+                readPostitoimipaikka(wrapper),
+                wrapper.getAsuinmaa(),
+                wrapper.getKansalaisuus(),
+                readKotikunta(wrapper),
+                null);
+    }
+
+    private String readAsiointikieli(HakemusWrapper wrapper) {
+        return wrapper.hasAsiointikieli() ? wrapper.getAsiointikieli() : null;
+    }
+
+    private String readKotikunta(HakemusWrapper wrapper) {
+        String kuntanumero = wrapper.getKotikunta();
+        if(isNotBlank(kuntanumero)) {
+            Map<String, Koodi> kuntaKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.KUNTA);
+            Koodi postitoimipaikka = kuntaKoodit.get(kuntanumero);
+            return KoodistoCachedAsyncResource.haeKoodistaArvo(postitoimipaikka, "FI", null);
+        }
+        return null;
+    }
+
+    private String readPostitoimipaikka(HakemusWrapper wrapper) {
+        String suomalainenPostinumero = wrapper.getSuomalainenPostinumero();
+
+        if(isNotBlank(suomalainenPostinumero)) {
+            Map<String, Koodi> postiKoodit = koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
+            Koodi postitoimipaikka = postiKoodit.get(suomalainenPostinumero);
+            return KoodistoCachedAsyncResource.haeKoodistaArvo(postitoimipaikka, "FI", null);
+        }
+
+        return wrapper.getKaupunkiUlkomaa();
+    }
+
+    private String readLahiosoite(HakemusWrapper wrapper) {
+        return isNotBlank(wrapper.getSuomalainenLahiosoite()) ? wrapper.getSuomalainenLahiosoite() : wrapper.getUlkomainenLahiosoite();
+    }
+
+    private String readPostinumero(HakemusWrapper wrapper) {
+        return isNotBlank(wrapper.getSuomalainenPostinumero()) ? wrapper.getSuomalainenPostinumero() : wrapper.getUlkomainenPostinumero();
     }
 
     private Map<String, Valintatulos> getValintatulokset(final ErillishakuDTO erillishaku, final List<Valintatulos> valintatulos) {

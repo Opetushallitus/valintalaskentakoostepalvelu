@@ -38,6 +38,7 @@ public class HakemusWrapper {
     private final static String OSOITE_ULKOMAA = "osoiteUlkomaa";
     private final static String SUKUPUOLI = "sukupuoli";
     private final static String AIDINKIELI = "aidinkieli";
+    private final static String KOTIKUNTA = "kotikunta";
     private final static String NAINEN = "2";
     private final static String MIES = "1";
     private Yhteystiedot yhteystiedot = null;
@@ -122,6 +123,11 @@ public class HakemusWrapper {
     public String getPassinnumero() {
         getHenkilotiedot();
         return Optional.ofNullable(henkilotiedot.get(PASSINNUMERO)).orElse(StringUtils.EMPTY);
+    }
+
+    public String getKotikunta() {
+        getHenkilotiedot();
+        return Optional.ofNullable(henkilotiedot.get(KOTIKUNTA)).orElse(StringUtils.EMPTY);
     }
 
     public String getPuhelinnumero() {
@@ -216,6 +222,11 @@ public class HakemusWrapper {
             return Boolean.TRUE.equals(Boolean.valueOf(l));
         }
         return false;
+    }
+
+    public boolean hasAsiointikieli() {
+        getLisatiedot();
+        return lisatiedot.containsKey(ASIOINTIKIELI);
     }
 
     public String getAsiointikieli() {
